@@ -8,6 +8,7 @@
     * Updated the SqlServer configuration to use SqlServerDsc version 10.0.0.0.
 * SPAlternateURL
   * Added the ability to manage the Central Administration AAMs
+  * If resource specifies Central Admin webapp and Default Zone, the existing AAM will be updated instead of adding a new one
 * SPDiagnosticsProvider
   * Added the resource
 * SPFarm

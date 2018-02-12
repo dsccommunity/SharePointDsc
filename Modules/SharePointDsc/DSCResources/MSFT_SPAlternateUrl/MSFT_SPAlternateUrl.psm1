@@ -165,20 +165,14 @@ function Set-TargetResource
                    if ($null -eq $urlAam)
                     {
                         # urlAAM not found, so it is safe to create AAM on specified zone (or modify existing if CA)
-                        # If this is Central Admin, we want to update the existing Default AAM instead of adding a new one
+                        # If this is Central Admin and Default zone, we want to update the existing AAM instead of adding a new one
                         if ($webapp.IsAdministrationWebApplication -and $params.Zone -eq "Default")
                         {
-                            # web app is Central Administration
-                            # assumptions we have to make to proceed without introducing breaking changes:
-                            # 1. CA only has 1 AAM
-                            #    update: this shouldn't matter -- if CA has more than 1 AAM in Default zone, Set-SPAlternateUrl should consolidate into 1
-                            #            For additional CA servers, use other zones instead of Default
-                            #
-                            # sanity checks before updating AAM:
-                            # 1. We are editing the Default Zone AAM (done in if condition above)
-                            # 2. Internal URL == Public URL (does this matter? we could still set both to the new URL)
-                            #    update: if $webAppAams is an array (more than 1 AAM in Default zone), maybe this is the best way to find the primary AAM to use
-                            #            OR, maybe the best way is to ask CA for its URL (RECOMMENDED)
+                            # web app is Central Administration and Default zone
+
+                            # If CA has more than 1 AAM in Default zone, Set-SPAlternateUrl should consolidate into 1
+                            # For additional CA servers, use other zones instead of Default
+
                             Set-SPAlternateURL -Identity $webApp.Url -Url $params.Url -Zone $params.Zone | Out-Null
                         }
                         else
