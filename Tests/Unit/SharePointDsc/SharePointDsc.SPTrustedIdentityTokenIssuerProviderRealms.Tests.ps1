@@ -1,7 +1,7 @@
 [CmdletBinding()]
 param (
     [Parameter()]
-    [string]$SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
+    [string]$SharePointCmdletModule = (Join-Path -Path "C:\Users\Administrator\Source\Repos\SharePointDsc\Tests\Unit\SharePointDsc" `
                                                  -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
                                                  -Resolve)
 )
@@ -16,8 +16,8 @@ $Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointC
 Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
     InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
         Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
-        
-        Context -Name "The SPTrustedLoginProviderRealms not exists in the farm" -Fixture {
+
+        Context -Name "The SPTrustedLoginProvider not exists in the farm" -Fixture {
             $testParams = @{
                 IssuerName = "Contoso"
                 ProviderRealms = @((New-CimInstance -ClassName MSFT_SPProviderRealm -Property @{
@@ -37,7 +37,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 { Get-TargetResource @testParams } | Should -Throw "SPTrustedIdentityTokenIssuer 'Contoso' not found"
             }
         }
-        
+
         Context -Name "The SPTrustedLoginProviderRealms already exists and should not be changed" -Fixture {
             $testParams = @{
                 IssuerName = "Contoso"
@@ -75,7 +75,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 $getResults.Ensure | Should Be "Present"
             }
         }
-        
+
         Context -Name "The SPTrustedLoginProviderRealms already exists but one realm will be added" -Fixture {
             $testParams = @{
                 IssuerName = "Contoso"
@@ -126,14 +126,71 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Test-TargetResource @testParams | Should Be $false
             }
             
-            It "Set-TargetResource: Realm must be added to SPTrustedIdentityTokenIssuer.ProviderRealms" {
+            It "Set-TargetResource: Realm added to SPTrustedIdentityTokenIssuer.ProviderRealms" {
                 Set-TargetResource @testParams
                 $($Global:SPTrustedIdentityTokenIssuerAddProviderRealmCalledCount -eq 1 `
                     -and $Global:SPTrustedIdentityTokenIssuerUpdateCalledCount -eq 1 ) | Should Be $true
             }
             
         }
-        
+
+        Context -Name "The SPTrustedLoginProviderRealms empty and all will be added" -Fixture {
+            $testParams = @{
+                IssuerName = "Contoso"
+                ProviderRealms = @((New-CimInstance -ClassName MSFT_SPProviderRealm -Property @{
+                    RealmUrl = "https://search.contoso.com"
+                    RealmUrn = "urn:sharepoint:contoso:search"
+                } -ClientOnly)
+                (New-CimInstance -ClassName MSFT_SPProviderRealm -Property @{
+                    RealmUrl = "https://intranet.contoso.com"
+                    RealmUrn = "urn:sharepoint:contoso:intranet"
+                } -ClientOnly))
+                Ensure = "Present"
+            }
+
+            $Global:SPTrustedIdentityTokenIssuerUpdateCalledCount = 0
+            $Global:SPTrustedIdentityTokenIssuerAddProviderRealmCalledCount = 0
+
+            $realmsDict = New-Object 'system.collections.generic.dictionary[system.uri,string]'
+            foreach ($realm in $testParams.ProviderRealms)
+            {
+                $url = New-Object System.Uri($realm.RealmUrl)
+                $realmsDict[$url.ToString()] = $realm.RealmUrn
+            }
+
+            $realmsDict.Clear()
+
+            $realmRet = [pscustomobject]@{
+                ProviderRealms = $realmsDict
+            }
+            $realmRet | Add-Member -Name Update -MemberType ScriptMethod -Value {
+                ++$Global:SPTrustedIdentityTokenIssuerUpdateCalledCount
+            } -PassThru
+
+            $realmRet.ProviderRealms | Add-Member -Name Add -MemberType ScriptMethod -Value {
+                ++$Global:SPTrustedIdentityTokenIssuerAddProviderRealmCalledCount
+            } -Force
+
+            Mock -CommandName Get-SPTrustedIdentityTokenIssuer -MockWith {
+                return $realmRet
+            }
+
+            It "Get-TargetResource: Should return absent" {
+                $getResults = Get-TargetResource @testParams
+                $getResults.Ensure | Should Be "Absent"
+            }
+
+            It "Test-TargetResource: Should return false" {
+                Test-TargetResource @testParams | Should Be $false
+            }
+
+            It "Set-TargetResource: Realms added to SPTrustedIdentityTokenIssuer.ProviderRealms" {
+                Set-TargetResource @testParams
+                $($Global:SPTrustedIdentityTokenIssuerAddProviderRealmCalledCount -eq 2 `
+                    -and $Global:SPTrustedIdentityTokenIssuerUpdateCalledCount -eq 1 ) | Should Be $true
+            }
+        }
+
         Context -Name "The SPTrustedLoginProviderRealms already exists and one realm will be removed" -Fixture {
             $testParams = @{
                 IssuerName = "Contoso"
@@ -149,9 +206,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
             
 
-
-            $Global:SPTrustedIdentityTokenIssuerUpdateCalledCount = 0
             $Global:SPTrustedIdentityTokenIssuerRemoveProviderRealmCalledCount = 0
+            $Global:SPTrustedIdentityTokenIssuerUpdateCalledCount = 0
             
             $realmsDict = New-Object 'system.collections.generic.dictionary[system.uri,string]'
             foreach ($realm in $testParams.ProviderRealms)
@@ -188,9 +244,67 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Test-TargetResource @testParams | Should Be $false
             }
             
-            It "Set-TargetResource: Realms removed SPTrustedIdentityTokenIssuer.ProviderRealms" {
+            It "Set-TargetResource: Realm removed from SPTrustedIdentityTokenIssuer.ProviderRealms" {
                 Set-TargetResource @testParams
                 $($Global:SPTrustedIdentityTokenIssuerRemoveProviderRealmCalledCount -eq 1 `
+                    -and $Global:SPTrustedIdentityTokenIssuerUpdateCalledCount -eq 1) | Should Be $true
+            }
+        }
+
+        Context -Name "The SPTrustedLoginProviderRealms already exists and all will be removed" -Fixture {
+            $testParams = @{
+                IssuerName = "Contoso"
+                ProviderRealms = @((New-CimInstance -ClassName MSFT_SPProviderRealm -Property @{
+                    RealmUrl = "https://search.contoso.com"
+                    RealmUrn = "urn:sharepoint:contoso:search"
+                } -ClientOnly)
+                (New-CimInstance -ClassName MSFT_SPProviderRealm -Property @{
+                    RealmUrl = "https://intranet.contoso.com"
+                    RealmUrn = "urn:sharepoint:contoso:intranet"
+                } -ClientOnly))
+                Ensure = "Absent"
+            }
+            
+
+            $Global:SPTrustedIdentityTokenIssuerRemoveProviderRealmCalledCount = 0
+            $Global:SPTrustedIdentityTokenIssuerUpdateCalledCount = 0
+            
+            $realmsDict = New-Object 'system.collections.generic.dictionary[system.uri,string]'
+            foreach ($realm in $testParams.ProviderRealms)
+            {
+                $url = New-Object System.Uri($realm.RealmUrl)
+                $realmsDict[$url.ToString()] = $realm.RealmUrn
+            }
+
+            $realmRet = [pscustomobject]@{
+                ProviderRealms = $realmsDict
+            }
+            
+            $realmRet.ProviderRealms | Add-Member -Name Remove -MemberType ScriptMethod -Value {
+                ++$Global:SPTrustedIdentityTokenIssuerRemoveProviderRealmCalledCount
+            } -Force
+            
+            $realmRet | Add-Member -Name Update -MemberType ScriptMethod -Value {
+                ++$Global:SPTrustedIdentityTokenIssuerUpdateCalledCount
+            }  -Force
+            
+            
+            Mock -CommandName Get-SPTrustedIdentityTokenIssuer -MockWith {
+                return $realmRet
+            }
+            
+            It "Get-TargetResource: Should return present" {
+                $getResults = Get-TargetResource @testParams
+                $getResults.Ensure | Should Be "Present"
+            }
+            
+            It "Test-TargetResource: Should return false" {
+                Test-TargetResource @testParams | Should Be $false
+            }
+            
+            It "Set-TargetResource: Realms removed from SPTrustedIdentityTokenIssuer.ProviderRealms" {
+                Set-TargetResource @testParams
+                $($Global:SPTrustedIdentityTokenIssuerRemoveProviderRealmCalledCount -eq 2 `
                     -and $Global:SPTrustedIdentityTokenIssuerUpdateCalledCount -eq 1) | Should Be $true
             }
         }
@@ -243,7 +357,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 return $realmRet
             }
             
-            It "Get-TargetResource: Should return present" {
+            It "Get-TargetResource: Should return absent" {
                 $getResults = Get-TargetResource @testParams
                 $getResults.Ensure | Should Be "Absent"
             }
@@ -254,11 +368,371 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             
             It "Set-TargetResource: Realm updated in SPTrustedIdentityTokenIssuer.ProviderRealms" {
                 Set-TargetResource @testParams
-                $($Global:SPTrustedIdentityTokenIssuerRemoveProviderRealmCalledCount -eq 1 `
-                    -and $Global:SPTrustedIdentityTokenIssuerAddProviderRealmCalledCount -eq 1 `
+                $($Global:SPTrustedIdentityTokenIssuerAddProviderRealmCalledCount -eq 1 `
+                    -and $Global:SPTrustedIdentityTokenIssuerRemoveProviderRealmCalledCount -eq 1 `
                     -and $Global:SPTrustedIdentityTokenIssuerUpdateCalledCount -eq 1) | Should Be $true
             }
         }
+
+        Context -Name "The SPTrustedLoginProviderRealms already exists and one will be excluded" -Fixture {
+            $testParams = @{
+                IssuerName = "Contoso"
+                ProviderRealmsToExclude = @((New-CimInstance -ClassName MSFT_SPProviderRealm -Property @{
+                    RealmUrl = "https://search.contoso.com"
+                    RealmUrn = "urn:sharepoint:contoso:search"
+                } -ClientOnly))
+                Ensure = "Present"
+            }
+
+                $pRealms = @((New-CimInstance -ClassName MSFT_SPProviderRealm -Property @{
+                    RealmUrl = "https://search.contoso.com"
+                    RealmUrn = "urn:sharepoint:contoso:search"
+                } -ClientOnly)
+                (New-CimInstance -ClassName MSFT_SPProviderRealm -Property @{
+                    RealmUrl = "https://intranet.contoso.com"
+                    RealmUrn = "urn:sharepoint:contoso:intranet"
+                } -ClientOnly))
+            $Global:SPTrustedIdentityTokenIssuerUpdateCalledCount = 0
+            $Global:SPTrustedIdentityTokenIssuerRemoveProviderRealmCalledCount = 0
+            $Global:SPTrustedIdentityTokenIssuerAddProviderRealmCalledCount = 0
+
+            $realmsDict = New-Object 'system.collections.generic.dictionary[system.uri,string]'
+            foreach ($realm in $pRealms)
+            {
+                $url = New-Object System.Uri($realm.RealmUrl)
+                $realmsDict[$url.ToString()] = $realm.RealmUrn
+            }
+
+            $realmRet = [pscustomobject]@{
+                ProviderRealms = $realmsDict
+            }
+
+            $realmRet.ProviderRealms | Add-Member -Name Remove -MemberType ScriptMethod -Value {
+                ++$Global:SPTrustedIdentityTokenIssuerRemoveProviderRealmCalledCount
+            } -Force
+
+            $realmRet.ProviderRealms | Add-Member -Name Add -MemberType ScriptMethod -Value {
+                ++$Global:SPTrustedIdentityTokenIssuerAddProviderRealmCalledCount
+            } -Force
+
+            $realmRet | Add-Member -Name Update -MemberType ScriptMethod -Value {
+                ++$Global:SPTrustedIdentityTokenIssuerUpdateCalledCount
+            }  -Force
+
+            Mock -CommandName Get-SPTrustedIdentityTokenIssuer -MockWith {
+                return $realmRet
+            }
+
+            It "Get-TargetResource: Should return absent" {
+                $getResults = Get-TargetResource @testParams
+                $getResults.Ensure | Should Be "Absent"
+            }
+
+            It "Test-TargetResource: Should return false" {
+                Test-TargetResource @testParams | Should Be $false
+            }
+
+            It "Set-TargetResource: Realm removed in SPTrustedIdentityTokenIssuer.ProviderRealms" {
+                Set-TargetResource @testParams
+                $($Global:SPTrustedIdentityTokenIssuerAddProviderRealmCalledCount -eq 0 `
+                    -and $Global:SPTrustedIdentityTokenIssuerRemoveProviderRealmCalledCount -eq 1 `
+                    -and $Global:SPTrustedIdentityTokenIssuerUpdateCalledCount -eq 1) | Should Be $true
+            }
+        }
+
+        Context -Name "The SPTrustedLoginProviderRealms already exists and one should be excluded but not found" -Fixture {
+            $testParams = @{
+                IssuerName = "Contoso"
+                ProviderRealmsToExclude = @((New-CimInstance -ClassName MSFT_SPProviderRealm -Property @{
+                    RealmUrl = "https://search.contoso.com"
+                    RealmUrn = "urn:sharepoint:contoso:search1"
+                } -ClientOnly))
+                Ensure = "Present"
+            }
+
+                $pRealms = @((New-CimInstance -ClassName MSFT_SPProviderRealm -Property @{
+                    RealmUrl = "https://search.contoso.com"
+                    RealmUrn = "urn:sharepoint:contoso:search"
+                } -ClientOnly)
+                (New-CimInstance -ClassName MSFT_SPProviderRealm -Property @{
+                    RealmUrl = "https://intranet.contoso.com"
+                    RealmUrn = "urn:sharepoint:contoso:intranet"
+                } -ClientOnly))
+
+            $realmsDict = New-Object 'system.collections.generic.dictionary[system.uri,string]'
+            foreach ($realm in $pRealms)
+            {
+                $url = New-Object System.Uri($realm.RealmUrl)
+                $realmsDict[$url.ToString()] = $realm.RealmUrn
+            }
+
+            $realmRet = [pscustomobject]@{
+                ProviderRealms = $realmsDict
+            }
+
+            Mock -CommandName Get-SPTrustedIdentityTokenIssuer -MockWith {
+                return $realmRet
+            }
+
+            It "Get-TargetResource: Should return present" {
+                $getResults = Get-TargetResource @testParams
+                $getResults.Ensure | Should Be "Present"
+            }
+
+            It "Test-TargetResource: Should return true" {
+                Test-TargetResource @testParams | Should Be $true
+            }
+        }
+
+        Context -Name "The SPTrustedLoginProviderRealms already exists and one should be included" -Fixture {
+            $testParams = @{
+                IssuerName = "Contoso"
+                ProviderRealmsToInclude = @((New-CimInstance -ClassName MSFT_SPProviderRealm -Property @{
+                    RealmUrl = "https://searchx.contoso.com"
+                    RealmUrn = "urn:sharepoint:contoso:search"
+                } -ClientOnly))
+                Ensure = "Present"
+            }
+
+                $pRealms = @((New-CimInstance -ClassName MSFT_SPProviderRealm -Property @{
+                    RealmUrl = "https://search.contoso.com"
+                    RealmUrn = "urn:sharepoint:contoso:search"
+                } -ClientOnly)
+                (New-CimInstance -ClassName MSFT_SPProviderRealm -Property @{
+                    RealmUrl = "https://intranet.contoso.com"
+                    RealmUrn = "urn:sharepoint:contoso:intranet"
+                } -ClientOnly))
+            $Global:SPTrustedIdentityTokenIssuerUpdateCalledCount = 0
+            $Global:SPTrustedIdentityTokenIssuerRemoveProviderRealmCalledCount = 0
+            $Global:SPTrustedIdentityTokenIssuerAddProviderRealmCalledCount = 0
+
+            $realmsDict = New-Object 'system.collections.generic.dictionary[system.uri,string]'
+            foreach ($realm in $pRealms)
+            {
+                $url = New-Object System.Uri($realm.RealmUrl)
+                $realmsDict[$url.ToString()] = $realm.RealmUrn
+            }
+
+            $realmRet = [pscustomobject]@{
+                ProviderRealms = $realmsDict
+            }
+
+            $realmRet.ProviderRealms | Add-Member -Name Remove -MemberType ScriptMethod -Value {
+                ++$Global:SPTrustedIdentityTokenIssuerRemoveProviderRealmCalledCount
+            } -Force
+
+            $realmRet.ProviderRealms | Add-Member -Name Add -MemberType ScriptMethod -Value {
+                ++$Global:SPTrustedIdentityTokenIssuerAddProviderRealmCalledCount
+            } -Force
+
+            $realmRet | Add-Member -Name Update -MemberType ScriptMethod -Value {
+                ++$Global:SPTrustedIdentityTokenIssuerUpdateCalledCount
+            }  -Force
+
+            Mock -CommandName Get-SPTrustedIdentityTokenIssuer -MockWith {
+                return $realmRet
+            }
+
+            It "Get-TargetResource: Should return absent" {
+                $getResults = Get-TargetResource @testParams
+                $getResults.Ensure | Should Be "Absent"
+            }
+
+            It "Test-TargetResource: Should return false" {
+                Test-TargetResource @testParams | Should Be $false
+            }
+
+            It "Set-TargetResource: Realm added in SPTrustedIdentityTokenIssuer.ProviderRealms" {
+                Set-TargetResource @testParams
+                $($Global:SPTrustedIdentityTokenIssuerAddProviderRealmCalledCount -eq 1 `
+                    -and $Global:SPTrustedIdentityTokenIssuerRemoveProviderRealmCalledCount -eq 0 `
+                    -and $Global:SPTrustedIdentityTokenIssuerUpdateCalledCount -eq 1) | Should Be $true
+            }
+        }
+
+        Context -Name "The SPTrustedLoginProviderRealms empty and two should be included" -Fixture {
+            $testParams = @{
+                IssuerName = "Contoso"
+                ProviderRealmsToInclude = @((New-CimInstance -ClassName MSFT_SPProviderRealm -Property @{
+                    RealmUrl = "https://search.contoso.com"
+                    RealmUrn = "urn:sharepoint:contoso:search"
+                } -ClientOnly)
+                (New-CimInstance -ClassName MSFT_SPProviderRealm -Property @{
+                    RealmUrl = "https://intranet.contoso.com"
+                    RealmUrn = "urn:sharepoint:contoso:intranet"
+                } -ClientOnly))
+                Ensure = "Present"
+            }
+
+                $pRealms = @((New-CimInstance -ClassName MSFT_SPProviderRealm -Property @{
+                    RealmUrl = "https://search.contoso.com"
+                    RealmUrn = "urn:sharepoint:contoso:search"
+                } -ClientOnly)
+                (New-CimInstance -ClassName MSFT_SPProviderRealm -Property @{
+                    RealmUrl = "https://intranet.contoso.com"
+                    RealmUrn = "urn:sharepoint:contoso:intranet"
+                } -ClientOnly))
+            $Global:SPTrustedIdentityTokenIssuerUpdateCalledCount = 0
+            $Global:SPTrustedIdentityTokenIssuerRemoveProviderRealmCalledCount = 0
+            $Global:SPTrustedIdentityTokenIssuerAddProviderRealmCalledCount = 0
+
+            $realmsDict = New-Object 'system.collections.generic.dictionary[system.uri,string]'
+            foreach ($realm in $pRealms)
+            {
+                $url = New-Object System.Uri($realm.RealmUrl)
+                $realmsDict[$url.ToString()] = $realm.RealmUrn
+            }
+
+            $realmsDict.Clear()
+
+            $realmRet = [pscustomobject]@{
+                ProviderRealms = $realmsDict
+            }
+
+            $realmRet.ProviderRealms | Add-Member -Name Remove -MemberType ScriptMethod -Value {
+                ++$Global:SPTrustedIdentityTokenIssuerRemoveProviderRealmCalledCount
+            } -Force
+
+            $realmRet.ProviderRealms | Add-Member -Name Add -MemberType ScriptMethod -Value {
+                ++$Global:SPTrustedIdentityTokenIssuerAddProviderRealmCalledCount
+            } -Force
+
+            $realmRet | Add-Member -Name Update -MemberType ScriptMethod -Value {
+                ++$Global:SPTrustedIdentityTokenIssuerUpdateCalledCount
+            }  -Force
+
+            Mock -CommandName Get-SPTrustedIdentityTokenIssuer -MockWith {
+                return $realmRet
+            }
+
+            It "Get-TargetResource: Should return absent" {
+                $getResults = Get-TargetResource @testParams
+                $getResults.Ensure | Should Be "Absent"
+            }
+
+            It "Test-TargetResource: Should return false" {
+                Test-TargetResource @testParams | Should Be $false
+            }
+
+            It "Set-TargetResource: Realms included in to SPTrustedIdentityTokenIssuer.ProviderRealms" {
+                Set-TargetResource @testParams
+                $($Global:SPTrustedIdentityTokenIssuerAddProviderRealmCalledCount -eq 2 `
+                    -and $Global:SPTrustedIdentityTokenIssuerRemoveProviderRealmCalledCount -eq 0 `
+                    -and $Global:SPTrustedIdentityTokenIssuerUpdateCalledCount -eq 1) | Should Be $true
+            }
+        }
+
+        Context -Name "The SPTrustedLoginProviderRealms already exists and one should be included but found" -Fixture {
+            $testParams = @{
+                IssuerName = "Contoso"
+                ProviderRealmsToInclude = @((New-CimInstance -ClassName MSFT_SPProviderRealm -Property @{
+                    RealmUrl = "https://search.contoso.com"
+                    RealmUrn = "urn:sharepoint:contoso:search"
+                } -ClientOnly))
+                Ensure = "Present"
+            }
+
+                $pRealms = @((New-CimInstance -ClassName MSFT_SPProviderRealm -Property @{
+                    RealmUrl = "https://search.contoso.com"
+                    RealmUrn = "urn:sharepoint:contoso:search"
+                } -ClientOnly)
+                (New-CimInstance -ClassName MSFT_SPProviderRealm -Property @{
+                    RealmUrl = "https://intranet.contoso.com"
+                    RealmUrn = "urn:sharepoint:contoso:intranet"
+                } -ClientOnly))
+
+            $realmsDict = New-Object 'system.collections.generic.dictionary[system.uri,string]'
+            foreach ($realm in $pRealms)
+            {
+                $url = New-Object System.Uri($realm.RealmUrl)
+                $realmsDict[$url.ToString()] = $realm.RealmUrn
+            }
+
+            $realmRet = [pscustomobject]@{
+                ProviderRealms = $realmsDict
+            }
+
+            Mock -CommandName Get-SPTrustedIdentityTokenIssuer -MockWith {
+                return $realmRet
+            }
+
+            It "Get-TargetResource: Should return present" {
+                $getResults = Get-TargetResource @testParams
+                $getResults.Ensure | Should Be "Present"
+            }
+
+            It "Test-TargetResource: Should return true" {
+                Test-TargetResource @testParams | Should Be $true
+            }
+
+        }
+
+        Context -Name "The SPTrustedLoginProviderRealms already exists and one should be included and updated" -Fixture {
+            $testParams = @{
+                IssuerName = "Contoso"
+                ProviderRealmsToInclude = @((New-CimInstance -ClassName MSFT_SPProviderRealm -Property @{
+                    RealmUrl = "https://search.contoso.com"
+                    RealmUrn = "urn:sharepoint:contoso:search1"
+                } -ClientOnly))
+                Ensure = "Present"
+            }
+
+                $pRealms = @((New-CimInstance -ClassName MSFT_SPProviderRealm -Property @{
+                    RealmUrl = "https://search.contoso.com"
+                    RealmUrn = "urn:sharepoint:contoso:search"
+                } -ClientOnly)
+                (New-CimInstance -ClassName MSFT_SPProviderRealm -Property @{
+                    RealmUrl = "https://intranet.contoso.com"
+                    RealmUrn = "urn:sharepoint:contoso:intranet"
+                } -ClientOnly))
+            $Global:SPTrustedIdentityTokenIssuerUpdateCalledCount = 0
+            $Global:SPTrustedIdentityTokenIssuerRemoveProviderRealmCalledCount = 0
+            $Global:SPTrustedIdentityTokenIssuerAddProviderRealmCalledCount = 0
+
+            $realmsDict = New-Object 'system.collections.generic.dictionary[system.uri,string]'
+            foreach ($realm in $pRealms)
+            {
+                $url = New-Object System.Uri($realm.RealmUrl)
+                $realmsDict[$url.ToString()] = $realm.RealmUrn
+            }
+
+            $realmRet = [pscustomobject]@{
+                ProviderRealms = $realmsDict
+            }
+
+            $realmRet.ProviderRealms | Add-Member -Name Remove -MemberType ScriptMethod -Value {
+                ++$Global:SPTrustedIdentityTokenIssuerRemoveProviderRealmCalledCount
+            } -Force
+
+            $realmRet.ProviderRealms | Add-Member -Name Add -MemberType ScriptMethod -Value {
+                ++$Global:SPTrustedIdentityTokenIssuerAddProviderRealmCalledCount
+            } -Force
+
+            $realmRet | Add-Member -Name Update -MemberType ScriptMethod -Value {
+                ++$Global:SPTrustedIdentityTokenIssuerUpdateCalledCount
+            }  -Force
+
+            Mock -CommandName Get-SPTrustedIdentityTokenIssuer -MockWith {
+                return $realmRet
+            }
+
+            It "Get-TargetResource: Should return present" {
+                $getResults = Get-TargetResource @testParams
+                $getResults.Ensure | Should Be "Absent"
+            }
+
+            It "Test-TargetResource: Should return false" {
+                Test-TargetResource @testParams | Should Be $false
+            }
+
+            It "Set-TargetResource: Realm updated in SPTrustedIdentityTokenIssuer.ProviderRealms" {
+                Set-TargetResource @testParams
+                $($Global:SPTrustedIdentityTokenIssuerAddProviderRealmCalledCount -eq 1 `
+                    -and $Global:SPTrustedIdentityTokenIssuerRemoveProviderRealmCalledCount -eq 1 `
+                    -and $Global:SPTrustedIdentityTokenIssuerUpdateCalledCount -eq 1) | Should Be $true
+            }
+        }
+
     }
 }
 

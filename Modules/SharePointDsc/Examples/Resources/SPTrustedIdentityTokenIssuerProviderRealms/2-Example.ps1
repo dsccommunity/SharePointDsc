@@ -1,7 +1,7 @@
 <#
 .EXAMPLE
     This example adds provider realms to existing trusted token issuer.
-    Existing will be removed.
+    Existing are left and not removed.
 #>
 
 Configuration Example 
@@ -14,21 +14,22 @@ Configuration Example
     Import-DscResource -ModuleName SharePointDsc
 
     node localhost {
-        $ProviderRealms = @()
-        $ProviderRealms += MSFT_SPProviderRealm {
+
+        $ProviderRealmsToInclude = @()
+        $ProviderRealmsToInclude += MSFT_SPProviderRealmToInclude {
                                 RealmUrl = "https://search.contoso.com"
                                 RealmUrn = "urn:sharepoint:contoso:search"
-                            }
+                                }
 
-        $ProviderRealms += MSFT_SPProviderRealm {
+        $ProviderRealmsToInclude += MSFT_SPProviderRealmToInclude {
                                 RealmUrl = "https://intranet.contoso.com"
                                 RealmUrn = "urn:sharepoint:contoso:intranet"
                                 }
 
-        SPTrustedIdentityTokenIssuerProviderRealms Farm1OverwriteExample
+        SPTrustedIdentityTokenIssuerProviderRealms Farm1IncludeExample
         {
             IssuerName               = "Contoso"
-            ProviderRealms           = $ProviderRealms
+            ProviderRealmsToInclude  = $ProviderRealmsToInclude
             Ensure                   = "Present"
             PsDscRunAsCredential     = $SetupAccount
         }

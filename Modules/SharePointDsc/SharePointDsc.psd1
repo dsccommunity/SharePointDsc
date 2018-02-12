@@ -89,7 +89,8 @@ CmdletsToExport = @("Invoke-SPDSCCommand",
                     "Get-SPDscFarmProductsInfo",
                     "Get-SPDscFarmVersionInfo",
                     "Convert-SPDscADGroupIDToName",
-                    "Convert-SPDscADGroupNameToID")
+                    "Convert-SPDscADGroupNameToID",
+                    "Get-ProviderRealmsChanges")
 
 # Variables to export from this module
 #VariablesToExport = '*'
