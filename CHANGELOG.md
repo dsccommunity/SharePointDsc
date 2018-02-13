@@ -3,7 +3,8 @@
 ## Unreleased
 
 * SPAlternateURL
-  * If resource specifies Central Admin webapp and Default Zone, the existing AAM will be updated instead of adding a new one
+  * If resource specifies Central Admin webapp and Default Zone, the existing
+    AAM will be updated instead of adding a new one
 
 ## 2.1
 
