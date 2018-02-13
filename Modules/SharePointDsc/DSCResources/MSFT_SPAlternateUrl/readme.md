@@ -8,7 +8,7 @@ will remain empty and have no alternate URL.
 The default value for the Ensure parameter is Present. When not specifying this
 parameter, the setting is configured.
 
-# Central Administration
+## Central Administration
 
 To select the Central Administration site, use the following command to retrieve
 the correct web application name:
