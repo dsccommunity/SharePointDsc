@@ -44,10 +44,11 @@ function Get-TargetResource
         if ($PSBoundParameters.ContainsKey("InstallAccount") -eq $true)
         {
             # InstallAccount used
-            if ($InstallAccount.UserName -ne $farmAccountName)
+            if ($InstallAccount.UserName -eq $farmAccountName)
             {
-                throw ("Specified InstallAccount isn't the Farm Account. Make sure " + `
-                       "the specified InstallAccount is the Farm Account and try again")
+                throw ("Specified InstallAccount ($($InstallAccount.UserName)) is the Farm " + `
+                       "Account. Make sure the specified InstallAccount isn't the Farm Account " + `
+                       "and try again")
             }
         }
         else {
@@ -56,12 +57,20 @@ function Get-TargetResource
             {
                 # PSDSCRunAsCredential used
                 $localaccount = "$($Env:USERDOMAIN)\$($Env:USERNAME)"
-                if ($localaccount -ne $farmAccountName)
+                if ($localaccount -eq $farmAccountName)
                 {
-                    throw ("Specified PSDSCRunAsCredential isn't the Farm Account. Make sure " + `
-                           "the specified Install Account is the Farm Account and try again")
+                    throw ("Specified PSDSCRunAsCredential ($localaccount) is the Farm " + `
+                           "Account. Make sure the specified PSDSCRunAsCredential isn't the " + `
+                           "Farm Account and try again")
                 }
             }
+        }
+
+        if ($FarmAccount.UserName -ne $farmAccountName)
+        {
+            throw ("Specified FarmAccount ($($FarmAccount.UserName)) isn't the Farm " + `
+                    "Account. Make sure the specified FarmAccount is the actual Farm " + `
+                    "Account and try again")
         }
     }
     else
@@ -175,8 +184,8 @@ function Set-TargetResource
     }
 
     $farmAccountName = Invoke-SPDSCCommand -Credential $InstallAccount `
-                                  -Arguments $PSBoundParameters `
-                                  -ScriptBlock {
+                                           -Arguments $PSBoundParameters `
+                                           -ScriptBlock {
         return Get-SPDSCFarmAccountName
     }
 
@@ -185,10 +194,11 @@ function Set-TargetResource
         if ($PSBoundParameters.ContainsKey("InstallAccount") -eq $true)
         {
             # InstallAccount used
-            if ($InstallAccount.UserName -ne $farmAccountName)
+            if ($InstallAccount.UserName -eq $farmAccountName)
             {
-                throw ("Specified InstallAccount isn't the Farm Account. Make sure " + `
-                       "the specified InstallAccount is the Farm Account and try again")
+                throw ("Specified InstallAccount ($($InstallAccount.UserName)) is the Farm " + `
+                       "Account. Make sure the specified InstallAccount isn't the Farm Account " + `
+                       "and try again")
             }
         }
         else {
@@ -197,12 +207,20 @@ function Set-TargetResource
             {
                 # PSDSCRunAsCredential used
                 $localaccount = "$($Env:USERDOMAIN)\$($Env:USERNAME)"
-                if ($localaccount -ne $farmAccountName)
+                if ($localaccount -eq $farmAccountName)
                 {
-                    throw ("Specified PSDSCRunAsCredential isn't the Farm Account. Make sure " + `
-                           "the specified Install Account is the Farm Account and try again")
+                    throw ("Specified PSDSCRunAsCredential ($localaccount) is the Farm " + `
+                           "Account. Make sure the specified PSDSCRunAsCredential isn't the " + `
+                           "Farm Account and try again")
                 }
             }
+        }
+
+        if ($FarmAccount.UserName -ne $farmAccountName)
+        {
+            throw ("Specified FarmAccount ($($FarmAccount.UserName)) isn't the Farm " + `
+                    "Account. Make sure the specified FarmAccount is the actual Farm " + `
+                    "Account and try again")
         }
     }
     else
@@ -242,14 +260,16 @@ function Set-TargetResource
     $isInDesiredState = $false
     try
     {
-        Invoke-SPDSCCommand -Credential $InstallAccount -Arguments ($PSBoundParameters,$farmAccountName) -ScriptBlock {
+        Invoke-SPDSCCommand -Credential $FarmAccount `
+                            -Arguments ($PSBoundParameters,$farmAccountName) `
+                            -ScriptBlock {
             $params = $args[0]
             $farmAccountName = $args[1]
 
             $currentServer = $env:COMPUTERNAME
 
             $services = Get-SPServiceInstance -Server $currentServer `
-                                                  -ErrorAction SilentlyContinue
+                                              -ErrorAction SilentlyContinue
             $syncService = $services | Where-Object -FilterScript {
                 $_.GetType().Name -eq "ProfileSynchronizationServiceInstance"
             }

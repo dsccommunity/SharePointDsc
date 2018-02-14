@@ -1,5 +1,11 @@
 # Change log for SharePointDsc
 
+## Unreleased
+
+* SPManagedMetadataServiceApp
+  * Fixed issue with creating the Content Type Hub on an existing MMS
+    service app without Content Type Hub.
+
 ## 2.1
 
 * General
