@@ -16,11 +16,11 @@ the correct web application name:
      $_.IsAdministrationWebApplication
  }).DisplayName
 
- To update the existing Default Zone AAM for Central Administration (e.g. to
- implement HTTPS), use the above command to retrieve the web application name
- (by default, it will be "SharePoint Central Administration v4") and specify
- "Default" as the Zone. If you wish to add AAM's instead, you may use the other
- zones to do so.
+To update the existing Default Zone AAM for Central Administration (e.g. to
+implement HTTPS), use the above command to retrieve the web application name
+(by default, it will be "SharePoint Central Administration v4") and specify
+"Default" as the Zone. If you wish to add AAM's instead, you may use the other
+zones to do so.
 
 Using SPAlternateUrl to update the Default Zone AAM for Central Administration
 will update the AAM in SharePoint as well as the CentralAdministrationUrl value
