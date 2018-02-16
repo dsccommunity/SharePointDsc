@@ -1,6 +1,7 @@
 # Change log for SharePointDsc
 
 ## Unreleased
+
 * SPDistributedCacheClientSettings
   * Added the new resource
 
