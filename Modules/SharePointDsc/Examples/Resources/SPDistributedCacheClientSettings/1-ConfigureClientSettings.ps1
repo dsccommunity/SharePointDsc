@@ -3,7 +3,7 @@
     This example configures the distributed cache client settings.
 #>
 
-    Configuration Example 
+    Configuration Example
     {
         param(
             [Parameter(Mandatory = $true)]
@@ -13,10 +13,10 @@
         Import-DscResource -ModuleName SharePointDsc
 
         node localhost {
-            SPDistributedCacheClientsettings Settings
+            SPDistributedCacheClientSettings Settings
             {
-                Ensure 		            = "Present"
-		DLTCMaxConnectionsToServer  = 3
+                Ensure                      = "Present"
+                DLTCMaxConnectionsToServer  = 3
                 DLTCRequestTimeout          = 1000
                 DLTCChannelOpenTimeOut      = 1000
                 DVSCMaxConnectionsToServer  = 3
