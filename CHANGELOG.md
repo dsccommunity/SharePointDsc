@@ -1,6 +1,8 @@
 # Change log for SharePointDsc
 
 ## Unreleased
+* SPDistributedCacheClientSettings
+  * Added the new resource
 
 * General
   * Updated the integration tests for building the Azure environment
