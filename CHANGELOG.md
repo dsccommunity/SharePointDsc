@@ -4,6 +4,11 @@
 
 * SPDistributedCacheClientSettings
   * Added the new resource
+* SPAlternateURL
+  * If resource specifies Central Admin webapp and Default Zone, the existing
+    AAM will be updated instead of adding a new one
+
+## 2.1
 
 * General
   * Updated the integration tests for building the Azure environment
@@ -34,15 +39,13 @@
   * Fixed issue with correctly retrieving the process identity for the
     Search instance
   * Added support for LocalSystem, LocalService and NetworkService
-* SPUserProfileSyncConnection
-  * Fixed issues with the User Profile Sync connection for SharePoint
-    2016
 * SPUserProfileProperty
   * Fixed issues with the User Profile properties for 2016
 * SPUserProfileServiceAppPermissions
   * Removed the mandatory requirement from secondary parameters
 * SPUserProfileSyncConnection
-  * Fixed issues with the User Profile Sync connection for 2016
+  * Fixed issues with the User Profile Sync connection for SharePoint
+    2016
 * SPUserProfileSyncService
   * Added returning the FarmAccount to the Get method
 * SPWebAppAuthentication
