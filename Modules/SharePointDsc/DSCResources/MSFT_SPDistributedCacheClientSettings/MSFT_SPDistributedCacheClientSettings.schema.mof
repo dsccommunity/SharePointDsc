@@ -3,8 +3,8 @@ class MSFT_SPDistributedCacheClientSettings : OMI_BaseResource
 {
     [Key, Description("Present to initiate the configuration of the settings. Absent is not supported"), ValueMap{"Present","Absent"}, Values{"Present","Absent"}] String Ensure;
     [Write, Description("Maximum number of connections to the Distributed Logon Token Cache")] UInt32 DLTCMaxConnectionsToServer;
-    [Write, Description("Request timeout for the Distributed Logon Token Cache")] DLTCRequestTimeout;
-    [Write, Description("Channel timeout for the Distributed Logon Token Cache")] DLTCChannelOpenTimeOut;
+    [Write, Description("Request timeout for the Distributed Logon Token Cache")] UInt32 DLTCRequestTimeout;
+    [Write, Description("Channel timeout for the Distributed Logon Token Cache")] UInt32 DLTCChannelOpenTimeOut;
     [Write, Description("Maximum number of connections to the Distributed View State Cache")] UInt32 DVSCMaxConnectionsToServer;
     [Write, Description("Request timeout for the Distributed View State Cache")] UInt32 DVSCRequestTimeout;
     [Write, Description("Channel timeout for the Distributed View State Cache")] UInt32 DVSCChannelOpenTimeOut;
