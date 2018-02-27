@@ -93,7 +93,29 @@ function Get-SPDSCAssemblyVersion
 }
 
 
-function Get-SPDSCFarmAccountName
+function Get-SPDscFarmAccount
+{
+    [CmdletBinding()]
+    param
+    ()
+
+    $farmaccount = (Get-SPFarm).DefaultServiceAccount.Name
+
+    $account = Get-SPManagedAccount | Where-Object -FilterScript { $_.UserName -eq $farmaccount }
+
+    $bindings = [System.Reflection.BindingFlags]::CreateInstance -bor `
+                [System.Reflection.BindingFlags]::GetField -bor `
+                [System.Reflection.BindingFlags]::Instance -bor `
+                [System.Reflection.BindingFlags]::NonPublic
+
+    $pw = $account.GetType().GetField("m_Password", $bindings).GetValue($account);
+
+    return New-Object -TypeName System.Management.Automation.PSCredential `
+                      -ArgumentList $farmaccount, $pw.SecureStringValue
+}
+
+
+function Get-SPDscFarmAccountName
 {
     [CmdletBinding()]
     param

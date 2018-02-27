@@ -12,7 +12,7 @@ function Get-TargetResource
         [ValidateSet("Present","Absent")]
         [System.String] $Ensure = "Present",
 
-        [Parameter(Mandatory = $true)]
+        [Parameter()]
         [System.Management.Automation.PSCredential]
         $FarmAccount,
 
@@ -33,18 +33,18 @@ function Get-TargetResource
                            "service via DSC, as 2016 does not use the FIM based sync service.")
     }
 
-    $farmAccountName = Invoke-SPDSCCommand -Credential $InstallAccount `
+    $farmAccount = Invoke-SPDSCCommand -Credential $InstallAccount `
                                        -Arguments $PSBoundParameters `
                                        -ScriptBlock {
-        return Get-SPDSCFarmAccountName
+        return Get-SPDscFarmAccount
     }
 
-    if ($null -ne $farmAccountName)
+    if ($null -ne $farmAccount)
     {
         if ($PSBoundParameters.ContainsKey("InstallAccount") -eq $true)
         {
             # InstallAccount used
-            if ($InstallAccount.UserName -eq $farmAccountName)
+            if ($InstallAccount.UserName -eq $farmAccount.UserName)
             {
                 throw ("Specified InstallAccount ($($InstallAccount.UserName)) is the Farm " + `
                        "Account. Make sure the specified InstallAccount isn't the Farm Account " + `
@@ -57,20 +57,13 @@ function Get-TargetResource
             {
                 # PSDSCRunAsCredential used
                 $localaccount = "$($Env:USERDOMAIN)\$($Env:USERNAME)"
-                if ($localaccount -eq $farmAccountName)
+                if ($localaccount -eq $farmAccount.UserName)
                 {
                     throw ("Specified PSDSCRunAsCredential ($localaccount) is the Farm " + `
                            "Account. Make sure the specified PSDSCRunAsCredential isn't the " + `
                            "Farm Account and try again")
                 }
             }
-        }
-
-        if ($FarmAccount.UserName -ne $farmAccountName)
-        {
-            throw ("Specified FarmAccount ($($FarmAccount.UserName)) isn't the Farm " + `
-                    "Account. Make sure the specified FarmAccount is the actual Farm " + `
-                    "Account and try again")
         }
     }
     else
@@ -160,7 +153,7 @@ function Set-TargetResource
         [ValidateSet("Present","Absent")]
         [System.String] $Ensure = "Present",
 
-        [Parameter(Mandatory = $true)]
+        [Parameter()]
         [System.Management.Automation.PSCredential]
         $FarmAccount,
 
@@ -183,18 +176,18 @@ function Set-TargetResource
                            "service via DSC, as 2016 does not use the FIM based sync service.")
     }
 
-    $farmAccountName = Invoke-SPDSCCommand -Credential $InstallAccount `
+    $farmAccount = Invoke-SPDSCCommand -Credential $InstallAccount `
                                            -Arguments $PSBoundParameters `
                                            -ScriptBlock {
-        return Get-SPDSCFarmAccountName
+        return Get-SPDscFarmAccount
     }
 
-    if ($null -ne $farmAccountName)
+    if ($null -ne $farmAccount)
     {
         if ($PSBoundParameters.ContainsKey("InstallAccount") -eq $true)
         {
             # InstallAccount used
-            if ($InstallAccount.UserName -eq $farmAccountName)
+            if ($InstallAccount.UserName -eq $farmAccount.UserName)
             {
                 throw ("Specified InstallAccount ($($InstallAccount.UserName)) is the Farm " + `
                        "Account. Make sure the specified InstallAccount isn't the Farm Account " + `
@@ -207,20 +200,13 @@ function Set-TargetResource
             {
                 # PSDSCRunAsCredential used
                 $localaccount = "$($Env:USERDOMAIN)\$($Env:USERNAME)"
-                if ($localaccount -eq $farmAccountName)
+                if ($localaccount -eq $farmAccount.UserName)
                 {
                     throw ("Specified PSDSCRunAsCredential ($localaccount) is the Farm " + `
                            "Account. Make sure the specified PSDSCRunAsCredential isn't the " + `
                            "Farm Account and try again")
                 }
             }
-        }
-
-        if ($FarmAccount.UserName -ne $farmAccountName)
-        {
-            throw ("Specified FarmAccount ($($FarmAccount.UserName)) isn't the Farm " + `
-                    "Account. Make sure the specified FarmAccount is the actual Farm " + `
-                    "Account and try again")
         }
     }
     else
@@ -247,24 +233,39 @@ function Set-TargetResource
     }
 
     # Add the Farm Account to the local Admins group, if it's not already there
-    $isLocalAdmin = Test-SPDSCUserIsLocalAdmin -UserName $farmAccountName
+    $isLocalAdmin = Test-SPDSCUserIsLocalAdmin -UserName $farmAccount.UserName
 
     if (!$isLocalAdmin)
     {
-        Add-SPDSCUserToLocalAdmin -UserName $farmAccountName
+        Write-Verbose -Message "Adding farm account to Local Administrators group"
+        Add-SPDSCUserToLocalAdmin -UserName $farmAccount.UserName
 
-        # Cycle the Timer Service so that it picks up the local Admin token
+        # Cycle the Timer Service and flush Kerberos tickets
+        # so that it picks up the local Admin token
         Restart-Service -Name "SPTimerV4"
+
+        $sessions = klist sessions
+        foreach ($session in $sessions)
+        {
+            if ($session.Contains($farmAccount.UserName))
+            {
+                Write-Verbose -Message "Purging Kerberos ticket for $LogonId"
+                $LogonId = $session.split(' ')[3]
+                $LogonId = $LogonId.Replace('0:','')
+                klist -li $LogonId purge | Out-Null
+            }
+
+        }
     }
 
     $isInDesiredState = $false
     try
     {
         Invoke-SPDSCCommand -Credential $FarmAccount `
-                            -Arguments ($PSBoundParameters,$farmAccountName) `
+                            -Arguments ($PSBoundParameters,$farmAccount) `
                             -ScriptBlock {
             $params = $args[0]
-            $farmAccountName = $args[1]
+            $farmAccount = $args[1]
 
             $currentServer = $env:COMPUTERNAME
 
@@ -297,8 +298,8 @@ function Set-TargetResource
                                        "named $($params.UserProfileServiceAppName)")
                 }
 
-                $userName = $farmAccountName
-                $password = $params.FarmAccount.GetNetworkCredential().Password
+                $userName = $farmAccount.UserName
+                $password = $farmAccount.GetNetworkCredential().Password
                 $ups.SetSynchronizationMachine($currentServer, $syncService.ID, $userName, $password)
 
                 Start-SPServiceInstance -Identity $syncService.ID
@@ -341,7 +342,25 @@ function Set-TargetResource
         # Remove the Farm Account from the local Admins group, if it was added above
         if (!$isLocalAdmin)
         {
-            Remove-SPDSCUserToLocalAdmin -UserName $farmAccountName
+            Write-Verbose -Message "Removing farm account from Local Administrators group"
+            Remove-SPDSCUserToLocalAdmin -UserName $farmAccount.UserName
+
+            # Cycle the Timer Service and flush Kerberos tickets
+            # so that it picks up the local Admin token
+            Restart-Service -Name "SPTimerV4"
+
+            $sessions = klist sessions
+            foreach ($session in $sessions)
+            {
+                if ($session.Contains($farmAccount.UserName))
+                {
+                    Write-Verbose -Message "Purging Kerberos ticket for $LogonId"
+                    $LogonId = $session.split(' ')[3]
+                    $LogonId = $LogonId.Replace('0:','')
+                    klist -li $LogonId purge | Out-Null
+                }
+
+            }
         }
     }
     if($syncService.Status -ne $desiredState)
@@ -364,7 +383,7 @@ function Test-TargetResource
         [ValidateSet("Present","Absent")]
         [System.String] $Ensure = "Present",
 
-        [Parameter(Mandatory = $true)]
+        [Parameter()]
         [System.Management.Automation.PSCredential]
         $FarmAccount,
 
