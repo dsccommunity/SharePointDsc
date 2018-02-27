@@ -8,7 +8,7 @@
   * If resource specifies Central Admin webapp and Default Zone, the existing
     AAM will be updated instead of adding a new one
 * SPVisioServiceApp
-  * Fixed issue where proxy is not properly getting created
+  * Fixed an issue where the proxy is not properly getting created
 
 ## 2.1
 
