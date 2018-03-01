@@ -2,7 +2,7 @@
 [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingConvertToSecureStringWithPlainText", "")]
 param(
     [Parameter()]
-    [string] 
+    [string]
     $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
                                          -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
                                          -Resolve)
@@ -23,39 +23,41 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         $getTypeFullName = "Microsoft.Office.Server.Administration.UserProfileApplication"
         $mockPassword = ConvertTo-SecureString -String "password" -AsPlainText -Force
         $mockCredential = New-Object -TypeName System.Management.Automation.PSCredential `
-                                     -ArgumentList @("DOMAIN\username", $mockPassword)
+                                     -ArgumentList @("$($Env:USERDOMAIN)\$($Env:USERNAME)", $mockPassword)
+        $mockFarmCredential = New-Object -TypeName System.Management.Automation.PSCredential `
+                                         -ArgumentList @("DOMAIN\sp_farm", $mockPassword)
 
-        # Mocks for all contexts   
-        Mock -CommandName Get-SPDSCFarmAccountName -MockWith { 
-            return $mockCredential.Username
+        # Mocks for all contexts
+        Mock -CommandName Get-SPDSCFarmAccount -MockWith {
+            return $mockFarmCredential
         }
-        Mock -CommandName New-SPProfileServiceApplication -MockWith { 
+        Mock -CommandName New-SPProfileServiceApplication -MockWith {
             return (@{
                 NetBIOSDomainNamesEnabled =  $false
                 NoILMUsed = $false
             }
             )
-        } 
+        }
         Mock -CommandName New-SPProfileServiceApplicationProxy -MockWith { }
-        Mock -CommandName Add-SPDSCUserToLocalAdmin -MockWith { } 
+        Mock -CommandName Add-SPDSCUserToLocalAdmin -MockWith { }
         Mock -CommandName Test-SPDSCUserIsLocalAdmin -MockWith { return $false }
         Mock -CommandName Remove-SPDSCUserToLocalAdmin -MockWith { }
-        Mock -CommandName Remove-SPServiceApplication -MockWith { } 
+        Mock -CommandName Remove-SPServiceApplication -MockWith { }
 
         # Test contexts
-        Context -Name "When PSDSCRunAsCredential does not match the Farm Account" -Fixture {
+        Context -Name "When PSDSCRunAsCredential matches the Farm Account" -Fixture {
             $testParams = @{
                 Name = "User Profile Service App"
                 ApplicationPool = "SharePoint Service Applications"
                 Ensure = "Present"
-            } 
-
-            Mock -CommandName Get-SPDSCFarmAccountName -MockWith { 
-                return "DOMAIN\sp_farm"
             }
 
-            Mock -CommandName Get-SPServiceApplication -MockWith { 
-                return $null 
+            Mock -CommandName Get-SPDSCFarmAccount -MockWith {
+                return $mockCredential
+            }
+
+            Mock -CommandName Get-SPServiceApplication -MockWith {
+                return $null
             }
 
             Mock -CommandName Restart-Service {}
@@ -73,34 +75,30 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
         }
 
-        Context -Name "When InstallAccount does not match the Farm Account" -Fixture {
+        Context -Name "When InstallAccount matches the Farm Account" -Fixture {
             $testParams = @{
                 Name = "User Profile Service App"
                 ApplicationPool = "SharePoint Service Applications"
                 Ensure = "Present"
-                InstallAccount = $mockCredential
-            } 
-
-            Mock -CommandName Get-SPDSCFarmAccountName -MockWith { 
-                return "DOMAIN\sp_farm"
+                InstallAccount = $mockFarmCredential
             }
 
-            Mock -CommandName Get-SPServiceApplication -MockWith { 
-                return $null 
+            Mock -CommandName Get-SPServiceApplication -MockWith {
+                return $null
             }
 
             Mock -CommandName Restart-Service {}
 
             It "Should throw exception in the Get method" {
-                { Get-TargetResource @testParams } | Should throw "Specified InstallAccount "  
+                { Get-TargetResource @testParams } | Should throw "Specified InstallAccount "
             }
 
             It "Should throw exception in the Test method" {
-                { Test-TargetResource @testParams } | Should throw "Specified InstallAccount "  
+                { Test-TargetResource @testParams } | Should throw "Specified InstallAccount "
             }
 
             It "Should throw exception in the set method" {
-                { Set-TargetResource @testParams } | Should throw "Specified InstallAccount "  
+                { Set-TargetResource @testParams } | Should throw "Specified InstallAccount "
             }
         }
 
@@ -109,17 +107,16 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Name = "User Profile Service App"
                 ApplicationPool = "SharePoint Service Applications"
                 Ensure = "Present"
-                InstallAccount = $mockCredential
-            } 
+            }
 
-            Mock -CommandName Get-SPServiceApplication -MockWith { 
-                return $null 
+            Mock -CommandName Get-SPServiceApplication -MockWith {
+                return $null
             }
 
             Mock -CommandName Restart-Service {}
 
             It "Should return absent from the Get method" {
-                (Get-TargetResource @testParams).Ensure | Should Be "Absent"  
+                (Get-TargetResource @testParams).Ensure | Should Be "Absent"
             }
 
             It "Should return false when the Test method is called" {
@@ -137,25 +134,24 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Name = "User Profile Service App"
                 ApplicationPool = "SharePoint Service Applications"
                 Ensure = "Present"
-                InstallAccount = $mockCredential
-            } 
+            }
 
-            Mock -CommandName Get-SPServiceApplication -MockWith { 
-                $spServiceApp = [PSCustomObject]@{ 
-                                    DisplayName = $testParams.Name 
-                                } 
+            Mock -CommandName Get-SPServiceApplication -MockWith {
+                $spServiceApp = [PSCustomObject]@{
+                                    DisplayName = $testParams.Name
+                                }
                 $spServiceApp | Add-Member -MemberType ScriptMethod `
                                            -Name GetType `
-                                           -Value {  
-                                                return @{ 
-                                                    FullName = "Microsoft.Office.UnKnownWebServiceApplication" 
-                                                }  
-                                            } -PassThru -Force 
-                return $spServiceApp 
+                                           -Value {
+                                                return @{
+                                                    FullName = "Microsoft.Office.UnKnownWebServiceApplication"
+                                                }
+                                            } -PassThru -Force
+                return $spServiceApp
             }
 
             It "Should return absent from the Get method" {
-                (Get-TargetResource @testParams).Ensure | Should Be "Absent"  
+                (Get-TargetResource @testParams).Ensure | Should Be "Absent"
             }
 
             It "Should return false when the Test method is called" {
@@ -169,13 +165,12 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 ApplicationPool = "SharePoint Service Applications"
                 EnableNetBIOS = $true
                 Ensure = "Present"
-                InstallAccount = $mockCredential
             }
-            
+
             Mock -CommandName Restart-Service -MockWith {}
-            Mock -CommandName Get-SPServiceApplication -MockWith { 
+            Mock -CommandName Get-SPServiceApplication -MockWith {
                 return @(
-                    New-Object -TypeName "Object" |            
+                    New-Object -TypeName "Object" |
                         Add-Member -MemberType NoteProperty `
                                    -Name TypeName `
                                    -Value "User Profile Service Application" `
@@ -183,7 +178,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                         Add-Member -MemberType NoteProperty `
                                    -Name DisplayName `
                                    -Value $testParams.Name `
-                                   -PassThru | 
+                                   -PassThru |
                         Add-Member -MemberType NoteProperty `
                                    -Name "NetBIOSDomainNamesEnabled" `
                                    -Value $false `
@@ -195,9 +190,9 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                                     } -PassThru |
                         Add-Member -MemberType NoteProperty `
                                    -Name ApplicationPool `
-                                   -Value @{ 
-                                       Name = $testParams.ApplicationPool 
-                                    } -PassThru |             
+                                   -Value @{
+                                       Name = $testParams.ApplicationPool
+                                    } -PassThru |
                         Add-Member -MemberType ScriptMethod `
                                    -Name GetType `
                                    -Value {
@@ -205,7 +200,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                                             Add-Member -MemberType NoteProperty `
                                                        -Name FullName `
                                                        -Value $getTypeFullName `
-                                                       -PassThru | 
+                                                       -PassThru |
                                             Add-Member -MemberType ScriptMethod `
                                                        -Name GetProperties `
                                                        -Value {
@@ -256,18 +251,18 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                                                                 )
                                                             )
                                                         } -PassThru
-                                    } -PassThru -Force 
+                                    } -PassThru -Force
                 )
             }
-            
+
             It "Should return false from the Get method" {
-                (Get-TargetResource @testParams).EnableNetBIOS | Should Be $false  
+                (Get-TargetResource @testParams).EnableNetBIOS | Should Be $false
             }
 
             It "Should call Update method on Service Application before finishing set method" {
-                $Global:SPDscUPSAUpdateCalled = $false            
+                $Global:SPDscUPSAUpdateCalled = $false
                 Set-TargetResource @testParams
-                $Global:SPDscUPSAUpdateCalled | Should Be $true  
+                $Global:SPDscUPSAUpdateCalled | Should Be $true
             }
 
             It "Should return false when the Test method is called" {
@@ -286,13 +281,12 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 ApplicationPool = "SharePoint Service Applications"
                 NoILMUsed = $true
                 Ensure = "Present"
-                InstallAccount = $mockCredential
             }
-            
+
             Mock -CommandName Restart-Service -MockWith {}
-            Mock -CommandName Get-SPServiceApplication -MockWith { 
+            Mock -CommandName Get-SPServiceApplication -MockWith {
                 return @(
-                    New-Object -TypeName "Object" |            
+                    New-Object -TypeName "Object" |
                         Add-Member -MemberType NoteProperty `
                                    -Name TypeName `
                                    -Value "User Profile Service Application" `
@@ -300,7 +294,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                         Add-Member -MemberType NoteProperty `
                                    -Name DisplayName `
                                    -Value $testParams.Name `
-                                   -PassThru | 
+                                   -PassThru |
                         Add-Member -MemberType NoteProperty `
                                    -Name "NoILMUsed" `
                                    -Value $false `
@@ -312,9 +306,9 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                                     } -PassThru |
                         Add-Member -MemberType NoteProperty `
                                    -Name ApplicationPool `
-                                   -Value @{ 
-                                       Name = $testParams.ApplicationPool 
-                                    } -PassThru |             
+                                   -Value @{
+                                       Name = $testParams.ApplicationPool
+                                    } -PassThru |
                         Add-Member -MemberType ScriptMethod `
                                    -Name GetType `
                                    -Value {
@@ -322,7 +316,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                                             Add-Member -MemberType NoteProperty `
                                                        -Name FullName `
                                                        -Value $getTypeFullName `
-                                                       -PassThru | 
+                                                       -PassThru |
                                             Add-Member -MemberType ScriptMethod `
                                                        -Name GetProperties `
                                                        -Value {
@@ -373,18 +367,18 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                                                                 )
                                                             )
                                                         } -PassThru
-                                    } -PassThru -Force 
+                                    } -PassThru -Force
                 )
             }
-            
+
             It "Should return false from the Get method" {
-                (Get-TargetResource @testParams).NoILMUsed | Should Be $false  
+                (Get-TargetResource @testParams).NoILMUsed | Should Be $false
             }
 
             It "Should call Update method on Service Application before finishing set method" {
-                $Global:SPDscUPSAUpdateCalled = $false            
+                $Global:SPDscUPSAUpdateCalled = $false
                 Set-TargetResource @testParams
-                $Global:SPDscUPSAUpdateCalled | Should Be $true  
+                $Global:SPDscUPSAUpdateCalled | Should Be $true
             }
 
             It "Should return false when the Test method is called" {
@@ -402,12 +396,11 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Name = "User Profile Service App"
                 ApplicationPool = "SharePoint Service Applications"
                 Ensure = "Present"
-                InstallAccount = $mockCredential
-            } 
+            }
 
-            Mock -CommandName Get-SPServiceApplication -MockWith { 
+            Mock -CommandName Get-SPServiceApplication -MockWith {
                 return @(
-                    New-Object -TypeName "Object" |            
+                    New-Object -TypeName "Object" |
                         Add-Member -MemberType NoteProperty `
                                    -Name TypeName `
                                    -Value "User Profile Service Application" `
@@ -415,7 +408,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                         Add-Member -MemberType NoteProperty `
                                    -Name DisplayName `
                                    -Value $testParams.Name `
-                                   -PassThru | 
+                                   -PassThru |
                         Add-Member -MemberType NoteProperty `
                                    -Name "NetBIOSDomainNamesEnabled" `
                                    -Value $false `
@@ -427,9 +420,9 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                                     } -PassThru |
                         Add-Member -MemberType NoteProperty `
                                    -Name ApplicationPool `
-                                   -Value @{ 
-                                       Name = $testParams.ApplicationPool 
-                                    } -PassThru |             
+                                   -Value @{
+                                       Name = $testParams.ApplicationPool
+                                    } -PassThru |
                         Add-Member -MemberType ScriptMethod `
                                    -Name GetType `
                                    -Value {
@@ -488,30 +481,29 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                                                                 )
                                                             )
                                                         } -PassThru
-                                    } -PassThru -Force 
+                                    } -PassThru -Force
                 )
             }
 
             It "Should return present from the get method" {
-                (Get-TargetResource @testParams).Ensure | Should Be "Present"  
+                (Get-TargetResource @testParams).Ensure | Should Be "Present"
             }
 
             It "Should return true when the Test method is called" {
                 Test-TargetResource @testParams | Should Be $true
             }
         }
-        
+
         Context -Name "When the service app exists but it shouldn't" -Fixture {
             $testParams = @{
                 Name = "Test App"
                 ApplicationPool = "-"
                 Ensure = "Absent"
-                InstallAccount = $mockCredential
             }
 
-            Mock -CommandName Get-SPServiceApplication -MockWith { 
+            Mock -CommandName Get-SPServiceApplication -MockWith {
                 return @(
-                    New-Object -TypeName "Object" |            
+                    New-Object -TypeName "Object" |
                         Add-Member -MemberType NoteProperty `
                                    -Name TypeName `
                                    -Value "User Profile Service Application" `
@@ -519,7 +511,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                         Add-Member -MemberType NoteProperty `
                                    -Name DisplayName `
                                    -Value $testParams.Name `
-                                   -PassThru | 
+                                   -PassThru |
                         Add-Member -MemberType NoteProperty `
                                    -Name "NetBIOSDomainNamesEnabled" `
                                    -Value $false `
@@ -531,9 +523,9 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                                     } -PassThru |
                         Add-Member -MemberType NoteProperty `
                                    -Name ApplicationPool `
-                                   -Value @{ 
-                                       Name = $testParams.ApplicationPool 
-                                    } -PassThru |             
+                                   -Value @{
+                                       Name = $testParams.ApplicationPool
+                                    } -PassThru |
                         Add-Member -MemberType ScriptMethod `
                                    -Name GetType `
                                    -Value {
@@ -592,40 +584,39 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                                                                 )
                                                             )
                                                         } -PassThru
-                                    } -PassThru -Force 
+                                    } -PassThru -Force
                 )
             }
-            
+
             It "Should return present from the Get method" {
-                (Get-TargetResource @testParams).Ensure | Should Be "Present" 
+                (Get-TargetResource @testParams).Ensure | Should Be "Present"
             }
-            
+
             It "Should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $false
             }
-            
+
             It "Should remove the service application in the set method" {
                 Set-TargetResource @testParams
                 Assert-MockCalled Remove-SPServiceApplication
             }
         }
-        
+
         Context -Name "When the service app doesn't exist and shouldn't" -Fixture {
             $testParams = @{
                 Name = "Test App"
                 ApplicationPool = "-"
                 Ensure = "Absent"
-                InstallAccount = $mockCredential
             }
 
-            Mock -CommandName Get-SPServiceApplication -MockWith { 
-                return $null 
+            Mock -CommandName Get-SPServiceApplication -MockWith {
+                return $null
             }
-            
+
             It "Should return absent from the Get method" {
-                (Get-TargetResource @testParams).Ensure | Should Be "Absent" 
+                (Get-TargetResource @testParams).Ensure | Should Be "Absent"
             }
-            
+
             It "Should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $true
             }

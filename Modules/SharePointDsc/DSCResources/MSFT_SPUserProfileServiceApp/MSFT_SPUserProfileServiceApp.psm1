@@ -304,7 +304,7 @@ function Set-TargetResource
             $sessions = klist sessions
             foreach ($session in $sessions)
             {
-                if ($session.Contains($farmAccount.UserName))
+                if ($session -like "*$($farmAccount.UserName)*")
                 {
                     Write-Verbose -Message "Purging Kerberos ticket for $LogonId"
                     $LogonId = $session.split(' ')[3]
@@ -407,7 +407,7 @@ function Set-TargetResource
             $sessions = klist sessions
             foreach ($session in $sessions)
             {
-                if ($session.Contains($farmAccount.UserName))
+                if ($session -like "*$($farmAccount.UserName)*")
                 {
                     Write-Verbose -Message "Purging Kerberos ticket for $LogonId"
                     $LogonId = $session.split(' ')[3]

@@ -21,8 +21,8 @@
     local Administrator permissions for the resource to function properly.
   * Updated resource to retrieve the Farm account from the Managed Accounts
     instead of requiring it as a parameter.
-  * The FarmAccount parameter is depricated and no longer required. Will be
-    removed in v3.0.
+  * The FarmAccount parameter is deprecated and no longer required. Is ignored
+    in the code and will be removed in v3.0.
 
 ## 2.1
 

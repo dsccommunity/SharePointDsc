@@ -247,7 +247,7 @@ function Set-TargetResource
         $sessions = klist sessions
         foreach ($session in $sessions)
         {
-            if ($session.Contains($farmAccount.UserName))
+            if ($session -like "*$($farmAccount.UserName)*")
             {
                 Write-Verbose -Message "Purging Kerberos ticket for $LogonId"
                 $LogonId = $session.split(' ')[3]
@@ -314,7 +314,7 @@ function Set-TargetResource
             }
 
             $count = 0
-            $maxCount = 10
+            $maxCount = 20
 
             while (($count -lt $maxCount) -and ($syncService.Status -ne $desiredState))
             {
@@ -324,9 +324,9 @@ function Set-TargetResource
                 }
 
                 # Get the current status of the Sync service
-                Write-Verbose ("$([DateTime]::Now.ToShortTimeString()) - Waiting for user profile " + `
-                            "sync service to become '$desiredState' (waited $count of " + `
-                            "$maxCount minutes)")
+                Write-Verbose -Message ("$([DateTime]::Now.ToShortTimeString()) - Waiting for user " + `
+                                        "profile sync service to become '$desiredState' (waited " + `
+                                        "$count of $maxCount minutes)")
 
                 $services = Get-SPServiceInstance -Server $currentServer `
                                                   -ErrorAction SilentlyContinue
@@ -352,7 +352,7 @@ function Set-TargetResource
             $sessions = klist sessions
             foreach ($session in $sessions)
             {
-                if ($session.Contains($farmAccount.UserName))
+                if ($session -like "*$($farmAccount.UserName)*")
                 {
                     Write-Verbose -Message "Purging Kerberos ticket for $LogonId"
                     $LogonId = $session.split(' ')[3]
