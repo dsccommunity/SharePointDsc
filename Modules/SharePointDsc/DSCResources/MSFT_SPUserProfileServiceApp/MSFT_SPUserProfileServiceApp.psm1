@@ -301,18 +301,7 @@ function Set-TargetResource
             # so that it picks up the local Admin token
             Restart-Service -Name "SPTimerV4"
 
-            $sessions = klist sessions
-            foreach ($session in $sessions)
-            {
-                if ($session -like "*$($farmAccount.UserName)*")
-                {
-                    Write-Verbose -Message "Purging Kerberos ticket for $LogonId"
-                    $LogonId = $session.split(' ')[3]
-                    $LogonId = $LogonId.Replace('0:','')
-                    klist -li $LogonId purge | Out-Null
-                }
-
-            }
+            Clear-SPDscKerberosToken -Account $farmAccount.UserName
         }
 
         $null = Invoke-SPDSCCommand -Credential $FarmAccount `
@@ -404,18 +393,7 @@ function Set-TargetResource
             # so that it picks up the local Admin token
             Restart-Service -Name "SPTimerV4"
 
-            $sessions = klist sessions
-            foreach ($session in $sessions)
-            {
-                if ($session -like "*$($farmAccount.UserName)*")
-                {
-                    Write-Verbose -Message "Purging Kerberos ticket for $LogonId"
-                    $LogonId = $session.split(' ')[3]
-                    $LogonId = $LogonId.Replace('0:','')
-                    klist -li $LogonId purge | Out-Null
-                }
-
-            }
+            Clear-SPDscKerberosToken -Account $farmAccount.UserName
         }
     }
 

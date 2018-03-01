@@ -28,6 +28,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                                          -ArgumentList @("DOMAIN\sp_farm", $mockPassword)
 
         # Mocks for all contexts
+        Mock -CommandName Clear-SPDscKerberosToken -MockWith { }
         Mock -CommandName Get-SPDSCFarmAccount -MockWith {
             return $mockFarmCredential
         }

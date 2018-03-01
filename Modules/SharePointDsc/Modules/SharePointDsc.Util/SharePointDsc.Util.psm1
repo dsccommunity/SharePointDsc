@@ -20,6 +20,28 @@ function Add-SPDSCUserToLocalAdmin
     ([ADSI]"WinNT://$($env:computername)/Administrators,group").Add("WinNT://$domainName/$accountName") | Out-Null
 }
 
+function Clear-SPDscKerberosToken
+{
+    param (
+        [Parameter(Mandatory=$true)]
+        [System.String]
+        $Account
+    )
+
+    $sessions = klist sessions
+    foreach ($session in $sessions)
+    {
+        if ($session -like "*$($Account)*")
+        {
+            Write-Verbose -Message "Purging Kerberos ticket for $LogonId"
+            $LogonId = $session.split(' ')[3]
+            $LogonId = $LogonId.Replace('0:','')
+            klist -li $LogonId purge | Out-Null
+        }
+
+    }
+}
+
 function Convert-SPDscADGroupIDToName
 {
     param(
