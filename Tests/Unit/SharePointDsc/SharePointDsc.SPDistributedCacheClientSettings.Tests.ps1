@@ -124,6 +124,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             It "Should successfully test the resource" {
                 (Test-TargetResource @testParams) | Should Be $false
             }
+        }
     }
 }
 
