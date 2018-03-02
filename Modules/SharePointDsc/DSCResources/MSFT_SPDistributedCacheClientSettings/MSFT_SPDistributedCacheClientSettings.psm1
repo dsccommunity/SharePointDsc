@@ -246,123 +246,123 @@ function Set-TargetResource
 
         [Parameter()]
         [System.UInt32]
-        $DLTCMaxConnectionsToServer,
+        $DLTCMaxConnectionsToServer = 1,
 
         [Parameter()]
         [System.UInt32]
-        $DLTCRequestTimeout,
+        $DLTCRequestTimeout = 3000,
 
         [Parameter()]
         [System.UInt32]
-        $DLTCChannelOpenTimeOut,
+        $DLTCChannelOpenTimeOut = 3000,
 
         [Parameter()]
         [System.UInt32]
-        $DVSCMaxConnectionsToServer,
+        $DVSCMaxConnectionsToServer = 1,
 
         [Parameter()]
         [System.UInt32]
-        $DVSCRequestTimeout,
+        $DVSCRequestTimeout = 3000,
 
         [Parameter()]
         [System.UInt32]
-        $DVSCChannelOpenTimeOut,
+        $DVSCChannelOpenTimeOut = 3000,
 
         [Parameter()]
         [System.UInt32]
-        $DACMaxConnectionsToServer,
+        $DACMaxConnectionsToServer = 1,
 
         [Parameter()]
         [System.UInt32]
-        $DACRequestTimeout,
+        $DACRequestTimeout = 3000,
 
         [Parameter()]
         [System.UInt32]
-        $DACChannelOpenTimeOut,
+        $DACChannelOpenTimeOut = 3000,
 
         [Parameter()]
         [System.UInt32]
-        $DAFMaxConnectionsToServer,
+        $DAFMaxConnectionsToServer = 1,
 
         [Parameter()]
         [System.UInt32]
-        $DAFRequestTimeout,
+        $DAFRequestTimeout = 3000,
 
         [Parameter()]
         [System.UInt32]
-        $DAFChannelOpenTimeOut,
+        $DAFChannelOpenTimeOut = 3000,
 
         [Parameter()]
         [System.UInt32]
-        $DAFCMaxConnectionsToServer,
+        $DAFCMaxConnectionsToServer = 1,
 
         [Parameter()]
         [System.UInt32]
-        $DAFCRequestTimeout,
+        $DAFCRequestTimeout = 3000,
 
         [Parameter()]
         [System.UInt32]
-        $DAFCChannelOpenTimeOut,
+        $DAFCChannelOpenTimeOut = 3000,
 
         [Parameter()]
         [System.UInt32]
-        $DBCMaxConnectionsToServer,
+        $DBCMaxConnectionsToServer = 1,
 
         [Parameter()]
         [System.UInt32]
-        $DBCRequestTimeout,
+        $DBCRequestTimeout = 3000,
 
         [Parameter()]
         [System.UInt32]
-        $DBCChannelOpenTimeOut,
+        $DBCChannelOpenTimeOut = 3000,
 
         [Parameter()]
         [System.UInt32]
-        $DDCMaxConnectionsToServer,
+        $DDCMaxConnectionsToServer = 1,
 
         [Parameter()]
         [System.UInt32]
-        $DDCRequestTimeout,
+        $DDCRequestTimeout = 3000,
 
         [Parameter()]
         [System.UInt32]
-        $DDCChannelOpenTimeOut,
+        $DDCChannelOpenTimeOut = 3000,
 
         [Parameter()]
         [System.UInt32]
-        $DSCMaxConnectionsToServer,
+        $DSCMaxConnectionsToServer = 1,
 
         [Parameter()]
         [System.UInt32]
-        $DSCRequestTimeout,
+        $DSCRequestTimeout = 3000,
 
         [Parameter()]
         [System.UInt32]
-        $DSCChannelOpenTimeOut,
+        $DSCChannelOpenTimeOut = 3000,
 
         [Parameter()]
         [System.UInt32]
-        $DTCMaxConnectionsToServer,
+        $DTCMaxConnectionsToServer = 1,
 
         [Parameter()]
         [System.UInt32]
-        $DTCRequestTimeout,
+        $DTCRequestTimeout = 3000,
 
         [Parameter()]
         [System.UInt32]
-        $DTCChannelOpenTimeOut,
+        $DTCChannelOpenTimeOut = 3000,
 
         [Parameter()]
         [System.UInt32]
-        $DSTACMaxConnectionsToServer,
+        $DSTACMaxConnectionsToServer = 1,
 
         [Parameter()]
         [System.UInt32]
-        $DSTACRequestTimeout,
+        $DSTACRequestTimeout = 3000,
 
         [Parameter()]
         [System.UInt32]
-        $DSTACChannelOpenTimeOut,
+        $DSTACChannelOpenTimeOut = 3000,
 
         [Parameter()]
         [System.Management.Automation.PSCredential]
@@ -690,7 +690,38 @@ function Test-TargetResource
 
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
                                     -DesiredValues $PSBoundParameters `
-                                    -ValuesToCheck @("Ensure")
+                                    -ValuesToCheck @("Ensure",
+                                    "DLTCMaxConnectionsToServer",
+                                    "DLTCRequestTimeout",
+                                    "DLTCChannelOpenTimeOut",
+                                    "DVSCMaxConnectionsToServer",
+                                    "DVSCRequestTimeout",
+                                    "DVSCChannelOpenTimeOut",
+                                    "DACMaxConnectionsToServer",
+                                    "DACRequestTimeout",
+                                    "DACChannelOpenTimeOut",
+                                    "DAFMaxConnectionsToServer",
+                                    "DAFRequestTimeout",
+                                    "DAFChannelOpenTimeOut",
+                                    "DAFCMaxConnectionsToServer",
+                                    "DAFCRequestTimeout",
+                                    "DAFCChannelOpenTimeOut",
+                                    "DBCMaxConnectionsToServer",
+                                    "DBCRequestTimeout",
+                                    "DBCChannelOpenTimeOut",
+                                    "DDCMaxConnectionsToServer",
+                                    "DDCRequestTimeout",
+                                    "DDCChannelOpenTimeOut",
+                                    "DSCMaxConnectionsToServer",
+                                    "DSCRequestTimeout",
+                                    "DSCChannelOpenTimeOut",
+                                    "DTCMaxConnectionsToServer",
+                                    "DTCRequestTimeout",
+                                    "DTCChannelOpenTimeOut",
+                                    "DSTACMaxConnectionsToServer",
+                                    "DSTACRequestTimeout",
+                                    "DSTACChannelOpenTimeOut"
+                                    )
 }
 
 Export-ModuleMember -Function *-TargetResource

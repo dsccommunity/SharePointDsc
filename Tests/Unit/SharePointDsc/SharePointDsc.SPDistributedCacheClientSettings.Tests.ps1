@@ -40,7 +40,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
         }
 
-        Context -Name "Some Distributed Cache Client Settings are Properly Configured" -Fixture {
+        Context -Name "Some Distributed Cache Client Settings are Not Properly Configured" -Fixture {
             $testParams = @{
                 Ensure = "Present"
                 DLTCMaxConnectionsToServer = 5
@@ -84,9 +84,46 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             It "Should successfully test the resource" {
-                (Test-TargetResource @testParams) | Should Be $true
+                (Test-TargetResource @testParams) | Should Be $false
             }
         }
+        Context -Name "Some Distributed Cache Client Settings are Not Properly Configured" -Fixture {
+            $testParams = @{
+                Ensure = "Present"
+                DLTCMaxConnectionsToServer = 1
+                DLTCRequestTimeout = 3000
+                DLTCChannelOpenTimeOut = 3000
+                DVSCMaxConnectionsToServer = 1
+                DVSCRequestTimeout = 3000
+                DVSCChannelOpenTimeOut = 3000
+                DACMaxConnectionsToServer = 1
+                DACRequestTimeout = 3000
+                DACChannelOpenTimeOut = 3000
+                DAFMaxConnectionsToServer = 1
+                DAFRequestTimeout = 3000
+                DAFChannelOpenTimeOut = 3000
+                DAFCMaxConnectionsToServer = 1
+                DAFCRequestTimeout = 3000
+                DAFCChannelOpenTimeOut = 3000
+                DBCMaxConnectionsToServer = 1
+                DBCRequestTimeout = 3000
+                DBCChannelOpenTimeOut = 3000
+                DDCMaxConnectionsToServer = 1
+                DDCRequestTimeout = 3000
+                DDCChannelOpenTimeOut = 3000
+                DSCMaxConnectionsToServer = 1
+                DSCRequestTimeout = 3000
+                DSCChannelOpenTimeOut = 3000
+                DTCMaxConnectionsToServer = 1
+                DTCRequestTimeout = 3000
+                DTCChannelOpenTimeOut = 3000
+                DSTACMaxConnectionsToServer = 1
+                DSTACRequestTimeout = 3000
+                DSTACChannelOpenTimeOut = 3000
+            }
+            It "Should successfully test the resource" {
+                (Test-TargetResource @testParams) | Should Be $false
+            }
     }
 }
 

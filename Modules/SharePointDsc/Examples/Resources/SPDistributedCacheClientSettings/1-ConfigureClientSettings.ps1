@@ -46,7 +46,7 @@
                 DSTACMaxConnectionsToServer = 3
                 DSTACRequestTimeout         = 1000
                 DSTACChannelOpenTimeOut     = 1000
-                InstallAccount              = $SetupAccount
+                PsDscRunAscredential        = $SetupAccount
             }
         }
     }
