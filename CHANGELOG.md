@@ -29,6 +29,8 @@
     instead of requiring it as a parameter.
   * The FarmAccount parameter is deprecated and no longer required. Is ignored
     in the code and will be removed in v3.0.
+* SPVisioServiceApp
+  * Fixed an issue where the proxy is not properly getting created
 
 ## 2.1
 
