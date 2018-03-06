@@ -14,6 +14,9 @@
 * SPManagedMetadataServiceApp
   * Fixed issue with creating the Content Type Hub on an existing MMS
     service app without Content Type Hub.
+* SPTimerJobState
+  * Updated description of WebAppUrl parameter to make it clear that
+    "N/A" has to be used to specify a global timer job.
 * SPUserProfileServiceApp
   * Fixed issue introduced in v2.0, where the Farm Account had to have
     local Administrator permissions for the resource to function properly.
