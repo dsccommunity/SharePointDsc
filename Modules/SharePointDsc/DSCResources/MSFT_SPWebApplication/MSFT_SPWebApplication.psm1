@@ -4,7 +4,7 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [Parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]
         [System.String]
         $Name,
 
@@ -12,40 +12,40 @@ function Get-TargetResource
         [System.String]
         $ApplicationPool,
 
-        [Parameter(Mandatory = $true)]  
-        [System.String]  
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $ApplicationPoolAccount,
 
-        [Parameter(Mandatory = $true)]  
-        [System.String] 
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $Url,
 
-        [Parameter()] 
-        [System.Boolean] 
+        [Parameter()]
+        [System.Boolean]
         $AllowAnonymous,
 
-        [Parameter()] 
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $DatabaseName,
 
         [Parameter()]
-        [System.String] 
+        [System.String]
         $DatabaseServer,
 
         [Parameter()]
-        [System.String] 
+        [System.String]
         $HostHeader,
 
         [Parameter()]
-        [System.String] 
+        [System.String]
         $Path,
 
         [Parameter()]
-        [System.String] 
+        [System.String]
         $Port,
 
         [Parameter()]
-        [System.Boolean] 
+        [System.Boolean]
         $UseClassic = $false,
 
         [Parameter()]
@@ -54,17 +54,17 @@ function Get-TargetResource
         $Ensure = "Present",
 
         [Parameter()]
-        [System.Management.Automation.PSCredential] 
+        [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 
     Write-Verbose -Message "Getting web application '$Name' config"
-   
+
     $result = Invoke-SPDSCCommand -Credential $InstallAccount `
                                   -Arguments $PSBoundParameters `
                                   -ScriptBlock {
         $params = $args[0]
-        
+
         $wa = Get-SPWebApplication -Identity $params.Name -ErrorAction SilentlyContinue
         if ($null -eq $wa)
         {
@@ -74,12 +74,12 @@ function Get-TargetResource
                 ApplicationPoolAccount = $params.ApplicationPoolAccount
                 Url = $params.Url
                 Ensure = "Absent"
-            } 
+            }
         }
 
         ### COMMENT: Are we making an assumption here, about Default Zone
         $classicAuth = $false
-        $authProvider = Get-SPAuthenticationProvider -WebApplication $wa.Url -Zone "Default" 
+        $authProvider = Get-SPAuthenticationProvider -WebApplication $wa.Url -Zone "Default"
         if ($null -eq $authProvider)
         {
             $classicAuth = $true
@@ -96,8 +96,7 @@ function Get-TargetResource
             HostHeader = (New-Object -TypeName System.Uri $wa.Url).Host
             Path = $wa.IisSettings[0].Path
             Port = (New-Object -TypeName System.Uri $wa.Url).Port
-            UseClassic = $classicAuth    
-            UseSSL = (New-Object -TypeName System.Uri $wa.Url).Scheme -eq "https"
+            UseClassic = $classicAuth
             InstallAccount = $params.InstallAccount
             Ensure = "Present"
         }
@@ -111,7 +110,7 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [Parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]
         [System.String]
         $Name,
 
@@ -119,40 +118,40 @@ function Set-TargetResource
         [System.String]
         $ApplicationPool,
 
-        [Parameter(Mandatory = $true)]  
-        [System.String]  
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $ApplicationPoolAccount,
 
-        [Parameter(Mandatory = $true)]  
-        [System.String] 
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $Url,
 
-        [Parameter()] 
-        [System.Boolean] 
+        [Parameter()]
+        [System.Boolean]
         $AllowAnonymous,
 
-        [Parameter()] 
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $DatabaseName,
 
         [Parameter()]
-        [System.String] 
+        [System.String]
         $DatabaseServer,
 
         [Parameter()]
-        [System.String] 
+        [System.String]
         $HostHeader,
 
         [Parameter()]
-        [System.String] 
+        [System.String]
         $Path,
 
         [Parameter()]
-        [System.String] 
+        [System.String]
         $Port,
 
         [Parameter()]
-        [System.Boolean] 
+        [System.Boolean]
         $UseClassic = $false,
 
         [Parameter()]
@@ -161,12 +160,12 @@ function Set-TargetResource
         $Ensure = "Present",
 
         [Parameter()]
-        [System.Management.Automation.PSCredential] 
+        [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 
     Write-Verbose -Message "Setting web application '$Name' config"
-    
+
     $PSBoundParameters.UseClassic = $UseClassic
 
     if ($Ensure -eq "Present")
@@ -188,27 +187,27 @@ function Set-TargetResource
                 # Get a reference to the Administration WebService
                 $admService = Get-SPDSCContentService
                 $appPools = $admService.ApplicationPools | Where-Object -FilterScript {
-                    $_.Name -eq $params.ApplicationPool 
+                    $_.Name -eq $params.ApplicationPool
                 }
                 if ($null -eq $appPools)
                 {
                     # Application pool does not exist, create a new one.
-                    # Test if the specified managed account exists. If so, add 
+                    # Test if the specified managed account exists. If so, add
                     # ApplicationPoolAccount parameter to create the application pool
-                    try 
+                    try
                     {
                         Get-SPManagedAccount $params.ApplicationPoolAccount -ErrorAction Stop | Out-Null
                         $newWebAppParams.Add("ApplicationPoolAccount", $params.ApplicationPoolAccount)
                     }
-                    catch 
+                    catch
                     {
                         if ($_.Exception.Message -like "*No matching accounts were found*")
                         {
                             throw ("The specified managed account was not found. Please make " + `
                                    "sure the managed account exists before continuing.")
                             return
-                        } 
-                        else 
+                        }
+                        else
                         {
                             throw ("Error occurred. Web application was not created. Error " + `
                                    "details: $($_.Exception.Message)")
@@ -216,13 +215,13 @@ function Set-TargetResource
                         }
                     }
                 }
-                
+
                 if ($params.UseClassic -eq $false)
                 {
                     $ap = New-SPAuthenticationProvider
                     $newWebAppParams.Add("AuthenticationProvider", $ap)
                 }
-                
+
                 if ($params.ContainsKey("AllowAnonymous") -eq $true)
                 {
                     $newWebAppParams.Add("AllowAnonymousAccess", $params.AllowAnonymous)
@@ -246,7 +245,7 @@ function Set-TargetResource
                 if ($params.ContainsKey("Port") -eq $true)
                 {
                     $newWebAppParams.Add("Port", $params.Port)
-                } 
+                }
                 if ((New-Object -TypeName System.Uri $params.Url).Scheme -eq "https")
                 {
                     $newWebAppParams.Add("SecureSocketsLayer", $true)
@@ -256,7 +255,7 @@ function Set-TargetResource
             }
         }
     }
-    
+
     if ($Ensure -eq "Absent")
     {
         Invoke-SPDSCCommand -Credential $InstallAccount `
@@ -279,7 +278,7 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [Parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]
         [System.String]
         $Name,
 
@@ -287,40 +286,40 @@ function Test-TargetResource
         [System.String]
         $ApplicationPool,
 
-        [Parameter(Mandatory = $true)]  
-        [System.String]  
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $ApplicationPoolAccount,
 
-        [Parameter(Mandatory = $true)]  
-        [System.String] 
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $Url,
 
-        [Parameter()] 
-        [System.Boolean] 
+        [Parameter()]
+        [System.Boolean]
         $AllowAnonymous,
 
-        [Parameter()] 
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $DatabaseName,
 
         [Parameter()]
-        [System.String] 
+        [System.String]
         $DatabaseServer,
 
         [Parameter()]
-        [System.String] 
+        [System.String]
         $HostHeader,
 
         [Parameter()]
-        [System.String] 
+        [System.String]
         $Path,
 
         [Parameter()]
-        [System.String] 
+        [System.String]
         $Port,
 
         [Parameter()]
-        [System.Boolean] 
+        [System.Boolean]
         $UseClassic = $false,
 
         [Parameter()]
@@ -329,7 +328,7 @@ function Test-TargetResource
         $Ensure = "Present",
 
         [Parameter()]
-        [System.Management.Automation.PSCredential] 
+        [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 

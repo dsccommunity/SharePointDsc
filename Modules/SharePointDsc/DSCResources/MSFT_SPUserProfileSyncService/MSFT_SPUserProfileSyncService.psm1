@@ -4,30 +4,30 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [Parameter(Mandatory = $true)]  
-        [System.String] 
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $UserProfileServiceAppName,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")] 
+        [ValidateSet("Present","Absent")]
         [System.String] $Ensure = "Present",
 
-        [Parameter(Mandatory = $true)]  
-        [System.Management.Automation.PSCredential] 
+        [Parameter(Mandatory = $true)]
+        [System.Management.Automation.PSCredential]
         $FarmAccount,
 
         [Parameter()]
-        [System.Boolean] 
+        [System.Boolean]
         $RunOnlyWhenWriteable,
 
         [Parameter()]
-        [System.Management.Automation.PSCredential] 
+        [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 
     Write-Verbose -Message "Getting user profile sync service for $UserProfileServiceAppName"
 
-    if ((Get-SPDSCInstalledProductVersion).FileMajorPart -ne 15) 
+    if ((Get-SPDSCInstalledProductVersion).FileMajorPart -ne 15)
     {
         throw [Exception] ("Only SharePoint 2013 is supported to deploy the user profile sync " + `
                            "service via DSC, as 2016 does not use the FIM based sync service.")
@@ -41,7 +41,7 @@ function Get-TargetResource
 
     if ($null -ne $farmAccountName)
     {
-        if ($PSBoundParameters.ContainsKey("InstallAccount") -eq $true) 
+        if ($PSBoundParameters.ContainsKey("InstallAccount") -eq $true)
         {
             # InstallAccount used
             if ($InstallAccount.UserName -ne $farmAccountName)
@@ -73,11 +73,11 @@ function Get-TargetResource
                                   -Arguments $PSBoundParameters `
                                   -ScriptBlock {
         $params = $args[0]
-        
-        $syncServices = Get-SPServiceInstance -Server $env:COMPUTERNAME `
+
+        $services = Get-SPServiceInstance -Server $env:COMPUTERNAME `
                         -ErrorAction SilentlyContinue
-        
-        if ($null -eq $syncServices)
+
+        if ($null -eq $services)
         {
             return @{
                 UserProfileServiceAppName = $params.UserProfileServiceAppName
@@ -86,49 +86,50 @@ function Get-TargetResource
                 InstallAccount = $params.InstallAccount
             }
         }
-        
-        $syncService = $syncServices | Where-Object -FilterScript {
-            $_.GetType().Name -eq "UserProfileServiceInstance"
+
+        $syncService = $services | Where-Object -FilterScript {
+            $_.GetType().Name -eq "ProfileSynchronizationServiceInstance"
         }
 
-        if ($null -eq $syncService) 
+        if ($null -eq $syncService)
         {
             $domain = (Get-CimInstance -ClassName Win32_ComputerSystem).Domain
             $currentServer = "$($env:COMPUTERNAME).$domain"
-            $syncServices = Get-SPServiceInstance -Server $currentServer `
+            $services = Get-SPServiceInstance -Server $currentServer `
                                                   -ErrorAction SilentlyContinue
-            $syncService = $syncServices | Where-Object -FilterScript {
-                $_.GetType().Name -eq "UserProfileServiceInstance" 
+            $syncService = $services | Where-Object -FilterScript {
+                $_.GetType().Name -eq "ProfileSynchronizationServiceInstance"
             }
         }
 
-        if ($null -eq $syncService) 
+        if ($null -eq $syncService)
         {
             return @{
                 UserProfileServiceAppName = $params.UserProfileServiceAppName
                 Ensure = "Absent"
                 RunOnlyWhenWriteable = $params.RunOnlyWhenWriteable
                 InstallAccount = $params.InstallAccount
-            } 
+            }
         }
         if ($null -ne $syncService.UserProfileApplicationGuid -and `
-            $syncService.UserProfileApplicationGuid -ne [Guid]::Empty) 
+            $syncService.UserProfileApplicationGuid -ne [Guid]::Empty)
         {
-            $upa = Get-SPServiceInstance -Identity $syncService.UserProfileApplicationGuid `
+            $upa = Get-SPServiceApplication -Identity $syncService.UserProfileApplicationGuid `
                                          -ErrorAction SilentlyContinue
         }
-        if ($syncService.Status -eq "Online") 
+        if ($syncService.Status -eq "Online")
         {
-            $localEnsure = "Present" 
-        } 
-        else 
+            $localEnsure = "Present"
+        }
+        else
         {
-            $localEnsure = "Absent" 
+            $localEnsure = "Absent"
         }
 
         return @{
             UserProfileServiceAppName = $upa.Name
             Ensure = $localEnsure
+            FarmAccount = $params.FarmAccount
             RunOnlyWhenWriteable = $params.RunOnlyWhenWriteable
             InstallAccount = $params.InstallAccount
         }
@@ -142,24 +143,24 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [Parameter(Mandatory = $true)]  
-        [System.String] 
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $UserProfileServiceAppName,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")] 
+        [ValidateSet("Present","Absent")]
         [System.String] $Ensure = "Present",
 
-        [Parameter(Mandatory = $true)]  
-        [System.Management.Automation.PSCredential] 
+        [Parameter(Mandatory = $true)]
+        [System.Management.Automation.PSCredential]
         $FarmAccount,
 
         [Parameter()]
-        [System.Boolean] 
+        [System.Boolean]
         $RunOnlyWhenWriteable,
 
         [Parameter()]
-        [System.Management.Automation.PSCredential] 
+        [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 
@@ -167,7 +168,7 @@ function Set-TargetResource
 
     $PSBoundParameters.Ensure = $Ensure
 
-    if ((Get-SPDSCInstalledProductVersion).FileMajorPart -ne 15) 
+    if ((Get-SPDSCInstalledProductVersion).FileMajorPart -ne 15)
     {
         throw [Exception] ("Only SharePoint 2013 is supported to deploy the user profile sync " + `
                            "service via DSC, as 2016 does not use the FIM based sync service.")
@@ -181,7 +182,7 @@ function Set-TargetResource
 
     if ($null -ne $farmAccountName)
     {
-        if ($PSBoundParameters.ContainsKey("InstallAccount") -eq $true) 
+        if ($PSBoundParameters.ContainsKey("InstallAccount") -eq $true)
         {
             # InstallAccount used
             if ($InstallAccount.UserName -ne $farmAccountName)
@@ -214,14 +215,14 @@ function Set-TargetResource
         $databaseReadOnly = Test-SPDscUserProfileDBReadOnly `
                                 -UserProfileServiceAppName $UserProfileServiceAppName `
                                 -InstallAccount $InstallAccount
-                                
+
         if ($databaseReadOnly)
         {
             Write-Verbose -Message ("User profile database is read only, setting user profile " + `
                                    "sync service to not run on the local server")
             $PSBoundParameters.Ensure = "Absent"
         }
-        else 
+        else
         {
             $PSBoundParameters.Ensure = "Present"
         }
@@ -238,7 +239,8 @@ function Set-TargetResource
         Restart-Service -Name "SPTimerV4"
     }
 
-    try 
+    $isInDesiredState = $false
+    try
     {
         Invoke-SPDSCCommand -Credential $InstallAccount -Arguments ($PSBoundParameters,$farmAccountName) -ScriptBlock {
             $params = $args[0]
@@ -246,48 +248,45 @@ function Set-TargetResource
 
             $currentServer = $env:COMPUTERNAME
 
-            $syncServices = Get-SPServiceInstance -Server $currentServer `
+            $services = Get-SPServiceInstance -Server $currentServer `
                                                   -ErrorAction SilentlyContinue
-            $syncService = $syncServices | Where-Object -FilterScript {
-                $_.GetType().Name -eq "UserProfileServiceInstance"  
+            $syncService = $services | Where-Object -FilterScript {
+                $_.GetType().Name -eq "ProfileSynchronizationServiceInstance"
             }
-            if ($null -eq $syncService) 
+            if ($null -eq $syncService)
             {
                 $domain = (Get-CimInstance -ClassName Win32_ComputerSystem).Domain
                 $currentServer = "$currentServer.$domain"
-                $syncService = $syncServices | Where-Object -FilterScript {
-                    $_.GetType().Name -eq "UserProfileServiceInstance"  
+                $syncService = $services | Where-Object -FilterScript {
+                    $_.GetType().Name -eq "ProfileSynchronizationServiceInstance"
                 }
             }
-            if ($null -eq $syncService) 
+            if ($null -eq $syncService)
             {
-                throw "Unable to locate a user profile service instance on $currentServer to start"
+                throw "Unable to locate a user profile sync service instance on $currentServer to start"
             }
-            
+
             # Start the Sync service if it should be running on this server
-            if (($params.Ensure -eq "Present") -and ($syncService.Status -ne "Online")) 
+            if (($params.Ensure -eq "Present") -and ($syncService.Status -ne "Online"))
             {
-                $serviceApps = Get-SPServiceApplication -Name $params.UserProfileServiceAppName `
-                                                        -ErrorAction SilentlyContinue 
-                if ($null -eq $serviceApps)
+                $ups = Get-SPServiceApplication -Name $params.UserProfileServiceAppName `
+                                                        -ErrorAction SilentlyContinue
+                if ($null -eq $ups)
                 {
-                    throw [Exception] ("No user profile service was found " + `
+                    throw [Exception] ("No User Profile Service Application was found " + `
                                        "named $($params.UserProfileServiceAppName)")
-                }
-                $ups = $serviceApps | Where-Object -FilterScript {
-                    $_.GetType().FullName -eq "Microsoft.Office.Server.Administration.UserProfileApplication" 
                 }
 
                 $userName = $farmAccountName
                 $password = $params.FarmAccount.GetNetworkCredential().Password
                 $ups.SetSynchronizationMachine($currentServer, $syncService.ID, $userName, $password)
 
-                Start-SPServiceInstance -Identity $syncService.ID 
-                
+                Start-SPServiceInstance -Identity $syncService.ID
+
                 $desiredState = "Online"
             }
             # Stop the Sync service in all other cases
-            else 
+            else
             {
                 Stop-SPServiceInstance -Identity $syncService.ID -Confirm:$false
                 $desiredState = "Disabled"
@@ -296,30 +295,38 @@ function Set-TargetResource
             $count = 0
             $maxCount = 10
 
-            while (($count -lt $maxCount) -and ($syncService.Status -ne $desiredState)) 
+            while (($count -lt $maxCount) -and ($syncService.Status -ne $desiredState))
             {
-                if ($syncService.Status -ne $desiredState) 
+                if ($syncService.Status -ne $desiredState)
                 {
-                    Start-Sleep -Seconds 60 
+                    Start-Sleep -Seconds 60
                 }
+
                 # Get the current status of the Sync service
                 Write-Verbose ("$([DateTime]::Now.ToShortTimeString()) - Waiting for user profile " + `
                             "sync service to become '$desiredState' (waited $count of " + `
                             "$maxCount minutes)")
-                $syncService = $syncServices | Where-Object -FilterScript {
-                    $_.GetType().Name -eq "UserProfileServiceInstance"  
+
+                $services = Get-SPServiceInstance -Server $currentServer `
+                                                  -ErrorAction SilentlyContinue
+                $syncService = $services | Where-Object -FilterScript {
+                    $_.GetType().Name -eq "ProfileSynchronizationServiceInstance"
                 }
                 $count++
             }
-        }  
+        }
     }
-    finally 
+    finally
     {
         # Remove the Farm Account from the local Admins group, if it was added above
         if (!$isLocalAdmin)
         {
             Remove-SPDSCUserToLocalAdmin -UserName $farmAccountName
         }
+    }
+    if($syncService.Status -ne $desiredState)
+    {
+        throw "An error occured. We couldn't properly set the User Profile Sync Service on the server."
     }
 }
 
@@ -329,24 +336,24 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [Parameter(Mandatory = $true)]  
-        [System.String] 
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $UserProfileServiceAppName,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")] 
+        [ValidateSet("Present","Absent")]
         [System.String] $Ensure = "Present",
 
-        [Parameter(Mandatory = $true)]  
-        [System.Management.Automation.PSCredential] 
+        [Parameter(Mandatory = $true)]
+        [System.Management.Automation.PSCredential]
         $FarmAccount,
 
         [Parameter()]
-        [System.Boolean] 
+        [System.Boolean]
         $RunOnlyWhenWriteable,
 
         [Parameter()]
-        [System.Management.Automation.PSCredential] 
+        [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 
@@ -354,7 +361,7 @@ function Test-TargetResource
 
     $PSBoundParameters.Ensure = $Ensure
 
-    if ((Get-SPDSCInstalledProductVersion).FileMajorPart -ne 15) 
+    if ((Get-SPDSCInstalledProductVersion).FileMajorPart -ne 15)
     {
         throw [Exception] ("Only SharePoint 2013 is supported to deploy the user profile sync " + `
                            "service via DSC, as 2016 does not use the FIM based sync service.")
@@ -374,20 +381,20 @@ function Test-TargetResource
                                    "sync service to not run on the local server")
             $PSBoundParameters.Ensure = "Absent"
         }
-        else 
+        else
         {
             $PSBoundParameters.Ensure = "Present"
         }
     }
-    
+
     Write-Verbose -Message "Testing for User Profile Synchronization Service"
-    
+
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
                                     -DesiredValues $PSBoundParameters `
                                     -ValuesToCheck @("Ensure")
 }
 
-function Test-SPDscUserProfileDBReadOnly() 
+function Test-SPDscUserProfileDBReadOnly()
 {
     param(
         [Parameter(Mandatory = $true)]
@@ -395,7 +402,7 @@ function Test-SPDscUserProfileDBReadOnly()
         $UserProfileServiceAppName,
 
         [Parameter()]
-        [System.Management.Automation.PSCredential] 
+        [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 
@@ -405,8 +412,8 @@ function Test-SPDscUserProfileDBReadOnly()
         $UserProfileServiceAppName = $args[0]
 
         $serviceApps = Get-SPServiceApplication -Name $UserProfileServiceAppName `
-                                                -ErrorAction SilentlyContinue 
-        if ($null -eq $serviceApps) 
+                                                -ErrorAction SilentlyContinue
+        if ($null -eq $serviceApps)
         {
             throw [Exception] ("No user profile service was found " + `
                                "named $UserProfileServiceAppName")
@@ -432,4 +439,3 @@ function Test-SPDscUserProfileDBReadOnly()
 }
 
 Export-ModuleMember -Function *-TargetResource
-

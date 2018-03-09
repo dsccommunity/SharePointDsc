@@ -1,7 +1,7 @@
 [CmdletBinding()]
 param(
     [Parameter()]
-    [string] 
+    [string]
     $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
                                          -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
                                          -Resolve)
@@ -20,18 +20,18 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         # Initialize tests
 
-        # Mocks for all contexts   
-        Mock -CommandName New-SPClaimsPrincipal -MockWith { 
+        # Mocks for all contexts
+        Mock -CommandName New-SPClaimsPrincipal -MockWith {
             return @{
                 Value = $Identity -replace "i:0#.w\|"
             }
         } -ParameterFilter { $IdentityType -eq "EncodedClaim" }
 
-        Mock -CommandName New-SPClaimsPrincipal -MockWith { 
+        Mock -CommandName New-SPClaimsPrincipal -MockWith {
             $Global:SPDscClaimsPrincipalUser = $Identity
             return (
-                New-Object -TypeName "Object" | Add-Member -MemberType ScriptMethod ToEncodedString { 
-                    return "i:0#.w|$($Global:SPDscClaimsPrincipalUser)" 
+                New-Object -TypeName "Object" | Add-Member -MemberType ScriptMethod ToEncodedString {
+                    return "i:0#.w|$($Global:SPDscClaimsPrincipalUser)"
                 } -PassThru
             )
         } -ParameterFilter { $IdentityType -eq "WindowsSamAccountName" }
@@ -273,6 +273,39 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             It "Should set the permissions correctly" {
                 Set-TargetResource @testParams
                 Assert-MockCalled Set-SPProfileServiceApplicationSecurity
+            }
+        }
+
+        Context -Name "Passing empty values for non-mandatory parameters" -Fixture {
+            $testParams = @{
+                ProxyName = "User Profile Service App Proxy"
+            }
+
+            Mock -CommandName Get-SPProfileServiceApplicationSecurity -MockWith {
+                return @{
+                    AccessRules = @(
+                        @{
+                            Name = "i:0#.w|DEMO\User2"
+                            AllowedRights = "CreatePersonalSite,UseMicrobloggingAndFollowing"
+                        },
+                        @{
+                            Name = "i:0#.w|DEMO\User1"
+                            AllowedRights = "CreatePersonalSite,UseMicrobloggingAndFollowing"
+                        },
+                        @{
+                            Name = "c:0(.s|true"
+                            AllowedRights = "UsePersonalFeatures"
+                        }
+                    )
+                }
+            }
+
+            It "Should return the current permissions correctly" {
+                Get-TargetResource @testParams
+            }
+
+            It "Should return true in the test method" {
+                Test-TargetResource @testParams | Should Be $true
             }
         }
     }

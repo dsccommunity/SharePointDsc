@@ -16,7 +16,8 @@ Examples are:
 - Monthly at 15 15:00:00
 - Yearly at Jan 1 15:00:00
 
-NOTE: Make sure you use the typename timer job name, not the display name! Use
+NOTE:
+Make sure you use the typename timer job name, not the display name! Use
 "Get-SPTimerJob | Where-Object { $_.Title -eq "\<Display Name\>" } | Select typename"
 to find the typename for each Timer Job.
 

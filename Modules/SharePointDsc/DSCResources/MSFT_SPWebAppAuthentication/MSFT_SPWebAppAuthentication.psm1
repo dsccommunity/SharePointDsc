@@ -4,7 +4,7 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [Parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]
         [System.String]
         $WebAppUrl,
 
@@ -53,7 +53,7 @@ function Get-TargetResource
         Write-Verbose -Message "You have to specify at least one zone."
         return $nullreturn
     }
-    
+
     if ($PSBoundParameters.ContainsKey("Default"))
     {
         $result = Test-Parameter -Zone $Default
@@ -103,7 +103,7 @@ function Get-TargetResource
                                   -Arguments $PSBoundParameters `
                                   -ScriptBlock {
         $params = $args[0]
-        
+
         $wa = Get-SPWebApplication -Identity $params.WebAppUrl -ErrorAction SilentlyContinue
         if ($null -eq $wa)
         {
@@ -114,7 +114,7 @@ function Get-TargetResource
                 Internet  = $null
                 Extranet  = $null
                 Custom    = $null
-            } 
+            }
         }
 
         $zones = $wa.IisSettings.Keys
@@ -135,7 +135,7 @@ function Get-TargetResource
                 $membershipProvider     = $null
 
                 $provider = @{
-                    AuthenticationMethod   = $localAuthMode 
+                    AuthenticationMethod   = $localAuthMode
                     AuthenticationProvider = $authenticationProvider
                     MembershipProvider     = $membershipProvider
                     RoleProvider           = $roleProvider
@@ -156,24 +156,24 @@ function Get-TargetResource
                     $localAuthMode          = $null
                     $authenticationProvider = $null
                     $roleProvider           = $null
-                    $membershipProvider     = $null 
-    
+                    $membershipProvider     = $null
+
                     if ($authProvider.DisplayName -eq "Windows Authentication")
                     {
                         if ($authProvider.DisableKerberos -eq $true)
                         {
-                            $localAuthMode = "NTLM" 
-                        } 
-                        else 
+                            $localAuthMode = "NTLM"
+                        }
+                        else
                         {
-                            $localAuthMode = "Kerberos" 
+                            $localAuthMode = "Kerberos"
                         }
                     }
                     elseif ($authProvider.DisplayName -eq "Forms Authentication")
                     {
                         $localAuthMode          = "FBA"
                         $roleProvider           = $authProvider.RoleProvider
-                        $membershipProvider     = $authProvider.MembershipProvider 
+                        $membershipProvider     = $authProvider.MembershipProvider
                     }
                     else
                     {
@@ -182,7 +182,7 @@ function Get-TargetResource
                     }
 
                     $provider = @{
-                        AuthenticationMethod   = $localAuthMode 
+                        AuthenticationMethod   = $localAuthMode
                         AuthenticationProvider = $authenticationProvider
                         MembershipProvider     = $membershipProvider
                         RoleProvider           = $roleProvider
@@ -216,37 +216,37 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [Parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]
         [System.String]
         $WebAppUrl,
 
-        [Parameter()] 
-        [Microsoft.Management.Infrastructure.CimInstance[]] 
+        [Parameter()]
+        [Microsoft.Management.Infrastructure.CimInstance[]]
         $Default,
 
-        [Parameter()] 
-        [Microsoft.Management.Infrastructure.CimInstance[]] 
+        [Parameter()]
+        [Microsoft.Management.Infrastructure.CimInstance[]]
         $Intranet,
 
-        [Parameter()] 
-        [Microsoft.Management.Infrastructure.CimInstance[]] 
+        [Parameter()]
+        [Microsoft.Management.Infrastructure.CimInstance[]]
         $Internet,
 
-        [Parameter()] 
-        [Microsoft.Management.Infrastructure.CimInstance[]] 
+        [Parameter()]
+        [Microsoft.Management.Infrastructure.CimInstance[]]
         $Extranet,
 
-        [Parameter()] 
-        [Microsoft.Management.Infrastructure.CimInstance[]] 
+        [Parameter()]
+        [Microsoft.Management.Infrastructure.CimInstance[]]
         $Custom,
 
         [Parameter()]
-        [System.Management.Automation.PSCredential] 
+        [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 
     Write-Verbose -Message "Setting web application authentication for '$WebAppUrl'"
-    
+
     # Test is at least one zone is specified
     if ($PSBoundParameters.ContainsKey("Default") -eq $false -and `
         $PSBoundParameters.ContainsKey("Intranet") -eq $false -and `
@@ -294,7 +294,7 @@ function Set-TargetResource
         {
             throw "Specified Web Application $($params.WebAppUrl) does not exist"
         }
-        
+
         $authProviders = Get-SPAuthenticationProvider -WebApplication $params.WebAppUrl -Zone Default
         if ($null -eq $authProviders)
         {
@@ -324,12 +324,12 @@ function Set-TargetResource
         {
             Test-ZoneIsNotClassic -Zone $Intranet
         }
-    
+
         if ($PSBoundParameters.ContainsKey("Extranet"))
         {
             Test-ZoneIsNotClassic -Zone $Extranet
         }
-            
+
         if ($PSBoundParameters.ContainsKey("Custom"))
         {
             Test-ZoneIsNotClassic -Zone $Custom
@@ -337,7 +337,7 @@ function Set-TargetResource
     }
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
-    
+
     if ($PSBoundParameters.ContainsKey("Default"))
     {
         # Test is current config matches desired config
@@ -358,7 +358,7 @@ function Set-TargetResource
         {
             throw "Specified zone Intranet does not exist"
         }
-        
+
         # Test is current config matches desired config
         $result = Test-ZoneConfiguration -DesiredConfig $Intranet `
                                          -CurrentConfig $CurrentValues.Intranet
@@ -377,7 +377,7 @@ function Set-TargetResource
         {
             throw "Specified zone Internet does not exist"
         }
-        
+
         # Test is current config matches desired config
         $result = Test-ZoneConfiguration -DesiredConfig $Internet `
                                          -CurrentConfig $CurrentValues.Internet
@@ -396,7 +396,7 @@ function Set-TargetResource
         {
             throw "Specified zone Extranet does not exist"
         }
-        
+
         # Test is current config matches desired config
         $result = Test-ZoneConfiguration -DesiredConfig $Extranet `
                                          -CurrentConfig $CurrentValues.Extranet
@@ -415,7 +415,7 @@ function Set-TargetResource
         {
             throw "Specified zone Custom does not exist"
         }
-        
+
         # Test is current config matches desired config
         $result = Test-ZoneConfiguration -DesiredConfig $Custom `
                                          -CurrentConfig $CurrentValues.Custom
@@ -434,32 +434,32 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [Parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]
         [System.String]
         $WebAppUrl,
 
-        [Parameter()] 
-        [Microsoft.Management.Infrastructure.CimInstance[]] 
+        [Parameter()]
+        [Microsoft.Management.Infrastructure.CimInstance[]]
         $Default,
 
-        [Parameter()] 
-        [Microsoft.Management.Infrastructure.CimInstance[]] 
+        [Parameter()]
+        [Microsoft.Management.Infrastructure.CimInstance[]]
         $Intranet,
 
-        [Parameter()] 
-        [Microsoft.Management.Infrastructure.CimInstance[]] 
+        [Parameter()]
+        [Microsoft.Management.Infrastructure.CimInstance[]]
         $Internet,
 
-        [Parameter()] 
-        [Microsoft.Management.Infrastructure.CimInstance[]] 
+        [Parameter()]
+        [Microsoft.Management.Infrastructure.CimInstance[]]
         $Extranet,
 
-        [Parameter()] 
-        [Microsoft.Management.Infrastructure.CimInstance[]] 
+        [Parameter()]
+        [Microsoft.Management.Infrastructure.CimInstance[]]
         $Custom,
 
         [Parameter()]
-        [System.Management.Automation.PSCredential] 
+        [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 
@@ -480,7 +480,7 @@ function Test-TargetResource
     {
         $result = Test-ZoneConfiguration -DesiredConfig $Default `
                                          -CurrentConfig $CurrentValues.Default
-        
+
         if ($result -eq $false)
         {
             return $false
@@ -496,7 +496,7 @@ function Test-TargetResource
 
         $result = Test-ZoneConfiguration -DesiredConfig $Intranet `
                                          -CurrentConfig $CurrentValues.Intranet
-        
+
         if ($result -eq $false)
         {
             return $false
@@ -541,7 +541,7 @@ function Test-TargetResource
         {
             throw "Specified zone Custom does not exist"
         }
-        
+
         $result = Test-ZoneConfiguration -DesiredConfig $Custom `
                                          -CurrentConfig $CurrentValues.Custom
 
@@ -562,7 +562,7 @@ function Test-Parameter()
         [Parameter(Mandatory = $true)]
         $Zone,
 
-        [Parameter()]  
+        [Parameter()]
         [switch]
         $Exception
     )
@@ -575,29 +575,29 @@ function Test-Parameter()
         $membProviderUsed = $false
         $roleProviderUsed = $false
         # Check if the config contains the AuthenticationProvider Property
-        $prop = $zoneConfig.CimInstanceProperties | Where-Object -FilterScript { 
-            $_.Name -eq "AuthenticationProvider" 
-        } 
-        if ($null -ne $prop)
-        { 
+        $prop = $zoneConfig.CimInstanceProperties | Where-Object -FilterScript {
+            $_.Name -eq "AuthenticationProvider"
+        }
+        if ($null -ne $prop.Value)
+        {
             $authProviderUsed = $true
         }
 
         # Check if the config contains the MembershipProvider Property
-        $prop = $zoneConfig.CimInstanceProperties | Where-Object -FilterScript { 
-            $_.Name -eq "MembershipProvider" 
-        } 
-        if ($null -ne $prop)
-        { 
+        $prop = $zoneConfig.CimInstanceProperties | Where-Object -FilterScript {
+            $_.Name -eq "MembershipProvider"
+        }
+        if ($null -ne $prop.Value)
+        {
             $membProviderUsed = $true
         }
 
         # Check if the config contains the RoleProvider Property
-        $prop = $zoneConfig.CimInstanceProperties | Where-Object -FilterScript { 
-            $_.Name -eq "RoleProvider" 
-        } 
-        if ($null -ne $prop)
-        { 
+        $prop = $zoneConfig.CimInstanceProperties | Where-Object -FilterScript {
+            $_.Name -eq "RoleProvider"
+        }
+        if ($null -ne $prop.Value)
+        {
             $roleProviderUsed = $true
         }
 
@@ -731,7 +731,7 @@ function Test-Parameter()
 function Test-ZoneIsNotClassic()
 {
     param (
-        [Parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]
         $Zone
     )
 
@@ -749,11 +749,11 @@ function Test-ZoneIsNotClassic()
 function Set-ZoneConfiguration()
 {
     param (
-        [Parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]
         [System.String]
         $WebAppUrl,
-        
-        [Parameter(Mandatory = $true)]  
+
+        [Parameter(Mandatory = $true)]
         [ValidateSet("Default","Intranet","Internet","Extranet","Custom")]
         [System.String]
         $Zone,
@@ -769,7 +769,7 @@ function Set-ZoneConfiguration()
         $params = $args[0]
 
         $ap = @()
-        
+
         foreach ($zoneConfig in $params.DesiredConfig)
         {
             switch ($zoneConfig.AuthenticationMethod)
@@ -793,7 +793,7 @@ function Set-ZoneConfiguration()
                         throw ("Specified AuthenticationProvider $($zoneConfig.AuthenticationProvider) " + `
                                "does not exist")
                     }
-                    $newap = New-SPAuthenticationProvider -TrustedIdentityTokenIssuer $tokenIssuer                    
+                    $newap = New-SPAuthenticationProvider -TrustedIdentityTokenIssuer $tokenIssuer
                 }
             }
             $ap += $newap
@@ -815,7 +815,7 @@ function Test-ZoneConfiguration()
         $CurrentConfig
     )
 
-    # Testing specified configuration against configured values 
+    # Testing specified configuration against configured values
     foreach ($zoneConfig in $DesiredConfig)
     {
         switch ($zoneConfig.AuthenticationMethod)
