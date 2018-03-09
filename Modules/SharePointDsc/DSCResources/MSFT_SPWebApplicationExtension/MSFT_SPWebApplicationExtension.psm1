@@ -4,37 +4,37 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [Parameter(Mandatory = $true)]  
-        [System.String] 
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $WebAppUrl,
 
-        [Parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]
         [System.String]
         $Name,
 
-        [Parameter(Mandatory = $true)]  
-        [System.String] 
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $Url,
 
         [Parameter(Mandatory = $true)]
         [ValidateSet("Default","Intranet","Internet","Extranet","Custom")]
-        [System.String] 
+        [System.String]
         $Zone,
 
-        [Parameter()] 
-        [System.Boolean] 
+        [Parameter()]
+        [System.Boolean]
         $AllowAnonymous,
 
         [Parameter()]
-        [System.String] 
+        [System.String]
         $HostHeader,
 
         [Parameter()]
-        [System.String] 
+        [System.String]
         $Path,
 
         [Parameter()]
-        [System.String] 
+        [System.String]
         $Port,
 
         [Parameter()]
@@ -47,7 +47,7 @@ function Get-TargetResource
         $Ensure = "Present",
 
         [Parameter()]
-        [System.Management.Automation.PSCredential] 
+        [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 
@@ -57,19 +57,20 @@ function Get-TargetResource
                                   -Arguments $PSBoundParameters `
                                   -ScriptBlock {
         $params = $args[0]
-        
+
         $wa = Get-SPWebApplication -Identity $params.WebAppUrl -ErrorAction SilentlyContinue
-        
+
         if ($null -eq $wa)
         {
             Write-Verbose -Message "WebApplication $($params.WebAppUrl) does not exist"
             return @{
                 WebAppUrl = $params.WebAppUrl
                 Name = $params.Name
-                Url = $null 
-                Zone = $null 
+                Url = $null
+                Zone = $null
+                AllowAnonymous = $null
                 Ensure = "Absent"
-            } 
+            }
         }
 
         $zone = [Microsoft.SharePoint.Administration.SPUrlZone]::$($params.Zone)
@@ -81,24 +82,25 @@ function Get-TargetResource
                 WebAppUrl = $params.WebAppUrl
                 Name = $params.Name
                 Url = $params.Url
-                Zone = $params.zone 
+                Zone = $params.zone
+                AllowAnonymous = $params.AllowAnonymous
                 Ensure = "Absent"
-            } 
+            }
         }
 
         $publicUrl = (Get-SPAlternateURL -WebApplication $params.WebAppUrl -Zone $params.zone).PublicUrl
-        
-        if ($null -ne $waExt.SecureBindings.HostHeader) #default to SSL bindings if present  
+
+        if ($null -ne $waExt.SecureBindings.HostHeader) #default to SSL bindings if present
         {
             $HostHeader = $waExt.SecureBindings.HostHeader
             $Port = $waExt.SecureBindings.Port
-            $UseSSL = $true 
+            $UseSSL = $true
         }
-        else 
+        else
         {
             $HostHeader = $waExt.ServerBindings.HostHeader
             $Port = $waExt.ServerBindings.Port
-            $UseSSL = $false 
+            $UseSSL = $false
         }
 
          return @{
@@ -106,7 +108,7 @@ function Get-TargetResource
             Name = $waExt.ServerComment
             Url = $PublicURL
             AllowAnonymous = $waExt.AllowAnonymous
-            HostHeader = $HostHeader 
+            HostHeader = $HostHeader
             Path = $waExt.Path
             Port = $Port
             Zone = $params.zone
@@ -124,37 +126,37 @@ function Set-TargetResource
     [CmdletBinding()]
     param
         (
-        [Parameter(Mandatory = $true)]  
-        [System.String] 
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $WebAppUrl,
 
-        [Parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]
         [System.String]
         $Name,
 
-        [Parameter(Mandatory = $true)]  
-        [System.String] 
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $Url,
 
         [Parameter(Mandatory = $true)]
         [ValidateSet("Default","Intranet","Internet","Extranet","Custom")]
-        [System.String] 
+        [System.String]
         $Zone,
 
-        [Parameter()] 
-        [System.Boolean] 
+        [Parameter()]
+        [System.Boolean]
         $AllowAnonymous,
 
         [Parameter()]
-        [System.String] 
+        [System.String]
         $HostHeader,
 
         [Parameter()]
-        [System.String] 
+        [System.String]
         $Path,
 
         [Parameter()]
-        [System.String] 
+        [System.String]
         $Port,
 
         [Parameter()]
@@ -167,13 +169,13 @@ function Set-TargetResource
         $Ensure = "Present",
 
         [Parameter()]
-        [System.Management.Automation.PSCredential] 
+        [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 
     Write-Verbose -Message "Setting web application extension '$Name' config"
-    
-    if ($Ensure -eq "Present") 
+
+    if ($Ensure -eq "Present")
     {
         Invoke-SPDSCCommand -Credential $InstallAccount `
                             -Arguments $PSBoundParameters `
@@ -181,7 +183,7 @@ function Set-TargetResource
             $params = $args[0]
 
             $wa = Get-SPWebApplication -Identity $params.WebAppUrl -ErrorAction SilentlyContinue
-            if ($null -eq $wa) 
+            if ($null -eq $wa)
             {
                 throw "Web Application with URL $($params.WebAppUrl) does not exist"
             }
@@ -190,40 +192,40 @@ function Set-TargetResource
             $zone = [Microsoft.SharePoint.Administration.SPUrlZone]::$($params.Zone)
             $waExt = $wa.IisSettings[$zone]
 
-            if ($null -eq $waExt) 
+            if ($null -eq $waExt)
             {
                 $newWebAppExtParams = @{
                     Name = $params.Name
                     Url = $params.Url
-                    Zone = $params.zone 
+                    Zone = $params.zone
                 }
-                    
+
                 if ($params.ContainsKey("AllowAnonymous") -eq $true)
                 {
-                    $newWebAppExtParams.Add("AllowAnonymousAccess", $params.AllowAnonymous) 
+                    $newWebAppExtParams.Add("AllowAnonymousAccess", $params.AllowAnonymous)
                 }
                 if ($params.ContainsKey("HostHeader") -eq $true)
                 {
-                    $newWebAppExtParams.Add("HostHeader", $params.HostHeader) 
+                    $newWebAppExtParams.Add("HostHeader", $params.HostHeader)
                 }
                 if ($params.ContainsKey("Path") -eq $true)
                 {
-                    $newWebAppExtParams.Add("Path", $params.Path) 
+                    $newWebAppExtParams.Add("Path", $params.Path)
                 }
                 if ($params.ContainsKey("Port") -eq $true)
                 {
-                    $newWebAppExtParams.Add("Port", $params.Port) 
-                } 
+                    $newWebAppExtParams.Add("Port", $params.Port)
+                }
                 if ($params.ContainsKey("UseSSL") -eq $true)
                 {
-                    $newWebAppExtParams.Add("SecureSocketsLayer", $params.UseSSL) 
-                } 
-                
+                    $newWebAppExtParams.Add("SecureSocketsLayer", $params.UseSSL)
+                }
+
                 $wa | New-SPWebApplicationExtension @newWebAppExtParams | Out-Null
             }
-            else 
+            else
             {
-                if ($params.ContainsKey("AllowAnonymous") -eq $true) 
+                if ($params.ContainsKey("AllowAnonymous") -eq $true)
                 {
                     $waExt.AllowAnonymous = $params.AllowAnonymous
                     $wa.update()
@@ -231,8 +233,8 @@ function Set-TargetResource
             }
         }
     }
-    
-    if ($Ensure -eq "Absent") 
+
+    if ($Ensure -eq "Absent")
     {
         Invoke-SPDSCCommand -Credential $InstallAccount `
                             -Arguments $PSBoundParameters `
@@ -240,11 +242,11 @@ function Set-TargetResource
             $params = $args[0]
 
             $wa = Get-SPWebApplication -Identity $params.WebAppUrl -ErrorAction SilentlyContinue
-            if ($null -eq $wa) 
+            if ($null -eq $wa)
             {
                 throw "Web Application with URL $($params.WebAppUrl) does not exist"
             }
-            if ($null -ne $wa) 
+            if ($null -ne $wa)
             {
                 $wa | Remove-SPWebApplication -Zone $params.zone -Confirm:$false -DeleteIISSite
             }
@@ -259,37 +261,37 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
         (
-        [Parameter(Mandatory = $true)]  
-        [System.String] 
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $WebAppUrl,
 
-        [Parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]
         [System.String]
         $Name,
 
-        [Parameter(Mandatory = $true)]  
-        [System.String] 
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $Url,
 
         [Parameter(Mandatory = $true)]
         [ValidateSet("Default","Intranet","Internet","Extranet","Custom")]
-        [System.String] 
+        [System.String]
         $Zone,
 
-        [Parameter()] 
-        [System.Boolean] 
+        [Parameter()]
+        [System.Boolean]
         $AllowAnonymous,
 
         [Parameter()]
-        [System.String] 
+        [System.String]
         $HostHeader,
 
         [Parameter()]
-        [System.String] 
+        [System.String]
         $Path,
 
         [Parameter()]
-        [System.String] 
+        [System.String]
         $Port,
 
         [Parameter()]
@@ -302,7 +304,7 @@ function Test-TargetResource
         $Ensure = "Present",
 
         [Parameter()]
-        [System.Management.Automation.PSCredential] 
+        [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 

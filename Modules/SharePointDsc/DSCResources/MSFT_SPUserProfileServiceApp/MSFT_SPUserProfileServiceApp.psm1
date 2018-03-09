@@ -4,75 +4,75 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [Parameter(Mandatory = $true)]  
-        [System.String] 
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $Name,
 
-        [Parameter()] 
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $ProxyName,
 
-        [Parameter(Mandatory = $true)] 
-        [System.String] 
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $ApplicationPool,
 
-        [Parameter()] 
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $MySiteHostLocation,
 
-        [Parameter()] 
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $ProfileDBName,
 
-        [Parameter()] 
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $ProfileDBServer,
 
-        [Parameter()] 
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $SocialDBName,
 
-        [Parameter()] 
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $SocialDBServer,
 
-        [Parameter()] 
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $SyncDBName,
 
-        [Parameter()] 
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $SyncDBServer,
 
-        [Parameter()] 
-        [System.Boolean] 
+        [Parameter()]
+        [System.Boolean]
         $EnableNetBIOS = $false,
 
-        [Parameter()] 
-        [System.Boolean] 
+        [Parameter()]
+        [System.Boolean]
         $NoILMUsed = $false,
 
-        [Parameter()] 
-        [ValidateSet("Present","Absent")] 
-        [System.String] 
+        [Parameter()]
+        [ValidateSet("Present","Absent")]
+        [System.String]
         $Ensure = "Present",
 
-        [Parameter()] 
-        [System.Management.Automation.PSCredential] 
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
         $InstallAccount
     )
-       
+
     Write-Verbose -Message "Getting user profile service application $Name"
 
     $farmAccount = Invoke-SPDSCCommand -Credential $InstallAccount `
                                        -Arguments $PSBoundParameters `
                                        -ScriptBlock {
-        return Get-SPDSCFarmAccountName 
+        return Get-SPDSCFarmAccountName
     }
 
     if ($null -ne $farmAccount)
     {
-        if ($PSBoundParameters.ContainsKey("InstallAccount") -eq $true) 
+        if ($PSBoundParameters.ContainsKey("InstallAccount") -eq $true)
         {
             # InstallAccount used
             if ($InstallAccount.UserName -ne $farmAccount)
@@ -106,18 +106,18 @@ function Get-TargetResource
                                   -Arguments $PSBoundParameters `
                                   -ScriptBlock {
         $params = $args[0]
-          
+
         $serviceApps = Get-SPServiceApplication -Name $params.Name -ErrorAction SilentlyContinue
         $nullReturn = @{
             Name = $params.Name
             Ensure = "Absent"
-        } 
-        if ($null -eq $serviceApps) 
+        }
+        if ($null -eq $serviceApps)
         {
-            return $nullReturn 
+            return $nullReturn
         }
         $serviceApp = $serviceApps | Where-Object -FilterScript {
-            $_.GetType().FullName -eq "Microsoft.Office.Server.Administration.UserProfileApplication"            
+            $_.GetType().FullName -eq "Microsoft.Office.Server.Administration.UserProfileApplication"
         }
 
         if ($null -eq $serviceApp)
@@ -135,7 +135,7 @@ function Get-TargetResource
             $socialProp = $propData | Where-Object -FilterScript {
                 $_.Name -eq "SocialDatabase"
             }
-            $databases.Add("SocialDatabase", $socialProp.GetValue($serviceApp)) 
+            $databases.Add("SocialDatabase", $socialProp.GetValue($serviceApp))
 
             $profileProp = $propData | Where-Object -FilterScript {
                 $_.Name -eq "ProfileDatabase"
@@ -153,7 +153,7 @@ function Get-TargetResource
                 $serviceAppProxy = $serviceAppProxies | Where-Object -FilterScript {
                     $serviceApp.IsConnected($_)
                 }
-                if ($null -ne $serviceAppProxy) 
+                if ($null -ne $serviceAppProxy)
                 {
                     $proxyName = $serviceAppProxy.Name
                 }
@@ -184,67 +184,67 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [Parameter(Mandatory = $true)]  
-        [System.String] 
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $Name,
 
-        [Parameter()] 
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $ProxyName,
 
-        [Parameter(Mandatory = $true)] 
-        [System.String] 
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $ApplicationPool,
 
-        [Parameter()] 
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $MySiteHostLocation,
 
-        [Parameter()] 
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $ProfileDBName,
 
-        [Parameter()] 
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $ProfileDBServer,
 
-        [Parameter()] 
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $SocialDBName,
 
-        [Parameter()] 
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $SocialDBServer,
 
-        [Parameter()] 
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $SyncDBName,
 
-        [Parameter()] 
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $SyncDBServer,
 
-        [Parameter()] 
-        [System.Boolean] 
+        [Parameter()]
+        [System.Boolean]
         $EnableNetBIOS = $false,
 
-        [Parameter()] 
-        [System.Boolean] 
+        [Parameter()]
+        [System.Boolean]
         $NoILMUsed = $false,
 
-        [Parameter()] 
-        [ValidateSet("Present","Absent")] 
-        [System.String] 
+        [Parameter()]
+        [ValidateSet("Present","Absent")]
+        [System.String]
         $Ensure = "Present",
 
-        [Parameter()] 
-        [System.Management.Automation.PSCredential] 
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 
     Write-Verbose -Message "Setting user profile service application $Name"
 
-    if ($Ensure -eq "Present") 
+    if ($Ensure -eq "Present")
     {
         $farmAccount = Invoke-SPDSCCommand -Credential $InstallAccount `
                                     -Arguments $PSBoundParameters `
@@ -254,7 +254,7 @@ function Set-TargetResource
 
         if ($null -ne $farmAccount)
         {
-            if ($PSBoundParameters.ContainsKey("InstallAccount") -eq $true) 
+            if ($PSBoundParameters.ContainsKey("InstallAccount") -eq $true)
             {
                 # InstallAccount used
                 if ($InstallAccount.UserName -ne $farmAccount)
@@ -281,9 +281,9 @@ function Set-TargetResource
         {
             throw ("Unable to retrieve the Farm Account. Check if the farm exists.")
         }
-        
+
         Write-Verbose -Message "Creating user profile service application $Name"
-        
+
         # Add the InstallAccount to the local Administrators group, if it's not already there
         $isLocalAdmin = Test-SPDSCUserIsLocalAdmin -UserName $farmAccount
 
@@ -299,30 +299,30 @@ function Set-TargetResource
                                       -Arguments $PSBoundParameters `
                                       -ScriptBlock {
             $params = $args[0]
-            
+
             $updateEnableNetBIOS = $false
-            if ($params.ContainsKey("EnableNetBIOS")) 
+            if ($params.ContainsKey("EnableNetBIOS"))
             {
                 $updateEnableNetBIOS = $true
                 $enableNetBIOS = $params.EnableNetBIOS
-                $params.Remove("EnableNetBIOS") | Out-Null 
+                $params.Remove("EnableNetBIOS") | Out-Null
             }
 
             $updateNoILMUsed = $false
-            if ($params.ContainsKey("NoILMUsed")) 
+            if ($params.ContainsKey("NoILMUsed"))
             {
                 $updateNoILMUsed = $true
                 $NoILMUsed = $params.NoILMUsed
-                $params.Remove("NoILMUsed") | Out-Null 
+                $params.Remove("NoILMUsed") | Out-Null
             }
 
-            if ($params.ContainsKey("InstallAccount")) 
+            if ($params.ContainsKey("InstallAccount"))
             {
-                $params.Remove("InstallAccount") | Out-Null 
+                $params.Remove("InstallAccount") | Out-Null
             }
-            if ($params.ContainsKey("Ensure")) 
+            if ($params.ContainsKey("Ensure"))
             {
-                $params.Remove("Ensure") | Out-Null 
+                $params.Remove("Ensure") | Out-Null
             }
 
             $params = Rename-SPDSCParamValue -params $params `
@@ -333,23 +333,23 @@ function Set-TargetResource
                                              -oldName "SyncDBServer" `
                                              -newName "ProfileSyncDBServer"
 
-            if ($params.ContainsKey("ProxyName")) 
+            if ($params.ContainsKey("ProxyName"))
             {
                 $pName = $params.ProxyName
-                $params.Remove("ProxyName") | Out-Null 
+                $params.Remove("ProxyName") | Out-Null
             }
-            if ($null -eq $pName) 
+            if ($null -eq $pName)
             {
                 $pName = "$($params.Name) Proxy"
             }
 
             $serviceApps = Get-SPServiceApplication -Name $params.Name `
-                                                    -ErrorAction SilentlyContinue 
+                                                    -ErrorAction SilentlyContinue
             $app = $serviceApps | Select-Object -First 1
-            if ($null -eq $serviceApps) 
+            if ($null -eq $serviceApps)
             {
                 $app = New-SPProfileServiceApplication @params
-                if ($null -ne $app) 
+                if ($null -ne $app)
                 {
                     New-SPProfileServiceApplicationProxy -Name $pName `
                                                          -ServiceApplication $app `
@@ -369,7 +369,7 @@ function Set-TargetResource
                     ($app.NoILMUsed -ne $NoILMUsed))
                 {
                     $app.NoILMUsed = $NoILMUsed
-                }                
+                }
                 $app.Update()
             }
         }
@@ -380,8 +380,8 @@ function Set-TargetResource
             Remove-SPDSCUserToLocalAdmin -UserName $farmAccount
         }
     }
-    
-    if ($Ensure -eq "Absent") 
+
+    if ($Ensure -eq "Absent")
     {
         Write-Verbose -Message "Removing user profile service application $Name"
         Invoke-SPDSCCommand -Credential $InstallAccount `
@@ -389,10 +389,10 @@ function Set-TargetResource
                             -ScriptBlock {
 
             $params = $args[0]
-            
+
             $app = Get-SPServiceApplication -Name $params.Name `
                     | Where-Object -FilterScript {
-                        $_.GetType().FullName -eq "Microsoft.Office.Server.Administration.UserProfileApplication"  
+                        $_.GetType().FullName -eq "Microsoft.Office.Server.Administration.UserProfileApplication"
                     }
 
             $proxies = Get-SPServiceApplicationProxy
@@ -406,7 +406,7 @@ function Set-TargetResource
 
             Remove-SPServiceApplication -Identity $app -Confirm:$false
         }
-    }        
+    }
 }
 
 function Test-TargetResource
@@ -415,61 +415,61 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [Parameter(Mandatory = $true)]  
-        [System.String] 
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $Name,
 
-        [Parameter()] 
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $ProxyName,
 
-        [Parameter(Mandatory = $true)] 
-        [System.String] 
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $ApplicationPool,
 
-        [Parameter()] 
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $MySiteHostLocation,
 
-        [Parameter()] 
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $ProfileDBName,
 
-        [Parameter()] 
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $ProfileDBServer,
 
-        [Parameter()] 
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $SocialDBName,
 
-        [Parameter()] 
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $SocialDBServer,
 
-        [Parameter()] 
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $SyncDBName,
 
-        [Parameter()] 
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $SyncDBServer,
 
-        [Parameter()] 
-        [System.Boolean] 
+        [Parameter()]
+        [System.Boolean]
         $EnableNetBIOS = $false,
 
-        [Parameter()] 
-        [System.Boolean] 
+        [Parameter()]
+        [System.Boolean]
         $NoILMUsed = $false,
 
-        [Parameter()] 
-        [ValidateSet("Present","Absent")] 
-        [System.String] 
+        [Parameter()]
+        [ValidateSet("Present","Absent")]
+        [System.String]
         $Ensure = "Present",
 
-        [Parameter()] 
-        [System.Management.Automation.PSCredential] 
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 
@@ -485,7 +485,7 @@ function Test-TargetResource
                                             -DesiredValues $PSBoundParameters `
                                             -ValuesToCheck @("Name",
                                                              "EnableNetBIOS",
-                                                             "NoILMUsed", 
+                                                             "NoILMUsed",
                                                              "Ensure")
     }
     else
