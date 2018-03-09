@@ -7,6 +7,9 @@
     AAM will be updated instead of adding a new one
 * SPVisioServiceApp
   * Fixed an issue where the proxy is not properly getting created
+* SPManagedMetadataServiceAppDefault
+  * Fixed issue where .GetType().FullName and TypeName were not used
+  properly
 
 ## 2.1
 
