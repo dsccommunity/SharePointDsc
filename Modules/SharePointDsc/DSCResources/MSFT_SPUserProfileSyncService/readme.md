@@ -18,7 +18,7 @@ parameter, the user profile sync service is provisioned.
 
 NOTE:
 Due to the fact that SharePoint requires certain User Profile components to be
-provisioned as the Farm account, do this resource and SPUserProfileServiceApp
+provisioned as the Farm account, this resource and SPUserProfileServiceApp
 retrieve the Farm account from the Managed Accounts.
 This does however mean that CredSSP is required, which has some security
 implications. More information about these risks can be found at:
