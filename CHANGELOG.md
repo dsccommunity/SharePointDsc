@@ -31,6 +31,9 @@
     in the code and will be removed in v3.0.
 * SPVisioServiceApp
   * Fixed an issue where the proxy is not properly getting created
+* SPManagedMetadataServiceAppDefault
+  * Fixed issue where .GetType().FullName and TypeName were not used
+  properly
 
 ## 2.1
 
