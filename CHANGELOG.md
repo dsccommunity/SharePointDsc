@@ -21,7 +21,7 @@
   * Fixed issue introduced in v2.0, where the Farm Account had to have
     local Administrator permissions for the resource to function properly.
   * Updated resource to retrieve the Farm account from the Managed Accounts
-    instead of requiring it as a parameter
+    instead of requiring it as a parameter.
 * SPUserProfileSyncService
   * Fixed issue introduced in v2.0, where the Farm Account had to have
     local Administrator permissions for the resource to function properly.
