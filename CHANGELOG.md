@@ -14,6 +14,9 @@
 * SPManagedMetadataServiceApp
   * Fixed issue with creating the Content Type Hub on an existing MMS
     service app without Content Type Hub.
+* SPManagedMetadataServiceAppDefault
+  * Fixed issue where .GetType().FullName and TypeName were not used
+    properly
 * SPTimerJobState
   * Updated description of WebAppUrl parameter to make it clear that
     "N/A" has to be used to specify a global timer job.
@@ -31,9 +34,6 @@
     in the code and will be removed in v3.0.
 * SPVisioServiceApp
   * Fixed an issue where the proxy is not properly getting created
-* SPManagedMetadataServiceAppDefault
-  * Fixed issue where .GetType().FullName and TypeName were not used
-  properly
 
 ## 2.1
 
