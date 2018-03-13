@@ -16,7 +16,7 @@
     service app without Content Type Hub.
 * SPManagedMetadataServiceAppDefault
   * Fixed issue where .GetType().FullName and TypeName were not used
-    properly
+    properly.
 * SPTimerJobState
   * Updated description of WebAppUrl parameter to make it clear that
     "N/A" has to be used to specify a global timer job.
