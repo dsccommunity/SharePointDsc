@@ -5,11 +5,35 @@
 * SPAlternateURL
   * If resource specifies Central Admin webapp and Default Zone, the existing
     AAM will be updated instead of adding a new one
-* SPVisioServiceApp
-  * Fixed an issue where the proxy is not properly getting created
+* SPContentDatabase
+  * Fixed issue where mounting a content database which had to be upgraded
+    resulted in a reboot.
+* SPFarmAdministrators
+  * Fixed issue where member comparisons was case sensitive. This had
+    to be case insensitive.
+* SPManagedMetadataServiceApp
+  * Fixed issue with creating the Content Type Hub on an existing MMS
+    service app without Content Type Hub.
 * SPManagedMetadataServiceAppDefault
   * Fixed issue where .GetType().FullName and TypeName were not used
-  properly
+    properly.
+* SPTimerJobState
+  * Updated description of WebAppUrl parameter to make it clear that
+    "N/A" has to be used to specify a global timer job.
+* SPUserProfileServiceApp
+  * Fixed issue introduced in v2.0, where the Farm Account had to have
+    local Administrator permissions for the resource to function properly.
+  * Updated resource to retrieve the Farm account from the Managed Accounts
+    instead of requiring it as a parameter.
+* SPUserProfileSyncService
+  * Fixed issue introduced in v2.0, where the Farm Account had to have
+    local Administrator permissions for the resource to function properly.
+  * Updated resource to retrieve the Farm account from the Managed Accounts
+    instead of requiring it as a parameter.
+  * The FarmAccount parameter is deprecated and no longer required. Is ignored
+    in the code and will be removed in v3.0.
+* SPVisioServiceApp
+  * Fixed an issue where the proxy is not properly getting created
 
 ## 2.1
 
