@@ -130,11 +130,6 @@ function Get-TargetResource
         $DSTACChannelOpenTimeOut,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
-        [System.String]
-        $Ensure = "Present",
-
-        [Parameter()]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
@@ -148,7 +143,6 @@ function Get-TargetResource
 
         $nullReturnValue = @{
             IsSingleInstance = "Yes"
-            Ensure = "Absent"
             DLTCMaxConnectionsToServer = $null
             DLTCRequestTimeout = $null
             DLTCChannelOpenTimeOut = $null
@@ -197,7 +191,6 @@ function Get-TargetResource
 
             $returnValue = @{
                 IsSingleInstance = "Yes"
-                Ensure = "Present"
                 DLTCMaxConnectionsToServer = $DLTC.MaxConnectionsToServer
                 DLTCRequestTimeout = $DLTC.RequestTimeout
                 DLTCChannelOpenTimeOut = $DLTC.ChannelOpenTimeOut
@@ -372,18 +365,13 @@ function Set-TargetResource
         $DSTACChannelOpenTimeOut = 3000,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
-        [System.String]
-        $Ensure = "Present",
-
-        [Parameter()]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 
     Write-Verbose -Message "Setting the Distributed Cache Client Settings"
 
-    if ($Ensure -eq "Present")
+    if ($IsSingleInstance -eq "Yes")
     {
         Invoke-SPDSCCommand -Credential $InstallAccount `
                         -Arguments $PSBoundParameters `
@@ -554,7 +542,7 @@ function Set-TargetResource
     }
     else
     {
-        throw "The SPDistributedCacheClientSettings resource only supports Ensure='Present'."
+        throw "The SPDistributedCacheClientSettings resource only supports IsSingleInstance='Yes'."
     }
 }
 
@@ -690,25 +678,17 @@ function Test-TargetResource
         $DSTACChannelOpenTimeOut,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
-        [System.String]
-        $Ensure = "Present",
-
-        [Parameter()]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 
     Write-Verbose -Message "Testing the Distributed Cache Client Settings"
 
-    $PSBoundParameters.Ensure = $Ensure
-
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
                                     -DesiredValues $PSBoundParameters `
                                     -ValuesToCheck @("IsSingleInstance",
-                                    "Ensure",
                                     "DLTCMaxConnectionsToServer",
                                     "DLTCRequestTimeout",
                                     "DLTCChannelOpenTimeOut",

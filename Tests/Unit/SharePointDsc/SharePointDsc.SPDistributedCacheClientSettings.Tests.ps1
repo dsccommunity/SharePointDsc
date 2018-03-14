@@ -30,19 +30,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         } }
 
         # Test contexts
-        Context -Name "Ensure is set to Absent" -Fixture {
-            $testParams = @{
-                Ensure = "Absent"
-            }
-
-            It "Should throw an error complaining that Ensure can't be Absent" {
-                { Set-TargetResource @testParams } | Should Throw "The SPDistributedCacheClientSettings resource only supports Ensure='Present'."
-            }
-        }
-
         Context -Name "Some Distributed Cache Client Settings are Not Properly Configured" -Fixture {
             $testParams = @{
-                Ensure = "Present"
                 IsSingleInstance = "Yes"
                 DLTCMaxConnectionsToServer = 5
                 DLTCRequestTimeout = 1000
@@ -76,8 +65,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 DSTACChannelOpenTimeOut = 1000
             }
 
-            It "Should return Ensure equals Present" {
-                (Get-TargetResource @testParams).Ensure | Should Be "Present"
+            It "Should return IsSingleInstance equals Yes" {
+                (Get-TargetResource @testParams).IsSingleInstance | Should Be "Yes"
             }
 
             It "Should properly set the settings" {
@@ -90,7 +79,6 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         }
         Context -Name "Some Distributed Cache Client Settings are Not Properly Configured" -Fixture {
             $testParams = @{
-                Ensure = "Present"
                 IsSingleInstance = "Yes"
                 DLTCMaxConnectionsToServer = 1
                 DLTCRequestTimeout = 3000

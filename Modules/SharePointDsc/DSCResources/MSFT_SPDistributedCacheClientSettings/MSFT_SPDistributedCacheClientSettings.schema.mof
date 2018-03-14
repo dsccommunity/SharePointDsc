@@ -2,7 +2,6 @@
 class MSFT_SPDistributedCacheClientSettings : OMI_BaseResource
 {
     [Key, Description("Unique key for the resource. Set to 'Yes' to apply configuration."), ValueMap{"Yes"}, Values{"Yes"}] String IsSingleInstance;
-    [Write, Description("Present to initiate the configuration of the settings. Absent is not supported"), ValueMap{"Present","Absent"}, Values{"Present","Absent"}] String Ensure;
     [Write, Description("Maximum number of connections to the Distributed Logon Token Cache")] UInt32 DLTCMaxConnectionsToServer;
     [Write, Description("Request timeout for the Distributed Logon Token Cache")] UInt32 DLTCRequestTimeout;
     [Write, Description("Channel timeout for the Distributed Logon Token Cache")] UInt32 DLTCChannelOpenTimeOut;
@@ -33,6 +32,5 @@ class MSFT_SPDistributedCacheClientSettings : OMI_BaseResource
     [Write, Description("Maximum number of connections to the Distributed Server to Application Server Cache")] UInt32 DSTACMaxConnectionsToServer;
     [Write, Description("Request timeout for the Distributed Server to Application Server Cache")] UInt32 DSTACRequestTimeout;
     [Write, Description("Channel timeout for the Distributed Server to Application Server Cache")] UInt32 DSTACChannelOpenTimeOut;
-    [Write, Description("Present ensures the configs are applied, absent is not supported"), ValueMap{"Present","Absent"}, Values{"Present","Absent"}] string Ensure;
     [Write, Description("POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5"), EmbeddedInstance("MSFT_Credential")] String InstallAccount;
 };
