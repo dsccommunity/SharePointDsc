@@ -5,9 +5,9 @@ function Get-TargetResource
     param
     (
         [Parameter(Mandatory = $true)]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Yes")]
         [System.String]
-        $Ensure,
+        $IsSingleInstance,
 
         [Parameter()]
         [System.UInt32]
@@ -240,9 +240,9 @@ function Set-TargetResource
     param
     (
         [Parameter(Mandatory = $true)]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Yes")]
         [System.String]
-        $Ensure,
+        $IsSingleInstance,
 
         [Parameter()]
         [System.UInt32]
@@ -553,9 +553,9 @@ function Test-TargetResource
     param
     (
         [Parameter(Mandatory = $true)]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Yes")]
         [System.String]
-        $Ensure,
+        $IsSingleInstance,
 
         [Parameter()]
         [System.UInt32]

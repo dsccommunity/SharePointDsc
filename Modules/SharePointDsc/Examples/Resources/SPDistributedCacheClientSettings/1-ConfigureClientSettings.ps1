@@ -15,7 +15,7 @@
         node localhost {
             SPDistributedCacheClientSettings Settings
             {
-                Ensure                      = "Present"
+                IsSingleInstance            = "Yes"
                 DLTCMaxConnectionsToServer  = 3
                 DLTCRequestTimeout          = 1000
                 DLTCChannelOpenTimeOut      = 1000
