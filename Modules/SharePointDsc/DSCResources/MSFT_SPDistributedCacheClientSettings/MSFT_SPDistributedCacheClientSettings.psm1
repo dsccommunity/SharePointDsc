@@ -142,6 +142,7 @@ function Get-TargetResource
         $params = $args[0]
 
         $nullReturnValue = @{
+            IsSingleInstance = "Yes"
             Ensure = "Absent"
             DLTCMaxConnectionsToServer = $null
             DLTCRequestTimeout = $null
@@ -190,6 +191,7 @@ function Get-TargetResource
             $DSTAC = Get-SPDistributedCacheClientSetting -ContainerType "DistributedServerToAppServerAccessTokenCache"
 
             $returnValue = @{
+                IsSingleInstance = "Yes"
                 Ensure = "Present"
                 DLTCMaxConnectionsToServer = $DLTC.MaxConnectionsToServer
                 DLTCRequestTimeout = $DLTC.RequestTimeout
@@ -690,7 +692,8 @@ function Test-TargetResource
 
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
                                     -DesiredValues $PSBoundParameters `
-                                    -ValuesToCheck @("Ensure",
+                                    -ValuesToCheck @("IsSingleInstance",
+                                    "Ensure",
                                     "DLTCMaxConnectionsToServer",
                                     "DLTCRequestTimeout",
                                     "DLTCChannelOpenTimeOut",
