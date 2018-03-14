@@ -33,5 +33,6 @@ class MSFT_SPDistributedCacheClientSettings : OMI_BaseResource
     [Write, Description("Maximum number of connections to the Distributed Server to Application Server Cache")] UInt32 DSTACMaxConnectionsToServer;
     [Write, Description("Request timeout for the Distributed Server to Application Server Cache")] UInt32 DSTACRequestTimeout;
     [Write, Description("Channel timeout for the Distributed Server to Application Server Cache")] UInt32 DSTACChannelOpenTimeOut;
+    [Write, Description("Present ensures the configs are applied, absent is not supported"), ValueMap{"Present","Absent"}, Values{"Present","Absent"}] string Ensure;
     [Write, Description("POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5"), EmbeddedInstance("MSFT_Credential")] String InstallAccount;
 };

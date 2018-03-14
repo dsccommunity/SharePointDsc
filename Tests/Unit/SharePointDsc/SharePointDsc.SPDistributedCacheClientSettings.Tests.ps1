@@ -42,6 +42,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "Some Distributed Cache Client Settings are Not Properly Configured" -Fixture {
             $testParams = @{
+                Ensure = "Present"
                 IsSingleInstance = "Yes"
                 DLTCMaxConnectionsToServer = 5
                 DLTCRequestTimeout = 1000
@@ -89,6 +90,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         }
         Context -Name "Some Distributed Cache Client Settings are Not Properly Configured" -Fixture {
             $testParams = @{
+                Ensure = "Present"
                 IsSingleInstance = "Yes"
                 DLTCMaxConnectionsToServer = 1
                 DLTCRequestTimeout = 3000

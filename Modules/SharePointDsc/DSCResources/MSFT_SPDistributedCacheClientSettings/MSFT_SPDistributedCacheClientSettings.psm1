@@ -130,6 +130,11 @@ function Get-TargetResource
         $DSTACChannelOpenTimeOut,
 
         [Parameter()]
+        [ValidateSet("Present","Absent")]
+        [System.String]
+        $Ensure = "Present",
+
+        [Parameter()]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
@@ -365,6 +370,11 @@ function Set-TargetResource
         [Parameter()]
         [System.UInt32]
         $DSTACChannelOpenTimeOut = 3000,
+
+        [Parameter()]
+        [ValidateSet("Present","Absent")]
+        [System.String]
+        $Ensure = "Present",
 
         [Parameter()]
         [System.Management.Automation.PSCredential]
@@ -678,6 +688,11 @@ function Test-TargetResource
         [Parameter()]
         [System.UInt32]
         $DSTACChannelOpenTimeOut,
+
+        [Parameter()]
+        [ValidateSet("Present","Absent")]
+        [System.String]
+        $Ensure = "Present",
 
         [Parameter()]
         [System.Management.Automation.PSCredential]
