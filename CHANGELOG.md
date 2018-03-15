@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+* SPDistributedCacheClientSettings
+  * Added the new resource
 * SPAlternateURL
   * If resource specifies Central Admin webapp and Default Zone, the existing
     AAM will be updated instead of adding a new one
