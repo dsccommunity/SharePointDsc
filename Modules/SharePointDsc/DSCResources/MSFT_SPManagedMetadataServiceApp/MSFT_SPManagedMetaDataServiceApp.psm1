@@ -140,6 +140,10 @@ function Get-TargetResource
                 {
                     $hubUrl = $hubUrl.TrimEnd('/')
                 }
+                else
+                {
+                    $hubUrl = ""
+                }
             }
             catch [System.Exception]
             {
