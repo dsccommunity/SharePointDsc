@@ -371,178 +371,171 @@ function Set-TargetResource
 
     Write-Verbose -Message "Setting the Distributed Cache Client Settings"
 
-    if ($IsSingleInstance -eq "Yes")
-    {
-        Invoke-SPDSCCommand -Credential $InstallAccount `
-                        -Arguments $PSBoundParameters `
-                        -ScriptBlock {
-            $params = $args[0]
+    Invoke-SPDSCCommand -Credential $InstallAccount `
+                    -Arguments $PSBoundParameters `
+                    -ScriptBlock {
+        $params = $args[0]
 
-            #DistributedLogonTokenCache
-            $DLTC = Get-SPDistributedCacheClientSetting -ContainerType "DistributedLogonTokenCache"
+        #DistributedLogonTokenCache
+        $DLTC = Get-SPDistributedCacheClientSetting -ContainerType "DistributedLogonTokenCache"
 
-            if($params.DLTCMaxConnectionsToServer)
-            {
-                $DLTC.MaxConnectionsToServer = $params.DLTCMaxConnectionsToServer
-            }
-            if($params.DLTCRequestTimeout)
-            {
-                $DLTC.RequestTimeout = $params.DLTCRequestTimeout
-            }
-            if($params.DLTCChannelOpenTimeOut)
-            {
-                $DLTC.ChannelOpenTimeOut = $params.DLTCChannelOpenTimeOut
-            }
-            Set-SPDistributedCacheClientSetting -ContainerType "DistributedLogonTokenCache" $DLTC
-
-            #DistributedViewStateCache
-            $DVSC = Get-SPDistributedCacheClientSetting -ContainerType "DistributedViewStateCache"
-            if($params.DVSCMaxConnectionsToServer)
-            {
-                $DVSC.MaxConnectionsToServer = $params.DVSCMaxConnectionsToServer
-            }
-            if($params.DVSCRequestTimeout)
-            {
-                $DVSC.RequestTimeout = $params.DVSCRequestTimeout
-            }
-            if($params.DVSCChannelOpenTimeOut)
-            {
-                $DVSC.ChannelOpenTimeOut = $params.DVSCChannelOpenTimeOut
-            }
-            Set-SPDistributedCacheClientSetting -ContainerType "DistributedViewStateCache" $DVSC
-
-            #DistributedAccessCache
-            $DAC = Get-SPDistributedCacheClientSetting -ContainerType "DistributedAccessCache"
-            if($params.DACMaxConnectionsToServer)
-            {
-                $DAC.MaxConnectionsToServer = $params.DACMaxConnectionsToServer
-            }
-            if($params.DACRequestTimeout)
-            {
-                $DAC.RequestTimeout = $params.DACRequestTimeout
-            }
-            if($params.DACChannelOpenTimeOut)
-            {
-                $DAC.ChannelOpenTimeOut = $params.DACChannelOpenTimeOut
-            }
-            Set-SPDistributedCacheClientSetting -ContainerType "DistributedAccessCache" $DAC
-
-            #DistributedActivityFeedCache
-            $DAF = Get-SPDistributedCacheClientSetting -ContainerType "DistributedActivityFeedCache"
-            if($params.DAFMaxConnectionsToServer)
-            {
-                $DAF.MaxConnectionsToServer = $params.DAFMaxConnectionsToServer
-            }
-            if($params.DAFRequestTimeout)
-            {
-                $DAF.RequestTimeout = $params.DAFRequestTimeout
-            }
-            if($params.DAFChannelOpenTimeOut)
-            {
-                $DAF.ChannelOpenTimeOut = $params.DAFChannelOpenTimeOut
-            }
-            Set-SPDistributedCacheClientSetting -ContainerType "DistributedActivityFeedCache" $DAF
-
-            #DistributedActivityFeedLMTCache
-            $DAFC = Get-SPDistributedCacheClientSetting -ContainerType "DistributedActivityFeedLMTCache"
-            if($params.DAFCMaxConnectionsToServer)
-            {
-                $DAFC.MaxConnectionsToServer = $params.DAFCMaxConnectionsToServer
-            }
-            if($params.DAFCRequestTimeout)
-            {
-                $DAFC.RequestTimeout = $params.DAFCRequestTimeout
-            }
-            if($params.DAFCChannelOpenTimeOut)
-            {
-                $DAFC.ChannelOpenTimeOut = $params.DAFCChannelOpenTimeOut
-            }
-            Set-SPDistributedCacheClientSetting -ContainerType "DistributedActivityFeedLMTCache" $DAFC
-
-            #DistributedBouncerCache
-            $DBC = Get-SPDistributedCacheClientSetting -ContainerType "DistributedBouncerCache"
-            if($params.DBCMaxConnectionsToServer)
-            {
-                $DBC.MaxConnectionsToServer = $params.DBCMaxConnectionsToServer
-            }
-            if($params.DBCRequestTimeout)
-            {
-                $DBC.RequestTimeout = $params.DBCRequestTimeout
-            }
-            if($params.DBCChannelOpenTimeOut)
-            {
-                $DBC.ChannelOpenTimeOut = $params.DBCChannelOpenTimeOut
-            }
-            Set-SPDistributedCacheClientSetting -ContainerType "DistributedBouncerCache" $DBC
-
-            #DistributedDefaultCache
-            $DDC = Get-SPDistributedCacheClientSetting -ContainerType "DistributedDefaultCache"
-            if($params.DDCMaxConnectionsToServer)
-            {
-                $DDC.MaxConnectionsToServer = $params.DDCMaxConnectionsToServer
-            }
-            if($params.DDCRequestTimeout)
-            {
-                $DDC.RequestTimeout = $params.DDCRequestTimeout
-            }
-            if($params.DDCChannelOpenTimeOut)
-            {
-                $DDC.ChannelOpenTimeOut = $params.DDCChannelOpenTimeOut
-            }
-            Set-SPDistributedCacheClientSetting -ContainerType "DistributedDefaultCache" $DDC
-
-            #DistributedSearchCache
-            $DSC = Get-SPDistributedCacheClientSetting -ContainerType "DistributedSearchCache"
-            if($params.DSCMaxConnectionsToServer)
-            {
-                $DSC.MaxConnectionsToServer = $params.DSCMaxConnectionsToServer
-            }
-            if($params.DSCRequestTimeout)
-            {
-                $DSC.RequestTimeout = $params.DSCRequestTimeout
-            }
-            if($params.DSCChannelOpenTimeOut)
-            {
-                $DSC.ChannelOpenTimeOut = $params.DSCChannelOpenTimeOut
-            }
-            Set-SPDistributedCacheClientSetting -ContainerType "DistributedSearchCache" $DSC
-
-            #DistributedSecurityTrimmingCache
-            $DTC = Get-SPDistributedCacheClientSetting -ContainerType "DistributedSecurityTrimmingCache"
-            if($params.DTCMaxConnectionsToServer)
-            {
-                $DTC.MaxConnectionsToServer = $params.DTCMaxConnectionsToServer
-            }
-            if($params.DTCRequestTimeout)
-            {
-                $DTC.RequestTimeout = $params.DTCRequestTimeout
-            }
-            if($params.DTCChannelOpenTimeOut)
-            {
-                $DTC.ChannelOpenTimeOut = $params.DTCChannelOpenTimeOut
-            }
-            Set-SPDistributedCacheClientSetting -ContainerType "DistributedSecurityTrimmingCache" $DTC
-
-            #DistributedServerToAppServerAccessTokenCache
-            $DSTAC = Get-SPDistributedCacheClientSetting -ContainerType "DistributedServerToAppServerAccessTokenCache"
-            if($params.DSTACMaxConnectionsToServer)
-            {
-                $DSTAC.MaxConnectionsToServer = $params.DSTACMaxConnectionsToServer
-            }
-            if($params.DSTACRequestTimeout)
-            {
-                $DSTAC.RequestTimeout = $params.DSTACRequestTimeout
-            }
-            if($params.DSTACChannelOpenTimeOut)
-            {
-                $DSTAC.ChannelOpenTimeOut = $params.DSTACChannelOpenTimeOut
-            }
-            Set-SPDistributedCacheClientSetting -ContainerType "DistributedServerToAppServerAccessTokenCache" $DSTAC
+        if($params.DLTCMaxConnectionsToServer)
+        {
+            $DLTC.MaxConnectionsToServer = $params.DLTCMaxConnectionsToServer
         }
-    }
-    else
-    {
-        throw "The SPDistributedCacheClientSettings resource only supports IsSingleInstance='Yes'."
+        if($params.DLTCRequestTimeout)
+        {
+            $DLTC.RequestTimeout = $params.DLTCRequestTimeout
+        }
+        if($params.DLTCChannelOpenTimeOut)
+        {
+            $DLTC.ChannelOpenTimeOut = $params.DLTCChannelOpenTimeOut
+        }
+        Set-SPDistributedCacheClientSetting -ContainerType "DistributedLogonTokenCache" $DLTC
+
+        #DistributedViewStateCache
+        $DVSC = Get-SPDistributedCacheClientSetting -ContainerType "DistributedViewStateCache"
+        if($params.DVSCMaxConnectionsToServer)
+        {
+            $DVSC.MaxConnectionsToServer = $params.DVSCMaxConnectionsToServer
+        }
+        if($params.DVSCRequestTimeout)
+        {
+            $DVSC.RequestTimeout = $params.DVSCRequestTimeout
+        }
+        if($params.DVSCChannelOpenTimeOut)
+        {
+            $DVSC.ChannelOpenTimeOut = $params.DVSCChannelOpenTimeOut
+        }
+        Set-SPDistributedCacheClientSetting -ContainerType "DistributedViewStateCache" $DVSC
+
+        #DistributedAccessCache
+        $DAC = Get-SPDistributedCacheClientSetting -ContainerType "DistributedAccessCache"
+        if($params.DACMaxConnectionsToServer)
+        {
+            $DAC.MaxConnectionsToServer = $params.DACMaxConnectionsToServer
+        }
+        if($params.DACRequestTimeout)
+        {
+            $DAC.RequestTimeout = $params.DACRequestTimeout
+        }
+        if($params.DACChannelOpenTimeOut)
+        {
+            $DAC.ChannelOpenTimeOut = $params.DACChannelOpenTimeOut
+        }
+        Set-SPDistributedCacheClientSetting -ContainerType "DistributedAccessCache" $DAC
+
+        #DistributedActivityFeedCache
+        $DAF = Get-SPDistributedCacheClientSetting -ContainerType "DistributedActivityFeedCache"
+        if($params.DAFMaxConnectionsToServer)
+        {
+            $DAF.MaxConnectionsToServer = $params.DAFMaxConnectionsToServer
+        }
+        if($params.DAFRequestTimeout)
+        {
+            $DAF.RequestTimeout = $params.DAFRequestTimeout
+        }
+        if($params.DAFChannelOpenTimeOut)
+        {
+            $DAF.ChannelOpenTimeOut = $params.DAFChannelOpenTimeOut
+        }
+        Set-SPDistributedCacheClientSetting -ContainerType "DistributedActivityFeedCache" $DAF
+
+        #DistributedActivityFeedLMTCache
+        $DAFC = Get-SPDistributedCacheClientSetting -ContainerType "DistributedActivityFeedLMTCache"
+        if($params.DAFCMaxConnectionsToServer)
+        {
+            $DAFC.MaxConnectionsToServer = $params.DAFCMaxConnectionsToServer
+        }
+        if($params.DAFCRequestTimeout)
+        {
+            $DAFC.RequestTimeout = $params.DAFCRequestTimeout
+        }
+        if($params.DAFCChannelOpenTimeOut)
+        {
+            $DAFC.ChannelOpenTimeOut = $params.DAFCChannelOpenTimeOut
+        }
+        Set-SPDistributedCacheClientSetting -ContainerType "DistributedActivityFeedLMTCache" $DAFC
+
+        #DistributedBouncerCache
+        $DBC = Get-SPDistributedCacheClientSetting -ContainerType "DistributedBouncerCache"
+        if($params.DBCMaxConnectionsToServer)
+        {
+            $DBC.MaxConnectionsToServer = $params.DBCMaxConnectionsToServer
+        }
+        if($params.DBCRequestTimeout)
+        {
+            $DBC.RequestTimeout = $params.DBCRequestTimeout
+        }
+        if($params.DBCChannelOpenTimeOut)
+        {
+            $DBC.ChannelOpenTimeOut = $params.DBCChannelOpenTimeOut
+        }
+        Set-SPDistributedCacheClientSetting -ContainerType "DistributedBouncerCache" $DBC
+
+        #DistributedDefaultCache
+        $DDC = Get-SPDistributedCacheClientSetting -ContainerType "DistributedDefaultCache"
+        if($params.DDCMaxConnectionsToServer)
+        {
+            $DDC.MaxConnectionsToServer = $params.DDCMaxConnectionsToServer
+        }
+        if($params.DDCRequestTimeout)
+        {
+            $DDC.RequestTimeout = $params.DDCRequestTimeout
+        }
+        if($params.DDCChannelOpenTimeOut)
+        {
+            $DDC.ChannelOpenTimeOut = $params.DDCChannelOpenTimeOut
+        }
+        Set-SPDistributedCacheClientSetting -ContainerType "DistributedDefaultCache" $DDC
+
+        #DistributedSearchCache
+        $DSC = Get-SPDistributedCacheClientSetting -ContainerType "DistributedSearchCache"
+        if($params.DSCMaxConnectionsToServer)
+        {
+            $DSC.MaxConnectionsToServer = $params.DSCMaxConnectionsToServer
+        }
+        if($params.DSCRequestTimeout)
+        {
+            $DSC.RequestTimeout = $params.DSCRequestTimeout
+        }
+        if($params.DSCChannelOpenTimeOut)
+        {
+            $DSC.ChannelOpenTimeOut = $params.DSCChannelOpenTimeOut
+        }
+        Set-SPDistributedCacheClientSetting -ContainerType "DistributedSearchCache" $DSC
+
+        #DistributedSecurityTrimmingCache
+        $DTC = Get-SPDistributedCacheClientSetting -ContainerType "DistributedSecurityTrimmingCache"
+        if($params.DTCMaxConnectionsToServer)
+        {
+            $DTC.MaxConnectionsToServer = $params.DTCMaxConnectionsToServer
+        }
+        if($params.DTCRequestTimeout)
+        {
+            $DTC.RequestTimeout = $params.DTCRequestTimeout
+        }
+        if($params.DTCChannelOpenTimeOut)
+        {
+            $DTC.ChannelOpenTimeOut = $params.DTCChannelOpenTimeOut
+        }
+        Set-SPDistributedCacheClientSetting -ContainerType "DistributedSecurityTrimmingCache" $DTC
+
+        #DistributedServerToAppServerAccessTokenCache
+        $DSTAC = Get-SPDistributedCacheClientSetting -ContainerType "DistributedServerToAppServerAccessTokenCache"
+        if($params.DSTACMaxConnectionsToServer)
+        {
+            $DSTAC.MaxConnectionsToServer = $params.DSTACMaxConnectionsToServer
+        }
+        if($params.DSTACRequestTimeout)
+        {
+            $DSTAC.RequestTimeout = $params.DSTACRequestTimeout
+        }
+        if($params.DSTACChannelOpenTimeOut)
+        {
+            $DSTAC.ChannelOpenTimeOut = $params.DSTACChannelOpenTimeOut
+        }
+        Set-SPDistributedCacheClientSetting -ContainerType "DistributedServerToAppServerAccessTokenCache" $DSTAC
     }
 }
 
@@ -688,8 +681,7 @@ function Test-TargetResource
 
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
                                     -DesiredValues $PSBoundParameters `
-                                    -ValuesToCheck @("IsSingleInstance",
-                                    "DLTCMaxConnectionsToServer",
+                                    -ValuesToCheck @("DLTCMaxConnectionsToServer",
                                     "DLTCRequestTimeout",
                                     "DLTCChannelOpenTimeOut",
                                     "DVSCMaxConnectionsToServer",

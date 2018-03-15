@@ -22,15 +22,15 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         # Mocks for all contexts
 
         Mock -CommandName Set-SPDistributedCacheClientSetting{}
-        Mock -CommandName Get-SPDistributedCacheClientSetting -MockWith {
-            return @{
-                MaxConnectionsToServer = 3
-                RequestTimeout = 1000
-                ChannelOpenTimeOut = 1000
-        } }
 
         # Test contexts
         Context -Name "Some Distributed Cache Client Settings are Not Properly Configured" -Fixture {
+            Mock -CommandName Get-SPDistributedCacheClientSetting -MockWith {
+                return @{
+                    MaxConnectionsToServer = 3
+                    RequestTimeout = 1000
+                    ChannelOpenTimeOut = 1000
+            } }
             $testParams = @{
                 IsSingleInstance = "Yes"
                 DLTCMaxConnectionsToServer = 5
@@ -73,11 +73,17 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Set-TargetResource @testParams
             }
 
-            It "Should successfully test the resource" {
+            It "Should return false from Test-TargetResource" {
                 (Test-TargetResource @testParams) | Should Be $false
             }
         }
         Context -Name "Some Distributed Cache Client Settings are Not Properly Configured" -Fixture {
+            Mock -CommandName Get-SPDistributedCacheClientSetting -MockWith {
+                return @{
+                    MaxConnectionsToServer = 1
+                    RequestTimeout = 3000
+                    ChannelOpenTimeOut = 3000
+            } }
             $testParams = @{
                 IsSingleInstance = "Yes"
                 DLTCMaxConnectionsToServer = 1
@@ -112,7 +118,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 DSTACChannelOpenTimeOut = 3000
             }
             It "Should successfully test the resource" {
-                (Test-TargetResource @testParams) | Should Be $false
+                (Test-TargetResource @testParams) | Should Be $true
             }
         }
     }
