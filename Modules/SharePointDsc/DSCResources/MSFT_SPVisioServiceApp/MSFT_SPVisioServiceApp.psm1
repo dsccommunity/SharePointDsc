@@ -133,7 +133,7 @@ function Set-TargetResource
             if ($null -ne $visioApp)
             {
                 New-SPVisioServiceApplicationProxy -Name $pName `
-                                                   -ServiceApplication $visioApp | Out-Null
+                                                   -ServiceApplication $visioApp.Name | Out-Null
             }
         }
     }
