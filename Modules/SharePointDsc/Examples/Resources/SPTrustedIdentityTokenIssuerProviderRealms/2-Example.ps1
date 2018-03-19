@@ -16,12 +16,12 @@ Configuration Example
     node localhost {
 
         $ProviderRealmsToInclude = @()
-        $ProviderRealmsToInclude += MSFT_SPProviderRealmToInclude {
+        $ProviderRealmsToInclude += MSFT_SPProviderRealm {
                                 RealmUrl = "https://search.contoso.com"
                                 RealmUrn = "urn:sharepoint:contoso:search"
                                 }
 
-        $ProviderRealmsToInclude += MSFT_SPProviderRealmToInclude {
+        $ProviderRealmsToInclude += MSFT_SPProviderRealm {
                                 RealmUrl = "https://intranet.contoso.com"
                                 RealmUrn = "urn:sharepoint:contoso:intranet"
                                 }

@@ -16,23 +16,23 @@ Configuration Example
 
     node localhost {
         $ProviderRealmsToInclude = @()
-        $ProviderRealmsToInclude += MSFT_SPProviderRealmToInclude {
+        $ProviderRealmsToInclude += MSFT_SPProviderRealm {
                                 RealmUrl = "https://search.contoso.com"
                                 RealmUrn = "urn:sharepoint:contoso:search"
                                 }
 
-        $ProviderRealmsToInclude += MSFT_SPProviderRealmToInclude {
+        $ProviderRealmsToInclude += MSFT_SPProviderRealm {
                                 RealmUrl = "https://intranet.contoso.com"
                                 RealmUrn = "urn:sharepoint:contoso:intranet"
                                 }
 
         $ProviderRealmsToExclude = @()
-        $ProviderRealmsToExclude += MSFT_SPProviderRealmToExclude {
+        $ProviderRealmsToExclude += MSFT_SPProviderRealm {
                                 RealmUrl = "https://search1.contoso.com"
                                 RealmUrn = "urn:sharepoint:contoso:search1"
                                 }
 
-        $ProviderRealmsToExclude += MSFT_SPProviderRealmToExclude {
+        $ProviderRealmsToExclude += MSFT_SPProviderRealm {
                                 RealmUrl = "https://intranet.contoso.com"
                                 RealmUrn = "urn:sharepoint:contoso:intranet"
                                 }

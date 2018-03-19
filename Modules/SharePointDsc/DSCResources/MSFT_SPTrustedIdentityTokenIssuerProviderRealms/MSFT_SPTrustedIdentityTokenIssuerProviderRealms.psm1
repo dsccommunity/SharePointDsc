@@ -5,57 +5,50 @@ function Get-TargetResource
     param
     (
         [Parameter(Mandatory = $true)]
-        [string]
-        $IssuerName,
-
+        [string]$IssuerName,
         [Parameter()]
-        [Microsoft.Management.Infrastructure.CimInstance[]]
-        $ProviderRealms,
-
+        [Microsoft.Management.Infrastructure.CimInstance[]]$ProviderRealms,
         [Parameter()]
-        [Microsoft.Management.Infrastructure.CimInstance[]]
-        $ProviderRealmsToInclude,
-
+        [Microsoft.Management.Infrastructure.CimInstance[]]$ProviderRealmsToInclude,
         [Parameter()]
-        [Microsoft.Management.Infrastructure.CimInstance[]]
-        $ProviderRealmsToExclude,
-
+        [Microsoft.Management.Infrastructure.CimInstance[]]$ProviderRealmsToExclude,
         [Parameter()]
-        [ValidateSet("Present","Absent")]
-        [String]
-        $Ensure = "Present",
-
+        [ValidateSet("Present", "Absent")]
+        [String]$Ensure = "Present",
         [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        [System.Management.Automation.PSCredential]$InstallAccount
     )
 
     Write-Verbose -Message "Getting SPTrustedIdentityTokenIssuer ProviderRealms"
 
     $result = Invoke-SPDSCCommand -Credential $InstallAccount `
                                   -Arguments $PSBoundParameters `
-                                  -ScriptBlock     {
+                                  -ScriptBlock {
         $params = $args[0]
-        $paramRealms = $null
-        $includeRealms = $null
-        $excludeRealms = $null
+        $paramRealms = @{ }
+        $includeRealms = @{ }
+        $excludeRealms = @{ }
+        $currentRealms = @{ }
 
-        if(!!$params.ProviderRealms)
+        if (!!$params.ProviderRealms)
         {
-             $paramRealms = $params.ProviderRealms | ForEach-Object {
-                        "$([System.Uri]$_.RealmUrl)=$($_.RealmUrn)" }
+            $params.ProviderRealms | ForEach-Object {
+                $paramRealms.Add("$([System.Uri]$_.RealmUrl)", "$($_.RealmUrn)")
+            }
         }
 
-        if(!!$params.ProviderRealmsToInclude)
+        if (!!$params.ProviderRealmsToInclude)
         {
-             $includeRealms = $params.ProviderRealmsToInclude | ForEach-Object {
-                        "$([System.Uri]$_.RealmUrl)=$($_.RealmUrn)" }
+            $params.ProviderRealmsToInclude | ForEach-Object {
+                $includeRealms.Add("$([System.Uri]$_.RealmUrl)", "$($_.RealmUrn)")
+            }
         }
 
-        if(!!$params.ProviderRealmsToExclude)
+        if (!!$params.ProviderRealmsToExclude)
         {
-             $excludeRealms = $params.ProviderRealmsToExclude | ForEach-Object {
-                        "$([System.Uri]$_.RealmUrl)=$($_.RealmUrn)" }
+            $params.ProviderRealmsToExclude | ForEach-Object {
+                $excludeRealms.Add("$([System.Uri]$_.RealmUrl)", "$($_.RealmUrn)")
+            }
         }
 
         $spTrust = Get-SPTrustedIdentityTokenIssuer -Identity $params.IssuerName `
@@ -66,41 +59,37 @@ function Get-TargetResource
             throw "SPTrustedIdentityTokenIssuer '$($params.IssuerName)' not found"
         }
 
-        if($spTrust.ProviderRealms.Count -gt 0)
+        if ($spTrust.ProviderRealms.Count -gt 0)
         {
-            $currentRealms = $spTrust.ProviderRealms.GetEnumerator() | ForEach-Object {
-                            "$($_.Key)=$($_.Value)" 
+            $spTrust.ProviderRealms.Keys | ForEach-Object {
+                $currentRealms.Add("$($_.ToString())", "$($spTrust.ProviderRealms[$_])")
             }
         }
-
-        $diffObjects = Get-ProviderRealmsChanges -currentRealms $currentRealms -desiredRealms $paramRealms `
-                                      -includeRealms $includeRealms -excludeRealms $excludeRealms
-
-        $state = $diffObjects.Count -eq 0
-
-        if($params.Ensure -eq "Absent")
-        {
-            if($state)
-            {
-                $state = $currentRealms.Count -gt 0
-            }
-            else
-            {
-                $state = $true
-            }
-        }
-
-        $currentState = @{$true = "Present"; $false = "Absent"}[$state]
 
         return @{
-            IssuerName                   = $params.IssuerName
-            ProviderRealms               = $spTrust.ProviderRealms
-            ProviderRealmsToInclude      = $params.ProviderRealmsToInclude
-            ProviderRealmsToExclude      = $params.ProviderRealmsToExclude
-            Ensure                       = $currentState
+            IssuerName = $params.IssuerName
+            ProviderRealms = $currentRealms
+            ProviderRealmsToInclude = $includeRealms
+            ProviderRealmsToExclude = $excludeRealms
+            CurrentRealms = $currentRealms
+            DesiredRealms = $paramRealms
+            Ensure = $params.Ensure
         }
     }
-    return $result
+
+    $currentStatus = Get-ProviderRealmsStatus -currentRealms $result.ProviderRealms -desiredRealms $result.DesiredRealms `
+                                                  -includeRealms $result.ProviderRealmsToInclude -excludeRealms $result.ProviderRealmsToExclude `
+                                                  -Ensure $result.Ensure
+
+    return @{
+            IssuerName = $result.IssuerName
+            ProviderRealms = $result.ProviderRealms
+            ProviderRealmsToInclude = $result.ProviderRealmsToInclude
+            ProviderRealmsToExclude = $result.ProviderRealmsToExclude
+            CurrentRealms = $result.CurrentRealms
+            RealmsToAdd = $currentStatus.NewRealms
+            Ensure = $currentStatus.CurrentStatus
+        }
 }
 
 function Set-TargetResource
@@ -109,97 +98,40 @@ function Set-TargetResource
     param
     (
         [Parameter(Mandatory = $true)]
-        [string]
-        $IssuerName,
-        
+        [string]$IssuerName,
         [Parameter()]
-        [Microsoft.Management.Infrastructure.CimInstance[]]
-        $ProviderRealms,
-
+        [Microsoft.Management.Infrastructure.CimInstance[]]$ProviderRealms,
         [Parameter()]
-        [Microsoft.Management.Infrastructure.CimInstance[]]
-        $ProviderRealmsToInclude,
-
+        [Microsoft.Management.Infrastructure.CimInstance[]]$ProviderRealmsToInclude,
         [Parameter()]
-        [Microsoft.Management.Infrastructure.CimInstance[]]
-        $ProviderRealmsToExclude,
-
+        [Microsoft.Management.Infrastructure.CimInstance[]]$ProviderRealmsToExclude,
         [Parameter()]
-        [ValidateSet("Present","Absent")]
-        [String]
-        $Ensure = "Present",
-
+        [ValidateSet("Present", "Absent")]
+        [String]$Ensure = "Present",
         [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        [System.Management.Automation.PSCredential]$InstallAccount
     )
-        $CurrentValues = Get-TargetResource @PSBoundParameters
-        
-        Write-Verbose -Message "Setting SPTrustedIdentityTokenIssuer provider realms"
-        $result = Invoke-SPDSCCommand -Credential $InstallAccount `
-                                      -Arguments $PSBoundParameters `
-                                      -ScriptBlock {
-            $params = $args[0]
 
-            $paramRealms = $null
-            $includeRealms = $null
-            $excludeRealms = $null
+    $CurrentValues = Get-TargetResource @PSBoundParameters
+    $PSBoundParameters.Add('CurrentValues', $CurrentValues)
 
-            if(!!$params.ProviderRealms)
-            {
-            $paramRealms = $params.ProviderRealms | ForEach-Object {
-                            "$([System.Uri]$_.RealmUrl)=$($_.RealmUrn)" }
+    Write-Verbose -Message "Setting SPTrustedIdentityTokenIssuer provider realms"
+    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+                                  -Arguments $PSBoundParameters `
+                                  -ScriptBlock {
+        $params = $args[0]
+
+        if ($params.CurrentValues.RealmsToAdd.Count -gt 0)
+        {
+            $trust = Get-SPTrustedIdentityTokenIssuer -Identity $params.IssuerName `
+                                  -ErrorAction SilentlyContinue
+            $trust.ProviderRealms.Clear()
+            $params.CurrentValues.RealmsToAdd.Keys | ForEach-Object {
+                Write-Verbose "Adding Realm: $([System.Uri]$_)=$($params.CurrentValues.RealmsToAdd[$_])"
+                $trust.ProviderRealms.Add([System.Uri]$_, $params.CurrentValues.RealmsToAdd[$_])
             }
-
-            if(!!$params.ProviderRealmsToInclude)
-            {
-            $includeRealms = $params.ProviderRealmsToInclude | ForEach-Object {
-                            "$([System.Uri]$_.RealmUrl)=$($_.RealmUrn)" }
-            }
-
-            if(!!$params.ProviderRealmsToExclude)
-            {
-            $excludeRealms = $params.ProviderRealmsToExclude | ForEach-Object {
-                            "$([System.Uri]$_.RealmUrl)=$($_.RealmUrn)" }
-            }
-
-            $trust = Get-SPTrustedIdentityTokenIssuer -Identity $params.IssuerName -ErrorAction SilentlyContinue
-
-            $currentRealms =$trust.ProviderRealms.GetEnumerator() | ForEach-Object {
-                        "$($_.Key)=$($_.Value)" 
-            }
-
-            $diffObjects = Get-ProviderRealmsChanges -currentRealms $currentRealms -desiredRealms $paramRealms `
-                                          -includeRealms $includeRealms -excludeRealms $excludeRealms
-
-            $needsUpdate = $false
-            if($params.Ensure -eq "Absent" `
-                -and $params.Ensure -ne $CurrentValues.Ensure `
-                -and $diffObjects.Count -le 1)
-            {
-                $currentRealms | ForEach-Object { 
-                        Write-Verbose "Removing Realm $([System.Uri]$_.Split('=')[0])"
-                        $trust.ProviderRealms.Remove([System.Uri]$_.Split('=')[0])
-                        $needsUpdate = $true
-                }
-            }
-            else
-            {
-                $diffObjects | Where-Object {$_.Split('=')[0]-eq "Remove"} | ForEach-Object {
-                        Write-Verbose "Removing Realm $([System.Uri]$_.Split('=')[1])"
-                        $trust.ProviderRealms.Remove([System.Uri]$_.Split('=')[1])
-                        $needsUpdate = $true
-                }
-                $diffObjects | Where-Object {$_.Split('=')[0]-eq "Add"} | ForEach-Object {
-                        Write-Verbose "Adding Realm $([System.Uri]$_.Split('=')[1])"
-                        $trust.ProviderRealms.Add([System.Uri]$_.Split('=')[1],$_.Split('=')[2])
-                        $needsUpdate = $true
-                }
-            }
-            if($needsUpdate)
-            {
-                $trust.Update()
-            }
+            $trust.Update()
+        }
     }
 }
 
@@ -210,29 +142,18 @@ function Test-TargetResource
     param
     (
         [Parameter(Mandatory = $true)]
-        [string]
-        $IssuerName,
-
+        [string]$IssuerName,
         [Parameter()]
-        [Microsoft.Management.Infrastructure.CimInstance[]]
-        $ProviderRealms,
-
+        [Microsoft.Management.Infrastructure.CimInstance[]]$ProviderRealms,
         [Parameter()]
-        [Microsoft.Management.Infrastructure.CimInstance[]]
-        $ProviderRealmsToInclude,
-
+        [Microsoft.Management.Infrastructure.CimInstance[]]$ProviderRealmsToInclude,
         [Parameter()]
-        [Microsoft.Management.Infrastructure.CimInstance[]]
-        $ProviderRealmsToExclude,
-
+        [Microsoft.Management.Infrastructure.CimInstance[]]$ProviderRealmsToExclude,
         [Parameter()]
-        [ValidateSet("Present","Absent")]
-        [String]
-        $Ensure = "Present",
-
+        [ValidateSet("Present", "Absent")]
+        [String]$Ensure = "Present",
         [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        [System.Management.Automation.PSCredential]$InstallAccount
     )
 
     Write-Verbose -Message "Testing SPTrustedIdentityTokenIssuer provider realms"
@@ -245,3 +166,153 @@ function Test-TargetResource
 }
 
 Export-ModuleMember -Function *-TargetResource
+
+function Get-ProviderRealmsStatus()
+{
+    param
+    (
+        [Parameter()]
+        $currentRealms = $null,
+        [Parameter()]
+        $desiredRealms = $null,
+        [Parameter()]
+        $includeRealms = $null,
+        [Parameter()]
+        $excludeRealms = $null,
+        [Parameter()]
+        $Ensure = "Present"
+    )
+
+    $res = $null
+    $res = New-Object PsObject
+    Add-Member -InputObject $res -Name "CurrentStatus" -MemberType NoteProperty -Value $null
+    Add-Member -InputObject $res -Name "NewRealms" -MemberType NoteProperty -Value $null
+    $res.CurrentStatus = "Present"
+    $res.NewRealms = $null
+
+    if ($currentRealms.Count -eq 0)
+    {
+        $res.CurrentStatus = "Present"
+        $res.NewRealms = @{ }
+
+        if ($desiredRealms.Count -gt 0)
+        {
+            $res.CurrentStatus = "Absent"
+            $res.NewRealms = $desiredRealms
+        }
+        else
+        {
+            if ($includeRealms.Count -gt 0)
+            {
+                if ($excludeRealms.Count -gt 0)
+                {
+                    $excludeRealms.Keys | Where-Object
+                    {
+                        $includeRealms.ContainsKey($_) -and $includeRealms[$_] -eq $excludeRealms[$_]
+                    } | ForEach-Object { $includeRealms.Remove($_) }
+                }
+
+                $res.CurrentStatus = "Absent"
+                $res.NewRealms = $includeRealms
+            }
+        }
+        return $res
+    }
+
+    if ($Ensure -eq "Present")
+    {
+        if ($desiredRealms.Count -gt 0)
+        {
+            $eqBoth = @{ }
+
+            $desiredRealms.Keys | Where-Object {
+                $currentRealms.ContainsKey($_) -and $currentRealms[$_] -eq $desiredRealms[$_]
+            } | ForEach-Object { $eqBoth.Add("$($_)", "$($currentRealms[$_])") }
+
+            if ($eqBoth.Count -eq $desiredRealms.Count)
+            {
+                return $res
+            }
+            else
+            {
+                $res.CurrentStatus = "Absent"
+                $res.NewRealms = $desiredRealms
+                return $res
+            }
+        }
+        else
+        {
+            if ($includeRealms.Count -gt 0)
+            {
+                $inclusion = @{ }
+                $includeRealms.Keys | Where-Object {
+                    !$currentRealms.ContainsKey($_) -and $currentRealms[$_] -ne $includeRealms[$_]
+                } | ForEach-Object { $inclusion.Add("$($_)", "$($includeRealms[$_])") }
+
+                $update = @{ }
+                $includeRealms.Keys | Where-Object {
+                    $currentRealms.ContainsKey($_) -and $currentRealms[$_] -ne $includeRealms[$_]
+                } | ForEach-Object { $update.Add("$($_)", "$($includeRealms[$_])") }
+            }
+
+            if ($update.Count -gt 0)
+            {
+                $update.Keys | ForEach-Object{ $currentRealms[$_] = $update[$_] }
+            }
+
+            if ($inclusion.Count -gt 0)
+            {
+                $inclusion.Keys | ForEach-Object { $currentRealms.Add($_, $inclusion[$_]) }
+            }
+
+            if ($excludeRealms.Count -gt 0)
+            {
+                $exclusion = @{ }
+
+                $excludeRealms.Keys | Where-Object {
+                    $currentRealms.ContainsKey($_) -and $currentRealms[$_] -eq $excludeRealms[$_]
+                } | ForEach-Object { $exclusion.Add("$($_)", "$($excludeRealms[$_])") }
+
+                if ($exclusion.Count -gt 0)
+                {
+                    $exclusion.Keys | ForEach-Object{ $currentRealms.Remove($_) }
+                }
+            }
+
+            if ($inclusion.Count -gt 0 -or $update.Count -gt 0 -or $exclusion.Count -gt 0)
+            {
+                $res.CurrentStatus = "Absent"
+                $res.NewRealms = $currentRealms
+                return $res
+            }
+            else
+            {
+                return $res
+            }
+        }
+    }
+    else
+    {
+        if ($includeRealms.Count -gt 0 -or $excludeRealms.Count -gt 0)
+        {
+            throw "Parameters ProviderRealmsToInclude and/or ProviderRealmsToExclude can not be used together with Ensure='Absent' use ProviderRealms instead"
+        }
+
+        $eqBoth = $desiredRealms.Keys | Where-Object {
+            $currentRealms.ContainsKey($_) -and $currentRealms[$_] -eq $desiredRealms[$_]
+        } | ForEach-Object {
+            @{ "$($_)" = "$($currentRealms[$_])" }
+        }
+
+        if ($eqBoth.Count -eq 0)
+        {
+            $res.CurrentStatus = "Absent"
+            return $res
+        }
+        else
+        {
+            $res.NewRealms = $eqBoth
+            return $res
+        }
+    }
+}

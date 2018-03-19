@@ -1,111 +1,3 @@
-function Get-ProviderRealmsChanges
-{
-    [CmdletBinding()]
-    param
-    (
-        [Parameter()]
-        $currentRealms=$null,
-
-        [Parameter()]
-        $desiredRealms=$null,
-
-        [Parameter()]
-        $includeRealms=$null,
-
-        [Parameter()]
-        $excludeRealms=$null
-    )
-
-    $res=@()
-
-    if (!!$desiredRealms -and ((!!$includeRealms) -or (!!$excludeRealms))) 
-    {
-        throw ("Cannot use the ProviderRealms parameter together with the " + `
-               "ProviderRealmsToInclude or ProviderRealmsToExclude parameters")
-    }
-
-    if (!$desiredRealms -and !$includeRealms -and !$excludeRealms) 
-    {
-        throw ("At least one of the following parameters must be specified: " + `
-               "ProviderRealms, ProviderRealmsToInclude, ProviderRealmsToExclude")
-    }
-
-    if($desiredRealms.Count -gt 0)
-    {
-        $res = Compare-Object @($currentRealms | Select-Object) $desiredRealms | `
-           ForEach-Object {
-               if($_.SideIndicator -eq "=>")
-               {
-                   $("Add=$($_.InputObject)")
-               }
-               if($_.SideIndicator -eq "<="){
-                   "Remove=$($_.InputObject)"
-               }
-           }
-    }
-    else
-    {
-        if(!!$includeRealms -and !$excludeRealms)
-        {
-            $cHash=@{}
-            @($currentRealms | Select-Object) | ForEach-Object {
-                $cHash[$_.Split('=')[0]]=$_.Split('=')[1]
-            }
-
-            $iHash=@{}
-            $includeRealms | ForEach-Object {
-                $iHash[$_.Split('=')[0]]=$_.Split('=')[1]
-            }
-
-            $includeUpdates = $cHash | ForEach-Object{$_.Keys}| `
-            Where-Object {
-                !$iHash.ContainsValue($cHash[$_]) -and $iHash.ContainsKey($_)
-            } | `
-            ForEach-Object{
-                @("Remove=$($_)=$($cHash[$_])")
-            }
-
-            $res = @(Compare-Object @($currentRealms | Select-Object) $includeRealms | `
-                Where-Object {
-                    $_.SideIndicator -eq "=>"
-                } | `
-                ForEach-Object {
-                    "Add=$($_.InputObject)"
-                }) + @($includeUpdates)
-        }
-        elseif(!$includeRealms -and !!$excludeRealms)
-        {
-            $res = Compare-Object @($currentRealms | Select-Object) $excludeRealms -IncludeEqual -ExcludeDifferent | ForEach-Object{"Remove=$($_.InputObject)"}
-        }
-        else
-        {
-            $cHash=@{}
-            @($currentRealms | Select-Object)  | ForEach-Object{$cHash[$_.Split('=')[0]]=$_.Split('=')[1]}
-
-            $iHash=@{}
-            $includeRealms | ForEach-Object {
-                   $iHash[$_.Split('=')[0]]=$_.Split('=')[1]
-            }
-
-            $includeUpdates = $cHash | ForEach-Object{$_.Keys}| `
-            Where-Object{!$iHash.ContainsValue($cHash[$_]) -and $iHash.ContainsKey($_)} | `
-                   ForEach-Object{
-                       @("$($_)=$($cHash[$_])")
-                   }
-
-            $tmpObj = Compare-Object @($currentRealms | Select-Object) $includeRealms -IncludeEqual | `
-                Where-Object{$includeUpdates -notcontains $_.InputObject} | `
-                   ForEach-Object {"$($_.InputObject)"
-                   }
-
-            $res = Compare-Object $tmpObj $excludeRealms -IncludeEqual -ExcludeDifferent | `
-                      ForEach-Object{"Remove=$($_.InputObject)"
-                   }
-        }
-    }
-    return $res
-}
-
 function Add-SPDSCUserToLocalAdmin
 {
     [CmdletBinding()]
@@ -126,6 +18,28 @@ function Add-SPDSCUserToLocalAdmin
 
     Write-Verbose -Message "Adding $domainName\$userName to local admin group"
     ([ADSI]"WinNT://$($env:computername)/Administrators,group").Add("WinNT://$domainName/$accountName") | Out-Null
+}
+
+function Clear-SPDscKerberosToken
+{
+    param (
+        [Parameter(Mandatory=$true)]
+        [System.String]
+        $Account
+    )
+
+    $sessions = klist sessions
+    foreach ($session in $sessions)
+    {
+        if ($session -like "*$($Account)*")
+        {
+            Write-Verbose -Message "Purging Kerberos ticket for $LogonId"
+            $LogonId = $session.split(' ')[3]
+            $LogonId = $LogonId.Replace('0:','')
+            klist -li $LogonId purge | Out-Null
+        }
+
+    }
 }
 
 function Convert-SPDscADGroupIDToName
@@ -201,7 +115,29 @@ function Get-SPDSCAssemblyVersion
 }
 
 
-function Get-SPDSCFarmAccountName
+function Get-SPDscFarmAccount
+{
+    [CmdletBinding()]
+    param
+    ()
+
+    $farmaccount = (Get-SPFarm).DefaultServiceAccount.Name
+
+    $account = Get-SPManagedAccount | Where-Object -FilterScript { $_.UserName -eq $farmaccount }
+
+    $bindings = [System.Reflection.BindingFlags]::CreateInstance -bor `
+                [System.Reflection.BindingFlags]::GetField -bor `
+                [System.Reflection.BindingFlags]::Instance -bor `
+                [System.Reflection.BindingFlags]::NonPublic
+
+    $pw = $account.GetType().GetField("m_Password", $bindings).GetValue($account);
+
+    return New-Object -TypeName System.Management.Automation.PSCredential `
+                      -ArgumentList $farmaccount, $pw.SecureStringValue
+}
+
+
+function Get-SPDscFarmAccountName
 {
     [CmdletBinding()]
     param

@@ -2,14 +2,51 @@
 
 ## Unreleased
 
+* SPTrustedIdentityTokenIssuerProviderRealms
+  * Added the resource
+* SPDistributedCacheClientSettings
+  * Added the new resource
+* SPAlternateURL
+  * If resource specifies Central Admin webapp and Default Zone, the existing
+    AAM will be updated instead of adding a new one
+* SPContentDatabase
+  * Fixed issue where mounting a content database which had to be upgraded
+    resulted in a reboot.
+* SPFarmAdministrators
+  * Fixed issue where member comparisons was case sensitive. This had
+    to be case insensitive.
+* SPManagedMetadataServiceApp
+  * Fixed issue with creating the Content Type Hub on an existing MMS
+    service app without Content Type Hub.
+* SPManagedMetadataServiceAppDefault
+  * Fixed issue where .GetType().FullName and TypeName were not used
+    properly.
+* SPTimerJobState
+  * Updated description of WebAppUrl parameter to make it clear that
+    "N/A" has to be used to specify a global timer job.
+* SPUserProfileServiceApp
+  * Fixed issue introduced in v2.0, where the Farm Account had to have
+    local Administrator permissions for the resource to function properly.
+  * Updated resource to retrieve the Farm account from the Managed Accounts
+    instead of requiring it as a parameter.
+* SPUserProfileSyncService
+  * Fixed issue introduced in v2.0, where the Farm Account had to have
+    local Administrator permissions for the resource to function properly.
+  * Updated resource to retrieve the Farm account from the Managed Accounts
+    instead of requiring it as a parameter.
+  * The FarmAccount parameter is deprecated and no longer required. Is ignored
+    in the code and will be removed in v3.0.
+* SPVisioServiceApp
+  * Fixed an issue where the proxy is not properly getting created
+
+## 2.1
+
 * General
   * Updated the integration tests for building the Azure environment
     * Works in any Azure environment.
     * Updated the SqlServer configuration to use SqlServerDsc version 10.0.0.0.
 * SPAlternateURL
   * Added the ability to manage the Central Administration AAMs
-* SPTrustedIdentityTokenIssuerProviderRealms
-  * Added the resource
 * SPDiagnosticsProvider
   * Added the resource
 * SPFarm
@@ -33,15 +70,13 @@
   * Fixed issue with correctly retrieving the process identity for the
     Search instance
   * Added support for LocalSystem, LocalService and NetworkService
-* SPUserProfileSyncConnection
-  * Fixed issues with the User Profile Sync connection for SharePoint
-    2016
 * SPUserProfileProperty
   * Fixed issues with the User Profile properties for 2016
 * SPUserProfileServiceAppPermissions
   * Removed the mandatory requirement from secondary parameters
 * SPUserProfileSyncConnection
-  * Fixed issues with the User Profile Sync connection for 2016
+  * Fixed issues with the User Profile Sync connection for SharePoint
+    2016
 * SPUserProfileSyncService
   * Added returning the FarmAccount to the Get method
 * SPWebAppAuthentication
