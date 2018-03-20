@@ -1,0 +1,74 @@
+﻿.NAME
+    SPUserProfileSyncService
+
+# Description
+    
+    This resource is responsible for ensuring that the user profile sync service
+    has been provisioned (Ensure = "Present") or is not running (Ensure =
+    "Absent") on the current server.
+    
+    This resource requires that the FarmAccount is specified as the InstallAccount
+    or PsDscRunAsCredential parameter. It will throw an exception if this is not
+    the case.
+    
+    To allow successful provisioning the farm account must be in the local
+    administrators group, however it is not best practice to leave this account in
+    the Administrators group. Therefore this resource will add the FarmAccount
+    credential to the local administrators group at the beginning of the set method
+    and remove it again later on.
+    
+    The default value for the Ensure parameter is Present. When not specifying this
+    parameter, the user profile sync service is provisioned.
+    
+.PARAMETER UserProfileServiceAppName
+    Key - string
+    The name of the user profile service for this sync instance
+
+.PARAMETER Ensure
+    Write - string
+    Allowed values: Present, Absent
+    Present to ensure the service is running, absent to ensure it is not
+
+.PARAMETER FarmAccount
+    Required - String
+    The farm account, which is needed to provision the service app
+
+.PARAMETER RunOnlyWhenWriteable
+    Write - Boolean
+    Should the sync service only run when the user profile database is in a writeable state?
+
+.PARAMETER InstallAccount
+    Write - String
+    POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5
+
+
+.EXAMPLE
+    This example provisions the user profile sync service to the local server
+
+
+    Configuration Example 
+    {
+        param(
+            [Parameter(Mandatory = $true)]
+            [PSCredential]
+            $SetupAccount,
+
+            [Parameter(Mandatory = $true)]
+            [PSCredential]
+            $FarmAccount
+        )
+        Import-DscResource -ModuleName SharePointDsc
+
+        node localhost {
+            SPUserProfileSyncService UserProfileSyncService
+            {
+                UserProfileServiceAppName   = "User Profile Service Application"
+                Ensure                      = "Present"
+                FarmAccount                 = $FarmAccount
+                RunOnlyWhenWriteable        = $true
+                InstallAccount              = $SetupAccount
+            }
+        }
+    }
+
+
