@@ -38,7 +38,7 @@ function Get-TargetResource
         }
 
         $serviceAppProxies = $serviceAppProxies | Where-Object -FilterScript {
-            $_.GetType().FullName -eq "Managed Metadata Service Connection"
+            $_.GetType().FullName -eq "Microsoft.SharePoint.Taxonomy.MetadataWebServiceApplicationProxy"
         }
 
         if ($null -eq $serviceAppProxies)
@@ -126,7 +126,7 @@ function Set-TargetResource
         $serviceAppProxies = Get-SPServiceApplicationProxy -ErrorAction SilentlyContinue
 
         $serviceAppProxies = $serviceAppProxies | Where-Object -FilterScript {
-            $_.GetType().FullName -eq "Managed Metadata Service Connection"
+            $_.GetType().FullName -eq "Microsoft.SharePoint.Taxonomy.MetadataWebServiceApplicationProxy"
         }
 
         foreach ($serviceAppProxy in $serviceAppProxies)

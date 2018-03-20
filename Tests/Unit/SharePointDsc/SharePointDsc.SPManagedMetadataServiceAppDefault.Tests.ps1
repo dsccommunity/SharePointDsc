@@ -18,7 +18,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
     InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
         Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
-        $getTypeFullName = "Managed Metadata Service Connection"
+        $getTypeFullName = "Microsoft.SharePoint.Taxonomy.MetadataWebServiceApplicationProxy"
 
         $managedMetadataServiceApplicationProxy = @{
             TypeName   = "Managed Metadata Service Connection"
