@@ -30,21 +30,21 @@ function Get-TargetResource
         $excludeRealms = @{ }
         $currentRealms = @{ }
 
-        if (!!$params.ProviderRealms)
+        if ($params.ProviderRealms.Count -gt 0)
         {
             $params.ProviderRealms | ForEach-Object {
                 $paramRealms.Add("$([System.Uri]$_.RealmUrl)", "$($_.RealmUrn)")
             }
         }
 
-        if (!!$params.ProviderRealmsToInclude)
+        if (!!$params.ProviderRealmsToInclude.Count -gt 0)
         {
             $params.ProviderRealmsToInclude | ForEach-Object {
                 $includeRealms.Add("$([System.Uri]$_.RealmUrl)", "$($_.RealmUrn)")
             }
         }
 
-        if (!!$params.ProviderRealmsToExclude)
+        if ($params.ProviderRealmsToExclude.Count -gt 0)
         {
             $params.ProviderRealmsToExclude | ForEach-Object {
                 $excludeRealms.Add("$([System.Uri]$_.RealmUrl)", "$($_.RealmUrn)")
@@ -54,9 +54,9 @@ function Get-TargetResource
         $spTrust = Get-SPTrustedIdentityTokenIssuer -Identity $params.IssuerName `
                                                     -ErrorAction SilentlyContinue
 
-        if (!$spTrust)
+        if ($spTrust -eq $null)
         {
-            throw "SPTrustedIdentityTokenIssuer '$($params.IssuerName)' not found"
+            throw ("SPTrustedIdentityTokenIssuer '$($params.IssuerName)' not found")
         }
 
         if ($spTrust.ProviderRealms.Count -gt 0)
@@ -125,9 +125,15 @@ function Set-TargetResource
         {
             $trust = Get-SPTrustedIdentityTokenIssuer -Identity $params.IssuerName `
                                   -ErrorAction SilentlyContinue
+
+            if ($trust -eq $null)
+            {
+                 throw ("SPTrustedIdentityTokenIssuer '$($params.IssuerName)' not found")
+            }
+
             $trust.ProviderRealms.Clear()
             $params.CurrentValues.RealmsToAdd.Keys | ForEach-Object {
-                Write-Verbose "Adding Realm: $([System.Uri]$_)=$($params.CurrentValues.RealmsToAdd[$_])"
+                Write-Verbose "Setting Realm: $([System.Uri]$_)=$($params.CurrentValues.RealmsToAdd[$_])"
                 $trust.ProviderRealms.Add([System.Uri]$_, $params.CurrentValues.RealmsToAdd[$_])
             }
             $trust.Update()
@@ -182,6 +188,18 @@ function Get-ProviderRealmsStatus()
         [Parameter()]
         $Ensure = "Present"
     )
+
+    if ($desiredRealms.Count -gt 0 -and ($includeRealms.Count -gt 0 -or $excludeRealms.Count -gt 0)) 
+    {
+        throw ("Cannot use the ProviderRealms parameter together with the " + `
+               "ProviderRealmsToInclude or ProviderRealmsToExclude parameters")
+    }
+
+    if ($desiredRealms.Count -eq 0 -and $includeRealms.Count -eq 0 -and $excludeRealms.Count -eq 0) 
+    {
+        throw ("At least one of the following parameters must be specified: " + `
+               "ProviderRealms, ProviderRealmsToInclude, ProviderRealmsToExclude")
+    }
 
     $res = $null
     $res = New-Object PsObject
@@ -295,7 +313,7 @@ function Get-ProviderRealmsStatus()
     {
         if ($includeRealms.Count -gt 0 -or $excludeRealms.Count -gt 0)
         {
-            throw "Parameters ProviderRealmsToInclude and/or ProviderRealmsToExclude can not be used together with Ensure='Absent' use ProviderRealms instead"
+            throw ("Parameters ProviderRealmsToInclude and/or ProviderRealmsToExclude can not be used together with Ensure='Absent' use ProviderRealms instead")
         }
 
         $eqBoth = $desiredRealms.Keys | Where-Object {
