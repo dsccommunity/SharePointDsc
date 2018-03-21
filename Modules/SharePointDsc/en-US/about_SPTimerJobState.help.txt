@@ -33,7 +33,7 @@
 
 .PARAMETER WebAppUrl
     Key - String
-    The URL of the web application that the timer job belongs to, N/A if no web application is applicable
+    The URL of the web application that the timer job belongs to. Use the value 'N/A' if no web application is applicable
 
 .PARAMETER Enabled
     Write - Boolean

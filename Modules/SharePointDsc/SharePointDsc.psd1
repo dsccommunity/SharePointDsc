@@ -12,7 +12,7 @@
 # RootModule = ''
 
 # Version number of this module.
-ModuleVersion = '2.1.0.0'
+ModuleVersion = '2.2.0.0'
 
 # ID used to uniquely identify this module
 GUID = '6c1176a0-4fac-4134-8ca2-3fa8a21a7b90'
@@ -128,53 +128,41 @@ PrivateData = @{
 
         # ReleaseNotes of this module
         ReleaseNotes = "
-      * General
-        * Updated the integration tests for building the Azure environment
-          * Works in any Azure environment.
-          * Updated the SqlServer configuration to use SqlServerDsc version 10.0.0.0.
       * SPAlternateURL
-        * Added the ability to manage the Central Administration AAMs
-      * SPDiagnosticsProvider
-        * Added the resource
-      * SPFarm
-        * Corrected issue where ServerRole parameter is returned in SP2013
-      * SPInfoPathFormsServiceConfig
-        * Added the resource
-      * SPInstallPrereqs
-        * Fixed two typos in to be installed Windows features for SharePoint 2016
-      * SPSearchAutoritativePage
-        * Added missing readme.md
-      * SPSearchCrawlerImpactRule
-        * Fixed issue where an error was thrown when retrieving Crawl Impact rules
-        * Added missing readme.md
-      * SPSearchCrawlMapping
-        * Added missing readme.md
-      * SPSecureStoreServiceApp
-        * Fixed issue in Get-TargetResource to return AuditingEnabled property
-      * SPSecurityTokenServiceConfig
-        * Added the resource
-      * SPServiceIdentity
-        * Fixed issue with correctly retrieving the process identity for the
-          Search instance
-        * Added support for LocalSystem, LocalService and NetworkService
-      * SPUserProfileProperty
-        * Fixed issues with the User Profile properties for 2016
-      * SPUserProfileServiceAppPermissions
-        * Removed the mandatory requirement from secondary parameters
-      * SPUserProfileSyncConnection
-        * Fixed issues with the User Profile Sync connection for SharePoint
-          2016
+        * If resource specifies Central Admin webapp and Default Zone, the existing
+          AAM will be updated instead of adding a new one
+      * SPContentDatabase
+        * Fixed issue where mounting a content database which had to be upgraded
+          resulted in a reboot.
+      * SPDistributedCacheClientSettings
+        * Added the new resource
+      * SPFarmAdministrators
+        * Fixed issue where member comparisons was case sensitive. This had
+          to be case insensitive.
+      * SPManagedMetadataServiceApp
+        * Fixed issue with creating the Content Type Hub on an existing MMS
+          service app without Content Type Hub.
+      * SPManagedMetadataServiceAppDefault
+        * Fixed issue where .GetType().FullName and TypeName were not used
+          properly.
+      * SPTimerJobState
+        * Updated description of WebAppUrl parameter to make it clear that
+          N/A has to be used to specify a global timer job.
+      * SPUserProfileServiceApp
+        * Fixed issue introduced in v2.0, where the Farm Account had to have
+          local Administrator permissions for the resource to function properly.
+        * Updated resource to retrieve the Farm account from the Managed Accounts
+          instead of requiring it as a parameter.
       * SPUserProfileSyncService
-        * Added returning the FarmAccount to the Get method
-      * SPWebAppAuthentication
-        * Corrected issue where parameter validation wasn't performed correctly
-      * SPWebApplicationExtension
-        * Fixed issue with test always failing when Ensure was set to Absent
-      * SPWorkManagementServiceApp
-        * Added check for SharePoint 2016, since this functionality has been
-          removed in SharePoint 2016
-"
-
+        * Fixed issue introduced in v2.0, where the Farm Account had to have
+          local Administrator permissions for the resource to function properly.
+        * Updated resource to retrieve the Farm account from the Managed Accounts
+          instead of requiring it as a parameter.
+        * The FarmAccount parameter is deprecated and no longer required. Is ignored
+          in the code and will be removed in v3.0.
+      * SPVisioServiceApp
+        * Fixed an issue where the proxy is not properly getting created
+      "
     } # End of PSData hashtable
 
 } # End of PrivateData hashtable

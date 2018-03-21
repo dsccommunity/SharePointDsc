@@ -7,32 +7,32 @@ function Get-TargetResource
         [Parameter(Mandatory = $true)]
         [System.String]
         $Name,
-        
+
         [Parameter()]
         [System.String]
         $DatabaseServer,
-        
+
         [Parameter(Mandatory = $true)]
         [System.String]
         $WebAppUrl,
-        
+
         [Parameter()]
         [System.Boolean]
         $Enabled,
-        
+
         [Parameter()]
         [System.UInt16]
         $WarningSiteCount,
-        
+
         [Parameter()]
         [System.UInt16]
         $MaximumSiteCount,
-        
+
         [Parameter()]
         [ValidateSet("Present","Absent")]
         [System.String]
         $Ensure = "Present",
-        
+
         [Parameter()]
         [System.Management.Automation.PSCredential]
         $InstallAccount
@@ -44,7 +44,7 @@ function Get-TargetResource
                                   -Arguments $PSBoundParameters `
                                   -ScriptBlock {
         $params = $args[0]
-        
+
         $cdb = Get-SPDatabase | Where-Object -FilterScript {
             $_.GetType().FullName -eq "Microsoft.SharePoint.Administration.SPContentDatabase" -and `
             $_.Name -eq $params.Name
@@ -102,32 +102,32 @@ function Set-TargetResource
         [Parameter(Mandatory = $true)]
         [System.String]
         $Name,
-        
+
         [Parameter()]
         [System.String]
         $DatabaseServer,
-        
+
         [Parameter(Mandatory = $true)]
         [System.String]
         $WebAppUrl,
-        
+
         [Parameter()]
         [System.Boolean]
         $Enabled,
-        
+
         [Parameter()]
         [System.UInt16]
         $WarningSiteCount,
-        
+
         [Parameter()]
         [System.UInt16]
         $MaximumSiteCount,
-        
+
         [Parameter()]
         [ValidateSet("Present","Absent")]
         [System.String]
         $Ensure = "Present",
-        
+
         [Parameter()]
         [System.Management.Automation.PSCredential]
         $InstallAccount
@@ -184,7 +184,7 @@ function Set-TargetResource
                         {
                             $newParams.$($param.Key) = $param.Value
                         }
-                    
+
                         if ($param.Key -eq "MaximumSiteCount")
                         {
                             $newParams.MaxSiteCount = $param.Value
@@ -215,7 +215,7 @@ function Set-TargetResource
                     {
                         $cdbenabled = $false
                     }
-                    
+
                     if ($params.Enabled -ne $cdbenabled)
                     {
                         switch ($params.Enabled)
@@ -241,7 +241,7 @@ function Set-TargetResource
                 {
                     $cdbenabled = $false
                 }
-                
+
                 if ($params.ContainsKey("Enabled") -and $params.Enabled -ne $cdbenabled)
                 {
                     switch ($params.Enabled)
@@ -256,13 +256,13 @@ function Set-TargetResource
                         }
                     }
                  }
-                 
+
                  # Check and change site count settings
                 if ($null -ne $params.WarningSiteCount -and $params.WarningSiteCount -ne $cdb.WarningSiteCount)
                 {
                     $cdb.WarningSiteCount = $params.WarningSiteCount
                 }
-                
+
                 if ($params.MaximumSiteCount -and $params.MaximumSiteCount -ne $cdb.MaximumSiteCount)
                 {
                     $cdb.MaximumSiteCount = $params.MaximumSiteCount
@@ -280,12 +280,12 @@ function Set-TargetResource
                     {
                         $newParams.$($param.Key) = $param.Value
                     }
-                
+
                     if ($param.Key -eq "MaximumSiteCount")
                     {
                         $newParams.MaxSiteCount = $param.Value
                     }
-                    
+
                     if ($param.Key -eq "WebAppUrl")
                     {
                         $newParams.WebApplication = $param.Value
@@ -311,8 +311,9 @@ function Set-TargetResource
                 {
                     $cdbenabled = $false
                 }
-                
-                if ($params.Enabled -ne $cdbenabled)
+
+                if ($params.ContainsKey("Enabled") -eq $true -and `
+                    $params.Enabled -ne $cdbenabled)
                 {
                     switch ($params.Enabled)
                     {
@@ -350,32 +351,32 @@ function Test-TargetResource
         [Parameter(Mandatory = $true)]
         [System.String]
         $Name,
-        
+
         [Parameter()]
         [System.String]
         $DatabaseServer,
-        
+
         [Parameter(Mandatory = $true)]
         [System.String]
         $WebAppUrl,
-        
+
         [Parameter()]
         [System.Boolean]
         $Enabled,
-        
+
         [Parameter()]
         [System.UInt16]
         $WarningSiteCount,
-        
+
         [Parameter()]
         [System.UInt16]
         $MaximumSiteCount,
-        
+
         [Parameter()]
         [ValidateSet("Present","Absent")]
         [System.String]
         $Ensure = "Present",
-        
+
         [Parameter()]
         [System.Management.Automation.PSCredential]
         $InstallAccount

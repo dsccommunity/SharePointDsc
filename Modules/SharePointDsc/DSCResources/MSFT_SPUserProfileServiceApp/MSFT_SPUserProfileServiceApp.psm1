@@ -67,7 +67,7 @@ function Get-TargetResource
     $farmAccount = Invoke-SPDSCCommand -Credential $InstallAccount `
                                        -Arguments $PSBoundParameters `
                                        -ScriptBlock {
-        return Get-SPDSCFarmAccountName
+        return Get-SPDscFarmAccount
     }
 
     if ($null -ne $farmAccount)
@@ -75,24 +75,25 @@ function Get-TargetResource
         if ($PSBoundParameters.ContainsKey("InstallAccount") -eq $true)
         {
             # InstallAccount used
-            if ($InstallAccount.UserName -ne $farmAccount)
+            if ($InstallAccount.UserName -eq $farmAccount.UserName)
             {
-                throw ("Specified InstallAccount ($($InstallAccount.UserName)) isn't the Farm " + `
-                       "Account. Make sure the specified InstallAccount is the Farm Account " + `
+                throw ("Specified InstallAccount ($($InstallAccount.UserName)) is the Farm " + `
+                       "Account. Make sure the specified InstallAccount isn't the Farm Account " + `
                        "and try again")
             }
         }
-        else {
+        else
+        {
             # PSDSCRunAsCredential or System
             if (-not $Env:USERNAME.Contains("$"))
             {
                 # PSDSCRunAsCredential used
                 $localaccount = "$($Env:USERDOMAIN)\$($Env:USERNAME)"
-                if ($localaccount -ne $farmAccount)
+                if ($localaccount -eq $farmAccount.UserName)
                 {
-                    throw ("Specified PSDSCRunAsCredential ($localaccount) isn't the Farm " + `
-                           "Account. Make sure the specified PSDSCRunAsCredential is the Farm " + `
-                           "Account and try again")
+                    throw ("Specified PSDSCRunAsCredential ($localaccount) is the Farm " + `
+                           "Account. Make sure the specified PSDSCRunAsCredential isn't the " + `
+                           "Farm Account and try again")
                 }
             }
         }
@@ -111,6 +112,7 @@ function Get-TargetResource
         $nullReturn = @{
             Name = $params.Name
             Ensure = "Absent"
+            ApplicationPool = $params.ApplicationPool
         }
         if ($null -eq $serviceApps)
         {
@@ -127,8 +129,8 @@ function Get-TargetResource
         else
         {
             $databases = @{}
-            $propertyFlags = [System.Reflection.BindingFlags]::Instance `
-                             -bor [System.Reflection.BindingFlags]::NonPublic
+            $propertyFlags = [System.Reflection.BindingFlags]::Instance -bor `
+                             [System.Reflection.BindingFlags]::NonPublic
 
             $propData = $serviceApp.GetType().GetProperties($propertyFlags)
 
@@ -247,9 +249,9 @@ function Set-TargetResource
     if ($Ensure -eq "Present")
     {
         $farmAccount = Invoke-SPDSCCommand -Credential $InstallAccount `
-                                    -Arguments $PSBoundParameters `
-                                    -ScriptBlock {
-            return Get-SPDSCFarmAccountName
+                                               -Arguments $PSBoundParameters `
+                                               -ScriptBlock {
+            return Get-SPDscFarmAccount
         }
 
         if ($null -ne $farmAccount)
@@ -257,22 +259,25 @@ function Set-TargetResource
             if ($PSBoundParameters.ContainsKey("InstallAccount") -eq $true)
             {
                 # InstallAccount used
-                if ($InstallAccount.UserName -ne $farmAccount)
+                if ($InstallAccount.UserName -eq $farmAccount.UserName)
                 {
-                    throw ("Specified InstallAccount ($($InstallAccount.UserName)) isn't the Farm Account. Make sure " + `
-                           "the specified InstallAccount is the Farm Account and try again")
+                    throw ("Specified InstallAccount ($($InstallAccount.UserName)) is the Farm " + `
+                           "Account. Make sure the specified InstallAccount isn't the Farm Account " + `
+                           "and try again")
                 }
             }
-            else {
+            else
+            {
                 # PSDSCRunAsCredential or System
                 if (-not $Env:USERNAME.Contains("$"))
                 {
                     # PSDSCRunAsCredential used
                     $localaccount = "$($Env:USERDOMAIN)\$($Env:USERNAME)"
-                    if ($localaccount -ne $farmAccount)
+                    if ($localaccount -eq $farmAccount.UserName)
                     {
-                        throw ("Specified PSDSCRunAsCredential ($localaccount) isn't the Farm Account. Make sure " + `
-                               "the specified PSDSCRunAsCredential is the Farm Account and try again")
+                        throw ("Specified PSDSCRunAsCredential ($localaccount) is the Farm " + `
+                               "Account. Make sure the specified PSDSCRunAsCredential isn't the " + `
+                               "Farm Account and try again")
                     }
                 }
             }
@@ -284,20 +289,24 @@ function Set-TargetResource
 
         Write-Verbose -Message "Creating user profile service application $Name"
 
-        # Add the InstallAccount to the local Administrators group, if it's not already there
-        $isLocalAdmin = Test-SPDSCUserIsLocalAdmin -UserName $farmAccount
+        # Add the FarmAccount to the local Administrators group, if it's not already there
+        $isLocalAdmin = Test-SPDSCUserIsLocalAdmin -UserName $farmAccount.UserName
 
         if (!$isLocalAdmin)
         {
-            Add-SPDSCUserToLocalAdmin -UserName $farmAccount
+            Write-Verbose -Message "Adding farm account to Local Administrators group"
+            Add-SPDSCUserToLocalAdmin -UserName $farmAccount.UserName
 
-            # Cycle the Timer Service so that it picks up the local Admin token
+            # Cycle the Timer Service and flush Kerberos tickets
+            # so that it picks up the local Admin token
             Restart-Service -Name "SPTimerV4"
+
+            Clear-SPDscKerberosToken -Account $farmAccount.UserName
         }
 
-        $result = Invoke-SPDSCCommand -Credential $InstallAccount `
-                                      -Arguments $PSBoundParameters `
-                                      -ScriptBlock {
+        $null = Invoke-SPDSCCommand -Credential $FarmAccount `
+                                    -Arguments $PSBoundParameters `
+                                    -ScriptBlock {
             $params = $args[0]
 
             $updateEnableNetBIOS = $false
@@ -377,7 +386,14 @@ function Set-TargetResource
         # Remove the InstallAccount from the local Administrators group, if it was added above
         if (!$isLocalAdmin)
         {
-            Remove-SPDSCUserToLocalAdmin -UserName $farmAccount
+            Write-Verbose -Message "Removing farm account from Local Administrators group"
+            Remove-SPDSCUserToLocalAdmin -UserName $farmAccount.UserName
+
+            # Cycle the Timer Service and flush Kerberos tickets
+            # so that it picks up the local Admin token
+            Restart-Service -Name "SPTimerV4"
+
+            Clear-SPDscKerberosToken -Account $farmAccount.UserName
         }
     }
 

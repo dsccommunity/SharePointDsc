@@ -164,17 +164,30 @@ function Set-TargetResource
                     # URL not configured on WebApp
                    if ($null -eq $urlAam)
                     {
-                        # urlAAM not found, so it is safe to create AAM on specified zone
-                        $cmdParams = @{
-                            WebApplication = $webapp
-                            Url = $params.Url
-                            Zone = $params.Zone
-                        }
-                        if (($params.ContainsKey("Internal") -eq $true))
+                        # urlAAM not found, so it is safe to create AAM on specified zone (or modify existing if CA)
+                        # If this is Central Admin and Default zone, we want to update the existing AAM instead of adding a new one
+                        if ($webapp.IsAdministrationWebApplication -and $params.Zone -eq "Default")
                         {
-                            $cmdParams.Add("Internal", $params.Internal)
+                            # web app is Central Administration and Default zone
+
+                            # If CA has more than 1 AAM in Default zone, Set-SPAlternateUrl should consolidate into 1
+                            # For additional CA servers, use other zones instead of Default
+
+                            Set-SPAlternateURL -Identity $webApp.Url -Url $params.Url -Zone $params.Zone | Out-Null
                         }
-                        New-SPAlternateURL @cmdParams | Out-Null
+                        else
+                        {
+                            $cmdParams = @{
+                                WebApplication = $webapp
+                                Url = $params.Url
+                                Zone = $params.Zone
+                            }
+                            if (($params.ContainsKey("Internal") -eq $true))
+                            {
+                                $cmdParams.Add("Internal", $params.Internal)
+                            }
+                            New-SPAlternateURL @cmdParams | Out-Null
+                        }
                     }
                     else
                     {
