@@ -4,14 +4,17 @@
 
 * SPTrustedIdentityTokenIssuerProviderRealms
   * Added the resource
-* SPDistributedCacheClientSettings
-  * Added the new resource
+
+## 2.2
+
 * SPAlternateURL
   * If resource specifies Central Admin webapp and Default Zone, the existing
     AAM will be updated instead of adding a new one
 * SPContentDatabase
   * Fixed issue where mounting a content database which had to be upgraded
     resulted in a reboot.
+* SPDistributedCacheClientSettings
+  * Added the new resource
 * SPFarmAdministrators
   * Fixed issue where member comparisons was case sensitive. This had
     to be case insensitive.

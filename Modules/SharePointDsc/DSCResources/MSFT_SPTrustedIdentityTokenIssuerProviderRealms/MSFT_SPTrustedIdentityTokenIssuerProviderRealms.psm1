@@ -6,18 +6,40 @@ function Get-TargetResource
     (
         [Parameter(Mandatory = $true)]
         [string]$IssuerName,
+
         [Parameter()]
-        [Microsoft.Management.Infrastructure.CimInstance[]]$ProviderRealms,
+        [Microsoft.Management.Infrastructure.CimInstance[]]
+        $ProviderRealms,
+
         [Parameter()]
-        [Microsoft.Management.Infrastructure.CimInstance[]]$ProviderRealmsToInclude,
+        [Microsoft.Management.Infrastructure.CimInstance[]]
+        $ProviderRealmsToInclude,
+
         [Parameter()]
-        [Microsoft.Management.Infrastructure.CimInstance[]]$ProviderRealmsToExclude,
+        [Microsoft.Management.Infrastructure.CimInstance[]]
+        $ProviderRealmsToExclude,
+
         [Parameter()]
         [ValidateSet("Present", "Absent")]
-        [String]$Ensure = "Present",
+        [String]
+        $Ensure = "Present",
+
         [Parameter()]
-        [System.Management.Automation.PSCredential]$InstallAccount
+        [System.Management.Automation.PSCredential]
+        $InstallAccount
     )
+
+    if ($ProviderRealms.Count -gt 0 -and ($ProviderRealmsToInclude.Count -gt 0 -or $ProviderRealmsToExclude.Count -gt 0)) 
+    {
+        throw ("Cannot use the ProviderRealms parameter together with the " + `
+               "ProviderRealmsToInclude or ProviderRealmsToExclude parameters")
+    }
+
+    if ($ProviderRealms.Count -eq 0 -and $ProviderRealmsToInclude.Count -eq 0 -and $ProviderRealmsToExclude.Count -eq 0) 
+    {
+        throw ("At least one of the following parameters must be specified: " + `
+               "ProviderRealms, ProviderRealmsToInclude, ProviderRealmsToExclude")
+    }
 
     Write-Verbose -Message "Getting SPTrustedIdentityTokenIssuer ProviderRealms"
 
@@ -98,18 +120,29 @@ function Set-TargetResource
     param
     (
         [Parameter(Mandatory = $true)]
-        [string]$IssuerName,
+        [string]
+        $IssuerName,
+
         [Parameter()]
-        [Microsoft.Management.Infrastructure.CimInstance[]]$ProviderRealms,
+        [Microsoft.Management.Infrastructure.CimInstance[]]
+        $ProviderRealms,
+
         [Parameter()]
-        [Microsoft.Management.Infrastructure.CimInstance[]]$ProviderRealmsToInclude,
+        [Microsoft.Management.Infrastructure.CimInstance[]]
+        $ProviderRealmsToInclude,
+
         [Parameter()]
-        [Microsoft.Management.Infrastructure.CimInstance[]]$ProviderRealmsToExclude,
+        [Microsoft.Management.Infrastructure.CimInstance[]]
+        $ProviderRealmsToExclude,
+
         [Parameter()]
         [ValidateSet("Present", "Absent")]
-        [String]$Ensure = "Present",
+        [String]
+        $Ensure = "Present",
+
         [Parameter()]
-        [System.Management.Automation.PSCredential]$InstallAccount
+        [System.Management.Automation.PSCredential]
+        $InstallAccount
     )
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
@@ -148,18 +181,29 @@ function Test-TargetResource
     param
     (
         [Parameter(Mandatory = $true)]
-        [string]$IssuerName,
+        [string]
+        $IssuerName,
+
         [Parameter()]
-        [Microsoft.Management.Infrastructure.CimInstance[]]$ProviderRealms,
+        [Microsoft.Management.Infrastructure.CimInstance[]]
+        $ProviderRealms,
+
         [Parameter()]
-        [Microsoft.Management.Infrastructure.CimInstance[]]$ProviderRealmsToInclude,
+        [Microsoft.Management.Infrastructure.CimInstance[]]
+        $ProviderRealmsToInclude,
+
         [Parameter()]
-        [Microsoft.Management.Infrastructure.CimInstance[]]$ProviderRealmsToExclude,
+        [Microsoft.Management.Infrastructure.CimInstance[]]
+        $ProviderRealmsToExclude,
+
         [Parameter()]
         [ValidateSet("Present", "Absent")]
-        [String]$Ensure = "Present",
+        [String]
+        $Ensure = "Present",
+
         [Parameter()]
-        [System.Management.Automation.PSCredential]$InstallAccount
+        [System.Management.Automation.PSCredential]
+        $InstallAccount
     )
 
     Write-Verbose -Message "Testing SPTrustedIdentityTokenIssuer provider realms"
@@ -179,27 +223,19 @@ function Get-ProviderRealmsStatus()
     (
         [Parameter()]
         $currentRealms = $null,
+
         [Parameter()]
         $desiredRealms = $null,
+
         [Parameter()]
         $includeRealms = $null,
+
         [Parameter()]
         $excludeRealms = $null,
+
         [Parameter()]
         $Ensure = "Present"
     )
-
-    if ($desiredRealms.Count -gt 0 -and ($includeRealms.Count -gt 0 -or $excludeRealms.Count -gt 0)) 
-    {
-        throw ("Cannot use the ProviderRealms parameter together with the " + `
-               "ProviderRealmsToInclude or ProviderRealmsToExclude parameters")
-    }
-
-    if ($desiredRealms.Count -eq 0 -and $includeRealms.Count -eq 0 -and $excludeRealms.Count -eq 0) 
-    {
-        throw ("At least one of the following parameters must be specified: " + `
-               "ProviderRealms, ProviderRealmsToInclude, ProviderRealmsToExclude")
-    }
 
     $res = $null
     $res = New-Object PsObject
@@ -314,6 +350,11 @@ function Get-ProviderRealmsStatus()
         if ($includeRealms.Count -gt 0 -or $excludeRealms.Count -gt 0)
         {
             throw ("Parameters ProviderRealmsToInclude and/or ProviderRealmsToExclude can not be used together with Ensure='Absent' use ProviderRealms instead")
+        }
+
+        if ($desiredRealms.Count -gt 0)
+        {
+            throw ("Parameter ProviderRealms is empty or Null")
         }
 
         $eqBoth = $desiredRealms.Keys | Where-Object {
