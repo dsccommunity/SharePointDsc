@@ -22,6 +22,10 @@ function Get-TargetResource
 
         [Parameter()]
         [System.String]
+        $MySiteManagedPath,
+
+        [Parameter()]
+        [System.String]
         $ProfileDBName,
 
         [Parameter()]
@@ -160,11 +164,26 @@ function Get-TargetResource
                     $proxyName = $serviceAppProxy.Name
                 }
             }
+            $upMySiteLocation = $null
+            $upMySiteManagedPath = $null
+            try {
+                $ca = [Microsoft.SharePoint.Administration.SPAdministrationWebApplication]::Local
+                $caSite = $ca.Sites[0];
+                $serviceContext = Get-SPServiceContext($caSite)
+                $userProfileManager = new-object Microsoft.Office.Server.UserProfiles.UserProfileManager($serviceContext)
+                $upMySiteLocation = $userProfileManager.MySiteHostUrl
+                $upMySiteManagedPath = $userProfileManager.PersonalSiteInclusion
+            }
+            catch {
+                throw "The provided My Site Location is not a valid My Site Host."
+            }
+
             return @{
                 Name               = $serviceApp.DisplayName
                 ProxyName          = $proxyName
                 ApplicationPool    = $serviceApp.ApplicationPool.Name
-                MySiteHostLocation = $params.MySiteHostLocation
+                MySiteHostLocation = $upMySiteLocation
+                MySiteManagedPath  = $upMySiteManagedPath
                 ProfileDBName      = $databases.ProfileDatabase.Name
                 ProfileDBServer    = $databases.ProfileDatabase.NormalizedDataSource
                 SocialDBName       = $databases.SocialDatabase.Name
@@ -201,6 +220,10 @@ function Set-TargetResource
         [Parameter()]
         [System.String]
         $MySiteHostLocation,
+
+        [Parameter()]
+        [System.String]
+        $MySiteManagedPath,
 
         [Parameter()]
         [System.String]
@@ -379,7 +402,6 @@ function Set-TargetResource
                 {
                     $app.NoILMUsed = $NoILMUsed
                 }
-                $app.Update()
             }
         }
 
@@ -446,6 +468,10 @@ function Test-TargetResource
         [Parameter()]
         [System.String]
         $MySiteHostLocation,
+
+        [Parameter()]
+        [System.String]
+        $MySiteManagedPath,
 
         [Parameter()]
         [System.String]
