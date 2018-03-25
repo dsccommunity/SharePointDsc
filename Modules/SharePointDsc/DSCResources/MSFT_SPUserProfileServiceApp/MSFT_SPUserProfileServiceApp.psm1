@@ -167,7 +167,7 @@ function Get-TargetResource
             $upMySiteLocation = $null
             $upMySiteManagedPath = $null
             try {
-                $ca = [Microsoft.SharePoint.Administration.SPAdministrationWebApplication]::Local
+                $ca = Get-SPWebApplication -IncludeCentralAdministration | Where-Object {$_.IsAdministrationWebApplication}
                 $caSite = $ca.Sites[0];
                 $serviceContext = Get-SPServiceContext($caSite)
                 $userProfileManager = new-object Microsoft.Office.Server.UserProfiles.UserProfileManager($serviceContext)
@@ -402,6 +402,7 @@ function Set-TargetResource
                 {
                     $app.NoILMUsed = $NoILMUsed
                 }
+                $app.Update()
             }
         }
 
