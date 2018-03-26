@@ -170,7 +170,7 @@ function Get-TargetResource
                 $ca = Get-SPWebApplication -IncludeCentralAdministration | Where-Object -FilterScript {$_.IsAdministrationWebApplication}
                 $caSite = $ca.Sites[0]
                 $serviceContext = Get-SPServiceContext($caSite)
-                $userProfileManager = new-object Microsoft.Office.Server.UserProfiles.UserProfileManager($serviceContext)
+                $userProfileManager = New-Object Microsoft.Office.Server.UserProfiles.UserProfileManager($serviceContext)
                 $upMySiteLocation = $userProfileManager.MySiteHostUrl
                 $upMySiteManagedPath = $userProfileManager.PersonalSiteInclusion
             }
