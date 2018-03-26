@@ -167,8 +167,8 @@ function Get-TargetResource
             $upMySiteLocation = $null
             $upMySiteManagedPath = $null
             try {
-                $ca = Get-SPWebApplication -IncludeCentralAdministration | Where-Object {$_.IsAdministrationWebApplication}
-                $caSite = $ca.Sites[0];
+                $ca = Get-SPWebApplication -IncludeCentralAdministration | Where-Object -FilterScript {$_.IsAdministrationWebApplication}
+                $caSite = $ca.Sites[0]
                 $serviceContext = Get-SPServiceContext($caSite)
                 $userProfileManager = new-object Microsoft.Office.Server.UserProfiles.UserProfileManager($serviceContext)
                 $upMySiteLocation = $userProfileManager.MySiteHostUrl
