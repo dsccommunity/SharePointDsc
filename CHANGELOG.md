@@ -4,6 +4,8 @@
 
 * SPTrustedIdentityTokenIssuerProviderRealms
   * Added the resource
+* SPUserProfileServiceApp
+  * Now supported specifying the host Managed path, and properly sets the host.
 
 ## 2.2
 

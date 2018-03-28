@@ -41,37 +41,38 @@ function Get-TargetResource
                "ProviderRealms, ProviderRealmsToInclude, ProviderRealmsToExclude")
     }
 
+    $paramRealms = @{ }
+    $includeRealms = @{ }
+    $excludeRealms = @{ }
+
+    if ($ProviderRealms.Count -gt 0)
+    {
+        $ProviderRealms | ForEach-Object {
+            $paramRealms.Add("$([System.Uri]$_.RealmUrl)", "$($_.RealmUrn)")
+        }
+    }
+
+    if ($ProviderRealmsToInclude.Count -gt 0)
+    {
+        $ProviderRealmsToInclude | ForEach-Object {
+            $includeRealms.Add("$([System.Uri]$_.RealmUrl)", "$($_.RealmUrn)")
+        }
+    }
+
+    if ($ProviderRealmsToExclude.Count -gt 0)
+    {
+        $ProviderRealmsToExclude | ForEach-Object {
+            $excludeRealms.Add("$([System.Uri]$_.RealmUrl)", "$($_.RealmUrn)")
+        }
+    }
+
     Write-Verbose -Message "Getting SPTrustedIdentityTokenIssuer ProviderRealms"
 
     $result = Invoke-SPDSCCommand -Credential $InstallAccount `
                                   -Arguments $PSBoundParameters `
                                   -ScriptBlock {
         $params = $args[0]
-        $paramRealms = @{ }
-        $includeRealms = @{ }
-        $excludeRealms = @{ }
         $currentRealms = @{ }
-
-        if ($params.ProviderRealms.Count -gt 0)
-        {
-            $params.ProviderRealms | ForEach-Object {
-                $paramRealms.Add("$([System.Uri]$_.RealmUrl)", "$($_.RealmUrn)")
-            }
-        }
-
-        if (!!$params.ProviderRealmsToInclude.Count -gt 0)
-        {
-            $params.ProviderRealmsToInclude | ForEach-Object {
-                $includeRealms.Add("$([System.Uri]$_.RealmUrl)", "$($_.RealmUrn)")
-            }
-        }
-
-        if ($params.ProviderRealmsToExclude.Count -gt 0)
-        {
-            $params.ProviderRealmsToExclude | ForEach-Object {
-                $excludeRealms.Add("$([System.Uri]$_.RealmUrl)", "$($_.RealmUrn)")
-            }
-        }
 
         $spTrust = Get-SPTrustedIdentityTokenIssuer -Identity $params.IssuerName `
                                                     -ErrorAction SilentlyContinue
@@ -87,28 +88,19 @@ function Get-TargetResource
                 $currentRealms.Add("$($_.ToString())", "$($spTrust.ProviderRealms[$_])")
             }
         }
-
-        return @{
-            IssuerName = $params.IssuerName
-            ProviderRealms = $currentRealms
-            ProviderRealmsToInclude = $includeRealms
-            ProviderRealmsToExclude = $excludeRealms
-            CurrentRealms = $currentRealms
-            DesiredRealms = $paramRealms
-            Ensure = $params.Ensure
-        }
+        return $currentRealms
     }
 
-    $currentStatus = Get-ProviderRealmsStatus -currentRealms $result.ProviderRealms -desiredRealms $result.DesiredRealms `
-                                                  -includeRealms $result.ProviderRealmsToInclude -excludeRealms $result.ProviderRealmsToExclude `
-                                                  -Ensure $result.Ensure
+    $currentStatus = Get-ProviderRealmsStatus -currentRealms $result -desiredRealms $paramRealms `
+                                                  -includeRealms $includeRealms -excludeRealms $excludeRealms `
+                                                  -Ensure $Ensure
 
     return @{
-            IssuerName = $result.IssuerName
-            ProviderRealms = $result.ProviderRealms
-            ProviderRealmsToInclude = $result.ProviderRealmsToInclude
-            ProviderRealmsToExclude = $result.ProviderRealmsToExclude
-            CurrentRealms = $result.CurrentRealms
+            IssuerName = $IssuerName
+            ProviderRealms = $paramRealms
+            ProviderRealmsToInclude = $includeRealms
+            ProviderRealmsToExclude = $excludeRealms
+            CurrentRealms = $result
             RealmsToAdd = $currentStatus.NewRealms
             Ensure = $currentStatus.CurrentStatus
         }
@@ -146,28 +138,29 @@ function Set-TargetResource
     )
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
-    $PSBoundParameters.Add('CurrentValues', $CurrentValues)
 
-    Write-Verbose -Message "Setting SPTrustedIdentityTokenIssuer provider realms"
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
-                                  -Arguments $PSBoundParameters `
-                                  -ScriptBlock {
-        $params = $args[0]
+    if($CurrentValues.RealmsToAdd.Count -gt 0)
+    {
+        $PSBoundParameters.Add('RealmsToAdd', $CurrentValues.RealmsToAdd)
 
-        if ($params.CurrentValues.RealmsToAdd.Count -gt 0)
-        {
+        Write-Verbose -Message "Setting SPTrustedIdentityTokenIssuer provider realms"
+        $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+                                      -Arguments $PSBoundParameters `
+                                      -ScriptBlock {
+            $params = $args[0]
+
             $trust = Get-SPTrustedIdentityTokenIssuer -Identity $params.IssuerName `
-                                  -ErrorAction SilentlyContinue
+                                    -ErrorAction SilentlyContinue
 
             if ($trust -eq $null)
             {
-                 throw ("SPTrustedIdentityTokenIssuer '$($params.IssuerName)' not found")
+                    throw ("SPTrustedIdentityTokenIssuer '$($params.IssuerName)' not found")
             }
 
             $trust.ProviderRealms.Clear()
-            $params.CurrentValues.RealmsToAdd.Keys | ForEach-Object {
-                Write-Verbose "Setting Realm: $([System.Uri]$_)=$($params.CurrentValues.RealmsToAdd[$_])"
-                $trust.ProviderRealms.Add([System.Uri]$_, $params.CurrentValues.RealmsToAdd[$_])
+            $params.RealmsToAdd.Keys | ForEach-Object {
+                Write-Verbose "Setting Realm: $([System.Uri]$_)=$($params.RealmsToAdd[$_])"
+                $trust.ProviderRealms.Add([System.Uri]$_, $params.RealmsToAdd[$_])
             }
             $trust.Update()
         }
@@ -352,7 +345,7 @@ function Get-ProviderRealmsStatus()
             throw ("Parameters ProviderRealmsToInclude and/or ProviderRealmsToExclude can not be used together with Ensure='Absent' use ProviderRealms instead")
         }
 
-        if ($desiredRealms.Count -gt 0)
+        if ($desiredRealms.Count -eq 0)
         {
             throw ("Parameter ProviderRealms is empty or Null")
         }
