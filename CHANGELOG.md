@@ -1,6 +1,7 @@
 # Change log for SharePointDsc
 
 ## Unreleased
+
 * All Resources
   * Added information about the Resource Type in each ReadMe.md files.
 * SPTrustedIdentityTokenIssuerProviderRealms
