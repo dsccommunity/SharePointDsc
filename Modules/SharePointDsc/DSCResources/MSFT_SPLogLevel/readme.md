@@ -1,3 +1,7 @@
+# Type
+
+Distributed
+
 # Description
 
 This resource is used to change the minimum severity of events captured in

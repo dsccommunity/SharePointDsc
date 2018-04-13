@@ -1,3 +1,7 @@
+# Type
+
+Distributed
+
 # Description
 
 This resource will ensure a managed account is provisioned in to the SharePoint

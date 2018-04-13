@@ -1,3 +1,7 @@
+# Type
+
+Distributed
+
 # Description
 
 This resource will ensure that a specific site collection is marked as the app

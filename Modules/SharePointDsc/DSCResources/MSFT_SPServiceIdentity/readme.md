@@ -1,3 +1,7 @@
+# Type
+
+Distributed
+
 # Description
 
 This resource is used to specify a managed account to be used to run a service instance.

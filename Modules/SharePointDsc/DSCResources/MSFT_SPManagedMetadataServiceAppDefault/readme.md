@@ -1,3 +1,7 @@
+# Type
+
+Distributed
+
 # Description
 
 Using several managed metadata service instances in a farm requires some

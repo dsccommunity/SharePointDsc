@@ -1,3 +1,7 @@
+# Type
+
+Distributed
+
 # Description
 
 This resource is used to configure the People Picker settings for a web

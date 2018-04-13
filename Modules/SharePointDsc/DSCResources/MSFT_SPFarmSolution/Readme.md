@@ -1,3 +1,7 @@
+# Type
+
+Distributed
+
 # Description
 
 This resource is used to make sure that a specific farm solution is either

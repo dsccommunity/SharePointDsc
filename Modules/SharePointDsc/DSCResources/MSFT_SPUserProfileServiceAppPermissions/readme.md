@@ -1,3 +1,7 @@
+# Type
+
+Distributed
+
 # Description
 
 This resource will apply permissions to a user profile service application.

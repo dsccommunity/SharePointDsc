@@ -1,3 +1,7 @@
+# Type
+
+Common
+
 # Description
 
 This resource is used to install the SharePoint binaries. The BinaryDir

@@ -1,3 +1,7 @@
+# Type
+
+Distributed
+
 # Description
 
 This resource is used to manage the "additional settings" for a PWA instance

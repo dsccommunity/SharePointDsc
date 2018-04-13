@@ -1,3 +1,7 @@
+# Type
+
+Distributed
+
 # Description
 
 This resource is responsible for managing the search crawl rules in the search

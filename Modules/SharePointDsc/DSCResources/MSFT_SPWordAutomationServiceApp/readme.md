@@ -1,3 +1,7 @@
+# Type
+
+Distributed
+
 # Description
 
 The resource is able to provision, unprovision and configure the Word

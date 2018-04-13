@@ -1,3 +1,7 @@
+# Type
+
+Distributed
+
 # Description
 
 This resource will provision an instance of the user profile service to the

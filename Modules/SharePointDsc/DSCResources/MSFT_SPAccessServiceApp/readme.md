@@ -1,3 +1,7 @@
+# Type
+
+Distributed
+
 # Description
 
 This resource is responsible for creating Access Services Application instances

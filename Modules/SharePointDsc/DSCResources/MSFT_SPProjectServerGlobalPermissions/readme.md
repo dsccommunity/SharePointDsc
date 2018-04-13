@@ -1,3 +1,7 @@
+# Type
+
+Distributed
+
 # Description
 
 This resource allows you to enforce global permissions in a PWA site for a

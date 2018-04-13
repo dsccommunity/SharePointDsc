@@ -1,3 +1,7 @@
+# Type
+
+Distributed
+
 # Description
 
 This resource is responsible for managing the search crawl impact rules in the

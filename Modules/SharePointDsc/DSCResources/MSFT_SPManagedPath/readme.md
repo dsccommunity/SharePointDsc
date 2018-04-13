@@ -1,3 +1,7 @@
+# Type
+
+Distributed
+
 # Description
 
 This resource is responsible for creating managed paths associated with a

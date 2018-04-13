@@ -1,3 +1,7 @@
+# Type
+
+Distributed
+
 # Description
 
 This resource will provision a site collection to the current farm, based on

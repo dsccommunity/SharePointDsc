@@ -1,3 +1,7 @@
+# Type
+
+Specific
+
 # Description
 
 This resource is responsible for ensuring that the user profile sync service

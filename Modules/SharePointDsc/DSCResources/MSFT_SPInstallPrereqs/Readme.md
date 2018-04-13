@@ -1,3 +1,7 @@
+# Type
+
+Common
+
 # Description
 
 This resource is responsible for ensuring the installation of all SharePoint

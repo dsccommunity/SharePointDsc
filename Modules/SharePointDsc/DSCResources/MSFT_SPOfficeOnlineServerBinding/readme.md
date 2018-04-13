@@ -1,3 +1,7 @@
+# Type
+
+Distributed
+
 # Description
 
 This resource will create a binding to an Office Online Server (formerly known

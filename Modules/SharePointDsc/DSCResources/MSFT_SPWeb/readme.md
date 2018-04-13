@@ -1,3 +1,7 @@
+# Type
+
+Distributed
+
 # Description
 
 This resource will provision a SPWeb based on the settings that are passed

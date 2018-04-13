@@ -1,3 +1,7 @@
+# Type
+
+Common
+
 # Description
 
 This resource is used to perform the update step of installing SharePoint

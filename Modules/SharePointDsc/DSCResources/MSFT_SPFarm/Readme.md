@@ -1,3 +1,7 @@
+# Type
+
+Common
+
 # Description
 
 This resource is used to create a new SharePoint farm and allow servers to

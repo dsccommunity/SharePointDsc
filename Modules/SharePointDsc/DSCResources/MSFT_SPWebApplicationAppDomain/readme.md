@@ -1,3 +1,7 @@
+# Type
+
+Distributed
+
 # Description
 
 This resource will configure the App Domain at a specific zone for the given

@@ -1,3 +1,7 @@
+# Type
+
+Utility
+
 # Description
 
 This resource is used to perform the upgrade step of installing SharePoint

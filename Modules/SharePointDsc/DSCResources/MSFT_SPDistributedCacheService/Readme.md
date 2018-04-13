@@ -1,3 +1,7 @@
+# Type
+
+Specific
+
 # Description
 
 This resource is responsible for provisioning the distributed cache to the

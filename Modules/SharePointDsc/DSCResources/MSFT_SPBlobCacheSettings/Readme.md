@@ -1,3 +1,7 @@
+# Type
+
+Specific
+
 # Description
 
 This resource is used to configure the Blob Cache settings for a web

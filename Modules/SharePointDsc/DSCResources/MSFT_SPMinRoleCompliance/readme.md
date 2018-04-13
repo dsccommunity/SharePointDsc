@@ -1,3 +1,7 @@
+# Type
+
+Utility
+
 # Description
 
 This resource will help manage compliance of MinRole based servers. Each time

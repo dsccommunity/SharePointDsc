@@ -1,3 +1,7 @@
+# Type
+
+Distributed
+
 # Description
 
 This resource provisions an instance of the state service in to the local farm.

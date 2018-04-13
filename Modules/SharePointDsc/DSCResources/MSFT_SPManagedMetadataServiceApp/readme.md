@@ -1,3 +1,7 @@
+# Type
+
+Distributed
+
 # Description
 
 Creates a managed metadata service application. The application pool property

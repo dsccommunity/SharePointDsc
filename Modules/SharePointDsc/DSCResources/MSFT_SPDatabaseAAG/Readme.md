@@ -1,3 +1,7 @@
+# Type
+
+Distributed
+
 # Description
 
 This resource will allow specifying which SQL Server AlwaysOn Availability

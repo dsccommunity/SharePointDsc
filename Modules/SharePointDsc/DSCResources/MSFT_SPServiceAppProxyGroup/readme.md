@@ -1,3 +1,7 @@
+# Type
+
+Distributed
+
 # Description
 
 This resource is used to manage SharePoint Service Application Proxy Groups.

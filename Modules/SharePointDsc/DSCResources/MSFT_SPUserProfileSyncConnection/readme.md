@@ -1,3 +1,7 @@
+# Type
+
+Distributed
+
 # Description
 
 This resource will ensure a specifc user profile sync connection

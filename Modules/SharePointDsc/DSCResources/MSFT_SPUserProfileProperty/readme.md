@@ -1,3 +1,7 @@
+# Type
+
+Distributed
+
 # Description
 
 This resource will create a property in a user profile service application. It

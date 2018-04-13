@@ -1,3 +1,7 @@
+# Type
+
+Distributed
+
 # Description
 
 This resource will provision a state service app to the local farm. Specify
