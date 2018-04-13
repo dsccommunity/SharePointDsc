@@ -1,8 +1,6 @@
-# Type
-
-Distributed
-
 # Description
+
+**Type:** Distributed
 
 This resource is used to define an alternate access mapping URL for a specified
 web application. These can be assigned to specific zones for each web

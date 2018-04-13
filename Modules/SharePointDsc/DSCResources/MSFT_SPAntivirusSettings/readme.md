@@ -1,8 +1,6 @@
-# Type
-
-Distributed
-
 # Description
+
+**Type:** Distributed
 
 This resource is used to set the global antivirus settings for the local farm.
 These settings will be used to control the behavior of an external anti-virus

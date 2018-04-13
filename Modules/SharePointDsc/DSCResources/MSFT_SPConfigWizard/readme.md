@@ -1,8 +1,6 @@
-# Type
-
-Utility
-
 # Description
+
+**Type:** Utility
 
 This resource is used to perform the upgrade step of installing SharePoint
 updates, like Cumulative Updates, Service Packs and Language Packs. The

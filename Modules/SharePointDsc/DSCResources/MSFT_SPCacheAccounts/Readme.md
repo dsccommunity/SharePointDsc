@@ -1,8 +1,6 @@
-# Type
-
-Distributed
-
 # Description
+
+**Type:** Distributed
 
 This resource is used to set the "super user" and "super reader" cache accounts
 for the specified web application object (as described in the TechNet article

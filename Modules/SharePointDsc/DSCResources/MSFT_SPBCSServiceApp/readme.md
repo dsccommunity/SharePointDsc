@@ -1,8 +1,6 @@
-# Type
-
-Distributed
-
 # Description
+
+**Type:** Distributed
 
 This resource is used to provision and manage an instance of the Business
 Connectivity Services Service Application. It will identify an instance

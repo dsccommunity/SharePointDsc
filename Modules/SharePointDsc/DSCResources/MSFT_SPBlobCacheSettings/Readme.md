@@ -1,8 +1,6 @@
-# Type
-
-Specific
-
 # Description
+
+**Type:** Specific
 
 This resource is used to configure the Blob Cache settings for a web
 application.
