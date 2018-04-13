@@ -1,8 +1,6 @@
-# Type
-
-Distributed
-
 # Description
+
+**Type:** Distributed
 
 This resource is used to add and remove Content Databases to web applications
 and configure these databases.

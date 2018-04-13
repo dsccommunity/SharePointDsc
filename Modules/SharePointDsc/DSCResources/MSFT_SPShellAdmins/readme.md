@@ -1,8 +1,6 @@
-# Type
-
-Distributed
-
 # Description
+
+**Type:** Distributed
 
 This resource is used to manage the users with Shell Admin permissions. There
 are a number of approaches to how this can be implemented. The "Members"

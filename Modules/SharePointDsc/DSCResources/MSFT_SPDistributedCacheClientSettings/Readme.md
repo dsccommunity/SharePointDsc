@@ -1,8 +1,6 @@
-# Type
-
-Distributed
-
 # Description
+
+**Type:** Distributed
 
 This resource is responsible for configuring the distributed cache client
 settings. It only accepts Ensure='Present' as a key. The resource can

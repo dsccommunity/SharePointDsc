@@ -1,8 +1,6 @@
-# Type
-
-Distributed
-
 # Description
+
+**Type:** Distributed
 
 This resource is used to manage the sharing security settings of a specific
 service application. There are a number of approaches to how this can be

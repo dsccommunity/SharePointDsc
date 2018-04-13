@@ -1,8 +1,6 @@
-# Type
-
-Distributed
-
 # Description
+
+**Type:** Distributed
 
 This resource is responsible for provisioning the search service application.
 The current version lets you specify the database name and server, as well as

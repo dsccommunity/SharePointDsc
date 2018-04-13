@@ -1,8 +1,6 @@
-# Type
-
-Distributed
-
 # Description
+
+**Type:** Distributed
 
 This resource is responsible for creating search indexes. It works by creating
 the index topology components and updating the topology from the server that

@@ -1,8 +1,6 @@
-# Type
-
-Distributed
-
 # Description
+
+**Type:** Distributed
 
 This resource will ensure a managed account is provisioned in to the SharePoint
 farm. The Account object specific the credential to store (including username

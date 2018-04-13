@@ -1,8 +1,6 @@
-# Type
-
-Specific
-
 # Description
+
+**Type:** Specific
 
 This resource is responsible for provisioning the distributed cache to the
 service it runs on. This is required in your farm on at least one server (as

@@ -1,8 +1,6 @@
-# Type
-
-Common
-
 # Description
+
+**Type:** Common
 
 This resource is used to create a new SharePoint farm and allow servers to
 join that farm. It will detect the presence of the configuration database

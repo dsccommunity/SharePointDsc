@@ -1,8 +1,6 @@
-# Type
-
-Distributed
-
 # Description
+
+**Type:** Distributed
 
 This resource is used to set the SharePoint Designer settings for the local
 farm or site collections. These settings will be used to control if users are

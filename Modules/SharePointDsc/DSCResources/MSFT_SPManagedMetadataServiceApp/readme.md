@@ -1,8 +1,6 @@
-# Type
-
-Distributed
-
 # Description
+
+**Type:** Distributed
 
 Creates a managed metadata service application. The application pool property
 specifies which application pool it should use, and will reset the application

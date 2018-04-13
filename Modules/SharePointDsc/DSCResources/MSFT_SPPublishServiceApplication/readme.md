@@ -1,8 +1,6 @@
-# Type
-
-Distributed
-
 # Description
+
+**Type:** Distributed
 
 This resource is used to specify if a specific service application should be
 published (Ensure = "Present") or not published (Ensure = "Absent") on the

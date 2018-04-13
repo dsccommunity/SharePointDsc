@@ -1,8 +1,6 @@
-# Type
-
-Distributed
-
 # Description
+
+**Type:** Distributed
 
 This resource is used to specify a managed account to be used to run a service instance.
 You can also specify LocalService, LocalSystem or NetworkService as ManagedAccount.

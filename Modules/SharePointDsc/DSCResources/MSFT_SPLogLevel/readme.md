@@ -1,8 +1,6 @@
-# Type
-
-Distributed
-
 # Description
+
+**Type:** Distributed
 
 This resource is used to change the minimum severity of events captured in
 the trace logs (ULS logs) and the Windows event logs. Settings can be changed

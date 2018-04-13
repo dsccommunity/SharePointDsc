@@ -1,8 +1,6 @@
-# Type
-
-Distributed
-
 # Description
+
+**Type:** Distributed
 
 This resource will allow specifying which SQL Server AlwaysOn Availability
 group a resource should be in. This resource does not configure the

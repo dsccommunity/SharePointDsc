@@ -1,8 +1,6 @@
-# Type
-
-Distributed
-
 # Description
+
+**Type:** Distributed
 
 This resource is used to set the User Policies for web applications. The
 usernames can be either specified in Classic or Claims format, both will be

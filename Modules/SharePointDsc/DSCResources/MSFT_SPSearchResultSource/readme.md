@@ -1,8 +1,6 @@
-# Type
-
-Distributed
-
 # Description
+
+**Type:** Distributed
 
 This resource is used to configure search result sources in the SharePoint
 search service application. Result sources can be configured to be of the

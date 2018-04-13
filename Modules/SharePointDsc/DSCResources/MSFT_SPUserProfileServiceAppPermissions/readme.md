@@ -1,8 +1,6 @@
-# Type
-
-Distributed
-
 # Description
+
+**Type:** Distributed
 
 This resource will apply permissions to a user profile service application.
 These can control access to create my sites, use social features, and use

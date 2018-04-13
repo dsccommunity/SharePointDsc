@@ -1,8 +1,6 @@
-# Type
-
-Distributed
-
 # Description
+
+**Type:** Distributed
 
 This resource is used to manage the "additional settings" for a PWA instance
 (based on what is in the 'additional settings' page of the web interface).

@@ -1,8 +1,6 @@
-# Type
-
-Distributed
-
 # Description
+
+**Type:** Distributed
 
 This resource provisions an instance of the usage and health monitoring service
 application. The database settings are only used for initial provisioning, but

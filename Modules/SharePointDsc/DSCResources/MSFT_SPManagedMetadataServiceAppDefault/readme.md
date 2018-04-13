@@ -1,8 +1,6 @@
-# Type
-
-Distributed
-
 # Description
+
+**Type:** Distributed
 
 Using several managed metadata service instances in a farm requires some
 configuration, which service application proxy should be used as default

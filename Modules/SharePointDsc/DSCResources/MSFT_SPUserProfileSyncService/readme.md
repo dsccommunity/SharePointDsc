@@ -1,8 +1,6 @@
-# Type
-
-Specific
-
 # Description
+
+**Type:** Specific
 
 This resource is responsible for ensuring that the user profile sync service
 has been provisioned (Ensure = "Present") or is not running (Ensure =

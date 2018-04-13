@@ -1,8 +1,6 @@
-# Type
-
-Distributed
-
 # Description
+
+**Type:** Distributed
 
 This resource is responsible for creating a web application within the local
 SharePoint farm. The resource will provision the web application with all of

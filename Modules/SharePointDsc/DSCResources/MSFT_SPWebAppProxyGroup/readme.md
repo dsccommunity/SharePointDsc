@@ -1,8 +1,6 @@
-# Type
-
-Distributed
-
 # Description
+
+**Type:** Distributed
 
 This resource is used to associate a web application to a service application
 proxy group. Use the proxy group name "Default" to associate the web
