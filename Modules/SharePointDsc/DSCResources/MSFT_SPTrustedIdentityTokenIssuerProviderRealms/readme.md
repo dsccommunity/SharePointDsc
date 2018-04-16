@@ -1,5 +1,7 @@
 # Description
 
+**Type:** Distributed
+
 This resource is used to add or remove provider realms to
 SPTrustedIdentityTokenIssuer in a SharePoint farm. The "ProviderRealms"
 property will set a specific list of realms, making sure

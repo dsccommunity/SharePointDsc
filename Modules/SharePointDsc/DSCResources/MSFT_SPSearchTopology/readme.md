@@ -1,5 +1,7 @@
 # Description
 
+**Type:** Distributed
+
 This resource is responsible for provisioning a search topology in to the
 current farm. It allows the configuration to dictate the search topology roles
 that the current server should be running. Any combination of roles can be

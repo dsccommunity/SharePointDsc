@@ -1,5 +1,7 @@
 # Description
 
+**Type:** Distributed
+
 This resource is used to configure a timer job and make sure it is in a
 specific state. The resource can be used to enable or disabled the job and
 configure the schedule of the job.

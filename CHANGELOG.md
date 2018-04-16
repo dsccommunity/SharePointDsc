@@ -2,8 +2,10 @@
 
 ## Unreleased
 
+* All Resources
+  * Added information about the Resource Type in each ReadMe.md files.
 * SPTrustedIdentityTokenIssuerProviderRealms
-  * Added the resource
+  * Added the resource.
 * SPUserProfileServiceApp
   * Now supported specifying the host Managed path, and properly sets the host.
 

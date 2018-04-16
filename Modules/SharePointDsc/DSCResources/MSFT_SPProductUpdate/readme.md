@@ -1,5 +1,7 @@
 # Description
 
+**Type:** Common
+
 This resource is used to perform the update step of installing SharePoint
 updates, like Cumulative Updates and Service Packs. The SetupFile parameter
 should point to the update file. The ShutdownServices parameter is used to
