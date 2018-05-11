@@ -61,7 +61,7 @@ function Get-TargetResource
             }
     
             $timerjob = Get-SPTimerJob -Type $params.TypeName `
-                                        -WebApplication $params.WebAppUrl
+                                        -WebApplication $wa
             
             if ($timerjob.Count -eq 0)
             {
