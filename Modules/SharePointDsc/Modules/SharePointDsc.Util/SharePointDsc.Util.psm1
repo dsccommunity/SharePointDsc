@@ -20,6 +20,28 @@ function Add-SPDSCUserToLocalAdmin
     ([ADSI]"WinNT://$($env:computername)/Administrators,group").Add("WinNT://$domainName/$accountName") | Out-Null
 }
 
+function Clear-SPDscKerberosToken
+{
+    param (
+        [Parameter(Mandatory=$true)]
+        [System.String]
+        $Account
+    )
+
+    $sessions = klist sessions
+    foreach ($session in $sessions)
+    {
+        if ($session -like "*$($Account)*")
+        {
+            Write-Verbose -Message "Purging Kerberos ticket for $LogonId"
+            $LogonId = $session.split(' ')[3]
+            $LogonId = $LogonId.Replace('0:','')
+            klist -li $LogonId purge | Out-Null
+        }
+
+    }
+}
+
 function Convert-SPDscADGroupIDToName
 {
     param(
@@ -93,7 +115,29 @@ function Get-SPDSCAssemblyVersion
 }
 
 
-function Get-SPDSCFarmAccountName
+function Get-SPDscFarmAccount
+{
+    [CmdletBinding()]
+    param
+    ()
+
+    $farmaccount = (Get-SPFarm).DefaultServiceAccount.Name
+
+    $account = Get-SPManagedAccount | Where-Object -FilterScript { $_.UserName -eq $farmaccount }
+
+    $bindings = [System.Reflection.BindingFlags]::CreateInstance -bor `
+                [System.Reflection.BindingFlags]::GetField -bor `
+                [System.Reflection.BindingFlags]::Instance -bor `
+                [System.Reflection.BindingFlags]::NonPublic
+
+    $pw = $account.GetType().GetField("m_Password", $bindings).GetValue($account);
+
+    return New-Object -TypeName System.Management.Automation.PSCredential `
+                      -ArgumentList $farmaccount, $pw.SecureStringValue
+}
+
+
+function Get-SPDscFarmAccountName
 {
     [CmdletBinding()]
     param
