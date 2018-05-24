@@ -8,6 +8,9 @@
   * Added the resource.
 * SPUserProfileServiceApp
   * Now supported specifying the host Managed path, and properly sets the host.
+* SPTimerJobState
+  * Fixed issue where the Set method for timerjobs deployed to multiple web
+    applications failed.
 
 ## 2.2
 
