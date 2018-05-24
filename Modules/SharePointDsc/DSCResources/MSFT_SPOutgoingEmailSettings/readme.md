@@ -1,5 +1,7 @@
 # Description
 
+**Type:** Distributed
+
 This resource is used to set the outgoing email settings for either a single
 web application, or the whole farm. To configure the resource for a specific
 web app, use the URL of the web application for the WebAppUrl property, to

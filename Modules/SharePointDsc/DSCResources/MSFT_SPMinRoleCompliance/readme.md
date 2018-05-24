@@ -1,5 +1,7 @@
 # Description
 
+**Type:** Utility
+
 This resource will help manage compliance of MinRole based servers. Each time
 the resource runs it will investigate which service instances should be running
 based on the role of servers anywhere in the farm, and if they are not in a

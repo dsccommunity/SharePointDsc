@@ -1,5 +1,7 @@
 # Description
 
+**Type:** Distributed
+
 This resource is responsible for configuring the authentication on a web
 application within the local SharePoint farm. The resource is able to
 configure the five available zones (if they exist) separately and each

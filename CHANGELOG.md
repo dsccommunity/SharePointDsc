@@ -2,9 +2,18 @@
 
 ## Unreleased
 
+* All Resources
+  * Added information about the Resource Type in each ReadMe.md files.
 * SPFarm
   * Fixed issue where the resource throws an exception if the farm already
     exists and the server has been joined using the FQDN (issue 795)
+* SPTimerJobState
+  * Fixed issue where the Set method for timerjobs deployed to multiple web
+    applications failed.
+* SPTrustedIdentityTokenIssuerProviderRealms
+  * Added the resource.
+* SPUserProfileServiceApp
+  * Now supported specifying the host Managed path, and properly sets the host.
 * SPUserProfileSyncConnection
   * Added support for filtering disabled users (issue 794)
   * Fixed issue where UseSSL was set to true resulted in an error (issue 774)
@@ -13,7 +22,7 @@
 
 * SPAlternateURL
   * If resource specifies Central Admin webapp and Default Zone, the existing
-    AAM will be updated instead of adding a new one
+    AAM will be updated instead of adding a new one.
 * SPContentDatabase
   * Fixed issue where mounting a content database which had to be upgraded
     resulted in a reboot.

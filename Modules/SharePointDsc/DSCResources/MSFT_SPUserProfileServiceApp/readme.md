@@ -1,5 +1,7 @@
 # Description
 
+**Type:** Distributed
+
 This resource will provision an instance of the user profile service to the
 farm. It creates the required databases using the parameters that are passed
 in to it (although these are only used during the initial provisioning).
