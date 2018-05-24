@@ -1,5 +1,14 @@
 # Change log for SharePointDsc
 
+## Unreleased
+
+* SPFarm
+  * Fixed issue where the resource throws an exception if the farm already
+    exists and the server has been joined using the FQDN (issue 795)
+* SPUserProfileSyncConnection
+  * Added support for filtering disabled users (issue 794)
+  * Fixed issue where UseSSL was set to true resulted in an error (issue 774)
+
 ## 2.2
 
 * SPAlternateURL

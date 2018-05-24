@@ -293,6 +293,7 @@ function Set-TargetResource
     {
         if ($installedVersion.FileMajorPart -eq 15)
         {
+            Write-Verbose -Message "NOTE: The UseDisabledFilter parameter is ignored in SharePoint 2013."
         }
     }
 
