@@ -1,5 +1,5 @@
 version: 2.3.0.{build}
-image: WMF 5
+#image: WMF 5
 
 install:
     - git clone https://github.com/PowerShell/DscResource.Tests
