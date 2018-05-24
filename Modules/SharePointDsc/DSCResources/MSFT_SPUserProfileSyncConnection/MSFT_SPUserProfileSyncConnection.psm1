@@ -33,12 +33,20 @@ function Get-TargetResource
         $Server,
 
         [Parameter()]
+        [System.UInt32]
+        $Port = 389,
+
+        [Parameter()]
         [System.Boolean]
         $Force,
 
         [Parameter()]
         [System.Boolean]
         $UseSSL,
+
+        [Parameter()]
+        [System.Boolean]
+        $UseDisabledFilter,
 
         [Parameter()]
         [ValidateSet("ActiveDirectory","BusinessDataCatalog")]
@@ -82,44 +90,102 @@ function Get-TargetResource
             {
                 $BINDING_FLAGS = ([System.Reflection.BindingFlags]::NonPublic -bOr [System.Reflection.BindingFlags]::Instance)
                 $adImportNamespace = [Microsoft.Office.Server.UserProfiles.ActiveDirectoryImportConnection]
-                $METHOD_GET_NAMINGCONTEXTS = $adImportNamespace::GetMethod("get_NamingContexts", $BINDING_FLAGS)
-                $METHOD_GET_ACCOUNTUSERNAME = $adImportNamespace::GetMethod("get_AccountUsername", $BINDING_FLAGS)
-                $METHOD_GET_ACCOUNTDOMAIN = $adImportNamespace::GetMethod("get_AccountDomain", $BINDING_FLAGS)
-                $METHOD_GET_USESSL = $adImportNamespace::GetMethod("get_UseSSL", $BINDING_FLAGS)
+                $METHOD_GET_NAMINGCONTEXTS = $adImportNamespace.GetMethod("get_NamingContexts", $BINDING_FLAGS)
+                $METHOD_GET_ACCOUNTUSERNAME = $adImportNamespace.GetMethod("get_AccountUsername", $BINDING_FLAGS)
+                $METHOD_GET_ACCOUNTDOMAIN = $adImportNamespace.GetMethod("get_AccountDomain", $BINDING_FLAGS)
+                $METHOD_GET_USEDISABLEDFILTER = $adImportNamespace.GetMethod("get_UseDisabledFilter", $BINDING_FLAGS)
+                $METHOD_GET_USESSL = $adImportNamespace.GetMethod("get_UseSSL", $BINDING_FLAGS)
                 $namingContexts = $METHOD_GET_NAMINGCONTEXTS.Invoke($connection, $null)
                 $accountName = $METHOD_GET_ACCOUNTUSERNAME.Invoke($connection, $null)
                 $accountDomain = $METHOD_GET_ACCOUNTDOMAIN.Invoke($connection, $null)
                 $accountCredentials = $accountDomain + "\" + $accountName
+                $useDisabledFilter = $METHOD_GET_USEDISABLEDFILTER.Invoke($connection, $null)
                 $useSSL = $METHOD_GET_USESSL.Invoke($connection, $null)
 
                 if($null -eq $namingContexts)
                 {
-                    return $null
+                    return @{
+                        Name = $params.Name
+                        UserprofileService = $null
+                        Forest = $null
+                        Credentials = $null
+                        IncludedOUs = $null
+                        ExcludedOUs = $null
+                        Server = $null
+                        Port = $null
+                        UseSSL = $null
+                        UseDisabledFilter = $null
+                        ConnectionType = $null
+                        Force = $null
+                    }
+                }
+
+                if ($null -eq $namingContexts.ContainersIncluded)
+                {
+                    $inclOUs = $null
+                }
+                else
+                {
+                    $inclOUs = @($namingContexts.ContainersIncluded)
+                }
+
+                if ($null -eq $namingContexts.ContainersExcluded)
+                {
+                    $exclOUs = $null
+                }
+                else
+                {
+                    $exclOUs = @($namingContexts.ContainersExcluded)
                 }
 
                 return @{
-                    UserprofileService = $UserProfileService
+                    Name = $params.Name
+                    UserprofileService = $params.UserProfileService
                     Forest = $namingContexts.DistinguishedName
-                    Credentials = $accountCredentials
-                    IncludedOUs = $namingContext.ContainersIncluded
-                    ExcludedOUs = $namingContext.ContainersExcluded
+                    ConnectionCredentials = $accountCredentials
+                    IncludedOUs = @($namingContexts.ContainersIncluded)
+                    ExcludedOUs = @($namingContexts.ContainersExcluded)
                     Server = $null
+                    Port = $params.Port
                     UseSSL = $useSSL
-                    ConnectionType = $conn.Type
+                    UseDisabledFilter = $useDisabledFilter
+                    ConnectionType = $connection.Type -replace "Import",""
                     Force = $params.Force
                 }
             }
+
             $accountCredentials = "$($connection.AccountDomain)\$($connection.AccountUsername)"
             $domainController = $namingContext.PreferredDomainControllers | Select-Object -First 1
+
+            if ($null -eq $namingContext.ContainersIncluded)
+            {
+                $inclOUs = $null
+            }
+            else
+            {
+                $inclOUs = @($namingContext.ContainersIncluded)
+            }
+
+            if ($null -eq $namingContext.ContainersExcluded)
+            {
+                $exclOUs = $null
+            }
+            else
+            {
+                $exclOUs = @($namingContext.ContainersExcluded)
+            }
+
             return @{
-                UserProfileService = $UserProfileService
+                UserProfileService = $params.UserProfileService
                 Forest = $connection.Server
                 Name = $namingContext.DisplayName
-                Credentials = $accountCredentials
-                IncludedOUs = $namingContext.ContainersIncluded
-                ExcludedOUs = $namingContext.ContainersExcluded
-                Server =$domainController
+                ConnectionCredentials = $accountCredentials
+                IncludedOUs = $inclOUs
+                ExcludedOUs = $exclOUs
+                Server = $domainController
                 UseSSL = $connection.UseSSL
+                UseDisabledFilter = $connection.UseDisabledFilter
+                Port = $params.Port
                 ConnectionType = $connection.Type.ToString()
                 Force = $params.Force
             }
@@ -162,12 +228,20 @@ function Set-TargetResource
         $Server,
 
         [Parameter()]
+        [System.UInt32]
+        $Port = 389,
+
+        [Parameter()]
         [System.Boolean]
         $Force,
 
         [Parameter()]
         [System.Boolean]
         $UseSSL,
+
+        [Parameter()]
+        [System.Boolean]
+        $UseDisabledFilter,
 
         [Parameter()]
         [ValidateSet("ActiveDirectory","BusinessDataCatalog")]
@@ -180,6 +254,47 @@ function Set-TargetResource
    )
 
     Write-Verbose -Message "Setting user profile service sync connection $Name"
+
+    if ($PSBoundParameters.ContainsKey("UseSSL") -eq $false)
+    {
+        Write-Verbose -Message "UseSSL is not specified. Assuming that SSL is not required."
+        $PSBoundParameters.UseSSL = $false
+    }
+    else
+    {
+        if ($UseSSL -eq $true -and $PSBoundParameters.ContainsKey("Port") -eq $false)
+        {
+            Write-Verbose -Message ("UseSSL is set to True, but no port is specified. Assuming " + `
+                                    "that port 636 (default LDAPS port) is to be used.")
+            $PSBoundParameters.Port = 636
+        }
+    }
+
+    $installedVersion = Get-SPDSCInstalledProductVersion
+    if ($PSBoundParameters.ContainsKey("Port") -eq $false)
+    {
+        $PSBoundParameters.Port = $Port
+    }
+    else
+    {
+        if ($installedVersion.FileMajorPart -eq 15)
+        {
+            Write-Verbose -Message "NOTE: The Port parameter is not used in SharePoint 2013."
+        }
+    }
+
+    if ($PSBoundParameters.ContainsKey("UseDisabledFilter") -eq $false)
+    {
+        Write-Verbose -Message ("UseDisabledFilter is not specified. Assuming that disabled " + `
+                                "accounts should not be filtered.")
+        $PSBoundParameters.UseDisabledFilter = $false
+    }
+    else
+    {
+        if ($installedVersion.FileMajorPart -eq 15)
+        {
+        }
+    }
 
     Invoke-SPDSCCommand -Credential $InstallAccount `
                         -Arguments @($PSBoundParameters, $PSScriptRoot) `
@@ -310,7 +425,8 @@ function Set-TargetResource
 
             switch($installedVersion.FileMajorPart)
             {
-                15{
+                15
+                {
                     $upcm.ConnectionManager.AddActiveDirectoryConnection( [Microsoft.Office.Server.UserProfiles.ConnectionType]::ActiveDirectory,  `
                                             $params.Name, `
                                             $params.Forest, `
@@ -326,15 +442,25 @@ function Set-TargetResource
                {
                     foreach($ou in $params.IncludedOUs)
                     {
-                        Add-SPProfileSyncConnection -ProfileServiceApplication $ups -ConnectionForestName $params.Forest -ConnectionDomain $userDomain `
-                            -ConnectionUserName $userName -ConnectionPassword $params.ConnectionCredentials.Password -ConnectionUseSSL $params.UseSSL `
-                            -ConnectionSynchronizationOU $ou
+                        Add-SPProfileSyncConnection -ProfileServiceApplication $ups `
+                                                    -ConnectionForestName $params.Forest `
+                                                    -ConnectionDomain $userDomain `
+                                                    -ConnectionUserName $userName `
+                                                    -ConnectionPassword $params.ConnectionCredentials.Password `
+                                                    -ConnectionUseSSL $params.UseSSL `
+                                                    -ConnectionSynchronizationOU $ou `
+                                                    -ConnectionPort $params.Port `
+                                                    -ConnectionUseDisabledFilter $params.UseDisabledFilter
                     }
 
                     foreach($ou in $params.ExcludedOUs)
                     {
-                        Remove-SPProfilesyncConnection -ProfileServiceApplication $ups -ConnectionForestName $params.Forest -ConnectionDomain $userDomain `
-                            -ConnectionUserName $userName -ConnectionPassword $params.ConnectionCredentials.Password -ConnectionSynchronizationOU $ou
+                        Remove-SPProfilesyncConnection -ProfileServiceApplication $ups `
+                                                       -ConnectionForestName $params.Forest `
+                                                       -ConnectionDomain $userDomain `
+                                                       -ConnectionUserName $userName `
+                                                       -ConnectionPassword $params.ConnectionCredentials.Password `
+                                                       -ConnectionSynchronizationOU $ou
                     }
                }
             }
@@ -377,12 +503,20 @@ function Test-TargetResource
         $Server,
 
         [Parameter()]
+        [System.UInt32]
+        $Port = 389,
+
+        [Parameter()]
         [System.Boolean]
         $Force,
 
         [Parameter()]
         [System.Boolean]
         $UseSSL,
+
+        [Parameter()]
+        [System.Boolean]
+        $UseDisabledFilter,
 
         [Parameter()]
         [ValidateSet("ActiveDirectory","BusinessDataCatalog")]
