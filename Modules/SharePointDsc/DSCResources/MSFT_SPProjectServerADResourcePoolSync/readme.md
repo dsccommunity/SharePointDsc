@@ -1,5 +1,7 @@
 # Description
 
+**Type:** Distributed
+
 This resource is used to control the settings of the Active Directory
 resource pool sync for Project Server, for a specific PWA instance.
 You can control which AD groups should be imported from and control

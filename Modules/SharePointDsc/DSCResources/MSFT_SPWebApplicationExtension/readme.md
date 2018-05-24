@@ -1,5 +1,7 @@
 # Description
 
+**Type:** Distributed
+
 This resource is responsible for extending an existing web application into a new
 zone. The resource will provision the web application extension with all of
 the current settings, and then ensure that it stays present and will ensure the

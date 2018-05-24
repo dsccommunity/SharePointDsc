@@ -1,10 +1,22 @@
 # Change log for SharePointDsc
 
+## Unreleased
+
+* All Resources
+  * Added information about the Resource Type in each ReadMe.md files.
+* SPTrustedIdentityTokenIssuerProviderRealms
+  * Added the resource.
+* SPUserProfileServiceApp
+  * Now supported specifying the host Managed path, and properly sets the host.
+* SPTimerJobState
+  * Fixed issue where the Set method for timerjobs deployed to multiple web
+    applications failed.
+
 ## 2.2
 
 * SPAlternateURL
   * If resource specifies Central Admin webapp and Default Zone, the existing
-    AAM will be updated instead of adding a new one
+    AAM will be updated instead of adding a new one.
 * SPContentDatabase
   * Fixed issue where mounting a content database which had to be upgraded
     resulted in a reboot.
