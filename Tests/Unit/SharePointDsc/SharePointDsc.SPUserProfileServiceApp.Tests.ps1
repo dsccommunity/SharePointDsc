@@ -27,6 +27,23 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         $mockFarmCredential = New-Object -TypeName System.Management.Automation.PSCredential `
                                          -ArgumentList @("DOMAIN\sp_farm", $mockPassword)
 
+        try { [Microsoft.Office.Server.UserProfiles.UserProfileManager] }
+        catch {
+            try {
+                Add-Type -TypeDefinition @"
+                    namespace Microsoft.Office.Server.UserProfiles {
+                        public class UserProfileManager {
+                            public UserProfileManager(System.Object a)
+                            {
+                            }
+                        }
+                    }
+"@ -ErrorAction SilentlyContinue
+            }
+            catch {
+                Write-Verbose -Message "The Type Microsoft.Office.Server.UserProfiles.DirectoryServiceNamingContext was already added."
+            }
+        }
         # Mocks for all contexts
         Mock -CommandName Get-SPDSCFarmAccount -MockWith {
             return $mockFarmCredential
@@ -43,6 +60,19 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         Mock -CommandName Test-SPDSCUserIsLocalAdmin -MockWith { return $false }
         Mock -CommandName Remove-SPDSCUserToLocalAdmin -MockWith { }
         Mock -CommandName Remove-SPServiceApplication -MockWith { }
+
+        Mock -CommandName Get-SPWebApplication -MockWith {
+            return @{
+                IsAdministrationWebApplication = $true
+                Url = "http://fake.contoso.com"
+                Sites = @("FakeSite1")
+            }
+        }
+        Mock -CommandName Get-SPServiceContext -MockWith {
+            return (@{
+                Fake1 = $true
+            })
+        }
 
         # Test contexts
         Context -Name "When PSDSCRunAsCredential matches the Farm Account" -Fixture {
