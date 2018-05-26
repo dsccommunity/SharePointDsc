@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+* Changes to SharePointDsc
+  * Added a Branches section to the README.md with Codecov and build badges for
+    both master and dev branch.
 * All Resources
   * Added information about the Resource Type in each ReadMe.md files.
 * SPTrustedIdentityTokenIssuerProviderRealms
