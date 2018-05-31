@@ -106,7 +106,7 @@ function Get-TargetResource
                     ExcludedOUs = $namingContext.ContainersExcluded
                     Server = $null
                     UseSSL = $useSSL
-                    ConnectionType = $conn.Type
+                    ConnectionType = $connection.Type.ToString()
                     Force = $params.Force
                 }
             }
