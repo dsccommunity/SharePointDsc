@@ -82,10 +82,10 @@ function Get-TargetResource
             {
                 $BINDING_FLAGS = ([System.Reflection.BindingFlags]::NonPublic -bOr [System.Reflection.BindingFlags]::Instance)
                 $adImportNamespace = [Microsoft.Office.Server.UserProfiles.ActiveDirectoryImportConnection]
-                $METHOD_GET_NAMINGCONTEXTS = $adImportNamespace::GetMethod("get_NamingContexts", $BINDING_FLAGS)
-                $METHOD_GET_ACCOUNTUSERNAME = $adImportNamespace::GetMethod("get_AccountUsername", $BINDING_FLAGS)
-                $METHOD_GET_ACCOUNTDOMAIN = $adImportNamespace::GetMethod("get_AccountDomain", $BINDING_FLAGS)
-                $METHOD_GET_USESSL = $adImportNamespace::GetMethod("get_UseSSL", $BINDING_FLAGS)
+                $METHOD_GET_NAMINGCONTEXTS = $adImportNamespace.GetMethod("get_NamingContexts", $BINDING_FLAGS)
+                $METHOD_GET_ACCOUNTUSERNAME = $adImportNamespace.GetMethod("get_AccountUsername", $BINDING_FLAGS)
+                $METHOD_GET_ACCOUNTDOMAIN = $adImportNamespace.GetMethod("get_AccountDomain", $BINDING_FLAGS)
+                $METHOD_GET_USESSL = $adImportNamespace.GetMethod("get_UseSSL", $BINDING_FLAGS)
                 $namingContexts = $METHOD_GET_NAMINGCONTEXTS.Invoke($connection, $null)
                 $accountName = $METHOD_GET_ACCOUNTUSERNAME.Invoke($connection, $null)
                 $accountDomain = $METHOD_GET_ACCOUNTDOMAIN.Invoke($connection, $null)
