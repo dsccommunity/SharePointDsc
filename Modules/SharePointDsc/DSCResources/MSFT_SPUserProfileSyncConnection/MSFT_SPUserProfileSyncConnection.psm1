@@ -101,7 +101,7 @@ function Get-TargetResource
                     Name = $params.Name
                     UserprofileService = $params.UserProfileService
                     Forest = $namingContexts.DistinguishedName
-                    Credentials = $accountCredentials
+                    ConnectionCredentials = $accountCredentials
                     IncludedOUs = $namingContext.ContainersIncluded
                     ExcludedOUs = $namingContext.ContainersExcluded
                     Server = $null
@@ -113,10 +113,10 @@ function Get-TargetResource
             $accountCredentials = "$($connection.AccountDomain)\$($connection.AccountUsername)"
             $domainController = $namingContext.PreferredDomainControllers | Select-Object -First 1
             return @{
-                UserProfileService = $UserProfileService
+                UserProfileService = $params.UserProfileService
                 Forest = $connection.Server
-                Name = $namingContext.DisplayName
-                Credentials = $accountCredentials
+                Name = $params.Name
+                ConnectionCredentials = $accountCredentials
                 IncludedOUs = $namingContext.ContainersIncluded
                 ExcludedOUs = $namingContext.ContainersExcluded
                 Server =$domainController
