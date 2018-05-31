@@ -98,7 +98,8 @@ function Get-TargetResource
                 }
 
                 return @{
-                    UserprofileService = $UserProfileService
+                    Name = $params.Name
+                    UserprofileService = $params.UserProfileService
                     Forest = $namingContexts.DistinguishedName
                     Credentials = $accountCredentials
                     IncludedOUs = $namingContext.ContainersIncluded
