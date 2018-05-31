@@ -493,7 +493,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 NamingContexts=  New-Object -TypeName System.Collections.ArrayList
                 AccountDomain = "Contoso"
                 AccountUsername = "TestAccount"
-                Type= "ActiveDirectory"
+                Type = "ActiveDirectoryImport"
             }
 
             $userProfileServiceValidConnection =  @{
