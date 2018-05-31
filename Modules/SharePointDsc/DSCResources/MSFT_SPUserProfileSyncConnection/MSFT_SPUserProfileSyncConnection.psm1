@@ -82,10 +82,10 @@ function Get-TargetResource
             {
                 $BINDING_FLAGS = ([System.Reflection.BindingFlags]::NonPublic -bOr [System.Reflection.BindingFlags]::Instance)
                 $adImportNamespace = [Microsoft.Office.Server.UserProfiles.ActiveDirectoryImportConnection]
-                $METHOD_GET_NAMINGCONTEXTS = $adImportNamespace::GetMethod("get_NamingContexts", $BINDING_FLAGS)
-                $METHOD_GET_ACCOUNTUSERNAME = $adImportNamespace::GetMethod("get_AccountUsername", $BINDING_FLAGS)
-                $METHOD_GET_ACCOUNTDOMAIN = $adImportNamespace::GetMethod("get_AccountDomain", $BINDING_FLAGS)
-                $METHOD_GET_USESSL = $adImportNamespace::GetMethod("get_UseSSL", $BINDING_FLAGS)
+                $METHOD_GET_NAMINGCONTEXTS = $adImportNamespace.GetMethod("get_NamingContexts", $BINDING_FLAGS)
+                $METHOD_GET_ACCOUNTUSERNAME = $adImportNamespace.GetMethod("get_AccountUsername", $BINDING_FLAGS)
+                $METHOD_GET_ACCOUNTDOMAIN = $adImportNamespace.GetMethod("get_AccountDomain", $BINDING_FLAGS)
+                $METHOD_GET_USESSL = $adImportNamespace.GetMethod("get_UseSSL", $BINDING_FLAGS)
                 $namingContexts = $METHOD_GET_NAMINGCONTEXTS.Invoke($connection, $null)
                 $accountName = $METHOD_GET_ACCOUNTUSERNAME.Invoke($connection, $null)
                 $accountDomain = $METHOD_GET_ACCOUNTDOMAIN.Invoke($connection, $null)
@@ -98,24 +98,25 @@ function Get-TargetResource
                 }
 
                 return @{
-                    UserprofileService = $UserProfileService
+                    Name = $params.Name
+                    UserprofileService = $params.UserProfileService
                     Forest = $namingContexts.DistinguishedName
-                    Credentials = $accountCredentials
+                    ConnectionCredentials = $accountCredentials
                     IncludedOUs = $namingContext.ContainersIncluded
                     ExcludedOUs = $namingContext.ContainersExcluded
                     Server = $null
                     UseSSL = $useSSL
-                    ConnectionType = $conn.Type
+                    ConnectionType = $connection.Type.ToString()
                     Force = $params.Force
                 }
             }
             $accountCredentials = "$($connection.AccountDomain)\$($connection.AccountUsername)"
             $domainController = $namingContext.PreferredDomainControllers | Select-Object -First 1
             return @{
-                UserProfileService = $UserProfileService
+                UserProfileService = $params.UserProfileService
                 Forest = $connection.Server
-                Name = $namingContext.DisplayName
-                Credentials = $accountCredentials
+                Name = $params.Name
+                ConnectionCredentials = $accountCredentials
                 IncludedOUs = $namingContext.ContainersIncluded
                 ExcludedOUs = $namingContext.ContainersExcluded
                 Server =$domainController
