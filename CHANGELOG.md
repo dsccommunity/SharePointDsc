@@ -15,8 +15,10 @@
 * SPUserProfileServiceApp
   * Now supported specifying the host Managed path, and properly sets the host.
 * SPUserProfileSyncConnection
-  * Added support for filtering disabled users (issue 794)
-  * Fixed issue where UseSSL was set to true resulted in an error (issue 774)
+  * Added support for filtering disabled users
+  * Fixed issue where UseSSL was set to true resulted in an error
+  * Fixed issue where the connection was recreated when the name contained a
+    dot (SP2016)
 
 ## 2.2
 
