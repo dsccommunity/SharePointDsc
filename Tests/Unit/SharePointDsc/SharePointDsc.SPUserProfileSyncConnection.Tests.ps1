@@ -212,6 +212,34 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         }
 
         # Test contexts
+        Context -Name "When UPS doesn't exist" -Fixture {
+            $testParams = @{
+                UserProfileService = "User Profile Service Application"
+                Forest = "contoso.com"
+                Name = "Contoso"
+                ConnectionCredentials = $mockCredential
+                Server = "server.contoso.com"
+                UseSSL = $false
+                IncludedOUs = @("OU=SharePoint Users,DC=Contoso,DC=com")
+                ConnectionType = "ActiveDirectory"
+            }
+
+            Mock -CommandName Get-SPServiceApplication -MockWith { return $null }
+
+            It "Should return null from the Get method" {
+                (Get-TargetResource @testParams).UserProfileService | Should BeNullOrEmpty
+                Assert-MockCalled Get-SPServiceApplication -ParameterFilter { $Name -eq $testParams.UserProfileService }
+            }
+
+            It "Should return false when the Test method is called" {
+                Test-TargetResource @testParams | Should Be $false
+            }
+
+            It "Should create a new service application in the set method" {
+                { Set-TargetResource @testParams } | Should throw "User Profile Service Application $($testParams.UserProfileService) not found"
+            }
+        }
+
         Context -Name "When connection doesn't exist" -Fixture {
             $testParams = @{
                 UserProfileService = "User Profile Service Application"
@@ -286,6 +314,45 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
         }
 
+
+        Context -Name "Port and UseDisabledFilter are specified and UseSSL is True" -Fixture {
+            $testParams = @{
+                UserProfileService = "User Profile Service Application"
+                Forest = "contoso.com"
+                Name = "Contoso"
+                ConnectionCredentials = $mockCredential
+                Server = "server.contoso.com"
+                UseSSL = $true
+                UseDisabledFilter = $true
+                Port = 636
+                IncludedOUs = @("OU=SharePoint Users,DC=Contoso,DC=com")
+                ConnectionType = "ActiveDirectory"
+            }
+
+            Mock -CommandName Get-SPServiceApplication -MockWith {
+                return $userProfileServiceValidConnection
+            }
+
+            $ConnnectionManager.Add($connection)
+
+            It "Should return service instance from the Get method" {
+                (Get-TargetResource @testParams).UserProfileService | Should Not BeNullOrEmpty
+                Assert-MockCalled Get-SPServiceApplication -ParameterFilter { $Name -eq $testParams.UserProfileService }
+            }
+
+            It "Should return false when the Test method is called" {
+                Test-TargetResource @testParams | Should Be $false
+            }
+
+            It "execute update credentials" {
+                $Global:SPDscUPSSyncConnectionSetCredentialsCalled=$false
+                $Global:SPDscUPSSyncConnectionRefreshSchemaCalled=$false
+                Set-TargetResource @testParams
+                $Global:SPDscUPSSyncConnectionSetCredentialsCalled | Should be $true
+                $Global:SPDscUPSSyncConnectionRefreshSchemaCalled | Should be $true
+            }
+        }
+
         Context -Name "When connection exists and forest is different" -Fixture {
             $testParams = @{
                 UserProfileService = "User Profile Service Application"
@@ -293,7 +360,6 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Name = "Contoso"
                 ConnectionCredentials = $mockCredential
                 Server = "server.contoso.com"
-                UseSSL = $false
                 IncludedOUs = @("OU=SharePoint Users,DC=Contoso,DC=com")
                 ConnectionType = "ActiveDirectory"
             }
@@ -381,6 +447,11 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 $Global:SPDscUPSSyncConnectionDeleteCalled | Should be $true
                 $Global:SPDscUPSAddActiveDirectoryConnectionCalled | Should be $true
             }
+
+            It "returns false in Test method as force is specified" {
+                Test-TargetResource @forceTestParams | Should Be $false
+            }
+
         }
 
         Context -Name "When synchronization is running" -Fixture {
