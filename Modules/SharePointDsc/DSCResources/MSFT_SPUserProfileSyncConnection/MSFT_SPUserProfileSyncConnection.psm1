@@ -68,9 +68,24 @@ function Get-TargetResource
         $ups = Get-SPServiceApplication -Name $params.UserProfileService `
                                         -ErrorAction SilentlyContinue
 
+        $nullreturn = @{
+            Name = $params.Name
+            UserprofileService = $null
+            Forest = $null
+            ConnectionCredentials = $null
+            IncludedOUs = $null
+            ExcludedOUs = $null
+            Server = $null
+            Port = $null
+            UseSSL = $null
+            UseDisabledFilter = $null
+            ConnectionType = $null
+            Force = $null
+        }
+
         if ($null -eq $ups)
         {
-            return $null
+            return $nullreturn
         }
         else
         {
@@ -78,12 +93,23 @@ function Get-TargetResource
             $upcm = New-Object -TypeName "Microsoft.Office.Server.UserProfiles.UserProfileConfigManager" `
                                -ArgumentList $context
 
+            # In SP2016, the forest name is used as name but the dot is replaced by a dash
+            $installedVersion = Get-SPDSCInstalledProductVersion
+            if ($installedVersion.FileMajorPart -eq 16)
+            {
+                $Name = $params.Forest -replace "\.", "-"
+            }
+            else
+            {
+                $Name = $params.Name
+            }
+
             $connection = $upcm.ConnectionManager | Where-Object -FilterScript {
-                $_.DisplayName -eq $params.Name
+                $_.DisplayName -eq $Name
             }
             if ($null -eq $connection)
             {
-                return $null
+                return $nullreturn
             }
             $namingContext = $connection.NamingContexts | Select-Object -First 1
             if ($null -eq $namingContext)
@@ -104,20 +130,7 @@ function Get-TargetResource
 
                 if($null -eq $namingContexts)
                 {
-                    return @{
-                        Name = $params.Name
-                        UserprofileService = $null
-                        Forest = $null
-                        Credentials = $null
-                        IncludedOUs = $null
-                        ExcludedOUs = $null
-                        Server = $null
-                        Port = $null
-                        UseSSL = $null
-                        UseDisabledFilter = $null
-                        ConnectionType = $null
-                        Force = $null
-                    }
+                    return $nullreturn
                 }
 
                 if ($null -eq $namingContexts.ContainersIncluded)
@@ -178,7 +191,7 @@ function Get-TargetResource
             return @{
                 UserProfileService = $params.UserProfileService
                 Forest = $connection.Server
-                Name = $namingContext.DisplayName
+                Name = $params.Name
                 ConnectionCredentials = $accountCredentials
                 IncludedOUs = $inclOUs
                 ExcludedOUs = $exclOUs
@@ -270,7 +283,6 @@ function Set-TargetResource
         }
     }
 
-    $installedVersion = Get-SPDSCInstalledProductVersion
     if ($PSBoundParameters.ContainsKey("Port") -eq $false)
     {
         $PSBoundParameters.Port = $Port
@@ -327,8 +339,19 @@ function Set-TargetResource
             throw "Synchronization is in Progress."
         }
 
+        # In SP2016, the forest name is used as name but the dot is replaced by a dash
+        $installedVersion = Get-SPDSCInstalledProductVersion
+        if ($installedVersion.FileMajorPart -eq 16)
+        {
+            $Name = $Forest -replace "\.", "-"
+        }
+        else
+        {
+            $Name = $params.Name
+        }
+
         $connection = $upcm.ConnectionManager | Where-Object -FilterScript {
-            $_.DisplayName -eq $params.Name
+            $_.DisplayName -eq $Name
         } | Select-Object -first 1
 
         if ($null -ne $connection -and $params.Forest -ieq  $connection.Server)
@@ -361,7 +384,7 @@ function Set-TargetResource
         }
         else
         {
-            Write-Verbose -Message "creating a new connection "
+            Write-Verbose -Message "Creating a new connection "
             if ($null -ne $connection -and $params.Forest -ine  $connection.Server)
             {
                 if ($params.ContainsKey("Force") -and $params.Force -eq $true)
@@ -533,7 +556,7 @@ function Test-TargetResource
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
-    if ($null -eq $CurrentValues)
+    if ($null -eq $CurrentValues.UserProfileService)
     {
         return $false
     }
@@ -545,8 +568,7 @@ function Test-TargetResource
 
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
                                     -DesiredValues $PSBoundParameters `
-                                    -ValuesToCheck @("Name",
-                                                     "Forest",
+                                    -ValuesToCheck @("Forest",
                                                      "UserProfileService",
                                                      "Server",
                                                      "UseSSL",

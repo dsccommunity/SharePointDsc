@@ -24,6 +24,15 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         $mockCredential = New-Object -TypeName System.Management.Automation.PSCredential `
                                      -ArgumentList @("DOMAIN\username", $mockPassword)
 
+        if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 16)
+        {
+            $name = "contoso-com"
+        }
+        else
+        {
+            $name = "contoso"
+        }
+
         try { [Microsoft.Office.Server.UserProfiles] }
         catch {
             try {
@@ -69,14 +78,25 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
                         }
 
-                        public static System.Object GetMethod(System.Object a, System.Object b)
+                        public System.Object GetMethod(System.Object a, System.Object b)
                         {return new ActiveDirectoryImportConnection();}
 
                         public System.Object Invoke(System.Object a, System.Object b)
                         {return "";}
                     }
                 }
-"@ -ErrorAction SilentlyContinue
+"@ -ErrorAction SilentlyContinue -PassThru | Add-Member -MemberType ScriptMethod -Name GetMethod -Value {
+                    param ($a, $b)
+                    return (@{
+                                FullName = $a
+                            }) | Add-Member -MemberType ScriptMethod -Name Invoke -Value {
+                                        switch ($this.FullName)
+                                        {
+                                            get_NamingContexts { return "NC" }
+                                            get_UseSSL { return $false }
+                                        }
+                                    } -PassThru -Force
+                } -PassThru -Force
             }
             catch {
                 Write-Verbose -Message "The Type Microsoft.Office.Server.UserProfiles.ActiveDirectoryImportConnection was already added."
@@ -98,11 +118,12 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
         }
         $connection = @{
-            DisplayName = "Contoso"
+            DisplayName = $name
             Server = "contoso.com"
             NamingContexts =  New-Object -TypeName System.Collections.ArrayList
             AccountDomain = "Contoso"
             AccountUsername = "TestAccount"
+            UseDisabledFilter = $false
             Type = "ActiveDirectory"
         }
         $connection = $connection  | Add-Member -MemberType ScriptMethod `
@@ -214,7 +235,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             Mock -CommandName Get-SPServiceApplication -MockWith { return $userProfileServiceNoConnections }
 
             It "Should return null from the Get method" {
-                Get-TargetResource @testParams | Should BeNullOrEmpty
+                (Get-TargetResource @testParams).UserProfileService | Should BeNullOrEmpty
                 Assert-MockCalled Get-SPServiceApplication -ParameterFilter { $Name -eq $testParams.UserProfileService }
             }
 
@@ -248,7 +269,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             $ConnnectionManager.Add($connection)
 
             It "Should return service instance from the Get method" {
-                Get-TargetResource @testParams | Should Not BeNullOrEmpty
+                (Get-TargetResource @testParams).UserProfileService | Should Not BeNullOrEmpty
                 Assert-MockCalled Get-SPServiceApplication -ParameterFilter { $Name -eq $testParams.UserProfileService }
             }
 
@@ -278,7 +299,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             $litWareconnection = @{
-                DisplayName = "Contoso"
+                DisplayName = $name
                 Server = "litware.net"
                 NamingContexts=  New-Object -TypeName System.Collections.ArrayList
                 AccountDomain = "Contoso"
@@ -327,7 +348,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             } -ParameterFilter { $TypeName -eq "Microsoft.Office.Server.UserProfiles.UserProfileConfigManager" }
 
             It "Should return service instance from the Get method" {
-                Get-TargetResource @testParams | Should Not BeNullOrEmpty
+                (Get-TargetResource @testParams).UserProfileService | Should Not BeNullOrEmpty
                 Assert-MockCalled Get-SPServiceApplication -ParameterFilter { $Name -eq $testParams.UserProfileService }
             }
 
@@ -437,7 +458,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 } -PassThru -Force
                 } -PassThru -Force
             } -PassThru -Force
-            $userProfileServiceValidConnection.ConnectionManager.Add($connection);
+            $userProfileServiceValidConnection.ConnectionManager.Add($connection)
+
             Mock -CommandName Get-SPServiceApplication -MockWith {
                 return $userProfileServiceValidConnection
             }
@@ -456,7 +478,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             It "Should return values from the get method" {
-                Get-TargetResource @difOUsTestParams | Should Not BeNullOrEmpty
+                (Get-TargetResource @testParams).UserProfileService | Should Not BeNullOrEmpty
                 Assert-MockCalled Get-SPServiceApplication -ParameterFilter { $Name -eq $testParams.UserProfileService }
             }
 
@@ -475,66 +497,81 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
         }
 
-        Context -Name "When naming context is null (ADImport for SP2016)" -Fixture {
-            $testParams = @{
-                UserProfileService = "User Profile Service Application"
-                Forest = "contoso.com"
-                Name = "Contoso"
-                ConnectionCredentials = $mockCredential
-                Server = "server.contoso.com"
-                UseSSL = $false
-                IncludedOUs = @("OU=SharePoint Users,DC=Contoso,DC=com")
-                ConnectionType = "ActiveDirectory"
-            }
+        if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 16)
+        {
+            Context -Name "When naming context is null (ADImport for SP2016)" -Fixture {
+                $testParams = @{
+                    UserProfileService = "User Profile Service Application"
+                    Forest = "contoso.com"
+                    Name = "Contoso"
+                    ConnectionCredentials = $mockCredential
+                    Server = "server.contoso.com"
+                    UseSSL = $false
+                    IncludedOUs = @("OU=SharePoint Users,DC=Contoso,DC=com")
+                    ConnectionType = "ActiveDirectory"
+                }
 
-            $litWareconnection = @{
-                DisplayName = "Contoso"
-                Server = "litware.net"
-                NamingContexts=  New-Object -TypeName System.Collections.ArrayList
-                AccountDomain = "Contoso"
-                AccountUsername = "TestAccount"
-                Type= "ActiveDirectory"
-            }
+                $litWareconnection = @{
+                    DisplayName = $name
+                    Server = "litware.net"
+                    NamingContexts=  New-Object -TypeName System.Collections.ArrayList
+                    AccountDomain = "Contoso"
+                    AccountUsername = "TestAccount"
+                    UseDisabledFilter = $false
+                    Type= "ActiveDirectory"
+                }
 
-            $userProfileServiceValidConnection =  @{
-                Name = "User Profile Service Application"
-                TypeName = "User Profile Service Application"
-                ApplicationPool = "SharePoint Service Applications"
-                FarmAccount = $mockCredential
-                ServiceApplicationProxyGroup = "Proxy Group"
-                ConnectionManager=  New-Object -TypeName System.Collections.ArrayList
-            }
+                $userProfileServiceValidConnection =  @{
+                    Name = "User Profile Service Application"
+                    TypeName = "User Profile Service Application"
+                    ApplicationPool = "SharePoint Service Applications"
+                    FarmAccount = $mockCredential
+                    ServiceApplicationProxyGroup = "Proxy Group"
+                    ConnectionManager=  New-Object -TypeName System.Collections.ArrayList
+                } | Add-Member -MemberType ScriptMethod -Name GetMethod -Value {
+                    return (@{
+                            FullName = $getTypeFullName
+                        }) | Add-Member -MemberType ScriptMethod -Name GetMethod -Value {
+                        return (@{
+                                Name = "get_NamingContexts"
+                            }) | Add-Member -MemberType ScriptMethod -Name Invoke -Value {
+                            return @{
+                                AbsoluteUri = "http://contoso.sharepoint.com/sites/ct"
+                            }
+                        } -PassThru -Force
+                        } -PassThru -Force
+                    } -PassThru -Force
+                    $userProfileServiceValidConnection.ConnectionManager.Add($connection);
 
-            $userProfileServiceValidConnection.ConnectionManager.Add($litWareconnection);
-            Mock -CommandName Get-SPServiceApplication -MockWith {
-                return $userProfileServiceValidConnection
-            }
-            $litwareConnnectionManager = New-Object -TypeName System.Collections.ArrayList | Add-Member -MemberType ScriptMethod  AddActiveDirectoryConnection{ `
-                                                    param([Microsoft.Office.Server.UserProfiles.ConnectionType] $connectionType,  `
-                                                    $name, `
-                                                    $forest, `
-                                                    $useSSL, `
-                                                    $userName, `
-                                                    $securePassword, `
-                                                    $namingContext, `
-                                                    $p1, $p2 `
-                                                )
+                $userProfileServiceValidConnection.ConnectionManager.Add($litWareconnection);
+                Mock -CommandName Get-SPServiceApplication -MockWith {
+                    return $userProfileServiceValidConnection
+                }
+                $litwareConnnectionManager = New-Object -TypeName System.Collections.ArrayList | Add-Member -MemberType ScriptMethod  AddActiveDirectoryConnection{ `
+                                                        param([Microsoft.Office.Server.UserProfiles.ConnectionType] $connectionType,  `
+                                                        $name, `
+                                                        $forest, `
+                                                        $useSSL, `
+                                                        $userName, `
+                                                        $securePassword, `
+                                                        $namingContext, `
+                                                        $p1, $p2 `
+                                                    )
 
-                $Global:SPDscUPSAddActiveDirectoryConnectionCalled =$true
-            } -PassThru
-            $litwareConnnectionManager.Add($litWareconnection)
+                    $Global:SPDscUPSAddActiveDirectoryConnectionCalled =$true
+                } -PassThru
+                $litwareConnnectionManager.Add($litWareconnection)
 
-            Mock -CommandName New-Object -MockWith {
-                return (@{} | Add-Member -MemberType ScriptMethod IsSynchronizationRunning {
-                    $Global:SPDscUpsSyncIsSynchronizationRunning=$true;
-                    return $false;
-                } -PassThru   |  Add-Member  ConnectionManager $litwareConnnectionManager  -PassThru )
-            } -ParameterFilter { $TypeName -eq "Microsoft.Office.Server.UserProfiles.UserProfileConfigManager" }
+                Mock -CommandName New-Object -MockWith {
+                    return (@{} | Add-Member -MemberType ScriptMethod IsSynchronizationRunning {
+                        $Global:SPDscUpsSyncIsSynchronizationRunning=$true;
+                        return $false;
+                    } -PassThru   |  Add-Member  ConnectionManager $litwareConnnectionManager  -PassThru )
+                } -ParameterFilter { $TypeName -eq "Microsoft.Office.Server.UserProfiles.UserProfileConfigManager" }
 
-
-
-            It "Should return values from the get method" {
-                Get-TargetResource @testParams | Should Not BeNullOrEmpty
+                It "Should return values from the get method" {
+                    (Get-TargetResource @testParams).UserProfileService | Should Not BeNullOrEmpty
+                }
             }
         }
     }
