@@ -70,7 +70,7 @@ function Get-TargetResource
 
         $nullreturn = @{
             Name = $params.Name
-            UserprofileService = $null
+            UserProfileService = $null
             Forest = $null
             ConnectionCredentials = $null
             IncludedOUs = $null
@@ -153,7 +153,7 @@ function Get-TargetResource
 
                 return @{
                     Name = $params.Name
-                    UserprofileService = $params.UserProfileService
+                    UserProfileService = $params.UserProfileService
                     Forest = $namingContexts.DistinguishedName
                     ConnectionCredentials = $accountCredentials
                     IncludedOUs = @($namingContexts.ContainersIncluded)
