@@ -93,19 +93,8 @@ function Get-TargetResource
             $upcm = New-Object -TypeName "Microsoft.Office.Server.UserProfiles.UserProfileConfigManager" `
                                -ArgumentList $context
 
-            # In SP2016, the forest name is used as name but the dot is replaced by a dash
-            $installedVersion = Get-SPDSCInstalledProductVersion
-            if ($installedVersion.FileMajorPart -eq 16)
-            {
-                $Name = $params.Forest -replace "\.", "-"
-            }
-            else
-            {
-                $Name = $params.Name
-            }
-
             $connection = $upcm.ConnectionManager | Where-Object -FilterScript {
-                $_.DisplayName -eq $Name
+                $_.DisplayName -eq $params.Name
             }
             if ($null -eq $connection)
             {
@@ -339,19 +328,8 @@ function Set-TargetResource
             throw "Synchronization is in Progress."
         }
 
-        # In SP2016, the forest name is used as name but the dot is replaced by a dash
-        $installedVersion = Get-SPDSCInstalledProductVersion
-        if ($installedVersion.FileMajorPart -eq 16)
-        {
-            $Name = $Forest -replace "\.", "-"
-        }
-        else
-        {
-            $Name = $params.Name
-        }
-
         $connection = $upcm.ConnectionManager | Where-Object -FilterScript {
-            $_.DisplayName -eq $Name
+            $_.DisplayName -eq $params.Name
         } | Select-Object -first 1
 
         if ($null -ne $connection -and $params.Forest -ieq  $connection.Server)
