@@ -93,8 +93,16 @@ function Get-TargetResource
             $upcm = New-Object -TypeName "Microsoft.Office.Server.UserProfiles.UserProfileConfigManager" `
                                -ArgumentList $context
 
+            if($null -ne $params.Name)
+            {
+                $Name = $params.Name
+            }
+            else
+            {
+                $Name = $params.Forest.Replace(".", "-")
+            }
             $connection = $upcm.ConnectionManager | Where-Object -FilterScript {
-                $_.DisplayName -eq $params.Name
+                $_.DisplayName -eq $Name
             }
             if ($null -eq $connection)
             {
@@ -328,8 +336,16 @@ function Set-TargetResource
             throw "Synchronization is in Progress."
         }
 
+        if($null -ne $params.Name)
+        {
+            $Name = $params.Name
+        }
+        else {
+            $Name = $params.Forest.Replace(".", "-")
+        }
+
         $connection = $upcm.ConnectionManager | Where-Object -FilterScript {
-            $_.DisplayName -eq $params.Name
+            $_.DisplayName -eq $Name
         } | Select-Object -first 1
 
         if ($null -ne $connection -and $params.Forest -ieq  $connection.Server)
