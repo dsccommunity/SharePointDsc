@@ -5,28 +5,28 @@ function Get-TargetResource
     param
     (
         [Parameter(Mandatory = $true)]
-        [System.String] 
+        [System.String]
         $AppDomain,
 
-        [Parameter(Mandatory = $true)] 
-        [System.String] 
-        $WebApplication,
+        [Parameter(Mandatory = $true)]
+        [System.String]
+        $WebAppUrl,
 
-        [Parameter(Mandatory = $true)] 
-        [System.String] 
-        [ValidateSet("Default","Internet","Intranet","Extranet","Custom")] 
+        [Parameter(Mandatory = $true)]
+        [System.String]
+        [ValidateSet("Default","Internet","Intranet","Extranet","Custom")]
         $Zone,
 
-        [Parameter()] 
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $Port,
 
-        [Parameter()] 
-        [System.Boolean] 
+        [Parameter()]
+        [System.Boolean]
         $SSL,
 
-        [Parameter()] 
-        [System.Management.Automation.PSCredential] 
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 
@@ -36,18 +36,18 @@ function Get-TargetResource
                                   -Arguments $PSBoundParameters `
                                   -ScriptBlock {
         $params = $args[0]
-        $webAppAppDomain = Get-SPWebApplicationAppDomain -WebApplication $params.WebApplication `
+        $webAppAppDomain = Get-SPWebApplicationAppDomain -WebApplication $params.WebAppUrl `
                                                          -Zone $params.Zone
 
-        if ($null -eq $webAppAppDomain) 
+        if ($null -eq $webAppAppDomain)
         {
             return $null
-        } 
-        else 
+        }
+        else
         {
             return @{
-                AppDomain = $webAppAppDomain.AppDomain 
-                WebApplication = $params.WebApplication
+                AppDomain = $webAppAppDomain.AppDomain
+                WebAppUrl = $params.WebAppUrl
                 Zone = $webAppAppDomain.UrlZone
                 Port = $webAppAppDomain.Port
                 SSL = $webAppAppDomain.IsSchemeSSL
@@ -64,28 +64,28 @@ function Set-TargetResource
     param
     (
         [Parameter(Mandatory = $true)]
-        [System.String] 
+        [System.String]
         $AppDomain,
 
-        [Parameter(Mandatory = $true)] 
-        [System.String] 
-        $WebApplication,
+        [Parameter(Mandatory = $true)]
+        [System.String]
+        $WebAppUrl,
 
-        [Parameter(Mandatory = $true)] 
-        [System.String] 
-        [ValidateSet("Default","Internet","Intranet","Extranet","Custom")] 
+        [Parameter(Mandatory = $true)]
+        [System.String]
+        [ValidateSet("Default","Internet","Intranet","Extranet","Custom")]
         $Zone,
 
-        [Parameter()] 
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $Port,
 
-        [Parameter()] 
-        [System.Boolean] 
+        [Parameter()]
+        [System.Boolean]
         $SSL,
 
-        [Parameter()] 
-        [System.Management.Automation.PSCredential] 
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 
@@ -99,21 +99,21 @@ function Set-TargetResource
         $params = $args[0]
         $CurrentValues = $args[1]
 
-        if ($null -ne $CurrentValues) 
+        if ($null -ne $CurrentValues)
         {
-            Get-SPWebApplicationAppDomain -WebApplication $params.WebApplication `
+            Get-SPWebApplicationAppDomain -WebApplication $params.WebAppUrl `
                                           -Zone $params.Zone | Remove-SPWebApplicationAppDomain
             Start-Sleep -Seconds 5
         }
 
         $newParams = @{
             AppDomain = $params.AppDomain
-            WebApplication = $params.WebApplication 
+            WebApplication = $params.WebAppUrl
             Zone = $params.Zone
         }
         if ($params.ContainsKey("Port") -eq $true)
         {
-            $newParams.Add("Port", $params.Port) 
+            $newParams.Add("Port", $params.Port)
         }
         if ($params.ContainsKey("SSL") -eq $true)
         {
@@ -131,28 +131,28 @@ function Test-TargetResource
     param
     (
         [Parameter(Mandatory = $true)]
-        [System.String] 
+        [System.String]
         $AppDomain,
 
-        [Parameter(Mandatory = $true)] 
-        [System.String] 
-        $WebApplication,
+        [Parameter(Mandatory = $true)]
+        [System.String]
+        $WebAppUrl,
 
-        [Parameter(Mandatory = $true)] 
-        [System.String] 
-        [ValidateSet("Default","Internet","Intranet","Extranet","Custom")] 
+        [Parameter(Mandatory = $true)]
+        [System.String]
+        [ValidateSet("Default","Internet","Intranet","Extranet","Custom")]
         $Zone,
 
-        [Parameter()] 
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $Port,
 
-        [Parameter()] 
-        [System.Boolean] 
+        [Parameter()]
+        [System.Boolean]
         $SSL,
 
-        [Parameter()] 
-        [System.Management.Automation.PSCredential] 
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 
@@ -162,12 +162,12 @@ function Test-TargetResource
 
     if ($null -eq $CurrentValues)
     {
-        return $false 
+        return $false
     }
 
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
                                     -DesiredValues $PSBoundParameters `
-                                    -ValuesToCheck @("AppDomain", "Port", "SSL") 
+                                    -ValuesToCheck @("AppDomain", "Port", "SSL")
 }
 
 Export-ModuleMember -Function *-TargetResource

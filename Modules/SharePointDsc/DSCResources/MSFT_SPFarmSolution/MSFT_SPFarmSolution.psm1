@@ -4,36 +4,36 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [Parameter(Mandatory = $true)]  
-        [System.String]   
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $Name,
 
-        [Parameter(Mandatory = $true)]  
-        [System.String]   
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $LiteralPath,
 
-        [Parameter()] 
-        [System.String[]] 
-        $WebApplications = @(),
+        [Parameter()]
+        [System.String[]]
+        $WebAppUrl = @(),
 
-        [Parameter()] 
+        [Parameter()]
         [ValidateSet("Present","Absent")]
         [System.String]
         $Ensure = "Present",
-        
+
         [Parameter()]
         [System.String]
         $Version = "1.0.0.0",
 
-        [Parameter()] 
+        [Parameter()]
         [System.Boolean]
         $Deployed = $true,
 
-        [Parameter()] 
+        [Parameter()]
         [ValidateSet("14","15","All")]
         [System.String]
         $SolutionLevel,
-        
+
         [Parameter()]
         [System.Management.Automation.PSCredential]
         $InstallAccount
@@ -50,17 +50,17 @@ function Get-TargetResource
                                    -ErrorAction SilentlyContinue `
                                    -Verbose:$false
 
-        if ($null -ne $solution) 
+        if ($null -ne $solution)
         {
-            $currentState = "Present" 
+            $currentState = "Present"
             $deployed = $solution.Deployed
             $version = $Solution.Properties["Version"]
             $deployedWebApplications = @($solution.DeployedWebApplications `
                                          | Select-Object -ExpandProperty Url)
-        } 
-        else 
+        }
+        else
         {
-            $currentState = "Absent" 
+            $currentState = "Absent"
             $deployed = $false
             $version = "0.0.0.0"
             $deployedWebApplications = @()
@@ -72,7 +72,7 @@ function Get-TargetResource
             Deployed        = $deployed
             Ensure          = $currentState
             Version         = $version
-            WebApplications = $deployedWebApplications
+            WebAppUrl       = $deployedWebApplications
             SolutionLevel   = $params.SolutionLevel
         }
     }
@@ -84,36 +84,36 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [Parameter(Mandatory = $true)]  
-        [System.String]   
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $Name,
 
-        [Parameter(Mandatory = $true)]  
-        [System.String]   
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $LiteralPath,
 
-        [Parameter()] 
-        [System.String[]] 
-        $WebApplications = @(),
+        [Parameter()]
+        [System.String[]]
+        $WebAppUrl = @(),
 
-        [Parameter()] 
+        [Parameter()]
         [ValidateSet("Present","Absent")]
         [System.String]
         $Ensure = "Present",
-        
+
         [Parameter()]
         [System.String]
         $Version = "1.0.0.0",
 
-        [Parameter()] 
+        [Parameter()]
         [System.Boolean]
         $Deployed = $true,
 
-        [Parameter()] 
+        [Parameter()]
         [ValidateSet("14","15","All")]
         [System.String]
         $SolutionLevel,
-        
+
         [Parameter()]
         [System.Management.Automation.PSCredential]
         $InstallAccount
@@ -127,7 +127,7 @@ function Set-TargetResource
     $PSBoundParameters.Version = $Version
     $PSBoundParameters.Deployed = $Deployed
 
-    if ($Ensure -eq "Present") 
+    if ($Ensure -eq "Present")
     {
         if ($CurrentValues.Ensure -eq "Absent")
         {
@@ -137,14 +137,14 @@ function Set-TargetResource
                                           -Arguments $PSBoundParameters `
                                           -ScriptBlock {
                 $params = $args[0]
-        
+
                 $runParams = @{}
                 $runParams.Add("LiteralPath", $params.LiteralPath)
                 $runParams.Add("Verbose", $false)
 
                 $solution = Add-SPSolution @runParams
 
-                $solution.Properties["Version"] = $params.Version 
+                $solution.Properties["Version"] = $params.Version
                 $solution.Update()
 
                 return $solution
@@ -152,10 +152,10 @@ function Set-TargetResource
 
             $CurrentValues.Version = $result.Properties["Version"]
         }
-    
+
         if ($CurrentValues.Version -ne $Version)
         {
-            # If the solution is not deployed and the versions do not match we have to 
+            # If the solution is not deployed and the versions do not match we have to
             # remove the current solution and add the new one
             if (-not $CurrentValues.Deployed)
             {
@@ -166,10 +166,10 @@ function Set-TargetResource
                                               -Arguments $PSBoundParameters `
                                               -ScriptBlock {
                     $params = $args[0]
-        
+
                     $runParams = @{}
                     $runParams.Add("Identity", $params.Name)
-                    $runParams.Add("Confirm", $false) 
+                    $runParams.Add("Confirm", $false)
                     $runParams.Add("Verbose", $false)
 
                     Remove-SPSolution $runParams
@@ -179,7 +179,7 @@ function Set-TargetResource
 
                     $solution = Add-SPSolution @runParams
 
-                    $solution.Properties["Version"] = $params.Version 
+                    $solution.Properties["Version"] = $params.Version
                     $solution.Update()
 
                     return $solution
@@ -196,21 +196,21 @@ function Set-TargetResource
                                               -Arguments $PSBoundParameters `
                                               -ScriptBlock {
                     $params = $args[0]
-        
+
                     $solution = Get-SPSolution -Identity $params.Name -Verbose:$false
 
                     $runParams = @{}
                     $runParams.Add("Identity", $params.Name)
                     $runParams.Add("LiteralPath", $params.LiteralPath)
                     $runParams.Add("GACDeployment", $solution.ContainsGlobalAssembly)
-                    $runParams.Add("Confirm", $false) 
-                    $runParams.Add("Local", $false) 
+                    $runParams.Add("Confirm", $false)
+                    $runParams.Add("Local", $false)
                     $runParams.Add("Verbose", $false)
 
                     Update-SPSolution @runParams
 
                     $solution = Get-SPSolution -Identity $params.Name -Verbose:$false
-                    $solution.Properties["Version"] = $params.Version 
+                    $solution.Properties["Version"] = $params.Version
                     $solution.Update()
 
                     # Install new features...
@@ -223,29 +223,29 @@ function Set-TargetResource
     else
     {
         #If ensure is absent we should also retract the solution first
-        $Deployed = $false 
+        $Deployed = $false
     }
 
-    if ($Deployed -ne $CurrentValues.Deployed) 
+    if ($Deployed -ne $CurrentValues.Deployed)
     {
         Write-Verbose -Message ("The deploy state of $Name is " + `
-                                "'$($CurrentValues.Deployed)' but should be '$Deployed'.") 
-        if ($CurrentValues.Deployed) 
+                                "'$($CurrentValues.Deployed)' but should be '$Deployed'.")
+        if ($CurrentValues.Deployed)
         {
-            # Retract Solution globally 
+            # Retract Solution globally
             $result = Invoke-SPDSCCommand -Credential $InstallAccount `
                                           -Arguments $PSBoundParameters `
                                           -ScriptBlock {
                 $params = $args[0]
-        
+
                 $runParams = @{}
                 $runParams.Add("Identity", $params.Name)
                 $runParams.Add("Confirm", $false)
                 $runParams.Add("Verbose", $false)
 
-                if ($solution.ContainsWebApplicationResource) 
+                if ($solution.ContainsWebApplicationResource)
                 {
-                    if ($null -eq $webApps -or $webApps.Length -eq 0) 
+                    if ($null -eq $webApps -or $webApps.Length -eq 0)
                     {
                         $runParams.Add("AllWebApplications", $true)
 
@@ -261,20 +261,20 @@ function Set-TargetResource
                         }
                     }
                 }
-                else 
+                else
                 {
                     Uninstall-SPSolution @runParams
                 }
             }
-        } 
-        else 
+        }
+        else
         {
-            # Deploy solution 
+            # Deploy solution
             $result = Invoke-SPDSCCommand -Credential $InstallAccount `
                                           -Arguments $PSBoundParameters `
                                           -ScriptBlock {
                 $params = $args[0]
-       
+
                 $solution = Get-SPSolution -Identity $params.Name -Verbose:$false
 
                 $runParams = @{
@@ -283,18 +283,18 @@ function Set-TargetResource
                     Local = $false
                     Verbose = $false
                 }
-                if ($params.ContainsKey("SolutionLevel") -eq $true) 
+                if ($params.ContainsKey("SolutionLevel") -eq $true)
                 {
                     $runParams.Add("CompatibilityLevel", $params.SolutionLevel)
                 }
 
-                if (!$solution.ContainsWebApplicationResource) 
+                if (!$solution.ContainsWebApplicationResource)
                 {
                     Install-SPSolution @runParams
                 }
                 else
                 {
-                    if ($null -eq $webApps -or $webApps.Length -eq 0) 
+                    if ($null -eq $webApps -or $webApps.Length -eq 0)
                     {
                         $runParams.Add("AllWebApplications", $true)
 
@@ -304,7 +304,7 @@ function Set-TargetResource
                     {
                         foreach ($webApp in $webApps)
                         {
-                            $runParams["WebApplication"] = $webApp 
+                            $runParams["WebApplication"] = $webApp
 
                             Install-SPSolution @runParams
                         }
@@ -312,7 +312,7 @@ function Set-TargetResource
                 }
             }
         }
-    } 
+    }
 
     Wait-SPDSCSolutionJob -SolutionName $Name -InstallAccount $InstallAccount
 
@@ -322,7 +322,7 @@ function Set-TargetResource
                                       -Arguments $PSBoundParameters `
                                       -ScriptBlock {
             $params = $args[0]
-        
+
             $runParams = @{
                 Identity = $params.Name
                 Confirm = $false
@@ -341,36 +341,36 @@ function Test-TargetResource
     [OutputType([Boolean])]
     param
     (
-        [Parameter(Mandatory = $true)]  
-        [System.String]   
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $Name,
 
-        [Parameter(Mandatory = $true)]  
-        [System.String]   
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $LiteralPath,
 
-        [Parameter()] 
-        [System.String[]] 
-        $WebApplications = @(),
+        [Parameter()]
+        [System.String[]]
+        $WebAppUrl = @(),
 
-        [Parameter()] 
+        [Parameter()]
         [ValidateSet("Present","Absent")]
         [System.String]
         $Ensure = "Present",
-        
+
         [Parameter()]
         [System.String]
         $Version = "1.0.0.0",
 
-        [Parameter()] 
+        [Parameter()]
         [System.Boolean]
         $Deployed = $true,
 
-        [Parameter()] 
+        [Parameter()]
         [ValidateSet("14","15","All")]
         [System.String]
         $SolutionLevel,
-        
+
         [Parameter()]
         [System.Management.Automation.PSCredential]
         $InstallAccount
@@ -383,11 +383,11 @@ function Test-TargetResource
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
     $valuesToCheck = @("Ensure", "Version", "Deployed")
-    if ($WebApplications.Count -gt 0)
+    if ($WebAppUrl.Count -gt 0)
     {
-        $valuesToCheck += "WebApplications"
+        $valuesToCheck += "WebAppUrl"
     }
-    
+
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
                                     -DesiredValues $PSBoundParameters `
                                     -ValuesToCheck $valuesToCheck
@@ -398,12 +398,12 @@ function Wait-SPDSCSolutionJob
     [CmdletBinding()]
     param
     (
-        [Parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]
         [string]
         $SolutionName,
 
-        [Parameter()] 
-        [System.Management.Automation.PSCredential] 
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 
@@ -415,7 +415,7 @@ function Wait-SPDSCSolutionJob
         $params = $args[0]
 
         $gc = Start-SPAssignment -Verbose:$false
-    
+
         $solution = Get-SPSolution -Identity $params.Name -Verbose:$false -AssignmentCollection $gc
 
         if ($solution.JobExists -eq $true)
@@ -428,9 +428,9 @@ function Wait-SPDSCSolutionJob
 
                 Write-Verbose -Message ("$([DateTime]::Now.ToShortTimeString()) - Waiting for a " + `
                                         "job for solution '$($params.Name)' to complete")
-                $loopCount++ 
+                $loopCount++
                 Start-Sleep -Seconds 5
-                
+
             }
 
             Write-Verbose -Message "Result: $($solution.LastOperationResult)"
