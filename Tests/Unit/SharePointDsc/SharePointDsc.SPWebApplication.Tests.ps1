@@ -1,7 +1,7 @@
 [CmdletBinding()]
 param(
     [Parameter()]
-    [string] 
+    [string]
     $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
                                          -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
                                          -Resolve)
@@ -20,7 +20,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         # Initialize tests
 
-        # Mocks for all contexts   
+        # Mocks for all contexts
         Mock -CommandName New-SPAuthenticationProvider -MockWith { }
         Mock -CommandName New-SPWebApplication -MockWith { }
         Mock -CommandName Remove-SPWebApplication -MockWith { }
@@ -32,8 +32,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Name = "SharePoint Sites"
                 ApplicationPool = "SharePoint Web Apps"
                 ApplicationPoolAccount = "DEMO\ServiceAccount"
-                Url = "http://sites.sharepoint.com"
-                Ensure = "Present"              
+                WebAppUrl = "http://sites.sharepoint.com"
+                Ensure = "Present"
             }
 
             Mock -CommandName Get-SPWebapplication -MockWith { return $null }
@@ -54,10 +54,10 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Name = "SharePoint Sites"
                 ApplicationPool = "SharePoint Web Apps"
                 ApplicationPoolAccount = "DEMO\ServiceAccount"
-                Url = "http://sites.sharepoint.com"
-                Ensure = "Present"              
+                WebAppUrl = "http://sites.sharepoint.com"
+                Ensure = "Present"
             }
-           
+
             Mock -CommandName Get-SPWebapplication -MockWith { return $null }
             Mock -CommandName Get-SPDSCContentService -MockWith {
                 return @{ Name = "PlaceHolder" }
@@ -76,7 +76,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Name = "SharePoint Sites"
                 ApplicationPool = "SharePoint Web Apps"
                 ApplicationPoolAccount = "DEMO\ServiceAccount"
-                Url = "http://sites.sharepoint.com"
+                WebAppUrl = "http://sites.sharepoint.com"
                 Ensure = "Present"
             }
 
@@ -112,7 +112,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Name = "SharePoint Sites"
                 ApplicationPool = "SharePoint Web Apps"
                 ApplicationPoolAccount = "DEMO\ServiceAccount"
-                Url = "http://sites.sharepoint.com"
+                WebAppUrl = "http://sites.sharepoint.com"
                 Ensure = "Present"
             }
 
@@ -142,18 +142,18 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Name = "SharePoint Sites"
                 ApplicationPool = "SharePoint Web Apps"
                 ApplicationPoolAccount = "DEMO\ServiceAccount"
-                Url = "http://sites.sharepoint.com"
+                WebAppUrl = "http://sites.sharepoint.com"
                 UseClassic = $true
                 Ensure = "Present"
             }
 
-            Mock -CommandName Get-SPAuthenticationProvider -MockWith { 
+            Mock -CommandName Get-SPAuthenticationProvider -MockWith {
                 return $null
             }
-            
+
             Mock -CommandName Get-SPWebapplication -MockWith { return @(@{
                 DisplayName = $testParams.Name
-                ApplicationPool = @{ 
+                ApplicationPool = @{
                     Name = $testParams.ApplicationPool
                     Username = $testParams.ApplicationPoolAccount
                 }
@@ -163,10 +163,10 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                         Server = "sql.domain.local"
                     }
                 )
-                IisSettings = @( 
+                IisSettings = @(
                     @{ Path = "C:\inetpub\wwwroot\something" }
                 )
-                Url = $testParams.Url
+                Url = $testParams.WebAppUrl
             })}
 
             It "Should return present from the get method" {
@@ -177,7 +177,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Test-TargetResource @testParams | Should Be $true
             }
 
-           
+
         }
 
         Context -Name "The web application does exist and should that uses NTLM" -Fixture {
@@ -185,20 +185,20 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Name = "SharePoint Sites"
                 ApplicationPool = "SharePoint Web Apps"
                 ApplicationPoolAccount = "DEMO\ServiceAccount"
-                Url = "http://sites.sharepoint.com"
+                WebAppUrl = "http://sites.sharepoint.com"
                 Ensure = "Present"
             }
 
-            Mock -CommandName Get-SPAuthenticationProvider -MockWith { 
-                return @{ 
-                    DisableKerberos = $true 
-                    AllowAnonymous = $false 
-                } 
+            Mock -CommandName Get-SPAuthenticationProvider -MockWith {
+                return @{
+                    DisableKerberos = $true
+                    AllowAnonymous = $false
+                }
             }
-            
+
             Mock -CommandName Get-SPWebapplication -MockWith { return @(@{
                 DisplayName = $testParams.Name
-                ApplicationPool = @{ 
+                ApplicationPool = @{
                     Name = $testParams.ApplicationPool
                     Username = $testParams.ApplicationPoolAccount
                 }
@@ -208,10 +208,10 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                         Server = "sql.domain.local"
                     }
                 )
-                IisSettings = @( 
+                IisSettings = @(
                     @{ Path = "C:\inetpub\wwwroot\something" }
                 )
-                Url = $testParams.Url
+                Url = $testParams.WebAppUrl
             })}
 
             It "Should return present from the get method" {
@@ -222,7 +222,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Test-TargetResource @testParams | Should Be $true
             }
 
-           
+
         }
 
         Context -Name "The web application does exist and should that uses Kerberos" -Fixture {
@@ -230,20 +230,20 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Name = "SharePoint Sites"
                 ApplicationPool = "SharePoint Web Apps"
                 ApplicationPoolAccount = "DEMO\ServiceAccount"
-                Url = "http://sites.sharepoint.com"
+                WebAppUrl = "http://sites.sharepoint.com"
                 Ensure = "Present"
             }
 
-            Mock -CommandName Get-SPAuthenticationProvider -MockWith { 
-                return @{ 
-                    DisableKerberos = $false 
-                    AllowAnonymous = $false 
-                } 
+            Mock -CommandName Get-SPAuthenticationProvider -MockWith {
+                return @{
+                    DisableKerberos = $false
+                    AllowAnonymous = $false
+                }
             }
-            
+
             Mock -CommandName Get-SPWebapplication -MockWith { return @(@{
                 DisplayName = $testParams.Name
-                ApplicationPool = @{ 
+                ApplicationPool = @{
                     Name = $testParams.ApplicationPool
                     Username = $testParams.ApplicationPoolAccount
                 }
@@ -253,10 +253,10 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                         Server = "sql.domain.local"
                     }
                 )
-                IisSettings = @( 
+                IisSettings = @(
                     @{ Path = "C:\inetpub\wwwroot\something" }
                 )
-                Url = $testParams.Url
+                Url = $testParams.WebAppUrl
             })}
 
             It "Should return present from the get method" {
@@ -267,27 +267,27 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Test-TargetResource @testParams | Should Be $true
             }
         }
-        
+
         Context -Name "A web application exists but shouldn't" -Fixture {
             $testParams = @{
                 Name = "SharePoint Sites"
                 ApplicationPool = "SharePoint Web Apps"
                 ApplicationPoolAccount = "DEMO\ServiceAccount"
-                Url = "http://sites.sharepoint.com"
+                WebAppUrl = "http://sites.sharepoint.com"
                 Ensure = "Absent"
             }
 
-            Mock -CommandName Get-SPAuthenticationProvider -MockWith { 
-                return @{ 
+            Mock -CommandName Get-SPAuthenticationProvider -MockWith {
+                return @{
                     DisplayName = "Windows Authentication"
                     DisableKerberos = $true
-                    AllowAnonymous = $false 
-                } 
+                    AllowAnonymous = $false
+                }
             }
-            
+
             Mock -CommandName Get-SPWebapplication -MockWith { return @(@{
                 DisplayName = $testParams.Name
-                ApplicationPool = @{ 
+                ApplicationPool = @{
                     Name = $testParams.ApplicationPool
                     Username = $testParams.ApplicationPoolAccount
                 }
@@ -297,69 +297,69 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                         Server = "sql.domain.local"
                     }
                 )
-                IisSettings = @( 
+                IisSettings = @(
                     @{ Path = "C:\inetpub\wwwroot\something" }
                 )
-                Url = $testParams.Url
+                Url = $testParams.WebAppUrl
             })}
-            
+
             It "Should return present from the Get method" {
-                (Get-TargetResource @testParams).Ensure | Should Be "Present" 
+                (Get-TargetResource @testParams).Ensure | Should Be "Present"
             }
-            
+
             It "Should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $false
             }
-            
+
             It "Should remove the web application in the set method" {
                 Set-TargetResource @testParams
                 Assert-MockCalled Remove-SPWebApplication
             }
         }
-        
+
         Context -Name "A web application doesn't exist and shouldn't" -Fixture {
             $testParams = @{
                 Name = "SharePoint Sites"
                 ApplicationPool = "SharePoint Web Apps"
                 ApplicationPoolAccount = "DEMO\ServiceAccount"
-                Url = "http://sites.sharepoint.com"
+                WebAppUrl = "http://sites.sharepoint.com"
                 Ensure = "Absent"
             }
 
             Mock -CommandName Get-SPWebapplication -MockWith { return $null }
-            
+
             It "Should return absent from the Get method" {
-                (Get-TargetResource @testParams).Ensure | Should Be "Absent" 
+                (Get-TargetResource @testParams).Ensure | Should Be "Absent"
             }
-            
+
             It "Should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $true
             }
         }
-        
-      
+
+
         Context -Name "The web application does exist and should that uses Claims" -Fixture {
             $testParams = @{
                 Name = "SharePoint Sites"
                 ApplicationPool = "SharePoint Web Apps"
                 ApplicationPoolAccount = "DEMO\ServiceAccount"
-                Url = "http://sites.sharepoint.com"
+                WebAppUrl = "http://sites.sharepoint.com"
                 Ensure = "Present"
             }
 
-             Mock -CommandName Get-SPAuthenticationProvider -MockWith { 
-                return @{ 
+             Mock -CommandName Get-SPAuthenticationProvider -MockWith {
+                return @{
 
                    DisplayName = "TestProvider"
                    LoginProviderName = "TestProvider"
                    ClaimProviderName = "TestClaimProvider"
                    AuthenticationRedirectUrl = "/_trust/default.aspx?trust=TestProvider"
-                } 
+                }
             }
 
             Mock -CommandName Get-SPWebApplication -MockWith { return @(@{
                 DisplayName = $testParams.Name
-                ApplicationPool = @{ 
+                ApplicationPool = @{
                     Name = $testParams.ApplicationPool
                     Username = $testParams.ApplicationPoolAccount
                 }
@@ -370,10 +370,10 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                         Server = "sql.domain.local"
                     }
                 )
-                IisSettings = @( 
+                IisSettings = @(
                     @{ Path = "C:\inetpub\wwwroot\something" }
                 )
-                Url = $testParams.Url
+                Url = $testParams.WebAppUrl
                 }
             )}
 
@@ -391,23 +391,23 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Name = "SharePoint Sites"
                 ApplicationPool = "SharePoint Web Apps"
                 ApplicationPoolAccount = "DEMO\ServiceAccount"
-                Url = "http://sites.sharepoint.com"
+                WebAppUrl = "http://sites.sharepoint.com"
                 Ensure = "Absent"
             }
 
-             Mock -CommandName Get-SPAuthenticationProvider -MockWith { 
-                return @{ 
+             Mock -CommandName Get-SPAuthenticationProvider -MockWith {
+                return @{
 
                    DisplayName = "TestProvider"
                    LoginProviderName = "TestProvider"
                    ClaimProviderName = "TestClaimProvider"
                    AuthenticationRedirectUrl = "/_trust/default.aspx?trust=TestProvider"
-                } 
+                }
             }
 
             Mock -CommandName Get-SPWebApplication -MockWith { return @(@{
                 DisplayName = $testParams.Name
-                ApplicationPool = @{ 
+                ApplicationPool = @{
                     Name = $testParams.ApplicationPool
                     Username = $testParams.ApplicationPoolAccount
                 }
@@ -418,10 +418,10 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                         Server = "sql.domain.local"
                     }
                 )
-                IisSettings = @( 
+                IisSettings = @(
                     @{ Path = "C:\inetpub\wwwroot\something" }
                 )
-                Url = $testParams.Url
+                Url = $testParams.WebAppUrl
                 }
             )}
 
@@ -439,7 +439,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Name = "SharePoint Sites"
                 ApplicationPool = "SharePoint Web Apps"
                 ApplicationPoolAccount = "DEMO\ServiceAccount"
-                Url = "http://sites.sharepoint.com"
+                WebAppUrl = "http://sites.sharepoint.com"
                 Ensure = "Present"
                 DatabaseServer = "sql.domain.local"
                 DatabaseName = "SP_Content_01"
@@ -447,21 +447,21 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Path = "C:\inetpub\wwwroot\something"
                 Port = 80
             }
-  
+
             Mock -CommandName Get-SPTrustedIdentityTokenIssuer -MockWith {
                 return @{
                     Name = $testParams.AuthenticationProvider
                 }
             }
-            
-            Mock -CommandName Get-SPAuthenticationProvider -MockWith { 
-                return @{ 
+
+            Mock -CommandName Get-SPAuthenticationProvider -MockWith {
+                return @{
 
                    DisplayName = $testParams.AuthenticationProvider
                    LoginProviderName = $testParams.AuthenticationProvider
                    ClaimProviderName = "TestClaimProvider"
                    AuthenticationRedirectUrl = "/_trust/default.aspx?trust=$($testParams.AuthenticationProvider)"
-                } 
+                }
             }
 
            Mock -CommandName Get-SPDSCContentService -MockWith {
@@ -480,14 +480,14 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 }
             }
 
-            Mock -CommandName Get-SPWebApplication -MockWith { 
+            Mock -CommandName Get-SPWebApplication -MockWith {
                 return $null
             }
 
             Mock -CommandName New-SPWebApplication -MockWith {
                 return @(@{
                 DisplayName = $testParams.Name
-                ApplicationPool = @{ 
+                ApplicationPool = @{
                     Name = $testParams.ApplicationPool
                     Username = $testParams.ApplicationPoolAccount
                 }
@@ -498,14 +498,14 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                         Server = "sql.domain.local"
                     }
                 )
-                IisSettings = @( 
+                IisSettings = @(
                     @{ Path = "C:\inetpub\wwwroot\something" }
                 )
-                Url = $testParams.Url
+                Url = $testParams.WebAppUrl
                 }
                 )
             }
-            
+
 
             It "Should return absent from the get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Absent"
@@ -518,31 +518,31 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Set-TargetResource @testParams
                 Assert-MockCalled New-SPWebApplication
             }
-            
-                
+
+
         }
 
-        
+
         Context -Name "The web application doesn't exist and shouldn't that uses Claims" -Fixture {
             $testParams = @{
                 Name = "SharePoint Sites"
                 ApplicationPool = "SharePoint Web Apps"
                 ApplicationPoolAccount = "DEMO\ServiceAccount"
-                Url = "http://sites.sharepoint.com"
+                WebAppUrl = "http://sites.sharepoint.com"
                 Ensure = "Absent"
             }
 
-             Mock -CommandName Get-SPAuthenticationProvider -MockWith { 
-                return @{ 
+             Mock -CommandName Get-SPAuthenticationProvider -MockWith {
+                return @{
 
                    DisplayName = "TestProvider"
                    LoginProviderName = "TestProvider"
                    ClaimProviderName = "TestClaimProvider"
                    AuthenticationRedirectUrl = "/_trust/default.aspx?trust=TestProvider"
-                } 
+                }
             }
 
-            Mock -CommandName Get-SPWebApplication -MockWith { 
+            Mock -CommandName Get-SPWebApplication -MockWith {
                 return $null
             }
 
@@ -555,25 +555,25 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
         }
 
-                  
+
         Context -Name "The web application doesn't exists authentication method is specified with NTLM provider" -Fixture {
             $testParams = @{
                 Name = "SharePoint Sites"
                 ApplicationPool = "SharePoint Web Apps"
                 ApplicationPoolAccount = "DEMO\ServiceAccount"
-                Url = "http://sites.sharepoint.com"
+                WebAppUrl = "http://sites.sharepoint.com"
                 Ensure = "Present"
             }
 
-             Mock -CommandName Get-SPAuthenticationProvider -MockWith { 
-                return @{ 
+             Mock -CommandName Get-SPAuthenticationProvider -MockWith {
+                return @{
                     DisplayName = "Windows Authentication"
-                    DisableKerberos = $true 
-                    AllowAnonymous = $false 
-                } 
+                    DisableKerberos = $true
+                    AllowAnonymous = $false
+                }
             }
 
-            Mock -CommandName Get-SPWebApplication -MockWith { 
+            Mock -CommandName Get-SPWebApplication -MockWith {
                 return $null
             }
 
@@ -591,23 +591,23 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Name = "SharePoint Sites"
                 ApplicationPool = "SharePoint Web Apps"
                 ApplicationPoolAccount = "DEMO\ServiceAccount"
-                Url = "http://sites.sharepoint.com"
+                WebAppUrl = "http://sites.sharepoint.com"
                 Ensure = "Present"
             }
 
-             Mock -CommandName Get-SPAuthenticationProvider -MockWith { 
-                return @{ 
+             Mock -CommandName Get-SPAuthenticationProvider -MockWith {
+                return @{
                     DisplayName = "Windows Authentication"
-                    DisableKerberos = $false 
-                    AllowAnonymous = $false 
-                } 
-               
+                    DisableKerberos = $false
+                    AllowAnonymous = $false
+                }
+
             }
-            
+
 
            Mock -CommandName Get-SPWebApplication -MockWith { return @(@{
                 DisplayName = $testParams.Name
-                ApplicationPool = @{ 
+                ApplicationPool = @{
                     Name = $testParams.ApplicationPool
                     Username = $testParams.ApplicationPoolAccount
                 }
@@ -618,10 +618,10 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                         Server = "sql.domain.local"
                     }
                 )
-                IisSettings = @( 
+                IisSettings = @(
                     @{ Path = "C:\inetpub\wwwroot\something" }
                 )
-                Url = $testParams.Url
+                Url = $testParams.WebAppUrl
                 }
             )}
 
@@ -639,7 +639,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Name = "SharePoint Sites"
                 ApplicationPool = "SharePoint Web Apps"
                 ApplicationPoolAccount = "DEMO\ServiceAccount"
-                Url = "http://sites.sharepoint.com"
+                WebAppUrl = "http://sites.sharepoint.com"
                 Ensure = "Present"
                 DatabaseServer = "sql.domain.local"
                 DatabaseName = "SP_Content_01"
@@ -648,7 +648,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Port = 80
             }
 
-            
+
             Mock -CommandName Get-SPDSCContentService -MockWith {
                 ApplicationPools = @(
                      @{
@@ -662,15 +662,15 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     }
                 )
             }
-            Mock -CommandName Get-SPAuthenticationProvider -MockWith { 
-                return @{ 
+            Mock -CommandName Get-SPAuthenticationProvider -MockWith {
+                return @{
                     DisplayName = "Windows Authentication"
-                    DisableKerberos = $true 
-                    AllowAnonymous = $false 
-                } 
+                    DisableKerberos = $true
+                    AllowAnonymous = $false
+                }
             }
-            
-            Mock -CommandName Get-SPWebapplication -MockWith { 
+
+            Mock -CommandName Get-SPWebapplication -MockWith {
                 return $null
             }
 
@@ -680,14 +680,14 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
             It "Should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $false
-            }           
-            
+            }
+
             It "Should return false from the set method" {
                 Test-TargetResource @testParams | Should Be $false
-            }           
+            }
         }
-       
-        
+
+
     }
 }
 

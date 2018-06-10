@@ -1,7 +1,7 @@
 [ClassVersion("1.0.0"), FriendlyName("SPWebAppGeneralSettings")]
 class MSFT_SPWebAppGeneralSettings : OMI_BaseResource
 {
-    [Key, Description("The URL of the web app to set the general settings for")] string Url;
+    [Key, Description("The URL of the web app to set the general settings for")] string WebAppUrl;
     [Write, Description("The timezone code to use for this web app. A full list is at https://msdn.microsoft.com/en-us/library/office/microsoft.sharepoint.spregionalsettings.timezones.aspx")] uint32 TimeZone;
     [Write, Description("Should alerts be enabled for this web app")] boolean Alerts;
     [Write, Description("What is the maximum number of alerts that a user can create in this web app")] uint32 AlertsLimit;

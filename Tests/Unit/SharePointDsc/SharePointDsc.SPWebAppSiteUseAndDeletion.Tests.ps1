@@ -1,7 +1,7 @@
 [CmdletBinding()]
 param(
     [Parameter()]
-    [string] 
+    [string]
     $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
                                          -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
                                          -Resolve)
@@ -20,12 +20,12 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         # Initialize tests
 
-        # Mocks for all contexts   
+        # Mocks for all contexts
 
         # Test contexts
         Context -Name "The server is not part of SharePoint farm" -Fixture {
             $testParams = @{
-                Url                                      = "http://example.contoso.local"
+                WebAppUrl                                = "http://example.contoso.local"
                 SendUnusedSiteCollectionNotifications    = $true
                 UnusedSiteNotificationPeriod             = 90
                 AutomaticallyDeleteUnusedSiteCollections = $true
@@ -49,19 +49,19 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "The Web Application isn't available" -Fixture {
             $testParams = @{
-                Url                                      = "http://example.contoso.local"
+                WebAppUrl                                = "http://example.contoso.local"
                 SendUnusedSiteCollectionNotifications    = $true
                 UnusedSiteNotificationPeriod             = 90
                 AutomaticallyDeleteUnusedSiteCollections = $true
                 UnusedSiteNotificationsBeforeDeletion    = 30
             }
 
-            Mock -CommandName Get-SPWebApplication -MockWith  { 
+            Mock -CommandName Get-SPWebApplication -MockWith  {
                 return $null
             }
 
             It "Should return null from the get method" {
-                Get-TargetResource @testParams | Should BeNullOrEmpty 
+                Get-TargetResource @testParams | Should BeNullOrEmpty
             }
 
             It "Should return false from the test method" {
@@ -75,7 +75,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "UnusedSiteNotificationsBeforeDeletion is out of range" -Fixture {
             $testParams = @{
-                Url                                      = "http://example.contoso.local"
+                WebAppUrl                                = "http://example.contoso.local"
                 SendUnusedSiteCollectionNotifications    = $true
                 UnusedSiteNotificationPeriod             = 90
                 AutomaticallyDeleteUnusedSiteCollections = $true
@@ -101,7 +101,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                         Schedule = @{
                             Description = "Daily"
                         }
-                    } 
+                    }
                 }
                 $testParams.UnusedSiteNotificationsBeforeDeletion = 24
 
@@ -114,7 +114,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                         Schedule = @{
                             Description = "Weekly"
                         }
-                    } 
+                    }
                 }
                 $testParams.UnusedSiteNotificationsBeforeDeletion = 28
 
@@ -127,7 +127,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                         Schedule = @{
                             Description = "Monthly"
                         }
-                    } 
+                    }
                 }
                 $testParams.UnusedSiteNotificationsBeforeDeletion = 12
 
@@ -137,7 +137,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "The Dead Site Delete timer job does not exist" -Fixture {
             $testParams = @{
-                Url                                      = "http://example.contoso.local"
+                WebAppUrl                                = "http://example.contoso.local"
                 SendUnusedSiteCollectionNotifications    = $true
                 UnusedSiteNotificationPeriod             = 90
                 AutomaticallyDeleteUnusedSiteCollections = $true
@@ -150,7 +150,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                         UnusedSiteNotificationPeriod             = @{ TotalDays = 45; }
                         AutomaticallyDeleteUnusedSiteCollections = $false
                         UnusedSiteNotificationsBeforeDeletion    = 28
-                } 
+                }
                 return $returnVal
             }
 
@@ -164,7 +164,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "The server is in a farm and the incorrect settings have been applied" -Fixture {
             $testParams = @{
-                Url                                      = "http://example.contoso.local"
+                WebAppUrl                                = "http://example.contoso.local"
                 SendUnusedSiteCollectionNotifications    = $true
                 UnusedSiteNotificationPeriod             = 90
                 AutomaticallyDeleteUnusedSiteCollections = $true
@@ -177,7 +177,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                         UnusedSiteNotificationPeriod             = @{ TotalDays = 45; }
                         AutomaticallyDeleteUnusedSiteCollections = $false
                         UnusedSiteNotificationsBeforeDeletion    = 28
-                } 
+                }
                 $returnVal = $returnVal | Add-Member -MemberType ScriptMethod -Name Update -Value { $Global:SPDscSiteUseUpdated = $true } -PassThru
                 return $returnVal
             }
@@ -188,7 +188,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     Schedule = @{
                         Description = "Daily"
                     }
-                } 
+                }
             }
 
             It "Should return values from the get method" {
@@ -208,7 +208,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "The server is in a farm and the correct settings have been applied" -Fixture {
             $testParams = @{
-                Url                                      = "http://example.contoso.local"
+                WebAppUrl                                = "http://example.contoso.local"
                 SendUnusedSiteCollectionNotifications    = $true
                 UnusedSiteNotificationPeriod             = 90
                 AutomaticallyDeleteUnusedSiteCollections = $true
@@ -221,7 +221,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     UnusedSiteNotificationPeriod             = @{ TotalDays = 90; }
                     AutomaticallyDeleteUnusedSiteCollections = $true
                     UnusedSiteNotificationsBeforeDeletion    = 30
-                } 
+                }
                 $returnVal = $returnVal | Add-Member -MemberType ScriptMethod -Name Update -Value { $Global:SPDscSiteUseUpdated = $true } -PassThru
                 return $returnVal
             }
