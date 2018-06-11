@@ -24,7 +24,14 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         $mockCredential = New-Object -TypeName System.Management.Automation.PSCredential `
                                      -ArgumentList @("DOMAIN\username", $mockPassword)
 
-        $name = "contoso"
+        if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 16)
+        {
+            $name = "contoso-com"
+        }
+        else
+        {
+            $name = "contoso"
+        }
 
         try { [Microsoft.Office.Server.UserProfiles] }
         catch {
@@ -642,4 +649,3 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 }
 
 Invoke-Command -ScriptBlock $Global:SPDscHelper.CleanupScript -NoNewScope
-
