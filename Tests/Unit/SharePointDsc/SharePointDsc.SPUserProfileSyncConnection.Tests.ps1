@@ -649,4 +649,3 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 }
 
 Invoke-Command -ScriptBlock $Global:SPDscHelper.CleanupScript -NoNewScope
- 
