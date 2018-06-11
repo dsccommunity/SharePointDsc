@@ -96,7 +96,7 @@ function Get-TargetResource
                 if ($localaccount -eq $farmAccount.UserName)
                 {
                     Write-Verbose -Message ("The current user ($localaccount) is the Farm " + `
-                           "Account.")
+                           "Account. Please note that this will cause issues when applying the configuration.")
                 }
             }
         }
