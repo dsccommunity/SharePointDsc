@@ -24,14 +24,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         $mockCredential = New-Object -TypeName System.Management.Automation.PSCredential `
                                      -ArgumentList @("DOMAIN\username", $mockPassword)
 
-        if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 16)
-        {
-            $name = "contoso-com"
-        }
-        else
-        {
-            $name = "contoso"
-        }
+        $name = "contoso"
 
         try { [Microsoft.Office.Server.UserProfiles] }
         catch {

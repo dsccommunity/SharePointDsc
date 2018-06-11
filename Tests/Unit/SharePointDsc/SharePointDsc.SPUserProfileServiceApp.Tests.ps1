@@ -92,8 +92,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
             Mock -CommandName Restart-Service {}
 
-            It "Should throw exception in the Get method" {
-                { Get-TargetResource @testParams } | Should throw "Specified PSDSCRunAsCredential "
+            It "Should NOT throw exception in the Get method" {
+                { Get-TargetResource @testParams } | (Get-TargetResource @testParams).Ensure | Should Be "Present"
             }
 
             It "Should throw exception in the Test method" {
