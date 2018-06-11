@@ -24,7 +24,14 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         $mockCredential = New-Object -TypeName System.Management.Automation.PSCredential `
                                      -ArgumentList @("DOMAIN\username", $mockPassword)
 
-        $name = "contoso"
+        if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 16)
+        {
+            $name = "contoso-com"
+        }
+        else
+        {
+            $name = "contoso"
+        }
 
         try { [Microsoft.Office.Server.UserProfiles] }
         catch {
@@ -491,6 +498,77 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         }
 
         Context -Name "When connection exists and Excluded and Included OUs are different. force parameter provided" -Fixture {
+            $testParams = @{
+                UserProfileService = "User Profile Service Application"
+                Forest = "contoso.com"
+                Name = "Contoso"
+                ConnectionCredentials = $mockCredential
+                Server = "server.contoso.com"
+                UseSSL = $false
+                IncludedOUs = @("OU=SharePoint Users,DC=Contoso,DC=com")
+                ConnectionType = "ActiveDirectory"
+            }
+
+            $userProfileServiceValidConnection =  @{
+                Name = "User Profile Service Application"
+                TypeName = "User Profile Service Application"
+                ApplicationPool = "SharePoint Service Applications"
+                FarmAccount = $mockCredential
+                ServiceApplicationProxyGroup = "Proxy Group"
+                ConnectionManager=  New-Object -TypeName System.Collections.ArrayList
+            } | Add-Member -MemberType ScriptMethod -Name GetMethod -Value {
+            return (@{
+                    FullName = $getTypeFullName
+                }) | Add-Member -MemberType ScriptMethod -Name GetMethods -Value {
+                return (@{
+                        Name = "get_NamingContexts"
+                    }) | Add-Member -MemberType ScriptMethod -Name Invoke -Value {
+                    return @{
+                        AbsoluteUri = "http://contoso.sharepoint.com/sites/ct"
+                    }
+                } -PassThru -Force
+                } -PassThru -Force
+            } -PassThru -Force
+            $userProfileServiceValidConnection.ConnectionManager.Add($connection)
+
+            Mock -CommandName Get-SPServiceApplication -MockWith {
+                return $userProfileServiceValidConnection
+            }
+
+            $difOUsTestParams = @{
+                UserProfileService = "User Profile Service Application"
+                Forest = "contoso.com"
+                Name = "Contoso"
+                ConnectionCredentials = $mockCredential
+                Server = "server.contoso.com"
+                UseSSL = $false
+                Force = $false
+                IncludedOUs = @("OU=SharePoint Users,DC=Contoso,DC=com","OU=Notes Users,DC=Contoso,DC=com")
+                ExcludedOUs = @("OU=Excluded, OU=SharePoint Users,DC=Contoso,DC=com")
+                ConnectionType = "ActiveDirectory"
+            }
+
+            It "Should return values from the get method" {
+                (Get-TargetResource @testParams).UserProfileService | Should Not BeNullOrEmpty
+                Assert-MockCalled Get-SPServiceApplication -ParameterFilter { $Name -eq $testParams.UserProfileService }
+            }
+
+            It "Should return false when the Test method is called" {
+                Test-TargetResource @difOUsTestParams | Should Be $false
+            }
+
+            It "Should update OU lists" {
+                $Global:SPDscUPSSyncConnectionUpdateCalled= $false
+                $Global:SPDscUPSSyncConnectionSetCredentialsCalled  = $false
+                $Global:SPDscUPSSyncConnectionRefreshSchemaCalled =$false
+                Set-TargetResource @difOUsTestParams
+                $Global:SPDscUPSSyncConnectionUpdateCalled | Should be $true
+                $Global:SPDscUPSSyncConnectionSetCredentialsCalled  | Should be $true
+                $Global:SPDscUPSSyncConnectionRefreshSchemaCalled | Should be $true
+            }
+        }
+
+        Context -Name "Connection exists and name contains dots" -Fixture {
             $testParams = @{
                 UserProfileService = "User Profile Service Application"
                 Forest = "contoso.com"
