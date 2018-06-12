@@ -1,7 +1,8 @@
 [ClassVersion("1.0.0.0"), FriendlyName("SPInfoPathFormsServiceConfig")]
 class MSFT_SPInfoPathFormsServiceConfig : OMI_BaseResource
 {
-    [Key, Description("Present ensures the settings are applied"), ValueMap{"Present","Absent"}, Values{"Present","Absent"}] string Ensure;
+    [Key, Description("Specifies the resource is a single instance, the value must be 'Yes'"), ValueMap{"Yes"}, Values{"Yes"}] String IsSingleInstance;
+    [Required, Description("Present ensures the settings are applied"), ValueMap{"Present","Absent"}, Values{"Present","Absent"}] string Ensure;
     [Write, Description("True sets the InfoPath Forms Service to allow users to browse forms")] Boolean AllowUserFormBrowserEnabling;
     [Write, Description("True sets the InfoPath Forms Service to render forms in the browser")] Boolean AllowUserFormBrowserRendering;
     [Write, Description("Sets the maximum connection timeout in milliseconds")] Uint32 MaxDataConnectionTimeout;

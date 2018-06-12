@@ -6,7 +6,7 @@
     example is provisioned to port 9999 using NTLM authentication.
 #>
 
-    Configuration Example 
+    Configuration Example
     {
         param(
             [Parameter(Mandatory = $true)]
@@ -26,6 +26,7 @@
         node localhost {
             SPFarm SharePointFarm
             {
+                IsSingleInstance          = "Yes"
                 Ensure                    = "Present"
                 DatabaseServer            = "SQL.contoso.local\SQLINSTANCE"
                 FarmConfigDatabaseName    = "SP_Config"

@@ -5,6 +5,11 @@ function Get-TargetResource
     param
     (
         [Parameter(Mandatory = $true)]
+        [ValidateSet('Yes')]
+        [String]
+        $IsSingleInstance,
+
+        [Parameter(Mandatory = $true)]
         [ValidateSet("Present","Absent")]
         [System.String]
         $Ensure,
@@ -75,6 +80,7 @@ function Get-TargetResource
 
         $config = Get-SPInfoPathFormsService
         $nullReturn = @{
+            IsSingleInstance = "Yes"
             AllowUserFormBrowserEnabling = $params.AllowUserFormBrowserEnabling
             AllowUserFormBrowserRendering = $params.AllowUserFormBrowserRendering
             MaxDataConnectionTimeout = $params.MaxDataConnectionTimeout
@@ -97,6 +103,7 @@ function Get-TargetResource
         }
 
         return @{
+            IsSingleInstance = "Yes"
             AllowUserFormBrowserEnabling = $config.AllowUserFormBrowserEnabling
             AllowUserFormBrowserRendering = $config.AllowUserFormBrowserRendering
             MaxDataConnectionTimeout = $config.MaxDataConnectionTimeout
@@ -122,6 +129,11 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
+        [Parameter(Mandatory = $true)]
+        [ValidateSet('Yes')]
+        [String]
+        $IsSingleInstance,
+
         [Parameter(Mandatory = $true)]
         [ValidateSet("Present","Absent")]
         [System.String]
@@ -273,6 +285,11 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
+        [Parameter(Mandatory = $true)]
+        [ValidateSet('Yes')]
+        [String]
+        $IsSingleInstance,
+
         [Parameter(Mandatory = $true)]
         [ValidateSet("Present","Absent")]
         [System.String]
