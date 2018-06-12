@@ -81,6 +81,7 @@ function Get-TargetResource
             UseDisabledFilter = $null
             ConnectionType = $null
             Force = $null
+            Ensure = "Absent"
         }
 
         if ($null -eq $ups)
@@ -93,20 +94,21 @@ function Get-TargetResource
             $upcm = New-Object -TypeName "Microsoft.Office.Server.UserProfiles.UserProfileConfigManager" `
                                -ArgumentList $context
 
-            # In SP2016, the forest name is used as name but the dot is replaced by a dash
-            $installedVersion = Get-SPDSCInstalledProductVersion
-            if ($installedVersion.FileMajorPart -eq 16)
-            {
-                $Name = $params.Forest -replace "\.", "-"
-            }
-            else
-            {
-                $Name = $params.Name
-            }
-
+            $Name = $params.Name
             $connection = $upcm.ConnectionManager | Where-Object -FilterScript {
                 $_.DisplayName -eq $Name
             }
+
+            # In SP2016, the forest name is used as name but the dot is replaced by a dash
+            $installedVersion = Get-SPDSCInstalledProductVersion
+            if ($installedVersion.FileMajorPart -eq 16 -and $null -eq $connection)
+            {
+                $Name = $params.Forest -replace "\.", "-"
+                $connection = $upcm.ConnectionManager | Where-Object -FilterScript {
+                    $_.DisplayName -eq $Name
+                }
+            }
+
             if ($null -eq $connection)
             {
                 return $nullreturn
@@ -164,6 +166,7 @@ function Get-TargetResource
                     UseDisabledFilter = $useDisabledFilter
                     ConnectionType = $connection.Type -replace "Import",""
                     Force = $params.Force
+                    Ensure = "Present"
                 }
             }
 
@@ -201,6 +204,7 @@ function Get-TargetResource
                 Port = $params.Port
                 ConnectionType = $connection.Type.ToString()
                 Force = $params.Force
+                Ensure = "Present"
             }
         }
     }
