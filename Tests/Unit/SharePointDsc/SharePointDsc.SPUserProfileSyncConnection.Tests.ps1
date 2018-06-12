@@ -572,11 +572,9 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             $testParams = @{
                 UserProfileService = "User Profile Service Application"
                 Forest = "contoso.com"
-                Name = "Contoso"
+                Name = "contoso.com"
                 ConnectionCredentials = $mockCredential
                 Server = "server.contoso.com"
-                UseSSL = $false
-                IncludedOUs = @("OU=SharePoint Users,DC=Contoso,DC=com")
                 ConnectionType = "ActiveDirectory"
             }
 
@@ -606,36 +604,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 return $userProfileServiceValidConnection
             }
 
-            $difOUsTestParams = @{
-                UserProfileService = "User Profile Service Application"
-                Forest = "contoso.com"
-                Name = "Contoso"
-                ConnectionCredentials = $mockCredential
-                Server = "server.contoso.com"
-                UseSSL = $false
-                Force = $false
-                IncludedOUs = @("OU=SharePoint Users,DC=Contoso,DC=com","OU=Notes Users,DC=Contoso,DC=com")
-                ExcludedOUs = @("OU=Excluded, OU=SharePoint Users,DC=Contoso,DC=com")
-                ConnectionType = "ActiveDirectory"
-            }
-
-            It "Should return values from the get method" {
-                (Get-TargetResource @testParams).UserProfileService | Should Not BeNullOrEmpty
-                Assert-MockCalled Get-SPServiceApplication -ParameterFilter { $Name -eq $testParams.UserProfileService }
-            }
-
-            It "Should return false when the Test method is called" {
-                Test-TargetResource @difOUsTestParams | Should Be $false
-            }
-
-            It "Should update OU lists" {
-                $Global:SPDscUPSSyncConnectionUpdateCalled= $false
-                $Global:SPDscUPSSyncConnectionSetCredentialsCalled  = $false
-                $Global:SPDscUPSSyncConnectionRefreshSchemaCalled =$false
-                Set-TargetResource @difOUsTestParams
-                $Global:SPDscUPSSyncConnectionUpdateCalled | Should be $true
-                $Global:SPDscUPSSyncConnectionSetCredentialsCalled  | Should be $true
-                $Global:SPDscUPSSyncConnectionRefreshSchemaCalled | Should be $true
+            It "Should return Ensure Present from the get method" {
+                (Get-TargetResource @testParams).Ensure | Should Be "Present"
             }
         }
 
