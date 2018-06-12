@@ -16,6 +16,7 @@
         node localhost {
             SPInstallPrereqs InstallPrerequisites
             {
+                IsSingleInstance  = "Yes"
                 InstallerPath     = "C:\SPInstall\Prerequisiteinstaller.exe"
                 OnlineMode        = $false
                 SXSpath           = "C:\SPInstall\Windows2012r2-SXS"

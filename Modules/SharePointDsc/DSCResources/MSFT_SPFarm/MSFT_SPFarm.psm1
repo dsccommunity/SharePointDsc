@@ -5,9 +5,14 @@ function Get-TargetResource
     param
     (
         [Parameter(Mandatory = $true)]
+        [ValidateSet('Yes')]
+        [String]
+        $IsSingleInstance,
+
+        [Parameter()]
         [ValidateSet("Present","Absent")]
         [System.String]
-        $Ensure,
+        $Ensure = "Present",
 
         [Parameter(Mandatory = $true)]
         [System.String]
@@ -181,6 +186,7 @@ function Get-TargetResource
             }
 
             $returnValue = @{
+                IsSingleInstance = "Yes"
                 FarmConfigDatabaseName = $spFarm.Name
                 DatabaseServer = $configDb.NormalizedDataSource
                 FarmAccount = $farmAccount # Need to return this as a credential to match the type expected
@@ -224,6 +230,7 @@ function Get-TargetResource
                                     "incomplete, however the 'Ensure' property should be " + `
                                     "considered correct")
             return @{
+                IsSingleInstance = "Yes"
                 FarmConfigDatabaseName = $null
                 DatabaseServer = $null
                 FarmAccount = $null
@@ -246,6 +253,7 @@ function Get-TargetResource
     {
         # This node has never been connected to a farm, return the null return object
         return @{
+            IsSingleInstance = "Yes"
             FarmConfigDatabaseName = $null
             DatabaseServer = $null
             FarmAccount = $null
@@ -268,9 +276,14 @@ function Set-TargetResource
     param
     (
         [Parameter(Mandatory = $true)]
+        [ValidateSet('Yes')]
+        [String]
+        $IsSingleInstance,
+
+        [Parameter()]
         [ValidateSet("Present","Absent")]
         [System.String]
-        $Ensure,
+        $Ensure = "Present",
 
         [Parameter(Mandatory = $true)]
         [System.String]
@@ -647,9 +660,14 @@ function Test-TargetResource
     param
     (
         [Parameter(Mandatory = $true)]
+        [ValidateSet('Yes')]
+        [String]
+        $IsSingleInstance,
+
+        [Parameter()]
         [ValidateSet("Present","Absent")]
         [System.String]
-        $Ensure,
+        $Ensure = "Present",
 
         [Parameter(Mandatory = $true)]
         [System.String]
@@ -703,6 +721,8 @@ function Test-TargetResource
     )
 
     Write-Verbose -Message "Testing local SP Farm settings"
+
+    $PSBoundParameters.Ensure = $Ensure
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
 

@@ -47,6 +47,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         # Test Contexts
         Context -Name "No config databaes exists, and this server should be connected to one" -Fixture {
             $testParams = @{
+                IsSingleInstance = "Yes"
                 Ensure = "Present"
                 FarmConfigDatabaseName = "SP_Config"
                 CentralAdministrationPort = 80000
@@ -114,6 +115,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "No config databaes exists, and this server should be connected to one but won't run central admin" -Fixture {
             $testParams = @{
+                IsSingleInstance = "Yes"
                 Ensure = "Present"
                 FarmConfigDatabaseName = "SP_Config"
                 DatabaseServer = "sql.contoso.com"
@@ -155,6 +157,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "A config database exists, and this server should be connected to it but isn't and this sever won't run central admin" -Fixture {
             $testParams = @{
+                IsSingleInstance = "Yes"
                 Ensure = "Present"
                 FarmConfigDatabaseName = "SP_Config"
                 DatabaseServer = "sql.contoso.com"
@@ -225,6 +228,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "A config database exists, and this server should be connected to it but isn't and this sever will run central admin" -Fixture {
             $testParams = @{
+                IsSingleInstance = "Yes"
                 Ensure = "Present"
                 FarmConfigDatabaseName = "SP_Config"
                 DatabaseServer = "sql.contoso.com"
@@ -291,6 +295,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "A config and lock database exist, and this server should be connected to it but isn't" -Fixture {
             $testParams = @{
+                IsSingleInstance = "Yes"
                 Ensure = "Present"
                 FarmConfigDatabaseName = "SP_Config"
                 DatabaseServer = "sql.contoso.com"
@@ -606,6 +611,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "A config database exists, and this server is connected to it and should be" -Fixture {
             $testParams = @{
+                IsSingleInstance = "Yes"
                 Ensure = "Present"
                 FarmConfigDatabaseName = "SP_Config"
                 DatabaseServer = "sql.contoso.com"
@@ -680,6 +686,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "Absent is specified for the ensure property" -Fixture {
             $testParams = @{
+                IsSingleInstance = "Yes"
                 Ensure = "Absent"
                 FarmConfigDatabaseName = "SP_Config"
                 DatabaseServer = "sql.contoso.com"
@@ -706,6 +713,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         {
             Context -Name "Only valid parameters for SharePoint 2013 are used" -Fixture {
                 $testParams = @{
+                    IsSingleInstance = "Yes"
                     Ensure = "Present"
                     FarmConfigDatabaseName = "SP_Config"
                     DatabaseServer = "DatabaseServer\Instance"
@@ -733,6 +741,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
             Context -Name "no serverrole is specified and get-targetresource needs to return null" -Fixture {
                 $testParams = @{
+                    IsSingleInstance = "Yes"
                     Ensure = "Present"
                     FarmConfigDatabaseName = "SP_Config"
                     DatabaseServer = "sql.contoso.com"
@@ -803,6 +812,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         {
             Context -Name "enhanced minrole options fail when Feature Pack 1 is not installed" -Fixture {
                 $testParams = @{
+                    IsSingleInstance = "Yes"
                     Ensure = "Present"
                     FarmConfigDatabaseName = "SP_Config"
                     DatabaseServer = "DatabaseServer\Instance"
@@ -837,6 +847,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
             Context -Name "enhanced minrole options succeed when Feature Pack 1 is installed" -Fixture {
                 $testParams = @{
+                    IsSingleInstance = "Yes"
                     Ensure = "Present"
                     FarmConfigDatabaseName = "SP_Config"
                     DatabaseServer = "sql.contoso.com"
@@ -886,6 +897,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "no serverrole is specified but get-targetresource needs to identify and return it" -Fixture {
             $testParams = @{
+                IsSingleInstance = "Yes"
                 Ensure = "Present"
                 FarmConfigDatabaseName = "SP_Config"
                 DatabaseServer = "sql.contoso.com"
@@ -951,6 +963,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "no farm is configured locally and an unsupported version of SharePoint is installed on the server" -Fixture {
             $testParams = @{
+                IsSingleInstance = "Yes"
                 Ensure = "Present"
                 FarmConfigDatabaseName = "SP_Config"
                 DatabaseServer = "sql.contoso.com"
@@ -970,6 +983,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "The server is joined to the farm, but SQL server is unavailable" -Fixture {
             $testParams = @{
+                IsSingleInstance = "Yes"
                 Ensure = "Present"
                 FarmConfigDatabaseName = "SP_Config"
                 DatabaseServer = "sql.contoso.com"
@@ -1026,6 +1040,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "A config database exists, and this server is connected (with FQDN) to it and should be" -Fixture {
             $testParams = @{
+                IsSingleInstance = "Yes"
                 Ensure = "Present"
                 FarmConfigDatabaseName = "SP_Config"
                 DatabaseServer = "sql.contoso.com"

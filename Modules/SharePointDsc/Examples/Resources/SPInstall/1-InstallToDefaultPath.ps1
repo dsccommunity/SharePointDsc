@@ -5,7 +5,7 @@
     C:\SPInstall\Setup.exe)
 #>
 
-    Configuration Example 
+    Configuration Example
     {
         param(
             [Parameter(Mandatory = $true)]
@@ -17,8 +17,9 @@
         node localhost {
             SPInstall InstallBinaries
             {
-                BinaryDir  = "C:\SPInstall"
-                ProductKey = "XXXXX-XXXXX-XXXXX-XXXXX-XXXXX"
+                IsSingleInstance = "Yes"
+                BinaryDir        = "C:\SPInstall"
+                ProductKey       = "XXXXX-XXXXX-XXXXX-XXXXX-XXXXX"
             }
         }
     }

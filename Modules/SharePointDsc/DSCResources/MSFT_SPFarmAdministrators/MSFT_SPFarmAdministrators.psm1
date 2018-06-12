@@ -5,8 +5,9 @@ function Get-TargetResource
     param
     (
         [Parameter(Mandatory = $true)]
-        [System.String]
-        $Name,
+        [ValidateSet('Yes')]
+        [String]
+        $IsSingleInstance,
 
         [Parameter()]
         [System.String[]]
@@ -58,7 +59,7 @@ function Get-TargetResource
         $farmAdminGroup = $caWeb.AssociatedOwnerGroup
         $farmAdministratorsGroup = $caWeb.SiteGroups.GetByName($farmAdminGroup)
         return @{
-            Name = $params.Name
+            IsSingleInstance = "Yes"
             Members = $farmAdministratorsGroup.users.UserLogin
             MembersToInclude = $params.MembersToInclude
             MembersToExclude = $params.MembersToExclude
@@ -75,8 +76,9 @@ function Set-TargetResource
     param
     (
         [Parameter(Mandatory = $true)]
-        [System.String]
-        $Name,
+        [ValidateSet('Yes')]
+        [String]
+        $IsSingleInstance,
 
         [Parameter()]
         [System.String[]]
@@ -235,8 +237,9 @@ function Test-TargetResource
     param
     (
         [Parameter(Mandatory = $true)]
-        [System.String]
-        $Name,
+        [ValidateSet('Yes')]
+        [String]
+        $IsSingleInstance,
 
         [Parameter()]
         [System.String[]]

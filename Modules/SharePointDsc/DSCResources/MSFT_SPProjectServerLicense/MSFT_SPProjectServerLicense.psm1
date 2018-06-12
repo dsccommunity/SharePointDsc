@@ -5,6 +5,11 @@ function Get-TargetResource
     param
     (
         [Parameter(Mandatory = $true)]
+        [ValidateSet('Yes')]
+        [String]
+        $IsSingleInstance,
+
+        [Parameter(Mandatory = $true)]
         [ValidateSet("Present","Absent")]
         [System.String]
         $Ensure,
@@ -47,6 +52,7 @@ function Get-TargetResource
                 }
 
                 return @{
+                    IsSingleInstance = "Yes"
                     Ensure = $status
                     ProductKey = $params.ProductKey
                     InstallAccount = $params.InstallAccount
@@ -56,6 +62,7 @@ function Get-TargetResource
             {
                 Write-Verbose -Message "Unable to determine the license status for Project Server"
                 return @{
+                    IsSingleInstance = "Yes"
                     Ensure = "Absent"
                     ProductKey = $params.ProductKey
                     InstallAccount = $params.InstallAccount
@@ -66,6 +73,7 @@ function Get-TargetResource
         {
             Write-Verbose -Message "Unable to determine the license status for Project Server"
             return @{
+                IsSingleInstance = "Yes"
                 Ensure = "Absent"
                 ProductKey = $params.ProductKey
                 InstallAccount = $params.InstallAccount
@@ -81,6 +89,11 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
+        [Parameter(Mandatory = $true)]
+        [ValidateSet('Yes')]
+        [String]
+        $IsSingleInstance,
+
         [Parameter(Mandatory = $true)]
         [ValidateSet("Present","Absent")]
         [System.String]
@@ -105,7 +118,7 @@ function Set-TargetResource
 
     if ($Ensure -eq "Present" -and $PSBoundParameters.ContainsKey("ProductKey") -eq $false)
     {
-        throw [Exception] "ProductKey is requried when Ensure equals 'Present'"
+        throw [Exception] "ProductKey is required when Ensure equals 'Present'"
     }
 
     $currentValues = Get-TargetResource @PSBoundParameters
@@ -142,6 +155,11 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
+        [Parameter(Mandatory = $true)]
+        [ValidateSet('Yes')]
+        [String]
+        $IsSingleInstance,
+
         [Parameter(Mandatory = $true)]
         [ValidateSet("Present","Absent")]
         [System.String]

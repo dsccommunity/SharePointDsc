@@ -3,7 +3,7 @@
     This example sets the password change settings for managed accounts in the local farm
 #>
 
-    Configuration Example 
+    Configuration Example
     {
         param(
             [Parameter(Mandatory = $true)]
@@ -15,6 +15,7 @@
         node localhost {
             SPPasswordChangeSettings ManagedAccountPasswordResetSettings
             {
+                IsSingleInstance              = "Yes"
                 MailAddress                   = "sharepoint`@contoso.com"
                 DaysBeforeExpiry              = "14"
                 PasswordChangeWaitTimeSeconds = "60"

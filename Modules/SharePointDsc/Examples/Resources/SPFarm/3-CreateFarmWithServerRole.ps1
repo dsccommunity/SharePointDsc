@@ -1,5 +1,5 @@
 <#
-.EXAMPLE 
+.EXAMPLE
     This example shows how a basic SharePoint farm can be created. The database server and names
     are specified, and the accounts to run the setup as, the farm account and the passphrase are
     all passed in to the configuration to be applied. By default the central admin site in this
@@ -9,7 +9,7 @@
     and so this specific example would fail if used against that verison.
 #>
 
-    Configuration Example 
+    Configuration Example
     {
         param(
             [Parameter(Mandatory = $true)]
@@ -29,6 +29,7 @@
         node localhost {
             SPFarm SharePointFarm
             {
+                IsSingleInstance          = "Yes"
                 Ensure                    = "Present"
                 DatabaseServer            = "SQL.contoso.local\SQLINSTANCE"
                 FarmConfigDatabaseName    = "SP_Config"

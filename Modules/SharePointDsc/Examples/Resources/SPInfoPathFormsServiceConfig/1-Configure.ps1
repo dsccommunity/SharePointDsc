@@ -16,6 +16,7 @@
         node localhost {
             SPInfoPathFormsServiceConfig InfoPathFormsServiceConfig
             {
+                IsSingleInstance                         = "Yes"
                 Ensure                                   = "Present"
                 AllowUserFormBrowserEnabling             = $true
                 AllowUserFormBrowserRendering            = $true

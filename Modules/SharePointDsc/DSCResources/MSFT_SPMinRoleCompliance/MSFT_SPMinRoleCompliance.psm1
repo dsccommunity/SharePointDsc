@@ -5,6 +5,11 @@ function Get-TargetResource
     param
     (
         [Parameter(Mandatory = $true)]
+        [ValidateSet('Yes')]
+        [String]
+        $IsSingleInstance,
+
+        [Parameter(Mandatory = $true)]
         [ValidateSet("Compliant","NonCompliant")]
         [System.String]
         $State,
@@ -32,15 +37,17 @@ function Get-TargetResource
         if ($null -eq $nonCompliantServices)
         {
             return @{
-                State          = "Compliant"
-                InstallAccount = $params.InstallAccount
+                IsSingleInstance = "Yes"
+                State            = "Compliant"
+                InstallAccount   = $params.InstallAccount
             }
         }
         else
         {
             return @{
-                State          = "NonCompliant"
-                InstallAccount = $params.InstallAccount
+                IsSingleInstance = "Yes"
+                State            = "NonCompliant"
+                InstallAccount   = $params.InstallAccount
             }
         }
     }
@@ -60,6 +67,11 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
+        [Parameter(Mandatory = $true)]
+        [ValidateSet('Yes')]
+        [String]
+        $IsSingleInstance,
+
         [Parameter(Mandatory = $true)]
         [ValidateSet("Compliant","NonCompliant")]
         [System.String]
@@ -119,6 +131,11 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
+        [Parameter(Mandatory = $true)]
+        [ValidateSet('Yes')]
+        [String]
+        $IsSingleInstance,
+
         [Parameter(Mandatory = $true)]
         [ValidateSet("Compliant","NonCompliant")]
         [System.String]

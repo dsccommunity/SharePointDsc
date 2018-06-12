@@ -1,10 +1,10 @@
 <#
 .EXAMPLE
     This example shows how to set a specific list of members for the farm admins group.
-    Any members not in this list will be removed. 
+    Any members not in this list will be removed.
 #>
 
-    Configuration Example 
+    Configuration Example
     {
         param(
             [Parameter(Mandatory = $true)]
@@ -16,7 +16,7 @@
         node localhost {
             SPFarmAdministrators LocalFarmAdmins
             {
-                Name                 = "Farm Administrators"
+                IsSingleInstance     = "Yes"
                 Members              = @("CONTOSO\user1", "CONTOSO\user2")
                 PsDscRunAsCredential = $SetupAccount
             }

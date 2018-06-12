@@ -3,7 +3,7 @@
     This module will install SharePoint Foundation 2013 to the local server
 #>
 
-    Configuration Example 
+    Configuration Example
     {
         param(
             [Parameter(Mandatory = $true)]
@@ -15,6 +15,7 @@
         node localhost {
             Package InstallSharePointFoundation
             {
+                IsSingleInstance   = "Yes"
                 Ensure             = "Present"
                 Name               = "Microsoft SharePoint Foundation 2013 Core"
                 Path               = "E:\SharePoint2013\Setup.exe"

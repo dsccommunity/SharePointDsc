@@ -58,6 +58,11 @@ function Get-TargetResource
     param
     (
         [Parameter(Mandatory = $true)]
+        [ValidateSet('Yes')]
+        [String]
+        $IsSingleInstance,
+
+        [Parameter(Mandatory = $true)]
         [System.String]
         $InstallerPath,
 
@@ -292,6 +297,7 @@ function Get-TargetResource
                                                       -PrereqsToCheck $prereqsToTest
 
     $results = @{
+        IsSingleInstance = "Yes"
         InstallerPath = $InstallerPath
         OnlineMode = $OnlineMode
         SXSpath = $SXSpath
@@ -332,6 +338,11 @@ function Set-TargetResource
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidGlobalVars", "")]
     param
     (
+        [Parameter(Mandatory = $true)]
+        [ValidateSet('Yes')]
+        [String]
+        $IsSingleInstance,
+
         [Parameter(Mandatory = $true)]
         [System.String]
         $InstallerPath,
@@ -610,6 +621,11 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
+        [Parameter(Mandatory = $true)]
+        [ValidateSet('Yes')]
+        [String]
+        $IsSingleInstance,
+
         [Parameter(Mandatory = $true)]
         [System.String]
         $InstallerPath,
