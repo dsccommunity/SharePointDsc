@@ -3,6 +3,8 @@
 
 # Description
     
+    **Type:** Distributed
+    
     This resource is used to set the Suite Bar branding for web
     applications. It supports both the SharePoint 2013 and SharePoint
     2016 ways of branding the suite bar.

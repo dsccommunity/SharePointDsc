@@ -3,6 +3,8 @@
 
 # Description
     
+    **Type:** Distributed
+    
     This resource is used to set the SharePoint Designer settings for the local
     farm or site collections. These settings will be used to control if users are
     allowed to make changes using SharePoint Designer. Note that this will not

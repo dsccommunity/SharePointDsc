@@ -3,6 +3,8 @@
 
 # Description
     
+    **Type:** Distributed
+    
     This resource will apply permissions to a user profile service application.
     These can control access to create my sites, use social features, and use
     tagging. If you want to allow all users the ability to use a specific
