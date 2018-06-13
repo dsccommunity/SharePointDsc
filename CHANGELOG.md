@@ -2,15 +2,27 @@
 
 ## Unreleased
 
+* Changes to SharePointDsc
+  * Added a Branches section to the README.md with Codecov and build badges for
+    both master and dev branch.
 * All Resources
   * Added information about the Resource Type in each ReadMe.md files.
+* SPFarm
+  * Fixed issue where the resource throws an exception if the farm already
+    exists and the server has been joined using the FQDN (issue 795)
+* SPTimerJobState
+  * Fixed issue where the Set method for timerjobs deployed to multiple web
+    applications failed.
 * SPTrustedIdentityTokenIssuerProviderRealms
   * Added the resource.
 * SPUserProfileServiceApp
   * Now supported specifying the host Managed path, and properly sets the host.
-* SPTimerJobState
-  * Fixed issue where the Set method for timerjobs deployed to multiple web
-    applications failed.
+  * Changed error for running with Farm Account into being a warning
+* SPUserProfileSyncConnection
+  * Added support for filtering disabled users
+  * Fixed issue where UseSSL was set to true resulted in an error
+  * Fixed issue where the connection was recreated when the name contained a
+    dot (SP2016)
 
 ## 2.2
 

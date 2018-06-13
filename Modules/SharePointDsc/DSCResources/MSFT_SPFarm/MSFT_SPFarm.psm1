@@ -83,7 +83,6 @@ function Get-TargetResource
         }
     }
 
-
     if (($PSBoundParameters.ContainsKey("ServerRole") -eq $true) `
         -and $installedVersion.FileMajorPart -ne 16)
     {
@@ -186,10 +185,21 @@ function Get-TargetResource
             $installedVersion = Get-SPDSCInstalledProductVersion
             if($installedVersion.FileMajorPart -eq 16)
             {
-                $server = Get-SPServer -Identity $env:COMPUTERNAME
+                $server = Get-SPServer -Identity $env:COMPUTERNAME -ErrorAction SilentlyContinue
                 if($null -ne $server -and $null -ne $server.Role)
                 {
                     $returnValue.Add("ServerRole", $server.Role)
+                }
+                else
+                {
+                    $domain = (Get-CimInstance -ClassName Win32_ComputerSystem).Domain
+                    $currentServer = "$($env:COMPUTERNAME).$domain"
+
+                    $server = Get-SPServer -Identity $currentServer -ErrorAction SilentlyContinue
+                    if($null -ne $server -and $null -ne $server.Role)
+                    {
+                        $returnValue.Add("ServerRole", $server.Role)
+                    }
                 }
             }
             return $returnValue

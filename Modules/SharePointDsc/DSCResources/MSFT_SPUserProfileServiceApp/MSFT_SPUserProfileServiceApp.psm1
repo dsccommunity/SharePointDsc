@@ -95,9 +95,8 @@ function Get-TargetResource
                 $localaccount = "$($Env:USERDOMAIN)\$($Env:USERNAME)"
                 if ($localaccount -eq $farmAccount.UserName)
                 {
-                    throw ("Specified PSDSCRunAsCredential ($localaccount) is the Farm " + `
-                           "Account. Make sure the specified PSDSCRunAsCredential isn't the " + `
-                           "Farm Account and try again")
+                    Write-Verbose -Message ("The current user ($localaccount) is the Farm " + `
+                           "Account. Please note that this will cause issues when applying the configuration.")
                 }
             }
         }
