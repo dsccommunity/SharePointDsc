@@ -12,7 +12,7 @@
 # RootModule = ''
 
 # Version number of this module.
-ModuleVersion = '2.2.0.0'
+ModuleVersion = '2.3.0.0'
 
 # ID used to uniquely identify this module
 GUID = '6c1176a0-4fac-4134-8ca2-3fa8a21a7b90'
@@ -128,40 +128,27 @@ PrivateData = @{
 
         # ReleaseNotes of this module
         ReleaseNotes = "
-      * SPAlternateURL
-        * If resource specifies Central Admin webapp and Default Zone, the existing
-          AAM will be updated instead of adding a new one
-      * SPContentDatabase
-        * Fixed issue where mounting a content database which had to be upgraded
-          resulted in a reboot.
-      * SPDistributedCacheClientSettings
-        * Added the new resource
-      * SPFarmAdministrators
-        * Fixed issue where member comparisons was case sensitive. This had
-          to be case insensitive.
-      * SPManagedMetadataServiceApp
-        * Fixed issue with creating the Content Type Hub on an existing MMS
-          service app without Content Type Hub.
-      * SPManagedMetadataServiceAppDefault
-        * Fixed issue where .GetType().FullName and TypeName were not used
-          properly.
+      * Changes to SharePointDsc
+        * Added a Branches section to the README.md with Codecov and build badges for
+          both master and dev branch.
+      * All Resources
+        * Added information about the Resource Type in each ReadMe.md files.
+      * SPFarm
+        * Fixed issue where the resource throws an exception if the farm already
+          exists and the server has been joined using the FQDN (issue 795)
       * SPTimerJobState
-        * Updated description of WebAppUrl parameter to make it clear that
-          N/A has to be used to specify a global timer job.
+        * Fixed issue where the Set method for timerjobs deployed to multiple web
+          applications failed.
+      * SPTrustedIdentityTokenIssuerProviderRealms
+        * Added the resource.
       * SPUserProfileServiceApp
-        * Fixed issue introduced in v2.0, where the Farm Account had to have
-          local Administrator permissions for the resource to function properly.
-        * Updated resource to retrieve the Farm account from the Managed Accounts
-          instead of requiring it as a parameter.
-      * SPUserProfileSyncService
-        * Fixed issue introduced in v2.0, where the Farm Account had to have
-          local Administrator permissions for the resource to function properly.
-        * Updated resource to retrieve the Farm account from the Managed Accounts
-          instead of requiring it as a parameter.
-        * The FarmAccount parameter is deprecated and no longer required. Is ignored
-          in the code and will be removed in v3.0.
-      * SPVisioServiceApp
-        * Fixed an issue where the proxy is not properly getting created
+        * Now supported specifying the host Managed path, and properly sets the host.
+        * Changed error for running with Farm Account into being a warning
+      * SPUserProfileSyncConnection
+        * Added support for filtering disabled users
+        * Fixed issue where UseSSL was set to true resulted in an error
+        * Fixed issue where the connection was recreated when the name contained a
+          dot (SP2016)
       "
     } # End of PSData hashtable
 

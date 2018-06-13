@@ -37,6 +37,8 @@
 
 ## Unreleased
 
+## 2.3
+
 * Changes to SharePointDsc
   * Added a Branches section to the README.md with Codecov and build badges for
     both master and dev branch.
@@ -52,6 +54,7 @@
   * Added the resource.
 * SPUserProfileServiceApp
   * Now supported specifying the host Managed path, and properly sets the host.
+  * Changed error for running with Farm Account into being a warning
 * SPUserProfileSyncConnection
   * Added support for filtering disabled users
   * Fixed issue where UseSSL was set to true resulted in an error
