@@ -1,5 +1,7 @@
 # Change log for SharePointDsc
 
+## Unreleased
+
 ## 2.3
 
 * Changes to SharePointDsc
