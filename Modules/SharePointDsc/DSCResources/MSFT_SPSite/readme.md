@@ -1,5 +1,7 @@
 # Description
 
+**Type:** Distributed
+
 This resource will provision a site collection to the current farm, based on
 the settings that are passed through. These settings map to the New-SPSite
 cmdlet and accept the same values and types.

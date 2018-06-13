@@ -3,6 +3,8 @@
 
 # Description
     
+    **Type:** Specific
+    
     This resource is used to create a new SharePoint farm and allow servers to
     join that farm. It will detect the presence of the configuration database
     on the SQL server as a first step, and if it does not exist then the farm

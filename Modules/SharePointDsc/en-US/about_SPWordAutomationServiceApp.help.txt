@@ -3,6 +3,8 @@
 
 # Description
     
+    **Type:** Distributed
+    
     The resource is able to provision, unprovision and configure the Word
     Automation Service Application. All settings that you can configure on the
     Service Application administration page are configurable using this resource.

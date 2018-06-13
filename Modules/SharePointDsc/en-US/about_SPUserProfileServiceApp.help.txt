@@ -3,6 +3,8 @@
 
 # Description
     
+    **Type:** Distributed
+    
     This resource will provision an instance of the user profile service to the
     farm. It creates the required databases using the parameters that are passed
     in to it (although these are only used during the initial provisioning).
@@ -42,6 +44,10 @@
 .PARAMETER MySiteHostLocation
     Write - string
     The URL of the my site host collection
+
+.PARAMETER MySiteManagedPath
+    Write - string
+    The Managed Path of the my site sites
 
 .PARAMETER ProfileDBName
     Write - string
@@ -89,7 +95,7 @@
     This example adds a new user profile service application to the local farm
 
 
-    Configuration Example 
+    Configuration Example
     {
         param(
             [Parameter(Mandatory = $true)]
@@ -104,6 +110,7 @@
                 Name                 = "User Profile Service Application"
                 ApplicationPool      = "SharePoint Service Applications"
                 MySiteHostLocation   = "http://my.sharepoint.contoso.local"
+                MySiteManagedPath    = "personal"
                 ProfileDBName        = "SP_UserProfiles"
                 ProfileDBServer      = "SQL.contoso.local\SQLINSTANCE"
                 SocialDBName         = "SP_Social"
@@ -121,7 +128,7 @@
     This example adds a new user profile service application to the local farm
 
 
-    Configuration Example 
+    Configuration Example
     {
         param(
             [Parameter(Mandatory = $true)]
@@ -140,6 +147,7 @@
                 Name                 = "User Profile Service Application"
                 ApplicationPool      = "SharePoint Service Applications"
                 MySiteHostLocation   = "http://my.sharepoint.contoso.local"
+                MySiteManagedPath    = "personal"
                 ProfileDBName        = "SP_UserProfiles"
                 ProfileDBServer      = "SQL.contoso.local\SQLINSTANCE"
                 SocialDBName         = "SP_Social"
