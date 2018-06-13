@@ -1,6 +1,6 @@
 # Change log for SharePointDsc
 
-## Unreleased
+## 2.3
 
 * Changes to SharePointDsc
   * Added a Branches section to the README.md with Codecov and build badges for
