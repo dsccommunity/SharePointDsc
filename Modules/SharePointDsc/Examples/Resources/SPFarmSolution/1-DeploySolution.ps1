@@ -19,7 +19,7 @@
                 LiteralPath          = "C:\src\MySolution.wsp"
                 Ensure               = "Present"
                 Version              = "1.0.0"
-                WebAppUrl            = @("http://collaboration", "http://mysites")
+                WebAppUrls           = @("http://collaboration", "http://mysites")
                 PsDscRunAsCredential = $SetupAccount
             }
         }

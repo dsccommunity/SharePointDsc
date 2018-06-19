@@ -16,7 +16,6 @@ Configuration Example
         SPProjectServerLicense ProjectLicense
         {
             IsSingleInstance     = "Yes"
-            Ensure               = "Present"
             ProductKey           = "XXXXX-XXXXX-XXXXX-XXXXX-XXXXX"
             PsDscRunAsCredential = $SetupAccount
         }

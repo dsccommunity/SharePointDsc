@@ -139,7 +139,7 @@ namespace Microsoft.SharePoint.Administration {
             }
         }
 
-        Context -Name "The web application extension does exist and should that uses NTLM without AllowAnonymous" -Fixture {
+        Context -Name "The web application extension does exist and should use NTLM without AllowAnonymous" -Fixture {
             $testParams = @{
                 WebAppUrl = "http://company.sharepoint.com"
                 Name = "Intranet Zone"

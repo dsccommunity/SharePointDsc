@@ -36,7 +36,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Deployed        = $true
                 Ensure          = "Present"
                 Version         = "1.0.0.0"
-                WebAppUrl       = @("http://app1", "http://app2")
+                WebAppUrls      = @("http://app1", "http://app2")
             }
 
             $global:SPDscSolutionAdded = $false
@@ -86,7 +86,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Deployed        = $true
                 Ensure          = "Present"
                 Version         = "1.0.0.0"
-                WebAppUrl       = @("http://app1", "http://app2")
+                WebAppUrls      = @("http://app1", "http://app2")
             }
 
             $global:SPDscSolutionAdded = $false
@@ -153,7 +153,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Deployed        = $true
                 Ensure          = "Absent"
                 Version         = "1.0.0.0"
-                WebAppUrl       = @("http://app1", "http://app2")
+                WebAppUrls      = @("http://app1", "http://app2")
             }
 
             Mock -CommandName Get-SPSolution -MockWith {
@@ -191,7 +191,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Deployed        = $false
                 Ensure          = "Absent"
                 Version         = "0.0.0.0"
-                WebAppUrl       = @()
+                WebAppUrls      = @()
             }
 
             Mock -CommandName Get-SPSolution -MockWith { $null }
@@ -216,7 +216,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Deployed        = $true
                 Ensure          = "Present"
                 Version         = "1.1.0.0"
-                WebAppUrl       = @("http://app1", "http://app2")
+                WebAppUrls      = @("http://app1", "http://app2")
             }
 
             Mock -CommandName Get-SPSolution -MockWith {
@@ -256,7 +256,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Deployed        = $true
                 Ensure          = "Present"
                 Version         = "1.0.0.0"
-                WebAppUrl       = @("http://app1", "http://app2")
+                WebAppUrls      = @("http://app1", "http://app2")
             }
 
             Mock -CommandName Get-SPSolution -MockWith {
@@ -288,7 +288,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Deployed        = $true
                 Ensure          = "Present"
                 Version         = "1.1.0.0"
-                WebAppUrl       = @()
+                WebAppUrls      = @()
             }
 
             $solution = [pscustomobject]@{
@@ -330,7 +330,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Deployed        = $true
                 Ensure          = "Present"
                 Version         = "1.1.0.0"
-                WebAppUrl       = @()
+                WebAppUrls      = @()
                 SolutionLevel   = "All"
             }
 

@@ -14,7 +14,7 @@ function Get-TargetResource
 
         [Parameter()]
         [System.String[]]
-        $WebAppUrl = @(),
+        $WebAppUrls = @(),
 
         [Parameter()]
         [ValidateSet("Present","Absent")]
@@ -72,7 +72,7 @@ function Get-TargetResource
             Deployed        = $deployed
             Ensure          = $currentState
             Version         = $version
-            WebAppUrl       = $deployedWebApplications
+            WebAppUrls      = $deployedWebApplications
             SolutionLevel   = $params.SolutionLevel
         }
     }
@@ -94,7 +94,7 @@ function Set-TargetResource
 
         [Parameter()]
         [System.String[]]
-        $WebAppUrl = @(),
+        $WebAppUrls = @(),
 
         [Parameter()]
         [ValidateSet("Present","Absent")]
@@ -351,7 +351,7 @@ function Test-TargetResource
 
         [Parameter()]
         [System.String[]]
-        $WebAppUrl = @(),
+        $WebAppUrls = @(),
 
         [Parameter()]
         [ValidateSet("Present","Absent")]
@@ -383,9 +383,9 @@ function Test-TargetResource
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
     $valuesToCheck = @("Ensure", "Version", "Deployed")
-    if ($WebAppUrl.Count -gt 0)
+    if ($WebAppUrls.Count -gt 0)
     {
-        $valuesToCheck += "WebAppUrl"
+        $valuesToCheck += "WebAppUrls"
     }
 
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
