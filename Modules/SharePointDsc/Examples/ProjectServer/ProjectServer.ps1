@@ -138,7 +138,7 @@ Configuration Example
             ApplicationPoolAccount = $WebPoolManagedAccount.UserName
             AllowAnonymous         = $false
             DatabaseName           = "SP_Content"
-            Url                    = "http://sites.contoso.com"
+            WebAppUrl              = "http://sites.contoso.com"
             HostHeader             = "sites.contoso.com"
             Port                   = 80
             PsDscRunAsCredential   = $SPSetupAccount
