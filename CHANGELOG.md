@@ -22,6 +22,7 @@
   * SPMinRoleCompliance
   * SPPasswordChangeSettings
   * SPProjectServerLicense
+  * SPShellAdmin
   * SPSPSecurityTokenServiceConfig
 * Standardized Url/WebApplication parameter to default WebAppUrl parameter
   for the following resources:
