@@ -6,6 +6,9 @@
     false.
 * SPDistributedCacheService
   * Updated resource to allow updating the cache size
+* SPFarm
+  * Implemented ability to deploy Central Administration site to a server at a
+    later point in time
 * SPTrustedIdentityTokenIssuerProviderRealms
   * Fixed code styling issues
 * SPUserProfileServiceApp
