@@ -114,6 +114,17 @@ function Get-SPDSCAssemblyVersion
     return (Get-Command $PathToAssembly).FileVersionInfo.FileMajorPart
 }
 
+function Get-SPDSCBuildVersion
+{
+    [CmdletBinding()]
+    param
+    (
+        [Parameter(Mandatory = $true,Position=1)]
+        [string]
+        $PathToAssembly
+    )
+    return (Get-Command $PathToAssembly).FileVersionInfo.ProductBuildPart
+}
 
 function Get-SPDscFarmAccount
 {
