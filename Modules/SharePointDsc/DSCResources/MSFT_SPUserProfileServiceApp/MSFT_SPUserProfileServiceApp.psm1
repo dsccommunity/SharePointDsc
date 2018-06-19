@@ -165,7 +165,8 @@ function Get-TargetResource
             }
             $upMySiteLocation = $null
             $upMySiteManagedPath = $null
-            try {
+            try
+            {
                 $ca = Get-SPWebApplication -IncludeCentralAdministration | Where-Object -FilterScript {$_.IsAdministrationWebApplication}
                 $caSite = $ca.Sites[0]
                 $serviceContext = Get-SPServiceContext($caSite)
@@ -173,7 +174,8 @@ function Get-TargetResource
                 $upMySiteLocation = $userProfileManager.MySiteHostUrl
                 $upMySiteManagedPath = $userProfileManager.PersonalSiteInclusion
             }
-            catch {
+            catch
+            {
                 throw "The provided My Site Location is not a valid My Site Host."
             }
 
