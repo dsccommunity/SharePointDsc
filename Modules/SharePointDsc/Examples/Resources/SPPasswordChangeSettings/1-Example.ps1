@@ -16,7 +16,7 @@
             SPPasswordChangeSettings ManagedAccountPasswordResetSettings
             {
                 IsSingleInstance              = "Yes"
-                MailAddress                   = "sharepoint`@contoso.com"
+                MailAddress                   = "sharepoint@contoso.com"
                 DaysBeforeExpiry              = "14"
                 PasswordChangeWaitTimeSeconds = "60"
                 NumberOfRetries               = "3"

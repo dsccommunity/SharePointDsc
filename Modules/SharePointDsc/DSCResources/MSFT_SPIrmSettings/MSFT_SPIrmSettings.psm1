@@ -9,7 +9,7 @@ function Get-TargetResource
         [String]
         $IsSingleInstance,
 
-        [Parameter(Mandatory = $true)]
+        [Parameter()]
         [System.String]
         [ValidateSet("Present","Absent")]
         $Ensure,
@@ -82,7 +82,7 @@ function Set-TargetResource
         [String]
         $IsSingleInstance,
 
-        [Parameter(Mandatory = $true)]
+        [Parameter()]
         [System.String]
         [ValidateSet("Present","Absent")]
         $Ensure,
@@ -156,7 +156,7 @@ function Test-TargetResource
         [String]
         $IsSingleInstance,
 
-        [Parameter(Mandatory = $true)]
+        [Parameter()]
         [System.String]
         [ValidateSet("Present","Absent")]
         $Ensure,

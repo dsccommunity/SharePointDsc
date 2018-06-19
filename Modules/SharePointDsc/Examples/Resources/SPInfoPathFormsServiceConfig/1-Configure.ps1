@@ -17,7 +17,6 @@
             SPInfoPathFormsServiceConfig InfoPathFormsServiceConfig
             {
                 IsSingleInstance                         = "Yes"
-                Ensure                                   = "Present"
                 AllowUserFormBrowserEnabling             = $true
                 AllowUserFormBrowserRendering            = $true
                 MaxDataConnectionTimeout                 = 20000

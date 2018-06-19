@@ -17,7 +17,6 @@
             SPIrmSettings RMSSettings
             {
                 IsSingleInstance     = "Yes"
-                Ensure               = "Present"
                 RMSserver            = "https://rms.contoso.com"
                 PsDscRunAsCredential = $SetupAccount
             }

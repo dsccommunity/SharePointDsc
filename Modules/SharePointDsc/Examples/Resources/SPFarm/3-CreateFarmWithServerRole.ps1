@@ -30,7 +30,6 @@
             SPFarm SharePointFarm
             {
                 IsSingleInstance          = "Yes"
-                Ensure                    = "Present"
                 DatabaseServer            = "SQL.contoso.local\SQLINSTANCE"
                 FarmConfigDatabaseName    = "SP_Config"
                 AdminContentDatabaseName  = "SP_AdminContent"
