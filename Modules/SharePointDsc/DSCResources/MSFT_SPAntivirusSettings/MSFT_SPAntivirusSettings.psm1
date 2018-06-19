@@ -9,7 +9,7 @@ function Get-TargetResource
         [String]
         $IsSingleInstance,
 
-        [Parameter(Mandatory = $true)]
+        [Parameter()]
         [System.Boolean]
         $ScanOnDownload,
 
@@ -94,7 +94,7 @@ function Set-TargetResource
         [String]
         $IsSingleInstance,
 
-        [Parameter(Mandatory = $true)]
+        [Parameter()]
         [System.Boolean]
         $ScanOnDownload,
 
@@ -185,7 +185,7 @@ function Test-TargetResource
         [String]
         $IsSingleInstance,
 
-        [Parameter(Mandatory = $true)]
+        [Parameter()]
         [System.Boolean]
         $ScanOnDownload,
 
