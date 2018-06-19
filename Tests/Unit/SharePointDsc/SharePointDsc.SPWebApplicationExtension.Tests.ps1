@@ -198,7 +198,7 @@ namespace Microsoft.SharePoint.Administration {
             }
         }
 
-        Context -Name "The web application extension does exist and should that uses NTLM without AllowAnonymous and HTTPS" -Fixture {
+        Context -Name "The web application extension does exist and should use NTLM without AllowAnonymous and with HTTPS" -Fixture {
             $testParams = @{
                 WebAppUrl = "http://company.sharepoint.com"
                 Name = "Intranet Zone"
@@ -258,7 +258,7 @@ namespace Microsoft.SharePoint.Administration {
             }
         }
 
-        Context -Name "The web application extension does exist and should that uses NTLM and AllowAnonymous" -Fixture {
+        Context -Name "The web application extension does exist and should use NTLM and AllowAnonymous" -Fixture {
             $testParams = @{
                 WebAppUrl = "http://company.sharepoint.com"
                 Name = "Intranet Zone"
@@ -318,7 +318,7 @@ namespace Microsoft.SharePoint.Administration {
             }
         }
 
-        Context -Name "The web application extension does exist and should that uses Kerberos without AllowAnonymous" -Fixture {
+        Context -Name "The web application extension does exist and should use Kerberos without AllowAnonymous" -Fixture {
             $testParams = @{
                 WebAppUrl = "http://company.sharepoint.com"
                 Name = "Intranet Zone"
@@ -377,7 +377,7 @@ namespace Microsoft.SharePoint.Administration {
             }
         }
 
-        Context -Name "The web application extension does exist and should that uses Kerberos and AllowAnonymous" -Fixture {
+        Context -Name "The web application extension does exist and should use Kerberos and AllowAnonymous" -Fixture {
             $testParams = @{
                 WebAppUrl = "http://company.sharepoint.com"
                 Name = "Intranet Zone"
