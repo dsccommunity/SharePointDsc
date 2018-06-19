@@ -7,7 +7,8 @@
 * SPSPSecurityTokenServiceConfig
   * The resource only tested for the Ensure parameter. Added more parameters.
 
-**BREAKING CHANGES**
+The following changes will break v2.x and earlier configurations that use these
+resources:
 
 * Implemented IsSingleInstance parameter to force that the resource can only
   be used once in a configuration for the following resources:
