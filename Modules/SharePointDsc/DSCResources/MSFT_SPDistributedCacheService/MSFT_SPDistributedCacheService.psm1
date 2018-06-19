@@ -313,6 +313,17 @@ function Set-TargetResource
                 }
             }
         }
+        elseif ($CurrentState.CacheSizeInMB -ne $CacheSizeInMB)
+        {
+            Write-Verbose -Message "Updating distributed cache service cache size"
+            Invoke-SPDSCCommand -Credential $InstallAccount `
+                                -Arguments $PSBoundParameters `
+                                -ScriptBlock {
+                $params = $args[0]
+
+                Update-SPDistributedCacheSize -CacheSizeInMB $params.CacheSizeInMB
+            }
+        }
     }
     else
     {
@@ -401,7 +412,9 @@ function Test-TargetResource
     {
         return Test-SPDscParameterState -CurrentValues $CurrentValues `
                                         -DesiredValues $PSBoundParameters `
-                                        -ValuesToCheck @("Ensure", "CreateFirewallRules")
+                                        -ValuesToCheck @("Ensure", `
+                                                         "CreateFirewallRules", `
+                                                         "CacheSizeInMB")
     }
     else
     {

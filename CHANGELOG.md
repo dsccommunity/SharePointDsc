@@ -4,6 +4,12 @@
 * SPCacheAccounts
   * Fixed issue where the Test method would fail if SetWebAppPolicy was set to
     false.
+* SPDistributedCacheService
+  * Updated resource to allow updating the cache size
+* SPTrustedIdentityTokenIssuerProviderRealms
+  * Fixed code styling issues
+* SPUserProfileServiceApp
+  * Fixed code styling issues
 
 ## 2.3
 

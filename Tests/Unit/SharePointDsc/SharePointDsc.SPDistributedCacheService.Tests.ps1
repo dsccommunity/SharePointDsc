@@ -36,7 +36,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         Mock -CommandName New-NetFirewallRule -MockWith { }
         Mock -CommandName Disable-NetFirewallRule -MockWith { }
         Mock -CommandName Add-SPDistributedCacheServiceInstance -MockWith { }
-        Mock Update-SPDistributedCacheSize -MockWith { }
+        Mock -CommandName Update-SPDistributedCacheSize -MockWith { }
         Mock -CommandName Get-SPManagedAccount -MockWith {
             return @{}
         }
@@ -282,6 +282,42 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
         }
 
+        Context -Name "Distributed cache is configured but the cachesize is incorrect" -Fixture {
+            $testParams = @{
+                Name = "AppFabricCache"
+                Ensure = "Present"
+                CacheSizeInMB = 1024
+                ServiceAccount = "DOMAIN\user"
+                CreateFirewallRules = $true
+            }
+
+            $Global:SPDscDCacheOnline = $true
+
+            Mock -CommandName Get-AFCacheHostConfiguration -MockWith {
+                return @{
+                    Size = 2048
+                }
+            }
+            Mock -CommandName Get-CacheHost -MockWith {
+                return @{
+                    PortNo = 22233
+                }
+            }
+
+            It "Should return null from the get method" {
+                (Get-TargetResource @testParams).CacheSizeInMB | Should Be 2048
+            }
+
+            It "Should configure the distributed cache service cache size" {
+                Set-TargetResource @testParams
+                Assert-MockCalled Update-SPDistributedCacheSize
+            }
+
+            It "Should return false from the test method" {
+                Test-TargetResource @testParams | Should Be $false
+            }
+        }
+
         Context -Name "Distributed cache is configured but the required firewall rules are not deployed" -Fixture {
             $testParams = @{
                 Name = "AppFabricCache"
@@ -301,7 +337,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Test-TargetResource @testParams | Should Be $false
             }
 
-            It "shuts down the distributed cache service" {
+            It "Should configure the firewall rules" {
                 Set-TargetResource @testParams
                 Assert-MockCalled Enable-NetFirewallRule
             }
