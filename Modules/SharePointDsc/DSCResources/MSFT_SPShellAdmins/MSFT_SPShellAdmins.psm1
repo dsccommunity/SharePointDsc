@@ -5,8 +5,9 @@ function Get-TargetResource
     param
     (
         [Parameter(Mandatory = $true)]
-        [System.String]
-        $Name,
+        [ValidateSet('Yes')]
+        [String]
+        $IsSingleInstance,
 
         [Parameter()]
         [System.String[]]
@@ -40,7 +41,10 @@ function Get-TargetResource
     Write-Verbose -Message "Getting Shell Admins config"
 
     $nullreturn = @{
-        Name = $null
+        IsSingleInstance = "Yes"
+        Members          = $null
+        MembersToInclude = $null
+        MembersToExclude = $null
     }
 
     if ($Members -and (($MembersToInclude) -or ($MembersToExclude)))
@@ -140,7 +144,7 @@ function Get-TargetResource
         }
 
         return @{
-            Name = $params.Name
+            IsSingleInstance = "Yes"
             Members = $shellAdmins.UserName
             MembersToInclude = $params.MembersToInclude
             MembersToExclude = $params.MembersToExclude
@@ -159,8 +163,9 @@ function Set-TargetResource
     param
     (
         [Parameter(Mandatory = $true)]
-        [System.String]
-        $Name,
+        [ValidateSet('Yes')]
+        [String]
+        $IsSingleInstance,
 
         [Parameter()]
         [System.String[]]
@@ -723,8 +728,9 @@ function Test-TargetResource
     param
     (
         [Parameter(Mandatory = $true)]
-        [System.String]
-        $Name,
+        [ValidateSet('Yes')]
+        [String]
+        $IsSingleInstance,
 
         [Parameter()]
         [System.String[]]
@@ -760,7 +766,9 @@ function Test-TargetResource
     # Start checking
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
-    if ($null -eq $CurrentValues.Name)
+    if ($null -eq $CurrentValues.Members -and `
+        $null -eq $CurrentValues.MembersToInclude -and `
+        $null -eq $CurrentValues.MembersToExclude)
     {
         return $false
     }
