@@ -281,14 +281,14 @@ Configuration Example
         #**********************************************************
 
         SPInstallPrereqs InstallPrereqs {
-            IsSingelInstance  = "Yes"
+            IsSingleInstance  = "Yes"
             Ensure            = "Present"
             InstallerPath     = "C:\binaries\prerequisiteinstaller.exe"
             OnlineMode        = $true
         }
 
         SPInstall InstallSharePoint {
-            IsSingelInstance  = "Yes"
+            IsSingleInstance  = "Yes"
             Ensure            = "Present"
             BinaryDir         = "C:\binaries\"
             ProductKey        = "XXXXX-XXXXX-XXXXX-XXXXX-XXXXX"
@@ -304,7 +304,7 @@ Configuration Example
         #**********************************************************
         SPFarm JoinSPFarm
         {
-            IsSingelInstance         = "Yes"
+            IsSingleInstance         = "Yes"
             Ensure                   = "Present"
             DatabaseServer           = "sql.contoso.com"
             FarmConfigDatabaseName   = "SP_Config"
