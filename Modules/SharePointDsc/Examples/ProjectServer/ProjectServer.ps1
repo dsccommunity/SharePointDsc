@@ -21,6 +21,7 @@ Configuration Example
 
         SPInstallPrereqs InstallPrereqs
         {
+            IsSingleInstance  = "Yes"
             Ensure            = "Present"
             InstallerPath     = "C:\binaries\prerequisiteinstaller.exe"
             OnlineMode        = $true
@@ -28,10 +29,11 @@ Configuration Example
 
         SPInstall InstallSharePoint
         {
-            Ensure = "Present"
-            BinaryDir = "C:\binaries\"
-            ProductKey = "XXXXX-XXXXX-XXXXX-XXXXX-XXXXX"
-            DependsOn = "[SPInstallPrereqs]InstallPrereqs"
+            IsSingleInstance  = "Yes"
+            Ensure            = "Present"
+            BinaryDir         = "C:\binaries\"
+            ProductKey        = "XXXXX-XXXXX-XXXXX-XXXXX-XXXXX"
+            DependsOn         = "[SPInstallPrereqs]InstallPrereqs"
         }
 
         #**********************************************************
@@ -43,6 +45,7 @@ Configuration Example
         #**********************************************************
         SPFarm CreateSPFarm
         {
+            IsSingleInstance         = "Yes"
             Ensure                   = "Present"
             DatabaseServer           = "sql.contoso.com"
             FarmConfigDatabaseName   = "SP_Config"
@@ -70,6 +73,7 @@ Configuration Example
         }
         SPDiagnosticLoggingSettings ApplyDiagnosticLogSettings
         {
+            IsSingleInstance                            = "Yes"
             PsDscRunAsCredential                        = $SPSetupAccount
             LogPath                                     = "C:\ULS"
             LogSpaceInGB                                = 5
@@ -272,6 +276,7 @@ Configuration Example
 
         SPProjectServerLicense PWALicense
         {
+            IsSingleInstance     = "Yes"
             Ensure               = "Present"
             ProductKey           = "XXXXX-XXXXX-XXXXX-XXXXX-XXXXX"
             PsDscRunAsCredential = $SPSetupAccount

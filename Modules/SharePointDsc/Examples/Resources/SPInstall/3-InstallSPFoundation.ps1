@@ -15,7 +15,6 @@
         node localhost {
             Package InstallSharePointFoundation
             {
-                IsSingleInstance   = "Yes"
                 Ensure             = "Present"
                 Name               = "Microsoft SharePoint Foundation 2013 Core"
                 Path               = "E:\SharePoint2013\Setup.exe"

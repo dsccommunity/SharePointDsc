@@ -8,6 +8,7 @@
   * The resource only tested for the Ensure parameter. Added more parameters.
 
 **BREAKING CHANGES**
+
 * Implemented IsSingleInstance parameter to force that the resource can only
   be used once in a configuration for the following resources:
   * SPAntivirusSettings
