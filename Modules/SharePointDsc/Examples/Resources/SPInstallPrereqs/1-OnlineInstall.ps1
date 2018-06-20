@@ -4,7 +4,7 @@
     online mode, looking to download all prerequisites from the internet.
 #>
 
-    Configuration Example 
+    Configuration Example
     {
         param(
             [Parameter(Mandatory = $true)]
@@ -16,6 +16,7 @@
         node localhost {
             SPInstallPrereqs InstallPrerequisites
             {
+                IsSingleInstance  = "Yes"
                 InstallerPath     = "C:\SPInstall\Prerequisiteinstaller.exe"
                 OnlineMode        = $true
             }

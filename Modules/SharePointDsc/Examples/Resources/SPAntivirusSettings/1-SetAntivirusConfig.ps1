@@ -3,7 +3,7 @@
     This example shows how to apply specific anti-virus configuration to the farm
 #>
 
-    Configuration Example 
+    Configuration Example
     {
         param(
             [Parameter(Mandatory = $true)]
@@ -15,6 +15,7 @@
         node localhost {
             SPAntivirusSettings AVSettings
             {
+                IsSingleInstance      = "Yes"
                 ScanOnDownload        = $true
                 ScanOnUpload          = $true
                 AllowDownloadInfected = $false

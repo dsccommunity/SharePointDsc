@@ -6,7 +6,7 @@ function Get-TargetResource
     (
         [Parameter(Mandatory = $true)]
         [System.String]
-        $Url,
+        $WebAppUrl,
 
         [Parameter(Mandatory = $true)]
         [ValidateSet("WebApplication","SiteCollection")]
@@ -68,7 +68,7 @@ function Get-TargetResource
 
                 # Check if web application exists
                 $webapp = Get-SPWebApplication | Where-Object -FilterScript {
-                    ($_.Url).StartsWith($params.Url, "CurrentCultureIgnoreCase")
+                    ($_.Url).StartsWith($params.WebAppUrl, "CurrentCultureIgnoreCase")
                 }
                 if ($null -eq $webapp)
                 {
@@ -79,11 +79,11 @@ function Get-TargetResource
                 else
                 {
                     # Get SPD settings for the web application
-                    $spdSettings = Get-SPDesignerSettings $params.Url
+                    $spdSettings = Get-SPDesignerSettings $params.WebAppUrl
 
                     return @{
                         # Set the SPD settings
-                        Url = $params.Url
+                        WebAppUrl = $params.WebAppUrl
                         SettingsScope = $params.SettingsScope
                         AllowSharePointDesigner = $spdSettings.AllowDesigner
                         AllowDetachPagesFromDefinition = $spdSettings.AllowRevertFromTemplate
@@ -120,7 +120,7 @@ function Get-TargetResource
                     }
 
                     # Check if site collections exists
-                    $site = Get-SPSite -Identity $params.Url -ErrorAction SilentlyContinue
+                    $site = Get-SPSite -Identity $params.WebAppUrl -ErrorAction SilentlyContinue
                     if ($null -eq $site)
                     {
                         Write-Verbose -Message ("Site collection not found. SharePoint " + `
@@ -131,7 +131,7 @@ function Get-TargetResource
                     {
                         return @{
                             # Set the SPD settings
-                            Url = $params.Url
+                            WebAppUrl = $params.WebAppUrl
                             SettingsScope = $params.SettingsScope
                             AllowSharePointDesigner = $site.AllowDesigner
                             AllowDetachPagesFromDefinition = $site.AllowRevertFromTemplate
@@ -166,7 +166,7 @@ function Set-TargetResource
     (
         [Parameter(Mandatory = $true)]
         [System.String]
-        $Url,
+        $WebAppUrl,
 
         [Parameter(Mandatory = $true)]
         [ValidateSet("WebApplication","SiteCollection")]
@@ -231,7 +231,7 @@ function Set-TargetResource
 
                 # Check if web application exists
                 $webapp = Get-SPWebApplication | Where-Object -FilterScript {
-                    ($_.Url).StartsWith($params.Url, "CurrentCultureIgnoreCase")
+                    ($_.Url).StartsWith($params.WebAppUrl, "CurrentCultureIgnoreCase")
                 }
                 if ($null -eq $webapp)
                 {
@@ -299,7 +299,7 @@ function Set-TargetResource
                     Write-Verbose -Message "Start update SPD site collection settings"
 
                     # Check if site collection exists
-                    $site = Get-SPSite -Identity $params.Url -ErrorAction SilentlyContinue
+                    $site = Get-SPSite -Identity $params.WebAppUrl -ErrorAction SilentlyContinue
                     if ($null -eq $site)
                     {
                         throw ("Site collection not found. SharePoint Designer settings " + `
@@ -362,7 +362,7 @@ function Test-TargetResource
     (
         [Parameter(Mandatory = $true)]
         [System.String]
-        $Url,
+        $WebAppUrl,
 
         [Parameter(Mandatory = $true)]
         [ValidateSet("WebApplication","SiteCollection")]

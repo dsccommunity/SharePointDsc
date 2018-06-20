@@ -1,5 +1,43 @@
 # Change log for SharePointDsc
 
+## v3.0
+
+* SPConfigWizard
+  * Fixed check for Ensure=Absent in the Set method
+* SPSPSecurityTokenServiceConfig
+  * The resource only tested for the Ensure parameter. Added more parameters.
+
+The following changes will break v2.x and earlier configurations that use these
+resources:
+
+* Implemented IsSingleInstance parameter to force that the resource can only
+  be used once in a configuration for the following resources:
+  * SPAntivirusSettings
+  * SPConfigWizard
+  * SPDiagnosticLoggingSettings
+  * SPFarm
+  * SPFarmAdministrators
+  * SPInfoPathFormsServiceConfig
+  * SPInstall
+  * SPInstallPrereqs
+  * SPIrmSettings
+  * SPMinRoleCompliance
+  * SPPasswordChangeSettings
+  * SPProjectServerLicense
+  * SPShellAdmin
+  * SPSPSecurityTokenServiceConfig
+* Standardized Url/WebApplication parameter to default WebAppUrl parameter
+  for the following resources:
+  * SPDesignerSettings
+  * SPFarmSolution
+  * SPWebAppBlockedFileTypes
+  * SPWebAppGeneralSettings
+  * SPWebApplication
+  * SPWebApplicationAppDomain
+  * SPWebAppSiteUseAndDeletion
+  * SPWebAppThrottlingSettings
+  * SPWebAppWorkflowSettings
+
 ## Unreleased
 
 ## 2.3
