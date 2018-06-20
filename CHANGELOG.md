@@ -9,6 +9,9 @@
 * SPFarm
   * Implemented ability to deploy Central Administration site to a server at a
     later point in time
+* SPServiceAppSecurity
+  * Fixed issue where error was thrown when no permissions were set on the
+    service application
 * SPTrustedIdentityTokenIssuerProviderRealms
   * Fixed code styling issues
 * SPUserProfileServiceApp
