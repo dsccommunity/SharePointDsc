@@ -45,8 +45,9 @@ function New-SPDscUnitTestHelper
     }
 
     $spBuild = (Get-Item -Path $SharePointStubModule).Directory.BaseName
-    $firstDot = $spBuild.IndexOf(".")
-    $majorBuildNumber = $spBuild.Substring(0, $firstDot)
+    $spBuildParts = $spBuild.Split('.')
+    $majorBuildNumber = $spBuildParts[0]
+    $minorBuildNumber = $spBuildParts[1]
 
     $describeHeader += " [SP Build: $spBuild]"
 
@@ -67,6 +68,10 @@ function New-SPDscUnitTestHelper
 
             Mock -CommandName Get-SPDSCAssemblyVersion -MockWith {
                 return $majorBuildNumber
+            }
+
+            Mock -CommandName Get-SPDSCBuildVersion -MockWith {
+                return $minorBuildNumber
             }
 
 "@

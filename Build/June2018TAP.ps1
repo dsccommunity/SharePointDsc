@@ -153,7 +153,61 @@ configuration June2018Tap
             RunCentralAdmin           = $Node.RunCentralAdmin
             CentralAdministrationPort = "7777"
             ServerRole                = "Application"
-            PSDSCRunAsCredential      = $credsDomainAdmin
+            PSDSCRunAsCredential      = $credsSPSetup
+        }
+
+        SPWebApplication Root
+        {
+            Ensure                 = "Present"
+            Name                   = "Root"
+            ApplicationPool        = "SharePoint - 80"
+            ApplicationPoolAccount = "contoso\lcladmin"
+            Url                    = "http://root.contoso.com"
+            DatabaseServer         = $ConfigurationData.SharePoint.Settings.DatabaseServer
+            DatabaseName           = "Root_Content_DB"
+            HostHeader             = "root.contoso.com"
+            AllowAnonymous         = $false
+            PSDSCRunAsCredential   = $credsSPSetup
+            DependsOn              = "[SPFarm]SharePointFarm"
+        }
+
+        SPQuotaTemplate RegularQuota
+        {
+            Name                        = "RegularQuota"
+            StorageMaxInMb              = 2048
+            StorageWarningInMb          = 1600
+            MaximumUsagePointsSolutions = 400
+            WarningUsagePointsSolutions = 360
+            PSDSCRunAsCredential        = $credsSPSetup
+            DependsOn                   = "[SPWebApplication]Root"
+        }
+
+        SPSite RootSite
+        {
+            Name                     = "Root Site Collection"
+            Url                      = "http://root.contoso.com"
+            OwnerAlias               = "contoso\lcladmin"
+            ContentDatabase          = "Root_Content_DB"
+            HostHeaderWebApplication = "http://root.contoso.com"
+            Description              = "Root Site Collection"
+            Template                 = "STS#0"
+            QuotaTemplate            = "RegularQuota"
+            PSDSCRunAsCredential     = $credsSPSetup
+            DependsOn                = "[SPQuotaTemplate]RegularQuota"
+        }
+
+        SPWeb SubWeb1
+        {
+            Name                  = "Subweb1"
+            Url                   = "http://root.contoso.com/subweb1"
+            AddToQuickLaunch      = $true
+            AddToTopNav           = $true
+            Description           = "This is a subsite"
+            UseParentTopNav       = $true
+            UniquePermissions     = $true
+            Template              = "STS#0"
+            PSDSCRunAsCredential  = $credsSPSetup
+            DependsOn             = "[SPSite]RootSite"
         }
     }
 }
