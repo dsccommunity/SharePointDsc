@@ -401,6 +401,86 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
         }
 
+        Context -Name "This server is connected to the farm and is running CA, but shouldn't" -Fixture {
+            $testParams = @{
+                Ensure = "Present"
+                FarmConfigDatabaseName = "SP_Config"
+                DatabaseServer = "sql.contoso.com"
+                FarmAccount = $mockFarmAccount
+                Passphrase = $mockPassphrase
+                AdminContentDatabaseName = "SP_AdminContent"
+                RunCentralAdmin = $false
+            }
+
+            Mock -CommandName "Get-SPDSCRegistryKey" -MockWith {
+                return "Connection string example"
+            }
+
+            Mock -CommandName "Get-SPFarm" -MockWith {
+                return @{
+                    Name = $testParams.FarmConfigDatabaseName
+                    DatabaseServer = @{
+                        Name = $testParams.DatabaseServer
+                    }
+                    AdminContentDatabaseName = $testParams.AdminContentDatabaseName
+                }
+            }
+            Mock -CommandName "Get-SPDSCConfigDBStatus" -MockWith {
+                return @{
+                    Locked = $false
+                    ValidPermissions = $true
+                    DatabaseExists = $true
+                }
+            }
+            Mock -CommandName "Get-SPDatabase" -MockWith {
+                return @(@{
+                    Name = $testParams.FarmConfigDatabaseName
+                    Type = "Configuration Database"
+                    NormalizedDataSource = $testParams.DatabaseServer
+                })
+            }
+            Mock -CommandName "Get-SPWebApplication" -MockWith {
+                return @{
+                    IsAdministrationWebApplication = $true
+                    ContentDatabases = @(@{
+                        Name = $testParams.AdminContentDatabaseName
+                    })
+                    IISSettings = @(@{
+                        DisableKerberos = $true
+                    })
+                    Url = "http://localhost:9999"
+                }
+            }
+            Mock -CommandName "Get-SPServiceInstance" -MockWith {
+                if ($global:SPDscCentralAdminCheckDone -eq $true)
+                {
+                    return @(@{
+                        TypeName = "Central Administration"
+                        Status = "Online"
+                    })
+                }
+                else
+                {
+                    $global:SPDscCentralAdminCheckDone = $true
+                    return $null
+                }
+            }
+            Mock -CommandName "Stop-SPServiceInstance" -MockWith {}
+
+            It "Should return present from the get method" {
+                (Get-TargetResource @testParams).Ensure | Should Be "Present"
+            }
+
+            It "Should return present from the get method" {
+                Set-TargetResource @testParams
+                Assert-MockCalled Stop-SPServiceInstance
+            }
+
+            It "Should return true from the test method" {
+                Test-TargetResource @testParams | Should be $false
+            }
+        }
+
         Context -Name "A config database exists, and this server is connected to it and should be" -Fixture {
             $testParams = @{
                 Ensure = "Present"
