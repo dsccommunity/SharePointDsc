@@ -156,19 +156,26 @@ configuration June2018Tap
             PSDSCRunAsCredential      = $credsSPSetup
         }
 
+        SPManagedAccount SPFarmAccount
+        {
+            AccountName            = $credsSPFarm.UserName
+            PSDSCRunAsCredential   = $credsSPSetup
+            DependsOn              = "[SPFarm]SharePointFarm"
+        }
+
         SPWebApplication Root
         {
             Ensure                 = "Present"
             Name                   = "Root"
             ApplicationPool        = "SharePoint - 80"
-            ApplicationPoolAccount = "contoso\lcladmin"
+            ApplicationPoolAccount = $credsSPFarm.UserName
             Url                    = "http://root.contoso.com"
             DatabaseServer         = $ConfigurationData.SharePoint.Settings.DatabaseServer
             DatabaseName           = "Root_Content_DB"
             HostHeader             = "root.contoso.com"
             AllowAnonymous         = $false
-            PSDSCRunAsCredential   = $credsSPSetup
-            DependsOn              = "[SPFarm]SharePointFarm"
+            PSDSCRunAsCredential   = $credsDomainAdmin
+            DependsOn              = "[SPManagedAccount]SPFarmAccount"
         }
 
         SPQuotaTemplate RegularQuota
@@ -178,7 +185,7 @@ configuration June2018Tap
             StorageWarningInMb          = 1600
             MaximumUsagePointsSolutions = 400
             WarningUsagePointsSolutions = 360
-            PSDSCRunAsCredential        = $credsSPSetup
+            PSDSCRunAsCredential        = $credsDomainAdmin
             DependsOn                   = "[SPWebApplication]Root"
         }
 
