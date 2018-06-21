@@ -94,3 +94,4 @@ function Invoke-TestHarness
 
     return $results
 }
+Invoke-TestHarness
