@@ -178,17 +178,6 @@ configuration June2018Tap
             DependsOn              = "[SPManagedAccount]SPFarmAccount"
         }
 
-        SPQuotaTemplate RegularQuota
-        {
-            Name                        = "RegularQuota"
-            StorageMaxInMb              = 2048
-            StorageWarningInMb          = 1600
-            MaximumUsagePointsSolutions = 400
-            WarningUsagePointsSolutions = 360
-            PSDSCRunAsCredential        = $credsDomainAdmin
-            DependsOn                   = "[SPWebApplication]Root"
-        }
-
         SPSite RootSite
         {
             Name                     = "Root Site Collection"
@@ -198,7 +187,6 @@ configuration June2018Tap
             HostHeaderWebApplication = "http://root.contoso.com"
             Description              = "Root Site Collection"
             Template                 = "STS#0"
-            QuotaTemplate            = "RegularQuota"
             PSDSCRunAsCredential     = $credsSPSetup
             DependsOn                = "[SPQuotaTemplate]RegularQuota"
         }
