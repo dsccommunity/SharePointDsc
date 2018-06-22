@@ -188,7 +188,7 @@ configuration June2018Tap
             Description              = "Root Site Collection"
             Template                 = "STS#0"
             PSDSCRunAsCredential     = $credsSPSetup
-            DependsOn                = "[SPQuotaTemplate]RegularQuota"
+            DependsOn                = "[SPWebApplication]Root"
         }
 
         SPWeb SubWeb1
