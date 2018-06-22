@@ -156,30 +156,26 @@ configuration June2018Tap
             PSDSCRunAsCredential      = $credsSPSetup
         }
 
+        SPManagedAccount SPFarmAccount
+        {
+            AccountName            = $credsSPFarm.UserName
+            PSDSCRunAsCredential   = $credsSPSetup
+            DependsOn              = "[SPFarm]SharePointFarm"
+        }
+
         SPWebApplication Root
         {
             Ensure                 = "Present"
             Name                   = "Root"
             ApplicationPool        = "SharePoint - 80"
-            ApplicationPoolAccount = "contoso\lcladmin"
+            ApplicationPoolAccount = $credsSPFarm.UserName
             Url                    = "http://root.contoso.com"
             DatabaseServer         = $ConfigurationData.SharePoint.Settings.DatabaseServer
             DatabaseName           = "Root_Content_DB"
             HostHeader             = "root.contoso.com"
             AllowAnonymous         = $false
-            PSDSCRunAsCredential   = $credsSPSetup
-            DependsOn              = "[SPFarm]SharePointFarm"
-        }
-
-        SPQuotaTemplate RegularQuota
-        {
-            Name                        = "RegularQuota"
-            StorageMaxInMb              = 2048
-            StorageWarningInMb          = 1600
-            MaximumUsagePointsSolutions = 400
-            WarningUsagePointsSolutions = 360
-            PSDSCRunAsCredential        = $credsSPSetup
-            DependsOn                   = "[SPWebApplication]Root"
+            PSDSCRunAsCredential   = $credsDomainAdmin
+            DependsOn              = "[SPManagedAccount]SPFarmAccount"
         }
 
         SPSite RootSite
@@ -191,7 +187,6 @@ configuration June2018Tap
             HostHeaderWebApplication = "http://root.contoso.com"
             Description              = "Root Site Collection"
             Template                 = "STS#0"
-            QuotaTemplate            = "RegularQuota"
             PSDSCRunAsCredential     = $credsSPSetup
             DependsOn                = "[SPQuotaTemplate]RegularQuota"
         }
