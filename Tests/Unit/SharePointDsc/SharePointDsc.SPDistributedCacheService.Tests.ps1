@@ -168,6 +168,98 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
         }
 
+        Context -Name "Distributed cache is not configured, waiting for stop of DC" -Fixture {
+            $testParams = @{
+                Name = "AppFabricCache"
+                Ensure = "Present"
+                CacheSizeInMB = 1024
+                ServiceAccount = "DOMAIN\user"
+                CreateFirewallRules = $true
+            }
+
+            Mock Start-Sleep -MockWith {}
+
+            Mock Use-CacheCluster -MockWith {
+                throw [Exception] "ERRPS001 Error in reading provider and connection string values."
+            }
+            Mock -CommandName Stop-SPServiceInstance -MockWith {}
+            Mock -CommandName Start-SPServiceInstance -MockWith {}
+
+            Mock -CommandName Get-SPServiceInstance -MockWith {
+                switch ($Global:SPDscRunCount)
+                {
+                    { 0,3,4,5 -contains $_ }
+                        {
+                            $Global:SPDscRunCount++
+                            return @(New-Object -TypeName "Object" |
+                                        Add-Member -MemberType NoteProperty `
+                                                   -Name Status `
+                                                   -Value "Disabled" `
+                                                   -PassThru |
+                                        Add-Member -MemberType NoteProperty `
+                                                   -Name Service `
+                                                   -Value "SPDistributedCacheService Name=AppFabricCachingService" `
+                                                   -PassThru |
+                                        Add-Member -MemberType NoteProperty `
+                                                   -Name Server `
+                                                   -Value @{
+                                                       Name = $env:COMPUTERNAME
+                                                    } -PassThru |
+                                        Add-Member -MemberType ScriptMethod `
+                                                   -Name Delete `
+                                                   -Value {} `
+                                                   -PassThru |
+                                        Add-Member -MemberType ScriptMethod `
+                                                   -Name GetType `
+                                                   -Value {
+                                                New-Object -TypeName "Object" |
+                                                    Add-Member -MemberType NoteProperty `
+                                                               -Name Name `
+                                                               -Value "SPDistributedCacheServiceInstance" `
+                                                               -PassThru
+                                                    } -PassThru -Force)
+                        }
+                    { 1,2,6,7 -contains $_ }
+                        {
+                            $Global:SPDscRunCount = $Global:SPDscRunCount + 1
+                            return @(New-Object -TypeName "Object" |
+                                        Add-Member -MemberType NoteProperty `
+                                                   -Name Status `
+                                                   -Value "Online" `
+                                                   -PassThru |
+                                        Add-Member -MemberType NoteProperty `
+                                                   -Name Service `
+                                                   -Value "SPDistributedCacheService Name=AppFabricCachingService" `
+                                                   -PassThru |
+                                        Add-Member -MemberType NoteProperty `
+                                                   -Name Server `
+                                                   -Value @{
+                                                       Name = $env:COMPUTERNAME
+                                                    } -PassThru |
+                                        Add-Member -MemberType ScriptMethod `
+                                                   -Name Delete `
+                                                   -Value {} `
+                                                   -PassThru |
+                                        Add-Member -MemberType ScriptMethod `
+                                                   -Name GetType `
+                                                   -Value {
+                                                New-Object -TypeName "Object" |
+                                                    Add-Member -MemberType NoteProperty `
+                                                               -Name Name `
+                                                               -Value "SPDistributedCacheServiceInstance" `
+                                                               -PassThru
+                                                    } -PassThru -Force)
+                        }
+                }
+            }
+
+            $Global:SPDscRunCount = 0
+            It "Should set up the cache correctly" {
+                Set-TargetResource @testParams
+                Assert-MockCalled Add-SPDistributedCacheServiceInstance
+            }
+        }
+
         Context -Name "Distributed cache is not configured, ServerProvisionOrder specified" -Fixture {
             $testParams = @{
                 Name = "AppFabricCache"
@@ -303,8 +395,78 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     PortNo = 22233
                 }
             }
+            Mock -CommandName Start-Sleep -MockWith {}
 
-            It "Should return null from the get method" {
+            Mock -CommandName Get-SPServiceInstance -MockWith {
+                switch ($Global:SPDscRunCount)
+                {
+                    { 0,3,4,5 -contains $_ }
+                        {
+                            $Global:SPDscRunCount++
+                            return @(New-Object -TypeName "Object" |
+                                        Add-Member -MemberType NoteProperty `
+                                                   -Name Status `
+                                                   -Value "Disabled" `
+                                                   -PassThru |
+                                        Add-Member -MemberType NoteProperty `
+                                                   -Name Service `
+                                                   -Value "SPDistributedCacheService Name=AppFabricCachingService" `
+                                                   -PassThru |
+                                        Add-Member -MemberType NoteProperty `
+                                                   -Name Server `
+                                                   -Value @{
+                                                       Name = $env:COMPUTERNAME
+                                                    } -PassThru |
+                                        Add-Member -MemberType ScriptMethod `
+                                                   -Name Delete `
+                                                   -Value {} `
+                                                   -PassThru |
+                                        Add-Member -MemberType ScriptMethod `
+                                                   -Name GetType `
+                                                   -Value {
+                                                New-Object -TypeName "Object" |
+                                                    Add-Member -MemberType NoteProperty `
+                                                               -Name Name `
+                                                               -Value "SPDistributedCacheServiceInstance" `
+                                                               -PassThru
+                                                    } -PassThru -Force)
+                        }
+                    { 1,2,6,7 -contains $_ }
+                        {
+                            $Global:SPDscRunCount = $Global:SPDscRunCount + 1
+                            return @(New-Object -TypeName "Object" |
+                                        Add-Member -MemberType NoteProperty `
+                                                   -Name Status `
+                                                   -Value "Online" `
+                                                   -PassThru |
+                                        Add-Member -MemberType NoteProperty `
+                                                   -Name Service `
+                                                   -Value "SPDistributedCacheService Name=AppFabricCachingService" `
+                                                   -PassThru |
+                                        Add-Member -MemberType NoteProperty `
+                                                   -Name Server `
+                                                   -Value @{
+                                                       Name = $env:COMPUTERNAME
+                                                    } -PassThru |
+                                        Add-Member -MemberType ScriptMethod `
+                                                   -Name Delete `
+                                                   -Value {} `
+                                                   -PassThru |
+                                        Add-Member -MemberType ScriptMethod `
+                                                   -Name GetType `
+                                                   -Value {
+                                                New-Object -TypeName "Object" |
+                                                    Add-Member -MemberType NoteProperty `
+                                                               -Name Name `
+                                                               -Value "SPDistributedCacheServiceInstance" `
+                                                               -PassThru
+                                                    } -PassThru -Force)
+                        }
+                }
+            }
+
+            $Global:SPDscRunCount = 0
+            It "Should return CacheSizeInMB = 2048 from the get method" {
                 (Get-TargetResource @testParams).CacheSizeInMB | Should Be 2048
             }
 
