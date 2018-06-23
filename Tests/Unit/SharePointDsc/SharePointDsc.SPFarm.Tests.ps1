@@ -330,11 +330,11 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 RunCentralAdmin = $true
             }
 
-            Mock -CommandName "Get-SPDSCRegistryKey" -MockWith {
+            Mock -CommandName Get-SPDSCRegistryKey -MockWith {
                 return "Connection string example"
             }
 
-            Mock -CommandName "Get-SPFarm" -MockWith {
+            Mock -CommandName Get-SPFarm -MockWith {
                 return @{
                     Name = $testParams.FarmConfigDatabaseName
                     DatabaseServer = @{
@@ -343,21 +343,21 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     AdminContentDatabaseName = $testParams.AdminContentDatabaseName
                 }
             }
-            Mock -CommandName "Get-SPDSCConfigDBStatus" -MockWith {
+            Mock -CommandName Get-SPDSCConfigDBStatus -MockWith {
                 return @{
                     Locked = $false
                     ValidPermissions = $true
                     DatabaseExists = $true
                 }
             }
-            Mock -CommandName "Get-SPDatabase" -MockWith {
+            Mock -CommandName Get-SPDatabase -MockWith {
                 return @(@{
                     Name = $testParams.FarmConfigDatabaseName
                     Type = "Configuration Database"
                     NormalizedDataSource = $testParams.DatabaseServer
                 })
             }
-            Mock -CommandName "Get-SPWebApplication" -MockWith {
+            Mock -CommandName Get-SPWebApplication -MockWith {
                 return @{
                     IsAdministrationWebApplication = $true
                     ContentDatabases = @(@{
@@ -369,27 +369,37 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     Url = "http://localhost:9999"
                 }
             }
-            Mock -CommandName "Get-SPServiceInstance" -MockWith {
-                if ($global:SPDscCentralAdminCheckDone -eq $true)
-                {
-                    return @(@{
-                        TypeName = "Central Administration"
-                        Status = "Online"
-                    })
-                }
-                else
-                {
-                    $global:SPDscCentralAdminCheckDone = $true
-                    return $null
+            Mock -CommandName Get-CimInstance -MockWith {
+                return @{
+                    Domain = "domain.com"
                 }
             }
 
-            $global:SPDscCentralAdminCheckDone = $false
+            Mock -CommandName Get-SPServiceInstance -MockWith {
+                switch ($global:SPDscSIRunCount)
+                {
+                    { 2 -contains $_ }
+                        {
+                            $global:SPDscSIRunCount++
+                            return @(@{
+                                TypeName = "Central Administration"
+                                Status = "Online"
+                            })
+                        }
+                    { 0,1 -contains $_ }
+                        {
+                            $global:SPDscSIRunCount++
+                            return $null
+                        }
+                }
+            }
+
+            $global:SPDscSIRunCount = 0
             It "Should return false from the get method" {
                 (Get-TargetResource @testParams).RunCentralAdmin | Should Be $false
             }
 
-            $global:SPDscCentralAdminCheckDone = $false
+            $global:SPDscSIRunCount = 0
             It "Should start the central administration instance" {
                 Set-TargetResource @testParams
                 Assert-MockCalled -CommandName "Start-SPServiceInstance"
@@ -451,31 +461,39 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     Url = "http://localhost:9999"
                 }
             }
-            Mock -CommandName "Get-SPServiceInstance" -MockWith {
-                if ($global:SPDscCentralAdminCheckDone -eq $true)
+            Mock -CommandName Start-Sleep -MockWith {}
+            Mock -CommandName Get-SPServiceInstance -MockWith {
+                switch ($global:SPDscSIRunCount)
                 {
-                    return @(@{
-                        TypeName = "Central Administration"
-                        Status = "Online"
-                    })
-                }
-                else
-                {
-                    $global:SPDscCentralAdminCheckDone = $true
-                    return $null
+                    { 0,2 -contains $_ }
+                        {
+                            $global:SPDscSIRunCount++
+                            return @(@{
+                                TypeName = "Central Administration"
+                                Status = "Online"
+                            })
+                        }
+                    { 1 -contains $_ }
+                        {
+                            $global:SPDscSIRunCount++
+                            return $null
+                        }
                 }
             }
             Mock -CommandName "Stop-SPServiceInstance" -MockWith {}
 
+            $global:SPDscSIRunCount = 0
             It "Should return present from the get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Present"
             }
 
+            $global:SPDscSIRunCount = 0
             It "Should return present from the get method" {
                 Set-TargetResource @testParams
                 Assert-MockCalled Stop-SPServiceInstance
             }
 
+            $global:SPDscSIRunCount = 0
             It "Should return true from the test method" {
                 Test-TargetResource @testParams | Should be $false
             }
