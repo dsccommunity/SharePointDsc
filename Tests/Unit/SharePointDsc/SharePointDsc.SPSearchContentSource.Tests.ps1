@@ -1177,8 +1177,7 @@ namespace Microsoft.Office.Server.Search.Administration {
             }
 
             It "Should throw unsupported type error" {
-                { Get-TargetResource @testParams } | Should Throw "SharePointDsc does not currently support 'FakeType' content " + `
-                "sources. Please use only 'SharePoint', 'FileShare', 'Website' or 'Business'."
+                { Get-TargetResource @testParams } | Should Throw "SharePointDsc does not currently support 'FakeType' content sources. Please use only 'SharePoint', 'FileShare', 'Website' or 'Business'."
             }
         }
 
@@ -1229,10 +1228,8 @@ namespace Microsoft.Office.Server.Search.Administration {
             }
 
             It "Should throw Invalid parameter error" {
-                { Set-TargetResource @testParams } | Should Throw "You can not specify an incremental crawl schedule on a content source " + `
-                "that will use continous crawl"
-                { Test-TargetResource @testParams } | Should Throw "You can not specify an incremental crawl schedule on a content source " + `
-                "that will use continous crawl"
+                { Set-TargetResource @testParams } | Should Throw "You can not specify an incremental crawl schedule on a content source that will use continous crawl"
+                { Test-TargetResource @testParams } | Should Throw "You can not specify an incremental crawl schedule on a content source that will use continous crawl"
             }
 
             $testParams = @{
@@ -1244,10 +1241,8 @@ namespace Microsoft.Office.Server.Search.Administration {
             }
 
             It "Should throw Invalid parameter error" {
-                { Set-TargetResource @testParams } | Should Throw "Parameter CrawlSetting can only be set to custom for website content " + `
-                "sources"
-                { Test-TargetResource @testParams } | Should Throw "Parameter CrawlSetting can only be set to custom for website content " + `
-                "sources"
+                { Set-TargetResource @testParams } | Should Throw "Parameter CrawlSetting can only be set to custom for website content sources"
+                { Test-TargetResource @testParams } | Should Throw "Parameter CrawlSetting can only be set to custom for website content sources"
             }
         }
 
