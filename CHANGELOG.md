@@ -4,7 +4,9 @@
 
 * SPConfigWizard
   * Fixed check for Ensure=Absent in the Set method
-* SPSPSecurityTokenServiceConfig
+* SPSearchContentSource
+  * Added support for Business Content Source Type
+* SPSecurityTokenServiceConfig
   * The resource only tested for the Ensure parameter. Added more parameters.
 
 The following changes will break v2.x and earlier configurations that use these
@@ -148,7 +150,6 @@ resources:
   * Fixed code styling issues
 * SPUserProfileServiceApp
   * Fixed code styling issues
-
 ## 2.3
 
 * Changes to SharePointDsc
