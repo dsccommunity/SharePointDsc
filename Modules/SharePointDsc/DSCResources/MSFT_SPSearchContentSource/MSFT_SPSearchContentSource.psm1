@@ -307,7 +307,7 @@ function Set-TargetResource
             }
             if ($CrawlSetting -eq "Custom")
             {
-                throw ("Parameter 'CrawlSetting' can only be set to custom for website content " + `
+                throw ("Parameter CrawlSetting can only be set to custom for website content " + `
                        "sources")
             }
         }
@@ -332,7 +332,7 @@ function Set-TargetResource
             }
             if ($CrawlSetting -eq "Custom")
             {
-                throw "Parameter 'CrawlSetting' can only be set to custom for website content sources"
+                throw "Parameter CrawlSetting can only be set to custom for website content sources"
             }
         }
         "Business" {
@@ -771,7 +771,7 @@ function Test-TargetResource
             }
             if ($CrawlSetting -eq "Custom")
             {
-                throw ("Parameter 'CrawlSetting' can only be set to custom for website content " + `
+                throw ("Parameter CrawlSetting can only be set to custom for website content " + `
                        "sources")
             }
         }
@@ -796,7 +796,7 @@ function Test-TargetResource
             }
             if ($CrawlSetting -eq "Custom")
             {
-                throw "Parameter 'CrawlSetting' can only be set to custom for website content sources"
+                throw "Parameter CrawlSetting can only be set to custom for website content sources"
             }
         }
         "Business" {

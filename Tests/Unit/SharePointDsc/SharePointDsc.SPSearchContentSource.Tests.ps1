@@ -1198,6 +1198,7 @@ namespace Microsoft.Office.Server.Search.Administration {
 
             It "Should throw Invalid parameter error" {
                 { Set-TargetResource @testParams } | Should Throw "Parameter LimitPageDepth is not valid for SharePoint content sources"
+                { Test-TargetResource @testParams } | Should Throw "Parameter LimitPageDepth is not valid for SharePoint content sources"
             }
 
             $testParams = @{
@@ -1210,6 +1211,7 @@ namespace Microsoft.Office.Server.Search.Administration {
 
             It "Should throw Invalid parameter error" {
                 { Set-TargetResource @testParams } | Should Throw "Parameter LimitServerHops is not valid for SharePoint content sources"
+                { Test-TargetResource @testParams } | Should Throw "Parameter LimitServerHops is not valid for SharePoint content sources"
             }
 
             $testParams = @{
@@ -1229,6 +1231,8 @@ namespace Microsoft.Office.Server.Search.Administration {
             It "Should throw Invalid parameter error" {
                 { Set-TargetResource @testParams } | Should Throw "You can not specify an incremental crawl schedule on a content source " + `
                 "that will use continous crawl"
+                { Test-TargetResource @testParams } | Should Throw "You can not specify an incremental crawl schedule on a content source " + `
+                "that will use continous crawl"
             }
 
             $testParams = @{
@@ -1240,7 +1244,9 @@ namespace Microsoft.Office.Server.Search.Administration {
             }
 
             It "Should throw Invalid parameter error" {
-                { Set-TargetResource @testParams } | Should Throw "Parameter 'CrawlSetting' can only be set to custom for website content " + `
+                { Set-TargetResource @testParams } | Should Throw "Parameter CrawlSetting can only be set to custom for website content " + `
+                "sources"
+                { Test-TargetResource @testParams } | Should Throw "Parameter CrawlSetting can only be set to custom for website content " + `
                 "sources"
             }
         }
@@ -1261,6 +1267,7 @@ namespace Microsoft.Office.Server.Search.Administration {
 
             It "Should throw Invalid parameter error" {
                 { Set-TargetResource @testParams } | Should Throw "Parameter ContinuousCrawl is not valid for website content sources"
+                { Test-TargetResource @testParams } | Should Throw "Parameter ContinuousCrawl is not valid for website content sources"
             }
 
             $testParams = @{
@@ -1273,6 +1280,7 @@ namespace Microsoft.Office.Server.Search.Administration {
 
             It "Should throw Invalid parameter error" {
                 { Set-TargetResource @testParams } | Should Throw "Parameter LimitServerHops is not valid for website content sources"
+                { Test-TargetResource @testParams } | Should Throw "Parameter LimitServerHops is not valid for website content sources"
             }
         }
 
@@ -1292,6 +1300,7 @@ namespace Microsoft.Office.Server.Search.Administration {
 
             It "Should throw Invalid parameter error" {
                 { Set-TargetResource @testParams } | Should Throw "Parameter LimitPageDepth is not valid for file share content sources"
+                { Test-TargetResource @testParams } | Should Throw "Parameter LimitPageDepth is not valid for file share content sources"
             }
 
             $testParams = @{
@@ -1304,6 +1313,7 @@ namespace Microsoft.Office.Server.Search.Administration {
 
             It "Should throw Invalid parameter error" {
                 { Set-TargetResource @testParams } | Should Throw "Parameter LimitServerHops is not valid for file share content sources"
+                { Test-TargetResource @testParams } | Should Throw "Parameter LimitServerHops is not valid for file share content sources"
             }
 
             $testParams = @{
@@ -1315,7 +1325,8 @@ namespace Microsoft.Office.Server.Search.Administration {
             }
 
             It "Should throw Invalid parameter error" {
-                { Set-TargetResource @testParams } | Should Throw "Parameter 'CrawlSetting' can only be set to custom for website content sources"
+                { Set-TargetResource @testParams } | Should Throw "Parameter CrawlSetting can only be set to custom for website content sources"
+                { Test-TargetResource @testParams } | Should Throw "Parameter CrawlSetting can only be set to custom for website content sources"
             }
         }
 
@@ -1335,6 +1346,7 @@ namespace Microsoft.Office.Server.Search.Administration {
 
             It "Should throw Invalid parameter error" {
                 { Set-TargetResource @testParams } | Should Throw "Parameter LimitPageDepth is not valid for Business content sources"
+                { Test-TargetResource @testParams } | Should Throw "Parameter LimitPageDepth is not valid for Business content sources"
             }
 
             $testParams = @{
@@ -1347,6 +1359,7 @@ namespace Microsoft.Office.Server.Search.Administration {
 
             It "Should throw Invalid parameter error" {
                 { Set-TargetResource @testParams } | Should Throw "Parameter LimitServerHops is not valid for Business content sources"
+                { Test-TargetResource @testParams } | Should Throw "Parameter LimitServerHops is not valid for Business content sources"
             }
 
             $testParams = @{
