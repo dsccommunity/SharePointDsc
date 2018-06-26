@@ -1018,6 +1018,139 @@ namespace Microsoft.Office.Server.Search.Administration {
                 Test-TargetResource @testParams | Should Be $true
             }
         }
+
+        Context -Name "A business content source does exist and should" -Fixture {
+            $testParams = @{
+                Name = "Example content source"
+                ServiceAppName = "Search Service Application"
+                ContentSourceType = "Business"
+                LOBSystemSet = @("MyDataSource", "MyDataSourceInstance")
+                Ensure = "Present"
+            }
+            Mock -CommandName Get-SPEnterpriseSearchCrawlContentSource -MockWith {
+                return @{
+                    Type = "Business"
+                    IncrementalCrawlSchedule = $null
+                    FullCrawlSchedule = $null
+                    StartAddresses = @(
+                        @{
+                            AbsoluteUri = "bdc3://segment1/segment2/MyDataSource/MyDataSourceInstance&fakevalue=1"
+                        }
+                    )
+                }
+            }
+
+            It "Should return present from the get method" {
+                $result = Get-TargetResource @testParams
+                $result.Ensure | Should Be "Present"
+            }
+
+            It "Should return the correct LOBSystemSet from the get method"
+
+            It "Should return true from the test method" {
+                Test-TargetResource @testParams | Should Be $true
+            }
+        }
+
+        Context -Name "A business content source does not exist and should" -Fixture {
+            $testParams = @{
+                Name = "Example content source"
+                ServiceAppName = "Search Service Application"
+                ContentSourceType = "Business"
+                LOBSystemSet = @("MyDataSource", "MyDataSourceInstance")
+                Ensure = "Present"
+            }
+            Mock -CommandName Get-SPEnterpriseSearchCrawlContentSource -MockWith {
+                return @{
+                    Type = "Web"
+                    MaxPageEnumerationDepth = [System.Int32]::MaxValue
+                    MaxSiteEnumerationDepth = 0
+                    StartAddresses = @(
+                        @{
+                            AbsoluteUri = "http://site.contoso.com"
+                        }
+                    )
+                    IncrementalCrawlSchedule = $null
+                    FullCrawlSchedule = $null
+                    CrawlPriority = "Normal"
+                    CrawlStatus = "Idle"
+                }
+            }
+
+            It "Should return present from the get method" {
+                $result = Get-TargetResource @testParams
+                $result.Ensure | Should Be "Present"
+            }
+
+            It "Should return true from the test method" {
+                Test-TargetResource @testParams | Should Be $true
+            }
+        }
+
+        Context -Name "A business content source does exist and shouldn't" -Fixture {
+            $testParams = @{
+                Name = "Example content source"
+                ServiceAppName = "Search Service Application"
+                ContentSourceType = "Business"
+                LOBSystemSet = @("MyDataSource", "MyDataSourceInstance")
+                Ensure = "Absent"
+            }
+
+            Mock -CommandName Get-SPEnterpriseSearchCrawlContentSource -MockWith {
+                return @{
+                    Type = "Web"
+                    MaxPageEnumerationDepth = [System.Int32]::MaxValue
+                    MaxSiteEnumerationDepth = 0
+                    StartAddresses = @(
+                        @{
+                            AbsoluteUri = "http://site.contoso.com"
+                        }
+                    )
+                    IncrementalCrawlSchedule = $null
+                    FullCrawlSchedule = $null
+                    CrawlPriority = "Normal"
+                    CrawlStatus = "Idle"
+                }
+            }
+
+            It "Should return present from the get method" {
+                $result = Get-TargetResource @testParams
+                $result.Ensure | Should Be "Present"
+            }
+
+            It "Should return false from the test method" {
+                Test-TargetResource @testParams | Should Be $false
+            }
+
+            It "Should remove the content source in the set method" {
+                Set-TargetResource @testParams
+
+                Assert-MockCalled -CommandName Remove-SPEnterpriseSearchCrawlContentSource
+            }
+        }
+
+        Context -Name "A business content source doesn't exist and shouldn't" -Fixture {
+            $testParams = @{
+                Name = "Example content source"
+                ServiceAppName = "Search Service Application"
+                ContentSourceType = "Business"
+                LOBSystemSet = @("MyDataSource", "MyDataSourceInstance")
+                Ensure = "Absent"
+            }
+
+            Mock -CommandName Get-SPEnterpriseSearchCrawlContentSource -MockWith {
+                return $null
+            }
+
+            It "Should return absent from the get method" {
+                $result = Get-TargetResource @testParams
+                $result.Ensure | Should Be "Absent"
+            }
+
+            It "Should return true from the test method" {
+                Test-TargetResource @testParams | Should Be $true
+            }
+        }
     }
 }
 
