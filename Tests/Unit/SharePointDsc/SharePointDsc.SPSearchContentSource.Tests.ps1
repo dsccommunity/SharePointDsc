@@ -1395,11 +1395,7 @@ namespace Microsoft.Office.Server.Search.Administration {
             }
 
             It "Should throw error complaining cannot change type without the force parameter" {
-                { Set-TargetResource @testParams } | Should Throw "The type of the a search content source can not be changed from " + `
-                "'FileShare' to 'Business' without " + `
-                "deleting and adding it again. Specify 'Force = `$true' in order to allow " + `
-                "DSC to do this, or manually remove the existing content source and re-run " + `
-                "the configuration."
+                { Set-TargetResource @testParams } | Should Throw "The type of the a search content source can not be changed from 'FileShare' to 'Business' without deleting and adding it again. Specify 'Force = `$true' in order to allow DSC to do this, or manually remove the existing content source and re-run the configuration."
             }
 
             $testParams = @{
