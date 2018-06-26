@@ -1034,7 +1034,8 @@ namespace Microsoft.Office.Server.Search.Administration {
                     FullCrawlSchedule = $null
                     StartAddresses = @(
                         @{
-                            AbsoluteUri = "bdc3://segment1/segment2/MyDataSource/MyDataSourceInstance&fakevalue=1"
+                            AbsoluteUri = "bdc3://segment1/segment2/segment3/MyDataSource/MyDataSourceInstance&fakevalue=1"
+                            Segments = @("bdc3", "segment1", "segment2", "segment3", "MyDataSource", "MyDataSourceInstance&fakevalue=1")
                         }
                     )
                 }
@@ -1045,7 +1046,10 @@ namespace Microsoft.Office.Server.Search.Administration {
                 $result.Ensure | Should Be "Present"
             }
 
-            It "Should return the correct LOBSystemSet from the get method"
+            It "Should return the correct LOBSystemSet from the get method" {
+                $result = Get-TargetResource @testParams
+                $result.LOBSystemSet | Should Be $testParams.LOBSystemSet
+            }
 
             It "Should return true from the test method" {
                 Test-TargetResource @testParams | Should Be $true
@@ -1061,29 +1065,39 @@ namespace Microsoft.Office.Server.Search.Administration {
                 Ensure = "Present"
             }
             Mock -CommandName Get-SPEnterpriseSearchCrawlContentSource -MockWith {
+                return $null
+            }
+
+            Mock -CommandName New-SPEnterpriseSearchCrawlContentSource -MockWith {
                 return @{
-                    Type = "Web"
-                    MaxPageEnumerationDepth = [System.Int32]::MaxValue
-                    MaxSiteEnumerationDepth = 0
-                    StartAddresses = @(
-                        @{
-                            AbsoluteUri = "http://site.contoso.com"
-                        }
-                    )
+                    Type = "Business"
+                    SearchApplication = $testParams.ServiceAppName
                     IncrementalCrawlSchedule = $null
                     FullCrawlSchedule = $null
-                    CrawlPriority = "Normal"
+                    LOBSystemSet = $testParams.LOBSystemSet
                     CrawlStatus = "Idle"
                 }
             }
 
-            It "Should return present from the get method" {
-                $result = Get-TargetResource @testParams
-                $result.Ensure | Should Be "Present"
+            Mock -CommandName Get-SPServiceApplicationProxyGroup -MockWith {
+                return @{
+                    Name = "Default Proxy Group"
+                }
             }
 
-            It "Should return true from the test method" {
-                Test-TargetResource @testParams | Should Be $true
+            It "Should return absent from the get method" {
+                $result = Get-TargetResource @testParams
+                $result.Ensure | Should Be "Absent"
+            }
+
+            It "Should return false from the test method" {
+                Test-TargetResource @testParams | Should Be $false
+            }
+
+            It "Should create the new content source in the set method" {
+                Set-TargetResource @testParams
+
+                Assert-MockCalled -CommandName New-SPEnterpriseSearchCrawlContentSource
             }
         }
 
@@ -1098,18 +1112,15 @@ namespace Microsoft.Office.Server.Search.Administration {
 
             Mock -CommandName Get-SPEnterpriseSearchCrawlContentSource -MockWith {
                 return @{
-                    Type = "Web"
-                    MaxPageEnumerationDepth = [System.Int32]::MaxValue
-                    MaxSiteEnumerationDepth = 0
-                    StartAddresses = @(
-                        @{
-                            AbsoluteUri = "http://site.contoso.com"
-                        }
-                    )
+                    Type = "Business"
                     IncrementalCrawlSchedule = $null
                     FullCrawlSchedule = $null
-                    CrawlPriority = "Normal"
-                    CrawlStatus = "Idle"
+                    StartAddresses = @(
+                        @{
+                            AbsoluteUri = "bdc3://segment1/segment2/segment3/MyDataSource/MyDataSourceInstance&fakevalue=1"
+                            Segments = @("bdc3", "segment1", "segment2", "segment3", "MyDataSource", "MyDataSourceInstance&fakevalue=1")
+                        }
+                    )
                 }
             }
 
