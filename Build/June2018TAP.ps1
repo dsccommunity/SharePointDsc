@@ -153,7 +153,7 @@ configuration June2018Tap
             RunCentralAdmin           = $Node.RunCentralAdmin
             CentralAdministrationPort = "7777"
             ServerRole                = "Application"
-            PSDSCRunAsCredential      = $credsSPSetup
+            PSDSCRunAsCredential      = $credsDomainAdmin
         }
 
         SPManagedAccount SPFarmAccount
