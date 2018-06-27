@@ -40,6 +40,9 @@ resources:
 
 ## Unreleased
 
+* SPSearchContentSource
+  * Added support for Business Content Source Type
+
 ## 2.3
 
 * Changes to SharePointDsc
