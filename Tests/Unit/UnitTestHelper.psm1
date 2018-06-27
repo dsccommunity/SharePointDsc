@@ -53,8 +53,6 @@ function New-SPDscUnitTestHelper
 
     Import-Module -Name $moduleToLoad -Global
 
-
-
     $initScript = @"
             Remove-Module -Name "Microsoft.SharePoint.PowerShell" -Force -ErrorAction SilentlyContinue
             Import-Module -Name "$SharePointStubModule" -WarningAction SilentlyContinue
