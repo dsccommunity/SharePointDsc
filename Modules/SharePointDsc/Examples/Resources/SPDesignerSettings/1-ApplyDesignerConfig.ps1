@@ -1,10 +1,10 @@
 <#
 .EXAMPLE
-    This example applies settings to disable SharePoint Designer access to the 
+    This example applies settings to disable SharePoint Designer access to the
     specified web application.
 #>
 
-    Configuration Example 
+    Configuration Example
     {
         param(
             [Parameter(Mandatory = $true)]
@@ -16,7 +16,7 @@
         node localhost {
             SPDesignerSettings MainWebAppSPDSettings
             {
-                Url                                     = "https://intranet.sharepoint.contoso.com"
+                WebAppUrl                               = "https://intranet.sharepoint.contoso.com"
                 SettingsScope                           = "WebApplication"
                 AllowSharePointDesigner                 = $false
                 AllowDetachPagesFromDefinition          = $false

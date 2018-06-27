@@ -21,7 +21,7 @@
                 AllowAnonymous         = $false
                 DatabaseName           = "SP_Content_01"
                 DatabaseServer         = "SQL.contoso.local\SQLINSTANCE"
-                Url                    = "http://example.contoso.local"
+                WebAppUrl              = "http://example.contoso.local"
                 Port                   = 80
                 Ensure                 = "Present"
                 PsDscRunAsCredential   = $SetupAccount

@@ -1,11 +1,11 @@
 <#
 .EXAMPLE
-    This example shows how to ensure that specific file types are always blocked while 
+    This example shows how to ensure that specific file types are always blocked while
     others will always be allowed. Any file types not mentioned in this config will be
     able to be managed manually.
 #>
 
-    Configuration Example 
+    Configuration Example
     {
         param(
             [Parameter(Mandatory = $true)]
@@ -17,7 +17,7 @@
         node localhost {
             SPWebAppBlockedFileTypes PrimaryWebAppBlockedFileTypes
             {
-                Url                    = "http://exmaple.contoso.local"
+                WebAppUrl              = "http://exmaple.contoso.local"
                 EnsureBlocked          = @("exe", "dll", "msi")
                 EnsureAllowed          = @("pdf", "docx", "xlsx")
                 PsDscRunAsCredential   = $SetupAccount

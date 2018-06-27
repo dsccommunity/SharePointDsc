@@ -4,7 +4,7 @@ class MSFT_SPWebApplication : OMI_BaseResource
     [Key, Description("The name of the web application")] string Name;
     [Required, Description("The name of the application pool to run this site in")] string ApplicationPool;
     [Required, Description("The name of the managed account to run the app pool with")] string ApplicationPoolAccount;
-    [Required, Description("The URL of the web application")] string Url;
+    [Required, Description("The URL of the web application")] string WebAppUrl;
     [Write, Description("Should anonymous access be enabled for this web app")] boolean AllowAnonymous;
     [Write, Description("Create the web application with Classic authentication (only used during creation of a new web application)")] boolean UseClassic;
     [Write, Description("The name of the first content database to be created with this web app")] string DatabaseName;

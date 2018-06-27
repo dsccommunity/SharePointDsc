@@ -5,6 +5,11 @@ function Get-TargetResource
     param
     (
         [Parameter(Mandatory = $true)]
+        [ValidateSet('Yes')]
+        [String]
+        $IsSingleInstance,
+
+        [Parameter(Mandatory = $true)]
         [System.String]
         $Name,
 
@@ -43,6 +48,7 @@ function Get-TargetResource
 
         $config = Get-SPSecurityTokenServiceConfig
         $nullReturn = @{
+            IsSingleInstance = "Yes"
             Name = $params.Name
             NameIdentifier = $params.NameIdentifier
             UseSessionCookies = $params.UseSessionCookies
@@ -57,6 +63,7 @@ function Get-TargetResource
         }
 
         return @{
+            IsSingleInstance = "Yes"
             Name = $config.Name
             NameIdentifier = $config.NameIdentifier
             UseSessionCookies = $config.UseSessionCookies
@@ -74,6 +81,11 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
+        [Parameter(Mandatory = $true)]
+        [ValidateSet('Yes')]
+        [String]
+        $IsSingleInstance,
+
         [Parameter(Mandatory = $true)]
         [System.String]
         $Name,
@@ -150,6 +162,11 @@ function Test-TargetResource
     param
     (
         [Parameter(Mandatory = $true)]
+        [ValidateSet('Yes')]
+        [String]
+        $IsSingleInstance,
+
+        [Parameter(Mandatory = $true)]
         [System.String]
         $Name,
 
@@ -187,7 +204,11 @@ function Test-TargetResource
 
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
                                     -DesiredValues $PSBoundParameters `
-                                    -ValuesToCheck @("Ensure")
+                                    -ValuesToCheck @("Ensure",
+                                                     "NameIdentifier",
+                                                     "UseSessionCookies",
+                                                     "AllowOAuthOverHttp",
+                                                     "AllowMetadataOverHttp")
 }
 
 Export-ModuleMember -Function *-TargetResource

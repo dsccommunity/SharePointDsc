@@ -4,65 +4,72 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [Parameter(Mandatory = $true)]  
-        [System.String] 
-        [ValidateSet("Present","Absent")] 
+        [Parameter(Mandatory = $true)]
+        [ValidateSet('Yes')]
+        [String]
+        $IsSingleInstance,
+
+        [Parameter()]
+        [System.String]
+        [ValidateSet("Present","Absent")]
         $Ensure,
 
-        [Parameter()] 
-        [System.Boolean] 
+        [Parameter()]
+        [System.Boolean]
         $UseADRMS,
 
-        [Parameter()] 
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $RMSserver,
 
-        [Parameter()] 
-        [System.Management.Automation.PSCredential] 
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
         $InstallAccount
     )
-    
+
     Write-Verbose "Getting SharePoint IRM Settings"
-    
+
     $result = Invoke-SPDSCCommand -Credential $InstallAccount `
                                   -Arguments $PSBoundParameters `
                                   -ScriptBlock {
         $params = $args[0]
-        
-        try 
+
+        try
         {
             $spFarm = Get-SPFarm
-        } 
-        catch 
+        }
+        catch
         {
             Write-Verbose -Message ("No local SharePoint farm was detected. IRM settings " + `
                                     "will not be applied")
             return @{
-                    Ensure = "Absent" 
+                    IsSingleInstance = "Yes"
+                    Ensure = "Absent"
                     UseADRMS =  $UseADRMS
-                    RMSserver = $RMSserver 
+                    RMSserver = $RMSserver
                    }
         }
 
         # Get a reference to the Administration WebService
         $admService = Get-SPDSCContentService
-        
+
         if ($admService.IrmSettings.IrmRMSEnabled)
         {
-            $Ensure = "Present" 
+            $Ensure = "Present"
         }
         else
         {
             $Ensure = "Absent"
         }
-        
+
         return @{
-            Ensure = $Ensure  
+            IsSingleInstance = "Yes"
+            Ensure = $Ensure
             UseADRMS =  $admService.IrmSettings.IrmRMSUseAD
             RMSserver = $admService.IrmSettings.IrmRMSCertServer
         }
-   } 
-   return $Result 
+   }
+   return $Result
 }
 
 function Set-TargetResource
@@ -70,66 +77,71 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [Parameter(Mandatory = $true)]  
-        [System.String] 
-        [ValidateSet("Present","Absent")] 
+        [Parameter(Mandatory = $true)]
+        [ValidateSet('Yes')]
+        [String]
+        $IsSingleInstance,
+
+        [Parameter()]
+        [System.String]
+        [ValidateSet("Present","Absent")]
         $Ensure,
 
-        [Parameter()] 
-        [System.Boolean] 
+        [Parameter()]
+        [System.Boolean]
         $UseADRMS,
 
-        [Parameter()] 
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $RMSserver,
 
-        [Parameter()] 
-        [System.Management.Automation.PSCredential] 
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
         $InstallAccount
     )
-    
+
     Write-Verbose "Setting SharePoint IRM Settings"
-     
+
     Invoke-SPDSCCommand -Credential $InstallAccount `
                         -Arguments $PSBoundParameters `
                         -ScriptBlock {
         $params = $args[0]
 
-        try 
+        try
         {
             $spFarm = Get-SPFarm
-        } 
-        catch 
+        }
+        catch
         {
             throw "No local SharePoint farm was detected. IRM settings will not be applied"
             return
         }
-        
+
         $admService = Get-SPDSCContentService
-        
-        if ($params.UseADRMS -and ($null -ne $params.RMSserver)) 
+
+        if ($params.UseADRMS -and ($null -ne $params.RMSserver))
         {
             throw "Cannot specify both an RMSserver and set UseADRMS to True"
         }
-        
-        if ($params.UseADRMS -ne $true) 
+
+        if ($params.UseADRMS -ne $true)
         {
-            $params.UseADRMS = $false 
+            $params.UseADRMS = $false
         }
-        
+
         if ($params.Ensure -eq "Present")
         {
             $admService.IrmSettings.IrmRMSEnabled = $true
             $admService.IrmSettings.IrmRMSUseAD = $params.UseADRMS
-            $admService.IrmSettings.IrmRMSCertServer = $params.RMSserver 
-        } 
-        else 
+            $admService.IrmSettings.IrmRMSCertServer = $params.RMSserver
+        }
+        else
         {
             $admService.IrmSettings.IrmRMSEnabled = $false
-            $admService.IrmSettings.IrmRMSUseAD = $false 
+            $admService.IrmSettings.IrmRMSUseAD = $false
             $admService.IrmSettings.IrmRMSCertServer = $null
         }
-        $admService.Update() 
+        $admService.Update()
     }
 }
 
@@ -139,36 +151,41 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [Parameter(Mandatory = $true)]  
-        [System.String] 
-        [ValidateSet("Present","Absent")] 
+        [Parameter(Mandatory = $true)]
+        [ValidateSet('Yes')]
+        [String]
+        $IsSingleInstance,
+
+        [Parameter()]
+        [System.String]
+        [ValidateSet("Present","Absent")]
         $Ensure,
 
-        [Parameter()] 
-        [System.Boolean] 
+        [Parameter()]
+        [System.Boolean]
         $UseADRMS,
 
-        [Parameter()] 
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $RMSserver,
 
-        [Parameter()] 
-        [System.Management.Automation.PSCredential] 
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
         $InstallAccount
     )
-    
+
     Write-Verbose "Testing SharePoint IRM settings"
-    
+
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
-    if ($null -eq $CurrentValues) 
+    if ($null -eq $CurrentValues)
     {
-        return $false 
+        return $false
     }
 
-    if ($UseADRMS -ne $true) 
+    if ($UseADRMS -ne $true)
     {
-        $PSBoundParameters.UseADRMS = $false 
+        $PSBoundParameters.UseADRMS = $false
     }
 
     return Test-SPDscParameterState -CurrentValues $CurrentValues `

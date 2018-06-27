@@ -1,7 +1,7 @@
 [CmdletBinding()]
 param(
     [Parameter()]
-    [string] 
+    [string]
     $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
                                          -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
                                          -Resolve)
@@ -21,17 +21,18 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         # Test contexts
         Context -Name "No local SharePoint farm is available" {
             $testParams = @{
+                IsSingleInstance = "Yes"
                 MailAddress = "e@mail.com"
                 DaysBeforeExpiry = 7
                 PasswordChangeWaitTimeSeconds = 60
             }
 
-            Mock -CommandName Get-SPFarm -MockWith { 
-                return $null 
+            Mock -CommandName Get-SPFarm -MockWith {
+                return $null
             }
 
             It "Should return null from the get method" {
-                Get-TargetResource @testParams | Should BeNullOrEmpty 
+                Get-TargetResource @testParams | Should BeNullOrEmpty
             }
 
             It "Should return false from the test method" {
@@ -42,12 +43,13 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "There is a local SharePoint farm and the properties are set correctly" {
             $testParams = @{
+                IsSingleInstance = "Yes"
                 MailAddress = "e@mail.com"
                 DaysBeforeExpiry = 7
                 PasswordChangeWaitTimeSeconds = 60
             }
-            
-            Mock -CommandName Get-SPFarm -MockWith { 
+
+            Mock -CommandName Get-SPFarm -MockWith {
                 return @{
                     PasswordChangeEmailAddress = "e@mail.com"
                     DaysBeforePasswordExpirationToSendEmail = 7
@@ -55,9 +57,9 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     PasswordChangeMaximumTries = 3
                 }
             }
-            
+
             It "Should return farm properties from the get method" {
-                Get-TargetResource @testParams | Should Not BeNullOrEmpty 
+                Get-TargetResource @testParams | Should Not BeNullOrEmpty
             }
 
             It "Should return true from the test method" {
@@ -67,28 +69,29 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "There is a local SharePoint farm and the properties are not set correctly" {
             $testParams = @{
+                IsSingleInstance = "Yes"
                 MailAddress = "e@mail.com"
                 DaysBeforeExpiry = 7
                 PasswordChangeWaitTimeSeconds = 60
             }
-            
-            Mock -CommandName Get-SPFarm -MockWith { 
+
+            Mock -CommandName Get-SPFarm -MockWith {
                 $result = @{
                     PasswordChangeEmailAddress = ""
                     PasswordChangeGuardTime = 0
                     PasswordChangeMaximumTries = 0
                     DaysBeforePasswordExpirationToSendEmail = 0
                 }
-                $result = $result | Add-Member  ScriptMethod Update { 
+                $result = $result | Add-Member  ScriptMethod Update {
                     $Global:SPDscFarmUpdateCalled = $true
                     return $true;
-                
+
                     } -PassThru
                 return $result
             }
 
             It "Should return farm properties from the get method" {
-                Get-TargetResource @testParams | Should Not BeNullOrEmpty 
+                Get-TargetResource @testParams | Should Not BeNullOrEmpty
             }
 
             It "Should return false from the test method" {

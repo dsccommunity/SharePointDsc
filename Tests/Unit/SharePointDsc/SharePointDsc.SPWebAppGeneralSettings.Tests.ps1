@@ -33,7 +33,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         # Test contexts
         Context -Name "The web application exists and has the correct general settings" -Fixture {
             $testParams = @{
-                Url = "http://sites.sharepoint.com"
+                WebAppUrl = "http://sites.sharepoint.com"
                 TimeZone = 3081
                 Alerts = $true
                 AlertsLimit = 10
@@ -70,7 +70,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     IisSettings = @(
                         @{ Path = "C:\inetpub\wwwroot\something" }
                     )
-                    Url = $testParams.Url
+                    Url = $testParams.WebAppUrl
                     DefaultTimeZone = $testParams.TimeZone
                     AlertsEnabled = $testParams.Alerts
                     AlertsMaximum = $testParams.AlertsLimit
@@ -109,7 +109,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "The web application exists and uses incorrect general settings" -Fixture {
             $testParams = @{
-                Url = "http://sites.sharepoint.com"
+                WebAppUrl = "http://sites.sharepoint.com"
                 TimeZone = 3081
                 Alerts = $true
                 AlertsLimit = 10
@@ -160,7 +160,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     IisSettings = @(
                         @{ Path = "C:\inetpub\wwwroot\something" }
                     )
-                    Url = $testParams.Url
+                    Url = $testParams.WebAppUrl
                     DefaultTimeZone = 1
                     AlertsEnabled = $false
                     AlertsMaximum = 1
@@ -202,7 +202,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "The specified web application does not exist" -Fixture {
             $testParams = @{
-                Url = "http://sites.sharepoint.com"
+                WebAppUrl = "http://sites.sharepoint.com"
                 TimeZone = 3081
                 Alerts = $true
                 AlertsLimit = 10
@@ -238,7 +238,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "The specified Quota Template does not exist" -Fixture {
             $testParams = @{
-                Url = "http://sites.sharepoint.com"
+                WebAppUrl = "http://sites.sharepoint.com"
                 TimeZone = 3081
                 Alerts = $true
                 AlertsLimit = 10
@@ -289,7 +289,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     IisSettings = @(
                         @{ Path = "C:\inetpub\wwwroot\something" }
                     )
-                    Url = $testParams.Url
+                    Url = $testParams.WebAppUrl
                     DefaultTimeZone = 1
                     AlertsEnabled = $false
                     AlertsMaximum = 1
