@@ -18,7 +18,7 @@ function Get-TargetResource
 
         [Parameter(Mandatory = $true)]
         [System.String]
-        $Url,
+        $WebAppUrl,
 
         [Parameter()]
         [System.Boolean]
@@ -72,7 +72,7 @@ function Get-TargetResource
                 Name = $params.Name
                 ApplicationPool = $params.ApplicationPool
                 ApplicationPoolAccount = $params.ApplicationPoolAccount
-                Url = $params.Url
+                WebAppUrl = $params.WebAppUrl
                 Ensure = "Absent"
             }
         }
@@ -89,7 +89,7 @@ function Get-TargetResource
             Name = $wa.DisplayName
             ApplicationPool = $wa.ApplicationPool.Name
             ApplicationPoolAccount = $wa.ApplicationPool.Username
-            Url = $wa.Url
+            WebAppUrl = $wa.WebAppUrl
             AllowAnonymous = $authProvider.AllowAnonymous
             DatabaseName = $wa.ContentDatabases[0].Name
             DatabaseServer = $wa.ContentDatabases[0].Server
@@ -124,7 +124,7 @@ function Set-TargetResource
 
         [Parameter(Mandatory = $true)]
         [System.String]
-        $Url,
+        $WebAppUrl,
 
         [Parameter()]
         [System.Boolean]
@@ -181,7 +181,7 @@ function Set-TargetResource
                 $newWebAppParams = @{
                     Name = $params.Name
                     ApplicationPool = $params.ApplicationPool
-                    Url = $params.Url
+                    Url = $params.WebAppUrl
                 }
 
                 # Get a reference to the Administration WebService
@@ -246,7 +246,7 @@ function Set-TargetResource
                 {
                     $newWebAppParams.Add("Port", $params.Port)
                 }
-                if ((New-Object -TypeName System.Uri $params.Url).Scheme -eq "https")
+                if ((New-Object -TypeName System.Uri $params.WebAppUrl).Scheme -eq "https")
                 {
                     $newWebAppParams.Add("SecureSocketsLayer", $true)
                 }
@@ -292,7 +292,7 @@ function Test-TargetResource
 
         [Parameter(Mandatory = $true)]
         [System.String]
-        $Url,
+        $WebAppUrl,
 
         [Parameter()]
         [System.Boolean]
