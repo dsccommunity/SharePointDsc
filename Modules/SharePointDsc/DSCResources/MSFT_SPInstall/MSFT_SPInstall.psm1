@@ -5,6 +5,11 @@ function Get-TargetResource
     param
     (
         [Parameter(Mandatory = $true)]
+        [ValidateSet('Yes')]
+        [String]
+        $IsSingleInstance,
+
+        [Parameter(Mandatory = $true)]
         [System.String]
         $BinaryDir,
 
@@ -43,6 +48,7 @@ function Get-TargetResource
     if ($spInstall)
     {
         return @{
+            IsSingleInstance = "Yes"
             BinaryDir = $BinaryDir
             ProductKey = $ProductKey
             InstallPath = $InstallPath
@@ -53,6 +59,7 @@ function Get-TargetResource
     else
     {
         return @{
+            IsSingleInstance = "Yes"
             BinaryDir = $BinaryDir
             ProductKey = $ProductKey
             InstallPath = $InstallPath
@@ -70,6 +77,11 @@ function Set-TargetResource
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidGlobalVars", "")]
     param
     (
+        [Parameter(Mandatory = $true)]
+        [ValidateSet('Yes')]
+        [String]
+        $IsSingleInstance,
+
         [Parameter(Mandatory = $true)]
         [System.String]
         $BinaryDir,
@@ -231,6 +243,11 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
+        [Parameter(Mandatory = $true)]
+        [ValidateSet('Yes')]
+        [String]
+        $IsSingleInstance,
+
         [Parameter(Mandatory = $true)]
         [System.String]
         $BinaryDir,

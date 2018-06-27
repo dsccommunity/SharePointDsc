@@ -5,7 +5,7 @@
     whatever value has been manually configured outside of DSC.
 #>
 
-    Configuration Example 
+    Configuration Example
     {
         param(
             [Parameter(Mandatory = $true)]
@@ -17,7 +17,7 @@
         node localhost {
             SPDiagnosticLoggingSettings ApplyDiagnosticLogSettings
             {
-                PsDscRunAsCredential                        = $SetupAccount
+                IsSingleInstance                            = "Yes"
                 LogPath                                     = "L:\ULSLogs"
                 LogSpaceInGB                                = 10
                 AppAnalyticsAutomaticUploadEnabled          = $false
@@ -36,6 +36,7 @@
                 ScriptErrorReportingDelay                   = 30
                 ScriptErrorReportingEnabled                 = $true
                 ScriptErrorReportingRequireAuth             = $true
+                PsDscRunAsCredential                        = $SetupAccount
             }
         }
     }

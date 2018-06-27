@@ -15,7 +15,7 @@
         node localhost {
             SPWebAppSiteUseAndDeletion ConfigureSiteUseAndDeletion
             {
-                Url                                      = "http://example.contoso.local"
+                WebAppUrl                                = "http://example.contoso.local"
                 SendUnusedSiteCollectionNotifications    = $true
                 UnusedSiteNotificationPeriod             = 90
                 AutomaticallyDeleteUnusedSiteCollections = $true

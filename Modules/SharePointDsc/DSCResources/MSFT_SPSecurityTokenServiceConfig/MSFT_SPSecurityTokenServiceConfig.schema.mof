@@ -1,7 +1,8 @@
 [ClassVersion("1.0.0.0"), FriendlyName("SPSecurityTokenServiceConfig")]
 class MSFT_SPSecurityTokenServiceConfig : OMI_BaseResource
 {
-    [Key, Description("The name of the security token service")] string Name;
+    [Key, Description("Specifies the resource is a single instance, the value must be 'Yes'"), ValueMap{"Yes"}, Values{"Yes"}] String IsSingleInstance;
+    [Required, Description("The name of the security token service")] string Name;
     [Write, Description("The identifier for the security token service")] string NameIdentifier;
     [Write, Description("True set the security token service to use cookies")] Boolean UseSessionCookies;
     [Write, Description("True set the security token service to allow OAuth over HTTP")] Boolean AllowOAuthOverHttp;

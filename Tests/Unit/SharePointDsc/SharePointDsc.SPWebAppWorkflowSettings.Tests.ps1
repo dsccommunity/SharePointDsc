@@ -1,7 +1,7 @@
 [CmdletBinding()]
 param(
     [Parameter()]
-    [string] 
+    [string]
     $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
                                          -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
                                          -Resolve)
@@ -20,20 +20,20 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         # Initialize tests
 
-        # Mocks for all contexts   
+        # Mocks for all contexts
         Mock -CommandName New-SPAuthenticationProvider -MockWith { }
         Mock -CommandName New-SPWebApplication -MockWith { }
-        Mock -CommandName Get-SPAuthenticationProvider -MockWith { 
-            return @{ 
+        Mock -CommandName Get-SPAuthenticationProvider -MockWith {
+            return @{
                 DisableKerberos = $true
-                AllowAnonymous = $false 
-            } 
+                AllowAnonymous = $false
+            }
         }
 
         # Test contexts
         Context -Name "The web appliation exists and has the correct workflow settings" -Fixture {
             $testParams = @{
-                Url = "http://sites.sharepoint.com"
+                WebAppUrl = "http://sites.sharepoint.com"
                 ExternalWorkflowParticipantsEnabled = $true
                 UserDefinedWorkflowsEnabled = $true
                 EmailToNoPermissionWorkflowParticipantsEnable = $true
@@ -41,7 +41,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
             Mock -CommandName Get-SPWebapplication -MockWith { return @(@{
                 DisplayName = $testParams.Name
-                ApplicationPool = @{ 
+                ApplicationPool = @{
                     Name = $testParams.ApplicationPool
                     Username = $testParams.ApplicationPoolAccount
                 }
@@ -51,10 +51,10 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                         Server = "sql.domain.local"
                     }
                 )
-                IisSettings = @( 
+                IisSettings = @(
                     @{ Path = "C:\inetpub\wwwroot\something" }
                 )
-                Url = $testParams.Url
+                Url = $testParams.WebAppUrl
                 UserDefinedWorkflowsEnabled = $true
                 EmailToNoPermissionWorkflowParticipantsEnabled = $true
                 ExternalWorkflowParticipantsEnabled = $true
@@ -71,16 +71,16 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "The web appliation exists and uses incorrect workflow settings" -Fixture {
             $testParams = @{
-                Url = "http://sites.sharepoint.com"
+                WebAppUrl = "http://sites.sharepoint.com"
                 ExternalWorkflowParticipantsEnabled = $true
                 UserDefinedWorkflowsEnabled = $true
                 EmailToNoPermissionWorkflowParticipantsEnable = $true
             }
 
-            Mock -CommandName Get-SPWebapplication -MockWith { 
+            Mock -CommandName Get-SPWebapplication -MockWith {
                 $webApp = @{
                     DisplayName = $testParams.Name
-                    ApplicationPool = @{ 
+                    ApplicationPool = @{
                         Name = $testParams.ApplicationPool
                         Username = $testParams.ApplicationPoolAccount
                     }
@@ -90,15 +90,15 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                             Server = "sql.domain.local"
                         }
                     )
-                    IisSettings = @( 
+                    IisSettings = @(
                         @{ Path = "C:\inetpub\wwwroot\something" }
                     )
-                    Url = $testParams.Url
+                    Url = $testParams.WebAppUrl
                     UserDefinedWorkflowsEnabled = $false
                     EmailToNoPermissionWorkflowParticipantsEnabled = $false
                     ExternalWorkflowParticipantsEnabled = $false
                 }
-                $webApp = $webApp | Add-Member -MemberType ScriptMethod -Name Update -Value {} -PassThru | 
+                $webApp = $webApp | Add-Member -MemberType ScriptMethod -Name Update -Value {} -PassThru |
                                     Add-Member -MemberType ScriptMethod -Name UpdateWorkflowConfigurationSettings -Value {
                     $Global:SPDscWebApplicationUpdateWorkflowCalled = $true
                 } -PassThru
