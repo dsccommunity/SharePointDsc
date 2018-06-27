@@ -132,7 +132,7 @@ function Get-TargetResource
                     default
                     {
                         throw ("Detected an unsupported major version of SharePoint. " + `
-                                "SharePointDsc only supports SharePoint 2013 or 2016.")
+                                "SharePointDsc only supports SharePoint 2013, 2016 or 2019.")
                     }
                 }
 
