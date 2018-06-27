@@ -4,7 +4,7 @@
     a specific RMS server
 #>
 
-    Configuration Example 
+    Configuration Example
     {
         param(
             [Parameter(Mandatory = $true)]
@@ -16,7 +16,7 @@
         node localhost {
             SPIrmSettings RMSSettings
             {
-                Ensure               = "Present"
+                IsSingleInstance     = "Yes"
                 RMSserver            = "https://rms.contoso.com"
                 PsDscRunAsCredential = $SetupAccount
             }

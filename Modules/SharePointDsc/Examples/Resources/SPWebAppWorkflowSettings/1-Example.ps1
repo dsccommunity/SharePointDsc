@@ -3,7 +3,7 @@
     This example shows how to apply workflow settings to the specific web application
 #>
 
-    Configuration Example 
+    Configuration Example
     {
         param(
             [Parameter(Mandatory = $true)]
@@ -15,7 +15,7 @@
         node localhost {
             SPWebAppWorkflowSettings PrimaryWebAppWorkflowSettings
             {
-                Url                                           = "Shttp://exmaple.contoso.local"
+                WebAppUrl                                     = "Shttp://exmaple.contoso.local"
                 ExternalWorkflowParticipantsEnabled           = $false
                 EmailToNoPermissionWorkflowParticipantsEnable = $false
                 PsDscRunAsCredential                          = $SetupAccount

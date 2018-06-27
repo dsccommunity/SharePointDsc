@@ -29,13 +29,13 @@ function Get-TargetResource
         $InstallAccount
     )
 
-    if ($ProviderRealms.Count -gt 0 -and ($ProviderRealmsToInclude.Count -gt 0 -or $ProviderRealmsToExclude.Count -gt 0)) 
+    if ($ProviderRealms.Count -gt 0 -and ($ProviderRealmsToInclude.Count -gt 0 -or $ProviderRealmsToExclude.Count -gt 0))
     {
         throw ("Cannot use the ProviderRealms parameter together with the " + `
                "ProviderRealmsToInclude or ProviderRealmsToExclude parameters")
     }
 
-    if ($ProviderRealms.Count -eq 0 -and $ProviderRealmsToInclude.Count -eq 0 -and $ProviderRealmsToExclude.Count -eq 0) 
+    if ($ProviderRealms.Count -eq 0 -and $ProviderRealmsToInclude.Count -eq 0 -and $ProviderRealmsToExclude.Count -eq 0)
     {
         throw ("At least one of the following parameters must be specified: " + `
                "ProviderRealms, ProviderRealmsToInclude, ProviderRealmsToExclude")
@@ -77,7 +77,7 @@ function Get-TargetResource
         $spTrust = Get-SPTrustedIdentityTokenIssuer -Identity $params.IssuerName `
                                                     -ErrorAction SilentlyContinue
 
-        if ($spTrust -eq $null)
+        if ($null -eq $spTrust)
         {
             throw ("SPTrustedIdentityTokenIssuer '$($params.IssuerName)' not found")
         }
@@ -152,7 +152,7 @@ function Set-TargetResource
             $trust = Get-SPTrustedIdentityTokenIssuer -Identity $params.IssuerName `
                                     -ErrorAction SilentlyContinue
 
-            if ($trust -eq $null)
+            if ($null -eq $trust)
             {
                     throw ("SPTrustedIdentityTokenIssuer '$($params.IssuerName)' not found")
             }

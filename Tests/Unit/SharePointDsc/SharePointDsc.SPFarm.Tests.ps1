@@ -47,6 +47,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         # Test Contexts
         Context -Name "No config databaes exists, and this server should be connected to one" -Fixture {
             $testParams = @{
+                IsSingleInstance = "Yes"
                 Ensure = "Present"
                 FarmConfigDatabaseName = "SP_Config"
                 DatabaseServer = "sql.contoso.com"
@@ -89,6 +90,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "No config databaes exists, and this server should be connected to one but won't run central admin" -Fixture {
             $testParams = @{
+                IsSingleInstance = "Yes"
                 Ensure = "Present"
                 FarmConfigDatabaseName = "SP_Config"
                 DatabaseServer = "sql.contoso.com"
@@ -130,6 +132,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "A config database exists, and this server should be connected to it but isn't and this sever won't run central admin" -Fixture {
             $testParams = @{
+                IsSingleInstance = "Yes"
                 Ensure = "Present"
                 FarmConfigDatabaseName = "SP_Config"
                 DatabaseServer = "sql.contoso.com"
@@ -200,6 +203,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "A config database exists, and this server should be connected to it but isn't and this sever will run central admin" -Fixture {
             $testParams = @{
+                IsSingleInstance = "Yes"
                 Ensure = "Present"
                 FarmConfigDatabaseName = "SP_Config"
                 DatabaseServer = "sql.contoso.com"
@@ -266,6 +270,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "A config and lock database exist, and this server should be connected to it but isn't" -Fixture {
             $testParams = @{
+                IsSingleInstance = "Yes"
                 Ensure = "Present"
                 FarmConfigDatabaseName = "SP_Config"
                 DatabaseServer = "sql.contoso.com"
@@ -319,8 +324,189 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
         }
 
+        Context -Name "Server is connected to farm, but Central Admin isn't started" -Fixture {
+            $testParams = @{
+                Ensure = "Present"
+                FarmConfigDatabaseName = "SP_Config"
+                DatabaseServer = "sql.contoso.com"
+                FarmAccount = $mockFarmAccount
+                Passphrase = $mockPassphrase
+                AdminContentDatabaseName = "SP_AdminContent"
+                RunCentralAdmin = $true
+            }
+
+            Mock -CommandName Get-SPDSCRegistryKey -MockWith {
+                return "Connection string example"
+            }
+
+            Mock -CommandName Get-SPFarm -MockWith {
+                return @{
+                    Name = $testParams.FarmConfigDatabaseName
+                    DatabaseServer = @{
+                        Name = $testParams.DatabaseServer
+                    }
+                    AdminContentDatabaseName = $testParams.AdminContentDatabaseName
+                }
+            }
+            Mock -CommandName Get-SPDSCConfigDBStatus -MockWith {
+                return @{
+                    Locked = $false
+                    ValidPermissions = $true
+                    DatabaseExists = $true
+                }
+            }
+            Mock -CommandName Get-SPDatabase -MockWith {
+                return @(@{
+                    Name = $testParams.FarmConfigDatabaseName
+                    Type = "Configuration Database"
+                    NormalizedDataSource = $testParams.DatabaseServer
+                })
+            }
+            Mock -CommandName Get-SPWebApplication -MockWith {
+                return @{
+                    IsAdministrationWebApplication = $true
+                    ContentDatabases = @(@{
+                        Name = $testParams.AdminContentDatabaseName
+                    })
+                    IISSettings = @(@{
+                        DisableKerberos = $true
+                    })
+                    Url = "http://localhost:9999"
+                }
+            }
+            Mock -CommandName Get-CimInstance -MockWith {
+                return @{
+                    Domain = "domain.com"
+                }
+            }
+
+            Mock -CommandName Get-SPServiceInstance -MockWith {
+                switch ($global:SPDscSIRunCount)
+                {
+                    { 2 -contains $_ }
+                        {
+                            $global:SPDscSIRunCount++
+                            return @(@{
+                                TypeName = "Central Administration"
+                                Status = "Online"
+                            })
+                        }
+                    { 0,1 -contains $_ }
+                        {
+                            $global:SPDscSIRunCount++
+                            return $null
+                        }
+                }
+            }
+
+            $global:SPDscSIRunCount = 0
+            It "Should return false from the get method" {
+                (Get-TargetResource @testParams).RunCentralAdmin | Should Be $false
+            }
+
+            $global:SPDscSIRunCount = 0
+            It "Should start the central administration instance" {
+                Set-TargetResource @testParams
+                Assert-MockCalled -CommandName "Start-SPServiceInstance"
+            }
+
+            $global:SPDscCentralAdminCheckDone = $false
+            It "Should return false from the test method" {
+                Test-TargetResource @testParams | Should be $false
+            }
+        }
+
+        Context -Name "This server is connected to the farm and is running CA, but shouldn't" -Fixture {
+            $testParams = @{
+                Ensure = "Present"
+                FarmConfigDatabaseName = "SP_Config"
+                DatabaseServer = "sql.contoso.com"
+                FarmAccount = $mockFarmAccount
+                Passphrase = $mockPassphrase
+                AdminContentDatabaseName = "SP_AdminContent"
+                RunCentralAdmin = $false
+            }
+
+            Mock -CommandName "Get-SPDSCRegistryKey" -MockWith {
+                return "Connection string example"
+            }
+
+            Mock -CommandName "Get-SPFarm" -MockWith {
+                return @{
+                    Name = $testParams.FarmConfigDatabaseName
+                    DatabaseServer = @{
+                        Name = $testParams.DatabaseServer
+                    }
+                    AdminContentDatabaseName = $testParams.AdminContentDatabaseName
+                }
+            }
+            Mock -CommandName "Get-SPDSCConfigDBStatus" -MockWith {
+                return @{
+                    Locked = $false
+                    ValidPermissions = $true
+                    DatabaseExists = $true
+                }
+            }
+            Mock -CommandName "Get-SPDatabase" -MockWith {
+                return @(@{
+                    Name = $testParams.FarmConfigDatabaseName
+                    Type = "Configuration Database"
+                    NormalizedDataSource = $testParams.DatabaseServer
+                })
+            }
+            Mock -CommandName "Get-SPWebApplication" -MockWith {
+                return @{
+                    IsAdministrationWebApplication = $true
+                    ContentDatabases = @(@{
+                        Name = $testParams.AdminContentDatabaseName
+                    })
+                    IISSettings = @(@{
+                        DisableKerberos = $true
+                    })
+                    Url = "http://localhost:9999"
+                }
+            }
+            Mock -CommandName Start-Sleep -MockWith {}
+            Mock -CommandName Get-SPServiceInstance -MockWith {
+                switch ($global:SPDscSIRunCount)
+                {
+                    { 0,2 -contains $_ }
+                        {
+                            $global:SPDscSIRunCount++
+                            return @(@{
+                                TypeName = "Central Administration"
+                                Status = "Online"
+                            })
+                        }
+                    { 1 -contains $_ }
+                        {
+                            $global:SPDscSIRunCount++
+                            return $null
+                        }
+                }
+            }
+            Mock -CommandName "Stop-SPServiceInstance" -MockWith {}
+
+            $global:SPDscSIRunCount = 0
+            It "Should return present from the get method" {
+                (Get-TargetResource @testParams).Ensure | Should Be "Present"
+            }
+
+            $global:SPDscSIRunCount = 0
+            It "Should return present from the get method" {
+                Set-TargetResource @testParams
+                Assert-MockCalled Stop-SPServiceInstance
+            }
+
+            $global:SPDscSIRunCount = 0
+            It "Should return true from the test method" {
+                Test-TargetResource @testParams | Should be $false
+            }
+        }
+
         Context -Name "A config database exists, and this server is connected to it and should be" -Fixture {
             $testParams = @{
+                IsSingleInstance = "Yes"
                 Ensure = "Present"
                 FarmConfigDatabaseName = "SP_Config"
                 DatabaseServer = "sql.contoso.com"
@@ -369,6 +555,20 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     Url = "http://localhost:9999"
                 }
             }
+            Mock -CommandName "Get-SPServiceInstance" -MockWith {
+                if ($global:SPDscCentralAdminCheckDone -eq $true)
+                {
+                    return @(@{
+                        TypeName = "Central Administration"
+                        Status = "Online"
+                    })
+                }
+                else
+                {
+                    $global:SPDscCentralAdminCheckDone = $true
+                    return $null
+                }
+            }
 
             It "Should return present from the get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Present"
@@ -381,6 +581,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "Absent is specified for the ensure property" -Fixture {
             $testParams = @{
+                IsSingleInstance = "Yes"
                 Ensure = "Absent"
                 FarmConfigDatabaseName = "SP_Config"
                 DatabaseServer = "sql.contoso.com"
@@ -407,6 +608,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         {
             Context -Name "Only valid parameters for SharePoint 2013 are used" -Fixture {
                 $testParams = @{
+                    IsSingleInstance = "Yes"
                     Ensure = "Present"
                     FarmConfigDatabaseName = "SP_Config"
                     DatabaseServer = "DatabaseServer\Instance"
@@ -434,6 +636,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
             Context -Name "no serverrole is specified and get-targetresource needs to return null" -Fixture {
                 $testParams = @{
+                    IsSingleInstance = "Yes"
                     Ensure = "Present"
                     FarmConfigDatabaseName = "SP_Config"
                     DatabaseServer = "sql.contoso.com"
@@ -504,6 +707,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         {
             Context -Name "enhanced minrole options fail when Feature Pack 1 is not installed" -Fixture {
                 $testParams = @{
+                    IsSingleInstance = "Yes"
                     Ensure = "Present"
                     FarmConfigDatabaseName = "SP_Config"
                     DatabaseServer = "DatabaseServer\Instance"
@@ -538,6 +742,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
             Context -Name "enhanced minrole options succeed when Feature Pack 1 is installed" -Fixture {
                 $testParams = @{
+                    IsSingleInstance = "Yes"
                     Ensure = "Present"
                     FarmConfigDatabaseName = "SP_Config"
                     DatabaseServer = "sql.contoso.com"
@@ -587,6 +792,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "no serverrole is specified but get-targetresource needs to identify and return it" -Fixture {
             $testParams = @{
+                IsSingleInstance = "Yes"
                 Ensure = "Present"
                 FarmConfigDatabaseName = "SP_Config"
                 DatabaseServer = "sql.contoso.com"
@@ -652,6 +858,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "no farm is configured locally and an unsupported version of SharePoint is installed on the server" -Fixture {
             $testParams = @{
+                IsSingleInstance = "Yes"
                 Ensure = "Present"
                 FarmConfigDatabaseName = "SP_Config"
                 DatabaseServer = "sql.contoso.com"
@@ -671,6 +878,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "The server is joined to the farm, but SQL server is unavailable" -Fixture {
             $testParams = @{
+                IsSingleInstance = "Yes"
                 Ensure = "Present"
                 FarmConfigDatabaseName = "SP_Config"
                 DatabaseServer = "sql.contoso.com"
@@ -699,18 +907,35 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             Mock -CommandName "Get-SPWebApplication" -MockWith {
                 return $null
             }
-
-            It "Should still return present in the get method" {
-                (Get-TargetResource @testParams).Ensure | Should Be "Present"
+            Mock -CommandName "Get-SPServiceInstance" -MockWith {
+                if ($global:SPDscCentralAdminCheckDone -eq $true)
+                {
+                    return @(@{
+                        TypeName = "Central Administration"
+                        Status = "Online"
+                    })
+                }
+                else
+                {
+                    $global:SPDscCentralAdminCheckDone = $true
+                    return $null
+                }
             }
 
-            It "Should still return true in the test method" {
-                Test-TargetResource @testParams | Should Be $true
+            It "Should still return present in the get method" {
+                $result = Get-TargetResource @testParams
+                $result.Ensure | Should Be "Present"
+                $result.RunCentralAdmin | Should BeNullOrEmpty
+            }
+
+            It "Should return false in the test method" {
+                Test-TargetResource @testParams | Should Be $false
             }
         }
 
         Context -Name "A config database exists, and this server is connected (with FQDN) to it and should be" -Fixture {
             $testParams = @{
+                IsSingleInstance = "Yes"
                 Ensure = "Present"
                 FarmConfigDatabaseName = "SP_Config"
                 DatabaseServer = "sql.contoso.com"
@@ -768,6 +993,20 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                         DisableKerberos = $true
                     })
                     Url = "http://localhost:9999"
+                }
+            }
+            Mock -CommandName "Get-SPServiceInstance" -MockWith {
+                if ($global:SPDscCentralAdminCheckDone -eq $true)
+                {
+                    return @(@{
+                        TypeName = "Central Administration"
+                        Status = "Online"
+                    })
+                }
+                else
+                {
+                    $global:SPDscCentralAdminCheckDone = $true
+                    return $null
                 }
             }
 

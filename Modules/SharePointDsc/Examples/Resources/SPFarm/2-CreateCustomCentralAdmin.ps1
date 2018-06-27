@@ -6,7 +6,7 @@
     run on, as well as the authentication mode for the site are also specified.
 #>
 
-    Configuration Example 
+    Configuration Example
     {
         param(
             [Parameter(Mandatory = $true)]
@@ -26,7 +26,7 @@
         node localhost {
             SPFarm SharePointFarm
             {
-                Ensure                    = "Present"
+                IsSingleInstance          = "Yes"
                 DatabaseServer            = "SQL.contoso.local\SQLINSTANCE"
                 FarmConfigDatabaseName    = "SP_Config"
                 AdminContentDatabaseName  = "SP_AdminContent"

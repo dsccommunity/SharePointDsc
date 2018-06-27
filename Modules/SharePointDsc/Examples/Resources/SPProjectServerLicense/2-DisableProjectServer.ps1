@@ -3,7 +3,7 @@
     This example disables Project Server in the current environment
 #>
 
-Configuration Example 
+Configuration Example
 {
     param(
         [Parameter(Mandatory = $true)]
@@ -15,6 +15,7 @@ Configuration Example
     node localhost {
         SPProjectServerLicense ProjectLicense
         {
+            IsSingleInstance     = "Yes"
             Ensure               = "Absent"
             PsDscRunAsCredential = $SetupAccount
         }

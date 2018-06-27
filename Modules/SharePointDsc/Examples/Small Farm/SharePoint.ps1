@@ -33,16 +33,18 @@ Configuration Example
         #**********************************************************
 
         SPInstallPrereqs InstallPrereqs {
+            IsSingleInstance  = "Yes"
             Ensure            = "Present"
             InstallerPath     = "C:\binaries\prerequisiteinstaller.exe"
             OnlineMode        = $true
         }
 
         SPInstall InstallSharePoint {
-            Ensure = "Present"
-            BinaryDir = "C:\binaries\"
-            ProductKey = "XXXXX-XXXXX-XXXXX-XXXXX-XXXXX"
-            DependsOn = "[SPInstallPrereqs]InstallPrereqs"
+            IsSingleInstance  = "Yes"
+            Ensure            = "Present"
+            BinaryDir         = "C:\binaries\"
+            ProductKey        = "XXXXX-XXXXX-XXXXX-XXXXX-XXXXX"
+            DependsOn         = "[SPInstallPrereqs]InstallPrereqs"
         }
 
         #**********************************************************
@@ -54,6 +56,7 @@ Configuration Example
         #**********************************************************
         SPFarm CreateSPFarm
         {
+            IsSingleInstance         = "Yes"
             Ensure                   = "Present"
             DatabaseServer           = "sql.contoso.com"
             FarmConfigDatabaseName   = "SP_Config"
@@ -80,6 +83,7 @@ Configuration Example
         }
         SPDiagnosticLoggingSettings ApplyDiagnosticLogSettings
         {
+            IsSingleInstance                            = "Yes"
             PsDscRunAsCredential                        = $SPSetupAccount
             LogPath                                     = "C:\ULS"
             LogSpaceInGB                                = 5
@@ -144,7 +148,7 @@ Configuration Example
             ApplicationPoolAccount = $WebPoolManagedAccount.UserName
             AllowAnonymous         = $false
             DatabaseName           = "SP_Content"
-            Url                    = "http://sites.contoso.com"
+            WebAppUrl              = "http://sites.contoso.com"
             HostHeader             = "sites.contoso.com"
             Port                   = 80
             PsDscRunAsCredential   = $SPSetupAccount
@@ -277,16 +281,18 @@ Configuration Example
         #**********************************************************
 
         SPInstallPrereqs InstallPrereqs {
+            IsSingleInstance  = "Yes"
             Ensure            = "Present"
             InstallerPath     = "C:\binaries\prerequisiteinstaller.exe"
             OnlineMode        = $true
         }
 
         SPInstall InstallSharePoint {
-            Ensure = "Present"
-            BinaryDir = "C:\binaries\"
-            ProductKey = "XXXXX-XXXXX-XXXXX-XXXXX-XXXXX"
-            DependsOn = "[SPInstallPrereqs]InstallPrereqs"
+            IsSingleInstance  = "Yes"
+            Ensure            = "Present"
+            BinaryDir         = "C:\binaries\"
+            ProductKey        = "XXXXX-XXXXX-XXXXX-XXXXX-XXXXX"
+            DependsOn         = "[SPInstallPrereqs]InstallPrereqs"
         }
 
         #**********************************************************
@@ -298,6 +304,7 @@ Configuration Example
         #**********************************************************
         SPFarm JoinSPFarm
         {
+            IsSingleInstance         = "Yes"
             Ensure                   = "Present"
             DatabaseServer           = "sql.contoso.com"
             FarmConfigDatabaseName   = "SP_Config"

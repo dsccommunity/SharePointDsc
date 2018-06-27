@@ -1,7 +1,7 @@
 [CmdletBinding()]
 param(
     [Parameter()]
-    [string] 
+    [string]
     $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
                                          -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
                                          -Resolve)
@@ -21,7 +21,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         # Test contexts
         Context -Name "No central admin site exists" {
             $testParams = @{
-                Name = "Farm Administrators"
+                IsSingleInstance = "Yes"
                 Members = @("Demo\User1", "Demo\User2")
             }
 
@@ -42,11 +42,11 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "Central admin exists and a fixed members list is used which matches" -Fixture {
             $testParams = @{
-                Name = "Farm Administrators"
+                IsSingleInstance = "Yes"
                 Members = @("Demo\User1", "Demo\User2")
             }
-            
-            Mock -CommandName Get-SPwebapplication -MockWith { 
+
+            Mock -CommandName Get-SPwebapplication -MockWith {
                 return @{
                     IsAdministrationWebApplication = $true
                     Url = "http://admin.shareopoint.contoso.local"
@@ -55,7 +55,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             Mock -CommandName Get-SPWeb -MockWith {
                 return @{
                     AssociatedOwnerGroup = "Farm Administrators"
-                    SiteGroups = New-Object -TypeName "Object" | 
+                    SiteGroups = New-Object -TypeName "Object" |
                                     Add-Member -MemberType ScriptMethod `
                                                -Name GetByName `
                                                -Value {
@@ -80,38 +80,38 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "Central admin exists and a fixed members list is used which does not match" -Fixture {
             $testParams = @{
-                Name = "Farm Administrators"
+                IsSingleInstance = "Yes"
                 Members = @("Demo\User1", "Demo\User2")
             }
-            
-            Mock -CommandName Get-SPwebapplication -MockWith { 
+
+            Mock -CommandName Get-SPwebapplication -MockWith {
                 return @{
                     IsAdministrationWebApplication = $true
                     Url = "http://admin.shareopoint.contoso.local"
                 }
             }
-            
+
             Mock -CommandName Get-SPWeb -MockWith {
                 $web =  @{
                     AssociatedOwnerGroup = "Farm Administrators"
-                    SiteGroups = New-Object -TypeName "Object" | 
+                    SiteGroups = New-Object -TypeName "Object" |
                                     Add-Member -MemberType ScriptMethod `
                                                -Name GetByName `
                                                -Value {
-                                                    return New-Object -TypeName "Object" | 
+                                                    return New-Object -TypeName "Object" |
                                                         Add-Member -MemberType ScriptProperty `
                                                                    -Name Users `
                                                                    -Value {
                                                                         return @(
                                                                             @{
-                                                                                UserLogin = "Demo\User1" 
+                                                                                UserLogin = "Demo\User1"
                                                                             }
-                                                                        )                                                 
-                                                                    } -PassThru | 
+                                                                        )
+                                                                    } -PassThru |
                                                         Add-Member -MemberType ScriptMethod `
                                                                    -Name AddUser `
                                                                    -Value { } `
-                                                                   -PassThru | 
+                                                                   -PassThru |
                                                         Add-Member -MemberType ScriptMethod `
                                                                    -Name RemoveUser `
                                                                    -Value { } `
@@ -121,8 +121,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 return $web
             }
 
-            Mock -CommandName Get-SPUser -MockWith { 
-                return @{} 
+            Mock -CommandName Get-SPUser -MockWith {
+                return @{}
             }
 
             It "Should return values from the get method" {
@@ -134,47 +134,47 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             It "Should update the members list" {
-                Set-TargetResource @testParams 
+                Set-TargetResource @testParams
             }
         }
-        
+
         Context -Name "Central admin exists and a members to include is set where the members are in the group" -Fixture {
             $testParams = @{
-                Name = "Farm Administrators"
+                IsSingleInstance = "Yes"
                 MembersToInclude = @("Demo\User2")
             }
 
-            Mock -CommandName Get-SPwebapplication -MockWith { 
+            Mock -CommandName Get-SPwebapplication -MockWith {
                 return @{
                     IsAdministrationWebApplication = $true
                     Url = "http://admin.shareopoint.contoso.local"
                 }
             }
-            
+
             Mock -CommandName Get-SPWeb -MockWith {
                 return @{
                     AssociatedOwnerGroup = "Farm Administrators"
-                    SiteGroups = New-Object -TypeName "Object" | 
+                    SiteGroups = New-Object -TypeName "Object" |
                                     Add-Member -MemberType ScriptMethod `
                                                -Name GetByName `
                                                -Value {
-                                                    return New-Object "Object" | 
+                                                    return New-Object "Object" |
                                                         Add-Member -MemberType ScriptProperty `
                                                                    -Name Users `
                                                                    -Value {
                                                                         return @(
                                                                             @{
-                                                                                UserLogin = "Demo\User1" 
+                                                                                UserLogin = "Demo\User1"
                                                                             },
                                                                             @{
-                                                                                UserLogin = "Demo\User2" 
+                                                                                UserLogin = "Demo\User2"
                                                                             }
-                                                                        )                                                 
-                                                                    } -PassThru | 
+                                                                        )
+                                                                    } -PassThru |
                                                         Add-Member -MemberType ScriptMethod `
                                                                    -Name AddUser `
                                                                    -Value { } `
-                                                                   -PassThru | 
+                                                                   -PassThru |
                                                         Add-Member -MemberType ScriptMethod `
                                                                    -Name RemoveUser `
                                                                    -Value { } `
@@ -194,11 +194,11 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "Central admin exists and a members to include is set where the members are not in the group" -Fixture {
             $testParams = @{
-                Name = "Farm Administrators"
+                IsSingleInstance = "Yes"
                 MembersToInclude = @("Demo\User2")
             }
 
-            Mock -CommandName Get-SPwebapplication -MockWith { 
+            Mock -CommandName Get-SPwebapplication -MockWith {
                 return @{
                     IsAdministrationWebApplication = $true
                     Url = "http://admin.shareopoint.contoso.local"
@@ -208,24 +208,24 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             Mock -CommandName Get-SPWeb -MockWith {
                 return @{
                     AssociatedOwnerGroup = "Farm Administrators"
-                    SiteGroups = New-Object -TypeName "Object" | 
+                    SiteGroups = New-Object -TypeName "Object" |
                                     Add-Member -MemberType ScriptMethod `
                                                -Name GetByName `
                                                -Value {
-                                                    return New-Object "Object" | 
+                                                    return New-Object "Object" |
                                                         Add-Member -MemberType ScriptProperty `
                                                                    -Name Users `
                                                                    -Value {
                                                                         return @(
                                                                             @{
-                                                                                UserLogin = "Demo\User1" 
+                                                                                UserLogin = "Demo\User1"
                                                                             }
-                                                                        )                                                 
-                                                                    } -PassThru | 
+                                                                        )
+                                                                    } -PassThru |
                                                         Add-Member -MemberType ScriptMethod `
                                                                    -Name AddUser `
                                                                    -Value { } `
-                                                                   -PassThru | 
+                                                                   -PassThru |
                                                         Add-Member -MemberType ScriptMethod `
                                                                    -Name RemoveUser `
                                                                    -Value { } `
@@ -241,49 +241,49 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             It "Should return true from the test method" {
                 Test-TargetResource @testParams | Should Be $false
             }
-            
+
             It "Should update the members list" {
-                Set-TargetResource @testParams 
+                Set-TargetResource @testParams
             }
         }
 
         Context -Name "Central admin exists and a members to exclude is set where the members are in the group" -Fixture {
             $testParams = @{
-                Name = "Farm Administrators"
+                IsSingleInstance = "Yes"
                 MembersToExclude = @("Demo\User1")
             }
 
-            Mock -CommandName Get-SPwebapplication -MockWith { 
+            Mock -CommandName Get-SPwebapplication -MockWith {
                 return @{
                     IsAdministrationWebApplication = $true
                     Url = "http://admin.shareopoint.contoso.local"
                 }
             }
-            
+
             Mock -CommandName Get-SPWeb -MockWith {
                 return @{
                     AssociatedOwnerGroup = "Farm Administrators"
-                    SiteGroups = New-Object -TypeName "Object" | 
+                    SiteGroups = New-Object -TypeName "Object" |
                                     Add-Member -MemberType ScriptMethod `
                                                -Name GetByName `
                                                -Value {
-                                                    return New-Object "Object" | 
+                                                    return New-Object "Object" |
                                                         Add-Member -MemberType ScriptProperty `
                                                                    -Name Users `
                                                                    -Value {
                                                                         return @(
                                                                             @{
-                                                                                UserLogin = "Demo\User1" 
+                                                                                UserLogin = "Demo\User1"
                                                                             },
                                                                             @{
                                                                                 UserLogin = "Demo\User2"
                                                                             }
-                                                                        )                                                 
-                                                                    } -PassThru | 
+                                                                        )
+                                                                    } -PassThru |
                                                         Add-Member -MemberType ScriptMethod `
                                                                    -Name AddUser `
                                                                    -Value { } `
-                                                                   -PassThru | 
+                                                                   -PassThru |
                                                         Add-Member -MemberType ScriptMethod `
                                                                    -Name RemoveUser `
                                                                    -Value { } `
@@ -301,13 +301,13 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             It "Should update the members list" {
-                Set-TargetResource @testParams 
+                Set-TargetResource @testParams
             }
         }
 
         Context -Name "Central admin exists and a members to exclude is set where the members are not in the group" -Fixture {
             $testParams = @{
-                Name = "Farm Administrators"
+                IsSingleInstance = "Yes"
                 MembersToExclude = @("Demo\User1")
             }
 
@@ -318,24 +318,24 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             Mock -CommandName Get-SPWeb -MockWith {
                 return @{
                     AssociatedOwnerGroup = "Farm Administrators"
-                    SiteGroups = New-Object -TypeName "Object" | 
+                    SiteGroups = New-Object -TypeName "Object" |
                                     Add-Member -MemberType ScriptMethod `
                                                -Name GetByName `
                                                -Value {
-                                                    return New-Object "Object" | 
+                                                    return New-Object "Object" |
                                                         Add-Member -MemberType ScriptProperty `
                                                                    -Name Users `
                                                                    -Value {
                                                                         return @(
                                                                             @{
-                                                                                UserLogin = "Demo\User2" 
+                                                                                UserLogin = "Demo\User2"
                                                                             }
-                                                                        )                                                 
-                                                                    } -PassThru | 
+                                                                        )
+                                                                    } -PassThru |
                                                         Add-Member -MemberType ScriptMethod `
                                                                    -Name AddUser `
                                                                    -Value { } `
-                                                                   -PassThru | 
+                                                                   -PassThru |
                                                         Add-Member -MemberType ScriptMethod `
                                                                    -Name RemoveUser `
                                                                    -Value { } `
@@ -355,39 +355,39 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "The resource is called with both an explicit members list as well as members to include/exclude" -Fixture {
             $testParams = @{
-                Name = "Farm Administrators"
+                IsSingleInstance = "Yes"
                 Members = @("Demo\User1")
                 MembersToExclude = @("Demo\User1")
             }
 
-            Mock -CommandName Get-SPwebapplication -MockWith { 
+            Mock -CommandName Get-SPwebapplication -MockWith {
                 return @{
                     IsAdministrationWebApplication = $true
                     Url = "http://admin.shareopoint.contoso.local"
                 }
             }
-            
+
             Mock -CommandName Get-SPWeb -MockWith {
                 return @{
                     AssociatedOwnerGroup = "Farm Administrators"
-                    SiteGroups = New-Object -TypeName "Object" | 
+                    SiteGroups = New-Object -TypeName "Object" |
                                     Add-Member -MemberType ScriptMethod `
                                                -Name GetByName `
                                                -Value {
-                                                    return New-Object "Object" | 
+                                                    return New-Object "Object" |
                                                         Add-Member -MemberType ScriptProperty `
                                                                    -Name Users `
                                                                    -Value {
                                                                         return @(
                                                                             @{
-                                                                                UserLogin = "Demo\User2" 
+                                                                                UserLogin = "Demo\User2"
                                                                             }
-                                                                        )                                                 
-                                                                    } -PassThru | 
+                                                                        )
+                                                                    } -PassThru |
                                                         Add-Member -MemberType ScriptMethod `
                                                                    -Name AddUser `
                                                                    -Value { } `
-                                                                   -PassThru | 
+                                                                   -PassThru |
                                                         Add-Member -MemberType ScriptMethod `
                                                                    -Name RemoveUser `
                                                                    -Value { } `
@@ -397,7 +397,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             It "Should throw in the get method" {
-                { Get-TargetResource @testParams } | Should throw 
+                { Get-TargetResource @testParams } | Should throw
             }
 
             It "Should throw in the test method" {
@@ -411,37 +411,37 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "The resource is called without either the specific members list or the include/exclude lists" -Fixture {
             $testParams = @{
-                Name = "Farm Administrators"
+                IsSingleInstance = "Yes"
             }
 
-            Mock -CommandName Get-SPwebapplication -MockWith { 
+            Mock -CommandName Get-SPwebapplication -MockWith {
                 return @{
                     IsAdministrationWebApplication = $true
-                    Url = "http://admin.shareopoint.contoso.local"
+                    Url = "http://admin.sharepoint.contoso.local"
                 }
             }
-            
+
             Mock -CommandName Get-SPWeb -MockWith {
                 return @{
                     AssociatedOwnerGroup = "Farm Administrators"
-                    SiteGroups = New-Object -TypeName "Object" | 
+                    SiteGroups = New-Object -TypeName "Object" |
                                     Add-Member -MemberType ScriptMethod `
                                                -Name GetByName `
                                                -Value {
-                                                    return New-Object "Object" | 
+                                                    return New-Object "Object" |
                                                         Add-Member -MemberType ScriptProperty `
                                                                    -Name Users `
                                                                    -Value {
                                                                         return @(
                                                                             @{
-                                                                                UserLogin = "Demo\User2" 
+                                                                                UserLogin = "Demo\User2"
                                                                             }
-                                                                        )                                                 
-                                                                    } -PassThru | 
+                                                                        )
+                                                                    } -PassThru |
                                                         Add-Member -MemberType ScriptMethod `
                                                                    -Name AddUser `
                                                                    -Value { } `
-                                                                   -PassThru | 
+                                                                   -PassThru |
                                                         Add-Member -MemberType ScriptMethod `
                                                                    -Name RemoveUser `
                                                                    -Value { } `
@@ -451,7 +451,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             It "Should throw in the get method" {
-                { Get-TargetResource @testParams } | Should throw 
+                { Get-TargetResource @testParams } | Should throw
             }
 
             It "Should throw in the test method" {
