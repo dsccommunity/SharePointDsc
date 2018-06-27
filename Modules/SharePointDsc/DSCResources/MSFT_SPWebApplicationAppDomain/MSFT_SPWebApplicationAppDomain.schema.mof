@@ -1,7 +1,7 @@
 [ClassVersion("1.0.0.0"), FriendlyName("SPWebApplicationAppDomain")]
 class MSFT_SPWebApplicationAppDomain : OMI_BaseResource
 {
-    [Key, Description("The URL of the web application to set the app domain for")] string WebApplication;
+    [Key, Description("The URL of the web application to set the app domain for")] string WebAppUrl;
     [Key, Description("The zone that this app domain applies to"), ValueMap{"Default","Internet","Intranet","Extranet","Custom"}, Values{"Default","Internet","Intranet","Extranet","Custom"}] string Zone;
     [Required, Description("The domain for apps in this web app zone")] string AppDomain;
     [Write, Description("The port to run apps on")] string Port;

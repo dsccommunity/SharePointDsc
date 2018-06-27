@@ -1,7 +1,8 @@
 [ClassVersion("1.0.0.0"), FriendlyName("SPInstallPrereqs")]
 class MSFT_SPInstallPrereqs : OMI_BaseResource
 {
-    [Key, Description("The full path to prerequisiteinstaller.exe")] String InstallerPath;
+    [Key, Description("Specifies the resource is a single instance, the value must be 'Yes'"), ValueMap{"Yes"}, Values{"Yes"}] String IsSingleInstance;
+    [Required, Description("The full path to prerequisiteinstaller.exe")] String InstallerPath;
     [Required, Description("Should the installer download prerequisites from the internet or not")] Boolean OnlineMode;
     [Write, Description("The path to the Windows Server Operating System SXS source files, for use in closed environments without access to Windows Update")] String SXSpath;
     [Write, Description("The path to the installer for this prerequisite (SP2013 and SP2016)")] String SQLNCli;

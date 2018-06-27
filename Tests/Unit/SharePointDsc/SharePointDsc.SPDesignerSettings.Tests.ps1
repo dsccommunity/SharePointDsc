@@ -1,7 +1,7 @@
 [CmdletBinding()]
 param(
     [Parameter()]
-    [string] 
+    [string]
     $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
                                          -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
                                          -Resolve)
@@ -18,15 +18,15 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
     InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
         Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
-        # Mocks for all contexts   
-        Mock -CommandName Get-SPFarm -MockWith { 
-            return @{} 
+        # Mocks for all contexts
+        Mock -CommandName Get-SPFarm -MockWith {
+            return @{}
         }
 
         # Test contexts
         Context -Name "The server is not part of SharePoint farm" -Fixture {
             $testParams = @{
-                Url = "https://intranet.sharepoint.contoso.com"
+                WebAppUrl = "https://intranet.sharepoint.contoso.com"
                 SettingsScope = "WebApplication"
                 AllowSharePointDesigner = $false
                 AllowDetachPagesFromDefinition = $false
@@ -37,8 +37,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 AllowSaveDeclarativeWorkflowAsTemplate = $false
             }
 
-            Mock -CommandName Get-SPFarm -MockWith { 
-                throw "Unable to detect local farm" 
+            Mock -CommandName Get-SPFarm -MockWith {
+                throw "Unable to detect local farm"
             }
 
             It "Should return null from the get method" {
@@ -56,7 +56,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "The server is in a farm, target web application and the incorrect settings have been applied" -Fixture {
             $testParams = @{
-                Url = "https://intranet.sharepoint.contoso.com"
+                WebAppUrl = "https://intranet.sharepoint.contoso.com"
                 SettingsScope = "WebApplication"
                 AllowSharePointDesigner = $false
                 AllowDetachPagesFromDefinition = $false
@@ -66,7 +66,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 AllowSavePublishDeclarativeWorkflow = $false
                 AllowSaveDeclarativeWorkflowAsTemplate = $false
             }
-            
+
             Mock -CommandName Get-SPDesignerSettings -MockWith { return @{
                     AllowDesigner = $true
                     AllowRevertFromTemplate = $true
@@ -75,21 +75,21 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     AllowCreateDeclarativeWorkflow = $true
                     AllowSavePublishDeclarativeWorkflow = $true
                     AllowSaveDeclarativeWorkflowAsTemplate = $true
-                } 
+                }
             }
-            
-            Mock -CommandName Get-SPWebapplication -MockWith { 
+
+            Mock -CommandName Get-SPWebapplication -MockWith {
                 $result = @{}
                 $result.DisplayName = "Test"
                 $result.Url = "https://intranet.sharepoint.contoso.com"
 
-                $result = $result | Add-Member -MemberType ScriptMethod -Name Update -Value { 
-                    $Global:SPDscDesignerUpdated = $true 
+                $result = $result | Add-Member -MemberType ScriptMethod -Name Update -Value {
+                    $Global:SPDscDesignerUpdated = $true
                 } -PassThru
 
                 return $result
             }
-            
+
             It "Should return values from the get method" {
                 Get-TargetResource @testParams | Should Not BeNullOrEmpty
             }
@@ -107,7 +107,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "The server is in a farm, target site collection and the incorrect settings have been applied" -Fixture {
             $testParams = @{
-                Url = "https://intranet.sharepoint.contoso.com"
+                WebAppUrl = "https://intranet.sharepoint.contoso.com"
                 SettingsScope = "SiteCollection"
                 AllowSharePointDesigner = $false
                 AllowDetachPagesFromDefinition = $false
@@ -128,7 +128,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                         AllowCreateDeclarativeWorkflow = $true
                         AllowSavePublishDeclarativeWorkflow = $true
                         AllowSaveDeclarativeWorkflowAsTemplate = $true
-                } 
+                }
             }
 
             Mock -CommandName Test-SPDSCRunAsCredential { return $true }
@@ -148,7 +148,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "The server is in a farm, target site collection and InstallAccount is used" -Fixture {
             $testParams = @{
-                Url = "https://intranet.sharepoint.contoso.com"
+                WebAppUrl = "https://intranet.sharepoint.contoso.com"
                 SettingsScope = "SiteCollection"
                 AllowSharePointDesigner = $false
                 AllowDetachPagesFromDefinition = $false
@@ -168,7 +168,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                         AllowCreateDeclarativeWorkflow = $true
                         AllowSavePublishDeclarativeWorkflow = $true
                         AllowSaveDeclarativeWorkflowAsTemplate = $true
-                } 
+                }
             }
             Mock -CommandName Test-SPDSCRunAsCredential { return $false }
 
@@ -187,7 +187,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "The server is in a farm, target is web application and the correct settings have been applied" -Fixture {
             $testParams = @{
-                Url = "https://intranet.sharepoint.contoso.com"
+                WebAppUrl = "https://intranet.sharepoint.contoso.com"
                 SettingsScope = "SiteCollection"
                 AllowSharePointDesigner = $false
                 AllowDetachPagesFromDefinition = $false
@@ -208,16 +208,16 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     AllowCreateDeclarativeWorkflow = $false
                     AllowSavePublishDeclarativeWorkflow = $false
                     AllowSaveDeclarativeWorkflowAsTemplate = $false
-                } 
-                $returnVal = $returnVal | Add-Member -MemberType ScriptMethod -Name Update -Value { 
-                    $Global:SPDscDesignerUpdated = $true 
+                }
+                $returnVal = $returnVal | Add-Member -MemberType ScriptMethod -Name Update -Value {
+                    $Global:SPDscDesignerUpdated = $true
                 } -PassThru
                 return $returnVal
             }
 
             Mock -CommandName Test-SPDSCRunAsCredential { return $true }
-            
-            Mock -CommandName Get-SPWebApplication -MockWith { 
+
+            Mock -CommandName Get-SPWebApplication -MockWith {
                 $result = @{}
                 $result.DisplayName = "Test"
                 $result.Url = "https://intranet.sharepoint.contoso.com"
@@ -236,7 +236,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "The server is in a farm, target is site collection and the correct settings have been applied" -Fixture {
             $testParams = @{
-                Url = "https://intranet.sharepoint.contoso.com"
+                WebAppUrl = "https://intranet.sharepoint.contoso.com"
                 SettingsScope = "SiteCollection"
                 AllowSharePointDesigner = $false
                 AllowDetachPagesFromDefinition = $false
@@ -257,9 +257,9 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                         AllowCreateDeclarativeWorkflow = $false
                         AllowSavePublishDeclarativeWorkflow = $false
                         AllowSaveDeclarativeWorkflowAsTemplate = $false
-                } 
-                $returnVal = $returnVal | Add-Member -MemberType ScriptMethod -Name Update -Value { 
-                    $Global:SPDscDesignerUpdated = $true 
+                }
+                $returnVal = $returnVal | Add-Member -MemberType ScriptMethod -Name Update -Value {
+                    $Global:SPDscDesignerUpdated = $true
                 } -PassThru
                 return $returnVal
             }

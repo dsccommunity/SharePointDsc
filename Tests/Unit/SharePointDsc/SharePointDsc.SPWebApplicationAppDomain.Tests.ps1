@@ -1,7 +1,7 @@
 [CmdletBinding()]
 param(
     [Parameter()]
-    [string] 
+    [string]
     $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
                                          -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
                                          -Resolve)
@@ -20,7 +20,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         # Initialize tests
 
-        # Mocks for all contexts   
+        # Mocks for all contexts
         Mock -CommandName New-SPWebApplicationAppDomain -MockWith { }
         Mock -CommandName Remove-SPWebApplicationAppDomain -MockWith { }
         Mock -CommandName Start-Sleep -MockWith { }
@@ -29,7 +29,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         Context -Name "No app domain settings have been configured for the specified web app and zone" -Fixture {
             $testParams = @{
                 AppDomain = "contosointranetapps.com"
-                WebApplication ="http://portal.contoso.com"
+                WebAppUrl ="http://portal.contoso.com"
                 Zone = "Default"
                 Port = 80;
                 SSL = $false
@@ -54,13 +54,13 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         Context -Name "An app domain has been configured for the specified web app and zone but it's not correct" -Fixture {
             $testParams = @{
                 AppDomain = "contosointranetapps.com"
-                WebApplication ="http://portal.contoso.com"
+                WebAppUrl ="http://portal.contoso.com"
                 Zone = "Default"
                 Port = 80;
                 SSL = $false
             }
 
-            Mock -CommandName Get-SPWebApplicationAppDomain -MockWith { 
+            Mock -CommandName Get-SPWebApplicationAppDomain -MockWith {
                 return @{
                     AppDomain = "wrong.domain"
                     UrlZone = $testParams.Zone
@@ -87,13 +87,13 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         Context -Name "The correct app domain has been configued for the requested web app and zone" -Fixture {
             $testParams = @{
                 AppDomain = "contosointranetapps.com"
-                WebApplication ="http://portal.contoso.com"
+                WebAppUrl ="http://portal.contoso.com"
                 Zone = "Default"
                 Port = 80;
                 SSL = $false
             }
 
-            Mock -CommandName Get-SPWebApplicationAppDomain -MockWith { 
+            Mock -CommandName Get-SPWebApplicationAppDomain -MockWith {
                 return @{
                     AppDomain = $testParams.AppDomain
                     UrlZone = $testParams.Zone
@@ -114,11 +114,11 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         Context -Name "The functions operate without optional parameters included" -Fixture {
             $testParams = @{
                 AppDomain = "contosointranetapps.com"
-                WebApplication ="http://portal.contoso.com"
+                WebAppUrl ="http://portal.contoso.com"
                 Zone = "Default"
             }
 
-            Mock -CommandName Get-SPWebApplicationAppDomain -MockWith { 
+            Mock -CommandName Get-SPWebApplicationAppDomain -MockWith {
                 return @{
                     AppDomain = "invalid.domain"
                     UrlZone = $testParams.Zone

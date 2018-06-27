@@ -1,6 +1,64 @@
 # Change log for SharePointDsc
 
+## v3.0
+
+* SPConfigWizard
+  * Fixed check for Ensure=Absent in the Set method
+* SPSearchContentSource
+  * Added support for Business Content Source Type
+* SPSPSecurityTokenServiceConfig
+  * The resource only tested for the Ensure parameter. Added more parameters.
+
+The following changes will break v2.x and earlier configurations that use these
+resources:
+
+* Implemented IsSingleInstance parameter to force that the resource can only
+  be used once in a configuration for the following resources:
+  * SPAntivirusSettings
+  * SPConfigWizard
+  * SPDiagnosticLoggingSettings
+  * SPFarm
+  * SPFarmAdministrators
+  * SPInfoPathFormsServiceConfig
+  * SPInstall
+  * SPInstallPrereqs
+  * SPIrmSettings
+  * SPMinRoleCompliance
+  * SPPasswordChangeSettings
+  * SPProjectServerLicense
+  * SPShellAdmin
+  * SPSPSecurityTokenServiceConfig
+* Standardized Url/WebApplication parameter to default WebAppUrl parameter
+  for the following resources:
+  * SPDesignerSettings
+  * SPFarmSolution
+  * SPWebAppBlockedFileTypes
+  * SPWebAppGeneralSettings
+  * SPWebApplication
+  * SPWebApplicationAppDomain
+  * SPWebAppSiteUseAndDeletion
+  * SPWebAppThrottlingSettings
+  * SPWebAppWorkflowSettings
+
 ## Unreleased
+
+* SPCacheAccounts
+  * Fixed issue where the Test method would fail if SetWebAppPolicy was set to
+    false.
+* SPDistributedCacheService
+  * Updated resource to allow updating the cache size
+* SPFarm
+  * Implemented ability to deploy Central Administration site to a server at a
+    later point in time
+* SPProjectServerLicense
+  * Fixed issue with incorrect detection of the license
+* SPServiceAppSecurity
+  * Fixed issue where error was thrown when no permissions were set on the
+    service application
+* SPTrustedIdentityTokenIssuerProviderRealms
+  * Fixed code styling issues
+* SPUserProfileServiceApp
+  * Fixed code styling issues
 
 ## 2.3
 

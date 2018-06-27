@@ -1,10 +1,10 @@
 <#
 .EXAMPLE
     This module will install SharePoint to the specific locations set for the
-    InstallPath and DataPath directories. 
+    InstallPath and DataPath directories.
 #>
 
-    Configuration Example 
+    Configuration Example
     {
         param(
             [Parameter(Mandatory = $true)]
@@ -16,10 +16,11 @@
         node localhost {
             SPInstall InstallBinaries
             {
-                BinaryDir   = "D:\SharePoint\Binaries"
-                InstallPath = "D:\SharePoint\Install"
-                DataPath    = "D:\SharePoint\Data"
-                ProductKey  = "XXXXX-XXXXX-XXXXX-XXXXX-XXXXX"
+                IsSingleInstance = "Yes"
+                BinaryDir        = "D:\SharePoint\Binaries"
+                InstallPath      = "D:\SharePoint\Install"
+                DataPath         = "D:\SharePoint\Data"
+                ProductKey       = "XXXXX-XXXXX-XXXXX-XXXXX-XXXXX"
             }
         }
     }
