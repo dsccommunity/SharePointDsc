@@ -190,7 +190,7 @@ configuration June2018Tap
             HostHeaderWebApplication = "http://root.contoso.com"
             Description              = "Root Site Collection"
             Template                 = "STS#0"
-            PSDSCRunAsCredential     = $credsSPSetup
+            PSDSCRunAsCredential     = $credsSPFarm
             DependsOn                = "[SPWebApplication]Root"
         }
 
