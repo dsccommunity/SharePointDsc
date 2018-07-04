@@ -10,7 +10,13 @@
 
 if(!$ResourceGroupName)
 {
-    $ResourceGroupName = Read-Host "SP Farm Resource Group Name"
+    do{
+        if($ResourceGroupName -and $ResourceGroupName.Length -gt 7)
+        {
+            Write-Host "Please select a resource name that is 7 characters long or less" -ForegroundColor Yellow
+        }
+        $ResourceGroupName = Read-Host "SP Farm Resource Group Name"
+    }while($ResourceGroupName -and $ResourceGroupName.Length -gt 7)
 }
 
 $GuidPart = (New-Guid).ToString().ToLower().Replace("-","").Substring(0,10)
@@ -34,6 +40,7 @@ try
     else
     {
         Write-Host -ForegroundColor White " - You are already logged in to Azure."
+        $loginSucceeded = $true
     }
 }
 catch
@@ -399,17 +406,23 @@ $message = "Completed in " + $time.Seconds + " seconds"
 
 Write-Host $message -ForegroundColor Green
 Write-Host "Assigning WFE Server Configuration..." -NoNewline -ForegroundColor Yellow
-Register-AzureRmAutomationDscNode -AzureVMResourceGroup $ResourceGroupName -AzureVMName ("SPWFE" + $ResourceGroupName) -AzureVMLocation "EastUS" -NodeConfigurationName ($ConfigurationName + ".SPWFE" + $ResourceGroupName + ".contoso.com") -ActionAfterReboot ContinueConfiguration -RebootNodeIfNeeded $true -AutomationAccountName $AutomationAccountName -ResourceGroupName $ResourceGroupName
+$jobWFE = Start-Job -ScriptBlock{
+    Register-AzureRmAutomationDscNode -AzureVMResourceGroup $ResourceGroupName -AzureVMName ("SPWFE" + $ResourceGroupName) -AzureVMLocation "EastUS" -NodeConfigurationName ($ConfigurationName + ".SPWFE" + $ResourceGroupName + ".contoso.com") -ActionAfterReboot ContinueConfiguration -RebootNodeIfNeeded $true -AutomationAccountName $AutomationAccountName -ResourceGroupName $ResourceGroupName
+}
 $message = "Completed"
 Write-Host $message -ForegroundColor Green
 
 Write-Host "Assigning Application Server Configuration..." -NoNewline -ForegroundColor Yellow
-Register-AzureRmAutomationDscNode -AzureVMResourceGroup $ResourceGroupName -AzureVMName ("SPApp" + $ResourceGroupName) -AzureVMLocation "EastUS" -NodeConfigurationName ($ConfigurationName + ".SPAPP" + $ResourceGroupName + ".contoso.com") -ActionAfterReboot ContinueConfiguration -RebootNodeIfNeeded $true -AutomationAccountName $AutomationAccountName -ResourceGroupName $ResourceGroupName
+$jobAPP = Start-Job -ScriptBlock{
+    Register-AzureRmAutomationDscNode -AzureVMResourceGroup $ResourceGroupName -AzureVMName ("SPApp" + $ResourceGroupName) -AzureVMLocation "EastUS" -NodeConfigurationName ($ConfigurationName + ".SPAPP" + $ResourceGroupName + ".contoso.com") -ActionAfterReboot ContinueConfiguration -RebootNodeIfNeeded $true -AutomationAccountName $AutomationAccountName -ResourceGroupName $ResourceGroupName
+}
 $message = "Completed"
 Write-Host $message -ForegroundColor Green
 
 Write-Host "Assigning Search Server Configuration..." -NoNewline -ForegroundColor Yellow
-Register-AzureRmAutomationDscNode -AzureVMResourceGroup $ResourceGroupName -AzureVMName ("SPSearch" + $ResourceGroupName) -AzureVMLocation "EastUS" -NodeConfigurationName ($ConfigurationName + ".SPSEARCH" + $ResourceGroupName + ".contoso.com") -ActionAfterReboot ContinueConfiguration -RebootNodeIfNeeded $true -AutomationAccountName $AutomationAccountName -ResourceGroupName $ResourceGroupName
+$jobSearch = Start-Job -ScriptBlock{
+    Register-AzureRmAutomationDscNode -AzureVMResourceGroup $ResourceGroupName -AzureVMName ("SPSearch" + $ResourceGroupName) -AzureVMLocation "EastUS" -NodeConfigurationName ($ConfigurationName + ".SPSEARCH" + $ResourceGroupName + ".contoso.com") -ActionAfterReboot ContinueConfiguration -RebootNodeIfNeeded $true -AutomationAccountName $AutomationAccountName -ResourceGroupName $ResourceGroupName
+}
 $message = "Completed"
 Write-Host $message -ForegroundColor Green
 #endregion
