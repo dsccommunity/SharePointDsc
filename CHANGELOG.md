@@ -12,6 +12,12 @@
     later point in time
 * SPProjectServerLicense
   * Fixed issue with incorrect detection of the license
+* SPSearchServiceApp
+  * Fixed issue where the service account was not set correctly when the service
+    application was first created
+* SPSearchTopology
+  * Fixed issue where Get method threw an error when the specified service
+    application didn't exist yet.
 * SPServiceAppSecurity
   * Fixed issue where error was thrown when no permissions were set on the
     service application
