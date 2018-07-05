@@ -10,7 +10,13 @@
 
 if(!$ResourceGroupName)
 {
-    $ResourceGroupName = Read-Host "SP Farm Resource Group Name"
+    do{
+        if($ResourceGroupName -and $ResourceGroupName.Length -gt 7)
+        {
+            Write-Host "Please select a resource name that is 7 characters long or less" -ForegroundColor Yellow
+        }
+        $ResourceGroupName = Read-Host "SP Farm Resource Group Name"
+    }while($ResourceGroupName -and $ResourceGroupName.Length -gt 7)
 }
 
 $GuidPart = (New-Guid).ToString().ToLower().Replace("-","").Substring(0,10)
@@ -21,21 +27,84 @@ $BlobContainerName = "dscmodules"
 #endregion
 
 # Nik20180518 - Connect to Azure Account, and ask to select subscription if multiple ones exist;
-Login-AzureRmAccount
-$subscriptions = Get-AzureRmSubscription
-if($subscriptions.Length -gt 1)
+# Brian20180628 - Only prompt for Azure creds if we're not already logged in
+$loginSucceeded = $false
+try
 {
-    $i = 1;
-    foreach($sub in $subscriptions)
+    # Run a simple command to check if we are logged in
+    (Get-AzureRmResource -ErrorAction Stop -WarningAction SilentlyContinue) | Out-Null
+    if ($? -eq $false)
     {
-        Write-Host $i "-" $sub.Name
-        $i++
+        throw
     }
-    $id = Read-Host "Select a Subscription"
-
-    Select-AzureRMSubscription -subscriptionId $subscriptions[$id-1].Id
+    else
+    {
+        Write-Host -ForegroundColor White " - You are already logged in to Azure."
+        $loginSucceeded = $true
+    }
 }
+catch
+{
+    if ($_.Exception -like "*-AzureRmAccount to *" -or $_.Exception -like "*Your Azure credentials have not been set up or have expired*")
+    {
+        try
+        {
+            Write-Host -ForegroundColor Cyan " - Prompting for Azure Resource Manager credentials..."
+            Add-AzureRmAccount
+            if ($? -eq $false)
+            {
+                throw $Error
+            }
+            else
+            {
+                $loginSucceeded = $true
+            }
+        }
+        catch
+        {
+            Write-Verbose -Message $Error
+            if ($Error[2] -like "*User canceled authentication*")
+            {
+                throw "User canceled authentication"
+            }
+            else
+            {
+                throw "No credentials were provided, or another error occurred logging on to Azure."
+            }
+        }
+    }
+    elseif ($_.Exception -like "*Unable to acquire token for tenant*")
+    {
+        Write-Host $_.Exception
+    }
+    elseif ($_.Exception -like "*null array*")
+    {
+        # Do nothing
+    }
+    else
+    {
+        Write-Host $_.Exception
+    }
+}
+finally
+{
+    if ($loginSucceeded)
+    {
+        $subscriptions = Get-AzureRmSubscription
+        if($subscriptions.Length -gt 1)
+        {
+            $i = 1;
+            foreach($sub in $subscriptions)
+            {
+                Write-Host $i "-" $sub.Name
+                $i++
+            }
+            $id = Read-Host "Select a Subscription"
 
+            Select-AzureRMSubscription -subscriptionId $subscriptions[$id-1].Id
+        }
+    }
+}
 
 #region Deploy IaaS VMs
 Write-Host "Deploying the SharePoint Farm (this can take up to 1h)..." -NoNewline -ForegroundColor Yellow
@@ -338,17 +407,23 @@ $message = "Completed in {0:N0} seconds" -f $time.TotalSeconds
 Write-Host $message -ForegroundColor Green
 
 Write-Host "Assigning WFE Server Configuration..." -NoNewline -ForegroundColor Yellow
-Register-AzureRmAutomationDscNode -AzureVMResourceGroup $ResourceGroupName -AzureVMName ("SPWFE" + $ResourceGroupName) -AzureVMLocation "EastUS" -NodeConfigurationName ($ConfigurationName + ".SPWFE" + $ResourceGroupName + ".contoso.com") -ActionAfterReboot ContinueConfiguration -RebootNodeIfNeeded $true -AutomationAccountName $AutomationAccountName -ResourceGroupName $ResourceGroupName
+$jobWFE = Start-Job -ScriptBlock{
+    Register-AzureRmAutomationDscNode -AzureVMResourceGroup $ResourceGroupName -AzureVMName ("SPWFE" + $ResourceGroupName) -AzureVMLocation "EastUS" -NodeConfigurationName ($ConfigurationName + ".SPWFE" + $ResourceGroupName + ".contoso.com") -ActionAfterReboot ContinueConfiguration -RebootNodeIfNeeded $true -AutomationAccountName $AutomationAccountName -ResourceGroupName $ResourceGroupName
+}
 $message = "Completed"
 Write-Host $message -ForegroundColor Green
 
 Write-Host "Assigning Application Server Configuration..." -NoNewline -ForegroundColor Yellow
-Register-AzureRmAutomationDscNode -AzureVMResourceGroup $ResourceGroupName -AzureVMName ("SPApp" + $ResourceGroupName) -AzureVMLocation "EastUS" -NodeConfigurationName ($ConfigurationName + ".SPAPP" + $ResourceGroupName + ".contoso.com") -ActionAfterReboot ContinueConfiguration -RebootNodeIfNeeded $true -AutomationAccountName $AutomationAccountName -ResourceGroupName $ResourceGroupName
+$jobAPP = Start-Job -ScriptBlock{
+    Register-AzureRmAutomationDscNode -AzureVMResourceGroup $ResourceGroupName -AzureVMName ("SPApp" + $ResourceGroupName) -AzureVMLocation "EastUS" -NodeConfigurationName ($ConfigurationName + ".SPAPP" + $ResourceGroupName + ".contoso.com") -ActionAfterReboot ContinueConfiguration -RebootNodeIfNeeded $true -AutomationAccountName $AutomationAccountName -ResourceGroupName $ResourceGroupName
+}
 $message = "Completed"
 Write-Host $message -ForegroundColor Green
 
 Write-Host "Assigning Search Server Configuration..." -NoNewline -ForegroundColor Yellow
-Register-AzureRmAutomationDscNode -AzureVMResourceGroup $ResourceGroupName -AzureVMName ("SPSearch" + $ResourceGroupName) -AzureVMLocation "EastUS" -NodeConfigurationName ($ConfigurationName + ".SPSEARCH" + $ResourceGroupName + ".contoso.com") -ActionAfterReboot ContinueConfiguration -RebootNodeIfNeeded $true -AutomationAccountName $AutomationAccountName -ResourceGroupName $ResourceGroupName
+$jobSearch = Start-Job -ScriptBlock{
+    Register-AzureRmAutomationDscNode -AzureVMResourceGroup $ResourceGroupName -AzureVMName ("SPSearch" + $ResourceGroupName) -AzureVMLocation "EastUS" -NodeConfigurationName ($ConfigurationName + ".SPSEARCH" + $ResourceGroupName + ".contoso.com") -ActionAfterReboot ContinueConfiguration -RebootNodeIfNeeded $true -AutomationAccountName $AutomationAccountName -ResourceGroupName $ResourceGroupName
+}
 $message = "Completed"
 Write-Host $message -ForegroundColor Green
 #endregion

@@ -73,7 +73,6 @@ $Script:SP2019Win19Features = @("Web-Server", "Web-WebServer",
                                 "Web-Digest-Auth", "Web-Windows-Auth", "Web-App-Dev", "Web-Net-Ext",
                                 "Web-Net-Ext45", "Web-Asp-Net", "Web-Asp-Net45", "Web-ISAPI-Ext",
                                 "Web-ISAPI-Filter", "Web-Mgmt-Tools", "Web-Mgmt-Console",
-                                "Web-Mgmt-Compat", "Web-Metabase", "Web-Lgcy-Scripting", "Web-WMI",
                                 "NET-Framework-Features", "NET-HTTP-Activation", "NET-Non-HTTP-Activ",
                                 "NET-Framework-45-ASPNET", "NET-WCF-Pipe-Activation45",
                                 "Windows-Identity-Foundation", "WAS", "WAS-Process-Model",
@@ -376,9 +375,9 @@ function Get-TargetResource
                     SearchValue = "Microsoft SQL Server 2012 Native Client"
                 },
                 [PSObject]@{
-                    Name = "Microsoft Visual C++ 2017 x64 Additional Runtime - 14"
+                    Name = "Microsoft Visual C++ 2017 x64 Additional Runtime - 14.14"
                     SearchType = "Like"
-                    SearchValue = "Microsoft Visual C++ 2017 x64 Additional Runtime - 14.*"
+                    SearchValue = "Microsoft Visual C++ 2017 x64 Additional Runtime - 14.14.*"
                 }
             )
         }
