@@ -9,7 +9,7 @@ configuration June2018Tap
     Import-DscResource -ModuleName "xDownloadFile" -ModuleVersion "1.0"
     Import-DscResource -ModuleName "xDownloadISO" -ModuleVersion "1.0"
     Import-DscResource -ModuleName "xPendingReboot" -ModuleVersion "0.4.0.0"
-    
+
     Node $AllNodes.NodeName
     {
         xDownloadISO DownloadTAPBits
@@ -100,6 +100,15 @@ configuration June2018Tap
             PsDscRunAsCredential     = $credsLocalAdmin
         }
 
+        Group GrantSetupAccountLocalAdmin
+        {
+            GroupName            = "Administrators"
+            Ensure               = "Present"
+            MembersToInclude     = $credsSPSetup.UserName
+            PsDscRunAsCredential = $credsLocalAdmin
+            DependsOn            = "[xDownloadFile]MSVCRT141"
+        }
+
         SPInstallPrereqs SharePointPrereqInstall
         {
             IsSingleInstance     = "Yes"
@@ -115,9 +124,9 @@ configuration June2018Tap
             KB3092423            = $ConfigurationData.SharePoint.Settings.BinaryPath + "prerequisiteinstallerfiles\AppFabric-KB3092423-x64-ENU.exe"
             DotNet472            = $ConfigurationData.SharePoint.Settings.BinaryPath + "prerequisiteinstallerfiles\NDP472-KB4054530-x86-x64-AllOS-ENU.exe"
             Ensure               = "Present"
-            DependsOn            = "[xDownloadFile]MSVCRT141"
+            DependsOn            = "[Group]GrantSetupAccountLocalAdmin"
             # For On-prem - SXSPath = "D:\sources\sxs"
-            PsDscRunAsCredential = $credsDomainAdmin
+            PsDscRunAsCredential = $credsSPSetup
         }
 
         xPendingReboot AfterPrereqInstall
@@ -156,7 +165,7 @@ configuration June2018Tap
             RunCentralAdmin           = $Node.RunCentralAdmin
             CentralAdministrationPort = "7777"
             ServerRole                = "Application"
-            PSDSCRunAsCredential      = $credsDomainAdmin
+            PSDSCRunAsCredential      = $credsSPSetup
         }
 
         SPManagedAccount SPFarmAccount
@@ -177,7 +186,7 @@ configuration June2018Tap
             DatabaseName           = "Root_Content_DB"
             HostHeader             = "root.contoso.com"
             AllowAnonymous         = $false
-            PSDSCRunAsCredential   = $credsDomainAdmin
+            PSDSCRunAsCredential   = $credsSPSetup
             DependsOn              = "[SPManagedAccount]SPFarmAccount"
         }
 
@@ -187,7 +196,6 @@ configuration June2018Tap
             Url                      = "http://root.contoso.com"
             OwnerAlias               = "contoso\lcladmin"
             ContentDatabase          = "Root_Content_DB"
-            HostHeaderWebApplication = "http://root.contoso.com"
             Description              = "Root Site Collection"
             Template                 = "STS#0"
             PSDSCRunAsCredential     = $credsSPSetup
