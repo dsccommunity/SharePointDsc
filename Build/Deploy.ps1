@@ -8,6 +8,27 @@
     $ConfigurationName = "June2018Tap"
 )
 
+$catch = Import-Module AzureRM -EA SilentlyContinue
+try
+{
+    $catch = Import-Module AzureRM
+    $currentModule = Get-Module AzureRM
+    $galleryModule = Find-Module AzureRM
+
+    if($currentModule.Version.ToString() -ne $galleryModule.Version.ToString())
+    {
+        Write-Host "Installing the latest AzureRM Module..." -NoNewline -ForegroundColor Yellow
+        $catch = Install-Module AzureRM -Force
+        Write-Host "Done" -ForegroundColor Green
+    }
+}
+catch
+{
+    Write-Host "Installing the AzureRM Module..." -NoNewline -ForegroundColor Yellow
+    $catch = Install-Module AzureRM -Force
+    Write-Host "Done" -ForegroundColor Green
+}
+
 if(!$ResourceGroupName)
 {
     do{
@@ -50,7 +71,7 @@ catch
         try
         {
             Write-Host -ForegroundColor Cyan " - Prompting for Azure Resource Manager credentials..."
-            Add-AzureRmAccount
+            $catch = Add-AzureRmAccount
             if ($? -eq $false)
             {
                 throw $Error
@@ -101,7 +122,7 @@ finally
             }
             $id = Read-Host "Select a Subscription"
 
-            Select-AzureRMSubscription -subscriptionId $subscriptions[$id-1].Id
+            $catch = Select-AzureRMSubscription -subscriptionId $subscriptions[$id-1].Id
         }
     }
 }
@@ -388,7 +409,20 @@ $Command = {
         }
         catch{}
     }
-    Start-Sleep -Seconds 300 # Give enough time for the Extensions to be properly removed;
+
+    $spwfeExt1 = Get-AzureRMVMExtension -VMName ("SPWFE" + $ResourceGroupName) -ResourceGroupName $ResourceGroupName -Name "ConfigSPServer" -EA SilentlyContinue
+    $spwfeExt2 = Get-AzureRMVMExtension -VMName ("SPWFE" + $ResourceGroupName) -ResourceGroupName $ResourceGroupName -Name "Microsoft.Powershell.DSC" -EA SilentlyContinue
+
+    $spappExt1 = Get-AzureRMVMExtension -VMName ("SPApp" + $ResourceGroupName) -ResourceGroupName $ResourceGroupName -Name "ConfigSPServer" -EA SilentlyContinue
+    $spappExt1 = Get-AzureRMVMExtension -VMName ("SPApp" + $ResourceGroupName) -ResourceGroupName $ResourceGroupName -Name "Microsoft.Powershell.DSC" -EA SilentlyContinue
+
+    $spsearchExt1 = Get-AzureRMVMExtension -VMName ("SPSearch" + $ResourceGroupName) -ResourceGroupName $ResourceGroupName -Name "ConfigSPServer" -EA SilentlyContinue
+    $spsearchExt1 = Get-AzureRMVMExtension -VMName ("SPSearch" + $ResourceGroupName) -ResourceGroupName $ResourceGroupName -Name "Microsoft.Powershell.DSC" -EA SilentlyContinue
+
+    while($spwfeExt1 -or $spwfeExt2 -or $spappExt1 -or $spappExt2 -or $spsearchExt1 -or $spsearchExt2)
+    {
+        Start-Sleep 20
+    }
 }
 $time = Measure-Command $Command
 $message = "Completed in {0:N0} minutes" -f $time.TotalMinutes
@@ -407,23 +441,17 @@ $message = "Completed in {0:N0} seconds" -f $time.TotalSeconds
 Write-Host $message -ForegroundColor Green
 
 Write-Host "Assigning WFE Server Configuration..." -NoNewline -ForegroundColor Yellow
-$jobWFE = Start-Job -ScriptBlock{
-    Register-AzureRmAutomationDscNode -AzureVMResourceGroup $ResourceGroupName -AzureVMName ("SPWFE" + $ResourceGroupName) -AzureVMLocation "EastUS" -NodeConfigurationName ($ConfigurationName + ".SPWFE" + $ResourceGroupName + ".contoso.com") -ActionAfterReboot ContinueConfiguration -RebootNodeIfNeeded $true -AutomationAccountName $AutomationAccountName -ResourceGroupName $ResourceGroupName
-}
+Register-AzureRmAutomationDscNode -AzureVMResourceGroup $ResourceGroupName -AzureVMName ("SPWFE" + $ResourceGroupName) -AzureVMLocation "EastUS" -NodeConfigurationName ($ConfigurationName + ".SPWFE" + $ResourceGroupName + ".contoso.com") -ActionAfterReboot ContinueConfiguration -RebootNodeIfNeeded $true -AutomationAccountName $AutomationAccountName -ResourceGroupName $ResourceGroupName -AllowModuleOverwrite $true -Verbose
 $message = "Completed"
 Write-Host $message -ForegroundColor Green
 
 Write-Host "Assigning Application Server Configuration..." -NoNewline -ForegroundColor Yellow
-$jobAPP = Start-Job -ScriptBlock{
-    Register-AzureRmAutomationDscNode -AzureVMResourceGroup $ResourceGroupName -AzureVMName ("SPApp" + $ResourceGroupName) -AzureVMLocation "EastUS" -NodeConfigurationName ($ConfigurationName + ".SPAPP" + $ResourceGroupName + ".contoso.com") -ActionAfterReboot ContinueConfiguration -RebootNodeIfNeeded $true -AutomationAccountName $AutomationAccountName -ResourceGroupName $ResourceGroupName
-}
+Register-AzureRmAutomationDscNode -AzureVMResourceGroup $ResourceGroupName -AzureVMName ("SPApp" + $ResourceGroupName) -AzureVMLocation "EastUS" -NodeConfigurationName ($ConfigurationName + ".SPAPP" + $ResourceGroupName + ".contoso.com") -ActionAfterReboot ContinueConfiguration -RebootNodeIfNeeded $true -AutomationAccountName $AutomationAccountName -ResourceGroupName $ResourceGroupName -AllowModuleOverwrite $true -Verbose
 $message = "Completed"
 Write-Host $message -ForegroundColor Green
 
 Write-Host "Assigning Search Server Configuration..." -NoNewline -ForegroundColor Yellow
-$jobSearch = Start-Job -ScriptBlock{
-    Register-AzureRmAutomationDscNode -AzureVMResourceGroup $ResourceGroupName -AzureVMName ("SPSearch" + $ResourceGroupName) -AzureVMLocation "EastUS" -NodeConfigurationName ($ConfigurationName + ".SPSEARCH" + $ResourceGroupName + ".contoso.com") -ActionAfterReboot ContinueConfiguration -RebootNodeIfNeeded $true -AutomationAccountName $AutomationAccountName -ResourceGroupName $ResourceGroupName
-}
+Register-AzureRmAutomationDscNode -AzureVMResourceGroup $ResourceGroupName -AzureVMName ("SPSearch" + $ResourceGroupName) -AzureVMLocation "EastUS" -NodeConfigurationName ($ConfigurationName + ".SPSEARCH" + $ResourceGroupName + ".contoso.com") -ActionAfterReboot ContinueConfiguration -RebootNodeIfNeeded $true -AutomationAccountName $AutomationAccountName -ResourceGroupName $ResourceGroupName -AllowModuleOverwrite $true -Verbose
 $message = "Completed"
 Write-Host $message -ForegroundColor Green
 #endregion
