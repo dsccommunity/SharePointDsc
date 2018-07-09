@@ -316,11 +316,12 @@ function Get-TargetResource
         )
     }
 
-    #SP2016 prereqs
+    #SP2016/SP2019 prereqs
     if ($majorVersion -eq 16)
     {
         if($buildVersion -lt 5000)
         {
+            #SP2016 prereqs
             $prereqsToTest += @(
                 [PSObject]@{
                     Name = "Active Directory Rights Management Services Client 2.1"
@@ -361,6 +362,7 @@ function Get-TargetResource
         }
         elseif($buildVersion -ge 5000)
         {
+            #SP2019 prereqs
             $prereqsToTest += @(
                 [PSObject]@{
                     Name = "Active Directory Rights Management Services Client 2.1"

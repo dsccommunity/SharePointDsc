@@ -134,7 +134,7 @@ $Command = {
     $catch = New-AzureRmResourceGroupDeployment -Name "spvms" -ResourceGroupName $ResourceGroupName -TemplateUri "https://raw.githubusercontent.com/NikCharlebois/SharePointFarms/BlankSPVMs/sharepoint-2016-non-ha/azuredeploy.json" -TemplateParameterUri "https://raw.githubusercontent.com/NikCharlebois/SharePointFarms/BlankSPVMs/sharepoint-2016-non-ha/azuredeploy.parameters.json"
 }
 $time = Measure-Command $Command
-$message = "Done in " + $time.Minutes + " minutes"
+$message = "Done in {0:N0} minutes" -f $time.TotalMinutes
 Write-Host $message -ForegroundColor Green
 #endregion
 
@@ -152,7 +152,7 @@ $Command = {
     }
 }
 $time = Measure-Command $Command
-$message = "Completed in " + $time.Seconds + " seconds"
+$message = "Completed in {0:N0} seconds" -f $time.TotalSeconds
 Write-Host $message -ForegroundColor Green
 
 # Nik20180517 - Checks to see if the Automation Account exists;
@@ -168,7 +168,7 @@ $Command = {
     }
 }
 $time = Measure-Command $Command
-$message = "Completed in " + $time.Seconds + " seconds"
+$message = "Completed in {0:N0} seconds" -f $time.TotalSeconds
 Write-Host $message -ForegroundColor Green
 
 # Nik20180517 - Create a new Storage Account
@@ -187,7 +187,7 @@ $Command = {
     $ctx = $storageAccount.Context
 }
 $time = Measure-Command $Command
-$message = "Completed in " + $time.Seconds + " seconds"
+$message = "Completed in {0:N0} seconds" -f $time.TotalSeconds
 Write-Host $message -ForegroundColor Green
 
 # Nik20180517 - Create the Blob Container
@@ -203,7 +203,7 @@ $Command = {
     }
 }
 $time = Measure-Command $Command
-$message = "Completed in " + $time.Milliseconds + " milliseconds"
+$message = "Completed in {0:N0} milliseconds" -f $time.TotalMilliseconds
 Write-Host $message -ForegroundColor Green
 #endregion
 
@@ -217,7 +217,7 @@ $Command = {
     $xDownloadFileUrl = $blob.ICloudBlob.Uri.AbsoluteUri
 }
 $time = Measure-Command $Command
-$message = "Completed in " + $time.Milliseconds + " milliseconds"
+$message = "Completed in {0:N0} milliseconds" -f $time.TotalMilliseconds
 Write-Host $message -ForegroundColor Green
 
 # Nik20180517 - Upload the xdownloadISO module
@@ -229,7 +229,7 @@ $Command = {
     $xdownloadISOUrl = $blob.ICloudBlob.Uri.AbsoluteUri
 }
 $time = Measure-Command $Command
-$message = "Completed in " + $time.Milliseconds + " milliseconds"
+$message = "Completed in {0:N0} milliseconds" -f $time.TotalMilliseconds
 Write-Host $message -ForegroundColor Green
 
 # Nik20180516 - Zip the new Module on the Build Agent using the download source;
@@ -240,7 +240,7 @@ $Command = {
     Compress-Archive -Path ($SPDSCRoot + "/*") -DestinationPath $zipPath -Force
 }
 $time = Measure-Command $Command
-$message = "Completed in " + $time.Seconds + " seconds"
+$message = "Completed in {0:N0} seconds" -f $time.TotalSeconds
 Write-Host $message -ForegroundColor Green
 
 # Nik20180516 - Upload the newly zipped module into a Blob Storage Account;
@@ -250,7 +250,7 @@ $Command = {
     $blobURL = $blob.ICloudBlob.Uri.AbsoluteUri
 }
 $time = Measure-Command $Command
-$message = "Completed in " + $time.Milliseconds + " milliseconds"
+$message = "Completed in {0:N0} milliseconds" -f $time.TotalMilliseconds
 Write-Host $message -ForegroundColor Green
 
 # Nik20180516 - Remove the Module if it already exists;
@@ -274,13 +274,15 @@ $Command = {
     }while((Get-AzureRmAutomationModule -Name "SharePointDSC" -ResourceGroupName $ResourceGroupName -AutomationAccountName $AutomationAccountName).ProvisioningState -ne "Succeeded")
 }
 $time = Measure-Command $Command
-$message = "Completed in " + $time.Seconds + " seconds"
+$message = "Completed in {0:N0} seconds" -f $time.TotalSeconds
 Write-Host $message -ForegroundColor Green
 #endregion
 
 #region Credential Assets
 Write-Host "Creating Credential Assets into Automation Account..." -NoNewline -ForegroundColor Yellow
 $Command = {
+    $pw = ConvertTo-SecureString "Pass@word!123" -AsPlainText -Force
+
     try
     {
         Get-AzureRMAutomationCredential -Name "DomainAdmin" -ResourceGroupName $ResourceGroupName -AutomationAccountName $AutomationAccountName -EA Stop
@@ -288,7 +290,6 @@ $Command = {
     catch
     {
         $user = "contoso\lcladmin"
-        $pw = ConvertTo-SecureString "Pass@word!123" -AsPlainText -Force
         $cred = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList $user, $pw
         New-AzureRMAutomationCredential -AutomationAccountName $AutomationAccountName -Name "DomainAdmin" -Value $cred -ResourceGroupName $ResourceGroupName
     }
@@ -327,7 +328,7 @@ $Command = {
     }
 }
 $time = Measure-Command $Command
-$message = "Completed in " + $time.Seconds + " seconds"
+$message = "Completed in {0:N0} seconds" -f $time.TotalSeconds
 Write-Host $message -ForegroundColor Green
 #endregion
 
@@ -367,7 +368,7 @@ $Command = {
     Import-AzureRmAutomationDscConfiguration -SourcePath $ConfigPath -ResourceGroupName $ResourceGroupName -AutomationAccountName $AutomationAccountName -Published -Force
 }
 $time = Measure-Command $Command
-$message = "Completed in " + $time.Seconds + " seconds"
+$message = "Completed in {0:N0} seconds" -f $time.TotalSeconds
 Write-Host $message -ForegroundColor Green
 
 Write-Host "Removing the Azure VM DSC Extensions..." -NoNewline -ForegroundColor Yellow
@@ -424,7 +425,7 @@ $Command = {
     }
 }
 $time = Measure-Command $Command
-$message = "Completed in " + $time.Minutes + " Minutes"
+$message = "Completed in {0:N0} minutes" -f $time.TotalMinutes
 Write-Host $message -ForegroundColor Green
 
 Write-Host "Compiling Configuration..." -NoNewline -ForegroundColor Yellow
@@ -436,9 +437,9 @@ $Command = {
     }while((Get-AzureRmAutomationDscCompilationJob -ConfigurationName $ConfigurationName -ResourceGroupName $ResourceGroupName -AutomationAccountName $AutomationAccountName).Status -ne "Completed")
 }
 $time = Measure-Command $Command
-$message = "Completed in " + $time.Seconds + " seconds"
-
+$message = "Completed in {0:N0} seconds" -f $time.TotalSeconds
 Write-Host $message -ForegroundColor Green
+
 Write-Host "Assigning WFE Server Configuration..." -NoNewline -ForegroundColor Yellow
 Register-AzureRmAutomationDscNode -AzureVMResourceGroup $ResourceGroupName -AzureVMName ("SPWFE" + $ResourceGroupName) -AzureVMLocation "EastUS" -NodeConfigurationName ($ConfigurationName + ".SPWFE" + $ResourceGroupName + ".contoso.com") -ActionAfterReboot ContinueConfiguration -RebootNodeIfNeeded $true -AutomationAccountName $AutomationAccountName -ResourceGroupName $ResourceGroupName -AllowModuleOverwrite $true -Verbose
 $message = "Completed"
