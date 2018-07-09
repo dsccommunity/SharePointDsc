@@ -10,6 +10,8 @@
 * SPFarm
   * Implemented ability to deploy Central Administration site to a server at a
     later point in time
+* SPProductUpdate
+  * Fixed an issue where the resource failed when the search was already paused
 * SPProjectServerLicense
   * Fixed issue with incorrect detection of the license
 * SPSearchServiceApp
