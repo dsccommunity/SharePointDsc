@@ -487,7 +487,10 @@ function Set-TargetResource
                 $searchSAs = Get-SPEnterpriseSearchServiceApplication
                 foreach ($searchSA in $searchSAs)
                 {
-                    $searchSA.Resume()
+                    if (($searchSA.IsPaused() -band 0x80) -ne 0)
+                    {
+                        $searchSA.Resume()
+                    }
                 }
             }
         }

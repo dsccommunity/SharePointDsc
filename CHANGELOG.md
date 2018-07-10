@@ -14,6 +14,9 @@
   * Fixed an issue where the resource failed when the search was already paused
 * SPProjectServerLicense
   * Fixed issue with incorrect detection of the license
+* SPSearchContentSource
+  * Fixed issue where the Get method returned a conversion error when the content
+    source contained just one address
 * SPSearchServiceApp
   * Fixed issue where the service account was not set correctly when the service
     application was first created
