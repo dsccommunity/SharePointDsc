@@ -19,6 +19,8 @@
   * Fixed code styling issues
 * SPUserProfileServiceApp
   * Fixed code styling issues
+* SPInfoPathFormsServiceConfig
+  * Fixed issue with trying to set the MaxSizeOfUserFormState parameter
 
 ## 2.3
 
