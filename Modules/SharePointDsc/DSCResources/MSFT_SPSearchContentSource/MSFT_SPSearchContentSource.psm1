@@ -115,7 +115,7 @@ function Get-TargetResource
                     ServiceAppName = $params.ServiceAppName
                     Ensure = "Present"
                     ContentSourceType = "SharePoint"
-                    Addresses = $source.StartAddresses.AbsoluteUri
+                    Addresses = [array] $source.StartAddresses.AbsoluteUri
                     CrawlSetting = $crawlSetting
                     ContinuousCrawl = $source.EnableContinuousCrawls
                     IncrementalSchedule = $incrementalSchedule
@@ -145,7 +145,7 @@ function Get-TargetResource
                     ServiceAppName = $params.ServiceAppName
                     Ensure = "Present"
                     ContentSourceType = "Website"
-                    Addresses = $source.StartAddresses.AbsoluteUri
+                    Addresses = [array] $source.StartAddresses.AbsoluteUri
                     CrawlSetting = $crawlSetting
                     IncrementalSchedule = $incrementalSchedule
                     FullSchedule = $fullSchedule
@@ -161,7 +161,7 @@ function Get-TargetResource
                     $crawlSetting = "CrawlEverything"
                 }
 
-                $addresses = $source.StartAddresses.AbsoluteUri
+                $addresses = [array] $source.StartAddresses.AbsoluteUri
                 $addresses = $addresses.Replace("file:///","\\").Replace("/", "\")
 
                 $incrementalSchedule = Get-SPDSCSearchCrawlSchedule `
@@ -461,7 +461,7 @@ function Set-TargetResource
                                     -SearchApplication $params.ServiceAppName `
                                     -Identity $params.Name
 
-                while ($sourceToWait.CrawlStatus -ne "Idle" -or $loopCount > 15)
+                while ($sourceToWait.CrawlStatus -ne "Idle" -and $loopCount -lt 15)
                 {
                     $sourceToWait = Get-SPEnterpriseSearchCrawlContentSource `
                                         -SearchApplication $params.ServiceAppName `
