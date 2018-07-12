@@ -20,6 +20,8 @@
 * SPSearchServiceApp
   * Fixed issue where the service account was not set correctly when the service
     application was first created
+  * Fixed issue where the Get method throws an error when the service app wasn't
+    created properly
 * SPSearchTopology
   * Fixed issue where Get method threw an error when the specified service
     application didn't exist yet.

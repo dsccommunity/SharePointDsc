@@ -95,8 +95,11 @@ function Get-TargetResource
             $sc = New-Object -TypeName Microsoft.Office.Server.Search.Administration.Content `
                              -ArgumentList $c;
             $dummyPassword = ConvertTo-SecureString -String "-" -AsPlainText -Force
-            $defaultAccount = New-Object -TypeName System.Management.Automation.PSCredential `
-                                         -ArgumentList @($sc.DefaultGatheringAccount, $dummyPassword)
+            if ($null -ne $sc.DefaultGatheringAccount)
+            {
+                $defaultAccount = New-Object -TypeName System.Management.Automation.PSCredential `
+                                             -ArgumentList @($sc.DefaultGatheringAccount, $dummyPassword)
+            }
 
             $cloudIndex = $false
             $version = Get-SPDSCInstalledProductVersion
