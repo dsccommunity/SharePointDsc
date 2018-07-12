@@ -10,6 +10,8 @@
 * SPFarm
   * Implemented ability to deploy Central Administration site to a server at a
     later point in time
+* SPInfoPathFormsServiceConfig
+  * Fixed issue with trying to set the MaxSizeOfUserFormState parameter
 * SPShellAdmins
   * Updated documentation to specify required permissions for successfully using
     this resource
