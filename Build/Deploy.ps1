@@ -127,11 +127,13 @@ finally
     }
 }
 
+cls
+
 #region Deploy IaaS VMs
 Write-Host "Deploying the SharePoint Farm (this can take up to 1h)..." -NoNewline -ForegroundColor Yellow
 $Command = {
     $catch = New-AzureRmResourceGroup -Name $ResourceGroupName -Location "EastUS"
-    $catch = New-AzureRmResourceGroupDeployment -Name "spvms" -ResourceGroupName $ResourceGroupName -TemplateUri "https://raw.githubusercontent.com/NikCharlebois/SharePointFarms/BlankSPVMs/sharepoint-2016-non-ha/azuredeploy.json" -TemplateParameterUri "https://raw.githubusercontent.com/NikCharlebois/SharePointFarms/BlankSPVMs/sharepoint-2016-non-ha/azuredeploy.parameters.json"
+    $catch = New-AzureRmResourceGroupDeployment -Name "spvms" -ResourceGroupName $ResourceGroupName -TemplateUri "https://raw.githubusercontent.com/NikCharlebois/SharePointFarms/BlankSPVMs/sharepoint-non-ha/azuredeploy.json" -TemplateParameterUri "https://raw.githubusercontent.com/NikCharlebois/SharePointFarms/BlankSPVMs/sharepoint-non-ha/azuredeploy.parameters.json"
 }
 $time = Measure-Command $Command
 $message = "Done in {0:N0} minutes" -f $time.TotalMinutes
