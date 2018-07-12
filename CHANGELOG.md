@@ -10,6 +10,8 @@
 * SPFarm
   * Implemented ability to deploy Central Administration site to a server at a
     later point in time
+* SPInfoPathFormsServiceConfig
+  * Fixed issue with trying to set the MaxSizeOfUserFormState parameter
 * SPProjectServerLicense
   * Fixed issue with incorrect detection of the license
 * SPServiceAppSecurity
@@ -19,8 +21,6 @@
   * Fixed code styling issues
 * SPUserProfileServiceApp
   * Fixed code styling issues
-* SPInfoPathFormsServiceConfig
-  * Fixed issue with trying to set the MaxSizeOfUserFormState parameter
 
 ## 2.3
 
