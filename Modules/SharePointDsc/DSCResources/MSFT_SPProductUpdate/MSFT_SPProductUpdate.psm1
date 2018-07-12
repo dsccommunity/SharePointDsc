@@ -370,7 +370,6 @@ function Set-TargetResource
 
         $result = Invoke-SPDSCCommand -Credential $InstallAccount `
                                       -ScriptBlock {
-            $searchPaused = $true
             $searchSAs = Get-SPEnterpriseSearchServiceApplication
             foreach ($searchSA in $searchSAs)
             {
@@ -380,6 +379,7 @@ function Set-TargetResource
                 }
             }
         }
+        $searchPaused = $true
 
         if($osearchSvc.Status -eq "Running")
         {
@@ -479,11 +479,11 @@ function Set-TargetResource
             $hostControllerSvc.Start()
         }
 
-        # Resuming Search Service Application if paused###
-        $result = Invoke-SPDSCCommand -Credential $InstallAccount `
-                                      -ScriptBlock {
-            if($searchPaused -eq $true)
-            {
+        if($searchPaused -eq $true)
+        {
+            # Resuming Search Service Application if paused###
+            $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+                                        -ScriptBlock {
                 $searchSAs = Get-SPEnterpriseSearchServiceApplication
                 foreach ($searchSA in $searchSAs)
                 {
