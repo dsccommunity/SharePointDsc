@@ -272,7 +272,7 @@ function Set-TargetResource
 
         if($params.ContainsKey("MaxSizeOfUserFormState"))
         {
-            $config.MaxSizeOfUserFormState = ($config.MaxSizeOfUserFormState * 1024)
+            $config.MaxSizeOfUserFormState = ($params.MaxSizeOfUserFormState * 1024)
         }
 
         $config.Update()
