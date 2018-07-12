@@ -10,6 +10,9 @@
 * SPFarm
   * Implemented ability to deploy Central Administration site to a server at a
     later point in time
+* SPShellAdmins
+  * Updated documentation to specify required permissions for successfully using
+    this resource
 * SPProductUpdate
   * Fixed an issue where the resource failed when the search was already paused
 * SPProjectServerLicense

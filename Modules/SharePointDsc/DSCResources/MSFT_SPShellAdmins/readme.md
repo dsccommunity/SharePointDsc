@@ -23,6 +23,16 @@ Requirements:
 * Do not combine the ContentDatabase property with the AllContentDatabases
   property.
 
+Required permissions:
+
+The documentation of the Shell Admin cmdlets state you need the following
+permissions to successfully run this resource:
+"When you run this cmdlet to add a user to the SharePoint_Shell_Access role,
+you must have membership in the securityadmin fixed server role on the SQL
+Server instance, membership in the db_owner fixed database role on all
+affected databases, and local administrative permission on the local computer."
+https://docs.microsoft.com/en-us/powershell/module/sharepoint-server/add-spshelladmin?view=sharepoint-ps
+
 Notes:
 1.) If a content database is created using the Central Admin, the farm account
 is the owner of that content database in SQL Server. When this is true, you
