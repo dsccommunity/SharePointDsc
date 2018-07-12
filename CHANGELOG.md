@@ -12,9 +12,6 @@
     later point in time
 * SPInfoPathFormsServiceConfig
   * Fixed issue with trying to set the MaxSizeOfUserFormState parameter
-* SPShellAdmins
-  * Updated documentation to specify required permissions for successfully using
-    this resource
 * SPProductUpdate
   * Fixed an issue where the resource failed when the search was already paused
 * SPProjectServerLicense
@@ -33,6 +30,9 @@
 * SPServiceAppSecurity
   * Fixed issue where error was thrown when no permissions were set on the
     service application
+* SPShellAdmins
+  * Updated documentation to specify required permissions for successfully using
+    this resource
 * SPTrustedIdentityTokenIssuerProviderRealms
   * Fixed code styling issues
 * SPUserProfileServiceApp

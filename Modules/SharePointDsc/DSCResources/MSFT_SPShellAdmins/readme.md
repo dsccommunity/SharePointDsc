@@ -25,7 +25,7 @@ Requirements:
 
 Required permissions:
 
-The documentation of the Shell Admin cmdlets state you need the following
+The documentation of the Shell Admin cmdlets states that you need the following
 permissions to successfully run this resource:
 "When you run this cmdlet to add a user to the SharePoint_Shell_Access role,
 you must have membership in the securityadmin fixed server role on the SQL
