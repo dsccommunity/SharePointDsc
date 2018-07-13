@@ -74,13 +74,21 @@ function Get-TargetResource
     }
 
     $installedVersion = Get-SPDSCInstalledProductVersion
+    $minorVersion = Get-SPDSC
     switch ($installedVersion.FileMajorPart)
     {
         15 {
             Write-Verbose -Message "Detected installation of SharePoint 2013"
         }
         16 {
-            Write-Verbose -Message "Detected installation of SharePoint 2016"
+            if($InstalledVersion.ProductBuildPart.ToString().Length -eq 4)
+            {
+                Write-Verbose -Message "Detected installation of SharePoint 2016"
+            }
+            else
+            {
+                Write-Verbose -Message "Detected installation of SharePoint 2019"
+            }
         }
         default {
             throw ("Detected an unsupported major version of SharePoint. SharePointDsc only " + `
@@ -91,7 +99,7 @@ function Get-TargetResource
     if (($PSBoundParameters.ContainsKey("ServerRole") -eq $true) `
         -and $installedVersion.FileMajorPart -ne 16)
     {
-        throw [Exception] "Server role is only supported in SharePoint 2016."
+        throw [Exception] "Server role is only supported in SharePoint 2016 and 2019."
     }
 
     if (($PSBoundParameters.ContainsKey("ServerRole") -eq $true) `
