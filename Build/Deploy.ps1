@@ -5,7 +5,7 @@
 
     [Parameter()]
     [String]
-    $ConfigurationName = "June2018Tap"
+    $ConfigurationName = "July2018Tap"
 )
 
 $catch = Import-Module AzureRM -EA SilentlyContinue
