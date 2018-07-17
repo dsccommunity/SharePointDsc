@@ -24,7 +24,7 @@ function Get-TargetResource
     $installedVersion = Get-SPDSCInstalledProductVersion
     if ($installedVersion.FileMajorPart -ne 16)
     {
-        throw [Exception] "MinRole is only supported in SharePoint 2016."
+        throw [Exception] "MinRole is only supported in SharePoint 2016 and 2019."
     }
 
     $result = Invoke-SPDSCCommand -Credential $InstallAccount `
@@ -87,7 +87,7 @@ function Set-TargetResource
     $installedVersion = Get-SPDSCInstalledProductVersion
     if ($installedVersion.FileMajorPart -ne 16)
     {
-        throw [Exception] "MinRole is only supported in SharePoint 2016."
+        throw [Exception] "MinRole is only supported in SharePoint 2016 and 2019."
     }
 
     if ($State -eq "NonCompliant")
