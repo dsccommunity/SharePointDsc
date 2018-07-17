@@ -351,7 +351,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 }
             }
             16 {
-                Context -Name "All methods throw exceptions as Excel Services doesn't exist in 2016" -Fixture {
+                Context -Name "All methods throw exceptions as Excel Services doesn't exist in 2016/2019" -Fixture {
                     It "Should throw on the get method" {
                         { Get-TargetResource @testParams } | Should Throw
                     }

@@ -183,7 +183,14 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 }
                 else
                 {
-                    return @("Microsoft SharePoint Server 2016")
+                    if($Global:SPDscHelper.CurrentStubBuildNumber.Minor.ToString().Length -le 4)
+                    {
+                        return @("Microsoft SharePoint Server 2016")
+                    }
+                    else
+                    {
+                        return @("Microsoft SharePoint Server 2019")
+                    }
                 }
             }
 
@@ -234,7 +241,14 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 }
                 else
                 {
-                    return @("Microsoft SharePoint Server 2016")
+                    if($Global:SPDscHelper.CurrentStubBuildNumber.Minor.ToString().Length -le 4)
+                    {
+                        return @("Microsoft SharePoint Server 2016")
+                    }
+                    else
+                    {
+                        return @("Microsoft SharePoint Server 2019")
+                    }
                 }
             }
 
@@ -290,7 +304,14 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 }
                 else
                 {
-                    return @("Microsoft SharePoint Server 2016")
+                    if($Global:SPDscHelper.CurrentStubBuildNumber.Minor.ToString().Length -le 4)
+                    {
+                        return @("Microsoft SharePoint Server 2016")
+                    }
+                    else
+                    {
+                        return @("Microsoft SharePoint Server 2019")
+                    }
                 }
             }
 
@@ -352,7 +373,14 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 }
                 else
                 {
-                    return @("Microsoft SharePoint Server 2016")
+                    if($Global:SPDscHelper.CurrentStubBuildNumber.Minor.ToString().Length -le 4)
+                    {
+                        return @("Microsoft SharePoint Server 2016")
+                    }
+                    else
+                    {
+                        return @("Microsoft SharePoint Server 2019")
+                    }
                 }
             }
 
@@ -414,7 +442,14 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 }
                 else
                 {
-                    return @("Microsoft SharePoint Server 2016")
+                    if($Global:SPDscHelper.CurrentStubBuildNumber.Minor.ToString().Length -le 4)
+                    {
+                        return @("Microsoft SharePoint Server 2016")
+                    }
+                    else
+                    {
+                        return @("Microsoft SharePoint Server 2019")
+                    }
                 }
             }
 
@@ -465,7 +500,14 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 }
                 else
                 {
-                    return @("Microsoft SharePoint Server 2016")
+                    if($Global:SPDscHelper.CurrentStubBuildNumber.Minor.ToString().Length -le 4)
+                    {
+                        return @("Microsoft SharePoint Server 2016")
+                    }
+                    else
+                    {
+                        return @("Microsoft SharePoint Server 2019")
+                    }
                 }
             }
 
@@ -549,7 +591,14 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 }
                 else
                 {
-                    return @("Microsoft SharePoint Server 2016", "Language Pack for SharePoint and Project Server 2016  - Dutch/Nederlands")
+                    if($Global:SPDscHelper.CurrentStubBuildNumber.Minor.ToString().Length -le 4)
+                    {
+                        return @("Microsoft SharePoint Server 2016", "Language Pack for SharePoint and Project Server 2016  - Dutch/Nederlands")
+                    }
+                    else
+                    {
+                        return @("Microsoft SharePoint Server 2019", "Language Pack for SharePoint and Project Server 2019  - Dutch/Nederlands")
+                    }
                 }
             }
 
@@ -600,9 +649,15 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 }
                 else
                 {
-                    return @("Microsoft SharePoint Server 2016", "Language Pack for SharePoint and Project Server 2016  - Dutch/Nederlands")
+                    if($Global:SPDscHelper.CurrentStubBuildNumber.Minor.ToString().Length -le 4)
+                    {
+                        return @("Microsoft SharePoint Server 2016", "Language Pack for SharePoint and Project Server 2016  - Dutch/Nederlands")
+                    }
+                    else
+                    {
+                        return @("Microsoft SharePoint Server 2019", "Language Pack for SharePoint and Project Server 2016\9  - Dutch/Nederlands")
+                    }
                 }
-            }
 
             It "Should return Ensure is Present from the get method" {
                 $result = Get-TargetResource @testParams

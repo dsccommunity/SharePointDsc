@@ -122,7 +122,7 @@ function Set-TargetResource
     {
         15
         {
-            <# Exception: One of the SP2016 specific parameter was passed with SP2013 #>
+            <# Exception: One of the SP2016/SP2019 specific parameter was passed with SP2013 #>
             if($PSBoundParameters.ContainsKey("SuiteNavBrandingLogoNavigationUrl") `
             -or $PSBoundParameters.ContainsKey("SuiteNavBrandingLogoTitle") `
             -or $PSBoundParameters.ContainsKey("SuiteNavBrandingLogoUrl") `
@@ -145,10 +145,10 @@ function Set-TargetResource
             if($PSBoundParameters.ContainsKey("SuiteBarBrandingElementHtml"))
             {
                 Write-Verbose ("SuiteBarBrandingElementHtml with SharePoint 2016 only works if using a " + `
-                                        "SharePoint 2016 masterpage")
+                                        "SharePoint 2013 masterpage")
             }
 
-            <# Exception: All the optional parameters are null for SP2016. #>
+            <# Exception: All the optional parameters are null for SP2016/SP2019. #>
             if(!$PSBoundParameters.ContainsKey("SuiteNavBrandingLogoNavigationUrl") `
             -and !$PSBoundParameters.ContainsKey("SuiteNavBrandingLogoTitle") `
             -and !$PSBoundParameters.ContainsKey("SuiteNavBrandingLogoUrl") `
@@ -157,7 +157,7 @@ function Set-TargetResource
             {
                 throw ("You need to specify a value for either SuiteNavBrandingLogoNavigationUrl, " + `
                                         "SuiteNavBrandingLogoTitle, SuiteNavBrandingLogoUrl, SuiteNavBrandingText, " + `
-                                        "and SuiteBarBrandingElementHtml with SharePoint 2016")
+                                        "and SuiteBarBrandingElementHtml with SharePoint 2016 or SharePoint 2019")
             }
         }
     }

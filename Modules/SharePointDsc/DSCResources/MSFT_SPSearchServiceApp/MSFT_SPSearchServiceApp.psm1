@@ -247,7 +247,7 @@ function Set-TargetResource
                 }
                 else
                 {
-                    throw ("Please install SharePoint 2016 or SharePoint 2013 with August " + `
+                    throw ("Please install SharePoint 2019, 2016 or SharePoint 2013 with August " + `
                            "2015 CU or higher before attempting to create a cloud enabled " + `
                            "search service application")
                 }

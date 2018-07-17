@@ -212,7 +212,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 16)
         {
-            Context -Name "Trying to use SPWorkManagementServiceApp in SP2016, not available" -Fixture {
+            Context -Name "Trying to use SPWorkManagementServiceApp in SP2016/SP2019, not available" -Fixture {
                 $testParams = @{
                     Name = "Test Work Management App"
                     ApplicationPool = "Test App Pool"
@@ -225,15 +225,15 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 }
 
                 It "Should throw an exception in the Get method" {
-                    { Get-TargetResource @testParams } | Should throw "Work Management Service Application is no longer available in SharePoint 2016"
+                    { Get-TargetResource @testParams } | Should throw "Work Management Service Application is no longer available in SharePoint 2016/2019"
                 }
 
                 It "Should throw an exception in the Test method" {
-                    { Test-TargetResource @testParams } | Should throw "Work Management Service Application is no longer available in SharePoint 2016"
+                    { Test-TargetResource @testParams } | Should throw "Work Management Service Application is no longer available in SharePoint 2016/2019"
                 }
 
                 It "Should throw an exception in the Set method" {
-                    { Set-TargetResource @testParams } | Should throw "Work Management Service Application is no longer available in SharePoint 2016"
+                    { Set-TargetResource @testParams } | Should throw "Work Management Service Application is no longer available in SharePoint 2016/2019"
                 }
             }
         }
