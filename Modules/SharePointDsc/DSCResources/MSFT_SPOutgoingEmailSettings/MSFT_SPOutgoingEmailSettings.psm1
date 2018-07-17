@@ -43,13 +43,13 @@ function Get-TargetResource
     if (($PSBoundParameters.ContainsKey("UseTLS") -eq $true) `
         -and $installedVersion.FileMajorPart -ne 16) 
     {
-        throw [Exception] "UseTLS is only supported in SharePoint 2016."
+        throw [Exception] "UseTLS is only supported in SharePoint 2016 and 2019."
     }
 
     if (($PSBoundParameters.ContainsKey("SMTPPort") -eq $true) `
         -and $installedVersion.FileMajorPart -ne 16) 
     {
-        throw [Exception] "SMTPPort is only supported in SharePoint 2016."
+        throw [Exception] "SMTPPort is only supported in SharePoint 2016 and 2019."
     }
 
     $result = Invoke-SPDSCCommand -Credential $InstallAccount `
@@ -128,13 +128,13 @@ function Set-TargetResource
     if (($PSBoundParameters.ContainsKey("UseTLS") -eq $true) `
         -and $installedVersion.FileMajorPart -lt 16) 
     {
-        throw [Exception] "UseTLS is only supported in SharePoint 2016."
+        throw [Exception] "UseTLS is only supported in SharePoint 2016 and 2019."
     }
 
     if (($PSBoundParameters.ContainsKey("SMTPPort") -eq $true) `
         -and $installedVersion.FileMajorPart -lt 16) 
     {
-        throw [Exception] "SMTPPort is only supported in SharePoint 2016."
+        throw [Exception] "SMTPPort is only supported in SharePoint 2016 and 2019."
     }
     
     $null = Invoke-SPDSCCommand -Credential $InstallAccount `
@@ -188,7 +188,7 @@ function Set-TargetResource
             }
             default {
                 throw ("Detected an unsupported major version of SharePoint. SharePointDsc only " + `
-                       "supports SharePoint 2013 or 2016.")
+                       "supports SharePoint 2013 or greater.")
             }
         }
     }

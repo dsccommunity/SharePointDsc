@@ -460,15 +460,32 @@ function Set-TargetResource
             16 {
                 if ($params.ContainsKey("ServerRole") -eq $true)
                 {
-                    Write-Verbose -Message ("Detected Version: SharePoint 2016 - " + `
-                                            "configuring server as $($params.ServerRole)")
+                    if($InstalledVersion.ProductBuildPart.ToString().Length -eq 4)
+                    {
+                        Write-Verbose -Message ("Detected Version: SharePoint 2016 - " + `
+                                                "configuring server as $($params.ServerRole)")
+                    }
+                    else
+                    {
+                        Write-Verbose -Message ("Detected Version: SharePoint 2019 - " + `
+                                                "configuring server as $($params.ServerRole)")
+                    }
                     $executeArgs.Add("LocalServerRole", $params.ServerRole)
                 }
                 else
                 {
-                    Write-Verbose -Message ("Detected Version: SharePoint 2016 - no server " + `
-                                            "role provided, configuring server without a " + `
-                                            "specific role")
+                    if($InstalledVersion.ProductBuildPart.ToString().Length -eq 4)
+                    {
+                        Write-Verbose -Message ("Detected Version: SharePoint 2016 - no server " + `
+                                                "role provided, configuring server without a " + `
+                                                "specific role")
+                    }
+                    else
+                    {
+                        Write-Verbose -Message ("Detected Version: SharePoint 2019 - no server " + `
+                                                "role provided, configuring server without a " + `
+                                                "specific role")
+                    }
                     $executeArgs.Add("ServerRoleOptional", $true)
                 }
             }

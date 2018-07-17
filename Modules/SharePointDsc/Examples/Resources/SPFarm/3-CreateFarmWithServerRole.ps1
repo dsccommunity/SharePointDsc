@@ -4,7 +4,7 @@
     are specified, and the accounts to run the setup as, the farm account and the passphrase are
     all passed in to the configuration to be applied. By default the central admin site in this
     example is provisioned to port 9999 using NTLM authentication. In this example we also see
-    the server role defined as "Application" which tells SharePoint 2016 the role to apply to
+    the server role defined as "Application" which tells SharePoint 2016/2019 the role to apply to
     this server as soon as the farm is created. This property is not supported for SharePoint 2013
     and so this specific example would fail if used against that verison.
 #>

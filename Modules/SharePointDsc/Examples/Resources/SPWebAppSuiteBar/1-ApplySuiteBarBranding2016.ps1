@@ -1,7 +1,7 @@
 <#
 .EXAMPLE
     This example sets the branding for the suite bar of a given
-    Web Application in SharePoint 2016.
+    Web Application in SharePoint 2016/2019.
 #>
 
     Configuration Example 
