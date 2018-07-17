@@ -74,7 +74,6 @@ function Get-TargetResource
     }
 
     $installedVersion = Get-SPDSCInstalledProductVersion
-    $minorVersion = Get-SPDSC
     switch ($installedVersion.FileMajorPart)
     {
         15 {
