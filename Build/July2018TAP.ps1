@@ -1,9 +1,12 @@
 configuration July2018Tap
 {
-    $credsLocalAdmin = Get-AutomationPSCredential -Name "LocalAdmin"
+    $credsLocalAdmin  = Get-AutomationPSCredential -Name "LocalAdmin"
     $credsDomainAdmin = Get-AutomationPSCredential -Name "DomainAdmin"
     $credsSPFarm      = Get-AutomationPSCredential -Name "FarmAccount"
     $credsSPSetup     = Get-AutomationPSCredential -Name "SetupAccount"
+    $credsSPServices  = Get-AutomationPSCredential -Name "SPServices"
+    $credsSPSearch    = Get-AutomationPSCredential -Name "SPSearch"
+    $credsSPAdmin     = Get-AutomationPSCredential -Name "SharePointAdmin"
 
     Import-DscResource -ModuleName "SharePointDSC" -Moduleversion "3.0.0.0"
     Import-DscResource -ModuleName "xDownloadFile" -ModuleVersion "1.0"
@@ -33,10 +36,10 @@ configuration July2018Tap
             PsDscRunAsCredential     = $credsLocalAdmin
         }
 
-        xDownloadISO DeutchLPISO
+        xDownloadISO DutchLPISO
         {
             SourcePath               = "https://spdsctap.blob.core.windows.net/spdsc/LP-Deutch.iso"
-            DestinationDirectoryPath = $ConfigurationData.SharePoint.Settings.BinaryPath + "LP\Deutch"
+            DestinationDirectoryPath = $ConfigurationData.SharePoint.Settings.BinaryPath + "LP\Dutch"
             PsDscRunAsCredential     = $credsLocalAdmin
         }
 
@@ -167,16 +170,16 @@ configuration July2018Tap
             PsDscRunAsCredential = $credsSPSetup
         }
 
-        SPInstallLanguagePack DeutchLanguagePack
+        SPInstallLanguagePack DutchLanguagePack
         {
-            BinaryDir = $ConfigurationData.SharePoint.Settings.BinaryPath + "LP\Deutch"
+            BinaryDir            = $ConfigurationData.SharePoint.Settings.BinaryPath + "LP\Dutch"
             DependsOn            = "[SPInstall]SharePointInstall"
             PsDscRunAsCredential = $credsSPSetup
         }
 
         SPInstallLanguagePack FrenchLanguagePack
         {
-            BinaryDir = $ConfigurationData.SharePoint.Settings.BinaryPath + "LP\French"
+            BinaryDir            = $ConfigurationData.SharePoint.Settings.BinaryPath + "LP\French"
             DependsOn            = "[SPInstall]SharePointInstall"
             PsDscRunAsCredential = $credsSPSetup
         }
@@ -190,7 +193,7 @@ configuration July2018Tap
 
         SPFarm SharePointFarm
         {
-            IsSingleInstance = "Yes"
+            IsSingleInstance          = "Yes"
             Ensure                    = "Present"
             FarmConfigDatabaseName    = "SP_Config"
             DatabaseServer            = $ConfigurationData.SharePoint.Settings.DatabaseServer
@@ -207,19 +210,41 @@ configuration July2018Tap
         {
             SetupFile            = $ConfigurationData.SharePoint.Settings.BinaryPath + "Patch\sts2016-kb2345678-fullfile-x64-glb.exe"
             ShutdownServices     = $true
-            DependsOn            = "[SPInstall]SharePointInstall"
-            PsDscRunAsCredential = $credsSPSFarm
+            DependsOn            = "[SPFarm]SharePointFarm"
+            PsDscRunAsCredential = $credsSPSetup
         }
 
         SPConfigWizard PSConfig
         {
             IsSingleInstance     = "yes"
-            PsDscRunAsCredential = $credsSPSFarm
+            PsDscRunAsCredential = $credsSPSetup
+            DependsOn            = "[SPFarm]SharePointFarm"
         }
 
         SPManagedAccount SPFarmAccount
         {
             AccountName            = $credsSPFarm.UserName
+            PSDSCRunAsCredential   = $credsSPSetup
+            DependsOn              = "[SPFarm]SharePointFarm"
+        }
+
+        SPManagedAccount SPServices
+        {
+            AccountName            = $credsSPServices.UserName
+            PSDSCRunAsCredential   = $credsSPSetup
+            DependsOn              = "[SPFarm]SharePointFarm"
+        }
+
+        SPManagedAccount SPSearch
+        {
+            AccountName            = $credsSPSearch.UserName
+            PSDSCRunAsCredential   = $credsSPSetup
+            DependsOn              = "[SPFarm]SharePointFarm"
+        }
+
+        SPManagedAccount SPAdmin
+        {
+            AccountName            = $credsSPAdmin.UserName
             PSDSCRunAsCredential   = $credsSPSetup
             DependsOn              = "[SPFarm]SharePointFarm"
         }
@@ -235,7 +260,7 @@ configuration July2018Tap
             DatabaseName           = "Root_Content_DB"
             HostHeader             = "root.contoso.com"
             AllowAnonymous         = $false
-            PSDSCRunAsCredential   = $credsSPSFarm
+            PSDSCRunAsCredential   = $credsSPSetup
             DependsOn              = "[SPManagedAccount]SPFarmAccount"
         }
 
@@ -247,7 +272,7 @@ configuration July2018Tap
             ContentDatabase          = "Root_Content_DB"
             Description              = "Root Site Collection"
             Template                 = "STS#0"
-            PSDSCRunAsCredential     = $credsSPSFarm
+            PSDSCRunAsCredential     = $credsSPSetup
             DependsOn                = "[SPWebApplication]Root"
         }
 
@@ -261,7 +286,7 @@ configuration July2018Tap
             UseParentTopNav       = $true
             UniquePermissions     = $true
             Template              = "STS#0"
-            PSDSCRunAsCredential  = $credsSPSFarm
+            PSDSCRunAsCredential  = $credsSPSetup
             DependsOn             = "[SPSite]RootSite"
         }
     }

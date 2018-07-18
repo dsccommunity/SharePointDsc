@@ -91,7 +91,7 @@ function Get-TargetResource
         }
         default {
             throw ("Detected an unsupported major version of SharePoint. SharePointDsc only " + `
-                   "supports SharePoint 2013 or 2016.")
+                   "supports SharePoint 2013, 2016 or 2019.")
         }
     }
 
@@ -490,8 +490,8 @@ function Set-TargetResource
             }
             Default {
                 throw [Exception] ("An unknown version of SharePoint (Major version $_) " + `
-                                    "was detected. Only versions 15 (SharePoint 2013) or " + `
-                                    "16 (SharePoint 2016) are supported.")
+                                    "was detected. Only versions 15 (SharePoint 2013) and" + `
+                                    "16 (SharePoint 2016 or SharePoint 2019) are supported.")
             }
         }
 
