@@ -89,7 +89,7 @@ function Get-TargetResource
             Write-Verbose -Message "Detected installation of SharePoint 2013"
         }
         16 {
-            if($InstalledVersion.ProductBuildPart.ToString().Length -eq 4)
+            if($installedVersion.ProductBuildPart.ToString().Length -eq 4)
             {
                 Write-Verbose -Message "Detected installation of SharePoint 2016"
             }

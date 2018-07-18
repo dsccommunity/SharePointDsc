@@ -5,6 +5,10 @@
 
     [Parameter()]
     [String]
+    $Region,
+
+    [Parameter()]
+    [String]
     $ConfigurationName = "July2018Tap"
 )
 
@@ -31,13 +35,37 @@ catch
 
 if(!$ResourceGroupName)
 {
-    do{
+    do
+    {
         if($ResourceGroupName -and $ResourceGroupName.Length -gt 7)
         {
             Write-Host "Please select a resource name that is 7 characters long or less" -ForegroundColor Yellow
         }
         $ResourceGroupName = Read-Host "SP Farm Resource Group Name"
-    }while($ResourceGroupName -and $ResourceGroupName.Length -gt 7)
+    }
+    while($ResourceGroupName -and $ResourceGroupName.Length -gt 7)
+}
+
+$azureLocations = (Get-AzureRMLocation).Location | Sort-Object
+if(!$Region -or $Region -notin $azureLocations)
+{
+    do
+    {
+        Write-Host "Please select a Azure location" -ForegroundColor Yellow
+        $i = 1;
+        foreach($loc in $azureLocations)
+        {
+            Write-Host $i "-" $loc
+            $i++
+        }
+        $id = Read-Host "Select a location"
+        
+        if ($locationId -le $azureLocations.Count)
+        {
+            $Region = $azureLocations[$id-1]
+        }
+    }
+    while(!$Region)
 }
 
 $GuidPart = (New-Guid).ToString().ToLower().Replace("-","").Substring(0,10)
@@ -132,7 +160,7 @@ cls
 #region Deploy IaaS VMs
 Write-Host "Deploying the SharePoint Farm (this can take up to 1h)..." -NoNewline -ForegroundColor Yellow
 $Command = {
-    $catch = New-AzureRmResourceGroup -Name $ResourceGroupName -Location "EastUS"
+    $catch = New-AzureRmResourceGroup -Name $ResourceGroupName -Location $Region
     $catch = New-AzureRmResourceGroupDeployment -Name "spvms" -ResourceGroupName $ResourceGroupName -TemplateUri "https://raw.githubusercontent.com/NikCharlebois/SharePointFarms/BlankSPVMs/sharepoint-non-ha/azuredeploy.json" -TemplateParameterUri "https://raw.githubusercontent.com/NikCharlebois/SharePointFarms/BlankSPVMs/sharepoint-non-ha/azuredeploy.parameters.json"
 }
 $time = Measure-Command $Command
@@ -150,7 +178,7 @@ $Command = {
     }
     catch
     {
-        New-AzureRmResourceGroup -Name $ResourceGroupName -Location "EastUS"
+        New-AzureRmResourceGroup -Name $ResourceGroupName -Location $Region
     }
 }
 $time = Measure-Command $Command
@@ -166,7 +194,7 @@ $Command = {
     }
     catch
     {
-        New-AzureRmAutomationAccount -ResourceGroupName $ResourceGroupName -Name $AutomationAccountName -Location "EastUS2"
+        New-AzureRmAutomationAccount -ResourceGroupName $ResourceGroupName -Name $AutomationAccountName -Location $Region
     }
 }
 $time = Measure-Command $Command
@@ -183,7 +211,7 @@ $Command = {
     }
     catch
     {
-        $storageAccount = New-AzureRmStorageAccount -ResourceGroupName $ResourceGroupName -Name $StorageAccountName -Location "EastUS" -SkuName "Standard_GRS" -Kind "BlobStorage" -AccessTier Hot
+        $storageAccount = New-AzureRmStorageAccount -ResourceGroupName $ResourceGroupName -Name $StorageAccountName -Location $Region -SkuName "Standard_GRS" -Kind "BlobStorage" -AccessTier Hot
     }
     Set-AzureRmCurrentStorageAccount -ResourceGroupName $ResourceGroupName -Name $StorageAccountName
     $ctx = $storageAccount.Context
@@ -320,6 +348,28 @@ $Command = {
 
     try
     {
+        Get-AzureRMAutomationCredential -Name "ServicesAccount" -ResourceGroupName $ResourceGroupName -AutomationAccountName $AutomationAccountName -EA Stop
+    }
+    catch
+    {
+        $user = "contoso\sp_services"
+        $cred = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList $user, $pw
+        New-AzureRMAutomationCredential -AutomationAccountName $AutomationAccountName -Name "ServicesAccount" -Value $cred -ResourceGroupName $ResourceGroupName
+    }
+
+    try
+    {
+        Get-AzureRMAutomationCredential -Name "SearchAccount" -ResourceGroupName $ResourceGroupName -AutomationAccountName $AutomationAccountName -EA Stop
+    }
+    catch
+    {
+        $user = "contoso\sp_search"
+        $cred = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList $user, $pw
+        New-AzureRMAutomationCredential -AutomationAccountName $AutomationAccountName -Name "SearchAccount" -Value $cred -ResourceGroupName $ResourceGroupName
+    }
+
+    try
+    {
         Get-AzureRMAutomationCredential -Name "LocalAdmin" -ResourceGroupName $ResourceGroupName -AutomationAccountName $AutomationAccountName -EA Stop
     }
     catch
@@ -339,15 +389,18 @@ $ConfigData = @{
     AllNodes = @(
         @{
             NodeName                    = "SPWFE" + $ResourceGroupName + ".contoso.com"
-            RunCentralAdmin             = $true
+            RunCentralAdmin             = $false
+            Role                        = "WebFrontEnd"
         },
         @{
             NodeName                    = "SPApp" + $ResourceGroupName + ".contoso.com"
-            RunCentralAdmin             = $false
+            RunCentralAdmin             = $true
+            Role                        = "Application"
         },
         @{
             NodeName                    = "SPSearch" + $ResourceGroupName + ".contoso.com"
             RunCentralAdmin             = $false
+            Role                        = "Search"
         },
         @{
             NodeName = "*"
@@ -442,18 +495,18 @@ $time = Measure-Command $Command
 $message = "Completed in {0:N0} seconds" -f $time.TotalSeconds
 Write-Host $message -ForegroundColor Green
 
-Write-Host "Assigning WFE Server Configuration..." -NoNewline -ForegroundColor Yellow
-Register-AzureRmAutomationDscNode -AzureVMResourceGroup $ResourceGroupName -AzureVMName ("SPWFE" + $ResourceGroupName) -AzureVMLocation "EastUS" -NodeConfigurationName ($ConfigurationName + ".SPWFE" + $ResourceGroupName + ".contoso.com") -ActionAfterReboot ContinueConfiguration -RebootNodeIfNeeded $true -AutomationAccountName $AutomationAccountName -ResourceGroupName $ResourceGroupName -AllowModuleOverwrite $true -Verbose
+Write-Host "Assigning Application Server Configuration..." -NoNewline -ForegroundColor Yellow
+Register-AzureRmAutomationDscNode -AzureVMResourceGroup $ResourceGroupName -AzureVMName ("SPApp" + $ResourceGroupName) -AzureVMLocation $Region -NodeConfigurationName ($ConfigurationName + ".SPAPP" + $ResourceGroupName + ".contoso.com") -ActionAfterReboot ContinueConfiguration -RebootNodeIfNeeded $true -AutomationAccountName $AutomationAccountName -ResourceGroupName $ResourceGroupName -AllowModuleOverwrite $true -Verbose
 $message = "Completed"
 Write-Host $message -ForegroundColor Green
 
-Write-Host "Assigning Application Server Configuration..." -NoNewline -ForegroundColor Yellow
-Register-AzureRmAutomationDscNode -AzureVMResourceGroup $ResourceGroupName -AzureVMName ("SPApp" + $ResourceGroupName) -AzureVMLocation "EastUS" -NodeConfigurationName ($ConfigurationName + ".SPAPP" + $ResourceGroupName + ".contoso.com") -ActionAfterReboot ContinueConfiguration -RebootNodeIfNeeded $true -AutomationAccountName $AutomationAccountName -ResourceGroupName $ResourceGroupName -AllowModuleOverwrite $true -Verbose
+Write-Host "Assigning WFE Server Configuration..." -NoNewline -ForegroundColor Yellow
+Register-AzureRmAutomationDscNode -AzureVMResourceGroup $ResourceGroupName -AzureVMName ("SPWFE" + $ResourceGroupName) -AzureVMLocation $Region -NodeConfigurationName ($ConfigurationName + ".SPWFE" + $ResourceGroupName + ".contoso.com") -ActionAfterReboot ContinueConfiguration -RebootNodeIfNeeded $true -AutomationAccountName $AutomationAccountName -ResourceGroupName $ResourceGroupName -AllowModuleOverwrite $true -Verbose
 $message = "Completed"
 Write-Host $message -ForegroundColor Green
 
 Write-Host "Assigning Search Server Configuration..." -NoNewline -ForegroundColor Yellow
-Register-AzureRmAutomationDscNode -AzureVMResourceGroup $ResourceGroupName -AzureVMName ("SPSearch" + $ResourceGroupName) -AzureVMLocation "EastUS" -NodeConfigurationName ($ConfigurationName + ".SPSEARCH" + $ResourceGroupName + ".contoso.com") -ActionAfterReboot ContinueConfiguration -RebootNodeIfNeeded $true -AutomationAccountName $AutomationAccountName -ResourceGroupName $ResourceGroupName -AllowModuleOverwrite $true -Verbose
+Register-AzureRmAutomationDscNode -AzureVMResourceGroup $ResourceGroupName -AzureVMName ("SPSearch" + $ResourceGroupName) -AzureVMLocation $Region -NodeConfigurationName ($ConfigurationName + ".SPSEARCH" + $ResourceGroupName + ".contoso.com") -ActionAfterReboot ContinueConfiguration -RebootNodeIfNeeded $true -AutomationAccountName $AutomationAccountName -ResourceGroupName $ResourceGroupName -AllowModuleOverwrite $true -Verbose
 $message = "Completed"
 Write-Host $message -ForegroundColor Green
 #endregion
