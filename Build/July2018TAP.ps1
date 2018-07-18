@@ -1,11 +1,12 @@
 configuration July2018Tap
 {
-    $credsLocalAdmin = Get-AutomationPSCredential -Name "LocalAdmin"
+    $credsLocalAdmin  = Get-AutomationPSCredential -Name "LocalAdmin"
     $credsDomainAdmin = Get-AutomationPSCredential -Name "DomainAdmin"
     $credsSPFarm      = Get-AutomationPSCredential -Name "FarmAccount"
     $credsSPSetup     = Get-AutomationPSCredential -Name "SetupAccount"
-    $credsSPSearch    = Get-AutomationPSCredential -Name "SearchAccount"
-    $credsSPServices  = Get-AutomationPSCredential -Name "ServicesAccount"
+    $credsSPServices  = Get-AutomationPSCredential -Name "SPServices"
+    $credsSPSearch    = Get-AutomationPSCredential -Name "SPSearch"
+    $credsSPAdmin     = Get-AutomationPSCredential -Name "SharePointAdmin"
 
     Import-DscResource -ModuleName "SharePointDSC" -Moduleversion "3.0.0.0"
     Import-DscResource -ModuleName "xDownloadFile" -ModuleVersion "1.0"
@@ -172,14 +173,9 @@ configuration July2018Tap
 
         SPInstallLanguagePack DutchLanguagePack
         {
-            BinaryDir = $ConfigurationData.SharePoint.Settings.BinaryPath + "LP\Dutch"
-            DependsOn            = "[SPInstall]SharePointInstall"
-            PsDscRunAsCredential = $credsSPSetup
-        }
-
-        SPInstallLanguagePack FrenchLanguagePack
+            BinaryDir            = $ConfigurationData.SharePoint.Settings.BinaryPath + "LP\Dutch"
         {
-            BinaryDir = $ConfigurationData.SharePoint.Settings.BinaryPath + "LP\French"
+            BinaryDir            = $ConfigurationData.SharePoint.Settings.BinaryPath + "LP\French"
             DependsOn            = "[SPInstall]SharePointInstall"
             PsDscRunAsCredential = $credsSPSetup
         }
@@ -221,7 +217,14 @@ configuration July2018Tap
             CentralAdministrationPort = "7777"
             ServerRole                = $Node.ServerRole
             PSDSCRunAsCredential      = $credsSPSetup
-            DependsOn                 = @("[SPInstallLanguagePack]FrenchLanguagePack", "[SPInstallLanguagePack]DutchLanguagePack", "[SPProductUpdate]PatchInstall10325Loc")
+        }
+
+        SPProductUpdate PatchInstall
+        {
+            SetupFile            = $ConfigurationData.SharePoint.Settings.BinaryPath + "Patch\sts2016-kb2345678-fullfile-x64-glb.exe"
+            ShutdownServices     = $true
+            DependsOn            = "[SPFarm]SharePointFarm"
+            PsDscRunAsCredential = $credsSPSetup
         }
 
         SPConfigWizard PSConfig
@@ -284,6 +287,12 @@ configuration July2018Tap
                 DependsOn             = "[SPSite]RootSite"
             }
 
+            SPManagedAccount SPAdmin
+            {
+                AccountName            = $credsSPAdmin.UserName
+                PSDSCRunAsCredential   = $credsSPSetup
+                DependsOn              = "[SPFarm]SharePointFarm"
+            }
 
             SPQuotaTemplate RemoveTemplate
             {
@@ -348,7 +357,7 @@ configuration July2018Tap
                 PsDscRunAsCredential = $credsSPSetup
                 DependsOn            = "[SPManagedAccount]ServicesManagedAccount"
             }
-        
+
             SPSearchServiceApp SearchServiceApp
             {
                 Name                  = "Search Service Application"
@@ -360,7 +369,7 @@ configuration July2018Tap
                 PsDscRunAsCredential  = $credsSPSetup
                 DependsOn             = @("[SPServiceAppPool]SearchServiceAppPool","[SPManagedAccount]SearchManagedAccount")
             }
-            
+
             SPSearchTopology LocalSearchTopology
             {
                 ServiceAppName          = "Search Service Application"
