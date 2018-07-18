@@ -390,17 +390,17 @@ $ConfigData = @{
         @{
             NodeName                    = "SPWFE" + $ResourceGroupName + ".contoso.com"
             RunCentralAdmin             = $false
-            Role                        = "WebFrontEnd"
+            ServerRole                  = "WebFrontEnd"
         },
         @{
             NodeName                    = "SPApp" + $ResourceGroupName + ".contoso.com"
             RunCentralAdmin             = $true
-            Role                        = "Application"
+            ServerRole                  = "Application"
         },
         @{
             NodeName                    = "SPSearch" + $ResourceGroupName + ".contoso.com"
             RunCentralAdmin             = $false
-            Role                        = "Search"
+            ServerRole                  = "Search"
         },
         @{
             NodeName = "*"
@@ -489,7 +489,8 @@ $Command = {
     do
     {
         Start-Sleep 5
-    }while((Get-AzureRmAutomationDscCompilationJob -ConfigurationName $ConfigurationName -ResourceGroupName $ResourceGroupName -AutomationAccountName $AutomationAccountName).Status -ne "Completed")
+    }
+    while ((Get-AzureRmAutomationDscCompilationJob -ConfigurationName $ConfigurationName -ResourceGroupName $ResourceGroupName -AutomationAccountName $AutomationAccountName | Sort-Object -Property LastModifiedTime -Descending | Select-Object -First 1).Status -ne "Completed")
 }
 $time = Measure-Command $Command
 $message = "Completed in {0:N0} seconds" -f $time.TotalSeconds
