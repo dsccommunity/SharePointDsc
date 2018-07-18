@@ -188,22 +188,6 @@ configuration July2018Tap
             PsDscRunAsCredential = $credsDomainAdmin
         }
 
-        SPProductUpdate PatchInstall10325
-        {
-            SetupFile            = $ConfigurationData.SharePoint.Settings.BinaryPath + "Patch\sts2016-kb2345678-fullfile-x64-glb.exe"
-            ShutdownServices     = $false
-            DependsOn            = "[SPInstall]SharePointInstall"
-            PsDscRunAsCredential = $credsSPSetup
-        }
-
-        SPProductUpdate PatchInstall10325Loc
-        {
-            SetupFile            = $ConfigurationData.SharePoint.Settings.BinaryPath + "Patch\wssloc2016-kb2345678-fullfile-x64-glb.exe"
-            ShutdownServices     = $false
-            DependsOn            = "[SPProductUpdate]PatchInstall10325"
-            PsDscRunAsCredential = $credsSPSetup
-        }
-
         SPFarm SharePointFarm
         {
             IsSingleInstance          = "Yes"
@@ -217,12 +201,21 @@ configuration July2018Tap
             CentralAdministrationPort = "7777"
             ServerRole                = $Node.ServerRole
             PSDSCRunAsCredential      = $credsSPSetup
+            DependsOn                 = @("[SPInstallLanguagePack]FrenchLanguagePack", "[SPInstallLanguagePack]DutchLanguagePack")
         }
 
-        SPProductUpdate PatchInstall
+<#        SPProductUpdate PatchInstall10325
         {
             SetupFile            = $ConfigurationData.SharePoint.Settings.BinaryPath + "Patch\sts2016-kb2345678-fullfile-x64-glb.exe"
-            ShutdownServices     = $true
+            ShutdownServices     = $false
+            DependsOn            = "[SPFarm]SharePointFarm"
+            PsDscRunAsCredential = $credsSPSetup
+        }
+
+        SPProductUpdate PatchInstall10325Loc
+        {
+            SetupFile            = $ConfigurationData.SharePoint.Settings.BinaryPath + "Patch\wssloc2016-kb2345678-fullfile-x64-glb.exe"
+            ShutdownServices     = $false
             DependsOn            = "[SPFarm]SharePointFarm"
             PsDscRunAsCredential = $credsSPSetup
         }
@@ -232,7 +225,7 @@ configuration July2018Tap
             IsSingleInstance     = "Yes"
             PsDscRunAsCredential = $credsSPSetup
             DependsOn            = "[SPFarm]SharePointFarm"
-        }
+        }#>
 
         # Determine the first app server and let it create the farm, all other servers will join that afterwards
         $FirstAppServer = ($AllNodes | Where-Object { ($_.ServerRole -eq 'Application' -or $_.ServerRole -eq 'ApplicationWithSearch' ) -or ($_.ServerRole -eq 'Custom' -and $_.ServiceRoles.Application) -or $_.ServerRole -eq 'SingleServer' } | Select-Object -First 1).NodeName
