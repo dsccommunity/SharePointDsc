@@ -384,7 +384,7 @@ configuration July2018Tap
 
             SPProjectServerAdditionalSettings Settings
             {
-                Url                   = "http://project.contoso.com/pwa"
+                Url                   = "http://project.contoso.com"
                 ServerCurrency        = "EUR"
                 EnforceServerCurrency = $true 
                 PsDscRunAsCredential = $credsSPSetup
