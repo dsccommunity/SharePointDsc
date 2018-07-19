@@ -45,7 +45,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         Mock -CommandName "Start-SPServiceInstance" -MockWith { }
 
         # Test Contexts
-        Context -Name "No config databaes exists, and this server should be connected to one" -Fixture {
+        Context -Name "No config databases exists, and this server should be connected to one" -Fixture {
             $testParams = @{
                 IsSingleInstance = "Yes"
                 Ensure = "Present"
@@ -91,6 +91,11 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     DatabaseExists = $false
                 }
             }
+            Mock -CommandName "Get-SPDSCSQLInstanceStatus" -MockWith {
+                return @{
+                    MaxDOPCorrect = $true
+                }
+            }
             Mock -CommandName "Get-SPWebApplication" -MockWith {
                 return @{
                     IsAdministrationWebApplication = $true
@@ -113,7 +118,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
         }
 
-        Context -Name "No config databaes exists, and this server should be connected to one but won't run central admin" -Fixture {
+        Context -Name "No config databases exists, and this server should be connected to one but won't run central admin" -Fixture {
             $testParams = @{
                 IsSingleInstance = "Yes"
                 Ensure = "Present"
@@ -132,6 +137,11 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     Locked = $false
                     ValidPermissions = $true
                     DatabaseExists = $false
+                }
+            }
+            Mock -CommandName "Get-SPDSCSQLInstanceStatus" -MockWith {
+                return @{
+                    MaxDOPCorrect = $true
                 }
             }
             Mock -CommandName "Get-SPWebApplication" -MockWith {
@@ -174,6 +184,11 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     Locked = $false
                     ValidPermissions = $true
                     DatabaseExists = $true
+                }
+            }
+            Mock -CommandName "Get-SPDSCSQLInstanceStatus" -MockWith {
+                return @{
+                    MaxDOPCorrect = $true
                 }
             }
             Mock -CommandName "Get-SPWebApplication" -MockWith {
@@ -245,6 +260,11 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     Locked = $false
                     ValidPermissions = $true
                     DatabaseExists = $true
+                }
+            }
+            Mock -CommandName "Get-SPDSCSQLInstanceStatus" -MockWith {
+                return @{
+                    MaxDOPCorrect = $true
                 }
             }
             Mock -CommandName "Get-SPWebApplication" -MockWith {
@@ -326,6 +346,11 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     }
                 }
             }
+            Mock -CommandName "Get-SPDSCSQLInstanceStatus" -MockWith {
+                return @{
+                    MaxDOPCorrect = $true
+                }
+            }
             Mock -CommandName "Get-SPWebApplication" -MockWith {
                 return @{
                     IsAdministrationWebApplication = $true
@@ -351,6 +376,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "Server is connected to farm, but Central Admin isn't started" -Fixture {
             $testParams = @{
+                IsSingleInstance = "Yes"
                 Ensure = "Present"
                 FarmConfigDatabaseName = "SP_Config"
                 DatabaseServer = "sql.contoso.com"
@@ -378,6 +404,11 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     Locked = $false
                     ValidPermissions = $true
                     DatabaseExists = $true
+                }
+            }
+            Mock -CommandName "Get-SPDSCSQLInstanceStatus" -MockWith {
+                return @{
+                    MaxDOPCorrect = $true
                 }
             }
             Mock -CommandName Get-SPDatabase -MockWith {
@@ -523,6 +554,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "This server is connected to the farm and is running CA, but shouldn't" -Fixture {
             $testParams = @{
+                IsSingleInstance = "Yes"
                 Ensure = "Present"
                 FarmConfigDatabaseName = "SP_Config"
                 DatabaseServer = "sql.contoso.com"
@@ -550,6 +582,11 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     Locked = $false
                     ValidPermissions = $true
                     DatabaseExists = $true
+                }
+            }
+            Mock -CommandName "Get-SPDSCSQLInstanceStatus" -MockWith {
+                return @{
+                    MaxDOPCorrect = $true
                 }
             }
             Mock -CommandName "Get-SPDatabase" -MockWith {
@@ -639,6 +676,11 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     Locked = $false
                     ValidPermissions = $true
                     DatabaseExists = $true
+                }
+            }
+            Mock -CommandName "Get-SPDSCSQLInstanceStatus" -MockWith {
+                return @{
+                    MaxDOPCorrect = $true
                 }
             }
             Mock -CommandName "Get-SPDatabase" -MockWith {
@@ -771,6 +813,11 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                         DatabaseExists = $true
                     }
                 }
+                Mock -CommandName "Get-SPDSCSQLInstanceStatus" -MockWith {
+                    return @{
+                        MaxDOPCorrect = $true
+                    }
+                }
                 Mock -CommandName "Get-SPDatabase" -MockWith {
                     return @(@{
                         Name = $testParams.FarmConfigDatabaseName
@@ -867,6 +914,11 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                         DatabaseExists = $false
                     }
                 }
+                Mock -CommandName "Get-SPDSCSQLInstanceStatus" -MockWith {
+                    return @{
+                        MaxDOPCorrect = $true
+                    }
+                }
                 Mock -CommandName "Get-SPWebApplication" -MockWith {
                     return @{
                         IsAdministrationWebApplication = $true
@@ -926,6 +978,11 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     DatabaseExists = $true
                 }
             }
+            Mock -CommandName "Get-SPDSCSQLInstanceStatus" -MockWith {
+                return @{
+                    MaxDOPCorrect = $true
+                }
+            }
             Mock -CommandName "Get-SPDatabase" -MockWith {
                 return @(@{
                     Name = $testParams.FarmConfigDatabaseName
@@ -954,7 +1011,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 }
             }
 
-            Mock -CommandName Get-SPDSCInstalledProductVersion -MockWith { return @{ FileMajorPart = 16 } }
+            Mock -CommandName Get-SPDSCInstalledProductVersion -MockWith { return @{ FileMajorPart = 16; ProductBuildPart = 4700 } }
 
             It "Should return WebFrontEnd from the get method"{
                 (Get-TargetResource @testParams).ServerRole | Should Be "WebFrontEnd"
@@ -1004,6 +1061,11 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     Locked = $false
                     ValidPermissions = $false
                     DatabaseExists = $false
+                }
+            }
+            Mock -CommandName "Get-SPDSCSQLInstanceStatus" -MockWith {
+                return @{
+                    MaxDOPCorrect = $true
                 }
             }
             Mock -CommandName "Get-SPDatabase" -MockWith {
@@ -1079,6 +1141,11 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     Locked = $false
                     ValidPermissions = $true
                     DatabaseExists = $true
+                }
+            }
+            Mock -CommandName "Get-SPDSCSQLInstanceStatus" -MockWith {
+                return @{
+                    MaxDOPCorrect = $true
                 }
             }
             Mock -CommandName "Get-SPDatabase" -MockWith {

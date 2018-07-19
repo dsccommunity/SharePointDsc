@@ -441,6 +441,14 @@ function Set-TargetResource
 
             $modulePath = "..\..\Modules\SharePointDsc.Farm\SPFarm.psm1"
             Import-Module -Name (Join-Path -Path $scriptRoot -ChildPath $modulePath -Resolve)
+
+            $sqlInstanceStatus = Get-SPDSCSQLInstanceStatus -SQLServer $params.DatabaseServer `
+
+            if ($sqlInstanceStatus.MaxDOPCorrect -ne $true)
+            {
+                throw "The MaxDOP setting is incorrect. Please correct before continuing."
+            }
+
             $dbStatus = Get-SPDSCConfigDBStatus -SQLServer $params.DatabaseServer `
                                                 -Database $params.FarmConfigDatabaseName
 
@@ -467,7 +475,8 @@ function Set-TargetResource
                 SkipRegisterAsDistributedCacheHost = $true
             }
 
-            switch((Get-SPDSCInstalledProductVersion).FileMajorPart)
+            $installedVersion = Get-SPDSCInstalledProductVersion
+            switch($installedVersion.FileMajorPart)
             {
                 15 {
                     Write-Verbose -Message "Detected Version: SharePoint 2013"
@@ -508,7 +517,7 @@ function Set-TargetResource
                     throw [Exception] ("An unknown version of SharePoint (Major version $_) " + `
                                        "was detected. Only versions 15 (SharePoint 2013) and" + `
                                        "16 (SharePoint 2016 or SharePoint 2019) are supported.")
-}
+                }
             }
         }
 

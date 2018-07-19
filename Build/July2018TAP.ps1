@@ -229,6 +229,7 @@ configuration July2018Tap
 
         # Determine the first app server and let it create the farm, all other servers will join that afterwards
         $FirstAppServer = ($AllNodes | Where-Object { ($_.ServerRole -eq 'Application' -or $_.ServerRole -eq 'ApplicationWithSearch' ) -or ($_.ServerRole -eq 'Custom' -and $_.ServiceRoles.Application) -or $_.ServerRole -eq 'SingleServer' } | Select-Object -First 1).NodeName
+        $FirstSearchServer = ($AllNodes | Where-Object { ($_.ServerRole -eq 'Search' -or $_.ServerRole -eq 'ApplicationWithSearch' ) -or ($_.ServerRole -eq 'Custom' -and $_.ServiceRoles.Application) -or $_.ServerRole -eq 'SingleServer' } | Select-Object -First 1).NodeName
 
         if ($Node.NodeName -eq $FirstAppServer)
         {
@@ -333,6 +334,75 @@ configuration July2018Tap
                 DependsOn            = "[SPFarm]SharePointFarm"
             }
 
+            SPServiceAppPool ServicesServiceAppPool
+            {
+                Name                 = "Services Application Pool"
+                ServiceAccount       = $credsSPServices.UserName
+                Ensure               = "Present"
+                PsDscRunAsCredential = $credsSPSetup
+                DependsOn            = "[SPManagedAccount]ServicesManagedAccount"
+            }
+
+            SPSecureStoreServiceApp SecureStoreServiceApp
+            {
+                Name                 = "Secure Store Service Application"
+                ApplicationPool      = "Services Application Pool"
+                AuditingEnabled      = $true
+                AuditlogMaxSize      = 30
+                DatabaseName         = "SP_SecureStore"
+                PSDSCRunAsCredential = $credsSPSetup
+                DependsOn            = "[SPServiceAppPool]ServicesServiceAppPool"
+            }
+
+            SPProjectServerServiceApp ProjectServiceApp
+            {
+                Name                 = "Project Server Service Application"
+                ApplicationPool      = "Services Application Pool"
+                PsDscRunAsCredential = $credsSPSetup
+                DependsOn            = "[SPFarm]SharePointFarm"
+            }
+
+            SPSite PWASite
+            {
+                Url                      = "http://project.contoso.com"
+                OwnerAlias               = "CONTOSO\lcladmin"
+                HostHeaderWebApplication = "http://root.contoso.com"
+                Name                     = "PWA Site"
+                Template                 = "PWA#0"
+                PsDscRunAsCredential     = $credsSPSetup
+                DependsOn                = "[SPProjectServerServiceApp]ProjectServiceApp"
+            }
+
+            SPFeature PWASiteFeature
+            {
+                Name                 = "PWASITE"
+                Url                  = "http://project.contoso.com"
+                FeatureScope         = "Site"
+                PsDscRunAsCredential = $credsSPSetup
+                DependsOn            = "[SPSite]PWASite"
+            }
+
+            SPProjectServerAdditionalSettings Settings
+            {
+                Url                   = "http://project.contoso.com/pwa"
+                ServerCurrency        = "EUR"
+                EnforceServerCurrency = $true 
+                PsDscRunAsCredential = $credsSPSetup
+                DependsOn            = "[SPFeature]PWASiteFeature"
+            }
+                    
+            SPSessionStateService StateServiceApp
+            {
+                DatabaseName         = "SP_StateService"
+                DatabaseServer       = "SPSQL19"
+                Ensure               = "Present"
+                PsDscRunAsCredential = $credsSPSetup
+                DependsOn            = "[SPFarm]SharePointFarm"
+            }
+        }
+
+        if ($Node.NodeName -eq $FirstSearchServer)
+        {
             SPManagedAccount SearchManagedAccount
             {
                 AccountName          = $credsSPSearch.UserName
@@ -342,13 +412,21 @@ configuration July2018Tap
                 DependsOn            = "[SPFarm]SharePointFarm"
             }
 
+            WaitForAll ServicesManagedAccountCreation
+            {
+                ResourceName      = '[SPManagedAccount]ServicesManagedAccount'
+                NodeName          = $FirstAppServer
+                RetryIntervalSec  = 60
+                RetryCount        = 60
+            }
+
             SPServiceAppPool SearchServiceAppPool
             {
                 Name                 = "Search Application Pool"
                 ServiceAccount       = $credsSPServices.UserName
                 Ensure               = "Present"
                 PsDscRunAsCredential = $credsSPSetup
-                DependsOn            = "[SPManagedAccount]ServicesManagedAccount"
+                DependsOn            = "[WaitForAll]ServicesManagedAccountCreation"
             }
 
             SPSearchServiceApp SearchServiceApp
@@ -375,6 +453,44 @@ configuration July2018Tap
                 IndexPartition          = @("SPSearch19")
                 PsDscRunAsCredential    = $credsSPSetup
                 DependsOn               = @("[SPSearchServiceApp]SearchServiceApp")
+            }
+
+            SPSearchContentSource WebsiteSource
+            {
+                Name                 = "Microsoft website"
+                ServiceAppName       = "Search Service Application"
+                ContentSourceType    = "Website"
+                Addresses            = @("http://www.microsoft.com")
+                CrawlSetting         = "Custom"
+                LimitPageDepth       = 2
+                IncrementalSchedule  = MSFT_SPSearchCrawlSchedule{
+                                        ScheduleType = "Daily"
+                                        StartHour = "0"
+                                        StartMinute = "0"
+                                        CrawlScheduleRepeatDuration = "1440"
+                                        CrawlScheduleRepeatInterval = "60"
+                                       }
+                FullSchedule         = MSFT_SPSearchCrawlSchedule{
+                                        ScheduleType = "Weekly"
+                                        CrawlScheduleDaysOfWeek = @("Sunday")
+                                        StartHour = "3"
+                                        StartMinute = "0"
+                                       }
+                Priority             = "Normal"
+                Ensure               = "Present"
+                PsDscRunAsCredential = $credsSPSetup
+                DependsOn            = @("[SPSearchServiceApp]SearchServiceApp")
+            }
+
+            SPSearchFileType PDF
+            {
+                FileType             = "pdf"
+                ServiceAppName       = "Search Service Application"
+                Description          = "PDF"
+                MimeType             = "application/pdf"
+                Ensure               = "Present"
+                PsDscRunAsCredential = $credsSPSetup
+                DependsOn            = @("[SPSearchServiceApp]SearchServiceApp")
             }
         }
     }
