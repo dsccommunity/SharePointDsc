@@ -1,4 +1,4 @@
-configuration July2018Tap
+configuration PublicPreview
 {
     $credsLocalAdmin  = Get-AutomationPSCredential -Name "LocalAdmin"
     $credsDomainAdmin = Get-AutomationPSCredential -Name "DomainAdmin"
@@ -8,24 +8,17 @@ configuration July2018Tap
     $credsSPSearch    = Get-AutomationPSCredential -Name "SPSearch"
     $credsSPAdmin     = Get-AutomationPSCredential -Name "SharePointAdmin"
 
-    Import-DscResource -ModuleName "SharePointDSC" -Moduleversion "3.0.0.0"
-    Import-DscResource -ModuleName "xDownloadFile" -ModuleVersion "1.0"
-    Import-DscResource -ModuleName "xDownloadISO" -ModuleVersion "1.0"
+    Import-DscResource -ModuleName "SharePointDSC"  -Moduleversion "3.0.0.0"
+    Import-DscResource -ModuleName "xDownloadFile"  -ModuleVersion "1.0"
+    Import-DscResource -ModuleName "xDownloadISO"   -ModuleVersion "1.0"
     Import-DscResource -ModuleName "xPendingReboot" -ModuleVersion "0.4.0.0"
 
     Node $AllNodes.NodeName
     {
         xDownloadISO DownloadTAPBits
         {
-            SourcePath               = "https://spdsctap.blob.core.windows.net/spdsc/June2018.iso"
+            SourcePath               = "https://spdsctap.blob.core.windows.net/spdsc/PublicPreview.img"
             DestinationDirectoryPath = $ConfigurationData.SharePoint.Settings.BinaryPath
-            PsDscRunAsCredential     = $credsLocalAdmin
-        }
-
-        xDownloadISO PatchISO
-        {
-            SourcePath               = "https://spdsctap.blob.core.windows.net/spdsc/July2018-16.0.10325.10000.iso"
-            DestinationDirectoryPath = $ConfigurationData.SharePoint.Settings.BinaryPath + "Patch\"
             PsDscRunAsCredential     = $credsLocalAdmin
         }
 
@@ -124,13 +117,22 @@ configuration July2018Tap
             PsDscRunAsCredential     = $credsLocalAdmin
         }
 
+        xDownloadFile MSVCRT11
+        {
+            SourcePath               = "https://download.microsoft.com/download/1/6/B/16B06F60-3B20-4FF2-B699-5E9B7962F9AE/VSU_4/vcredist_x64.exe"
+            FileName                 = "vcredist_x64.exe"
+            DestinationDirectoryPath = $ConfigurationData.SharePoint.Settings.BinaryPath + "prerequisiteinstallerfiles"
+            DependsOn                = "[xDownloadFile]MSVCRT141"
+            PsDscRunAsCredential     = $credsLocalAdmin
+        }
+
         Group GrantSetupAccountLocalAdmin
         {
             GroupName            = "Administrators"
             Ensure               = "Present"
             MembersToInclude     = $credsSPSetup.UserName
             PsDscRunAsCredential = $credsLocalAdmin
-            DependsOn            = "[xDownloadFile]MSVCRT141"
+            DependsOn            = "[xDownloadFile]MSVCRT11"
         }
 
         SPInstallPrereqs SharePointPrereqInstall
@@ -144,6 +146,7 @@ configuration July2018Tap
             IDFX11               = $ConfigurationData.SharePoint.Settings.BinaryPath + "prerequisiteinstallerfiles\MicrosoftIdentityExtensions-64.msi"
             MSIPCClient          = $ConfigurationData.SharePoint.Settings.BinaryPath + "prerequisiteinstallerfiles\setup_msipc_x64.msi"
             WCFDataServices56    = $ConfigurationData.SharePoint.Settings.BinaryPath + "prerequisiteinstallerfiles\WcfDataServices56.exe"
+            MSVCRT11             = $ConfigurationData.SharePoint.Settings.BinaryPath + "prerequisiteinstallerfiles\vcredist_x64.exe"
             MSVCRT141            = $ConfigurationData.SharePoint.Settings.BinaryPath + "prerequisiteinstallerfiles\vc_redist.x64.exe"
             KB3092423            = $ConfigurationData.SharePoint.Settings.BinaryPath + "prerequisiteinstallerfiles\AppFabric-KB3092423-x64-ENU.exe"
             DotNet472            = $ConfigurationData.SharePoint.Settings.BinaryPath + "prerequisiteinstallerfiles\NDP472-KB4054530-x86-x64-AllOS-ENU.exe"
@@ -164,7 +167,7 @@ configuration July2018Tap
         {
             IsSingleInstance     = "Yes"
             BinaryDir            = $ConfigurationData.SharePoint.Settings.BinaryPath
-            ProductKey           = $ConfigurationData.SharePoint.Settings.ProductKey
+            ProductKey           = "M692G-8N2JP-GG8B2-2W2P7-YY7J6"
             Ensure               = "Present"
             DependsOn            = "[xPendingReboot]AfterPrereqInstall"
             PsDscRunAsCredential = $credsSPSetup
@@ -204,21 +207,6 @@ configuration July2018Tap
             CentralAdministrationPort = "7777"
             ServerRole                = "Application"
             PSDSCRunAsCredential      = $credsSPSetup
-        }
-
-        SPProductUpdate PatchInstall
-        {
-            SetupFile            = $ConfigurationData.SharePoint.Settings.BinaryPath + "Patch\sts2016-kb2345678-fullfile-x64-glb.exe"
-            ShutdownServices     = $true
-            DependsOn            = "[SPFarm]SharePointFarm"
-            PsDscRunAsCredential = $credsSPSetup
-        }
-
-        SPConfigWizard PSConfig
-        {
-            IsSingleInstance     = "yes"
-            PsDscRunAsCredential = $credsSPSetup
-            DependsOn            = "[SPFarm]SharePointFarm"
         }
 
         SPManagedAccount SPFarmAccount

@@ -5,7 +5,7 @@
 
     [Parameter()]
     [String]
-    $ConfigurationName = "July2018Tap"
+    $ConfigurationName = "PublicPreview"
 )
 
 $catch = Import-Module AzureRM -EA SilentlyContinue
@@ -327,6 +327,39 @@ $Command = {
         $user = "lcladmin"
         $cred = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList $user, $pw
         New-AzureRMAutomationCredential -AutomationAccountName $AutomationAccountName -Name "LocalAdmin" -Value $cred -ResourceGroupName $ResourceGroupName
+    }
+
+    try
+    {
+        Get-AzureRMAutomationCredential -Name "SPServices" -ResourceGroupName $ResourceGroupName -AutomationAccountName $AutomationAccountName -EA Stop
+    }
+    catch
+    {
+        $user = "contoso\sp_services"
+        $cred = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList $user, $pw
+        New-AzureRMAutomationCredential -AutomationAccountName $AutomationAccountName -Name "SPServices" -Value $cred -ResourceGroupName $ResourceGroupName
+    }
+
+    try
+    {
+        Get-AzureRMAutomationCredential -Name "SPSearch" -ResourceGroupName $ResourceGroupName -AutomationAccountName $AutomationAccountName -EA Stop
+    }
+    catch
+    {
+        $user = "contoso\sp_search"
+        $cred = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList $user, $pw
+        New-AzureRMAutomationCredential -AutomationAccountName $AutomationAccountName -Name "SPSearch" -Value $cred -ResourceGroupName $ResourceGroupName
+    }
+
+    try
+    {
+        Get-AzureRMAutomationCredential -Name "SharePointAdmin" -ResourceGroupName $ResourceGroupName -AutomationAccountName $AutomationAccountName -EA Stop
+    }
+    catch
+    {
+        $user = "contoso\sharepointadmin"
+        $cred = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList $user, $pw
+        New-AzureRMAutomationCredential -AutomationAccountName $AutomationAccountName -Name "SharePointAdmin" -Value $cred -ResourceGroupName $ResourceGroupName
     }
 }
 $time = Measure-Command $Command
