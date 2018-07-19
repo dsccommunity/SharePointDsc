@@ -194,7 +194,7 @@ function Set-TargetResource
                                   -ScriptBlock {
         $psconfigExe = $args[0]
         $psconfig = Start-Process -FilePath $psconfigExe `
-                                  -ArgumentList "-cmd upgrade -inplace b2b -wait -force" `
+                                  -ArgumentList "-cmd upgrade -inplace b2b -wait -force -cmd installcheck -noinstallcheck" `
                                   -Wait `
                                   -PassThru
 
@@ -209,7 +209,7 @@ function Set-TargetResource
         }
         Default {
             throw ("SharePoint Post Setup Configuration Wizard failed, " + `
-                   "exit code was $($setup.ExitCode). Error codes can be found at " + `
+                   "exit code was $result. Error codes can be found at " + `
                    "https://aka.ms/installerrorcodes")
         }
     }

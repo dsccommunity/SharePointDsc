@@ -80,7 +80,7 @@ function Get-TargetResource
             Write-Verbose -Message "Detected installation of SharePoint 2013"
         }
         16 {
-            if($InstalledVersion.ProductBuildPart.ToString().Length -eq 4)
+            if($installedVersion.ProductBuildPart.ToString().Length -eq 4)
             {
                 Write-Verbose -Message "Detected installation of SharePoint 2016"
             }
@@ -425,6 +425,13 @@ function Set-TargetResource
 
         $modulePath = "..\..\Modules\SharePointDsc.Farm\SPFarm.psm1"
         Import-Module -Name (Join-Path -Path $scriptRoot -ChildPath $modulePath -Resolve)
+        $sqlInstanceStatus = Get-SPDSCSQLInstanceStatus -SQLServer $params.DatabaseServer `
+
+        if ($sqlInstanceStatus.MaxDOPCorrect -ne $true)
+        {
+            throw "The MaxDOP setting is incorrect. Please correct before continuing."
+        }
+
         $dbStatus = Get-SPDSCConfigDBStatus -SQLServer $params.DatabaseServer `
                                             -Database $params.FarmConfigDatabaseName
 
@@ -450,6 +457,7 @@ function Set-TargetResource
             Passphrase = $params.Passphrase.Password
             SkipRegisterAsDistributedCacheHost = $true
         }
+
         $installedVersion = Get-SPDSCInstalledProductVersion
         switch($installedVersion.FileMajorPart)
         {

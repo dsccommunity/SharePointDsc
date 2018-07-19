@@ -40,7 +40,7 @@ function Get-TargetResource
         {
             $currentLicense = Get-ProjectServerLicense
 
-            if ($currentLicense[0] -match "Project Server [0-9]{4} : (?<Status>[a-zA-Z]+)")
+            if ($currentLicense[0] -match "Project Server [0-9]{4} \w*: (?<Status>[a-zA-Z]+)")
             {
                 if ($Matches.Status -eq "Active")
                 {
