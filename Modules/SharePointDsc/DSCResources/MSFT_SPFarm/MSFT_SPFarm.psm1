@@ -465,7 +465,6 @@ function Set-TargetResource
             if ($dbStatus.ValidPermissions -eq $false)
             {
                 throw "The current user does not have sufficient permissions to SQL Server"
-                return
             }
 
             $executeArgs = @{
