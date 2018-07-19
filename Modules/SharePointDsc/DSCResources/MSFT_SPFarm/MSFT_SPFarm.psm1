@@ -425,6 +425,13 @@ function Set-TargetResource
 
         $modulePath = "..\..\Modules\SharePointDsc.Farm\SPFarm.psm1"
         Import-Module -Name (Join-Path -Path $scriptRoot -ChildPath $modulePath -Resolve)
+        $sqlInstanceStatus = Get-SPDSCSQLInstanceStatus -SQLServer $params.DatabaseServer `
+
+        if ($sqlInstanceStatus.MaxDOPCorrect -ne $true)
+        {
+            throw "The MaxDOP setting is incorrect. Please correct before continuing."
+        }
+
         $dbStatus = Get-SPDSCConfigDBStatus -SQLServer $params.DatabaseServer `
                                             -Database $params.FarmConfigDatabaseName
 
@@ -451,7 +458,8 @@ function Set-TargetResource
             SkipRegisterAsDistributedCacheHost = $true
         }
 
-        switch((Get-SPDSCInstalledProductVersion).FileMajorPart)
+        $installedVersion = Get-SPDSCInstalledProductVersion
+        switch($installedVersion.FileMajorPart)
         {
             15 {
                 Write-Verbose -Message "Detected Version: SharePoint 2013"
@@ -459,7 +467,7 @@ function Set-TargetResource
             16 {
                 if ($params.ContainsKey("ServerRole") -eq $true)
                 {
-                    if($InstalledVersion.ProductBuildPart.ToString().Length -eq 4)
+                    if($installedVersion.ProductBuildPart.ToString().Length -eq 4)
                     {
                         Write-Verbose -Message ("Detected Version: SharePoint 2016 - " + `
                                                 "configuring server as $($params.ServerRole)")
@@ -473,7 +481,7 @@ function Set-TargetResource
                 }
                 else
                 {
-                    if($InstalledVersion.ProductBuildPart.ToString().Length -eq 4)
+                    if($installedVersion.ProductBuildPart.ToString().Length -eq 4)
                     {
                         Write-Verbose -Message ("Detected Version: SharePoint 2016 - no server " + `
                                                 "role provided, configuring server without a " + `
