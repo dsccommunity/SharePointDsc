@@ -167,7 +167,7 @@ configuration PublicPreview
         {
             IsSingleInstance     = "Yes"
             BinaryDir            = $ConfigurationData.SharePoint.Settings.BinaryPath
-            ProductKey           = "M692G-8N2JP-GG8B2-2W2P7-YY7J6"
+            ProductKey           = $ConfigurationData.SharePoint.Settings.ProductKey
             Ensure               = "Present"
             DependsOn            = "[xPendingReboot]AfterPrereqInstall"
             PsDscRunAsCredential = $credsSPSetup
@@ -209,73 +209,80 @@ configuration PublicPreview
             PSDSCRunAsCredential      = $credsSPSetup
         }
 
-        SPManagedAccount SPFarmAccount
+        if ($node.RunCentralAdmin -eq $true)
         {
-            AccountName            = $credsSPFarm.UserName
-            PSDSCRunAsCredential   = $credsSPSetup
-            DependsOn              = "[SPFarm]SharePointFarm"
-        }
+            SPManagedAccount SPFarmAccount
+            {
+                AccountName            = $credsSPFarm.UserName
+                Account                = $credsSPFarm
+                PSDSCRunAsCredential   = $credsSPSetup
+                DependsOn              = "[SPFarm]SharePointFarm"
+            }
 
-        SPManagedAccount SPServices
-        {
-            AccountName            = $credsSPServices.UserName
-            PSDSCRunAsCredential   = $credsSPSetup
-            DependsOn              = "[SPFarm]SharePointFarm"
-        }
+            SPManagedAccount SPServices
+            {
+                AccountName            = $credsSPServices.UserName
+                Account                = $credsSPServices
+                PSDSCRunAsCredential   = $credsSPSetup
+                DependsOn              = "[SPFarm]SharePointFarm"
+            }
 
-        SPManagedAccount SPSearch
-        {
-            AccountName            = $credsSPSearch.UserName
-            PSDSCRunAsCredential   = $credsSPSetup
-            DependsOn              = "[SPFarm]SharePointFarm"
-        }
+            SPManagedAccount SPSearch
+            {
+                AccountName            = $credsSPSearch.UserName
+                Account                = $credsSPSearch
+                PSDSCRunAsCredential   = $credsSPSetup
+                DependsOn              = "[SPFarm]SharePointFarm"
+            }
 
-        SPManagedAccount SPAdmin
-        {
-            AccountName            = $credsSPAdmin.UserName
-            PSDSCRunAsCredential   = $credsSPSetup
-            DependsOn              = "[SPFarm]SharePointFarm"
-        }
+            SPManagedAccount SPAdmin
+            {
+                AccountName            = $credsSPAdmin.UserName
+                Account                = $credsSPAdmin
+                PSDSCRunAsCredential   = $credsSPSetup
+                DependsOn              = "[SPFarm]SharePointFarm"
+            }
 
-        SPWebApplication Root
-        {
-            Ensure                 = "Present"
-            Name                   = "Root"
-            ApplicationPool        = "SharePoint - 80"
-            ApplicationPoolAccount = $credsSPFarm.UserName
-            WebAppUrl              = "http://root.contoso.com"
-            DatabaseServer         = $ConfigurationData.SharePoint.Settings.DatabaseServer
-            DatabaseName           = "Root_Content_DB"
-            HostHeader             = "root.contoso.com"
-            AllowAnonymous         = $false
-            PSDSCRunAsCredential   = $credsSPSetup
-            DependsOn              = "[SPManagedAccount]SPFarmAccount"
-        }
+            SPWebApplication Root
+            {
+                Ensure                 = "Present"
+                Name                   = "Root"
+                ApplicationPool        = "SharePoint - 80"
+                ApplicationPoolAccount = $credsSPFarm.UserName
+                WebAppUrl              = "http://root.contoso.com"
+                DatabaseServer         = $ConfigurationData.SharePoint.Settings.DatabaseServer
+                DatabaseName           = "Root_Content_DB"
+                HostHeader             = "root.contoso.com"
+                AllowAnonymous         = $false
+                PSDSCRunAsCredential   = $credsSPSetup
+                DependsOn              = "[SPManagedAccount]SPFarmAccount"
+            }
 
-        SPSite RootSite
-        {
-            Name                     = "Root Site Collection"
-            Url                      = "http://root.contoso.com"
-            OwnerAlias               = "contoso\lcladmin"
-            ContentDatabase          = "Root_Content_DB"
-            Description              = "Root Site Collection"
-            Template                 = "STS#0"
-            PSDSCRunAsCredential     = $credsSPSetup
-            DependsOn                = "[SPWebApplication]Root"
-        }
+            SPSite RootSite
+            {
+                Name                     = "Root Site Collection"
+                Url                      = "http://root.contoso.com"
+                OwnerAlias               = "contoso\lcladmin"
+                ContentDatabase          = "Root_Content_DB"
+                Description              = "Root Site Collection"
+                Template                 = "STS#0"
+                PSDSCRunAsCredential     = $credsSPSetup
+                DependsOn                = "[SPWebApplication]Root"
+            }
 
-        SPWeb SubWeb1
-        {
-            Name                  = "Subweb1"
-            Url                   = "http://root.contoso.com/subweb1"
-            AddToQuickLaunch      = $true
-            AddToTopNav           = $true
-            Description           = "This is a subsite"
-            UseParentTopNav       = $true
-            UniquePermissions     = $true
-            Template              = "STS#0"
-            PSDSCRunAsCredential  = $credsSPSetup
-            DependsOn             = "[SPSite]RootSite"
+            SPWeb SubWeb1
+            {
+                Name                  = "Subweb1"
+                Url                   = "http://root.contoso.com/subweb1"
+                AddToQuickLaunch      = $true
+                AddToTopNav           = $true
+                Description           = "This is a subsite"
+                UseParentTopNav       = $true
+                UniquePermissions     = $true
+                Template              = "STS#0"
+                PSDSCRunAsCredential  = $credsSPSetup
+                DependsOn             = "[SPSite]RootSite"
+            }
         }
     }
 }
