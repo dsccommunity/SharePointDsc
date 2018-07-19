@@ -1,4 +1,8 @@
 # Change log for SharePointDsc
+## Unreleased
+
+* MSFT_SPSearchContentSource
+  * Fixed issue where the parameter StartHour was never taken into account (issue 840)
 
 ## 2.3
 
