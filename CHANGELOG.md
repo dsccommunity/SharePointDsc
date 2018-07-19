@@ -19,6 +19,7 @@
 * SPSearchContentSource
   * Fixed issue where the Get method returned a conversion error when the content
     source contained just one address
+  * Fixed issue where the parameter StartHour was never taken into account (issue 840)
 * SPSearchServiceApp
   * Fixed issue where the service account was not set correctly when the service
     application was first created
