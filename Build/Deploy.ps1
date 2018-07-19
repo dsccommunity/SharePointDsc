@@ -9,7 +9,7 @@
 
     [Parameter()]
     [String]
-    $ConfigurationName = "July2018Tap"
+    $ConfigurationName = "PublicPreview"
 )
 
 $catch = Import-Module AzureRM -EA SilentlyContinue
@@ -59,7 +59,7 @@ if(!$Region -or $Region -notin $azureLocations)
             $i++
         }
         $id = Read-Host "Select a location"
-        
+
         if ($locationId -le $azureLocations.Count)
         {
             $Region = $azureLocations[$id-1]
@@ -348,28 +348,6 @@ $Command = {
 
     try
     {
-        Get-AzureRMAutomationCredential -Name "ServicesAccount" -ResourceGroupName $ResourceGroupName -AutomationAccountName $AutomationAccountName -EA Stop
-    }
-    catch
-    {
-        $user = "contoso\sp_services"
-        $cred = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList $user, $pw
-        New-AzureRMAutomationCredential -AutomationAccountName $AutomationAccountName -Name "ServicesAccount" -Value $cred -ResourceGroupName $ResourceGroupName
-    }
-
-    try
-    {
-        Get-AzureRMAutomationCredential -Name "SearchAccount" -ResourceGroupName $ResourceGroupName -AutomationAccountName $AutomationAccountName -EA Stop
-    }
-    catch
-    {
-        $user = "contoso\sp_search"
-        $cred = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList $user, $pw
-        New-AzureRMAutomationCredential -AutomationAccountName $AutomationAccountName -Name "SearchAccount" -Value $cred -ResourceGroupName $ResourceGroupName
-    }
-
-    try
-    {
         Get-AzureRMAutomationCredential -Name "LocalAdmin" -ResourceGroupName $ResourceGroupName -AutomationAccountName $AutomationAccountName -EA Stop
     }
     catch
@@ -377,6 +355,39 @@ $Command = {
         $user = "lcladmin"
         $cred = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList $user, $pw
         New-AzureRMAutomationCredential -AutomationAccountName $AutomationAccountName -Name "LocalAdmin" -Value $cred -ResourceGroupName $ResourceGroupName
+    }
+
+    try
+    {
+        Get-AzureRMAutomationCredential -Name "SPServices" -ResourceGroupName $ResourceGroupName -AutomationAccountName $AutomationAccountName -EA Stop
+    }
+    catch
+    {
+        $user = "contoso\sp_services"
+        $cred = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList $user, $pw
+        New-AzureRMAutomationCredential -AutomationAccountName $AutomationAccountName -Name "SPServices" -Value $cred -ResourceGroupName $ResourceGroupName
+    }
+
+    try
+    {
+        Get-AzureRMAutomationCredential -Name "SPSearch" -ResourceGroupName $ResourceGroupName -AutomationAccountName $AutomationAccountName -EA Stop
+    }
+    catch
+    {
+        $user = "contoso\sp_search"
+        $cred = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList $user, $pw
+        New-AzureRMAutomationCredential -AutomationAccountName $AutomationAccountName -Name "SPSearch" -Value $cred -ResourceGroupName $ResourceGroupName
+    }
+
+    try
+    {
+        Get-AzureRMAutomationCredential -Name "SharePointAdmin" -ResourceGroupName $ResourceGroupName -AutomationAccountName $AutomationAccountName -EA Stop
+    }
+    catch
+    {
+        $user = "contoso\sharepointadmin"
+        $cred = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList $user, $pw
+        New-AzureRMAutomationCredential -AutomationAccountName $AutomationAccountName -Name "SharePointAdmin" -Value $cred -ResourceGroupName $ResourceGroupName
     }
 }
 $time = Measure-Command $Command
