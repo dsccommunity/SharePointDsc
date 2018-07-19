@@ -46,7 +46,8 @@ if(!$ResourceGroupName)
     while($ResourceGroupName -and $ResourceGroupName.Length -gt 7)
 }
 
-$azureLocations = (Get-AzureRMLocation).Location | Sort-Object
+$locObj = Get-AzureRmResourceProvider -ProviderNamespace Microsoft.Automation  | ?{$_.ResourceTypes.ResourceTypeName -eq "automationAccounts"} | Select Locations | Sort -Property Locations
+$azureLocations = $locObj.Locations | sort-object
 if(!$Region -or $Region -notin $azureLocations)
 {
     do
@@ -399,19 +400,19 @@ Write-Host $message -ForegroundColor Green
 $ConfigData = @{
     AllNodes = @(
         @{
-            NodeName                    = "SPWFE" + $ResourceGroupName + ".contoso.com"
-            RunCentralAdmin             = $false
-            ServerRole                  = "WebFrontEnd"
+            NodeName        = "SPWFE" + $ResourceGroupName + ".contoso.com"
+            RunCentralAdmin = $false
+            ServerRole      = "WebFrontEnd"
         },
         @{
-            NodeName                    = "SPApp" + $ResourceGroupName + ".contoso.com"
-            RunCentralAdmin             = $true
-            ServerRole                  = "Application"
+            NodeName        = "SPApp" + $ResourceGroupName + ".contoso.com"
+            RunCentralAdmin = $true
+            ServerRole      = "Application"
         },
         @{
-            NodeName                    = "SPSearch" + $ResourceGroupName + ".contoso.com"
-            RunCentralAdmin             = $false
-            ServerRole                  = "Search"
+            NodeName        = "SPSearch" + $ResourceGroupName + ".contoso.com"
+            RunCentralAdmin = $false
+            ServerRole      = "Search"
         },
         @{
             NodeName = "*"
@@ -421,9 +422,9 @@ $ConfigData = @{
     )
     SharePoint = @{
         Settings = @{
-            DatabaseServer    = "SPSQL" + $ResourceGroupName
-            ProductKey        = "NQGJR-63HC8-XCRQH-MYVCH-3J3QR"
-            BinaryPath        = "C:\SP2019\"
+            DatabaseServer = "SPSQL" + $ResourceGroupName
+            BinaryPath     = "C:\SP2019\"
+            ProductKey     = "M692G-8N2JP-GG8B2-2W2P7-YY7J6"
         }
     }
 }
