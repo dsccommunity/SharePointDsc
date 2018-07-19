@@ -60,6 +60,190 @@ namespace Microsoft.Office.Server.Search.Administration {
         Mock -CommandName Remove-SPEnterpriseSearchCrawlContentSource -MockWith {}
 
         # Test contexts
+        Context -Name "LimitPageDepth should not be used with Content Source Type SharePoint" {
+            $testParams = @{
+                Name = "Example content source"
+                ServiceAppName = "Search Service Application"
+                ContentSourceType = "SharePoint"
+                LimitPageDepth = 2
+                Addresses = @("http://site.contoso.com")
+                CrawlSetting = "CrawlEverything"
+                Ensure = "Present"
+            }
+
+            It "Should create the content source in the test method" {
+                { Test-TargetResource @testParams } | Should Throw "Parameter LimitPageDepth is not valid for SharePoint content sources"
+            }
+
+            It "Should create the content source in the set method" {
+                { Set-TargetResource @testParams } | Should Throw "Parameter LimitPageDepth is not valid for SharePoint content sources"
+            }
+        }
+
+        Context -Name "LimitServerHops should not be used with Content Source Type SharePoint" {
+            $testParams = @{
+                Name = "Example content source"
+                ServiceAppName = "Search Service Application"
+                ContentSourceType = "SharePoint"
+                LimitServerHops = 2
+                Addresses = @("http://site.contoso.com")
+                CrawlSetting = "CrawlEverything"
+                Ensure = "Present"
+            }
+
+            It "Should create the content source in the test method" {
+                { Test-TargetResource @testParams } | Should Throw "Parameter LimitServerHops is not valid for SharePoint content sources"
+            }
+
+            It "Should create the content source in the set method" {
+                { Set-TargetResource @testParams } | Should Throw "Parameter LimitServerHops is not valid for SharePoint content sources"
+            }
+        }
+
+        Context -Name "CrawlSetting=Custom should not be used with Content Source Type SharePoint" {
+            $testParams = @{
+                Name = "Example content source"
+                ServiceAppName = "Search Service Application"
+                ContentSourceType = "SharePoint"
+                Addresses = @("http://site.contoso.com")
+                CrawlSetting = "Custom"
+                Ensure = "Present"
+            }
+
+            It "Should create the content source in the test method" {
+                { Test-TargetResource @testParams } | Should Throw "Parameter CrawlSetting can only be set to custom for website content sources"
+            }
+
+            It "Should create the content source in the set method" {
+                { Set-TargetResource @testParams } | Should Throw "Parameter CrawlSetting can only be set to custom for website content sources"
+            }
+        }
+
+        Context -Name "LimitServerHops should not be used with Content Source Type Website" {
+            $testParams = @{
+                Name = "Example content source"
+                ServiceAppName = "Search Service Application"
+                ContentSourceType = "Website"
+                LimitServerHops = 2
+                Addresses = @("http://site.contoso.com")
+                CrawlSetting = "CrawlEverything"
+                Ensure = "Present"
+            }
+
+            It "Should create the content source in the test method" {
+                { Test-TargetResource @testParams } | Should Throw "Parameter LimitServerHops is not valid for website content sources"
+            }
+
+            It "Should create the content source in the set method" {
+                { Set-TargetResource @testParams } | Should Throw "Parameter LimitServerHops is not valid for website content sources"
+            }
+        }
+
+        Context -Name "ContinuousCrawl should not be used with Content Source Type SharePoint" {
+            $testParams = @{
+                Name = "Example content source"
+                ServiceAppName = "Search Service Application"
+                ContentSourceType = "Website"
+                ContinuousCrawl = $true
+                Addresses = @("http://site.contoso.com")
+                CrawlSetting = "CrawlEverything"
+                Ensure = "Present"
+            }
+
+            It "Should create the content source in the test method" {
+                { Test-TargetResource @testParams } | Should Throw "Parameter ContinuousCrawl is not valid for website content sources"
+            }
+
+            It "Should create the content source in the set method" {
+                { Set-TargetResource @testParams } | Should Throw "Parameter ContinuousCrawl is not valid for website content sources"
+            }
+        }
+
+        Context -Name "ContinuousCrawl should not be used with Incremental Schedule" {
+            $testParams = @{
+                Name = "Example content source"
+                ServiceAppName = "Search Service Application"
+                ContentSourceType = "SharePoint"
+                ContinuousCrawl = $true
+                IncrementalSchedule = (New-CimInstance -ClassName MSFT_SPSearchCrawlSchedule -Property @{
+                    ScheduleType = "Weekly"
+                    StartHour = "0"
+                    StartMinute = "0"
+                    CrawlScheduleDaysOfWeek = @("Monday", "Wednesday")
+                } -ClientOnly)
+                Addresses = @("http://site.contoso.com")
+                CrawlSetting = "CrawlEverything"
+                Ensure = "Present"
+            }
+
+            It "Should create the content source in the test method" {
+                { Test-TargetResource @testParams } | Should Throw "You can not specify an incremental crawl schedule on a content source that will use continous crawl"
+            }
+
+            It "Should create the content source in the set method" {
+                { Set-TargetResource @testParams } | Should Throw "You can not specify an incremental crawl schedule on a content source that will use continous crawl"
+            }
+        }
+
+        Context -Name "LimitPageDepth should not be used with Content Source Type FileShare" {
+            $testParams = @{
+                Name = "Example content source"
+                ServiceAppName = "Search Service Application"
+                ContentSourceType = "FileShare"
+                LimitPageDepth = 2
+                Addresses = @("http://site.contoso.com")
+                CrawlSetting = "CrawlEverything"
+                Ensure = "Present"
+            }
+
+            It "Should create the content source in the test method" {
+                { Test-TargetResource @testParams } | Should Throw "Parameter LimitPageDepth is not valid for file share content sources"
+            }
+
+            It "Should create the content source in the set method" {
+                { Set-TargetResource @testParams } | Should Throw "Parameter LimitPageDepth is not valid for file share content sources"
+            }
+        }
+
+        Context -Name "LimitServerHops should not be used with Content Source Type FileShare" {
+            $testParams = @{
+                Name = "Example content source"
+                ServiceAppName = "Search Service Application"
+                ContentSourceType = "FileShare"
+                LimitServerHops = 2
+                Addresses = @("http://site.contoso.com")
+                CrawlSetting = "CrawlEverything"
+                Ensure = "Present"
+            }
+
+            It "Should create the content source in the test method" {
+                { Test-TargetResource @testParams } | Should Throw "Parameter LimitServerHops is not valid for file share content sources"
+            }
+
+            It "Should create the content source in the set method" {
+                { Set-TargetResource @testParams } | Should Throw "Parameter LimitServerHops is not valid for file share content sources"
+            }
+        }
+
+        Context -Name "CrawlSetting=Custom should not be used with Content Source Type FileShare" {
+            $testParams = @{
+                Name = "Example content source"
+                ServiceAppName = "Search Service Application"
+                ContentSourceType = "FileShare"
+                Addresses = @("http://site.contoso.com")
+                CrawlSetting = "Custom"
+                Ensure = "Present"
+            }
+
+            It "Should create the content source in the test method" {
+                { Test-TargetResource @testParams } | Should Throw "Parameter CrawlSetting can only be set to custom for website content sources"
+            }
+
+            It "Should create the content source in the set method" {
+                { Set-TargetResource @testParams } | Should Throw "Parameter CrawlSetting can only be set to custom for website content sources"
+            }
+        }
+
         Context -Name "A SharePoint content source doesn't exist but should" {
             $testParams = @{
                 Name = "Example content source"
@@ -645,7 +829,16 @@ namespace Microsoft.Office.Server.Search.Administration {
                 $schedule.StartHour = 0
                 $schedule.StartMinute = 0
                 $schedule.DaysInterval = 1
-                return @{
+
+                if ($Global:SPDscContentSourceLoopCount -le 8)
+                {
+                    $crawlStatus = "Running"
+                }
+                else
+                {
+                    $crawlStatus = "Idle"
+                }
+                $returnval = @{
                     Type = "SharePoint"
                     SharePointCrawlBehavior = "CrawlVirtualServers"
                     StartAddresses = @(
@@ -657,14 +850,22 @@ namespace Microsoft.Office.Server.Search.Administration {
                     IncrementalCrawlSchedule = $null
                     FullCrawlSchedule = $schedule
                     CrawlPriority = "Normal"
-                    CrawlStatus = "Idle"
+                    CrawlStatus = $crawlStatus
                 }
+                $returnval = $returnval | Add-Member -MemberType ScriptMethod `
+                                                     -Name StopCrawl `
+                                                     -Value {
+                                                     } -PassThru -Force
+
+                $Global:SPDscContentSourceLoopCount++
+                return $returnval
             }
 
             It "Should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $false
             }
 
+            $Global:SPDscContentSourceLoopCount = 0
             It "Should update the schedule in the set method" {
                 Set-TargetResource @testParams
                 Assert-MockCalled -CommandName Set-SPEnterpriseSearchCrawlContentSource -ParameterFilter { $ScheduleType -eq "Full" }
