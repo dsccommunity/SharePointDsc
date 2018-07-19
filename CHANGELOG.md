@@ -1,5 +1,44 @@
 # Change log for SharePointDsc
 
+## Unreleased
+
+* SPCacheAccounts
+  * Fixed issue where the Test method would fail if SetWebAppPolicy was set to
+    false.
+* SPDistributedCacheService
+  * Updated resource to allow updating the cache size
+* SPFarm
+  * Implemented ability to deploy Central Administration site to a server at a
+    later point in time
+* SPInfoPathFormsServiceConfig
+  * Fixed issue with trying to set the MaxSizeOfUserFormState parameter
+* SPProductUpdate
+  * Fixed an issue where the resource failed when the search was already paused
+* SPProjectServerLicense
+  * Fixed issue with incorrect detection of the license
+* SPSearchContentSource
+  * Fixed issue where the Get method returned a conversion error when the content
+    source contained just one address
+  * Fixed issue where the parameter StartHour was never taken into account (issue 840)
+* SPSearchServiceApp
+  * Fixed issue where the service account was not set correctly when the service
+    application was first created
+  * Fixed issue where the Get method throws an error when the service app wasn't
+    created properly
+* SPSearchTopology
+  * Fixed issue where Get method threw an error when the specified service
+    application didn't exist yet.
+* SPServiceAppSecurity
+  * Fixed issue where error was thrown when no permissions were set on the
+    service application
+* SPShellAdmins
+  * Updated documentation to specify required permissions for successfully using
+    this resource
+* SPTrustedIdentityTokenIssuerProviderRealms
+  * Fixed code styling issues
+* SPUserProfileServiceApp
+  * Fixed code styling issues
+
 ## 2.3
 
 * Changes to SharePointDsc
@@ -642,3 +681,4 @@ The following changes will break 1.x configurations that use these resources:
 ## 0.2.0
 
 * Initial public release of xSharePoint
+

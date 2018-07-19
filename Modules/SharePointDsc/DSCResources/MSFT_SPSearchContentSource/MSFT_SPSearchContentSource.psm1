@@ -517,6 +517,14 @@ function Set-TargetResource
                     $incrementalSetArgs.Add("CrawlScheduleRunEveryInterval", 
                         $params.IncrementalSchedule.CrawlScheduleRunEveryInterval)
                 }
+                
+                $propertyTest = Test-SPDSCObjectHasProperty -Object $params.IncrementalSchedule `
+                                                            -PropertyName "StartHour"
+                if ($propertyTest -eq $true)
+                {
+                    $incrementalSetArgs.Add("CrawlScheduleStartDateTime", 
+                        "$($params.IncrementalSchedule.StartHour):$($params.IncrementalSchedule.StartMinute)")
+                }
                 Set-SPEnterpriseSearchCrawlContentSource @allSetArguments @incrementalSetArgs
             }
             
@@ -592,6 +600,14 @@ function Set-TargetResource
                 {
                     $fullSetArgs.Add("CrawlScheduleRunEveryInterval", 
                         $params.FullSchedule.CrawlScheduleRunEveryInterval)
+                }
+                
+                $propertyTest = Test-SPDSCObjectHasProperty -Object $params.FullSchedule `
+                                                            -PropertyName "StartHour"
+                if ($propertyTest -eq $true)
+                {
+                    $fullSetArgs.Add("CrawlScheduleStartDateTime", 
+                        "$($params.FullSchedule.StartHour):$($params.FullSchedule.StartMinute)")
                 }
                 Set-SPEnterpriseSearchCrawlContentSource @allSetArguments @fullSetArgs
             }
