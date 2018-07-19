@@ -1,9 +1,9 @@
 <#
 .EXAMPLE
-    This example shows how to deploy a WSP to specific web applications. 
+    This example shows how to deploy a WSP to specific web applications.
 #>
 
-    Configuration Example 
+    Configuration Example
     {
         param(
             [Parameter(Mandatory = $true)]
@@ -19,7 +19,7 @@
                 LiteralPath          = "C:\src\MySolution.wsp"
                 Ensure               = "Present"
                 Version              = "1.0.0"
-                WebApplications      = @("http://collaboration", "http://mysites")
+                WebAppUrls           = @("http://collaboration", "http://mysites")
                 PsDscRunAsCredential = $SetupAccount
             }
         }

@@ -5,12 +5,67 @@
 
     [Parameter()]
     [String]
-    $ConfigurationName = "June2018Tap"
+    $Region,
+
+    [Parameter()]
+    [String]
+    $ConfigurationName = "PublicPreview"
 )
+
+$catch = Import-Module AzureRM -EA SilentlyContinue
+try
+{
+    $catch = Import-Module AzureRM
+    $currentModule = Get-Module AzureRM
+    $galleryModule = Find-Module AzureRM
+
+    if($currentModule.Version.ToString() -ne $galleryModule.Version.ToString())
+    {
+        Write-Host "Installing the latest AzureRM Module..." -NoNewline -ForegroundColor Yellow
+        $catch = Install-Module AzureRM -Force
+        Write-Host "Done" -ForegroundColor Green
+    }
+}
+catch
+{
+    Write-Host "Installing the AzureRM Module..." -NoNewline -ForegroundColor Yellow
+    $catch = Install-Module AzureRM -Force
+    Write-Host "Done" -ForegroundColor Green
+}
 
 if(!$ResourceGroupName)
 {
-    $ResourceGroupName = Read-Host "SP Farm Resource Group Name"
+    do
+    {
+        if($ResourceGroupName -and $ResourceGroupName.Length -gt 7)
+        {
+            Write-Host "Please select a resource name that is 7 characters long or less" -ForegroundColor Yellow
+        }
+        $ResourceGroupName = Read-Host "SP Farm Resource Group Name"
+    }
+    while($ResourceGroupName -and $ResourceGroupName.Length -gt 7)
+}
+
+$azureLocations = (Get-AzureRMLocation).Location | Sort-Object
+if(!$Region -or $Region -notin $azureLocations)
+{
+    do
+    {
+        Write-Host "Please select a Azure location" -ForegroundColor Yellow
+        $i = 1;
+        foreach($loc in $azureLocations)
+        {
+            Write-Host $i "-" $loc
+            $i++
+        }
+        $id = Read-Host "Select a location"
+
+        if ($locationId -le $azureLocations.Count)
+        {
+            $Region = $azureLocations[$id-1]
+        }
+    }
+    while(!$Region)
 }
 
 $GuidPart = (New-Guid).ToString().ToLower().Replace("-","").Substring(0,10)
@@ -21,30 +76,95 @@ $BlobContainerName = "dscmodules"
 #endregion
 
 # Nik20180518 - Connect to Azure Account, and ask to select subscription if multiple ones exist;
-Login-AzureRmAccount
-$subscriptions = Get-AzureRmSubscription
-if($subscriptions.Length -gt 1)
+# Brian20180628 - Only prompt for Azure creds if we're not already logged in
+$loginSucceeded = $false
+try
 {
-    $i = 1;
-    foreach($sub in $subscriptions)
+    # Run a simple command to check if we are logged in
+    (Get-AzureRmResource -ErrorAction Stop -WarningAction SilentlyContinue) | Out-Null
+    if ($? -eq $false)
     {
-        Write-Host $i "-" $sub.Name
-        $i++
+        throw
     }
-    $id = Read-Host "Select a Subscription"
+    else
+    {
+        Write-Host -ForegroundColor White " - You are already logged in to Azure."
+        $loginSucceeded = $true
+    }
+}
+catch
+{
+    if ($_.Exception -like "*-AzureRmAccount to *" -or $_.Exception -like "*Your Azure credentials have not been set up or have expired*")
+    {
+        try
+        {
+            Write-Host -ForegroundColor Cyan " - Prompting for Azure Resource Manager credentials..."
+            $catch = Add-AzureRmAccount
+            if ($? -eq $false)
+            {
+                throw $Error
+            }
+            else
+            {
+                $loginSucceeded = $true
+            }
+        }
+        catch
+        {
+            Write-Verbose -Message $Error
+            if ($Error[2] -like "*User canceled authentication*")
+            {
+                throw "User canceled authentication"
+            }
+            else
+            {
+                throw "No credentials were provided, or another error occurred logging on to Azure."
+            }
+        }
+    }
+    elseif ($_.Exception -like "*Unable to acquire token for tenant*")
+    {
+        Write-Host $_.Exception
+    }
+    elseif ($_.Exception -like "*null array*")
+    {
+        # Do nothing
+    }
+    else
+    {
+        Write-Host $_.Exception
+    }
+}
+finally
+{
+    if ($loginSucceeded)
+    {
+        $subscriptions = Get-AzureRmSubscription
+        if($subscriptions.Length -gt 1)
+        {
+            $i = 1;
+            foreach($sub in $subscriptions)
+            {
+                Write-Host $i "-" $sub.Name
+                $i++
+            }
+            $id = Read-Host "Select a Subscription"
 
-    Select-AzureRMSubscription -subscriptionId $subscriptions[$id-1].Id
+            $catch = Select-AzureRMSubscription -subscriptionId $subscriptions[$id-1].Id
+        }
+    }
 }
 
+cls
 
 #region Deploy IaaS VMs
 Write-Host "Deploying the SharePoint Farm (this can take up to 1h)..." -NoNewline -ForegroundColor Yellow
 $Command = {
-    $catch = New-AzureRmResourceGroup -Name $ResourceGroupName -Location "EastUS"
-    $catch = New-AzureRmResourceGroupDeployment -Name "spvms" -ResourceGroupName $ResourceGroupName -TemplateUri "https://raw.githubusercontent.com/NikCharlebois/SharePointFarms/BlankSPVMs/sharepoint-2016-non-ha/azuredeploy.json" -TemplateParameterUri "https://raw.githubusercontent.com/NikCharlebois/SharePointFarms/BlankSPVMs/sharepoint-2016-non-ha/azuredeploy.parameters.json"
+    $catch = New-AzureRmResourceGroup -Name $ResourceGroupName -Location $Region
+    $catch = New-AzureRmResourceGroupDeployment -Name "spvms" -ResourceGroupName $ResourceGroupName -TemplateUri "https://raw.githubusercontent.com/NikCharlebois/SharePointFarms/BlankSPVMs/sharepoint-non-ha/azuredeploy.json" -TemplateParameterUri "https://raw.githubusercontent.com/NikCharlebois/SharePointFarms/BlankSPVMs/sharepoint-non-ha/azuredeploy.parameters.json"
 }
 $time = Measure-Command $Command
-$message = "Done in " + $time.Minutes + " minutes"
+$message = "Done in {0:N0} minutes" -f $time.TotalMinutes
 Write-Host $message -ForegroundColor Green
 #endregion
 
@@ -58,11 +178,11 @@ $Command = {
     }
     catch
     {
-        New-AzureRmResourceGroup -Name $ResourceGroupName -Location "EastUS"
+        New-AzureRmResourceGroup -Name $ResourceGroupName -Location $Region
     }
 }
 $time = Measure-Command $Command
-$message = "Completed in " + $time.Seconds + " seconds"
+$message = "Completed in {0:N0} seconds" -f $time.TotalSeconds
 Write-Host $message -ForegroundColor Green
 
 # Nik20180517 - Checks to see if the Automation Account exists;
@@ -74,11 +194,11 @@ $Command = {
     }
     catch
     {
-        New-AzureRmAutomationAccount -ResourceGroupName $ResourceGroupName -Name $AutomationAccountName -Location "EastUS2"
+        New-AzureRmAutomationAccount -ResourceGroupName $ResourceGroupName -Name $AutomationAccountName -Location $Region
     }
 }
 $time = Measure-Command $Command
-$message = "Completed in " + $time.Seconds + " seconds"
+$message = "Completed in {0:N0} seconds" -f $time.TotalSeconds
 Write-Host $message -ForegroundColor Green
 
 # Nik20180517 - Create a new Storage Account
@@ -91,13 +211,13 @@ $Command = {
     }
     catch
     {
-        $storageAccount = New-AzureRmStorageAccount -ResourceGroupName $ResourceGroupName -Name $StorageAccountName -Location "EastUS" -SkuName "Standard_GRS" -Kind "BlobStorage" -AccessTier Hot
+        $storageAccount = New-AzureRmStorageAccount -ResourceGroupName $ResourceGroupName -Name $StorageAccountName -Location $Region -SkuName "Standard_GRS" -Kind "BlobStorage" -AccessTier Hot
     }
     Set-AzureRmCurrentStorageAccount -ResourceGroupName $ResourceGroupName -Name $StorageAccountName
     $ctx = $storageAccount.Context
 }
 $time = Measure-Command $Command
-$message = "Completed in " + $time.Seconds + " seconds"
+$message = "Completed in {0:N0} seconds" -f $time.TotalSeconds
 Write-Host $message -ForegroundColor Green
 
 # Nik20180517 - Create the Blob Container
@@ -113,7 +233,7 @@ $Command = {
     }
 }
 $time = Measure-Command $Command
-$message = "Completed in " + $time.Milliseconds + " milliseconds"
+$message = "Completed in {0:N0} milliseconds" -f $time.TotalMilliseconds
 Write-Host $message -ForegroundColor Green
 #endregion
 
@@ -127,7 +247,7 @@ $Command = {
     $xDownloadFileUrl = $blob.ICloudBlob.Uri.AbsoluteUri
 }
 $time = Measure-Command $Command
-$message = "Completed in " + $time.Milliseconds + " milliseconds"
+$message = "Completed in {0:N0} milliseconds" -f $time.TotalMilliseconds
 Write-Host $message -ForegroundColor Green
 
 # Nik20180517 - Upload the xdownloadISO module
@@ -139,7 +259,7 @@ $Command = {
     $xdownloadISOUrl = $blob.ICloudBlob.Uri.AbsoluteUri
 }
 $time = Measure-Command $Command
-$message = "Completed in " + $time.Milliseconds + " milliseconds"
+$message = "Completed in {0:N0} milliseconds" -f $time.TotalMilliseconds
 Write-Host $message -ForegroundColor Green
 
 # Nik20180516 - Zip the new Module on the Build Agent using the download source;
@@ -150,7 +270,7 @@ $Command = {
     Compress-Archive -Path ($SPDSCRoot + "/*") -DestinationPath $zipPath -Force
 }
 $time = Measure-Command $Command
-$message = "Completed in " + $time.Seconds + " seconds"
+$message = "Completed in {0:N0} seconds" -f $time.TotalSeconds
 Write-Host $message -ForegroundColor Green
 
 # Nik20180516 - Upload the newly zipped module into a Blob Storage Account;
@@ -160,7 +280,7 @@ $Command = {
     $blobURL = $blob.ICloudBlob.Uri.AbsoluteUri
 }
 $time = Measure-Command $Command
-$message = "Completed in " + $time.Milliseconds + " milliseconds"
+$message = "Completed in {0:N0} milliseconds" -f $time.TotalMilliseconds
 Write-Host $message -ForegroundColor Green
 
 # Nik20180516 - Remove the Module if it already exists;
@@ -184,13 +304,15 @@ $Command = {
     }while((Get-AzureRmAutomationModule -Name "SharePointDSC" -ResourceGroupName $ResourceGroupName -AutomationAccountName $AutomationAccountName).ProvisioningState -ne "Succeeded")
 }
 $time = Measure-Command $Command
-$message = "Completed in " + $time.Seconds + " seconds"
+$message = "Completed in {0:N0} seconds" -f $time.TotalSeconds
 Write-Host $message -ForegroundColor Green
 #endregion
 
 #region Credential Assets
 Write-Host "Creating Credential Assets into Automation Account..." -NoNewline -ForegroundColor Yellow
 $Command = {
+    $pw = ConvertTo-SecureString "Pass@word!123" -AsPlainText -Force
+
     try
     {
         Get-AzureRMAutomationCredential -Name "DomainAdmin" -ResourceGroupName $ResourceGroupName -AutomationAccountName $AutomationAccountName -EA Stop
@@ -198,7 +320,6 @@ $Command = {
     catch
     {
         $user = "contoso\lcladmin"
-        $pw = ConvertTo-SecureString "Pass@word!123" -AsPlainText -Force
         $cred = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList $user, $pw
         New-AzureRMAutomationCredential -AutomationAccountName $AutomationAccountName -Name "DomainAdmin" -Value $cred -ResourceGroupName $ResourceGroupName
     }
@@ -235,9 +356,42 @@ $Command = {
         $cred = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList $user, $pw
         New-AzureRMAutomationCredential -AutomationAccountName $AutomationAccountName -Name "LocalAdmin" -Value $cred -ResourceGroupName $ResourceGroupName
     }
+
+    try
+    {
+        Get-AzureRMAutomationCredential -Name "SPServices" -ResourceGroupName $ResourceGroupName -AutomationAccountName $AutomationAccountName -EA Stop
+    }
+    catch
+    {
+        $user = "contoso\sp_services"
+        $cred = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList $user, $pw
+        New-AzureRMAutomationCredential -AutomationAccountName $AutomationAccountName -Name "SPServices" -Value $cred -ResourceGroupName $ResourceGroupName
+    }
+
+    try
+    {
+        Get-AzureRMAutomationCredential -Name "SPSearch" -ResourceGroupName $ResourceGroupName -AutomationAccountName $AutomationAccountName -EA Stop
+    }
+    catch
+    {
+        $user = "contoso\sp_search"
+        $cred = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList $user, $pw
+        New-AzureRMAutomationCredential -AutomationAccountName $AutomationAccountName -Name "SPSearch" -Value $cred -ResourceGroupName $ResourceGroupName
+    }
+
+    try
+    {
+        Get-AzureRMAutomationCredential -Name "SharePointAdmin" -ResourceGroupName $ResourceGroupName -AutomationAccountName $AutomationAccountName -EA Stop
+    }
+    catch
+    {
+        $user = "contoso\sharepointadmin"
+        $cred = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList $user, $pw
+        New-AzureRMAutomationCredential -AutomationAccountName $AutomationAccountName -Name "SharePointAdmin" -Value $cred -ResourceGroupName $ResourceGroupName
+    }
 }
 $time = Measure-Command $Command
-$message = "Completed in " + $time.Seconds + " seconds"
+$message = "Completed in {0:N0} seconds" -f $time.TotalSeconds
 Write-Host $message -ForegroundColor Green
 #endregion
 
@@ -246,15 +400,18 @@ $ConfigData = @{
     AllNodes = @(
         @{
             NodeName                    = "SPWFE" + $ResourceGroupName + ".contoso.com"
-            RunCentralAdmin             = $true
+            RunCentralAdmin             = $false
+            ServerRole                  = "WebFrontEnd"
         },
         @{
             NodeName                    = "SPApp" + $ResourceGroupName + ".contoso.com"
-            RunCentralAdmin             = $false
+            RunCentralAdmin             = $true
+            ServerRole                  = "Application"
         },
         @{
             NodeName                    = "SPSearch" + $ResourceGroupName + ".contoso.com"
             RunCentralAdmin             = $false
+            ServerRole                  = "Search"
         },
         @{
             NodeName = "*"
@@ -277,7 +434,7 @@ $Command = {
     Import-AzureRmAutomationDscConfiguration -SourcePath $ConfigPath -ResourceGroupName $ResourceGroupName -AutomationAccountName $AutomationAccountName -Published -Force
 }
 $time = Measure-Command $Command
-$message = "Completed in " + $time.Seconds + " seconds"
+$message = "Completed in {0:N0} seconds" -f $time.TotalSeconds
 Write-Host $message -ForegroundColor Green
 
 Write-Host "Removing the Azure VM DSC Extensions..." -NoNewline -ForegroundColor Yellow
@@ -318,10 +475,23 @@ $Command = {
         }
         catch{}
     }
-    Start-Sleep -Seconds 300 # Give enough time for the Extensions to be properly removed;
+
+    $spwfeExt1 = Get-AzureRMVMExtension -VMName ("SPWFE" + $ResourceGroupName) -ResourceGroupName $ResourceGroupName -Name "ConfigSPServer" -EA SilentlyContinue
+    $spwfeExt2 = Get-AzureRMVMExtension -VMName ("SPWFE" + $ResourceGroupName) -ResourceGroupName $ResourceGroupName -Name "Microsoft.Powershell.DSC" -EA SilentlyContinue
+
+    $spappExt1 = Get-AzureRMVMExtension -VMName ("SPApp" + $ResourceGroupName) -ResourceGroupName $ResourceGroupName -Name "ConfigSPServer" -EA SilentlyContinue
+    $spappExt1 = Get-AzureRMVMExtension -VMName ("SPApp" + $ResourceGroupName) -ResourceGroupName $ResourceGroupName -Name "Microsoft.Powershell.DSC" -EA SilentlyContinue
+
+    $spsearchExt1 = Get-AzureRMVMExtension -VMName ("SPSearch" + $ResourceGroupName) -ResourceGroupName $ResourceGroupName -Name "ConfigSPServer" -EA SilentlyContinue
+    $spsearchExt1 = Get-AzureRMVMExtension -VMName ("SPSearch" + $ResourceGroupName) -ResourceGroupName $ResourceGroupName -Name "Microsoft.Powershell.DSC" -EA SilentlyContinue
+
+    while($spwfeExt1 -or $spwfeExt2 -or $spappExt1 -or $spappExt2 -or $spsearchExt1 -or $spsearchExt2)
+    {
+        Start-Sleep 20
+    }
 }
 $time = Measure-Command $Command
-$message = "Completed in " + $time.Minutes + " Minutes"
+$message = "Completed in {0:N0} minutes" -f $time.TotalMinutes
 Write-Host $message -ForegroundColor Green
 
 Write-Host "Compiling Configuration..." -NoNewline -ForegroundColor Yellow
@@ -330,24 +500,25 @@ $Command = {
     do
     {
         Start-Sleep 5
-    }while((Get-AzureRmAutomationDscCompilationJob -ConfigurationName $ConfigurationName -ResourceGroupName $ResourceGroupName -AutomationAccountName $AutomationAccountName).Status -ne "Completed")
+    }
+    while ((Get-AzureRmAutomationDscCompilationJob -ConfigurationName $ConfigurationName -ResourceGroupName $ResourceGroupName -AutomationAccountName $AutomationAccountName | Sort-Object -Property LastModifiedTime -Descending | Select-Object -First 1).Status -ne "Completed")
 }
 $time = Measure-Command $Command
-$message = "Completed in " + $time.Seconds + " seconds"
-
-Write-Host $message -ForegroundColor Green
-Write-Host "Assigning WFE Server Configuration..." -NoNewline -ForegroundColor Yellow
-Register-AzureRmAutomationDscNode -AzureVMResourceGroup $ResourceGroupName -AzureVMName ("SPWFE" + $ResourceGroupName) -AzureVMLocation "EastUS" -NodeConfigurationName ($ConfigurationName + ".SPWFE" + $ResourceGroupName + ".contoso.com") -ActionAfterReboot ContinueConfiguration -RebootNodeIfNeeded $true -AutomationAccountName $AutomationAccountName -ResourceGroupName $ResourceGroupName
-$message = "Completed"
+$message = "Completed in {0:N0} seconds" -f $time.TotalSeconds
 Write-Host $message -ForegroundColor Green
 
 Write-Host "Assigning Application Server Configuration..." -NoNewline -ForegroundColor Yellow
-Register-AzureRmAutomationDscNode -AzureVMResourceGroup $ResourceGroupName -AzureVMName ("SPApp" + $ResourceGroupName) -AzureVMLocation "EastUS" -NodeConfigurationName ($ConfigurationName + ".SPAPP" + $ResourceGroupName + ".contoso.com") -ActionAfterReboot ContinueConfiguration -RebootNodeIfNeeded $true -AutomationAccountName $AutomationAccountName -ResourceGroupName $ResourceGroupName
+Register-AzureRmAutomationDscNode -AzureVMResourceGroup $ResourceGroupName -AzureVMName ("SPApp" + $ResourceGroupName) -AzureVMLocation $Region -NodeConfigurationName ($ConfigurationName + ".SPAPP" + $ResourceGroupName + ".contoso.com") -ActionAfterReboot ContinueConfiguration -RebootNodeIfNeeded $true -AutomationAccountName $AutomationAccountName -ResourceGroupName $ResourceGroupName -AllowModuleOverwrite $true -Verbose
+$message = "Completed"
+Write-Host $message -ForegroundColor Green
+
+Write-Host "Assigning WFE Server Configuration..." -NoNewline -ForegroundColor Yellow
+Register-AzureRmAutomationDscNode -AzureVMResourceGroup $ResourceGroupName -AzureVMName ("SPWFE" + $ResourceGroupName) -AzureVMLocation $Region -NodeConfigurationName ($ConfigurationName + ".SPWFE" + $ResourceGroupName + ".contoso.com") -ActionAfterReboot ContinueConfiguration -RebootNodeIfNeeded $true -AutomationAccountName $AutomationAccountName -ResourceGroupName $ResourceGroupName -AllowModuleOverwrite $true -Verbose
 $message = "Completed"
 Write-Host $message -ForegroundColor Green
 
 Write-Host "Assigning Search Server Configuration..." -NoNewline -ForegroundColor Yellow
-Register-AzureRmAutomationDscNode -AzureVMResourceGroup $ResourceGroupName -AzureVMName ("SPSearch" + $ResourceGroupName) -AzureVMLocation "EastUS" -NodeConfigurationName ($ConfigurationName + ".SPSEARCH" + $ResourceGroupName + ".contoso.com") -ActionAfterReboot ContinueConfiguration -RebootNodeIfNeeded $true -AutomationAccountName $AutomationAccountName -ResourceGroupName $ResourceGroupName
+Register-AzureRmAutomationDscNode -AzureVMResourceGroup $ResourceGroupName -AzureVMName ("SPSearch" + $ResourceGroupName) -AzureVMLocation $Region -NodeConfigurationName ($ConfigurationName + ".SPSEARCH" + $ResourceGroupName + ".contoso.com") -ActionAfterReboot ContinueConfiguration -RebootNodeIfNeeded $true -AutomationAccountName $AutomationAccountName -ResourceGroupName $ResourceGroupName -AllowModuleOverwrite $true -Verbose
 $message = "Completed"
 Write-Host $message -ForegroundColor Green
 #endregion

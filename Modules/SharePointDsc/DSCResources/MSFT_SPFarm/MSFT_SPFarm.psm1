@@ -5,9 +5,14 @@ function Get-TargetResource
     param
     (
         [Parameter(Mandatory = $true)]
+        [ValidateSet('Yes')]
+        [String]
+        $IsSingleInstance,
+
+        [Parameter()]
         [ValidateSet("Present","Absent")]
         [System.String]
-        $Ensure,
+        $Ensure = "Present",
 
         [Parameter(Mandatory = $true)]
         [System.String]
@@ -75,18 +80,25 @@ function Get-TargetResource
             Write-Verbose -Message "Detected installation of SharePoint 2013"
         }
         16 {
-            Write-Verbose -Message "Detected installation of SharePoint 2016"
+            if($installedVersion.ProductBuildPart.ToString().Length -eq 4)
+            {
+                Write-Verbose -Message "Detected installation of SharePoint 2016"
+            }
+            else
+            {
+                Write-Verbose -Message "Detected installation of SharePoint 2019"
+            }
         }
         default {
             throw ("Detected an unsupported major version of SharePoint. SharePointDsc only " + `
-                   "supports SharePoint 2013 or 2016.")
+                   "supports SharePoint 2013, 2016 or 2019.")
         }
     }
 
     if (($PSBoundParameters.ContainsKey("ServerRole") -eq $true) `
         -and $installedVersion.FileMajorPart -ne 16)
     {
-        throw [Exception] "Server role is only supported in SharePoint 2016."
+        throw [Exception] "Server role is only supported in SharePoint 2016 and 2019."
     }
 
     if (($PSBoundParameters.ContainsKey("ServerRole") -eq $true) `
@@ -172,6 +184,7 @@ function Get-TargetResource
             }
 
             $returnValue = @{
+                IsSingleInstance = "Yes"
                 FarmConfigDatabaseName = $spFarm.Name
                 DatabaseServer = $configDb.NormalizedDataSource
                 FarmAccount = $farmAccount # Need to return this as a credential to match the type expected
@@ -215,6 +228,7 @@ function Get-TargetResource
                                     "incomplete, however the 'Ensure' property should be " + `
                                     "considered correct")
             return @{
+                IsSingleInstance = "Yes"
                 FarmConfigDatabaseName = $null
                 DatabaseServer = $null
                 FarmAccount = $null
@@ -237,6 +251,7 @@ function Get-TargetResource
     {
         # This node has never been connected to a farm, return the null return object
         return @{
+            IsSingleInstance = "Yes"
             FarmConfigDatabaseName = $null
             DatabaseServer = $null
             FarmAccount = $null
@@ -259,9 +274,14 @@ function Set-TargetResource
     param
     (
         [Parameter(Mandatory = $true)]
+        [ValidateSet('Yes')]
+        [String]
+        $IsSingleInstance,
+
+        [Parameter()]
         [ValidateSet("Present","Absent")]
         [System.String]
-        $Ensure,
+        $Ensure = "Present",
 
         [Parameter(Mandatory = $true)]
         [System.String]
@@ -324,13 +344,6 @@ function Set-TargetResource
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
-    if ($CurrentValues.Ensure -eq "Present")
-    {
-        throw ("This server is already connected to a farm. " + `
-               "Please manually remove it to apply this change.")
-    }
-
-
     # Set default values to ensure they are passed to Invoke-SPDSCCommand
     if (-not $PSBoundParameters.ContainsKey("CentralAdministrationPort"))
     {
@@ -341,6 +354,69 @@ function Set-TargetResource
         $PSBoundParameters.Add("CentralAdministrationAuth", "NTLM")
     }
 
+    if ($CurrentValues.Ensure -eq "Present")
+    {
+        if ($CurrentValues.RunCentralAdmin -ne $RunCentralAdmin)
+        {
+            Invoke-SPDSCCommand -Credential $InstallAccount `
+                                -Arguments $PSBoundParameters `
+                                -ScriptBlock {
+                $params = $args[0]
+
+                # Provision central administration
+                if ($params.RunCentralAdmin -eq $true)
+                {
+                    $serviceInstance = Get-SPServiceInstance -Server $env:COMPUTERNAME `
+                                            | Where-Object -FilterScript {
+                                                $_.TypeName -eq "Central Administration"
+                                            }
+                    if ($null -eq $serviceInstance)
+                    {
+                        $domain = (Get-CimInstance -ClassName Win32_ComputerSystem).Domain
+                        $fqdn = "$($env:COMPUTERNAME).$domain"
+                        $serviceInstance = Get-SPServiceInstance -Server $fqdn `
+                                            | Where-Object -FilterScript {
+                                                $_.TypeName -eq "Central Administration"
+                                            }
+                    }
+                    if ($null -eq $serviceInstance)
+                    {
+                        throw [Exception] "Unable to locate Central Admin service instance on this server"
+                    }
+                    Start-SPServiceInstance -Identity $serviceInstance
+                }
+                else
+                {
+                    # Unprovision central administration
+                    $serviceInstance = Get-SPServiceInstance -Server $env:COMPUTERNAME `
+                                                | Where-Object -FilterScript {
+                                                    $_.TypeName -eq "Central Administration"
+                                                }
+                    if ($null -eq $serviceInstance)
+                    {
+                        $domain = (Get-CimInstance -ClassName Win32_ComputerSystem).Domain
+                        $fqdn = "$($env:COMPUTERNAME).$domain"
+                        $serviceInstance = Get-SPServiceInstance -Server $fqdn `
+                                            | Where-Object -FilterScript {
+                                                $_.TypeName -eq "Central Administration"
+                                            }
+                    }
+                    if ($null -eq $serviceInstance)
+                    {
+                        throw [Exception] "Unable to locate Central Admin service instance on this server"
+                    }
+                    Stop-SPServiceInstance -Identity $serviceInstance
+                }
+            }
+            return
+        }
+        else
+        {
+            throw ("This server is already connected to a farm. " + `
+                   "Please manually remove it to apply this change.")
+        }
+    }
+
     $actionResult = Invoke-SPDSCCommand -Credential $InstallAccount `
                                         -Arguments @($PSBoundParameters, $PSScriptRoot) `
                                         -ScriptBlock {
@@ -349,6 +425,13 @@ function Set-TargetResource
 
         $modulePath = "..\..\Modules\SharePointDsc.Farm\SPFarm.psm1"
         Import-Module -Name (Join-Path -Path $scriptRoot -ChildPath $modulePath -Resolve)
+        $sqlInstanceStatus = Get-SPDSCSQLInstanceStatus -SQLServer $params.DatabaseServer `
+
+        if ($sqlInstanceStatus.MaxDOPCorrect -ne $true)
+        {
+            throw "The MaxDOP setting is incorrect. Please correct before continuing."
+        }
+
         $dbStatus = Get-SPDSCConfigDBStatus -SQLServer $params.DatabaseServer `
                                             -Database $params.FarmConfigDatabaseName
 
@@ -375,7 +458,8 @@ function Set-TargetResource
             SkipRegisterAsDistributedCacheHost = $true
         }
 
-        switch((Get-SPDSCInstalledProductVersion).FileMajorPart)
+        $installedVersion = Get-SPDSCInstalledProductVersion
+        switch($installedVersion.FileMajorPart)
         {
             15 {
                 Write-Verbose -Message "Detected Version: SharePoint 2013"
@@ -383,22 +467,39 @@ function Set-TargetResource
             16 {
                 if ($params.ContainsKey("ServerRole") -eq $true)
                 {
-                    Write-Verbose -Message ("Detected Version: SharePoint 2016 - " + `
-                                            "configuring server as $($params.ServerRole)")
+                    if($installedVersion.ProductBuildPart.ToString().Length -eq 4)
+                    {
+                        Write-Verbose -Message ("Detected Version: SharePoint 2016 - " + `
+                                                "configuring server as $($params.ServerRole)")
+                    }
+                    else
+                    {
+                        Write-Verbose -Message ("Detected Version: SharePoint 2019 - " + `
+                                                "configuring server as $($params.ServerRole)")
+                    }
                     $executeArgs.Add("LocalServerRole", $params.ServerRole)
                 }
                 else
                 {
-                    Write-Verbose -Message ("Detected Version: SharePoint 2016 - no server " + `
-                                            "role provided, configuring server without a " + `
-                                            "specific role")
+                    if($installedVersion.ProductBuildPart.ToString().Length -eq 4)
+                    {
+                        Write-Verbose -Message ("Detected Version: SharePoint 2016 - no server " + `
+                                                "role provided, configuring server without a " + `
+                                                "specific role")
+                    }
+                    else
+                    {
+                        Write-Verbose -Message ("Detected Version: SharePoint 2019 - no server " + `
+                                                "role provided, configuring server without a " + `
+                                                "specific role")
+                    }
                     $executeArgs.Add("ServerRoleOptional", $true)
                 }
             }
             Default {
                 throw [Exception] ("An unknown version of SharePoint (Major version $_) " + `
-                                    "was detected. Only versions 15 (SharePoint 2013) or " + `
-                                    "16 (SharePoint 2016) are supported.")
+                                    "was detected. Only versions 15 (SharePoint 2013) and" + `
+                                    "16 (SharePoint 2016 or SharePoint 2019) are supported.")
             }
         }
 
@@ -450,7 +551,7 @@ function Set-TargetResource
             {
                 try
                 {
-                    $joinObject = Connect-SPConfigurationDatabase @executeArgs
+                    Connect-SPConfigurationDatabase @executeArgs | Out-Null
                     $connectedToFarm = $true
                 }
                 catch
@@ -574,9 +675,14 @@ function Test-TargetResource
     param
     (
         [Parameter(Mandatory = $true)]
+        [ValidateSet('Yes')]
+        [String]
+        $IsSingleInstance,
+
+        [Parameter()]
         [ValidateSet("Present","Absent")]
         [System.String]
-        $Ensure,
+        $Ensure = "Present",
 
         [Parameter(Mandatory = $true)]
         [System.String]
@@ -631,11 +737,13 @@ function Test-TargetResource
 
     Write-Verbose -Message "Testing local SP Farm settings"
 
+    $PSBoundParameters.Ensure = $Ensure
+
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
                                     -DesiredValues $PSBoundParameters `
-                                    -ValuesToCheck @("Ensure")
+                                    -ValuesToCheck @("Ensure", "RunCentralAdmin")
 }
 
 Export-ModuleMember -Function *-TargetResource

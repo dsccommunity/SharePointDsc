@@ -69,7 +69,8 @@ function Get-TargetResource
                                            -PassThru
                         }
 
-        $allComponents = Get-SPEnterpriseSearchComponent -SearchTopology $currentTopology
+        $allComponents = Get-SPEnterpriseSearchComponent -SearchTopology $currentTopology `
+                                                         -ErrorAction SilentlyContinue
 
         $AdminComponents = @()
         $AdminComponents += ($allComponents | Where-Object -FilterScript {

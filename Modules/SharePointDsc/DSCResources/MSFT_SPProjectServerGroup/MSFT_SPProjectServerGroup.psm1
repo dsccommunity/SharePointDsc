@@ -47,7 +47,7 @@ function Get-TargetResource
     if ((Get-SPDSCInstalledProductVersion).FileMajorPart -lt 16)
     {
         throw [Exception] ("Support for Project Server in SharePointDsc is only valid for " + `
-                           "SharePoint 2016.")
+                           "SharePoint 2016 and 2019.")
     }
 
     if ($PSBoundParameters.ContainsKey("ADGroup") -eq $true -and `

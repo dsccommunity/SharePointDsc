@@ -8,7 +8,7 @@ current server. The name is the display name of the service application as
 shown in the Central Admin website.
 
 You can publish the following service applications in a SharePoint Server
-2013/2016 farm:
+2013/2016/2019 farm:
 
 * Business Data Connectivity
 * Machine Translation

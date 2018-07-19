@@ -1,7 +1,8 @@
 [ClassVersion("1.0.0.0"), FriendlyName("SPAntivirusSettings")]
 class MSFT_SPAntivirusSettings : OMI_BaseResource
 {
-    [Key, Description("Should documents be scanned before being downloaded")] Boolean ScanOnDownload;
+    [Key, Description("Specifies the resource is a single instance, the value must be 'Yes'"), ValueMap{"Yes"}, Values{"Yes"}] String IsSingleInstance;
+    [Write, Description("Should documents be scanned before being downloaded")] Boolean ScanOnDownload;
     [Write, Description("Should documents be scanned on upload")] Boolean ScanOnUpload;
     [Write, Description("Should documents that are infected be allowed to be downloaded")] Boolean AllowDownloadInfected;
     [Write, Description("Should infected documents be handed to the AV engine to attempt cleaning")] Boolean AttemptToClean;

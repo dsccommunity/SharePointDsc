@@ -5,6 +5,11 @@ function Get-TargetResource
     param
     (
         [Parameter(Mandatory = $true)]
+        [ValidateSet('Yes')]
+        [String]
+        $IsSingleInstance,
+
+        [Parameter()]
         [ValidateSet("Present","Absent")]
         [System.String]
         $Ensure,
@@ -75,6 +80,7 @@ function Get-TargetResource
 
         $config = Get-SPInfoPathFormsService
         $nullReturn = @{
+            IsSingleInstance = "Yes"
             AllowUserFormBrowserEnabling = $params.AllowUserFormBrowserEnabling
             AllowUserFormBrowserRendering = $params.AllowUserFormBrowserRendering
             MaxDataConnectionTimeout = $params.MaxDataConnectionTimeout
@@ -97,6 +103,7 @@ function Get-TargetResource
         }
 
         return @{
+            IsSingleInstance = "Yes"
             AllowUserFormBrowserEnabling = $config.AllowUserFormBrowserEnabling
             AllowUserFormBrowserRendering = $config.AllowUserFormBrowserRendering
             MaxDataConnectionTimeout = $config.MaxDataConnectionTimeout
@@ -123,6 +130,11 @@ function Set-TargetResource
     param
     (
         [Parameter(Mandatory = $true)]
+        [ValidateSet('Yes')]
+        [String]
+        $IsSingleInstance,
+
+        [Parameter()]
         [ValidateSet("Present","Absent")]
         [System.String]
         $Ensure,
@@ -260,7 +272,7 @@ function Set-TargetResource
 
         if($params.ContainsKey("MaxSizeOfUserFormState"))
         {
-            $config.MaxSizeOfUserFormState = ($config.MaxSizeOfUserFormState * 1024)
+            $config.MaxSizeOfUserFormState = ($params.MaxSizeOfUserFormState * 1024)
         }
 
         $config.Update()
@@ -274,6 +286,11 @@ function Test-TargetResource
     param
     (
         [Parameter(Mandatory = $true)]
+        [ValidateSet('Yes')]
+        [String]
+        $IsSingleInstance,
+
+        [Parameter()]
         [ValidateSet("Present","Absent")]
         [System.String]
         $Ensure,

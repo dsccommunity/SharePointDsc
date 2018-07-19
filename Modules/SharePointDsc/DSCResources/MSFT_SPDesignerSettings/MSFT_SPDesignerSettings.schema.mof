@@ -1,8 +1,8 @@
 [ClassVersion("1.0.0.0"), FriendlyName("SPDesignerSettings")]
 class MSFT_SPDesignerSettings : OMI_BaseResource
 {
-    [Key, Description("The URL of the web application or site collection to configure")] string Url;
-    [Required, Description("Define the scope of the configuration - either WebApplication or SiteCollection"), ValueMap{"WebApplication","SiteCollection"}, Values{"WebApplication","SiteCollection"}] string SettingsScope; 
+    [Key, Description("The URL of the web application or site collection to configure")] string WebAppUrl;
+    [Required, Description("Define the scope of the configuration - either WebApplication or SiteCollection"), ValueMap{"WebApplication","SiteCollection"}, Values{"WebApplication","SiteCollection"}] string SettingsScope;
     [Write, Description("Allow the use of SharePoint Designer")] Boolean AllowSharePointDesigner;
     [Write, Description("Allow pages to be un-ghosted by SharePoint Designer")] Boolean AllowDetachPagesFromDefinition;
     [Write, Description("Allow masterpages to be changed by SharePoint Designer")] Boolean AllowCustomiseMasterPage;

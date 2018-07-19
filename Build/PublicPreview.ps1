@@ -1,21 +1,38 @@
-configuration June2018Tap
+configuration PublicPreview
 {
-    $credsLocalAdmin = Get-AutomationPSCredential -Name "LocalAdmin"
+    $credsLocalAdmin  = Get-AutomationPSCredential -Name "LocalAdmin"
     $credsDomainAdmin = Get-AutomationPSCredential -Name "DomainAdmin"
     $credsSPFarm      = Get-AutomationPSCredential -Name "FarmAccount"
     $credsSPSetup     = Get-AutomationPSCredential -Name "SetupAccount"
+    $credsSPServices  = Get-AutomationPSCredential -Name "SPServices"
+    $credsSPSearch    = Get-AutomationPSCredential -Name "SPSearch"
+    $credsSPAdmin     = Get-AutomationPSCredential -Name "SharePointAdmin"
 
-    Import-DscResource -ModuleName "SharePointDSC" -Moduleversion "3.0.0.0"
-    Import-DscResource -ModuleName "xDownloadFile" -ModuleVersion "1.0"
-    Import-DscResource -ModuleName "xDownloadISO" -ModuleVersion "1.0"
+    Import-DscResource -ModuleName "SharePointDSC"  -Moduleversion "3.0.0.0"
+    Import-DscResource -ModuleName "xDownloadFile"  -ModuleVersion "1.0"
+    Import-DscResource -ModuleName "xDownloadISO"   -ModuleVersion "1.0"
     Import-DscResource -ModuleName "xPendingReboot" -ModuleVersion "0.4.0.0"
 
     Node $AllNodes.NodeName
     {
         xDownloadISO DownloadTAPBits
         {
-            SourcePath               = "https://spdsctap.blob.core.windows.net/spdsc/June2018.iso"
+            SourcePath               = "https://spdsctap.blob.core.windows.net/spdsc/PublicPreview.img"
             DestinationDirectoryPath = $ConfigurationData.SharePoint.Settings.BinaryPath
+            PsDscRunAsCredential     = $credsLocalAdmin
+        }
+
+        xDownloadISO FrenchLPISO
+        {
+            SourcePath               = "https://spdsctap.blob.core.windows.net/spdsc/LP-French.iso"
+            DestinationDirectoryPath = $ConfigurationData.SharePoint.Settings.BinaryPath + "LP\French\"
+            PsDscRunAsCredential     = $credsLocalAdmin
+        }
+
+        xDownloadISO DutchLPISO
+        {
+            SourcePath               = "https://spdsctap.blob.core.windows.net/spdsc/LP-Deutch.iso"
+            DestinationDirectoryPath = $ConfigurationData.SharePoint.Settings.BinaryPath + "LP\Dutch"
             PsDscRunAsCredential     = $credsLocalAdmin
         }
 
@@ -75,7 +92,7 @@ configuration June2018Tap
 
         xDownloadFile DotNet472
         {
-            SourcePath               = "https://download.microsoft.com/download/3/D/7/3D72C5C2-4CCB-4EEF-925D-B5FA33EAC25A/NDP472-KB4054530-x86-x64-AllOS-ENU.exe"
+            SourcePath               = "https://go.microsoft.com/fwlink/?linkid=863265"
             FileName                 = "NDP472-KB4054530-x86-x64-AllOS-ENU.exe"
             DestinationDirectoryPath = $ConfigurationData.SharePoint.Settings.BinaryPath + "prerequisiteinstallerfiles"
             DependsOn                = "[xDownloadFile]AppFabricDL"
@@ -100,13 +117,22 @@ configuration June2018Tap
             PsDscRunAsCredential     = $credsLocalAdmin
         }
 
+        xDownloadFile MSVCRT11
+        {
+            SourcePath               = "https://download.microsoft.com/download/1/6/B/16B06F60-3B20-4FF2-B699-5E9B7962F9AE/VSU_4/vcredist_x64.exe"
+            FileName                 = "vcredist_x64.exe"
+            DestinationDirectoryPath = $ConfigurationData.SharePoint.Settings.BinaryPath + "prerequisiteinstallerfiles"
+            DependsOn                = "[xDownloadFile]MSVCRT141"
+            PsDscRunAsCredential     = $credsLocalAdmin
+        }
+
         Group GrantSetupAccountLocalAdmin
         {
             GroupName            = "Administrators"
             Ensure               = "Present"
             MembersToInclude     = $credsSPSetup.UserName
             PsDscRunAsCredential = $credsLocalAdmin
-            DependsOn            = "[xDownloadFile]MSVCRT141"
+            DependsOn            = "[xDownloadFile]MSVCRT11"
         }
 
         SPInstallPrereqs SharePointPrereqInstall
@@ -120,6 +146,7 @@ configuration June2018Tap
             IDFX11               = $ConfigurationData.SharePoint.Settings.BinaryPath + "prerequisiteinstallerfiles\MicrosoftIdentityExtensions-64.msi"
             MSIPCClient          = $ConfigurationData.SharePoint.Settings.BinaryPath + "prerequisiteinstallerfiles\setup_msipc_x64.msi"
             WCFDataServices56    = $ConfigurationData.SharePoint.Settings.BinaryPath + "prerequisiteinstallerfiles\WcfDataServices56.exe"
+            MSVCRT11             = $ConfigurationData.SharePoint.Settings.BinaryPath + "prerequisiteinstallerfiles\vcredist_x64.exe"
             MSVCRT141            = $ConfigurationData.SharePoint.Settings.BinaryPath + "prerequisiteinstallerfiles\vc_redist.x64.exe"
             KB3092423            = $ConfigurationData.SharePoint.Settings.BinaryPath + "prerequisiteinstallerfiles\AppFabric-KB3092423-x64-ENU.exe"
             DotNet472            = $ConfigurationData.SharePoint.Settings.BinaryPath + "prerequisiteinstallerfiles\NDP472-KB4054530-x86-x64-AllOS-ENU.exe"
@@ -140,9 +167,23 @@ configuration June2018Tap
         {
             IsSingleInstance     = "Yes"
             BinaryDir            = $ConfigurationData.SharePoint.Settings.BinaryPath
-            ProductKey           = $ConfigurationData.SharePoint.Settings.ProductKey
+            ProductKey           = "M692G-8N2JP-GG8B2-2W2P7-YY7J6"
             Ensure               = "Present"
             DependsOn            = "[xPendingReboot]AfterPrereqInstall"
+            PsDscRunAsCredential = $credsSPSetup
+        }
+
+        SPInstallLanguagePack DutchLanguagePack
+        {
+            BinaryDir            = $ConfigurationData.SharePoint.Settings.BinaryPath + "LP\Dutch"
+            DependsOn            = "[SPInstall]SharePointInstall"
+            PsDscRunAsCredential = $credsSPSetup
+        }
+
+        SPInstallLanguagePack FrenchLanguagePack
+        {
+            BinaryDir            = $ConfigurationData.SharePoint.Settings.BinaryPath + "LP\French"
+            DependsOn            = "[SPInstall]SharePointInstall"
             PsDscRunAsCredential = $credsSPSetup
         }
 
@@ -155,7 +196,7 @@ configuration June2018Tap
 
         SPFarm SharePointFarm
         {
-            IsSingleInstance = "Yes"
+            IsSingleInstance          = "Yes"
             Ensure                    = "Present"
             FarmConfigDatabaseName    = "SP_Config"
             DatabaseServer            = $ConfigurationData.SharePoint.Settings.DatabaseServer
@@ -171,6 +212,27 @@ configuration June2018Tap
         SPManagedAccount SPFarmAccount
         {
             AccountName            = $credsSPFarm.UserName
+            PSDSCRunAsCredential   = $credsSPSetup
+            DependsOn              = "[SPFarm]SharePointFarm"
+        }
+
+        SPManagedAccount SPServices
+        {
+            AccountName            = $credsSPServices.UserName
+            PSDSCRunAsCredential   = $credsSPSetup
+            DependsOn              = "[SPFarm]SharePointFarm"
+        }
+
+        SPManagedAccount SPSearch
+        {
+            AccountName            = $credsSPSearch.UserName
+            PSDSCRunAsCredential   = $credsSPSetup
+            DependsOn              = "[SPFarm]SharePointFarm"
+        }
+
+        SPManagedAccount SPAdmin
+        {
+            AccountName            = $credsSPAdmin.UserName
             PSDSCRunAsCredential   = $credsSPSetup
             DependsOn              = "[SPFarm]SharePointFarm"
         }

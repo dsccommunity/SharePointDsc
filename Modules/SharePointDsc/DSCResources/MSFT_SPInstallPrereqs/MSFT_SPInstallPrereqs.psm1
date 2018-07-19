@@ -59,7 +59,6 @@ $Script:SP2019Win16Features = @("Web-Server", "Web-WebServer",
                                 "Web-Windows-Auth", "Web-App-Dev", "Web-Net-Ext",
                                 "Web-Net-Ext45", "Web-Asp-Net", "Web-Asp-Net45", "Web-ISAPI-Ext",
                                 "Web-ISAPI-Filter", "Web-Mgmt-Tools", "Web-Mgmt-Console",
-                                "Web-Mgmt-Compat", "Web-Metabase", "Web-Lgcy-Scripting", "Web-WMI",
                                 "NET-Framework-Features", "NET-HTTP-Activation", "NET-Non-HTTP-Activ",
                                 "NET-Framework-45-ASPNET", "NET-WCF-Pipe-Activation45",
                                 "Windows-Identity-Foundation", "WAS", "WAS-Process-Model",
@@ -74,7 +73,6 @@ $Script:SP2019Win19Features = @("Web-Server", "Web-WebServer",
                                 "Web-Digest-Auth", "Web-Windows-Auth", "Web-App-Dev", "Web-Net-Ext",
                                 "Web-Net-Ext45", "Web-Asp-Net", "Web-Asp-Net45", "Web-ISAPI-Ext",
                                 "Web-ISAPI-Filter", "Web-Mgmt-Tools", "Web-Mgmt-Console",
-                                "Web-Mgmt-Compat", "Web-Metabase", "Web-Lgcy-Scripting", "Web-WMI",
                                 "NET-Framework-Features", "NET-HTTP-Activation", "NET-Non-HTTP-Activ",
                                 "NET-Framework-45-ASPNET", "NET-WCF-Pipe-Activation45",
                                 "Windows-Identity-Foundation", "WAS", "WAS-Process-Model",
@@ -86,6 +84,11 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
+        [Parameter(Mandatory = $true)]
+        [ValidateSet('Yes')]
+        [String]
+        $IsSingleInstance,
+
         [Parameter(Mandatory = $true)]
         [System.String]
         $InstallerPath,
@@ -313,11 +316,12 @@ function Get-TargetResource
         )
     }
 
-    #SP2016 prereqs
+    #SP2016/SP2019 prereqs
     if ($majorVersion -eq 16)
     {
         if($buildVersion -lt 5000)
         {
+            #SP2016 prereqs
             $prereqsToTest += @(
                 [PSObject]@{
                     Name = "Active Directory Rights Management Services Client 2.1"
@@ -358,6 +362,7 @@ function Get-TargetResource
         }
         elseif($buildVersion -ge 5000)
         {
+            #SP2019 prereqs
             $prereqsToTest += @(
                 [PSObject]@{
                     Name = "Active Directory Rights Management Services Client 2.1"
@@ -370,19 +375,9 @@ function Get-TargetResource
                     SearchValue = "Microsoft SQL Server 2012 Native Client"
                 },
                 [PSObject]@{
-                    Name = "Microsoft ODBC Driver 11 for SQL Server"
-                    SearchType = "Equals"
-                    SearchValue = "Microsoft ODBC Driver 11 for SQL Server"
-                },
-                [PSObject]@{
-                    Name = "Microsoft Visual C++ 2012 x64 Minimum Runtime - 11.0"
+                    Name = "Microsoft Visual C++ 2017 x64 Additional Runtime - 14.14"
                     SearchType = "Like"
-                    SearchValue = "Microsoft Visual C++ 2012 x64 Minimum Runtime - 11.0.*"
-                },
-                [PSObject]@{
-                    Name = "Microsoft Visual C++ 2017 x64 Additional Runtime - 14.0"
-                    SearchType = "Like"
-                    SearchValue = "Microsoft Visual C++ 2017 x64 Additional Runtime - 14.0.*"
+                    SearchValue = "Microsoft Visual C++ 2017 x64 Additional Runtime - 14.14.*"
                 }
             )
         }
@@ -391,6 +386,7 @@ function Get-TargetResource
                                                       -PrereqsToCheck $prereqsToTest
 
     $results = @{
+        IsSingleInstance = "Yes"
         InstallerPath = $InstallerPath
         OnlineMode = $OnlineMode
         SXSpath = $SXSpath
@@ -433,6 +429,11 @@ function Set-TargetResource
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidGlobalVars", "")]
     param
     (
+        [Parameter(Mandatory = $true)]
+        [ValidateSet('Yes')]
+        [String]
+        $IsSingleInstance,
+
         [Parameter(Mandatory = $true)]
         [System.String]
         $InstallerPath,
@@ -744,6 +745,11 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
+        [Parameter(Mandatory = $true)]
+        [ValidateSet('Yes')]
+        [String]
+        $IsSingleInstance,
+
         [Parameter(Mandatory = $true)]
         [System.String]
         $InstallerPath,

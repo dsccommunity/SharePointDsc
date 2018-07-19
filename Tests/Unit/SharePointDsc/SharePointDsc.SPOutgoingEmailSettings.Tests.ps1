@@ -146,15 +146,15 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 }
 
                 It "Should throw an exception in the get method" {
-                    { Get-TargetResource @testParams } | Should Throw "UseTLS is only supported in SharePoint 2016." 
+                    { Get-TargetResource @testParams } | Should Throw "UseTLS is only supported in SharePoint 2016 and 2019." 
                 }
 
                 It "Should throw an exception in the test method" {
-                    { Test-TargetResource @testParams } | Should Throw "UseTLS is only supported in SharePoint 2016."
+                    { Test-TargetResource @testParams } | Should Throw "UseTLS is only supported in SharePoint 2016 and 2019."
                 }
 
                 It "Should throw an exception in the set method" {
-                    { Set-TargetResource @testParams } | Should Throw "UseTLS is only supported in SharePoint 2016."
+                    { Set-TargetResource @testParams } | Should Throw "UseTLS is only supported in SharePoint 2016 and 2019."
                 }
             }
 
@@ -169,22 +169,22 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 }
 
                 It "Should throw an exception in the get method" {
-                    { Get-TargetResource @testParams } | Should Throw "SMTPPort is only supported in SharePoint 2016." 
+                    { Get-TargetResource @testParams } | Should Throw "SMTPPort is only supported in SharePoint 2016 and 2019." 
                 }
 
                 It "Should throw an exception in the test method" {
-                    { Test-TargetResource @testParams } | Should Throw "SMTPPort is only supported in SharePoint 2016."
+                    { Test-TargetResource @testParams } | Should Throw "SMTPPort is only supported in SharePoint 2016 and 2019."
                 }
 
                 It "Should throw an exception in the set method" {
-                    { Set-TargetResource @testParams } | Should Throw "SMTPPort is only supported in SharePoint 2016."
+                    { Set-TargetResource @testParams } | Should Throw "SMTPPort is only supported in SharePoint 2016 and 2019."
                 }
             }
         }
 
         if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 16)
         {
-            Context -Name "The web application exists and the properties match - SharePoint 2016" -Fixture {
+            Context -Name "The web application exists and the properties match - SharePoint 2016/2019" -Fixture {
                 $testParams = @{
                     WebAppUrl = "http://sharepoint.contoso.com"
                     SMTPServer = "smtp.contoso.com"
@@ -220,7 +220,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 }
             } 
 
-            Context -Name "The web application exists and the properties don't match - SharePoint 2016" -Fixture {
+            Context -Name "The web application exists and the properties don't match - SharePoint 2016/2019" -Fixture {
                 $testParams = @{
                     WebAppUrl = "http://sharepoint.contoso.com"
                     SMTPServer = "smtp.contoso.com"

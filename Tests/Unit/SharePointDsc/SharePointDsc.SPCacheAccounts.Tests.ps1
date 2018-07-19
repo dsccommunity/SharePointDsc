@@ -1,7 +1,7 @@
 [CmdletBinding()]
 param(
     [Parameter()]
-    [string] 
+    [string]
     $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
                                          -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
                                          -Resolve)
@@ -19,38 +19,38 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
         # Initialize tests
-        try 
-        { 
-            [Microsoft.SharePoint.Administration.SPPolicyRoleType] 
+        try
+        {
+            [Microsoft.SharePoint.Administration.SPPolicyRoleType]
         }
-        catch 
+        catch
         {
             Add-Type -TypeDefinition @"
 namespace Microsoft.SharePoint.Administration {
     public enum SPPolicyRoleType { FullRead, FullControl, DenyWrite, DenyAll };
-}        
+}
 "@
-        }    
+        }
 
-        # Mocks for all contexts        
-        Mock -CommandName New-SPClaimsPrincipal -MockWith { 
+        # Mocks for all contexts
+        Mock -CommandName New-SPClaimsPrincipal -MockWith {
             $Global:SPDscClaimsPrincipalUser = $Identity
             return (
                 New-Object -TypeName Object | Add-Member -MemberType ScriptMethod `
                                                          -Name "ToEncodedString" `
-                                                         -Value { 
-                                                                    return "i:0#.w|$($Global:SPDscClaimsPrincipalUser)" 
+                                                         -Value {
+                                                                    return "i:0#.w|$($Global:SPDscClaimsPrincipalUser)"
                                                                 } -PassThru
             )
         } -ParameterFilter { $IdentityType -eq "WindowsSamAccountName" }
-        
-        Mock -CommandName New-SPClaimsPrincipal -MockWith { 
+
+        Mock -CommandName New-SPClaimsPrincipal -MockWith {
             return @{
                 Value = $Identity -replace "i:0#.w|"
             }
         } -ParameterFilter { $IdentityType -eq "EncodedClaim" }
-        
-        # Test contexts 
+
+        # Test contexts
         Context -Name "The web application specified does not exist" -Fixture {
             $testParams = @{
                 WebAppUrl = "http://test.sharepoint.com"
@@ -75,7 +75,7 @@ namespace Microsoft.SharePoint.Administration {
             }
         }
 
-        Context -Name "The specified cache accounts have not been configured" -Fixture {
+        Context -Name "The specified cache accounts have not been configured, Claims WebApp" -Fixture {
             $testParams = @{
                 WebAppUrl = "http://test.sharepoint.com"
                 SuperUserAlias = "DEMO\SuperUser"
@@ -86,7 +86,7 @@ namespace Microsoft.SharePoint.Administration {
                 $policiesObject =  New-Object -TypeName "Object" |
                                         Add-Member -MemberType ScriptMethod `
                                                     -Name Add `
-                                                    -Value { 
+                                                    -Value {
                                                         return New-Object -TypeName "Object" |
                                                                     Add-Member -MemberType NoteProperty `
                                                                                 -Name PolicyRoleBindings `
@@ -97,7 +97,7 @@ namespace Microsoft.SharePoint.Administration {
                                                                                                     -Value {} `
                                                                                                     -PassThru
                                                                                         ) -PassThru
-                                                            } -PassThru | 
+                                                            } -PassThru |
                                         Add-Member -MemberType ScriptMethod `
                                                     -Name Remove `
                                                     -Value {} `
@@ -146,14 +146,86 @@ namespace Microsoft.SharePoint.Administration {
             }
         }
 
-        Context -Name "The cache accounts have been configured correctly" -Fixture {
+        Context -Name "The specified cache accounts have not been configured, non-claims WebApp" -Fixture {
             $testParams = @{
                 WebAppUrl = "http://test.sharepoint.com"
                 SuperUserAlias = "DEMO\SuperUser"
                 SuperReaderAlias = "DEMO\SuperReader"
             }
 
-            Mock -CommandName Get-SPWebApplication -MockWith { 
+            Mock -CommandName Get-SPWebApplication -MockWith {
+                $policiesObject =  New-Object -TypeName "Object" |
+                                        Add-Member -MemberType ScriptMethod `
+                                                    -Name Add `
+                                                    -Value {
+                                                        return New-Object -TypeName "Object" |
+                                                                    Add-Member -MemberType NoteProperty `
+                                                                                -Name PolicyRoleBindings `
+                                                                                -Value (
+                                                                                    New-Object -TypeName "Object" |
+                                                                                        Add-Member -MemberType ScriptMethod `
+                                                                                                    -Name Add `
+                                                                                                    -Value {} `
+                                                                                                    -PassThru
+                                                                                        ) -PassThru
+                                                            } -PassThru |
+                                        Add-Member -MemberType ScriptMethod `
+                                                    -Name Remove `
+                                                    -Value {} `
+                                                    -PassThru
+
+                return New-Object -TypeName "Object" |
+                            Add-Member -MemberType NoteProperty `
+                                       -Name Properties `
+                                       -Value @{} `
+                                       -PassThru |
+                            Add-Member -MemberType NoteProperty `
+                                       -Name Policies `
+                                       -Value $policiesObject `
+                                       -PassThru |
+                            Add-Member -MemberType NoteProperty `
+                                       -Name PolicyRoles `
+                                       -Value (
+                                                New-Object -TypeName "Object" |
+                                                        Add-Member -MemberType ScriptMethod `
+                                                                   -Name GetSpecialRole `
+                                                                   -Value { return @{} } `
+                                                                   -PassThru
+                                              ) -PassThru |
+                            Add-Member -MemberType ScriptMethod `
+                                       -Name Update `
+                                       -Value {} `
+                                       -PassThru |
+                            Add-Member -MemberType NoteProperty `
+                                       -Name UseClaimsAuthentication `
+                                       -Value $false `
+                                       -PassThru
+            }
+
+            It "Should return empty strings from the Get method" {
+                $results = Get-TargetResource @testParams
+                $results.SuperUserAlias | Should BeNullOrEmpty
+                $results.SuperReaderAlias | Should BeNullOrEmpty
+            }
+
+            It "Should return false from the test method" {
+                Test-TargetResource @testParams | Should Be $false
+            }
+
+            It "Should update the accounts when set is called" {
+                Set-TargetResource @testParams
+            }
+        }
+
+        Context -Name "The cache accounts have been configured correctly, SetWebAppPolicy set to False" -Fixture {
+            $testParams = @{
+                WebAppUrl = "http://test.sharepoint.com"
+                SuperUserAlias = "DEMO\SuperUser"
+                SuperReaderAlias = "DEMO\SuperReader"
+                SetWebAppPolicy = $false
+            }
+
+            Mock -CommandName Get-SPWebApplication -MockWith {
                 return New-Object -TypeName "Object" |
                             Add-Member -MemberType NoteProperty `
                                        -Name Properties `
@@ -183,8 +255,70 @@ namespace Microsoft.SharePoint.Administration {
                                             New-Object -TypeName "Object" |
                                                 Add-Member -MemberType ScriptMethod `
                                                            -Name GetSpecialRole `
-                                                           -Value { 
-                                                               return @{} 
+                                                           -Value {
+                                                               return @{}
+                                                            } -PassThru
+                                              ) -PassThru |
+                            Add-Member -MemberType ScriptMethod `
+                                       -Name Update `
+                                       -Value {} `
+                                       -PassThru |
+                            Add-Member -MemberType NoteProperty `
+                                       -Name UseClaimsAuthentication `
+                                       -Value $false `
+                                       -PassThru
+            }
+
+            It "Should return the values from the get method" {
+                $results = Get-TargetResource @testParams
+                $results.SuperUserAlias | Should Not BeNullOrEmpty
+                $results.SuperReaderAlias | Should Not BeNullOrEmpty
+            }
+
+            It "Should return true from the test method" {
+                Test-TargetResource @testParams | Should Be $true
+            }
+        }
+
+        Context -Name "The cache accounts have been configured correctly" -Fixture {
+            $testParams = @{
+                WebAppUrl = "http://test.sharepoint.com"
+                SuperUserAlias = "DEMO\SuperUser"
+                SuperReaderAlias = "DEMO\SuperReader"
+            }
+
+            Mock -CommandName Get-SPWebApplication -MockWith {
+                return New-Object -TypeName "Object" |
+                            Add-Member -MemberType NoteProperty `
+                                       -Name Properties `
+                                       -Value @{
+                                            portalsuperuseraccount = $testParams.SuperUserAlias
+                                            portalsuperreaderaccount = $testParams.SuperReaderAlias
+                                        } -PassThru |
+                            Add-Member -MemberType NoteProperty `
+                                       -Name Policies `
+                                       -Value @(
+                                                @{
+                                                    UserName = $testParams.SuperUserAlias
+                                                },
+                                                @{
+                                                    UserName = $testParams.SuperReaderAlias
+                                                },
+                                                @{
+                                                    UserName = "i:0#.w|$($testParams.SuperUserAlias)"
+                                                },
+                                                @{
+                                                    UserName = "i:0#.w|$($testParams.SuperReaderAlias)"
+                                                }
+                                               ) -PassThru |
+                            Add-Member -MemberType NoteProperty `
+                                       -Name PolicyRoles `
+                                       -Value (
+                                            New-Object -TypeName "Object" |
+                                                Add-Member -MemberType ScriptMethod `
+                                                           -Name GetSpecialRole `
+                                                           -Value {
+                                                               return @{}
                                                             } -PassThru
                                               ) -PassThru |
                             Add-Member -MemberType ScriptMethod `
@@ -215,7 +349,7 @@ namespace Microsoft.SharePoint.Administration {
                 SuperReaderAlias = "DEMO\SuperReader"
             }
 
-            Mock -CommandName Get-SPWebApplication -MockWith { 
+            Mock -CommandName Get-SPWebApplication -MockWith {
                 return New-Object -TypeName "Object" |
                             Add-Member -MemberType NoteProperty -Name Properties @{
                                 portalsuperuseraccount = $testParams.SuperUserAlias
@@ -227,7 +361,7 @@ namespace Microsoft.SharePoint.Administration {
                                                 New-Object -TypeName "Object" |
                                                     Add-Member -MemberType ScriptMethod `
                                                                -Name Add `
-                                                               -Value { 
+                                                               -Value {
                                                                     return New-Object -TypeName "Object" |
                                                                         Add-Member -MemberType NoteProperty `
                                                                                    -Name PolicyRoleBindings `
@@ -238,7 +372,7 @@ namespace Microsoft.SharePoint.Administration {
                                                                                                            -Value {} `
                                                                                                            -PassThru
                                                                                           ) -PassThru
-                                                                        } -PassThru | 
+                                                                        } -PassThru |
                                                     Add-Member -MemberType ScriptMethod `
                                                                -Name Remove `
                                                                -Value {} `
@@ -250,8 +384,8 @@ namespace Microsoft.SharePoint.Administration {
                                             New-Object -TypeName "Object" |
                                                 Add-Member -MemberType ScriptMethod `
                                                            -Name GetSpecialRole `
-                                                           -Value { 
-                                                               return @{} 
+                                                           -Value {
+                                                               return @{}
                                                             } -PassThru
                                               ) -PassThru |
                             Add-Member -MemberType ScriptMethod `
@@ -280,7 +414,7 @@ namespace Microsoft.SharePoint.Administration {
                 SuperReaderAlias = "DEMO\SuperReader"
             }
 
-            Mock -CommandName Get-SPWebApplication -MockWith { 
+            Mock -CommandName Get-SPWebApplication -MockWith {
                 return New-Object -TypeName "Object" |
                     Add-Member -MemberType NoteProperty -Name Properties @{
                         portalsuperuseraccount = "WRONG\AccountName"
@@ -290,7 +424,7 @@ namespace Microsoft.SharePoint.Administration {
                         New-Object -TypeName "Object" |
                         Add-Member -MemberType ScriptMethod `
                                    -Name Add `
-                                   -Value { 
+                                   -Value {
                                        return New-Object -TypeName "Object" |
                                                 Add-Member -MemberType NoteProperty `
                                                            -Name PolicyRoleBindings `
@@ -301,7 +435,7 @@ namespace Microsoft.SharePoint.Administration {
                                                                                    -Value {} `
                                                                                    -PassThru
                                                                   ) -PassThru
-                                   } -PassThru | 
+                                   } -PassThru |
                         Add-Member -MemberType ScriptMethod `
                                    -Name Remove `
                                    -Value {} `
@@ -313,8 +447,8 @@ namespace Microsoft.SharePoint.Administration {
                                         New-Object -TypeName "Object" |
                                             Add-Member -MemberType ScriptMethod `
                                                        -Name GetSpecialRole `
-                                                       -Value { 
-                                                           return @{} 
+                                                       -Value {
+                                                           return @{}
                                                         } -PassThru
                     ) -PassThru |
                     Add-Member -MemberType ScriptMethod `

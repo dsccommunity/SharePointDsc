@@ -4,7 +4,7 @@
     offline mode, running all prerequisite installations from the specified paths.
 #>
 
-    Configuration Example 
+    Configuration Example
     {
         param(
             [Parameter(Mandatory = $true)]
@@ -16,6 +16,7 @@
         node localhost {
             SPInstallPrereqs InstallPrerequisites
             {
+                IsSingleInstance  = "Yes"
                 InstallerPath     = "C:\SPInstall\Prerequisiteinstaller.exe"
                 OnlineMode        = $false
                 SXSpath          = "c:\SPInstall\Windows2012r2-SXS"
