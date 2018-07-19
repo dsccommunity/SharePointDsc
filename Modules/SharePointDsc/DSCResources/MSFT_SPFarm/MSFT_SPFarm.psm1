@@ -450,8 +450,8 @@ function Set-TargetResource
             Passphrase = $params.Passphrase.Password
             SkipRegisterAsDistributedCacheHost = $true
         }
-
-        switch((Get-SPDSCInstalledProductVersion).FileMajorPart)
+        $installedVersion = Get-SPDSCInstalledProductVersion
+        switch($installedVersion.FileMajorPart)
         {
             15 {
                 Write-Verbose -Message "Detected Version: SharePoint 2013"
@@ -459,7 +459,7 @@ function Set-TargetResource
             16 {
                 if ($params.ContainsKey("ServerRole") -eq $true)
                 {
-                    if($InstalledVersion.ProductBuildPart.ToString().Length -eq 4)
+                    if($installedVersion.ProductBuildPart.ToString().Length -eq 4)
                     {
                         Write-Verbose -Message ("Detected Version: SharePoint 2016 - " + `
                                                 "configuring server as $($params.ServerRole)")
@@ -473,7 +473,7 @@ function Set-TargetResource
                 }
                 else
                 {
-                    if($InstalledVersion.ProductBuildPart.ToString().Length -eq 4)
+                    if($installedVersion.ProductBuildPart.ToString().Length -eq 4)
                     {
                         Write-Verbose -Message ("Detected Version: SharePoint 2016 - no server " + `
                                                 "role provided, configuring server without a " + `
