@@ -84,6 +84,62 @@ function Get-SPDSCConfigDBStatus
 
 .SYNOPSIS
 
+Get-SPDSCSQLInstanceStatus is used to determine the state of the SQL instance
+
+.DESCRIPTION
+
+Get-SPDSCSQLInstanceStatus will determine the state of the MaxDOP setting. This
+value is used by the SPFarm resource to determine if the SQL instance is ready
+for SharePoint deployment.
+
+.PARAMETER SQLServer
+
+The name of the SQL server to check against
+
+.EXAMPLE
+
+Get-SPDSCConfigDBStatus -SQLServer sql.contoso.com
+
+#>
+function Get-SPDSCSQLInstanceStatus
+{
+    param(
+        [Parameter(Mandatory = $true)]
+        [String]
+        $SQLServer
+    )
+
+    $connection = New-Object -TypeName "System.Data.SqlClient.SqlConnection"
+    $connection.ConnectionString = "Server=$SQLServer;Integrated Security=SSPI;Database=Master"
+    $command = New-Object -TypeName "System.Data.SqlClient.SqlCommand"
+
+    try 
+    {
+        $currentUser = ([Security.Principal.WindowsIdentity]::GetCurrent()).Name
+        $connection.Open()
+        $command.Connection = $connection
+
+        $command.CommandText = "SELECT value_in_use FROM sys.configurations WHERE name = 'max degree of parallelism'"
+        $maxDOPCorrect = ($command.ExecuteScalar() -eq 1)
+
+        return @{
+            MaxDOPCorrect = $maxDOPCorrect
+        }
+    }
+    finally
+    {
+        if ($connection.State -eq "Open") 
+        {
+            $connection.Close()
+            $connection.Dispose()
+        }
+    }
+}
+
+<#
+
+.SYNOPSIS
+
 Add-SPDSCConfigDBLock is used to create a lock to tell other servers that the
 config DB is currently provisioning
 

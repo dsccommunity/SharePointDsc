@@ -157,6 +157,7 @@ configuration July2018Tap
         {
             Name                 = "AfterPrereqInstall"
             DependsOn            = "[SPInstallPrereqs]SharePointPrereqInstall"
+            SkipCcmClientSDK     = $true
             PsDscRunAsCredential = $credsDomainAdmin
         }
 
@@ -188,6 +189,7 @@ configuration July2018Tap
         {
             Name                 = "AfterSPInstall"
             DependsOn            = "[SPInstall]SharePointInstall"
+            SkipCcmClientSDK     = $true
             PsDscRunAsCredential = $credsDomainAdmin
         }
 
@@ -202,92 +204,293 @@ configuration July2018Tap
             AdminContentDatabaseName  = "SP_Admin"
             RunCentralAdmin           = $Node.RunCentralAdmin
             CentralAdministrationPort = "7777"
-            ServerRole                = "Application"
+            ServerRole                = $Node.ServerRole
             PSDSCRunAsCredential      = $credsSPSetup
+            DependsOn                 = @("[SPInstallLanguagePack]FrenchLanguagePack", "[SPInstallLanguagePack]DutchLanguagePack")
         }
 
-        SPProductUpdate PatchInstall
+<#        SPProductUpdate PatchInstall10325
         {
             SetupFile            = $ConfigurationData.SharePoint.Settings.BinaryPath + "Patch\sts2016-kb2345678-fullfile-x64-glb.exe"
-            ShutdownServices     = $true
+            ShutdownServices     = $false
+            DependsOn            = "[SPFarm]SharePointFarm"
+            PsDscRunAsCredential = $credsSPSetup
+        }
+
+        SPProductUpdate PatchInstall10325Loc
+        {
+            SetupFile            = $ConfigurationData.SharePoint.Settings.BinaryPath + "Patch\wssloc2016-kb2345678-fullfile-x64-glb.exe"
+            ShutdownServices     = $false
             DependsOn            = "[SPFarm]SharePointFarm"
             PsDscRunAsCredential = $credsSPSetup
         }
 
         SPConfigWizard PSConfig
         {
-            IsSingleInstance     = "yes"
+            IsSingleInstance     = "Yes"
             PsDscRunAsCredential = $credsSPSetup
             DependsOn            = "[SPFarm]SharePointFarm"
+        }#>
+
+        # Determine the first app server and let it create the farm, all other servers will join that afterwards
+        $FirstAppServer = ($AllNodes | Where-Object { ($_.ServerRole -eq 'Application' -or $_.ServerRole -eq 'ApplicationWithSearch' ) -or ($_.ServerRole -eq 'Custom' -and $_.ServiceRoles.Application) -or $_.ServerRole -eq 'SingleServer' } | Select-Object -First 1).NodeName
+        $FirstSearchServer = ($AllNodes | Where-Object { ($_.ServerRole -eq 'Search' -or $_.ServerRole -eq 'ApplicationWithSearch' ) -or ($_.ServerRole -eq 'Custom' -and $_.ServiceRoles.Application) -or $_.ServerRole -eq 'SingleServer' } | Select-Object -First 1).NodeName
+
+        if ($Node.NodeName -eq $FirstAppServer)
+        {
+            SPManagedAccount SPFarmAccount
+            {
+                AccountName            = $credsSPFarm.UserName
+                PSDSCRunAsCredential   = $credsSPSetup
+                DependsOn              = "[SPFarm]SharePointFarm"
+            }
+
+            SPWebApplication Root
+            {
+                Ensure                 = "Present"
+                Name                   = "Root"
+                ApplicationPool        = "SharePoint - 80"
+                ApplicationPoolAccount = $credsSPFarm.UserName
+                WebAppUrl              = "http://root.contoso.com"
+                DatabaseServer         = $ConfigurationData.SharePoint.Settings.DatabaseServer
+                DatabaseName           = "Root_Content_DB"
+                HostHeader             = "root.contoso.com"
+                AllowAnonymous         = $false
+                PSDSCRunAsCredential   = $credsSPSetup
+                DependsOn              = "[SPManagedAccount]SPFarmAccount"
+            }
+
+            SPSite RootSite
+            {
+                Name                     = "Root Site Collection"
+                Url                      = "http://root.contoso.com"
+                OwnerAlias               = "contoso\lcladmin"
+                ContentDatabase          = "Root_Content_DB"
+                Description              = "Root Site Collection"
+                Template                 = "STS#0"
+                PSDSCRunAsCredential     = $credsSPSetup
+                DependsOn                = "[SPWebApplication]Root"
+            }
+
+            SPWeb SubWeb1
+            {
+                Name                  = "Subweb1"
+                Url                   = "http://root.contoso.com/subweb1"
+                AddToQuickLaunch      = $true
+                AddToTopNav           = $true
+                Description           = "This is a subsite"
+                UseParentTopNav       = $true
+                UniquePermissions     = $true
+                Template              = "STS#0"
+                PSDSCRunAsCredential  = $credsSPSetup
+                DependsOn             = "[SPSite]RootSite"
+            }
+
+
+            SPQuotaTemplate RemoveTemplate
+            {
+                Name                        = "Teamsite"
+                Ensure                      = "Absent"
+                PSDSCRunAsCredential        = $credsSPSetup
+                DependsOn                   = "[SPFarm]SharePointFarm"
+            }
+
+            SPQuotaTemplate TestTemplate
+            {
+                Name                        = "10GB"
+                StorageMaxInMB              = 10240
+                StorageWarningInMB          = 5120
+                MaximumUsagePointsSolutions = 1000
+                Ensure                      = "Present"
+                PSDSCRunAsCredential        = $credsSPSetup
+                DependsOn                   = "[SPFarm]SharePointFarm"
+            }
+
+            SPShellAdmins SPAdmin
+            {
+                IsSingleInstance     = "Yes"
+                MembersToInclude     = "CONTOSO\SPAdmins"
+                AllDatabases         = $true
+                PSDSCRunAsCredential = $credsSPSetup
+                DependsOn            = "[SPFarm]SharePointFarm"
+            }
+
+            SPProjectServerLicense ProjectLicense
+            {
+                IsSingleInstance     = "Yes"
+                Ensure               = "Present"
+                ProductKey           = "Y2WC2-K7NFX-KWCVC-T4Q8P-4RG9W"
+                PSDSCRunAsCredential = $credsSPSetup
+                DependsOn            = "[SPFarm]SharePointFarm"
+            }
+
+            SPManagedAccount ServicesManagedAccount
+            {
+                AccountName          = $credsSPServices.UserName
+                Account              = $credsSPServices
+                Ensure               = "Present"
+                PsDscRunAsCredential = $credsSPSetup
+                DependsOn            = "[SPFarm]SharePointFarm"
+            }
+
+            SPServiceAppPool ServicesServiceAppPool
+            {
+                Name                 = "Services Application Pool"
+                ServiceAccount       = $credsSPServices.UserName
+                Ensure               = "Present"
+                PsDscRunAsCredential = $credsSPSetup
+                DependsOn            = "[SPManagedAccount]ServicesManagedAccount"
+            }
+
+            SPSecureStoreServiceApp SecureStoreServiceApp
+            {
+                Name                 = "Secure Store Service Application"
+                ApplicationPool      = "Services Application Pool"
+                AuditingEnabled      = $true
+                AuditlogMaxSize      = 30
+                DatabaseName         = "SP_SecureStore"
+                PSDSCRunAsCredential = $credsSPSetup
+                DependsOn            = "[SPServiceAppPool]ServicesServiceAppPool"
+            }
+
+            SPProjectServerServiceApp ProjectServiceApp
+            {
+                Name                 = "Project Server Service Application"
+                ApplicationPool      = "Services Application Pool"
+                PsDscRunAsCredential = $credsSPSetup
+                DependsOn            = "[SPFarm]SharePointFarm"
+            }
+
+            SPSite PWASite
+            {
+                Url                      = "http://project.contoso.com"
+                OwnerAlias               = "CONTOSO\lcladmin"
+                HostHeaderWebApplication = "http://root.contoso.com"
+                Name                     = "PWA Site"
+                Template                 = "PWA#0"
+                PsDscRunAsCredential     = $credsSPSetup
+                DependsOn                = "[SPProjectServerServiceApp]ProjectServiceApp"
+            }
+
+            SPFeature PWASiteFeature
+            {
+                Name                 = "PWASITE"
+                Url                  = "http://project.contoso.com"
+                FeatureScope         = "Site"
+                PsDscRunAsCredential = $credsSPSetup
+                DependsOn            = "[SPSite]PWASite"
+            }
+
+            SPProjectServerAdditionalSettings Settings
+            {
+                Url                   = "http://project.contoso.com"
+                ServerCurrency        = "EUR"
+                EnforceServerCurrency = $true
+                PsDscRunAsCredential = $credsSPSetup
+                DependsOn            = "[SPFeature]PWASiteFeature"
+            }
+
+            SPSessionStateService StateServiceApp
+            {
+                DatabaseName         = "SP_StateService"
+                DatabaseServer       = "SPSQL19"
+                Ensure               = "Present"
+                PsDscRunAsCredential = $credsSPSetup
+                DependsOn            = "[SPFarm]SharePointFarm"
+            }
         }
 
-        SPManagedAccount SPFarmAccount
+        if ($Node.NodeName -eq $FirstSearchServer)
         {
-            AccountName            = $credsSPFarm.UserName
-            PSDSCRunAsCredential   = $credsSPSetup
-            DependsOn              = "[SPFarm]SharePointFarm"
-        }
+            SPManagedAccount SearchManagedAccount
+            {
+                AccountName          = $credsSPSearch.UserName
+                Account              = $credsSPSearch
+                Ensure               = "Present"
+                PsDscRunAsCredential = $credsSPSetup
+                DependsOn            = "[SPFarm]SharePointFarm"
+            }
 
-        SPManagedAccount SPServices
-        {
-            AccountName            = $credsSPServices.UserName
-            PSDSCRunAsCredential   = $credsSPSetup
-            DependsOn              = "[SPFarm]SharePointFarm"
-        }
+            WaitForAll ServicesManagedAccountCreation
+            {
+                ResourceName      = '[SPManagedAccount]ServicesManagedAccount'
+                NodeName          = $FirstAppServer
+                RetryIntervalSec  = 60
+                RetryCount        = 60
+            }
 
-        SPManagedAccount SPSearch
-        {
-            AccountName            = $credsSPSearch.UserName
-            PSDSCRunAsCredential   = $credsSPSetup
-            DependsOn              = "[SPFarm]SharePointFarm"
-        }
+            SPServiceAppPool SearchServiceAppPool
+            {
+                Name                 = "Search Application Pool"
+                ServiceAccount       = $credsSPServices.UserName
+                Ensure               = "Present"
+                PsDscRunAsCredential = $credsSPSetup
+                DependsOn            = "[WaitForAll]ServicesManagedAccountCreation"
+            }
 
-        SPManagedAccount SPAdmin
-        {
-            AccountName            = $credsSPAdmin.UserName
-            PSDSCRunAsCredential   = $credsSPSetup
-            DependsOn              = "[SPFarm]SharePointFarm"
-        }
+            SPSearchServiceApp SearchServiceApp
+            {
+                Name                  = "Search Service Application"
+                ProxyName             = "Search SA Proxy"
+                DatabaseName          = "SP_Search"
+                ApplicationPool       = "Search Application Pool"
+                Ensure                = "Present"
+                WindowsServiceAccount = $credsSPSearch
+                PsDscRunAsCredential  = $credsSPSetup
+                DependsOn             = @("[SPServiceAppPool]SearchServiceAppPool","[SPManagedAccount]SearchManagedAccount")
+            }
 
-        SPWebApplication Root
-        {
-            Ensure                 = "Present"
-            Name                   = "Root"
-            ApplicationPool        = "SharePoint - 80"
-            ApplicationPoolAccount = $credsSPFarm.UserName
-            WebAppUrl              = "http://root.contoso.com"
-            DatabaseServer         = $ConfigurationData.SharePoint.Settings.DatabaseServer
-            DatabaseName           = "Root_Content_DB"
-            HostHeader             = "root.contoso.com"
-            AllowAnonymous         = $false
-            PSDSCRunAsCredential   = $credsSPSetup
-            DependsOn              = "[SPManagedAccount]SPFarmAccount"
-        }
+            SPSearchTopology LocalSearchTopology
+            {
+                ServiceAppName          = "Search Service Application"
+                Admin                   = @("SPSearch19")
+                Crawler                 = @("SPSearch19")
+                ContentProcessing       = @("SPSearch19")
+                AnalyticsProcessing     = @("SPSearch19")
+                QueryProcessing         = @("SPSearch19")
+                FirstPartitionDirectory = "C:\SearchIndexes\0"
+                IndexPartition          = @("SPSearch19")
+                PsDscRunAsCredential    = $credsSPSetup
+                DependsOn               = @("[SPSearchServiceApp]SearchServiceApp")
+            }
 
-        SPSite RootSite
-        {
-            Name                     = "Root Site Collection"
-            Url                      = "http://root.contoso.com"
-            OwnerAlias               = "contoso\lcladmin"
-            ContentDatabase          = "Root_Content_DB"
-            Description              = "Root Site Collection"
-            Template                 = "STS#0"
-            PSDSCRunAsCredential     = $credsSPSetup
-            DependsOn                = "[SPWebApplication]Root"
-        }
+            SPSearchContentSource WebsiteSource
+            {
+                Name                 = "Microsoft website"
+                ServiceAppName       = "Search Service Application"
+                ContentSourceType    = "Website"
+                Addresses            = @("http://www.microsoft.com")
+                CrawlSetting         = "Custom"
+                LimitPageDepth       = 2
+                IncrementalSchedule  = MSFT_SPSearchCrawlSchedule{
+                                        ScheduleType = "Daily"
+                                        StartHour = "0"
+                                        StartMinute = "0"
+                                        CrawlScheduleRepeatDuration = "1440"
+                                        CrawlScheduleRepeatInterval = "60"
+                                       }
+                FullSchedule         = MSFT_SPSearchCrawlSchedule{
+                                        ScheduleType = "Weekly"
+                                        CrawlScheduleDaysOfWeek = @("Sunday")
+                                        StartHour = "3"
+                                        StartMinute = "0"
+                                       }
+                Priority             = "Normal"
+                Ensure               = "Present"
+                PsDscRunAsCredential = $credsSPSetup
+                DependsOn            = @("[SPSearchServiceApp]SearchServiceApp")
+            }
 
-        SPWeb SubWeb1
-        {
-            Name                  = "Subweb1"
-            Url                   = "http://root.contoso.com/subweb1"
-            AddToQuickLaunch      = $true
-            AddToTopNav           = $true
-            Description           = "This is a subsite"
-            UseParentTopNav       = $true
-            UniquePermissions     = $true
-            Template              = "STS#0"
-            PSDSCRunAsCredential  = $credsSPSetup
-            DependsOn             = "[SPSite]RootSite"
+            SPSearchFileType PDF
+            {
+                FileType             = "pdf"
+                ServiceAppName       = "Search Service Application"
+                Description          = "PDF"
+                MimeType             = "application/pdf"
+                Ensure               = "Present"
+                PsDscRunAsCredential = $credsSPSetup
+                DependsOn            = @("[SPSearchServiceApp]SearchServiceApp")
+            }
         }
     }
 }

@@ -326,7 +326,8 @@ function Set-TargetResource
     }
 
     # To prevent an endless loop: Check if an upgrade is required.
-    if ((Get-SPDSCInstalledProductVersion).FileMajorPart -eq 15)
+    $installedVersion = Get-SPDSCInstalledProductVersion
+    if ($spVersion.FileMajorPart -eq 15)
     {
         $wssRegKey ="hklm:SOFTWARE\Microsoft\Shared Tools\Web Server Extensions\15.0\WSS"
     }
@@ -356,7 +357,7 @@ function Set-TargetResource
         $osearchStopped = $false
         $hostControllerStopped = $false
 
-        if ((Get-SPDSCInstalledProductVersion).FileMajorPart -eq 15)
+        if ($installedVersion.FileMajorPart -eq 15)
         {
             $searchServiceName = "OSearch15"
         }
@@ -401,7 +402,11 @@ function Set-TargetResource
 
         Write-Verbose -Message "Stopping other services"
 
-        Set-Service -Name "IISADMIN" -StartupType Disabled
+        if($InstalledVersion.FileMajorPart -eq 15 -or $installedVersion.ProductBuildPart.ToString().Length -eq 4)
+        {
+            Write-Verbose -Message "SharePoint 2013 or 2016 used, reconfiguring IISAdmin service to Disabled startup."
+            Set-Service -Name "IISADMIN" -StartupType Disabled
+        }
         Set-Service -Name "SPTimerV4" -StartupType Disabled
 
         $iisreset = Start-Process -FilePath "iisreset.exe" `
@@ -453,7 +458,12 @@ function Set-TargetResource
     {
         Write-Verbose -Message "Restart stopped services"
         Set-Service -Name "SPTimerV4" -StartupType Automatic
-        Set-Service -Name "IISADMIN" -StartupType Automatic
+
+        if($InstalledVersion.FileMajorPart -eq 15 -or $installedVersion.ProductBuildPart.ToString().Length -eq 4)
+        {
+            Write-Verbose -Message "SharePoint 2013 or 2016 used, reconfiguring IISAdmin service to Automatic startup."
+            Set-Service -Name "IISADMIN" -StartupType Automatic
+        }
 
         $timerSvc = Get-Service -Name "SPTimerV4"
         $timerSvc.Start()
