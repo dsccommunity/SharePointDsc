@@ -46,13 +46,13 @@ if(!$ResourceGroupName)
     while($ResourceGroupName -and $ResourceGroupName.Length -gt 7)
 }
 
-$locObj = Get-AzureRmResourceProvider -ProviderNamespace Microsoft.Automation  | ?{$_.ResourceTypes.ResourceTypeName -eq "automationAccounts"} | Select Locations | Sort -Property Locations
+$locObj = Get-AzureRmResourceProvider -ProviderNamespace Microsoft.Automation | ?{$_.ResourceTypes.ResourceTypeName -eq "automationAccounts"} | Select Locations | Sort -Property Locations
 $azureLocations = $locObj.Locations | sort-object
 if(!$Region -or $Region -notin $azureLocations)
 {
     do
     {
-        Write-Host "Please select a Azure location" -ForegroundColor Yellow
+        Write-Host "`r`n`r`nPlease select a Azure location" -ForegroundColor Yellow
         $i = 1;
         foreach($loc in $azureLocations)
         {
@@ -89,7 +89,7 @@ try
     }
     else
     {
-        Write-Host -ForegroundColor White " - You are already logged in to Azure."
+        Write-Host -ForegroundColor Yellow "`r`n`r`nYou are already logged in to Azure."
         $loginSucceeded = $true
     }
 }
@@ -99,7 +99,7 @@ catch
     {
         try
         {
-            Write-Host -ForegroundColor Cyan " - Prompting for Azure Resource Manager credentials..."
+            Write-Host -ForegroundColor Cyan "`r`n`r`nPrompting for Azure Resource Manager credentials..."
             $catch = Add-AzureRmAccount
             if ($? -eq $false)
             {
@@ -144,6 +144,7 @@ finally
         if($subscriptions.Length -gt 1)
         {
             $i = 1;
+            Write-Host "`r`n"
             foreach($sub in $subscriptions)
             {
                 Write-Host $i "-" $sub.Name
@@ -415,7 +416,7 @@ $ConfigData = @{
             ServerRole      = "Search"
         },
         @{
-            NodeName = "*"
+            NodeName                    = "*"
             PSDSCAllowPlainTextPassword = $true
             PSDSCAllowDomainUser        = $true
         }
