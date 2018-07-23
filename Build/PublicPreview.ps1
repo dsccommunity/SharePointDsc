@@ -205,11 +205,11 @@ configuration PublicPreview
             AdminContentDatabaseName  = "SP_Admin"
             RunCentralAdmin           = $Node.RunCentralAdmin
             CentralAdministrationPort = "7777"
-            ServerRole                = "Application"
+            ServerRole                = $Node.ServerRole
             PSDSCRunAsCredential      = $credsSPSetup
         }
 
-        if ($node.RunCentralAdmin -eq $true)
+        if ($Node.RunCentralAdmin -eq $true)
         {
             SPManagedAccount SPFarmAccount
             {
@@ -243,6 +243,14 @@ configuration PublicPreview
                 DependsOn              = "[SPFarm]SharePointFarm"
             }
 
+            SPServiceAppPool ServicesAppPool
+            {
+                Name                   = "Service Applications"
+                ServiceAccount         = $credsSPServices.Username
+                DependsOn              = "[SPManagedAccount]SPServices"
+                PSDSCRunAsCredential   = $credsSPSetup
+            }
+
             SPWebApplication Root
             {
                 Ensure                 = "Present"
@@ -261,11 +269,23 @@ configuration PublicPreview
             SPSite RootSite
             {
                 Name                     = "Root Site Collection"
-                Url                      = "http://root.contoso.com"
+                Url                      = "http://classic.contoso.com"
                 OwnerAlias               = "contoso\lcladmin"
-                ContentDatabase          = "Root_Content_DB"
+                ContentDatabase          = "Classic_Content_DB"
                 Description              = "Root Site Collection"
                 Template                 = "STS#0"
+                PSDSCRunAsCredential     = $credsSPSetup
+                DependsOn                = "[SPWebApplication]Root"
+            }
+
+            SPSite CatalogSite
+            {
+                Name                     = "App Catalog"
+                Url                      = "http://classic.contoso.com/sites/catalog"
+                OwnerAlias               = "contoso\lcladmin"
+                ContentDatabase          = "Catalog_Content_DB"
+                Description              = "App Catalog"
+                Template                 = "APPCATALOG#0"
                 PSDSCRunAsCredential     = $credsSPSetup
                 DependsOn                = "[SPWebApplication]Root"
             }
@@ -273,7 +293,7 @@ configuration PublicPreview
             SPWeb SubWeb1
             {
                 Name                  = "Subweb1"
-                Url                   = "http://root.contoso.com/subweb1"
+                Url                   = "http://classic.contoso.com/subweb1"
                 AddToQuickLaunch      = $true
                 AddToTopNav           = $true
                 Description           = "This is a subsite"
@@ -282,6 +302,119 @@ configuration PublicPreview
                 Template              = "STS#0"
                 PSDSCRunAsCredential  = $credsSPSetup
                 DependsOn             = "[SPSite]RootSite"
+            }
+
+            SPSite ModernRootSite
+            {
+                Name                     = "Root Site Collection"
+                Url                      = "http://classic.contoso.com"
+                OwnerAlias               = "contoso\lcladmin"
+                ContentDatabase          = "Modern_Content_DB"
+                Description              = "Modern Root Site Collection"
+                Template                 = "STS#3"
+                PSDSCRunAsCredential     = $credsSPSetup
+                DependsOn                = "[SPWebApplication]Root"
+            }
+
+            SPWeb SubWeb1
+            {
+                Name                  = "Subweb1"
+                Url                   = "http://modern.contoso.com/subweb1"
+                AddToQuickLaunch      = $true
+                AddToTopNav           = $true
+                Description           = "Modern - This is a subsite"
+                UseParentTopNav       = $true
+                UniquePermissions     = $true
+                Template              = "STS#3"
+                PSDSCRunAsCredential  = $credsSPSetup
+                DependsOn             = "[SPSite]ModernRootSite"
+            }
+        }
+
+        if($Node.ServerRole -eq "Application")
+        {
+            SPBCSServiceApp BCS
+            {
+                Name                  = "Business Connectivity Services"
+                ApplicationPool       = "Service Applications"
+                DatabaseServer        = $ConfigurationData.SharePoint.Settings.DatabaseServer
+                DatabaseName          = "SA_BusinessConnectivityServices"
+                ProxyName             = "Business Connectivity Services Proxy"
+                PSDSCRunAsCredential  = $credsSPSetup
+            }
+
+            SPAppManagementServiceApp AppManagementSA
+            {
+                Name                 = "App Management Service Application"
+                ApplicationPool      = "Service Applications"
+                DatabaseServer       = $ConfigurationData.SharePoint.Settings.DatabaseServer
+                DatabaseName         = "SA_AppManagement"
+                ProxyName            = "App Management Proxy"
+                PSDSCRunAsCredential = $credsSPSetup
+            }
+
+            SPAppDomain AppDomain
+            {
+                AppDomain            = "apps.contoso.com"
+                Prefix               = "app"
+                DependsOn            = "[SPAppManagementServiceApp]AppManagementSA"
+                PSDSCRunAsCredential = $credsSPSetup
+            }
+
+            SPAppCatalog AppCatalog
+            {
+                SiteUrl              = "http://classic.contoso.com/sites/catalog"
+                DependsOn            = "[SPAppManagementServiceApp]AppManagementSA"
+                PSDSCRunAsCredential = $credsSPSetup
+            }
+
+            SPSubscriptionSettingsServiceApp SubscriptionSA
+            {
+                Name                 = "Subscription Settings Service Application"
+                ApplicationPool      = "Service Applications"
+                DatabaseServer       = $ConfigurationData.SharePoint.Settings.DatabaseServer
+                DatabaseName         = "SA_SubscriptionSettings"
+                DependsOn            = "[SPAppManagementServiceApp]AppManagementSA"
+                PSDSCRunAsCredential = $credsSPSetup
+            }
+        }
+
+        if($Node.ServerRole -eq "Search")
+        {
+            SPSearchServiceApp SearchSA
+            {
+                Name                        = "Search Service Application"
+                ApplicationPool             = "Service Applications"
+                CloudIndex                  = $false
+                DatabaseServer              = $ConfigurationData.SharePoint.Settings.DatabaseServer
+                DatabaseName                = "SA_SearchServiceApplication"
+                ProxyName                   = "Search Proxy"
+                DefaultContentAccessAccount = $credsSPSearch
+                PSDSCRunAsCredential        = $credsSPSetup
+            }
+
+            SPSearchIndexPartition SearchMainPartition
+            {
+                Index                 = 0
+                Servers               = $Node.NodeName
+                ServiceAppName        = "Search Service Application"
+                RootDirectory         = "C:\SPSearch"
+                DependsOn             = "[SPSearchServiceApp]SearchSA"
+                PSDSCRunAsCredential  = $credsSPSetup
+            }
+
+            SPSearchTopology SearchTopology
+            {
+                ServiceAppName          = "Search Service Application"
+                Admin                   = $Node.NodeName
+                Crawler                 = $Node.NodeName
+                ContentProcessing       = $Node.NodeName
+                AnalyticsProcessing     = $Node.NodeName
+                QueryProcessing         = $Node.NodeName
+                IndexPartition          = $Node.NodeName
+                FirstPartitionDirectory = "C:\SPSearch"
+                DependsOn               = @("[SPSearchServiceApp]SearchSA","[SPSearchIndexPartition]SearchMainPartition")
+                PSDSCRunAsCredential    = $credsSPSetup
             }
         }
     }
