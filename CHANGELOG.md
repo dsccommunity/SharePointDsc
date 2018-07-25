@@ -1,6 +1,6 @@
 # Change log for SharePointDsc
 
-## Unreleased
+## 2.4
 
 * SPCacheAccounts
   * Fixed issue where the Test method would fail if SetWebAppPolicy was set to
