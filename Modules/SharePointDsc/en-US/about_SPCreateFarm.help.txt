@@ -1,0 +1,47 @@
+﻿.NAME
+    SPCreateFarm
+
+# Description
+    
+    WARNING: This resource has been removed. Please use SPFarm instead.
+    See http://aka.ms/SPDsc-SPFarm for details.
+    
+.PARAMETER FarmConfigDatabaseName
+    Key - String
+    Name of the configuration database
+
+.PARAMETER DatabaseServer
+    Key - String
+    Server that will host the configuration and admin content databases
+
+.PARAMETER FarmAccount
+    Required - String
+    The account to use as the main farm account
+
+.PARAMETER Passphrase
+    Required - String
+    The passphrase to use to allow servers to join this farm
+
+.PARAMETER AdminContentDatabaseName
+    Required - String
+    The name of the admin content database
+
+.PARAMETER CentralAdministrationPort
+    Write - uint32
+    What port will Central Admin be provisioned to - default is 9999
+
+.PARAMETER CentralAdministrationAuth
+    Write - String
+    Allowed values: NTLM, Kerberos
+    The authentication provider of the CentralAdministration web application
+
+.PARAMETER ServerRole
+    Write - string
+    Allowed values: Application, ApplicationWithSearch, Custom, DistributedCache, Search, SingleServer, SingleServerFarm, WebFrontEnd, WebFrontEndWithDistributedCache
+    SharePoint 2016 only - the MinRole role to enroll this server as
+
+.PARAMETER InstallAccount
+    Write - String
+    POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5
+
+
