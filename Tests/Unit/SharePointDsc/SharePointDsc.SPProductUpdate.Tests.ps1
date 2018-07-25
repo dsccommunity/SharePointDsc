@@ -1,7 +1,7 @@
 [CmdletBinding()]
 param(
     [Parameter()]
-    [string] 
+    [string]
     $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
                                          -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
                                          -Resolve)
@@ -21,7 +21,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         # Mocks for all contexts
         Mock -CommandName Test-Path {
             return $true
-        }   
+        }
 
         Mock -CommandName Get-Service -MockWith {
             $service = @{
@@ -29,19 +29,19 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
             $service = $service | Add-Member -MemberType ScriptMethod `
                                                 -Name Stop `
-                                                -Value { 
+                                                -Value {
                                                     return $null
-                                                } -PassThru 
+                                                } -PassThru
             $service = $service | Add-Member -MemberType ScriptMethod `
                                                 -Name Start `
-                                                -Value { 
+                                                -Value {
                                                     return $null
-                                                } -PassThru 
+                                                } -PassThru
             $service = $service | Add-Member -MemberType ScriptMethod `
                                                 -Name WaitForStatus `
-                                                -Value { 
+                                                -Value {
                                                     return $null
-                                                } -PassThru 
+                                                } -PassThru
             return $service
         }
 
@@ -73,7 +73,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
         }
 
-        # Test contexts        
+        # Test contexts
         Context -Name "Specified update file not found" -Fixture {
             $testParams = @{
                 SetupFile            = "C:\Install\CUMay2016\ubersrv2013-kb3115029-fullfile-x64-glb.exe"
@@ -81,8 +81,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Ensure               = "Present"
             }
 
-            Mock -CommandName Test-Path -MockWith { 
-                return $false 
+            Mock -CommandName Test-Path -MockWith {
+                return $false
             }
 
             It "Should throw exception in the get method" {
@@ -105,7 +105,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Ensure               = "Present"
             }
 
-            Mock -CommandName Test-Path -MockWith { 
+            Mock -CommandName Test-Path -MockWith {
                 return $true
             }
 
@@ -152,7 +152,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 ShutdownServices     = $true
                 Ensure               = "Present"
             }
-            
+
             Mock -CommandName Get-ItemProperty -MockWith {
                 if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq  15)
                 {
@@ -162,9 +162,9 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                             FileDescription = "Cumulative Update"
                         }
                         Name = "serverlpksp2013-kb2880554-fullfile-x64-en-us.exe"
-                    } 
+                    }
                 }
-                else 
+                else
                 {
                     return @{
                         VersionInfo = @{
@@ -172,16 +172,16 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                             FileDescription = "Cumulative Update"
                         }
                         Name = "serverlpksp2016-kb2880554-fullfile-x64-en-us.exe"
-                    } 
+                    }
                 }
             }
-            
+
             Mock -CommandName Get-SPDscFarmProductsInfo -MockWith {
                 if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq  15)
                 {
                     return @("Microsoft SharePoint Server 2013")
                 }
-                else 
+                else
                 {
                     return @("Microsoft SharePoint Server 2016")
                 }
@@ -213,9 +213,9 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                             FileDescription = "Cumulative Update"
                         }
                         Name = "serverlpksp2013-kb2880554-fullfile-x64-en-us.exe"
-                    } 
+                    }
                 }
-                else 
+                else
                 {
                     return @{
                         VersionInfo = @{
@@ -223,16 +223,16 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                             FileDescription = "Cumulative Update"
                         }
                         Name = "serverlpksp2016-kb2880554-fullfile-x64-en-us.exe"
-                    } 
+                    }
                 }
             }
-            
+
             Mock -CommandName Get-SPDscFarmProductsInfo -MockWith {
                 if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq  15)
                 {
                     return @("Microsoft SharePoint Server 2013")
                 }
-                else 
+                else
                 {
                     return @("Microsoft SharePoint Server 2016")
                 }
@@ -259,7 +259,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 ShutdownServices     = $true
                 Ensure               = "Present"
             }
-            
+
             Mock -CommandName Get-ItemProperty -MockWith {
                 if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq  15)
                 {
@@ -269,9 +269,9 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                             FileDescription = "Cumulative Update"
                         }
                         Name = "serverlpksp2013-kb2880554-fullfile-x64-en-us.exe"
-                    } 
+                    }
                 }
-                else 
+                else
                 {
                     return @{
                         VersionInfo = @{
@@ -279,16 +279,16 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                             FileDescription = "Cumulative Update"
                         }
                         Name = "serverlpksp2016-kb2880554-fullfile-x64-en-us.exe"
-                    } 
+                    }
                 }
             }
-            
+
             Mock -CommandName Get-SPDscFarmProductsInfo -MockWith {
                 if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq  15)
                 {
                     return @("Microsoft SharePoint Server 2013")
                 }
-                else 
+                else
                 {
                     return @("Microsoft SharePoint Server 2016")
                 }
@@ -321,7 +321,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 ShutdownServices     = $true
                 Ensure               = "Present"
             }
-            
+
             Mock -CommandName Get-ItemProperty -MockWith {
                 if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq  15)
                 {
@@ -331,9 +331,9 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                             FileDescription = "Cumulative Update"
                         }
                         Name = "serverlpksp2013-kb2880554-fullfile-x64-en-us.exe"
-                    } 
+                    }
                 }
-                else 
+                else
                 {
                     return @{
                         VersionInfo = @{
@@ -341,7 +341,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                             FileDescription = "Cumulative Update"
                         }
                         Name = "serverlpksp2016-kb2880554-fullfile-x64-en-us.exe"
-                    } 
+                    }
                 }
             }
 
@@ -350,7 +350,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 {
                     return @("Microsoft SharePoint Server 2013")
                 }
-                else 
+                else
                 {
                     return @("Microsoft SharePoint Server 2016")
                 }
@@ -383,7 +383,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 ShutdownServices     = $true
                 Ensure               = "Present"
             }
-            
+
             Mock -CommandName Get-ItemProperty -MockWith {
                 if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq  15)
                 {
@@ -395,7 +395,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                         Name = "serverlpksp2013-kb2880554-fullfile-x64-en-us.exe"
                     }
                 }
-                else 
+                else
                 {
                     return @{
                         VersionInfo = @{
@@ -412,7 +412,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 {
                     return @("Microsoft SharePoint Server 2013")
                 }
-                else 
+                else
                 {
                     return @("Microsoft SharePoint Server 2016")
                 }
@@ -434,7 +434,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 ShutdownServices     = $true
                 Ensure               = "Present"
             }
-            
+
             Mock -CommandName Get-ItemProperty -MockWith {
                 if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq  15)
                 {
@@ -444,9 +444,9 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                             FileDescription = "Service Pack"
                         }
                         Name = "serverlpksp2013-kb2880554-fullfile-x64-en-us.exe"
-                    } 
+                    }
                 }
-                else 
+                else
                 {
                     return @{
                         VersionInfo = @{
@@ -454,7 +454,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                             FileDescription = "Service Pack"
                         }
                         Name = "serverlpksp2016-kb2880554-fullfile-x64-en-us.exe"
-                    } 
+                    }
                 }
             }
 
@@ -463,10 +463,37 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 {
                     return @("Microsoft SharePoint Server 2013")
                 }
-                else 
+                else
                 {
                     return @("Microsoft SharePoint Server 2016")
                 }
+            }
+
+            Mock -CommandName Get-SPEnterpriseSearchServiceApplication -MockWith {
+                $returnval = @{}
+                $returnval = $returnval | Add-Member -MemberType ScriptMethod `
+                                                     -Name IsPaused `
+                                                     -Value {
+                                                        if ($Global:SPDscSearchPaused -eq $false)
+                                                        {
+                                                            return 0
+                                                        }
+                                                        else
+                                                        {
+                                                            return 128
+                                                        }
+                                                     } -PassThru -Force
+                $returnval = $returnval | Add-Member -MemberType ScriptMethod `
+                                                     -Name Pause `
+                                                     -Value {
+                                                        $Global:SPDscSearchPaused = $true
+                                                     } -PassThru -Force
+                $returnval = $returnval | Add-Member -MemberType ScriptMethod `
+                                                     -Name Resume `
+                                                     -Value {
+                                                        $Global:SPDscSearchPaused = $false
+                                                     } -PassThru -Force
+                return $returnval
             }
 
             It "Should return Ensure is Present from the get method" {
@@ -474,6 +501,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 $result.Ensure | Should Be "Absent"
             }
 
+            $Global:SPDscSearchPaused = $false
             It "Should run the Start-Process function in the set method" {
                 Set-TargetResource @testParams
                 Assert-MockCalled Start-Process
@@ -490,7 +518,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 ShutdownServices     = $true
                 Ensure               = "Present"
             }
-            
+
             Mock -CommandName Get-ItemProperty -MockWith {
                 if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq  15)
                 {
@@ -500,9 +528,9 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                             FileDescription = "Service Pack Language Pack"
                         }
                         Name = "serverlpksp2013-kb2880554-fullfile-x64-nl-nl.exe"
-                    } 
+                    }
                 }
-                else 
+                else
                 {
                     return @{
                         VersionInfo = @{
@@ -510,7 +538,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                             FileDescription = "Service Pack Language Pack"
                         }
                         Name = "serverlpksp2016-kb2880554-fullfile-x64-nl-nl.exe"
-                    } 
+                    }
                 }
             }
 
@@ -519,7 +547,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 {
                     return @("Microsoft SharePoint Server 2013", "Language Pack for SharePoint and Project Server 2013  - Dutch/Nederlands")
                 }
-                else 
+                else
                 {
                     return @("Microsoft SharePoint Server 2016", "Language Pack for SharePoint and Project Server 2016  - Dutch/Nederlands")
                 }
@@ -551,9 +579,9 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                             FileDescription = "Service Pack Language Pack"
                         }
                         Name = "serverlpksp2013-kb2880554-fullfile-x64-nl-nl.exe"
-                    } 
+                    }
                 }
-                else 
+                else
                 {
                     return @{
                         VersionInfo = @{
@@ -561,7 +589,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                             FileDescription = "Service Pack Language Pack"
                         }
                         Name = "serverlpksp2016-kb2880554-fullfile-x64-nl-nl.exe"
-                    } 
+                    }
                 }
             }
 
@@ -570,7 +598,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 {
                     return @("Microsoft SharePoint Server 2013", "Language Pack for SharePoint and Project Server 2013  - Dutch/Nederlands")
                 }
-                else 
+                else
                 {
                     return @("Microsoft SharePoint Server 2016", "Language Pack for SharePoint and Project Server 2016  - Dutch/Nederlands")
                 }
@@ -597,7 +625,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 ShutdownServices     = $true
                 Ensure               = "Present"
             }
-            
+
             Mock -CommandName Get-ItemProperty -MockWith {
                 if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq  15)
                 {
@@ -607,9 +635,9 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                             FileDescription = "Service Pack Language Pack"
                         }
                         Name = "serverlpksp2013-kb2880554-fullfile-x64.exe"
-                    } 
+                    }
                 }
-                else 
+                else
                 {
                     return @{
                         VersionInfo = @{
@@ -626,7 +654,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 {
                     return @("Microsoft SharePoint Server 2013", "Language Pack for SharePoint and Project Server 2013  - Dutch/Nederlands")
                 }
-                else 
+                else
                 {
                     return @("Microsoft SharePoint Server 2016", "Language Pack for SharePoint and Project Server 2016  - Dutch/Nederlands")
                 }
@@ -643,7 +671,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 ShutdownServices     = $true
                 Ensure               = "Present"
             }
-            
+
             Mock -CommandName Get-ItemProperty -MockWith {
                 if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq  15)
                 {
@@ -653,9 +681,9 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                             FileDescription = "Service Pack Language Pack"
                         }
                         Name = "serverlpksp2013-kb2880554-fullfile-x64-ab-yz.exe"
-                    } 
+                    }
                 }
-                else 
+                else
                 {
                     return @{
                         VersionInfo = @{
@@ -663,7 +691,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                             FileDescription = "Service Pack Language Pack"
                         }
                         Name = "serverlpksp2016-kb2880554-fullfile-x64-ab-yz.exe"
-                    } 
+                    }
                 }
             }
 
@@ -672,7 +700,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 {
                     return @("Microsoft SharePoint Server 2013", "Language Pack for SharePoint and Project Server 2013  - Dutch/Nederlands")
                 }
-                else 
+                else
                 {
                     return @("Microsoft SharePoint Server 2016", "Language Pack for SharePoint and Project Server 2016  - Dutch/Nederlands")
                 }
@@ -689,7 +717,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 ShutdownServices     = $true
                 Ensure               = "Present"
             }
-            
+
             Mock -CommandName Get-ItemProperty -MockWith {
                 if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq  15)
                 {
@@ -699,9 +727,9 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                             FileDescription = "Service Pack Language Pack"
                         }
                         Name = "serverlpksp2013-kb2880554-fullfile-x64-fr-fr.exe"
-                    } 
+                    }
                 }
-                else 
+                else
                 {
                     return @{
                         VersionInfo = @{
@@ -709,7 +737,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                             FileDescription = "Service Pack Language Pack"
                         }
                         Name = "serverlpksp2016-kb2880554-fullfile-x64-fr-fr.exe"
-                    } 
+                    }
                 }
             }
 
@@ -718,7 +746,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 {
                     return @("Microsoft SharePoint Server 2013", "Language Pack for SharePoint and Project Server 2013  - Dutch/Nederlands")
                 }
-                else 
+                else
                 {
                     return @("Microsoft SharePoint Server 2016", "Language Pack for SharePoint and Project Server 2016  - Dutch/Nederlands")
                 }
@@ -735,7 +763,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 ShutdownServices     = $true
                 Ensure               = "Present"
             }
-            
+
             Mock -CommandName Get-ItemProperty -MockWith {
                 if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq  15)
                 {
@@ -745,9 +773,9 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                             FileDescription = "Service Pack Language Pack"
                         }
                         Name = "serverlpksp2013-kb2880554-fullfile-x64-fr-fr.exe"
-                    } 
+                    }
                 }
-                else 
+                else
                 {
                     return @{
                         VersionInfo = @{
@@ -755,7 +783,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                             FileDescription = "Service Pack Language Pack"
                         }
                         Name = "serverlpksp2016-kb2880554-fullfile-x64-fr-fr.exe"
-                    } 
+                    }
                 }
             }
 
@@ -789,7 +817,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             Mock -CommandName Get-Date -MockWith {
                  return $testDate
             }
-            
+
             It "Should return null from the set method" {
                 Set-TargetResource @testParams | Should BeNullOrEmpty
             }
@@ -809,7 +837,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             Mock -CommandName Get-Date -MockWith {
                  return $testDate
             }
-            
+
             It "Should return null from the set method" {
                 Set-TargetResource @testParams | Should BeNullOrEmpty
             }
@@ -829,7 +857,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             Mock -CommandName Get-Date -MockWith {
                  return $testDate
             }
-            
+
             It "Should throw exception in the set method" {
                 { Set-TargetResource @testParams } | Should Throw "Time window incorrectly formatted."
             }
@@ -849,7 +877,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             Mock -CommandName Get-Date -MockWith {
                  return $testDate
             }
-            
+
             It "Should throw exception in the set method" {
                 { Set-TargetResource @testParams } | Should Throw "Error converting start time"
             }
@@ -869,7 +897,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             Mock -CommandName Get-Date -MockWith {
                  return $testDate
             }
-            
+
             It "Should throw exception in the set method" {
                 { Set-TargetResource @testParams } | Should Throw "Error converting end time"
             }
@@ -889,7 +917,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             Mock -CommandName Get-Date -MockWith {
                  return $testDate
             }
-            
+
             It "Should throw exception in the set method" {
                 { Set-TargetResource @testParams } | Should Throw "Error: Start time cannot be larger than end time"
             }

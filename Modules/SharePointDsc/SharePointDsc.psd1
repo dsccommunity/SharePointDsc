@@ -12,7 +12,7 @@
 # RootModule = ''
 
 # Version number of this module.
-ModuleVersion = '2.3.0.0'
+ModuleVersion = '2.4.0.0'
 
 # ID used to uniquely identify this module
 GUID = '6c1176a0-4fac-4134-8ca2-3fa8a21a7b90'
@@ -128,27 +128,42 @@ PrivateData = @{
 
         # ReleaseNotes of this module
         ReleaseNotes = "
-      * Changes to SharePointDsc
-        * Added a Branches section to the README.md with Codecov and build badges for
-          both master and dev branch.
-      * All Resources
-        * Added information about the Resource Type in each ReadMe.md files.
+      * SPCacheAccounts
+        * Fixed issue where the Test method would fail if SetWebAppPolicy was set to
+          false.
+      * SPDistributedCacheService
+        * Updated resource to allow updating the cache size
       * SPFarm
-        * Fixed issue where the resource throws an exception if the farm already
-          exists and the server has been joined using the FQDN (issue 795)
-      * SPTimerJobState
-        * Fixed issue where the Set method for timerjobs deployed to multiple web
-          applications failed.
+        * Implemented ability to deploy Central Administration site to a server at a
+          later point in time
+      * SPInfoPathFormsServiceConfig
+        * Fixed issue with trying to set the MaxSizeOfUserFormState parameter
+      * SPProductUpdate
+        * Fixed an issue where the resource failed when the search was already paused
+      * SPProjectServerLicense
+        * Fixed issue with incorrect detection of the license
+      * SPSearchContentSource
+        * Fixed issue where the Get method returned a conversion error when the content
+          source contained just one address
+        * Fixed issue 840 where the parameter StartHour was never taken into account
+      * SPSearchServiceApp
+        * Fixed issue where the service account was not set correctly when the service
+          application was first created
+        * Fixed issue where the Get method throws an error when the service app wasn't
+          created properly
+      * SPSearchTopology
+        * Fixed issue where Get method threw an error when the specified service
+          application didn't exist yet.
+      * SPServiceAppSecurity
+        * Fixed issue where error was thrown when no permissions were set on the
+          service application
+      * SPShellAdmins
+        * Updated documentation to specify required permissions for successfully using
+          this resource
       * SPTrustedIdentityTokenIssuerProviderRealms
-        * Added the resource.
+        * Fixed code styling issues
       * SPUserProfileServiceApp
-        * Now supported specifying the host Managed path, and properly sets the host.
-        * Changed error for running with Farm Account into being a warning
-      * SPUserProfileSyncConnection
-        * Added support for filtering disabled users
-        * Fixed issue where UseSSL was set to true resulted in an error
-        * Fixed issue where the connection was recreated when the name contained a
-          dot (SP2016)
+        * Fixed code styling issues
       "
     } # End of PSData hashtable
 
