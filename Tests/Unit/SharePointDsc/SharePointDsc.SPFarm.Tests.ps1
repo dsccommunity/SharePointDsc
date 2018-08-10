@@ -43,6 +43,14 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         Mock -CommandName "Start-Service" -MockWith { }
         Mock -CommandName "Stop-Service" -MockWith { }
         Mock -CommandName "Start-SPServiceInstance" -MockWith { }
+        Mock -CommandName Get-SPDSCInstalledProductVersion {
+            return @{
+                FileMajorPart = $Global:SPDscHelper.CurrentStubBuildNumber.Major
+                FileBuildPart = $Global:SPDscHelper.CurrentStubBuildNumber.Build
+                ProductBuildPart = $Global:SPDscHelper.CurrentStubBuildNumber.Build
+            }
+        }
+
 
         # Test Contexts
         Context -Name "No config databases exists, and this server should be connected to one" -Fixture {
@@ -818,13 +826,6 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     return @{
                         IsAdministrationWebApplication = $true
                         Url = "http://localhost:12345"
-                    }
-                }
-
-                Mock -CommandName Get-SPDSCInstalledProductVersion -MockWith {
-                    return @{
-                        FileMajorPart = 16
-                        FileBuildPart = 4456
                     }
                 }
 
