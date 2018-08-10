@@ -1,7 +1,7 @@
 [CmdletBinding()]
 param(
     [Parameter()]
-    [string] 
+    [string]
     $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
                                          -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
                                          -Resolve)
@@ -20,7 +20,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         # Initialize tests
 
-        # Mocks for all contexts   
+        # Mocks for all contexts
         Mock -CommandName Test-Path -MockWith {
             return $true
         }
@@ -37,6 +37,14 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
         }
 
+        Mock -CommandName Get-SPDSCInstalledProductVersion {
+            return @{
+                FileMajorPart = $Global:SPDscHelper.CurrentStubBuildNumber.Major
+                FileBuildPart = $Global:SPDscHelper.CurrentStubBuildNumber.Build
+                ProductBuildPart = $Global:SPDscHelper.CurrentStubBuildNumber.Build
+            }
+        }
+
         # Test contexts
         Context -Name "Specified update file not found" -Fixture {
             $testParams = @{
@@ -44,8 +52,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Ensure    = "Present"
             }
 
-            Mock -CommandName Test-Path { 
-                return $false 
+            Mock -CommandName Test-Path {
+                return $false
             }
 
             It "Should throw exception in the get method" {
@@ -498,7 +506,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 BinaryDir = "C:\SPInstall"
                 Ensure    = "Present"
             }
-            
+
             Mock -CommandName Get-SPDscFarmProductsInfo -MockWith {
                 switch ($Global:SPDscHelper.CurrentStubBuildNumber.Major)
                 {
@@ -520,13 +528,13 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     }
                 }
             }
-            
+
             Mock -CommandName Get-SPDscRegProductsInfo -MockWith {
                 if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq  15)
                 {
                     return @("Microsoft SharePoint Server 2013")
                 }
-                else 
+                else
                 {
                     if($Global:SPDscHelper.CurrentStubBuildNumber.Minor.ToString().Length -le 4)
                     {
@@ -538,7 +546,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     }
                 }
             }
-            
+
             Mock -CommandName Start-Process -MockWith {
                 return @{
                     ExitCode = 0
@@ -565,7 +573,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 BinaryDir = "C:\SPInstall"
                 Ensure    = "Present"
             }
-            
+
             Mock -CommandName Get-SPDscFarmProductsInfo -MockWith {
                 switch ($Global:SPDscHelper.CurrentStubBuildNumber.Major)
                 {
@@ -587,13 +595,13 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     }
                 }
             }
-            
+
             Mock -CommandName Get-SPDscRegProductsInfo -MockWith {
                 if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq  15)
                 {
                     return @("Microsoft SharePoint Server 2013")
                 }
-                else 
+                else
                 {
                     if($Global:SPDscHelper.CurrentStubBuildNumber.Minor.ToString().Length -le 4)
                     {
@@ -605,7 +613,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     }
                 }
             }
-            
+
             Mock -CommandName Start-Process -MockWith {
                 return @{
                     ExitCode = 17022
@@ -660,7 +668,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 {
                     return @("Microsoft SharePoint Server 2013")
                 }
-                else 
+                else
                 {
                     if($Global:SPDscHelper.CurrentStubBuildNumber.Minor.ToString().Length -le 4)
                     {
@@ -705,7 +713,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     Name = "C:\SPInstall\osmui"
                 }
             }
-            
+
             Mock -CommandName Get-SPDscFarmProductsInfo {
                 switch ($Global:SPDscHelper.CurrentStubBuildNumber.Major)
                 {
@@ -733,7 +741,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 {
                     return @("Microsoft SharePoint Server 2013", "Language Pack for SharePoint and Project Server 2013  - Dutch/Nederlands")
                 }
-                else 
+                else
                 {
                     if($Global:SPDscHelper.CurrentStubBuildNumber.Minor.ToString().Length -le 4)
                     {
@@ -762,7 +770,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     Name = "C:\SPInstall\osmui.xx-xx"
                 }
             }
-            
+
             Mock -CommandName Get-SPDscFarmProductsInfo -MockWith {
                 switch ($Global:SPDscHelper.CurrentStubBuildNumber.Major)
                 {
@@ -790,7 +798,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 {
                     return @("Microsoft SharePoint Server 2013", "Language Pack for SharePoint and Project Server 2013  - Dutch/Nederlands")
                 }
-                else 
+                else
                 {
                     if($Global:SPDscHelper.CurrentStubBuildNumber.Minor.ToString().Length -le 4)
                     {
@@ -802,7 +810,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     }
                 }
             }
-            
+
             It "Should throw exception in the get method" {
                 { Get-TargetResource @testParams } | Should Throw "Error while converting language information:"
             }
@@ -831,7 +839,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             Mock -CommandName Get-Date -MockWith {
                  return $testDate
             }
-            
+
             It "Should return null from the set method" {
                 Set-TargetResource @testParams | Should BeNullOrEmpty
             }
@@ -850,7 +858,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             Mock -CommandName Get-Date -MockWith {
                  return $testDate
             }
-            
+
             It "Should return null from the set method" {
                 Set-TargetResource @testParams | Should BeNullOrEmpty
             }
@@ -869,7 +877,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             Mock -CommandName Get-Date -MockWith {
                  return $testDate
             }
-            
+
             It "Should throw exception in the set method" {
                 { Set-TargetResource @testParams } | Should Throw "Time window incorrectly formatted."
             }
@@ -888,7 +896,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             Mock -CommandName Get-Date -MockWith {
                  return $testDate
             }
-            
+
             It "Should throw exception in the set method" {
                 { Set-TargetResource @testParams } | Should Throw "Error converting start time"
             }
@@ -907,7 +915,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             Mock -CommandName Get-Date -MockWith {
                  return $testDate
             }
-            
+
             It "Should throw exception in the set method" {
                 { Set-TargetResource @testParams } | Should Throw "Error converting end time"
             }
@@ -926,7 +934,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             Mock -CommandName Get-Date -MockWith {
                  return $testDate
             }
-            
+
             It "Should throw exception in the set method" {
                 { Set-TargetResource @testParams } | Should Throw "Error: Start time cannot be larger than end time"
             }
