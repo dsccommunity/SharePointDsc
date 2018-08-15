@@ -123,7 +123,7 @@ function Get-SPDSCBuildVersion
         [string]
         $PathToAssembly
     )
-    return (Get-Command $PathToAssembly).FileVersionInfo.ProductBuildPart
+    return (Get-Command $PathToAssembly).FileVersionInfo.FileBuildPart
 }
 
 function Get-SPDscFarmAccount

@@ -80,9 +80,22 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         }
 
         Mock -CommandName Get-SPDscOSVersion -MockWith {
-            return @{
-                Major = 6
-                Minor = 3
+            if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 16 -and
+                $Global:SPDscHelper.CurrentStubBuildNumber.Build -gt 10000)
+            {
+                # SharePoint 2019
+                return @{
+                    Major = 10
+                    Minor = 0
+                }
+            }
+            else
+            {
+                # SharePoint 2013 / 2016
+                return @{
+                    Major = 6
+                    Minor = 3
+                }
             }
         }
 
@@ -91,6 +104,14 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Name = "ExampleFeature"
                 Installed = $false
             })
+        }
+
+        Mock -CommandName Get-SPDSCAssemblyVersion {
+            return $Global:SPDscHelper.CurrentStubBuildNumber.Major
+        }
+
+        Mock -CommandName Get-SPDSCBuildVersion {
+            return $Global:SPDscHelper.CurrentStubBuildNumber.Build
         }
 
         # Test contexts
@@ -181,23 +202,45 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     }
                 }
                 16 {
-                    Mock -CommandName Get-ItemProperty -ParameterFilter {
-                        $Path -eq "HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall\*"
-                    } -MockWith {
-                        return @(
-                            (New-SPDscMockPrereq -Name "Microsoft CCR and DSS Runtime 2008 R3"),
-                            (New-SPDscMockPrereq -Name "Microsoft Sync Framework Runtime v1.0 SP1 (x64)"),
-                            (New-SPDscMockPrereq -Name "AppFabric 1.1 for Windows Server"),
-                            (New-SPDscMockPrereq -Name "WCF Data Services 5.6.0 Runtime"),
-                            (New-SPDscMockPrereq -Name "Microsoft ODBC Driver 11 for SQL Server"),
-                            (New-SPDscMockPrereq -Name "Microsoft Visual C++ 2012 x64 Minimum Runtime - 11.0.61030"),
-                            (New-SPDscMockPrereq -Name "Microsoft Visual C++ 2012 x64 Additional Runtime - 11.0.61030"),
-                            (New-SPDscMockPrereq -Name "Microsoft Visual C++ 2015 x64 Minimum Runtime - 14.0.23026"),
-                            (New-SPDscMockPrereq -Name "Microsoft Visual C++ 2015 x64 Additional Runtime - 14.0.23026"),
-                            (New-SPDscMockPrereq -Name "Microsoft SQL Server 2012 Native Client"),
-                            (New-SPDscMockPrereq -Name "Active Directory Rights Management Services Client 2.1"),
-                            (New-SPDscMockPrereq -Name "Microsoft Identity Extensions")
-                        )
+                    if ($Global:SPDscHelper.CurrentStubBuildNumber.Build -lt 10000)
+                    {
+                        # SharePoint 2016
+                        Mock -CommandName Get-ItemProperty -ParameterFilter {
+                            $Path -eq "HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall\*"
+                        } -MockWith {
+                            return @(
+                                (New-SPDscMockPrereq -Name "Microsoft CCR and DSS Runtime 2008 R3"),
+                                (New-SPDscMockPrereq -Name "Microsoft Sync Framework Runtime v1.0 SP1 (x64)"),
+                                (New-SPDscMockPrereq -Name "AppFabric 1.1 for Windows Server"),
+                                (New-SPDscMockPrereq -Name "WCF Data Services 5.6.0 Runtime"),
+                                (New-SPDscMockPrereq -Name "Microsoft ODBC Driver 11 for SQL Server"),
+                                (New-SPDscMockPrereq -Name "Microsoft Visual C++ 2012 x64 Minimum Runtime - 11.0.61030"),
+                                (New-SPDscMockPrereq -Name "Microsoft Visual C++ 2012 x64 Additional Runtime - 11.0.61030"),
+                                (New-SPDscMockPrereq -Name "Microsoft Visual C++ 2015 x64 Minimum Runtime - 14.0.23026"),
+                                (New-SPDscMockPrereq -Name "Microsoft Visual C++ 2015 x64 Additional Runtime - 14.0.23026"),
+                                (New-SPDscMockPrereq -Name "Microsoft SQL Server 2012 Native Client"),
+                                (New-SPDscMockPrereq -Name "Active Directory Rights Management Services Client 2.1"),
+                                (New-SPDscMockPrereq -Name "Microsoft Identity Extensions")
+                            )
+                        }
+                    }
+                    else
+                    {
+                        # SharePoint 2019
+                        Mock -CommandName Get-ItemProperty -ParameterFilter {
+                            $Path -eq "HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall\*"
+                        } -MockWith {
+                            return @(
+                                (New-SPDscMockPrereq -Name "Microsoft CCR and DSS Runtime 2008 R3"),
+                                (New-SPDscMockPrereq -Name "Microsoft Sync Framework Runtime v1.0 SP1 (x64)"),
+                                (New-SPDscMockPrereq -Name "AppFabric 1.1 for Windows Server"),
+                                (New-SPDscMockPrereq -Name "WCF Data Services 5.6.0 Runtime"),
+                                (New-SPDscMockPrereq -Name "Microsoft Identity Extensions"),
+                                (New-SPDscMockPrereq -Name "Active Directory Rights Management Services Client 2.1"),
+                                (New-SPDscMockPrereq -Name "Microsoft SQL Server 2012 Native Client"),
+                                (New-SPDscMockPrereq -Name "Microsoft Visual C++ 2017 x64 Additional Runtime - 14.14.10")
+                            )
+                        }
                     }
                 }
                 Default {
@@ -311,7 +354,16 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     $requiredParams = @("SQLNCli","PowerShell","NETFX","IDFX","Sync","AppFabric","IDFX11","MSIPCClient","WCFDataServices","KB2671763","WCFDataServices56")
                 }
                 16 {
-                    $requiredParams = @("SQLNCli","Sync","AppFabric","IDFX11","MSIPCClient","KB3092423","WCFDataServices56","DotNetFx","MSVCRT11","MSVCRT14","ODBC")
+                    if ($Global:SPDscHelper.CurrentStubBuildNumber.Build -lt 10000)
+                    {
+                        # SharePoint 2016
+                        $requiredParams = @("SQLNCli","Sync","AppFabric","IDFX11","MSIPCClient","KB3092423","WCFDataServices56","DotNetFx","MSVCRT11","MSVCRT14","ODBC")
+                    }
+                    else
+                    {
+                        # SharePoint 2019
+                        $requiredParams = @("SQLNCli","Sync","AppFabric","IDFX11","MSIPCClient","KB3092423","WCFDataServices56","DotNet472","MSVCRT141")
+                    }
                 }
                 Default {
                     throw [Exception] "A supported version of SharePoint was not used in testing"
@@ -545,6 +597,49 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 }
 
                 {Set-TargetResource @testParams} | should Throw "Error installing ExampleFeature"
+            }
+        }
+
+        if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 16)
+        {
+            Context -Name "Unsupported OS is used" -Fixture {
+                $testParams = @{
+                    IsSingleInstance = "Yes"
+                    InstallerPath = "C:\SPInstall\Prerequisiteinstaller.exe"
+                    OnlineMode = $true
+                    Ensure = "Present"
+                }
+
+                Mock -CommandName Get-SPDscOSVersion -MockWith {
+                    if ($Global:SPDscHelper.CurrentStubBuildNumber.Build -lt 10000)
+                    {
+                        # SharePoint 2016
+                        return @{
+                            Major = 6
+                            Minor = 2
+                        }
+                    }
+                    else
+                    {
+                        # SharePoint 2019
+                        return @{
+                            Major = 6
+                            Minor = 3
+                        }
+                    }
+                }
+
+                It "Should throw an exception from the get method" {
+                    {Get-TargetResource @testParams} | Should Throw
+                }
+
+                It "Should throw an exception from the test method" {
+                    {Test-TargetResource @testParams} | Should Throw
+                }
+
+                It "Should throw an exception from the set method" {
+                    {Set-TargetResource @testParams} | Should Throw
+                }
             }
         }
     }
