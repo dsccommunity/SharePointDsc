@@ -2,8 +2,15 @@
 
 ## Unreleased
 
+* SPDiagnosticsProvider
+  * Fixed issue where enabling providers did not work
 * SPLogLevel
   * Added High as TraceLevel, which was not included yet
+* SPSearchServiceApp
+  * Updated Set method to check if service application pool exists. Resource
+    will throw an error if it does not exist
+* SPRemoteFarmTrust
+  * Updated readme.md file to add a link that was lost during earlier updates
 * SPSearchTopology
   * Fixed issue where Get method threw an error when the specified service
     application didn't exist yet

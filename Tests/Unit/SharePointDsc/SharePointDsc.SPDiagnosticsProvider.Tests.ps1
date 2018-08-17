@@ -28,6 +28,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             } -PassThru
         }
 
+        Mock -CommandName Set-SPDiagnosticsProvider -MockWith {}
+
         Context -Name "When the Diagnostics Provider passed doesn't exist" -Fixture {
 
             $testParams = @{
@@ -67,6 +69,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
             It "Should properly configure the provider" {
                 Set-TargetResource @testParams
+                Assert-MockCalled Set-SPDiagnosticsProvider
             }
 
             It "Should return a Retention period of 14 from the Get method" {

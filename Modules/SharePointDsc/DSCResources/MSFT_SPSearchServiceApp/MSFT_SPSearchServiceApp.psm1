@@ -69,6 +69,13 @@ function Get-TargetResource
         [void][System.Reflection.Assembly]::LoadWithPartialName("Microsoft.Office.Server.Search")
         [void][System.Reflection.Assembly]::LoadWithPartialName("Microsoft.Office.Server")
 
+        $serviceAppPool = Get-SPServiceApplicationPool $params.ApplicationPool
+        if ($null -eq $serviceAppPool)
+        {
+            Write-Verbose -Message ("Specified service application pool $($params.ApplicationPool) " + `
+                                    "does not exist.")
+        }
+
         $serviceApps = Get-SPServiceApplication -Name $params.Name -ErrorAction SilentlyContinue
 
         $nullReturn = @{
@@ -206,6 +213,13 @@ function Set-TargetResource
         Write-Verbose -Message "Creating Search Service Application $Name"
         Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
             $params = $args[0]
+
+            $serviceAppPool = Get-SPServiceApplicationPool $params.ApplicationPool
+            if ($null -eq $serviceAppPool)
+            {
+                throw ("Specified service application pool $($params.ApplicationPool) does not " + `
+                       "exist. Please make sure it exists before continuing.")
+            }
 
             $serviceInstance = Get-SPEnterpriseSearchServiceInstance -Local
             Start-SPEnterpriseSearchServiceInstance -Identity $serviceInstance `
