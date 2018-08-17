@@ -49,7 +49,8 @@ function Get-TargetResource
         $params = $args[0]
         $ConfirmPreference = 'None'
 
-        $ssa = Get-SPEnterpriseSearchServiceApplication -Identity $params.ServiceAppName
+        $ssa = Get-SPEnterpriseSearchServiceApplication -Identity $params.ServiceAppName `
+                                                        -ErrorAction SilentlyContinue
 
         if ($null -eq $ssa)
         {
@@ -248,6 +249,12 @@ function Set-TargetResource
         # Ensure the search service instance is running on all servers
         foreach($searchServer in $AllSearchServers)
         {
+            if($searchServer -like '*.*')
+            {
+                Write-Verbose -Message "Server name specified in FQDN, extracting just server name."
+                $searchServer = $searchServer.Split('.')[0]
+            }
+
             $searchService = Get-SPEnterpriseSearchServiceInstance -Identity $searchServer `
                                                                    -ErrorAction SilentlyContinue
             if ($null -eq $searchService)
@@ -295,6 +302,12 @@ function Set-TargetResource
         $AllSearchServiceInstances = @{}
         foreach ($server in $AllSearchServers)
         {
+            if($server -like '*.*')
+            {
+                Write-Verbose -Message "Server name specified in FQDN, extracting just server name."
+                $server = $server.Split('.')[0]
+            }
+
             $serverName = $server
             $serviceToAdd = Get-SPEnterpriseSearchServiceInstance -Identity $server `
                                                                   -ErrorAction SilentlyContinue

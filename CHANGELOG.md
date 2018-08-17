@@ -1,5 +1,16 @@
 # Change log for SharePointDsc
 
+## Unreleased
+
+* SPLogLevel
+  * Added High as TraceLevel, which was not included yet
+* SPSearchTopology
+  * Fixed issue where Get method threw an error when the specified service
+    application didn't exist yet
+  * Fixed issue where the resource would fail is the FQDN was specified
+* SPTrustedIdentityTokenIssuerProviderRealm
+  * Fixed issue where Get method threw an error when the realm didn't exist yet
+
 ## 2.4
 
 * SPCacheAccounts

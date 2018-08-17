@@ -47,9 +47,9 @@ function Get-TargetResource
             }
         }
 
-        if ($null -ne $DesiredSetting.TraceLevel -and @("None","Unexpected","Monitorable","Medium","Verbose","VerboseEx","Default") -notcontains $DesiredSetting.TraceLevel)
+        if ($null -ne $DesiredSetting.TraceLevel -and @("None","Unexpected","Monitorable","High","Medium","Verbose","VerboseEx","Default") -notcontains $DesiredSetting.TraceLevel)
         {
-            Write-Verbose -Message "TraceLevel $($DesiredSetting.TraceLevel) is not valid, must specify exactly one of None,Unexpected,Monitorable,Medium,Verbose,VerboseEx, or Default"
+            Write-Verbose -Message "TraceLevel $($DesiredSetting.TraceLevel) is not valid, must specify exactly one of None,Unexpected,Monitorable,High,Medium,Verbose,VerboseEx, or Default"
             return @{
                 Name = $Name
                 SPLogLevelSetting = $null
@@ -194,9 +194,9 @@ function Set-TargetResource
             throw "TraceLevel and / or EventLevel must be provided for each Area"
         }
 
-        if ($null -ne $DesiredSetting.TraceLevel -and @("None","Unexpected","Monitorable","Medium","Verbose","VerboseEx","Default") -notcontains $DesiredSetting.TraceLevel)
+        if ($null -ne $DesiredSetting.TraceLevel -and @("None","Unexpected","Monitorable","High","Medium","Verbose","VerboseEx","Default") -notcontains $DesiredSetting.TraceLevel)
         {
-            throw "TraceLevel $($DesiredSetting.TraceLevel) is not valid, must specify exactly one of None,Unexpected,Monitorable,Medium,Verbose,VerboseEx, or Default"
+            throw "TraceLevel $($DesiredSetting.TraceLevel) is not valid, must specify exactly one of None,Unexpected,Monitorable,High,Medium,Verbose,VerboseEx, or Default"
         }
 
         if ($null -ne $DesiredSetting.EventLevel -and @("None","ErrorCritical","Error","Warning","Information","Verbose","Default") -notcontains $DesiredSetting.EventLevel)
