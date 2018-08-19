@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+* SPDatabaseAAG
+  * Updated readme.md to specify that this resource also updates the database
+    connection string
 * SPDiagnosticsProvider
   * Fixed issue where enabling providers did not work
 * SPLogLevel
