@@ -2,6 +2,8 @@
 
 ## v3.0
 
+* Changes to SharePointDsc
+  * Add support for SharePoint 2019 Public Preview
 * SPConfigWizard
   * Fixed check for Ensure=Absent in the Set method
 * SPSearchContentSource

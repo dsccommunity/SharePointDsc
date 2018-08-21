@@ -119,7 +119,7 @@ function Set-TargetResource
     {
         15
         {
-            <# Exception: One of the SP2016 specific parameter was passed with SP2013 #>
+            <# Exception: One of the SP2016/SP2019 specific parameter was passed with SP2013 #>
             if($PSBoundParameters.ContainsKey("SuiteNavBrandingLogoNavigationUrl") `
             -or $PSBoundParameters.ContainsKey("SuiteNavBrandingLogoTitle") `
             -or $PSBoundParameters.ContainsKey("SuiteNavBrandingLogoUrl") `
@@ -142,12 +142,12 @@ function Set-TargetResource
             <# Exception: The SP2013 specific SuiteBarBrandingElementHtml parameter was passed with SP2016. #>
             if($PSBoundParameters.ContainsKey("SuiteBarBrandingElementHtml"))
             {
-                throw ("Cannot specify SuiteBarBrandingElementHtml with SharePoint 2016. Instead," + `
+                throw ("Cannot specify SuiteBarBrandingElementHtml with SharePoint 2016 and 2019. Instead," + `
                                         " use the SuiteNavBrandingLogoNavigationUrl, SuiteNavBrandingLogoTitle, " + `
                                         "SuiteNavBrandingLogoUrl and SuiteNavBrandingText parameters")
             }
 
-            <# Exception: All the optional parameters are null for SP2016. #>
+            <# Exception: All the optional parameters are null for SP2016/SP2019. #>
             if(!$PSBoundParameters.ContainsKey("SuiteNavBrandingLogoNavigationUrl") `
             -and !$PSBoundParameters.ContainsKey("SuiteNavBrandingLogoTitle") `
             -and !$PSBoundParameters.ContainsKey("SuiteNavBrandingLogoUrl") `
@@ -155,7 +155,7 @@ function Set-TargetResource
             {
                 throw ("You need to specify a value for either SuiteNavBrandingLogoNavigationUrl" + `
                                         ", SuiteNavBrandingLogoTitle, SuiteNavBrandingLogoUrl and SuiteNavBrandingText " + `
-                                        "with SharePoint 2016")
+                                        "with SharePoint 2016 and 2019")
             }
         }
     }

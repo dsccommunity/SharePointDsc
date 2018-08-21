@@ -1,6 +1,6 @@
 <#
 .EXAMPLE
-    This module will install the prerequisites for SharePoint 2016. This resource will run in
+    This module will install the prerequisites for SharePoint 2016/2019. This resource will run in
     offline mode, running all prerequisite installations from the specified paths.
 #>
 

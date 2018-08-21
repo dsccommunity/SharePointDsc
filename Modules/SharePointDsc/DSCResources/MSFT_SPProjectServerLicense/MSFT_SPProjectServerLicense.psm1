@@ -28,7 +28,7 @@ function Get-TargetResource
     if ((Get-SPDSCInstalledProductVersion).FileMajorPart -lt 16)
     {
         throw [Exception] ("Support for Project Server in SharePointDsc is only valid for " + `
-                           "SharePoint 2016.")
+                           "SharePoint 2016 and 2019.")
     }
 
     $result = Invoke-SPDSCCommand -Credential $InstallAccount `
@@ -40,7 +40,7 @@ function Get-TargetResource
         {
             $currentLicense = Get-ProjectServerLicense
 
-            if ($currentLicense[0] -match "Project Server [0-9]{4} : (?<Status>[a-zA-Z]+)")
+            if ($currentLicense[0] -match "Project Server [0-9]{4} \w*: (?<Status>[a-zA-Z]+)")
             {
                 if ($Matches.Status -eq "Active")
                 {
@@ -113,7 +113,7 @@ function Set-TargetResource
     if ((Get-SPDSCInstalledProductVersion).FileMajorPart -lt 16)
     {
         throw [Exception] ("Support for Project Server in SharePointDsc is only valid for " + `
-                           "SharePoint 2016.")
+                           "SharePoint 2016 and 2019.")
     }
 
     if ($Ensure -eq "Present" -and $PSBoundParameters.ContainsKey("ProductKey") -eq $false)

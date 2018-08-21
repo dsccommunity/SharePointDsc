@@ -123,7 +123,7 @@ function Get-TargetResource
     if ((Get-SPDSCInstalledProductVersion).FileMajorPart -ne 15) 
     {
         throw [Exception] ("Only SharePoint 2013 is supported to deploy Excel Services " + `
-                           "service applications via DSC, as SharePoint 2016 deprecated " + `
+                           "service applications via DSC, as SharePoint 2016 and SharePoint 2019 deprecated " + `
                            "this service. See " + `
                            "https://technet.microsoft.com/en-us/library/mt346112(v=office.16).aspx " + `
                            "for more info.")
@@ -314,7 +314,7 @@ function Set-TargetResource
     if ((Get-SPDSCInstalledProductVersion).FileMajorPart -ne 15) 
     {
         throw [Exception] ("Only SharePoint 2013 is supported to deploy Excel Services " + `
-                           "service applications via DSC, as SharePoint 2016 deprecated " + `
+                           "service applications via DSC, as SharePoint 2016 and SharePoint 2019 are deprecated " + `
                            "this service. See " + `
                            "https://technet.microsoft.com/en-us/library/mt346112(v=office.16).aspx " + `
                            "for more info.")
@@ -572,7 +572,7 @@ function Test-TargetResource
     if ((Get-SPDSCInstalledProductVersion).FileMajorPart -ne 15) 
     {
         throw [Exception] ("Only SharePoint 2013 is supported to deploy Excel Services " + `
-                           "service applications via DSC, as SharePoint 2016 deprecated " + `
+                           "service applications via DSC, as SharePoint 2016 and SharePoint 2019 are deprecated " + `
                            "this service. See " + `
                            "https://technet.microsoft.com/en-us/library/mt346112(v=office.16).aspx " + `
                            "for more info.")
