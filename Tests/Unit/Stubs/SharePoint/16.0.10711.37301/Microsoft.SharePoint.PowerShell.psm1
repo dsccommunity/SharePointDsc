@@ -19,6 +19,8 @@ param(
     [Parameter(ValueFromPipeline=$true)]
     [object]
     ${AssignmentCollection})
+
+
  }
 
 
@@ -33,6 +35,8 @@ param(
     [Parameter(ValueFromPipeline=$true)]
     [object]
     ${AssignmentCollection})
+
+
  }
 
 
@@ -56,6 +60,8 @@ param(
     [Parameter(ValueFromPipeline=$true)]
     [object]
     ${AssignmentCollection})
+
+
  }
 
 
@@ -104,6 +110,8 @@ param(
     [Parameter(ValueFromPipeline=$true)]
     [object]
     ${AssignmentCollection})
+
+
  }
 
 
@@ -123,6 +131,8 @@ param(
     [Parameter(ValueFromPipeline=$true)]
     [object]
     ${AssignmentCollection})
+
+
  }
 
 
@@ -136,6 +146,8 @@ param(
     [Parameter(ValueFromPipeline=$true)]
     [object]
     ${AssignmentCollection})
+
+
  }
 
 
@@ -160,6 +172,8 @@ param(
     [Parameter(ValueFromPipeline=$true)]
     [object]
     ${AssignmentCollection})
+
+
  }
 
 
@@ -184,6 +198,8 @@ param(
     [Parameter(ValueFromPipeline=$true)]
     [object]
     ${AssignmentCollection})
+
+
  }
 
 
@@ -244,6 +260,8 @@ param(
     [Parameter(ValueFromPipeline=$true)]
     [object]
     ${AssignmentCollection})
+
+
  }
 
 
@@ -278,6 +296,8 @@ param(
     [Parameter(ValueFromPipeline=$true)]
     [object]
     ${AssignmentCollection})
+
+
  }
 
 
@@ -300,6 +320,8 @@ param(
     [Parameter(ValueFromPipeline=$true)]
     [object]
     ${AssignmentCollection})
+
+
  }
 
 
@@ -335,7 +357,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Add-SPScaleOutDatabase {
@@ -370,7 +392,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Add-SPSecureStoreSystemAccount {
@@ -386,7 +408,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Add-SPServerScaleOutDatabase {
@@ -421,7 +443,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Add-SPServiceApplicationProxyGroupMember {
@@ -443,7 +465,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Add-SPShellAdmin {
@@ -462,7 +484,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Add-SPSiteSubscriptionFeaturePackMember {
@@ -483,7 +505,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Add-SPSiteSubscriptionProfileConfig {
@@ -518,7 +540,10 @@ param(
 
     [Parameter(ValueFromPipeline=$true)]
     [object]
-    ${AssignmentCollection})}
+    ${AssignmentCollection})
+
+
+ }
 
 
 function Add-SPSolution {
@@ -536,7 +561,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Add-SPThrottlingRule {
@@ -569,7 +594,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Add-SPUserLicenseMapping {
@@ -577,14 +602,15 @@ function Add-SPUserLicenseMapping {
 param(
     [Parameter(Mandatory=$true, ValueFromPipeline=$true, ValueFromPipelineByPropertyName=$true, ValueFromRemainingArguments=$true)]
     [ValidateNotNullOrEmpty()]
-    [System.Collections.Generic.List`1[[object]
+    [System.Collections.Generic.List`1[[object]]]
     ${Mapping},
 
     [Parameter(ValueFromPipeline=$true)]
     [object]
     ${AssignmentCollection})
 
-}
+
+ }
 
 
 function Add-SPUserSolution {
@@ -603,7 +629,8 @@ param(
     [object]
     ${AssignmentCollection})
 
-}
+
+ }
 
 
 function Backup-SPConfigurationDatabase {
@@ -635,7 +662,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Backup-SPEnterpriseSearchServiceApplicationIndex {
@@ -678,7 +705,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Backup-SPFarm {
@@ -720,7 +747,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Backup-SPSite {
@@ -751,7 +778,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Clear-SPAppDeniedEndpointList {
@@ -762,7 +789,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Clear-SPBusinessDataCatalogEntityNotificationWeb {
@@ -778,7 +805,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Clear-SPContentDatabaseSyncData {
@@ -793,7 +820,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Clear-SPDistributedCacheItem {
@@ -809,7 +836,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Clear-SPLogLevel {
@@ -827,7 +854,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Clear-SPMetadataWebServicePartitionData {
@@ -860,7 +887,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Clear-SPPerformancePointServiceApplicationTrustedLocation {
@@ -878,7 +905,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Clear-SPScaleOutDatabaseDeletedDataSubRange {
@@ -903,7 +930,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Clear-SPScaleOutDatabaseLog {
@@ -922,7 +949,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Clear-SPScaleOutDatabaseTenantData {
@@ -941,7 +968,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Clear-SPSecureStoreCredentialMapping {
@@ -971,7 +998,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Clear-SPSecureStoreDefaultProvider {
@@ -982,7 +1009,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Clear-SPServerScaleOutDatabaseDeletedDataSubRange {
@@ -1007,7 +1034,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Clear-SPServerScaleOutDatabaseLog {
@@ -1026,7 +1053,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Clear-SPServerScaleOutDatabaseTenantData {
@@ -1045,7 +1072,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Clear-SPSiteSubscriptionBusinessDataCatalogConfig {
@@ -1061,7 +1088,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Connect-SPConfigurationDatabase {
@@ -1092,7 +1119,8 @@ param(
     ${DatabaseFailOverPartner},
 
     [ValidateSet('Application','ApplicationWithSearch','Custom','DistributedCache','Search','SingleServerFarm','WebFrontEnd','WebFrontEndWithDistributedCache')]
-    [System.Nullable[object]]
+    [object]
+	#[System.Nullable[object]]
     ${LocalServerRole},
 
     [Parameter(ValueFromPipeline=$true)]
@@ -1100,7 +1128,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Convert-SPWebApplication {
@@ -1172,7 +1200,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Copy-SPActivitiesToWorkflowService {
@@ -1195,7 +1223,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Copy-SPBusinessDataCatalogAclToChildren {
@@ -1211,7 +1239,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Copy-SPContentTypes {
@@ -1248,7 +1276,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Copy-SPSideBySideFiles {
@@ -1262,7 +1290,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Copy-SPSite {
@@ -1291,7 +1319,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Copy-SPTaxonomyGroups {
@@ -1328,7 +1356,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Disable-ProjectServerLicense {
@@ -1339,7 +1367,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Disable-SPAppAutoProvision {
@@ -1353,7 +1381,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Disable-SPBusinessDataCatalogEntity {
@@ -1369,7 +1397,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Disable-SPFeature {
@@ -1390,7 +1418,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Disable-SPHealthAnalysisRule {
@@ -1405,7 +1433,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Disable-SPProjectActiveDirectoryEnterpriseResourcePoolSync {
@@ -1421,7 +1449,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Disable-SPProjectEmailNotification {
@@ -1437,7 +1465,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Disable-SPProjectEnterpriseProjectTaskSync {
@@ -1452,7 +1480,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Disable-SPProjectQueueStatsMonitoring {
@@ -1463,7 +1491,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Disable-SPSessionStateService {
@@ -1474,7 +1502,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Disable-SPSingleSignOn {
@@ -1490,7 +1518,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Disable-SPTimerJob {
@@ -1505,7 +1533,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Disable-SPUserLicensing {
@@ -1516,7 +1544,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Disable-SPUserSolutionAllowList {
@@ -1527,7 +1555,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Disable-SPWebApplicationHttpThrottling {
@@ -1542,7 +1570,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Disable-SPWebTemplateForSiteMaster {
@@ -1560,7 +1588,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Disconnect-SPConfigurationDatabase {
@@ -1571,7 +1599,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Dismount-SPContentDatabase {
@@ -1587,7 +1615,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Dismount-SPStateServiceDatabase {
@@ -1603,7 +1631,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Enable-ProjectServerLicense {
@@ -1619,7 +1647,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Enable-SPAppAutoProvision {
@@ -1633,7 +1661,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Enable-SPBusinessDataCatalogEntity {
@@ -1649,7 +1677,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Enable-SPFeature {
@@ -1678,7 +1706,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Enable-SPHealthAnalysisRule {
@@ -1693,7 +1721,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Enable-SPProjectActiveDirectoryEnterpriseResourcePoolSync {
@@ -1714,7 +1742,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Enable-SPProjectEmailNotification {
@@ -1730,7 +1758,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Enable-SPProjectEnterpriseProjectTaskSync {
@@ -1745,7 +1773,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Enable-SPProjectQueueStatsMonitoring {
@@ -1756,7 +1784,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Enable-SPSessionStateService {
@@ -1786,7 +1814,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Enable-SPTimerJob {
@@ -1801,7 +1829,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Enable-SPUserLicensing {
@@ -1812,7 +1840,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Enable-SPUserSolutionAllowList {
@@ -1823,7 +1851,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Enable-SPWebApplicationHttpThrottling {
@@ -1838,7 +1866,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Enable-SPWebTemplateForSiteMaster {
@@ -1856,7 +1884,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Export-SPAppPackage {
@@ -1877,7 +1905,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Export-SPBusinessDataCatalogModel {
@@ -1919,7 +1947,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Export-SPEnterpriseSearchTopology {
@@ -1938,7 +1966,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Export-SPInfoPathAdministrationFiles {
@@ -1956,7 +1984,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Export-SPMetadataWebServicePartitionData {
@@ -1984,7 +2012,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Export-SPPerformancePointContent {
@@ -2003,7 +2031,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Export-SPScaleOutDatabaseTenantData {
@@ -2029,7 +2057,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Export-SPServerScaleOutDatabaseTenantData {
@@ -2055,7 +2083,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Export-SPSiteSubscriptionBusinessDataCatalogConfig {
@@ -2094,7 +2122,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Export-SPSiteSubscriptionSettings {
@@ -2121,7 +2149,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Export-SPTagsAndNotesData {
@@ -2142,7 +2170,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Export-SPWeb {
@@ -2197,7 +2225,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-AvailabilityGroupStatus {
@@ -2211,7 +2239,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-ProjectServerLicense {
@@ -2222,7 +2250,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPAlternateURL {
@@ -2248,7 +2276,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPAppAcquisitionConfiguration {
@@ -2267,7 +2295,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPAppAutoProvisionConnection {
@@ -2284,7 +2312,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPAppDeniedEndpointList {
@@ -2295,7 +2323,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPAppDisablingConfiguration {
@@ -2306,7 +2334,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPAppDomain {
@@ -2317,7 +2345,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPAppHostingQuotaConfiguration {
@@ -2333,7 +2361,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPAppInstance {
@@ -2368,7 +2396,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPAppPrincipal {
@@ -2389,7 +2417,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPAppScaleProfile {
@@ -2400,7 +2428,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPAppSiteSubscriptionName {
@@ -2414,7 +2442,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPAppStateSyncLastRunTime {
@@ -2425,7 +2453,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPAppStateUpdateInterval {
@@ -2436,7 +2464,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPAppStoreConfiguration {
@@ -2447,7 +2475,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPAppStoreWebServiceConfiguration {
@@ -2458,7 +2486,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPAuthenticationProvider {
@@ -2483,7 +2511,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPAuthenticationRealm {
@@ -2499,7 +2527,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPBackupHistory {
@@ -2520,7 +2548,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPBingMapsBlock {
@@ -2531,7 +2559,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPBingMapsKey {
@@ -2542,7 +2570,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPBrowserCustomerExperienceImprovementProgram {
@@ -2565,7 +2593,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPBusinessDataCatalogEntityNotificationWeb {
@@ -2581,7 +2609,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPBusinessDataCatalogMetadataObject {
@@ -2610,7 +2638,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPBusinessDataCatalogThrottleConfig {
@@ -2638,7 +2666,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPCacheApplicationSetting {
@@ -2649,7 +2677,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPCertificateAuthority {
@@ -2660,7 +2688,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPClaimProvider {
@@ -2675,7 +2703,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPClaimProviderManager {
@@ -2686,7 +2714,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPClaimTypeEncoding {
@@ -2704,7 +2732,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPConnectedServiceApplicationInformation {
@@ -2719,7 +2747,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPContentDatabase {
@@ -2772,7 +2800,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPContentDatabaseOrphanedData {
@@ -2788,7 +2816,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPContentDeploymentJob {
@@ -2807,7 +2835,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPContentDeploymentPath {
@@ -2822,7 +2850,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPCustomLayoutsPage {
@@ -2844,7 +2872,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPDatabase {
@@ -2868,7 +2896,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPDataConnectionFile {
@@ -2883,7 +2911,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPDataConnectionFileDependent {
@@ -2898,7 +2926,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPDeletedSite {
@@ -2934,7 +2962,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPDesignerSettings {
@@ -2949,7 +2977,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPDiagnosticConfig {
@@ -2960,7 +2988,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPDiagnosticsPerformanceCounter {
@@ -2979,7 +3007,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPDiagnosticsProvider {
@@ -2994,7 +3022,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPDistributedCacheClientSetting {
@@ -3010,7 +3038,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPEnterpriseSearchAdministrationComponent {
@@ -3025,7 +3053,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPEnterpriseSearchComponent {
@@ -3047,7 +3075,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPEnterpriseSearchContentEnrichmentConfiguration {
@@ -3062,7 +3090,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPEnterpriseSearchCrawlContentSource {
@@ -3081,7 +3109,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPEnterpriseSearchCrawlCustomConnector {
@@ -3100,7 +3128,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPEnterpriseSearchCrawlDatabase {
@@ -3119,7 +3147,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPEnterpriseSearchCrawlExtension {
@@ -3138,7 +3166,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPEnterpriseSearchCrawlLogReadPermission {
@@ -3157,7 +3185,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPEnterpriseSearchCrawlMapping {
@@ -3176,7 +3204,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPEnterpriseSearchCrawlRule {
@@ -3195,7 +3223,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPEnterpriseSearchFileFormat {
@@ -3214,7 +3242,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPEnterpriseSearchHostController {
@@ -3228,7 +3256,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPEnterpriseSearchLanguageResourcePhrase {
@@ -3264,7 +3292,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPEnterpriseSearchLinguisticComponentsStatus {
@@ -3283,7 +3311,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPEnterpriseSearchLinksDatabase {
@@ -3302,7 +3330,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPEnterpriseSearchMetadataCategory {
@@ -3327,7 +3355,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPEnterpriseSearchMetadataCrawledProperty {
@@ -3368,7 +3396,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPEnterpriseSearchMetadataManagedProperty {
@@ -3396,7 +3424,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPEnterpriseSearchMetadataMapping {
@@ -3423,7 +3451,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPEnterpriseSearchOwner {
@@ -3446,7 +3474,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPEnterpriseSearchPropertyRule {
@@ -3465,7 +3493,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPEnterpriseSearchPropertyRuleCollection {
@@ -3476,7 +3504,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPEnterpriseSearchQueryAndSiteSettingsService {
@@ -3487,7 +3515,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPEnterpriseSearchQueryAndSiteSettingsServiceInstance {
@@ -3505,7 +3533,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPEnterpriseSearchQueryAndSiteSettingsServiceProxy {
@@ -3516,7 +3544,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPEnterpriseSearchQueryAuthority {
@@ -3540,7 +3568,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPEnterpriseSearchQueryDemoted {
@@ -3564,7 +3592,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPEnterpriseSearchQueryKeyword {
@@ -3583,7 +3611,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPEnterpriseSearchQueryScope {
@@ -3606,7 +3634,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPEnterpriseSearchQueryScopeRule {
@@ -3632,7 +3660,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPEnterpriseSearchQuerySpellingCorrection {
@@ -3651,7 +3679,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPEnterpriseSearchQuerySuggestionCandidates {
@@ -3674,7 +3702,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPEnterpriseSearchRankingModel {
@@ -3698,7 +3726,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPEnterpriseSearchResultItemType {
@@ -3726,7 +3754,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPEnterpriseSearchResultSource {
@@ -3750,7 +3778,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPEnterpriseSearchSecurityTrimmer {
@@ -3769,7 +3797,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPEnterpriseSearchService {
@@ -3780,7 +3808,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPEnterpriseSearchServiceApplication {
@@ -3795,7 +3823,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPEnterpriseSearchServiceApplicationBackupStore {
@@ -3826,7 +3854,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPEnterpriseSearchServiceApplicationProxy {
@@ -3841,7 +3869,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPEnterpriseSearchServiceInstance {
@@ -3859,7 +3887,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPEnterpriseSearchSiteHitRule {
@@ -3878,7 +3906,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPEnterpriseSearchStatus {
@@ -3921,7 +3949,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPEnterpriseSearchTopology {
@@ -3943,7 +3971,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPEnterpriseSearchVssDataPath {
@@ -3954,7 +3982,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPFarm {
@@ -3965,7 +3993,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPFarmConfig {
@@ -3979,7 +4007,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPFeature {
@@ -4021,7 +4049,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPHealthAnalysisRule {
@@ -4036,7 +4064,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPHelpCollection {
@@ -4050,7 +4078,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPInfoPathFormsService {
@@ -4064,7 +4092,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPInfoPathFormTemplate {
@@ -4079,7 +4107,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPInfoPathUserAgent {
@@ -4094,7 +4122,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPInfoPathWebServiceProxy {
@@ -4109,7 +4137,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPInsightsConfig {
@@ -4120,7 +4148,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPInternalAppStateSyncLastRunTime {
@@ -4131,7 +4159,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPInternalAppStateUpdateInterval {
@@ -4142,7 +4170,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPIRMSettings {
@@ -4153,7 +4181,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPLogEvent {
@@ -4191,7 +4219,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPLogLevel {
@@ -4206,7 +4234,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPManagedAccount {
@@ -4233,7 +4261,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPManagedPath {
@@ -4256,7 +4284,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPMetadataServiceApplication {
@@ -4271,7 +4299,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPMetadataServiceApplicationProxy {
@@ -4286,7 +4314,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPMicrofeedOptions {
@@ -4307,7 +4335,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPMobileMessagingAccount {
@@ -4327,7 +4355,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPO365LinkSettings {
@@ -4338,7 +4366,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPODataConnectionSetting {
@@ -4359,7 +4387,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPODataConnectionSettingMetadata {
@@ -4381,7 +4409,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPOfficeStoreAppsDefaultActivation {
@@ -4400,7 +4428,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPPendingUpgradeActions {
@@ -4421,7 +4449,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPPerformancePointServiceApplication {
@@ -4436,7 +4464,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPPerformancePointServiceApplicationTrustedLocation {
@@ -4455,7 +4483,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPPluggableSecurityTrimmer {
@@ -4471,7 +4499,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPProcessAccount {
@@ -4494,7 +4522,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPProduct {
@@ -4513,7 +4541,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPProfileLeader {
@@ -4534,7 +4562,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPProfileServiceApplicationSecurity {
@@ -4558,7 +4586,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPProjectDatabaseQuota {
@@ -4574,7 +4602,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPProjectDatabaseUsage {
@@ -4590,7 +4618,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPProjectEnterpriseProjectTaskSync {
@@ -4605,7 +4633,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPProjectEventServiceSettings {
@@ -4616,7 +4644,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPProjectIsEmailNotificationEnabled {
@@ -4632,7 +4660,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPProjectOdataConfiguration {
@@ -4643,7 +4671,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPProjectPCSSettings {
@@ -4659,7 +4687,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPProjectPermissionMode {
@@ -4675,7 +4703,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPProjectQueueSettings {
@@ -4691,7 +4719,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPProjectReportingTimephasedMode {
@@ -4707,7 +4735,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPProjectWebInstance {
@@ -4726,7 +4754,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPRequestManagementSettings {
@@ -4742,7 +4770,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPRoutingMachineInfo {
@@ -4766,7 +4794,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPRoutingMachinePool {
@@ -4786,7 +4814,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPRoutingRule {
@@ -4806,7 +4834,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPScaleOutDatabase {
@@ -4821,7 +4849,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPScaleOutDatabaseDataState {
@@ -4846,7 +4874,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPScaleOutDatabaseInconsistency {
@@ -4861,7 +4889,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPScaleOutDatabaseLogEntry {
@@ -4890,7 +4918,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPSecureStoreApplication {
@@ -4914,7 +4942,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPSecureStoreSystemAccount {
@@ -4925,7 +4953,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPSecurityTokenServiceConfig {
@@ -4936,7 +4964,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPServer {
@@ -4952,7 +4980,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPServerScaleOutDatabase {
@@ -4967,7 +4995,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPServerScaleOutDatabaseDataState {
@@ -4992,7 +5020,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPServerScaleOutDatabaseInconsistency {
@@ -5007,7 +5035,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPServerScaleOutDatabaseLogEntry {
@@ -5036,7 +5064,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPService {
@@ -5054,7 +5082,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPServiceApplication {
@@ -5072,7 +5100,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPServiceApplicationEndpoint {
@@ -5095,7 +5123,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPServiceApplicationPool {
@@ -5110,7 +5138,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPServiceApplicationProxy {
@@ -5125,7 +5153,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPServiceApplicationProxyGroup {
@@ -5144,7 +5172,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPServiceApplicationSecurity {
@@ -5163,7 +5191,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPServiceContext {
@@ -5182,7 +5210,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPServiceHostConfig {
@@ -5196,7 +5224,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPServiceInstance {
@@ -5218,7 +5246,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPSessionStateService {
@@ -5229,7 +5257,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPShellAdmin {
@@ -5244,7 +5272,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPSite {
@@ -5288,7 +5316,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPSiteAdministration {
@@ -5325,7 +5353,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPSiteMaster {
@@ -5340,7 +5368,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPSiteSubscription {
@@ -5355,7 +5383,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPSiteSubscriptionConfig {
@@ -5371,7 +5399,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPSiteSubscriptionEdiscoveryHub {
@@ -5386,7 +5414,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPSiteSubscriptionEdiscoverySearchScope {
@@ -5401,7 +5429,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPSiteSubscriptionFeaturePack {
@@ -5420,7 +5448,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPSiteSubscriptionIRMConfig {
@@ -5436,7 +5464,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPSiteSubscriptionMetadataConfig {
@@ -5455,7 +5483,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPSiteUpgradeSessionInfo {
@@ -5494,7 +5522,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPSiteURL {
@@ -5509,7 +5537,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPSolution {
@@ -5524,7 +5552,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPStateServiceApplication {
@@ -5540,7 +5568,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPStateServiceApplicationProxy {
@@ -5556,7 +5584,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPStateServiceDatabase {
@@ -5577,7 +5605,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPTaxonomySession {
@@ -5592,7 +5620,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPThrottlingRule {
@@ -5612,7 +5640,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPTimerJob {
@@ -5635,7 +5663,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPTopologyServiceApplication {
@@ -5650,7 +5678,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPTopologyServiceApplicationProxy {
@@ -5665,7 +5693,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPTranslationThrottlingSetting {
@@ -5679,7 +5707,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPTrustedIdentityTokenIssuer {
@@ -5695,7 +5723,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPTrustedRootAuthority {
@@ -5711,7 +5739,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPTrustedSecurityTokenIssuer {
@@ -5726,7 +5754,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPTrustedServiceTokenIssuer {
@@ -5741,7 +5769,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPUpgradeActions {
@@ -5752,7 +5780,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPUsageApplication {
@@ -5771,7 +5799,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPUsageDefinition {
@@ -5786,7 +5814,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPUsageService {
@@ -5801,7 +5829,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPUser {
@@ -5829,7 +5857,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPUserLicense {
@@ -5840,7 +5868,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPUserLicenseMapping {
@@ -5856,7 +5884,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPUserLicensing {
@@ -5867,7 +5895,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPUserSettingsProvider {
@@ -5882,7 +5910,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPUserSettingsProviderManager {
@@ -5893,7 +5921,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPUserSolution {
@@ -5912,7 +5940,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPUserSolutionAllowList {
@@ -5928,7 +5956,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPWeb {
@@ -5956,7 +5984,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPWebApplication {
@@ -5974,7 +6002,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPWebApplicationAppDomain {
@@ -6000,7 +6028,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPWebApplicationHttpThrottlingMonitor {
@@ -6015,7 +6043,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPWebPartPack {
@@ -6038,7 +6066,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPWebTemplate {
@@ -6056,7 +6084,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPWebTemplatesEnabledForSiteMaster {
@@ -6067,7 +6095,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPWOPIBinding {
@@ -6103,7 +6131,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPWOPISuppressionSetting {
@@ -6114,7 +6142,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPWOPIZone {
@@ -6125,7 +6153,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPWorkflowConfig {
@@ -6144,7 +6172,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Get-SPWorkflowServiceApplicationProxy {
@@ -6155,7 +6183,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Grant-SPBusinessDataCatalogMetadataObject {
@@ -6183,7 +6211,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Grant-SPObjectSecurity {
@@ -6212,7 +6240,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Import-SPAppPackage {
@@ -6243,7 +6271,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Import-SPBusinessDataCatalogDotNetAssembly {
@@ -6268,7 +6296,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Import-SPBusinessDataCatalogModel {
@@ -6312,7 +6340,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Import-SPEnterpriseSearchCustomExtractionDictionary {
@@ -6336,7 +6364,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Import-SPEnterpriseSearchPopularQueries {
@@ -6362,7 +6390,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Import-SPEnterpriseSearchThesaurus {
@@ -6381,7 +6409,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Import-SPEnterpriseSearchTopology {
@@ -6400,7 +6428,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Import-SPInfoPathAdministrationFiles {
@@ -6418,7 +6446,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Import-SPMetadataWebServicePartitionData {
@@ -6457,7 +6485,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Import-SPPerformancePointContent {
@@ -6488,7 +6516,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Import-SPScaleOutDatabaseTenantData {
@@ -6511,7 +6539,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Import-SPServerScaleOutDatabaseTenantData {
@@ -6534,7 +6562,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Import-SPSiteSubscriptionBusinessDataCatalogConfig {
@@ -6570,7 +6598,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Import-SPSiteSubscriptionSettings {
@@ -6597,7 +6625,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Import-SPWeb {
@@ -6646,7 +6674,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Initialize-SPResourceSecurity {
@@ -6657,7 +6685,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Initialize-SPStateServiceDatabase {
@@ -6673,7 +6701,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Install-SPApp {
@@ -6694,7 +6722,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Install-SPApplicationContent {
@@ -6705,7 +6733,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Install-SPDataConnectionFile {
@@ -6731,7 +6759,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Install-SPFeature {
@@ -6766,7 +6794,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Install-SPHelpCollection {
@@ -6786,7 +6814,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Install-SPService {
@@ -6800,7 +6828,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Install-SPSolution {
@@ -6859,7 +6887,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Install-SPUserSolution {
@@ -6878,7 +6906,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Install-SPWebPartPack {
@@ -6916,7 +6944,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Invoke-SPProjectActiveDirectoryEnterpriseResourcePoolSync {
@@ -6932,7 +6960,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Invoke-SPProjectActiveDirectoryGroupSync {
@@ -6948,7 +6976,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Invoke-SPProjectRedactUser {
@@ -6990,7 +7018,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Merge-SPLogFile {
@@ -7044,7 +7072,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Merge-SPUsageLog {
@@ -7077,7 +7105,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Migrate-SPDatabase {
@@ -7116,7 +7144,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Migrate-SPProjectResourcePlans {
@@ -7132,7 +7160,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Mount-SPContentDatabase {
@@ -7195,7 +7223,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Mount-SPStateServiceDatabase {
@@ -7224,7 +7252,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Move-SPAppManagementData {
@@ -7251,7 +7279,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Move-SPBlobStorageLocation {
@@ -7283,7 +7311,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Move-SPDeletedSite {
@@ -7314,7 +7342,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Move-SPEnterpriseSearchLinksDatabases {
@@ -7341,7 +7369,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Move-SPProfileManagedMetadataProperty {
@@ -7368,7 +7396,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Move-SPSite {
@@ -7394,7 +7422,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Move-SPSocialComment {
@@ -7420,7 +7448,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Move-SPUser {
@@ -7445,7 +7473,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function New-SPAlternateURL {
@@ -7474,7 +7502,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function New-SPAppManagementServiceApplication {
@@ -7510,7 +7538,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function New-SPAppManagementServiceApplicationProxy {
@@ -7536,7 +7564,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function New-SPAuthenticationProvider {
@@ -7578,7 +7606,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function New-SPAzureAccessControlServiceApplicationProxy {
@@ -7603,7 +7631,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function New-SPBECWebServiceApplicationProxy {
@@ -7628,7 +7656,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function New-SPBusinessDataCatalogServiceApplication {
@@ -7674,7 +7702,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function New-SPBusinessDataCatalogServiceApplicationProxy {
@@ -7705,7 +7733,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function New-SPCentralAdministration {
@@ -7728,7 +7756,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function New-SPClaimProvider {
@@ -7761,7 +7789,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function New-SPClaimsPrincipal {
@@ -7816,7 +7844,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function New-SPClaimTypeEncoding {
@@ -7839,7 +7867,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function New-SPClaimTypeMapping {
@@ -7869,7 +7897,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function New-SPConfigurationDatabase {
@@ -7910,7 +7938,8 @@ param(
     ${DatabaseFailOverServer},
 
     [ValidateSet('Application','ApplicationWithSearch','Custom','DistributedCache','Search','SingleServerFarm','WebFrontEnd','WebFrontEndWithDistributedCache')]
-    [System.Nullable[object]]
+    [object]
+	#[System.Nullable[object]]
     ${LocalServerRole},
 
     [switch]
@@ -7921,7 +7950,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function New-SPContentDatabase {
@@ -7974,7 +8003,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function New-SPContentDeploymentJob {
@@ -8020,7 +8049,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function New-SPContentDeploymentPath {
@@ -8083,7 +8112,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function New-SPEnterpriseSearchAdminComponent {
@@ -8105,7 +8134,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function New-SPEnterpriseSearchAnalyticsProcessingComponent {
@@ -8127,7 +8156,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function New-SPEnterpriseSearchContentEnrichmentConfiguration {
@@ -8138,7 +8167,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function New-SPEnterpriseSearchContentProcessingComponent {
@@ -8160,7 +8189,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function New-SPEnterpriseSearchCrawlComponent {
@@ -8182,7 +8211,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function New-SPEnterpriseSearchCrawlContentSource {
@@ -8209,7 +8238,8 @@ param(
     ${StartAddresses},
 
     [Alias('p')]
-    [System.Nullable[object]]
+	[object]
+    #[System.Nullable[object]]
     ${CrawlPriority},
 
     [System.Nullable[int]]
@@ -8218,7 +8248,8 @@ param(
     [System.Nullable[int]]
     ${MaxSiteEnumerationDepth},
 
-    [System.Nullable[object]]
+	[object]
+    #[System.Nullable[object]]
     ${SharePointCrawlBehavior},
 
     [object]
@@ -8235,7 +8266,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function New-SPEnterpriseSearchCrawlCustomConnector {
@@ -8262,7 +8293,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function New-SPEnterpriseSearchCrawlDatabase {
@@ -8293,7 +8324,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function New-SPEnterpriseSearchCrawlExtension {
@@ -8312,7 +8343,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function New-SPEnterpriseSearchCrawlMapping {
@@ -8336,7 +8367,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function New-SPEnterpriseSearchCrawlRule {
@@ -8376,7 +8407,8 @@ param(
     [string]
     ${ContentClass},
 
-    [System.Nullable[object]]
+	[object]
+    #[System.Nullable[object]]
     ${AuthenticationType},
 
     [string]
@@ -8390,7 +8422,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function New-SPEnterpriseSearchFileFormat {
@@ -8417,7 +8449,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function New-SPEnterpriseSearchIndexComponent {
@@ -8445,7 +8477,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function New-SPEnterpriseSearchLanguageResourcePhrase {
@@ -8460,7 +8492,8 @@ param(
     ${SearchApplication},
 
     [Parameter(Mandatory=$true)]
-    [System.Nullable[object]]
+	[object]
+    #[System.Nullable[object]]
     ${Type},
 
     [Parameter(Mandatory=$true)]
@@ -8483,7 +8516,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function New-SPEnterpriseSearchLinksDatabase {
@@ -8514,7 +8547,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function New-SPEnterpriseSearchMetadataCategory {
@@ -8549,7 +8582,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function New-SPEnterpriseSearchMetadataCrawledProperty {
@@ -8599,7 +8632,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function New-SPEnterpriseSearchMetadataManagedProperty {
@@ -8698,7 +8731,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function New-SPEnterpriseSearchMetadataMapping {
@@ -8727,7 +8760,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function New-SPEnterpriseSearchQueryAuthority {
@@ -8756,7 +8789,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function New-SPEnterpriseSearchQueryDemoted {
@@ -8780,7 +8813,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function New-SPEnterpriseSearchQueryKeyword {
@@ -8819,7 +8852,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function New-SPEnterpriseSearchQueryProcessingComponent {
@@ -8841,7 +8874,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function New-SPEnterpriseSearchQueryScope {
@@ -8886,7 +8919,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function New-SPEnterpriseSearchQueryScopeRule {
@@ -8935,7 +8968,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function New-SPEnterpriseSearchRankingModel {
@@ -8959,7 +8992,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function New-SPEnterpriseSearchResultItemType {
@@ -9030,7 +9063,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function New-SPEnterpriseSearchResultSource {
@@ -9065,7 +9098,8 @@ param(
     [System.Nullable[bool]]
     ${AutoDiscover},
 
-    [System.Nullable[object]]
+	[object]
+    #[System.Nullable[object]]
     ${AuthenticationType},
 
     [string]
@@ -9085,7 +9119,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function New-SPEnterpriseSearchSecurityTrimmer {
@@ -9114,7 +9148,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function New-SPEnterpriseSearchServiceApplication {
@@ -9174,7 +9208,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function New-SPEnterpriseSearchServiceApplicationProxy {
@@ -9203,7 +9237,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function New-SPEnterpriseSearchSiteHitRule {
@@ -9230,7 +9264,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function New-SPEnterpriseSearchTopology {
@@ -9253,7 +9287,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function New-SPLogFile {
@@ -9264,7 +9298,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function New-SPManagedAccount {
@@ -9279,7 +9313,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function New-SPManagedPath {
@@ -9305,7 +9339,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function New-SPMarketplaceWebServiceApplicationProxy {
@@ -9330,7 +9364,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function New-SPMetadataServiceApplication {
@@ -9422,7 +9456,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function New-SPMetadataServiceApplicationProxy {
@@ -9461,7 +9495,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function New-SPODataConnectionSetting {
@@ -9501,7 +9535,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function New-SPOnlineApplicationPrincipalManagementServiceApplicationProxy {
@@ -9526,7 +9560,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function New-SPPerformancePointServiceApplication {
@@ -9636,7 +9670,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function New-SPPerformancePointServiceApplicationProxy {
@@ -9659,7 +9693,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function New-SPPerformancePointServiceApplicationTrustedLocation {
@@ -9690,7 +9724,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function New-SPPowerPointConversionServiceApplication {
@@ -9711,7 +9745,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function New-SPPowerPointConversionServiceApplicationProxy {
@@ -9734,7 +9768,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function New-SPProfileServiceApplication {
@@ -9809,7 +9843,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function New-SPProfileServiceApplicationProxy {
@@ -9839,7 +9873,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function New-SPProjectServiceApplication {
@@ -9862,7 +9896,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function New-SPProjectServiceApplicationProxy {
@@ -9882,7 +9916,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function New-SPRequestManagementRuleCriteria {
@@ -9900,13 +9934,15 @@ param(
 
     [Parameter(ParameterSetName='StandardParameterSet', Mandatory=$true, Position=1)]
     [ValidateNotNull()]
-    [System.Nullable[object]]
+    [object]
+	#[System.Nullable[object]]
     ${Property},
 
     [Parameter(ParameterSetName='CustomPropertyParameterSet', Position=2)]
     [Parameter(ParameterSetName='StandardParameterSet', Position=2)]
     [ValidateNotNull()]
-    [System.Nullable[object]]
+    [object]
+	#[System.Nullable[object]]
     ${MatchType},
 
     [Parameter(ParameterSetName='StandardParameterSet', Position=2)]
@@ -9919,7 +9955,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function New-SPSecureStoreApplication {
@@ -9953,7 +9989,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function New-SPSecureStoreApplicationField {
@@ -9976,7 +10012,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function New-SPSecureStoreServiceApplication {
@@ -10035,7 +10071,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function New-SPSecureStoreServiceApplicationProxy {
@@ -10061,7 +10097,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function New-SPSecureStoreTargetApplication {
@@ -10094,7 +10130,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function New-SPServiceApplicationPool {
@@ -10115,7 +10151,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function New-SPServiceApplicationProxyGroup {
@@ -10133,7 +10169,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function New-SPSite {
@@ -10197,7 +10233,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function New-SPSiteMaster {
@@ -10222,7 +10258,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function New-SPSiteSubscription {
@@ -10233,7 +10269,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function New-SPSiteSubscriptionFeaturePack {
@@ -10244,7 +10280,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function New-SPStateServiceApplication {
@@ -10263,7 +10299,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function New-SPStateServiceApplicationProxy {
@@ -10284,7 +10320,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function New-SPStateServiceDatabase {
@@ -10313,7 +10349,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function New-SPSubscriptionSettingsServiceApplication {
@@ -10351,7 +10387,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function New-SPSubscriptionSettingsServiceApplicationProxy {
@@ -10371,7 +10407,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function New-SPTranslationServiceApplication {
@@ -10411,7 +10447,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function New-SPTranslationServiceApplicationProxy {
@@ -10440,7 +10476,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function New-SPTrustedIdentityTokenIssuer {
@@ -10535,7 +10571,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function New-SPTrustedRootAuthority {
@@ -10561,7 +10597,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function New-SPTrustedSecurityTokenIssuer {
@@ -10599,7 +10635,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function New-SPTrustedServiceTokenIssuer {
@@ -10629,7 +10665,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function New-SPUsageApplication {
@@ -10674,7 +10710,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function New-SPUsageLogFile {
@@ -10685,7 +10721,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function New-SPUser {
@@ -10721,7 +10757,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function New-SPUserLicenseMapping {
@@ -10781,7 +10817,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function New-SPUserSettingsProvider {
@@ -10804,7 +10840,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function New-SPUserSolutionAllowList {
@@ -10825,7 +10861,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function New-SPWeb {
@@ -10864,7 +10900,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function New-SPWebApplication {
@@ -10936,7 +10972,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function New-SPWebApplicationAppDomain {
@@ -10964,7 +11000,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function New-SPWebApplicationExtension {
@@ -11021,7 +11057,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function New-SPWOPIBinding {
@@ -11060,7 +11096,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function New-SPWOPISuppressionSetting {
@@ -11083,7 +11119,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function New-SPWordConversionServiceApplication {
@@ -11117,7 +11153,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function New-SPWorkflowServiceApplicationProxy {
@@ -11131,7 +11167,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function New-SPWorkManagementServiceApplication {
@@ -11153,7 +11189,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function New-SPWorkManagementServiceApplicationProxy {
@@ -11177,7 +11213,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Pause-SPProjectWebInstance {
@@ -11192,7 +11228,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Publish-SPServiceApplication {
@@ -11217,7 +11253,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Receive-SPServiceApplicationConnectionInfo {
@@ -11237,7 +11273,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Register-SPAppPrincipal {
@@ -11263,7 +11299,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Register-SPWorkflowService {
@@ -11295,7 +11331,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Remove-DatabaseFromAvailabilityGroup {
@@ -11324,7 +11360,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Remove-SPActivityFeedItems {
@@ -11353,7 +11389,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Remove-SPAlternateURL {
@@ -11368,7 +11404,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Remove-SPAppDeniedEndpoint {
@@ -11384,7 +11420,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Remove-SPApplicationCredentialKey {
@@ -11395,7 +11431,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Remove-SPAppPrincipalPermission {
@@ -11424,7 +11460,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Remove-SPBusinessDataCatalogModel {
@@ -11440,7 +11476,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Remove-SPCentralAdministration {
@@ -11451,7 +11487,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Remove-SPClaimProvider {
@@ -11467,7 +11503,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Remove-SPClaimTypeMapping {
@@ -11488,7 +11524,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Remove-SPConfigurationDatabase {
@@ -11499,7 +11535,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Remove-SPContentDatabase {
@@ -11518,7 +11554,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Remove-SPContentDeploymentJob {
@@ -11533,7 +11569,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Remove-SPContentDeploymentPath {
@@ -11548,7 +11584,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Remove-SPDeletedSite {
@@ -11572,7 +11608,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Remove-SPDiagnosticsPerformanceCounter {
@@ -11603,7 +11639,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Remove-SPDistributedCacheServiceInstance {
@@ -11614,7 +11650,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Remove-SPEnterpriseSearchComponent {
@@ -11636,7 +11672,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Remove-SPEnterpriseSearchContentEnrichmentConfiguration {
@@ -11651,7 +11687,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Remove-SPEnterpriseSearchCrawlContentSource {
@@ -11669,7 +11705,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Remove-SPEnterpriseSearchCrawlCustomConnector {
@@ -11689,7 +11725,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Remove-SPEnterpriseSearchCrawlDatabase {
@@ -11707,7 +11743,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Remove-SPEnterpriseSearchCrawlExtension {
@@ -11725,7 +11761,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Remove-SPEnterpriseSearchCrawlLogReadPermission {
@@ -11751,7 +11787,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Remove-SPEnterpriseSearchCrawlMapping {
@@ -11769,7 +11805,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Remove-SPEnterpriseSearchCrawlRule {
@@ -11787,7 +11823,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Remove-SPEnterpriseSearchFileFormat {
@@ -11806,7 +11842,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Remove-SPEnterpriseSearchLanguageResourcePhrase {
@@ -11819,7 +11855,8 @@ param(
     [object]
     ${SearchApplication},
 
-    [System.Nullable[object]]
+	[object]
+    #[System.Nullable[object]]
     ${Type},
 
     [string]
@@ -11841,7 +11878,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Remove-SPEnterpriseSearchLinksDatabase {
@@ -11859,7 +11896,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Remove-SPEnterpriseSearchMetadataCategory {
@@ -11877,7 +11914,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Remove-SPEnterpriseSearchMetadataManagedProperty {
@@ -11901,7 +11938,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Remove-SPEnterpriseSearchMetadataMapping {
@@ -11919,7 +11956,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Remove-SPEnterpriseSearchQueryAuthority {
@@ -11942,7 +11979,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Remove-SPEnterpriseSearchQueryDemoted {
@@ -11965,7 +12002,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Remove-SPEnterpriseSearchQueryKeyword {
@@ -11984,7 +12021,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Remove-SPEnterpriseSearchQueryScope {
@@ -12006,7 +12043,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Remove-SPEnterpriseSearchQueryScopeRule {
@@ -12033,7 +12070,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Remove-SPEnterpriseSearchRankingModel {
@@ -12056,7 +12093,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Remove-SPEnterpriseSearchResultItemType {
@@ -12083,7 +12120,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Remove-SPEnterpriseSearchResultSource {
@@ -12107,7 +12144,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Remove-SPEnterpriseSearchSecurityTrimmer {
@@ -12126,7 +12163,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Remove-SPEnterpriseSearchServiceApplication {
@@ -12144,7 +12181,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Remove-SPEnterpriseSearchServiceApplicationProxy {
@@ -12159,7 +12196,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Remove-SPEnterpriseSearchServiceApplicationSiteSettings {
@@ -12181,7 +12218,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Remove-SPEnterpriseSearchSiteHitRule {
@@ -12199,7 +12236,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Remove-SPEnterpriseSearchTenantConfiguration {
@@ -12219,7 +12256,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Remove-SPEnterpriseSearchTenantSchema {
@@ -12240,7 +12277,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Remove-SPEnterpriseSearchTopology {
@@ -12258,7 +12295,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Remove-SPInfoPathUserAgent {
@@ -12274,7 +12311,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Remove-SPManagedAccount {
@@ -12297,7 +12334,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Remove-SPManagedPath {
@@ -12320,7 +12357,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Remove-SPODataConnectionSetting {
@@ -12346,7 +12383,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Remove-SPPerformancePointServiceApplication {
@@ -12361,7 +12398,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Remove-SPPerformancePointServiceApplicationProxy {
@@ -12376,7 +12413,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Remove-SPPerformancePointServiceApplicationTrustedLocation {
@@ -12391,7 +12428,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Remove-SPPluggableSecurityTrimmer {
@@ -12411,7 +12448,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Remove-SPProfileLeader {
@@ -12437,7 +12474,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Remove-SPProfileSyncConnection {
@@ -12479,7 +12516,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Remove-SPProjectWebInstanceData {
@@ -12494,7 +12531,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Remove-SPRoutingMachineInfo {
@@ -12510,7 +12547,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Remove-SPRoutingMachinePool {
@@ -12526,7 +12563,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Remove-SPRoutingRule {
@@ -12542,7 +12579,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Remove-SPScaleOutDatabase {
@@ -12564,7 +12601,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Remove-SPSecureStoreApplication {
@@ -12580,7 +12617,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Remove-SPSecureStoreSystemAccount {
@@ -12595,7 +12632,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Remove-SPServerScaleOutDatabase {
@@ -12617,7 +12654,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Remove-SPServiceApplication {
@@ -12637,7 +12674,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Remove-SPServiceApplicationPool {
@@ -12653,7 +12690,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Remove-SPServiceApplicationProxy {
@@ -12673,7 +12710,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Remove-SPServiceApplicationProxyGroup {
@@ -12689,7 +12726,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Remove-SPServiceApplicationProxyGroupMember {
@@ -12711,7 +12748,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Remove-SPShellAdmin {
@@ -12730,7 +12767,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Remove-SPSite {
@@ -12755,7 +12792,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Remove-SPSiteMaster {
@@ -12774,7 +12811,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Remove-SPSiteSubscription {
@@ -12792,7 +12829,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Remove-SPSiteSubscriptionBusinessDataCatalogConfig {
@@ -12808,7 +12845,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Remove-SPSiteSubscriptionFeaturePack {
@@ -12824,7 +12861,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Remove-SPSiteSubscriptionFeaturePackMember {
@@ -12849,7 +12886,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Remove-SPSiteSubscriptionMetadataConfig {
@@ -12868,7 +12905,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Remove-SPSiteSubscriptionProfileConfig {
@@ -12894,7 +12931,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Remove-SPSiteSubscriptionSettings {
@@ -12929,7 +12966,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Remove-SPSiteUpgradeSessionInfo {
@@ -12944,7 +12981,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Remove-SPSiteURL {
@@ -12959,7 +12996,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Remove-SPSocialItemByDate {
@@ -12994,7 +13031,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Remove-SPSolution {
@@ -13015,7 +13052,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Remove-SPSolutionDeploymentLock {
@@ -13030,7 +13067,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Remove-SPStateServiceDatabase {
@@ -13046,7 +13083,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Remove-SPThrottlingRule {
@@ -13062,7 +13099,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Remove-SPTranslationServiceJobHistory {
@@ -13092,7 +13129,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Remove-SPTrustedIdentityTokenIssuer {
@@ -13108,7 +13145,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Remove-SPTrustedRootAuthority {
@@ -13124,7 +13161,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Remove-SPTrustedSecurityTokenIssuer {
@@ -13140,7 +13177,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Remove-SPTrustedServiceTokenIssuer {
@@ -13156,7 +13193,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Remove-SPUsageApplication {
@@ -13178,7 +13215,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Remove-SPUser {
@@ -13203,7 +13240,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Remove-SPUserLicenseMapping {
@@ -13219,7 +13256,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Remove-SPUserSettingsProvider {
@@ -13235,7 +13272,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Remove-SPUserSolution {
@@ -13254,7 +13291,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Remove-SPWeb {
@@ -13275,7 +13312,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Remove-SPWebApplication {
@@ -13301,7 +13338,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Remove-SPWebApplicationAppDomain {
@@ -13316,7 +13353,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Remove-SPWOPIBinding {
@@ -13365,7 +13402,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Remove-SPWOPISuppressionSetting {
@@ -13396,7 +13433,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Remove-SPWordConversionServiceJobHistory {
@@ -13423,7 +13460,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Rename-SPServer {
@@ -13445,7 +13482,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Repair-SPManagedAccountDeployment {
@@ -13456,7 +13493,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Repair-SPProjectWebInstance {
@@ -13475,7 +13512,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Repair-SPSite {
@@ -13496,7 +13533,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Request-SPUpgradeEvaluationSite {
@@ -13517,7 +13554,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Reset-SPProjectEventServiceSettings {
@@ -13528,7 +13565,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Reset-SPProjectPCSSettings {
@@ -13544,7 +13581,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Reset-SPProjectQueueSettings {
@@ -13560,7 +13597,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Reset-SPSites {
@@ -13576,7 +13613,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Restart-SPAppInstanceJob {
@@ -13592,7 +13629,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Restore-SPDeletedSite {
@@ -13616,7 +13653,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Restore-SPEnterpriseSearchServiceApplication {
@@ -13671,7 +13708,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Restore-SPEnterpriseSearchServiceApplicationIndex {
@@ -13710,7 +13747,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Restore-SPFarm {
@@ -13764,7 +13801,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Restore-SPSite {
@@ -13807,7 +13844,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Resume-SPEnterpriseSearchServiceApplication {
@@ -13822,7 +13859,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Resume-SPProjectWebInstance {
@@ -13837,7 +13874,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Resume-SPStateServiceDatabase {
@@ -13853,7 +13890,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Revoke-SPBusinessDataCatalogMetadataObject {
@@ -13881,7 +13918,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Revoke-SPObjectSecurity {
@@ -13911,7 +13948,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Set-SPAlternateURL {
@@ -13932,7 +13969,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Set-SPAppAcquisitionConfiguration {
@@ -13955,7 +13992,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Set-SPAppAutoProvisionConnection {
@@ -13994,7 +14031,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Set-SPAppDisablingConfiguration {
@@ -14009,7 +14046,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Set-SPAppDomain {
@@ -14026,7 +14063,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Set-SPAppHostingQuotaConfiguration {
@@ -14052,7 +14089,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Set-SPApplicationCredentialKey {
@@ -14068,7 +14105,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Set-SPAppManagementDeploymentId {
@@ -14094,7 +14131,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Set-SPAppPrincipalPermission {
@@ -14128,7 +14165,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Set-SPAppScaleProfile {
@@ -14147,7 +14184,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Set-SPAppSiteDomain {
@@ -14163,7 +14200,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Set-SPAppSiteSubscriptionName {
@@ -14185,7 +14222,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Set-SPAppStateUpdateInterval {
@@ -14206,7 +14243,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Set-SPAppStoreConfiguration {
@@ -14224,7 +14261,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Set-SPAppStoreWebServiceConfiguration {
@@ -14242,7 +14279,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Set-SPAuthenticationRealm {
@@ -14260,7 +14297,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Set-SPBingMapsBlock {
@@ -14275,7 +14312,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Set-SPBingMapsKey {
@@ -14290,7 +14327,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Set-SPBrowserCustomerExperienceImprovementProgram {
@@ -14316,7 +14353,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Set-SPBusinessDataCatalogEntityNotificationWeb {
@@ -14332,7 +14369,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Set-SPBusinessDataCatalogMetadataObject {
@@ -14369,7 +14406,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Set-SPBusinessDataCatalogServiceApplication {
@@ -14421,7 +14458,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Set-SPBusinessDataCatalogThrottleConfig {
@@ -14449,7 +14486,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Set-SPCacheApplicationSetting {
@@ -14465,7 +14502,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Set-SPCentralAdministration {
@@ -14483,7 +14520,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Set-SPClaimProvider {
@@ -14505,7 +14542,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Set-SPContentDatabase {
@@ -14535,7 +14572,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Set-SPContentDeploymentJob {
@@ -14582,7 +14619,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Set-SPContentDeploymentPath {
@@ -14632,7 +14669,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Set-SPCustomLayoutsPage {
@@ -14665,7 +14702,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Set-SPDataConnectionFile {
@@ -14696,7 +14733,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Set-SPDefaultProfileConfig {
@@ -14716,7 +14753,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Set-SPDesignerSettings {
@@ -14758,7 +14795,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Set-SPDiagnosticConfig {
@@ -14867,7 +14904,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Set-SPDiagnosticsProvider {
@@ -14893,7 +14930,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Set-SPDistributedCacheClientSetting {
@@ -14914,7 +14951,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Set-SPEnterpriseSearchAdministrationComponent {
@@ -14941,7 +14978,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Set-SPEnterpriseSearchContentEnrichmentConfiguration {
@@ -14960,7 +14997,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Set-SPEnterpriseSearchCrawlContentSource {
@@ -14986,7 +15023,8 @@ param(
     ${StartAddresses},
 
     [Alias('p')]
-    [System.Nullable[object]]
+	[object]
+    #[System.Nullable[object]]
     ${CrawlPriority},
 
     [Parameter(ParameterSetName='Weekly')]
@@ -15043,7 +15081,8 @@ param(
     ${CrawlScheduleRunEveryInterval},
 
     [Parameter(ParameterSetName='Weekly')]
-    [System.Nullable[object]]
+    [object]
+	#[System.Nullable[object]]
     ${CrawlScheduleDaysOfWeek},
 
     [Parameter(ParameterSetName='MonthlyDate')]
@@ -15052,7 +15091,8 @@ param(
 
     [Parameter(ParameterSetName='MonthlyDate')]
     [Alias('month')]
-    [System.Nullable[object]]
+	[object]
+    #[System.Nullable[object]]
     ${CrawlScheduleMonthsOfYear},
 
     [System.Nullable[int]]
@@ -15078,7 +15118,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Set-SPEnterpriseSearchCrawlDatabase {
@@ -15111,7 +15151,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Set-SPEnterpriseSearchCrawlLogReadPermission {
@@ -15136,7 +15176,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Set-SPEnterpriseSearchCrawlRule {
@@ -15150,7 +15190,8 @@ param(
     ${SearchApplication},
 
     [Alias('t')]
-    [System.Nullable[object]]
+	[object]
+    #[System.Nullable[object]]
     ${Type},
 
     [System.Nullable[bool]]
@@ -15174,7 +15215,8 @@ param(
     [string]
     ${ContentClass},
 
-    [System.Nullable[object]]
+	[object]
+    #[System.Nullable[object]]
     ${AuthenticationType},
 
     [string]
@@ -15188,7 +15230,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Set-SPEnterpriseSearchFileFormatState {
@@ -15215,7 +15257,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Set-SPEnterpriseSearchLinguisticComponentsStatus {
@@ -15249,7 +15291,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Set-SPEnterpriseSearchLinksDatabase {
@@ -15282,7 +15324,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Set-SPEnterpriseSearchMetadataCategory {
@@ -15317,7 +15359,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Set-SPEnterpriseSearchMetadataCrawledProperty {
@@ -15337,7 +15379,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Set-SPEnterpriseSearchMetadataManagedProperty {
@@ -15430,7 +15472,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Set-SPEnterpriseSearchMetadataMapping {
@@ -15460,7 +15502,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Set-SPEnterpriseSearchPrimaryHostController {
@@ -15478,7 +15520,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Set-SPEnterpriseSearchQueryAuthority {
@@ -15505,7 +15547,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Set-SPEnterpriseSearchQueryKeyword {
@@ -15548,7 +15590,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Set-SPEnterpriseSearchQueryScope {
@@ -15590,7 +15632,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Set-SPEnterpriseSearchQueryScopeRule {
@@ -15637,7 +15679,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Set-SPEnterpriseSearchQuerySpellingCorrection {
@@ -15666,7 +15708,8 @@ param(
     [System.Nullable[bool]]
     ${SecurityTrimmingEnabled},
 
-    [System.Nullable[object]]
+	[object]
+    #[System.Nullable[object]]
     ${SpellingDictionary},
 
     [System.Nullable[timespan]]
@@ -15677,7 +15720,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Set-SPEnterpriseSearchRankingModel {
@@ -15704,7 +15747,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Set-SPEnterpriseSearchResultItemType {
@@ -15759,7 +15802,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Set-SPEnterpriseSearchResultSource {
@@ -15795,7 +15838,8 @@ param(
     [System.Nullable[bool]]
     ${AutoDiscover},
 
-    [System.Nullable[object]]
+	[object]
+    #[System.Nullable[object]]
     ${AuthenticationType},
 
     [string]
@@ -15815,7 +15859,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Set-SPEnterpriseSearchService {
@@ -15857,7 +15901,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Set-SPEnterpriseSearchServiceApplication {
@@ -15873,7 +15917,8 @@ param(
     [string]
     ${DiacriticSensitive},
 
-    [System.Nullable[object]]
+	[object]
+    #[System.Nullable[object]]
     ${DefaultSearchProvider},
 
     [string]
@@ -15908,7 +15953,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Set-SPEnterpriseSearchServiceApplicationProxy {
@@ -15926,7 +15971,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Set-SPEnterpriseSearchServiceInstance {
@@ -15944,7 +15989,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Set-SPEnterpriseSearchTopology {
@@ -15962,7 +16007,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Set-SPFarmConfig {
@@ -15998,7 +16043,8 @@ param(
     [string]
     ${ServiceConnectionPointBindingInformation},
 
-    [System.Nullable[object]]
+	[object]
+    #[System.Nullable[object]]
     ${SiteMasterMode},
 
     [System.Nullable[uint32]]
@@ -16024,7 +16070,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Set-SPInfoPathFormsService {
@@ -16110,7 +16156,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Set-SPInfoPathFormTemplate {
@@ -16129,7 +16175,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Set-SPInfoPathWebServiceProxy {
@@ -16152,7 +16198,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Set-SPInternalAppStateUpdateInterval {
@@ -16168,7 +16214,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Set-SPIRMSettings {
@@ -16205,7 +16251,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Set-SPLogLevel {
@@ -16229,7 +16275,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Set-SPManagedAccount {
@@ -16281,7 +16327,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Set-SPMetadataServiceApplication {
@@ -16373,7 +16419,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Set-SPMetadataServiceApplicationProxy {
@@ -16406,7 +16452,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Set-SPMicrofeedOptions {
@@ -16447,7 +16493,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Set-SPMobileMessagingAccount {
@@ -16479,7 +16525,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Set-SPO365LinkSettings {
@@ -16511,7 +16557,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Set-SPODataConnectionSetting {
@@ -16533,7 +16579,8 @@ param(
     ${ServiceAddressURL},
 
     [ValidateNotNull()]
-    [System.Nullable[object]]
+	[object]
+    #[System.Nullable[object]]
     ${AuthenticationMode},
 
     [ValidateNotNull()]
@@ -16554,7 +16601,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Set-SPODataConnectionSettingMetadata {
@@ -16576,7 +16623,8 @@ param(
     ${ServiceAddressMetadataURL},
 
     [ValidateNotNull()]
-    [System.Nullable[object]]
+	[object]
+    #[System.Nullable[object]]
     ${AuthenticationMode},
 
     [ValidateLength(0, 1024)]
@@ -16594,7 +16642,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Set-SPOfficeStoreAppsDefaultActivation {
@@ -16617,7 +16665,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Set-SPPassPhrase {
@@ -16640,7 +16688,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Set-SPPerformancePointSecureDataValues {
@@ -16659,7 +16707,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Set-SPPerformancePointServiceApplication {
@@ -16774,7 +16822,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Set-SPPowerPointConversionServiceApplication {
@@ -16805,7 +16853,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Set-SPProfileServiceApplication {
@@ -16868,7 +16916,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Set-SPProfileServiceApplicationProxy {
@@ -16902,7 +16950,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Set-SPProfileServiceApplicationSecurity {
@@ -16937,7 +16985,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Set-SPProjectDatabaseQuota {
@@ -16977,7 +17025,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Set-SPProjectEventServiceSettings {
@@ -16991,7 +17039,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Set-SPProjectOdataConfiguration {
@@ -17029,7 +17077,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Set-SPProjectPCSSettings {
@@ -17072,7 +17120,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Set-SPProjectPermissionMode {
@@ -17094,7 +17142,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Set-SPProjectQueueSettings {
@@ -17146,7 +17194,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Set-SPProjectReportingTimephasedMode {
@@ -17168,7 +17216,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Set-SPProjectServiceApplication {
@@ -17186,7 +17234,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Set-SPProjectUserSync {
@@ -17207,7 +17255,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Set-SPProjectUserSyncDisabledSyncThreshold {
@@ -17228,7 +17276,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Set-SPProjectUserSyncFullSyncThreshold {
@@ -17249,7 +17297,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Set-SPProjectUserSyncOffPeakSyncThreshold {
@@ -17270,7 +17318,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Set-SPRequestManagementSettings {
@@ -17290,7 +17338,8 @@ param(
     ${ThrottlingEnabled},
 
     [ValidateNotNull()]
-    [System.Nullable[object]]
+	[object]
+    #[System.Nullable[object]]
     ${RoutingScheme},
 
     [Parameter(ValueFromPipeline=$true)]
@@ -17298,7 +17347,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Set-SPRoutingMachineInfo {
@@ -17310,11 +17359,13 @@ param(
     ${Identity},
 
     [ValidateNotNull()]
-    [System.Nullable[object]]
+    [object]
+	#[System.Nullable[object]]
     ${Availability},
 
     [ValidateNotNull()]
-    [System.Nullable[object]]
+	[object]
+    #[System.Nullable[object]]
     ${OutgoingScheme},
 
     [ValidateNotNull()]
@@ -17335,7 +17386,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Set-SPRoutingMachinePool {
@@ -17355,7 +17406,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Set-SPRoutingRule {
@@ -17386,7 +17437,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Set-SPScaleOutDatabaseDataRange {
@@ -17412,7 +17463,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Set-SPScaleOutDatabaseDataSubRange {
@@ -17456,7 +17507,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Set-SPSecureStoreApplication {
@@ -17487,7 +17538,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Set-SPSecureStoreDefaultProvider {
@@ -17503,7 +17554,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Set-SPSecureStoreServiceApplication {
@@ -17555,7 +17606,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Set-SPSecurityTokenServiceConfig {
@@ -17625,7 +17676,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Set-SPServer {
@@ -17636,11 +17687,13 @@ param(
     [object]
     ${Identity},
 
-    [System.Nullable[object]]
+    [object]
+	#[System.Nullable[object]]
     ${Status},
 
     [ValidateSet('Application','ApplicationWithSearch','Custom','DistributedCache','Search','SingleServerFarm','WebFrontEnd','WebFrontEndWithDistributedCache')]
-    [System.Nullable[object]]
+    [object]
+	#[System.Nullable[object]]
     ${Role},
 
     [Parameter(ValueFromPipeline=$true)]
@@ -17648,7 +17701,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Set-SPServerScaleOutDatabaseDataRange {
@@ -17674,7 +17727,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Set-SPServerScaleOutDatabaseDataSubRange {
@@ -17718,7 +17771,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Set-SPServiceApplication {
@@ -17746,7 +17799,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Set-SPServiceApplicationEndpoint {
@@ -17771,7 +17824,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Set-SPServiceApplicationPool {
@@ -17791,7 +17844,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Set-SPServiceApplicationSecurity {
@@ -17815,7 +17868,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Set-SPServiceHostConfig {
@@ -17879,7 +17932,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Set-SPSessionStateService {
@@ -17897,7 +17950,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Set-SPSite {
@@ -17964,7 +18017,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Set-SPSiteAdministration {
@@ -18015,7 +18068,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Set-SPSiteSubscriptionConfig {
@@ -18042,7 +18095,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Set-SPSiteSubscriptionEdiscoveryHub {
@@ -18061,7 +18114,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Set-SPSiteSubscriptionIRMConfig {
@@ -18088,7 +18141,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Set-SPSiteSubscriptionMetadataConfig {
@@ -18117,7 +18170,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Set-SPSiteSubscriptionProfileConfig {
@@ -18155,7 +18208,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Set-SPSiteURL {
@@ -18177,7 +18230,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Set-SPStateServiceApplication {
@@ -18195,7 +18248,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Set-SPStateServiceApplicationProxy {
@@ -18213,7 +18266,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Set-SPStateServiceDatabase {
@@ -18241,7 +18294,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Set-SPSubscriptionSettingsServiceApplication {
@@ -18273,7 +18326,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Set-SPThrottlingRule {
@@ -18302,7 +18355,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Set-SPTimerJob {
@@ -18321,7 +18374,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Set-SPTopologyServiceApplication {
@@ -18341,7 +18394,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Set-SPTopologyServiceApplicationProxy {
@@ -18360,7 +18413,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Set-SPTranslationServiceApplication {
@@ -18463,7 +18516,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Set-SPTranslationServiceApplicationProxy {
@@ -18487,7 +18540,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Set-SPTranslationThrottlingSetting {
@@ -18504,7 +18557,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Set-SPTrustedIdentityTokenIssuer {
@@ -18576,7 +18629,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Set-SPTrustedRootAuthority {
@@ -18602,7 +18655,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Set-SPTrustedSecurityTokenIssuer {
@@ -18639,7 +18692,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Set-SPTrustedServiceTokenIssuer {
@@ -18669,7 +18722,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Set-SPUsageApplication {
@@ -18713,7 +18766,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Set-SPUsageDefinition {
@@ -18746,7 +18799,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Set-SPUsageService {
@@ -18785,7 +18838,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Set-SPUser {
@@ -18833,7 +18886,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Set-SPWeb {
@@ -18861,7 +18914,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Set-SPWebApplication {
@@ -18944,7 +18997,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Set-SPWebApplicationHttpThrottlingMonitor {
@@ -18992,7 +19045,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Set-SPWOPIBinding {
@@ -19011,7 +19064,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Set-SPWOPIZone {
@@ -19027,7 +19080,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Set-SPWordConversionServiceApplication {
@@ -19103,7 +19156,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Set-SPWorkflowConfig {
@@ -19134,7 +19187,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Set-SPWorkManagementServiceApplication {
@@ -19180,7 +19233,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Set-SPWorkManagementServiceApplicationProxy {
@@ -19201,7 +19254,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Split-SPScaleOutDatabase {
@@ -19251,7 +19304,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Split-SPServerScaleOutDatabase {
@@ -19301,7 +19354,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Start-SPAdminJob {
@@ -19312,7 +19365,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Start-SPAssignment {
@@ -19326,7 +19379,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Start-SPContentDeploymentJob {
@@ -19353,7 +19406,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Start-SPDiagnosticsSession {
@@ -19374,7 +19427,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Start-SPEnterpriseSearchQueryAndSiteSettingsServiceInstance {
@@ -19389,7 +19442,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Start-SPEnterpriseSearchServiceInstance {
@@ -19404,7 +19457,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Start-SPInfoPathFormTemplate {
@@ -19419,7 +19472,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Start-SPService {
@@ -19438,7 +19491,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Start-SPServiceInstance {
@@ -19454,7 +19507,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Start-SPTimerJob {
@@ -19469,7 +19522,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Stop-SPAssignment {
@@ -19487,7 +19540,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Stop-SPContentTypeReplication {
@@ -19498,7 +19551,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Stop-SPDiagnosticsSession {
@@ -19509,7 +19562,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Stop-SPDistributedCacheServiceInstance {
@@ -19524,7 +19577,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Stop-SPEnterpriseSearchQueryAndSiteSettingsServiceInstance {
@@ -19539,7 +19592,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Stop-SPEnterpriseSearchServiceInstance {
@@ -19554,7 +19607,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Stop-SPInfoPathFormTemplate {
@@ -19573,7 +19626,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Stop-SPService {
@@ -19592,7 +19645,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Stop-SPServiceInstance {
@@ -19608,7 +19661,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Stop-SPTaxonomyReplication {
@@ -19623,7 +19676,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Suspend-SPEnterpriseSearchServiceApplication {
@@ -19638,7 +19691,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Suspend-SPStateServiceDatabase {
@@ -19654,7 +19707,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Sync-SPProjectPermissions {
@@ -19689,7 +19742,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Test-SPContentDatabase {
@@ -19731,7 +19784,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Test-SPInfoPathFormTemplate {
@@ -19746,7 +19799,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Test-SPO365LinkSettings {
@@ -19761,7 +19814,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Test-SPProjectServiceApplication {
@@ -19780,7 +19833,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Test-SPProjectWebInstance {
@@ -19799,7 +19852,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Test-SPSite {
@@ -19820,7 +19873,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Uninstall-SPAppInstance {
@@ -19836,7 +19889,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Uninstall-SPDataConnectionFile {
@@ -19851,7 +19904,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Uninstall-SPFeature {
@@ -19872,7 +19925,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Uninstall-SPHelpCollection {
@@ -19888,7 +19941,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Uninstall-SPSolution {
@@ -19923,7 +19976,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Uninstall-SPUserSolution {
@@ -19942,7 +19995,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Uninstall-SPWebPartPack {
@@ -19968,7 +20021,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Unpublish-SPServiceApplication {
@@ -19984,7 +20037,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Update-SPAppCatalogConfiguration {
@@ -20006,7 +20059,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Update-SPAppInstance {
@@ -20027,7 +20080,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Update-SPAzureBlobConfigLocatorEx1 {
@@ -20043,7 +20096,7 @@ param(
     ${Locator})
 
 
-}
+ }
 
 
 function Update-SPDistributedCacheSize {
@@ -20058,7 +20111,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Update-SPFarmEncryptionKey {
@@ -20072,7 +20125,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Update-SPHelp {
@@ -20086,7 +20139,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Update-SPInfoPathAdminFileUrl {
@@ -20108,7 +20161,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Update-SPInfoPathFormTemplate {
@@ -20119,7 +20172,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Update-SPInfoPathUserFileUrl {
@@ -20153,7 +20206,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Update-SPProfilePhotoStore {
@@ -20181,7 +20234,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Update-SPProfileSync {
@@ -20212,7 +20265,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Update-SPRepopulateMicroblogFeedCache {
@@ -20265,7 +20318,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Update-SPRepopulateMicroblogLMTCache {
@@ -20281,7 +20334,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Update-SPSecureStoreApplicationServerKey {
@@ -20302,7 +20355,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Update-SPSecureStoreCredentialMapping {
@@ -20328,7 +20381,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Update-SPSecureStoreGroupCredentialMapping {
@@ -20349,7 +20402,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Update-SPSecureStoreMasterKey {
@@ -20370,7 +20423,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Update-SPSolution {
@@ -20407,7 +20460,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Update-SPUserSolution {
@@ -20430,7 +20483,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Update-SPWOPIProofKey {
@@ -20445,7 +20498,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Upgrade-SPAppManagementServiceApplication {
@@ -20467,7 +20520,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Upgrade-SPContentDatabase {
@@ -20513,7 +20566,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Upgrade-SPEnterpriseSearchServiceApplication {
@@ -20528,7 +20581,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Upgrade-SPEnterpriseSearchServiceApplicationSiteSettings {
@@ -20543,7 +20596,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Upgrade-SPFarm {
@@ -20564,7 +20617,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Upgrade-SPProfileServiceApplication {
@@ -20580,7 +20633,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Upgrade-SPSingleSignOnDatabase {
@@ -20606,7 +20659,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 function Upgrade-SPSite {
@@ -20636,7 +20689,7 @@ param(
     ${AssignmentCollection})
 
 
-}
+ }
 
 
 
