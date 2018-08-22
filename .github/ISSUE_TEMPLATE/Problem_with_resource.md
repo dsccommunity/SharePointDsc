@@ -48,6 +48,8 @@ about: If you have a problem, bug, or enhancement with a resource in this resour
         'OsMuiLanguages')
 -->
 
+#### Version of SharePoint that is used (e.g. SharePoint 2016)
+
 #### Version and build of PowerShell the target node is running
 <!--
     To help with this information, please run this command:

@@ -2,6 +2,8 @@
     Thanks for submitting a Pull Request (PR) to this project.
     Your contribution to this project is greatly appreciated!
 
+    Please make sure you have read the [Contribution Guidelines](https://github.com/PowerShell/SharePointDsc/wiki/Contributing%20to%20SharePointDsc).
+
     Please prefix the PR title with the resource name,
     e.g. 'ResourceName: My short description'.
     If this is a breaking change, then also prefix the PR title
@@ -34,10 +36,10 @@
     Change to [x] for each task in the task list that applies to your PR.
     For those task that don't apply to you PR, leave those as is.
 -->
-- [ ] Added an entry under the Unreleased section of the change log in the README.md.
+- [ ] Added an entry under the Unreleased section of the change log in the CHANGELOG.md.
       Entry should say what was changed, and how that affects users (if applicable).
 - [ ] Resource documentation added/updated in README.md.
-- [ ] Resource parameter descriptions added/updated in README.md, schema.mof
+- [ ] Resource parameter descriptions added/updated in schema.mof
       and comment-based help.
 - [ ] Comment-based help added/updated.
 - [ ] Localization strings added/updated in all localization files as appropriate.
