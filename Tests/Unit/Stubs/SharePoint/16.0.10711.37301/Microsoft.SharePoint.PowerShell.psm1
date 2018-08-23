@@ -10499,7 +10499,8 @@ param(
     [Parameter(ParameterSetName='BasicParameterSet')]
     [Parameter(ParameterSetName='ActiveDirectoryBackedParameterSet')]
     [ValidateNotNull()]
-    [System.Security.Cryptography.X509Certificates.X509Certificate2]
+    [object]
+    #[System.Security.Cryptography.X509Certificates.X509Certificate2]
     ${ImportTrustCertificate},
 
     [Parameter(ParameterSetName='MetadataEndPointParameterSet', Mandatory=$true)]
@@ -10623,7 +10624,8 @@ param(
 
     [Parameter(ParameterSetName='ImportCertificateParameterSet', Mandatory=$true)]
     [ValidateNotNull()]
-    [System.Security.Cryptography.X509Certificates.X509Certificate2]
+    [object]
+    #[System.Security.Cryptography.X509Certificates.X509Certificate2]
     ${Certificate},
 
     [Parameter(ParameterSetName='MetadataEndPointParameterSet', Mandatory=$true)]
@@ -10653,7 +10655,8 @@ param(
 
     [Parameter(ParameterSetName='ImportCertificateParameterSet', Mandatory=$true)]
     [ValidateNotNull()]
-    [System.Security.Cryptography.X509Certificates.X509Certificate2]
+    [object]
+    #[System.Security.Cryptography.X509Certificates.X509Certificate2]
     ${Certificate},
 
     [Parameter(ParameterSetName='MetadataEndPointParameterSet', Mandatory=$true)]
@@ -16238,7 +16241,8 @@ param(
     ${CertificateServerUrl},
 
     [ValidateNotNull()]
-    [System.Security.Cryptography.X509Certificates.X509Certificate2]
+    [object]
+    #[System.Security.Cryptography.X509Certificates.X509Certificate2]
     ${ServiceAuthenticationCertificate},
 
     [ValidateNotNull()]
@@ -17616,7 +17620,8 @@ function Set-SPSecurityTokenServiceConfig {
 param(
     [Parameter(ParameterSetName='SigningCertificateImport')]
     [ValidateNotNull()]
-    [System.Security.Cryptography.X509Certificates.X509Certificate2]
+    [object]
+    #[System.Security.Cryptography.X509Certificates.X509Certificate2]
     ${ImportSigningCertificate},
 
     [Parameter(ParameterSetName='SigningCertificateReference')]
@@ -17629,7 +17634,8 @@ param(
 
     [Parameter(ParameterSetName='SigningCertificateQueue')]
     [ValidateNotNull()]
-    [System.Security.Cryptography.X509Certificates.X509Certificate2]
+    [object]
+    #[System.Security.Cryptography.X509Certificates.X509Certificate2]
     ${QueueSigningCertificate},
 
     [Parameter(ParameterSetName='SigningCertificateReference')]
@@ -17642,7 +17648,8 @@ param(
 
     [Parameter(ParameterSetName='SigningCertificateRevoke')]
     [ValidateNotNull()]
-    [System.Security.Cryptography.X509Certificates.X509Certificate2]
+    [object]
+    #[System.Security.Cryptography.X509Certificates.X509Certificate2]
     ${RevokeSigningCertificate},
 
     [Parameter(ParameterSetName='RevokeSigningCertificateReference', Mandatory=$true)]
@@ -17917,7 +17924,8 @@ param(
 
     [Parameter(ParameterSetName='SslCertificateImport')]
     [ValidateNotNull()]
-    [System.Security.Cryptography.X509Certificates.X509Certificate2]
+    [object]
+    #[System.Security.Cryptography.X509Certificates.X509Certificate2]
     ${ImportSslCertificate},
 
     [Parameter(ParameterSetName='SslCertificateImport')]
@@ -18581,7 +18589,8 @@ param(
 
     [Parameter(ParameterSetName='ImportCertificateParameterSet', Mandatory=$true)]
     [ValidateNotNull()]
-    [System.Security.Cryptography.X509Certificates.X509Certificate2]
+    [object]
+    #[System.Security.Cryptography.X509Certificates.X509Certificate2]
     ${ImportTrustCertificate},
 
     [Parameter(ParameterSetName='MetadataEndPointParameterSet', Mandatory=$true)]
@@ -18683,7 +18692,8 @@ param(
 
     [Parameter(ParameterSetName='ImportCertificateParameterSet')]
     [ValidateNotNull()]
-    [System.Security.Cryptography.X509Certificates.X509Certificate2]
+    [object]
+    #[System.Security.Cryptography.X509Certificates.X509Certificate2]
     ${Certificate},
 
     [ValidateNotNullOrEmpty()]
@@ -18712,7 +18722,8 @@ param(
 
     [Parameter(ParameterSetName='ImportCertificateParameterSet')]
     [ValidateNotNull()]
-    [System.Security.Cryptography.X509Certificates.X509Certificate2]
+    [object]
+    #[System.Security.Cryptography.X509Certificates.X509Certificate2]
     ${Certificate},
 
     [Parameter(ParameterSetName='MetadataEndPointParameterSet')]
