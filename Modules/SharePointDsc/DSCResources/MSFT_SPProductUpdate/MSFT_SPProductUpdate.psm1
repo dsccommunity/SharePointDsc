@@ -1,3 +1,4 @@
+
 function Get-TargetResource
 {
     [CmdletBinding()]
@@ -13,7 +14,7 @@ function Get-TargetResource
         $ShutdownServices,
 
         [Parameter()]
-        [ValidateSet("mon","tue","wed","thu","fri","sat","sun")]
+        [ValidateSet("mon", "tue", "wed", "thu", "fri", "sat", "sun")]
         [System.String[]]
         $BinaryInstallDays,
 
@@ -22,7 +23,7 @@ function Get-TargetResource
         $BinaryInstallTime,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present",
 
@@ -40,8 +41,8 @@ function Get-TargetResource
     Write-Verbose -Message "Getting install status of SP binaries"
 
     $languagepack = $false
-    $servicepack  = $false
-    $language     = ""
+    $servicepack = $false
+    $language = ""
 
     # Get file information from setup file
     if (-not(Test-Path $SetupFile))
@@ -54,16 +55,31 @@ function Get-TargetResource
 
     if ($null -ne $zone)
     {
-        throw ("Setup file is blocked! Please use Unblock-File to unblock the file " + `
-               "before continuing.")
+        #    throw ("Setup file is blocked! Please use Unblock-File to unblock the file " + `
+        #           "before continuing.")
     }
+
+    $nullVersion = New-Object -TypeName System.Version
 
     $setupFileInfo = Get-ItemProperty -Path $SetupFile
     $fileVersion = $setupFileInfo.VersionInfo.FileVersion
     Write-Verbose -Message "Update has version $fileVersion"
 
-    $products = Invoke-SPDSCCommand -Credential $InstallAccount -ScriptBlock {
-        return Get-SPDscFarmProductsInfo
+    $fileVersionInfo = New-Object -TypeName System.Version -ArgumentList $fileVersion
+    switch ($fileVersionInfo.Major)
+    {
+        15
+        {
+            $sharePointVersion = 2013
+        }
+        16
+        {
+            $sharePointVersion = 2016
+        }
+        default
+        {
+            $sharePointVersion = 2013
+        }
     }
 
     if ($setupFileInfo.VersionInfo.FileDescription -match "Language Pack")
@@ -123,29 +139,15 @@ function Get-TargetResource
         $languageString = "$languageEnglish/$languageNative"
         Write-Verbose -Message "Update is for the $languageEnglish language"
 
-        # Find the product name for the specific language pack
-        $productName = ""
-        foreach ($product in $products)
-        {
-            if ($product -match $languageString)
-            {
-                $productName = $product
-            }
-        }
+        $versionInfo = Get-SPDscLocalVersionInfo -ProductVersion $sharePointVersion -Lcid $($cultureInfo.LCID)
 
-        if ($productName -eq "")
+        if ($versionInfo -eq $nullVersion)
         {
             throw "Error: Product for language $language is not found."
         }
         else
         {
-            Write-Verbose -Message "Product found: $productName"
-        }
-        $versionInfo = Invoke-SPDSCCommand -Credential $InstallAccount `
-                                      -Arguments $productName `
-                                      -ScriptBlock {
-            $productToCheck = $args[0]
-            return Get-SPDscFarmVersionInfo -ProductToCheck $productToCheck
+            Write-Verbose -Message "Product found; Version: $versionInfo"
         }
     }
     elseif ($setupFileInfo.VersionInfo.FileDescription -match "Service Pack")
@@ -153,27 +155,29 @@ function Get-TargetResource
         Write-Verbose -Message "Update is a Service Pack for SharePoint."
         # Check SharePoint version information.
         $servicepack = $true
-        $versionInfo = Invoke-SPDSCCommand -Credential $InstallAccount `
-                                      -Arguments $productName `
-                                      -ScriptBlock {
-            $productToCheck = $args[0]
-            return Get-SPDscFarmVersionInfo -ProductToCheck "Microsoft SharePoint Server 2013"
-        }
+        $versionInfo = Get-SPDscLocalVersionInfo -ProductVersion $sharePointVersion
     }
     else
     {
         Write-Verbose -Message "Update is a Cumulative Update."
-        # Cumulative Update is multi-lingual. Check version information of all products.
-        $versionInfo = Invoke-SPDSCCommand -Credential $InstallAccount `
-                                      -Arguments $productName `
-                                      -ScriptBlock {
-            $productToCheck = $args[0]
-            return Get-SPDscFarmVersionInfo
+
+        # For SP 2016 Patches
+        $setupFileInformation = New-Object -TypeName System.IO.FileInfo -ArgumentList  $SetupFile
+        if ($setupFileInformation.Name.StartsWith("wssloc"))
+        {
+            Write-Verbose -Message "Cumulative Update is multi-lingual"
+            $versionInfo = Get-SPDscLocalVersionInfo -ProductVersion $sharePointVersion -IsWssPackage
         }
+        else
+        {
+            Write-Verbose -Message "Cumulative Update is generic"
+            $versionInfo = Get-SPDscLocalVersionInfo -ProductVersion $sharePointVersion
+        }
+
     }
 
-    Write-Verbose -Message "The lowest version of any SharePoint component is $($versionInfo.Lowest)"
-    if ($versionInfo.Lowest -lt $fileVersion)
+    Write-Verbose -Message "The lowest version of any SharePoint component is $($versionInfo)"
+    if ($versionInfo -lt $fileVersion)
     {
         # Version of SharePoint is lower than the patch version. Patch is not installed.
         return @{
