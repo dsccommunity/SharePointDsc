@@ -55,8 +55,8 @@ function Get-TargetResource
 
     if ($null -ne $zone)
     {
-        #    throw ("Setup file is blocked! Please use Unblock-File to unblock the file " + `
-        #           "before continuing.")
+        throw ("Setup file is blocked! Please use Unblock-File to unblock the file " + `
+            "before continuing.")
     }
 
     $nullVersion = New-Object -TypeName System.Version
@@ -75,6 +75,10 @@ function Get-TargetResource
         16
         {
             $sharePointVersion = 2016
+            if($fileVersionInfo.Minor.length -eq 5)
+            {
+                $sharePointVersion = 2019
+            }
         }
         default
         {
@@ -137,7 +141,7 @@ function Get-TargetResource
 
         # Build language string used in Language Pack names
         $languageString = "$languageEnglish/$languageNative"
-        Write-Verbose -Message "Update is for the $languageEnglish language"
+        Write-Verbose -Message "Update is for the $($languageString) language"
 
         $versionInfo = Get-SPDscLocalVersionInfo -ProductVersion $sharePointVersion -Lcid $($cultureInfo.LCID)
 
@@ -161,7 +165,7 @@ function Get-TargetResource
     {
         Write-Verbose -Message "Update is a Cumulative Update."
 
-        # For SP 2016 Patches
+        # For SP 2016 + 2019 Patches
         $setupFileInformation = New-Object -TypeName System.IO.FileInfo -ArgumentList  $SetupFile
         if ($setupFileInformation.Name.StartsWith("wssloc"))
         {
@@ -333,11 +337,11 @@ function Set-TargetResource
     $installedVersion = Get-SPDSCInstalledProductVersion
     if ($spVersion.FileMajorPart -eq 15)
     {
-        $wssRegKey ="hklm:SOFTWARE\Microsoft\Shared Tools\Web Server Extensions\15.0\WSS"
+        $wssRegKey ="HKLM:SOFTWARE\Microsoft\Shared Tools\Web Server Extensions\15.0\WSS"
     }
     else
     {
-        $wssRegKey ="hklm:SOFTWARE\Microsoft\Shared Tools\Web Server Extensions\16.0\WSS"
+        $wssRegKey ="HKLM:SOFTWARE\Microsoft\Shared Tools\Web Server Extensions\16.0\WSS"
     }
 
     # Read LanguagePackInstalled and SetupType registry keys

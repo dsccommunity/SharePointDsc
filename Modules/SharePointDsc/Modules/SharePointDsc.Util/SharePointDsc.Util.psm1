@@ -176,7 +176,6 @@ function Get-SPDscLocalVersionInfo
         $IsWssPackage
     )
 
-    $isWssUpdatePackage = $false
     $productNameRegEx = "Microsoft SharePoint Foundation $($ProductVersion) Core"
 
     if (0 -ne $Lcid)
@@ -207,7 +206,6 @@ function Get-SPDscLocalVersionInfo
         $productInfo = Get-ItemProperty "Registry::$($officeProductKey)\InstallProperties"
 
         $prodName = $productInfo.DisplayName
-
 
         if ($prodName -match $productNameRegEx)
         {
