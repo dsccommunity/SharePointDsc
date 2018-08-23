@@ -10,6 +10,8 @@
   * Added support for Business Content Source Type
 * SPSPSecurityTokenServiceConfig
   * The resource only tested for the Ensure parameter. Added more parameters.
+* SPProductUpdate
+  * Added support for several product updates before a farm exists.
 
 The following changes will break v2.x and earlier configurations that use these
 resources:
