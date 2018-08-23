@@ -8,7 +8,7 @@
   * Fixed check for Ensure=Absent in the Set method
 * SPSearchContentSource
   * Added support for Business Content Source Type
-* SPSPSecurityTokenServiceConfig
+* SPSecurityTokenServiceConfig
   * The resource only tested for the Ensure parameter. Added more parameters.
 * SPProductUpdate
   * Added support for several product updates before a farm exists.
@@ -31,7 +31,7 @@ resources:
   * SPPasswordChangeSettings
   * SPProjectServerLicense
   * SPShellAdmin
-  * SPSPSecurityTokenServiceConfig
+  * SPSecurityTokenServiceConfig
 * Standardized Url/WebApplication parameter to default WebAppUrl parameter
   for the following resources:
   * SPDesignerSettings
