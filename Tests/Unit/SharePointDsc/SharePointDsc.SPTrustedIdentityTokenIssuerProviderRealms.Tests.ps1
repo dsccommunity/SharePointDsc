@@ -33,8 +33,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
             Mock -CommandName Get-SPTrustedIdentityTokenIssuer -MockWith { return $null }
 
-            It "Should get Error message SPTrustedIdentityTokenIssuer 'Contoso' not found" {
-                (Get-TargetResource @testParams).Ensure | Should Be $null
+            It "Ensure should be Absent, since SPTrustedIdentityTokenIssuer 'Contoso' was not found" {
+                (Get-TargetResource @testParams).Ensure | Should Be "Absent"
             }
         }
 

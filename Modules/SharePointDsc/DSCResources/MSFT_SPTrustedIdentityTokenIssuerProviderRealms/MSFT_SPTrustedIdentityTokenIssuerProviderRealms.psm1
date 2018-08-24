@@ -101,7 +101,7 @@ function Get-TargetResource
             ProviderRealmsToExclude = $null
             CurrentRealms = $null
             RealmsToAdd = $null
-            Ensure = $null
+            Ensure = "Absent"
         }
     }
     $currentStatus = Get-ProviderRealmsStatus -currentRealms $result `
