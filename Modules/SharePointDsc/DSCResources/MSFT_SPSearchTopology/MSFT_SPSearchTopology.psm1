@@ -321,7 +321,7 @@ function Set-TargetResource
             {
                 throw "Unable to locate a search service instance on $serverName"
             }
-            $AllSearchServiceInstances.Add($serverName, $serviceToAdd)
+            $AllSearchServiceInstances.Add($server, $serviceToAdd)
         }
 
         # Get current topology and prepare a new one
