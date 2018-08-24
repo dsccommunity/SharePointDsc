@@ -1120,7 +1120,7 @@ param(
 
     [ValidateSet('Application','ApplicationWithSearch','Custom','DistributedCache','Search','SingleServerFarm','WebFrontEnd','WebFrontEndWithDistributedCache')]
     [object]
-    #[System.Nullable[object]]
+	#[System.Nullable[object]]
     ${LocalServerRole},
 
     [Parameter(ValueFromPipeline=$true)]
@@ -1194,37 +1194,6 @@ param(
     [ValidateNotNullOrEmpty()]
     [string]
     ${LoggingDirectory},
-
-    [Parameter(ValueFromPipeline=$true)]
-    [object]
-    ${AssignmentCollection})
-
-
- }
-
-
-function Copy-SPAccessServicesDatabaseCredentials {
- [CmdletBinding()]
-param(
-    [Parameter(Mandatory=$true, Position=0)]
-    [string]
-    ${AppUrl},
-
-    [Parameter(Mandatory=$true, ValueFromPipeline=$true)]
-    [object]
-    ${ServiceContext},
-
-    [Parameter(Mandatory=$true)]
-    [string]
-    ${SourceServer},
-
-    [Parameter(Mandatory=$true)]
-    [string]
-    ${TargetServer},
-
-    [Parameter(Mandatory=$true)]
-    [System.Net.NetworkCredential]
-    ${ServerCredential},
 
     [Parameter(ValueFromPipeline=$true)]
     [object]
@@ -1458,26 +1427,6 @@ param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
     [object]
     ${Identity},
-
-    [Parameter(ValueFromPipeline=$true)]
-    [object]
-    ${AssignmentCollection})
-
-
- }
-
-
-function Disable-SPInfoPathFormTemplate {
- [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
-param(
-    [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
-    [object]
-    ${Identity},
-
-    [Parameter(Mandatory=$true, ValueFromPipelineByPropertyName=$true)]
-    [Alias('Url')]
-    [object]
-    ${Site},
 
     [Parameter(ValueFromPipeline=$true)]
     [object]
@@ -1775,26 +1724,6 @@ param(
  }
 
 
-function Enable-SPInfoPathFormTemplate {
- [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
-param(
-    [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
-    [object]
-    ${Identity},
-
-    [Parameter(Mandatory=$true, ValueFromPipelineByPropertyName=$true)]
-    [Alias('url')]
-    [object]
-    ${Site},
-
-    [Parameter(ValueFromPipeline=$true)]
-    [object]
-    ${AssignmentCollection})
-
-
- }
-
-
 function Enable-SPProjectActiveDirectoryEnterpriseResourcePoolSync {
  [CmdletBinding()]
 param(
@@ -1949,27 +1878,6 @@ param(
 
     [int]
     ${CompatibilityLevel},
-
-    [Parameter(ValueFromPipeline=$true)]
-    [object]
-    ${AssignmentCollection})
-
-
- }
-
-
-function Export-SPAccessServicesDatabase {
- [CmdletBinding()]
-param(
-    [Parameter(Mandatory=$true, ValueFromPipeline=$true)]
-    [ValidateNotNullOrEmpty()]
-    [string]
-    ${DatabaseName},
-
-    [Parameter(Mandatory=$true, ValueFromPipeline=$true)]
-    [ValidateNotNullOrEmpty()]
-    [guid]
-    ${ServerReferenceId},
 
     [Parameter(ValueFromPipeline=$true)]
     [object]
@@ -2337,118 +2245,6 @@ param(
 function Get-ProjectServerLicense {
  [CmdletBinding()]
 param(
-    [Parameter(ValueFromPipeline=$true)]
-    [object]
-    ${AssignmentCollection})
-
-
- }
-
-
-function Get-SPAccessServiceApplication {
- [CmdletBinding()]
-param(
-    [Parameter(Position=0, ValueFromPipeline=$true)]
-    [object]
-    ${Identity},
-
-    [Parameter(ValueFromPipeline=$true)]
-    [object]
-    ${AssignmentCollection})
-
-
- }
-
-
-function Get-SPAccessServicesApplication {
- [CmdletBinding()]
-param(
-    [Parameter(Position=0, ValueFromPipeline=$true)]
-    [object]
-    ${Identity},
-
-    [Parameter(ValueFromPipeline=$true)]
-    [object]
-    ${AssignmentCollection})
-
-
- }
-
-
-function Get-SPAccessServicesDatabase {
- [CmdletBinding()]
-param(
-    [Parameter(Position=0, ValueFromPipeline=$true)]
-    [object]
-    ${Identity},
-
-    [Parameter(Position=1, ValueFromPipeline=$true)]
-    [object]
-    ${ContentDb},
-
-    [Parameter(Position=2, ValueFromPipeline=$true)]
-    [bool]
-    ${AccessAppsOnly},
-
-    [Parameter(ValueFromPipeline=$true)]
-    [object]
-    ${AssignmentCollection})
-
-
- }
-
-
-function Get-SPAccessServicesDatabaseServer {
- [CmdletBinding(DefaultParameterSetName='GetDatabaseServersParameterSet')]
-param(
-    [Parameter(ParameterSetName='GetDatabaseServersParameterSet', Mandatory=$true, Position=0, ValueFromPipeline=$true)]
-    [Parameter(ParameterSetName='GetSingleDatabaseServerParamterSet', Mandatory=$true, Position=0, ValueFromPipeline=$true)]
-    [object]
-    ${ServiceContext},
-
-    [Parameter(ParameterSetName='GetSingleDatabaseServerParamterSet', Mandatory=$true)]
-    [Parameter(ParameterSetName='GetDatabaseServersParameterSet')]
-    [object]
-    ${DatabaseServerGroup},
-
-    [Parameter(ParameterSetName='GetSingleDatabaseServerParamterSet', Mandatory=$true)]
-    [object]
-    ${DatabaseServer},
-
-    [Parameter(ValueFromPipeline=$true)]
-    [object]
-    ${AssignmentCollection})
-
-
- }
-
-
-function Get-SPAccessServicesDatabaseServerGroup {
- [CmdletBinding()]
-param(
-    [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
-    [object]
-    ${ServiceContext},
-
-    [Parameter(Position=1, ValueFromPipeline=$true)]
-    [object]
-    ${DatabaseServerGroup},
-
-    [Parameter(ValueFromPipeline=$true)]
-    [object]
-    ${AssignmentCollection})
-
-
- }
-
-
-function Get-SPAccessServicesDatabaseServerGroupMapping {
- [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
-param(
-    [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
-    [object]
-    ${ServiceContext},
-
     [Parameter(ValueFromPipeline=$true)]
     [object]
     ${AssignmentCollection})
@@ -6163,90 +5959,6 @@ param(
  }
 
 
-function Get-SPVisioExternalData {
- [CmdletBinding()]
-param(
-    [Parameter(Mandatory=$true, ValueFromPipeline=$true, ValueFromPipelineByPropertyName=$true)]
-    [ValidateNotNullOrEmpty()]
-    [object]
-    ${VisioServiceApplication},
-
-    [Parameter(ValueFromPipeline=$true)]
-    [object]
-    ${AssignmentCollection})
-
-
- }
-
-
-function Get-SPVisioPerformance {
- [CmdletBinding()]
-param(
-    [Parameter(Mandatory=$true, ValueFromPipeline=$true, ValueFromPipelineByPropertyName=$true)]
-    [ValidateNotNullOrEmpty()]
-    [object]
-    ${VisioServiceApplication},
-
-    [Parameter(ValueFromPipeline=$true)]
-    [object]
-    ${AssignmentCollection})
-
-
- }
-
-
-function Get-SPVisioSafeDataProvider {
- [CmdletBinding()]
-param(
-    [Parameter(Mandatory=$true, ValueFromPipeline=$true, ValueFromPipelineByPropertyName=$true)]
-    [ValidateNotNullOrEmpty()]
-    [object]
-    ${VisioServiceApplication},
-
-    [string]
-    ${DataProviderId},
-
-    [int]
-    ${DataProviderType},
-
-    [Parameter(ValueFromPipeline=$true)]
-    [object]
-    ${AssignmentCollection})
-
-
- }
-
-
-function Get-SPVisioServiceApplication {
- [CmdletBinding()]
-param(
-    [Parameter(Position=0, ValueFromPipeline=$true, ValueFromPipelineByPropertyName=$true)]
-    [object]
-    ${Identity},
-
-    [Parameter(ValueFromPipeline=$true)]
-    [object]
-    ${AssignmentCollection})
-
-
- }
-
-
-function Get-SPVisioServiceApplicationProxy {
- [CmdletBinding()]
-param(
-    [Parameter(Position=0, ValueFromPipeline=$true, ValueFromPipelineByPropertyName=$true)]
-    [object]
-    ${Identity},
-
-    [Parameter(ValueFromPipeline=$true)]
-    [object]
-    ${AssignmentCollection})
-
-
- }
-
-
 function Get-SPWeb {
  [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
@@ -6522,32 +6234,6 @@ param(
 
     [switch]
     ${Replace},
-
-    [Parameter(ValueFromPipeline=$true)]
-    [object]
-    ${AssignmentCollection})
-
-
- }
-
-
-function Import-SPAccessServicesDatabase {
- [CmdletBinding()]
-param(
-    [Parameter(Mandatory=$true, ValueFromPipeline=$true)]
-    [ValidateNotNullOrEmpty()]
-    [string]
-    ${DatabaseName},
-
-    [Parameter(Mandatory=$true, ValueFromPipeline=$true)]
-    [ValidateNotNullOrEmpty()]
-    [guid]
-    ${ServerReferenceId},
-
-    [Parameter(Mandatory=$true, ValueFromPipeline=$true)]
-    [ValidateNotNullOrEmpty()]
-    [byte[]]
-    ${Bacpac},
 
     [Parameter(ValueFromPipeline=$true)]
     [object]
@@ -7131,27 +6817,6 @@ param(
  }
 
 
-function Install-SPInfoPathFormTemplate {
- [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='High')]
-param(
-    [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
-    [string]
-    ${Path},
-
-    [switch]
-    ${EnableGradualUpgrade},
-
-    [switch]
-    ${NoWait},
-
-    [Parameter(ValueFromPipeline=$true)]
-    [object]
-    ${AssignmentCollection})
-
-
- }
-
-
 function Install-SPService {
  [CmdletBinding()]
 param(
@@ -7317,10 +6982,10 @@ param(
 function Invoke-SPProjectRedactUser {
  [CmdletBinding()]
 param(
-    [Parameter(ParameterSetName='ByLoginNameWithUpdateName', Mandatory=$true)]
+    [Parameter(ParameterSetName='ByClaimsAccountWithUpdateName', Mandatory=$true)]
     [Parameter(ParameterSetName='ByResourceIdWithoutUpdateName', Mandatory=$true)]
     [Parameter(ParameterSetName='ByResourceIdWithUpdateName', Mandatory=$true)]
-    [Parameter(ParameterSetName='ByLoginNameWithoutUpdateName', Mandatory=$true)]
+    [Parameter(ParameterSetName='ByClaimsAccountWithoutUpdateName', Mandatory=$true)]
     [ValidateNotNullOrEmpty()]
     [uri]
     ${Url},
@@ -7331,19 +6996,19 @@ param(
     [guid]
     ${ResourceId},
 
-    [Parameter(ParameterSetName='ByLoginNameWithoutUpdateName', Mandatory=$true)]
-    [Parameter(ParameterSetName='ByLoginNameWithUpdateName', Mandatory=$true)]
+    [Parameter(ParameterSetName='ByClaimsAccountWithoutUpdateName', Mandatory=$true)]
+    [Parameter(ParameterSetName='ByClaimsAccountWithUpdateName', Mandatory=$true)]
     [ValidateNotNullOrEmpty()]
     [string]
-    ${LoginName},
+    ${ClaimsAccount},
 
-    [Parameter(ParameterSetName='ByLoginNameWithUpdateName', Mandatory=$true)]
+    [Parameter(ParameterSetName='ByClaimsAccountWithUpdateName', Mandatory=$true)]
     [Parameter(ParameterSetName='ByResourceIdWithUpdateName', Mandatory=$true)]
     [ValidateNotNullOrEmpty()]
     [string]
     ${UpdateDisplayName},
 
-    [Parameter(ParameterSetName='ByLoginNameWithUpdateName', Mandatory=$true)]
+    [Parameter(ParameterSetName='ByClaimsAccountWithUpdateName', Mandatory=$true)]
     [Parameter(ParameterSetName='ByResourceIdWithUpdateName', Mandatory=$true)]
     [bool]
     ${RedactTimesheet},
@@ -7802,263 +7467,6 @@ param(
 
     [switch]
     ${IgnoreSID},
-
-    [Parameter(ValueFromPipeline=$true)]
-    [object]
-    ${AssignmentCollection})
-
-
- }
-
-
-function New-SPAccessServiceApplication {
- [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
-param(
-    [Parameter(Mandatory=$true, ValueFromPipeline=$true)]
-    [ValidateNotNull()]
-    [object]
-    ${ApplicationPool},
-
-    [string]
-    ${Name},
-
-    [switch]
-    ${Default},
-
-    [ValidateRange(1, 255)]
-    [int]
-    ${ColumnsMax},
-
-    [ValidateRange(1, 200000)]
-    [int]
-    ${RowsMax},
-
-    [ValidateRange(1, 20)]
-    [int]
-    ${SourcesMax},
-
-    [ValidateRange(0, 32)]
-    [int]
-    ${OutputCalculatedColumnsMax},
-
-    [ValidateRange(0, 8)]
-    [int]
-    ${OrderByMax},
-
-    [switch]
-    ${OuterJoinsAllowed},
-
-    [switch]
-    ${NonRemotableQueriesAllowed},
-
-    [ValidateRange(-1, 2147483647)]
-    [int]
-    ${RecordsInTableMax},
-
-    [ValidateRange(-1, 2147483647)]
-    [int]
-    ${ApplicationLogSizeMax},
-
-    [ValidateRange(-1, 2073600)]
-    [int]
-    ${RequestDurationMax},
-
-    [ValidateRange(-1, 2147483647)]
-    [int]
-    ${SessionsPerUserMax},
-
-    [ValidateRange(-1, 2147483647)]
-    [int]
-    ${SessionsPerAnonymousUserMax},
-
-    [ValidateRange(-1, 2073600)]
-    [int]
-    ${CacheTimeout},
-
-    [ValidateRange(0, 4096)]
-    [int]
-    ${SessionMemoryMax},
-
-    [ValidateRange(-1, 2147483647)]
-    [int]
-    ${PrivateBytesMax},
-
-    [ValidateRange(-1, 2147483647)]
-    [int]
-    ${TemplateSizeMax},
-
-    [Parameter(ValueFromPipeline=$true)]
-    [object]
-    ${AssignmentCollection})
-
-
- }
-
-
-function New-SPAccessServicesApplication {
- [CmdletBinding(DefaultParameterSetName='NoApplicationServerParameterSet', SupportsShouldProcess=$true, ConfirmImpact='Medium')]
-param(
-    [Parameter(ParameterSetName='DefaultParameterSet', Mandatory=$true)]
-    [ValidateNotNullOrEmpty()]
-    [string]
-    ${DatabaseServer},
-
-    [Parameter(ParameterSetName='DefaultParameterSet')]
-    [ValidateNotNull()]
-    [pscredential]
-    ${DatabaseServerCredentials},
-
-    [Parameter(ParameterSetName='NoApplicationServerParameterSet', Mandatory=$true, ValueFromPipeline=$true)]
-    [Parameter(ParameterSetName='DefaultParameterSet', Mandatory=$true, ValueFromPipeline=$true)]
-    [ValidateNotNull()]
-    [object]
-    ${ApplicationPool},
-
-    [Parameter(ParameterSetName='NoApplicationServerParameterSet')]
-    [Parameter(ParameterSetName='DefaultParameterSet')]
-    [string]
-    ${Name},
-
-    [Parameter(ParameterSetName='NoApplicationServerParameterSet')]
-    [Parameter(ParameterSetName='DefaultParameterSet', Mandatory=$true)]
-    [switch]
-    ${Default},
-
-    [Parameter(ParameterSetName='NoApplicationServerParameterSet')]
-    [Parameter(ParameterSetName='DefaultParameterSet')]
-    [ValidateRange(-1, 2073600)]
-    [int]
-    ${RequestDurationMax},
-
-    [Parameter(ParameterSetName='NoApplicationServerParameterSet')]
-    [Parameter(ParameterSetName='DefaultParameterSet')]
-    [ValidateRange(-1, 2147483647)]
-    [int]
-    ${SessionsPerUserMax},
-
-    [Parameter(ParameterSetName='NoApplicationServerParameterSet')]
-    [Parameter(ParameterSetName='DefaultParameterSet')]
-    [ValidateRange(-1, 2147483647)]
-    [int]
-    ${SessionsPerAnonymousUserMax},
-
-    [Parameter(ParameterSetName='NoApplicationServerParameterSet')]
-    [Parameter(ParameterSetName='DefaultParameterSet')]
-    [ValidateRange(-1, 2073600)]
-    [int]
-    ${CacheTimeout},
-
-    [Parameter(ParameterSetName='DefaultParameterSet')]
-    [Parameter(ParameterSetName='NoApplicationServerParameterSet')]
-    [ValidateRange(-1, 2147483647)]
-    [int]
-    ${PrivateBytesMax},
-
-    [Parameter(ParameterSetName='NoApplicationServerParameterSet')]
-    [Parameter(ParameterSetName='DefaultParameterSet')]
-    [ValidateRange(-1, 2073600)]
-    [int]
-    ${QueryTimeout},
-
-    [Parameter(ParameterSetName='NoApplicationServerParameterSet')]
-    [Parameter(ParameterSetName='DefaultParameterSet')]
-    [ValidateRange(-1, 1440)]
-    [int]
-    ${RecoveryPointObjective},
-
-    [Parameter(ParameterSetName='NoApplicationServerParameterSet')]
-    [Parameter(ParameterSetName='DefaultParameterSet')]
-    [bool]
-    ${Hosted},
-
-    [Parameter(ParameterSetName='DefaultParameterSet')]
-    [bool]
-    ${Encrypt},
-
-    [Parameter(ParameterSetName='DefaultParameterSet')]
-    [bool]
-    ${TrustServerCertificate},
-
-    [Parameter(ValueFromPipeline=$true)]
-    [object]
-    ${AssignmentCollection})
-
-
- }
-
-
-function New-SPAccessServicesApplicationProxy {
- [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
-param(
-    [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
-    [object]
-    ${application},
-
-    [Parameter(ValueFromPipeline=$true)]
-    [object]
-    ${AssignmentCollection})
-
-
- }
-
-
-function New-SPAccessServicesDatabaseServer {
- [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
-param(
-    [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
-    [object]
-    ${ServiceContext},
-
-    [Parameter(Mandatory=$true)]
-    [ValidateNotNullOrEmpty()]
-    [string]
-    ${DatabaseServerName},
-
-    [ValidateNotNullOrEmpty()]
-    [string]
-    ${DatabaseServerGroupName},
-
-    [ValidateNotNullOrEmpty()]
-    [guid]
-    ${ServerReferenceId},
-
-    [ValidateNotNullOrEmpty()]
-    [pscredential]
-    ${DatabaseServerCredentials},
-
-    [ValidateNotNullOrEmpty()]
-    [bool]
-    ${AvailableForCreate},
-
-    [ValidateNotNullOrEmpty()]
-    [bool]
-    ${Exclusive},
-
-    [bool]
-    ${Encrypt},
-
-    [bool]
-    ${TrustServerCertificate},
-
-    [bool]
-    ${ValidateServer},
-
-    [ValidateNotNullOrEmpty()]
-    [string]
-    ${SecondaryDatabaseServerName},
-
-    [ValidateNotNullOrEmpty()]
-    [string]
-    ${UserDomain},
-
-    [object]
-    ${LoginType},
-
-    [object]
-    ${State},
-
-    [object]
-    ${StateOwner},
 
     [Parameter(ValueFromPipeline=$true)]
     [object]
@@ -8531,7 +7939,7 @@ param(
 
     [ValidateSet('Application','ApplicationWithSearch','Custom','DistributedCache','Search','SingleServerFarm','WebFrontEnd','WebFrontEndWithDistributedCache')]
     [object]
-    #[System.Nullable[object]]
+	#[System.Nullable[object]]
     ${LocalServerRole},
 
     [switch]
@@ -8830,7 +8238,7 @@ param(
     ${StartAddresses},
 
     [Alias('p')]
-    [object]
+	[object]
     #[System.Nullable[object]]
     ${CrawlPriority},
 
@@ -8840,7 +8248,7 @@ param(
     [System.Nullable[int]]
     ${MaxSiteEnumerationDepth},
 
-    [object]
+	[object]
     #[System.Nullable[object]]
     ${SharePointCrawlBehavior},
 
@@ -8999,7 +8407,7 @@ param(
     [string]
     ${ContentClass},
 
-    [object]
+	[object]
     #[System.Nullable[object]]
     ${AuthenticationType},
 
@@ -9084,7 +8492,8 @@ param(
     ${SearchApplication},
 
     [Parameter(Mandatory=$true)]
-    [System.Nullable[object]]
+	[object]
+    #[System.Nullable[object]]
     ${Type},
 
     [Parameter(Mandatory=$true)]
@@ -9689,7 +9098,8 @@ param(
     [System.Nullable[bool]]
     ${AutoDiscover},
 
-    [System.Nullable[object]]
+	[object]
+    #[System.Nullable[object]]
     ${AuthenticationType},
 
     [string]
@@ -10524,13 +9934,15 @@ param(
 
     [Parameter(ParameterSetName='StandardParameterSet', Mandatory=$true, Position=1)]
     [ValidateNotNull()]
-    [System.Nullable[object]]
+    [object]
+	#[System.Nullable[object]]
     ${Property},
 
     [Parameter(ParameterSetName='CustomPropertyParameterSet', Position=2)]
     [Parameter(ParameterSetName='StandardParameterSet', Position=2)]
     [ValidateNotNull()]
-    [System.Nullable[object]]
+    [object]
+	#[System.Nullable[object]]
     ${MatchType},
 
     [Parameter(ParameterSetName='StandardParameterSet', Position=2)]
@@ -11212,7 +10624,8 @@ param(
 
     [Parameter(ParameterSetName='ImportCertificateParameterSet', Mandatory=$true)]
     [ValidateNotNull()]
-    [System.Security.Cryptography.X509Certificates.X509Certificate2]
+    [object]
+    #[System.Security.Cryptography.X509Certificates.X509Certificate2]
     ${Certificate},
 
     [Parameter(ParameterSetName='MetadataEndPointParameterSet', Mandatory=$true)]
@@ -11242,7 +10655,8 @@ param(
 
     [Parameter(ParameterSetName='ImportCertificateParameterSet', Mandatory=$true)]
     [ValidateNotNull()]
-    [System.Security.Cryptography.X509Certificates.X509Certificate2]
+    [object]
+    #[System.Security.Cryptography.X509Certificates.X509Certificate2]
     ${Certificate},
 
     [Parameter(ParameterSetName='MetadataEndPointParameterSet', Mandatory=$true)]
@@ -11445,79 +10859,6 @@ param(
     [ValidateNotNullOrEmpty()]
     [string]
     ${ListTitle},
-
-    [Parameter(ValueFromPipeline=$true)]
-    [object]
-    ${AssignmentCollection})
-
-
- }
-
-
-function New-SPVisioSafeDataProvider {
- [CmdletBinding()]
-param(
-    [Parameter(Mandatory=$true, ValueFromPipeline=$true, ValueFromPipelineByPropertyName=$true)]
-    [ValidateNotNullOrEmpty()]
-    [object]
-    ${VisioServiceApplication},
-
-    [Parameter(Mandatory=$true)]
-    [ValidateNotNullOrEmpty()]
-    [string]
-    ${DataProviderId},
-
-    [Parameter(Mandatory=$true)]
-    [ValidateNotNullOrEmpty()]
-    [int]
-    ${DataProviderType},
-
-    [string]
-    ${Description},
-
-    [Parameter(ValueFromPipeline=$true)]
-    [object]
-    ${AssignmentCollection})
-
-
- }
-
-
-function New-SPVisioServiceApplication {
- [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
-param(
-    [Parameter(ValueFromPipeline=$true, ValueFromPipelineByPropertyName=$true)]
-    [switch]
-    ${AddToDefaultGroup},
-
-    [Parameter(ValueFromPipeline=$true, ValueFromPipelineByPropertyName=$true)]
-    [string]
-    ${Name},
-
-    [Parameter(Mandatory=$true, ValueFromPipeline=$true, ValueFromPipelineByPropertyName=$true)]
-    [ValidateNotNullOrEmpty()]
-    [object]
-    ${ApplicationPool},
-
-    [Parameter(ValueFromPipeline=$true)]
-    [object]
-    ${AssignmentCollection})
-
-
- }
-
-
-function New-SPVisioServiceApplicationProxy {
- [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
-param(
-    [Parameter(ValueFromPipeline=$true)]
-    [string]
-    ${Name},
-
-    [Parameter(Mandatory=$true, ValueFromPipeline=$true, ValueFromPipelineByPropertyName=$true)]
-    [ValidateNotNullOrEmpty()]
-    [string]
-    ${ServiceApplication},
 
     [Parameter(ValueFromPipeline=$true)]
     [object]
@@ -12026,34 +11367,6 @@ param(
  }
 
 
-function Remove-SPAccessServicesDatabaseServer {
- [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='High')]
-param(
-    [Parameter(Mandatory=$true)]
-    [ValidateNotNullOrEmpty()]
-    [object]
-    ${DatabaseServer},
-
-    [Parameter(Mandatory=$true)]
-    [ValidateNotNullOrEmpty()]
-    [object]
-    ${DatabaseServerGroup},
-
-    [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
-    [object]
-    ${ServiceContext},
-
-    [switch]
-    ${Force},
-
-    [Parameter(ValueFromPipeline=$true)]
-    [object]
-    ${AssignmentCollection})
-
-
- }
-
-
 function Remove-SPActivityFeedItems {
  [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='High')]
 param(
@@ -12546,7 +11859,8 @@ param(
     [object]
     ${SearchApplication},
 
-    [System.Nullable[object]]
+	[object]
+    #[System.Nullable[object]]
     ${Type},
 
     [string]
@@ -13984,32 +13298,6 @@ param(
  }
 
 
-function Remove-SPVisioSafeDataProvider {
- [CmdletBinding()]
-param(
-    [Parameter(Mandatory=$true, ValueFromPipeline=$true, ValueFromPipelineByPropertyName=$true)]
-    [ValidateNotNullOrEmpty()]
-    [object]
-    ${VisioServiceApplication},
-
-    [Parameter(Mandatory=$true, ValueFromPipeline=$true, ValueFromPipelineByPropertyName=$true)]
-    [ValidateNotNullOrEmpty()]
-    [string]
-    ${DataProviderId},
-
-    [Parameter(Mandatory=$true, ValueFromPipeline=$true, ValueFromPipelineByPropertyName=$true)]
-    [ValidateNotNullOrEmpty()]
-    [int]
-    ${DataProviderType},
-
-    [Parameter(ValueFromPipeline=$true)]
-    [object]
-    ${AssignmentCollection})
-
-
- }
-
-
 function Remove-SPWeb {
  [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='High')]
 param(
@@ -14264,26 +13552,6 @@ param(
 
     [switch]
     ${Email},
-
-    [Parameter(ValueFromPipeline=$true)]
-    [object]
-    ${AssignmentCollection})
-
-
- }
-
-
-function Reset-SPAccessServicesDatabasePassword {
- [CmdletBinding(DefaultParameterSetName='ResetAllApps', SupportsShouldProcess=$true, ConfirmImpact='Medium')]
-param(
-    [Parameter(ParameterSetName='ResetSingleApp', Mandatory=$true, ValueFromPipeline=$true)]
-    [object]
-    ${Database},
-
-    [Parameter(ParameterSetName='ResetSingleApp', Mandatory=$true, Position=0, ValueFromPipeline=$true)]
-    [Parameter(ParameterSetName='ResetAllApps', Mandatory=$true, Position=0, ValueFromPipeline=$true)]
-    [object]
-    ${ServiceContext},
 
     [Parameter(ValueFromPipeline=$true)]
     [object]
@@ -14678,268 +13946,6 @@ param(
     [Parameter(ParameterSetName='RevokeAll', Mandatory=$true)]
     [switch]
     ${All},
-
-    [Parameter(ValueFromPipeline=$true)]
-    [object]
-    ${AssignmentCollection})
-
-
- }
-
-
-function Set-SPAccessServiceApplication {
- [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
-param(
-    [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
-    [object]
-    ${Identity},
-
-    [ValidateRange(1, 255)]
-    [int]
-    ${ColumnsMax},
-
-    [ValidateRange(1, 200000)]
-    [int]
-    ${RowsMax},
-
-    [ValidateRange(1, 20)]
-    [int]
-    ${SourcesMax},
-
-    [ValidateRange(0, 32)]
-    [int]
-    ${OutputCalculatedColumnsMax},
-
-    [ValidateRange(0, 8)]
-    [int]
-    ${OrderByMax},
-
-    [switch]
-    ${OuterJoinsAllowed},
-
-    [switch]
-    ${NonRemotableQueriesAllowed},
-
-    [ValidateRange(-1, 2147483647)]
-    [int]
-    ${RecordsInTableMax},
-
-    [ValidateRange(-1, 2147483647)]
-    [int]
-    ${ApplicationLogSizeMax},
-
-    [ValidateRange(-1, 2073600)]
-    [int]
-    ${RequestDurationMax},
-
-    [ValidateRange(-1, 2147483647)]
-    [int]
-    ${SessionsPerUserMax},
-
-    [ValidateRange(-1, 2147483647)]
-    [int]
-    ${SessionsPerAnonymousUserMax},
-
-    [ValidateRange(-1, 2073600)]
-    [int]
-    ${CacheTimeout},
-
-    [ValidateRange(0, 4096)]
-    [int]
-    ${SessionMemoryMax},
-
-    [ValidateRange(-1, 2147483647)]
-    [int]
-    ${PrivateBytesMax},
-
-    [ValidateRange(-1, 2147483647)]
-    [int]
-    ${TemplateSizeMax},
-
-    [Parameter(ValueFromPipeline=$true)]
-    [object]
-    ${AssignmentCollection})
-
-
- }
-
-
-function Set-SPAccessServicesApplication {
- [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
-param(
-    [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
-    [object]
-    ${Identity},
-
-    [ValidateRange(-1, 2073600)]
-    [int]
-    ${RequestDurationMax},
-
-    [ValidateRange(-1, 2147483647)]
-    [int]
-    ${SessionsPerUserMax},
-
-    [ValidateRange(-1, 2147483647)]
-    [int]
-    ${SessionsPerAnonymousUserMax},
-
-    [ValidateRange(-1, 2073600)]
-    [int]
-    ${CacheTimeout},
-
-    [ValidateRange(-1, 2147483647)]
-    [int]
-    ${PrivateBytesMax},
-
-    [ValidateRange(-1, 2073600)]
-    [int]
-    ${QueryTimeout},
-
-    [ValidateRange(-1, 1440)]
-    [int]
-    ${RecoveryPointObjective},
-
-    [Parameter(ValueFromPipeline=$true)]
-    [object]
-    ${AssignmentCollection})
-
-
- }
-
-
-function Set-SPAccessServicesDatabaseServer {
- [CmdletBinding(DefaultParameterSetName='SetCredentialsParameterSet', SupportsShouldProcess=$true, ConfirmImpact='Medium')]
-param(
-    [Parameter(ParameterSetName='SetSecondaryDatabaseServerNameParameterSet', Mandatory=$true, Position=0, ValueFromPipeline=$true)]
-    [Parameter(ParameterSetName='SetServerStateParameterSet', Mandatory=$true, Position=0, ValueFromPipeline=$true)]
-    [Parameter(ParameterSetName='SetAvailableForCreateParameterSet', Mandatory=$true, Position=0, ValueFromPipeline=$true)]
-    [Parameter(ParameterSetName='SetEncryptParameterSet', Mandatory=$true, Position=0, ValueFromPipeline=$true)]
-    [Parameter(ParameterSetName='SetCredentialsParameterSet', Mandatory=$true, Position=0, ValueFromPipeline=$true)]
-    [Parameter(ParameterSetName='SetFailoverParameterSet', Mandatory=$true, Position=0, ValueFromPipeline=$true)]
-    [Parameter(ParameterSetName='SetUserDomainParameterSet', Mandatory=$true, Position=0, ValueFromPipeline=$true)]
-    [object]
-    ${ServiceContext},
-
-    [Parameter(ParameterSetName='SetServerStateParameterSet', Mandatory=$true)]
-    [Parameter(ParameterSetName='SetSecondaryDatabaseServerNameParameterSet', Mandatory=$true)]
-    [Parameter(ParameterSetName='SetUserDomainParameterSet', Mandatory=$true)]
-    [Parameter(ParameterSetName='SetFailoverParameterSet', Mandatory=$true)]
-    [Parameter(Mandatory=$true)]
-    [Parameter(ParameterSetName='SetCredentialsParameterSet', Mandatory=$true)]
-    [Parameter(ParameterSetName='SetAvailableForCreateParameterSet', Mandatory=$true)]
-    [Parameter(ParameterSetName='SetEncryptParameterSet', Mandatory=$true)]
-    [ValidateNotNullOrEmpty()]
-    [object]
-    ${DatabaseServerGroup},
-
-    [Parameter(ParameterSetName='SetServerStateParameterSet', Mandatory=$true)]
-    [Parameter(ParameterSetName='SetEncryptParameterSet', Mandatory=$true)]
-    [Parameter(ParameterSetName='SetUserDomainParameterSet', Mandatory=$true)]
-    [Parameter(ParameterSetName='SetFailoverParameterSet', Mandatory=$true)]
-    [Parameter(ParameterSetName='SetSecondaryDatabaseServerNameParameterSet', Mandatory=$true)]
-    [Parameter(Mandatory=$true)]
-    [Parameter(ParameterSetName='SetCredentialsParameterSet', Mandatory=$true)]
-    [Parameter(ParameterSetName='SetAvailableForCreateParameterSet', Mandatory=$true)]
-    [ValidateNotNullOrEmpty()]
-    [object]
-    ${DatabaseServer},
-
-    [Parameter(ParameterSetName='SetCredentialsParameterSet')]
-    [string]
-    ${DatabaseServerName},
-
-    [Parameter(ParameterSetName='SetCredentialsParameterSet')]
-    [pscredential]
-    ${DatabaseServerCredentials},
-
-    [Parameter(ParameterSetName='SetAvailableForCreateParameterSet', Mandatory=$true)]
-    [ValidateNotNullOrEmpty()]
-    [bool]
-    ${AvailableForCreate},
-
-    [Parameter(ParameterSetName='SetAvailableForCreateParameterSet')]
-    [ValidateNotNullOrEmpty()]
-    [bool]
-    ${Exclusive},
-
-    [Parameter(ParameterSetName='SetEncryptParameterSet', Mandatory=$true)]
-    [bool]
-    ${Encrypt},
-
-    [Parameter(ParameterSetName='SetEncryptParameterSet', Mandatory=$true)]
-    [bool]
-    ${TrustServerCertificate},
-
-    [Parameter(ParameterSetName='SetSecondaryDatabaseServerNameParameterSet')]
-    [string]
-    ${SecondaryDatabaseServerName},
-
-    [Parameter(ParameterSetName='SetFailoverParameterSet', Mandatory=$true)]
-    [bool]
-    ${Failover},
-
-    [Parameter(ParameterSetName='SetUserDomainParameterSet', Mandatory=$true)]
-    [ValidateNotNullOrEmpty()]
-    [string]
-    ${UserDomain},
-
-    [Parameter(ParameterSetName='SetServerStateParameterSet', Mandatory=$true)]
-    [object]
-    ${State},
-
-    [Parameter(ParameterSetName='SetServerStateParameterSet', Mandatory=$true)]
-    [object]
-    ${StateOwner},
-
-    [Parameter(ValueFromPipeline=$true)]
-    [object]
-    ${AssignmentCollection})
-
-
- }
-
-
-function Set-SPAccessServicesDatabaseServerGroupMapping {
- [CmdletBinding(DefaultParameterSetName='SetDatabaseServerGroupMappingParameter', SupportsShouldProcess=$true, ConfirmImpact='Medium')]
-param(
-    [Parameter(ParameterSetName='ClearDatabaseServerGroupMappingParameterSetName', Mandatory=$true, Position=0, ValueFromPipeline=$true)]
-    [Parameter(ParameterSetName='SetDatabaseServerGroupMappingParameter', Mandatory=$true, Position=0, ValueFromPipeline=$true)]
-    [object]
-    ${ServiceContext},
-
-    [Parameter(ParameterSetName='SetDatabaseServerGroupMappingParameter', Mandatory=$true)]
-    [ValidateNotNullOrEmpty()]
-    [object]
-    ${DatabaseServerGroup},
-
-    [Parameter(ParameterSetName='SetDatabaseServerGroupMappingParameter')]
-    [Parameter(ParameterSetName='ClearDatabaseServerGroupMappingParameterSetName')]
-    [switch]
-    ${CorporateCatalog},
-
-    [Parameter(ParameterSetName='ClearDatabaseServerGroupMappingParameterSetName')]
-    [Parameter(ParameterSetName='SetDatabaseServerGroupMappingParameter')]
-    [switch]
-    ${ObjectModel},
-
-    [Parameter(ParameterSetName='ClearDatabaseServerGroupMappingParameterSetName')]
-    [Parameter(ParameterSetName='SetDatabaseServerGroupMappingParameter')]
-    [switch]
-    ${RemoteObjectModel},
-
-    [Parameter(ParameterSetName='SetDatabaseServerGroupMappingParameter')]
-    [Parameter(ParameterSetName='ClearDatabaseServerGroupMappingParameterSetName')]
-    [switch]
-    ${DeveloperSite},
-
-    [Parameter(ParameterSetName='ClearDatabaseServerGroupMappingParameterSetName')]
-    [Parameter(ParameterSetName='SetDatabaseServerGroupMappingParameter')]
-    [switch]
-    ${StoreFront},
-
-    [Parameter(ParameterSetName='ClearDatabaseServerGroupMappingParameterSetName', Mandatory=$true)]
-    [switch]
-    ${ClearMapping},
 
     [Parameter(ValueFromPipeline=$true)]
     [object]
@@ -16021,7 +15027,7 @@ param(
     ${StartAddresses},
 
     [Alias('p')]
-    [object]
+	[object]
     #[System.Nullable[object]]
     ${CrawlPriority},
 
@@ -16081,7 +15087,7 @@ param(
 
     [Parameter(ParameterSetName='Weekly')]
     [object]
-    #[System.Nullable[object]]
+	#[System.Nullable[object]]
     ${CrawlScheduleDaysOfWeek},
 
     [Parameter(ParameterSetName='MonthlyDate')]
@@ -16090,7 +15096,7 @@ param(
 
     [Parameter(ParameterSetName='MonthlyDate')]
     [Alias('month')]
-    [object]
+	[object]
     #[System.Nullable[object]]
     ${CrawlScheduleMonthsOfYear},
 
@@ -16189,7 +15195,7 @@ param(
     ${SearchApplication},
 
     [Alias('t')]
-    [object]
+	[object]
     #[System.Nullable[object]]
     ${Type},
 
@@ -16214,7 +15220,7 @@ param(
     [string]
     ${ContentClass},
 
-    [object]
+	[object]
     #[System.Nullable[object]]
     ${AuthenticationType},
 
@@ -16707,7 +15713,8 @@ param(
     [System.Nullable[bool]]
     ${SecurityTrimmingEnabled},
 
-    [System.Nullable[object]]
+	[object]
+    #[System.Nullable[object]]
     ${SpellingDictionary},
 
     [System.Nullable[timespan]]
@@ -16836,7 +15843,8 @@ param(
     [System.Nullable[bool]]
     ${AutoDiscover},
 
-    [System.Nullable[object]]
+	[object]
+    #[System.Nullable[object]]
     ${AuthenticationType},
 
     [string]
@@ -16914,7 +15922,7 @@ param(
     [string]
     ${DiacriticSensitive},
 
-    [object]
+	[object]
     #[System.Nullable[object]]
     ${DefaultSearchProvider},
 
@@ -17040,7 +16048,8 @@ param(
     [string]
     ${ServiceConnectionPointBindingInformation},
 
-    [System.Nullable[object]]
+	[object]
+    #[System.Nullable[object]]
     ${SiteMasterMode},
 
     [System.Nullable[uint32]]
@@ -17232,7 +16241,8 @@ param(
     ${CertificateServerUrl},
 
     [ValidateNotNull()]
-    [System.Security.Cryptography.X509Certificates.X509Certificate2]
+    [object]
+    #[System.Security.Cryptography.X509Certificates.X509Certificate2]
     ${ServiceAuthenticationCertificate},
 
     [ValidateNotNull()]
@@ -17575,7 +16585,8 @@ param(
     ${ServiceAddressURL},
 
     [ValidateNotNull()]
-    [System.Nullable[object]]
+	[object]
+    #[System.Nullable[object]]
     ${AuthenticationMode},
 
     [ValidateNotNull()]
@@ -17618,7 +16629,8 @@ param(
     ${ServiceAddressMetadataURL},
 
     [ValidateNotNull()]
-    [System.Nullable[object]]
+	[object]
+    #[System.Nullable[object]]
     ${AuthenticationMode},
 
     [ValidateLength(0, 1024)]
@@ -18332,7 +17344,8 @@ param(
     ${ThrottlingEnabled},
 
     [ValidateNotNull()]
-    [System.Nullable[object]]
+	[object]
+    #[System.Nullable[object]]
     ${RoutingScheme},
 
     [Parameter(ValueFromPipeline=$true)]
@@ -18352,11 +17365,13 @@ param(
     ${Identity},
 
     [ValidateNotNull()]
-    [System.Nullable[object]]
+    [object]
+	#[System.Nullable[object]]
     ${Availability},
 
     [ValidateNotNull()]
-    [System.Nullable[object]]
+	[object]
+    #[System.Nullable[object]]
     ${OutgoingScheme},
 
     [ValidateNotNull()]
@@ -18605,7 +17620,8 @@ function Set-SPSecurityTokenServiceConfig {
 param(
     [Parameter(ParameterSetName='SigningCertificateImport')]
     [ValidateNotNull()]
-    [System.Security.Cryptography.X509Certificates.X509Certificate2]
+    [object]
+    #[System.Security.Cryptography.X509Certificates.X509Certificate2]
     ${ImportSigningCertificate},
 
     [Parameter(ParameterSetName='SigningCertificateReference')]
@@ -18618,7 +17634,8 @@ param(
 
     [Parameter(ParameterSetName='SigningCertificateQueue')]
     [ValidateNotNull()]
-    [System.Security.Cryptography.X509Certificates.X509Certificate2]
+    [object]
+    #[System.Security.Cryptography.X509Certificates.X509Certificate2]
     ${QueueSigningCertificate},
 
     [Parameter(ParameterSetName='SigningCertificateReference')]
@@ -18631,7 +17648,8 @@ param(
 
     [Parameter(ParameterSetName='SigningCertificateRevoke')]
     [ValidateNotNull()]
-    [System.Security.Cryptography.X509Certificates.X509Certificate2]
+    [object]
+    #[System.Security.Cryptography.X509Certificates.X509Certificate2]
     ${RevokeSigningCertificate},
 
     [Parameter(ParameterSetName='RevokeSigningCertificateReference', Mandatory=$true)]
@@ -18678,11 +17696,13 @@ param(
     [object]
     ${Identity},
 
-    [System.Nullable[object]]
+    [object]
+	#[System.Nullable[object]]
     ${Status},
 
     [ValidateSet('Application','ApplicationWithSearch','Custom','DistributedCache','Search','SingleServerFarm','WebFrontEnd','WebFrontEndWithDistributedCache')]
-    [System.Nullable[object]]
+    [object]
+	#[System.Nullable[object]]
     ${Role},
 
     [Parameter(ValueFromPipeline=$true)]
@@ -18904,7 +17924,8 @@ param(
 
     [Parameter(ParameterSetName='SslCertificateImport')]
     [ValidateNotNull()]
-    [System.Security.Cryptography.X509Certificates.X509Certificate2]
+    [object]
+    #[System.Security.Cryptography.X509Certificates.X509Certificate2]
     ${ImportSslCertificate},
 
     [Parameter(ParameterSetName='SslCertificateImport')]
@@ -19568,7 +18589,8 @@ param(
 
     [Parameter(ParameterSetName='ImportCertificateParameterSet', Mandatory=$true)]
     [ValidateNotNull()]
-    [System.Security.Cryptography.X509Certificates.X509Certificate2]
+    [object]
+    #[System.Security.Cryptography.X509Certificates.X509Certificate2]
     ${ImportTrustCertificate},
 
     [Parameter(ParameterSetName='MetadataEndPointParameterSet', Mandatory=$true)]
@@ -19670,7 +18692,8 @@ param(
 
     [Parameter(ParameterSetName='ImportCertificateParameterSet')]
     [ValidateNotNull()]
-    [System.Security.Cryptography.X509Certificates.X509Certificate2]
+    [object]
+    #[System.Security.Cryptography.X509Certificates.X509Certificate2]
     ${Certificate},
 
     [ValidateNotNullOrEmpty()]
@@ -19699,7 +18722,8 @@ param(
 
     [Parameter(ParameterSetName='ImportCertificateParameterSet')]
     [ValidateNotNull()]
-    [System.Security.Cryptography.X509Certificates.X509Certificate2]
+    [object]
+    #[System.Security.Cryptography.X509Certificates.X509Certificate2]
     ${Certificate},
 
     [Parameter(ParameterSetName='MetadataEndPointParameterSet')]
@@ -19870,118 +18894,6 @@ param(
 
     [switch]
     ${IsSiteCollectionAdmin},
-
-    [Parameter(ValueFromPipeline=$true)]
-    [object]
-    ${AssignmentCollection})
-
-
- }
-
-
-function Set-SPVisioExternalData {
- [CmdletBinding()]
-param(
-    [Parameter(Mandatory=$true, ValueFromPipeline=$true, ValueFromPipelineByPropertyName=$true)]
-    [ValidateNotNullOrEmpty()]
-    [object]
-    ${VisioServiceApplication},
-
-    [Parameter(Mandatory=$true)]
-    [ValidateNotNullOrEmpty()]
-    [string]
-    ${UnattendedServiceAccountApplicationID},
-
-    [Parameter(ValueFromPipeline=$true)]
-    [object]
-    ${AssignmentCollection})
-
-
- }
-
-
-function Set-SPVisioPerformance {
- [CmdletBinding()]
-param(
-    [Parameter(Mandatory=$true, ValueFromPipeline=$true, ValueFromPipelineByPropertyName=$true)]
-    [ValidateNotNullOrEmpty()]
-    [object]
-    ${VisioServiceApplication},
-
-    [Parameter(Mandatory=$true)]
-    [ValidateNotNullOrEmpty()]
-    [long]
-    ${MaxDiagramSize},
-
-    [Parameter(Mandatory=$true)]
-    [int]
-    ${MinDiagramCacheAge},
-
-    [Parameter(Mandatory=$true)]
-    [ValidateNotNullOrEmpty()]
-    [int]
-    ${MaxDiagramCacheAge},
-
-    [Parameter(Mandatory=$true)]
-    [ValidateNotNullOrEmpty()]
-    [int]
-    ${MaxRecalcDuration},
-
-    [Parameter(Mandatory=$true)]
-    [ValidateNotNullOrEmpty()]
-    [long]
-    ${MaxCacheSize},
-
-    [Parameter(ValueFromPipeline=$true)]
-    [object]
-    ${AssignmentCollection})
-
-
- }
-
-
-function Set-SPVisioSafeDataProvider {
- [CmdletBinding()]
-param(
-    [Parameter(Mandatory=$true, ValueFromPipeline=$true, ValueFromPipelineByPropertyName=$true)]
-    [ValidateNotNullOrEmpty()]
-    [object]
-    ${VisioServiceApplication},
-
-    [Parameter(Mandatory=$true)]
-    [ValidateNotNullOrEmpty()]
-    [string]
-    ${DataProviderId},
-
-    [Parameter(Mandatory=$true)]
-    [int]
-    ${DataProviderType},
-
-    [Parameter(Mandatory=$true)]
-    [ValidateNotNullOrEmpty()]
-    [string]
-    ${Description},
-
-    [Parameter(ValueFromPipeline=$true)]
-    [object]
-    ${AssignmentCollection})
-
-
- }
-
-
-function Set-SPVisioServiceApplication {
- [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
-param(
-    [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
-    [ValidateNotNullOrEmpty()]
-    [object]
-    ${Identity},
-
-    [Parameter(Mandatory=$true, Position=1, ValueFromPipeline=$true, ValueFromPipelineByPropertyName=$true)]
-    [ValidateNotNullOrEmpty()]
-    [object]
-    ${ServiceApplicationPool},
 
     [Parameter(ValueFromPipeline=$true)]
     [object]
@@ -21037,21 +19949,6 @@ param(
     [ValidateNotNullOrEmpty()]
     [string]
     ${Name},
-
-    [Parameter(ValueFromPipeline=$true)]
-    [object]
-    ${AssignmentCollection})
-
-
- }
-
-
-function Uninstall-SPInfoPathFormTemplate {
- [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
-param(
-    [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
-    [object]
-    ${Identity},
 
     [Parameter(ValueFromPipeline=$true)]
     [object]
