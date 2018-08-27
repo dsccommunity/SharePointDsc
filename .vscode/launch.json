@@ -1,7 +1,7 @@
 {
     "version": "0.3.0",
     "configurations": [
-        
+
         {
             "type": "PowerShell",
             "request": "launch",
@@ -20,6 +20,17 @@
             "script": "${file}",
             "args": [
                 "${workspaceRoot}/Tests/Unit/Stubs/SharePoint/16.0.4456.1000/Microsoft.SharePoint.PowerShell.psm1"
+            ],
+            "cwd": "${file}",
+            "createTemporaryIntegratedConsole": true
+        },
+        {
+            "type": "PowerShell",
+            "request": "launch",
+            "name": "Run current unit test (SP2019)",
+            "script": "${file}",
+            "args": [
+                "${workspaceRoot}/Tests/Unit/Stubs/SharePoint/16.0.10218.10000/Microsoft.SharePoint.PowerShell.psm1"
             ],
             "cwd": "${file}",
             "createTemporaryIntegratedConsole": true
