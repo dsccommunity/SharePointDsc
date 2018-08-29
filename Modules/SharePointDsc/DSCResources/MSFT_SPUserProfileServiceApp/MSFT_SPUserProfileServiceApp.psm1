@@ -381,13 +381,16 @@ function Set-TargetResource
             $app = $serviceApps | Select-Object -First 1
             if ($null -eq $serviceApps)
             {
-                $app = New-SPProfileServiceApplication @params
+                New-SPProfileServiceApplication @params | Out-Null
                 if ($null -ne $app)
                 {
                     New-SPProfileServiceApplicationProxy -Name $pName `
                                                          -ServiceApplication $app `
                                                          -DefaultProxyGroup
                 }
+
+                $app = Get-SPServiceApplication -Name $params.Name `
+                                                -ErrorAction SilentlyContinue
             }
 
             if (($updateEnableNetBIOS -eq $true) -or ($updateNoILMUsed -eq $true))

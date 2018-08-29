@@ -22,6 +22,9 @@
   * Fixed issue where the resource would fail is the FQDN was specified
 * SPTrustedIdentityTokenIssuerProviderRealm
   * Fixed issue where Get method threw an error when the realm didn't exist yet
+* SPUserProfileServiceApp
+  * Fix for issue where an update conflict error was thrown when new service
+    application was created.
 
 ## 2.4
 
