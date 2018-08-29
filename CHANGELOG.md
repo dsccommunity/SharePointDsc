@@ -7,6 +7,8 @@
     connection string
 * SPDiagnosticsProvider
   * Fixed issue where enabling providers did not work
+* SPFarm
+  * Added ability to check and update CentralAdministrationPort
 * SPLogLevel
   * Added High as TraceLevel, which was not included yet
 * SPSearchServiceApp
