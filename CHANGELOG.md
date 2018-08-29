@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+* SPAppCatalog
+  * Updated resource to retrieve the Farm account instead of requiring it
+    to be specifically used.
 * SPDatabaseAAG
   * Updated readme.md to specify that this resource also updates the database
     connection string
