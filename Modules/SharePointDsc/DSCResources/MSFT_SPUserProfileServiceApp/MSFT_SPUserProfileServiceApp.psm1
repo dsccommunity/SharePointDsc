@@ -57,6 +57,11 @@ function Get-TargetResource
         $NoILMUsed = $false,
 
         [Parameter()]
+        [ValidateSet("Username_CollisionError","Username_CollisionDomain","Domain_Username")]
+        [System.String]
+        $SiteNamingConflictResolution,
+
+        [Parameter()]
         [ValidateSet("Present","Absent")]
         [System.String]
         $Ensure = "Present",
@@ -165,6 +170,7 @@ function Get-TargetResource
             }
             $upMySiteLocation = $null
             $upMySiteManagedPath = $null
+            $upSiteConflictNaming = $null
             try
             {
                 $ca = Get-SPWebApplication -IncludeCentralAdministration | Where-Object -FilterScript {$_.IsAdministrationWebApplication}
@@ -173,6 +179,7 @@ function Get-TargetResource
                 $userProfileManager = New-Object Microsoft.Office.Server.UserProfiles.UserProfileManager($serviceContext)
                 $upMySiteLocation = $userProfileManager.MySiteHostUrl
                 $upMySiteManagedPath = $userProfileManager.PersonalSiteInclusion
+                $upSiteConflictNaming = $userProfileManager.PersonalSiteFormat
             }
             catch
             {
@@ -180,21 +187,22 @@ function Get-TargetResource
             }
 
             return @{
-                Name               = $serviceApp.DisplayName
-                ProxyName          = $proxyName
-                ApplicationPool    = $serviceApp.ApplicationPool.Name
-                MySiteHostLocation = $upMySiteLocation
-                MySiteManagedPath  = $upMySiteManagedPath
-                ProfileDBName      = $databases.ProfileDatabase.Name
-                ProfileDBServer    = $databases.ProfileDatabase.NormalizedDataSource
-                SocialDBName       = $databases.SocialDatabase.Name
-                SocialDBServer     = $databases.SocialDatabase.NormalizedDataSource
-                SyncDBName         = $databases.SynchronizationDatabase.Name
-                SyncDBServer       = $databases.SynchronizationDatabase.NormalizedDataSource
-                InstallAccount     = $params.InstallAccount
-                EnableNetBIOS      = $serviceApp.NetBIOSDomainNamesEnabled
-                NoILMUsed          = $serviceApp.NoILMUsed
-                Ensure             = "Present"
+                Name                         = $serviceApp.DisplayName
+                ProxyName                    = $proxyName
+                ApplicationPool              = $serviceApp.ApplicationPool.Name
+                MySiteHostLocation           = $upMySiteLocation
+                MySiteManagedPath            = $upMySiteManagedPath
+                ProfileDBName                = $databases.ProfileDatabase.Name
+                ProfileDBServer              = $databases.ProfileDatabase.NormalizedDataSource
+                SocialDBName                 = $databases.SocialDatabase.Name
+                SocialDBServer               = $databases.SocialDatabase.NormalizedDataSource
+                SyncDBName                   = $databases.SynchronizationDatabase.Name
+                SyncDBServer                 = $databases.SynchronizationDatabase.NormalizedDataSource
+                InstallAccount               = $params.InstallAccount
+                EnableNetBIOS                = $serviceApp.NetBIOSDomainNamesEnabled
+                NoILMUsed                    = $serviceApp.NoILMUsed
+                SiteNamingConflictResolution = $upSiteConflictNaming
+                Ensure                       = "Present"
             }
         }
     }
@@ -257,6 +265,11 @@ function Set-TargetResource
         [Parameter()]
         [System.Boolean]
         $NoILMUsed = $false,
+
+        [Parameter()]
+        [ValidateSet("Username_CollisionError","Username_CollisionDomain","Domain_Username")]
+        [System.String]
+        $SiteNamingConflictResolution,
 
         [Parameter()]
         [ValidateSet("Present","Absent")]
@@ -349,6 +362,14 @@ function Set-TargetResource
                 $params.Remove("NoILMUsed") | Out-Null
             }
 
+            $updateSiteNamingConflict = $false
+            if ($params.ContainsKey("SiteNamingConflictResolution"))
+            {
+                $updateSiteNamingConflict = $true
+                $SiteNamingConflictResolution = $params.SiteNamingConflictResolution
+                $params.Remove("SiteNamingConflictResolution") | Out-Null
+            }
+
             if ($params.ContainsKey("InstallAccount"))
             {
                 $params.Remove("InstallAccount") | Out-Null
@@ -407,6 +428,15 @@ function Set-TargetResource
                     $app.NoILMUsed = $NoILMUsed
                 }
                 $app.Update()
+            }
+
+            if ($updateSiteNamingConflict -eq $true)
+            {
+                $ca = Get-SPWebApplication -IncludeCentralAdministration | Where-Object -FilterScript {$_.IsAdministrationWebApplication}
+                $caSite = $ca.Sites[0]
+                $serviceContext = Get-SPServiceContext($caSite)
+                $userProfileManager = New-Object Microsoft.Office.Server.UserProfiles.UserProfileManager($serviceContext)
+                $userProfileManager.PersonalSiteFormat = $SiteNamingConflictResolution
             }
         }
 
@@ -511,6 +541,11 @@ function Test-TargetResource
         $NoILMUsed = $false,
 
         [Parameter()]
+        [ValidateSet("Username_CollisionError","Username_CollisionDomain","Domain_Username")]
+        [System.String]
+        $SiteNamingConflictResolution,
+
+        [Parameter()]
         [ValidateSet("Present","Absent")]
         [System.String]
         $Ensure = "Present",
@@ -533,6 +568,7 @@ function Test-TargetResource
                                             -ValuesToCheck @("Name",
                                                              "EnableNetBIOS",
                                                              "NoILMUsed",
+                                                             "SiteNamingConflictResolution",
                                                              "Ensure")
     }
     else

@@ -28,6 +28,7 @@
 * SPUserProfileServiceApp
   * Fix for issue where an update conflict error was thrown when new service
     application was created.
+  * Added SiteNamingConflictResolution parameter to the resource.
 
 ## 2.4
 
