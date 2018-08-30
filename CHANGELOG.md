@@ -23,6 +23,8 @@
   * Fixed issue where Get method threw an error when the specified service
     application didn't exist yet
   * Fixed issue where the resource would fail is the FQDN was specified
+* SPShellAdmins
+  * Added ExcludeDatabases parameter for AllDatabases
 * SPSite
   * Added ability to check and update QuotaTemplate, OwnerAlias and SecondaryOwnerAlias
 * SPTrustedIdentityTokenIssuerProviderRealm
