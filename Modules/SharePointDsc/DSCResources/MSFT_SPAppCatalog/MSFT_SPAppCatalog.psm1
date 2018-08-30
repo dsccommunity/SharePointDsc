@@ -119,7 +119,7 @@ function Set-TargetResource
         Clear-SPDscKerberosToken -Account $farmAccount.UserName
     }
 
-    Invoke-SPDSCCommand -Credential $FarmAccount `
+    Invoke-SPDSCCommand -Credential $farmAccount `
                         -Arguments $PSBoundParameters `
                         -ScriptBlock {
         $params = $args[0]
@@ -135,7 +135,7 @@ function Set-TargetResource
         }
     } | Out-Null
 
-    # Remove the InstallAccount from the local Administrators group, if it was added above
+    # Remove the FarmAccount from the local Administrators group, if it was added above
     if (!$isLocalAdmin)
     {
         Write-Verbose -Message "Removing farm account from Local Administrators group"
