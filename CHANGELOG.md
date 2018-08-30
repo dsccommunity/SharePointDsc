@@ -44,6 +44,27 @@ resources:
 
 ## Unreleased
 
+* SPDatabaseAAG
+  * Updated readme.md to specify that this resource also updates the database
+    connection string
+* SPDiagnosticsProvider
+  * Fixed issue where enabling providers did not work
+* SPLogLevel
+  * Added High as TraceLevel, which was not included yet
+* SPSearchServiceApp
+  * Updated Set method to check if service application pool exists. Resource
+    will throw an error if it does not exist
+* SPRemoteFarmTrust
+  * Updated readme.md file to add a link that was lost during earlier updates
+* SPSearchTopology
+  * Fixed issue where Get method threw an error when the specified service
+    application didn't exist yet
+  * Fixed issue where the resource would fail is the FQDN was specified
+* SPTrustedIdentityTokenIssuerProviderRealm
+  * Fixed issue where Get method threw an error when the realm didn't exist yet
+
+## 2.4
+
 * SPCacheAccounts
   * Fixed issue where the Test method would fail if SetWebAppPolicy was set to
     false.
@@ -61,6 +82,7 @@ resources:
 * SPSearchContentSource
   * Fixed issue where the Get method returned a conversion error when the content
     source contained just one address
+  * Fixed issue 840 where the parameter StartHour was never taken into account
 * SPSearchServiceApp
   * Fixed issue where the service account was not set correctly when the service
     application was first created
