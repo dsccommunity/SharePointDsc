@@ -4,7 +4,7 @@
 
 * SPAppCatalog
   * Updated resource to retrieve the Farm account instead of requiring it
-    to be specifically used.
+    to be specifically used
 * SPDatabaseAAG
   * Updated readme.md to specify that this resource also updates the database
     connection string
@@ -23,12 +23,14 @@
   * Fixed issue where Get method threw an error when the specified service
     application didn't exist yet
   * Fixed issue where the resource would fail is the FQDN was specified
+* SPSite
+  * Added ability to check and update QuotaTemplate, OwnerAlias and SecondaryOwnerAlias
 * SPTrustedIdentityTokenIssuerProviderRealm
   * Fixed issue where Get method threw an error when the realm didn't exist yet
 * SPUserProfileServiceApp
   * Fix for issue where an update conflict error was thrown when new service
-    application was created.
-  * Added SiteNamingConflictResolution parameter to the resource.
+    application was created
+  * Added SiteNamingConflictResolution parameter to the resource
 
 ## 2.4
 
