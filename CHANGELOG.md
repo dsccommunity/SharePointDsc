@@ -12,6 +12,8 @@
 * SPSearchServiceApp
   * Updated Set method to check if service application pool exists. Resource
     will throw an error if it does not exist
+* SPSiteUrl
+  * New resource to manage site collection urls for host named site collections
 * SPRemoteFarmTrust
   * Updated readme.md file to add a link that was lost during earlier updates
 * SPSearchTopology
