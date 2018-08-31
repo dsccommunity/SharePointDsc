@@ -1,7 +1,7 @@
 [CmdletBinding()]
 param(
     [Parameter()]
-    [string] 
+    [string]
     $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
                                          -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
                                          -Resolve)
@@ -18,7 +18,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
     InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
         Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
-        # Mocks for all contexts   
+        # Mocks for all contexts
         Mock -CommandName New-SPSite -MockWith { }
         Mock -CommandName Get-SPDSCContentService -MockWith {
             $quotaTemplates = @(@{
@@ -26,16 +26,16 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                         QuotaId = 65000
                     }
                 })
-            $quotaTemplatesCol = {$quotaTemplates}.Invoke() 
+            $quotaTemplatesCol = {$quotaTemplates}.Invoke()
 
             $contentService = @{
                 QuotaTemplates = $quotaTemplatesCol
-            } 
+            }
 
             $contentService = $contentService | Add-Member -MemberType ScriptMethod `
                                                             -Name Update `
-                                                            -Value { 
-                                                                $Global:SPDscQuotaTemplatesUpdated = $true 
+                                                            -Value {
+                                                                $Global:SPDscQuotaTemplatesUpdated = $true
                                                             } -PassThru
             return $contentService
         }
@@ -64,17 +64,77 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
         }
 
+        Context -Name "The site exists, but has incorrect owner alias and quota" -Fixture {
+            $testParams = @{
+                Url                 = "http://site.sharepoint.com"
+                OwnerAlias          = "DEMO\User"
+                SecondaryOwnerAlias = "DEMO\SecondUser"
+                QuotaTemplate       = "Test"
+            }
+
+            Mock -CommandName Get-SPSite -MockWith {
+                return @{
+                    HostHeaderIsSiteName = $true
+                    WebApplication = @{
+                        Url = $testParams.Url
+                        UseClaimsAuthentication = $false
+                    }
+                    Url = $testParams.Url
+                    Owner = @{ UserLogin = "DEMO\owner" }
+                    SecondaryContact = @{ UserLogin = "DEMO\secondowner" }
+                    Quota = @{
+                        QuotaId = 1
+                    }
+                }
+            }
+            Mock -CommandName Set-SPSite -MockWith {}
+            Mock -CommandName Get-SPDSCContentService -MockWith {
+                $quotaTemplates = @(@{
+                    QuotaId = 1
+                    Name = "WrongTemplate"
+                    WrongTemplate = @{
+                            StorageMaximumLevel = 512
+                            StorageWarningLevel = 256
+                            UserCodeMaximumLevel = 400
+                            UserCodeWarningLevel = 200
+                        }
+                    })
+                $quotaTemplatesCol = {$quotaTemplates}.Invoke()
+
+                $contentService = @{
+                    QuotaTemplates = $quotaTemplatesCol
+                }
+               return $contentService
+            }
+
+            It "Should return the site data from the get method" {
+                $result = Get-TargetResource @testParams
+                $result.OwnerAlias | Should Be "DEMO\owner"
+                $result.SecondaryOwnerAlias | Should Be "DEMO\SecondOwner"
+                $result.QuotaTemplate | Should Be "WrongTemplate"
+            }
+
+            It "Should update owner and quota in the set method" {
+                Set-TargetResource @testParams
+                Assert-MockCalled Set-SPSite
+            }
+
+            It "Should return true from the test method" {
+                Test-TargetResource @testParams | Should Be $false
+            }
+        }
+
         Context -Name "The site exists and is a host named site collection" -Fixture {
             $testParams = @{
                 Url = "http://site.sharepoint.com"
-                OwnerAlias = "DEMO\User"
+                OwnerAlias = "DEMO\owner"
             }
-            
-            Mock -CommandName Get-SPSite -MockWith { 
+
+            Mock -CommandName Get-SPSite -MockWith {
                 return @{
                     HostHeaderIsSiteName = $true
-                    WebApplication = @{ 
-                        Url = $testParams.Url 
+                    WebApplication = @{
+                        Url = $testParams.Url
                         UseClaimsAuthentication = $false
                     }
                     Url = $testParams.Url
@@ -96,12 +156,12 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Url = "http://site.sharepoint.com"
                 OwnerAlias = "DEMO\User"
             }
-            
-            Mock -CommandName Get-SPSite -MockWith { 
+
+            Mock -CommandName Get-SPSite -MockWith {
                 return @{
                     HostHeaderIsSiteName = $false
-                    WebApplication = @{ 
-                        Url = $testParams.Url 
+                    WebApplication = @{
+                        Url = $testParams.Url
                         UseClaimsAuthentication = $true
                     }
                     Url = $testParams.Url
@@ -110,9 +170,9 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 }
             }
 
-            Mock -CommandName New-SPClaimsPrincipal -MockWith { 
-                return @{ 
-                    Value = $testParams.OwnerAlias 
+            Mock -CommandName New-SPClaimsPrincipal -MockWith {
+                return @{
+                    Value = $testParams.OwnerAlias
                 }
             }
 
@@ -124,11 +184,11 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Test-TargetResource @testParams | Should Be $true
             }
 
-            Mock -CommandName Get-SPSite -MockWith { 
+            Mock -CommandName Get-SPSite -MockWith {
                 return @{
                     HostHeaderIsSiteName = $false
-                    WebApplication = @{ 
-                        Url = $testParams.Url 
+                    WebApplication = @{
+                        Url = $testParams.Url
                         UseClaimsAuthentication = $true
                     }
                     Url = $testParams.Url
@@ -139,12 +199,12 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             It "Should return the site data from the get method where a valid site collection admin does not exist" {
                 Get-TargetResource @testParams | Should Not BeNullOrEmpty
             }
-            
-            Mock -CommandName Get-SPSite -MockWith { 
+
+            Mock -CommandName Get-SPSite -MockWith {
                 return @{
                     HostHeaderIsSiteName = $false
-                    WebApplication = @{ 
-                        Url = $testParams.Url 
+                    WebApplication = @{
+                        Url = $testParams.Url
                         UseClaimsAuthentication = $true
                     }
                     Url = $testParams.Url
@@ -162,14 +222,14 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         Context -Name "The site exists and uses classic authentication" -Fixture {
             $testParams = @{
                 Url = "http://site.sharepoint.com"
-                OwnerAlias = "DEMO\User"
+                OwnerAlias = "DEMO\owner"
             }
-            
-            Mock -CommandName Get-SPSite -MockWith { 
+
+            Mock -CommandName Get-SPSite -MockWith {
                 return @{
                     HostHeaderIsSiteName = $false
-                    WebApplication = @{ 
-                        Url = $testParams.Url 
+                    WebApplication = @{
+                        Url = $testParams.Url
                         UseClaimsAuthentication = $false
                     }
                     Url = $testParams.Url
@@ -186,11 +246,11 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Test-TargetResource @testParams | Should Be $true
             }
 
-            Mock -CommandName Get-SPSite -MockWith { 
+            Mock -CommandName Get-SPSite -MockWith {
                 return @{
                     HostHeaderIsSiteName = $false
-                    WebApplication = @{ 
-                        Url = $testParams.Url 
+                    WebApplication = @{
+                        Url = $testParams.Url
                         UseClaimsAuthentication = $false
                     }
                     Url = $testParams.Url
