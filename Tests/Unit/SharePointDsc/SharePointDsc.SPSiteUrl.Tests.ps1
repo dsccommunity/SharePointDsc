@@ -22,21 +22,30 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         Mock -CommandName Remove-SPSiteUrl -MockWith { }
         Mock -CommandName Set-SPSiteUrl -MockWith { }
         Mock -CommandName Get-SPSiteUrl -MockWith {
-            return @(
-                @{
-                    Url = "http://sharepoint.contoso.intra"
-                    Zone = "Default"
-                },
-                @{
-                    Url = "http://sharepoint.contoso.com"
-                    Zone = "Intranet"
-                },
-                @{
-                    Url = "https://sharepoint.contoso.com"
-                    Zone = "Internet"
-                }
-            )
+            if ($global:SpDscSPSiteUrlRanOnce -eq $false)
+            {
+                $global:SpDscSPSiteUrlRanOnce = $true
+                return @(
+                    @{
+                        Url = "http://sharepoint.contoso.intra"
+                        Zone = "Default"
+                    },
+                    @{
+                        Url = "http://sharepoint.contoso.com"
+                        Zone = "Intranet"
+                    },
+                    @{
+                        Url = "https://sharepoint.contoso.com"
+                        Zone = "Internet"
+                    }
+                )
+            }
+            else
+            {
+                return $null
+            }
         }
+        $global:SpDscSPSiteUrlRanOnce = $false
 
         # Test contexts
         Context -Name "No zones specified" -Fixture {
@@ -103,6 +112,111 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
         }
 
+        Context -Name "The site exists, but the specified Intranet is already in use" -Fixture {
+            $testParams = @{
+                Url      = "http://sharepoint.contoso.intra"
+                Intranet = "http://sharepoint.contoso.com"
+                Internet = "http://custom.contoso.com"
+            }
+
+            Mock -CommandName Get-SPSite -MockWith {
+                return @{
+                    HostHeaderIsSiteName = $true
+                }
+            }
+
+            Mock -CommandName Get-SPSiteUrl -MockWith {
+                return @(
+                    @{
+                        Url = "http://sharepoint.contoso.intra"
+                        Zone = "Default"
+                    }
+                )
+            }
+
+            It "Should throw an exception in the set method" {
+                { Set-TargetResource @testParams } | Should Throw "Specified URL $($testParams.Intranet) (Zone: Intranet) is already assigned to a site collection"
+            }
+        }
+
+        Context -Name "The site exists, but the specified Internet is already in use" -Fixture {
+            $testParams = @{
+                Url      = "http://sharepoint.contoso.intra"
+                Internet = "http://custom.contoso.com"
+            }
+
+            Mock -CommandName Get-SPSite -MockWith {
+                return @{
+                    HostHeaderIsSiteName = $true
+                }
+            }
+
+            Mock -CommandName Get-SPSiteUrl -MockWith {
+                return @(
+                    @{
+                        Url = "http://sharepoint.contoso.intra"
+                        Zone = "Default"
+                    }
+                )
+            }
+
+            It "Should throw an exception in the set method" {
+                { Set-TargetResource @testParams } | Should Throw "Specified URL $($testParams.Internet) (Zone: Internet) is already assigned to a site collection"
+            }
+        }
+
+        Context -Name "The site exists, but the specified Extranet is already in use" -Fixture {
+            $testParams = @{
+                Url      = "http://sharepoint.contoso.intra"
+                Extranet = "http://sharepoint.contoso.com"
+            }
+
+            Mock -CommandName Get-SPSite -MockWith {
+                return @{
+                    HostHeaderIsSiteName = $true
+                }
+            }
+
+            Mock -CommandName Get-SPSiteUrl -MockWith {
+                return @(
+                    @{
+                        Url = "http://sharepoint.contoso.intra"
+                        Zone = "Default"
+                    }
+                )
+            }
+
+            It "Should throw an exception in the set method" {
+                { Set-TargetResource @testParams } | Should Throw "Specified URL $($testParams.Extranet) (Zone: Extranet) is already assigned to a site collection"
+            }
+        }
+
+        Context -Name "The site exists, but the specified Custom is already in use" -Fixture {
+            $testParams = @{
+                Url      = "http://sharepoint.contoso.intra"
+                Custom = "http://sharepoint.contoso.com"
+            }
+
+            Mock -CommandName Get-SPSite -MockWith {
+                return @{
+                    HostHeaderIsSiteName = $true
+                }
+            }
+
+            Mock -CommandName Get-SPSiteUrl -MockWith {
+                return @(
+                    @{
+                        Url = "http://sharepoint.contoso.intra"
+                        Zone = "Default"
+                    }
+                )
+            }
+
+            It "Should throw an exception in the set method" {
+                { Set-TargetResource @testParams } | Should Throw "Specified URL $($testParams.Custom) (Zone: Custom) is already assigned to a site collection"
+            }
+        }
+
         Context -Name "The site exists and the Internet zone should not be configured" -Fixture {
             $testParams = @{
                 Url      = "http://sharepoint.contoso.intra"
@@ -125,6 +239,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Test-TargetResource @testParams | Should Be $false
             }
 
+            $global:SpDscSPSiteUrlRanOnce = $false
             It "Should configure the specified values in the set method" {
                 Set-TargetResource @testParams
                 Assert-MockCalled Remove-SPSiteUrl
@@ -145,22 +260,31 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             Mock -CommandName Get-SPSiteUrl -MockWith {
-                return @(
-                    @{
-                        Url = "http://sharepoint.contoso.intra"
-                        Zone = "Default"
-                    },
-                    @{
-                        Url = "http://sharepoint.contoso.com"
-                        Zone = "Extranet"
-                    },
-                    @{
-                        Url = "https://sharepoint.contoso.com"
-                        Zone = "Custom"
+                if ($global:SpDscSPSiteUrlRanOnce -eq $false)
+                {
+                    $global:SpDscSPSiteUrlRanOnce = $true
+                    return @(
+                        @{
+                            Url = "http://sharepoint.contoso.intra"
+                            Zone = "Default"
+                        },
+                        @{
+                            Url = "http://sharepoint.contoso.com"
+                            Zone = "Extranet"
+                        },
+                        @{
+                            Url = "https://sharepoint.contoso.com"
+                            Zone = "Custom"
+                        }
+                    )
                     }
-                )
+                    else
+                    {
+                        return $null
+                    }
             }
 
+            $global:SpDscSPSiteUrlRanOnce = $false
             It "Should return values for the Intranet and Internet zones from the get method" {
                 $result = Get-TargetResource @testParams
                 $result.Extranet | Should Be "http://sharepoint.contoso.com"
@@ -171,6 +295,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Test-TargetResource @testParams | Should Be $false
             }
 
+            $global:SpDscSPSiteUrlRanOnce = $false
             It "Should configure the specified values in the set method" {
                 Set-TargetResource @testParams
                 Assert-MockCalled Remove-SPSiteUrl
@@ -192,22 +317,31 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             Mock -CommandName Get-SPSiteUrl -MockWith {
-                return @(
-                    @{
-                        Url = "http://sharepoint.contoso.intra"
-                        Zone = "Default"
-                    },
-                    @{
-                        Url = "http://sharepoint.contoso.com"
-                        Zone = "Intranet"
-                    },
-                    @{
-                        Url = "https://sharepoint.contoso.com"
-                        Zone = "Internet"
-                    }
-                )
+                if ($global:SpDscSPSiteUrlRanOnce -eq $false)
+                {
+                    $global:SpDscSPSiteUrlRanOnce = $true
+                    return @(
+                        @{
+                            Url = "http://sharepoint.contoso.intra"
+                            Zone = "Default"
+                        },
+                        @{
+                            Url = "http://sharepoint.contoso.com"
+                            Zone = "Intranet"
+                        },
+                        @{
+                            Url = "https://sharepoint.contoso.com"
+                            Zone = "Internet"
+                        }
+                    )
+                }
+                else
+                {
+                    return $null
+                }
             }
 
+            $global:SpDscSPSiteUrlRanOnce = $false
             It "Should return values for the Intranet and Internet zones from the get method" {
                 $result = Get-TargetResource @testParams
                 $result.Intranet | Should Be "http://sharepoint.contoso.com"
@@ -218,6 +352,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Test-TargetResource @testParams | Should Be $false
             }
 
+            $global:SpDscSPSiteUrlRanOnce = $false
             It "Should configure the specified values in the set method" {
                 Set-TargetResource @testParams
                 Assert-MockCalled Remove-SPSiteUrl
@@ -238,12 +373,14 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 }
             }
 
+            $global:SpDscSPSiteUrlRanOnce = $false
             It "Should return values for the Intranet and Internet zones from the get method" {
                 $result = Get-TargetResource @testParams
                 $result.Intranet | Should Be "http://sharepoint.contoso.com"
                 $result.Internet | Should Be "https://sharepoint.contoso.com"
             }
 
+            $global:SpDscSPSiteUrlRanOnce = $false
             It "Should return true from the test method" {
                 Test-TargetResource @testParams | Should Be $true
             }

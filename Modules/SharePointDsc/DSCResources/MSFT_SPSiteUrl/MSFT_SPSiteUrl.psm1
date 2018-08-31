@@ -216,22 +216,58 @@ function Set-TargetResource
 
         if ($null -ne $params.Intranet)
         {
-            Set-SPSiteUrl -Identity $params.Url -Zone Intranet -Url $params.Intranet
+            $siteurl = Get-SPSiteURL -Identity $params.Intranet -ErrorAction SilentlyContinue
+            if ($null -eq $siteurl)
+            {
+                Set-SPSiteUrl -Identity $params.Url -Zone Intranet -Url $params.Intranet
+            }
+            else
+            {
+                throw ("Specified URL $($params.Intranet) (Zone: Intranet) is already assigned " + `
+                       "to a site collection: $($siteurl[0].Url)")
+            }
         }
 
         if ($null -ne $params.Internet)
         {
-            Set-SPSiteUrl -Identity $params.Url -Zone Internet -Url $params.Internet
+            $siteurl = Get-SPSiteURL -Identity $params.Internet -ErrorAction SilentlyContinue
+            if ($null -eq $siteurl)
+            {
+                Set-SPSiteUrl -Identity $params.Url -Zone Internet -Url $params.Internet
+            }
+            else
+            {
+                throw ("Specified URL $($params.Internet) (Zone: Internet) is already assigned " + `
+                       "to a site collection: $($siteurl[0].Url)")
+            }
         }
 
         if ($null -ne $params.Extranet)
         {
-            Set-SPSiteUrl -Identity $params.Url -Zone Extranet -Url $params.Extranet
+            $siteurl = Get-SPSiteURL -Identity $params.Extranet -ErrorAction SilentlyContinue
+            if ($null -eq $siteurl)
+            {
+                Set-SPSiteUrl -Identity $params.Url -Zone Extranet -Url $params.Extranet
+            }
+            else
+            {
+                throw ("Specified URL $($params.Extranet) (Zone: Extranet) is already assigned " + `
+                       "to a site collection: $($siteurl[0].Url)")
+            }
         }
 
         if ($null -ne $params.Custom)
         {
-            Set-SPSiteUrl -Identity $params.Url -Zone Custom -Url $params.Custom
+            $siteurl = Get-SPSiteURL -Identity $params.Custom -ErrorAction SilentlyContinue
+            if ($null -eq $siteurl)
+            {
+                Set-SPSiteUrl -Identity $params.Url -Zone Custom -Url $params.Custom
+            }
+            else
+            {
+                throw ("Specified URL $($params.Custom) (Zone: Custom) is already assigned " + `
+                       "to a site collection: $($siteurl[0].Url)")
+            }
         }
     }
 }
