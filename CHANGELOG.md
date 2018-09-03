@@ -14,11 +14,11 @@
   * Added ability to check and update CentralAdministrationPort
 * SPLogLevel
   * Added High as TraceLevel, which was not included yet
+* SPRemoteFarmTrust
+  * Updated readme.md file to add a link that was lost during earlier updates
 * SPSearchServiceApp
   * Updated Set method to check if service application pool exists. Resource
     will throw an error if it does not exist
-* SPRemoteFarmTrust
-  * Updated readme.md file to add a link that was lost during earlier updates
 * SPSearchTopology
   * Fixed issue where Get method threw an error when the specified service
     application didn't exist yet
@@ -27,6 +27,8 @@
   * Added ExcludeDatabases parameter for AllDatabases
 * SPSite
   * Added ability to check and update QuotaTemplate, OwnerAlias and SecondaryOwnerAlias
+* SPSiteUrl
+  * New resource to manage site collection urls for host named site collections
 * SPTrustedIdentityTokenIssuerProviderRealm
   * Fixed issue where Get method threw an error when the realm didn't exist yet
 * SPUserProfileServiceApp
