@@ -1,6 +1,6 @@
 # Change log for SharePointDsc
 
-## Unreleased
+## 2.5
 
 * SPAppCatalog
   * Updated resource to retrieve the Farm account instead of requiring it
