@@ -1,5 +1,41 @@
 # Change log for SharePointDsc
 
+## 2.5
+
+* SPAppCatalog
+  * Updated resource to retrieve the Farm account instead of requiring it
+    to be specifically used
+* SPDatabaseAAG
+  * Updated readme.md to specify that this resource also updates the database
+    connection string
+* SPDiagnosticsProvider
+  * Fixed issue where enabling providers did not work
+* SPFarm
+  * Added ability to check and update CentralAdministrationPort
+* SPLogLevel
+  * Added High as TraceLevel, which was not included yet
+* SPRemoteFarmTrust
+  * Updated readme.md file to add a link that was lost during earlier updates
+* SPSearchServiceApp
+  * Updated Set method to check if service application pool exists. Resource
+    will throw an error if it does not exist
+* SPSearchTopology
+  * Fixed issue where Get method threw an error when the specified service
+    application didn't exist yet
+  * Fixed issue where the resource would fail is the FQDN was specified
+* SPShellAdmins
+  * Added ExcludeDatabases parameter for AllDatabases
+* SPSite
+  * Added ability to check and update QuotaTemplate, OwnerAlias and SecondaryOwnerAlias
+* SPSiteUrl
+  * New resource to manage site collection urls for host named site collections
+* SPTrustedIdentityTokenIssuerProviderRealm
+  * Fixed issue where Get method threw an error when the realm didn't exist yet
+* SPUserProfileServiceApp
+  * Fix for issue where an update conflict error was thrown when new service
+    application was created
+  * Added SiteNamingConflictResolution parameter to the resource
+
 ## 2.4
 
 * SPCacheAccounts

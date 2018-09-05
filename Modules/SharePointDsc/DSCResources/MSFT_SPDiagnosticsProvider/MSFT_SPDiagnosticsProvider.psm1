@@ -112,22 +112,26 @@ function Set-TargetResource
             throw "The specified Diagnostic Provider {" + $params.Name + "} could not be found."
         }
 
+        $newParams = @{
+            Identity = $params.Name
+        }
+
         if($params.ContainsKey("Retention"))
         {
-            $diagnosticProvider.Retention = $params.Retention
+            $newParams.DaysRetained = $params.Retention
         }
 
         if($params.ContainsKey("MaxTotalSizeInBytes"))
         {
-            $diagnosticProvider.MaxTotalSizeInBytes = $params.MaxTotalSizeInBytes
+            $newParams.MaxTotalSizeInBytes = $params.MaxTotalSizeInBytes
         }
 
         if($params.ContainsKey("Enabled"))
         {
-            $diagnosticProvider.Enabled = $params.Enabled
+            $newParams.Enable = $params.Enabled
         }
 
-        $diagnosticProvider.Update()
+        Set-SPDiagnosticsProvider @newParams
     }
 }
 

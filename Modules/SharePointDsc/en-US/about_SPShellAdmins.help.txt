@@ -66,6 +66,10 @@
     Write - Boolean
     Specify if all databases must get the same config as the general config
 
+.PARAMETER ExcludeDatabases
+    Write - String
+    Specify all databases that must be excluded from AllDatabases
+
 .PARAMETER InstallAccount
     Write - String
     POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5
@@ -125,6 +129,33 @@
                         Members = "CONTOSO\user3", "CONTOSO\user4"
                     })
                 )
+            }
+        }
+    }
+
+
+.EXAMPLE
+    This example gives admin access to the specified users for the local farm as
+    well as all content databases in the local farm, with the exception of database
+    WSS_Content_Portal.
+
+
+    Configuration Example
+    {
+        param(
+            [Parameter(Mandatory = $true)]
+            [PSCredential]
+            $SetupAccount
+        )
+        Import-DscResource -ModuleName SharePointDsc
+
+        node localhost {
+            SPShellAdmins ShellAdmins
+            {
+                Name             = "Shell Admins"
+                Members          = "CONTOSO\user1", "CONTOSO\user2"
+                AllDatabases     = $true
+                ExcludeDatabases = "WSS_Content_Portal"
             }
         }
     }

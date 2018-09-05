@@ -121,7 +121,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             It "Should throw an error from the set method" {
-                { Set-TargetResource @testParams } | Should throw "TraceLevel detailed is not valid, must specify exactly one of None,Unexpected,Monitorable,Medium,Verbose,VerboseEx, or Default"
+                { Set-TargetResource @testParams } | Should throw "TraceLevel detailed is not valid, must specify exactly one of None,Unexpected,Monitorable,High,Medium,Verbose,VerboseEx, or Default"
             }
         }
 

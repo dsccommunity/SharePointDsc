@@ -79,7 +79,8 @@ function Get-TargetResource
 
         if ($null -eq $spTrust)
         {
-            throw ("SPTrustedIdentityTokenIssuer '$($params.IssuerName)' not found")
+            Write-Verbose -Message "SPTrustedIdentityTokenIssuer '$($params.IssuerName)' not found"
+            return $null
         }
 
         if ($spTrust.ProviderRealms.Count -gt 0)
@@ -91,9 +92,23 @@ function Get-TargetResource
         return $currentRealms
     }
 
-    $currentStatus = Get-ProviderRealmsStatus -currentRealms $result -desiredRealms $paramRealms `
-                                                  -includeRealms $includeRealms -excludeRealms $excludeRealms `
-                                                  -Ensure $Ensure
+    if ($null -eq $result)
+    {
+        return @{
+            IssuerName = $IssuerName
+            ProviderRealms = $null
+            ProviderRealmsToInclude = $null
+            ProviderRealmsToExclude = $null
+            CurrentRealms = $null
+            RealmsToAdd = $null
+            Ensure = "Absent"
+        }
+    }
+    $currentStatus = Get-ProviderRealmsStatus -currentRealms $result `
+                                              -desiredRealms $paramRealms `
+                                              -includeRealms $includeRealms `
+                                              -excludeRealms $excludeRealms `
+                                              -Ensure $Ensure
 
     return @{
             IssuerName = $IssuerName
@@ -154,7 +169,7 @@ function Set-TargetResource
 
             if ($null -eq $trust)
             {
-                    throw ("SPTrustedIdentityTokenIssuer '$($params.IssuerName)' not found")
+                throw ("SPTrustedIdentityTokenIssuer '$($params.IssuerName)' not found")
             }
 
             $trust.ProviderRealms.Clear()

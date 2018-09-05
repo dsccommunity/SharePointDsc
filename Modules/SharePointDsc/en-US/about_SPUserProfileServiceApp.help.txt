@@ -21,6 +21,11 @@
     The default value for the Ensure parameter is Present. When not specifying this
     parameter, the service application is provisioned.
     
+    The parameter SiteNamingConflictResolution accepts three values: Username_CollisionError,
+    Username_CollisionDomain and Domain_Username. More information on each of these
+    parameters can be found at:
+    https://docs.microsoft.com/en-us/dotnet/api/microsoft.office.server.userprofiles.sitenameformat?view=sharepoint-server
+    
     NOTE:
     Due to the fact that SharePoint requires certain User Profile components to be
     provisioned as the Farm account, this resource and SPUserProfileSyncService
@@ -80,6 +85,11 @@
 .PARAMETER NoILMUsed
     Write - boolean
     Specifies if the service application should be configured to use AD Import
+
+.PARAMETER SiteNamingConflictResolution
+    Write - string
+    Allowed values: Username_CollisionError, Username_CollisionDomain, Domain_Username
+    Specifies which SiteNamingConflictResolution should be used
 
 .PARAMETER Ensure
     Write - string
@@ -157,6 +167,44 @@
                 EnableNetBIOS        = $false
                 NoILMUsed            = $true
                 PsDscRunAsCredential = $SetupAccount
+            }
+        }
+    }
+
+
+.EXAMPLE
+    This example adds a new user profile service application to the local farm
+
+
+    Configuration Example
+    {
+        param(
+            [Parameter(Mandatory = $true)]
+            [PSCredential]
+            $SetupAccount,
+
+            [Parameter(Mandatory = $true)]
+            [PSCredential]
+            $FarmAccount
+        )
+        Import-DscResource -ModuleName SharePointDsc
+
+        node localhost {
+            SPUserProfileServiceApp UserProfileServiceApp
+            {
+                Name                         = "User Profile Service Application"
+                ApplicationPool              = "SharePoint Service Applications"
+                MySiteHostLocation           = "http://my.sharepoint.contoso.local"
+                MySiteManagedPath            = "personal"
+                ProfileDBName                = "SP_UserProfiles"
+                ProfileDBServer              = "SQL.contoso.local\SQLINSTANCE"
+                SocialDBName                 = "SP_Social"
+                SocialDBServer               = "SQL.contoso.local\SQLINSTANCE"
+                SyncDBName                   = "SP_ProfileSync"
+                SyncDBServer                 = "SQL.contoso.local\SQLINSTANCE"
+                EnableNetBIOS                = $false
+                SiteNamingConflictResolution = "Domain_Username"
+                PsDscRunAsCredential         = $SetupAccount
             }
         }
     }

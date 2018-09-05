@@ -4,60 +4,60 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [Parameter(Mandatory = $true)]  
-        [System.String] 
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $Url,
 
-        [Parameter(Mandatory = $true)]  
-        [System.String] 
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $OwnerAlias,
 
-        [Parameter()] 
-        [System.UInt32] 
+        [Parameter()]
+        [System.UInt32]
         $CompatibilityLevel,
 
-        [Parameter()] 
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $ContentDatabase,
 
-        [Parameter()] 
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $Description,
 
-        [Parameter()] 
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $HostHeaderWebApplication,
 
-        [Parameter()] 
-        [System.UInt32] 
+        [Parameter()]
+        [System.UInt32]
         $Language,
 
-        [Parameter()] 
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $Name,
 
-        [Parameter()] 
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $OwnerEmail,
 
-        [Parameter()] 
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $QuotaTemplate,
 
-        [Parameter()] 
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $SecondaryEmail,
 
-        [Parameter()] 
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $SecondaryOwnerAlias,
 
-        [Parameter()] 
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $Template,
 
-        [Parameter()] 
-        [System.Management.Automation.PSCredential] 
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 
@@ -70,47 +70,47 @@ function Get-TargetResource
 
         $site = Get-SPSite -Identity $params.Url `
                            -ErrorAction SilentlyContinue
-        
-        if ($null -eq $site) 
-        {
-            return $null 
-        } 
-        else 
-        {
-            if ($site.HostHeaderIsSiteName) 
-            {
-                $HostHeaderWebApplication = $site.WebApplication.Url 
-            } 
 
-            if ($null -eq $site.Owner) 
+        if ($null -eq $site)
+        {
+            return $null
+        }
+        else
+        {
+            if ($site.HostHeaderIsSiteName)
+            {
+                $HostHeaderWebApplication = $site.WebApplication.Url
+            }
+
+            if ($null -eq $site.Owner)
             {
                 $owner = $null
-            } 
-            else 
+            }
+            else
             {
-                if ($site.WebApplication.UseClaimsAuthentication) 
+                if ($site.WebApplication.UseClaimsAuthentication)
                 {
                     $owner = (New-SPClaimsPrincipal -Identity $site.Owner.UserLogin `
                                                     -IdentityType "EncodedClaim").Value
-                } 
-                else 
+                }
+                else
                 {
                     $owner = $site.Owner.UserLogin
                 }
             }
-            
-            if ($null -eq $site.SecondaryContact) 
+
+            if ($null -eq $site.SecondaryContact)
             {
                 $secondaryOwner = $null
-            } 
-            else 
+            }
+            else
             {
-                if ($site.WebApplication.UseClaimsAuthentication) 
+                if ($site.WebApplication.UseClaimsAuthentication)
                 {
                     $secondaryOwner = (New-SPClaimsPrincipal -Identity $site.SecondaryContact.UserLogin `
                                                              -IdentityType "EncodedClaim").Value
-                } 
-                else 
+                }
+                else
                 {
                     $secondaryOwner = $site.SecondaryContact.UserLogin
                 }
@@ -121,7 +121,7 @@ function Get-TargetResource
                       Where-Object -FilterScript {
                           $_.QuotaID -eq $site.Quota.QuotaID
                       }).Name
-            
+
             return @{
                 Url = $site.Url
                 OwnerAlias = $owner
@@ -148,77 +148,116 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [Parameter(Mandatory = $true)]  
-        [System.String] 
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $Url,
 
-        [Parameter(Mandatory = $true)]  
-        [System.String] 
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $OwnerAlias,
 
-        [Parameter()] 
-        [System.UInt32] 
+        [Parameter()]
+        [System.UInt32]
         $CompatibilityLevel,
 
-        [Parameter()] 
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $ContentDatabase,
 
-        [Parameter()] 
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $Description,
 
-        [Parameter()] 
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $HostHeaderWebApplication,
 
-        [Parameter()] 
-        [System.UInt32] 
+        [Parameter()]
+        [System.UInt32]
         $Language,
 
-        [Parameter()] 
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $Name,
 
-        [Parameter()] 
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $OwnerEmail,
 
-        [Parameter()] 
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $QuotaTemplate,
 
-        [Parameter()] 
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $SecondaryEmail,
 
-        [Parameter()] 
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $SecondaryOwnerAlias,
 
-        [Parameter()] 
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $Template,
 
-        [Parameter()] 
-        [System.Management.Automation.PSCredential] 
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 
     Write-Verbose -Message "Setting site collection $Url"
 
+    $CurrentValues = Get-TargetResource @PSBoundParameters
+
     $result = Invoke-SPDSCCommand -Credential $InstallAccount `
-                                  -Arguments $PSBoundParameters `
+                                  -Arguments @($PSBoundParameters,$CurrentValues) `
                                   -ScriptBlock {
         $params = $args[0]
-        
+        $CurrentValues = $args[1]
+
         $params.Remove("InstallAccount") | Out-Null
 
         $site = Get-SPSite -Identity $params.Url -ErrorAction SilentlyContinue
 
-        if ($null -eq $site) 
+        if ($null -eq $site)
         {
             New-SPSite @params | Out-Null
+        }
+        else
+        {
+            $newParams = @{
+                Identity = $params.Url
+            }
+
+            if ($params.ContainsKey("QuotaTemplate") -eq $true)
+            {
+                if ($params.QuotaTemplate -ne $CurrentValues.QuotaTemplate)
+                {
+                    $newParams.QuotaTemplate = $params.QuotaTemplate
+                }
+            }
+
+            if ($params.ContainsKey("OwnerAlias") -eq $true)
+            {
+                if ($params.OwnerAlias -ne $CurrentValues.OwnerAlias)
+                {
+                    $newParams.OwnerAlias = $params.OwnerAlias
+                }
+            }
+
+            if ($params.ContainsKey("SecondaryOwnerAlias") -eq $true)
+            {
+                if ($params.SecondaryOwnerAlias -ne $CurrentValues.SecondaryOwnerAlias)
+                {
+                    $newParams.SecondaryOwnerAlias = $params.SecondaryOwnerAlias
+                }
+            }
+
+            if ($newParams.Count -gt 1)
+            {
+                Write-Verbose -Message "Updating existing site collection"
+                Set-SPSite @newParams
+            }
         }
     }
 }
@@ -229,60 +268,60 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [Parameter(Mandatory = $true)]  
-        [System.String] 
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $Url,
 
-        [Parameter(Mandatory = $true)]  
-        [System.String] 
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $OwnerAlias,
 
-        [Parameter()] 
-        [System.UInt32] 
+        [Parameter()]
+        [System.UInt32]
         $CompatibilityLevel,
 
-        [Parameter()] 
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $ContentDatabase,
 
-        [Parameter()] 
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $Description,
 
-        [Parameter()] 
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $HostHeaderWebApplication,
 
-        [Parameter()] 
-        [System.UInt32] 
+        [Parameter()]
+        [System.UInt32]
         $Language,
 
-        [Parameter()] 
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $Name,
 
-        [Parameter()] 
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $OwnerEmail,
 
-        [Parameter()] 
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $QuotaTemplate,
 
-        [Parameter()] 
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $SecondaryEmail,
 
-        [Parameter()] 
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $SecondaryOwnerAlias,
 
-        [Parameter()] 
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $Template,
 
-        [Parameter()] 
-        [System.Management.Automation.PSCredential] 
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 
@@ -290,13 +329,16 @@ function Test-TargetResource
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
-    if ($null -eq $CurrentValues) 
+    if ($null -eq $CurrentValues)
     {
-        return $false 
+        return $false
     }
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
                                     -DesiredValues $PSBoundParameters `
-                                    -ValuesToCheck @("Url")
+                                    -ValuesToCheck @("Url",
+                                                     "QuotaTemplate",
+                                                     "OwnerAlias",
+                                                     "SecondaryOwnerAlias")
 }
 
 Export-ModuleMember -Function *-TargetResource

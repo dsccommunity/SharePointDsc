@@ -18,6 +18,11 @@ and remove it again later on.
 The default value for the Ensure parameter is Present. When not specifying this
 parameter, the service application is provisioned.
 
+The parameter SiteNamingConflictResolution accepts three values: Username_CollisionError,
+Username_CollisionDomain and Domain_Username. More information on each of these
+parameters can be found at:
+https://docs.microsoft.com/en-us/dotnet/api/microsoft.office.server.userprofiles.sitenameformat?view=sharepoint-server
+
 NOTE:
 Due to the fact that SharePoint requires certain User Profile components to be
 provisioned as the Farm account, this resource and SPUserProfileSyncService
