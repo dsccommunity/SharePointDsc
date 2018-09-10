@@ -1,6 +1,7 @@
 # Change log for SharePointDsc
 
 ## Unreleased
+
 * SPSearchContentSource
   * Fixed issue with numerical Content Sources name;
 
