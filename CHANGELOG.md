@@ -1,5 +1,10 @@
 # Change log for SharePointDsc
 
+## Unreleased
+
+* SPSearchContentSource
+  * Fixed issue with numerical Content Sources name;
+
 ## 2.5
 
 * SPAppCatalog
