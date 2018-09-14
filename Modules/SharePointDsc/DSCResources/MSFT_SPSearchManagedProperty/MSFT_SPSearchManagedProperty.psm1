@@ -300,7 +300,7 @@ function Set-TargetResource
         $managedProperty = Get-SPEnterpriseSearchMetadataManagedProperty -Identity $params.Name `
                                                                          -SearchApplication $params.ServiceAppName
 
-        Set-SPEnterpriseSearchMetadataManagedProperty -Identity $managedProperty `
+        Set-SPEnterpriseSearchMetadataManagedProperty -Identity $managedProperty.Name `
                                                       -Retrievable $params.Retrievable `
                                                       -SafeForAnonymous $params.SafeForAnonymous `
                                                       -NoWordBreaker $params.NoWordBreaker
