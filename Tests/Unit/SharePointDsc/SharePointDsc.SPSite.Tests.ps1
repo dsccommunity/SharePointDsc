@@ -19,7 +19,27 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
         # Mocks for all contexts
-        Mock -CommandName New-SPSite -MockWith { }
+        Mock -CommandName New-SPSite -MockWith {
+            $rootWeb = @{}
+            $rootWeb = $rootWeb | Add-Member -MemberType ScriptMethod `
+                                    -Name CreateDefaultAssociatedGroups `
+                                    -Value {} -PassThru
+            $returnval = @{
+                HostHeaderIsSiteName = $true
+                WebApplication = @{
+                    Url = $testParams.Url
+                    UseClaimsAuthentication = $false
+                }
+                Url = $testParams.Url
+                Owner = @{ UserLogin = "DEMO\owner" }
+                SecondaryContact = @{ UserLogin = "DEMO\secondowner" }
+                Quota = @{
+                    QuotaId = 1
+                }
+                RootWeb = $rootWeb
+            }
+            return $returnval
+        }
         Mock -CommandName Get-SPDSCContentService -MockWith {
             $quotaTemplates = @(@{
                     Test = @{
@@ -73,7 +93,11 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             Mock -CommandName Get-SPSite -MockWith {
-                return @{
+                $rootWeb = @{}
+                $rootWeb = $rootWeb | Add-Member -MemberType ScriptMethod `
+                                        -Name CreateDefaultAssociatedGroups `
+                                        -Value {} -PassThru
+                $returnval = @{
                     HostHeaderIsSiteName = $true
                     WebApplication = @{
                         Url = $testParams.Url
@@ -85,7 +109,9 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     Quota = @{
                         QuotaId = 1
                     }
+                    RootWeb = $rootWeb
                 }
+                return $returnval
             }
             Mock -CommandName Set-SPSite -MockWith {}
             Mock -CommandName Get-SPDSCContentService -MockWith {

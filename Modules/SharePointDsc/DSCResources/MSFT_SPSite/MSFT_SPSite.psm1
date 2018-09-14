@@ -57,6 +57,10 @@ function Get-TargetResource
         $Template,
 
         [Parameter()]
+        [System.Boolean]
+        $CreateDefaultGroups,
+
+        [Parameter()]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
@@ -122,6 +126,14 @@ function Get-TargetResource
                           $_.QuotaID -eq $site.Quota.QuotaID
                       }).Name
 
+            $CreateDefaultGroups = $true
+            if ($null -eq $site.RootWeb.AssociatedVisitorsGroup -and
+                $null -eq $site.RootWeb.AssociatedMemberGroup -and
+                $null -eq $site.RootWeb.AssociatedOwnersGroup)
+            {
+                $CreateDefaultGroups = $false
+            }
+
             return @{
                 Url = $site.Url
                 OwnerAlias = $owner
@@ -136,6 +148,7 @@ function Get-TargetResource
                 SecondaryEmail = $site.SecondaryContact.Email
                 SecondaryOwnerAlias = $secondaryOwner
                 Template = "$($site.RootWeb.WebTemplate)#$($site.RootWeb.Configuration)"
+                CreateDefaultGroups = $CreateDefaultGroups
                 InstallAccount = $params.InstallAccount
             }
         }
@@ -201,11 +214,20 @@ function Set-TargetResource
         $Template,
 
         [Parameter()]
+        [System.Boolean]
+        $CreateDefaultGroups,
+
+        [Parameter()]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 
     Write-Verbose -Message "Setting site collection $Url"
+
+    if ($PSBoundParameters.ContainsKey("CreateDefaultGroups") -eq $false)
+    {
+        $PSBoundParameters.CreateDefaultGroups = $true
+    }
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
@@ -217,11 +239,21 @@ function Set-TargetResource
 
         $params.Remove("InstallAccount") | Out-Null
 
+        $CreateDefaultGroups = $params.CreateDefaultGroups
+        $params.Remove("CreateDefaultGroups") | Out-Null
+
         $site = Get-SPSite -Identity $params.Url -ErrorAction SilentlyContinue
 
         if ($null -eq $site)
         {
-            New-SPSite @params | Out-Null
+            $site = New-SPSite @params
+
+            if ($CreateDefaultGroups -eq $true)
+            {
+                $site.RootWeb.CreateDefaultAssociatedGroups($params.OwnerAlias,
+                                                            $params.SecondaryOwnerAlias,
+                                                            $null)
+            }
         }
         else
         {
@@ -257,6 +289,15 @@ function Set-TargetResource
             {
                 Write-Verbose -Message "Updating existing site collection"
                 Set-SPSite @newParams
+            }
+
+            if ($CurrentValues.CreateDefaultGroups -eq $false -and
+                $CreateDefaultGroups -eq $true)
+            {
+                $site = Get-SPSite -Identity $params.Url
+                $site.RootWeb.CreateDefaultAssociatedGroups($params.OwnerAlias,
+                                                            $params.SecondaryOwnerAlias,
+                                                            $null)
             }
         }
     }
@@ -321,6 +362,10 @@ function Test-TargetResource
         $Template,
 
         [Parameter()]
+        [System.Boolean]
+        $CreateDefaultGroups,
+
+        [Parameter()]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
@@ -338,7 +383,8 @@ function Test-TargetResource
                                     -ValuesToCheck @("Url",
                                                      "QuotaTemplate",
                                                      "OwnerAlias",
-                                                     "SecondaryOwnerAlias")
+                                                     "SecondaryOwnerAlias",
+                                                     "CreateDefaultGroups")
 }
 
 Export-ModuleMember -Function *-TargetResource

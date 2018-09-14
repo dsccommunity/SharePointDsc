@@ -402,7 +402,7 @@ function Set-TargetResource
             $app = $serviceApps | Select-Object -First 1
             if ($null -eq $serviceApps)
             {
-                New-SPProfileServiceApplication @params | Out-Null
+                $app = New-SPProfileServiceApplication @params | Out-Null
                 if ($null -ne $app)
                 {
                     New-SPProfileServiceApplicationProxy -Name $pName `

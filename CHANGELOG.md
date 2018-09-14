@@ -3,7 +3,12 @@
 ## Unreleased
 
 * SPSearchContentSource
-  * Fixed issue with numerical Content Sources name;
+  * Fixed issue with numerical Content Sources name
+* SPSite
+  * Added the possibility for creating the default site groups
+* SPUserProfileServiceApp
+  * Fixed issue which was introduced in v2.5 where the service application proxy
+    was not created.
 
 ## 2.5
 
