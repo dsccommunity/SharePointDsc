@@ -261,6 +261,10 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             Mock -CommandName Get-SPServiceApplication -MockWith {
                 return $null
             }
+            Mock -CommandName New-SPClaimsPrincipal -MockWith { return @("") }
+            Mock -CommandName Get-SPServiceApplicationSecurity -MockWith { return @("") }
+            Mock -CommandName Grant-SPObjectSecurity -MockWith {}
+            Mock -CommandName Set-SPServiceApplicationSecurity -MockWith {}
 
             Mock -CommandName Restart-Service {}
 
