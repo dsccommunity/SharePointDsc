@@ -4,6 +4,8 @@
 
 * SPSearchContentSource
   * Fixed issue with numerical Content Sources name;
+* SPWebAppSuiteBar
+  * Fixed incorrect test method that resulted in this resource to never apply changes.
 * SPWebAppPropertyBag
   * New resource to manage web application property bag
 

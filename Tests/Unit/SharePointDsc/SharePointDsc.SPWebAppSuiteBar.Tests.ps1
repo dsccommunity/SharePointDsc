@@ -115,6 +115,22 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     { Set-TargetResource @testParams } | Should Throw "You need to specify a value for the SuiteBarBrandingElementHtml parameter with SharePoint 2013"
                 }
             }
+            Context -Name "Configured values does not match" -Fixture {
+                $testParams = @{
+                    WebAppUrl = "http://sites.sharepoint.com"
+                    SuiteBarBrandingElementHtml = "<div>Test</div>"
+                }
+
+                Mock -CommandName Get-SPWebApplication -MockWith { return @(@{
+                    DisplayName = "Test Web App"
+                    Url = "http://sites.sharepoint.com"
+                    SuiteBarBrandingElementHtml = "<div>Another Test</div>"
+                })}
+
+                It "Should return false from the test method" {
+                    Test-TargetResource @testParams | Should Be $false
+                }
+            }
         }
         elseif ($Global:SPDscHelper.CurrentStubBuildNumber.Major -ge 16)
         {
@@ -240,6 +256,29 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
                 It "return error that sp2016 parameters are required" {
                     { Set-TargetResource @testParams } | Should Throw "You need to specify a value for either SuiteNavBrandingLogoNavigationUrl, SuiteNavBrandingLogoTitle, SuiteNavBrandingLogoUrl and SuiteNavBrandingText with SharePoint 2016"
+                }
+            }
+
+            Context -Name "Configured values does not match" -Fixture {
+                $testParams = @{
+                    WebAppUrl = "http://sites.sharepoint.com"
+                    SuiteNavBrandingLogoNavigationUrl = "http://sites.sharepoint.com"
+                    SuiteNavBrandingLogoTitle = "LogoTitle"
+                    SuiteNavBrandingLogoUrl = "http://sites.sharepoint.com/images/logo.gif"
+                    SuiteNavBrandingText = "Suite Bar Text"
+                }
+
+                Mock -CommandName Get-SPWebApplication -MockWith { return @(@{
+                    DisplayName = "Test Web App"
+                    Url = "http://sites.sharepoint.com"
+                    SuiteNavBrandingLogoNavigationUrl = "http://anothersite.sharepoint.com"
+                    SuiteNavBrandingLogoTitle = "AnotherLogoTitle"
+                    SuiteNavBrandingLogoUrl = "http://anothersite.sharepoint.com/images/logo.gif"
+                    SuiteNavBrandingText = "Another Suite Bar Text"
+                })}
+
+                It "Should return false from the test method" {
+                    Test-TargetResource @testParams | Should Be $false
                 }
             }
         }
