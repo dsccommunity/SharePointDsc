@@ -19,6 +19,7 @@ Configuration Example
         SPWebAppPropertyBag APPLICATION_APPCodeProperty
         {
             PsDscRunAsCredential = $SetupAccount
+            WebAppUrl = "https://web.contoso.com"
             Key = "KeyToRemove"
             Ensure = "Absent"
         }

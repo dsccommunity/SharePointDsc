@@ -19,9 +19,10 @@ Configuration Example
         SPWebAppPropertyBag APPLICATION_APPCodeProperty
         {
             PsDscRunAsCredential = $SetupAccount
-            Key = "KeyToAdd"
-            Value = "ValueToAddOrModify"
-            Ensure = "Present"
+            WebAppUrl = "https://web.contoso.com"
+            Key       = "KeyToAdd"
+            Value     = "ValueToAddOrModify"
+            Ensure    = "Present"
         }
     }
 }
