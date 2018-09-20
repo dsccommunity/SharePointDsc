@@ -4,6 +4,8 @@
 
 * SPSearchContentSource
   * Fixed issue with numerical Content Sources name;
+* SPWebAppPropertyBag
+  * New resource to manage web application property bag
 
 ## 2.5
 
