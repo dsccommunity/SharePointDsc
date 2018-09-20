@@ -105,13 +105,13 @@ function Set-TargetResource()
 
         if ($params.Ensure -eq 'Present')
         {
-            Write-Verbose -Message "Adding property '$params.Key'='$params.value' to SPWebApplication.Properties"
+            Write-Verbose -Message "Adding property '$($params.Key)'='$($params.value)' to SPWebApplication.Properties"
             $spWebApp.Properties[$params.Key] = $params.Value
             $spWebApp.Update()
         }
         else
         {
-            Write-Verbose -Message "Removing property '$params.Key' from SPWebApplication.Properties"
+            Write-Verbose -Message "Removing property '$($params.Key)' from SPWebApplication.Properties"
             $spWebApp.Properties.Remove($params.Key)
             $spWebApp.Update()
         }
