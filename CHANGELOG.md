@@ -2,13 +2,21 @@
 
 ## Unreleased
 
+* Changes to SharePointDsc
+  * Updated test helpers to force a reload of the resource every time you run a test
 * SPSearchContentSource
   * Fixed issue with numerical Content Sources name
+* SPSearchTopology
+  * Updated Readme.md to remove some incorrect information
 * SPSite
   * Added the possibility for creating the default site groups
 * SPUserProfileServiceApp
   * Fixed issue which was introduced in v2.5 where the service application proxy
     was not created.
+  * Updated resource to grant the InstallAccount permissions to a newly created service
+    application to prevent issues in the Get method.
+* SPWebAppSuiteBar
+  * Fixed incorrect test method that resulted in this resource to never apply changes.
 
 ## 2.5
 
