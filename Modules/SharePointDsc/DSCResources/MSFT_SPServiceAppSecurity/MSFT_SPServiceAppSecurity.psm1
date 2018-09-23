@@ -76,7 +76,7 @@ function Get-TargetResource
             $user = $securityEntry.Name
             if ($user -like "i:*|*" -or $user -like "c:*|*")
             {
-                if($user.Chars(3) -eq "%")
+                if($user.Chars(3) -eq "%" -and $user -ilike "*$((Get-SPFarm).Id.ToString())")
                 {
                     $user = "{LocalFarm}"
                 }
