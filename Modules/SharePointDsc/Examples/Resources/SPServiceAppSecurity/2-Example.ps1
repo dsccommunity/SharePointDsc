@@ -1,7 +1,7 @@
 <#
 .EXAMPLE
     This example shows how to use the local farm token to grant 
-	full control permission to the local farm to the 
+    full control permission to the local farm to the 
 	user profile service app's sharing permission.
 #>
 
