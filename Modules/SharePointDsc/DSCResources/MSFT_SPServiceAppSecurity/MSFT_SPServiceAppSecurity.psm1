@@ -389,12 +389,6 @@ function Test-TargetResource
     {
         Write-Verbose -Message "Processing Members parameter"
 
-        if ($null -eq $CurrentValues.Members)
-        {
-            Write-Verbose -Message "Security list does not match"
-            return $false
-        }
-
         if ($CurrentValues.Members.Count -eq 0)
         {
             if ($Members.Count -gt 0)
