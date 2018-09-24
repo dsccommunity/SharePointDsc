@@ -659,7 +659,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     (New-CimInstance -ClassName "MSFT_SPServiceAppSecurityEntry" `
                                      -ClientOnly `
                                      -Property @{
-                                                    Username = "{Local Farm}"
+                                                    Username = "{LocalFarm}"
                                                     AccessLevel = "Full Control"
                                                 })
                 )
@@ -697,6 +697,40 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 ServiceAppName = "Example Service App"
                 SecurityType = "SharingPermissions"
                 MembersToExclude = @("{LocalFarm}")
+            }
+
+            Mock -CommandName Get-SPServiceApplication -MockWith {
+                return @{}
+            }
+
+            Mock -CommandName Get-SPServiceApplicationSecurity -MockWith {
+                return @{
+                    AccessRules = @(
+                        @{
+                            Name = "c:0%.c|system|02a0cea2-d4e0-4e4e-ba2e-e532a433cfef"
+                            AllowedRights = "FullControl"
+                        }
+                    )
+                }
+            }
+
+            It "Should return false from the test method" {
+                Test-TargetResource @testParams | Should Be $false
+            }
+
+            It "Should call the update cmdlet from the set method" {
+                Set-TargetResource @testParams
+                Assert-MockCalled Grant-SPObjectSecurity -Times 0
+                Assert-MockCalled Revoke-SPObjectSecurity
+                Assert-MockCalled Set-SPServiceApplicationSecurity
+            }
+        }
+
+        Context -Name "The service app exists and an empty list of members are specified, which does not match the desired state" -Fixture {
+            $testParams = @{
+                ServiceAppName = "Example Service App"
+                SecurityType = "SharingPermissions"
+                Members = @()
             }
 
             Mock -CommandName Get-SPServiceApplication -MockWith {
