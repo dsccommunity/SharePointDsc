@@ -58,7 +58,7 @@ function Get-TargetResource
 
         [Parameter()]
         [System.Boolean]
-        $CreateDefaultGroups,
+        $CreateDefaultGroups = $true,
 
         [Parameter()]
         [System.Management.Automation.PSCredential]
@@ -77,7 +77,22 @@ function Get-TargetResource
 
         if ($null -eq $site)
         {
-            return $null
+            return @{
+                Url = $params.Url
+                OwnerAlias = $null
+                CompatibilityLevel = $null
+                ContentDatabase = $null
+                Description = $null
+                HostHeaderWebApplication = $null
+                Language = $null
+                Name = $null
+                OwnerEmail = $null
+                QuotaTemplate = $null
+                SecondaryEmail = $null
+                SecondaryOwnerAlias = $null
+                Template = $null
+                CreateDefaultGroups = $null
+            }
         }
         else
         {
@@ -127,9 +142,9 @@ function Get-TargetResource
                       }).Name
 
             $CreateDefaultGroups = $true
-            if ($null -eq $site.RootWeb.AssociatedVisitorsGroup -and
+            if ($null -eq $site.RootWeb.AssociatedVisitorGroup -and
                 $null -eq $site.RootWeb.AssociatedMemberGroup -and
-                $null -eq $site.RootWeb.AssociatedOwnersGroup)
+                $null -eq $site.RootWeb.AssociatedOwnerGroup)
             {
                 $CreateDefaultGroups = $false
             }
@@ -215,7 +230,7 @@ function Set-TargetResource
 
         [Parameter()]
         [System.Boolean]
-        $CreateDefaultGroups,
+        $CreateDefaultGroups = $true,
 
         [Parameter()]
         [System.Management.Automation.PSCredential]
@@ -254,6 +269,11 @@ function Set-TargetResource
                                                             $params.SecondaryOwnerAlias,
                                                             $null)
             }
+            else
+            {
+                Write-Verbose -Message ("CreateDefaultGroups set to false. The default " + `
+                                        "SharePoint groups will not be created")
+            }
         }
         else
         {
@@ -291,13 +311,20 @@ function Set-TargetResource
                 Set-SPSite @newParams
             }
 
-            if ($CurrentValues.CreateDefaultGroups -eq $false -and
-                $CreateDefaultGroups -eq $true)
+            if ($CurrentValues.CreateDefaultGroups -eq $false)
             {
-                $site = Get-SPSite -Identity $params.Url
-                $site.RootWeb.CreateDefaultAssociatedGroups($params.OwnerAlias,
-                                                            $params.SecondaryOwnerAlias,
-                                                            $null)
+                if ($CreateDefaultGroups -eq $true)
+                {
+                    $site = Get-SPSite -Identity $params.Url -ErrorAction SilentlyContinue
+                    $site.RootWeb.CreateDefaultAssociatedGroups($params.OwnerAlias,
+                                                                $params.SecondaryOwnerAlias,
+                                                                $null)
+                }
+                else
+                {
+                    Write-Verbose -Message ("CreateDefaultGroups set to false. The default " + `
+                                            "SharePoint groups will not be created")
+                }
             }
         }
     }
@@ -363,7 +390,7 @@ function Test-TargetResource
 
         [Parameter()]
         [System.Boolean]
-        $CreateDefaultGroups,
+        $CreateDefaultGroups = $true,
 
         [Parameter()]
         [System.Management.Automation.PSCredential]
@@ -374,17 +401,20 @@ function Test-TargetResource
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
-    if ($null -eq $CurrentValues)
+    if ($CreateDefaultGroups -eq $true)
     {
-        return $false
+        if ($CurrentValues.CreateDefaultGroups -ne $true)
+        {
+            return $false
+        }
     }
+
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
                                     -DesiredValues $PSBoundParameters `
                                     -ValuesToCheck @("Url",
                                                      "QuotaTemplate",
                                                      "OwnerAlias",
-                                                     "SecondaryOwnerAlias",
-                                                     "CreateDefaultGroups")
+                                                     "SecondaryOwnerAlias")
 }
 
 Export-ModuleMember -Function *-TargetResource

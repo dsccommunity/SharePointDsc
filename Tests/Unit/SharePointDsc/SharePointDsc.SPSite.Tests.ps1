@@ -69,8 +69,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
             Mock -CommandName Get-SPSite -MockWith { return $null }
 
-            It "Should return null from the get method" {
-                Get-TargetResource @testParams | Should BeNullOrEmpty
+            It "Should return OwnerAlias=Null from the get method" {
+                (Get-TargetResource @testParams).OwnerAlias | Should BeNullOrEmpty
             }
 
             It "Should return false from the test method" {
@@ -79,7 +79,6 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
             It "Should create a new site from the set method" {
                 Set-TargetResource @testParams
-
                 Assert-MockCalled New-SPSite
             }
         }
@@ -157,7 +156,15 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             Mock -CommandName Get-SPSite -MockWith {
-                return @{
+                $rootWeb = @{
+                    AssociatedVisitorGroup = "Test Visitors"
+                    AssociatedMemberGroup   = "Test Members"
+                    AssociatedOwnerGroup   = "Test Owners"
+                }
+                $rootWeb = $rootWeb | Add-Member -MemberType ScriptMethod `
+                                        -Name CreateDefaultAssociatedGroups `
+                                        -Value {} -PassThru
+                $returnval = @{
                     HostHeaderIsSiteName = $true
                     WebApplication = @{
                         Url = $testParams.Url
@@ -165,15 +172,69 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     }
                     Url = $testParams.Url
                     Owner = @{ UserLogin = "DEMO\owner" }
+                    RootWeb = $rootWeb
                 }
+                return $returnval
             }
 
             It "Should return the site data from the get method" {
-                Get-TargetResource @testParams | Should Not BeNullOrEmpty
+                (Get-TargetResource @testParams).OwnerAlias | Should Be "DEMO\owner"
             }
 
             It "Should return true from the test method" {
                 Test-TargetResource @testParams | Should Be $true
+            }
+        }
+
+        Context -Name "The site exists, but doesn't have default groups configured" -Fixture {
+            $testParams = @{
+                Url = "http://site.sharepoint.com"
+                OwnerAlias = "DEMO\User"
+            }
+
+            Mock -CommandName Get-SPSite -MockWith {
+                $rootWeb = @{
+                    AssociatedVisitorGroup = $null
+                    AssociatedMemberGroup   = $null
+                    AssociatedOwnerGroup   = $null
+                }
+                $rootWeb = $rootWeb | Add-Member -MemberType ScriptMethod `
+                                        -Name CreateDefaultAssociatedGroups `
+                                        -Value {
+                                            $Global:SPDscGroupsUpdated = $true
+                                        } -PassThru
+                $returnval = @{
+                    HostHeaderIsSiteName = $false
+                    WebApplication = @{
+                        Url = $testParams.Url
+                        UseClaimsAuthentication = $true
+                    }
+                    Url = $testParams.Url
+                    Owner = @{ UserLogin = "DEMO\owner" }
+                    Quota = @{ QuotaId = 65000 }
+                    RootWeb = $rootWeb
+                }
+                return $returnval
+            }
+
+            Mock -CommandName New-SPClaimsPrincipal -MockWith {
+                return @{
+                    Value = $testParams.OwnerAlias
+                }
+            }
+
+            It "Should return CreateDefaultGroups=False from the get method" {
+                (Get-TargetResource @testParams).CreateDefaultGroups | Should Be $false
+            }
+
+            It "Should return true from the test method" {
+                Test-TargetResource @testParams | Should Be $false
+            }
+
+            $Global:SPDscGroupsUpdated = $false
+            It "Should update the groups in the set method" {
+                Set-TargetResource @testParams
+                $Global:SPDscGroupsUpdated | Should Be $true
             }
         }
 
@@ -184,7 +245,15 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             Mock -CommandName Get-SPSite -MockWith {
-                return @{
+                $rootWeb = @{
+                    AssociatedVisitorGroup = "Test Visitors"
+                    AssociatedMemberGroup   = "Test Members"
+                    AssociatedOwnerGroup   = "Test Owners"
+                }
+                $rootWeb = $rootWeb | Add-Member -MemberType ScriptMethod `
+                                        -Name CreateDefaultAssociatedGroups `
+                                        -Value {} -PassThru
+                $returnval = @{
                     HostHeaderIsSiteName = $false
                     WebApplication = @{
                         Url = $testParams.Url
@@ -193,7 +262,9 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     Url = $testParams.Url
                     Owner = @{ UserLogin = "DEMO\owner" }
                     Quota = @{ QuotaId = 65000 }
+                    RootWeb = $rootWeb
                 }
+                return $returnval
             }
 
             Mock -CommandName New-SPClaimsPrincipal -MockWith {
@@ -252,7 +323,15 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             Mock -CommandName Get-SPSite -MockWith {
-                return @{
+                $rootWeb = @{
+                    AssociatedVisitorGroup = "Test Visitors"
+                    AssociatedMemberGroup   = "Test Members"
+                    AssociatedOwnerGroup   = "Test Owners"
+                }
+                $rootWeb = $rootWeb | Add-Member -MemberType ScriptMethod `
+                                        -Name CreateDefaultAssociatedGroups `
+                                        -Value {} -PassThru
+                $returnval = @{
                     HostHeaderIsSiteName = $false
                     WebApplication = @{
                         Url = $testParams.Url
@@ -261,7 +340,9 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     Url = $testParams.Url
                     Owner = @{ UserLogin = "DEMO\owner" }
                     Quota = @{ QuotaId = 65000 }
+                    RootWeb = $rootWeb
                 }
+                return $returnval
             }
 
             It "Should return the site data from the get method" {
@@ -288,6 +369,45 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
             It "Should return the site data from the get method where a secondary site contact exists" {
                 Get-TargetResource @testParams | Should Not BeNullOrEmpty
+            }
+        }
+
+        Context -Name "CreateDefaultGroups is set to false, don't correct anything" -Fixture {
+            $testParams = @{
+                Url = "http://site.sharepoint.com"
+                OwnerAlias = "DEMO\owner"
+                CreateDefaultGroups = $false
+            }
+
+            Mock -CommandName Get-SPSite -MockWith {
+                $rootWeb = @{
+                    AssociatedVisitorGroup = $null
+                    AssociatedMemberGroup   = $null
+                    AssociatedOwnerGroup   = $null
+                }
+                $rootWeb = $rootWeb | Add-Member -MemberType ScriptMethod `
+                                        -Name CreateDefaultAssociatedGroups `
+                                        -Value {} -PassThru
+                $returnval = @{
+                    HostHeaderIsSiteName = $false
+                    WebApplication = @{
+                        Url = $testParams.Url
+                        UseClaimsAuthentication = $false
+                    }
+                    Url = $testParams.Url
+                    Owner = @{ UserLogin = "DEMO\owner" }
+                    Quota = @{ QuotaId = 65000 }
+                    RootWeb = $rootWeb
+                }
+                return $returnval
+            }
+
+            It "Should return CreateDefaultGroups=False from the get method" {
+                (Get-TargetResource @testParams).CreateDefaultGroups | Should Be $false
+            }
+
+            It "Should return true from the test method" {
+                Test-TargetResource @testParams | Should Be $true
             }
         }
     }
