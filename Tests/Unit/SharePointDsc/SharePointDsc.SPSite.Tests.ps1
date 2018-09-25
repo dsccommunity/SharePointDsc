@@ -66,10 +66,11 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "The site exists, but has incorrect owner alias and quota" -Fixture {
             $testParams = @{
-                Url                 = "http://site.sharepoint.com"
-                OwnerAlias          = "DEMO\User"
-                SecondaryOwnerAlias = "DEMO\SecondUser"
-                QuotaTemplate       = "Test"
+                Url                    = "http://site.sharepoint.com"
+                OwnerAlias             = "DEMO\User"
+                SecondaryOwnerAlias    = "DEMO\SecondUser"
+                QuotaTemplate          = "Test"
+                AdministrationSiteType = "TenantAdministration"
             }
 
             Mock -CommandName Get-SPSite -MockWith {
@@ -85,9 +86,15 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     Quota = @{
                         QuotaId = 1
                     }
+                    AdministrationSiteType = "None"
                 }
             }
-            Mock -CommandName Set-SPSite -MockWith {}
+            Mock -CommandName Set-SPSite -MockWith {} -ParameterFilter {
+                $OwnerAlias = "DEMO\User"
+                $SecondaryOwnerAlias = "DEMO\SecondUser"
+                $QuotaTemplate = "Test"
+                $AdministrationSiteType -eq "TenantAdministration"
+            }
             Mock -CommandName Get-SPDSCContentService -MockWith {
                 $quotaTemplates = @(@{
                     QuotaId = 1
@@ -112,6 +119,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 $result.OwnerAlias | Should Be "DEMO\owner"
                 $result.SecondaryOwnerAlias | Should Be "DEMO\SecondOwner"
                 $result.QuotaTemplate | Should Be "WrongTemplate"
+                $result.AdministrationSiteType | Should Be "None"
             }
 
             It "Should update owner and quota in the set method" {
