@@ -38,7 +38,7 @@ function Get-TargetResource
                "MembersToExclude parameters")
     }
 
-    if ($null -eq $Members -and !$MembersToInclude -and !$MembersToExclude)
+    if ($null -eq $Members -and $null -eq $MembersToInclude -and $null -eq $MembersToExclude)
     {
         throw ("At least one of the following parameters must be specified: Members, " + `
                "MembersToInclude, MembersToExclude")
@@ -150,7 +150,7 @@ function Set-TargetResource
                "MembersToExclude parameters")
     }
 
-    if ($null -eq $Members -and !$MembersToInclude -and !$MembersToExclude)
+    if ($null -eq $Members -and $null -eq $MembersToInclude -and $null -eq $MembersToExclude)
     {
         throw ("At least one of the following parameters must be specified: Members, " + `
                "MembersToInclude, MembersToExclude")
