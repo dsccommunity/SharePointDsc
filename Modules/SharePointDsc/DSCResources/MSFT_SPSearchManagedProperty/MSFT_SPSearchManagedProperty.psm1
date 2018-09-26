@@ -427,10 +427,6 @@ function Test-TargetResource
                                     -DesiredValues $PSBoundParameters `
                                     -ValuesToCheck @("Name",
                                                      "PropertyType",
-                                                     "Searchable",
-                                                     "Refinable",
-                                                     "NoWordBreaker",
-                                                     "IncludeAllCrawledProperties",
                                                      "Ensure")
 }
 
