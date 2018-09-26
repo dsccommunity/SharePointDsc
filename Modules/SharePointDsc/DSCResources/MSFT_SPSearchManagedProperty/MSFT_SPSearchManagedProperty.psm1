@@ -259,6 +259,8 @@ function Set-TargetResource
         #endregion
         $needToRecreate = $false
 
+        # If the property should not be present and is, or if it should be present bu the current property type
+        # differs from the desired one.
         if ($params.Ensure -eq "Absent" -and $CurrentValues.Ensure -eq "Present" -or `
         ($params.PropertyType -ne $CurrentValues.PropertyType -and `
         $CurrentValues.Ensure -eq "Present"))
@@ -313,6 +315,7 @@ function Set-TargetResource
         $managedProperty.TokenNormalization = $params.TokenNormalization
         $managedProperty.RespectPriority = !($params.IncludeAllCrawledProperties)
         $managedProperty.OverrideValueOfHasMultipleValues = !($params.IncludeAllCrawledProperties)
+
         $managedProperty.Update()
         # If alias doesn't already exist, add it
         $alias = $managedProperty.GetAliases() | Where-Object{$_ -eq $params.Alias}
