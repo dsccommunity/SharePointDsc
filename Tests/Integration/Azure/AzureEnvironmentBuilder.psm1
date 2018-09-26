@@ -131,7 +131,7 @@ function New-SPDscAzureLab
                                                     -Context $mainStorageContext
 
     # Get keys for software storage
-    $storageAccount = Find-AzureRmResource -ResourceNameContains $SoftwareStorageAccountName
+    $storageAccount = Get-AzureRmResource -ResourceName $SoftwareStorageAccountName
     $softwareKeys = Get-AzureRmStorageAccountKey -ResourceGroupName $storageAccount.ResourceGroupName `
                                                  -Name $SoftwareStorageAccountName
 
