@@ -286,8 +286,8 @@ function Set-TargetResource
     if ($Ensure -eq "Present")
     {
         $farmAccount = Invoke-SPDSCCommand -Credential $InstallAccount `
-                                               -Arguments $PSBoundParameters `
-                                               -ScriptBlock {
+                                           -Arguments $PSBoundParameters `
+                                           -ScriptBlock {
             return Get-SPDscFarmAccount
         }
 
@@ -302,6 +302,7 @@ function Set-TargetResource
                            "Account. Make sure the specified InstallAccount isn't the Farm Account " + `
                            "and try again")
                 }
+                $setupAccount = $InstallAccount.UserName
             }
             else
             {
@@ -316,6 +317,7 @@ function Set-TargetResource
                                "Account. Make sure the specified PSDSCRunAsCredential isn't the " + `
                                "Farm Account and try again")
                     }
+                    $setupAccount = $localaccount
                 }
             }
         }
@@ -342,9 +344,10 @@ function Set-TargetResource
         }
 
         $null = Invoke-SPDSCCommand -Credential $FarmAccount `
-                                    -Arguments $PSBoundParameters `
+                                    -Arguments @($PSBoundParameters, $setupAccount) `
                                     -ScriptBlock {
             $params = $args[0]
+            $setupAccount = $args[1]
 
             $updateEnableNetBIOS = $false
             if ($params.ContainsKey("EnableNetBIOS"))
@@ -402,13 +405,23 @@ function Set-TargetResource
             $app = $serviceApps | Select-Object -First 1
             if ($null -eq $serviceApps)
             {
-                New-SPProfileServiceApplication @params | Out-Null
+                $app = New-SPProfileServiceApplication @params
                 if ($null -ne $app)
                 {
                     New-SPProfileServiceApplicationProxy -Name $pName `
                                                          -ServiceApplication $app `
                                                          -DefaultProxyGroup
                 }
+
+                $claimsPrincipal = New-SPClaimsPrincipal -Identity $setupAccount `
+                                                         -IdentityType WindowsSamAccountName
+
+                $serviceAppSecurity = Get-SPServiceApplicationSecurity $app
+                Grant-SPObjectSecurity -Identity $serviceAppSecurity `
+                                       -Principal $claimsPrincipal `
+                                       -Rights "Full Control"
+                Set-SPServiceApplicationSecurity -Identity $app `
+                                                 -ObjectSecurity $serviceAppSecurity
 
                 $app = Get-SPServiceApplication -Name $params.Name `
                                                 -ErrorAction SilentlyContinue
