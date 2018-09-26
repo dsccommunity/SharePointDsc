@@ -17,6 +17,9 @@
     application to prevent issues in the Get method.
 * SPWebAppSuiteBar
   * Fixed incorrect test method that resulted in this resource to never apply changes.
+* SPServiceAppSecurity
+  * Added local farm token.
+  * Fixed issues that prevented the resource to work as expected in many situations.
 * SPWebAppPropertyBag
   * New resource to manage web application property bag
 
