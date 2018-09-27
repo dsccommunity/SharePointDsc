@@ -4,7 +4,7 @@
 
 * SPSearchContentSource
   * Fixed issue with numerical Content Sources name
-* SPSearchMAnagedProperty
+* SPSearchManagedProperty
   * Added a new resource to support Search Managed Properties
 
 ## 2.5
