@@ -113,29 +113,29 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     -Name GetAliases `
                     -Value {
                         @("Alias1", "Alias2")
-                    } -PassThru -Force | 
+                    } -PassThru -Force |
                     Add-Member -MemberType ScriptMethod `
                     -Name GetMappedCrawledProperties `
                     -Value {
                         return @("Map1")
-                    } -PassThru -Force | 
+                    } -PassThru -Force |
                     Add-Member -MemberType ScriptMethod `
                     -Name Update `
                     -Value {
                         $null
-                    } -PassThru -Force | 
+                    } -PassThru -Force |
                     Add-Member -MemberType ScriptMethod `
                     -Name AddAlias `
                     -Value {
                         $null
-                    } -PassThru -Force | 
+                    } -PassThru -Force |
                     Add-Member -MemberType ScriptMethod `
                     -Name SetMappings `
                     -Value {
                         $null
                     } -PassThru -Force
                 return $results
-                
+
             } -ParameterFilter { $Script:PropertyCreated -eq $true }
 
             Mock -CommandName Get-SPEnterpriseSearchMetadataCrawledProperty -MockWith {
@@ -180,27 +180,27 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     -Name GetAliases `
                     -Value {
                         $null
-                    } -PassThru -Force | 
+                    } -PassThru -Force |
                     Add-Member -MemberType ScriptMethod `
                     -Name GetMappedCrawledProperties `
                     -Value {
                         $null
-                    } -PassThru -Force | 
+                    } -PassThru -Force |
                     Add-Member -MemberType ScriptMethod `
                     -Name Update `
                     -Value {
                         $null
-                    } -PassThru -Force | 
+                    } -PassThru -Force |
                     Add-Member -MemberType ScriptMethod `
                     -Name AddAlias `
                     -Value {
                         $null
-                    } -PassThru -Force | 
+                    } -PassThru -Force |
                     Add-Member -MemberType ScriptMethod `
                     -Name SetMappings `
                     -Value {
                         $null
-                    } -PassThru -Force | 
+                    } -PassThru -Force |
                     Add-Member -MemberType ScriptMethod `
                     -Name DeleteAllMappings `
                     -Value {
@@ -244,27 +244,27 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     -Name GetAliases `
                     -Value {
                         $null
-                    } -PassThru -Force | 
+                    } -PassThru -Force |
                     Add-Member -MemberType ScriptMethod `
                     -Name GetMappedCrawledProperties `
                     -Value {
                         $null
-                    } -PassThru -Force | 
+                    } -PassThru -Force |
                     Add-Member -MemberType ScriptMethod `
                     -Name Update `
                     -Value {
                         $null
-                    } -PassThru -Force | 
+                    } -PassThru -Force |
                     Add-Member -MemberType ScriptMethod `
                     -Name AddAlias `
                     -Value {
                         $null
-                    } -PassThru -Force | 
+                    } -PassThru -Force |
                     Add-Member -MemberType ScriptMethod `
                     -Name SetMappings `
                     -Value {
                         $null
-                    } -PassThru -Force | 
+                    } -PassThru -Force |
                     Add-Member -MemberType ScriptMethod `
                     -Name DeleteAllMappings `
                     -Value {
@@ -308,27 +308,27 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     -Name GetAliases `
                     -Value {
                         $null
-                    } -PassThru -Force | 
+                    } -PassThru -Force |
                     Add-Member -MemberType ScriptMethod `
                     -Name GetMappedCrawledProperties `
                     -Value {
                         $null
-                    } -PassThru -Force | 
+                    } -PassThru -Force |
                     Add-Member -MemberType ScriptMethod `
                     -Name Update `
                     -Value {
                         $null
-                    } -PassThru -Force | 
+                    } -PassThru -Force |
                     Add-Member -MemberType ScriptMethod `
                     -Name AddAlias `
                     -Value {
                         $null
-                    } -PassThru -Force | 
+                    } -PassThru -Force |
                     Add-Member -MemberType ScriptMethod `
                     -Name SetMappings `
                     -Value {
                         $null
-                    } -PassThru -Force | 
+                    } -PassThru -Force |
                     Add-Member -MemberType ScriptMethod `
                     -Name DeleteAllMappings `
                     -Value {
@@ -361,7 +361,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             It "Should throw an error" {
-                { Get-TargetResource @testParams }| Should Throw "The specified Search Service Application {InvalidSSA} is  `
+                { Get-TargetResource @testParams }| Should Throw "The specified Search Service Application InvalidSSA is  `
                    invalid. Please make sure you specify the name of an existing service application."
             }
         }
@@ -379,7 +379,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             It "Should throw an error" {
-                { Get-TargetResource @testParams }| Should Throw "The specified Search Service Application {InvalidSSA} is  `
+                { Get-TargetResource @testParams }| Should Throw "The specified Search Service Application InvalidSSA is  `
                    invalid. Please make sure you specify the name of an existing service application."
             }
         }
