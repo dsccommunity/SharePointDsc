@@ -273,15 +273,15 @@ function Set-TargetResource
             $managedProperty.DeleteAllMappings()
 
             # Remove the existing managed property
-            Write-Verbose  "Removing Managed Property {$($params.Name)}"
+            Write-Verbose  "Removing Managed Property $($params.Name)"
             Remove-SPEnterpriseSearchMetadataManagedProperty -Identity $params.Name `
                                                              -SearchApplication $params.ServiceAppName `
                                                              -Confirm:$false
 
             if ($params.PropertyType -ne $CurrentValues.PropertyType)
             {
-                Write-Verbose "Detected a change to type from {$($currentPropertyType)} to `
-                               {$($params.PropertyType)}"
+                Write-Verbose "Detected a change to type from $($currentPropertyType) to `
+                               $($params.PropertyType)"
                 $needToRecreate = $true
             }
         }
@@ -292,7 +292,7 @@ function Set-TargetResource
             # Create the new content source and then apply settings to it
             $managedTypeID = [Microsoft.Office.Server.Search.Administration.ManagedDataType]::$($params.PropertyType).value__
 
-            Write-Verbose "Creating a new Managed Property {$($params.Name)}"
+            Write-Verbose "Creating a new Managed Property $($params.Name)"
             New-SPEnterpriseSearchMetadataManagedProperty -Name $params.Name `
                                                           -SearchApplication $params.ServiceAppName `
                                                           -Type $managedTypeID
