@@ -57,6 +57,10 @@ function Get-TargetResource
         $Template,
 
         [Parameter()]
+        [System.Boolean]
+        $CreateDefaultGroups = $true,
+
+        [Parameter()]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
@@ -73,7 +77,22 @@ function Get-TargetResource
 
         if ($null -eq $site)
         {
-            return $null
+            return @{
+                Url = $params.Url
+                OwnerAlias = $null
+                CompatibilityLevel = $null
+                ContentDatabase = $null
+                Description = $null
+                HostHeaderWebApplication = $null
+                Language = $null
+                Name = $null
+                OwnerEmail = $null
+                QuotaTemplate = $null
+                SecondaryEmail = $null
+                SecondaryOwnerAlias = $null
+                Template = $null
+                CreateDefaultGroups = $null
+            }
         }
         else
         {
@@ -122,6 +141,14 @@ function Get-TargetResource
                           $_.QuotaID -eq $site.Quota.QuotaID
                       }).Name
 
+            $CreateDefaultGroups = $true
+            if ($null -eq $site.RootWeb.AssociatedVisitorGroup -and
+                $null -eq $site.RootWeb.AssociatedMemberGroup -and
+                $null -eq $site.RootWeb.AssociatedOwnerGroup)
+            {
+                $CreateDefaultGroups = $false
+            }
+
             return @{
                 Url = $site.Url
                 OwnerAlias = $owner
@@ -136,6 +163,7 @@ function Get-TargetResource
                 SecondaryEmail = $site.SecondaryContact.Email
                 SecondaryOwnerAlias = $secondaryOwner
                 Template = "$($site.RootWeb.WebTemplate)#$($site.RootWeb.Configuration)"
+                CreateDefaultGroups = $CreateDefaultGroups
                 InstallAccount = $params.InstallAccount
             }
         }
@@ -201,11 +229,20 @@ function Set-TargetResource
         $Template,
 
         [Parameter()]
+        [System.Boolean]
+        $CreateDefaultGroups = $true,
+
+        [Parameter()]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 
     Write-Verbose -Message "Setting site collection $Url"
+
+    if ($PSBoundParameters.ContainsKey("CreateDefaultGroups") -eq $false)
+    {
+        $PSBoundParameters.CreateDefaultGroups = $true
+    }
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
@@ -217,11 +254,26 @@ function Set-TargetResource
 
         $params.Remove("InstallAccount") | Out-Null
 
+        $CreateDefaultGroups = $params.CreateDefaultGroups
+        $params.Remove("CreateDefaultGroups") | Out-Null
+
         $site = Get-SPSite -Identity $params.Url -ErrorAction SilentlyContinue
 
         if ($null -eq $site)
         {
-            New-SPSite @params | Out-Null
+            $site = New-SPSite @params
+
+            if ($CreateDefaultGroups -eq $true)
+            {
+                $site.RootWeb.CreateDefaultAssociatedGroups($params.OwnerAlias,
+                                                            $params.SecondaryOwnerAlias,
+                                                            $null)
+            }
+            else
+            {
+                Write-Verbose -Message ("CreateDefaultGroups set to false. The default " + `
+                                        "SharePoint groups will not be created")
+            }
         }
         else
         {
@@ -257,6 +309,22 @@ function Set-TargetResource
             {
                 Write-Verbose -Message "Updating existing site collection"
                 Set-SPSite @newParams
+            }
+
+            if ($CurrentValues.CreateDefaultGroups -eq $false)
+            {
+                if ($CreateDefaultGroups -eq $true)
+                {
+                    $site = Get-SPSite -Identity $params.Url -ErrorAction SilentlyContinue
+                    $site.RootWeb.CreateDefaultAssociatedGroups($params.OwnerAlias,
+                                                                $params.SecondaryOwnerAlias,
+                                                                $null)
+                }
+                else
+                {
+                    Write-Verbose -Message ("CreateDefaultGroups set to false. The default " + `
+                                            "SharePoint groups will not be created")
+                }
             }
         }
     }
@@ -321,6 +389,10 @@ function Test-TargetResource
         $Template,
 
         [Parameter()]
+        [System.Boolean]
+        $CreateDefaultGroups = $true,
+
+        [Parameter()]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
@@ -329,10 +401,14 @@ function Test-TargetResource
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
-    if ($null -eq $CurrentValues)
+    if ($CreateDefaultGroups -eq $true)
     {
-        return $false
+        if ($CurrentValues.CreateDefaultGroups -ne $true)
+        {
+            return $false
+        }
     }
+
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
                                     -DesiredValues $PSBoundParameters `
                                     -ValuesToCheck @("Url",
