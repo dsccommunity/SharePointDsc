@@ -6,6 +6,8 @@
   * Updated test helpers to force a reload of the resource every time you run a test
 * SPSearchContentSource
   * Fixed issue with numerical Content Sources name
+* SPSearchManagedProperty
+  * Added a new resource to support Search Managed Properties
 * SPSearchTopology
   * Updated Readme.md to remove some incorrect information
 * SPSite
