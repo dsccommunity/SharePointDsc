@@ -83,9 +83,9 @@ function Get-TargetResource
         $params = $args[0]
 
         $ssa = Get-SPEnterpriseSearchServiceApplication -Identity $params.ServiceAppName
-        if(!$ssa)
+        if ($null -eq $ssa)
         {
-            throw("The specified Search Service Application {$($params.ServiceAppName)} is  `
+            throw("The specified Search Service Application $($params.ServiceAppName) is  `
                    invalid. Please make sure you specify the name of an existing service application.")
         }
         $managedProperty = Get-SPEnterpriseSearchMetadataManagedProperty -SearchApplication $ssa | `
@@ -99,17 +99,18 @@ function Get-TargetResource
                 Ensure = "Absent"
             }
         }
-        else {
+        else
+        {
             $aliases = $managedProperty.GetAliases()
             $alias = ""
-            if($aliases)
+            if ($aliases)
             {
                 $alias = $aliases[0]
             }
 
             $mappedCrawlProperties = $managedProperty.GetMappedCrawledProperties($false)
             $includeAllCrawlProperties = $false
-            if($mappedCrawlProperties)
+            if ($mappedCrawlProperties)
             {
                 $includeAllCrawlProperties = $true
             }
@@ -131,10 +132,10 @@ function Get-TargetResource
                 Ensure = "Present"
             }
 
-            if(!$includeAllCrawlProperties)
+            if (!$includeAllCrawlProperties)
             {
                 $crawledProperties = @()
-                foreach($mappedProperty in $mappedCrawlProperties)
+                foreach ($mappedProperty in $mappedCrawlProperties)
                 {
                     $crawledProperties += $mappedProperty.Name
                 }
@@ -238,20 +239,20 @@ function Set-TargetResource
         #region Pre-Validation
         # Ensure that if we specified that we don't specify any crawled property mapping if we selected to include
         # them all.
-        if($params.IncludeAllCrawledProperties -and $params.CrawledProperties.Length -gt 0)
+        if ($params.IncludeAllCrawledProperties -and $params.CrawledProperties.Length -gt 0)
         {
             throw("You cannot specify values for CrawledProperties if the property `
                 IncludeAllCrawledProperties is set to True.")
         }
 
         # Ensure that the specified crawled properties exist
-        foreach($mappedCrawlProperty in $params.CrawledProperties)
+        foreach ($mappedCrawlProperty in $params.CrawledProperties)
         {
             $currentCrawlProperty = Get-SPEnterpriseSearchMetadataCrawledProperty -Name $mappedCrawlProperty `
                                                                                   -SearchApplication $params.ServiceAppName
-            if(!$currentCrawlProperty)
+            if (!$currentCrawlProperty)
             {
-                throw("The specified crawled property {$($mappedCrawlProperty)} does not exist. `
+                throw("The specified crawled property $($mappedCrawlProperty) does not exist. `
                     Please make sure you specify valid existing crawl properties.")
             }
         }
@@ -277,7 +278,7 @@ function Set-TargetResource
                                                              -SearchApplication $params.ServiceAppName `
                                                              -Confirm:$false
 
-            if($params.PropertyType -ne $CurrentValues.PropertyType)
+            if ($params.PropertyType -ne $CurrentValues.PropertyType)
             {
                 Write-Verbose "Detected a change to type from {$($currentPropertyType)} to `
                                {$($params.PropertyType)}"
@@ -318,14 +319,14 @@ function Set-TargetResource
         $managedProperty.Update()
         # If alias doesn't already exist, add it
         $alias = $managedProperty.GetAliases() | Where-Object{$_ -eq $params.Alias}
-        if($alias)
+        if ($alias)
         {
             $managedProperty.AddAlias($params.Alias)
         }
 
         # Generate the Crawled Properties mapping
         $listOfMappedCrawlProperty = [Microsoft.Office.Server.Search.Administration.MappingCollection]::new()
-        foreach($mappedCrawlProperty in $params.CrawledProperties)
+        foreach ($mappedCrawlProperty in $params.CrawledProperties)
         {
             $currentCrawlProperty = Get-SPEnterpriseSearchMetadataCrawledProperty -Name $mappedCrawlProperty `
                                                                                   -SearchApplication $params.ServiceAppName
@@ -426,7 +427,17 @@ function Test-TargetResource
                                     -DesiredValues $PSBoundParameters `
                                     -ValuesToCheck @("Name",
                                                      "PropertyType",
-                                                     "Ensure")
+                                                     "Ensure",
+                                                     "HasMultipleValues",
+                                                     "Retrievable",
+                                                     "Searchable",
+                                                     "Refinable",
+                                                     "Searchable",
+                                                     "NoWordBreaker",
+                                                     "IncludeAllCrawledProperties",
+                                                     "Alias",
+                                                     "Sortable",
+                                                     "SafeForAnonymous")
 }
 
 Export-ModuleMember -Function *-TargetResource
