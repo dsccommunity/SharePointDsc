@@ -12,6 +12,7 @@
   * Updated Readme.md to remove some incorrect information
 * SPSite
   * Added the possibility for creating the default site groups
+  * Added the possibility to set AdministrationSiteType
 * SPUserProfileServiceApp
   * Fixed issue which was introduced in v2.5 where the service application proxy
     was not created.
@@ -24,6 +25,9 @@
   * Fixed issues that prevented the resource to work as expected in many situations.
 * SPWebAppPropertyBag
   * New resource to manage web application property bag
+* SPWebAppClientCallableSettings
+  * New resource to manage web application client callable settings including
+    proxy libraries.
 
 ## 2.5
 
