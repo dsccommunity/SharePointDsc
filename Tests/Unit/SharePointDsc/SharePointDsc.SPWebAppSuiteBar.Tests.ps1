@@ -23,6 +23,29 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         # Mocks for all contexts
 
         # Test contexts
+
+        Context -Name "Web application does not exist" -Fixture {
+            $testParams = @{
+                WebAppUrl = "http://sites.sharepoint.com"
+                SuiteBarBrandingElementHtml = "<div>Test</div>"
+            }
+
+            Mock -CommandName Get-SPWebApplication -MockWith {
+                return $null
+            }
+
+            It "Get target resource returns null value" {
+                $returnValue = Get-TargetResource @testParams
+                $returnValue | Should Not Be $null
+                $returnValue.WebAppUrl | Should Be $null
+                $returnValue.SuiteNavBrandingLogoNavigationUrl | Should Be $null
+                $returnValue.SuiteNavBrandingLogoTitle | Should Be $null
+                $returnValue.SuiteNavBrandingLogoUrl | Should Be $null
+                $returnValue.SuiteNavBrandingText | Should Be $null
+                $returnValue.SuiteBarBrandingElementHtml | Should Be $null
+            }
+        }
+
         if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 15)
         {
             Context -Name "Only all SP2016 parameters passed for a SP2013 environment" -Fixture {
@@ -141,6 +164,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     SuiteNavBrandingLogoTitle = "LogoTitle"
                     SuiteNavBrandingLogoUrl = "http://sites.sharepoint.com/images/logo.gif"
                     SuiteNavBrandingText = "Suite Bar Text"
+                    SuiteBarBrandingElementHtml = "<div>Test</div>"
                 }
 
                 Mock -CommandName Get-SPWebApplication -MockWith {
@@ -151,7 +175,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                         SuiteNavBrandingLogoTitle = "LogoTitle"
                         SuiteNavBrandingLogoUrl = "http://sites.sharepoint.com/images/logo.gif"
                         SuiteNavBrandingText = "Suite Bar Text"
-                        SuiteBarBrandingElementHtml = $null
+                        SuiteBarBrandingElementHtml = "<div>Test</div>"
                     }
                     $webApp = $webApp | Add-Member -MemberType ScriptMethod -Name Update -Value {
                         $Global:SPDscWebApplicationUpdateCalled = $true
@@ -166,6 +190,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     $results.SuiteNavBrandingLogoTitle | Should be "LogoTitle"
                     $results.SuiteNavBrandingLogoUrl | Should be "http://sites.sharepoint.com/images/logo.gif"
                     $results.SuiteNavBrandingText | Should be "Suite Bar Text"
+                    $result.SuiteBarBrandingElementHtml | Should be "<div>Test</div>"
                 }
 
                 It "Should properly configure the suite bar for the Web Application" {
@@ -192,7 +217,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                         SuiteNavBrandingLogoTitle = "LogoTitle"
                         SuiteNavBrandingLogoUrl = "http://sites.sharepoint.com/images/logo.gif"
                         SuiteNavBrandingText = "Suite Bar Text"
-                        SuiteBarBrandingElementHtml = $null
+                        SuiteBarBrandingElementHtml = "<div>Test</div>"
                     }
                     $webApp = $webApp | Add-Member -MemberType ScriptMethod -Name Update -Value {
                         $Global:SPDscWebApplicationUpdateCalled = $true
