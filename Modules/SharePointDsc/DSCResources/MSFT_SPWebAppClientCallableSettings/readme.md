@@ -19,6 +19,14 @@ administration site collection. This can be done using the SPSite
 resource setting the AdministrationSiteType to TenantAdministration.
 Use this site collection when creating a client side connection.
 
+More information about the tenant can be found in a [blog
+post]
+(https://blogs.msdn.microsoft.com/vesku/2015/12/04/sharepoint-tenant-csom-object-support-in-sharepoint-2013-and-2016/)
+by Vesa Juvonen. In another [blog post]
+(https://blogs.msdn.microsoft.com/vesku/2014/06/09/provisioning-site-collections-using-sp-app-model-in-on-premises-with-just-csom/)
+he goes into more details of
+the setup and architecture, and includes sample code for how to use.
+
 NOTE:
 Proxy library used for enabling tenant administration:
 
@@ -31,3 +39,7 @@ Microsoft.Online.SharePoint.Dedicated.TenantAdmin.ServerStub
 , Version=16.0.0.0, Culture=neutral, PublicKeyToken=71e9bce111e9429c
 
 In both version set the SupportAppAuthentication property to true.
+
+NOTE2:
+An IIS reset needs to be performed on all servers in the farm after
+modifying the registered proxy libraries.
