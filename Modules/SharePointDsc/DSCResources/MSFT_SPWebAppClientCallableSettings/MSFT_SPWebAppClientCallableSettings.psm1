@@ -268,7 +268,7 @@ function Set-TargetResource
             }
         }
 
-        if ($params.ContainsKey("ProxyLibrariesToInclude") -eq $true -and $params.ProxyLibrariesToInclude.Count -gt 0)
+        if ($params.ContainsKey("ProxyLibrariesToInclude") -eq $true)
         {
             foreach($desiredProxyLibrary in $params.ProxyLibrariesToInclude)
             {
