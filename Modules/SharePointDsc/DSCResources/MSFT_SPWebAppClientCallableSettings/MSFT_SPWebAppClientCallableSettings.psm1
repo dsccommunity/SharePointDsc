@@ -79,6 +79,7 @@ function Get-TargetResource
         $webApplication = Get-SPWebApplication -Identity $params.Url -ErrorAction SilentlyContinue
         if ($null -eq $webApplication)
         {
+            Write-Verbose "Web application $($params.Url) was not found"
             return @{
                 Url = $null
                 ProxyLibraries = $null
@@ -212,8 +213,8 @@ function Set-TargetResource
     }
 
     Invoke-SPDSCCommand -Credential $InstallAccount `
-                                  -Arguments @($PSBoundParameters) `
-                                  -ScriptBlock {
+                        -Arguments @($PSBoundParameters) `
+                        -ScriptBlock {
         $params = $args[0]
 
         $webApplication = Get-SPWebApplication -Identity $params.Url -ErrorAction SilentlyContinue
@@ -251,7 +252,7 @@ function Set-TargetResource
                 }
             }
 
-            $proxyLibrariesToRemove = {}.Invoke()
+            [System.Collections.ObjectModel.Collection[System.Object]]$proxyLibrariesToRemove = @{}
             foreach($currentProxyLibrary in $clientCallableSettings.ProxyLibraries)
             {
                 if ($params.ProxyLibraries.Count -eq 0 -or (-not ($params.ProxyLibraries.AssemblyName -contains $currentProxyLibrary.AssemblyName)))
@@ -573,56 +574,18 @@ function Test-TargetResource
         }
     }
 
-    $valuesToCheck = {"Url"}.Invoke()
-
-    if($PSBoundParameters.ContainsKey("MaxResourcesPerRequest") -eq $true)
-    {
-        $valuesToCheck.Add("MaxResourcesPerRequest")
-    }
-
-    if($PSBoundParameters.ContainsKey("MaxObjectPaths") -eq $true)
-    {
-        $valuesToCheck.Add("MaxObjectPaths")
-    }
-
-    if($PSBoundParameters.ContainsKey("ExecutionTimeout") -eq $true)
-    {
-        $valuesToCheck.Add("ExecutionTimeout")
-    }
-
-    if($PSBoundParameters.ContainsKey("RequestXmlMaxDepth") -eq $true)
-    {
-        $valuesToCheck.Add("RequestXmlMaxDepth")
-    }
-
-    if($PSBoundParameters.ContainsKey("EnableXsdValidation") -eq $true)
-    {
-        $valuesToCheck.Add("EnableXsdValidation")
-    }
-
-    if($PSBoundParameters.ContainsKey("EnableStackTrace") -eq $true)
-    {
-        $valuesToCheck.Add("EnableStackTrace")
-    }
-
-    if($PSBoundParameters.ContainsKey("RequestUsageExecutionTimeThreshold") -eq $true)
-    {
-        $valuesToCheck.Add("RequestUsageExecutionTimeThreshold")
-    }
-
-    if($PSBoundParameters.ContainsKey("EnableRequestUsage") -eq $true)
-    {
-        $valuesToCheck.Add("EnableRequestUsage")
-    }
-
-    if($PSBoundParameters.ContainsKey("LogActionsIfHasRequestException") -eq $true)
-    {
-        $valuesToCheck.Add("LogActionsIfHasRequestException")
-    }
-
     return Test-SPDscParameterState -CurrentValues $currentValues `
                                     -DesiredValues $PSBoundParameters `
-                                    -ValuesToCheck $valuesToCheck
+                                    -ValuesToCheck @("Url",
+                                                    "MaxResourcesPerRequest",
+                                                    "MaxObjectPaths",
+                                                    "ExecutionTimeout",
+                                                    "RequestXmlMaxDepth",
+                                                    "EnableXsdValidation",
+                                                    "EnableStackTrace",
+                                                    "RequestUsageExecutionTimeThreshold",
+                                                    "LogActionsIfHasRequestException",
+                                                    "EnableRequestUsage")
 }
 
 Export-ModuleMember -Function *-TargetResource
