@@ -433,25 +433,13 @@ function Test-TargetResource
         }
     }
 
-    if ($null -eq $AdministrationSiteType)
-    {
-        return Test-SPDscParameterState -CurrentValues $CurrentValues `
-                                        -DesiredValues $PSBoundParameters `
-                                        -ValuesToCheck @("Url",
-                                                         "QuotaTemplate",
-                                                         "OwnerAlias",
-                                                         "SecondaryOwnerAlias")
-    }
-    else
-    {
-        return Test-SPDscParameterState -CurrentValues $CurrentValues `
-                                        -DesiredValues $PSBoundParameters `
-                                        -ValuesToCheck @("Url",
-                                                         "QuotaTemplate",
-                                                         "OwnerAlias",
-                                                         "SecondaryOwnerAlias",
-                                                         "TenantAdministration")
-    }
+    return Test-SPDscParameterState -CurrentValues $CurrentValues `
+                                    -DesiredValues $PSBoundParameters `
+                                    -ValuesToCheck @("Url",
+                                                        "QuotaTemplate",
+                                                        "OwnerAlias",
+                                                        "SecondaryOwnerAlias",
+                                                        "TenantAdministration")
 }
 
 Export-ModuleMember -Function *-TargetResource
