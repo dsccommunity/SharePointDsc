@@ -1,5 +1,3 @@
-Set-StrictMode -Version 2
-
 function Get-TargetResource
 {
     [CmdletBinding()]
