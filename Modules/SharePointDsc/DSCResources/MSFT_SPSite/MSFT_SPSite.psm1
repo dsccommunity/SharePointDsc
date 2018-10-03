@@ -61,6 +61,11 @@ function Get-TargetResource
         $CreateDefaultGroups = $true,
 
         [Parameter()]
+        [ValidateSet("TenantAdministration", "None")]
+        [System.String]
+        $AdministrationSiteType,
+
+        [Parameter()]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
@@ -164,6 +169,7 @@ function Get-TargetResource
                 SecondaryOwnerAlias = $secondaryOwner
                 Template = "$($site.RootWeb.WebTemplate)#$($site.RootWeb.Configuration)"
                 CreateDefaultGroups = $CreateDefaultGroups
+                AdministrationSiteType = $site.AdministrationSiteType
                 InstallAccount = $params.InstallAccount
             }
         }
@@ -231,6 +237,11 @@ function Set-TargetResource
         [Parameter()]
         [System.Boolean]
         $CreateDefaultGroups = $true,
+
+        [Parameter()]
+        [ValidateSet("TenantAdministration","None")]
+        [System.String]
+        $AdministrationSiteType,
 
         [Parameter()]
         [System.Management.Automation.PSCredential]
@@ -302,6 +313,14 @@ function Set-TargetResource
                 if ($params.SecondaryOwnerAlias -ne $CurrentValues.SecondaryOwnerAlias)
                 {
                     $newParams.SecondaryOwnerAlias = $params.SecondaryOwnerAlias
+                }
+            }
+
+            if ($params.ContainsKey("AdministrationSiteType") -eq $true)
+            {
+                if ($params.AdministrationSiteType -ne $CurrentValues.AdministrationSiteType)
+                {
+                    $newParams.AdministrationSiteType = $params.AdministrationSiteType
                 }
             }
 
@@ -393,6 +412,11 @@ function Test-TargetResource
         $CreateDefaultGroups = $true,
 
         [Parameter()]
+        [ValidateSet("TenantAdministration","None")]
+        [System.String]
+        $AdministrationSiteType,
+
+        [Parameter()]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
@@ -412,9 +436,10 @@ function Test-TargetResource
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
                                     -DesiredValues $PSBoundParameters `
                                     -ValuesToCheck @("Url",
-                                                     "QuotaTemplate",
-                                                     "OwnerAlias",
-                                                     "SecondaryOwnerAlias")
+                                                        "QuotaTemplate",
+                                                        "OwnerAlias",
+                                                        "SecondaryOwnerAlias",
+                                                        "TenantAdministration")
 }
 
 Export-ModuleMember -Function *-TargetResource

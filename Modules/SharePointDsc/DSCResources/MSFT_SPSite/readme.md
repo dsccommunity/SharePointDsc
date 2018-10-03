@@ -21,3 +21,8 @@ resource in the xWebAdministration module.
 NOTE2:
 The CreateDefaultGroups parameter is only used for creating default site
 groups. It will not remove or change the default groups if they already exist.
+
+NOTE3:
+AdministrationSiteType is used in combination with the resource
+SPWebAppClientCallableSettings. The required proxy library must be configured
+before the administration site type has any effect.
