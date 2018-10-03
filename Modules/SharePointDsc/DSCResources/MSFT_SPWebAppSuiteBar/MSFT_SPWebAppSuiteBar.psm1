@@ -144,8 +144,8 @@ function Set-TargetResource
         {
             if($PSBoundParameters.ContainsKey("SuiteBarBrandingElementHtml"))
             {
-                Write-Verbose "SuiteBarBrandingElementHtml with SharePoint 2016 only works if using a " + `
-                                        "SharePoint 2016 masterpage"
+                Write-Verbose ("SuiteBarBrandingElementHtml with SharePoint 2016 only works if using a " + `
+                                        "SharePoint 2016 masterpage")
             }
 
             <# Exception: All the optional parameters are null for SP2016. #>
@@ -156,7 +156,7 @@ function Set-TargetResource
             -and !$PSBoundParameters.ContainsKey("SuiteBarBrandingElementHtml"))
             {
                 throw ("You need to specify a value for either SuiteNavBrandingLogoNavigationUrl, " + `
-                                        "SuiteNavBrandingLogoTitle, SuiteNavBrandingLogoUrl, SuiteNavBrandingTextm, " + `
+                                        "SuiteNavBrandingLogoTitle, SuiteNavBrandingLogoUrl, SuiteNavBrandingText, " + `
                                         "and SuiteBarBrandingElementHtml with SharePoint 2016")
             }
         }
