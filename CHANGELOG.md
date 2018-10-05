@@ -2,14 +2,98 @@
 
 ## Unreleased
 
-* SPDistributedCacheClientSettings
-  * Added the new resource
+* SPDatabaseAAG
+  * Updated readme.md to specify that this resource also updates the database
+    connection string
+* SPDiagnosticsProvider
+  * Fixed issue where enabling providers did not work
+* SPLogLevel
+  * Added High as TraceLevel, which was not included yet
+* SPSearchServiceApp
+  * Updated Set method to check if service application pool exists. Resource
+    will throw an error if it does not exist
+* SPRemoteFarmTrust
+  * Updated readme.md file to add a link that was lost during earlier updates
+* SPSearchTopology
+  * Fixed issue where Get method threw an error when the specified service
+    application didn't exist yet
+  * Fixed issue where the resource would fail is the FQDN was specified
+* SPTrustedIdentityTokenIssuerProviderRealm
+  * Fixed issue where Get method threw an error when the realm didn't exist yet
+
+## 2.4
+
+* SPCacheAccounts
+  * Fixed issue where the Test method would fail if SetWebAppPolicy was set to
+    false.
+* SPDistributedCacheService
+  * Updated resource to allow updating the cache size
+* SPFarm
+  * Implemented ability to deploy Central Administration site to a server at a
+    later point in time
+* SPInfoPathFormsServiceConfig
+  * Fixed issue with trying to set the MaxSizeOfUserFormState parameter
+* SPProductUpdate
+  * Fixed an issue where the resource failed when the search was already paused
+* SPProjectServerLicense
+  * Fixed issue with incorrect detection of the license
+* SPSearchContentSource
+  * Fixed issue where the Get method returned a conversion error when the content
+    source contained just one address
+  * Fixed issue 840 where the parameter StartHour was never taken into account
+* SPSearchServiceApp
+  * Fixed issue where the service account was not set correctly when the service
+    application was first created
+  * Fixed issue where the Get method throws an error when the service app wasn't
+    created properly
+* SPSearchTopology
+  * Fixed issue where Get method threw an error when the specified service
+    application didn't exist yet.
+* SPServiceAppSecurity
+  * Fixed issue where error was thrown when no permissions were set on the
+    service application
+* SPShellAdmins
+  * Updated documentation to specify required permissions for successfully using
+    this resource
+* SPTrustedIdentityTokenIssuerProviderRealms
+  * Fixed code styling issues
+* SPUserProfileServiceApp
+  * Fixed code styling issues
+
+## 2.3
+
+* Changes to SharePointDsc
+  * Added a Branches section to the README.md with Codecov and build badges for
+    both master and dev branch.
+* All Resources
+  * Added information about the Resource Type in each ReadMe.md files.
+* SPFarm
+  * Fixed issue where the resource throws an exception if the farm already
+    exists and the server has been joined using the FQDN (issue 795)
+* SPTimerJobState
+  * Fixed issue where the Set method for timerjobs deployed to multiple web
+    applications failed.
+* SPTrustedIdentityTokenIssuerProviderRealms
+  * Added the resource.
+* SPUserProfileServiceApp
+  * Now supported specifying the host Managed path, and properly sets the host.
+  * Changed error for running with Farm Account into being a warning
+* SPUserProfileSyncConnection
+  * Added support for filtering disabled users
+  * Fixed issue where UseSSL was set to true resulted in an error
+  * Fixed issue where the connection was recreated when the name contained a
+    dot (SP2016)
+
+## 2.2
+
 * SPAlternateURL
   * If resource specifies Central Admin webapp and Default Zone, the existing
-    AAM will be updated instead of adding a new one
+    AAM will be updated instead of adding a new one.
 * SPContentDatabase
   * Fixed issue where mounting a content database which had to be upgraded
     resulted in a reboot.
+* SPDistributedCacheClientSettings
+  * Added the new resource
 * SPFarmAdministrators
   * Fixed issue where member comparisons was case sensitive. This had
     to be case insensitive.

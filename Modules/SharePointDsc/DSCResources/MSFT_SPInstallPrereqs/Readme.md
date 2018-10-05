@@ -1,5 +1,7 @@
 # Description
 
+**Type:** Common
+
 This resource is responsible for ensuring the installation of all SharePoint
 prerequisites. It makes use of the PrerequisiteInstaller.exe file that is part
 of the SharePoint binaries, and will install the required Windows features as

@@ -12,7 +12,7 @@
 # RootModule = ''
 
 # Version number of this module.
-ModuleVersion = '2.1.0.0'
+ModuleVersion = '2.4.0.0'
 
 # ID used to uniquely identify this module
 GUID = '6c1176a0-4fac-4134-8ca2-3fa8a21a7b90'
@@ -128,53 +128,43 @@ PrivateData = @{
 
         # ReleaseNotes of this module
         ReleaseNotes = "
-      * General
-        * Updated the integration tests for building the Azure environment
-          * Works in any Azure environment.
-          * Updated the SqlServer configuration to use SqlServerDsc version 10.0.0.0.
-      * SPAlternateURL
-        * Added the ability to manage the Central Administration AAMs
-      * SPDiagnosticsProvider
-        * Added the resource
+      * SPCacheAccounts
+        * Fixed issue where the Test method would fail if SetWebAppPolicy was set to
+          false.
+      * SPDistributedCacheService
+        * Updated resource to allow updating the cache size
       * SPFarm
-        * Corrected issue where ServerRole parameter is returned in SP2013
+        * Implemented ability to deploy Central Administration site to a server at a
+          later point in time
       * SPInfoPathFormsServiceConfig
-        * Added the resource
-      * SPInstallPrereqs
-        * Fixed two typos in to be installed Windows features for SharePoint 2016
-      * SPSearchAutoritativePage
-        * Added missing readme.md
-      * SPSearchCrawlerImpactRule
-        * Fixed issue where an error was thrown when retrieving Crawl Impact rules
-        * Added missing readme.md
-      * SPSearchCrawlMapping
-        * Added missing readme.md
-      * SPSecureStoreServiceApp
-        * Fixed issue in Get-TargetResource to return AuditingEnabled property
-      * SPSecurityTokenServiceConfig
-        * Added the resource
-      * SPServiceIdentity
-        * Fixed issue with correctly retrieving the process identity for the
-          Search instance
-        * Added support for LocalSystem, LocalService and NetworkService
-      * SPUserProfileProperty
-        * Fixed issues with the User Profile properties for 2016
-      * SPUserProfileServiceAppPermissions
-        * Removed the mandatory requirement from secondary parameters
-      * SPUserProfileSyncConnection
-        * Fixed issues with the User Profile Sync connection for SharePoint
-          2016
-      * SPUserProfileSyncService
-        * Added returning the FarmAccount to the Get method
-      * SPWebAppAuthentication
-        * Corrected issue where parameter validation wasn't performed correctly
-      * SPWebApplicationExtension
-        * Fixed issue with test always failing when Ensure was set to Absent
-      * SPWorkManagementServiceApp
-        * Added check for SharePoint 2016, since this functionality has been
-          removed in SharePoint 2016
-"
-
+        * Fixed issue with trying to set the MaxSizeOfUserFormState parameter
+      * SPProductUpdate
+        * Fixed an issue where the resource failed when the search was already paused
+      * SPProjectServerLicense
+        * Fixed issue with incorrect detection of the license
+      * SPSearchContentSource
+        * Fixed issue where the Get method returned a conversion error when the content
+          source contained just one address
+        * Fixed issue 840 where the parameter StartHour was never taken into account
+      * SPSearchServiceApp
+        * Fixed issue where the service account was not set correctly when the service
+          application was first created
+        * Fixed issue where the Get method throws an error when the service app wasn't
+          created properly
+      * SPSearchTopology
+        * Fixed issue where Get method threw an error when the specified service
+          application didn't exist yet.
+      * SPServiceAppSecurity
+        * Fixed issue where error was thrown when no permissions were set on the
+          service application
+      * SPShellAdmins
+        * Updated documentation to specify required permissions for successfully using
+          this resource
+      * SPTrustedIdentityTokenIssuerProviderRealms
+        * Fixed code styling issues
+      * SPUserProfileServiceApp
+        * Fixed code styling issues
+      "
     } # End of PSData hashtable
 
 } # End of PrivateData hashtable
