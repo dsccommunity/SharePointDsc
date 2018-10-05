@@ -1,5 +1,7 @@
 # Description
 
+**Type:** Distributed
+
 This resource is used to specify a managed account to be used to run a service instance.
 You can also specify LocalService, LocalSystem or NetworkService as ManagedAccount.
 The name is the typename of the service as shown in the Central Admin website.

@@ -1,5 +1,7 @@
 # Description
 
+**Type:** Distributed
+
 This resource is used to manage the sharing security settings of a specific
 service application. There are a number of approaches to how this can be
 implemented. Firstly you can set permissions for the app administrators, or
@@ -12,3 +14,7 @@ and all others that are members and who are not in this list will be removed.
 The "MembersToInclude" and "MembersToExclude" properties will allow you to
 control a specific set of users to add or remove, without changing any other
 members that are in the group already that may not be specified here, allowing
+
+NOTE:
+In order to specify Local Farm you can use the token "\{LocalFarm\}"
+as the username. The token is case sensitive.

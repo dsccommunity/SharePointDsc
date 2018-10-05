@@ -1,5 +1,7 @@
 # Description
 
+**Type:** Distributed
+
 This resource is responsible for managing the search crawl mapping in the
 search service application. You can create new mappings, change existing mappings
 and remove existing mappings.

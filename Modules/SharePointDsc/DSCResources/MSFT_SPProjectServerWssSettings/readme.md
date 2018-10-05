@@ -1,5 +1,7 @@
 # Description
 
+**Type:** Distributed
+
 This resource is used to control settings that relate to the SharePoint sites
 that are linked to projects in Project Server.
 

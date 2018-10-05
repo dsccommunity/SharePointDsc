@@ -1,5 +1,7 @@
 # Description
 
+**Type:** Distributed
+
 This resource is used to provision and manage an instance of the Business
 Connectivity Services Service Application. It will identify an instance
 of the BCS app through the application display name. Currently the resource

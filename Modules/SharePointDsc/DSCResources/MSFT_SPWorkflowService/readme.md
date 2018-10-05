@@ -1,5 +1,7 @@
 # Description
 
+**Type:** Distributed
+
 This resource is used to register the SharePoint Server
 against a Workflow Manager Instance.
 

@@ -1,7 +1,5 @@
 # SharePointDsc
 
-Build status: [![Build status](https://ci.appveyor.com/api/projects/status/aj6ce04iy5j4qcd4/branch/master?svg=true)](https://ci.appveyor.com/project/PowerShell/xsharepoint/branch/master)
-
 Discuss SharePointDsc now: [![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/PowerShell/xSharePoint?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 
 The SharePointDsc PowerShell module (formerly known as xSharePoint) provides
@@ -22,6 +20,26 @@ This project has adopted the [Microsoft Open Source Code of Conduct](https://ope
 For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/)
 or contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any
 additional questions or comments.
+
+## Branches
+
+### master
+
+[![Build status](https://ci.appveyor.com/api/projects/status/aj6ce04iy5j4qcd4/branch/master?svg=true)](https://ci.appveyor.com/project/PowerShell/SharePointDsc/branch/master)
+[![codecov](https://codecov.io/gh/PowerShell/SharePointDsc/branch/master/graph/badge.svg)](https://codecov.io/gh/PowerShell/SharePointDsc/branch/master)
+
+This is the branch containing the latest release -
+no contributions should be made directly to this branch.
+
+### dev
+
+[![Build status](https://ci.appveyor.com/api/projects/status/aj6ce04iy5j4qcd4/branch/dev?svg=true)](https://ci.appveyor.com/project/PowerShell/SharePointDsc/branch/dev)
+[![codecov](https://codecov.io/gh/PowerShell/SharePointDsc/branch/dev/graph/badge.svg)](https://codecov.io/gh/PowerShell/SharePointDsc/branch/dev)
+
+This is the development branch
+to which contributions should be proposed by contributors as pull requests.
+This development branch will periodically be merged to the master branch,
+and be released to [PowerShell Gallery](https://www.powershellgallery.com/).
 
 ## Installation
 

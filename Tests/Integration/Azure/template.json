@@ -70,16 +70,17 @@
         }
     },
     "variables": {
+        "vmPrefix": "VM",
         "networkName": "[concat(resourceGroup().Name, '-network')]",
         "dcNicName": "[concat(resourceGroup().Name, '-dc-nic')]",
-        "dcVmName": "[concat(resourceGroup().Name, '-dc')]",
+        "dcVmName": "[concat(variables('vmPrefix'), '-dc')]",
         "dcDisk1Name": "[concat(resourceGroup().Name, '-dc-disk-c')]",
         "sqlNicName": "[concat(resourceGroup().Name, '-sql-nic')]",
-        "sqlVmName": "[concat(resourceGroup().Name, '-sql')]",
+        "sqlVmName": "[concat(variables('vmPrefix'), '-sql')]",
         "sqlDisk1Name": "[concat(resourceGroup().Name, '-sql-disk-c')]",
         "spIpAddressName": "[concat(resourceGroup().Name, '-sp-ip')]",
         "spNicName": "[concat(resourceGroup().Name, '-sp-nic')]",
-        "spVmName": "[concat(resourceGroup().Name, '-sp')]",
+        "spVmName": "[concat(variables('vmPrefix'), '-sp')]",
         "spDisk1Name": "[concat(resourceGroup().Name, '-sp-disk-c')]"
     },
     "resources": [

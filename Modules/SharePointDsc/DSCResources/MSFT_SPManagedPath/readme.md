@@ -1,5 +1,7 @@
 # Description
 
+**Type:** Distributed
+
 This resource is responsible for creating managed paths associated with a
 specific web application. The WebAppUrl parameter is used to specify the web
 application to create the path against, and the RelativeUrl parameter lets you
