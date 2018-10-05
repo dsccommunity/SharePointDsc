@@ -9,6 +9,9 @@
   * Fixed issue where enabling providers did not work
 * SPLogLevel
   * Added High as TraceLevel, which was not included yet
+* SPManagedMetadataServiceApp
+  * Added additional content type settings (ContentTypePushdownEnabled &
+    ContentTypeSyndicationEnabled).
 * SPSearchServiceApp
   * Updated Set method to check if service application pool exists. Resource
     will throw an error if it does not exist
