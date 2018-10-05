@@ -1,4 +1,3 @@
-
 function Get-TargetResource
 {
     [CmdletBinding()]
@@ -56,7 +55,7 @@ function Get-TargetResource
     if ($null -ne $zone)
     {
         throw ("Setup file is blocked! Please use Unblock-File to unblock the file " + `
-            "before continuing.")
+                "before continuing.")
     }
 
     $nullVersion = New-Object -TypeName System.Version
@@ -66,23 +65,19 @@ function Get-TargetResource
     Write-Verbose -Message "Update has version $fileVersion"
 
     $fileVersionInfo = New-Object -TypeName System.Version -ArgumentList $fileVersion
-    switch ($fileVersionInfo.Major)
+    if ($fileVersionInfo.Major -eq 15)
     {
-        15
-        {
-            $sharePointVersion = 2013
-        }
-        16
+        $sharePointVersion = 2013
+    }
+    else
+    {
+        if ($fileVersionInfo.Build.ToString().Length -eq 4)
         {
             $sharePointVersion = 2016
-            if($fileVersionInfo.Minor.length -eq 5)
-            {
-                $sharePointVersion = 2019
-            }
         }
-        default
+        else
         {
-            $sharePointVersion = 2013
+            $sharePointVersion = 2019
         }
     }
 
@@ -221,7 +216,7 @@ function Set-TargetResource
         $ShutdownServices,
 
         [Parameter()]
-        [ValidateSet("mon","tue","wed","thu","fri","sat","sun")]
+        [ValidateSet("mon", "tue", "wed", "thu", "fri", "sat", "sun")]
         [System.String[]]
         $BinaryInstallDays,
 
@@ -230,7 +225,7 @@ function Set-TargetResource
         $BinaryInstallTime,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present",
 
@@ -259,24 +254,24 @@ function Set-TargetResource
     if ($null -ne $zone)
     {
         throw ("Setup file is blocked! Please use Unblock-File to unblock the file " + `
-               "before continuing.")
+                "before continuing.")
     }
 
     $now = Get-Date
     if ($BinaryInstallDays)
     {
         # BinaryInstallDays parameter exists, check if current day is specified
-        $currentDayOfWeek = $now.DayOfWeek.ToString().ToLower().Substring(0,3)
+        $currentDayOfWeek = $now.DayOfWeek.ToString().ToLower().Substring(0, 3)
 
         if ($BinaryInstallDays -contains $currentDayOfWeek)
         {
             Write-Verbose -Message ("Current day is present in the parameter BinaryInstallDays. " + `
-                                    "Update can be run today.")
+                    "Update can be run today.")
         }
         else
         {
             Write-Verbose -Message ("Current day is not present in the parameter BinaryInstallDays, " + `
-                                    "skipping the update")
+                    "skipping the update")
             return
         }
     }
@@ -299,12 +294,12 @@ function Set-TargetResource
         }
         else
         {
-            if ([datetime]::TryParse($upgradeTimes[0],[ref]$starttime) -ne $true)
+            if ([datetime]::TryParse($upgradeTimes[0], [ref]$starttime) -ne $true)
             {
                 throw "Error converting start time"
             }
 
-            if ([datetime]::TryParse($upgradeTimes[2],[ref]$endtime) -ne $true)
+            if ([datetime]::TryParse($upgradeTimes[2], [ref]$endtime) -ne $true)
             {
                 throw "Error converting end time"
             }
@@ -318,43 +313,19 @@ function Set-TargetResource
         if (($starttime -lt $now) -and ($endtime -gt $now))
         {
             Write-Verbose -Message ("Current time is inside of the window specified in " + `
-                                    "BinaryInstallTime. Starting update")
+                    "BinaryInstallTime. Starting update")
         }
         else
         {
             Write-Verbose -Message ("Current time is outside of the window specified in " + `
-                                    "BinaryInstallTime, skipping the update")
+                    "BinaryInstallTime, skipping the update")
             return
         }
     }
     else
     {
         Write-Verbose -Message ("No BinaryInstallTime specified, Update can be ran at " + `
-                                "any time. Starting update.")
-    }
-
-    # To prevent an endless loop: Check if an upgrade is required.
-    $installedVersion = Get-SPDSCInstalledProductVersion
-    if ($spVersion.FileMajorPart -eq 15)
-    {
-        $wssRegKey ="HKLM:SOFTWARE\Microsoft\Shared Tools\Web Server Extensions\15.0\WSS"
-    }
-    else
-    {
-        $wssRegKey ="HKLM:SOFTWARE\Microsoft\Shared Tools\Web Server Extensions\16.0\WSS"
-    }
-
-    # Read LanguagePackInstalled and SetupType registry keys
-    $languagePackInstalled = Get-SPDSCRegistryKey -Key $wssRegKey -Value "LanguagePackInstalled"
-    $setupType = Get-SPDSCRegistryKey -Key $wssRegKey -Value "SetupType"
-
-    # Determine if LanguagePackInstalled=1 or SetupType=B2B_Upgrade.
-    # If so, the Config Wizard is required, so the installation will be skipped.
-    if (($languagePackInstalled -eq 1) -or ($setupType -eq "B2B_UPGRADE"))
-    {
-        Write-Verbose -Message ("An upgrade is pending. " + `
-                                "To prevent a possible loop, the install will be skipped")
-        return
+                "any time. Starting update.")
     }
 
     if ($ShutdownServices)
@@ -374,11 +345,11 @@ function Set-TargetResource
             $searchServiceName = "OSearch16"
         }
 
-        $osearchSvc        = Get-Service -Name $searchServiceName
+        $osearchSvc = Get-Service -Name $searchServiceName
         $hostControllerSvc = Get-Service -Name "SPSearchHostController"
 
         $result = Invoke-SPDSCCommand -Credential $InstallAccount `
-                                      -ScriptBlock {
+            -ScriptBlock {
             $searchSAs = Get-SPEnterpriseSearchServiceApplication
             foreach ($searchSA in $searchSAs)
             {
@@ -390,27 +361,27 @@ function Set-TargetResource
         }
         $searchPaused = $true
 
-        if($osearchSvc.Status -eq "Running")
+        if ($osearchSvc.Status -eq "Running")
         {
             $osearchStopped = $true
             Set-Service -Name $searchServiceName -StartupType Disabled
             $osearchSvc.Stop()
         }
 
-        if($hostControllerSvc.Status -eq "Running")
+        if ($hostControllerSvc.Status -eq "Running")
         {
             $hostControllerStopped = $true
             Set-Service "SPSearchHostController" -StartupType Disabled
             $hostControllerSvc.Stop()
         }
 
-        $hostControllerSvc.WaitForStatus('Stopped','00:01:00')
+        $hostControllerSvc.WaitForStatus('Stopped', '00:01:00')
 
         Write-Verbose -Message "Search Services are stopped"
 
         Write-Verbose -Message "Stopping other services"
 
-        if($InstalledVersion.FileMajorPart -eq 15 -or $installedVersion.ProductBuildPart.ToString().Length -eq 4)
+        if ($InstalledVersion.FileMajorPart -eq 15 -or $installedVersion.ProductBuildPart.ToString().Length -eq 4)
         {
             Write-Verbose -Message "SharePoint 2013 or 2016 used, reconfiguring IISAdmin service to Disabled startup."
             Set-Service -Name "IISADMIN" -StartupType Disabled
@@ -418,12 +389,12 @@ function Set-TargetResource
         Set-Service -Name "SPTimerV4" -StartupType Disabled
 
         $iisreset = Start-Process -FilePath "iisreset.exe" `
-                                  -ArgumentList "-stop -noforce" `
-                                  -Wait `
-                                  -PassThru
+            -ArgumentList "-stop -noforce" `
+            -Wait `
+            -PassThru
 
         $timerSvc = Get-Service -Name "SPTimerV4"
-        if($timerSvc.Status -eq "Running")
+        if ($timerSvc.Status -eq "Running")
         {
             $timerSvc.Stop()
         }
@@ -432,14 +403,14 @@ function Set-TargetResource
     Write-Verbose -Message "Beginning installation of the SharePoint update"
 
     $result = Invoke-SPDSCCommand -Credential $InstallAccount `
-                                  -Arguments $SetupFile `
-                                  -ScriptBlock {
+        -Arguments $SetupFile `
+        -ScriptBlock {
         $setupFile = $args[0]
 
         $setup = Start-Process -FilePath $setupFile `
-                               -ArgumentList "/quiet /passive" `
-                               -Wait `
-                               -PassThru
+            -ArgumentList "/quiet /passive" `
+            -Wait `
+            -PassThru
 
         # Error codes: https://aka.ms/installerrorcodes
         switch ($setup.ExitCode)
@@ -451,13 +422,18 @@ function Set-TargetResource
             17022
             {
                 Write-Verbose -Message ("SharePoint update binary installation complete, " + `
-                                        "however a reboot is required.")
+                        "however a reboot is required.")
                 $global:DSCMachineStatus = 1
+            }
+            17025
+            {
+                Write-Verbose -Message ("The SharePoint update was already installed on your system." + `
+                        "Please report an issue about this behaviour at https://github.com/PowerShell/SharePointDsc")
             }
             Default
             {
                 throw ("SharePoint update install failed, exit code was $($setup.ExitCode). " + `
-                       "Error codes can be found at https://aka.ms/installerrorcodes")
+                        "Error codes can be found at https://aka.ms/installerrorcodes")
             }
         }
     }
@@ -467,7 +443,7 @@ function Set-TargetResource
         Write-Verbose -Message "Restart stopped services"
         Set-Service -Name "SPTimerV4" -StartupType Automatic
 
-        if($InstalledVersion.FileMajorPart -eq 15 -or $installedVersion.ProductBuildPart.ToString().Length -eq 4)
+        if ($InstalledVersion.FileMajorPart -eq 15 -or $installedVersion.ProductBuildPart.ToString().Length -eq 4)
         {
             Write-Verbose -Message "SharePoint 2013 or 2016 used, reconfiguring IISAdmin service to Automatic startup."
             Set-Service -Name "IISADMIN" -StartupType Automatic
@@ -477,31 +453,31 @@ function Set-TargetResource
         $timerSvc.Start()
 
         $iisreset = Start-Process -FilePath "iisreset.exe" `
-                                  -ArgumentList "-start" `
-                                  -Wait `
-                                  -PassThru
+            -ArgumentList "-start" `
+            -Wait `
+            -PassThru
 
-        $osearchSvc        = Get-Service -Name $searchServiceName
+        $osearchSvc = Get-Service -Name $searchServiceName
         $hostControllerSvc = Get-Service -Name "SPSearchHostController"
 
         # Ensuring Search Services were stopped by script before Starting"
-        if($osearchStopped -eq $true)
+        if ($osearchStopped -eq $true)
         {
             Set-Service -Name $searchServiceName -StartupType Manual
             $osearchSvc.Start()
         }
 
-        if($hostControllerStopped -eq $true)
+        if ($hostControllerStopped -eq $true)
         {
             Set-Service "SPSearchHostController" -StartupType Automatic
             $hostControllerSvc.Start()
         }
 
-        if($searchPaused -eq $true)
+        if ($searchPaused -eq $true)
         {
             # Resuming Search Service Application if paused###
             $result = Invoke-SPDSCCommand -Credential $InstallAccount `
-                                        -ScriptBlock {
+                -ScriptBlock {
                 $searchSAs = Get-SPEnterpriseSearchServiceApplication
                 foreach ($searchSA in $searchSAs)
                 {
@@ -532,7 +508,7 @@ function Test-TargetResource
         $ShutdownServices,
 
         [Parameter()]
-        [ValidateSet("mon","tue","wed","thu","fri","sat","sun")]
+        [ValidateSet("mon", "tue", "wed", "thu", "fri", "sat", "sun")]
         [System.String[]]
         $BinaryInstallDays,
 
@@ -541,7 +517,7 @@ function Test-TargetResource
         $BinaryInstallTime,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present",
 
@@ -563,8 +539,8 @@ function Test-TargetResource
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
-                                    -DesiredValues $PSBoundParameters `
-                                    -ValuesToCheck @("Ensure")
+        -DesiredValues $PSBoundParameters `
+        -ValuesToCheck @("Ensure")
 }
 
 Export-ModuleMember -Function *-TargetResource

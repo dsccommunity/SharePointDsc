@@ -174,33 +174,46 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 }
                 else
                 {
-                    return @{
-                        VersionInfo = @{
-                            FileVersion     = $Global:SPDscHelper.CurrentStubBuildNumber
-                            FileDescription = "Cumulative Update"
+                    if ($Global:SPDscHelper.CurrentStubBuildNumber.Build.ToString().Length -eq 4)
+                    {
+                        return @{
+                            VersionInfo = @{
+                                FileVersion     = $Global:SPDscHelper.CurrentStubBuildNumber
+                                FileDescription = "Cumulative Update"
+                            }
+                            Name        = "serverlpksp2016-kb2880554-fullfile-x64-en-us.exe"
                         }
-                        Name        = "serverlpksp2016-kb2880554-fullfile-x64-en-us.exe"
+                    }
+                    else
+                    {
+                        return @{
+                            VersionInfo = @{
+                                FileVersion     = $Global:SPDscHelper.CurrentStubBuildNumber
+                                FileDescription = "Cumulative Update"
+                            }
+                            Name        = "serverlpksp2019-kb2880554-fullfile-x64-en-us.exe"
+                        }
                     }
                 }
             }
 
-            Mock -CommandName Get-SPDscFarmProductsInfo -MockWith {
-                if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 15)
-                {
-                    return @("Microsoft SharePoint Server 2013")
-                }
-                else
-                {
-                    if ($Global:SPDscHelper.CurrentStubBuildNumber.Minor.ToString().Length -le 4)
-                    {
-                        return @("Microsoft SharePoint Server 2016")
-                    }
-                    else
-                    {
-                        return @("Microsoft SharePoint Server 2019")
-                    }
-                }
-            }
+            # Mock -CommandName Get-SPDscFarmProductsInfo -MockWith {
+            #     if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 15)
+            #     {
+            #         return @("Microsoft SharePoint Server 2013")
+            #     }
+            #     else
+            #     {
+            #         if ($Global:SPDscHelper.CurrentStubBuildNumber.Minor.ToString().Length -le 4)
+            #         {
+            #             return @("Microsoft SharePoint Server 2016")
+            #         }
+            #         else
+            #         {
+            #             return @("Microsoft SharePoint Server 2019")
+            #         }
+            #     }
+            # }
 
             It "Should return Ensure is Present from the get method" {
                 $result = Get-TargetResource @testParams
