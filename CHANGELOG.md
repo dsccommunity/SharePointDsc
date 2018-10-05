@@ -25,15 +25,12 @@
   * Fixed issues that prevented the resource to work as expected in many situations.
 * SPWebAppPropertyBag
   * New resource to manage web application property bag
-<<<<<<< HEAD
 * SPWebAppClientCallableSettings
   * New resource to manage web application client callable settings including
     proxy libraries.
-=======
 * SPWebAppSuiteBar
   * Enable usage of SuiteBarBrandingElementHtml for SharePoint 2016
     (only supported if using a SharePoint 2013 masterpage)
->>>>>>> Enabled usage of SuiteBarBrandingElementHtml in SharePoiont 2016
 
 ## 2.5
 
