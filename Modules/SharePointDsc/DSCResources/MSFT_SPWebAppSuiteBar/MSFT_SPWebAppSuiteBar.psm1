@@ -243,9 +243,20 @@ function Test-TargetResource
         return $false
     }
 
-    return Test-SPDscParameterState -CurrentValues $CurrentValues `
-    -DesiredValues $PSBoundParameters `
-    -ValuesToCheck @("Ensure")
+    $installedVersion = Get-SPDSCInstalledProductVersion
+
+    if($installedVersion.FileMajorPart -eq 15)
+    {
+        return Test-SPDscParameterState -CurrentValues $CurrentValues `
+        -DesiredValues $PSBoundParameters `
+        -ValuesToCheck @("SuiteBarBrandingElementHtml");
+    }
+    else
+    {
+        return Test-SPDscParameterState -CurrentValues $CurrentValues `
+        -DesiredValues $PSBoundParameters `
+        -ValuesToCheck @("SuiteNavBrandingLogoNavigationUrl", "SuiteNavBrandingLogoTitle", "SuiteNavBrandingLogoUrl", "SuiteNavBrandingText")
+    }
 }
 
 Export-ModuleMember -Function *-TargetResource
