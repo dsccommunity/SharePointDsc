@@ -348,7 +348,7 @@ function Set-TargetResource
             Write-Verbose -Message ("Creating default groups")
 
             $centralAdminWebApp = [Microsoft.SharePoint.Administration.SPAdministrationWebApplication]::Local
-            $centralAdminSite = $centralAdminWebApp.Sites[0]
+            $centralAdminSite = Get-SPSite -Identity $centralAdminWebApp.Url
 
             $systemAccountSite = New-Object "Microsoft.SharePoint.SPSite" -ArgumentList @($site.Id, $centralAdminSite.SystemAccount.UserToken)
             $systemAccountSite.RootWeb.CreateDefaultAssociatedGroups($params.OwnerAlias,

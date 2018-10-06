@@ -18,7 +18,77 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
     InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
         Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
+        # Initialize tests
+        try
+        {
+            [Microsoft.SharePoint.Administration.SPAdministrationWebApplication]
+        }
+        catch
+        {
+            Add-Type -TypeDefinition @"
+namespace Microsoft.SharePoint.Administration {
+    public class SPAdministrationWebApplication {
+        public SPAdministrationWebApplication()
+        {
+        }
+        public static System.Object Local { get; set;}
+    }
+}
+"@
+        }
+
         # Mocks for all contexts
+        $siteImplementation =
+        {
+            $rootWeb = @{
+                AssociatedVisitorGroup = $null
+                AssociatedMemberGroup   = $null
+                AssociatedOwnerGroup   = $null
+                CreateDefaultAssociatedGroupsCalled = $false
+            }
+            $rootWeb | Add-Member -MemberType ScriptMethod `
+                                    -Name CreateDefaultAssociatedGroups `
+                                    -Value {
+                                        $this.CreateDefaultAssociatedGroupsCalled = $true
+                                    }
+
+            $site = @{
+                HostHeaderIsSiteName = $false
+                WebApplication = @{
+                    Url = "https://site.contoso.com"
+                    UseClaimsAuthentication = $true
+                }
+                Url = "https://site.contoso.com"
+                Owner = @{ UserLogin = "DEMO\owner" }
+                Quota = @{ QuotaId = 65000 }
+                RootWeb = $rootWeb
+            }
+            return $site
+        }
+
+        [Microsoft.SharePoint.Administration.SPAdministrationWebApplication]::Local = @{ Url = "https://CentralAdmin.contoso.com" }
+
+        Mock -CommandName Get-SPSite -MockWith {
+            return @{
+                Id = 1
+                SystemAccount = @{
+                    UserToken = "SystemAccountUserToken"
+                }
+            }
+        } -ParameterFilter {
+            $Identity -eq "https://CentralAdmin.contoso.com"
+        }
+
+        Mock -CommandName New-Object -MockWith {
+            $site = $siteImplementation.InvokeReturnAsIs()
+            $Script:SPDscSystemAccountSite = $site
+            return $site;
+        } -ParameterFilter {
+            $TypeName -eq "Microsoft.SharePoint.SPSite"
+            $ArgumentList[0] -eq 1
+            $ArgumentList[1] -eq "SystemAccountUserToken"
+        }
+
         Mock -CommandName New-SPSite -MockWith {
             $rootWeb = @{}
             $rootWeb = $rootWeb | Add-Member -MemberType ScriptMethod `
@@ -201,28 +271,14 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             Mock -CommandName Get-SPSite -MockWith {
-                $rootWeb = @{
-                    AssociatedVisitorGroup = $null
-                    AssociatedMemberGroup   = $null
-                    AssociatedOwnerGroup   = $null
-                }
-                $rootWeb = $rootWeb | Add-Member -MemberType ScriptMethod `
-                                        -Name CreateDefaultAssociatedGroups `
-                                        -Value {
-                                            $Global:SPDscGroupsUpdated = $true
-                                        } -PassThru
-                $returnval = @{
-                    HostHeaderIsSiteName = $false
-                    WebApplication = @{
-                        Url = $testParams.Url
-                        UseClaimsAuthentication = $true
-                    }
-                    Url = $testParams.Url
-                    Owner = @{ UserLogin = "DEMO\owner" }
-                    Quota = @{ QuotaId = 65000 }
-                    RootWeb = $rootWeb
-                }
-                return $returnval
+                $site = $siteImplementation.InvokeReturnAsIs()
+                $site.RootWeb.AssociatedMemberGroup = $null
+                $site.RootWeb.AssociatedMemberGroup = $null
+                $site.RootWeb.AssociatedOwnerGroup = $null
+
+                $site.WebApplication.Url = $testParams.Url
+                $site.Url = $testParams.Url
+                return $site
             }
 
             Mock -CommandName New-SPClaimsPrincipal -MockWith {
@@ -239,10 +295,9 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Test-TargetResource @testParams | Should Be $false
             }
 
-            $Global:SPDscGroupsUpdated = $false
             It "Should update the groups in the set method" {
                 Set-TargetResource @testParams
-                $Global:SPDscGroupsUpdated | Should Be $true
+                $Script:SPDscSystemAccountSite.RootWeb.CreateDefaultAssociatedGroupsCalled | Should Be $true
             }
         }
 
