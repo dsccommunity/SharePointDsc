@@ -262,6 +262,7 @@ function Set-TargetResource
                                   -ScriptBlock {
         $params = $args[0]
         $CurrentValues = $args[1]
+        $doCreateDefaultGroups = $false
 
         $params.Remove("InstallAccount") | Out-Null
 
@@ -273,12 +274,10 @@ function Set-TargetResource
         if ($null -eq $site)
         {
             $site = New-SPSite @params
-
             if ($CreateDefaultGroups -eq $true)
             {
-                $site.RootWeb.CreateDefaultAssociatedGroups($params.OwnerAlias,
-                                                            $params.SecondaryOwnerAlias,
-                                                            $null)
+                $doCreateDefaultGroups = $true;
+
             }
             else
             {
@@ -334,10 +333,7 @@ function Set-TargetResource
             {
                 if ($CreateDefaultGroups -eq $true)
                 {
-                    $site = Get-SPSite -Identity $params.Url -ErrorAction SilentlyContinue
-                    $site.RootWeb.CreateDefaultAssociatedGroups($params.OwnerAlias,
-                                                                $params.SecondaryOwnerAlias,
-                                                                $null)
+                    $doCreateDefaultGroups = $true;
                 }
                 else
                 {
@@ -345,6 +341,19 @@ function Set-TargetResource
                                             "SharePoint groups will not be created")
                 }
             }
+        }
+
+        if ($doCreateDefaultGroups -eq $true)
+        {
+            Write-Verbose -Message ("Creating default groups")
+
+            $centralAdminWebApp = [Microsoft.SharePoint.Administration.SPAdministrationWebApplication]::Local
+            $centralAdminSite = $centralAdminWebApp.Sites[0]
+
+            $systemAccountSite = New-Object "Microsoft.SharePoint.SPSite" -ArgumentList @($site.Id, $centralAdminSite.SystemAccount.UserToken)
+            $systemAccountSite.RootWeb.CreateDefaultAssociatedGroups($params.OwnerAlias,
+                                                                     $params.SecondaryOwnerAlias,
+                                                                     $null)
         }
     }
 }
