@@ -72,7 +72,7 @@ namespace Microsoft.SharePoint.Administration {
             return @{
                 Id = 1
                 SystemAccount = @{
-                    UserToken = "SystemAccountUserToken"
+                    UserToken = "CentralAdminSystemAccountUserToken"
                 }
             }
         } -ParameterFilter {
@@ -84,9 +84,8 @@ namespace Microsoft.SharePoint.Administration {
             $Script:SPDscSystemAccountSite = $site
             return $site;
         } -ParameterFilter {
-            $TypeName -eq "Microsoft.SharePoint.SPSite"
-            $ArgumentList[0] -eq 1
-            $ArgumentList[1] -eq "SystemAccountUserToken"
+            $TypeName -eq "Microsoft.SharePoint.SPSite" -and
+            $ArgumentList[1] -eq "CentralAdminSystemAccountUserToken"
         }
 
         Mock -CommandName New-SPSite -MockWith {
