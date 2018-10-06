@@ -76,12 +76,21 @@ function Get-TargetResource
                                   -Arguments $PSBoundParameters `
                                   -ScriptBlock {
         $params = $args[0]
+        $site = $null
 
-        $site = Get-SPSite -Identity $params.Url `
-                           -ErrorAction SilentlyContinue
+        try
+        {
+            $centralAdminWebApp = [Microsoft.SharePoint.Administration.SPAdministrationWebApplication]::Local
+            $centralAdminSite = Get-SPSite -Identity $centralAdminWebApp.Url
+
+            $site = New-Object "Microsoft.SharePoint.SPSite" -ArgumentList @($params.Url, $centralAdminSite.SystemAccount.UserToken)
+        }
+        catch [System.Exception] {}
 
         if ($null -eq $site)
         {
+            Write-Verbose "Site Collection not found"
+
             return @{
                 Url = $params.Url
                 OwnerAlias = $null
