@@ -448,7 +448,7 @@ function Test-TargetResource
                                                         "QuotaTemplate",
                                                         "OwnerAlias",
                                                         "SecondaryOwnerAlias",
-                                                        "TenantAdministration")
+                                                        "AdministrationSiteType")
 }
 
 Export-ModuleMember -Function *-TargetResource
