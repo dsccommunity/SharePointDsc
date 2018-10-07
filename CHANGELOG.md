@@ -28,6 +28,9 @@
 * SPWebAppClientCallableSettings
   * New resource to manage web application client callable settings including
     proxy libraries.
+* SPWebAppSuiteBar
+  * Enable usage of SuiteBarBrandingElementHtml for SharePoint 2016
+    (only supported if using a SharePoint 2013 masterpage)
 
 ## 2.5
 
