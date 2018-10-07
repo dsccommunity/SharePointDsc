@@ -13,6 +13,10 @@
 * SPSite
   * Added the possibility for creating the default site groups
   * Added the possibility to set AdministrationSiteType
+  * Fixed test method that in some cases always would return false
+  * Fixed a typo in the values to check for AdministrationSiteType
+  * Fixed an access denied issue when creating default site groups
+    when the run as account does not have proper permissions for the site
 * SPUserProfileServiceApp
   * Fixed issue which was introduced in v2.5 where the service application proxy
     was not created.
