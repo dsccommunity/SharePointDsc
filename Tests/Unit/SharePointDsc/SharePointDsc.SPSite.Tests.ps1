@@ -42,8 +42,8 @@ namespace Microsoft.SharePoint.Administration {
         {
             $rootWeb = @{
                 AssociatedVisitorGroup = $null
-                AssociatedMemberGroup   = $null
-                AssociatedOwnerGroup   = $null
+                AssociatedMemberGroup = $null
+                AssociatedOwnerGroup = $null
                 CreateDefaultAssociatedGroupsCalled = $false
             }
             $rootWeb | Add-Member -MemberType ScriptMethod `
@@ -62,6 +62,7 @@ namespace Microsoft.SharePoint.Administration {
                 Owner = @{ UserLogin = "DEMO\owner" }
                 Quota = @{ QuotaId = 65000 }
                 RootWeb = $rootWeb
+                AdministrationSiteType = "None"
             }
             return $site
         }
@@ -136,6 +137,14 @@ namespace Microsoft.SharePoint.Administration {
                 OwnerAlias = "DEMO\User"
             }
 
+            Mock -CommandName New-Object -MockWith {
+                return $null;
+            } -ParameterFilter {
+                $TypeName -eq "Microsoft.SharePoint.SPSite" -and
+                $ArgumentList[0] -eq "http://site.sharepoint.com" -and
+                $ArgumentList[1] -eq "CentralAdminSystemAccountUserToken"
+            }
+
             Mock -CommandName Get-SPSite -MockWith { return $null }
 
             It "Should return OwnerAlias=Null from the get method" {
@@ -161,28 +170,35 @@ namespace Microsoft.SharePoint.Administration {
                 AdministrationSiteType = "TenantAdministration"
             }
 
-            Mock -CommandName Get-SPSite -MockWith {
-                $rootWeb = @{}
-                $rootWeb = $rootWeb | Add-Member -MemberType ScriptMethod `
-                                        -Name CreateDefaultAssociatedGroups `
-                                        -Value {} -PassThru
-                $returnval = @{
-                    HostHeaderIsSiteName = $true
-                    WebApplication = @{
-                        Url = $testParams.Url
-                        UseClaimsAuthentication = $false
-                    }
-                    Url = $testParams.Url
-                    Owner = @{ UserLogin = "DEMO\owner" }
-                    SecondaryContact = @{ UserLogin = "DEMO\secondowner" }
-                    Quota = @{
-                        QuotaId = 1
-                    }
-                    RootWeb = $rootWeb
-                    AdministrationSiteType = "None"
+            $contextSiteImplementation = {
+                $site = $siteImplementation.InvokeReturnAsIs()
+                $site.WebApplication.Url = $testParams.Url
+                $site.WebApplication.UseClaimsAuthentication = $false
+                $site.Url = $testParams.Url
+                $site.Owner = @{ UserLogin = "DEMO\owner" }
+                $site.SecondaryContact = @{ UserLogin = "DEMO\secondowner" }
+                $site.Quota = @{
+                    QuotaId = 1
                 }
-                return $returnval
+                return $site;
             }
+
+            Mock -CommandName New-Object -MockWith {
+                $site = $contextSiteImplementation.InvokeReturnAsIs()
+                $Script:SPDscSystemAccountSite = $site
+                return $site
+            } -ParameterFilter {
+                $TypeName -eq "Microsoft.SharePoint.SPSite" -and
+                $ArgumentList[0] -eq $testParams.Url -and
+                $ArgumentList[1] -eq "CentralAdminSystemAccountUserToken"
+            }
+
+            Mock -CommandName Get-SPSite -MockWith {
+                $site = $contextSiteImplementation.InvokeReturnAsIs()
+                $Script:SPDscSite = $site
+                return $site
+            }
+
             Mock -CommandName Set-SPSite -MockWith {} -ParameterFilter {
                 $OwnerAlias = "DEMO\User"
                 $SecondaryOwnerAlias = "DEMO\SecondUser"
@@ -232,26 +248,34 @@ namespace Microsoft.SharePoint.Administration {
                 OwnerAlias = "DEMO\owner"
             }
 
+            $contextSiteImplementation = {
+                $site = $siteImplementation.InvokeReturnAsIs()
+                $site.RootWeb.AssociatedVisitorGroup = "Test Visitors"
+                $site.RootWeb.AssociatedMemberGroup = "Test Members"
+                $site.RootWeb.AssociatedOwnerGroup = "Test Owners"
+
+                $site.WebApplication.Url = $testParams.Url
+                $site.WebApplication.UseClaimsAuthentication = $false
+                $site.HostHeaderIsSiteName = $true
+                $site.Url = $testParams.Url
+                $site.Owner = @{ UserLogin = "DEMO\owner" }
+                return $site;
+            }
+
+            Mock -CommandName New-Object -MockWith {
+                $site = $contextSiteImplementation.InvokeReturnAsIs()
+                $Script:SPDscSystemAccountSite = $site
+                return $site
+            } -ParameterFilter {
+                $TypeName -eq "Microsoft.SharePoint.SPSite" -and
+                $ArgumentList[0] -eq $testParams.Url -and
+                $ArgumentList[1] -eq "CentralAdminSystemAccountUserToken"
+            }
+
             Mock -CommandName Get-SPSite -MockWith {
-                $rootWeb = @{
-                    AssociatedVisitorGroup = "Test Visitors"
-                    AssociatedMemberGroup   = "Test Members"
-                    AssociatedOwnerGroup   = "Test Owners"
-                }
-                $rootWeb = $rootWeb | Add-Member -MemberType ScriptMethod `
-                                        -Name CreateDefaultAssociatedGroups `
-                                        -Value {} -PassThru
-                $returnval = @{
-                    HostHeaderIsSiteName = $true
-                    WebApplication = @{
-                        Url = $testParams.Url
-                        UseClaimsAuthentication = $false
-                    }
-                    Url = $testParams.Url
-                    Owner = @{ UserLogin = "DEMO\owner" }
-                    RootWeb = $rootWeb
-                }
-                return $returnval
+                $site = $contextSiteImplementation.InvokeReturnAsIs()
+                $Script:SPDscSite = $site
+                return $site
             }
 
             It "Should return the site data from the get method" {
@@ -271,7 +295,7 @@ namespace Microsoft.SharePoint.Administration {
 
             Mock -CommandName Get-SPSite -MockWith {
                 $site = $siteImplementation.InvokeReturnAsIs()
-                $site.RootWeb.AssociatedMemberGroup = $null
+                $site.RootWeb.AssociatedVisitorGroup = $null
                 $site.RootWeb.AssociatedMemberGroup = $null
                 $site.RootWeb.AssociatedOwnerGroup = $null
 
@@ -306,27 +330,35 @@ namespace Microsoft.SharePoint.Administration {
                 OwnerAlias = "DEMO\User"
             }
 
+            $contextSiteImplementation = {
+                $site = $siteImplementation.InvokeReturnAsIs()
+                $site.RootWeb.AssociatedVisitorGroup = "Test Visitors"
+                $site.RootWeb.AssociatedMemberGroup = "Test Members"
+                $site.RootWeb.AssociatedOwnerGroup = "Test Owners"
+
+                $site.WebApplication.Url = $testParams.Url
+                $site.WebApplication.UseClaimsAuthentication = $true
+                $site.HostHeaderIsSiteName = $false
+                $site.Url = $testParams.Url
+                $site.Owner = @{ UserLogin = "DEMO\owner" }
+                $site.Quota = @{ QuotaId = 65000 }
+                return $site;
+            }
+
+            Mock -CommandName New-Object -MockWith {
+                $site = $contextSiteImplementation.InvokeReturnAsIs()
+                $Script:SPDscSystemAccountSite = $site
+                return $site
+            } -ParameterFilter {
+                $TypeName -eq "Microsoft.SharePoint.SPSite" -and
+                $ArgumentList[0] -eq $testParams.Url -and
+                $ArgumentList[1] -eq "CentralAdminSystemAccountUserToken"
+            }
+
             Mock -CommandName Get-SPSite -MockWith {
-                $rootWeb = @{
-                    AssociatedVisitorGroup = "Test Visitors"
-                    AssociatedMemberGroup   = "Test Members"
-                    AssociatedOwnerGroup   = "Test Owners"
-                }
-                $rootWeb = $rootWeb | Add-Member -MemberType ScriptMethod `
-                                        -Name CreateDefaultAssociatedGroups `
-                                        -Value {} -PassThru
-                $returnval = @{
-                    HostHeaderIsSiteName = $false
-                    WebApplication = @{
-                        Url = $testParams.Url
-                        UseClaimsAuthentication = $true
-                    }
-                    Url = $testParams.Url
-                    Owner = @{ UserLogin = "DEMO\owner" }
-                    Quota = @{ QuotaId = 65000 }
-                    RootWeb = $rootWeb
-                }
-                return $returnval
+                $site = $contextSiteImplementation.InvokeReturnAsIs()
+                $Script:SPDscSite = $site
+                return $site
             }
 
             Mock -CommandName New-SPClaimsPrincipal -MockWith {
@@ -343,34 +375,31 @@ namespace Microsoft.SharePoint.Administration {
                 Test-TargetResource @testParams | Should Be $true
             }
 
-            Mock -CommandName Get-SPSite -MockWith {
-                return @{
-                    HostHeaderIsSiteName = $false
-                    WebApplication = @{
-                        Url = $testParams.Url
-                        UseClaimsAuthentication = $true
-                    }
-                    Url = $testParams.Url
-                    Owner = $null
-                }
+            Mock -CommandName New-Object -MockWith {
+                $site = $contextSiteImplementation.InvokeReturnAsIs()
+                $site.Owner = $null
+                $Script:SPDscSystemAccountSite = $site
+                return $site
+            } -ParameterFilter {
+                $TypeName -eq "Microsoft.SharePoint.SPSite" -and
+                $ArgumentList[0] -eq $testParams.Url -and
+                $ArgumentList[1] -eq "CentralAdminSystemAccountUserToken"
             }
 
             It "Should return the site data from the get method where a valid site collection admin does not exist" {
                 Get-TargetResource @testParams | Should Not BeNullOrEmpty
             }
 
-            Mock -CommandName Get-SPSite -MockWith {
-                return @{
-                    HostHeaderIsSiteName = $false
-                    WebApplication = @{
-                        Url = $testParams.Url
-                        UseClaimsAuthentication = $true
-                    }
-                    Url = $testParams.Url
-                    Owner = @{ UserLogin = "DEMO\owner" }
-                    SecondaryContact = @{ UserLogin = "DEMO\secondary" }
-                    Quota = @{ QuotaId = 65000 }
-                }
+            Mock -CommandName New-Object -MockWith {
+                $site = $contextSiteImplementation.InvokeReturnAsIs()
+                $site.Owner = @{ UserLogin = "DEMO\owner" }
+                $site.SecondaryContact = @{ UserLogin = "DEMO\secondary" }
+                $Script:SPDscSystemAccountSite = $site
+                return $site
+            } -ParameterFilter {
+                $TypeName -eq "Microsoft.SharePoint.SPSite" -and
+                $ArgumentList[0] -eq $testParams.Url -and
+                $ArgumentList[1] -eq "CentralAdminSystemAccountUserToken"
             }
 
             It "Should return the site data from the get method where a secondary site contact exists" {
@@ -384,27 +413,35 @@ namespace Microsoft.SharePoint.Administration {
                 OwnerAlias = "DEMO\owner"
             }
 
+            $contextSiteImplementation = {
+                $site = $siteImplementation.InvokeReturnAsIs()
+                $site.RootWeb.AssociatedVisitorGroup = "Test Visitors"
+                $site.RootWeb.AssociatedMemberGroup = "Test Members"
+                $site.RootWeb.AssociatedOwnerGroup = "Test Owners"
+
+                $site.WebApplication.Url = $testParams.Url
+                $site.WebApplication.UseClaimsAuthentication = $false
+                $site.HostHeaderIsSiteName = $false
+                $site.Url = $testParams.Url
+                $site.Owner = @{ UserLogin = "DEMO\owner" }
+                $site.Quota = @{ QuotaId = 65000 }
+                return $site;
+            }
+
+            Mock -CommandName New-Object -MockWith {
+                $site = $contextSiteImplementation.InvokeReturnAsIs()
+                $Script:SPDscSystemAccountSite = $site
+                return $site
+            } -ParameterFilter {
+                $TypeName -eq "Microsoft.SharePoint.SPSite" -and
+                $ArgumentList[0] -eq $testParams.Url -and
+                $ArgumentList[1] -eq "CentralAdminSystemAccountUserToken"
+            }
+
             Mock -CommandName Get-SPSite -MockWith {
-                $rootWeb = @{
-                    AssociatedVisitorGroup = "Test Visitors"
-                    AssociatedMemberGroup   = "Test Members"
-                    AssociatedOwnerGroup   = "Test Owners"
-                }
-                $rootWeb = $rootWeb | Add-Member -MemberType ScriptMethod `
-                                        -Name CreateDefaultAssociatedGroups `
-                                        -Value {} -PassThru
-                $returnval = @{
-                    HostHeaderIsSiteName = $false
-                    WebApplication = @{
-                        Url = $testParams.Url
-                        UseClaimsAuthentication = $false
-                    }
-                    Url = $testParams.Url
-                    Owner = @{ UserLogin = "DEMO\owner" }
-                    Quota = @{ QuotaId = 65000 }
-                    RootWeb = $rootWeb
-                }
-                return $returnval
+                $site = $contextSiteImplementation.InvokeReturnAsIs()
+                $Script:SPDscSite = $site
+                return $site
             }
 
             It "Should return the site data from the get method" {
@@ -441,27 +478,35 @@ namespace Microsoft.SharePoint.Administration {
                 CreateDefaultGroups = $false
             }
 
+            $contextSiteImplementation = {
+                $site = $siteImplementation.InvokeReturnAsIs()
+                $site.RootWeb.AssociatedVisitorGroup = $null
+                $site.RootWeb.AssociatedMemberGroup = $null
+                $site.RootWeb.AssociatedOwnerGroup = $null
+
+                $site.WebApplication.Url = $testParams.Url
+                $site.WebApplication.UseClaimsAuthentication = $false
+                $site.HostHeaderIsSiteName = $false
+                $site.Url = $testParams.Url
+                $site.Owner = @{ UserLogin = "DEMO\owner" }
+                $site.Quota = @{ QuotaId = 65000 }
+                return $site;
+            }
+
+            Mock -CommandName New-Object -MockWith {
+                $site = $contextSiteImplementation.InvokeReturnAsIs()
+                $Script:SPDscSystemAccountSite = $site
+                return $site
+            } -ParameterFilter {
+                $TypeName -eq "Microsoft.SharePoint.SPSite" -and
+                $ArgumentList[0] -eq $testParams.Url -and
+                $ArgumentList[1] -eq "CentralAdminSystemAccountUserToken"
+            }
+
             Mock -CommandName Get-SPSite -MockWith {
-                $rootWeb = @{
-                    AssociatedVisitorGroup = $null
-                    AssociatedMemberGroup   = $null
-                    AssociatedOwnerGroup   = $null
-                }
-                $rootWeb = $rootWeb | Add-Member -MemberType ScriptMethod `
-                                        -Name CreateDefaultAssociatedGroups `
-                                        -Value {} -PassThru
-                $returnval = @{
-                    HostHeaderIsSiteName = $false
-                    WebApplication = @{
-                        Url = $testParams.Url
-                        UseClaimsAuthentication = $false
-                    }
-                    Url = $testParams.Url
-                    Owner = @{ UserLogin = "DEMO\owner" }
-                    Quota = @{ QuotaId = 65000 }
-                    RootWeb = $rootWeb
-                }
-                return $returnval
+                $site = $contextSiteImplementation.InvokeReturnAsIs()
+                $Script:SPDscSite = $site
+                return $site
             }
 
             It "Should return CreateDefaultGroups=False from the get method" {
