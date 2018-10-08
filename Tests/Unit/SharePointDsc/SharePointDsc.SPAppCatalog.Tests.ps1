@@ -1,7 +1,7 @@
 [CmdletBinding()]
 param(
     [Parameter()]
-    [string] 
+    [string]
     $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
                                          -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
                                          -Resolve)
@@ -19,8 +19,50 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
         $mockSiteId = [Guid]::NewGuid()
-        
-        # Test contexts 
+
+        $mockPassword = ConvertTo-SecureString -String "password" -AsPlainText -Force
+        $mockCredential = New-Object -TypeName System.Management.Automation.PSCredential `
+                                     -ArgumentList @("$($Env:USERDOMAIN)\$($Env:USERNAME)", $mockPassword)
+        $mockFarmCredential = New-Object -TypeName System.Management.Automation.PSCredential `
+                                         -ArgumentList @("DOMAIN\sp_farm", $mockPassword)
+
+        # Mocks for all contexts
+        Mock -CommandName Get-SPDSCFarmAccount -MockWith {
+            return $mockFarmCredential
+        }
+        Mock -CommandName Add-SPDSCUserToLocalAdmin -MockWith { }
+        Mock -CommandName Test-SPDSCUserIsLocalAdmin -MockWith { return $false }
+        Mock -CommandName Remove-SPDSCUserToLocalAdmin -MockWith { }
+        Mock -CommandName Restart-Service {}
+
+        # Test contexts
+        Context -Name "The PsDscRunAsCredential is the Farm account" -Fixture {
+            $testParams = @{
+                SiteUrl = "https://content.sharepoint.contoso.com/sites/AppCatalog"
+            }
+
+            Mock -CommandName Update-SPAppCatalogConfiguration -MockWith {}
+            Mock -CommandName Get-SPSite -MockWith {
+                return @{
+                    WebApplication = @{
+                        Features = @( @{} ) | Add-Member -MemberType ScriptMethod `
+                                                         -Name "Item" `
+                                                         -Value { return $null } `
+                                                         -PassThru `
+                                                         -Force
+                    }
+                    ID = $mockSiteId
+                }
+            }
+            Mock -CommandName Get-SPDSCFarmAccount -MockWith {
+                return $mockCredential
+            }
+
+            It "Should throw exception when executed" {
+                { Set-TargetResource @testParams } | Should Throw "Specified PSDSCRunAsCredential"
+            }
+        }
+
         Context -Name "The specified site exists, but cannot be set as an app catalog as it is of the wrong template" -Fixture {
             $testParams = @{
                 SiteUrl = "https://content.sharepoint.contoso.com/sites/AppCatalog"
@@ -86,7 +128,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
         }
-        
+
         Context -Name "The specified site exists and is the current app catalog already" -Fixture {
             $testParams = @{
                 SiteUrl = "https://content.sharepoint.contoso.com/sites/AppCatalog"
@@ -97,13 +139,13 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     WebApplication = @{
                         Features = @( @{} ) | Add-Member -MemberType ScriptMethod `
                                                          -Name "Item" `
-                                                         -Value { 
-                                                             return @{ 
+                                                         -Value {
+                                                             return @{
                                                                 ID = [guid]::NewGuid()
                                                                 Properties = @{
-                                                                    "__AppCatSiteId" = @{Value = $mockSiteId} 
+                                                                    "__AppCatSiteId" = @{Value = $mockSiteId}
                                                                 }
-                                                            } 
+                                                            }
                                                          } `
                                                          -PassThru `
                                                          -Force
@@ -128,7 +170,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 SiteUrl = "https://content.sharepoint.contoso.com/sites/AppCatalog"
             }
 
-            Mock -CommandName Update-SPAppCatalogConfiguration -MockWith { 
+            Mock -CommandName Update-SPAppCatalogConfiguration -MockWith {
                 throw [System.UnauthorizedAccessException] "ACCESS IS DENIED"
             }
             Mock -CommandName Get-SPSite -MockWith {
@@ -157,7 +199,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     ("This resource must be run as the farm account (not a setup account). " + `
                     "Please ensure either the PsDscRunAsCredential or InstallAccount " + `
                     "credentials are set to the farm account and run this resource again")
-            } 
+            }
         }
     }
 }

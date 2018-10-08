@@ -84,8 +84,8 @@ function Get-TargetResource
         Import-Module -Name $modulePath
 
         $source = Get-SPEnterpriseSearchCrawlContentSource -SearchApplication $params.ServiceAppName `
-                                                           -Identity $params.Name `
-                                                           -ErrorAction SilentlyContinue
+                                                            -ErrorAction SilentlyContinue | `
+                                                                Where-Object {$_.Name -eq $params.Name}
         if ($null -eq $source)
         {
             return @{
@@ -387,10 +387,9 @@ function Set-TargetResource
             $OFS = ","
             $startAddresses = "$($params.Addresses)"
 
-            $source = Get-SPEnterpriseSearchCrawlContentSource `
-                            -SearchApplication $params.ServiceAppName `
-                            -Identity $params.Name `
-                            -ErrorAction SilentlyContinue
+            $source = Get-SPEnterpriseSearchCrawlContentSource -SearchApplication $params.ServiceAppName `
+                                                               -ErrorAction SilentlyContinue | `
+                                                                    Where-Object {$_.Name -eq $params.Name}
 
             if ($null -eq $source)
             {
@@ -450,22 +449,19 @@ function Set-TargetResource
                 Write-Verbose -Message ("Content source '$($params.Name)' is not idle, " + `
                                         "stopping current crawls to allow settings to be updated")
 
-                $source = Get-SPEnterpriseSearchCrawlContentSource `
-                                -SearchApplication $params.ServiceAppName `
-                                -Identity $params.Name
+                $source = Get-SPEnterpriseSearchCrawlContentSource -SearchApplication $params.ServiceAppName | `
+                                                                        Where-Object {$_.Name -eq $params.Name}
 
                 $source.StopCrawl()
                 $loopCount = 0
 
-                $sourceToWait = Get-SPEnterpriseSearchCrawlContentSource `
-                                    -SearchApplication $params.ServiceAppName `
-                                    -Identity $params.Name
+                $sourceToWait = Get-SPEnterpriseSearchCrawlContentSource -SearchApplication $params.ServiceAppName | `
+                                                                            Where-Object {$_.Name -eq $params.Name}
 
                 while ($sourceToWait.CrawlStatus -ne "Idle" -and $loopCount -lt 15)
                 {
-                    $sourceToWait = Get-SPEnterpriseSearchCrawlContentSource `
-                                        -SearchApplication $params.ServiceAppName `
-                                        -Identity $params.Name
+                    $sourceToWait = Get-SPEnterpriseSearchCrawlContentSource -SearchApplication $params.ServiceAppName | `
+                                                                                Where-Object {$_.Name -eq $params.Name}
 
                     Write-Verbose -Message ("$([DateTime]::Now.ToShortTimeString()) - Waiting " + `
                                             "for content source '$($params.Name)' to be idle " + `
@@ -580,6 +576,14 @@ function Set-TargetResource
                     $incrementalSetArgs.Add("CrawlScheduleRunEveryInterval",
                         $params.IncrementalSchedule.CrawlScheduleRunEveryInterval)
                 }
+
+                $propertyTest = Test-SPDSCObjectHasProperty -Object $params.IncrementalSchedule `
+                                                            -PropertyName "StartHour"
+                if ($propertyTest -eq $true)
+                {
+                    $incrementalSetArgs.Add("CrawlScheduleStartDateTime",
+                        "$($params.IncrementalSchedule.StartHour):$($params.IncrementalSchedule.StartMinute)")
+                }
                 Set-SPEnterpriseSearchCrawlContentSource @allSetArguments @incrementalSetArgs
             }
 
@@ -655,6 +659,14 @@ function Set-TargetResource
                 {
                     $fullSetArgs.Add("CrawlScheduleRunEveryInterval",
                         $params.FullSchedule.CrawlScheduleRunEveryInterval)
+                }
+
+                $propertyTest = Test-SPDSCObjectHasProperty -Object $params.FullSchedule `
+                                                            -PropertyName "StartHour"
+                if ($propertyTest -eq $true)
+                {
+                    $fullSetArgs.Add("CrawlScheduleStartDateTime",
+                        "$($params.FullSchedule.StartHour):$($params.FullSchedule.StartMinute)")
                 }
                 Set-SPEnterpriseSearchCrawlContentSource @allSetArguments @fullSetArgs
             }

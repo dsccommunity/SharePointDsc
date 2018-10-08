@@ -36,6 +36,17 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                             public UserProfileManager(System.Object a)
                             {
                             }
+
+                            public string PersonalSiteFormat
+                            {
+                                get
+                                {
+                                    return "Domain_Username";
+                                }
+                                set
+                                {
+                                }
+                            }
                         }
                     }
 "@ -ErrorAction SilentlyContinue
@@ -250,6 +261,10 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             Mock -CommandName Get-SPServiceApplication -MockWith {
                 return $null
             }
+            Mock -CommandName New-SPClaimsPrincipal -MockWith { return @("") }
+            Mock -CommandName Get-SPServiceApplicationSecurity -MockWith { return @("") }
+            Mock -CommandName Grant-SPObjectSecurity -MockWith {}
+            Mock -CommandName Set-SPServiceApplicationSecurity -MockWith {}
 
             Mock -CommandName Restart-Service {}
 
@@ -526,6 +541,116 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             It "Should return true when the Test method is called" {
                 $testParams.NoILMUsed = $false
                 Test-TargetResource @testParams | Should Be $true
+            }
+        }
+
+        Context -Name "When service applications exist in the current farm and SiteNamingConflictResolution is incorrect" -Fixture {
+            $testParams = @{
+                Name                         = "User Profile Service App"
+                ApplicationPool              = "SharePoint Service Applications"
+                SiteNamingConflictResolution = "Username_CollisionDomain"
+                Ensure                       = "Present"
+            }
+
+            Mock -CommandName Restart-Service -MockWith {}
+            Mock -CommandName Get-SPServiceApplication -MockWith {
+                return @(
+                    New-Object -TypeName "Object" |
+                        Add-Member -MemberType NoteProperty `
+                                   -Name TypeName `
+                                   -Value "User Profile Service Application" `
+                                   -PassThru |
+                        Add-Member -MemberType NoteProperty `
+                                   -Name DisplayName `
+                                   -Value $testParams.Name `
+                                   -PassThru |
+                        Add-Member -MemberType NoteProperty `
+                                   -Name "NoILMUsed" `
+                                   -Value $false `
+                                   -PassThru |
+                        Add-Member -MemberType ScriptMethod `
+                                   -Name Update `
+                                   -Value {
+                                       $Global:SPDscUPSAUpdateCalled  = $true
+                                    } -PassThru |
+                        Add-Member -MemberType NoteProperty `
+                                   -Name ApplicationPool `
+                                   -Value @{
+                                       Name = $testParams.ApplicationPool
+                                    } -PassThru |
+                        Add-Member -MemberType ScriptMethod `
+                                   -Name GetType `
+                                   -Value {
+                                        New-Object -TypeName "Object" |
+                                            Add-Member -MemberType NoteProperty `
+                                                       -Name FullName `
+                                                       -Value $getTypeFullName `
+                                                       -PassThru |
+                                            Add-Member -MemberType ScriptMethod `
+                                                       -Name GetProperties `
+                                                       -Value {
+                                                            param($x)
+                                                            return @(
+                                                                (New-Object -TypeName "Object" |
+                                                                    Add-Member -MemberType NoteProperty `
+                                                                               -Name Name `
+                                                                               -Value "SocialDatabase" `
+                                                                               -PassThru |
+                                                                    Add-Member -MemberType ScriptMethod `
+                                                                               -Name GetValue `
+                                                                               -Value {
+                                                                                    param($x)
+                                                                                    return @{
+                                                                                        Name = "SP_SocialDB"
+                                                                                        NormalizedDataSource = "SQL.domain.local"
+                                                                                    }
+                                                                                } -PassThru
+                                                                ),
+                                                                (New-Object -TypeName "Object" |
+                                                                    Add-Member -MemberType NoteProperty `
+                                                                               -Name Name `
+                                                                               -Value "ProfileDatabase" `
+                                                                               -PassThru |
+                                                                    Add-Member -MemberType ScriptMethod `
+                                                                               -Name GetValue `
+                                                                               -Value {
+                                                                                    return @{
+                                                                                        Name = "SP_ProfileDB"
+                                                                                        NormalizedDataSource = "SQL.domain.local"
+                                                                                    }
+                                                                                } -PassThru
+                                                                ),
+                                                                (New-Object -TypeName "Object" |
+                                                                    Add-Member -MemberType NoteProperty `
+                                                                               -Name Name `
+                                                                               -Value "SynchronizationDatabase" `
+                                                                               -PassThru |
+                                                                    Add-Member -MemberType ScriptMethod `
+                                                                               -Name GetValue `
+                                                                               -Value {
+                                                                                    return @{
+                                                                                        Name = "SP_ProfileSyncDB"
+                                                                                        NormalizedDataSource = "SQL.domain.local"
+                                                                                    }
+                                                                                } -PassThru
+                                                                )
+                                                            )
+                                                        } -PassThru
+                                    } -PassThru -Force
+                )
+            }
+
+            It "Should return SiteNamingConflictResolution=Domain_Username from the Get method" {
+                (Get-TargetResource @testParams).SiteNamingConflictResolution | Should Be "Domain_Username"
+            }
+
+            It "Should call Get-SPWebApplication before finishing set method" {
+                Set-TargetResource @testParams
+                Assert-MockCalled Get-SPWebApplication
+            }
+
+            It "Should return false when the Test method is called" {
+                Test-TargetResource @testParams | Should Be $false
             }
         }
 

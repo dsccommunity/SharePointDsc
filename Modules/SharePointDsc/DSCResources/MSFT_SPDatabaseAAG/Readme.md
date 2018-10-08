@@ -17,3 +17,9 @@ cmdlets have been added in this CU: http://support.microsoft.com/kb/2880551
 
 The default value for the Ensure parameter is Present. When not specifying this
 parameter, the content database is added to the AAG.
+
+Note:
+By design the Add-DatabaseToAvailabilityGroup cmdlet updates the database
+connection string to the specified availability group. If this is NOT what
+you want (for example: You are using SQL aliasses which point to the AG
+listener), you should NOT use this resource.

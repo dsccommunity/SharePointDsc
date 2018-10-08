@@ -1,7 +1,7 @@
 [CmdletBinding()]
 param(
     [Parameter()]
-    [string] 
+    [string]
     $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
                                          -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
                                          -Resolve)
@@ -55,7 +55,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         $indexComponent.ServerId = $serverId
         $indexComponent.IndexPartitionOrdinal = 0
 
-        # Mocks for all contexts   
+        # Mocks for all contexts
         Mock -CommandName Start-Sleep -MockWith {}
         Mock -CommandName New-Item -MockWith { return @{} }
         Mock -CommandName Get-SPEnterpriseSearchServiceInstance -MockWith  {
@@ -71,35 +71,35 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 ActiveTopology = @{}
             }
         }
-        Mock -CommandName Start-SPEnterpriseSearchServiceInstance -MockWith { 
-            return $null 
+        Mock -CommandName Start-SPEnterpriseSearchServiceInstance -MockWith {
+            return $null
         }
-        Mock -CommandName New-SPEnterpriseSearchTopology -MockWith { 
-            return @{} 
+        Mock -CommandName New-SPEnterpriseSearchTopology -MockWith {
+            return @{}
         }
-        Mock -CommandName New-SPEnterpriseSearchAdminComponent -MockWith { 
-            return @{} 
-        } 
-        Mock -CommandName New-SPEnterpriseSearchCrawlComponent -MockWith { 
-            return @{} 
+        Mock -CommandName New-SPEnterpriseSearchAdminComponent -MockWith {
+            return @{}
         }
-        Mock -CommandName New-SPEnterpriseSearchContentProcessingComponent -MockWith { 
-            return @{} 
+        Mock -CommandName New-SPEnterpriseSearchCrawlComponent -MockWith {
+            return @{}
         }
-        Mock -CommandName New-SPEnterpriseSearchAnalyticsProcessingComponent -MockWith { 
-            return @{} 
+        Mock -CommandName New-SPEnterpriseSearchContentProcessingComponent -MockWith {
+            return @{}
         }
-        Mock -CommandName New-SPEnterpriseSearchQueryProcessingComponent -MockWith { 
-            return @{} 
+        Mock -CommandName New-SPEnterpriseSearchAnalyticsProcessingComponent -MockWith {
+            return @{}
         }
-        Mock -CommandName New-SPEnterpriseSearchIndexComponent -MockWith { 
-            return @{} 
+        Mock -CommandName New-SPEnterpriseSearchQueryProcessingComponent -MockWith {
+            return @{}
         }
-        Mock -CommandName Set-SPEnterpriseSearchTopology -MockWith { 
-            return @{} 
+        Mock -CommandName New-SPEnterpriseSearchIndexComponent -MockWith {
+            return @{}
         }
-        Mock -CommandName Remove-SPEnterpriseSearchComponent -MockWith { 
-            return $null 
+        Mock -CommandName Set-SPEnterpriseSearchTopology -MockWith {
+            return @{}
+        }
+        Mock -CommandName Remove-SPEnterpriseSearchComponent -MockWith {
+            return $null
         }
         Mock -CommandName Get-SPServer -MockWith {
             return @(
@@ -143,7 +143,60 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             It "Should set the desired topology for the current server" {
                 Set-TargetResource @testParams
             }
-        }      
+        }
+
+        Context -Name "No search topology has been applied, with servers specified as FQDN" -Fixture {
+            $testParams = @{
+                ServiceAppName          = "Search Service Application"
+                Admin                   = @("$($env:COMPUTERNAME).domain.com")
+                Crawler                 = @("$($env:COMPUTERNAME).domain.com")
+                ContentProcessing       = @("$($env:COMPUTERNAME).domain.com")
+                AnalyticsProcessing     = @("$($env:COMPUTERNAME).domain.com")
+                QueryProcessing         = @("$($env:COMPUTERNAME).domain.com")
+                IndexPartition          = @("$($env:COMPUTERNAME).domain.com")
+                FirstPartitionDirectory = "I:\SearchIndexes\0"
+            }
+
+            Mock -CommandName Get-SPEnterpriseSearchComponent -MockWith {
+                return @{}
+            }
+
+            Mock -CommandName Get-SPEnterpriseSearchServiceInstance -MockWith  {
+                return @{
+                    Server = @{
+                        Address = "$($env:COMPUTERNAME).domain.com"
+                    }
+                    Status = "Online"
+                }
+            } -ParameterFilter { $Identity -eq "$($env:COMPUTERNAME).domain.com" }
+
+            Mock -CommandName Get-CimInstance -MockWith {
+                return @{
+                    Domain = "domain.com"
+                }
+            }
+
+            Mock -CommandName Get-SPEnterpriseSearchServiceInstance -MockWith  {
+                return $null
+            } -ParameterFilter { $Identity -ne "$($env:COMPUTERNAME).domain.com" }
+
+            It "Should return empty values from the get method" {
+                $result = Get-TargetResource @testParams
+                $result.Admin | Should BeNullOrEmpty
+                $result.Crawler | Should BeNullOrEmpty
+                $result.ContentProcessing | Should BeNullOrEmpty
+                $result.AnalyticsProcessing | Should BeNullOrEmpty
+                $result.QueryProcessing | Should BeNullOrEmpty
+            }
+
+            It "Should return false from the test method" {
+                Test-TargetResource @testParams | Should Be $false
+            }
+
+            It "Should set the desired topology for the current server" {
+                Set-TargetResource @testParams
+            }
+        }
 
         Context -Name "No search topology exist and the search service instance isnt running" -Fixture {
             $testParams = @{
@@ -156,7 +209,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 IndexPartition          = @($env:COMPUTERNAME)
                 FirstPartitionDirectory = "I:\SearchIndexes\0"
             }
-            
+
             Mock -CommandName Get-SPEnterpriseSearchComponent -MockWith {
                 return @{}
             }
@@ -192,7 +245,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 IndexPartition          = @($env:COMPUTERNAME)
                 FirstPartitionDirectory = "I:\SearchIndexes\0"
             }
-            
+
             Mock -CommandName Get-SPEnterpriseSearchServiceInstance -MockWith {
                 return @{
                     Server = @{
@@ -201,13 +254,13 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     Status = "Online"
                 }
             }
-        
+
             It "Should add a missing admin component" {
                 Mock -CommandName Get-SPEnterpriseSearchComponent -MockWith {
                     return @(
-                        $crawlComponent, 
-                        $contentProcessingComponent, 
-                        $analyticsProcessingComponent, 
+                        $crawlComponent,
+                        $contentProcessingComponent,
+                        $analyticsProcessingComponent,
                         $queryProcessingComponent)
                 }
                 Set-TargetResource @testParams
@@ -217,9 +270,9 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             It "Should add a missing crawl component" {
                 Mock -CommandName Get-SPEnterpriseSearchComponent -MockWith {
                     return @(
-                        $adminComponent, 
-                        $contentProcessingComponent, 
-                        $analyticsProcessingComponent, 
+                        $adminComponent,
+                        $contentProcessingComponent,
+                        $analyticsProcessingComponent,
                         $queryProcessingComponent)
                 }
                 Set-TargetResource @testParams
@@ -229,9 +282,9 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             It "Should add a missing content processing component" {
                 Mock -CommandName Get-SPEnterpriseSearchComponent -MockWith {
                     return @(
-                        $adminComponent, 
-                        $crawlComponent, 
-                        $analyticsProcessingComponent, 
+                        $adminComponent,
+                        $crawlComponent,
+                        $analyticsProcessingComponent,
                         $queryProcessingComponent)
                 }
                 Set-TargetResource @testParams
@@ -241,9 +294,9 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             It "Should add a missing analytics processing component" {
                 Mock -CommandName Get-SPEnterpriseSearchComponent -MockWith {
                     return @(
-                        $adminComponent, 
+                        $adminComponent,
                         $crawlComponent,
-                        $contentProcessingComponent, 
+                        $contentProcessingComponent,
                         $queryProcessingComponent)
                 }
                 Set-TargetResource @testParams
@@ -253,9 +306,9 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             It "Should add a missing query processing component" {
                 Mock -CommandName Get-SPEnterpriseSearchComponent -MockWith {
                     return @(
-                        $adminComponent, 
-                        $crawlComponent, 
-                        $contentProcessingComponent, 
+                        $adminComponent,
+                        $crawlComponent,
+                        $contentProcessingComponent,
                         $analyticsProcessingComponent)
                 }
                 Set-TargetResource @testParams
@@ -272,13 +325,13 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 IndexPartition          = @("sharepoint2")
                 FirstPartitionDirectory = "I:\SearchIndexes\0"
             }
-            
+
             Mock -CommandName Get-SPEnterpriseSearchComponent -MockWith {
                 return @(
-                    $adminComponent, 
-                    $crawlComponent, 
-                    $contentProcessingComponent, 
-                    $analyticsProcessingComponent, 
+                    $adminComponent,
+                    $crawlComponent,
+                    $contentProcessingComponent,
+                    $analyticsProcessingComponent,
                     $queryProcessingComponent)
             }
 
@@ -302,11 +355,11 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
             Mock -CommandName Get-SPEnterpriseSearchComponent -MockWith {
                 return @(
-                    $adminComponent, 
-                    $crawlComponent, 
-                    $contentProcessingComponent, 
-                    $analyticsProcessingComponent, 
-                    $queryProcessingComponent, 
+                    $adminComponent,
+                    $crawlComponent,
+                    $contentProcessingComponent,
+                    $analyticsProcessingComponent,
+                    $queryProcessingComponent,
                     $indexComponent)
             }
 
@@ -344,8 +397,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 FirstPartitionDirectory = "I:\SearchIndexes\0"
             }
 
-            Mock -CommandName Get-SPEnterpriseSearchServiceApplication -MockWith { 
-                return $null 
+            Mock -CommandName Get-SPEnterpriseSearchServiceApplication -MockWith {
+                return $null
             }
             Mock -CommandName Get-SPEnterpriseSearchComponent -MockWith {
                 return @{}
@@ -360,7 +413,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             It "Should set the desired topology for the current server" {
-                { Set-TargetResource @testParams } | Should Throw 
+                { Set-TargetResource @testParams } | Should Throw
             }
         }
 
@@ -409,11 +462,11 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
             Mock -CommandName Get-SPEnterpriseSearchComponent -MockWith {
                 return @(
-                    $adminComponent, 
-                    $crawlComponent, 
-                    $contentProcessingComponent, 
-                    $analyticsProcessingComponent, 
-                    $queryProcessingComponent, 
+                    $adminComponent,
+                    $crawlComponent,
+                    $contentProcessingComponent,
+                    $analyticsProcessingComponent,
+                    $queryProcessingComponent,
                     $indexComponent)
             }
 
