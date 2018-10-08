@@ -46,14 +46,8 @@
   * Added ability to check and update CentralAdministrationPort
 * SPLogLevel
   * Added High as TraceLevel, which was not included yet
-<<<<<<< HEAD
 * SPRemoteFarmTrust
   * Updated readme.md file to add a link that was lost during earlier updates
-=======
-* SPManagedMetadataServiceApp
-  * Added additional content type settings (ContentTypePushdownEnabled &
-    ContentTypeSyndicationEnabled).
->>>>>>> Added example and changelog
 * SPSearchServiceApp
   * Updated Set method to check if service application pool exists. Resource
     will throw an error if it does not exist
