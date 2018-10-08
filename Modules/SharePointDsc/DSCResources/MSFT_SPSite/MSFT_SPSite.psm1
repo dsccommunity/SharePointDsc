@@ -360,13 +360,13 @@ function Set-TargetResource
             $centralAdminSite = Get-SPSite -Identity $centralAdminWebApp.Url
             $systemAccountSite = New-Object "Microsoft.SharePoint.SPSite" -ArgumentList @($site.Id, $centralAdminSite.SystemAccount.UserToken)
 
-            if($null -eq $systemAccountSite.SecondaryOwnerAlias)
+            if($null -eq $systemAccountSite.SecondaryContact)
             {
                 $secondaryOwnerLogin = $null;
             }
             else
             {
-                $secondaryOwnerLogin = $systemAccountSite.SecondaryOwnerAlias.UserLogin;
+                $secondaryOwnerLogin = $systemAccountSite.SecondaryContact.UserLogin;
             }
 
             $systemAccountSite.RootWeb.CreateDefaultAssociatedGroups($systemAccountSite.Owner.UserLogin,
