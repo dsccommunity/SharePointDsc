@@ -27,7 +27,7 @@ function New-SPDscUnitTestHelper
     $moduleRoot = Join-Path -Path $repoRoot -ChildPath "Modules\SharePointDsc"
 
     $mainModule = Join-Path -Path $moduleRoot -ChildPath "SharePointDsc.psd1"
-    Import-Module -Name $mainModule -Global -Force
+    Import-Module -Name $mainModule -Global
 
     if ($PSBoundParameters.ContainsKey("SubModulePath") -eq $true)
     {
@@ -50,7 +50,7 @@ function New-SPDscUnitTestHelper
 
     $describeHeader += " [SP Build: $spBuild]"
 
-    Import-Module -Name $moduleToLoad -Global -Force
+    Import-Module -Name $moduleToLoad -Global
 
 
 
