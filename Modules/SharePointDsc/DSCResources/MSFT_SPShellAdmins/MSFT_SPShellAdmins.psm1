@@ -30,25 +30,17 @@ function Get-TargetResource
         $AllDatabases,
 
         [Parameter()]
-        [System.String[]]
-        $ExcludeDatabases,
-
-        [Parameter()]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 
     Write-Verbose -Message "Getting Shell Admins config"
 
-    $nullreturn = @{
-        Name = $null
-    }
-
     if ($Members -and (($MembersToInclude) -or ($MembersToExclude)))
     {
         Write-Verbose -Message ("Cannot use the Members parameter together with the " + `
                                 "MembersToInclude or MembersToExclude parameters")
-        return $nullreturn
+        return $null
     }
 
     if ($Databases)
@@ -61,7 +53,7 @@ function Get-TargetResource
                 Write-Verbose -Message ("Databases: Cannot use the Members parameter " + `
                                         "together with the MembersToInclude or " + `
                                         "MembersToExclude parameters")
-                return $nullreturn
+                return $null
             }
 
             if (!$database.Members `
@@ -71,7 +63,7 @@ function Get-TargetResource
                 Write-Verbose -Message ("Databases: At least one of the following " + `
                                         "parameters must be specified: Members, " + `
                                         "MembersToInclude, MembersToExclude")
-                return $nullreturn
+                return $null
             }
         }
     }
@@ -81,7 +73,7 @@ function Get-TargetResource
         {
             Write-Verbose -Message ("At least one of the following parameters must be " + `
                                     "specified: Members, MembersToInclude, MembersToExclude")
-            return $nullreturn
+            return $null
         }
     }
 
@@ -89,14 +81,7 @@ function Get-TargetResource
     {
         Write-Verbose -Message ("Cannot use the Databases parameter together with the " + `
                                 "AllDatabases parameter")
-        return $nullreturn
-    }
-
-    if ($Databases -and $ExcludeDatabases)
-    {
-        Write-Verbose -Message ("Cannot use the Databases parameter together with the " + `
-                                "ExcludeDatabases parameter")
-        return $nullreturn
+        return $null
     }
 
     $result = Invoke-SPDSCCommand -Credential $InstallAccount `
@@ -115,20 +100,13 @@ function Get-TargetResource
         {
             Write-Verbose -Message ("No local SharePoint farm was detected. Shell admin " + `
                                     "settings will not be applied")
-            return $nullreturn
+            return $null
         }
 
         $shellAdmins = Get-SPShellAdmin
 
         $cdbPermissions = @()
         $databases = Get-SPDatabase
-        if ($params.ContainsKey("ExcludeDatabases"))
-        {
-            $databases = $databases | Where-Object -FilterScript {
-                                        $_.Name -notin $params.ExcludeDatabases
-                                      }
-        }
-
         foreach ($database in $databases)
         {
             $cdbPermission = @{}
@@ -185,10 +163,6 @@ function Set-TargetResource
         $AllDatabases,
 
         [Parameter()]
-        [System.String[]]
-        $ExcludeDatabases,
-
-        [Parameter()]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
@@ -236,12 +210,6 @@ function Set-TargetResource
     {
         throw ("Cannot use the Databases parameter together with the " + `
                "AllDatabases parameter")
-    }
-
-    if ($Databases -and $ExcludeDatabases)
-    {
-        throw ("Cannot use the Databases parameter together with the " + `
-               "ExcludeDatabases parameter")
     }
 
     $result = Invoke-SPDSCCommand -Credential $InstallAccount `
@@ -562,14 +530,7 @@ function Set-TargetResource
         {
             Write-Verbose -Message "Processing AllDatabases parameter"
 
-            $databases = Get-SPDatabase
-            if ($params.ContainsKey("ExcludeDatabases"))
-            {
-                $databases = $databases | Where-Object -FilterScript {
-                                            $_.Name -notin $params.ExcludeDatabases
-                                          }
-            }
-            foreach ($database in $databases)
+            foreach ($database in (Get-SPDatabase))
             {
                 $dbShellAdmins = Get-SPShellAdmin -database $database.Id
                 if ($params.Members)
@@ -750,10 +711,6 @@ function Test-TargetResource
         $AllDatabases,
 
         [Parameter()]
-        [System.String[]]
-        $ExcludeDatabases,
-
-        [Parameter()]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
@@ -763,7 +720,7 @@ function Test-TargetResource
     # Start checking
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
-    if ($null -eq $CurrentValues.Name)
+    if ($null -eq $CurrentValues)
     {
         return $false
     }

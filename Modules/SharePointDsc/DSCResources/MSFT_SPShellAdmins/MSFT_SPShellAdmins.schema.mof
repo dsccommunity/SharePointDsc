@@ -15,7 +15,6 @@ class MSFT_SPShellAdmins : OMI_BaseResource
     [Write, Description("List of all accounts that are not allowed to have Shell Admin permissions")] String MembersToExclude[];
     [Write, Description("Shell Admin configuration of Databases"), EmbeddedInstance("MSFT_SPDatabasePermissions")] String Databases[];
     [Write, Description("Specify if all databases must get the same config as the general config")] Boolean AllDatabases;
-    [Write, Description("Specify all databases that must be excluded from AllDatabases")] String ExcludeDatabases[];
     [Write, Description("POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5"), EmbeddedInstance("MSFT_Credential")] String InstallAccount;
 };
 
