@@ -103,15 +103,22 @@ function Get-TargetResource
             }
 
             $proxy = Get-SPMetadataServiceApplicationProxy -Identity $proxyName
+<<<<<<< HEAD
             if ($null -ne $proxy)
+=======
+            if($null -ne $proxy)
+>>>>>>> 432bbfdf030227f0cf9b197ed83f9a820f6f8926
             {
                 $contentTypePushDownEnabled = $proxy.Properties["IsContentTypePushdownEnabled"]
                 $contentTypeSyndicationEnabled = $proxy.Properties["IsNPContentTypeSyndicationEnabled"]
             }
+<<<<<<< HEAD
             else
             {
                 Write-Verbose "No SPMetadataServiceApplicationProxy with the name '$($proxyName)' was found. Please verify your Managed Metadata Service Application."
             }
+=======
+>>>>>>> 432bbfdf030227f0cf9b197ed83f9a820f6f8926
 
             # Get the ContentTypeHubUrl value
             $hubUrl = ""
@@ -589,6 +596,7 @@ function Set-TargetResource
             Invoke-SPDSCCommand -Credential $InstallAccount `
                 -Arguments @($PSBoundParameters, $result, $pName) `
                 -ScriptBlock {
+<<<<<<< HEAD
                 $params = $args[0]
                 $pName = $args[2]
 
@@ -603,6 +611,18 @@ function Set-TargetResource
                     throw [Exception] "No SPMetadataServiceApplicationProxy with the name '$($proxyName)' was found. Please verify your Managed Metadata Service Application."
                 }
             }
+=======
+                    $params = $args[0]
+                    $pName = $args[2]
+
+                    $proxy = Get-SPMetadataServiceApplicationProxy -Identity $pName
+                    if($null -ne $proxy)
+                    {
+                        $proxy.Properties["IsContentTypePushdownEnabled"] = $params.ContentTypePushdownEnabled
+                        $proxy.Update()
+                    }
+                }
+>>>>>>> 432bbfdf030227f0cf9b197ed83f9a820f6f8926
         }
 
         if (($PSBoundParameters.ContainsKey("ContentTypeSyndicationEnabled") -eq $true) `
@@ -610,21 +630,33 @@ function Set-TargetResource
         )
         {
             Invoke-SPDSCCommand -Credential $InstallAccount `
+<<<<<<< HEAD
                 -Arguments @($PSBoundParameters, $result, $pName) `
                 -ScriptBlock {
+=======
+            -Arguments @($PSBoundParameters, $result, $pName) `
+            -ScriptBlock {
+>>>>>>> 432bbfdf030227f0cf9b197ed83f9a820f6f8926
                 $params = $args[0]
                 $pName = $args[2]
 
                 $proxy = Get-SPMetadataServiceApplicationProxy -Identity $pName
+<<<<<<< HEAD
                 if ($null -ne $proxy)
+=======
+                if($null -ne $proxy)
+>>>>>>> 432bbfdf030227f0cf9b197ed83f9a820f6f8926
                 {
                     $proxy.Properties["IsNPContentTypeSyndicationEnabled"] = $params.ContentTypeSyndicationEnabled
                     $proxy.Update()
                 }
+<<<<<<< HEAD
                 else
                 {
                     throw [Exception] "No SPMetadataServiceApplicationProxy with the name '$($proxyName)' was found. Please verify your Managed Metadata Service Application."
                 }
+=======
+>>>>>>> 432bbfdf030227f0cf9b197ed83f9a820f6f8926
             }
         }
     }
