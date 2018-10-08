@@ -38,7 +38,7 @@ function Get-TargetResource
                "MembersToExclude parameters")
     }
 
-    if ($null -eq $Members -and $null -eq $MembersToInclude -and $null -eq $MembersToExclude)
+    if (!$Members -and !$MembersToInclude -and !$MembersToExclude)
     {
         throw ("At least one of the following parameters must be specified: Members, " + `
                "MembersToInclude, MembersToExclude")
@@ -76,17 +76,10 @@ function Get-TargetResource
             $user = $securityEntry.Name
             if ($user -like "i:*|*" -or $user -like "c:*|*")
             {
-                if($user.Chars(3) -eq "%" -and $user -ilike "*$((Get-SPFarm).Id.ToString())")
+                $user = (New-SPClaimsPrincipal -Identity $user -IdentityType EncodedClaim).Value
+                if ($user -match "^s-1-[0-59]-\d+-\d+-\d+-\d+-\d+")
                 {
-                    $user = "{LocalFarm}"
-                }
-                else
-                {
-                    $user = (New-SPClaimsPrincipal -Identity $user -IdentityType EncodedClaim).Value
-                    if ($user -match "^s-1-[0-59]-\d+-\d+-\d+-\d+-\d+")
-                    {
-                        $user = Resolve-SPDscSecurityIdentifier -SID $user
-                    }
+                    $user = Resolve-SPDscSecurityIdentifier -SID $user
                 }
             }
 
@@ -150,7 +143,7 @@ function Set-TargetResource
                "MembersToExclude parameters")
     }
 
-    if ($null -eq $Members -and $null -eq $MembersToInclude -and $null -eq $MembersToExclude)
+    if (!$Members -and !$MembersToInclude -and !$MembersToExclude)
     {
         throw ("At least one of the following parameters must be specified: Members, " + `
                "MembersToInclude, MembersToExclude")
@@ -180,30 +173,20 @@ function Set-TargetResource
             }
         }
 
-        $localFarmEncodedClaim = "c:0%.c|system|$((Get-SPFarm).Id.ToString())"
-
         if ($params.ContainsKey("Members") -eq $true)
         {
             foreach($desiredMember in $params.Members)
             {
-                if($desiredMember.Username -eq "{LocalFarm}")
+                $isUser = Test-SPDSCIsADUser -IdentityName $desiredMember.Username
+                if ($isUser -eq $true)
                 {
-                    $claim = New-SPClaimsPrincipal -Identity $localFarmEncodedClaim `
-                                                   -IdentityType EncodedClaim
+                    $claim = New-SPClaimsPrincipal -Identity $desiredMember.Username `
+                                                   -IdentityType WindowsSamAccountName
                 }
                 else
                 {
-                    $isUser = Test-SPDSCIsADUser -IdentityName $desiredMember.Username
-                    if ($isUser -eq $true)
-                    {
-                        $claim = New-SPClaimsPrincipal -Identity $desiredMember.Username `
-                                                       -IdentityType WindowsSamAccountName
-                    }
-                    else
-                    {
-                        $claim = New-SPClaimsPrincipal -Identity $desiredMember.Username `
-                                                       -IdentityType WindowsSecurityGroupName
-                    }
+                    $claim = New-SPClaimsPrincipal -Identity $desiredMember.Username `
+                                                   -IdentityType WindowsSecurityGroupName
                 }
 
                 if ($CurrentValues.Members.Username -contains $desiredMember.Username)
@@ -230,24 +213,16 @@ function Set-TargetResource
             {
                 if ($params.Members.Username -notcontains $currentMember.Username)
                 {
-                    if($currentMember.UserName -eq "{LocalFarm}")
+                    $isUser = Test-SPDSCIsADUser -IdentityName $desiredMember.Username
+                    if ($isUser -eq $true)
                     {
-                        $claim = New-SPClaimsPrincipal -Identity $localFarmEncodedClaim `
-                                                    -IdentityType EncodedClaim
+                        $claim = New-SPClaimsPrincipal -Identity $desiredMember.Username `
+                                                       -IdentityType WindowsSamAccountName
                     }
                     else
                     {
-                        $isUser = Test-SPDSCIsADUser -IdentityName $currentMember.Username
-                        if ($isUser -eq $true)
-                        {
-                            $claim = New-SPClaimsPrincipal -Identity $currentMember.Username `
-                                                        -IdentityType WindowsSamAccountName
-                        }
-                        else
-                        {
-                            $claim = New-SPClaimsPrincipal -Identity $currentMember.Username `
-                                                        -IdentityType WindowsSecurityGroupName
-                        }
+                        $claim = New-SPClaimsPrincipal -Identity $desiredMember.Username `
+                                                       -IdentityType WindowsSecurityGroupName
                     }
                     Revoke-SPObjectSecurity -Identity $security -Principal $claim
                 }
@@ -258,26 +233,17 @@ function Set-TargetResource
         {
             foreach($desiredMember in $params.MembersToInclude)
             {
-                if($desiredMember.Username -eq "{LocalFarm}")
+                $isUser = Test-SPDSCIsADUser -IdentityName $desiredMember.Username
+                if ($isUser -eq $true)
                 {
-                    $claim = New-SPClaimsPrincipal -Identity $localFarmEncodedClaim `
-                                                   -IdentityType EncodedClaim
+                    $claim = New-SPClaimsPrincipal -Identity $desiredMember.Username `
+                                                   -IdentityType WindowsSamAccountName
                 }
                 else
                 {
-                    $isUser = Test-SPDSCIsADUser -IdentityName $desiredMember.Username
-                    if ($isUser -eq $true)
-                    {
-                        $claim = New-SPClaimsPrincipal -Identity $desiredMember.Username `
-                                                    -IdentityType WindowsSamAccountName
-                    }
-                    else
-                    {
-                        $claim = New-SPClaimsPrincipal -Identity $desiredMember.Username `
-                                                    -IdentityType WindowsSecurityGroupName
-                    }
+                    $claim = New-SPClaimsPrincipal -Identity $desiredMember.Username `
+                                                   -IdentityType WindowsSecurityGroupName
                 }
-
                 if ($CurrentValues.Members.Username -contains $desiredMember.Username)
                 {
                     if (($CurrentValues.Members | Where-Object -FilterScript {
@@ -307,24 +273,16 @@ function Set-TargetResource
             {
                 if ($CurrentValues.Members.Username -contains $excludeMember)
                 {
-                    if($excludeMember -eq "{LocalFarm}")
+                    $isUser = Test-SPDSCIsADUser -IdentityName $desiredMember.Username
+                    if ($isUser -eq $true)
                     {
-                        $claim = New-SPClaimsPrincipal -Identity $localFarmEncodedClaim `
-                                                       -IdentityType EncodedClaim
+                        $claim = New-SPClaimsPrincipal -Identity $desiredMember.Username `
+                                                       -IdentityType WindowsSamAccountName
                     }
                     else
                     {
-                        $isUser = Test-SPDSCIsADUser -IdentityName $excludeMember
-                        if ($isUser -eq $true)
-                        {
-                            $claim = New-SPClaimsPrincipal -Identity $excludeMember `
-                                                        -IdentityType WindowsSamAccountName
-                        }
-                        else
-                        {
-                            $claim = New-SPClaimsPrincipal -Identity $excludeMember `
-                                                        -IdentityType WindowsSecurityGroupName
-                        }
+                        $claim = New-SPClaimsPrincipal -Identity $desiredMember.Username `
+                                                       -IdentityType WindowsSecurityGroupName
                     }
                     Revoke-SPObjectSecurity -Identity $security -Principal $claim
                 }
@@ -385,9 +343,15 @@ function Test-TargetResource
         return $false
     }
 
-    if ($null -ne $Members)
+    if ($Members)
     {
         Write-Verbose -Message "Processing Members parameter"
+
+        if ($null -eq $CurrentValues.Members)
+        {
+            Write-Verbose -Message "Security list does not match"
+            return $false
+        }
 
         if ($CurrentValues.Members.Count -eq 0)
         {
@@ -402,14 +366,9 @@ function Test-TargetResource
                 return $true
             }
         }
-        elseif($Members.Count -eq 0)
-        {
-            Write-Verbose -Message "Security list does not match"
-            return $false
-        }
 
         $differences = Compare-Object -ReferenceObject $CurrentValues.Members.Username `
-                                          -DifferenceObject $Members.Username
+                                      -DifferenceObject $Members.Username
 
         if ($null -eq $differences)
         {
@@ -463,7 +422,7 @@ function Test-TargetResource
         Write-Verbose -Message "Processing MembersToExclude parameter"
         foreach ($member in $MembersToExclude)
         {
-            if ($CurrentValues.Members.Username -contains $member)
+            if ($CurrentValues.Members.Username -contains $member.Username)
             {
                 Write-Verbose -Message "$member already has access. Set result to false"
                 $result = $false

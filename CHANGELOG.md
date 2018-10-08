@@ -44,75 +44,24 @@ resources:
 
 ## Unreleased
 
-* Changes to SharePointDsc
-  * Updated test helpers to force a reload of the resource every time you run a test
-* SPSearchContentSource
-  * Fixed issue with numerical Content Sources name
-* SPSearchManagedProperty
-  * Added a new resource to support Search Managed Properties
-* SPSearchTopology
-  * Updated Readme.md to remove some incorrect information
-* SPSite
-  * Added the possibility for creating the default site groups
-  * Added the possibility to set AdministrationSiteType
-  * Fixed test method that in some cases always would return false
-  * Fixed a typo in the values to check for AdministrationSiteType
-  * Fixed an access denied issue when creating default site groups
-    when the run as account does not have proper permissions for the site
-* SPUserProfileServiceApp
-  * Fixed issue which was introduced in v2.5 where the service application proxy
-    was not created.
-  * Updated resource to grant the InstallAccount permissions to a newly created service
-    application to prevent issues in the Get method.
-* SPWebAppSuiteBar
-  * Fixed incorrect test method that resulted in this resource to never apply changes.
-* SPServiceAppSecurity
-  * Added local farm token.
-  * Fixed issues that prevented the resource to work as expected in many situations.
-* SPWebAppPropertyBag
-  * New resource to manage web application property bag
-* SPWebAppClientCallableSettings
-  * New resource to manage web application client callable settings including
-    proxy libraries.
-* SPWebAppSuiteBar
-  * Enable usage of SuiteBarBrandingElementHtml for SharePoint 2016
-    (only supported if using a SharePoint 2013 masterpage)
-
-## 2.5
-
-* SPAppCatalog
-  * Updated resource to retrieve the Farm account instead of requiring it
-    to be specifically used
 * SPDatabaseAAG
   * Updated readme.md to specify that this resource also updates the database
     connection string
 * SPDiagnosticsProvider
   * Fixed issue where enabling providers did not work
-* SPFarm
-  * Added ability to check and update CentralAdministrationPort
 * SPLogLevel
   * Added High as TraceLevel, which was not included yet
-* SPRemoteFarmTrust
-  * Updated readme.md file to add a link that was lost during earlier updates
 * SPSearchServiceApp
   * Updated Set method to check if service application pool exists. Resource
     will throw an error if it does not exist
+* SPRemoteFarmTrust
+  * Updated readme.md file to add a link that was lost during earlier updates
 * SPSearchTopology
   * Fixed issue where Get method threw an error when the specified service
     application didn't exist yet
   * Fixed issue where the resource would fail is the FQDN was specified
-* SPShellAdmins
-  * Added ExcludeDatabases parameter for AllDatabases
-* SPSite
-  * Added ability to check and update QuotaTemplate, OwnerAlias and SecondaryOwnerAlias
-* SPSiteUrl
-  * New resource to manage site collection urls for host named site collections
 * SPTrustedIdentityTokenIssuerProviderRealm
   * Fixed issue where Get method threw an error when the realm didn't exist yet
-* SPUserProfileServiceApp
-  * Fix for issue where an update conflict error was thrown when new service
-    application was created
-  * Added SiteNamingConflictResolution parameter to the resource
 
 ## 2.4
 

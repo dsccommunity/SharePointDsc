@@ -44,7 +44,7 @@ function Get-TargetResource
                                    -ErrorAction SilentlyContinue
 
         $returnval = @{
-            WebAppUrl = $null
+            WebAppUrl = $wa.Url
             SuiteNavBrandingLogoNavigationUrl = $null
             SuiteNavBrandingLogoTitle = $null
             SuiteNavBrandingLogoUrl = $null
@@ -57,16 +57,13 @@ function Get-TargetResource
             return $returnval
         }
 
-        $returnval.WebAppUrl = $wa.Url
-
         $installedVersion = Get-SPDSCInstalledProductVersion
 
-        if($installedVersion.FileMajorPart -ge 15)
+        if($installedVersion.FileMajorPart -eq 15)
         {
             $returnval.SuiteBarBrandingElementHtml = $wa.SuiteBarBrandingElementHtml
         }
-
-        if($installedVersion.FileMajorPart -ge 16)
+        elseif($installedVersion.FileMajorPart -ge 16)
         {
             $returnval.SuiteNavBrandingLogoNavigationUrl = $wa.SuiteNavBrandingLogoNavigationUrl
             $returnval.SuiteNavBrandingLogoTitle = $wa.SuiteNavBrandingLogoTitle
@@ -142,18 +139,19 @@ function Set-TargetResource
         }
         16
         {
+            <# Exception: The SP2013 specific SuiteBarBrandingElementHtml parameter was passed with SP2016. #>
             if($PSBoundParameters.ContainsKey("SuiteBarBrandingElementHtml"))
             {
-                Write-Verbose ("SuiteBarBrandingElementHtml with SharePoint 2016 only works if using a " + `
-                                        "SharePoint 2013 masterpage")
+                throw ("Cannot specify SuiteBarBrandingElementHtml with SharePoint 2016 and 2019. Instead," + `
+                                        " use the SuiteNavBrandingLogoNavigationUrl, SuiteNavBrandingLogoTitle, " + `
+                                        "SuiteNavBrandingLogoUrl and SuiteNavBrandingText parameters")
             }
 
             <# Exception: All the optional parameters are null for SP2016/SP2019. #>
             if(!$PSBoundParameters.ContainsKey("SuiteNavBrandingLogoNavigationUrl") `
             -and !$PSBoundParameters.ContainsKey("SuiteNavBrandingLogoTitle") `
             -and !$PSBoundParameters.ContainsKey("SuiteNavBrandingLogoUrl") `
-            -and !$PSBoundParameters.ContainsKey("SuiteNavBrandingText") `
-            -and !$PSBoundParameters.ContainsKey("SuiteBarBrandingElementHtml"))
+            -and !$PSBoundParameters.ContainsKey("SuiteNavBrandingText"))
             {
                 throw ("You need to specify a value for either SuiteNavBrandingLogoNavigationUrl, " + `
                                         "SuiteNavBrandingLogoTitle, SuiteNavBrandingLogoUrl, SuiteNavBrandingText, " + `
@@ -186,12 +184,11 @@ function Set-TargetResource
 
         Write-Verbose -Message "Processing changes"
 
-        if($installedVersion.FileMajorPart -ge 15)
+        if($installedVersion.FileMajorPart -eq 15)
         {
             $wa.SuiteBarBrandingElementHtml = $params.SuiteBarBrandingElementHtml
         }
-
-        if($installedVersion.FileMajorPart -ge 16)
+        elseif($installedVersion.FileMajorPart -ge 16)
         {
             $wa.SuiteNavBrandingLogoNavigationUrl = $params.SuiteNavBrandingLogoNavigationUrl
             $wa.SuiteNavBrandingLogoTitle = $params.SuiteNavBrandingLogoTitle
@@ -246,20 +243,9 @@ function Test-TargetResource
         return $false
     }
 
-    $installedVersion = Get-SPDSCInstalledProductVersion
-
-    if($installedVersion.FileMajorPart -eq 15)
-    {
-        return Test-SPDscParameterState -CurrentValues $CurrentValues `
-        -DesiredValues $PSBoundParameters `
-        -ValuesToCheck @("SuiteBarBrandingElementHtml");
-    }
-    else
-    {
-        return Test-SPDscParameterState -CurrentValues $CurrentValues `
-        -DesiredValues $PSBoundParameters `
-        -ValuesToCheck @("SuiteBarBrandingElementHtml", "SuiteNavBrandingLogoNavigationUrl", "SuiteNavBrandingLogoTitle", "SuiteNavBrandingLogoUrl", "SuiteNavBrandingText")
-    }
+    return Test-SPDscParameterState -CurrentValues $CurrentValues `
+    -DesiredValues $PSBoundParameters `
+    -ValuesToCheck @("Ensure")
 }
 
 Export-ModuleMember -Function *-TargetResource

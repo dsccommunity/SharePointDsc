@@ -30,10 +30,6 @@ function Get-TargetResource
         $AllDatabases,
 
         [Parameter()]
-        [System.String[]]
-        $ExcludeDatabases,
-
-        [Parameter()]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
@@ -95,13 +91,6 @@ function Get-TargetResource
         return $nullreturn
     }
 
-    if ($Databases -and $ExcludeDatabases)
-    {
-        Write-Verbose -Message ("Cannot use the Databases parameter together with the " + `
-                                "ExcludeDatabases parameter")
-        return $nullreturn
-    }
-
     $result = Invoke-SPDSCCommand -Credential $InstallAccount `
                                   -Arguments @($PSBoundParameters, $PSScriptRoot) `
                                   -ScriptBlock {
@@ -125,13 +114,6 @@ function Get-TargetResource
 
         $cdbPermissions = @()
         $databases = Get-SPDatabase
-        if ($params.ContainsKey("ExcludeDatabases"))
-        {
-            $databases = $databases | Where-Object -FilterScript {
-                                        $_.Name -notin $params.ExcludeDatabases
-                                      }
-        }
-
         foreach ($database in $databases)
         {
             $cdbPermission = @{}
@@ -188,10 +170,6 @@ function Set-TargetResource
         $AllDatabases,
 
         [Parameter()]
-        [System.String[]]
-        $ExcludeDatabases,
-
-        [Parameter()]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
@@ -239,12 +217,6 @@ function Set-TargetResource
     {
         throw ("Cannot use the Databases parameter together with the " + `
                "AllDatabases parameter")
-    }
-
-    if ($Databases -and $ExcludeDatabases)
-    {
-        throw ("Cannot use the Databases parameter together with the " + `
-               "ExcludeDatabases parameter")
     }
 
     $result = Invoke-SPDSCCommand -Credential $InstallAccount `
@@ -565,14 +537,7 @@ function Set-TargetResource
         {
             Write-Verbose -Message "Processing AllDatabases parameter"
 
-            $databases = Get-SPDatabase
-            if ($params.ContainsKey("ExcludeDatabases"))
-            {
-                $databases = $databases | Where-Object -FilterScript {
-                                            $_.Name -notin $params.ExcludeDatabases
-                                          }
-            }
-            foreach ($database in $databases)
+            foreach ($database in (Get-SPDatabase))
             {
                 $dbShellAdmins = Get-SPShellAdmin -database $database.Id
                 if ($params.Members)
@@ -751,10 +716,6 @@ function Test-TargetResource
         [Parameter()]
         [System.Boolean]
         $AllDatabases,
-
-        [Parameter()]
-        [System.String[]]
-        $ExcludeDatabases,
 
         [Parameter()]
         [System.Management.Automation.PSCredential]

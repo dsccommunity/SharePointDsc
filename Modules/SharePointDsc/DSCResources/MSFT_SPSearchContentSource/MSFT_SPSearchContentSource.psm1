@@ -84,8 +84,8 @@ function Get-TargetResource
         Import-Module -Name $modulePath
 
         $source = Get-SPEnterpriseSearchCrawlContentSource -SearchApplication $params.ServiceAppName `
-                                                            -ErrorAction SilentlyContinue | `
-                                                                Where-Object {$_.Name -eq $params.Name}
+                                                           -Identity $params.Name `
+                                                           -ErrorAction SilentlyContinue
         if ($null -eq $source)
         {
             return @{
@@ -463,8 +463,9 @@ function Set-TargetResource
 
                 while ($sourceToWait.CrawlStatus -ne "Idle" -or $loopCount > 15)
                 {
-                    $sourceToWait = Get-SPEnterpriseSearchCrawlContentSource -SearchApplication $params.ServiceAppName | `
-                                                                                Where-Object {$_.Name -eq $params.Name}
+                    $sourceToWait = Get-SPEnterpriseSearchCrawlContentSource `
+                                        -SearchApplication $params.ServiceAppName `
+                                        -Identity $params.Name
 
                     Write-Verbose -Message ("$([DateTime]::Now.ToShortTimeString()) - Waiting " + `
                                             "for content source '$($params.Name)' to be idle " + `
