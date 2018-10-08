@@ -103,22 +103,15 @@ function Get-TargetResource
             }
 
             $proxy = Get-SPMetadataServiceApplicationProxy -Identity $proxyName
-<<<<<<< HEAD
             if ($null -ne $proxy)
-=======
-            if($null -ne $proxy)
->>>>>>> 432bbfdf030227f0cf9b197ed83f9a820f6f8926
             {
                 $contentTypePushDownEnabled = $proxy.Properties["IsContentTypePushdownEnabled"]
                 $contentTypeSyndicationEnabled = $proxy.Properties["IsNPContentTypeSyndicationEnabled"]
             }
-<<<<<<< HEAD
             else
             {
                 Write-Verbose "No SPMetadataServiceApplicationProxy with the name '$($proxyName)' was found. Please verify your Managed Metadata Service Application."
             }
-=======
->>>>>>> 432bbfdf030227f0cf9b197ed83f9a820f6f8926
 
             # Get the ContentTypeHubUrl value
             $hubUrl = ""
