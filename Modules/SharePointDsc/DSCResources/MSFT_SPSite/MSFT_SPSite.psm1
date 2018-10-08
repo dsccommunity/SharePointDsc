@@ -76,12 +76,21 @@ function Get-TargetResource
                                   -Arguments $PSBoundParameters `
                                   -ScriptBlock {
         $params = $args[0]
+        $site = $null
 
-        $site = Get-SPSite -Identity $params.Url `
-                           -ErrorAction SilentlyContinue
+        try
+        {
+            $centralAdminWebApp = [Microsoft.SharePoint.Administration.SPAdministrationWebApplication]::Local
+            $centralAdminSite = Get-SPSite -Identity $centralAdminWebApp.Url
+
+            $site = New-Object "Microsoft.SharePoint.SPSite" -ArgumentList @($params.Url, $centralAdminSite.SystemAccount.UserToken)
+        }
+        catch [System.Exception] {}
 
         if ($null -eq $site)
         {
+            Write-Verbose "Site Collection not found"
+
             return @{
                 Url = $params.Url
                 OwnerAlias = $null
@@ -262,6 +271,7 @@ function Set-TargetResource
                                   -ScriptBlock {
         $params = $args[0]
         $CurrentValues = $args[1]
+        $doCreateDefaultGroups = $false
 
         $params.Remove("InstallAccount") | Out-Null
 
@@ -273,12 +283,10 @@ function Set-TargetResource
         if ($null -eq $site)
         {
             $site = New-SPSite @params
-
             if ($CreateDefaultGroups -eq $true)
             {
-                $site.RootWeb.CreateDefaultAssociatedGroups($params.OwnerAlias,
-                                                            $params.SecondaryOwnerAlias,
-                                                            $null)
+                $doCreateDefaultGroups = $true;
+
             }
             else
             {
@@ -334,10 +342,7 @@ function Set-TargetResource
             {
                 if ($CreateDefaultGroups -eq $true)
                 {
-                    $site = Get-SPSite -Identity $params.Url -ErrorAction SilentlyContinue
-                    $site.RootWeb.CreateDefaultAssociatedGroups($params.OwnerAlias,
-                                                                $params.SecondaryOwnerAlias,
-                                                                $null)
+                    $doCreateDefaultGroups = $true;
                 }
                 else
                 {
@@ -345,6 +350,28 @@ function Set-TargetResource
                                             "SharePoint groups will not be created")
                 }
             }
+        }
+
+        if ($doCreateDefaultGroups -eq $true)
+        {
+            Write-Verbose -Message ("Creating default groups")
+
+            $centralAdminWebApp = [Microsoft.SharePoint.Administration.SPAdministrationWebApplication]::Local
+            $centralAdminSite = Get-SPSite -Identity $centralAdminWebApp.Url
+            $systemAccountSite = New-Object "Microsoft.SharePoint.SPSite" -ArgumentList @($site.Id, $centralAdminSite.SystemAccount.UserToken)
+
+            if($null -eq $systemAccountSite.SecondaryContact)
+            {
+                $secondaryOwnerLogin = $null;
+            }
+            else
+            {
+                $secondaryOwnerLogin = $systemAccountSite.SecondaryContact.UserLogin;
+            }
+
+            $systemAccountSite.RootWeb.CreateDefaultAssociatedGroups($systemAccountSite.Owner.UserLogin,
+                                                                     $secondaryOwnerLogin,
+                                                                     $null)
         }
     }
 }
@@ -439,7 +466,7 @@ function Test-TargetResource
                                                         "QuotaTemplate",
                                                         "OwnerAlias",
                                                         "SecondaryOwnerAlias",
-                                                        "TenantAdministration")
+                                                        "AdministrationSiteType")
 }
 
 Export-ModuleMember -Function *-TargetResource
