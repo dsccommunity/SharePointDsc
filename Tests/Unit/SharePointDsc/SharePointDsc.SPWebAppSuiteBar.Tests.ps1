@@ -23,6 +23,29 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         # Mocks for all contexts
 
         # Test contexts
+
+        Context -Name "Web application does not exist" -Fixture {
+            $testParams = @{
+                WebAppUrl = "http://sites.sharepoint.com"
+                SuiteBarBrandingElementHtml = "<div>Test</div>"
+            }
+
+            Mock -CommandName Get-SPWebApplication -MockWith {
+                return $null
+            }
+
+            It "Get target resource returns null value" {
+                $returnValue = Get-TargetResource @testParams
+                $returnValue | Should Not Be $null
+                $returnValue.WebAppUrl | Should Be $null
+                $returnValue.SuiteNavBrandingLogoNavigationUrl | Should Be $null
+                $returnValue.SuiteNavBrandingLogoTitle | Should Be $null
+                $returnValue.SuiteNavBrandingLogoUrl | Should Be $null
+                $returnValue.SuiteNavBrandingText | Should Be $null
+                $returnValue.SuiteBarBrandingElementHtml | Should Be $null
+            }
+        }
+
         if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 15)
         {
             Context -Name "Only all SP2016 parameters passed for a SP2013 environment" -Fixture {
@@ -115,6 +138,22 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     { Set-TargetResource @testParams } | Should Throw "You need to specify a value for the SuiteBarBrandingElementHtml parameter with SharePoint 2013"
                 }
             }
+            Context -Name "Configured values does not match" -Fixture {
+                $testParams = @{
+                    WebAppUrl = "http://sites.sharepoint.com"
+                    SuiteBarBrandingElementHtml = "<div>Test</div>"
+                }
+
+                Mock -CommandName Get-SPWebApplication -MockWith { return @(@{
+                    DisplayName = "Test Web App"
+                    Url = "http://sites.sharepoint.com"
+                    SuiteBarBrandingElementHtml = "<div>Another Test</div>"
+                })}
+
+                It "Should return false from the test method" {
+                    Test-TargetResource @testParams | Should Be $false
+                }
+            }
         }
         elseif ($Global:SPDscHelper.CurrentStubBuildNumber.Major -ge 16)
         {
@@ -125,6 +164,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     SuiteNavBrandingLogoTitle = "LogoTitle"
                     SuiteNavBrandingLogoUrl = "http://sites.sharepoint.com/images/logo.gif"
                     SuiteNavBrandingText = "Suite Bar Text"
+                    SuiteBarBrandingElementHtml = "<div>Test</div>"
                 }
 
                 Mock -CommandName Get-SPWebApplication -MockWith {
@@ -135,7 +175,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                         SuiteNavBrandingLogoTitle = "LogoTitle"
                         SuiteNavBrandingLogoUrl = "http://sites.sharepoint.com/images/logo.gif"
                         SuiteNavBrandingText = "Suite Bar Text"
-                        SuiteBarBrandingElementHtml = $null
+                        SuiteBarBrandingElementHtml = "<div>Test</div>"
                     }
                     $webApp = $webApp | Add-Member -MemberType ScriptMethod -Name Update -Value {
                         $Global:SPDscWebApplicationUpdateCalled = $true
@@ -150,6 +190,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     $results.SuiteNavBrandingLogoTitle | Should be "LogoTitle"
                     $results.SuiteNavBrandingLogoUrl | Should be "http://sites.sharepoint.com/images/logo.gif"
                     $results.SuiteNavBrandingText | Should be "Suite Bar Text"
+                    $results.SuiteBarBrandingElementHtml | Should be "<div>Test</div>"
                 }
 
                 It "Should properly configure the suite bar for the Web Application" {
@@ -176,7 +217,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                         SuiteNavBrandingLogoTitle = "LogoTitle"
                         SuiteNavBrandingLogoUrl = "http://sites.sharepoint.com/images/logo.gif"
                         SuiteNavBrandingText = "Suite Bar Text"
-                        SuiteBarBrandingElementHtml = $null
+                        SuiteBarBrandingElementHtml = "<div>Test</div>"
                     }
                     $webApp = $webApp | Add-Member -MemberType ScriptMethod -Name Update -Value {
                         $Global:SPDscWebApplicationUpdateCalled = $true
@@ -202,28 +243,6 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 }
             }
 
-            Context -Name "Only some SP2016 parameters passed along the SP2013 one for an SP2016 environment" -Fixture {
-                $testParams = @{
-                    WebAppUrl = "http://sites.sharepoint.com"
-                    SuiteBarBrandingElementHtml = "<div>Test</div>"
-                    SuiteNavBrandingLogoUrl = "http://sites.sharepoint.com/images/logo.gif"
-                    SuiteNavBrandingText = "Suite Bar Text"
-                }
-
-                Mock -CommandName Get-SPWebApplication -MockWith {return @(@{
-                    DisplayName = "Test Web App"
-                    Url = "http://sites.sharepoint.com"
-                    SuiteNavBrandingLogoNavigationUrl = "http://sites.sharepoint.com"
-                    SuiteNavBrandingLogoTitle = "LogoTitle"
-                    SuiteNavBrandingLogoUrl = "http://sites.sharepoint.com/images/logo.gif"
-                    SuiteNavBrandingText = "Suite Bar Text"
-                })}
-
-                It "return error that sp2013 parameter was passed for a sp2016 environment" {
-                    { Set-TargetResource @testParams } | Should Throw "Cannot specify SuiteBarBrandingElementHtml with SharePoint 2016 and 2019. Instead, use the SuiteNavBrandingLogoNavigationUrl, SuiteNavBrandingLogoTitle, SuiteNavBrandingLogoUrl and SuiteNavBrandingText parameters"
-                }
-            }
-
             Context -Name "None of the optional parameters passed" -Fixture {
                 $testParams = @{
                     WebAppUrl = "http://sites.sharepoint.com"
@@ -238,8 +257,31 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     SuiteNavBrandingText = "Suite Bar Text"
                 })}
 
-                It "return error that sp2016/2019 parameters are required" {
-                    { Set-TargetResource @testParams } | Should Throw "You need to specify a value for either SuiteNavBrandingLogoNavigationUrl, SuiteNavBrandingLogoTitle, SuiteNavBrandingLogoUrl and SuiteNavBrandingText with SharePoint 2016 and 2019"
+                It "return error that sp2016 parameters are required" {
+                    { Set-TargetResource @testParams } | Should Throw "You need to specify a value for either SuiteNavBrandingLogoNavigationUrl, SuiteNavBrandingLogoTitle, SuiteNavBrandingLogoUrl, SuiteNavBrandingText, and SuiteBarBrandingElementHtml with SharePoint 2016"
+                }
+            }
+
+            Context -Name "Configured values does not match" -Fixture {
+                $testParams = @{
+                    WebAppUrl = "http://sites.sharepoint.com"
+                    SuiteNavBrandingLogoNavigationUrl = "http://sites.sharepoint.com"
+                    SuiteNavBrandingLogoTitle = "LogoTitle"
+                    SuiteNavBrandingLogoUrl = "http://sites.sharepoint.com/images/logo.gif"
+                    SuiteNavBrandingText = "Suite Bar Text"
+                }
+
+                Mock -CommandName Get-SPWebApplication -MockWith { return @(@{
+                    DisplayName = "Test Web App"
+                    Url = "http://sites.sharepoint.com"
+                    SuiteNavBrandingLogoNavigationUrl = "http://anothersite.sharepoint.com"
+                    SuiteNavBrandingLogoTitle = "AnotherLogoTitle"
+                    SuiteNavBrandingLogoUrl = "http://anothersite.sharepoint.com/images/logo.gif"
+                    SuiteNavBrandingText = "Another Suite Bar Text"
+                })}
+
+                It "Should return false from the test method" {
+                    Test-TargetResource @testParams | Should Be $false
                 }
             }
         }

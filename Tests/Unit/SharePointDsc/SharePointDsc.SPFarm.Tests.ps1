@@ -58,6 +58,31 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 IsSingleInstance = "Yes"
                 Ensure = "Present"
                 FarmConfigDatabaseName = "SP_Config"
+                CentralAdministrationPort = 80000
+                DatabaseServer = "sql.contoso.com"
+                FarmAccount = $mockFarmAccount
+                Passphrase = $mockPassphrase
+                AdminContentDatabaseName = "SP_AdminContent"
+                RunCentralAdmin = $true
+            }
+
+            It "Should throw exception in the get method" {
+                { Get-TargetResource @testParams } | Should Throw "An invalid value for CentralAdministrationPort is specified:"
+            }
+
+            It "Should throw exception in the test method" {
+                { Test-TargetResource @testParams } | Should Throw "An invalid value for CentralAdministrationPort is specified:"
+            }
+
+            It "Should throw exception in the set method" {
+                { Set-TargetResource @testParams } | Should Throw "An invalid value for CentralAdministrationPort is specified:"
+            }
+        }
+
+        Context -Name "No config databaes exists, and this server should be connected to one" -Fixture {
+            $testParams = @{
+                Ensure = "Present"
+                FarmConfigDatabaseName = "SP_Config"
                 DatabaseServer = "sql.contoso.com"
                 FarmAccount = $mockFarmAccount
                 Passphrase = $mockPassphrase
@@ -450,6 +475,86 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             $global:SPDscCentralAdminCheckDone = $false
+            It "Should return false from the test method" {
+                Test-TargetResource @testParams | Should be $false
+            }
+        }
+
+        Context -Name "Server is connected to farm, but CentralAdminPort is different" -Fixture {
+            $testParams = @{
+                Ensure = "Present"
+                FarmConfigDatabaseName = "SP_Config"
+                DatabaseServer = "sql.contoso.com"
+                FarmAccount = $mockFarmAccount
+                Passphrase = $mockPassphrase
+                AdminContentDatabaseName = "SP_AdminContent"
+                RunCentralAdmin = $true
+                CentralAdministrationPort = 8080
+            }
+
+            Mock -CommandName Get-SPDSCRegistryKey -MockWith {
+                return "Connection string example"
+            }
+
+            Mock -CommandName Get-SPFarm -MockWith {
+                return @{
+                    Name = $testParams.FarmConfigDatabaseName
+                    DatabaseServer = @{
+                        Name = $testParams.DatabaseServer
+                    }
+                    AdminContentDatabaseName = $testParams.AdminContentDatabaseName
+                }
+            }
+            Mock -CommandName Get-SPDSCConfigDBStatus -MockWith {
+                return @{
+                    Locked = $false
+                    ValidPermissions = $true
+                    DatabaseExists = $true
+                }
+            }
+            Mock -CommandName Get-SPDatabase -MockWith {
+                return @(@{
+                    Name = $testParams.FarmConfigDatabaseName
+                    Type = "Configuration Database"
+                    NormalizedDataSource = $testParams.DatabaseServer
+                })
+            }
+            Mock -CommandName Get-SPWebApplication -MockWith {
+                return @{
+                    IsAdministrationWebApplication = $true
+                    ContentDatabases = @(@{
+                        Name = $testParams.AdminContentDatabaseName
+                    })
+                    IISSettings = @(@{
+                        DisableKerberos = $true
+                    })
+                    Url = "http://localhost:9999"
+                }
+            }
+            Mock -CommandName Get-CimInstance -MockWith {
+                return @{
+                    Domain = "domain.com"
+                }
+            }
+
+            Mock -CommandName Get-SPServiceInstance -MockWith {
+                return @(@{
+                    TypeName = "Central Administration"
+                    Status = "Online"
+                })
+            }
+
+            Mock -CommandName Set-SPCentralAdministration -MockWith {}
+
+            It "Should return 9999 as CA Port from the get method" {
+                (Get-TargetResource @testParams).CentralAdministrationPort | Should Be 9999
+            }
+
+            It "Should update the central administration port" {
+                Set-TargetResource @testParams
+                Assert-MockCalled -CommandName "Set-SPCentralAdministration"
+            }
+
             It "Should return false from the test method" {
                 Test-TargetResource @testParams | Should be $false
             }

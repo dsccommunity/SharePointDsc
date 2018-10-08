@@ -17,3 +17,12 @@ IIS site and prevent the site from listening for the URL of the Host Header
 Site Collection.
 If you want to change the IIS website binding settings, please use the xWebsite
 resource in the xWebAdministration module.
+
+NOTE2:
+The CreateDefaultGroups parameter is only used for creating default site
+groups. It will not remove or change the default groups if they already exist.
+
+NOTE3:
+AdministrationSiteType is used in combination with the resource
+SPWebAppClientCallableSettings. The required proxy library must be configured
+before the administration site type has any effect.

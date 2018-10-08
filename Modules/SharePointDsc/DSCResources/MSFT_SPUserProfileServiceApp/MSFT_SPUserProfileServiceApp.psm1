@@ -57,6 +57,11 @@ function Get-TargetResource
         $NoILMUsed = $false,
 
         [Parameter()]
+        [ValidateSet("Username_CollisionError","Username_CollisionDomain","Domain_Username")]
+        [System.String]
+        $SiteNamingConflictResolution,
+
+        [Parameter()]
         [ValidateSet("Present","Absent")]
         [System.String]
         $Ensure = "Present",
@@ -165,6 +170,7 @@ function Get-TargetResource
             }
             $upMySiteLocation = $null
             $upMySiteManagedPath = $null
+            $upSiteConflictNaming = $null
             try
             {
                 $ca = Get-SPWebApplication -IncludeCentralAdministration | Where-Object -FilterScript {$_.IsAdministrationWebApplication}
@@ -173,6 +179,7 @@ function Get-TargetResource
                 $userProfileManager = New-Object Microsoft.Office.Server.UserProfiles.UserProfileManager($serviceContext)
                 $upMySiteLocation = $userProfileManager.MySiteHostUrl
                 $upMySiteManagedPath = $userProfileManager.PersonalSiteInclusion
+                $upSiteConflictNaming = $userProfileManager.PersonalSiteFormat
             }
             catch
             {
@@ -180,21 +187,22 @@ function Get-TargetResource
             }
 
             return @{
-                Name               = $serviceApp.DisplayName
-                ProxyName          = $proxyName
-                ApplicationPool    = $serviceApp.ApplicationPool.Name
-                MySiteHostLocation = $upMySiteLocation
-                MySiteManagedPath  = $upMySiteManagedPath
-                ProfileDBName      = $databases.ProfileDatabase.Name
-                ProfileDBServer    = $databases.ProfileDatabase.NormalizedDataSource
-                SocialDBName       = $databases.SocialDatabase.Name
-                SocialDBServer     = $databases.SocialDatabase.NormalizedDataSource
-                SyncDBName         = $databases.SynchronizationDatabase.Name
-                SyncDBServer       = $databases.SynchronizationDatabase.NormalizedDataSource
-                InstallAccount     = $params.InstallAccount
-                EnableNetBIOS      = $serviceApp.NetBIOSDomainNamesEnabled
-                NoILMUsed          = $serviceApp.NoILMUsed
-                Ensure             = "Present"
+                Name                         = $serviceApp.DisplayName
+                ProxyName                    = $proxyName
+                ApplicationPool              = $serviceApp.ApplicationPool.Name
+                MySiteHostLocation           = $upMySiteLocation
+                MySiteManagedPath            = $upMySiteManagedPath
+                ProfileDBName                = $databases.ProfileDatabase.Name
+                ProfileDBServer              = $databases.ProfileDatabase.NormalizedDataSource
+                SocialDBName                 = $databases.SocialDatabase.Name
+                SocialDBServer               = $databases.SocialDatabase.NormalizedDataSource
+                SyncDBName                   = $databases.SynchronizationDatabase.Name
+                SyncDBServer                 = $databases.SynchronizationDatabase.NormalizedDataSource
+                InstallAccount               = $params.InstallAccount
+                EnableNetBIOS                = $serviceApp.NetBIOSDomainNamesEnabled
+                NoILMUsed                    = $serviceApp.NoILMUsed
+                SiteNamingConflictResolution = $upSiteConflictNaming
+                Ensure                       = "Present"
             }
         }
     }
@@ -259,6 +267,11 @@ function Set-TargetResource
         $NoILMUsed = $false,
 
         [Parameter()]
+        [ValidateSet("Username_CollisionError","Username_CollisionDomain","Domain_Username")]
+        [System.String]
+        $SiteNamingConflictResolution,
+
+        [Parameter()]
         [ValidateSet("Present","Absent")]
         [System.String]
         $Ensure = "Present",
@@ -273,8 +286,8 @@ function Set-TargetResource
     if ($Ensure -eq "Present")
     {
         $farmAccount = Invoke-SPDSCCommand -Credential $InstallAccount `
-                                               -Arguments $PSBoundParameters `
-                                               -ScriptBlock {
+                                           -Arguments $PSBoundParameters `
+                                           -ScriptBlock {
             return Get-SPDscFarmAccount
         }
 
@@ -289,6 +302,7 @@ function Set-TargetResource
                            "Account. Make sure the specified InstallAccount isn't the Farm Account " + `
                            "and try again")
                 }
+                $setupAccount = $InstallAccount.UserName
             }
             else
             {
@@ -303,6 +317,7 @@ function Set-TargetResource
                                "Account. Make sure the specified PSDSCRunAsCredential isn't the " + `
                                "Farm Account and try again")
                     }
+                    $setupAccount = $localaccount
                 }
             }
         }
@@ -329,9 +344,10 @@ function Set-TargetResource
         }
 
         $null = Invoke-SPDSCCommand -Credential $FarmAccount `
-                                    -Arguments $PSBoundParameters `
+                                    -Arguments @($PSBoundParameters, $setupAccount) `
                                     -ScriptBlock {
             $params = $args[0]
+            $setupAccount = $args[1]
 
             $updateEnableNetBIOS = $false
             if ($params.ContainsKey("EnableNetBIOS"))
@@ -347,6 +363,14 @@ function Set-TargetResource
                 $updateNoILMUsed = $true
                 $NoILMUsed = $params.NoILMUsed
                 $params.Remove("NoILMUsed") | Out-Null
+            }
+
+            $updateSiteNamingConflict = $false
+            if ($params.ContainsKey("SiteNamingConflictResolution"))
+            {
+                $updateSiteNamingConflict = $true
+                $SiteNamingConflictResolution = $params.SiteNamingConflictResolution
+                $params.Remove("SiteNamingConflictResolution") | Out-Null
             }
 
             if ($params.ContainsKey("InstallAccount"))
@@ -388,6 +412,19 @@ function Set-TargetResource
                                                          -ServiceApplication $app `
                                                          -DefaultProxyGroup
                 }
+
+                $claimsPrincipal = New-SPClaimsPrincipal -Identity $setupAccount `
+                                                         -IdentityType WindowsSamAccountName
+
+                $serviceAppSecurity = Get-SPServiceApplicationSecurity $app
+                Grant-SPObjectSecurity -Identity $serviceAppSecurity `
+                                       -Principal $claimsPrincipal `
+                                       -Rights "Full Control"
+                Set-SPServiceApplicationSecurity -Identity $app `
+                                                 -ObjectSecurity $serviceAppSecurity
+
+                $app = Get-SPServiceApplication -Name $params.Name `
+                                                -ErrorAction SilentlyContinue
             }
 
             if (($updateEnableNetBIOS -eq $true) -or ($updateNoILMUsed -eq $true))
@@ -404,6 +441,15 @@ function Set-TargetResource
                     $app.NoILMUsed = $NoILMUsed
                 }
                 $app.Update()
+            }
+
+            if ($updateSiteNamingConflict -eq $true)
+            {
+                $ca = Get-SPWebApplication -IncludeCentralAdministration | Where-Object -FilterScript {$_.IsAdministrationWebApplication}
+                $caSite = $ca.Sites[0]
+                $serviceContext = Get-SPServiceContext($caSite)
+                $userProfileManager = New-Object Microsoft.Office.Server.UserProfiles.UserProfileManager($serviceContext)
+                $userProfileManager.PersonalSiteFormat = $SiteNamingConflictResolution
             }
         }
 
@@ -508,6 +554,11 @@ function Test-TargetResource
         $NoILMUsed = $false,
 
         [Parameter()]
+        [ValidateSet("Username_CollisionError","Username_CollisionDomain","Domain_Username")]
+        [System.String]
+        $SiteNamingConflictResolution,
+
+        [Parameter()]
         [ValidateSet("Present","Absent")]
         [System.String]
         $Ensure = "Present",
@@ -530,6 +581,7 @@ function Test-TargetResource
                                             -ValuesToCheck @("Name",
                                                              "EnableNetBIOS",
                                                              "NoILMUsed",
+                                                             "SiteNamingConflictResolution",
                                                              "Ensure")
     }
     else
