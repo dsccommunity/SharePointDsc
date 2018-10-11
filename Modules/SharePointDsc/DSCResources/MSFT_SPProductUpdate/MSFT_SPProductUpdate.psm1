@@ -328,6 +328,8 @@ function Set-TargetResource
                 "any time. Starting update.")
     }
 
+    $installedVersion = [System.Version]Get-SPDSCInstalledProductVersion
+
     if ($ShutdownServices)
     {
         Write-Verbose -Message "Stopping services to speed up installation process"
@@ -381,7 +383,7 @@ function Set-TargetResource
 
         Write-Verbose -Message "Stopping other services"
 
-        if ($InstalledVersion.FileMajorPart -eq 15 -or $installedVersion.ProductBuildPart.ToString().Length -eq 4)
+        if ($installedVersion.FileMajorPart -eq 15 -or $installedVersion.ProductBuildPart.ToString().Length -eq 4)
         {
             Write-Verbose -Message "SharePoint 2013 or 2016 used, reconfiguring IISAdmin service to Disabled startup."
             Set-Service -Name "IISADMIN" -StartupType Disabled
@@ -443,7 +445,7 @@ function Set-TargetResource
         Write-Verbose -Message "Restart stopped services"
         Set-Service -Name "SPTimerV4" -StartupType Automatic
 
-        if ($InstalledVersion.FileMajorPart -eq 15 -or $installedVersion.ProductBuildPart.ToString().Length -eq 4)
+        if ($installedVersion.FileMajorPart -eq 15 -or $installedVersion.ProductBuildPart.ToString().Length -eq 4)
         {
             Write-Verbose -Message "SharePoint 2013 or 2016 used, reconfiguring IISAdmin service to Automatic startup."
             Set-Service -Name "IISADMIN" -StartupType Automatic
