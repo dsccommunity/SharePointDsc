@@ -159,6 +159,7 @@ function Get-SPDscFarmAccountName
 
 function Get-SPDscLocalVersionInfo
 {
+    [OutputType([System.Version])]
     param
     (
         # Parameter help description
@@ -200,7 +201,8 @@ function Get-SPDscLocalVersionInfo
     $nullVersion = New-Object -TypeName System.Version
     $versionInfoValue = New-Object -TypeName System.Version
 
-    $officeProductKeys | ForEach-Object -Process {
+    # $null - one command returns an empty value
+    $null = $officeProductKeys | ForEach-Object -Process {
         $officeProductKey = $_
 
         $productInfo = Get-ItemProperty "Registry::$($officeProductKey)\InstallProperties"
@@ -228,25 +230,30 @@ function Get-SPDscLocalVersionInfo
 
                 if ($null -ne $localPackage)
                 {
-
                     $patchFileInformation = New-Object -TypeName System.IO.FileInfo -ArgumentList $localPackage
                     if ($patchFileInformation.Extension -eq ".msp")
                     {
+                        try
+                        {
+                            $windowsInstaller = New-Object -ComObject WindowsInstaller.Installer
+                            $installerDatabase = $windowsInstaller.GetType().InvokeMember("OpenDatabase", "InvokeMethod", $null, $windowsInstaller, ($localPackage , 32))
+                            $databaseQuery = "SELECT Value FROM MsiPatchMetadata WHERE Property = 'BuildNumber'"
+                            $databaseView = $installerDatabase.GetType().InvokeMember("OpenView", "InvokeMethod", $null, $installerDatabase, ($databaseQuery))
+                            $databaseView.GetType().InvokeMember("Execute", "InvokeMethod", $null, $databaseView, $null)
+                            $value = $databaseView.GetType().InvokeMember("Fetch", "InvokeMethod", $null, $databaseView, $null)
+                            $versionInfo = [System.Version]$value.GetType().InvokeMember("StringData", "GetProperty", $null, $value, 1)
 
-                        $windowsInstaller = New-Object -ComObject WindowsInstaller.Installer
-                        $installerDatabase = $windowsInstaller.GetType().InvokeMember("OpenDatabase", "InvokeMethod", $null, $windowsInstaller, ($localPackage , 32))
-                        $databaseQuery = "SELECT Value FROM MsiPatchMetadata WHERE Property = 'BuildNumber'"
-                        $databaseView = $installerDatabase.GetType().InvokeMember("OpenView", "InvokeMethod", $null, $installerDatabase, ($databaseQuery))
-                        $databaseView.GetType().InvokeMember("Execute", "InvokeMethod", $null, $databaseView, $null)
-                        $value = $databaseView.GetType().InvokeMember("Fetch", "InvokeMethod", $null, $databaseView, $null)
-                        $versionInfo = $value.GetType().InvokeMember("StringData", "GetProperty", $null, $value, 1)
+                            # https://github.com/PowerShell/DscResources/issues/383
 
-                        # https://github.com/PowerShell/DscResources/issues/383
-
-                        $null = [System.Runtime.InteropServices.Marshal]::ReleaseComObject($databaseView)
-                        $null = [System.Runtime.InteropServices.Marshal]::ReleaseComObject($value)
-                        $null = [System.Runtime.InteropServices.Marshal]::ReleaseComObject($installerDatabase)
-                        $null = [System.Runtime.InteropServices.Marshal]::ReleaseComObject($windowsInstaller)
+                            $null = [System.Runtime.InteropServices.Marshal]::ReleaseComObject($databaseView)
+                            $null = [System.Runtime.InteropServices.Marshal]::ReleaseComObject($value)
+                            $null = [System.Runtime.InteropServices.Marshal]::ReleaseComObject($installerDatabase)
+                            $null = [System.Runtime.InteropServices.Marshal]::ReleaseComObject($windowsInstaller)
+                        }
+                        catch [Exception]
+                        {
+                            throw [Exception] "An error occured during the collection of data about installed products in Get-SPDscLocalVersionInfo."
+                        }
                     }
                 }
                 else

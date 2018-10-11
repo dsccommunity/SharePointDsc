@@ -176,7 +176,7 @@ function Get-TargetResource
     }
 
     Write-Verbose -Message "The lowest version of any SharePoint component is $($versionInfo)"
-    if ($versionInfo -lt $fileVersion)
+    if ($versionInfo -lt $fileVersionInfo)
     {
         # Version of SharePoint is lower than the patch version. Patch is not installed.
         return @{
