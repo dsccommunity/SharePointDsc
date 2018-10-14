@@ -13,4 +13,3 @@ class MSFT_SPSelfServiceSiteCreation : OMI_BaseResource
     [Write, Description("Specifies a custom form URL to use for Self Service Site Creation. This is only used when CreateIndividualSite is true. Must be an absolute URL or empty to use built in form (_layouts/_layouts/15/scsignup.aspx)")] string CustomFormUrl;
     [Write, Description("POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5"), EmbeddedInstance("MSFT_Credential")] String InstallAccount;
 };
-
