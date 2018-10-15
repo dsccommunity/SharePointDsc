@@ -303,6 +303,7 @@ function Set-TargetResource
                                                                          -SearchApplication $params.ServiceAppName
 
         Set-SPEnterpriseSearchMetadataManagedProperty -Identity $managedProperty.Name `
+                                                      -SearchApplication $params.ServiceAppName `
                                                       -Retrievable $params.Retrievable `
                                                       -SafeForAnonymous $params.SafeForAnonymous `
                                                       -NoWordBreaker $params.NoWordBreaker
