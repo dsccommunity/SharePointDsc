@@ -1,7 +1,7 @@
 [CmdletBinding()]
 param(
     [Parameter()]
-    [string] 
+    [string]
     $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
                                          -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
                                          -Resolve)
@@ -20,7 +20,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 try {
         # Initialize tests
            Add-Type -TypeDefinition @"
-namespace Microsoft.Office.Server.Search.Administration { 
+namespace Microsoft.Office.Server.Search.Administration {
     public enum SearchObjectLevel
     {
         SPWeb,
@@ -32,9 +32,10 @@ namespace Microsoft.Office.Server.Search.Administration {
 "@ -ErrorAction SilentlyContinue
 }
 catch {
-    
-}  
-        # Mocks for all contexts 
+
+}
+
+        # Mocks for all contexts
         Mock -CommandName Get-SPEnterpriseSearchServiceApplication {
             return @{
                 SearchCenterUrl = "http://example.sharepoint.com/pages"
@@ -44,7 +45,7 @@ catch {
         Mock -CommandName Get-SPWeb -MockWith {
             return @{}
         }
-        
+
         $Global:SPDscResultSourceProvicers = @(
             @{
                 Id = "c1e2843d-1825-4a37-ad15-dce5d50f46d2"
@@ -71,7 +72,7 @@ catch {
                 Name = "Remote SharePoint Provider"
             }
         )
- 
+
         Mock -CommandName New-Object {
             switch ($TypeName) {
                 "Microsoft.Office.Server.Search.Administration.SearchObjectOwner" {
@@ -81,7 +82,7 @@ catch {
                     return [System.Object]::new() | Add-Member -Name GetSourceByName `
                                              -MemberType ScriptMethod `
                                              -PassThru `
-                                             -Value { 
+                                             -Value {
                                                  return $Global:SPDscCurrentResultSourceMocks
                                              } `
                                 | Add-Member -Name ListProviders `
@@ -105,17 +106,34 @@ catch {
                                                 | Add-Member -Name Commit `
                                                             -MemberType ScriptMethod `
                                                             -PassThru `
-                                                            -Value { 
+                                                            -Value {
                                                                 $Global:SPDscResultSourceUpdated = $true
                                                             }
                                              } `
                                 | Add-Member -Name RemoveSource `
                                              -MemberType ScriptMethod `
                                              -PassThru `
+                                             -Value { } `
+                                | Add-Member -Name ListSources `
+                                             -MemberType ScriptMethod `
+                                             -PassThru `
                                              -Value { }
                 }
+                "Microsoft.Office.Server.Search.Administration.SearchObjectFilter" {
+                    return [System.Object]::new() | Add-Member -Name IncludeHigherLevel `
+                        -MemberType ScriptProperty `
+                        -PassThru `
+                        {
+                            # get
+                            "getter"
+                        }`
+                        {
+                            # set
+                            param ( $arg )
+                        }
+                }
             }
-        }  
+        }
 
         # Test contexts
         Context -Name "A search result source doesn't exist and should" -Fixture {
@@ -127,7 +145,7 @@ catch {
                 ConnectionUrl = "https://sharepoint.contoso.com"
                 Ensure = "Present"
             }
-            
+
             $Global:SPDscCurrentResultSourceMocks = $null
 
             It "Should return absent from the get method" {
@@ -246,6 +264,30 @@ catch {
 
             It "Should throw an exception trying to create the result source in the set method" {
                 { Set-TargetResource @testParams } | Should throw
+            }
+        }
+
+        Context -Name "Local Result Source" -Fixture {
+            $testParams = @{
+                Name = "Test source"
+                SearchServiceAppName = "Search Service Application"
+                ProviderType = "Remote SharePoint Provider"
+                Query = "{searchTerms}"
+                ConnectionUrl = "https://sharepoint.contoso.com"
+                ScopeUrl = "https://sharepoint.contoso.com"
+                Ensure = "Present"
+            }
+
+            It "Should return absent from the get method" {
+                (Get-TargetResource @testParams).Ensure | Should Be "Absent"
+            }
+
+            It "Should return false from the test method" {
+                Test-TargetResource @testParams | Should Be $false
+            }
+
+            It "Should create the result source in the set method" {
+                Set-TargetResource @testParams
             }
         }
     }
