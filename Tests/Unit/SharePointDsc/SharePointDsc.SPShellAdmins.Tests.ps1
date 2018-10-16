@@ -34,7 +34,10 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             It "Should return null from the get method" {
-                Get-TargetResource @testParams | Should Be $null
+                $result = Get-TargetResource @testParams
+                $result.Members | Should BeNullOrEmpty
+                $result.MembersToInclude | Should BeNullOrEmpty
+                $result.MembersToExclude | Should BeNullOrEmpty
             }
 
             It "Should return false from the test method" {
@@ -60,7 +63,10 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             It "Should return null from the get method" {
-                Get-TargetResource @testParams | Should BeNullOrEmpty
+                $result = Get-TargetResource @testParams
+                $result.Members | Should BeNullOrEmpty
+                $result.MembersToInclude | Should BeNullOrEmpty
+                $result.MembersToExclude | Should BeNullOrEmpty
             }
 
             It "Should return false from the test method" {
@@ -80,7 +86,10 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             It "Should return null from the get method" {
-                Get-TargetResource @testParams | Should Be $null
+                $result = Get-TargetResource @testParams
+                $result.Members | Should BeNullOrEmpty
+                $result.MembersToInclude | Should BeNullOrEmpty
+                $result.MembersToExclude | Should BeNullOrEmpty
             }
 
             It "Should return false from the test method" {
@@ -98,7 +107,10 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             It "Should return null from the get method" {
-                Get-TargetResource @testParams | Should Be $null
+                $result = Get-TargetResource @testParams
+                $result.Members | Should BeNullOrEmpty
+                $result.MembersToInclude | Should BeNullOrEmpty
+                $result.MembersToExclude | Should BeNullOrEmpty
             }
 
             It "Should return false from the test method" {
@@ -123,7 +135,10 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             It "Should return null from the get method" {
-                Get-TargetResource @testParams | Should Be $null
+                $result = Get-TargetResource @testParams
+                $result.Members | Should BeNullOrEmpty
+                $result.MembersToInclude | Should BeNullOrEmpty
+                $result.MembersToExclude | Should BeNullOrEmpty
             }
 
             It "Should return false from the test method" {
@@ -146,7 +161,10 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             It "Should return null from the get method" {
-                Get-TargetResource @testParams | Should Be $null
+                $result = Get-TargetResource @testParams
+                $result.Members | Should BeNullOrEmpty
+                $result.MembersToInclude | Should BeNullOrEmpty
+                $result.MembersToExclude | Should BeNullOrEmpty
             }
 
             It "Should return false from the test method" {
@@ -187,7 +205,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             It "Should return false from the test method" {
-                { Test-TargetResource @testParams } | Should throw "Specified database does not exist"
+                Test-TargetResource @testParams | Should Be $false
             }
 
             It "Should throw an exception in the set method" {
@@ -207,14 +225,14 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 {
                     # Database parameter used, return database permissions
                     return @{
-                        UserName = "contoso\user1","contoso\user2"
+                        UserName = "contoso\user3","contoso\user4"
                     }
                 }
                 else
                 {
                     # Database parameter not used, return general permissions
                     return @{
-                        UserName = "contoso\user1","contoso\user2"
+                        UserName = "contoso\user3","contoso\user4"
                     }
                 }
             }

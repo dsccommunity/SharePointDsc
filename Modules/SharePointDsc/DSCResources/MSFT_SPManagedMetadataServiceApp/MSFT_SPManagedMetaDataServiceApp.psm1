@@ -53,22 +53,24 @@ function Get-TargetResource
     Write-Verbose -Message "Getting managed metadata service application $Name"
 
     $result = Invoke-SPDSCCommand -Credential $InstallAccount `
-        -Arguments $PSBoundParameters `
-        -ScriptBlock {
+                                  -Arguments $PSBoundParameters `
+                                  -ScriptBlock {
         $params = $args[0]
 
         $serviceApps = Get-SPServiceApplication -Name $params.Name `
-            -ErrorAction SilentlyContinue
+                                                -ErrorAction SilentlyContinue
         $nullReturn = @{
             Name                    = $params.Name
             Ensure                  = "Absent"
             ApplicationPool         = $params.ApplicationPool
             TermStoreAdministrators = @()
         }
+
         if ($null -eq $serviceApps)
         {
             return $nullReturn
         }
+
         $serviceApp = $serviceApps | Where-Object -FilterScript {
             $_.GetType().FullName -eq "Microsoft.SharePoint.Taxonomy.MetadataWebServiceApplication"
         }

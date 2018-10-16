@@ -202,28 +202,6 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 }
             }
 
-            Context -Name "Only some SP2016 parameters passed along the SP2013 one for an SP2016 environment" -Fixture {
-                $testParams = @{
-                    WebAppUrl = "http://sites.sharepoint.com"
-                    SuiteBarBrandingElementHtml = "<div>Test</div>"
-                    SuiteNavBrandingLogoUrl = "http://sites.sharepoint.com/images/logo.gif"
-                    SuiteNavBrandingText = "Suite Bar Text"
-                }
-
-                Mock -CommandName Get-SPWebApplication -MockWith {return @(@{
-                    DisplayName = "Test Web App"
-                    Url = "http://sites.sharepoint.com"
-                    SuiteNavBrandingLogoNavigationUrl = "http://sites.sharepoint.com"
-                    SuiteNavBrandingLogoTitle = "LogoTitle"
-                    SuiteNavBrandingLogoUrl = "http://sites.sharepoint.com/images/logo.gif"
-                    SuiteNavBrandingText = "Suite Bar Text"
-                })}
-
-                It "return error that sp2016/sp2019 parameters are required" {
-                    { Set-TargetResource @testParams } | Should Throw "You need to specify a value for either SuiteNavBrandingLogoNavigationUrl, SuiteNavBrandingLogoTitle, SuiteNavBrandingLogoUrl, SuiteNavBrandingText, and SuiteBarBrandingElementHtml with SharePoint 2016 or SharePoint 2019"
-                }
-            }
-
             Context -Name "None of the optional parameters passed" -Fixture {
                 $testParams = @{
                     WebAppUrl = "http://sites.sharepoint.com"
@@ -239,7 +217,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 })}
 
                 It "return error that sp2016/2019 parameters are required" {
-                    { Set-TargetResource @testParams } | Should Throw "You need to specify a value for either SuiteNavBrandingLogoNavigationUrl, SuiteNavBrandingLogoTitle, SuiteNavBrandingLogoUrl and SuiteNavBrandingText with SharePoint 2016 and 2019"
+                    { Set-TargetResource @testParams } | Should Throw "You need to specify a value for either SuiteNavBrandingLogoNavigationUrl, SuiteNavBrandingLogoTitle, SuiteNavBrandingLogoUrl, SuiteNavBrandingText, and SuiteBarBrandingElementHtml with SharePoint 2016 or SharePoint 2019"
                 }
             }
         }

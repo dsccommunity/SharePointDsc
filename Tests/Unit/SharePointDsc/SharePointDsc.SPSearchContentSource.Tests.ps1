@@ -111,11 +111,11 @@ namespace Microsoft.Office.Server.Search.Administration {
             }
 
             It "Should create the content source in the test method" {
-                { Test-TargetResource @testParams } | Should Throw "Parameter 'CrawlSetting' can only be set to custom for website content sources"
+                { Test-TargetResource @testParams } | Should Throw "Parameter CrawlSetting can only be set to custom for website content sources"
             }
 
             It "Should create the content source in the set method" {
-                { Set-TargetResource @testParams } | Should Throw "Parameter 'CrawlSetting' can only be set to custom for website content sources"
+                { Set-TargetResource @testParams } | Should Throw "Parameter CrawlSetting can only be set to custom for website content sources"
             }
         }
 
@@ -236,11 +236,11 @@ namespace Microsoft.Office.Server.Search.Administration {
             }
 
             It "Should create the content source in the test method" {
-                { Test-TargetResource @testParams } | Should Throw "Parameter 'CrawlSetting' can only be set to custom for website content sources"
+                { Test-TargetResource @testParams } | Should Throw "Parameter CrawlSetting can only be set to custom for website content sources"
             }
 
             It "Should create the content source in the set method" {
-                { Set-TargetResource @testParams } | Should Throw "Parameter 'CrawlSetting' can only be set to custom for website content sources"
+                { Set-TargetResource @testParams } | Should Throw "Parameter CrawlSetting can only be set to custom for website content sources"
             }
         }
 
@@ -405,6 +405,7 @@ namespace Microsoft.Office.Server.Search.Administration {
             }
             Mock -CommandName Get-SPEnterpriseSearchCrawlContentSource -MockWith {
                 return @{
+                    Name = "Example content source"
                     Type = "SharePoint"
                     SharePointCrawlBehavior = "CrawlVirtualServers"
                     StartAddresses = @(
@@ -597,6 +598,7 @@ namespace Microsoft.Office.Server.Search.Administration {
 
             Mock -CommandName Get-SPEnterpriseSearchCrawlContentSource -MockWith {
                 return @{
+                    Name = "Example content source"
                     Type = "Web"
                     MaxPageEnumerationDepth = 0
                     MaxSiteEnumerationDepth = 0
@@ -780,6 +782,7 @@ namespace Microsoft.Office.Server.Search.Administration {
             }
             Mock -CommandName Get-SPEnterpriseSearchCrawlContentSource -MockWith {
                 return @{
+                    Name = "Example content source"
                     Type = "File"
                     FollowDirectories = $false
                     StartAddresses = @(
@@ -839,6 +842,7 @@ namespace Microsoft.Office.Server.Search.Administration {
                     $crawlStatus = "Idle"
                 }
                 $returnval = @{
+                    Name = "Example content source"
                     Type = "SharePoint"
                     SharePointCrawlBehavior = "CrawlVirtualServers"
                     StartAddresses = @(
@@ -897,6 +901,7 @@ namespace Microsoft.Office.Server.Search.Administration {
                 $schedule.StartMinute = 0
                 $schedule.DaysInterval = 1
                 return @{
+                    Name = "Example content source"
                     Type = "SharePoint"
                     SharePointCrawlBehavior = "CrawlVirtualServers"
                     StartAddresses = @(
@@ -939,6 +944,7 @@ namespace Microsoft.Office.Server.Search.Administration {
                 $schedule.StartMinute = 0
                 $schedule.DaysOfWeek = [enum]::Parse([Microsoft.Office.Server.Search.Administration.DaysOfWeek], "Monday, Wednesday, Friday")
                 return @{
+                    Name = "Example content source"
                     Type = "SharePoint"
                     SharePointCrawlBehavior = "CrawlVirtualServers"
                     StartAddresses = @(
@@ -986,6 +992,7 @@ namespace Microsoft.Office.Server.Search.Administration {
                 $schedule.StartMinute = 0
                 $schedule.DaysOfWeek = [enum]::Parse([Microsoft.Office.Server.Search.Administration.DaysOfWeek], "Monday, Wednesday, Friday")
                 return @{
+                    Name = "Example content source"
                     Type = "SharePoint"
                     SharePointCrawlBehavior = "CrawlVirtualServers"
                     StartAddresses = @(
@@ -1016,6 +1023,7 @@ namespace Microsoft.Office.Server.Search.Administration {
             }
             Mock -CommandName Get-SPEnterpriseSearchCrawlContentSource -MockWith {
                 return @{
+                    Name = "Example content source"
                     Type = "Business"
                     IncrementalCrawlSchedule = $null
                     FullCrawlSchedule = $null
@@ -1099,6 +1107,7 @@ namespace Microsoft.Office.Server.Search.Administration {
 
             Mock -CommandName Get-SPEnterpriseSearchCrawlContentSource -MockWith {
                 return @{
+                    Name = "Example content source"
                     Type = "Business"
                     IncrementalCrawlSchedule = $null
                     FullCrawlSchedule = $null
@@ -1159,6 +1168,7 @@ namespace Microsoft.Office.Server.Search.Administration {
             }
             Mock -CommandName Get-SPEnterpriseSearchCrawlContentSource -MockWith {
                 return @{
+                    Name = "Example content source"
                     Type = "FakeType"
                 }
             }
@@ -1360,18 +1370,19 @@ namespace Microsoft.Office.Server.Search.Administration {
         Context -Name "Trying to change Content Source Type" {
 
             Mock -CommandName Get-SPEnterpriseSearchCrawlContentSource -MockWith {
-                return @(
-                    New-Object -TypeName "Object" |
-                        Add-Member -MemberType NoteProperty `
-                                   -Name Type `
-                                   -Value "Business" `
-                                   -PassThru |
-                        Add-Member -MemberType ScriptMethod `
-                                   -Name StopCrawl `
-                                   -Value {
-                                       $null
-                                   }  -PassThru -Force
-                )
+                $returnval = @{
+                    Name = "Example content source"
+                }
+                $returnval = $returnval | Add-Member -MemberType NoteProperty `
+                                                     -Name Type `
+                                                     -Value "Business" `
+                                                     -PassThru |
+                                          Add-Member -MemberType ScriptMethod `
+                                                     -Name StopCrawl `
+                                                     -Value {
+                                                         $null
+                                                     }  -PassThru -Force
+                return $returnval
             }
 
             $testParams = @{
