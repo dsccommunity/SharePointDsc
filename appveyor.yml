@@ -3,8 +3,6 @@ version: 2.6.0.{build}
 install:
     - git clone https://github.com/PowerShell/DscResource.Tests
 
-    - npm --silent install
-
     - ps: |
         $moduleName = 'SharePointDsc'
         $mainModuleFolder = "Modules\$moduleName"
