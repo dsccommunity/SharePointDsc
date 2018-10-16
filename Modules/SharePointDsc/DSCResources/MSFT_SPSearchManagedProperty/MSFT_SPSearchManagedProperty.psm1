@@ -46,7 +46,7 @@ function Get-TargetResource
         $SafeForAnonymous,
 
         [Parameter()]
-        [System.String]
+        [System.String[]]
         $Alias,
 
         [Parameter()]
@@ -102,17 +102,12 @@ function Get-TargetResource
         else
         {
             $aliases = $managedProperty.GetAliases()
-            $alias = ""
-            if ($aliases)
-            {
-                $alias = $aliases[0]
-            }
 
             $mappedCrawlProperties = $managedProperty.GetMappedCrawledProperties($false)
-            $includeAllCrawlProperties = $false
+            $includeAllCrawlProperties = $true
             if ($mappedCrawlProperties)
             {
-                $includeAllCrawlProperties = $true
+                $includeAllCrawlProperties = $false
             }
             $results = @{
                 Name = $params.Name
@@ -125,7 +120,7 @@ function Get-TargetResource
                 Refinable = $managedProperty.Refinable
                 Sortable = $managedProperty.Sortable
                 SafeForAnonymous = $managedProperty.SafeForAnonymous
-                Alias = $alias
+                Alias = $aliases
                 TokenNormalization = $managedProperty.TokenNormalization
                 NoWordBreaker = $managedProperty.NoWordBreaker
                 IncludeAllCrawledProperties = $includeAllCrawlProperties
@@ -194,7 +189,7 @@ function Set-TargetResource
         $SafeForAnonymous,
 
         [Parameter()]
-        [System.String]
+        [System.String[]]
         $Alias,
 
         [Parameter()]
@@ -317,13 +312,32 @@ function Set-TargetResource
         $managedProperty.RespectPriority = !($params.IncludeAllCrawledProperties)
         $managedProperty.OverrideValueOfHasMultipleValues = !($params.IncludeAllCrawledProperties)
 
-        $managedProperty.Update()
+
         # If alias doesn't already exist, add it
-        $alias = $managedProperty.GetAliases() | Where-Object{$_ -eq $params.Alias}
-        if ($alias)
+        $currentAliases = $managedProperty.GetAliases()
+
+        foreach($alias in $params.Alias)
         {
-            $managedProperty.AddAlias($params.Alias)
+            $currentAlias = $managedProperty.GetAliases() | Where-Object {$_ -eq $alias}
+            if(!$currentAlias)
+            {
+                $managedProperty.AddAlias($params.Alias)
+            }
         }
+        $managedProperty.Update()
+
+        # Remove the aliases that are different, meaning they currently exist, but were not specified in the config,
+        # which means we need to remove them.
+        $currentAliases = $managedProperty.GetAliases()
+
+        foreach($alias in $currentAliases)
+        {
+            if(!$params.Alias.Contains($alias))
+            {
+                $managedProperty.DeleteAlias($alias)
+            }
+        }
+        $managedProperty.Update()
 
         # Generate the Crawled Properties mapping
         $listOfMappedCrawlProperty = [Microsoft.Office.Server.Search.Administration.MappingCollection]::new()
@@ -390,7 +404,7 @@ function Test-TargetResource
         $SafeForAnonymous,
 
         [Parameter()]
-        [System.String]
+        [System.String[]]
         $Alias,
 
         [Parameter()]
