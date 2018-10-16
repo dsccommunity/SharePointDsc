@@ -47,7 +47,7 @@ function Get-TargetResource
     {
         Write-Verbose -Message ("Cannot use the Members parameter together with the " + `
                                 "MembersToInclude or MembersToExclude parameters")
-        return $nullreturn
+        return $null
     }
 
     if ($Databases)
@@ -60,7 +60,7 @@ function Get-TargetResource
                 Write-Verbose -Message ("Databases: Cannot use the Members parameter " + `
                                         "together with the MembersToInclude or " + `
                                         "MembersToExclude parameters")
-                return $nullreturn
+                return $null
             }
 
             if (!$database.Members `
@@ -70,7 +70,7 @@ function Get-TargetResource
                 Write-Verbose -Message ("Databases: At least one of the following " + `
                                         "parameters must be specified: Members, " + `
                                         "MembersToInclude, MembersToExclude")
-                return $nullreturn
+                return $null
             }
         }
     }
@@ -80,7 +80,7 @@ function Get-TargetResource
         {
             Write-Verbose -Message ("At least one of the following parameters must be " + `
                                     "specified: Members, MembersToInclude, MembersToExclude")
-            return $nullreturn
+            return $null
         }
     }
 
@@ -107,7 +107,7 @@ function Get-TargetResource
         {
             Write-Verbose -Message ("No local SharePoint farm was detected. Shell admin " + `
                                     "settings will not be applied")
-            return $nullreturn
+            return $null
         }
 
         $shellAdmins = Get-SPShellAdmin

@@ -202,12 +202,15 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 }
             }
 
-            Context -Name "None of the optional parameters passed" -Fixture {
+            Context -Name "Only some SP2016 parameters passed along the SP2013 one for an SP2016 environment" -Fixture {
                 $testParams = @{
                     WebAppUrl = "http://sites.sharepoint.com"
+                    SuiteBarBrandingElementHtml = "<div>Test</div>"
+                    SuiteNavBrandingLogoUrl = "http://sites.sharepoint.com/images/logo.gif"
+                    SuiteNavBrandingText = "Suite Bar Text"
                 }
 
-                Mock -CommandName Get-SPWebApplication -MockWith { return @(@{
+                Mock -CommandName Get-SPWebApplication -MockWith {return @(@{
                     DisplayName = "Test Web App"
                     Url = "http://sites.sharepoint.com"
                     SuiteNavBrandingLogoNavigationUrl = "http://sites.sharepoint.com"

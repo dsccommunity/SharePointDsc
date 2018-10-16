@@ -139,6 +139,7 @@ function Set-TargetResource
         }
         16
         {
+            <# Exception: The SP2013 specific SuiteBarBrandingElementHtml parameter was passed with SP2016. #>
             if($PSBoundParameters.ContainsKey("SuiteBarBrandingElementHtml"))
             {
                 Write-Verbose ("SuiteBarBrandingElementHtml with SharePoint 2016 only works if using a " + `
