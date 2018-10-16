@@ -109,10 +109,10 @@ function Get-TargetResource
             }
 
             $mappedCrawlProperties = $managedProperty.GetMappedCrawledProperties($false)
-            $includeAllCrawlProperties = $false
+            $includeAllCrawlProperties = $true
             if ($mappedCrawlProperties)
             {
-                $includeAllCrawlProperties = $true
+                $includeAllCrawlProperties = $false
             }
             $results = @{
                 Name = $params.Name
