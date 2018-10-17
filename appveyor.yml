@@ -1,5 +1,11 @@
 version: 2.6.0.{build}
 
+environment:
+  APPVEYOR_RDP_PASSWORD: "P@ssw0rd"
+
+init:
+  - ps: iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
+
 install:
     - git clone https://github.com/PowerShell/DscResource.Tests
 
