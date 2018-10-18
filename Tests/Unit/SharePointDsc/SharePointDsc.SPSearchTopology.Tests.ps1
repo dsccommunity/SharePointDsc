@@ -120,7 +120,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 AnalyticsProcessing     = @($env:COMPUTERNAME)
                 QueryProcessing         = @($env:COMPUTERNAME)
                 IndexPartition          = @($env:COMPUTERNAME)
-                FirstPartitionDirectory = "I:\SearchIndexes\0"
+                FirstPartitionDirectory = @("I:\SearchIndexes\0", "N:\SearchIndexes\1")
             }
 
             Mock -CommandName Get-SPEnterpriseSearchComponent -MockWith {
