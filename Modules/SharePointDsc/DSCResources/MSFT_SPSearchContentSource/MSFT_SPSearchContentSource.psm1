@@ -461,7 +461,7 @@ function Set-TargetResource
                                     -SearchApplication $params.ServiceAppName | `
                                         Where-Object {$_.Name -eq $params.Name}
 
-                while ($sourceToWait.CrawlStatus -ne "Idle" -or $loopCount > 15)
+                while ($sourceToWait.CrawlStatus -ne "Idle" -and $loopCount -lt 15)
                 {
                     $sourceToWait = Get-SPEnterpriseSearchCrawlContentSource `
                                         -SearchApplication $params.ServiceAppName `

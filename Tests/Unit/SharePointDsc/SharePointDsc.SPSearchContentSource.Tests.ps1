@@ -405,6 +405,7 @@ namespace Microsoft.Office.Server.Search.Administration {
             }
             Mock -CommandName Get-SPEnterpriseSearchCrawlContentSource -MockWith {
                 return @{
+                    Name = "Example content source"
                     Type = "SharePoint"
                     SharePointCrawlBehavior = "CrawlVirtualServers"
                     StartAddresses = @(
@@ -597,6 +598,7 @@ namespace Microsoft.Office.Server.Search.Administration {
 
             Mock -CommandName Get-SPEnterpriseSearchCrawlContentSource -MockWith {
                 return @{
+                    Name = "Example content source"
                     Type = "Web"
                     MaxPageEnumerationDepth = 0
                     MaxSiteEnumerationDepth = 0
@@ -780,6 +782,7 @@ namespace Microsoft.Office.Server.Search.Administration {
             }
             Mock -CommandName Get-SPEnterpriseSearchCrawlContentSource -MockWith {
                 return @{
+                    Name = "Example content source"
                     Type = "File"
                     FollowDirectories = $false
                     StartAddresses = @(
@@ -839,6 +842,7 @@ namespace Microsoft.Office.Server.Search.Administration {
                     $crawlStatus = "Idle"
                 }
                 $returnval = @{
+                    Name = "Example content source"
                     Type = "SharePoint"
                     SharePointCrawlBehavior = "CrawlVirtualServers"
                     StartAddresses = @(
@@ -897,6 +901,7 @@ namespace Microsoft.Office.Server.Search.Administration {
                 $schedule.StartMinute = 0
                 $schedule.DaysInterval = 1
                 return @{
+                    Name = "Example content source"
                     Type = "SharePoint"
                     SharePointCrawlBehavior = "CrawlVirtualServers"
                     StartAddresses = @(
@@ -939,6 +944,7 @@ namespace Microsoft.Office.Server.Search.Administration {
                 $schedule.StartMinute = 0
                 $schedule.DaysOfWeek = [enum]::Parse([Microsoft.Office.Server.Search.Administration.DaysOfWeek], "Monday, Wednesday, Friday")
                 return @{
+                    Name = "Example content source"
                     Type = "SharePoint"
                     SharePointCrawlBehavior = "CrawlVirtualServers"
                     StartAddresses = @(
