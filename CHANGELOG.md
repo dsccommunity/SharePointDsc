@@ -4,6 +4,9 @@
 
 * Changes to SharePointDsc
   * Updated test helpers to force a reload of the resource every time you run a test
+* SPManagedMetadataServiceApp
+  * Added additional content type settings (ContentTypePushdownEnabled &
+    ContentTypeSyndicationEnabled).
 * SPSearchContentSource
   * Fixed issue with numerical Content Sources name
 * SPSearchManagedProperty
