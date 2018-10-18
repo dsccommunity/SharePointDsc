@@ -88,7 +88,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 PropertyType = "Text"
                 ServiceAppName = "Search Service Application"
                 HasMultipleValues = $false
-                Alias = "TestAlias"
+                Aliases = @("TestAlias")
                 CrawledProperties = @("CP1", "CP2")
                 Ensure = "Present"
             }
