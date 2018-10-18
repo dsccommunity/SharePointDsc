@@ -6,6 +6,9 @@
   * Updated test helpers to force a reload of the resource every time you run a test
 * SPFarm
   * Fixed issue where Central Admin service was not starting for non-english farms
+* SPManagedMetadataServiceApp
+  * Added additional content type settings (ContentTypePushdownEnabled &
+    ContentTypeSyndicationEnabled).
 * SPSearchContentSource
   * Fixed issue with numerical Content Sources name
 * SPSearchManagedProperty
