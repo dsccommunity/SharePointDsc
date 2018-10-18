@@ -133,6 +133,11 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     -Name SetMappings `
                     -Value {
                         $null
+                    } -PassThru -Force |
+                    Add-Member -MemberType ScriptMethod `
+                    -Name DeleteAlias `
+                    -Value {
+                        $null
                     } -PassThru -Force
                 return $results
 
