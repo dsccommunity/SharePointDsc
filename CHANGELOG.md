@@ -4,6 +4,8 @@
 
 * Changes to SharePointDsc
   * Updated test helpers to force a reload of the resource every time you run a test
+* SPBlobCacheSettings
+  * Updated the Service Instance retrieval to be language independent
 * SPSearchContentSource
   * Fixed issue with numerical Content Sources name
 * SPSearchManagedProperty

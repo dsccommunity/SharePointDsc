@@ -49,8 +49,13 @@ namespace Microsoft.SharePoint.Administration {
 
         Mock -CommandName Get-SPServiceInstance -MockWith {
             return @(@{
+                Name = ""
                 TypeName = "Microsoft SharePoint Foundation Web Application"
-            })
+            })  | Add-Member -MemberType ScriptMethod `
+            -Name GetType `
+            -Value {
+               @{Name = "SPWebServiceInstance"}
+            } -PassThru -Force
         }
 
         function Update-SPDscTestConfigFile

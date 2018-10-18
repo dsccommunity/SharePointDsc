@@ -48,7 +48,8 @@ function Get-TargetResource
         $webappsi = Get-SPServiceInstance -Server $env:COMPUTERNAME `
                                           -ErrorAction SilentlyContinue `
                         | Where-Object -FilterScript {
-                            $_.TypeName -eq "Microsoft SharePoint Foundation Web Application"
+                            $_.GetType().Name -eq "SPWebServiceInstance" -and `
+                            $_.Name -eq ""
                           }
 
         if ($null -eq $webappsi)
@@ -237,10 +238,11 @@ function Set-TargetResource
             $changes = $args[1]
 
             $webappsi = Get-SPServiceInstance -Server $env:COMPUTERNAME `
-                                              -ErrorAction SilentlyContinue `
+                                                    -ErrorAction SilentlyContinue `
                             | Where-Object -FilterScript {
-                                $_.TypeName -eq "Microsoft SharePoint Foundation Web Application"
-                              }
+                                $_.GetType().Name -eq "SPWebServiceInstance" -and `
+                                $_.Name -eq ""
+                            }
 
             if ($null -eq $webappsi)
             {
