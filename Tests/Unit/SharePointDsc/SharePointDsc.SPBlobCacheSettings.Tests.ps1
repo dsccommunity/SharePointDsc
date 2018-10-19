@@ -54,7 +54,7 @@ namespace Microsoft.SharePoint.Administration {
             })  | Add-Member -MemberType ScriptMethod `
             -Name GetType `
             -Value {
-               @{Name = "SPWebServiceInstance"}
+               return [PSObject]@{Name = "SPWebServiceInstance"}
             } -PassThru -Force
         }
 
@@ -102,7 +102,7 @@ namespace Microsoft.SharePoint.Administration {
                 Zone        = "Default"
                 EnableCache = $true
                 Location    = "c:\BlobCache"
-                MaxSizeInGB     = 30
+                MaxSizeInGB = 30
                 FileTypes   = "\.(gif|jpg|jpeg)$"
             }
 
