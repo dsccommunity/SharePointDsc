@@ -9,8 +9,11 @@ function Get-TargetResource
         $Name,
 
         [Parameter(Mandatory = $true)]
+        [ValidateSet("SSA",
+                     "SPSite",
+                     "SPWeb")]
         [System.String]
-        $ScopeUrl,
+        $Scope,
 
         [Parameter(Mandatory = $true)]
         [System.String]
@@ -32,6 +35,10 @@ function Get-TargetResource
 
         [Parameter()]
         [System.String]
+        $ScopeUrl,
+
+        [Parameter()]
+        [System.String]
         $ConnectionUrl,
 
         [Parameter()]
@@ -45,6 +52,11 @@ function Get-TargetResource
     )
 
     Write-Verbose -Message "Getting search result source '$Name'"
+    if($Scope -ne "SSA" -and "" -eq $ScopeUrl)
+    {
+        throw "When specifying a Scope of type $($Scope) you also need to provide" + `
+        " a ScopeUrl value."
+    }
 
     $result = Invoke-SPDSCCommand -Credential $InstallAccount `
                                   -Arguments $PSBoundParameters `
@@ -54,6 +66,7 @@ function Get-TargetResource
 
         $nullReturn = @{
             Name = $params.Name
+            Scope = $params.Scope
             SearchServiceAppName = $params.SearchServiceAppName
             Query = $null
             ProviderType = $null
@@ -66,13 +79,13 @@ function Get-TargetResource
 
         $fedManager = New-Object Microsoft.Office.Server.Search.Administration.Query.FederationManager($serviceApp)
         $searchOwner = $null
-        if ("global" -eq $params.ScopeUrl.ToLower())
+        if ("ssa" -eq $params.Scope.ToLower())
         {
             $searchOwner = Get-SPEnterpriseSearchOwner -Level SSA
         }
         else
         {
-            $searchOwner = Get-SPEnterpriseSearchOwner -Level SPSite -SPWeb $params.ScopeUrl
+            $searchOwner = Get-SPEnterpriseSearchOwner -Level $params.Scope -SPWeb $params.ScopeUrl
         }
 
         $filter = New-Object Microsoft.Office.Server.Search.Administration.SearchObjectFilter($searchOwner)
@@ -90,6 +103,7 @@ function Get-TargetResource
             }
             return @{
                 Name = $params.Name
+                Scope = $params.Scope
                 SearchServiceAppName = $params.SearchServiceAppName
                 Query = $source.QueryTransform.QueryTemplate
                 ProviderType = $provider.DisplayName
@@ -117,8 +131,11 @@ function Set-TargetResource
         $Name,
 
         [Parameter(Mandatory = $true)]
+        [ValidateSet("SSA",
+                     "SPSite",
+                     "SPWeb")]
         [System.String]
-        $ScopeUrl,
+        $Scope,
 
         [Parameter(Mandatory = $true)]
         [System.String]
@@ -140,6 +157,10 @@ function Set-TargetResource
 
         [Parameter()]
         [System.String]
+        $ScopeUrl,
+
+        [Parameter()]
+        [System.String]
         $ConnectionUrl,
 
         [Parameter()]
@@ -155,7 +176,11 @@ function Set-TargetResource
     Write-Verbose -Message "Setting search result source '$Name'"
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
-
+    if($Scope -ne "SSA" -and $null -eq $ScopeUrl)
+    {
+        throw "When specifying a Scope of type $($Scope) you also need to provide" + `
+        " a ScopeUrl value."
+    }
     if ($CurrentValues.Ensure -eq "Absent" -and $Ensure -eq "Present")
     {
         Write-Verbose -Message "Creating search result source $Name"
@@ -171,12 +196,12 @@ function Set-TargetResource
 
             $fedManager =  New-Object Microsoft.Office.Server.Search.Administration.Query.FederationManager($serviceApp)
             $searchOwner = $null
-            if ("global" -eq $params.ScopeUrl.ToLower())
+            if ("ssa" -eq $params.Scope.ToLower())
             {
                 $searchOwner = Get-SPEnterpriseSearchOwner -Level SSA
             }
             else {
-                $searchOwner = Get-SPEnterpriseSearchOwner -Level SPSite -SPWeb $params.ScopeUrl
+                $searchOwner = Get-SPEnterpriseSearchOwner -Level $params.Scope -SPWeb $params.ScopeUrl
             }
 
             $transformType = "Microsoft.Office.Server.Search.Query.Rules.QueryTransformProperties"
@@ -209,7 +234,14 @@ function Set-TargetResource
                             -Identity $params.SearchServiceAppName
 
             $fedManager = New-Object Microsoft.Office.Server.Search.Administration.Query.FederationManager($serviceApp)
-            $searchOwner = Get-SPEnterpriseSearchOwner -Level SSA
+            $searchOwner = $null
+            if ("ssa" -eq $params.Scope.ToLower())
+            {
+                $searchOwner = Get-SPEnterpriseSearchOwner -Level SSA
+            }
+            else {
+                $searchOwner = Get-SPEnterpriseSearchOwner -Level $params.Scope -SPWeb $params.ScopeUrl
+            }
 
             $source = $fedManager.GetSourceByName($params.Name, $searchOwner)
             if ($null -ne $source)
@@ -231,8 +263,11 @@ function Test-TargetResource
         $Name,
 
         [Parameter(Mandatory = $true)]
+        [ValidateSet("SSA",
+                     "SPSite",
+                     "SPWeb")]
         [System.String]
-        $ScopeUrl,
+        $Scope,
 
         [Parameter(Mandatory = $true)]
         [System.String]
@@ -251,6 +286,10 @@ function Test-TargetResource
                      "Remote SharePoint Provider")]
         [System.String]
         $ProviderType,
+
+        [Parameter()]
+        [System.String]
+        $ScopeUrl,
 
         [Parameter()]
         [System.String]
