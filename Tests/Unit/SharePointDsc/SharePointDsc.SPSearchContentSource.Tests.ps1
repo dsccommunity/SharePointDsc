@@ -111,11 +111,11 @@ namespace Microsoft.Office.Server.Search.Administration {
             }
 
             It "Should create the content source in the test method" {
-                { Test-TargetResource @testParams } | Should Throw "Parameter 'CrawlSetting' can only be set to custom for website content sources"
+                { Test-TargetResource @testParams } | Should Throw "Parameter CrawlSetting can only be set to custom for website content sources"
             }
 
             It "Should create the content source in the set method" {
-                { Set-TargetResource @testParams } | Should Throw "Parameter 'CrawlSetting' can only be set to custom for website content sources"
+                { Set-TargetResource @testParams } | Should Throw "Parameter CrawlSetting can only be set to custom for website content sources"
             }
         }
 
@@ -236,11 +236,11 @@ namespace Microsoft.Office.Server.Search.Administration {
             }
 
             It "Should create the content source in the test method" {
-                { Test-TargetResource @testParams } | Should Throw "Parameter 'CrawlSetting' can only be set to custom for website content sources"
+                { Test-TargetResource @testParams } | Should Throw "Parameter CrawlSetting can only be set to custom for website content sources"
             }
 
             It "Should create the content source in the set method" {
-                { Set-TargetResource @testParams } | Should Throw "Parameter 'CrawlSetting' can only be set to custom for website content sources"
+                { Set-TargetResource @testParams } | Should Throw "Parameter CrawlSetting can only be set to custom for website content sources"
             }
         }
 
@@ -298,14 +298,14 @@ namespace Microsoft.Office.Server.Search.Administration {
                 ServiceAppName = "Search Service Application"
                 ContentSourceType = "SharePoint"
                 Addresses = @("http://site.contoso.com")
-                CrawlSetting = "CrawlEverything"
+                CrawlSetting = "CrawlFirstOnly"
                 Ensure = "Present"
             }
             Mock -CommandName Get-SPEnterpriseSearchCrawlContentSource -MockWith {
                 return @{
                     Name = "Example content source"
                     Type = "SharePoint"
-                    SharePointCrawlBehavior = "CrawlVirtualServers"
+                    SharePointCrawlBehavior = "CrawlSites"
                     StartAddresses = @(
                         @{
                             AbsoluteUri = "http://site.contoso.com"
@@ -1016,6 +1016,400 @@ namespace Microsoft.Office.Server.Search.Administration {
 
             It "Should return true from the test method" {
                 Test-TargetResource @testParams | Should Be $true
+            }
+        }
+
+        Context -Name "A business content source does exist and should" -Fixture {
+            $testParams = @{
+                Name = "Example content source"
+                ServiceAppName = "Search Service Application"
+                ContentSourceType = "Business"
+                LOBSystemSet = @("MyDataSource", "MyDataSourceInstance")
+                Ensure = "Present"
+            }
+            Mock -CommandName Get-SPEnterpriseSearchCrawlContentSource -MockWith {
+                return @{
+                    Type = "Business"
+                    IncrementalCrawlSchedule = $null
+                    FullCrawlSchedule = $null
+                    StartAddresses = @(
+                        @{
+                            AbsoluteUri = "bdc3://segment1/segment2/segment3/MyDataSource/MyDataSourceInstance&fakevalue=1"
+                            Segments = @("bdc3", "segment1", "segment2", "segment3", "MyDataSource", "MyDataSourceInstance&fakevalue=1")
+                        }
+                    )
+                }
+            }
+
+            It "Should return present from the get method" {
+                $result = Get-TargetResource @testParams
+                $result.Ensure | Should Be "Present"
+            }
+
+            It "Should return the correct LOBSystemSet from the get method" {
+                $result = Get-TargetResource @testParams
+                $result.LOBSystemSet | Should Be $testParams.LOBSystemSet
+            }
+
+            It "Should return true from the test method" {
+                Test-TargetResource @testParams | Should Be $true
+            }
+        }
+
+        Context -Name "A business content source does not exist and should" -Fixture {
+            $testParams = @{
+                Name = "Example content source"
+                ServiceAppName = "Search Service Application"
+                ContentSourceType = "Business"
+                LOBSystemSet = @("MyDataSource", "MyDataSourceInstance")
+                Ensure = "Present"
+            }
+            Mock -CommandName Get-SPEnterpriseSearchCrawlContentSource -MockWith {
+                return $null
+            }
+
+            Mock -CommandName New-SPEnterpriseSearchCrawlContentSource -MockWith {
+                return @{
+                    Type = "Business"
+                    SearchApplication = $testParams.ServiceAppName
+                    IncrementalCrawlSchedule = $null
+                    FullCrawlSchedule = $null
+                    LOBSystemSet = $testParams.LOBSystemSet
+                    CrawlStatus = "Idle"
+                }
+            }
+
+            Mock -CommandName Get-SPServiceApplicationProxyGroup -MockWith {
+                return @{
+                    Name = "Default Proxy Group"
+                }
+            }
+
+            It "Should return absent from the get method" {
+                $result = Get-TargetResource @testParams
+                $result.Ensure | Should Be "Absent"
+            }
+
+            It "Should return false from the test method" {
+                Test-TargetResource @testParams | Should Be $false
+            }
+
+            It "Should create the new content source in the set method" {
+                Set-TargetResource @testParams
+
+                Assert-MockCalled -CommandName New-SPEnterpriseSearchCrawlContentSource
+            }
+        }
+
+        Context -Name "A business content source does exist and shouldn't" -Fixture {
+            $testParams = @{
+                Name = "Example content source"
+                ServiceAppName = "Search Service Application"
+                ContentSourceType = "Business"
+                LOBSystemSet = @("MyDataSource", "MyDataSourceInstance")
+                Ensure = "Absent"
+            }
+
+            Mock -CommandName Get-SPEnterpriseSearchCrawlContentSource -MockWith {
+                return @{
+                    Type = "Business"
+                    IncrementalCrawlSchedule = $null
+                    FullCrawlSchedule = $null
+                    StartAddresses = @(
+                        @{
+                            AbsoluteUri = "bdc3://segment1/segment2/segment3/MyDataSource/MyDataSourceInstance&fakevalue=1"
+                            Segments = @("bdc3", "segment1", "segment2", "segment3", "MyDataSource", "MyDataSourceInstance&fakevalue=1")
+                        }
+                    )
+                }
+            }
+
+            It "Should return present from the get method" {
+                $result = Get-TargetResource @testParams
+                $result.Ensure | Should Be "Present"
+            }
+
+            It "Should return false from the test method" {
+                Test-TargetResource @testParams | Should Be $false
+            }
+
+            It "Should remove the content source in the set method" {
+                Set-TargetResource @testParams
+
+                Assert-MockCalled -CommandName Remove-SPEnterpriseSearchCrawlContentSource
+            }
+        }
+
+        Context -Name "A business content source doesn't exist and shouldn't" -Fixture {
+            $testParams = @{
+                Name = "Example content source"
+                ServiceAppName = "Search Service Application"
+                ContentSourceType = "Business"
+                LOBSystemSet = @("MyDataSource", "MyDataSourceInstance")
+                Ensure = "Absent"
+            }
+
+            Mock -CommandName Get-SPEnterpriseSearchCrawlContentSource -MockWith {
+                return $null
+            }
+
+            It "Should return absent from the get method" {
+                $result = Get-TargetResource @testParams
+                $result.Ensure | Should Be "Absent"
+            }
+
+            It "Should return true from the test method" {
+                Test-TargetResource @testParams | Should Be $true
+            }
+        }
+
+        Context -Name "Invalid Content Source Type" {
+            $testParams = @{
+                Name = "Example content source"
+                ServiceAppName = "Search Service Application"
+                ContentSourceType = "Business"
+                Ensure = "Present"
+            }
+            Mock -CommandName Get-SPEnterpriseSearchCrawlContentSource -MockWith {
+                return @{
+                    Type = "FakeType"
+                }
+            }
+
+            It "Should throw unsupported type error" {
+                { Get-TargetResource @testParams } | Should Throw "SharePointDsc does not currently support 'FakeType' content sources. Please use only 'SharePoint', 'FileShare', 'Website' or 'Business'."
+            }
+        }
+
+        Context -Name "SharePoint Content Source with Invalid Parameters" {
+
+            Mock -CommandName Get-SPEnterpriseSearchCrawlContentSource -MockWith {
+                return $null
+            }
+
+            $testParams = @{
+                Name = "Example content source"
+                ServiceAppName = "Search Service Application"
+                ContentSourceType = "SharePoint"
+                LimitPageDepth = 1
+                Ensure = "Present"
+            }
+
+            It "Should throw Invalid parameter error" {
+                { Set-TargetResource @testParams } | Should Throw "Parameter LimitPageDepth is not valid for SharePoint content sources"
+                { Test-TargetResource @testParams } | Should Throw "Parameter LimitPageDepth is not valid for SharePoint content sources"
+            }
+
+            $testParams = @{
+                Name = "Example content source"
+                ServiceAppName = "Search Service Application"
+                ContentSourceType = "SharePoint"
+                LimitServerHops = 1
+                Ensure = "Present"
+            }
+
+            It "Should throw Invalid parameter error" {
+                { Set-TargetResource @testParams } | Should Throw "Parameter LimitServerHops is not valid for SharePoint content sources"
+                { Test-TargetResource @testParams } | Should Throw "Parameter LimitServerHops is not valid for SharePoint content sources"
+            }
+
+            $testParams = @{
+                Name = "Example content source"
+                ServiceAppName = "Search Service Application"
+                ContentSourceType = "SharePoint"
+                IncrementalSchedule = (New-CimInstance -ClassName MSFT_SPSearchCrawlSchedule -Property @{
+                    ScheduleType = "Weekly"
+                    StartHour = "0"
+                    StartMinute = "0"
+                    CrawlScheduleDaysOfWeek = @("Monday", "Wednesday", "Friday")
+                } -ClientOnly)
+                ContinuousCrawl = $true
+                Ensure = "Present"
+            }
+
+            It "Should throw Invalid parameter error" {
+                { Set-TargetResource @testParams } | Should Throw "You can not specify an incremental crawl schedule on a content source that will use continous crawl"
+                { Test-TargetResource @testParams } | Should Throw "You can not specify an incremental crawl schedule on a content source that will use continous crawl"
+            }
+
+            $testParams = @{
+                Name = "Example content source"
+                ServiceAppName = "Search Service Application"
+                ContentSourceType = "SharePoint"
+                CrawlSetting = "Custom"
+                Ensure = "Present"
+            }
+
+            It "Should throw Invalid parameter error" {
+                { Set-TargetResource @testParams } | Should Throw "Parameter CrawlSetting can only be set to custom for website content sources"
+                { Test-TargetResource @testParams } | Should Throw "Parameter CrawlSetting can only be set to custom for website content sources"
+            }
+        }
+
+        Context -Name "Website Content Source with Invalid Parameters" {
+
+            Mock -CommandName Get-SPEnterpriseSearchCrawlContentSource -MockWith {
+                return $null
+            }
+
+            $testParams = @{
+                Name = "Example content source"
+                ServiceAppName = "Search Service Application"
+                ContentSourceType = "Website"
+                ContinuousCrawl = $true
+                Ensure = "Present"
+            }
+
+            It "Should throw Invalid parameter error" {
+                { Set-TargetResource @testParams } | Should Throw "Parameter ContinuousCrawl is not valid for website content sources"
+                { Test-TargetResource @testParams } | Should Throw "Parameter ContinuousCrawl is not valid for website content sources"
+            }
+
+            $testParams = @{
+                Name = "Example content source"
+                ServiceAppName = "Search Service Application"
+                ContentSourceType = "Website"
+                LimitServerHops = 1
+                Ensure = "Present"
+            }
+
+            It "Should throw Invalid parameter error" {
+                { Set-TargetResource @testParams } | Should Throw "Parameter LimitServerHops is not valid for website content sources"
+                { Test-TargetResource @testParams } | Should Throw "Parameter LimitServerHops is not valid for website content sources"
+            }
+        }
+
+        Context -Name "FileShare Content Source with Invalid Parameters" {
+
+            Mock -CommandName Get-SPEnterpriseSearchCrawlContentSource -MockWith {
+                return $null
+            }
+
+            $testParams = @{
+                Name = "Example content source"
+                ServiceAppName = "Search Service Application"
+                ContentSourceType = "FileShare"
+                LimitPageDepth = 1
+                Ensure = "Present"
+            }
+
+            It "Should throw Invalid parameter error" {
+                { Set-TargetResource @testParams } | Should Throw "Parameter LimitPageDepth is not valid for file share content sources"
+                { Test-TargetResource @testParams } | Should Throw "Parameter LimitPageDepth is not valid for file share content sources"
+            }
+
+            $testParams = @{
+                Name = "Example content source"
+                ServiceAppName = "Search Service Application"
+                ContentSourceType = "FileShare"
+                LimitServerHops = 1
+                Ensure = "Present"
+            }
+
+            It "Should throw Invalid parameter error" {
+                { Set-TargetResource @testParams } | Should Throw "Parameter LimitServerHops is not valid for file share content sources"
+                { Test-TargetResource @testParams } | Should Throw "Parameter LimitServerHops is not valid for file share content sources"
+            }
+
+            $testParams = @{
+                Name = "Example content source"
+                ServiceAppName = "Search Service Application"
+                ContentSourceType = "FileShare"
+                CrawlSetting = "Custom"
+                Ensure = "Present"
+            }
+
+            It "Should throw Invalid parameter error" {
+                { Set-TargetResource @testParams } | Should Throw "Parameter CrawlSetting can only be set to custom for website content sources"
+                { Test-TargetResource @testParams } | Should Throw "Parameter CrawlSetting can only be set to custom for website content sources"
+            }
+        }
+
+        Context -Name "Business Content Source with Invalid Parameters" {
+
+            Mock -CommandName Get-SPEnterpriseSearchCrawlContentSource -MockWith {
+                return $null
+            }
+
+            $testParams = @{
+                Name = "Example content source"
+                ServiceAppName = "Search Service Application"
+                ContentSourceType = "Business"
+                LimitPageDepth = 1
+                Ensure = "Present"
+            }
+
+            It "Should throw Invalid parameter error" {
+                { Set-TargetResource @testParams } | Should Throw "Parameter LimitPageDepth is not valid for Business content sources"
+                { Test-TargetResource @testParams } | Should Throw "Parameter LimitPageDepth is not valid for Business content sources"
+            }
+
+            $testParams = @{
+                Name = "Example content source"
+                ServiceAppName = "Search Service Application"
+                ContentSourceType = "Business"
+                LimitServerHops = 1
+                Ensure = "Present"
+            }
+
+            It "Should throw Invalid parameter error" {
+                { Set-TargetResource @testParams } | Should Throw "Parameter LimitServerHops is not valid for Business content sources"
+                { Test-TargetResource @testParams } | Should Throw "Parameter LimitServerHops is not valid for Business content sources"
+            }
+
+            $testParams = @{
+                Name = "Example content source"
+                ServiceAppName = "Search Service Application"
+                ContentSourceType = "Business"
+                ContinuousCrawl = $true
+                Ensure = "Present"
+            }
+
+            It "Should throw Invalid parameter error" {
+                { Set-TargetResource @testParams } | Should Throw "Parameter ContinuousCrawl is not valid for Business content sources"
+            }
+        }
+
+        Context -Name "Trying to change Content Source Type" {
+
+            Mock -CommandName Get-SPEnterpriseSearchCrawlContentSource -MockWith {
+                return @(
+                    New-Object -TypeName "Object" |
+                        Add-Member -MemberType NoteProperty `
+                                   -Name Type `
+                                   -Value "Business" `
+                                   -PassThru |
+                        Add-Member -MemberType ScriptMethod `
+                                   -Name StopCrawl `
+                                   -Value {
+                                       $null
+                                   }  -PassThru -Force
+                )
+            }
+
+            $testParams = @{
+                Name = "Example content source"
+                ServiceAppName = "Search Service Application"
+                ContentSourceType = "FileShare"
+                Ensure = "Present"
+            }
+
+            It "Should throw error complaining cannot change type without the force parameter" {
+                { Set-TargetResource @testParams } | Should Throw "The type of the a search content source can not be changed from 'Business' to 'FileShare' without deleting and adding it again. Specify 'Force = `$true' in order to allow DSC to do this, or manually remove the existing content source and re-run the configuration."
+            }
+
+            $testParams = @{
+                Name = "Example content source"
+                ServiceAppName = "Search Service Application"
+                ContentSourceType = "FileShare"
+                Force = $true
+                Ensure = "Present"
+            }
+
+            It "Should change the Content Source Type" {
+                Set-TargetResource @testParams
+
+                Assert-MockCalled -CommandName Remove-SPEnterpriseSearchCrawlContentSource
             }
         }
     }

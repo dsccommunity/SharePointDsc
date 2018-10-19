@@ -2,7 +2,7 @@
 [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingConvertToSecureStringWithPlainText", "")]
 param(
     [Parameter()]
-    [string] 
+    [string]
     $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
                                          -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
                                          -Resolve)
@@ -25,6 +25,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         # Test contexts
         Context -Name "Diagnostic configuration can not be loaded" {
             $testParams = @{
+                IsSingleInstance = "Yes"
                 LogPath = "L:\ULSLogs"
                 LogSpaceInGB = 10
                 AppAnalyticsAutomaticUploadEnabled = $true
@@ -46,7 +47,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             Mock -CommandName Get-SPDiagnosticConfig -MockWith {
-                return $null 
+                return $null
             }
 
             It "Should return null from the get method" {
@@ -60,6 +61,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "Diagnostic configuration can be loaded and it is configured correctly" {
             $testParams = @{
+                IsSingleInstance = "Yes"
                 LogPath = "L:\ULSLogs"
                 LogSpaceInGB = 10
                 AppAnalyticsAutomaticUploadEnabled = $true
@@ -79,7 +81,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 EventLogFloodProtectionQuietPeriod = 5
                 EventLogFloodProtectionNotifyInterval = 5
             }
-            
+
             Mock -CommandName Get-SPDiagnosticConfig -MockWith {
                 return @{
                     AppAnalyticsAutomaticUploadEnabled = $testParams.AppAnalyticsAutomaticUploadEnabled
@@ -100,7 +102,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     ScriptErrorReportingEnabled = $testParams.ScriptErrorReportingEnabled
                     ScriptErrorReportingRequireAuth = $testParams.ScriptErrorReportingRequireAuth
                     ScriptErrorReportingDelay = $testParams.ScriptErrorReportingDelay
-                } 
+                }
             }
 
             It "Should return values from the get method" {
@@ -114,6 +116,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "Diagnostic configuration can be loaded and the log path is not set correctly" {
             $testParams = @{
+                IsSingleInstance = "Yes"
                 LogPath = "L:\ULSLogs"
                 LogSpaceInGB = 10
                 AppAnalyticsAutomaticUploadEnabled = $true
@@ -133,7 +136,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 EventLogFloodProtectionQuietPeriod = 5
                 EventLogFloodProtectionNotifyInterval = 5
             }
-            
+
             Mock -CommandName Get-SPDiagnosticConfig -MockWith {
                 return @{
                     AppAnalyticsAutomaticUploadEnabled = $testParams.AppAnalyticsAutomaticUploadEnabled
@@ -154,7 +157,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     ScriptErrorReportingEnabled = $testParams.ScriptErrorReportingEnabled
                     ScriptErrorReportingRequireAuth = $testParams.ScriptErrorReportingRequireAuth
                     ScriptErrorReportingDelay = $testParams.ScriptErrorReportingDelay
-                } 
+                }
             }
 
             It "Should return false from the test method" {
@@ -164,6 +167,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "Diagnostic configuration can be loaded and the log size is not set correctly" {
             $testParams = @{
+                IsSingleInstance = "Yes"
                 LogPath = "L:\ULSLogs"
                 LogSpaceInGB = 10
                 AppAnalyticsAutomaticUploadEnabled = $true
@@ -183,7 +187,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 EventLogFloodProtectionQuietPeriod = 5
                 EventLogFloodProtectionNotifyInterval = 5
             }
-            
+
             Mock -CommandName Get-SPDiagnosticConfig -MockWith {
                 return @{
                     AppAnalyticsAutomaticUploadEnabled = $testParams.AppAnalyticsAutomaticUploadEnabled
@@ -204,7 +208,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     ScriptErrorReportingEnabled = $testParams.ScriptErrorReportingEnabled
                     ScriptErrorReportingRequireAuth = $testParams.ScriptErrorReportingRequireAuth
                     ScriptErrorReportingDelay = $testParams.ScriptErrorReportingDelay
-                } 
+                }
             }
 
             It "Should return false from the test method" {
@@ -222,6 +226,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             $mockAccount = New-Object -TypeName "System.Management.Automation.PSCredential" `
                                       -ArgumentList @("username", $mockPassword)
             $testParams = @{
+                IsSingleInstance = "Yes"
                 LogPath = "L:\ULSLogs"
                 LogSpaceInGB = 10
                 AppAnalyticsAutomaticUploadEnabled = $true
@@ -242,7 +247,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 EventLogFloodProtectionNotifyInterval = 5
                 InstallAccount = $mockAccount
             }
-            
+
             Mock -CommandName Get-SPDiagnosticConfig -MockWith {
                 return @{
                     AppAnalyticsAutomaticUploadEnabled = $testParams.AppAnalyticsAutomaticUploadEnabled
@@ -263,7 +268,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     ScriptErrorReportingEnabled = $testParams.ScriptErrorReportingEnabled
                     ScriptErrorReportingRequireAuth = $testParams.ScriptErrorReportingRequireAuth
                     ScriptErrorReportingDelay = $testParams.ScriptErrorReportingDelay
-                } 
+                }
             }
 
             It "Should return false from the test method" {

@@ -5,6 +5,11 @@ function Get-TargetResource
     param
     (
         [Parameter(Mandatory = $true)]
+        [ValidateSet('Yes')]
+        [String]
+        $IsSingleInstance,
+
+        [Parameter(Mandatory = $true)]
         [System.String]
         $BinaryDir,
 
@@ -37,12 +42,13 @@ function Get-TargetResource
     $installedItems = $installedItemsX86 + $installedItemsX64
     $installedItems = $installedItems | Select-Object -Property DisplayName -Unique
     $spInstall = $installedItems | Where-Object -FilterScript {
-        $_ -match "Microsoft SharePoint Server (2013|2016)"
+        $_ -match "Microsoft SharePoint Server (2013|2016|2019)"
     }
 
     if ($spInstall)
     {
         return @{
+            IsSingleInstance = "Yes"
             BinaryDir = $BinaryDir
             ProductKey = $ProductKey
             InstallPath = $InstallPath
@@ -53,6 +59,7 @@ function Get-TargetResource
     else
     {
         return @{
+            IsSingleInstance = "Yes"
             BinaryDir = $BinaryDir
             ProductKey = $ProductKey
             InstallPath = $InstallPath
@@ -70,6 +77,11 @@ function Set-TargetResource
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidGlobalVars", "")]
     param
     (
+        [Parameter(Mandatory = $true)]
+        [ValidateSet('Yes')]
+        [String]
+        $IsSingleInstance,
+
         [Parameter(Mandatory = $true)]
         [System.String]
         $BinaryDir,
@@ -231,6 +243,11 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
+        [Parameter(Mandatory = $true)]
+        [ValidateSet('Yes')]
+        [String]
+        $IsSingleInstance,
+
         [Parameter(Mandatory = $true)]
         [System.String]
         $BinaryDir,

@@ -258,7 +258,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 })}
 
                 It "return error that sp2016 parameters are required" {
-                    { Set-TargetResource @testParams } | Should Throw "You need to specify a value for either SuiteNavBrandingLogoNavigationUrl, SuiteNavBrandingLogoTitle, SuiteNavBrandingLogoUrl, SuiteNavBrandingText, and SuiteBarBrandingElementHtml with SharePoint 2016"
+                    { Set-TargetResource @testParams } | Should Throw "You need to specify a value for either SuiteNavBrandingLogoNavigationUrl, SuiteNavBrandingLogoTitle, SuiteNavBrandingLogoUrl, SuiteNavBrandingText or SuiteBarBrandingElementHtml with SharePoint 2016 or 2019"
                 }
             }
 

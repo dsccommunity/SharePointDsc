@@ -41,8 +41,9 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
                 Context -Name "Project server license is not enabled, but it should be" -Fixture {
                     $testParams = @{
-                        Ensure     = "Present"
-                        ProductKey = "XXXXX-XXXXX-XXXXX-XXXXX-XXXXX"
+                        IsSingleInstance = "Yes"
+                        Ensure           = "Present"
+                        ProductKey       = "XXXXX-XXXXX-XXXXX-XXXXX-XXXXX"
                     }
 
                     Mock -CommandName Get-ProjectServerLicense -MockWith {
@@ -65,8 +66,9 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
                 Context -Name "Project server license is enabled, and it should be" -Fixture {
                     $testParams = @{
-                        Ensure     = "Present"
-                        ProductKey = "XXXXX-XXXXX-XXXXX-XXXXX-XXXXX"
+                        IsSingleInstance = "Yes"
+                        Ensure           = "Present"
+                        ProductKey       = "XXXXX-XXXXX-XXXXX-XXXXX-XXXXX"
                     }
 
                     Mock -CommandName Get-ProjectServerLicense -MockWith {
@@ -84,7 +86,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
                 Context -Name "Project server license is enabled, but it should not be" -Fixture {
                     $testParams = @{
-                        Ensure     = "Absent"
+                        IsSingleInstance = "Yes"
+                        Ensure           = "Absent"
                     }
 
                     Mock -CommandName Get-ProjectServerLicense -MockWith {
@@ -107,7 +110,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
                 Context -Name "Project server license is not enabled, and it should not be" -Fixture {
                     $testParams = @{
-                        Ensure     = "Absent"
+                        IsSingleInstance = "Yes"
+                        Ensure           = "Absent"
                     }
 
                     Mock -CommandName Get-ProjectServerLicense -MockWith {
@@ -125,8 +129,9 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
                 Context -Name "The farm is not in a state to determine the license status" -Fixture {
                     $testParams = @{
-                        Ensure     = "Present"
-                        ProductKey = "XXXXX-XXXXX-XXXXX-XXXXX-XXXXX"
+                        IsSingleInstance = "Yes"
+                        Ensure           = "Present"
+                        ProductKey       = "XXXXX-XXXXX-XXXXX-XXXXX-XXXXX"
                     }
 
                     Mock -CommandName Get-ProjectServerLicense -MockWith {
@@ -140,7 +145,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
                 Context -Name "The license should be enabled but no product key was provided" -Fixture {
                     $testParams = @{
-                        Ensure     = "Present"
+                        IsSingleInstance = "Yes"
+                        Ensure           = "Present"
                     }
 
                     Mock -CommandName Get-ProjectServerLicense -MockWith {

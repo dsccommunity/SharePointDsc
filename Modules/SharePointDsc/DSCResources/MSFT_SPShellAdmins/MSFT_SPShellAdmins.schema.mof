@@ -9,7 +9,7 @@ Class MSFT_SPDatabasePermissions
 [ClassVersion("1.0.0.0"), FriendlyName("SPShellAdmins")]
 class MSFT_SPShellAdmins : OMI_BaseResource
 {
-    [Key, Description("Name for the config, used for administration purposes")] String Name;
+    [Key, Description("Specifies the resource is a single instance, the value must be 'Yes'"), ValueMap{"Yes"}, Values{"Yes"}] String IsSingleInstance;
     [Write, Description("Exact list of accounts that will have to get Shell Admin permissions")] String Members[];
     [Write, Description("List of all accounts that must be in the Shell Admins group")] String MembersToInclude[];
     [Write, Description("List of all accounts that are not allowed to have Shell Admin permissions")] String MembersToExclude[];

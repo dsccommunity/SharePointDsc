@@ -4,7 +4,12 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [Parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]
+        [ValidateSet('Yes')]
+        [String]
+        $IsSingleInstance,
+
+        [Parameter(Mandatory = $true)]
         [System.String]
         $MailAddress,
 
@@ -17,12 +22,12 @@ function Get-TargetResource
         [ValidateRange(0,36000)]
         [System.UInt32]
         $PasswordChangeWaitTimeSeconds,
-        
-        [Parameter()] 
+
+        [Parameter()]
         [ValidateRange(0,99)]
         [System.UInt32]
         $NumberOfRetries,
-        
+
         [Parameter()]
         [System.Management.Automation.PSCredential]
         $InstallAccount
@@ -34,17 +39,18 @@ function Get-TargetResource
                                   -Arguments $PSBoundParameters `
                                   -ScriptBlock {
         $params = $args[0]
-        
+
         $farm = Get-SPFarm
-        if ($null -eq $farm ) 
+        if ($null -eq $farm )
         {
-            return $null 
+            return $null
         }
         return @{
+            IsSingleInstance = "Yes"
             MailAddress = $farm.PasswordChangeEmailAddress
             PasswordChangeWaitTimeSeconds= $farm.PasswordChangeGuardTime
             NumberOfRetries= $farm.PasswordChangeMaximumTries
-            DaysBeforeExpiry = $farm.DaysBeforePasswordExpirationToSendEmail 
+            DaysBeforeExpiry = $farm.DaysBeforePasswordExpirationToSendEmail
         }
     }
     return $result
@@ -55,7 +61,12 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [Parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]
+        [ValidateSet('Yes')]
+        [String]
+        $IsSingleInstance,
+
+        [Parameter(Mandatory = $true)]
         [System.String]
         $MailAddress,
 
@@ -68,12 +79,12 @@ function Set-TargetResource
         [ValidateRange(0,36000)]
         [System.UInt32]
         $PasswordChangeWaitTimeSeconds,
-        
-        [Parameter()] 
+
+        [Parameter()]
         [ValidateRange(0,99)]
         [System.UInt32]
         $NumberOfRetries,
-        
+
         [Parameter()]
         [System.Management.Automation.PSCredential]
         $InstallAccount
@@ -85,23 +96,23 @@ function Set-TargetResource
                         -Arguments $PSBoundParameters `
                         -ScriptBlock {
         $params = $args[0]
-        $farm = Get-SPFarm -ErrorAction Continue 
+        $farm = Get-SPFarm -ErrorAction Continue
 
-        if ($null -eq $farm ) 
+        if ($null -eq $farm )
         {
-            return $null 
+            return $null
         }
-        
+
         $farm.PasswordChangeEmailAddress = $params.MailAddress
-        if ($null -ne $params.PasswordChangeWaitTimeSeconds) 
+        if ($null -ne $params.PasswordChangeWaitTimeSeconds)
         {
             $farm.PasswordChangeGuardTime = $params.PasswordChangeWaitTimeSeconds
         }
-        if ($null -ne $params.NumberOfRetries) 
+        if ($null -ne $params.NumberOfRetries)
         {
             $farm.PasswordChangeMaximumTries = $params.NumberOfRetries
         }
-        if ($null -ne $params.DaysBeforeExpiry) 
+        if ($null -ne $params.DaysBeforeExpiry)
         {
             $farm.DaysBeforePasswordExpirationToSendEmail = $params.DaysBeforeExpiry
         }
@@ -115,7 +126,12 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [Parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]
+        [ValidateSet('Yes')]
+        [String]
+        $IsSingleInstance,
+
+        [Parameter(Mandatory = $true)]
         [System.String]
         $MailAddress,
 
@@ -128,12 +144,12 @@ function Test-TargetResource
         [ValidateRange(0,36000)]
         [System.UInt32]
         $PasswordChangeWaitTimeSeconds,
-        
-        [Parameter()] 
+
+        [Parameter()]
         [ValidateRange(0,99)]
         [System.UInt32]
         $NumberOfRetries,
-        
+
         [Parameter()]
         [System.Management.Automation.PSCredential]
         $InstallAccount
@@ -147,13 +163,13 @@ function Test-TargetResource
     {
         return $false
     }
-    
+
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
                                     -DesiredValues $PSBoundParameters `
-                                    -ValuesToCheck @("MailAddress", 
+                                    -ValuesToCheck @("MailAddress",
                                                      "DaysBeforeExpiry",
                                                      "PasswordChangeWaitTimeSeconds",
-                                                     "NumberOfRetries") 
+                                                     "NumberOfRetries")
 }
 
 Export-ModuleMember -Function *-TargetResource

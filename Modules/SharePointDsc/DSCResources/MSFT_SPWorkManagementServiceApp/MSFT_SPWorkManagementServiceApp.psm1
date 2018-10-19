@@ -56,7 +56,7 @@ function Get-TargetResource
     if ($installedVersion.FileMajorPart -eq 16)
     {
         throw [Exception] ("Work Management Service Application is no longer available " + `
-                           "in SharePoint 2016: " + `
+                           "in SharePoint 2016/2019: " + `
                            "https://technet.microsoft.com/en-us/library/mt346112(v=office.16).aspx")
     }
 
@@ -174,7 +174,7 @@ function Set-TargetResource
     if ($installedVersion.FileMajorPart -eq 16)
     {
         throw [Exception] ("Work Management Service Application is no longer available " + `
-                           "in SharePoint 2016: " + `
+                           "in SharePoint 2016/2019: " + `
                            "https://technet.microsoft.com/en-us/library/mt346112(v=office.16).aspx")
     }
 
@@ -387,7 +387,7 @@ function Test-TargetResource
     if ($installedVersion.FileMajorPart -eq 16)
     {
         throw [Exception] ("Work Management Service Application is no longer available " + `
-                           "in SharePoint 2016: " + `
+                           "in SharePoint 2016/2019: " + `
                            "https://technet.microsoft.com/en-us/library/mt346112(v=office.16).aspx")
     }
 

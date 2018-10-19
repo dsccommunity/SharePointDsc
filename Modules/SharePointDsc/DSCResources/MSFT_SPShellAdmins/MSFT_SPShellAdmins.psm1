@@ -5,8 +5,9 @@ function Get-TargetResource
     param
     (
         [Parameter(Mandatory = $true)]
-        [System.String]
-        $Name,
+        [ValidateSet('Yes')]
+        [String]
+        $IsSingleInstance,
 
         [Parameter()]
         [System.String[]]
@@ -140,7 +141,7 @@ function Get-TargetResource
         }
 
         return @{
-            Name = $params.Name
+            IsSingleInstance = "Yes"
             Members = $shellAdmins.UserName
             MembersToInclude = $params.MembersToInclude
             MembersToExclude = $params.MembersToExclude
@@ -159,8 +160,9 @@ function Set-TargetResource
     param
     (
         [Parameter(Mandatory = $true)]
-        [System.String]
-        $Name,
+        [ValidateSet('Yes')]
+        [String]
+        $IsSingleInstance,
 
         [Parameter()]
         [System.String[]]
@@ -723,8 +725,9 @@ function Test-TargetResource
     param
     (
         [Parameter(Mandatory = $true)]
-        [System.String]
-        $Name,
+        [ValidateSet('Yes')]
+        [String]
+        $IsSingleInstance,
 
         [Parameter()]
         [System.String[]]

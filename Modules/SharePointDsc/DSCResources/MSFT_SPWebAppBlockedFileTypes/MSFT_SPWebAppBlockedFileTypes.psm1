@@ -4,12 +4,12 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [Parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]
         [System.String]
-        $Url,
+        $WebAppUrl,
 
-        [Parameter()] 
-        [System.String[]] 
+        [Parameter()]
+        [System.String[]]
         $Blocked,
 
         [Parameter()]
@@ -21,19 +21,19 @@ function Get-TargetResource
         $EnsureAllowed,
 
         [Parameter()]
-        [System.Management.Automation.PSCredential] 
+        [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 
-    Write-Verbose -Message "Getting web application '$url' blocked file types"
+    Write-Verbose -Message "Getting web application '$WebAppUrl' blocked file types"
 
     $result = Invoke-SPDSCCommand -Credential $InstallAccount `
                                   -Arguments @($PSBoundParameters,$PSScriptRoot) `
                                   -ScriptBlock {
         $params = $args[0]
         $ScriptRoot = $args[1]
-        
-        $wa = Get-SPWebApplication -Identity $params.Url -ErrorAction SilentlyContinue
+
+        $wa = Get-SPWebApplication -Identity $params.WebAppUrl -ErrorAction SilentlyContinue
         if ($null -eq $wa)
         {
             return $null
@@ -43,7 +43,7 @@ function Get-TargetResource
         Import-Module -Name (Join-Path -Path $ScriptRoot -ChildPath $modulePath -Resolve)
 
         $result = Get-SPDSCWebApplicationBlockedFileTypeConfig -WebApplication $wa
-        $result.Add("Url", $params.Url)
+        $result.Add("Url", $params.WebAppUrl)
         $result.Add("InstallAccount", $params.InstallAccount)
         return $result
     }
@@ -56,12 +56,12 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [Parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]
         [System.String]
-        $Url,
+        $WebAppUrl,
 
-        [Parameter()] 
-        [System.String[]] 
+        [Parameter()]
+        [System.String[]]
         $Blocked,
 
         [Parameter()]
@@ -73,11 +73,11 @@ function Set-TargetResource
         $EnsureAllowed,
 
         [Parameter()]
-        [System.Management.Automation.PSCredential] 
+        [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 
-    Write-Verbose -Message "Setting web application '$Url' blocked file types"
+    Write-Verbose -Message "Setting web application '$WebAppUrl' blocked file types"
 
     $result = Invoke-SPDSCCommand -Credential $InstallAccount `
                                   -Arguments @($PSBoundParameters,$PSScriptRoot) `
@@ -85,10 +85,10 @@ function Set-TargetResource
         $params = $args[0]
         $ScriptRoot = $args[1]
 
-        $wa = Get-SPWebApplication -Identity $params.Url -ErrorAction SilentlyContinue
+        $wa = Get-SPWebApplication -Identity $params.WebAppUrl -ErrorAction SilentlyContinue
         if ($null -eq $wa)
         {
-            throw "Web application $($params.Url) was not found"
+            throw "Web application $($params.WebAppUrl) was not found"
             return
         }
 
@@ -106,12 +106,12 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [Parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]
         [System.String]
-        $Url,
+        $WebAppUrl,
 
-        [Parameter()] 
-        [System.String[]] 
+        [Parameter()]
+        [System.String[]]
         $Blocked,
 
         [Parameter()]
@@ -123,11 +123,11 @@ function Test-TargetResource
         $EnsureAllowed,
 
         [Parameter()]
-        [System.Management.Automation.PSCredential] 
+        [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 
-    Write-Verbose -Message "Testing for web application '$Url' blocked file types"
+    Write-Verbose -Message "Testing for web application '$WebAppUrl' blocked file types"
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
