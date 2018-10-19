@@ -6,6 +6,9 @@
   * Updated test helpers to force a reload of the resource every time you run a test
 * SPBlobCacheSettings
   * Updated the Service Instance retrieval to be language independent
+* SPManagedMetadataServiceApp
+  * Added additional content type settings (ContentTypePushdownEnabled &
+    ContentTypeSyndicationEnabled).
 * SPSearchContentSource
   * Fixed issue with numerical Content Sources name
 * SPSearchManagedProperty
@@ -39,6 +42,8 @@
 * SPWebAppSuiteBar
   * Enable usage of SuiteBarBrandingElementHtml for SharePoint 2016
     (only supported if using a SharePoint 2013 masterpage)
+* SPSelfServiceSiteCreation
+  * New resource to manage self-service site creation
 
 ## 2.5
 
