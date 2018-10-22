@@ -42,6 +42,8 @@
     (only supported if using a SharePoint 2013 masterpage)
 * SPSelfServiceSiteCreation
   * New resource to manage self-service site creation
+* SPTrustedIdentityTokenIssuer
+  * Added parameter UseWReplyParameter
 
 ## 2.5
 
