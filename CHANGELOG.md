@@ -13,6 +13,7 @@
   * Fixed issue with numerical Content Sources name
 * SPSearchManagedProperty
   * Added a new resource to support Search Managed Properties
+  * Fix for multiple aliases
 * SPSearchResultSource
   * Added a new ScopeUrl parameter to allow for local source creation
 * SPSearchTopology
