@@ -1,0 +1,11 @@
+[ClassVersion("1.0.0.0"), FriendlyName("SPSearchCrawledProperty")]
+class MSFT_SPSearchCrawledProperty : OMI_BaseResource
+{
+    [Key, Description("The name of the crawled property")] String Name;
+    [Key, Description("The name of the search service app that this crawled property exists within")] String ServiceAppName;
+    [Required, Description("The crawled property's associated metadata category")] String Category;
+    [Required, Description("Specifies if the crawled property is of type integer or not")] Boolean IsNameEnum;
+    [Required, Description("GUID of the property set associated with the crawled property")] String PropSet;
+    [Required, Description("Integer that represents the variant data type of the property set associated with the crawled property")] Int32 VariantType;
+    [Write, Description("Specify true to map the crawled property to an existing managed property")] Boolean IsMappedToContent;
+};
