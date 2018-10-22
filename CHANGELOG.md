@@ -18,6 +18,7 @@
   * Added a new ScopeUrl parameter to allow for local source creation
 * SPSearchTopology
   * Updated Readme.md to remove some incorrect information
+  * Fixed logic to handle the FirstPartitionDirectory in Get-TargetResource
 * SPSite
   * Added the possibility for creating the default site groups
   * Added the possibility to set AdministrationSiteType
