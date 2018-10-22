@@ -63,6 +63,14 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Server = @{
                     Address = $env:COMPUTERNAME
                 }
+                Components = @(
+                    @{
+                        IndexLocation = @("C:\Program Files\Fake", "C:\Program Files\Fake2")
+                    },
+                    @{
+                        IndexLocation = @("C:\Program Files\Fake3")
+                    }
+                )
                 Status = "Online"
             }
         }
