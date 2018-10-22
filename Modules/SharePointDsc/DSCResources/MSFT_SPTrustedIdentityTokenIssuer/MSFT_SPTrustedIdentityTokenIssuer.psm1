@@ -50,6 +50,10 @@
         $ProviderSignOutUri,
 
         [Parameter()]
+        [System.Boolean]
+        $UseWReplyParameter = $false,
+
+        [Parameter()]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
@@ -74,6 +78,7 @@
             $currentState = "Present"
             $claimProviderName = $sptrust.ClaimProviderName
             $providerSignOutUri = $sptrust.ProviderSignOutUri.OriginalString
+            $useWReplyParameter = $sptrust.UseWReplyParameter
             $spTrust.ClaimTypeInformation| Foreach-Object -Process {
                 $claimsMappings = $claimsMappings + @{
                     Name = $_.DisplayName
@@ -92,6 +97,7 @@
             $currentState = "Absent"
             $claimProviderName = ""
             $providerSignOutUri = ""
+            $useWReplyParameter = [String]::Empty
         }
 
         return @{
@@ -106,6 +112,7 @@
             Ensure                       = $currentState
             ClaimProviderName            = $claimProviderName
             ProviderSignOutUri           = $providerSignOutUri
+            UseWReplyParameter           = $useWReplyParameter
         }        
     }
     return $result
@@ -160,6 +167,10 @@ function Set-TargetResource
         [Parameter()]
         [String]
         $ProviderSignOutUri,
+
+        [Parameter()]
+        [System.Boolean]
+        $UseWReplyParameter = $false,
 
         [Parameter()]
         [System.Management.Automation.PSCredential]
@@ -272,6 +283,7 @@ function Set-TargetResource
                 $runParams.Add("SignInUrl", $params.SignInUrl)
                 $runParams.Add("IdentifierClaim", $params.IdentifierClaim)
                 $runParams.Add("ClaimsMappings", $claimsMappingsArray)
+                $runParams.Add("UseWReply", $params.UseWReplyParameter)
                 $trust = New-SPTrustedIdentityTokenIssuer @runParams
 
                 if ($null -eq $trust)
@@ -396,6 +408,10 @@ function Test-TargetResource
         [Parameter()]
         [String]
         $ProviderSignOutUri,
+
+        [Parameter()]
+        [System.Boolean]
+        $UseWReplyParameter = $false,
 
         [Parameter()]
         [System.Management.Automation.PSCredential]
