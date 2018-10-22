@@ -55,10 +55,12 @@ namespace Microsoft.SharePoint.Administration {
                 } | Add-Member -MemberType ScriptMethod `
                     -Name GetType `
                     -Value {
-                        return @{Name = "SPWebServiceInstance"}
-                    } -PassThru -Force)
-            }
+                        return @{
+                            Name = "SPWebServiceInstance"
+                        }
+            } -PassThru -Force)
         }
+
 
         function Update-SPDscTestConfigFile
         {
