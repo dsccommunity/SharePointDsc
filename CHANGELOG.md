@@ -4,6 +4,8 @@
 
 * Changes to SharePointDsc
   * Updated test helpers to force a reload of the resource every time you run a test
+* SPFarm
+  * Fixed issue where Central Admin service was not starting for non-english farms
 * SPManagedMetadataServiceApp
   * Added additional content type settings (ContentTypePushdownEnabled &
     ContentTypeSyndicationEnabled).
@@ -41,6 +43,8 @@
 * SPWebAppSuiteBar
   * Enable usage of SuiteBarBrandingElementHtml for SharePoint 2016
     (only supported if using a SharePoint 2013 masterpage)
+* SPSelfServiceSiteCreation
+  * New resource to manage self-service site creation
 
 ## 2.5
 
