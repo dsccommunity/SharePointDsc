@@ -54,6 +54,9 @@ function Get-TargetResource
             return @{
                 Name = $params.Name
                 ServiceAppName = $params.ServiceAppName
+                AutoCreateNewManagedProperties = $null
+                DiscoverNewProperties = $null
+                MapToContents = $null
                 Ensure = "Absent"
             }
         }
@@ -153,21 +156,6 @@ function Set-TargetResource
                                                -AutoCreateNewManagedProperties $params.AutoCreateNewManagedProperties `
                                                -DiscoverNewProperties $params.DiscoverNewProperties `
                                                -MapToContents $params.MapToContents
-
-
-
-        # If alias doesn't already exist, add it
-        $currentAliases = $managedProperty.GetAliases()
-
-        foreach($alias in $params.Aliases)
-        {
-            $currentAlias = $managedProperty.GetAliases() | Where-Object {$_ -eq $alias}
-            if(!$currentAlias)
-            {
-                $managedProperty.AddAlias($alias)
-            }
-        }
-        $managedProperty.Update()
     }
 }
 
