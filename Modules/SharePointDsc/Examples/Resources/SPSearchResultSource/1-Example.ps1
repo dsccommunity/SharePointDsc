@@ -16,7 +16,7 @@
             SPSearchResultSource RemoteSharePointFarm
             {
                 Name = "External SharePoint results"
-                Scope = "SPSite"
+                ScopeName = "SPSite"
                 ScopeUrl = "https://SharePoint.contoso.com"
                 SearchServiceAppName = "Search Service Application"
                 Query = "{searchTerms}"

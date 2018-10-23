@@ -145,7 +145,7 @@ catch {
         Context -Name "A search result source doesn't exist and should" -Fixture {
             $testParams = @{
                 Name = "New source"
-                Scope = "SSA"
+                ScopeName = "SSA"
                 SearchServiceAppName = "Search Service Application"
                 ProviderType = "Remote SharePoint Provider"
                 Query = "{searchTerms}"
@@ -171,7 +171,7 @@ catch {
         Context -Name "Invalid parameters are specified" -Fixture {
             $testParams = @{
                 Name = "Test source"
-                Scope = "SPSite"
+                ScopeName = "SPSite"
                 SearchServiceAppName = "Search Service Application"
                 ProviderType = "Remote SharePoint Provider"
                 Query = "{searchTerms}"
@@ -180,18 +180,18 @@ catch {
             }
 
             It "Should throw an error from the get method" {
-                { Get-TargetResource @testParams } | Should Throw "When specifying a Scope of type SPSite you also need to provide a ScopeUrl value."
+                { Get-TargetResource @testParams } | Should Throw "When specifying a ScopeName of type SPSite you also need to provide a ScopeUrl value."
             }
 
             It "Should thow an error from the set method" {
-                { Set-TargetResource @testParams } | Should Throw "When specifying a Scope of type SPSite you also need to provide a ScopeUrl value."
+                { Set-TargetResource @testParams } | Should Throw "When specifying a ScopeName of type SPSite you also need to provide a ScopeUrl value."
             }
         }
 
         Context -Name "A search result source exists and should" -Fixture {
             $testParams = @{
                 Name = "Test source"
-                Scope = "SSA"
+                ScopeName = "SSA"
                 SearchServiceAppName = "Search Service Application"
                 ProviderType = "Remote SharePoint Provider"
                 Query = "{searchTerms}"
@@ -222,7 +222,7 @@ catch {
                 SearchServiceAppName = "Search Service Application"
                 ProviderType = "Remote SharePoint Provider"
                 Query = "{searchTerms}"
-                Scope = "SSA"
+                ScopeName = "SSA"
                 ConnectionUrl = "https://sharepoint.contoso.com"
                 Ensure = "Absent"
             }
@@ -251,7 +251,7 @@ catch {
         Context -Name "A search result source doesn't exist and shouldn't" -Fixture {
             $testParams = @{
                 Name = "Non-Existing source"
-                Scope = "SSA"
+                ScopeName = "SSA"
                 SearchServiceAppName = "Search Service Application"
                 ProviderType = "Remote SharePoint Provider"
                 Query = "{searchTerms}"
@@ -270,10 +270,10 @@ catch {
             }
         }
 
-        Context -Name "Valid SPWeb Scope was provided" -Fixture {
+        Context -Name "Valid SPWeb ScopeName was provided" -Fixture {
             $testParams = @{
                 Name = "New source"
-                Scope = "SPWeb"
+                ScopeName = "SPWeb"
                 ScopeUrl = "https://SharePoint.contoso.com"
                 SearchServiceAppName = "Search Service Application"
                 ProviderType = "Remote SharePoint Provider"
