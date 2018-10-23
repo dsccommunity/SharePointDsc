@@ -176,7 +176,7 @@ function Get-TargetResource
             $centralAdminProvisioned = $false
             $ca = Get-SPServiceInstance -Server $env:ComputerName `
                   | Where-Object -Filterscript {
-                        $_.TypeName -eq "Central Administration" -and $_.Status -eq "Online"
+                        $_.Name -eq "WSS_Administration" -and $_.Status -eq "Online"
                     }
             if ($null -ne $ca)
             {
@@ -378,7 +378,7 @@ function Set-TargetResource
                 {
                     $serviceInstance = Get-SPServiceInstance -Server $env:COMPUTERNAME `
                                             | Where-Object -FilterScript {
-                                                $_.TypeName -eq "Central Administration"
+                                                $_.Name -eq "WSS_Administration"
                                             }
                     if ($null -eq $serviceInstance)
                     {
@@ -386,7 +386,7 @@ function Set-TargetResource
                         $fqdn = "$($env:COMPUTERNAME).$domain"
                         $serviceInstance = Get-SPServiceInstance -Server $fqdn `
                                             | Where-Object -FilterScript {
-                                                $_.TypeName -eq "Central Administration"
+                                                $_.Name -eq "WSS_Administration"
                                             }
                     }
                     if ($null -eq $serviceInstance)
@@ -400,7 +400,7 @@ function Set-TargetResource
                     # Unprovision central administration
                     $serviceInstance = Get-SPServiceInstance -Server $env:COMPUTERNAME `
                                                 | Where-Object -FilterScript {
-                                                    $_.TypeName -eq "Central Administration"
+                                                    $_.Name -eq "WSS_Administration"
                                                 }
                     if ($null -eq $serviceInstance)
                     {
@@ -408,7 +408,7 @@ function Set-TargetResource
                         $fqdn = "$($env:COMPUTERNAME).$domain"
                         $serviceInstance = Get-SPServiceInstance -Server $fqdn `
                                             | Where-Object -FilterScript {
-                                                $_.TypeName -eq "Central Administration"
+                                                $_.Name -eq "WSS_Administration"
                                             }
                     }
                     if ($null -eq $serviceInstance)
@@ -646,7 +646,7 @@ function Set-TargetResource
                 {
                     $serviceInstance = Get-SPServiceInstance -Server $env:COMPUTERNAME `
                                             | Where-Object -FilterScript {
-                                                $_.TypeName -eq "Central Administration"
+                                                $_.Name -eq "WSS_Administration"
                                             }
                     if ($null -eq $serviceInstance)
                     {
@@ -654,7 +654,7 @@ function Set-TargetResource
                         $fqdn = "$($env:COMPUTERNAME).$domain"
                         $serviceInstance = Get-SPServiceInstance -Server $fqdn `
                                             | Where-Object -FilterScript {
-                                                $_.TypeName -eq "Central Administration"
+                                                $_.Name -eq "WSS_Administration"
                                             }
                     }
                     if ($null -eq $serviceInstance)
