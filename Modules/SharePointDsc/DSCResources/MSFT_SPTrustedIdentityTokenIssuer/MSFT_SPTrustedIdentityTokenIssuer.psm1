@@ -97,7 +97,7 @@
             $currentState = "Absent"
             $claimProviderName = ""
             $providerSignOutUri = ""
-            $useWReplyParameter = [String]::Empty
+            $useWReplyParameter = $false
         }
 
         return @{
