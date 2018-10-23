@@ -29,20 +29,19 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         Import-Module -Name (Join-Path -Path $Global:SPDscHelper.RepoRoot -ChildPath $modulePath -Resolve)
 
         # Mocks for all contexts
-        Mock -CommandName "Add-SPDscConfigDBLock" -MockWith { }
-        Mock -CommandName "Remove-SPDscConfigDBLock" -MockWith { }
-        Mock -CommandName "New-SPConfigurationDatabase" -MockWith { }
-        Mock -CommandName "Connect-SPConfigurationDatabase" -MockWith { }
-        Mock -CommandName "Install-SPHelpCollection" -MockWith { }
-        Mock -CommandName "Initialize-SPResourceSecurity" -MockWith { }
-        Mock -CommandName "Install-SPService" -MockWith { }
-        Mock -CommandName "Install-SPFeature" -MockWith { }
-        Mock -CommandName "New-SPCentralAdministration" -MockWith { }
-        Mock -CommandName "Import-Module" -MockWith { }
-        Mock -CommandName "Start-Sleep" -MockWith { }
-        Mock -CommandName "Start-Service" -MockWith { }
-        Mock -CommandName "Stop-Service" -MockWith { }
-        Mock -CommandName "Start-SPServiceInstance" -MockWith { }
+        Mock -CommandName Add-SPDscConfigDBLock -MockWith { }
+        Mock -CommandName Remove-SPDscConfigDBLock -MockWith { }
+        Mock -CommandName New-SPConfigurationDatabase -MockWith { }
+        Mock -CommandName Connect-SPConfigurationDatabase -MockWith { }
+        Mock -CommandName Install-SPHelpCollection -MockWith { }
+        Mock -CommandName Initialize-SPResourceSecurity -MockWith { }
+        Mock -CommandName Install-SPService -MockWith { }
+        Mock -CommandName Install-SPFeature -MockWith { }
+        Mock -CommandName New-SPCentralAdministration -MockWith { }
+        Mock -CommandName Start-Sleep -MockWith { }
+        Mock -CommandName Start-Service -MockWith { }
+        Mock -CommandName Stop-Service -MockWith { }
+        Mock -CommandName Start-SPServiceInstance -MockWith { }
         Mock -CommandName Get-SPDSCInstalledProductVersion {
             return @{
                 FileMajorPart = $Global:SPDscHelper.CurrentStubBuildNumber.Major
@@ -81,6 +80,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "No config databaes exists, and this server should be connected to one" -Fixture {
             $testParams = @{
+                IsSingleInstance = "Yes"
                 Ensure = "Present"
                 FarmConfigDatabaseName = "SP_Config"
                 DatabaseServer = "sql.contoso.com"
@@ -485,6 +485,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "Server is connected to farm, but CentralAdminPort is different" -Fixture {
             $testParams = @{
+                IsSingleInstance = "Yes"
                 Ensure = "Present"
                 FarmConfigDatabaseName = "SP_Config"
                 DatabaseServer = "sql.contoso.com"
