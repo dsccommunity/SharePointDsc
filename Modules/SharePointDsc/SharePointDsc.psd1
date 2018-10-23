@@ -12,7 +12,11 @@
 # RootModule = ''
 
 # Version number of this module.
+<<<<<<< HEAD
 ModuleVersion = '3.0.0.0'
+=======
+ModuleVersion = '2.5.0.0'
+>>>>>>> upstream/dev
 
 # ID used to uniquely identify this module
 GUID = '6c1176a0-4fac-4134-8ca2-3fa8a21a7b90'
@@ -128,28 +132,40 @@ PrivateData = @{
 
         # ReleaseNotes of this module
         ReleaseNotes = "
-      * Changes to SharePointDsc
-        * Added a Branches section to the README.md with Codecov and build badges for
-          both master and dev branch.
-      * All Resources
-        * Added information about the Resource Type in each ReadMe.md files.
+      * SPAppCatalog
+        * Updated resource to retrieve the Farm account instead of requiring it
+          to be specifically used
+      * SPDatabaseAAG
+        * Updated readme.md to specify that this resource also updates the database
+          connection string
+      * SPDiagnosticsProvider
+        * Fixed issue where enabling providers did not work
       * SPFarm
-        * Fixed issue where the resource throws an exception if the farm already
-          exists and the server has been joined using the FQDN (issue 795)
-      * SPTimerJobState
-        * Fixed issue where the Set method for timerjobs deployed to multiple web
-          applications failed.
-      * SPTrustedIdentityTokenIssuerProviderRealms
-        * Added the resource.
+        * Added ability to check and update CentralAdministrationPort
+      * SPLogLevel
+        * Added High as TraceLevel, which was not included yet
+      * SPRemoteFarmTrust
+        * Updated readme.md file to add a link that was lost during earlier updates
+      * SPSearchServiceApp
+        * Updated Set method to check if service application pool exists. Resource
+          will throw an error if it does not exist
+      * SPSearchTopology
+        * Fixed issue where Get method threw an error when the specified service
+          application didn't exist yet
+        * Fixed issue where the resource would fail is the FQDN was specified
+      * SPShellAdmins
+        * Added ExcludeDatabases parameter for AllDatabases
+      * SPSite
+        * Added ability to check and update QuotaTemplate, OwnerAlias and SecondaryOwnerAlias
+      * SPSiteUrl
+        * New resource to manage site collection urls for host named site collections
+      * SPTrustedIdentityTokenIssuerProviderRealm
+        * Fixed issue where Get method threw an error when the realm didn't exist yet
       * SPUserProfileServiceApp
-        * Now supported specifying the host Managed path, and properly sets the host.
-        * Changed error for running with Farm Account into being a warning
-      * SPUserProfileSyncConnection
-        * Added support for filtering disabled users
-        * Fixed issue where UseSSL was set to true resulted in an error
-        * Fixed issue where the connection was recreated when the name contained a
-          dot (SP2016)
-      "
+        * Fix for issue where an update conflict error was thrown when new service
+          application was created
+        * Added SiteNamingConflictResolution parameter to the resource
+            "
     } # End of PSData hashtable
 
 } # End of PrivateData hashtable

@@ -19,6 +19,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 try {
         # Initialize tests
+<<<<<<< HEAD
         Add-Type -TypeDefinition @"
         namespace Microsoft.Office.Server.Search.Administration {
             public enum SearchObjectLevel
@@ -33,6 +34,22 @@ try {
 }
 catch {
     Write-Verbose "Could not instantiante the enum Microsoft.Office.Server.Search.Administration.SearchObjectLevel"
+=======
+           Add-Type -TypeDefinition @"
+namespace Microsoft.Office.Server.Search.Administration {
+    public enum SearchObjectLevel
+    {
+        SPWeb,
+        SPSite,
+        SPSiteSubscription,
+        Ssa
+    }
+}
+"@ -ErrorAction SilentlyContinue
+}
+catch {
+
+>>>>>>> upstream/dev
 }
 
         # Mocks for all contexts
@@ -121,6 +138,10 @@ catch {
                                                             }
                                              } `
                                 | Add-Member -Name RemoveSource `
+                                             -MemberType ScriptMethod `
+                                             -PassThru `
+                                             -Value { } `
+                                | Add-Member -Name ListSources `
                                              -MemberType ScriptMethod `
                                              -PassThru `
                                              -Value { }
@@ -279,6 +300,30 @@ catch {
                 ProviderType = "Remote SharePoint Provider"
                 Query = "{searchTerms}"
                 ConnectionUrl = "https://sharepoint.contoso.com"
+                Ensure = "Present"
+            }
+
+            It "Should return absent from the get method" {
+                (Get-TargetResource @testParams).Ensure | Should Be "Absent"
+            }
+
+            It "Should return false from the test method" {
+                Test-TargetResource @testParams | Should Be $false
+            }
+
+            It "Should create the result source in the set method" {
+                Set-TargetResource @testParams
+            }
+        }
+
+        Context -Name "Local Result Source" -Fixture {
+            $testParams = @{
+                Name = "Test source"
+                SearchServiceAppName = "Search Service Application"
+                ProviderType = "Remote SharePoint Provider"
+                Query = "{searchTerms}"
+                ConnectionUrl = "https://sharepoint.contoso.com"
+                ScopeUrl = "https://sharepoint.contoso.com"
                 Ensure = "Present"
             }
 

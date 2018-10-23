@@ -67,6 +67,15 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting the settings of the current local SharePoint Farm (if any)"
 
+    if ($PSBoundParameters.ContainsKey("CentralAdministrationPort"))
+    {
+        if ($CentralAdministrationPort -notin 1..65535)
+        {
+            throw ("An invalid value for CentralAdministrationPort is specified: " + `
+                   "$CentralAdministrationPort")
+        }
+    }
+
     if ($Ensure -eq "Absent")
     {
         throw ("SharePointDsc does not support removing a server from a farm, please set the " + `
@@ -167,7 +176,7 @@ function Get-TargetResource
             $centralAdminProvisioned = $false
             $ca = Get-SPServiceInstance -Server $env:ComputerName `
                   | Where-Object -Filterscript {
-                        $_.TypeName -eq "Central Administration" -and $_.Status -eq "Online"
+                        $_.Name -eq "WSS_Administration" -and $_.Status -eq "Online"
                     }
             if ($null -ne $ca)
             {
@@ -349,6 +358,7 @@ function Set-TargetResource
     {
         $PSBoundParameters.Add("CentralAdministrationPort", 9999)
     }
+
     if (-not $PSBoundParameters.ContainsKey("CentralAdministrationAuth"))
     {
         $PSBoundParameters.Add("CentralAdministrationAuth", "NTLM")
@@ -368,7 +378,7 @@ function Set-TargetResource
                 {
                     $serviceInstance = Get-SPServiceInstance -Server $env:COMPUTERNAME `
                                             | Where-Object -FilterScript {
-                                                $_.TypeName -eq "Central Administration"
+                                                $_.Name -eq "WSS_Administration"
                                             }
                     if ($null -eq $serviceInstance)
                     {
@@ -376,7 +386,7 @@ function Set-TargetResource
                         $fqdn = "$($env:COMPUTERNAME).$domain"
                         $serviceInstance = Get-SPServiceInstance -Server $fqdn `
                                             | Where-Object -FilterScript {
-                                                $_.TypeName -eq "Central Administration"
+                                                $_.Name -eq "WSS_Administration"
                                             }
                     }
                     if ($null -eq $serviceInstance)
@@ -390,7 +400,7 @@ function Set-TargetResource
                     # Unprovision central administration
                     $serviceInstance = Get-SPServiceInstance -Server $env:COMPUTERNAME `
                                                 | Where-Object -FilterScript {
-                                                    $_.TypeName -eq "Central Administration"
+                                                    $_.Name -eq "WSS_Administration"
                                                 }
                     if ($null -eq $serviceInstance)
                     {
@@ -398,25 +408,38 @@ function Set-TargetResource
                         $fqdn = "$($env:COMPUTERNAME).$domain"
                         $serviceInstance = Get-SPServiceInstance -Server $fqdn `
                                             | Where-Object -FilterScript {
-                                                $_.TypeName -eq "Central Administration"
+                                                $_.Name -eq "WSS_Administration"
                                             }
                     }
                     if ($null -eq $serviceInstance)
                     {
-                        throw [Exception] "Unable to locate Central Admin service instance on this server"
+                        throw "Unable to locate Central Admin service instance on this server"
                     }
                     Stop-SPServiceInstance -Identity $serviceInstance
                 }
             }
-            return
         }
-        else
+        if ($CurrentValues.CentralAdministrationPort -ne $CentralAdministrationPort)
         {
-            throw ("This server is already connected to a farm. " + `
-                   "Please manually remove it to apply this change.")
-        }
-    }
+            Invoke-SPDSCCommand -Credential $InstallAccount `
+                                -Arguments $PSBoundParameters `
+                                -ScriptBlock {
+                $params = $args[0]
 
+                Set-SPCentralAdministration -Port $params.CentralAdministrationPort
+            }
+        }
+        return
+    }
+    else
+    {
+        $actionResult = Invoke-SPDSCCommand -Credential $InstallAccount `
+                                            -Arguments @($PSBoundParameters, $PSScriptRoot) `
+                                            -ScriptBlock {
+            $params = $args[0]
+            $scriptRoot = $args[1]
+
+<<<<<<< HEAD
     $actionResult = Invoke-SPDSCCommand -Credential $InstallAccount `
                                         -Arguments @($PSBoundParameters, $PSScriptRoot) `
                                         -ScriptBlock {
@@ -441,23 +464,30 @@ function Set-TargetResource
                                     "database is currently being provisioned by a remote " + `
                                     "server, this server will wait for this to complete")
             Start-Sleep -Seconds 30
+=======
+            $modulePath = "..\..\Modules\SharePointDsc.Farm\SPFarm.psm1"
+            Import-Module -Name (Join-Path -Path $scriptRoot -ChildPath $modulePath -Resolve)
+>>>>>>> upstream/dev
             $dbStatus = Get-SPDSCConfigDBStatus -SQLServer $params.DatabaseServer `
                                                 -Database $params.FarmConfigDatabaseName
-        }
 
-        if ($dbStatus.ValidPermissions -eq $false)
-        {
-            throw "The current user does not have sufficient permissions to SQL Server"
-            return
-        }
+            while ($dbStatus.Locked -eq $true)
+            {
+                Write-Verbose -Message ("[$([DateTime]::Now.ToShortTimeString())] The configuration " + `
+                                        "database is currently being provisioned by a remote " + `
+                                        "server, this server will wait for this to complete")
+                Start-Sleep -Seconds 30
+                $dbStatus = Get-SPDSCConfigDBStatus -SQLServer $params.DatabaseServer `
+                                                    -Database $params.FarmConfigDatabaseName
+            }
 
-        $executeArgs = @{
-            DatabaseServer = $params.DatabaseServer
-            DatabaseName = $params.FarmConfigDatabaseName
-            Passphrase = $params.Passphrase.Password
-            SkipRegisterAsDistributedCacheHost = $true
-        }
+            if ($dbStatus.ValidPermissions -eq $false)
+            {
+                throw "The current user does not have sufficient permissions to SQL Server"
+                return
+            }
 
+<<<<<<< HEAD
         $installedVersion = Get-SPDSCInstalledProductVersion
         switch($installedVersion.FileMajorPart)
         {
@@ -533,138 +563,205 @@ function Set-TargetResource
         if ($createFarm -eq $false)
         {
             # The database exists, so attempt to join the farm to the server
-
-
-            # Remove the server role optional attribute as it is only used when creating
-            # a new farm
-            if ($executeArgs.ContainsKey("ServerRoleOptional") -eq $true)
-            {
-                $executeArgs.Remove("ServerRoleOptional")
+=======
+            $executeArgs = @{
+                DatabaseServer = $params.DatabaseServer
+                DatabaseName = $params.FarmConfigDatabaseName
+                Passphrase = $params.Passphrase.Password
+                SkipRegisterAsDistributedCacheHost = $true
             }
 
-            Write-Verbose -Message ("The server will attempt to join the farm now once every " + `
-                                    "60 seconds for the next 15 minutes.")
-            $loopCount = 0
-            $connectedToFarm = $false
-            $lastException = $null
-            while ($connectedToFarm -eq $false -and $loopCount -lt 15)
+            switch((Get-SPDSCInstalledProductVersion).FileMajorPart)
             {
-                try
-                {
-                    Connect-SPConfigurationDatabase @executeArgs | Out-Null
-                    $connectedToFarm = $true
+                15 {
+                    Write-Verbose -Message "Detected Version: SharePoint 2013"
                 }
-                catch
-                {
-                    $lastException = $_.Exception
-                    Write-Verbose -Message ("$([DateTime]::Now.ToShortTimeString()) - An error " + `
-                                            "occured joining config database " + `
-                                            "'$($params.FarmConfigDatabaseName)' on " + `
-                                            "'$($params.DatabaseServer)'. This resource will " + `
-                                            "wait and retry automatically for up to 15 minutes. " + `
-                                            "(waited $loopCount of 15 minutes)")
-                    $loopCount++
-                    Start-Sleep -Seconds 60
+                16 {
+                    if ($params.ContainsKey("ServerRole") -eq $true)
+                    {
+                        Write-Verbose -Message ("Detected Version: SharePoint 2016 - " + `
+                                                "configuring server as $($params.ServerRole)")
+                        $executeArgs.Add("LocalServerRole", $params.ServerRole)
+                    }
+                    else
+                    {
+                        Write-Verbose -Message ("Detected Version: SharePoint 2016 - no server " + `
+                                                "role provided, configuring server without a " + `
+                                                "specific role")
+                        $executeArgs.Add("ServerRoleOptional", $true)
+                    }
+                }
+                Default {
+                    throw [Exception] ("An unknown version of SharePoint (Major version $_) " + `
+                                        "was detected. Only versions 15 (SharePoint 2013) or " + `
+                                        "16 (SharePoint 2016) are supported.")
                 }
             }
+>>>>>>> upstream/dev
 
-            if ($connectedToFarm -eq $false)
+            if ($dbStatus.DatabaseExists -eq $true)
             {
-                Write-Verbose -Message ("Unable to join config database. Throwing exception.")
-                throw $lastException
-                return
+                Write-Verbose -Message ("The SharePoint config database " + `
+                                        "'$($params.FarmConfigDatabaseName)' already exists, so " + `
+                                        "this server will join the farm.")
+                $createFarm = $false
             }
-            $farmAction = "JoinedFarm"
-        }
-        else
-        {
-            Add-SPDscConfigDBLock -SQLServer $params.DatabaseServer `
-                                  -Database $params.FarmConfigDatabaseName
-
-            try
+            elseif ($dbStatus.DatabaseExists -eq $false -and $params.RunCentralAdmin -eq $false)
             {
-                $executeArgs += @{
-                    FarmCredentials = $params.FarmAccount
-                    AdministrationContentDatabaseName = $params.AdminContentDatabaseName
-                }
-
-                New-SPConfigurationDatabase @executeArgs
-
-                $farmAction = "CreatedFarm"
-            }
-            finally
-            {
-                Remove-SPDscConfigDBLock -SQLServer $params.DatabaseServer `
-                                         -Database $params.FarmConfigDatabaseName
-            }
-        }
-
-        # Run common tasks for a new server
-        Install-SPHelpCollection -All | Out-Null
-        Initialize-SPResourceSecurity | Out-Null
-        Install-SPService | Out-Null
-        Install-SPFeature -AllExistingFeatures -Force | Out-Null
-
-        # Provision central administration
-        if ($params.RunCentralAdmin -eq $true)
-        {
-            $centralAdminSite = Get-SPWebApplication -IncludeCentralAdministration `
-                                | Where-Object -FilterScript {
-                                    $_.IsAdministrationWebApplication -eq $true
-                                }
-
-
-            $centralAdminProvisioned = $false
-            if ((New-Object -TypeName System.Uri $centralAdminSite.Url).Port -eq $params.CentralAdministrationPort)
-            {
-                $centralAdminProvisioned = $true
-            }
-
-            if ($centralAdminProvisioned -eq $false)
-            {
-                New-SPCentralAdministration -Port $params.CentralAdministrationPort `
-                                            -WindowsAuthProvider $params.CentralAdministrationAuth
+                # Only allow the farm to be created by a server that will run central admin
+                # to avoid a ghost CA site appearing on this server and causing issues
+                Write-Verbose -Message ("The SharePoint config database " + `
+                                        "'$($params.FarmConfigDatabaseName)' does not exist, but " + `
+                                        "this server will not be running the central admin " + `
+                                        "website, so it will wait to join the farm rather than " + `
+                                        "create one.")
+                $createFarm = $false
             }
             else
             {
-                $serviceInstance = Get-SPServiceInstance -Server $env:COMPUTERNAME `
-                                        | Where-Object -FilterScript {
-                                            $_.TypeName -eq "Central Administration"
-                                        }
-                if ($null -eq $serviceInstance)
-                {
-                    $domain = (Get-CimInstance -ClassName Win32_ComputerSystem).Domain
-                    $fqdn = "$($env:COMPUTERNAME).$domain"
-                    $serviceInstance = Get-SPServiceInstance -Server $fqdn `
-                                        | Where-Object -FilterScript {
-                                            $_.TypeName -eq "Central Administration"
-                                        }
-                }
-                if ($null -eq $serviceInstance)
-                {
-                    throw [Exception] "Unable to locate Central Admin service instance on this server"
-                }
-                Start-SPServiceInstance -Identity $serviceInstance
+                Write-Verbose -Message ("The SharePoint config database " + `
+                                        "'$($params.FarmConfigDatabaseName)' does not exist, so " + `
+                                        "this server will create the farm.")
+                $createFarm = $true
             }
+
+            $farmAction = ""
+            if ($createFarm -eq $false)
+            {
+                # The database exists, so attempt to join the farm to the server
+
+
+                # Remove the server role optional attribute as it is only used when creating
+                # a new farm
+                if ($executeArgs.ContainsKey("ServerRoleOptional") -eq $true)
+                {
+                    $executeArgs.Remove("ServerRoleOptional")
+                }
+
+                Write-Verbose -Message ("The server will attempt to join the farm now once every " + `
+                                        "60 seconds for the next 15 minutes.")
+                $loopCount = 0
+                $connectedToFarm = $false
+                $lastException = $null
+                while ($connectedToFarm -eq $false -and $loopCount -lt 15)
+                {
+                    try
+                    {
+                        Connect-SPConfigurationDatabase @executeArgs | Out-Null
+                        $connectedToFarm = $true
+                    }
+                    catch
+                    {
+                        $lastException = $_.Exception
+                        Write-Verbose -Message ("$([DateTime]::Now.ToShortTimeString()) - An error " + `
+                                                "occured joining config database " + `
+                                                "'$($params.FarmConfigDatabaseName)' on " + `
+                                                "'$($params.DatabaseServer)'. This resource will " + `
+                                                "wait and retry automatically for up to 15 minutes. " + `
+                                                "(waited $loopCount of 15 minutes)")
+                        $loopCount++
+                        Start-Sleep -Seconds 60
+                    }
+                }
+
+                if ($connectedToFarm -eq $false)
+                {
+                    Write-Verbose -Message ("Unable to join config database. Throwing exception.")
+                    throw $lastException
+                    return
+                }
+                $farmAction = "JoinedFarm"
+            }
+            else
+            {
+                Add-SPDscConfigDBLock -SQLServer $params.DatabaseServer `
+                                    -Database $params.FarmConfigDatabaseName
+
+                try
+                {
+                    $executeArgs += @{
+                        FarmCredentials = $params.FarmAccount
+                        AdministrationContentDatabaseName = $params.AdminContentDatabaseName
+                    }
+
+                    New-SPConfigurationDatabase @executeArgs
+
+                    $farmAction = "CreatedFarm"
+                }
+                finally
+                {
+                    Remove-SPDscConfigDBLock -SQLServer $params.DatabaseServer `
+                                            -Database $params.FarmConfigDatabaseName
+                }
+            }
+
+            # Run common tasks for a new server
+            Install-SPHelpCollection -All | Out-Null
+            Initialize-SPResourceSecurity | Out-Null
+            Install-SPService | Out-Null
+            Install-SPFeature -AllExistingFeatures -Force | Out-Null
+
+            # Provision central administration
+            if ($params.RunCentralAdmin -eq $true)
+            {
+                $centralAdminSite = Get-SPWebApplication -IncludeCentralAdministration `
+                                    | Where-Object -FilterScript {
+                                        $_.IsAdministrationWebApplication -eq $true
+                                    }
+
+
+                $centralAdminProvisioned = $false
+                if ((New-Object -TypeName System.Uri $centralAdminSite.Url).Port -eq $params.CentralAdministrationPort)
+                {
+                    $centralAdminProvisioned = $true
+                }
+
+                if ($centralAdminProvisioned -eq $false)
+                {
+                    New-SPCentralAdministration -Port $params.CentralAdministrationPort `
+                                                -WindowsAuthProvider $params.CentralAdministrationAuth
+                }
+                else
+                {
+                    $serviceInstance = Get-SPServiceInstance -Server $env:COMPUTERNAME `
+                                            | Where-Object -FilterScript {
+                                                $_.Name -eq "WSS_Administration"
+                                            }
+                    if ($null -eq $serviceInstance)
+                    {
+                        $domain = (Get-CimInstance -ClassName Win32_ComputerSystem).Domain
+                        $fqdn = "$($env:COMPUTERNAME).$domain"
+                        $serviceInstance = Get-SPServiceInstance -Server $fqdn `
+                                            | Where-Object -FilterScript {
+                                                $_.Name -eq "WSS_Administration"
+                                            }
+                    }
+                    if ($null -eq $serviceInstance)
+                    {
+                        throw [Exception] "Unable to locate Central Admin service instance on this server"
+                    }
+                    Start-SPServiceInstance -Identity $serviceInstance
+                }
+            }
+
+            Install-SPApplicationContent | Out-Null
+
+            return $farmAction
         }
 
-        Install-SPApplicationContent | Out-Null
+        if ($actionResult -eq "JoinedFarm")
+        {
+            Write-Verbose -Message "Starting timer service"
+            Start-Service -Name sptimerv4
 
-        return $farmAction
-    }
+            Write-Verbose -Message ("Pausing for 5 minutes to allow the timer service to " + `
+                                    "fully provision the server")
+            Start-Sleep -Seconds 300
+            Write-Verbose -Message ("Join farm complete. Restarting computer to allow " + `
+                                    "configuration to continue")
 
-    if ($actionResult -eq "JoinedFarm")
-    {
-        Write-Verbose -Message "Starting timer service"
-        Start-Service -Name sptimerv4
-
-        Write-Verbose -Message ("Pausing for 5 minutes to allow the timer service to " + `
-                                "fully provision the server")
-        Start-Sleep -Seconds 300
-        Write-Verbose -Message ("Join farm complete. Restarting computer to allow " + `
-                                "configuration to continue")
-
-        $global:DSCMachineStatus = 1
+            $global:DSCMachineStatus = 1
+        }
     }
 }
 
@@ -743,7 +840,9 @@ function Test-TargetResource
 
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
                                     -DesiredValues $PSBoundParameters `
-                                    -ValuesToCheck @("Ensure", "RunCentralAdmin")
+                                    -ValuesToCheck @("Ensure",
+                                                     "RunCentralAdmin",
+                                                     "CentralAdministrationPort")
 }
 
 Export-ModuleMember -Function *-TargetResource

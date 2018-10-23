@@ -46,6 +46,14 @@ function Get-TargetResource
         $Languages,
 
         [Parameter()]
+        [System.Boolean]
+        $ContentTypePushdownEnabled,
+
+        [Parameter()]
+        [System.Boolean]
+        $ContentTypeSyndicationEnabled,
+
+        [Parameter()]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
@@ -92,6 +100,17 @@ function Get-TargetResource
                 {
                     $proxyName = $serviceAppProxy.Name
                 }
+            }
+
+            $proxy = Get-SPMetadataServiceApplicationProxy -Identity $proxyName
+            if ($null -ne $proxy)
+            {
+                $contentTypePushDownEnabled = $proxy.Properties["IsContentTypePushdownEnabled"]
+                $contentTypeSyndicationEnabled = $proxy.Properties["IsNPContentTypeSyndicationEnabled"]
+            }
+            else
+            {
+                Write-Verbose "No SPMetadataServiceApplicationProxy with the name '$($proxyName)' was found. Please verify your Managed Metadata Service Application."
             }
 
             # Get the ContentTypeHubUrl value
@@ -196,17 +215,19 @@ function Get-TargetResource
             }
 
             return @{
-                Name                    = $serviceApp.DisplayName
-                ProxyName               = $proxyName
-                Ensure                  = "Present"
-                ApplicationPool         = $serviceApp.ApplicationPool.Name
-                DatabaseName            = $serviceApp.Database.Name
-                DatabaseServer          = $serviceApp.Database.NormalizedDataSource
-                TermStoreAdministrators = $currentAdmins
-                ContentTypeHubUrl       = $hubUrl
-                DefaultLanguage         = $termStoreDefaultLanguage
-                Languages               = $termStoreLanguages
-                InstallAccount          = $params.InstallAccount
+                Name                          = $serviceApp.DisplayName
+                ProxyName                     = $proxyName
+                Ensure                        = "Present"
+                ApplicationPool               = $serviceApp.ApplicationPool.Name
+                DatabaseName                  = $serviceApp.Database.Name
+                DatabaseServer                = $serviceApp.Database.NormalizedDataSource
+                TermStoreAdministrators       = $currentAdmins
+                ContentTypeHubUrl             = $hubUrl
+                DefaultLanguage               = $termStoreDefaultLanguage
+                Languages                     = $termStoreLanguages
+                ContentTypePushdownEnabled    = $contentTypePushDownEnabled
+                ContentTypeSyndicationEnabled = $contentTypeSyndicationEnabled
+                InstallAccount                = $params.InstallAccount
             }
         }
     }
@@ -260,6 +281,14 @@ function Set-TargetResource
         $Languages,
 
         [Parameter()]
+        [System.Boolean]
+        $ContentTypePushdownEnabled,
+
+        [Parameter()]
+        [System.Boolean]
+        $ContentTypeSyndicationEnabled,
+
+        [Parameter()]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
@@ -269,7 +298,7 @@ function Set-TargetResource
     $result = Get-TargetResource @PSBoundParameters
 
     $pName = "$Name Proxy"
-    if($null -ne $result.ProxyName)
+    if ($null -ne $result.ProxyName)
     {
         $pName = $result.ProxyName
     }
@@ -552,6 +581,52 @@ function Set-TargetResource
                 }
             }
         }
+
+        if (($PSBoundParameters.ContainsKey("ContentTypePushdownEnabled") -eq $true) `
+                -and ($ContentTypePushdownEnabled -ne $result.ContentTypePushdownEnabled)
+        )
+        {
+            Invoke-SPDSCCommand -Credential $InstallAccount `
+                -Arguments @($PSBoundParameters, $pName) `
+                -ScriptBlock {
+                $params = $args[0]
+                $pName = $args[1]
+
+                $proxy = Get-SPMetadataServiceApplicationProxy -Identity $pName
+                if ($null -ne $proxy)
+                {
+                    $proxy.Properties["IsContentTypePushdownEnabled"] = $params.ContentTypePushdownEnabled
+                    $proxy.Update()
+                }
+                else
+                {
+                    throw [Exception] "No SPMetadataServiceApplicationProxy with the name '$($proxyName)' was found. Please verify your Managed Metadata Service Application."
+                }
+            }
+        }
+
+        if (($PSBoundParameters.ContainsKey("ContentTypeSyndicationEnabled") -eq $true) `
+                -and ($ContentTypeSyndicationEnabled -ne $result.ContentTypeSyndicationEnabled)
+        )
+        {
+            Invoke-SPDSCCommand -Credential $InstallAccount `
+                -Arguments @($PSBoundParameters, $pName) `
+                -ScriptBlock {
+                $params = $args[0]
+                $pName = $args[1]
+
+                $proxy = Get-SPMetadataServiceApplicationProxy -Identity $pName
+                if ($null -ne $proxy)
+                {
+                    $proxy.Properties["IsNPContentTypeSyndicationEnabled"] = $params.ContentTypeSyndicationEnabled
+                    $proxy.Update()
+                }
+                else
+                {
+                    throw [Exception] "No SPMetadataServiceApplicationProxy with the name '$($proxyName)' was found. Please verify your Managed Metadata Service Application."
+                }
+            }
+        }
     }
 
     if ($Ensure -eq "Absent")
@@ -629,6 +704,14 @@ function Test-TargetResource
         $Languages,
 
         [Parameter()]
+        [System.Boolean]
+        $ContentTypePushdownEnabled,
+
+        [Parameter()]
+        [System.Boolean]
+        $ContentTypeSyndicationEnabled,
+
+        [Parameter()]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
@@ -663,6 +746,16 @@ function Test-TargetResource
     if ($PSBoundParameters.ContainsKey("Languages") -eq $true)
     {
         $valuesToCheck += "Languages"
+    }
+
+    if ($PSBoundParameters.ContainsKey("ContentTypePushdownEnabled") -eq $true)
+    {
+        $valuesToCheck += "ContentTypePushdownEnabled"
+    }
+
+    if ($PSBoundParameters.ContainsKey("ContentTypeSyndicationEnabled") -eq $true)
+    {
+        $valuesToCheck += "ContentTypeSyndicationEnabled"
     }
 
     $CurrentValues = Get-TargetResource @PSBoundParameters

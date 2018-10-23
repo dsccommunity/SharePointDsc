@@ -15,8 +15,8 @@ function Get-TargetResource()
         [System.String]
         $LocalWebAppUrl,
 
-        [Parameter()] 
-        [ValidateSet("Present","Absent")] 
+        [Parameter()]
+        [ValidateSet("Present","Absent")]
         [System.String] $Ensure = "Present",
 
         [Parameter()]
@@ -63,7 +63,7 @@ function Get-TargetResource()
         $returnValue.Ensure = "Present"
         return $returnValue
     }
-    return $result    
+    return $result
 }
 
 function Set-TargetResource()
@@ -82,8 +82,8 @@ function Set-TargetResource()
         [System.String]
         $LocalWebAppUrl,
 
-        [Parameter()] 
-        [ValidateSet("Present","Absent")] 
+        [Parameter()]
+        [ValidateSet("Present","Absent")]
         [System.String] $Ensure = "Present",
 
         [Parameter()]
@@ -110,7 +110,8 @@ function Set-TargetResource()
                 $endpoint = "$remoteWebApp/_layouts/15/metadata/json/1"
                 $issuer = New-SPTrustedSecurityTokenIssuer -Name $params.Name `
                                                            -IsTrustBroker:$false `
-                                                           -MetadataEndpoint $endpoint
+                                                           -MetadataEndpoint $endpoint `
+                                                           -Confirm:$false
             }
 
             $rootAuthority = Get-SPTrustedRootAuthority -Identity $params.Name `
@@ -119,7 +120,8 @@ function Set-TargetResource()
             {
                 $endpoint = "$remoteWebApp/_layouts/15/metadata/json/1/rootcertificate"
                 New-SPTrustedRootAuthority -Name $params.Name `
-                                           -MetadataEndPoint $endpoint
+                                           -MetadataEndPoint $endpoint `
+                                           -Confirm:$false
             }
             $realm = $issuer.NameId.Split("@")
             $site = Get-SPSite -Identity $params.LocalWebAppUrl
@@ -129,7 +131,7 @@ function Set-TargetResource()
 
             if ($realm[1] -ne $currentRealm)
             {
-                Set-SPAuthenticationRealm -ServiceContext $serviceContext -Realm $realm[1]    
+                Set-SPAuthenticationRealm -ServiceContext $serviceContext -Realm $realm[1]
             }
 
             $appPrincipal = Get-SPAppPrincipal -Site $params.LocalWebAppUrl `
@@ -141,7 +143,7 @@ function Set-TargetResource()
                                          -Right FullControl
         }
     }
-    
+
     if ($Ensure -eq "Absent")
     {
         Write-Verbose -Message "Removing remote farm trust '$Name'"
@@ -163,7 +165,7 @@ function Set-TargetResource()
                                                 -Scope SiteCollection `
                                                 -Confirm:$false
             }
-            
+
             Get-SPTrustedRootAuthority -Identity $params.Name `
                                        -ErrorAction SilentlyContinue `
                                        | Remove-SPTrustedRootAuthority -Confirm:$false
@@ -192,8 +194,8 @@ function Test-TargetResource()
         [System.String]
         $LocalWebAppUrl,
 
-        [Parameter()] 
-        [ValidateSet("Present","Absent")] 
+        [Parameter()]
+        [ValidateSet("Present","Absent")]
         [System.String] $Ensure = "Present",
 
         [Parameter()]

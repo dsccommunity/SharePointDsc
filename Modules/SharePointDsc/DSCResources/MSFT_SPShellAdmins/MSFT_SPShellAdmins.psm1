@@ -5,9 +5,14 @@ function Get-TargetResource
     param
     (
         [Parameter(Mandatory = $true)]
+<<<<<<< HEAD
         [ValidateSet('Yes')]
         [String]
         $IsSingleInstance,
+=======
+        [System.String]
+        $Name,
+>>>>>>> upstream/dev
 
         [Parameter()]
         [System.String[]]
@@ -30,17 +35,31 @@ function Get-TargetResource
         $AllDatabases,
 
         [Parameter()]
+<<<<<<< HEAD
+=======
+        [System.String[]]
+        $ExcludeDatabases,
+
+        [Parameter()]
+>>>>>>> upstream/dev
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 
     Write-Verbose -Message "Getting Shell Admins config"
 
+<<<<<<< HEAD
+=======
+    $nullreturn = @{
+        Name = $null
+    }
+
+>>>>>>> upstream/dev
     if ($Members -and (($MembersToInclude) -or ($MembersToExclude)))
     {
         Write-Verbose -Message ("Cannot use the Members parameter together with the " + `
                                 "MembersToInclude or MembersToExclude parameters")
-        return $null
+        return $nullreturn
     }
 
     if ($Databases)
@@ -53,7 +72,7 @@ function Get-TargetResource
                 Write-Verbose -Message ("Databases: Cannot use the Members parameter " + `
                                         "together with the MembersToInclude or " + `
                                         "MembersToExclude parameters")
-                return $null
+                return $nullreturn
             }
 
             if (!$database.Members `
@@ -63,7 +82,7 @@ function Get-TargetResource
                 Write-Verbose -Message ("Databases: At least one of the following " + `
                                         "parameters must be specified: Members, " + `
                                         "MembersToInclude, MembersToExclude")
-                return $null
+                return $nullreturn
             }
         }
     }
@@ -73,7 +92,7 @@ function Get-TargetResource
         {
             Write-Verbose -Message ("At least one of the following parameters must be " + `
                                     "specified: Members, MembersToInclude, MembersToExclude")
-            return $null
+            return $nullreturn
         }
     }
 
@@ -81,7 +100,14 @@ function Get-TargetResource
     {
         Write-Verbose -Message ("Cannot use the Databases parameter together with the " + `
                                 "AllDatabases parameter")
-        return $null
+        return $nullreturn
+    }
+
+    if ($Databases -and $ExcludeDatabases)
+    {
+        Write-Verbose -Message ("Cannot use the Databases parameter together with the " + `
+                                "ExcludeDatabases parameter")
+        return $nullreturn
     }
 
     $result = Invoke-SPDSCCommand -Credential $InstallAccount `
@@ -100,13 +126,23 @@ function Get-TargetResource
         {
             Write-Verbose -Message ("No local SharePoint farm was detected. Shell admin " + `
                                     "settings will not be applied")
-            return $null
+            return $nullreturn
         }
 
         $shellAdmins = Get-SPShellAdmin
 
         $cdbPermissions = @()
         $databases = Get-SPDatabase
+<<<<<<< HEAD
+=======
+        if ($params.ContainsKey("ExcludeDatabases"))
+        {
+            $databases = $databases | Where-Object -FilterScript {
+                                        $_.Name -notin $params.ExcludeDatabases
+                                      }
+        }
+
+>>>>>>> upstream/dev
         foreach ($database in $databases)
         {
             $cdbPermission = @{}
@@ -138,9 +174,14 @@ function Set-TargetResource
     param
     (
         [Parameter(Mandatory = $true)]
+<<<<<<< HEAD
         [ValidateSet('Yes')]
         [String]
         $IsSingleInstance,
+=======
+        [System.String]
+        $Name,
+>>>>>>> upstream/dev
 
         [Parameter()]
         [System.String[]]
@@ -163,6 +204,13 @@ function Set-TargetResource
         $AllDatabases,
 
         [Parameter()]
+<<<<<<< HEAD
+=======
+        [System.String[]]
+        $ExcludeDatabases,
+
+        [Parameter()]
+>>>>>>> upstream/dev
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
@@ -210,6 +258,12 @@ function Set-TargetResource
     {
         throw ("Cannot use the Databases parameter together with the " + `
                "AllDatabases parameter")
+    }
+
+    if ($Databases -and $ExcludeDatabases)
+    {
+        throw ("Cannot use the Databases parameter together with the " + `
+               "ExcludeDatabases parameter")
     }
 
     $result = Invoke-SPDSCCommand -Credential $InstallAccount `
@@ -530,7 +584,18 @@ function Set-TargetResource
         {
             Write-Verbose -Message "Processing AllDatabases parameter"
 
+<<<<<<< HEAD
             foreach ($database in (Get-SPDatabase))
+=======
+            $databases = Get-SPDatabase
+            if ($params.ContainsKey("ExcludeDatabases"))
+            {
+                $databases = $databases | Where-Object -FilterScript {
+                                            $_.Name -notin $params.ExcludeDatabases
+                                          }
+            }
+            foreach ($database in $databases)
+>>>>>>> upstream/dev
             {
                 $dbShellAdmins = Get-SPShellAdmin -database $database.Id
                 if ($params.Members)
@@ -686,9 +751,14 @@ function Test-TargetResource
     param
     (
         [Parameter(Mandatory = $true)]
+<<<<<<< HEAD
         [ValidateSet('Yes')]
         [String]
         $IsSingleInstance,
+=======
+        [System.String]
+        $Name,
+>>>>>>> upstream/dev
 
         [Parameter()]
         [System.String[]]
@@ -711,6 +781,13 @@ function Test-TargetResource
         $AllDatabases,
 
         [Parameter()]
+<<<<<<< HEAD
+=======
+        [System.String[]]
+        $ExcludeDatabases,
+
+        [Parameter()]
+>>>>>>> upstream/dev
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
@@ -720,7 +797,11 @@ function Test-TargetResource
     # Start checking
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
+<<<<<<< HEAD
     if ($null -eq $CurrentValues)
+=======
+    if ($null -eq $CurrentValues.Name)
+>>>>>>> upstream/dev
     {
         return $false
     }
