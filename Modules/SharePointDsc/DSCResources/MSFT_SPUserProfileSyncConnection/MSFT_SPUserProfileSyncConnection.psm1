@@ -137,7 +137,7 @@ function Get-TargetResource
 
                 if ($null -eq $namingContexts.ContainersIncluded)
                 {
-                    $inclOUs = $null
+                    $inclOUs = @()
                 }
                 else
                 {
@@ -146,7 +146,7 @@ function Get-TargetResource
 
                 if ($null -eq $namingContexts.ContainersExcluded)
                 {
-                    $exclOUs = $null
+                    $exclOUs = @()
                 }
                 else
                 {
@@ -158,8 +158,8 @@ function Get-TargetResource
                     UserProfileService = $params.UserProfileService
                     Forest = $namingContexts.DistinguishedName
                     ConnectionCredentials = $accountCredentials
-                    IncludedOUs = @($namingContexts.ContainersIncluded)
-                    ExcludedOUs = @($namingContexts.ContainersExcluded)
+                    IncludedOUs = ,$inclOUs
+                    ExcludedOUs = ,$exclOUs
                     Server = $null
                     Port = $params.Port
                     UseSSL = $useSSL
@@ -175,7 +175,7 @@ function Get-TargetResource
 
             if ($null -eq $namingContext.ContainersIncluded)
             {
-                $inclOUs = $null
+                $inclOUs = @()
             }
             else
             {
@@ -184,7 +184,7 @@ function Get-TargetResource
 
             if ($null -eq $namingContext.ContainersExcluded)
             {
-                $exclOUs = $null
+                $exclOUs = @()
             }
             else
             {
@@ -196,8 +196,8 @@ function Get-TargetResource
                 Forest = $connection.Server
                 Name = $params.Name
                 ConnectionCredentials = $accountCredentials
-                IncludedOUs = $inclOUs
-                ExcludedOUs = $exclOUs
+                IncludedOUs = ,$inclOUs
+                ExcludedOUs = ,$exclOUs
                 Server = $domainController
                 UseSSL = $connection.UseSSL
                 UseDisabledFilter = $connection.UseDisabledFilter

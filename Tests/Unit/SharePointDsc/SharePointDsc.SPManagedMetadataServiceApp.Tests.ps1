@@ -1237,7 +1237,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "When the termstore for the service application proxy exists in the current farm and is not configured correctly" -Fixture {
             $testParams = @{
-                Name                          = "Managed Metadata Service Application"
+                Name                          = "Managed Metadata Service App"
                 ApplicationPool               = "SharePoint Service Applications"
                 DatabaseServer                = "databaseserver\instance"
                 DatabaseName                  = "SP_MMS"
@@ -1446,7 +1446,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
             It "Should change the value for 'ContentTypePushdownEnabled'" {
                 $testParams = @{
-                    Name                          = "Managed Metadata Service Application"
+                    Name                          = "Managed Metadata Service App"
                     ApplicationPool               = "SharePoint Service Applications"
                     DatabaseServer                = "databaseserver\instance"
                     DatabaseName                  = "SP_MMS"
@@ -1465,7 +1465,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
             It "Should change the value for 'ContentTypeSyndicationEnabled'" {
                 $testParams = @{
-                    Name                          = "Managed Metadata Service Application"
+                    Name                          = "Managed Metadata Service App"
                     ApplicationPool               = "SharePoint Service Applications"
                     DatabaseServer                = "databaseserver\instance"
                     DatabaseName                  = "SP_MMS"
@@ -1485,7 +1485,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "When there is no Managed Metadata Service and everything should be created and configured correctly" -Fixture {
             $testParams = @{
-                Name                    = "Managed Metadata Service Application"
+                Name                    = "Managed Metadata Service App"
                 ProxyName               = "Managed Metadata Service Application Proxy"
                 ApplicationPool         = "SharePoint Service Applications"
                 DatabaseServer          = "databaseserver\instance"
