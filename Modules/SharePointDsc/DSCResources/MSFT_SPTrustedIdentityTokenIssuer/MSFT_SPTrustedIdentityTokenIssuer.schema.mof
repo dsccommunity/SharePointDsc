@@ -8,7 +8,7 @@ class MSFT_SPClaimTypeMapping
 };
 
 
-[ClassVersion("1.1.0.0"), FriendlyName("SPTrustedIdentityTokenIssuer")]
+[ClassVersion("1.2.0.0"), FriendlyName("SPTrustedIdentityTokenIssuer")]
 class MSFT_SPTrustedIdentityTokenIssuer : OMI_BaseResource
 {
     [Key, Description("Name of the SPTrustedIdentityTokenIssuer")] String Name;
@@ -21,6 +21,7 @@ class MSFT_SPTrustedIdentityTokenIssuer : OMI_BaseResource
     [Write, Description("Specify the file path to the signing certificate if it is not stored in the local certificate store already")] String SigningCertificateFilePath;
     [Write, Description("Name of a claims provider to set with this SPTrustedIdentityTokenIssuer")] String ClaimProviderName;
     [Write, Description("Sign-out URL")] String ProviderSignOutUri;
+    [Write, Description("WReply parameter allows SharePoint to specify the return URL to the 3rd party STS upon successful authentication")] Boolean UseWReplyParameter;
     [Write, Description("Present if the SPTrustedIdentityTokenIssuer should be created, or Absent if it should be removed"), ValueMap{"Present","Absent"}, Values{"Present","Absent"}] String Ensure;
-    [Write, Description("POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5"), EmbeddedInstance("MSFT_Credential")] String InstallAccount;
+    [Write, EmbeddedInstance("MSFT_Credential"), Description("POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5")] String InstallAccount;
 };
