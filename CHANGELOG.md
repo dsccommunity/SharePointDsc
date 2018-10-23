@@ -8,6 +8,8 @@
   * Fixed check for Ensure=Absent in the Set method
 * SPSearchContentSource
   * Added support for Business Content Source Type
+* SPSearchMetadataCategory
+  * New resource added
 * SPSPSecurityTokenServiceConfig
   * The resource only tested for the Ensure parameter. Added more parameters.
 
