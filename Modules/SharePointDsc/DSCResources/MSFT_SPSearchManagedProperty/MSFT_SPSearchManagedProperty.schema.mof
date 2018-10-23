@@ -11,7 +11,7 @@ class MSFT_SPSearchManagedProperty : OMI_BaseResource
     [Write, Description("Should the property be Refinable")] Boolean Refinable;
     [Write, Description("Should the property be Sortable")] Boolean Sortable;
     [Write, Description("Should the property be marked as safe for anonymous access")] Boolean SafeForAnonymous;
-    [Write, Description("Alias of the managed property")] String Alias;
+    [Write, Description("Aliases of the managed property")] String Aliases[];
     [Write, Description("Should the property be case sensitive")] Boolean TokenNormalization;
     [Write, Description("Should the property only match exact content")] Boolean NoWordBreaker;
     [Write, Description("Should the property be mapped to all crawled properties")] Boolean IncludeAllCrawledProperties;

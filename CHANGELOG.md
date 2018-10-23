@@ -4,6 +4,8 @@
 
 * Changes to SharePointDsc
   * Updated test helpers to force a reload of the resource every time you run a test
+* SPFarm
+  * Fixed issue where Central Admin service was not starting for non-english farms
 * SPManagedMetadataServiceApp
   * Added additional content type settings (ContentTypePushdownEnabled &
     ContentTypeSyndicationEnabled).
@@ -11,10 +13,12 @@
   * Fixed issue with numerical Content Sources name
 * SPSearchManagedProperty
   * Added a new resource to support Search Managed Properties
+  * Fix for multiple aliases
 * SPSearchResultSource
   * Added a new ScopeUrl parameter to allow for local source creation
 * SPSearchTopology
   * Updated Readme.md to remove some incorrect information
+  * Fixed logic to handle the FirstPartitionDirectory in Get-TargetResource
 * SPSite
   * Added the possibility for creating the default site groups
   * Added the possibility to set AdministrationSiteType

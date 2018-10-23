@@ -144,16 +144,23 @@ function Get-TargetResource
 
         $firstPartition = $null
         $enterpriseSearchServiceInstance = Get-SPEnterpriseSearchServiceInstance
-        if($null -ne $enterpriseSearchServiceInstance)
+        if ($null -ne $enterpriseSearchServiceInstance)
         {
             $ssiComponents = $enterpriseSearchServiceInstance.Components
-            if($null -ne $ssiComponents)
+            if ($null -ne $ssiComponents)
             {
-                if($ssiComponents.Length -gt 1)
+                if ($ssiComponents.Length -gt 1)
                 {
                     $ssiComponents = $ssiComponents[0]
                 }
-                $firstPartition = $ssiComponents.IndexLocation
+
+                if ($ssiComponents.IndexLocation.GetType().Name -eq "String")
+                {
+                    $firstPartition = $ssiComponents.IndexLocation
+                }
+                elseif ($ssiComponents.IndexLocation.GetType().Name -eq "Object[]") {
+                    $firstPartition = $ssiComponents.IndexLocation[0]
+                }
             }
         }
 
