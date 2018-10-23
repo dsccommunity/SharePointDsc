@@ -307,6 +307,11 @@ function Set-TargetResource
     $result = Get-TargetResource @PSBoundParameters
 
     $pName = "$Name Proxy"
+    if ($null -ne $result.ProxyName)
+    {
+        $pName = $result.ProxyName
+    }
+
     if ($PSBoundParameters.ContainsKey("ProxyName"))
     {
         $pName = $ProxyName
