@@ -8,7 +8,7 @@
   * Fixed check for Ensure=Absent in the Set method
 * SPSearchContentSource
   * Added support for Business Content Source Type
-* SPSPSecurityTokenServiceConfig
+* SPSecurityTokenServiceConfig
   * The resource only tested for the Ensure parameter. Added more parameters.
 
 The following changes will break v2.x and earlier configurations that use these
@@ -29,7 +29,7 @@ resources:
   * SPPasswordChangeSettings
   * SPProjectServerLicense
   * SPShellAdmin
-  * SPSPSecurityTokenServiceConfig
+  * SPSecurityTokenServiceConfig
 * Standardized Url/WebApplication parameter to default WebAppUrl parameter
   for the following resources:
   * SPDesignerSettings
@@ -42,17 +42,20 @@ resources:
   * SPWebAppThrottlingSettings
   * SPWebAppWorkflowSettings
 
-## Unreleased
+## 2.6
 
-* Changes to SharePointDsc
-  * Updated test helpers to force a reload of the resource every time you run a test
 * SPFarm
   * Fixed issue where Central Admin service was not starting for non-english farms
 * SPManagedMetadataServiceApp
   * Added additional content type settings (ContentTypePushdownEnabled &
     ContentTypeSyndicationEnabled).
+  * Fixed issue where Get method would throw an error when the proxy did not exist.
+  * Fixed an issue where the resource checks if the proxy exists and if not, it is
+    created.
 * SPSearchContentSource
   * Fixed issue with numerical Content Sources name
+  * Fixed issue where the code throws an error when the content source cannot be
+    successfully created
 * SPSearchManagedProperty
   * Added a new resource to support Search Managed Properties
   * Fix for multiple aliases
@@ -61,6 +64,11 @@ resources:
 * SPSearchTopology
   * Updated Readme.md to remove some incorrect information
   * Fixed logic to handle the FirstPartitionDirectory in Get-TargetResource
+* SPSelfServiceSiteCreation
+  * New resource to manage self-service site creation
+* SPServiceAppSecurity
+  * Added local farm token.
+  * Fixed issues that prevented the resource to work as expected in many situations.
 * SPSite
   * Added the possibility for creating the default site groups
   * Added the possibility to set AdministrationSiteType
@@ -68,28 +76,24 @@ resources:
   * Fixed a typo in the values to check for AdministrationSiteType
   * Fixed an access denied issue when creating default site groups
     when the run as account does not have proper permissions for the site
+* SPTrustedIdentityTokenIssuer
+  * Added parameter UseWReplyParameter
 * SPUserProfileServiceApp
   * Fixed issue which was introduced in v2.5 where the service application proxy
     was not created.
   * Updated resource to grant the InstallAccount permissions to a newly created service
     application to prevent issues in the Get method.
-* SPWebAppSuiteBar
-  * Fixed incorrect test method that resulted in this resource to never apply changes.
-* SPServiceAppSecurity
-  * Added local farm token.
-  * Fixed issues that prevented the resource to work as expected in many situations.
-* SPWebAppPropertyBag
-  * New resource to manage web application property bag
+* SPUserProfileSyncConnection
+  * Fixed issue where empty IncludedOUs and ExcludedOUs would throw an error
 * SPWebAppClientCallableSettings
   * New resource to manage web application client callable settings including
     proxy libraries.
+* SPWebAppPropertyBag
+  * New resource to manage web application property bag
 * SPWebAppSuiteBar
+  * Fixed incorrect test method that resulted in this resource to never apply changes.
   * Enable usage of SuiteBarBrandingElementHtml for SharePoint 2016
     (only supported if using a SharePoint 2013 masterpage)
-* SPSelfServiceSiteCreation
-  * New resource to manage self-service site creation
-* SPTrustedIdentityTokenIssuer
-  * Added parameter UseWReplyParameter
 
 ## 2.5
 
