@@ -1029,6 +1029,7 @@ namespace Microsoft.Office.Server.Search.Administration {
             }
             Mock -CommandName Get-SPEnterpriseSearchCrawlContentSource -MockWith {
                 return @{
+                    Name = "Example content source"
                     Type = "Business"
                     IncrementalCrawlSchedule = $null
                     FullCrawlSchedule = $null
@@ -1112,6 +1113,7 @@ namespace Microsoft.Office.Server.Search.Administration {
 
             Mock -CommandName Get-SPEnterpriseSearchCrawlContentSource -MockWith {
                 return @{
+                    Name = "Example content source"
                     Type = "Business"
                     IncrementalCrawlSchedule = $null
                     FullCrawlSchedule = $null
@@ -1172,6 +1174,7 @@ namespace Microsoft.Office.Server.Search.Administration {
             }
             Mock -CommandName Get-SPEnterpriseSearchCrawlContentSource -MockWith {
                 return @{
+                    Name = "Example content source"
                     Type = "FakeType"
                 }
             }
@@ -1373,18 +1376,19 @@ namespace Microsoft.Office.Server.Search.Administration {
         Context -Name "Trying to change Content Source Type" {
 
             Mock -CommandName Get-SPEnterpriseSearchCrawlContentSource -MockWith {
-                return @(
-                    New-Object -TypeName "Object" |
-                        Add-Member -MemberType NoteProperty `
-                                   -Name Type `
-                                   -Value "Business" `
-                                   -PassThru |
-                        Add-Member -MemberType ScriptMethod `
-                                   -Name StopCrawl `
-                                   -Value {
-                                       $null
-                                   }  -PassThru -Force
-                )
+                $returnval = @{
+                    Name = "Example content source"
+                }
+                $returnval = $returnval | Add-Member -MemberType NoteProperty `
+                                                     -Name Type `
+                                                     -Value "Business" `
+                                                     -PassThru |
+                                          Add-Member -MemberType ScriptMethod `
+                                                     -Name StopCrawl `
+                                                     -Value {
+                                                         $null
+                                                     }  -PassThru -Force
+                return $returnval
             }
 
             $testParams = @{
