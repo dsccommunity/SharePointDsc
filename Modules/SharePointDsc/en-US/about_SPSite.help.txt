@@ -21,6 +21,15 @@
     If you want to change the IIS website binding settings, please use the xWebsite
     resource in the xWebAdministration module.
     
+    NOTE2:
+    The CreateDefaultGroups parameter is only used for creating default site
+    groups. It will not remove or change the default groups if they already exist.
+    
+    NOTE3:
+    AdministrationSiteType is used in combination with the resource
+    SPWebAppClientCallableSettings. The required proxy library must be configured
+    before the administration site type has any effect.
+    
 .PARAMETER Url
     Key - string
     The URL of the site collection
@@ -72,6 +81,15 @@
 .PARAMETER Template
     Write - string
     The template to apply to the site collection
+
+.PARAMETER CreateDefaultGroups
+    Write - boolean
+    Create the default site groups in the site collection
+
+.PARAMETER AdministrationSiteType
+    Write - string
+    Allowed values: TenantAdministration, None
+    The administration site type
 
 .PARAMETER InstallAccount
     Write - String
@@ -127,6 +145,34 @@
                 Name                     = "Team Sites"
                 Template                 = "STS#0"
                 QuotaTemplate            = "Teamsite"
+                PsDscRunAsCredential     = $SetupAccount
+            }
+        }
+    }
+
+
+.EXAMPLE
+    This example creates a site collection with the provided details
+
+
+    Configuration Example
+    {
+        param(
+            [Parameter(Mandatory = $true)]
+            [PSCredential]
+            $SetupAccount
+        )
+        Import-DscResource -ModuleName SharePointDsc
+
+        node localhost {
+            SPSite TeamSite
+            {
+                Url                      = "http://sharepoint.contoso.com"
+                OwnerAlias               = "CONTOSO\ExampleUser"
+                HostHeaderWebApplication = "http://spsites.contoso.com"
+                Name                     = "Team Sites"
+                Template                 = "STS#0"
+                AdministrationSiteType   = "TenantAdministration"
                 PsDscRunAsCredential     = $SetupAccount
             }
         }

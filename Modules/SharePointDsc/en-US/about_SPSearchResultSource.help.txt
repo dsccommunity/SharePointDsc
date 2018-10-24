@@ -40,6 +40,10 @@
     Write - String
     The URI to connect to the remote location
 
+.PARAMETER ScopeUrl
+    Write - String
+    The URI of the site where to create the result source. Leave empty to have it created globally
+
 .PARAMETER Ensure
     Write - string
     Allowed values: Present, Absent

@@ -46,6 +46,14 @@ function Get-TargetResource
         $Languages,
 
         [Parameter()]
+        [System.Boolean]
+        $ContentTypePushdownEnabled,
+
+        [Parameter()]
+        [System.Boolean]
+        $ContentTypeSyndicationEnabled,
+
+        [Parameter()]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
@@ -53,22 +61,24 @@ function Get-TargetResource
     Write-Verbose -Message "Getting managed metadata service application $Name"
 
     $result = Invoke-SPDSCCommand -Credential $InstallAccount `
-        -Arguments $PSBoundParameters `
-        -ScriptBlock {
+                                  -Arguments $PSBoundParameters `
+                                  -ScriptBlock {
         $params = $args[0]
 
         $serviceApps = Get-SPServiceApplication -Name $params.Name `
-            -ErrorAction SilentlyContinue
+                                                -ErrorAction SilentlyContinue
         $nullReturn = @{
             Name                    = $params.Name
             Ensure                  = "Absent"
             ApplicationPool         = $params.ApplicationPool
             TermStoreAdministrators = @()
         }
+
         if ($null -eq $serviceApps)
         {
             return $nullReturn
         }
+
         $serviceApp = $serviceApps | Where-Object -FilterScript {
             $_.GetType().FullName -eq "Microsoft.SharePoint.Taxonomy.MetadataWebServiceApplication"
         }
@@ -92,6 +102,17 @@ function Get-TargetResource
                 {
                     $proxyName = $serviceAppProxy.Name
                 }
+            }
+
+            $proxy = Get-SPMetadataServiceApplicationProxy -Identity $proxyName
+            if ($null -ne $proxy)
+            {
+                $contentTypePushDownEnabled = $proxy.Properties["IsContentTypePushdownEnabled"]
+                $contentTypeSyndicationEnabled = $proxy.Properties["IsNPContentTypeSyndicationEnabled"]
+            }
+            else
+            {
+                Write-Verbose "No SPMetadataServiceApplicationProxy with the name '$($proxyName)' was found. Please verify your Managed Metadata Service Application."
             }
 
             # Get the ContentTypeHubUrl value
@@ -162,32 +183,39 @@ function Get-TargetResource
 
             if ($null -ne $session)
             {
-                $termStore = $session.TermStores[$proxyName]
-
-                if ($null -ne $termstore)
+                if ($null -ne $proxyName)
                 {
-                    $termStore.TermStoreAdministrators | ForEach-Object -Process {
-                        $name = [string]::Empty
-                        if ($_.IsWindowsAuthenticationMode -eq $true)
-                        {
-                            $name = $_.PrincipalName
-                        }
-                        else
-                        {
-                            $name = (New-SPClaimsPrincipal -Identity $_.PrincipalName -IdentityType EncodedClaim).Value
-                            if ($name -match "^s-1-[0-59]-\d+-\d+-\d+-\d+-\d+")
+                    $termStore = $session.TermStores[$proxyName]
+
+                    if ($null -ne $termstore)
+                    {
+                        $termStore.TermStoreAdministrators | ForEach-Object -Process {
+                            $name = [string]::Empty
+                            if ($_.IsWindowsAuthenticationMode -eq $true)
                             {
-                                $name = Resolve-SPDscSecurityIdentifier -SID $name
+                                $name = $_.PrincipalName
                             }
+                            else
+                            {
+                                $name = (New-SPClaimsPrincipal -Identity $_.PrincipalName -IdentityType EncodedClaim).Value
+                                if ($name -match "^s-1-[0-59]-\d+-\d+-\d+-\d+-\d+")
+                                {
+                                    $name = Resolve-SPDscSecurityIdentifier -SID $name
+                                }
+                            }
+                            $currentAdmins += $name
                         }
-                        $currentAdmins += $name
+                        $termStoreDefaultLanguage = $termStore.DefaultLanguage
+                        $termStoreLanguages = $termStore.Languages
                     }
-                    $termStoreDefaultLanguage = $termStore.DefaultLanguage
-                    $termStoreLanguages = $termStore.Languages
+                    else
+                    {
+                        Write-Verbose "No termstore matching to the proxy name '$proxyName' was found"
+                    }
                 }
                 else
                 {
-                    Write-Verbose "No termstore matching to the proxy name '$proxyName' was found"
+                    Write-Verbose "No valid proxy for $($params.Name) was found"
                 }
             }
             else
@@ -196,17 +224,19 @@ function Get-TargetResource
             }
 
             return @{
-                Name                    = $serviceApp.DisplayName
-                ProxyName               = $proxyName
-                Ensure                  = "Present"
-                ApplicationPool         = $serviceApp.ApplicationPool.Name
-                DatabaseName            = $serviceApp.Database.Name
-                DatabaseServer          = $serviceApp.Database.NormalizedDataSource
-                TermStoreAdministrators = $currentAdmins
-                ContentTypeHubUrl       = $hubUrl
-                DefaultLanguage         = $termStoreDefaultLanguage
-                Languages               = $termStoreLanguages
-                InstallAccount          = $params.InstallAccount
+                Name                          = $serviceApp.DisplayName
+                ProxyName                     = $proxyName
+                Ensure                        = "Present"
+                ApplicationPool               = $serviceApp.ApplicationPool.Name
+                DatabaseName                  = $serviceApp.Database.Name
+                DatabaseServer                = $serviceApp.Database.NormalizedDataSource
+                TermStoreAdministrators       = $currentAdmins
+                ContentTypeHubUrl             = $hubUrl
+                DefaultLanguage               = $termStoreDefaultLanguage
+                Languages                     = $termStoreLanguages
+                ContentTypePushdownEnabled    = $contentTypePushDownEnabled
+                ContentTypeSyndicationEnabled = $contentTypeSyndicationEnabled
+                InstallAccount                = $params.InstallAccount
             }
         }
     }
@@ -260,6 +290,14 @@ function Set-TargetResource
         $Languages,
 
         [Parameter()]
+        [System.Boolean]
+        $ContentTypePushdownEnabled,
+
+        [Parameter()]
+        [System.Boolean]
+        $ContentTypeSyndicationEnabled,
+
+        [Parameter()]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
@@ -269,10 +307,11 @@ function Set-TargetResource
     $result = Get-TargetResource @PSBoundParameters
 
     $pName = "$Name Proxy"
-    if($null -ne $result.ProxyName)
+    if ($null -ne $result.ProxyName)
     {
         $pName = $result.ProxyName
     }
+
     if ($PSBoundParameters.ContainsKey("ProxyName"))
     {
         $pName = $ProxyName
@@ -282,10 +321,10 @@ function Set-TargetResource
     {
         Write-Verbose -Message "Creating Managed Metadata Service Application $Name"
         Invoke-SPDSCCommand -Credential $InstallAccount `
-            -Arguments ($PSBoundParameters, $pName) `
-            -ScriptBlock {
+                            -Arguments ($PSBoundParameters, $pName) `
+                            -ScriptBlock {
             $params = $args[0]
-            $pName = $args[1    ]
+            $pName = $args[1]
 
             $newParams = @{
                 Name            = $params.Name
@@ -303,9 +342,9 @@ function Set-TargetResource
             if ($null -ne $app)
             {
                 New-SPMetadataServiceApplicationProxy -Name $pName `
-                    -ServiceApplication $app `
-                    -DefaultProxyGroup `
-                    -ContentTypePushdownEnabled
+                                                      -ServiceApplication $app `
+                                                      -DefaultProxyGroup `
+                                                      -ContentTypePushdownEnabled
             }
         }
         $result = Get-TargetResource @PSBoundParameters
@@ -313,13 +352,13 @@ function Set-TargetResource
 
     if ($result.Ensure -eq "Present" -and $Ensure -eq "Present")
     {
-        if ([string]::IsNullOrEmpty($ApplicationPool) -eq $false `
-                -and $ApplicationPool -ne $result.ApplicationPool)
+        if ([string]::IsNullOrEmpty($ApplicationPool) -eq $false -and `
+            $ApplicationPool -ne $result.ApplicationPool)
         {
-            Write-Verbose -Message "Updating Managed Metadata Service Application $Name"
+            Write-Verbose -Message "Updating application pool of Managed Metadata Service Application $Name"
             Invoke-SPDSCCommand -Credential $InstallAccount `
-                -Arguments $PSBoundParameters `
-                -ScriptBlock {
+                                -Arguments $PSBoundParameters `
+                                -ScriptBlock {
                 $params = $args[0]
 
                 $serviceApp = Get-SPServiceApplication -Name $params.Name `
@@ -331,32 +370,41 @@ function Set-TargetResource
             }
         }
 
-        if (($PSBoundParameters.ContainsKey("ProxyName") -eq $true) `
-                -and ($pName -ne $result.ProxyName)
-        )
+        if ($pName -ne $result.ProxyName)
         {
-            Write-Verbose -Message "Updating Managed Metadata Service Application Proxy Name from '$($result.ProxyName)' to '$pName'"
+            Write-Verbose -Message "Updating Managed Metadata Service Application Proxy"
             Invoke-SPDSCCommand -Credential $InstallAccount `
-                -Arguments @($PSBoundParameters, $pName) `
-                -ScriptBlock {
+                                -Arguments @($PSBoundParameters, $pName) `
+                                -ScriptBlock {
                 $params = $args[0]
                 $pName = $args[1]
 
                 $serviceApps = Get-SPServiceApplication -Name $params.Name `
-                    -ErrorAction SilentlyContinue
+                                                        -ErrorAction SilentlyContinue
                 $serviceApp = $serviceApps | Where-Object -FilterScript {
                     $_.GetType().FullName -eq "Microsoft.SharePoint.Taxonomy.MetadataWebServiceApplication"
                 }
+
                 $serviceAppProxies = Get-SPServiceApplicationProxy -ErrorAction SilentlyContinue
                 if ($null -ne $serviceAppProxies)
                 {
                     $serviceAppProxy = $serviceAppProxies | Where-Object -FilterScript {
                         $serviceApp.IsConnected($_)
                     }
+
                     if ($null -ne $serviceAppProxy)
                     {
+                        Write-Verbose -Message "Updating Proxy Name from '$($result.ProxyName)' to '$pName'"
                         $serviceAppProxy.Name = $pName
                         $serviceAppProxy.Update()
+                    }
+                    else
+                    {
+                        Write-Verbose -Message "Creating Service Application Proxy '$pName'"
+                        New-SPMetadataServiceApplicationProxy -Name $pName `
+                                                              -ServiceApplication $serviceApp `
+                                                              -DefaultProxyGroup `
+                                                              -ContentTypePushdownEnabled
                     }
                 }
             }
@@ -552,6 +600,52 @@ function Set-TargetResource
                 }
             }
         }
+
+        if (($PSBoundParameters.ContainsKey("ContentTypePushdownEnabled") -eq $true) `
+                -and ($ContentTypePushdownEnabled -ne $result.ContentTypePushdownEnabled)
+        )
+        {
+            Invoke-SPDSCCommand -Credential $InstallAccount `
+                -Arguments @($PSBoundParameters, $pName) `
+                -ScriptBlock {
+                $params = $args[0]
+                $pName = $args[1]
+
+                $proxy = Get-SPMetadataServiceApplicationProxy -Identity $pName
+                if ($null -ne $proxy)
+                {
+                    $proxy.Properties["IsContentTypePushdownEnabled"] = $params.ContentTypePushdownEnabled
+                    $proxy.Update()
+                }
+                else
+                {
+                    throw [Exception] "No SPMetadataServiceApplicationProxy with the name '$($proxyName)' was found. Please verify your Managed Metadata Service Application."
+                }
+            }
+        }
+
+        if (($PSBoundParameters.ContainsKey("ContentTypeSyndicationEnabled") -eq $true) `
+                -and ($ContentTypeSyndicationEnabled -ne $result.ContentTypeSyndicationEnabled)
+        )
+        {
+            Invoke-SPDSCCommand -Credential $InstallAccount `
+                -Arguments @($PSBoundParameters, $pName) `
+                -ScriptBlock {
+                $params = $args[0]
+                $pName = $args[1]
+
+                $proxy = Get-SPMetadataServiceApplicationProxy -Identity $pName
+                if ($null -ne $proxy)
+                {
+                    $proxy.Properties["IsNPContentTypeSyndicationEnabled"] = $params.ContentTypeSyndicationEnabled
+                    $proxy.Update()
+                }
+                else
+                {
+                    throw [Exception] "No SPMetadataServiceApplicationProxy with the name '$($proxyName)' was found. Please verify your Managed Metadata Service Application."
+                }
+            }
+        }
     }
 
     if ($Ensure -eq "Absent")
@@ -629,47 +723,41 @@ function Test-TargetResource
         $Languages,
 
         [Parameter()]
+        [System.Boolean]
+        $ContentTypePushdownEnabled,
+
+        [Parameter()]
+        [System.Boolean]
+        $ContentTypeSyndicationEnabled,
+
+        [Parameter()]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 
     Write-Verbose -Message "Testing managed metadata service application $Name"
 
-    $valuesToCheck = @("ApplicationPool",
-        "Ensure")
-
     $PSBoundParameters.Ensure = $Ensure
     if ($PSBoundParameters.ContainsKey("ContentTypeHubUrl") -eq $true)
     {
         $PSBoundParameters.ContentTypeHubUrl = $ContentTypeHubUrl.TrimEnd('/')
-        $valuesToCheck += "ContentTypeHubUrl"
-    }
-
-    if ($PSBoundParameters.ContainsKey("ProxyName") -eq $true)
-    {
-        $valuesToCheck += "ProxyName"
-    }
-
-    if ($PSBoundParameters.ContainsKey("TermStoreAdministrators") -eq $true)
-    {
-        $valuesToCheck += "TermStoreAdministrators"
-    }
-
-    if ($PSBoundParameters.ContainsKey("DefaultLanguage") -eq $true)
-    {
-        $valuesToCheck += "DefaultLanguage"
-    }
-
-    if ($PSBoundParameters.ContainsKey("Languages") -eq $true)
-    {
-        $valuesToCheck += "Languages"
     }
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
+    $valuesToCheck = @("ApplicationPool",
+                       "ContentTypeHubUrl"
+                       "ContentTypePushdownEnabled"
+                       "ContentTypeSyndicationEnabled"
+                       "DefaultLanguage"
+                       "Ensure",
+                       "Languages"
+                       "TermStoreAdministrators"
+                       "ProxyName")
+
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
-        -DesiredValues $PSBoundParameters `
-        -ValuesToCheck $valuesToCheck
+                                    -DesiredValues $PSBoundParameters `
+                                    -ValuesToCheck $valuesToCheck
 }
 
 Export-ModuleMember -Function *-TargetResource

@@ -11,10 +11,9 @@
     
     Requirements:
     For SharePoint 2013, only the SuiteBarBrandingElementHtml
-    should be specified, whereas for SharePoint 2016, only one
-    or all of SuiteNavBrandingLogoNavigationUrl,
-    SuiteNavBrandingLogoTitle, SuiteNavBrandingLogoUrl or
-    SuiteNavBrandingText should be.
+    should be specified, whereas for SharePoint 2016, all properties
+    are supported. Note that SuiteBarBrandingElementHtml has no
+    effect unless using a SharePoint 2013 master page.
     
 .PARAMETER WebAppUrl
     Key - string
@@ -38,7 +37,7 @@
 
 .PARAMETER SuiteBarBrandingElementHtml
     Write - String
-    SP2013: HTML to inject in the left hand-side of the Suite Bar
+    SP2013+: HTML to inject in the left hand-side of the Suite Bar
 
 .PARAMETER InstallAccount
     Write - String
