@@ -18,6 +18,10 @@
     control a specific set of users to add or remove, without changing any other
     members that are in the group already that may not be specified here, allowing
     
+    NOTE:
+    In order to specify Local Farm you can use the token "\{LocalFarm\}"
+    as the username. The token is case sensitive.
+    
 .PARAMETER ServiceAppName
     Key - String
     The name of the service application you wish to apply security settings to
@@ -75,6 +79,38 @@
                 SecurityType         = "SharingPermissions"
                 MembersToInclude     = $membersToInclude
                 MembersToExclude     = @("CONTOSO\BadAccount1", "CONTOSO\BadAccount2")
+                PsDscRunAsCredential = $SetupAccount 
+            }
+        }
+    }
+
+
+.EXAMPLE
+    This example shows how to use the local farm token to grant 
+    full control permission to the local farm to the 
+    user profile service app's sharing permission.
+
+
+    Configuration Example 
+    {
+        param(
+            [Parameter(Mandatory = $true)]
+            [PSCredential]
+            $SetupAccount
+        )
+        Import-DscResource -ModuleName SharePointDsc
+
+        node localhost {
+            $members = @()
+            $members += MSFT_SPServiceAppSecurityEntry {
+                                    Username    = "{LocalFarm}"
+                                    AccessLevel = "Full Control"
+                                }
+            SPServiceAppSecurity UserProfileServiceSecurity
+            {
+                ServiceAppName       = "User Profile Service Application"
+                SecurityType         = "SharingPermissions"
+                Members              = $members
                 PsDscRunAsCredential = $SetupAccount 
             }
         }

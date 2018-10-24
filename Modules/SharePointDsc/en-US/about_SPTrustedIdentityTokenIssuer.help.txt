@@ -74,6 +74,10 @@
     Write - String
     Sign-out URL
 
+.PARAMETER UseWReplyParameter
+    Write - Boolean
+    WReply parameter allows SharePoint to specify the return URL to the 3rd party STS upon successful authentication
+
 .PARAMETER Ensure
     Write - String
     Allowed values: Present, Absent

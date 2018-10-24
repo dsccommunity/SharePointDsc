@@ -10,10 +10,7 @@
     that the current server should be running. Any combination of roles can be
     specified and the topology will be upaded to reflect the current servers new
     roles. If this is the first server to apply topology to a farm, then at least
-    one search index must be provided. To this end, the FirstPartitionIndex,
-    FirstPartitionDirectory and FirstPartitionServers allow configuring where the
-    first index partition will belong. This will behave the same as the
-    SPSearchIndexPartition resource.
+    one search index must be provided.
     
     You only need to run the topology resource on a single server in the farm.
     It will enable the components on each server in the farm, as specified in
