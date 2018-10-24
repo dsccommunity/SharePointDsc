@@ -363,6 +363,12 @@ function Set-TargetResource
                                 -Type $newType `
                                 -Name $params.Name `
                                 -StartAddresses $startAddresses
+
+                if ($null -eq $source)
+                {
+                    throw ("An error occurred during creation of the Content Source, " + `
+                           "please check if all parameters are correct.")
+                }
             }
 
             $allSetArguments = @{
