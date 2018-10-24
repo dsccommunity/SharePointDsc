@@ -41,7 +41,10 @@ function Get-TargetResource
     Write-Verbose -Message "Getting Shell Admins config"
 
     $nullreturn = @{
-        Name = $null
+        IsSingleInstance = "Yes"
+        Members          = $null
+        MembersToInclude = $null
+        MembersToExclude = $null
     }
 
     if ($Members -and (($MembersToInclude) -or ($MembersToExclude)))
@@ -763,7 +766,9 @@ function Test-TargetResource
     # Start checking
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
-    if ($null -eq $CurrentValues.Name)
+    if ($null -eq $CurrentValues.Members -and `
+        $null -eq $CurrentValues.MembersToInclude -and `
+        $null -eq $CurrentValues.MembersToExclude)
     {
         return $false
     }
