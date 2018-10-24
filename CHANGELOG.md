@@ -10,6 +10,8 @@
   * Added support for Business Content Source Type
 * SPSearchResultSource
   * BREAKING CHANGE: Added option to create Result Sources at different scopes.
+* SPSearchMetadataCategory
+  * New resource added
 * SPSPSecurityTokenServiceConfig
   * The resource only tested for the Ensure parameter. Added more parameters.
 
