@@ -5,11 +5,11 @@
   "main": "gulpfile.js",
   "dependencies": {
     "gulp": "^3.9.1",
-    "through2": "^2.0.1",
-    "markdownlint": "^0.2.0"
+    "through2": "^2.0.3",
+    "markdownlint": "^0.11.0"
   },
   "devDependencies": {
-    "gulp-concat": "^2.6.0"
+    "gulp-concat": "^2.6.1"
   },
   "scripts": {
     "test": "powershell -File .vscode\\RunPesterTests.ps1"
