@@ -30,12 +30,13 @@ resources:
   * SPMinRoleCompliance
   * SPPasswordChangeSettings
   * SPProjectServerLicense
-  * SPShellAdmin
   * SPSecurityTokenServiceConfig
+  * SPShellAdmin
 * Standardized Url/WebApplication parameter to default WebAppUrl parameter
   for the following resources:
   * SPDesignerSettings
   * SPFarmSolution
+  * SPSelfServiceSiteCreation
   * SPWebAppBlockedFileTypes
   * SPWebAppGeneralSettings
   * SPWebApplication
