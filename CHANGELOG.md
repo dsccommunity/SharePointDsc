@@ -38,6 +38,7 @@ resources:
   * SPFarmSolution
   * SPSelfServiceSiteCreation
   * SPWebAppBlockedFileTypes
+  * SPWebAppClientCallableSettings
   * SPWebAppGeneralSettings
   * SPWebApplication
   * SPWebApplicationAppDomain
