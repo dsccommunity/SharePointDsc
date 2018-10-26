@@ -128,28 +128,56 @@ PrivateData = @{
 
         # ReleaseNotes of this module
         ReleaseNotes = "
-      * Changes to SharePointDsc
-        * Added a Branches section to the README.md with Codecov and build badges for
-          both master and dev branch.
-      * All Resources
-        * Added information about the Resource Type in each ReadMe.md files.
       * SPFarm
-        * Fixed issue where the resource throws an exception if the farm already
-          exists and the server has been joined using the FQDN (issue 795)
-      * SPTimerJobState
-        * Fixed issue where the Set method for timerjobs deployed to multiple web
-          applications failed.
-      * SPTrustedIdentityTokenIssuerProviderRealms
-        * Added the resource.
+        * Fixed issue where Central Admin service was not starting for non-english farms
+      * SPManagedMetadataServiceApp
+        * Added additional content type settings (ContentTypePushdownEnabled &
+          ContentTypeSyndicationEnabled).
+        * Fixed issue where Get method would throw an error when the proxy did not exist.
+        * Fixed an issue where the resource checks if the proxy exists and if not, it is
+          created.
+      * SPSearchContentSource
+        * Fixed issue with numerical Content Sources name
+        * Fixed issue where the code throws an error when the content source cannot be
+          successfully created
+      * SPSearchManagedProperty
+        * Added a new resource to support Search Managed Properties
+        * Fix for multiple aliases
+      * SPSearchResultSource
+        * Added a new ScopeUrl parameter to allow for local source creation
+      * SPSearchTopology
+        * Updated Readme.md to remove some incorrect information
+        * Fixed logic to handle the FirstPartitionDirectory in Get-TargetResource
+      * SPSelfServiceSiteCreation
+        * New resource to manage self-service site creation
+      * SPServiceAppSecurity
+        * Added local farm token.
+        * Fixed issues that prevented the resource to work as expected in many situations.
+      * SPSite
+        * Added the possibility for creating the default site groups
+        * Added the possibility to set AdministrationSiteType
+        * Fixed test method that in some cases always would return false
+        * Fixed a typo in the values to check for AdministrationSiteType
+        * Fixed an access denied issue when creating default site groups
+          when the run as account does not have proper permissions for the site
+      * SPTrustedIdentityTokenIssuer
+        * Added parameter UseWReplyParameter
       * SPUserProfileServiceApp
-        * Now supported specifying the host Managed path, and properly sets the host.
-        * Changed error for running with Farm Account into being a warning
+        * Fixed issue which was introduced in v2.5 where the service application proxy
+          was not created.
+        * Updated resource to grant the InstallAccount permissions to a newly created service
+          application to prevent issues in the Get method.
       * SPUserProfileSyncConnection
-        * Added support for filtering disabled users
-        * Fixed issue where UseSSL was set to true resulted in an error
-        * Fixed issue where the connection was recreated when the name contained a
-          dot (SP2016)
-      "
+        * Fixed issue where empty IncludedOUs and ExcludedOUs would throw an error
+      * SPWebAppClientCallableSettings
+        * New resource to manage web application client callable settings including
+          proxy libraries.
+      * SPWebAppPropertyBag
+        * New resource to manage web application property bag
+      * SPWebAppSuiteBar
+        * Fixed incorrect test method that resulted in this resource to never apply changes.
+        * Enable usage of SuiteBarBrandingElementHtml for SharePoint 2016
+          (only supported if using a SharePoint 2013 masterpage)            "
     } # End of PSData hashtable
 
 } # End of PrivateData hashtable

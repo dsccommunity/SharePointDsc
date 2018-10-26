@@ -10,7 +10,7 @@
   * Added support for Business Content Source Type
 * SPSearchMetadataCategory
   * New resource added
-* SPSPSecurityTokenServiceConfig
+* SPSecurityTokenServiceConfig
   * The resource only tested for the Ensure parameter. Added more parameters.
 
 The following changes will break v2.x and earlier configurations that use these
@@ -30,13 +30,15 @@ resources:
   * SPMinRoleCompliance
   * SPPasswordChangeSettings
   * SPProjectServerLicense
+  * SPSecurityTokenServiceConfig
   * SPShellAdmin
-  * SPSPSecurityTokenServiceConfig
 * Standardized Url/WebApplication parameter to default WebAppUrl parameter
   for the following resources:
   * SPDesignerSettings
   * SPFarmSolution
+  * SPSelfServiceSiteCreation
   * SPWebAppBlockedFileTypes
+  * SPWebAppClientCallableSettings
   * SPWebAppGeneralSettings
   * SPWebApplication
   * SPWebApplicationAppDomain
@@ -44,7 +46,96 @@ resources:
   * SPWebAppThrottlingSettings
   * SPWebAppWorkflowSettings
 
-## Unreleased
+## 2.6
+
+* SPFarm
+  * Fixed issue where Central Admin service was not starting for non-english farms
+* SPManagedMetadataServiceApp
+  * Added additional content type settings (ContentTypePushdownEnabled &
+    ContentTypeSyndicationEnabled).
+  * Fixed issue where Get method would throw an error when the proxy did not exist.
+  * Fixed an issue where the resource checks if the proxy exists and if not, it is
+    created.
+* SPSearchContentSource
+  * Fixed issue with numerical Content Sources name
+  * Fixed issue where the code throws an error when the content source cannot be
+    successfully created
+* SPSearchManagedProperty
+  * Added a new resource to support Search Managed Properties
+  * Fix for multiple aliases
+* SPSearchResultSource
+  * Added a new ScopeUrl parameter to allow for local source creation
+* SPSearchTopology
+  * Updated Readme.md to remove some incorrect information
+  * Fixed logic to handle the FirstPartitionDirectory in Get-TargetResource
+* SPSelfServiceSiteCreation
+  * New resource to manage self-service site creation
+* SPServiceAppSecurity
+  * Added local farm token.
+  * Fixed issues that prevented the resource to work as expected in many situations.
+* SPSite
+  * Added the possibility for creating the default site groups
+  * Added the possibility to set AdministrationSiteType
+  * Fixed test method that in some cases always would return false
+  * Fixed a typo in the values to check for AdministrationSiteType
+  * Fixed an access denied issue when creating default site groups
+    when the run as account does not have proper permissions for the site
+* SPTrustedIdentityTokenIssuer
+  * Added parameter UseWReplyParameter
+* SPUserProfileServiceApp
+  * Fixed issue which was introduced in v2.5 where the service application proxy
+    was not created.
+  * Updated resource to grant the InstallAccount permissions to a newly created service
+    application to prevent issues in the Get method.
+* SPUserProfileSyncConnection
+  * Fixed issue where empty IncludedOUs and ExcludedOUs would throw an error
+* SPWebAppClientCallableSettings
+  * New resource to manage web application client callable settings including
+    proxy libraries.
+* SPWebAppPropertyBag
+  * New resource to manage web application property bag
+* SPWebAppSuiteBar
+  * Fixed incorrect test method that resulted in this resource to never apply changes.
+  * Enable usage of SuiteBarBrandingElementHtml for SharePoint 2016
+    (only supported if using a SharePoint 2013 masterpage)
+
+## 2.5
+
+* SPAppCatalog
+  * Updated resource to retrieve the Farm account instead of requiring it
+    to be specifically used
+* SPDatabaseAAG
+  * Updated readme.md to specify that this resource also updates the database
+    connection string
+* SPDiagnosticsProvider
+  * Fixed issue where enabling providers did not work
+* SPFarm
+  * Added ability to check and update CentralAdministrationPort
+* SPLogLevel
+  * Added High as TraceLevel, which was not included yet
+* SPRemoteFarmTrust
+  * Updated readme.md file to add a link that was lost during earlier updates
+* SPSearchServiceApp
+  * Updated Set method to check if service application pool exists. Resource
+    will throw an error if it does not exist
+* SPSearchTopology
+  * Fixed issue where Get method threw an error when the specified service
+    application didn't exist yet
+  * Fixed issue where the resource would fail is the FQDN was specified
+* SPShellAdmins
+  * Added ExcludeDatabases parameter for AllDatabases
+* SPSite
+  * Added ability to check and update QuotaTemplate, OwnerAlias and SecondaryOwnerAlias
+* SPSiteUrl
+  * New resource to manage site collection urls for host named site collections
+* SPTrustedIdentityTokenIssuerProviderRealm
+  * Fixed issue where Get method threw an error when the realm didn't exist yet
+* SPUserProfileServiceApp
+  * Fix for issue where an update conflict error was thrown when new service
+    application was created
+  * Added SiteNamingConflictResolution parameter to the resource
+
+## 2.4
 
 * SPCacheAccounts
   * Fixed issue where the Test method would fail if SetWebAppPolicy was set to
@@ -63,6 +154,7 @@ resources:
 * SPSearchContentSource
   * Fixed issue where the Get method returned a conversion error when the content
     source contained just one address
+  * Fixed issue 840 where the parameter StartHour was never taken into account
 * SPSearchServiceApp
   * Fixed issue where the service account was not set correctly when the service
     application was first created

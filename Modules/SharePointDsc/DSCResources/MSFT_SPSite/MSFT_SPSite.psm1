@@ -4,60 +4,69 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [Parameter(Mandatory = $true)]  
-        [System.String] 
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $Url,
 
-        [Parameter(Mandatory = $true)]  
-        [System.String] 
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $OwnerAlias,
 
-        [Parameter()] 
-        [System.UInt32] 
+        [Parameter()]
+        [System.UInt32]
         $CompatibilityLevel,
 
-        [Parameter()] 
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $ContentDatabase,
 
-        [Parameter()] 
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $Description,
 
-        [Parameter()] 
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $HostHeaderWebApplication,
 
-        [Parameter()] 
-        [System.UInt32] 
+        [Parameter()]
+        [System.UInt32]
         $Language,
 
-        [Parameter()] 
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $Name,
 
-        [Parameter()] 
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $OwnerEmail,
 
-        [Parameter()] 
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $QuotaTemplate,
 
-        [Parameter()] 
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $SecondaryEmail,
 
-        [Parameter()] 
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $SecondaryOwnerAlias,
 
-        [Parameter()] 
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $Template,
 
-        [Parameter()] 
-        [System.Management.Automation.PSCredential] 
+        [Parameter()]
+        [System.Boolean]
+        $CreateDefaultGroups = $true,
+
+        [Parameter()]
+        [ValidateSet("TenantAdministration", "None")]
+        [System.String]
+        $AdministrationSiteType,
+
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 
@@ -67,50 +76,74 @@ function Get-TargetResource
                                   -Arguments $PSBoundParameters `
                                   -ScriptBlock {
         $params = $args[0]
+        $site = $null
 
-        $site = Get-SPSite -Identity $params.Url `
-                           -ErrorAction SilentlyContinue
-        
-        if ($null -eq $site) 
+        try
         {
-            return $null 
-        } 
-        else 
+            $centralAdminWebApp = [Microsoft.SharePoint.Administration.SPAdministrationWebApplication]::Local
+            $centralAdminSite = Get-SPSite -Identity $centralAdminWebApp.Url
+
+            $site = New-Object "Microsoft.SharePoint.SPSite" -ArgumentList @($params.Url, $centralAdminSite.SystemAccount.UserToken)
+        }
+        catch [System.Exception] {}
+
+        if ($null -eq $site)
         {
-            if ($site.HostHeaderIsSiteName) 
+            Write-Verbose "Site Collection not found"
+
+            return @{
+                Url = $params.Url
+                OwnerAlias = $null
+                CompatibilityLevel = $null
+                ContentDatabase = $null
+                Description = $null
+                HostHeaderWebApplication = $null
+                Language = $null
+                Name = $null
+                OwnerEmail = $null
+                QuotaTemplate = $null
+                SecondaryEmail = $null
+                SecondaryOwnerAlias = $null
+                Template = $null
+                CreateDefaultGroups = $null
+            }
+        }
+        else
+        {
+            if ($site.HostHeaderIsSiteName)
             {
-                $HostHeaderWebApplication = $site.WebApplication.Url 
-            } 
+                $HostHeaderWebApplication = $site.WebApplication.Url
+            }
 
-            if ($null -eq $site.Owner) 
+            if ($null -eq $site.Owner)
             {
                 $owner = $null
-            } 
-            else 
+            }
+            else
             {
-                if ($site.WebApplication.UseClaimsAuthentication) 
+                if ($site.WebApplication.UseClaimsAuthentication)
                 {
                     $owner = (New-SPClaimsPrincipal -Identity $site.Owner.UserLogin `
                                                     -IdentityType "EncodedClaim").Value
-                } 
-                else 
+                }
+                else
                 {
                     $owner = $site.Owner.UserLogin
                 }
             }
-            
-            if ($null -eq $site.SecondaryContact) 
+
+            if ($null -eq $site.SecondaryContact)
             {
                 $secondaryOwner = $null
-            } 
-            else 
+            }
+            else
             {
-                if ($site.WebApplication.UseClaimsAuthentication) 
+                if ($site.WebApplication.UseClaimsAuthentication)
                 {
                     $secondaryOwner = (New-SPClaimsPrincipal -Identity $site.SecondaryContact.UserLogin `
                                                              -IdentityType "EncodedClaim").Value
-                } 
-                else 
+                }
+                else
                 {
                     $secondaryOwner = $site.SecondaryContact.UserLogin
                 }
@@ -121,7 +154,15 @@ function Get-TargetResource
                       Where-Object -FilterScript {
                           $_.QuotaID -eq $site.Quota.QuotaID
                       }).Name
-            
+
+            $CreateDefaultGroups = $true
+            if ($null -eq $site.RootWeb.AssociatedVisitorGroup -and
+                $null -eq $site.RootWeb.AssociatedMemberGroup -and
+                $null -eq $site.RootWeb.AssociatedOwnerGroup)
+            {
+                $CreateDefaultGroups = $false
+            }
+
             return @{
                 Url = $site.Url
                 OwnerAlias = $owner
@@ -136,6 +177,8 @@ function Get-TargetResource
                 SecondaryEmail = $site.SecondaryContact.Email
                 SecondaryOwnerAlias = $secondaryOwner
                 Template = "$($site.RootWeb.WebTemplate)#$($site.RootWeb.Configuration)"
+                CreateDefaultGroups = $CreateDefaultGroups
+                AdministrationSiteType = $site.AdministrationSiteType
                 InstallAccount = $params.InstallAccount
             }
         }
@@ -148,77 +191,187 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [Parameter(Mandatory = $true)]  
-        [System.String] 
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $Url,
 
-        [Parameter(Mandatory = $true)]  
-        [System.String] 
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $OwnerAlias,
 
-        [Parameter()] 
-        [System.UInt32] 
+        [Parameter()]
+        [System.UInt32]
         $CompatibilityLevel,
 
-        [Parameter()] 
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $ContentDatabase,
 
-        [Parameter()] 
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $Description,
 
-        [Parameter()] 
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $HostHeaderWebApplication,
 
-        [Parameter()] 
-        [System.UInt32] 
+        [Parameter()]
+        [System.UInt32]
         $Language,
 
-        [Parameter()] 
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $Name,
 
-        [Parameter()] 
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $OwnerEmail,
 
-        [Parameter()] 
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $QuotaTemplate,
 
-        [Parameter()] 
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $SecondaryEmail,
 
-        [Parameter()] 
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $SecondaryOwnerAlias,
 
-        [Parameter()] 
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $Template,
 
-        [Parameter()] 
-        [System.Management.Automation.PSCredential] 
+        [Parameter()]
+        [System.Boolean]
+        $CreateDefaultGroups = $true,
+
+        [Parameter()]
+        [ValidateSet("TenantAdministration","None")]
+        [System.String]
+        $AdministrationSiteType,
+
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 
     Write-Verbose -Message "Setting site collection $Url"
 
+    if ($PSBoundParameters.ContainsKey("CreateDefaultGroups") -eq $false)
+    {
+        $PSBoundParameters.CreateDefaultGroups = $true
+    }
+
+    $CurrentValues = Get-TargetResource @PSBoundParameters
+
     $result = Invoke-SPDSCCommand -Credential $InstallAccount `
-                                  -Arguments $PSBoundParameters `
+                                  -Arguments @($PSBoundParameters,$CurrentValues) `
                                   -ScriptBlock {
         $params = $args[0]
-        
+        $CurrentValues = $args[1]
+        $doCreateDefaultGroups = $false
+
         $params.Remove("InstallAccount") | Out-Null
+
+        $CreateDefaultGroups = $params.CreateDefaultGroups
+        $params.Remove("CreateDefaultGroups") | Out-Null
 
         $site = Get-SPSite -Identity $params.Url -ErrorAction SilentlyContinue
 
-        if ($null -eq $site) 
+        if ($null -eq $site)
         {
-            New-SPSite @params | Out-Null
+            $site = New-SPSite @params
+            if ($CreateDefaultGroups -eq $true)
+            {
+                $doCreateDefaultGroups = $true;
+
+            }
+            else
+            {
+                Write-Verbose -Message ("CreateDefaultGroups set to false. The default " + `
+                                        "SharePoint groups will not be created")
+            }
+        }
+        else
+        {
+            $newParams = @{
+                Identity = $params.Url
+            }
+
+            if ($params.ContainsKey("QuotaTemplate") -eq $true)
+            {
+                if ($params.QuotaTemplate -ne $CurrentValues.QuotaTemplate)
+                {
+                    $newParams.QuotaTemplate = $params.QuotaTemplate
+                }
+            }
+
+            if ($params.ContainsKey("OwnerAlias") -eq $true)
+            {
+                if ($params.OwnerAlias -ne $CurrentValues.OwnerAlias)
+                {
+                    $newParams.OwnerAlias = $params.OwnerAlias
+                }
+            }
+
+            if ($params.ContainsKey("SecondaryOwnerAlias") -eq $true)
+            {
+                if ($params.SecondaryOwnerAlias -ne $CurrentValues.SecondaryOwnerAlias)
+                {
+                    $newParams.SecondaryOwnerAlias = $params.SecondaryOwnerAlias
+                }
+            }
+
+            if ($params.ContainsKey("AdministrationSiteType") -eq $true)
+            {
+                if ($params.AdministrationSiteType -ne $CurrentValues.AdministrationSiteType)
+                {
+                    $newParams.AdministrationSiteType = $params.AdministrationSiteType
+                }
+            }
+
+            if ($newParams.Count -gt 1)
+            {
+                Write-Verbose -Message "Updating existing site collection"
+                Set-SPSite @newParams
+            }
+
+            if ($CurrentValues.CreateDefaultGroups -eq $false)
+            {
+                if ($CreateDefaultGroups -eq $true)
+                {
+                    $doCreateDefaultGroups = $true;
+                }
+                else
+                {
+                    Write-Verbose -Message ("CreateDefaultGroups set to false. The default " + `
+                                            "SharePoint groups will not be created")
+                }
+            }
+        }
+
+        if ($doCreateDefaultGroups -eq $true)
+        {
+            Write-Verbose -Message ("Creating default groups")
+
+            $centralAdminWebApp = [Microsoft.SharePoint.Administration.SPAdministrationWebApplication]::Local
+            $centralAdminSite = Get-SPSite -Identity $centralAdminWebApp.Url
+            $systemAccountSite = New-Object "Microsoft.SharePoint.SPSite" -ArgumentList @($site.Id, $centralAdminSite.SystemAccount.UserToken)
+
+            if($null -eq $systemAccountSite.SecondaryContact)
+            {
+                $secondaryOwnerLogin = $null;
+            }
+            else
+            {
+                $secondaryOwnerLogin = $systemAccountSite.SecondaryContact.UserLogin;
+            }
+
+            $systemAccountSite.RootWeb.CreateDefaultAssociatedGroups($systemAccountSite.Owner.UserLogin,
+                                                                     $secondaryOwnerLogin,
+                                                                     $null)
         }
     }
 }
@@ -229,60 +382,69 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [Parameter(Mandatory = $true)]  
-        [System.String] 
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $Url,
 
-        [Parameter(Mandatory = $true)]  
-        [System.String] 
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $OwnerAlias,
 
-        [Parameter()] 
-        [System.UInt32] 
+        [Parameter()]
+        [System.UInt32]
         $CompatibilityLevel,
 
-        [Parameter()] 
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $ContentDatabase,
 
-        [Parameter()] 
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $Description,
 
-        [Parameter()] 
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $HostHeaderWebApplication,
 
-        [Parameter()] 
-        [System.UInt32] 
+        [Parameter()]
+        [System.UInt32]
         $Language,
 
-        [Parameter()] 
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $Name,
 
-        [Parameter()] 
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $OwnerEmail,
 
-        [Parameter()] 
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $QuotaTemplate,
 
-        [Parameter()] 
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $SecondaryEmail,
 
-        [Parameter()] 
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $SecondaryOwnerAlias,
 
-        [Parameter()] 
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $Template,
 
-        [Parameter()] 
-        [System.Management.Automation.PSCredential] 
+        [Parameter()]
+        [System.Boolean]
+        $CreateDefaultGroups = $true,
+
+        [Parameter()]
+        [ValidateSet("TenantAdministration","None")]
+        [System.String]
+        $AdministrationSiteType,
+
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 
@@ -290,13 +452,21 @@ function Test-TargetResource
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
-    if ($null -eq $CurrentValues) 
+    if ($CreateDefaultGroups -eq $true)
     {
-        return $false 
+        if ($CurrentValues.CreateDefaultGroups -ne $true)
+        {
+            return $false
+        }
     }
+
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
                                     -DesiredValues $PSBoundParameters `
-                                    -ValuesToCheck @("Url")
+                                    -ValuesToCheck @("Url",
+                                                        "QuotaTemplate",
+                                                        "OwnerAlias",
+                                                        "SecondaryOwnerAlias",
+                                                        "AdministrationSiteType")
 }
 
 Export-ModuleMember -Function *-TargetResource

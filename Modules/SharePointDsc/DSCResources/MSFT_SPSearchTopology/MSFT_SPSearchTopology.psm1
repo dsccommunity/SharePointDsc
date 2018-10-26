@@ -49,7 +49,8 @@ function Get-TargetResource
         $params = $args[0]
         $ConfirmPreference = 'None'
 
-        $ssa = Get-SPEnterpriseSearchServiceApplication -Identity $params.ServiceAppName
+        $ssa = Get-SPEnterpriseSearchServiceApplication -Identity $params.ServiceAppName `
+                                                        -ErrorAction SilentlyContinue
 
         if ($null -eq $ssa)
         {
@@ -143,16 +144,23 @@ function Get-TargetResource
 
         $firstPartition = $null
         $enterpriseSearchServiceInstance = Get-SPEnterpriseSearchServiceInstance
-        if($null -ne $enterpriseSearchServiceInstance)
+        if ($null -ne $enterpriseSearchServiceInstance)
         {
             $ssiComponents = $enterpriseSearchServiceInstance.Components
-            if($null -ne $ssiComponents)
+            if ($null -ne $ssiComponents)
             {
-                if($ssiComponents.Length -gt 1)
+                if ($ssiComponents.Length -gt 1)
                 {
                     $ssiComponents = $ssiComponents[0]
                 }
-                $firstPartition = $ssiComponents.IndexLocation
+
+                if ($ssiComponents.IndexLocation.GetType().Name -eq "String")
+                {
+                    $firstPartition = $ssiComponents.IndexLocation
+                }
+                elseif ($ssiComponents.IndexLocation.GetType().Name -eq "Object[]") {
+                    $firstPartition = $ssiComponents.IndexLocation[0]
+                }
             }
         }
 
@@ -248,6 +256,12 @@ function Set-TargetResource
         # Ensure the search service instance is running on all servers
         foreach($searchServer in $AllSearchServers)
         {
+            if($searchServer -like '*.*')
+            {
+                Write-Verbose -Message "Server name specified in FQDN, extracting just server name."
+                $searchServer = $searchServer.Split('.')[0]
+            }
+
             $searchService = Get-SPEnterpriseSearchServiceInstance -Identity $searchServer `
                                                                    -ErrorAction SilentlyContinue
             if ($null -eq $searchService)
@@ -295,6 +309,12 @@ function Set-TargetResource
         $AllSearchServiceInstances = @{}
         foreach ($server in $AllSearchServers)
         {
+            if($server -like '*.*')
+            {
+                Write-Verbose -Message "Server name specified in FQDN, extracting just server name."
+                $server = $server.Split('.')[0]
+            }
+
             $serverName = $server
             $serviceToAdd = Get-SPEnterpriseSearchServiceInstance -Identity $server `
                                                                   -ErrorAction SilentlyContinue
@@ -308,7 +328,7 @@ function Set-TargetResource
             {
                 throw "Unable to locate a search service instance on $serverName"
             }
-            $AllSearchServiceInstances.Add($serverName, $serviceToAdd)
+            $AllSearchServiceInstances.Add($server, $serviceToAdd)
         }
 
         # Get current topology and prepare a new one

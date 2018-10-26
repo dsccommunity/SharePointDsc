@@ -42,6 +42,19 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             )
         }
 
+        Mock -CommandName Get-SPMetadataServiceApplicationProxy -MockWith {
+            return @{
+                Name = "Managed Metadata Service App Proxy"
+                Properties              = @{
+                    IsNPContentTypeSyndicationEnabled = $true
+                    IsContentTypePushdownEnabled = $true
+                }
+            } | Add-Member -MemberType ScriptMethod `
+                -Name update `
+                -Value {$Global:SPDscMetaDataServiceApplicationProxyUpdateCalled = $true} `
+                -PassThru -Force
+        }
+
         Mock -CommandName Get-SPServiceApplicationProxy -MockWith {
             return @(
                 @{
@@ -159,6 +172,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 ProxyName               = "Proxy Name"
                 DefaultLanguage         = 1033
                 Languages               = @()
+                ContentTypePushdownEnabled = $true
+                ContentTypeSyndicationEnabled = $true
                 Ensure                  = "Present"
             }
 
@@ -1222,13 +1237,15 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "When the termstore for the service application proxy exists in the current farm and is not configured correctly" -Fixture {
             $testParams = @{
-                Name            = "Managed Metadata Service Application"
-                ApplicationPool = "SharePoint Service Applications"
-                DatabaseServer  = "databaseserver\instance"
-                DatabaseName    = "SP_MMS"
-                Ensure          = "Present"
-                DefaultLanguage = 1033
-                Languages       = @(1033)
+                Name                          = "Managed Metadata Service App"
+                ApplicationPool               = "SharePoint Service Applications"
+                DatabaseServer                = "databaseserver\instance"
+                DatabaseName                  = "SP_MMS"
+                Ensure                        = "Present"
+                DefaultLanguage               = 1033
+                Languages                     = @(1033)
+                ContentTypePushdownEnabled    = $false
+                ContentTypeSyndicationEnabled = $false
             }
 
             if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 15)
@@ -1388,6 +1405,21 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 }
             }
 
+            $metadataServiceApplicationProxy = @{
+                Name = "Managed Metadata Service App Proxy"
+                Properties              = @{
+                    IsContentTypePushdownEnabled = $true
+                    IsNPContentTypeSyndicationEnabled = $true
+                }
+            } | Add-Member -MemberType ScriptMethod `
+                -Name Update `
+                -Value { $Global:SPDscMetaDataServiceApplicationProxyUpdateCalled = $true } `
+                -PassThru -Force
+
+            Mock -CommandName Get-SPMetadataServiceApplicationProxy -MockWith {
+                return $metadataServiceApplicationProxy
+            }
+
             It "Should return false when the Test method is called" {
                 Test-TargetResource @testParams | Should Be $false
             }
@@ -1411,11 +1443,49 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 $Global:SPDscAddLanguageCalled | Should Be $true
                 $Global:SPDscDeleteLanguageCalled | Should Be $true
             }
+
+            It "Should change the value for 'ContentTypePushdownEnabled'" {
+                $testParams = @{
+                    Name                          = "Managed Metadata Service App"
+                    ApplicationPool               = "SharePoint Service Applications"
+                    DatabaseServer                = "databaseserver\instance"
+                    DatabaseName                  = "SP_MMS"
+                    Ensure                        = "Present"
+                    DefaultLanguage               = 1033
+                    Languages                     = @(1033)
+                    ContentTypePushdownEnabled    = $true
+                    ContentTypeSyndicationEnabled = $false
+                }
+
+                $Global:SPDscMetaDataServiceApplicationProxyUpdateCalled = $false
+                Set-TargetResource @testParams
+                $Global:SPDscMetaDataServiceApplicationProxyUpdateCalled | Should Be $true
+                $metadataServiceApplicationProxy.Properties["IsContentTypePushdownEnabled"] | Should be $true
+            }
+
+            It "Should change the value for 'ContentTypeSyndicationEnabled'" {
+                $testParams = @{
+                    Name                          = "Managed Metadata Service App"
+                    ApplicationPool               = "SharePoint Service Applications"
+                    DatabaseServer                = "databaseserver\instance"
+                    DatabaseName                  = "SP_MMS"
+                    Ensure                        = "Present"
+                    DefaultLanguage               = 1033
+                    Languages                     = @(1033)
+                    ContentTypePushdownEnabled    = $false
+                    ContentTypeSyndicationEnabled = $true
+                }
+
+                $Global:SPDscMetaDataServiceApplicationProxyUpdateCalled = $false
+                Set-TargetResource @testParams
+                $Global:SPDscMetaDataServiceApplicationProxyUpdateCalled | Should Be $true
+                $metadataServiceApplicationProxy.Properties["IsNPContentTypeSyndicationEnabled"] | Should be $true
+            }
         }
 
         Context -Name "When there is no Managed Metadata Service and everything should be created and configured correctly" -Fixture {
             $testParams = @{
-                Name                    = "Managed Metadata Service Application"
+                Name                    = "Managed Metadata Service App"
                 ProxyName               = "Managed Metadata Service Application Proxy"
                 ApplicationPool         = "SharePoint Service Applications"
                 DatabaseServer          = "databaseserver\instance"

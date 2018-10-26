@@ -29,20 +29,19 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         Import-Module -Name (Join-Path -Path $Global:SPDscHelper.RepoRoot -ChildPath $modulePath -Resolve)
 
         # Mocks for all contexts
-        Mock -CommandName "Add-SPDscConfigDBLock" -MockWith { }
-        Mock -CommandName "Remove-SPDscConfigDBLock" -MockWith { }
-        Mock -CommandName "New-SPConfigurationDatabase" -MockWith { }
-        Mock -CommandName "Connect-SPConfigurationDatabase" -MockWith { }
-        Mock -CommandName "Install-SPHelpCollection" -MockWith { }
-        Mock -CommandName "Initialize-SPResourceSecurity" -MockWith { }
-        Mock -CommandName "Install-SPService" -MockWith { }
-        Mock -CommandName "Install-SPFeature" -MockWith { }
-        Mock -CommandName "New-SPCentralAdministration" -MockWith { }
-        Mock -CommandName "Import-Module" -MockWith { }
-        Mock -CommandName "Start-Sleep" -MockWith { }
-        Mock -CommandName "Start-Service" -MockWith { }
-        Mock -CommandName "Stop-Service" -MockWith { }
-        Mock -CommandName "Start-SPServiceInstance" -MockWith { }
+        Mock -CommandName Add-SPDscConfigDBLock -MockWith { }
+        Mock -CommandName Remove-SPDscConfigDBLock -MockWith { }
+        Mock -CommandName New-SPConfigurationDatabase -MockWith { }
+        Mock -CommandName Connect-SPConfigurationDatabase -MockWith { }
+        Mock -CommandName Install-SPHelpCollection -MockWith { }
+        Mock -CommandName Initialize-SPResourceSecurity -MockWith { }
+        Mock -CommandName Install-SPService -MockWith { }
+        Mock -CommandName Install-SPFeature -MockWith { }
+        Mock -CommandName New-SPCentralAdministration -MockWith { }
+        Mock -CommandName Start-Sleep -MockWith { }
+        Mock -CommandName Start-Service -MockWith { }
+        Mock -CommandName Stop-Service -MockWith { }
+        Mock -CommandName Start-SPServiceInstance -MockWith { }
         Mock -CommandName Get-SPDSCInstalledProductVersion {
             return @{
                 FileMajorPart = $Global:SPDscHelper.CurrentStubBuildNumber.Major
@@ -54,6 +53,32 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         # Test Contexts
         Context -Name "No config databases exists, and this server should be connected to one" -Fixture {
+            $testParams = @{
+                IsSingleInstance = "Yes"
+                Ensure = "Present"
+                FarmConfigDatabaseName = "SP_Config"
+                CentralAdministrationPort = 80000
+                DatabaseServer = "sql.contoso.com"
+                FarmAccount = $mockFarmAccount
+                Passphrase = $mockPassphrase
+                AdminContentDatabaseName = "SP_AdminContent"
+                RunCentralAdmin = $true
+            }
+
+            It "Should throw exception in the get method" {
+                { Get-TargetResource @testParams } | Should Throw "An invalid value for CentralAdministrationPort is specified:"
+            }
+
+            It "Should throw exception in the test method" {
+                { Test-TargetResource @testParams } | Should Throw "An invalid value for CentralAdministrationPort is specified:"
+            }
+
+            It "Should throw exception in the set method" {
+                { Set-TargetResource @testParams } | Should Throw "An invalid value for CentralAdministrationPort is specified:"
+            }
+        }
+
+        Context -Name "No config databaes exists, and this server should be connected to one" -Fixture {
             $testParams = @{
                 IsSingleInstance = "Yes"
                 Ensure = "Present"
@@ -189,6 +214,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 if ($global:SPDscCentralAdminCheckDone -eq $true)
                 {
                     return @(@{
+                        Name = "WSS_Administration"
                         TypeName = "Central Administration"
                     })
                 }
@@ -270,6 +296,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 if ($global:SPDscCentralAdminCheckDone -eq $true)
                 {
                     return @(@{
+                        Name = "WSS_Administration"
                         TypeName = "Central Administration"
                     })
                 }
@@ -427,6 +454,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                             $global:SPDscSIRunCount++
                             return @(@{
                                 TypeName = "Central Administration"
+                                Name = "WSS_Administration"
                                 Status = "Online"
                             })
                         }
@@ -450,6 +478,88 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             $global:SPDscCentralAdminCheckDone = $false
+            It "Should return false from the test method" {
+                Test-TargetResource @testParams | Should be $false
+            }
+        }
+
+        Context -Name "Server is connected to farm, but CentralAdminPort is different" -Fixture {
+            $testParams = @{
+                IsSingleInstance = "Yes"
+                Ensure = "Present"
+                FarmConfigDatabaseName = "SP_Config"
+                DatabaseServer = "sql.contoso.com"
+                FarmAccount = $mockFarmAccount
+                Passphrase = $mockPassphrase
+                AdminContentDatabaseName = "SP_AdminContent"
+                RunCentralAdmin = $true
+                CentralAdministrationPort = 8080
+            }
+
+            Mock -CommandName Get-SPDSCRegistryKey -MockWith {
+                return "Connection string example"
+            }
+
+            Mock -CommandName Get-SPFarm -MockWith {
+                return @{
+                    Name = $testParams.FarmConfigDatabaseName
+                    DatabaseServer = @{
+                        Name = $testParams.DatabaseServer
+                    }
+                    AdminContentDatabaseName = $testParams.AdminContentDatabaseName
+                }
+            }
+            Mock -CommandName Get-SPDSCConfigDBStatus -MockWith {
+                return @{
+                    Locked = $false
+                    ValidPermissions = $true
+                    DatabaseExists = $true
+                }
+            }
+            Mock -CommandName Get-SPDatabase -MockWith {
+                return @(@{
+                    Name = $testParams.FarmConfigDatabaseName
+                    Type = "Configuration Database"
+                    NormalizedDataSource = $testParams.DatabaseServer
+                })
+            }
+            Mock -CommandName Get-SPWebApplication -MockWith {
+                return @{
+                    IsAdministrationWebApplication = $true
+                    ContentDatabases = @(@{
+                        Name = $testParams.AdminContentDatabaseName
+                    })
+                    IISSettings = @(@{
+                        DisableKerberos = $true
+                    })
+                    Url = "http://localhost:9999"
+                }
+            }
+            Mock -CommandName Get-CimInstance -MockWith {
+                return @{
+                    Domain = "domain.com"
+                }
+            }
+
+            Mock -CommandName Get-SPServiceInstance -MockWith {
+                return @(@{
+                    Name = "WSS_Administration"
+                    TypeName = "Central Administration"
+                    Status = "Online"
+                })
+            }
+
+            Mock -CommandName Set-SPCentralAdministration -MockWith {}
+
+            It "Should return 9999 as CA Port from the get method" {
+                (Get-TargetResource @testParams).CentralAdministrationPort | Should Be 9999
+            }
+
+            It "Should update the central administration port" {
+                Set-TargetResource @testParams
+                Assert-MockCalled -CommandName "Set-SPCentralAdministration"
+            }
+
             It "Should return false from the test method" {
                 Test-TargetResource @testParams | Should be $false
             }
@@ -519,6 +629,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                         {
                             $global:SPDscSIRunCount++
                             return @(@{
+                                Name = "WSS_Administration"
                                 TypeName = "Central Administration"
                                 Status = "Online"
                             })
@@ -609,6 +720,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 if ($global:SPDscCentralAdminCheckDone -eq $true)
                 {
                     return @(@{
+                        Name = "WSS_Administration"
                         TypeName = "Central Administration"
                         Status = "Online"
                     })
@@ -974,6 +1086,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 if ($global:SPDscCentralAdminCheckDone -eq $true)
                 {
                     return @(@{
+                        Name = "WSS_Administration"
                         TypeName = "Central Administration"
                         Status = "Online"
                     })
@@ -1067,6 +1180,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 if ($global:SPDscCentralAdminCheckDone -eq $true)
                 {
                     return @(@{
+                        Name = "WSS_Administration"
                         TypeName = "Central Administration"
                         Status = "Online"
                     })

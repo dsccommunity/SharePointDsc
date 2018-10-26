@@ -44,7 +44,7 @@ function Get-TargetResource
                                    -ErrorAction SilentlyContinue
 
         $returnval = @{
-            WebAppUrl = $wa.Url
+            WebAppUrl = $null
             SuiteNavBrandingLogoNavigationUrl = $null
             SuiteNavBrandingLogoTitle = $null
             SuiteNavBrandingLogoUrl = $null
@@ -57,13 +57,16 @@ function Get-TargetResource
             return $returnval
         }
 
+        $returnval.WebAppUrl = $wa.Url
+
         $installedVersion = Get-SPDSCInstalledProductVersion
 
-        if($installedVersion.FileMajorPart -eq 15)
+        if($installedVersion.FileMajorPart -ge 15)
         {
             $returnval.SuiteBarBrandingElementHtml = $wa.SuiteBarBrandingElementHtml
         }
-        elseif($installedVersion.FileMajorPart -ge 16)
+
+        if($installedVersion.FileMajorPart -ge 16)
         {
             $returnval.SuiteNavBrandingLogoNavigationUrl = $wa.SuiteNavBrandingLogoNavigationUrl
             $returnval.SuiteNavBrandingLogoTitle = $wa.SuiteNavBrandingLogoTitle
@@ -126,8 +129,8 @@ function Set-TargetResource
             -or $PSBoundParameters.ContainsKey("SuiteNavBrandingText"))
             {
                 throw ("Cannot specify SuiteNavBrandingLogoNavigationUrl, SuiteNavBrandingLogoTitle, " + `
-                                        "SuiteNavBrandingLogoUrl or SuiteNavBrandingText with SharePoint 2013. Instead," + `
-                                        " only specify the SuiteBarBrandingElementHtml parameter")
+                       "SuiteNavBrandingLogoUrl or SuiteNavBrandingText with SharePoint 2013. Instead," + `
+                       " only specify the SuiteBarBrandingElementHtml parameter")
             }
 
             <# Exception: The SP2013 optional parameter is null. #>
@@ -139,23 +142,22 @@ function Set-TargetResource
         }
         16
         {
-            <# Exception: The SP2013 specific SuiteBarBrandingElementHtml parameter was passed with SP2016. #>
             if($PSBoundParameters.ContainsKey("SuiteBarBrandingElementHtml"))
             {
-                throw ("Cannot specify SuiteBarBrandingElementHtml with SharePoint 2016 and 2019. Instead," + `
-                                        " use the SuiteNavBrandingLogoNavigationUrl, SuiteNavBrandingLogoTitle, " + `
-                                        "SuiteNavBrandingLogoUrl and SuiteNavBrandingText parameters")
+                Write-Verbose ("SuiteBarBrandingElementHtml with SharePoint 2016 and 2019 only works " + `
+                               "if using a SharePoint 2013 masterpage")
             }
 
             <# Exception: All the optional parameters are null for SP2016/SP2019. #>
             if(!$PSBoundParameters.ContainsKey("SuiteNavBrandingLogoNavigationUrl") `
             -and !$PSBoundParameters.ContainsKey("SuiteNavBrandingLogoTitle") `
             -and !$PSBoundParameters.ContainsKey("SuiteNavBrandingLogoUrl") `
-            -and !$PSBoundParameters.ContainsKey("SuiteNavBrandingText"))
+            -and !$PSBoundParameters.ContainsKey("SuiteNavBrandingText") `
+            -and !$PSBoundParameters.ContainsKey("SuiteBarBrandingElementHtml"))
             {
-                throw ("You need to specify a value for either SuiteNavBrandingLogoNavigationUrl" + `
-                                        ", SuiteNavBrandingLogoTitle, SuiteNavBrandingLogoUrl and SuiteNavBrandingText " + `
-                                        "with SharePoint 2016 and 2019")
+                throw ("You need to specify a value for either SuiteNavBrandingLogoNavigationUrl, " + `
+                       "SuiteNavBrandingLogoTitle, SuiteNavBrandingLogoUrl, SuiteNavBrandingText " + `
+                       "or SuiteBarBrandingElementHtml with SharePoint 2016 or 2019")
             }
         }
     }
@@ -184,11 +186,12 @@ function Set-TargetResource
 
         Write-Verbose -Message "Processing changes"
 
-        if($installedVersion.FileMajorPart -eq 15)
+        if($installedVersion.FileMajorPart -ge 15)
         {
             $wa.SuiteBarBrandingElementHtml = $params.SuiteBarBrandingElementHtml
         }
-        elseif($installedVersion.FileMajorPart -ge 16)
+
+        if($installedVersion.FileMajorPart -ge 16)
         {
             $wa.SuiteNavBrandingLogoNavigationUrl = $params.SuiteNavBrandingLogoNavigationUrl
             $wa.SuiteNavBrandingLogoTitle = $params.SuiteNavBrandingLogoTitle
@@ -243,9 +246,24 @@ function Test-TargetResource
         return $false
     }
 
-    return Test-SPDscParameterState -CurrentValues $CurrentValues `
-    -DesiredValues $PSBoundParameters `
-    -ValuesToCheck @("Ensure")
+    $installedVersion = Get-SPDSCInstalledProductVersion
+
+    if($installedVersion.FileMajorPart -eq 15)
+    {
+        return Test-SPDscParameterState -CurrentValues $CurrentValues `
+                                        -DesiredValues $PSBoundParameters `
+                                        -ValuesToCheck @("SuiteBarBrandingElementHtml");
+    }
+    else
+    {
+        return Test-SPDscParameterState -CurrentValues $CurrentValues `
+                                        -DesiredValues $PSBoundParameters `
+                                        -ValuesToCheck @("SuiteBarBrandingElementHtml",
+                                                         "SuiteNavBrandingLogoNavigationUrl",
+                                                         "SuiteNavBrandingLogoTitle",
+                                                         "SuiteNavBrandingLogoUrl",
+                                                         "SuiteNavBrandingText")
+    }
 }
 
 Export-ModuleMember -Function *-TargetResource

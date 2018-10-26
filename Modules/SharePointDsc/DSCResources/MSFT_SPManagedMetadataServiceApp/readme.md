@@ -16,3 +16,6 @@ The content type hub url will be set or reset.
 
 The language settings (default and working) are only changed if they are part of
 the bound parameters. Otherwise they will not be altered.
+
+ContentTypePushdownEnabled and ContentTypeSyndicationEnabled will only be altered
+if they are part of the bound parameters.

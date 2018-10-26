@@ -34,7 +34,10 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             It "Should return null from the get method" {
-                Get-TargetResource @testParams | Should Be $null
+                $result = Get-TargetResource @testParams
+                $result.Members | Should BeNullOrEmpty
+                $result.MembersToInclude | Should BeNullOrEmpty
+                $result.MembersToExclude | Should BeNullOrEmpty
             }
 
             It "Should return false from the test method" {
@@ -46,7 +49,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
         }
 
-        Context -Name "ContentDatabases and AllContentDatabases parameters used simultaniously" -Fixture {
+        Context -Name "ContentDatabases and AllContentDatabases parameters used simultaneously" -Fixture {
             $testParams = @{
                 IsSingleInstance = "Yes"
                 Members          = "contoso\user1", "contoso\user2"
@@ -60,7 +63,10 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             It "Should return null from the get method" {
-                Get-TargetResource @testParams | Should BeNullOrEmpty
+                $result = Get-TargetResource @testParams
+                $result.Members | Should BeNullOrEmpty
+                $result.MembersToInclude | Should BeNullOrEmpty
+                $result.MembersToExclude | Should BeNullOrEmpty
             }
 
             It "Should return false from the test method" {
@@ -72,7 +78,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
         }
 
-        Context -Name "Members and MembersToInclude parameters used simultaniously - General permissions" -Fixture {
+        Context -Name "Members and MembersToInclude parameters used simultaneously - General permissions" -Fixture {
             $testParams = @{
                 IsSingleInstance = "Yes"
                 Members          = "contoso\user1", "contoso\user2"
@@ -80,7 +86,10 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             It "Should return null from the get method" {
-                Get-TargetResource @testParams | Should Be $null
+                $result = Get-TargetResource @testParams
+                $result.Members | Should BeNullOrEmpty
+                $result.MembersToInclude | Should BeNullOrEmpty
+                $result.MembersToExclude | Should BeNullOrEmpty
             }
 
             It "Should return false from the test method" {
@@ -98,7 +107,10 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             It "Should return null from the get method" {
-                Get-TargetResource @testParams | Should Be $null
+                $result = Get-TargetResource @testParams
+                $result.Members | Should BeNullOrEmpty
+                $result.MembersToInclude | Should BeNullOrEmpty
+                $result.MembersToExclude | Should BeNullOrEmpty
             }
 
             It "Should return false from the test method" {
@@ -110,7 +122,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
         }
 
-        Context -Name "Members and MembersToInclude parameters used simultaniously - Database permissions" -Fixture {
+        Context -Name "Members and MembersToInclude parameters used simultaneously - Database permissions" -Fixture {
             $testParams = @{
                 IsSingleInstance = "Yes"
                 Databases = @(
@@ -123,7 +135,10 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             It "Should return null from the get method" {
-                Get-TargetResource @testParams | Should Be $null
+                $result = Get-TargetResource @testParams
+                $result.Members | Should BeNullOrEmpty
+                $result.MembersToInclude | Should BeNullOrEmpty
+                $result.MembersToExclude | Should BeNullOrEmpty
             }
 
             It "Should return false from the test method" {
@@ -132,6 +147,31 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
             It "Should throw an exception in the set method" {
                 { Set-TargetResource @testParams } | Should throw "Databases: Cannot use the Members parameter together with the MembersToInclude or MembersToExclude parameters"
+            }
+        }
+
+        Context -Name "Databases and ExcludeDatabases parameters used simultaneously" -Fixture {
+            $testParams = @{
+                IsSingleInstance = "Yes"
+                Databases = @(
+                    (New-CimInstance -ClassName MSFT_SPDatabasePermissions -Property @{
+                        Name = "SharePoint_Content_Contoso1"
+                        Members = "contoso\user1", "contoso\user2"
+                    } -ClientOnly)
+                )
+                ExcludeDatabases = "SharePoint_Content_Contoso2"
+            }
+
+            It "Should return null from the get method" {
+                (Get-TargetResource @testParams).Name | Should BeNullOrEmpty
+            }
+
+            It "Should return false from the test method" {
+                Test-TargetResource @testParams | Should Be $false
+            }
+
+            It "Should throw an exception in the set method" {
+                { Set-TargetResource @testParams } | Should throw "Cannot use the Databases parameter together with the ExcludeDatabases parameter"
             }
         }
 
@@ -146,7 +186,10 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             It "Should return null from the get method" {
-                Get-TargetResource @testParams | Should Be $null
+                $result = Get-TargetResource @testParams
+                $result.Members | Should BeNullOrEmpty
+                $result.MembersToInclude | Should BeNullOrEmpty
+                $result.MembersToExclude | Should BeNullOrEmpty
             }
 
             It "Should return false from the test method" {
@@ -187,7 +230,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             It "Should return false from the test method" {
-                { Test-TargetResource @testParams } | Should throw "Specified database does not exist"
+                Test-TargetResource @testParams | Should Be $false
             }
 
             It "Should throw an exception in the set method" {
@@ -214,7 +257,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 {
                     # Database parameter not used, return general permissions
                     return @{
-                        UserName = "contoso\user1","contoso\user2"
+                        UserName = "contoso\user3","contoso\user4"
                     }
                 }
             }
@@ -247,11 +290,12 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
         }
 
-        Context -Name "AllDatabases parameter is used and permissions do not match" -Fixture {
+        Context -Name "AllDatabases parameter is used with ExcludeDatabases and permissions do not match" -Fixture {
             $testParams = @{
                 IsSingleInstance = "Yes"
                 Members          = "contoso\user1", "contoso\user2"
-                AllDatabases = $true
+                AllDatabases     = $true
+                ExcludeDatabases = "SharePoint_Content_Contoso3"
             }
 
             Mock -CommandName Get-SPShellAdmin -MockWith {
@@ -259,7 +303,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 {
                     # Database parameter used, return database permissions
                     return @{
-                        UserName = "contoso\user1","contoso\user2"
+                        UserName = "contoso\user3","contoso\user4"
                     }
                 }
                 else
@@ -280,6 +324,10 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     @{
                         Name = "SharePoint_Content_Contoso2"
                         Id   = "936DA01F-9ABD-4d9d-80C7-02AF85C822A8"
+                    },
+                    @{
+                        Name = "SharePoint_Content_Contoso3"
+                        Id   = "936DA01F-9ABD-4d9d-80C7-02AF85C822A9"
                     }
                 )
             }
@@ -289,7 +337,13 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             It "Should return false from the test method" {
-                Test-TargetResource @testParams | Should Be $true
+                Test-TargetResource @testParams | Should Be $false
+            }
+
+            It "Should throw an exception in the set method" {
+                Set-TargetResource @testParams
+                Assert-MockCalled Add-SPShellAdmin
+                Assert-MockCalled Remove-SPShellAdmin
             }
         }
 
