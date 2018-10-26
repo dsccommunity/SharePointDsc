@@ -426,6 +426,18 @@ function Set-TargetResource
                                     -BDCApplicationProxyGroup $proxyGroup `
                                     -LOBSystemSet $params.LOBSystemSet
                 }
+
+                $source = New-SPEnterpriseSearchCrawlContentSource `
+                                -SearchApplication $params.ServiceAppName `
+                                -Type $newType `
+                                -Name $params.Name `
+                                -StartAddresses $startAddresses
+
+                if ($null -eq $source)
+                {
+                    throw ("An error occurred during creation of the Content Source, " + `
+                           "please check if all parameters are correct.")
+                }
             }
 
             $allSetArguments = @{

@@ -5,14 +5,9 @@ function Get-TargetResource
     param
     (
         [Parameter(Mandatory = $true)]
-<<<<<<< HEAD
         [ValidateSet('Yes')]
         [String]
         $IsSingleInstance,
-=======
-        [System.String]
-        $Name,
->>>>>>> upstream/dev
 
         [Parameter()]
         [System.String[]]
@@ -35,26 +30,23 @@ function Get-TargetResource
         $AllDatabases,
 
         [Parameter()]
-<<<<<<< HEAD
-=======
         [System.String[]]
         $ExcludeDatabases,
 
         [Parameter()]
->>>>>>> upstream/dev
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 
     Write-Verbose -Message "Getting Shell Admins config"
 
-<<<<<<< HEAD
-=======
     $nullreturn = @{
-        Name = $null
+        IsSingleInstance = "Yes"
+        Members          = $null
+        MembersToInclude = $null
+        MembersToExclude = $null
     }
 
->>>>>>> upstream/dev
     if ($Members -and (($MembersToInclude) -or ($MembersToExclude)))
     {
         Write-Verbose -Message ("Cannot use the Members parameter together with the " + `
@@ -133,8 +125,6 @@ function Get-TargetResource
 
         $cdbPermissions = @()
         $databases = Get-SPDatabase
-<<<<<<< HEAD
-=======
         if ($params.ContainsKey("ExcludeDatabases"))
         {
             $databases = $databases | Where-Object -FilterScript {
@@ -142,7 +132,6 @@ function Get-TargetResource
                                       }
         }
 
->>>>>>> upstream/dev
         foreach ($database in $databases)
         {
             $cdbPermission = @{}
@@ -174,14 +163,9 @@ function Set-TargetResource
     param
     (
         [Parameter(Mandatory = $true)]
-<<<<<<< HEAD
         [ValidateSet('Yes')]
         [String]
         $IsSingleInstance,
-=======
-        [System.String]
-        $Name,
->>>>>>> upstream/dev
 
         [Parameter()]
         [System.String[]]
@@ -204,13 +188,10 @@ function Set-TargetResource
         $AllDatabases,
 
         [Parameter()]
-<<<<<<< HEAD
-=======
         [System.String[]]
         $ExcludeDatabases,
 
         [Parameter()]
->>>>>>> upstream/dev
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
@@ -584,9 +565,6 @@ function Set-TargetResource
         {
             Write-Verbose -Message "Processing AllDatabases parameter"
 
-<<<<<<< HEAD
-            foreach ($database in (Get-SPDatabase))
-=======
             $databases = Get-SPDatabase
             if ($params.ContainsKey("ExcludeDatabases"))
             {
@@ -595,7 +573,6 @@ function Set-TargetResource
                                           }
             }
             foreach ($database in $databases)
->>>>>>> upstream/dev
             {
                 $dbShellAdmins = Get-SPShellAdmin -database $database.Id
                 if ($params.Members)
@@ -751,14 +728,9 @@ function Test-TargetResource
     param
     (
         [Parameter(Mandatory = $true)]
-<<<<<<< HEAD
         [ValidateSet('Yes')]
         [String]
         $IsSingleInstance,
-=======
-        [System.String]
-        $Name,
->>>>>>> upstream/dev
 
         [Parameter()]
         [System.String[]]
@@ -781,13 +753,10 @@ function Test-TargetResource
         $AllDatabases,
 
         [Parameter()]
-<<<<<<< HEAD
-=======
         [System.String[]]
         $ExcludeDatabases,
 
         [Parameter()]
->>>>>>> upstream/dev
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
@@ -797,11 +766,9 @@ function Test-TargetResource
     # Start checking
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
-<<<<<<< HEAD
-    if ($null -eq $CurrentValues)
-=======
-    if ($null -eq $CurrentValues.Name)
->>>>>>> upstream/dev
+    if ($null -eq $CurrentValues.Members -and `
+        $null -eq $CurrentValues.MembersToInclude -and `
+        $null -eq $CurrentValues.MembersToExclude)
     {
         return $false
     }

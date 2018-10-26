@@ -129,8 +129,8 @@ function Set-TargetResource
             -or $PSBoundParameters.ContainsKey("SuiteNavBrandingText"))
             {
                 throw ("Cannot specify SuiteNavBrandingLogoNavigationUrl, SuiteNavBrandingLogoTitle, " + `
-                                        "SuiteNavBrandingLogoUrl or SuiteNavBrandingText with SharePoint 2013. Instead," + `
-                                        " only specify the SuiteBarBrandingElementHtml parameter")
+                       "SuiteNavBrandingLogoUrl or SuiteNavBrandingText with SharePoint 2013. Instead," + `
+                       " only specify the SuiteBarBrandingElementHtml parameter")
             }
 
             <# Exception: The SP2013 optional parameter is null. #>
@@ -145,6 +145,7 @@ function Set-TargetResource
             if($PSBoundParameters.ContainsKey("SuiteBarBrandingElementHtml"))
             {
 <<<<<<< HEAD
+<<<<<<< HEAD
                 throw ("Cannot specify SuiteBarBrandingElementHtml with SharePoint 2016 and 2019. Instead," + `
                                         " use the SuiteNavBrandingLogoNavigationUrl, SuiteNavBrandingLogoTitle, " + `
                                         "SuiteNavBrandingLogoUrl and SuiteNavBrandingText parameters")
@@ -152,6 +153,10 @@ function Set-TargetResource
                 Write-Verbose ("SuiteBarBrandingElementHtml with SharePoint 2016 only works if using a " + `
                                         "SharePoint 2016 masterpage")
 >>>>>>> upstream/dev
+=======
+                Write-Verbose ("SuiteBarBrandingElementHtml with SharePoint 2016 and 2019 only works " + `
+                               "if using a SharePoint 2013 masterpage")
+>>>>>>> upstream/v3.0-development
             }
 
             <# Exception: All the optional parameters are null for SP2016/SP2019. #>
@@ -162,6 +167,7 @@ function Set-TargetResource
             -and !$PSBoundParameters.ContainsKey("SuiteBarBrandingElementHtml"))
             {
 <<<<<<< HEAD
+<<<<<<< HEAD
                 throw ("You need to specify a value for either SuiteNavBrandingLogoNavigationUrl" + `
                                         ", SuiteNavBrandingLogoTitle, SuiteNavBrandingLogoUrl and SuiteNavBrandingText " + `
                                         "with SharePoint 2016 and 2019")
@@ -170,6 +176,11 @@ function Set-TargetResource
                                         "SuiteNavBrandingLogoTitle, SuiteNavBrandingLogoUrl, SuiteNavBrandingText, " + `
                                         "and SuiteBarBrandingElementHtml with SharePoint 2016")
 >>>>>>> upstream/dev
+=======
+                throw ("You need to specify a value for either SuiteNavBrandingLogoNavigationUrl, " + `
+                       "SuiteNavBrandingLogoTitle, SuiteNavBrandingLogoUrl, SuiteNavBrandingText " + `
+                       "or SuiteBarBrandingElementHtml with SharePoint 2016 or 2019")
+>>>>>>> upstream/v3.0-development
             }
         }
     }
@@ -263,14 +274,18 @@ function Test-TargetResource
     if($installedVersion.FileMajorPart -eq 15)
     {
         return Test-SPDscParameterState -CurrentValues $CurrentValues `
-        -DesiredValues $PSBoundParameters `
-        -ValuesToCheck @("SuiteBarBrandingElementHtml");
+                                        -DesiredValues $PSBoundParameters `
+                                        -ValuesToCheck @("SuiteBarBrandingElementHtml");
     }
     else
     {
         return Test-SPDscParameterState -CurrentValues $CurrentValues `
-        -DesiredValues $PSBoundParameters `
-        -ValuesToCheck @("SuiteBarBrandingElementHtml", "SuiteNavBrandingLogoNavigationUrl", "SuiteNavBrandingLogoTitle", "SuiteNavBrandingLogoUrl", "SuiteNavBrandingText")
+                                        -DesiredValues $PSBoundParameters `
+                                        -ValuesToCheck @("SuiteBarBrandingElementHtml",
+                                                         "SuiteNavBrandingLogoNavigationUrl",
+                                                         "SuiteNavBrandingLogoTitle",
+                                                         "SuiteNavBrandingLogoUrl",
+                                                         "SuiteNavBrandingText")
     }
 }
 

@@ -439,35 +439,16 @@ function Set-TargetResource
             $params = $args[0]
             $scriptRoot = $args[1]
 
-<<<<<<< HEAD
-    $actionResult = Invoke-SPDSCCommand -Credential $InstallAccount `
-                                        -Arguments @($PSBoundParameters, $PSScriptRoot) `
-                                        -ScriptBlock {
-        $params = $args[0]
-        $scriptRoot = $args[1]
-
-        $modulePath = "..\..\Modules\SharePointDsc.Farm\SPFarm.psm1"
-        Import-Module -Name (Join-Path -Path $scriptRoot -ChildPath $modulePath -Resolve)
-        $sqlInstanceStatus = Get-SPDSCSQLInstanceStatus -SQLServer $params.DatabaseServer `
-
-        if ($sqlInstanceStatus.MaxDOPCorrect -ne $true)
-        {
-            throw "The MaxDOP setting is incorrect. Please correct before continuing."
-        }
-
-        $dbStatus = Get-SPDSCConfigDBStatus -SQLServer $params.DatabaseServer `
-                                            -Database $params.FarmConfigDatabaseName
-
-        while ($dbStatus.Locked -eq $true)
-        {
-            Write-Verbose -Message ("[$([DateTime]::Now.ToShortTimeString())] The configuration " + `
-                                    "database is currently being provisioned by a remote " + `
-                                    "server, this server will wait for this to complete")
-            Start-Sleep -Seconds 30
-=======
             $modulePath = "..\..\Modules\SharePointDsc.Farm\SPFarm.psm1"
             Import-Module -Name (Join-Path -Path $scriptRoot -ChildPath $modulePath -Resolve)
->>>>>>> upstream/dev
+
+            $sqlInstanceStatus = Get-SPDSCSQLInstanceStatus -SQLServer $params.DatabaseServer `
+
+            if ($sqlInstanceStatus.MaxDOPCorrect -ne $true)
+            {
+                throw "The MaxDOP setting is incorrect. Please correct before continuing."
+            }
+
             $dbStatus = Get-SPDSCConfigDBStatus -SQLServer $params.DatabaseServer `
                                                 -Database $params.FarmConfigDatabaseName
 
@@ -487,83 +468,6 @@ function Set-TargetResource
                 return
             }
 
-<<<<<<< HEAD
-        $installedVersion = Get-SPDSCInstalledProductVersion
-        switch($installedVersion.FileMajorPart)
-        {
-            15 {
-                Write-Verbose -Message "Detected Version: SharePoint 2013"
-            }
-            16 {
-                if ($params.ContainsKey("ServerRole") -eq $true)
-                {
-                    if($installedVersion.ProductBuildPart.ToString().Length -eq 4)
-                    {
-                        Write-Verbose -Message ("Detected Version: SharePoint 2016 - " + `
-                                                "configuring server as $($params.ServerRole)")
-                    }
-                    else
-                    {
-                        Write-Verbose -Message ("Detected Version: SharePoint 2019 - " + `
-                                                "configuring server as $($params.ServerRole)")
-                    }
-                    $executeArgs.Add("LocalServerRole", $params.ServerRole)
-                }
-                else
-                {
-                    if($installedVersion.ProductBuildPart.ToString().Length -eq 4)
-                    {
-                        Write-Verbose -Message ("Detected Version: SharePoint 2016 - no server " + `
-                                                "role provided, configuring server without a " + `
-                                                "specific role")
-                    }
-                    else
-                    {
-                        Write-Verbose -Message ("Detected Version: SharePoint 2019 - no server " + `
-                                                "role provided, configuring server without a " + `
-                                                "specific role")
-                    }
-                    $executeArgs.Add("ServerRoleOptional", $true)
-                }
-            }
-            Default {
-                throw [Exception] ("An unknown version of SharePoint (Major version $_) " + `
-                                    "was detected. Only versions 15 (SharePoint 2013) and" + `
-                                    "16 (SharePoint 2016 or SharePoint 2019) are supported.")
-            }
-        }
-
-        if ($dbStatus.DatabaseExists -eq $true)
-        {
-            Write-Verbose -Message ("The SharePoint config database " + `
-                                    "'$($params.FarmConfigDatabaseName)' already exists, so " + `
-                                    "this server will join the farm.")
-            $createFarm = $false
-        }
-        elseif ($dbStatus.DatabaseExists -eq $false -and $params.RunCentralAdmin -eq $false)
-        {
-            # Only allow the farm to be created by a server that will run central admin
-            # to avoid a ghost CA site appearing on this server and causing issues
-            Write-Verbose -Message ("The SharePoint config database " + `
-                                    "'$($params.FarmConfigDatabaseName)' does not exist, but " + `
-                                    "this server will not be running the central admin " + `
-                                    "website, so it will wait to join the farm rather than " + `
-                                    "create one.")
-            $createFarm = $false
-        }
-        else
-        {
-            Write-Verbose -Message ("The SharePoint config database " + `
-                                    "'$($params.FarmConfigDatabaseName)' does not exist, so " + `
-                                    "this server will create the farm.")
-            $createFarm = $true
-        }
-
-        $farmAction = ""
-        if ($createFarm -eq $false)
-        {
-            # The database exists, so attempt to join the farm to the server
-=======
             $executeArgs = @{
                 DatabaseServer = $params.DatabaseServer
                 DatabaseName = $params.FarmConfigDatabaseName
@@ -571,7 +475,8 @@ function Set-TargetResource
                 SkipRegisterAsDistributedCacheHost = $true
             }
 
-            switch((Get-SPDSCInstalledProductVersion).FileMajorPart)
+            $installedVersion = Get-SPDSCInstalledProductVersion
+            switch($installedVersion.FileMajorPart)
             {
                 15 {
                     Write-Verbose -Message "Detected Version: SharePoint 2013"
@@ -579,25 +484,41 @@ function Set-TargetResource
                 16 {
                     if ($params.ContainsKey("ServerRole") -eq $true)
                     {
-                        Write-Verbose -Message ("Detected Version: SharePoint 2016 - " + `
-                                                "configuring server as $($params.ServerRole)")
+                        if($installedVersion.ProductBuildPart.ToString().Length -eq 4)
+                        {
+                            Write-Verbose -Message ("Detected Version: SharePoint 2016 - " + `
+                                                    "configuring server as $($params.ServerRole)")
+                        }
+                        else
+                        {
+                            Write-Verbose -Message ("Detected Version: SharePoint 2019 - " + `
+                                                    "configuring server as $($params.ServerRole)")
+                        }
                         $executeArgs.Add("LocalServerRole", $params.ServerRole)
                     }
                     else
                     {
-                        Write-Verbose -Message ("Detected Version: SharePoint 2016 - no server " + `
-                                                "role provided, configuring server without a " + `
-                                                "specific role")
+                        if($installedVersion.ProductBuildPart.ToString().Length -eq 4)
+                        {
+                            Write-Verbose -Message ("Detected Version: SharePoint 2016 - no server " + `
+                                                    "role provided, configuring server without a " + `
+                                                    "specific role")
+                        }
+                        else
+                        {
+                            Write-Verbose -Message ("Detected Version: SharePoint 2019 - no server " + `
+                                                    "role provided, configuring server without a " + `
+                                                    "specific role")
+                        }
                         $executeArgs.Add("ServerRoleOptional", $true)
                     }
                 }
                 Default {
                     throw [Exception] ("An unknown version of SharePoint (Major version $_) " + `
-                                        "was detected. Only versions 15 (SharePoint 2013) or " + `
-                                        "16 (SharePoint 2016) are supported.")
+                                       "was detected. Only versions 15 (SharePoint 2013) and" + `
+                                       "16 (SharePoint 2016 or SharePoint 2019) are supported.")
                 }
             }
->>>>>>> upstream/dev
 
             if ($dbStatus.DatabaseExists -eq $true)
             {

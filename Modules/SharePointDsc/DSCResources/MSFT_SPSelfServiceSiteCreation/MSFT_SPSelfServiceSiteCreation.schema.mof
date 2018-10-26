@@ -1,7 +1,7 @@
 [ClassVersion("1.0.0.0"), FriendlyName("SPSelfServiceSiteCreation")]
 class MSFT_SPSelfServiceSiteCreation : OMI_BaseResource
 {
-    [Key, Description("The url of the web application")] string Url;
+    [Key, Description("The url of the web application")] string WebAppUrl;
     [Required, Description("Specifies if users are allowed to create site collections or not")] boolean Enabled;
     [Write, Description("Specifies if site collections are created in SharePoint Online in a hybrid configuration. Hybrid configuration needs to be caried out seperately using the Hybrid Picker")] boolean OnlineEnabled;
     [Write, Description("The quota template to apply to new site collections. Specify null to not apply any qouta template")] string QuotaTemplate;

@@ -6,7 +6,7 @@ function Get-TargetResource
     (
         [Parameter(Mandatory = $true)]
         [System.String]
-        $Url,
+        $WebAppUrl,
 
         [Parameter()]
         [Microsoft.Management.Infrastructure.CimInstance[]]
@@ -61,7 +61,7 @@ function Get-TargetResource
         $InstallAccount
     )
 
-    Write-Verbose -Message "Getting web application '$url' client callable settings"
+    Write-Verbose -Message "Getting web application '$WebAppUrl' client callable settings"
 
     if ($ProxyLibraries -and (($ProxyLibrariesToInclude) -or ($ProxyLibrariesToExclude)))
     {
@@ -74,12 +74,12 @@ function Get-TargetResource
                                   -ScriptBlock {
         $params = $args[0]
 
-        $webApplication = Get-SPWebApplication -Identity $params.Url -ErrorAction SilentlyContinue
+        $webApplication = Get-SPWebApplication -Identity $params.WebAppUrl -ErrorAction SilentlyContinue
         if ($null -eq $webApplication)
         {
-            Write-Verbose "Web application $($params.Url) was not found"
+            Write-Verbose "Web application $($params.WebAppUrl) was not found"
             return @{
-                Url = $null
+                WebAppUrl = $null
                 ProxyLibraries = $null
                 ProxyLibrariesToInclude = $null
                 ProxyLibrariesToExclude = $null
@@ -120,7 +120,7 @@ function Get-TargetResource
         }
 
         return @{
-            Url = $params.Url
+            WebAppUrl = $params.WebAppUrl
             ProxyLibraries = $clientCallableSettings.ProxyLibraries #$proxyLibraries
             ProxyLibrariesToInclude = $include
             ProxyLibrariesToExclude = $exclude
@@ -147,7 +147,7 @@ function Set-TargetResource
     (
         [Parameter(Mandatory = $true)]
         [System.String]
-        $Url,
+        $WebAppUrl,
 
         [Parameter()]
         [Microsoft.Management.Infrastructure.CimInstance[]]
@@ -202,7 +202,7 @@ function Set-TargetResource
         $InstallAccount
     )
 
-    Write-Verbose -Message "Setting web application '$Url' client callable settings"
+    Write-Verbose -Message "Setting web application '$WebAppUrl' client callable settings"
 
     if ($ProxyLibraries -and (($ProxyLibrariesToInclude) -or ($ProxyLibrariesToExclude)))
     {
@@ -215,10 +215,10 @@ function Set-TargetResource
                         -ScriptBlock {
         $params = $args[0]
 
-        $webApplication = Get-SPWebApplication -Identity $params.Url -ErrorAction SilentlyContinue
+        $webApplication = Get-SPWebApplication -Identity $params.WebAppUrl -ErrorAction SilentlyContinue
         if ($null -eq $webApplication)
         {
-            throw "Web application $($params.Url) was not found"
+            throw "Web application $($params.WebAppUrl) was not found"
         }
 
         $clientCallableSettings = $webApplication.ClientCallableSettings
@@ -406,7 +406,7 @@ function Test-TargetResource
     (
         [Parameter(Mandatory = $true)]
         [System.String]
-        $Url,
+        $WebAppUrl,
 
         [Parameter()]
         [Microsoft.Management.Infrastructure.CimInstance[]]
@@ -461,7 +461,7 @@ function Test-TargetResource
         $InstallAccount
     )
 
-    Write-Verbose -Message "Testing for web application '$Url' client callable settings"
+    Write-Verbose -Message "Testing for web application '$WebAppUrl' client callable settings"
 
     $currentValues = Get-TargetResource @PSBoundParameters
 
@@ -574,7 +574,7 @@ function Test-TargetResource
 
     return Test-SPDscParameterState -CurrentValues $currentValues `
                                     -DesiredValues $PSBoundParameters `
-                                    -ValuesToCheck @("Url",
+                                    -ValuesToCheck @("WebAppUrl",
                                                     "MaxResourcesPerRequest",
                                                     "MaxObjectPaths",
                                                     "ExecutionTimeout",

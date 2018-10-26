@@ -46,7 +46,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "Self service site creation settings matches the current state" -Fixture {
             $testParams = @{
-                Url = "http://sites.sharepoint.com"
+                WebAppUrl = "http://sites.sharepoint.com"
                 Enabled = $true
                 OnlineEnabled = $false
                 QuotaTemplate = "SSCQoutaTemplate"
@@ -79,7 +79,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
             It "Should return the current data from the get method" {
                 $result = Get-TargetResource @testParams
-                $result.Url | Should Be "http://sites.sharepoint.com"
+                $result.WebAppUrl | Should Be "http://sites.sharepoint.com"
                 $result.Enabled | Should Be $true
                 $result.OnlineEnabled | Should Be $false
                 $result.QuotaTemplate | Should Be "SSCQoutaTemplate"
@@ -103,7 +103,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "Self service site creation settings does not matches the current state" -Fixture {
             $testParams = @{
-                Url = "http://sites.sharepoint.com"
+                WebAppUrl = "http://sites.sharepoint.com"
                 Enabled = $true
                 OnlineEnabled = $false
                 QuotaTemplate = "SSCQoutaTemplate"
@@ -144,7 +144,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "Disabling self service site creation does not match the current state" -Fixture {
             $testParams = @{
-                Url = "http://sites.sharepoint.com"
+                WebAppUrl = "http://sites.sharepoint.com"
                 Enabled = $false
             }
 
@@ -181,7 +181,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "Disabling self service site creation and enabling show start a site menu item" -Fixture {
             $testParams = @{
-                Url = "http://sites.sharepoint.com"
+                WebAppUrl = "http://sites.sharepoint.com"
                 Enabled = $false
                 ShowStartASiteMenuItem = $true
             }
@@ -216,7 +216,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "Web application does not exist" -Fixture {
             $testParams = @{
-                Url = "http://sites.sharepoint.com"
+                WebAppUrl = "http://sites.sharepoint.com"
                 Enabled = $true
                 }
 
@@ -227,7 +227,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             It "Should return a valid object with null on all properties" {
                 $result = Get-TargetResource @testParams
                 $result | Should Not BeNullOrEmpty
-                $result.Url | Should Be $null
+                $result.WebAppUrl | Should Be $null
                 $result.Enabled | Should Be $null
                 $result.OnlineEnabled | Should Be $null
                 $result.QuotaTemplate | Should Be $null

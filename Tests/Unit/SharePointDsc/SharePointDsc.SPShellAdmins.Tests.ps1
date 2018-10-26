@@ -34,7 +34,10 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             It "Should return null from the get method" {
-                (Get-TargetResource @testParams).Name | Should BeNullOrEmpty
+                $result = Get-TargetResource @testParams
+                $result.Members | Should BeNullOrEmpty
+                $result.MembersToInclude | Should BeNullOrEmpty
+                $result.MembersToExclude | Should BeNullOrEmpty
             }
 
             It "Should return false from the test method" {
@@ -60,7 +63,10 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             It "Should return null from the get method" {
-                (Get-TargetResource @testParams).Name | Should BeNullOrEmpty
+                $result = Get-TargetResource @testParams
+                $result.Members | Should BeNullOrEmpty
+                $result.MembersToInclude | Should BeNullOrEmpty
+                $result.MembersToExclude | Should BeNullOrEmpty
             }
 
             It "Should return false from the test method" {
@@ -72,11 +78,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
         }
 
-<<<<<<< HEAD
-        Context -Name "Members and MembersToInclude parameters used simultaniously - General permissions" -Fixture {
-=======
         Context -Name "Members and MembersToInclude parameters used simultaneously - General permissions" -Fixture {
->>>>>>> upstream/dev
             $testParams = @{
                 IsSingleInstance = "Yes"
                 Members          = "contoso\user1", "contoso\user2"
@@ -84,7 +86,10 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             It "Should return null from the get method" {
-                (Get-TargetResource @testParams).Name | Should BeNullOrEmpty
+                $result = Get-TargetResource @testParams
+                $result.Members | Should BeNullOrEmpty
+                $result.MembersToInclude | Should BeNullOrEmpty
+                $result.MembersToExclude | Should BeNullOrEmpty
             }
 
             It "Should return false from the test method" {
@@ -102,7 +107,10 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             It "Should return null from the get method" {
-                (Get-TargetResource @testParams).Name | Should BeNullOrEmpty
+                $result = Get-TargetResource @testParams
+                $result.Members | Should BeNullOrEmpty
+                $result.MembersToInclude | Should BeNullOrEmpty
+                $result.MembersToExclude | Should BeNullOrEmpty
             }
 
             It "Should return false from the test method" {
@@ -127,7 +135,10 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             It "Should return null from the get method" {
-                (Get-TargetResource @testParams).Name | Should BeNullOrEmpty
+                $result = Get-TargetResource @testParams
+                $result.Members | Should BeNullOrEmpty
+                $result.MembersToInclude | Should BeNullOrEmpty
+                $result.MembersToExclude | Should BeNullOrEmpty
             }
 
             It "Should return false from the test method" {
@@ -141,7 +152,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "Databases and ExcludeDatabases parameters used simultaneously" -Fixture {
             $testParams = @{
-                Name             = "ShellAdmins"
+                IsSingleInstance = "Yes"
                 Databases = @(
                     (New-CimInstance -ClassName MSFT_SPDatabasePermissions -Property @{
                         Name = "SharePoint_Content_Contoso1"
@@ -175,7 +186,10 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             It "Should return null from the get method" {
-                (Get-TargetResource @testParams).Name | Should BeNullOrEmpty
+                $result = Get-TargetResource @testParams
+                $result.Members | Should BeNullOrEmpty
+                $result.MembersToInclude | Should BeNullOrEmpty
+                $result.MembersToExclude | Should BeNullOrEmpty
             }
 
             It "Should return false from the test method" {
@@ -216,7 +230,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             It "Should return false from the test method" {
-                { Test-TargetResource @testParams } | Should throw "Specified database does not exist"
+                Test-TargetResource @testParams | Should Be $false
             }
 
             It "Should throw an exception in the set method" {
@@ -236,18 +250,14 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 {
                     # Database parameter used, return database permissions
                     return @{
-<<<<<<< HEAD
                         UserName = "contoso\user3","contoso\user4"
-=======
-                        UserName = "contoso\user1","contoso\user2"
->>>>>>> upstream/dev
                     }
                 }
                 else
                 {
                     # Database parameter not used, return general permissions
                     return @{
-                        UserName = "contoso\user1","contoso\user2"
+                        UserName = "contoso\user3","contoso\user4"
                     }
                 }
             }
@@ -270,7 +280,13 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             It "Should return false from the test method" {
-                Test-TargetResource @testParams | Should Be $true
+                Test-TargetResource @testParams | Should Be $false
+            }
+
+            It "Should throw an exception in the set method" {
+                Set-TargetResource @testParams
+                Assert-MockCalled Add-SPShellAdmin
+                Assert-MockCalled Remove-SPShellAdmin
             }
         }
 
@@ -287,11 +303,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 {
                     # Database parameter used, return database permissions
                     return @{
-<<<<<<< HEAD
-                        UserName = "contoso\user1","contoso\user2"
-=======
                         UserName = "contoso\user3","contoso\user4"
->>>>>>> upstream/dev
                     }
                 }
                 else

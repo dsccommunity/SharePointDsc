@@ -257,13 +257,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     SuiteNavBrandingText = "Suite Bar Text"
                 })}
 
-<<<<<<< HEAD
-                It "return error that sp2013 parameter was passed for a sp2016 environment" {
-                    { Set-TargetResource @testParams } | Should Throw "Cannot specify SuiteBarBrandingElementHtml with SharePoint 2016 and 2019. Instead, use the SuiteNavBrandingLogoNavigationUrl, SuiteNavBrandingLogoTitle, SuiteNavBrandingLogoUrl and SuiteNavBrandingText parameters"
-=======
                 It "return error that sp2016 parameters are required" {
-                    { Set-TargetResource @testParams } | Should Throw "You need to specify a value for either SuiteNavBrandingLogoNavigationUrl, SuiteNavBrandingLogoTitle, SuiteNavBrandingLogoUrl, SuiteNavBrandingText, and SuiteBarBrandingElementHtml with SharePoint 2016"
->>>>>>> upstream/dev
+                    { Set-TargetResource @testParams } | Should Throw "You need to specify a value for either SuiteNavBrandingLogoNavigationUrl, SuiteNavBrandingLogoTitle, SuiteNavBrandingLogoUrl, SuiteNavBrandingText or SuiteBarBrandingElementHtml with SharePoint 2016 or 2019"
                 }
             }
 
@@ -285,13 +280,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     SuiteNavBrandingText = "Another Suite Bar Text"
                 })}
 
-<<<<<<< HEAD
-                It "return error that sp2016/2019 parameters are required" {
-                    { Set-TargetResource @testParams } | Should Throw "You need to specify a value for either SuiteNavBrandingLogoNavigationUrl, SuiteNavBrandingLogoTitle, SuiteNavBrandingLogoUrl and SuiteNavBrandingText with SharePoint 2016 and 2019"
-=======
                 It "Should return false from the test method" {
                     Test-TargetResource @testParams | Should Be $false
->>>>>>> upstream/dev
                 }
             }
         }

@@ -7,6 +7,7 @@ applications. It supports both the SharePoint 2013 and SharePoint
 2016/2019 ways of branding the suite bar.
 
 Requirements:
+<<<<<<< HEAD
 For SharePoint 2013, only the SuiteBarBrandingElementHtml
 <<<<<<< HEAD
 should be specified, whereas for SharePoint 2016/2019, only one
@@ -18,3 +19,9 @@ should be specified, whereas for SharePoint 2016, all properties
 are supported. Note that SuiteBarBrandingElementHtml has no
 effect unless using a SharePoint 2013 master page.
 >>>>>>> upstream/dev
+=======
+For SharePoint 2013, only the SuiteBarBrandingElementHtml should
+be specified, whereas for SharePoint 2016/2019, all properties
+are supported. Note that SuiteBarBrandingElementHtml has no
+effect unless using a SharePoint 2013 master page.
+>>>>>>> upstream/v3.0-development

@@ -15,7 +15,7 @@ class MSFT_SPSite : OMI_BaseResource
     [Write, Description("The secondary site collection admin username")] string SecondaryOwnerAlias;
     [Write, Description("The template to apply to the site collection")] string Template;
     [Write, Description("Create the default site groups in the site collection")] boolean CreateDefaultGroups;
-    [Write, Description("The administration site type"), ValueMap{"TenantAdministration","None"}, Values{"TenantAdministration","None"}] string AdministrationSiteType;
+    [Write, Description("Specifies the type of the site collection: Regular site or tenant administration site"), ValueMap{"TenantAdministration","None"}, Values{"TenantAdministration","None"}] string AdministrationSiteType;
     [Write, Description("POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5"), EmbeddedInstance("MSFT_Credential")] String InstallAccount;
 };
 

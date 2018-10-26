@@ -1,6 +1,5 @@
 # Change log for SharePointDsc
 
-
 ## v3.0
 
 * Changes to SharePointDsc
@@ -13,7 +12,7 @@
   * BREAKING CHANGE: Added option to create Result Sources at different scopes.
 * SPSearchMetadataCategory
   * New resource added
-* SPSPSecurityTokenServiceConfig
+* SPSecurityTokenServiceConfig
   * The resource only tested for the Ensure parameter. Added more parameters.
 
 The following changes will break v2.x and earlier configurations that use these
@@ -34,20 +33,21 @@ resources:
   * SPPasswordChangeSettings
   * SPProjectServerLicense
   * SPSearchResultSource
+  * SPSecurityTokenServiceConfig
   * SPShellAdmin
-  * SPSPSecurityTokenServiceConfig
 * Standardized Url/WebApplication parameter to default WebAppUrl parameter
   for the following resources:
   * SPDesignerSettings
   * SPFarmSolution
+  * SPSelfServiceSiteCreation
   * SPWebAppBlockedFileTypes
+  * SPWebAppClientCallableSettings
   * SPWebAppGeneralSettings
   * SPWebApplication
   * SPWebApplicationAppDomain
   * SPWebAppSiteUseAndDeletion
   * SPWebAppThrottlingSettings
   * SPWebAppWorkflowSettings
-
 
 ## 2.6
 

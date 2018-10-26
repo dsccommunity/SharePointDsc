@@ -1,6 +1,6 @@
 <#
 .EXAMPLE
-    This example shows how to configure self-service site creation with a custom form for a web application
+    This example shows how to configure self-service site creation for a web application
 #>
 
     Configuration Example
@@ -15,10 +15,14 @@
         node localhost {
             SPSelfServiceSiteCreation SSC
             {
-                Url                     = "http://example.contoso.local"
+                WebAppUrl               = "http://example.contoso.local"
                 Enabled                 = $true
+                OnlineEnabled           = $false
+                QuotaTemplate           = "SSCQoutaTemplate"
                 ShowStartASiteMenuItem  = $true
-                CustomFormUrl           = "http://ssc.contoso.com.local/ssc"
+                CreateIndividualSite    = $true
+                PolicyOption            = "CanHavePolicy"
+                RequireSecondaryContact = $false
                 PsDscRunAsCredential    = $SetupAccount
             }
         }
