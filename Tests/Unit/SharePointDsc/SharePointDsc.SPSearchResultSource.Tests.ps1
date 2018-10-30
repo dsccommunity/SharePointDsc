@@ -19,7 +19,6 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 try {
         # Initialize tests
-<<<<<<< HEAD
         Add-Type -TypeDefinition @"
         namespace Microsoft.Office.Server.Search.Administration {
             public enum SearchObjectLevel
@@ -34,22 +33,6 @@ try {
 }
 catch {
     Write-Verbose "Could not instantiante the enum Microsoft.Office.Server.Search.Administration.SearchObjectLevel"
-=======
-           Add-Type -TypeDefinition @"
-namespace Microsoft.Office.Server.Search.Administration {
-    public enum SearchObjectLevel
-    {
-        SPWeb,
-        SPSite,
-        SPSiteSubscription,
-        Ssa
-    }
-}
-"@ -ErrorAction SilentlyContinue
-}
-catch {
-
->>>>>>> upstream/dev
 }
 
         # Mocks for all contexts
