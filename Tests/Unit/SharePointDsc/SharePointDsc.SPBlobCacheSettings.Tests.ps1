@@ -58,7 +58,18 @@ namespace Microsoft.SharePoint.Administration {
                         return @{
                             Name = "SPWebServiceInstance"
                         }
-            } -PassThru -Force)
+            } -PassThru -Force | Add-Member -Name Name `
+            -MemberType ScriptProperty `
+            -PassThru `
+            {
+                # get
+                ""
+            }`
+            {
+                # set
+                param ( $arg )
+            }
+            )
         }
 
 
@@ -339,7 +350,27 @@ namespace Microsoft.SharePoint.Administration {
 </configuration>'
 
             Mock -CommandName Test-Path -MockWith { return $true }
-            Mock -CommandName Get-SPServiceInstance -MockWith { return $null }
+            Mock -CommandName Get-SPServiceInstance -MockWith {
+                return @(
+                    $null | Add-Member -MemberType ScriptMethod `
+                        -Name GetType `
+                        -Value {
+                            return @{
+                                Name = "SPWebServiceInstance"
+                            }
+                } -PassThru -Force | Add-Member -Name Name `
+                -MemberType ScriptProperty `
+                -PassThru `
+                {
+                    # get
+                    ""
+                }`
+                {
+                    # set
+                    param ( $arg )
+                }
+                )
+            }
 
             It "Should return values from the get method" {
                 (Get-TargetResource @testParams).WebAppUrl | Should BeNullOrEmpty
