@@ -124,10 +124,6 @@ catch {
                                              -MemberType ScriptMethod `
                                              -PassThru `
                                              -Value { } `
-                                | Add-Member -Name ListSources `
-                                             -MemberType ScriptMethod `
-                                             -PassThru `
-                                             -Value { }
                 }
                 "Microsoft.Office.Server.Search.Administration.SearchObjectFilter" {
                     return [System.Object]::new() | Add-Member -Name IncludeHigherLevel `
@@ -301,11 +297,12 @@ catch {
 
         Context -Name "Local Result Source" -Fixture {
             $testParams = @{
-                Name = "Test source"
+                Name = "Test source Local"
                 SearchServiceAppName = "Search Service Application"
                 ProviderType = "Remote SharePoint Provider"
                 Query = "{searchTerms}"
                 ConnectionUrl = "https://sharepoint.contoso.com"
+                ScopeName = "SSA"
                 ScopeUrl = "https://sharepoint.contoso.com"
                 Ensure = "Present"
             }
