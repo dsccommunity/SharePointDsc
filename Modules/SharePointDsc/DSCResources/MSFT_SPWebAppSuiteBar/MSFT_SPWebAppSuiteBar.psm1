@@ -144,19 +144,8 @@ function Set-TargetResource
         {
             if($PSBoundParameters.ContainsKey("SuiteBarBrandingElementHtml"))
             {
-<<<<<<< HEAD
-<<<<<<< HEAD
-                throw ("Cannot specify SuiteBarBrandingElementHtml with SharePoint 2016 and 2019. Instead," + `
-                                        " use the SuiteNavBrandingLogoNavigationUrl, SuiteNavBrandingLogoTitle, " + `
-                                        "SuiteNavBrandingLogoUrl and SuiteNavBrandingText parameters")
-=======
-                Write-Verbose ("SuiteBarBrandingElementHtml with SharePoint 2016 only works if using a " + `
-                                        "SharePoint 2016 masterpage")
->>>>>>> upstream/dev
-=======
                 Write-Verbose ("SuiteBarBrandingElementHtml with SharePoint 2016 and 2019 only works " + `
                                "if using a SharePoint 2013 masterpage")
->>>>>>> upstream/v3.0-development
             }
 
             <# Exception: All the optional parameters are null for SP2016/SP2019. #>
@@ -166,21 +155,9 @@ function Set-TargetResource
             -and !$PSBoundParameters.ContainsKey("SuiteNavBrandingText") `
             -and !$PSBoundParameters.ContainsKey("SuiteBarBrandingElementHtml"))
             {
-<<<<<<< HEAD
-<<<<<<< HEAD
-                throw ("You need to specify a value for either SuiteNavBrandingLogoNavigationUrl" + `
-                                        ", SuiteNavBrandingLogoTitle, SuiteNavBrandingLogoUrl and SuiteNavBrandingText " + `
-                                        "with SharePoint 2016 and 2019")
-=======
-                throw ("You need to specify a value for either SuiteNavBrandingLogoNavigationUrl, " + `
-                                        "SuiteNavBrandingLogoTitle, SuiteNavBrandingLogoUrl, SuiteNavBrandingText, " + `
-                                        "and SuiteBarBrandingElementHtml with SharePoint 2016")
->>>>>>> upstream/dev
-=======
                 throw ("You need to specify a value for either SuiteNavBrandingLogoNavigationUrl, " + `
                        "SuiteNavBrandingLogoTitle, SuiteNavBrandingLogoUrl, SuiteNavBrandingText " + `
                        "or SuiteBarBrandingElementHtml with SharePoint 2016 or 2019")
->>>>>>> upstream/v3.0-development
             }
         }
     }
