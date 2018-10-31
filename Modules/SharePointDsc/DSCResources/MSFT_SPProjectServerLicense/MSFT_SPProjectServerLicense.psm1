@@ -40,7 +40,19 @@ function Get-TargetResource
         {
             $currentLicense = Get-ProjectServerLicense
 
-            if ($currentLicense[0] -match "Project Server [0-9]{4} \w*: (?<Status>[a-zA-Z]+)")
+            # Check if result is an array. If so, the result is multi-lined.
+            # We only need the first line.
+            if ($currentLicense -is [Array])
+            {
+                $currentLicense = $currentLicense[0]
+            }
+
+            # SP2016 value is "Project Server 2016 : Active" (space after 2016)
+            # SP2019 value is "Project Server 2019: Active" (no space after 2019)
+            # SP2019 Preview value is "Project Server 2019 Preview: Active"
+            $regex = "Project Server [0-9]{4}\s*\w*: (?<Status>[a-zA-Z]+)"
+
+            if ($currentLicense -match $regex)
             {
                 if ($Matches.Status -eq "Active")
                 {
@@ -175,6 +187,8 @@ function Test-TargetResource
     )
 
     Write-Verbose -Message "Testing Project Server License status"
+
+    $PSBoundParameters.Ensure = $Ensure
 
     $currentValues = Get-TargetResource @PSBoundParameters
 

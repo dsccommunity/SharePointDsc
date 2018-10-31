@@ -375,9 +375,9 @@ function Get-TargetResource
                     SearchValue = "Microsoft SQL Server 2012 Native Client"
                 },
                 [PSObject]@{
-                    Name = "Microsoft Visual C++ 2017 x64 Additional Runtime - 14.14"
+                    Name = "Microsoft Visual C++ 2017 x64 Additional Runtime - 14"
                     SearchType = "Like"
-                    SearchValue = "Microsoft Visual C++ 2017 x64 Additional Runtime - 14.14.*"
+                    SearchValue = "Microsoft Visual C++ 2017 x64 Additional Runtime - 14.*"
                 }
             )
         }

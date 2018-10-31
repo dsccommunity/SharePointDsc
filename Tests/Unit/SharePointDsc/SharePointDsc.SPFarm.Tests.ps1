@@ -214,7 +214,6 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 if ($global:SPDscCentralAdminCheckDone -eq $true)
                 {
                     return @(@{
-                        Name = "WSS_Administration"
                         TypeName = "Central Administration"
                     })
                 }
@@ -296,7 +295,6 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 if ($global:SPDscCentralAdminCheckDone -eq $true)
                 {
                     return @(@{
-                        Name = "WSS_Administration"
                         TypeName = "Central Administration"
                     })
                 }
@@ -454,7 +452,6 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                             $global:SPDscSIRunCount++
                             return @(@{
                                 TypeName = "Central Administration"
-                                Name = "WSS_Administration"
                                 Status = "Online"
                             })
                         }
@@ -543,7 +540,6 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
             Mock -CommandName Get-SPServiceInstance -MockWith {
                 return @(@{
-                    Name = "WSS_Administration"
                     TypeName = "Central Administration"
                     Status = "Online"
                 })
@@ -629,7 +625,6 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                         {
                             $global:SPDscSIRunCount++
                             return @(@{
-                                Name = "WSS_Administration"
                                 TypeName = "Central Administration"
                                 Status = "Online"
                             })
@@ -720,7 +715,6 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 if ($global:SPDscCentralAdminCheckDone -eq $true)
                 {
                     return @(@{
-                        Name = "WSS_Administration"
                         TypeName = "Central Administration"
                         Status = "Online"
                     })
@@ -1086,7 +1080,6 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 if ($global:SPDscCentralAdminCheckDone -eq $true)
                 {
                     return @(@{
-                        Name = "WSS_Administration"
                         TypeName = "Central Administration"
                         Status = "Online"
                     })
@@ -1180,7 +1173,6 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 if ($global:SPDscCentralAdminCheckDone -eq $true)
                 {
                     return @(@{
-                        Name = "WSS_Administration"
                         TypeName = "Central Administration"
                         Status = "Online"
                     })

@@ -50,6 +50,11 @@ resources:
 * Introduced new mandatory parameters
   * SPSearchResultSource
 
+## Unreleased
+
+* SPBlobCacheSettings
+  * Updated the Service Instance retrieval to be language independent
+
 ## 2.6
 
 * SPFarm
