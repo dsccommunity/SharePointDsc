@@ -53,8 +53,6 @@ resources:
 
 ## 2.6
 
-* Changes to SharePointDsc
-  * Updated test helpers to force a reload of the resource every time you run a test
 * SPFarm
   * Fixed issue where Central Admin service was not starting for non-english farms
 * SPManagedMetadataServiceApp
