@@ -1119,7 +1119,8 @@ function Add-DatabaseToAvailabilityGroup {
       ${DatabaseFailOverPartner},
 
       [ValidateSet('Application','ApplicationWithSearch','Custom','DistributedCache','Search','SingleServerFarm','WebFrontEnd','WebFrontEndWithDistributedCache')]
-      [System.Nullable[object]]
+      [object]
+      #[System.Nullable[object]]
       ${LocalServerRole},
 
       [Parameter(ValueFromPipeline=$true)]
