@@ -176,7 +176,7 @@ function Set-TargetResource
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
-    if($ScopeName -ne "SSA" -and $null -eq $ScopeUrl)
+    if ($ScopeName -ne "SSA" -and $null -eq $ScopeUrl)
     {
         throw "When specifying a ScopeName of type $($ScopeName) you also need to provide" + `
         " a ScopeUrl value."

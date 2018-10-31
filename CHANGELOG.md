@@ -32,7 +32,6 @@ resources:
   * SPMinRoleCompliance
   * SPPasswordChangeSettings
   * SPProjectServerLicense
-  * SPSearchResultSource
   * SPSecurityTokenServiceConfig
   * SPShellAdmin
 * Standardized Url/WebApplication parameter to default WebAppUrl parameter
@@ -48,6 +47,8 @@ resources:
   * SPWebAppSiteUseAndDeletion
   * SPWebAppThrottlingSettings
   * SPWebAppWorkflowSettings
+* Introduced new mandatory parameters
+  * SPSearchResultSource
 
 ## 2.6
 
