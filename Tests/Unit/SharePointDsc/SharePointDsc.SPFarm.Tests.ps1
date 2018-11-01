@@ -167,13 +167,13 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Test-TargetResource @testParams | Should be $false
             }
 
-            It "Should join the config database in the set method as it wont be running centrl admin" {
+            It "Should join the config database in the set method as it wont be running central admin" {
                 Set-TargetResource @testParams
                 Assert-MockCalled -CommandName "Connect-SPConfigurationDatabase"
             }
         }
 
-        Context -Name "A config database exists, and this server should be connected to it but isn't and this sever won't run central admin" -Fixture {
+        Context -Name "A config database exists, and this server should be connected to it but isn't and this server won't run central admin" -Fixture {
             $testParams = @{
                 IsSingleInstance = "Yes"
                 Ensure = "Present"
@@ -249,7 +249,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
         }
 
-        Context -Name "A config database exists, and this server should be connected to it but isn't and this sever will run central admin" -Fixture {
+        Context -Name "A config database exists, and this server should be connected to it but isn't and this server will run central admin" -Fixture {
             $testParams = @{
                 IsSingleInstance = "Yes"
                 Ensure = "Present"
