@@ -8,6 +8,8 @@
   * Fixed check for Ensure=Absent in the Set method
 * SPSearchContentSource
   * Added support for Business Content Source Type
+* SPSearchResultSource
+  * BREAKING CHANGE: Added option to create Result Sources at different scopes.
 * SPSearchMetadataCategory
   * New resource added
 * SPSecurityTokenServiceConfig
@@ -45,6 +47,8 @@ resources:
   * SPWebAppSiteUseAndDeletion
   * SPWebAppThrottlingSettings
   * SPWebAppWorkflowSettings
+* Introduced new mandatory parameters
+  * SPSearchResultSource
 
 ## Unreleased
 
