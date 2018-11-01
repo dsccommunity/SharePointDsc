@@ -6,7 +6,7 @@
     in either of these properties are left alone.
 #>
 
-    Configuration Example 
+    Configuration Example
     {
         param(
             [Parameter(Mandatory = $true)]
@@ -18,7 +18,7 @@
         node localhost {
             SPFarmAdministrators LocalFarmAdmins
             {
-                Name                 = "Farm Administrators"
+                IsSingleInstance     = "Yes"
                 MembersToInclude     = @("CONTOSO\user1")
                 MembersToExclude     = @("CONTOSO\user2")
                 PsDscRunAsCredential = $SetupAccount

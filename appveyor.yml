@@ -1,4 +1,5 @@
-version: 2.7.0.{build}
+version: 3.0.0.{build}
+
 
 install:
     - git clone https://github.com/PowerShell/DscResource.Tests

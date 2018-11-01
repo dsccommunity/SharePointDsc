@@ -4,9 +4,9 @@
 
 This resource sets the client callable settings for the web application.
 It can set the proxy libraries and specific properties for the client
-callable settings.
-The resource can for example be used to increase the timeout for client
-code, and to enable the tenant administration functionality.
+callable settings. The resource can for example be used to increase the
+timeout for client code, and to enable the tenant administration
+functionality.
 
 Tenant administration functionality enables client code to work with
 the namespace Microsoft.Online.SharePoint.Client.Tenant from the
@@ -34,7 +34,7 @@ Proxy library used for enabling tenant administration:
 Microsoft.Online.SharePoint.Dedicated.TenantAdmin.ServerStub
 , Version=15.0.0.0, Culture=neutral, PublicKeyToken=71e9bce111e9429c
 
-**SharePoint 2016**:
+**SharePoint 2016/2019**:
 Microsoft.Online.SharePoint.Dedicated.TenantAdmin.ServerStub
 , Version=16.0.0.0, Culture=neutral, PublicKeyToken=71e9bce111e9429c
 

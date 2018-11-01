@@ -296,13 +296,21 @@ function Set-TargetResource
     <Setting Id=`"USINGUIINSTALLMODE`" Value=`"0`"/>
     <Logging Type=`"verbose`" Path=`"%temp%`" Template=`"SharePoint "
 
-    if ((Get-SPDSCInstalledProductVersion).FileMajorPart -eq 15)
+    $InstalledVersion = Get-SPDSCInstalledProductVersion
+    if ($InstalledVersion.FileMajorPart -eq 15)
     {
         $configData += "2013"
     }
     else
     {
-        $configData += "2016"
+        if($InstalledVersion.ProductBuildPart.ToString().Length -eq 4)
+        {
+            $configData += "2016"
+        }
+        else
+        {
+            $configData += "2019"
+        }
     }
 
     $configData += " Products Language Pack Setup(*).log`"/>

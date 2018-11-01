@@ -4,7 +4,7 @@
     - Saturday and Sunday night between 3am and 5am.
 #>
 
-    Configuration Example 
+    Configuration Example
     {
         param(
             [Parameter(Mandatory = $true)]
@@ -16,7 +16,7 @@
         node localhost {
             SPConfigWizard RunConfigWizard
             {
-                Ensure               = "Present"
+                IsSingleInstance     = "Yes"
                 DatabaseUpgradeDays  = "sat", "sun"
                 DatabaseUpgradeTime  = "3:00am to 5:00am"
                 PsDscRunAsCredential = $SetupAccount

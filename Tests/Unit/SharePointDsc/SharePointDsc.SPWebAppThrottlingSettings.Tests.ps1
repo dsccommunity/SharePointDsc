@@ -33,7 +33,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         # Test contexts
         Context -Name "The web appliation exists and has the correct throttling settings" -Fixture {
             $testParams = @{
-                Url = "http://sites.sharepoint.com"
+                WebAppUrl = "http://sites.sharepoint.com"
                 ListViewThreshold = 1000
                 AllowObjectModelOverride = $true
                 AdminThreshold = 2000
@@ -66,7 +66,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 IisSettings = @(
                     @{ Path = "C:\inetpub\wwwroot\something" }
                 )
-                Url = $testParams.Url
+                Url = $testParams.WebAppUrl
                 MaxItemsPerThrottledOperation = $testParams.ListViewThreshold
                 AllowOMCodeOverrideThrottleSettings = $testParams.AllowObjectModelOverride
                 MaxItemsPerThrottledOperationOverride = $testParams.AdminThreshold
@@ -97,7 +97,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "The web appliation exists and uses incorrect throttling settings" -Fixture {
             $testParams = @{
-                Url = "http://sites.sharepoint.com"
+                WebAppUrl = "http://sites.sharepoint.com"
                 ListViewThreshold = 1000
                 AllowObjectModelOverride = $true
                 AdminThreshold = 2000
@@ -138,7 +138,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     IisSettings = @(
                         @{ Path = "C:\inetpub\wwwroot\something" }
                     )
-                    Url = $testParams.Url
+                    Url = $testParams.WebAppUrl
                     MaxItemsPerThrottledOperation = 1
                     AllowOMCodeOverrideThrottleSettings = $testParams.AllowObjectModelOverride
                     MaxItemsPerThrottledOperationOverride = $testParams.AdminThreshold
@@ -179,7 +179,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             $testParams = @{
-                Url = "http://sites.sharepoint.com"
+                WebAppUrl = "http://sites.sharepoint.com"
                 ListViewThreshold = 1000
                 AllowObjectModelOverride = $true
                 AdminThreshold = 2000
@@ -209,7 +209,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     Name = "SharePoint Sites"
                     ApplicationPool = "SharePoint Web Apps"
                     ApplicationPoolAccount = "DEMO\ServiceAccount"
-                    Url = "http://sites.sharepoint.com"
+                    WebAppUrl = "http://sites.sharepoint.com"
                     AuthenticationMethod = "NTLM"
                     ThrottlingSettings = (New-CimInstance -ClassName MSFT_SPWebApplicationThrottling -Property @{
                         HappyHourEnabled = $true
@@ -226,7 +226,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     Name = "SharePoint Sites"
                     ApplicationPool = "SharePoint Web Apps"
                     ApplicationPoolAccount = "DEMO\ServiceAccount"
-                    Url = "http://sites.sharepoint.com"
+                    WebAppUrl = "http://sites.sharepoint.com"
                     AuthenticationMethod = "NTLM"
                     ThrottlingSettings = (New-CimInstance -ClassName MSFT_SPWebApplicationThrottling -Property @{
                         HappyHourEnabled = $true
@@ -243,7 +243,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     Name = "SharePoint Sites"
                     ApplicationPool = "SharePoint Web Apps"
                     ApplicationPoolAccount = "DEMO\ServiceAccount"
-                    Url = "http://sites.sharepoint.com"
+                    WebAppUrl = "http://sites.sharepoint.com"
                     AuthenticationMethod = "NTLM"
                     ThrottlingSettings = (New-CimInstance -ClassName MSFT_SPWebApplicationThrottling -Property @{
                         HappyHourEnabled = $true

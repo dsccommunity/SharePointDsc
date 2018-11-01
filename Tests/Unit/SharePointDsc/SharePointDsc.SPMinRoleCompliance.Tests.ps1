@@ -52,6 +52,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             16 {
                 Context -Name "The farm is not compliant as services aren't running but should be" -Fixture {
                     $testParams = @{
+                        IsSingleInstance = "Yes"
                         State = "Compliant"
                     }
 
@@ -105,6 +106,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
                 Context -Name "The farm is not compliant as services are running that shouldn't be" -Fixture {
                     $testParams = @{
+                        IsSingleInstance = "Yes"
                         State = "Compliant"
                     }
 
@@ -158,10 +160,12 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
                 Context -Name "The farm is compliant and should be" -Fixture {
                     $testParams = @{
+                        IsSingleInstance = "Yes"
                         State = "Compliant"
                     }
 
                     $testParams = @{
+                        IsSingleInstance = "Yes"
                         State = "Compliant"
                     }
 
@@ -209,6 +213,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
                 Context -Name "NonCompliant is requested in any function" -Fixture {
                     $testParams = @{
+                        IsSingleInstance = "Yes"
                         State = "NonCompliant"
                     }
 

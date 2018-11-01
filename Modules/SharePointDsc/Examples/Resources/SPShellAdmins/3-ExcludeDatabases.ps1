@@ -17,7 +17,7 @@
         node localhost {
             SPShellAdmins ShellAdmins
             {
-                Name             = "Shell Admins"
+                IsSingleInstance = "Yes"
                 Members          = "CONTOSO\user1", "CONTOSO\user2"
                 AllDatabases     = $true
                 ExcludeDatabases = "WSS_Content_Portal"

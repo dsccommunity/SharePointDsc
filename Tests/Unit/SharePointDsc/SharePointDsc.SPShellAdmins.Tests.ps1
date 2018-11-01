@@ -25,8 +25,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         # Test contexts
         Context -Name "The server is not part of SharePoint farm" -Fixture {
             $testParams = @{
-                Name         = "ShellAdmins"
-                Members      = "contoso\user1", "contoso\user2"
+                IsSingleInstance = "Yes"
+                Members          = "contoso\user1", "contoso\user2"
             }
 
             Mock -CommandName Get-SPFarm -MockWith {
@@ -34,7 +34,10 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             It "Should return null from the get method" {
-                (Get-TargetResource @testParams).Name | Should BeNullOrEmpty
+                $result = Get-TargetResource @testParams
+                $result.Members | Should BeNullOrEmpty
+                $result.MembersToInclude | Should BeNullOrEmpty
+                $result.MembersToExclude | Should BeNullOrEmpty
             }
 
             It "Should return false from the test method" {
@@ -48,7 +51,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "ContentDatabases and AllContentDatabases parameters used simultaneously" -Fixture {
             $testParams = @{
-                Name             = "ShellAdmins"
+                IsSingleInstance = "Yes"
                 Members          = "contoso\user1", "contoso\user2"
                 Databases = @(
                     (New-CimInstance -ClassName MSFT_SPContentDatabasePermissions -Property @{
@@ -60,7 +63,10 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             It "Should return null from the get method" {
-                (Get-TargetResource @testParams).Name | Should BeNullOrEmpty
+                $result = Get-TargetResource @testParams
+                $result.Members | Should BeNullOrEmpty
+                $result.MembersToInclude | Should BeNullOrEmpty
+                $result.MembersToExclude | Should BeNullOrEmpty
             }
 
             It "Should return false from the test method" {
@@ -74,13 +80,16 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "Members and MembersToInclude parameters used simultaneously - General permissions" -Fixture {
             $testParams = @{
-                Name             = "ShellAdmins"
+                IsSingleInstance = "Yes"
                 Members          = "contoso\user1", "contoso\user2"
                 MembersToInclude = "contoso\user1", "contoso\user2"
             }
 
             It "Should return null from the get method" {
-                (Get-TargetResource @testParams).Name | Should BeNullOrEmpty
+                $result = Get-TargetResource @testParams
+                $result.Members | Should BeNullOrEmpty
+                $result.MembersToInclude | Should BeNullOrEmpty
+                $result.MembersToExclude | Should BeNullOrEmpty
             }
 
             It "Should return false from the test method" {
@@ -94,11 +103,14 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "None of the Members, MembersToInclude and MembersToExclude parameters are used - General permissions" -Fixture {
             $testParams = @{
-                Name             = "ShellAdmins"
+                IsSingleInstance = "Yes"
             }
 
             It "Should return null from the get method" {
-                (Get-TargetResource @testParams).Name | Should BeNullOrEmpty
+                $result = Get-TargetResource @testParams
+                $result.Members | Should BeNullOrEmpty
+                $result.MembersToInclude | Should BeNullOrEmpty
+                $result.MembersToExclude | Should BeNullOrEmpty
             }
 
             It "Should return false from the test method" {
@@ -112,7 +124,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "Members and MembersToInclude parameters used simultaneously - Database permissions" -Fixture {
             $testParams = @{
-                Name             = "ShellAdmins"
+                IsSingleInstance = "Yes"
                 Databases = @(
                     (New-CimInstance -ClassName MSFT_SPDatabasePermissions -Property @{
                         Name = "SharePoint_Content_Contoso1"
@@ -123,7 +135,10 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             It "Should return null from the get method" {
-                (Get-TargetResource @testParams).Name | Should BeNullOrEmpty
+                $result = Get-TargetResource @testParams
+                $result.Members | Should BeNullOrEmpty
+                $result.MembersToInclude | Should BeNullOrEmpty
+                $result.MembersToExclude | Should BeNullOrEmpty
             }
 
             It "Should return false from the test method" {
@@ -137,7 +152,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "Databases and ExcludeDatabases parameters used simultaneously" -Fixture {
             $testParams = @{
-                Name             = "ShellAdmins"
+                IsSingleInstance = "Yes"
                 Databases = @(
                     (New-CimInstance -ClassName MSFT_SPDatabasePermissions -Property @{
                         Name = "SharePoint_Content_Contoso1"
@@ -162,7 +177,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "None of the Members, MembersToInclude and MembersToExclude parameters are used - Database permissions" -Fixture {
             $testParams = @{
-                Name             = "ShellAdmins"
+                IsSingleInstance = "Yes"
                 Databases = @(
                     (New-CimInstance -ClassName MSFT_SPDatabasePermissions -Property @{
                         Name = "SharePoint_Content_Contoso1"
@@ -171,7 +186,10 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             It "Should return null from the get method" {
-                (Get-TargetResource @testParams).Name | Should BeNullOrEmpty
+                $result = Get-TargetResource @testParams
+                $result.Members | Should BeNullOrEmpty
+                $result.MembersToInclude | Should BeNullOrEmpty
+                $result.MembersToExclude | Should BeNullOrEmpty
             }
 
             It "Should return false from the test method" {
@@ -185,7 +203,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "Specified content database does not exist - Database permissions" -Fixture {
             $testParams = @{
-                Name             = "ShellAdmins"
+                IsSingleInstance = "Yes"
                 Databases = @(
                     (New-CimInstance -ClassName MSFT_SPDatabasePermissions -Property @{
                         Name    = "SharePoint_Content_Contoso3"
@@ -212,7 +230,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             It "Should return false from the test method" {
-                { Test-TargetResource @testParams } | Should throw "Specified database does not exist"
+                Test-TargetResource @testParams | Should Be $false
             }
 
             It "Should throw an exception in the set method" {
@@ -222,7 +240,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "AllDatabases parameter is used and permissions do not match" -Fixture {
             $testParams = @{
-                Name             = "ShellAdmins"
+                IsSingleInstance = "Yes"
                 Members          = "contoso\user1", "contoso\user2"
                 AllDatabases = $true
             }
@@ -232,14 +250,14 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 {
                     # Database parameter used, return database permissions
                     return @{
-                        UserName = "contoso\user1","contoso\user2"
+                        UserName = "contoso\user3","contoso\user4"
                     }
                 }
                 else
                 {
                     # Database parameter not used, return general permissions
                     return @{
-                        UserName = "contoso\user1","contoso\user2"
+                        UserName = "contoso\user3","contoso\user4"
                     }
                 }
             }
@@ -262,13 +280,19 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             It "Should return false from the test method" {
-                Test-TargetResource @testParams | Should Be $true
+                Test-TargetResource @testParams | Should Be $false
+            }
+
+            It "Should throw an exception in the set method" {
+                Set-TargetResource @testParams
+                Assert-MockCalled Add-SPShellAdmin
+                Assert-MockCalled Remove-SPShellAdmin
             }
         }
 
         Context -Name "AllDatabases parameter is used with ExcludeDatabases and permissions do not match" -Fixture {
             $testParams = @{
-                Name             = "ShellAdmins"
+                IsSingleInstance = "Yes"
                 Members          = "contoso\user1", "contoso\user2"
                 AllDatabases     = $true
                 ExcludeDatabases = "SharePoint_Content_Contoso3"
@@ -325,8 +349,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "Configured Members do not match the actual members - General permissions" -Fixture {
             $testParams = @{
-                Name         = "ShellAdmins"
-                Members      = "contoso\user1", "contoso\user2"
+                IsSingleInstance = "Yes"
+                Members          = "contoso\user1", "contoso\user2"
             }
 
             Mock -CommandName Get-SPShellAdmin -MockWith {
@@ -359,8 +383,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "Configured Members match the actual members - General permissions" -Fixture {
             $testParams = @{
-                Name         = "ShellAdmins"
-                Members      = "contoso\user1", "contoso\user2"
+                IsSingleInstance = "Yes"
+                Members          = "contoso\user1", "contoso\user2"
             }
 
             Mock -CommandName Get-SPShellAdmin -MockWith {
@@ -389,8 +413,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "Configured Members do not match the actual members - Database permissions" -Fixture {
             $testParams = @{
-                Name         = "ShellAdmins"
-                Databases = @(
+                IsSingleInstance = "Yes"
+                Databases        = @(
                     (New-CimInstance -ClassName MSFT_SPDatabasePermissions -Property @{
                         Name = "SharePoint_Content_Contoso1"
                         Members = "contoso\user1", "contoso\user2"
@@ -449,8 +473,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "Configured Members match the actual members - Database permissions" -Fixture {
             $testParams = @{
-                Name         = "ShellAdmins"
-                Databases = @(
+                IsSingleInstance = "Yes"
+                Databases        = @(
                     (New-CimInstance -ClassName MSFT_SPDatabasePermissions -Property @{
                         Name = "SharePoint_Content_Contoso1"
                         Members = "contoso\user1", "contoso\user2"
@@ -503,7 +527,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "Configured MembersToInclude do not match the actual members - General permissions" -Fixture {
             $testParams = @{
-                Name             = "ShellAdmins"
+                IsSingleInstance = "Yes"
                 MembersToInclude = "contoso\user1", "contoso\user2"
             }
 
@@ -538,7 +562,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "Configured MembersToInclude match the actual members - General permissions" -Fixture {
             $testParams = @{
-                Name             = "ShellAdmins"
+                IsSingleInstance = "Yes"
                 MembersToInclude = "contoso\user1", "contoso\user2"
             }
 
@@ -568,8 +592,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "Configured MembersToInclude do not match the actual members - Database permissions" -Fixture {
             $testParams = @{
-                Name         = "ShellAdmins"
-                Databases = @(
+                IsSingleInstance = "Yes"
+                Databases        = @(
                     (New-CimInstance -ClassName MSFT_SPDatabasePermissions -Property @{
                         Name             = "SharePoint_Content_Contoso1"
                         MembersToInclude = "contoso\user1", "contoso\user2"
@@ -627,8 +651,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "Configured MembersToInclude match the actual members - Database permissions" -Fixture {
             $testParams = @{
-                Name         = "ShellAdmins"
-                Databases = @(
+                IsSingleInstance = "Yes"
+                Databases        = @(
                     (New-CimInstance -ClassName MSFT_SPDatabasePermissions -Property @{
                         Name             = "SharePoint_Content_Contoso1"
                         MembersToInclude = "contoso\user1", "contoso\user2"
@@ -681,7 +705,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "Configured MembersToExclude do not match the actual members - General permissions" -Fixture {
             $testParams = @{
-                Name             = "ShellAdmins"
+                IsSingleInstance = "Yes"
                 MembersToExclude = "contoso\user1", "contoso\user2"
             }
 
@@ -716,7 +740,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "Configured MembersToExclude match the actual members - General permissions" -Fixture {
             $testParams = @{
-                Name             = "ShellAdmins"
+                IsSingleInstance = "Yes"
                 MembersToExclude = "contoso\user1", "contoso\user2"
             }
 
@@ -746,8 +770,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "Configured MembersToExclude do not match the actual members - Database permissions" -Fixture {
             $testParams = @{
-                Name         = "ShellAdmins"
-                Databases = @(
+                IsSingleInstance = "Yes"
+                Databases        = @(
                     (New-CimInstance -ClassName MSFT_SPDatabasePermissions -Property @{
                         Name             = "SharePoint_Content_Contoso1"
                         MembersToExclude = "contoso\user1", "contoso\user2"
@@ -805,8 +829,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "Configured MembersToExclude match the actual members - Database permissions" -Fixture {
             $testParams = @{
-                Name         = "ShellAdmins"
-                Databases = @(
+                IsSingleInstance = "Yes"
+                Databases        = @(
                     (New-CimInstance -ClassName MSFT_SPDatabasePermissions -Property @{
                         Name             = "SharePoint_Content_Contoso1"
                         MembersToExclude = "contoso\user3", "contoso\user4"

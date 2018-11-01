@@ -3,7 +3,7 @@
     This example shows how to ensure the farm is always compliant with MinRole settings
 #>
 
-    Configuration Example 
+    Configuration Example
     {
         param(
             [Parameter(Mandatory = $true)]
@@ -13,8 +13,9 @@
         Import-DscResource -ModuleName SharePointDsc
 
         node localhost {
-            SPMinRoleCompliance MinRoleCompliance 
+            SPMinRoleCompliance MinRoleCompliance
             {
+                IsSingleInstance     = "Yes"
                 State                = "Compliant"
                 PSDscRunAsCredential = $SetupAccount
             }

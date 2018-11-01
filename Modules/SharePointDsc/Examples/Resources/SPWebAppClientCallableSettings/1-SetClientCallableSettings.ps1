@@ -15,7 +15,7 @@
         node localhost {
             SPWebAppClientCallableSettings DefaultClientCallableSettings
             {
-                Url                                = "http://example.contoso.local"
+                WebAppUrl                          = "http://example.contoso.local"
                 MaxResourcesPerRequest             = 16
                 MaxObjectPaths                     = 256
                 ExecutionTimeout                   = 90

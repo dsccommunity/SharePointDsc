@@ -4,32 +4,37 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [Parameter(Mandatory = $true)] 
-        [System.Boolean] 
+        [Parameter(Mandatory = $true)]
+        [ValidateSet('Yes')]
+        [String]
+        $IsSingleInstance,
+
+        [Parameter()]
+        [System.Boolean]
         $ScanOnDownload,
 
-        [Parameter()] 
-        [System.Boolean] 
+        [Parameter()]
+        [System.Boolean]
         $ScanOnUpload,
 
-        [Parameter()] 
-        [System.Boolean] 
+        [Parameter()]
+        [System.Boolean]
         $AllowDownloadInfected,
 
-        [Parameter()] 
-        [System.Boolean] 
+        [Parameter()]
+        [System.Boolean]
         $AttemptToClean,
 
-        [Parameter()] 
-        [System.UInt16] 
+        [Parameter()]
+        [System.UInt16]
         $TimeoutDuration,
 
-        [Parameter()] 
-        [System.UInt16] 
+        [Parameter()]
+        [System.UInt16]
         $NumberOfThreads,
 
-        [Parameter()] 
-        [System.Management.Automation.PSCredential] 
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 
@@ -39,16 +44,17 @@ function Get-TargetResource
                                   -Arguments $PSBoundParameters `
                                   -ScriptBlock {
         $params = $args[0]
-        
-        try 
+
+        try
         {
             $spFarm = Get-SPFarm
-        } 
-        catch 
+        }
+        catch
         {
             Write-Verbose -Message ("No local SharePoint farm was detected. Antivirus " + `
                                     "settings will not be applied")
             return @{
+                IsSingleInstance = "Yes"
                 # Set the antivirus settings
                 AllowDownloadInfected = $false
                 ScanOnDownload = $false
@@ -62,8 +68,9 @@ function Get-TargetResource
 
         # Get a reference to the Administration WebService
         $admService = Get-SPDSCContentService
-        
+
         return @{
+            IsSingleInstance = "Yes"
             # Set the antivirus settings
             AllowDownloadInfected = $admService.AntivirusSettings.AllowDownload
             ScanOnDownload = $admService.AntivirusSettings.DownloadScanEnabled
@@ -82,32 +89,37 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [Parameter(Mandatory = $true)] 
-        [System.Boolean] 
+        [Parameter(Mandatory = $true)]
+        [ValidateSet('Yes')]
+        [String]
+        $IsSingleInstance,
+
+        [Parameter()]
+        [System.Boolean]
         $ScanOnDownload,
 
-        [Parameter()] 
-        [System.Boolean] 
+        [Parameter()]
+        [System.Boolean]
         $ScanOnUpload,
 
-        [Parameter()] 
-        [System.Boolean] 
+        [Parameter()]
+        [System.Boolean]
         $AllowDownloadInfected,
 
-        [Parameter()] 
-        [System.Boolean] 
+        [Parameter()]
+        [System.Boolean]
         $AttemptToClean,
 
-        [Parameter()] 
-        [System.UInt16] 
+        [Parameter()]
+        [System.UInt16]
         $TimeoutDuration,
 
-        [Parameter()] 
-        [System.UInt16] 
+        [Parameter()]
+        [System.UInt16]
         $NumberOfThreads,
 
-        [Parameter()] 
-        [System.Management.Automation.PSCredential] 
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 
@@ -118,42 +130,42 @@ function Set-TargetResource
                         -ScriptBlock {
         $params = $args[0]
 
-        try 
+        try
         {
             $spFarm = Get-SPFarm
-        } 
-        catch 
+        }
+        catch
         {
             throw "No local SharePoint farm was detected. Antivirus settings will not be applied"
             return
         }
-        
+
         Write-Verbose -Message "Start update"
         $admService = Get-SPDSCContentService
 
         # Set the antivirus settings
-        if ($params.ContainsKey("AllowDownloadInfected")) 
+        if ($params.ContainsKey("AllowDownloadInfected"))
         {
             Write-Verbose -Message "Setting Allow Download"
             $admService.AntivirusSettings.AllowDownload = $params.AllowDownloadInfected
         }
-        if ($params.ContainsKey("ScanOnDownload")) 
+        if ($params.ContainsKey("ScanOnDownload"))
         {
-            $admService.AntivirusSettings.DownloadScanEnabled = $params.ScanOnDownload 
+            $admService.AntivirusSettings.DownloadScanEnabled = $params.ScanOnDownload
         }
-        if ($params.ContainsKey("ScanOnUpload")) 
+        if ($params.ContainsKey("ScanOnUpload"))
         {
-            $admService.AntivirusSettings.UploadScanEnabled = $params.ScanOnUpload 
+            $admService.AntivirusSettings.UploadScanEnabled = $params.ScanOnUpload
         }
-        if ($params.ContainsKey("AttemptToClean")) 
+        if ($params.ContainsKey("AttemptToClean"))
         {
-            $admService.AntivirusSettings.CleaningEnabled = $params.AttemptToClean 
+            $admService.AntivirusSettings.CleaningEnabled = $params.AttemptToClean
         }
-        if ($params.ContainsKey("NumberOfThreads")) 
+        if ($params.ContainsKey("NumberOfThreads"))
         {
-            $admService.AntivirusSettings.NumberOfThreads = $params.NumberOfThreads 
+            $admService.AntivirusSettings.NumberOfThreads = $params.NumberOfThreads
         }
-        if ($params.ContainsKey("TimeoutDuration")) 
+        if ($params.ContainsKey("TimeoutDuration"))
         {
             $timespan = New-TimeSpan -Seconds $params.TimeoutDuration
             $admService.AntivirusSettings.Timeout = $timespan
@@ -168,37 +180,42 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [Parameter(Mandatory = $true)] 
-        [System.Boolean] 
+        [Parameter(Mandatory = $true)]
+        [ValidateSet('Yes')]
+        [String]
+        $IsSingleInstance,
+
+        [Parameter()]
+        [System.Boolean]
         $ScanOnDownload,
 
-        [Parameter()] 
-        [System.Boolean] 
+        [Parameter()]
+        [System.Boolean]
         $ScanOnUpload,
 
-        [Parameter()] 
-        [System.Boolean] 
+        [Parameter()]
+        [System.Boolean]
         $AllowDownloadInfected,
 
-        [Parameter()] 
-        [System.Boolean] 
+        [Parameter()]
+        [System.Boolean]
         $AttemptToClean,
 
-        [Parameter()] 
-        [System.UInt16] 
+        [Parameter()]
+        [System.UInt16]
         $TimeoutDuration,
 
-        [Parameter()] 
-        [System.UInt16] 
+        [Parameter()]
+        [System.UInt16]
         $NumberOfThreads,
 
-        [Parameter()] 
-        [System.Management.Automation.PSCredential] 
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 
     Write-Verbose -Message "Testing antivirus configuration settings"
-    
+
     return Test-SPDscParameterState -CurrentValues (Get-TargetResource @PSBoundParameters) `
                                     -DesiredValues $PSBoundParameters
 }

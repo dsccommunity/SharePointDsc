@@ -12,27 +12,27 @@ Import-Module -Name (Join-Path -Path $PSScriptRoot `
                                 -Resolve)
 
 $Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointCmdletModule `
-                                              -DscResource "SPSearchresultSource"
+                                              -DscResource "SPSearchResultSource"
 
 Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
     InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
         Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 try {
         # Initialize tests
-           Add-Type -TypeDefinition @"
-namespace Microsoft.Office.Server.Search.Administration {
-    public enum SearchObjectLevel
-    {
-        SPWeb,
-        SPSite,
-        SPSiteSubscription,
-        Ssa
-    }
-}
+        Add-Type -TypeDefinition @"
+        namespace Microsoft.Office.Server.Search.Administration {
+            public enum SearchObjectLevel
+            {
+                SPWeb,
+                SPSite,
+                SPSiteSubscription,
+                Ssa
+            }
+        }
 "@ -ErrorAction SilentlyContinue
 }
 catch {
-
+    Write-Verbose "Could not instantiante the enum Microsoft.Office.Server.Search.Administration.SearchObjectLevel"
 }
 
         # Mocks for all contexts
@@ -91,6 +91,16 @@ catch {
                                              -Value {
                                                  return $Global:SPDscResultSourceProviders
                                              } `
+                                | Add-Member -Name ListSources `
+                                             -MemberType ScriptMethod `
+                                             -PassThru `
+                                             -Value {
+                                                 return @(
+                                                     @{
+                                                        Name = "Test source"
+                                                    }
+                                                 )
+                                             } `
                                 | Add-Member -Name CreateSource `
                                              -MemberType ScriptMethod `
                                              -PassThru `
@@ -114,10 +124,6 @@ catch {
                                              -MemberType ScriptMethod `
                                              -PassThru `
                                              -Value { } `
-                                | Add-Member -Name ListSources `
-                                             -MemberType ScriptMethod `
-                                             -PassThru `
-                                             -Value { }
                 }
                 "Microsoft.Office.Server.Search.Administration.SearchObjectFilter" {
                     return [System.Object]::new() | Add-Member -Name IncludeHigherLevel `
@@ -138,7 +144,8 @@ catch {
         # Test contexts
         Context -Name "A search result source doesn't exist and should" -Fixture {
             $testParams = @{
-                Name = "Test source"
+                Name = "New source"
+                ScopeName = "SSA"
                 SearchServiceAppName = "Search Service Application"
                 ProviderType = "Remote SharePoint Provider"
                 Query = "{searchTerms}"
@@ -161,9 +168,30 @@ catch {
             }
         }
 
+        Context -Name "Invalid parameters are specified" -Fixture {
+            $testParams = @{
+                Name = "Test source"
+                ScopeName = "SPSite"
+                SearchServiceAppName = "Search Service Application"
+                ProviderType = "Remote SharePoint Provider"
+                Query = "{searchTerms}"
+                ConnectionUrl = "https://sharepoint.contoso.com"
+                Ensure = "Present"
+            }
+
+            It "Should throw an error from the get method" {
+                { Get-TargetResource @testParams } | Should Throw "When specifying a ScopeName of type SPSite you also need to provide a ScopeUrl value."
+            }
+
+            It "Should thow an error from the set method" {
+                { Set-TargetResource @testParams } | Should Throw "When specifying a ScopeName of type SPSite you also need to provide a ScopeUrl value."
+            }
+        }
+
         Context -Name "A search result source exists and should" -Fixture {
             $testParams = @{
                 Name = "Test source"
+                ScopeName = "SSA"
                 SearchServiceAppName = "Search Service Application"
                 ProviderType = "Remote SharePoint Provider"
                 Query = "{searchTerms}"
@@ -194,6 +222,7 @@ catch {
                 SearchServiceAppName = "Search Service Application"
                 ProviderType = "Remote SharePoint Provider"
                 Query = "{searchTerms}"
+                ScopeName = "SSA"
                 ConnectionUrl = "https://sharepoint.contoso.com"
                 Ensure = "Absent"
             }
@@ -221,7 +250,8 @@ catch {
 
         Context -Name "A search result source doesn't exist and shouldn't" -Fixture {
             $testParams = @{
-                Name = "Test source"
+                Name = "Non-Existing source"
+                ScopeName = "SSA"
                 SearchServiceAppName = "Search Service Application"
                 ProviderType = "Remote SharePoint Provider"
                 Query = "{searchTerms}"
@@ -240,18 +270,16 @@ catch {
             }
         }
 
-        Context -Name "The search centre site collection does not exist when trying to set a result source" -Fixture {
+        Context -Name "Valid SPWeb ScopeName was provided" -Fixture {
             $testParams = @{
-                Name = "Test source"
+                Name = "New source"
+                ScopeName = "SPWeb"
+                ScopeUrl = "https://SharePoint.contoso.com"
                 SearchServiceAppName = "Search Service Application"
                 ProviderType = "Remote SharePoint Provider"
                 Query = "{searchTerms}"
                 ConnectionUrl = "https://sharepoint.contoso.com"
                 Ensure = "Present"
-            }
-
-            Mock -CommandName Get-SPWeb -MockWith {
-                return $null
             }
 
             It "Should return absent from the get method" {
@@ -262,18 +290,19 @@ catch {
                 Test-TargetResource @testParams | Should Be $false
             }
 
-            It "Should throw an exception trying to create the result source in the set method" {
-                { Set-TargetResource @testParams } | Should throw
+            It "Should create the result source in the set method" {
+                Set-TargetResource @testParams
             }
         }
 
         Context -Name "Local Result Source" -Fixture {
             $testParams = @{
-                Name = "Test source"
+                Name = "Test source Local"
                 SearchServiceAppName = "Search Service Application"
                 ProviderType = "Remote SharePoint Provider"
                 Query = "{searchTerms}"
                 ConnectionUrl = "https://sharepoint.contoso.com"
+                ScopeName = "SSA"
                 ScopeUrl = "https://sharepoint.contoso.com"
                 Ensure = "Present"
             }

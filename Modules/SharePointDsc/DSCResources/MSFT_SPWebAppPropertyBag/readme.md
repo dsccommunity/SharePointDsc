@@ -2,9 +2,9 @@
 
 **Type:** Distributed
 
-This resource is used to work with SharePoint Property Bags
-at the web application level.
-The account that runs this resource must be a farm administrator.
+This resource is used to work with SharePoint Property Bags at the web
+application level. The account that runs this resource must be a farm
+administrator.
 
-The default value for the Ensure parameter is Present. When not specifying this
-parameter, the property bag is configured.
+The default value for the Ensure parameter is Present. When not specifying
+this parameter, the property bag is configured.

@@ -1,7 +1,7 @@
 [CmdletBinding()]
 param(
     [Parameter()]
-    [string] 
+    [string]
     $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
                                          -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
                                          -Resolve)
@@ -35,42 +35,42 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             return $object
         }
 
-        if ($null -eq (Get-Command Get-WindowsFeature -ErrorAction SilentlyContinue)) 
+        if ($null -eq (Get-Command Get-WindowsFeature -ErrorAction SilentlyContinue))
         {
             function Get-WindowsFeature { }
         }
-        if ($null -eq (Get-Command Install-WindowsFeature -ErrorAction SilentlyContinue)) 
+        if ($null -eq (Get-Command Install-WindowsFeature -ErrorAction SilentlyContinue))
         {
             function Install-WindowsFeature { }
         }
 
-        # Mocks for all contexts   
-         Mock -CommandName Get-ItemProperty -ParameterFilter { 
-                $Path -eq "HKLM:\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*" 
+        # Mocks for all contexts
+         Mock -CommandName Get-ItemProperty -ParameterFilter {
+                $Path -eq "HKLM:\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*"
             } -MockWith {
                 return @()
             }
-        
+
         Mock -CommandName Get-ChildItem {
             $full = @{
                 Version = "4.5.0.0"
                 Release = "0"
                 PSChildName = "Full"
-            } 
+            }
 
            $client = @{
                 Version = "4.5.0.0"
                 Release = "0"
                 PSChildName = "Client"
-            } 
+            }
 
             $returnval = @($full, $client)
             $returnVal = $returnVal | Add-Member ScriptMethod GetValue { return 380000 } -PassThru
             return $returnval
         }
 
-        Mock -CommandName Get-ItemProperty -ParameterFilter { 
-            $Path -eq "HKLM:\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*" 
+        Mock -CommandName Get-ItemProperty -ParameterFilter {
+            $Path -eq "HKLM:\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*"
         } -MockWith {
             return @()
         }
@@ -80,27 +80,49 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         }
 
         Mock -CommandName Get-SPDscOSVersion -MockWith {
-            return @{
-                Major = 6
-                Minor = 3
+            if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 16 -and
+                $Global:SPDscHelper.CurrentStubBuildNumber.Build -gt 10000)
+            {
+                # SharePoint 2019
+                return @{
+                    Major = 10
+                    Minor = 0
+                }
+            }
+            else
+            {
+                # SharePoint 2013 / 2016
+                return @{
+                    Major = 6
+                    Minor = 3
+                }
             }
         }
 
-        Mock -CommandName Get-WindowsFeature -MockWith { 
-            return @(@{ 
+        Mock -CommandName Get-WindowsFeature -MockWith {
+            return @(@{
                 Name = "ExampleFeature"
                 Installed = $false
-            }) 
+            })
+        }
+
+        Mock -CommandName Get-SPDSCAssemblyVersion {
+            return $Global:SPDscHelper.CurrentStubBuildNumber.Major
+        }
+
+        Mock -CommandName Get-SPDSCBuildVersion {
+            return $Global:SPDscHelper.CurrentStubBuildNumber.Build
         }
 
         # Test contexts
         Context -Name "Prerequisites are not installed but should be and are to be installed in online mode" -Fixture {
             $testParams = @{
+                IsSingleInstance = "Yes"
                 InstallerPath = "C:\SPInstall\Prerequisiteinstaller.exe"
                 OnlineMode = $true
                 Ensure = "Present"
             }
-            
+
             Mock -CommandName Get-ItemProperty -MockWith {
                 return @()
             } -ParameterFilter { $null -ne $Path }
@@ -155,6 +177,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "Prerequisites are installed and should be" -Fixture {
             $testParams = @{
+                IsSingleInstance = "Yes"
                 InstallerPath = "C:\SPInstall\Prerequisiteinstaller.exe"
                 OnlineMode = $true
                 Ensure = "Present"
@@ -163,39 +186,61 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             switch ($Global:SPDscHelper.CurrentStubBuildNumber.Major)
             {
                 15 {
-                    Mock -CommandName Get-ItemProperty -ParameterFilter { 
-                        $Path -eq "HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall\*" 
+                    Mock -CommandName Get-ItemProperty -ParameterFilter {
+                        $Path -eq "HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall\*"
                     } -MockWith {
                         return @(
-                            (New-SPDscMockPrereq -Name "Microsoft CCR and DSS Runtime 2008 R3"), 
-                            (New-SPDscMockPrereq -Name "Microsoft Sync Framework Runtime v1.0 SP1 (x64)"), 
-                            (New-SPDscMockPrereq -Name "AppFabric 1.1 for Windows Server"), 
-                            (New-SPDscMockPrereq -Name "WCF Data Services 5.6.0 Runtime"), 
-                            (New-SPDscMockPrereq -Name "WCF Data Services 5.0 (for OData v3) Primary Components"), 
-                            (New-SPDscMockPrereq -Name "Microsoft SQL Server 2008 R2 Native Client"), 
-                            (New-SPDscMockPrereq -Name "Active Directory Rights Management Services Client 2.0"), 
+                            (New-SPDscMockPrereq -Name "Microsoft CCR and DSS Runtime 2008 R3"),
+                            (New-SPDscMockPrereq -Name "Microsoft Sync Framework Runtime v1.0 SP1 (x64)"),
+                            (New-SPDscMockPrereq -Name "AppFabric 1.1 for Windows Server"),
+                            (New-SPDscMockPrereq -Name "WCF Data Services 5.6.0 Runtime"),
+                            (New-SPDscMockPrereq -Name "WCF Data Services 5.0 (for OData v3) Primary Components"),
+                            (New-SPDscMockPrereq -Name "Microsoft SQL Server 2008 R2 Native Client"),
+                            (New-SPDscMockPrereq -Name "Active Directory Rights Management Services Client 2.0"),
                             (New-SPDscMockPrereq -Name "Microsoft Identity Extensions" )
                         )
                     }
                 }
                 16 {
-                    Mock -CommandName Get-ItemProperty -ParameterFilter { 
-                        $Path -eq "HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall\*" 
-                    } -MockWith {
-                        return @(
-                            (New-SPDscMockPrereq -Name "Microsoft CCR and DSS Runtime 2008 R3"), 
-                            (New-SPDscMockPrereq -Name "Microsoft Sync Framework Runtime v1.0 SP1 (x64)"), 
-                            (New-SPDscMockPrereq -Name "AppFabric 1.1 for Windows Server"), 
-                            (New-SPDscMockPrereq -Name "WCF Data Services 5.6.0 Runtime"), 
-                            (New-SPDscMockPrereq -Name "Microsoft ODBC Driver 11 for SQL Server"), 
-                            (New-SPDscMockPrereq -Name "Microsoft Visual C++ 2012 x64 Minimum Runtime - 11.0.61030"), 
-                            (New-SPDscMockPrereq -Name "Microsoft Visual C++ 2012 x64 Additional Runtime - 11.0.61030"), 
-                            (New-SPDscMockPrereq -Name "Microsoft Visual C++ 2015 x64 Minimum Runtime - 14.0.23026"), 
-                            (New-SPDscMockPrereq -Name "Microsoft Visual C++ 2015 x64 Additional Runtime - 14.0.23026"), 
-                            (New-SPDscMockPrereq -Name "Microsoft SQL Server 2012 Native Client"), 
-                            (New-SPDscMockPrereq -Name "Active Directory Rights Management Services Client 2.1"), 
-                            (New-SPDscMockPrereq -Name "Microsoft Identity Extensions")
-                        )
+                    if ($Global:SPDscHelper.CurrentStubBuildNumber.Build -lt 10000)
+                    {
+                        # SharePoint 2016
+                        Mock -CommandName Get-ItemProperty -ParameterFilter {
+                            $Path -eq "HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall\*"
+                        } -MockWith {
+                            return @(
+                                (New-SPDscMockPrereq -Name "Microsoft CCR and DSS Runtime 2008 R3"),
+                                (New-SPDscMockPrereq -Name "Microsoft Sync Framework Runtime v1.0 SP1 (x64)"),
+                                (New-SPDscMockPrereq -Name "AppFabric 1.1 for Windows Server"),
+                                (New-SPDscMockPrereq -Name "WCF Data Services 5.6.0 Runtime"),
+                                (New-SPDscMockPrereq -Name "Microsoft ODBC Driver 11 for SQL Server"),
+                                (New-SPDscMockPrereq -Name "Microsoft Visual C++ 2012 x64 Minimum Runtime - 11.0.61030"),
+                                (New-SPDscMockPrereq -Name "Microsoft Visual C++ 2012 x64 Additional Runtime - 11.0.61030"),
+                                (New-SPDscMockPrereq -Name "Microsoft Visual C++ 2015 x64 Minimum Runtime - 14.0.23026"),
+                                (New-SPDscMockPrereq -Name "Microsoft Visual C++ 2015 x64 Additional Runtime - 14.0.23026"),
+                                (New-SPDscMockPrereq -Name "Microsoft SQL Server 2012 Native Client"),
+                                (New-SPDscMockPrereq -Name "Active Directory Rights Management Services Client 2.1"),
+                                (New-SPDscMockPrereq -Name "Microsoft Identity Extensions")
+                            )
+                        }
+                    }
+                    else
+                    {
+                        # SharePoint 2019
+                        Mock -CommandName Get-ItemProperty -ParameterFilter {
+                            $Path -eq "HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall\*"
+                        } -MockWith {
+                            return @(
+                                (New-SPDscMockPrereq -Name "Microsoft CCR and DSS Runtime 2008 R3"),
+                                (New-SPDscMockPrereq -Name "Microsoft Sync Framework Runtime v1.0 SP1 (x64)"),
+                                (New-SPDscMockPrereq -Name "AppFabric 1.1 for Windows Server"),
+                                (New-SPDscMockPrereq -Name "WCF Data Services 5.6.0 Runtime"),
+                                (New-SPDscMockPrereq -Name "Microsoft Identity Extensions"),
+                                (New-SPDscMockPrereq -Name "Active Directory Rights Management Services Client 2.1"),
+                                (New-SPDscMockPrereq -Name "Microsoft SQL Server 2012 Native Client"),
+                                (New-SPDscMockPrereq -Name "Microsoft Visual C++ 2017 x64 Additional Runtime - 14.14.10")
+                            )
+                        }
                     }
                 }
                 Default {
@@ -203,13 +248,13 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 }
             }
 
-            Mock -CommandName Get-WindowsFeature -MockWith { 
-                return @(@{ 
+            Mock -CommandName Get-WindowsFeature -MockWith {
+                return @(@{
                     Name = "ExampleFeature"
                     Installed = $true
-                }) 
+                })
             }
-            
+
             It "Should return present from the get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Present"
             }
@@ -223,31 +268,32 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         {
             Context -Name "Prerequisites are installed and should be (with SQL 2012 native client for SP2013)" -Fixture {
                 $testParams = @{
+                    IsSingleInstance = "Yes"
                     InstallerPath = "C:\SPInstall\Prerequisiteinstaller.exe"
                     OnlineMode = $true
                     Ensure = "Present"
                 }
 
-                Mock -CommandName Get-ItemProperty -ParameterFilter { 
-                    $Path -eq "HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall\*" 
+                Mock -CommandName Get-ItemProperty -ParameterFilter {
+                    $Path -eq "HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall\*"
                 } -MockWith {
                     return @(
-                        (New-SPDscMockPrereq -Name "Microsoft CCR and DSS Runtime 2008 R3"), 
-                        (New-SPDscMockPrereq -Name "Microsoft Sync Framework Runtime v1.0 SP1 (x64)"), 
-                        (New-SPDscMockPrereq -Name "AppFabric 1.1 for Windows Server"), 
-                        (New-SPDscMockPrereq -Name "WCF Data Services 5.6.0 Runtime"), 
-                        (New-SPDscMockPrereq -Name "WCF Data Services 5.0 (for OData v3) Primary Components"), 
-                        (New-SPDscMockPrereq -Name "Microsoft SQL Server 2012 Native Client"), 
-                        (New-SPDscMockPrereq -Name "Active Directory Rights Management Services Client 2.0"), 
+                        (New-SPDscMockPrereq -Name "Microsoft CCR and DSS Runtime 2008 R3"),
+                        (New-SPDscMockPrereq -Name "Microsoft Sync Framework Runtime v1.0 SP1 (x64)"),
+                        (New-SPDscMockPrereq -Name "AppFabric 1.1 for Windows Server"),
+                        (New-SPDscMockPrereq -Name "WCF Data Services 5.6.0 Runtime"),
+                        (New-SPDscMockPrereq -Name "WCF Data Services 5.0 (for OData v3) Primary Components"),
+                        (New-SPDscMockPrereq -Name "Microsoft SQL Server 2012 Native Client"),
+                        (New-SPDscMockPrereq -Name "Active Directory Rights Management Services Client 2.0"),
                         (New-SPDscMockPrereq -Name "Microsoft Identity Extensions")
                     )
                 }
 
-                Mock -CommandName Get-WindowsFeature -MockWith { 
-                    return @(@{ 
+                Mock -CommandName Get-WindowsFeature -MockWith {
+                    return @(@{
                         Name = "ExampleFeature"
                         Installed = $true
-                    }) 
+                    })
                 }
 
                 It "Should return present from the get method" {
@@ -259,9 +305,10 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 }
             }
         }
-        
+
         Context -Name "Prerequisites are installed but should not be" -Fixture {
             $testParams = @{
+                IsSingleInstance = "Yes"
                 InstallerPath = "C:\SPInstall\Prerequisiteinstaller.exe"
                 OnlineMode = $true
                 Ensure = "Absent"
@@ -278,6 +325,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "Prerequisites are not installed but should be and are to be installed in offline mode" -Fixture {
             $testParams = @{
+                IsSingleInstance = "Yes"
                 InstallerPath = "C:\SPInstall\Prerequisiteinstaller.exe"
                 OnlineMode = $false
                 Ensure = "Present"
@@ -287,13 +335,13 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 return @()
             } -ParameterFilter { $null -ne $Path }
 
-            Mock -CommandName Start-Process -MockWith { 
-                return @{ 
-                    ExitCode = 0 
-                } 
+            Mock -CommandName Start-Process -MockWith {
+                return @{
+                    ExitCode = 0
+                }
             }
-            Mock -CommandName Test-Path -MockWith { 
-                return $true 
+            Mock -CommandName Test-Path -MockWith {
+                return $true
             }
 
             It "Should throw an exception in the set method if required parameters are not set" {
@@ -306,7 +354,16 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     $requiredParams = @("SQLNCli","PowerShell","NETFX","IDFX","Sync","AppFabric","IDFX11","MSIPCClient","WCFDataServices","KB2671763","WCFDataServices56")
                 }
                 16 {
-                    $requiredParams = @("SQLNCli","Sync","AppFabric","IDFX11","MSIPCClient","KB3092423","WCFDataServices56","DotNetFx","MSVCRT11","MSVCRT14","ODBC")
+                    if ($Global:SPDscHelper.CurrentStubBuildNumber.Build -lt 10000)
+                    {
+                        # SharePoint 2016
+                        $requiredParams = @("SQLNCli","Sync","AppFabric","IDFX11","MSIPCClient","KB3092423","WCFDataServices56","DotNetFx","MSVCRT11","MSVCRT14","ODBC")
+                    }
+                    else
+                    {
+                        # SharePoint 2019
+                        $requiredParams = @("SQLNCli","Sync","AppFabric","IDFX11","MSIPCClient","KB3092423","WCFDataServices56","DotNet472","MSVCRT141")
+                    }
                 }
                 Default {
                     throw [Exception] "A supported version of SharePoint was not used in testing"
@@ -324,29 +381,30 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "Prerequisites are not installed but should be and are to be installed in offline mode, but invalid paths have been passed" -Fixture {
             $testParams = @{
+                IsSingleInstance = "Yes"
                 InstallerPath = "C:\SPInstall\Prerequisiteinstaller.exe"
                 OnlineMode = $false
                 Ensure = "Present"
             }
 
-            Mock -CommandName Get-WindowsFeature -MockWith { 
-                return @( @{ 
+            Mock -CommandName Get-WindowsFeature -MockWith {
+                return @( @{
                     Name = "ExampleFeature"
-                    Installed = $false 
-                }) 
+                    Installed = $false
+                })
             }
-            
+
             Mock -CommandName Get-ItemProperty -MockWith {
                 return @()
             }
 
-            Mock -CommandName Start-Process -MockWith { 
-                return @{ 
-                    ExitCode = 0 
-                } 
+            Mock -CommandName Start-Process -MockWith {
+                return @{
+                    ExitCode = 0
+                }
             }
-            Mock -CommandName Test-Path -MockWith { 
-                return $false 
+            Mock -CommandName Test-Path -MockWith {
+                return $false
             }
 
             It "Should throw an exception in the set method if required parameters are not set" {
@@ -373,11 +431,12 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 {Set-TargetResource @testParams} | Should Throw
             }
         }
-        
+
         if ($majorBuildNumber -eq 15)
         {
             Context -Name "SharePoint 2013 is installing on a server with .NET 4.6" -Fixture {
                 $testParams = @{
+                    IsSingleInstance = "Yes"
                     InstallerPath = "C:\SPInstall\Prerequisiteinstaller.exe"
                     OnlineMode = $true
                     Ensure = "Present"
@@ -388,13 +447,13 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                         Version = "4.6.0.0"
                         Release = "0"
                         PSChildName = "Full"
-                    } 
+                    }
 
                 $client = @{
                         Version = "4.6.0.0"
                         Release = "0"
                         PSChildName = "Client"
-                    } 
+                    }
 
                     $returnval = @($full, $client)
                     $returnVal = $returnVal | Add-Member ScriptMethod GetValue { return 391000 } -PassThru
@@ -407,10 +466,10 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                             FileVersion = "15.0.4600.1000"
                         }
                     }
-                } -ParameterFilter { 
+                } -ParameterFilter {
                     $Path -eq "C:\SPInstall\updates\svrsetup.dll"
                 }
-                
+
                 It "throws an error in the set method" {
                     { Set-TargetResource @testParams } | Should Throw ("A known issue prevents installation of SharePoint 2013 on " + `
                                                                        "servers that have .NET 4.6 already installed")
@@ -419,6 +478,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
             Context -Name "SharePoint 2013 is installing on a server with .NET 4.6 with compatibility update" {
                 $testParams = @{
+                    IsSingleInstance = "Yes"
                     InstallerPath = "C:\SPInstall\Prerequisiteinstaller.exe"
                     OnlineMode = $true
                     Ensure = "Present"
@@ -429,13 +489,13 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                         Version = "4.6.0.0"
                         Release = "0"
                         PSChildName = "Full"
-                    } 
+                    }
 
                 $client = @{
                         Version = "4.6.0.0"
                         Release = "0"
                         PSChildName = "Client"
-                    } 
+                    }
 
                     $returnval = @($full, $client)
                     $returnVal = $returnVal | Add-Member ScriptMethod GetValue { return 391000 } -PassThru
@@ -448,22 +508,23 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                             FileVersion = "15.0.4709.1000"
                         }
                     }
-                } -ParameterFilter { 
+                } -ParameterFilter {
                     $Path -eq "C:\SPInstall\updates\svrsetup.dll"
                 }
-                
+
                 It "should install prereqs" {
                     Mock Start-Process { return @{ ExitCode = 0 } }
                     Mock Test-Path { return $true }
 
                     Set-TargetResource @testParams
-                    Assert-MockCalled Start-Process -Scope It 
+                    Assert-MockCalled Start-Process -Scope It
                 }
             }
-        }        
-        
+        }
+
         Context -Name "Prerequisites are not installed but should be and are to be installed in offline mode, with SXSstore specified" -Fixture {
             $testParams = @{
+                IsSingleInstance = "Yes"
                 InstallerPath = "C:\SPInstall\Prerequisiteinstaller.exe"
                 OnlineMode = $false
                 SXSpath = "C:\SPInstall\SXS"
@@ -474,14 +535,14 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 return @()
             }
 
-            Mock -CommandName Start-Process -MockWith { 
-                return @{ 
-                    ExitCode = 0 
-                } 
+            Mock -CommandName Start-Process -MockWith {
+                return @{
+                    ExitCode = 0
+                }
             }
 
-            Mock -CommandName Test-Path -MockWith { 
-                return $true 
+            Mock -CommandName Test-Path -MockWith {
+                return $true
             }
 
             switch ($Global:SPDscHelper.CurrentStubBuildNumber.Major)
@@ -501,43 +562,86 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             It "installs required Windows features from specified path" {
-                Mock -CommandName Install-WindowsFeature -MockWith { 
-                    return @( @{ 
-                        Name = "ExampleFeature" 
-                        Success = $true 
+                Mock -CommandName Install-WindowsFeature -MockWith {
+                    return @( @{
+                        Name = "ExampleFeature"
+                        Success = $true
                         RestartNeeded = "No"
-                    })  
+                    })
                 }
 
                 Set-TargetResource @testParams
-                Assert-MockCalled Install-WindowsFeature 
+                Assert-MockCalled Install-WindowsFeature
             }
-            
+
              It "feature install requires a reboot" {
-                Mock -CommandName Install-WindowsFeature -MockWith { 
-                    return @( @{ 
-                        Name = "ExampleFeature" 
-                        Success = $true 
+                Mock -CommandName Install-WindowsFeature -MockWith {
+                    return @( @{
+                        Name = "ExampleFeature"
+                        Success = $true
                         RestartNeeded = "Yes"
-                    })  
+                    })
                 }
 
                 Set-TargetResource @testParams
-                $global:DSCMachineStatus | Should Be 1 
+                $global:DSCMachineStatus | Should Be 1
             }
-            
+
              It "feature install failure throws an error" {
-                Mock -CommandName Install-WindowsFeature -MockWith { 
-                    return @( @{ 
-                        Name = "ExampleFeature" 
-                        Success = $false 
+                Mock -CommandName Install-WindowsFeature -MockWith {
+                    return @( @{
+                        Name = "ExampleFeature"
+                        Success = $false
                         RestartNeeded = "No"
-                    })  
+                    })
                 }
 
-                {Set-TargetResource @testParams} | should Throw "Error installing ExampleFeature"                
+                {Set-TargetResource @testParams} | should Throw "Error installing ExampleFeature"
             }
-        } 
+        }
+
+        if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 16)
+        {
+            Context -Name "Unsupported OS is used" -Fixture {
+                $testParams = @{
+                    IsSingleInstance = "Yes"
+                    InstallerPath = "C:\SPInstall\Prerequisiteinstaller.exe"
+                    OnlineMode = $true
+                    Ensure = "Present"
+                }
+
+                Mock -CommandName Get-SPDscOSVersion -MockWith {
+                    if ($Global:SPDscHelper.CurrentStubBuildNumber.Build -lt 10000)
+                    {
+                        # SharePoint 2016
+                        return @{
+                            Major = 6
+                            Minor = 2
+                        }
+                    }
+                    else
+                    {
+                        # SharePoint 2019
+                        return @{
+                            Major = 6
+                            Minor = 3
+                        }
+                    }
+                }
+
+                It "Should throw an exception from the get method" {
+                    {Get-TargetResource @testParams} | Should Throw
+                }
+
+                It "Should throw an exception from the test method" {
+                    {Test-TargetResource @testParams} | Should Throw
+                }
+
+                It "Should throw an exception from the set method" {
+                    {Set-TargetResource @testParams} | Should Throw
+                }
+            }
+        }
     }
 }
 

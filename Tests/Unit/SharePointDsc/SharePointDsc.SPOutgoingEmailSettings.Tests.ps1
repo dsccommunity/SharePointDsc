@@ -1,7 +1,7 @@
 [CmdletBinding()]
 param(
     [Parameter()]
-    [string] 
+    [string]
     $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
                                          -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
                                          -Resolve)
@@ -28,12 +28,12 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 CharacterSet= "65001"
             }
 
-            Mock -CommandName Get-SPWebApplication -MockWith  { 
+            Mock -CommandName Get-SPWebApplication -MockWith  {
                 return $null
             }
 
             It "Should return null from the get method" {
-                Get-TargetResource @testParams | Should BeNullOrEmpty 
+                Get-TargetResource @testParams | Should BeNullOrEmpty
             }
 
             It "Should return false from the test method" {
@@ -53,8 +53,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 ReplyToAddress = "reply@email.com"
                 CharacterSet= "65001"
             }
-            
-            Mock -CommandName Get-SPWebapplication -MockWith { 
+
+            Mock -CommandName Get-SPWebapplication -MockWith {
                 return @{
                     Url= "http://sharepoint.contoso.com"
                     OutboundMailServiceInstance= @{
@@ -67,15 +67,15 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     OutboundMailCodePage= "65001"
                 }
             }
-            
+
             It "Should return web app properties from the get method" {
-                Get-TargetResource @testParams | Should Not BeNullOrEmpty 
+                Get-TargetResource @testParams | Should Not BeNullOrEmpty
             }
 
             It "Should return true from the test method" {
                 Test-TargetResource @testParams | Should Be $true
             }
-        } 
+        }
 
         Context -Name "The web application exists and the properties don't match" -Fixture {
             $testParams = @{
@@ -85,8 +85,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 ReplyToAddress = "reply@email.com"
                 CharacterSet= "65001"
             }
-            
-            Mock -CommandName Get-SPWebapplication -MockWith { 
+
+            Mock -CommandName Get-SPWebapplication -MockWith {
                 $result = @{
                     Url= "http://sharepoint.contoso.com"
                     OutboundMailServiceInstance= @{
@@ -101,15 +101,15 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 $result = $result | Add-Member -MemberType ScriptMethod `
                                                -Name UpdateMailSettings `
                                                -Value {
-                                                    param( 
+                                                    param(
                                                         [string]
-                                                        $SMTPServer, 
-                                                        
+                                                        $SMTPServer,
+
                                                         [string]
-                                                        $FromAddress, 
-                                                        
+                                                        $FromAddress,
+
                                                         [string]
-                                                        $ReplyToAddress, 
+                                                        $ReplyToAddress,
                                                         [string]
                                                         $CharacterSet
                                                     )
@@ -146,15 +146,15 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 }
 
                 It "Should throw an exception in the get method" {
-                    { Get-TargetResource @testParams } | Should Throw "UseTLS is only supported in SharePoint 2016." 
+                    { Get-TargetResource @testParams } | Should Throw "UseTLS is only supported in SharePoint 2016 and SharePoint 2019."
                 }
 
                 It "Should throw an exception in the test method" {
-                    { Test-TargetResource @testParams } | Should Throw "UseTLS is only supported in SharePoint 2016."
+                    { Test-TargetResource @testParams } | Should Throw "UseTLS is only supported in SharePoint 2016 and SharePoint 2019."
                 }
 
                 It "Should throw an exception in the set method" {
-                    { Set-TargetResource @testParams } | Should Throw "UseTLS is only supported in SharePoint 2016."
+                    { Set-TargetResource @testParams } | Should Throw "UseTLS is only supported in SharePoint 2016 and SharePoint 2019."
                 }
             }
 
@@ -169,22 +169,22 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 }
 
                 It "Should throw an exception in the get method" {
-                    { Get-TargetResource @testParams } | Should Throw "SMTPPort is only supported in SharePoint 2016." 
+                    { Get-TargetResource @testParams } | Should Throw "SMTPPort is only supported in SharePoint 2016 and SharePoint 2019."
                 }
 
                 It "Should throw an exception in the test method" {
-                    { Test-TargetResource @testParams } | Should Throw "SMTPPort is only supported in SharePoint 2016."
+                    { Test-TargetResource @testParams } | Should Throw "SMTPPort is only supported in SharePoint 2016 and SharePoint 2019."
                 }
 
                 It "Should throw an exception in the set method" {
-                    { Set-TargetResource @testParams } | Should Throw "SMTPPort is only supported in SharePoint 2016."
+                    { Set-TargetResource @testParams } | Should Throw "SMTPPort is only supported in SharePoint 2016 and SharePoint 2019."
                 }
             }
         }
 
         if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 16)
         {
-            Context -Name "The web application exists and the properties match - SharePoint 2016" -Fixture {
+            Context -Name "The web application exists and the properties match - SharePoint 2016/2019" -Fixture {
                 $testParams = @{
                     WebAppUrl = "http://sharepoint.contoso.com"
                     SMTPServer = "smtp.contoso.com"
@@ -194,8 +194,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     UseTLS = $false
                     SMTPPort = 25
                 }
-                
-                Mock -CommandName Get-SPWebapplication -MockWith { 
+
+                Mock -CommandName Get-SPWebapplication -MockWith {
                     return @{
                         Url= "http://sharepoint.contoso.com"
                         OutboundMailServiceInstance= @{
@@ -210,17 +210,17 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                         OutboundMailPort = 25
                     }
                 }
-                
+
                 It "Should return web app properties from the get method" {
-                    Get-TargetResource @testParams | Should Not BeNullOrEmpty 
+                    Get-TargetResource @testParams | Should Not BeNullOrEmpty
                 }
 
                 It "Should return true from the test method" {
                     Test-TargetResource @testParams | Should Be $true
                 }
-            } 
+            }
 
-            Context -Name "The web application exists and the properties don't match - SharePoint 2016" -Fixture {
+            Context -Name "The web application exists and the properties don't match - SharePoint 2016/2019" -Fixture {
                 $testParams = @{
                     WebAppUrl = "http://sharepoint.contoso.com"
                     SMTPServer = "smtp.contoso.com"
@@ -230,8 +230,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     UseTLS = $true
                     SMTPPort = 25
                 }
-                
-                Mock -CommandName Get-SPWebapplication -MockWith { 
+
+                Mock -CommandName Get-SPWebapplication -MockWith {
                     $result = @{
                         Url= "http://sharepoint.contoso.com"
                         OutboundMailServiceInstance= @{
@@ -248,16 +248,16 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     $result = $result | Add-Member -MemberType ScriptMethod `
                                                 -Name UpdateMailSettings `
                                                 -Value {
-                                                        param( 
+                                                        param(
                                                             [string]
-                                                            $SMTPServer, 
-                                                            
+                                                            $SMTPServer,
+
                                                             [string]
-                                                            $FromAddress, 
-                                                            
+                                                            $FromAddress,
+
                                                             [string]
                                                             $ReplyToAddress,
-                                                            
+
                                                             [string]
                                                             $CharacterSet,
 

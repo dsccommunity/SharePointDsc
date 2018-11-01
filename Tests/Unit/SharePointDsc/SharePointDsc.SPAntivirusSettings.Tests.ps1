@@ -1,7 +1,7 @@
 [CmdletBinding()]
 param(
     [Parameter()]
-    [string] 
+    [string]
     $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
                                          -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
                                          -Resolve)
@@ -18,9 +18,10 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
     InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
         Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
-        # Test contexts 
+        # Test contexts
         Context -Name "The server is not part of SharePoint farm" -Fixture {
             $testParams = @{
+                IsSingleInstance = "Yes"
                 ScanOnDownload = $true
                 ScanOnUpload = $true
                 AllowDownloadInfected = $true
@@ -29,8 +30,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 NumberOfThreads = 5
             }
 
-            Mock -CommandName Get-SPFarm -MockWith { 
-                throw "Unable to detect local farm" 
+            Mock -CommandName Get-SPFarm -MockWith {
+                throw "Unable to detect local farm"
             }
 
             It "Should return null from the get method" {
@@ -54,6 +55,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "The server is in a farm and the incorrect settings have been applied" -Fixture {
             $testParams = @{
+                IsSingleInstance = "Yes"
                 ScanOnDownload = $true
                 ScanOnUpload = $true
                 AllowDownloadInfected = $true
@@ -74,9 +76,9 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                             TotalSeconds = 0;
                         }
                     }
-                } 
-                $returnVal = $returnVal | Add-Member -MemberType ScriptMethod -Name Update -Value { 
-                    $Global:SPDscAntivirusUpdated = $true 
+                }
+                $returnVal = $returnVal | Add-Member -MemberType ScriptMethod -Name Update -Value {
+                    $Global:SPDscAntivirusUpdated = $true
                 } -PassThru
                 return $returnVal
             }
@@ -99,6 +101,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "The server is in a farm and the correct settings have been applied" -Fixture {
             $testParams = @{
+                IsSingleInstance = "Yes"
                 ScanOnDownload = $true
                 ScanOnUpload = $true
                 AllowDownloadInfected = $true
@@ -132,7 +135,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Test-TargetResource @testParams | Should Be $true
             }
         }
-    }    
+    }
 }
 
 Invoke-Command -ScriptBlock $Global:SPDscHelper.CleanupScript -NoNewScope

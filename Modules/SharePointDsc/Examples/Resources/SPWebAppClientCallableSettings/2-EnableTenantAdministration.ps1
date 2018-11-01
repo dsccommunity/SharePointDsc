@@ -21,7 +21,7 @@
 
             SPWebAppClientCallableSettings TenantAdministration
             {
-                Url                  = "http://example.contoso.local"
+                WebAppUrl            = "http://example.contoso.local"
                 ProxyLibraries       = $proxyLibraries
                 PsDscRunAsCredential = $SetupAccount
             }

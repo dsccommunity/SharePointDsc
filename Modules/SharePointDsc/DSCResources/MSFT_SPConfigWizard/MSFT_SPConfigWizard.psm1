@@ -5,19 +5,24 @@ function Get-TargetResource
     param
     (
         [Parameter(Mandatory = $true)]
+        [ValidateSet('Yes')]
+        [String]
+        $IsSingleInstance,
+
+        [Parameter()]
         [ValidateSet("Present","Absent")]
         [System.String]
-        $Ensure,
-        
+        $Ensure = "Present",
+
         [Parameter()]
         [ValidateSet("mon","tue","wed","thu","fri","sat","sun")]
         [System.String[]]
         $DatabaseUpgradeDays,
-        
+
         [Parameter()]
         [System.String]
         $DatabaseUpgradeTime,
-        
+
         [Parameter()]
         [System.Management.Automation.PSCredential]
         $InstallAccount
@@ -44,15 +49,17 @@ function Get-TargetResource
     if (($languagePackInstalled -eq 1) -or ($setupType -eq "B2B_UPGRADE"))
     {
         return @{
-            Ensure = "Absent"
+            IsSingleInstance    = "Yes"
+            Ensure              = "Absent"
             DatabaseUpgradeDays = $DatabaseUpgradeDays
             DatabaseUpgradeTime = $DatabaseUpgradeTime
         }
-    } 
+    }
     else
     {
         return @{
-            Ensure = "Present"
+            IsSingleInstance    = "Yes"
+            Ensure              = "Present"
             DatabaseUpgradeDays = $DatabaseUpgradeDays
             DatabaseUpgradeTime = $DatabaseUpgradeTime
         }
@@ -65,19 +72,24 @@ function Set-TargetResource
     param
     (
         [Parameter(Mandatory = $true)]
+        [ValidateSet('Yes')]
+        [String]
+        $IsSingleInstance,
+
+        [Parameter()]
         [ValidateSet("Present","Absent")]
         [System.String]
-        $Ensure,
-        
+        $Ensure = "Present",
+
         [Parameter()]
         [ValidateSet("mon","tue","wed","thu","fri","sat","sun")]
         [System.String[]]
         $DatabaseUpgradeDays,
-        
+
         [Parameter()]
         [System.String]
         $DatabaseUpgradeTime,
-        
+
         [Parameter()]
         [System.Management.Automation.PSCredential]
         $InstallAccount
@@ -157,7 +169,7 @@ function Set-TargetResource
                                 "ran at any time. Starting wizard.")
     }
 
-    if ($Ensure -eq $false)
+    if ($Ensure -eq "Absent")
     {
         Write-Verbose -Message ("Ensure is set to Absent, so running the Configuration " + `
                                 "Wizard is not required")
@@ -182,7 +194,7 @@ function Set-TargetResource
                                   -ScriptBlock {
         $psconfigExe = $args[0]
         $psconfig = Start-Process -FilePath $psconfigExe `
-                                  -ArgumentList "-cmd upgrade -inplace b2b -wait -force" `
+                                  -ArgumentList "-cmd upgrade -inplace b2b -wait -force -cmd installcheck -noinstallcheck" `
                                   -Wait `
                                   -PassThru
 
@@ -197,7 +209,7 @@ function Set-TargetResource
         }
         Default {
             throw ("SharePoint Post Setup Configuration Wizard failed, " + `
-                   "exit code was $($setup.ExitCode). Error codes can be found at " + `
+                   "exit code was $result. Error codes can be found at " + `
                    "https://aka.ms/installerrorcodes")
         }
     }
@@ -211,25 +223,32 @@ function Test-TargetResource
     param
     (
         [Parameter(Mandatory = $true)]
+        [ValidateSet('Yes')]
+        [String]
+        $IsSingleInstance,
+
+        [Parameter()]
         [ValidateSet("Present","Absent")]
         [System.String]
-        $Ensure,
-        
+        $Ensure = "Present",
+
         [Parameter()]
         [ValidateSet("mon","tue","wed","thu","fri","sat","sun")]
         [System.String[]]
         $DatabaseUpgradeDays,
-        
+
         [Parameter()]
         [System.String]
         $DatabaseUpgradeTime,
-        
+
         [Parameter()]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 
     Write-Verbose -Message "Testing status of Configuration Wizard"
+
+    $PSBoundParameters.Ensure = $Ensure
 
     if ($Ensure -eq "Absent")
     {
