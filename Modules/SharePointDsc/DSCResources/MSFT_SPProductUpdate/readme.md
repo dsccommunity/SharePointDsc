@@ -1,6 +1,7 @@
 # Description
 
 **Type:** Common
+**Requires CredSSP:** No
 
 This resource is used to perform the update step of installing SharePoint
 updates, like Cumulative Updates and Service Packs. The SetupFile parameter

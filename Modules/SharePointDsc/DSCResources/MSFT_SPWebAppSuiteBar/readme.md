@@ -1,6 +1,7 @@
 # Description
 
 **Type:** Distributed
+**Requires CredSSP:** No
 
 This resource is used to set the Suite Bar branding for web
 applications. It supports both the SharePoint 2013 and SharePoint

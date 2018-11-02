@@ -1,6 +1,7 @@
 # Description
 
 **Type:** Distributed
+**Requires CredSSP:** No
 
 This resource is used to work with SharePoint Property Bags at the web
 application level. The account that runs this resource must be a farm

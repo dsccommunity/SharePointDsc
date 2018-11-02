@@ -1,6 +1,7 @@
 # Description
 
 **Type:** Distributed
+**Requires CredSSP:** No
 
 This resource is responsible for controlling the Site Use and Deletion
 settings on a specific web application. You can enable or disable the Site Use

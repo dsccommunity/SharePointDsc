@@ -1,6 +1,7 @@
 # Description
 
 **Type:** Distributed
+**Requires CredSSP:** No
 
 This resource is used to specify a managed account to be used to run a service instance.
 You can also specify LocalService, LocalSystem or NetworkService as ManagedAccount.

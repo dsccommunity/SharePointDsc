@@ -1,6 +1,7 @@
 # Description
 
 **Type:** Distributed
+**Requires CredSSP:** No
 
 This resource sets the client callable settings for the web application.
 It can set the proxy libraries and specific properties for the client

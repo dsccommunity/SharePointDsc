@@ -1,6 +1,7 @@
 # Description
 
 **Type:** Distributed
+**Requires CredSSP:** No
 
 This resource will provision a site collection to the current farm, based on
 the settings that are passed through. These settings map to the New-SPSite

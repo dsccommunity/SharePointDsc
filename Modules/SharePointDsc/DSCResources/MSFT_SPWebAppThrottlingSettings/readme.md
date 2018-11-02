@@ -1,6 +1,7 @@
 # Description
 
 **Type:** Distributed
+**Requires CredSSP:** No
 
 This resource is responsible for setting web application settings that are
 found under the "resource throttling" screen in central admin. The web

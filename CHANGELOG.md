@@ -4,6 +4,11 @@
 
 * Changes to SharePointDsc
   * Added support for SharePoint 2019
+  * Added CredSSP requirement to the Readme files
+  * Removed the deprecated resources SPCreateFarm and SPJoinFarm (replaced
+    in v2.0 by SPFarm)
+* SPBlobCacheSettings
+  * Updated the Service Instance retrieval to be language independent
 * SPConfigWizard
   * Fixed check for Ensure=Absent in the Set method
 * SPSearchContentSource
@@ -49,11 +54,6 @@ resources:
   * SPWebAppWorkflowSettings
 * Introduced new mandatory parameters
   * SPSearchResultSource
-
-## Unreleased
-
-* SPBlobCacheSettings
-  * Updated the Service Instance retrieval to be language independent
 
 ## 2.6
 
