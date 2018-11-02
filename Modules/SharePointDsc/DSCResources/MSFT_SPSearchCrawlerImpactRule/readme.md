@@ -1,6 +1,7 @@
 # Description
 
 **Type:** Distributed
+**Requires CredSSP:** No
 
 This resource is responsible for managing the search crawl impact rules in the
 search service application. You can create new rules, change existing rules and

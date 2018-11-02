@@ -1,6 +1,7 @@
 # Description
 
 **Type:** Common
+**Requires CredSSP:** No
 
 This resource is responsible for ensuring the installation of all SharePoint
 prerequisites. It makes use of the PrerequisiteInstaller.exe file that is part

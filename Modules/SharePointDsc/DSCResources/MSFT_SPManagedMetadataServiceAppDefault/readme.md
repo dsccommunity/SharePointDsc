@@ -1,6 +1,7 @@
 # Description
 
 **Type:** Distributed
+**Requires CredSSP:** No
 
 Using several managed metadata service instances in a farm requires some
 configuration, which service application proxy should be used as default

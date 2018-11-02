@@ -1,6 +1,7 @@
 # Description
 
 **Type:** Distributed
+**Requires CredSSP:** No
 
 This resource is used to control settings that relate to the automatic
 changing of passwords for managed accounts (where they opt-in to be managed by

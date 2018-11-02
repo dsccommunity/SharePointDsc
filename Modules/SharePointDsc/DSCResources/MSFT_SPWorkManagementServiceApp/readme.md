@@ -1,6 +1,7 @@
 # Description
 
 **Type:** Distributed
+**Requires CredSSP:** No
 
 This resource is used to provision and manage an instance of the Work
 Management Services Service Application. It will identify an instance of the

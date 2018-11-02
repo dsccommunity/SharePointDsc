@@ -1,6 +1,7 @@
 # Description
 
 **Type:** Distributed
+**Requires CredSSP:** No
 
 This resource is responsible for provisioning and managing the Project Server
 service application in SharePoint Server 2016 or 2019.

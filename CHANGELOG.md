@@ -4,16 +4,25 @@
 
 * Changes to SharePointDsc
   * Added support for SharePoint 2019
+  * Added CredSSP requirement to the Readme files
+  * Removed the deprecated resources SPCreateFarm and SPJoinFarm (replaced
+    in v2.0 by SPFarm)
+* SPBlobCacheSettings
+  * Updated the Service Instance retrieval to be language independent
 * SPConfigWizard
   * Fixed check for Ensure=Absent in the Set method
 * SPSearchContentSource
   * Added support for Business Content Source Type
-* SPSearchResultSource
-  * BREAKING CHANGE: Added option to create Result Sources at different scopes.
 * SPSearchMetadataCategory
   * New resource added
+* SPSearchServiceApp
+  * Updated resource to make sure the presence of the service app proxy is
+    checked and created if it does not exist
 * SPSecurityTokenServiceConfig
-  * The resource only tested for the Ensure parameter. Added more parameters.
+  * The resource only tested for the Ensure parameter. Added more parameters
+* SPUserProfileServiceApp
+  * Updated the check for successful creation of the service app to throw an
+    error if this is not done correctly
 
 The following changes will break v2.x and earlier configurations that use these
 resources:
@@ -48,12 +57,7 @@ resources:
   * SPWebAppThrottlingSettings
   * SPWebAppWorkflowSettings
 * Introduced new mandatory parameters
-  * SPSearchResultSource
-
-## Unreleased
-
-* SPBlobCacheSettings
-  * Updated the Service Instance retrieval to be language independent
+  * SPSearchResultSource: Added option to create Result Sources at different scopes.
 
 ## 2.6
 

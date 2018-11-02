@@ -1,6 +1,7 @@
 # Description
 
 **Type:** Distributed
+**Requires CredSSP:** No
 
 This resource is used to install the SharePoint Language Pack binaries. The
 BinaryDir parameter should point to the path that setup.exe is located (not to

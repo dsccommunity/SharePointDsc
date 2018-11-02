@@ -1,6 +1,7 @@
 # Description
 
 **Type:** Distributed
+**Requires CredSSP:** No
 
 This resource will create a property in a user profile service application. It
 creates, update or delete a property using the parameters that are passed in to
