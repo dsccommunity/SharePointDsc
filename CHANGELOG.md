@@ -19,7 +19,10 @@
   * Updated resource to make sure the presence of the service app proxy is
     checked and created if it does not exist
 * SPSecurityTokenServiceConfig
-  * The resource only tested for the Ensure parameter. Added more parameters.
+  * The resource only tested for the Ensure parameter. Added more parameters
+* SPUserProfileServiceApp
+  * Updated the check for successful creation of the service app to throw an
+    error if this is not done correctly
 
 The following changes will break v2.x and earlier configurations that use these
 resources:
