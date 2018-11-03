@@ -17,7 +17,7 @@ class MSFT_SPUserProfileProperty : OMI_BaseResource
     [Write, Description("The description of the property")] string Description;
     [Write, Description("The policy setting to apply to the property"), ValueMap{"Mandatory","Optin","Optout","Disabled"}, Values{"Mandatory","Optin","Optout","Disabled"}] string PolicySetting;
     [Write, Description("The privacy setting for the property"), ValueMap{"Public","Contacts","Organization","Manager","Private"}, Values{"Public","Contacts","Organization","Manager","Private"}] string PrivacySetting;
-    [Write, Description("The details about the property mapping"), EmbeddedInstance("MSFT_SPUserProfilePropertyMapping")] string PropertyMappings;
+    [Write, Description("The details about the property mapping"), EmbeddedInstance("MSFT_SPUserProfilePropertyMapping")] string PropertyMappings[];
     [Write, Description("The length of the field")] uint32 Length;
     [Write, Description("The display order to put the property in to the list at")] uint32 DisplayOrder;
     [Write, Description("Is this field used for event logging")] boolean IsEventLog;

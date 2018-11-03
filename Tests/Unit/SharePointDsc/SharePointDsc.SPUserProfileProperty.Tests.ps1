@@ -29,54 +29,62 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
         $testParamsNewProperty = @{
-            Name                  = "WorkEmailNew"
-            UserProfileService    = "User Profile Service Application"
-            DisplayName           = "WorkEmailNew"
-            Type                  = "String (Single Value)"
-            Description           = ""
-            PolicySetting         = "Mandatory"
-            PrivacySetting        = "Public"
-            MappingConnectionName = "contoso"
-            MappingPropertyName   = "department"
-            MappingDirection      = "Import"
-            Length                = 30
-            DisplayOrder          = 5496
-            IsEventLog            = $false
-            IsVisibleOnEditor     = $true
-            IsVisibleOnViewer     = $true
-            IsUserEditable        = $true
-            IsAlias               = $false
-            IsSearchable          = $false
-            TermStore             = "Managed Metadata service"
-            TermGroup             = "People"
-            TermSet               = "Department"
-            UserOverridePrivacy   = $false
+            Name                = "WorkEmailNew"
+            UserProfileService  = "User Profile Service Application"
+            DisplayName         = "WorkEmailNew"
+            Type                = "String (Single Value)"
+            Description         = ""
+            PolicySetting       = "Mandatory"
+            PrivacySetting      = "Public"
+            PropertyMappings    = @(
+                (New-CimInstance -ClassName MSFT_SPUserProfilePropertyMapping -ClientOnly -Property @{
+                        ConnectionName = "contoso"
+                        PropertyName   = "department"
+                        Direction      = "Import"
+                    })
+            )
+            Length              = 30
+            DisplayOrder        = 5496
+            IsEventLog          = $false
+            IsVisibleOnEditor   = $true
+            IsVisibleOnViewer   = $true
+            IsUserEditable      = $true
+            IsAlias             = $false
+            IsSearchable        = $false
+            TermStore           = "Managed Metadata service"
+            TermGroup           = "People"
+            TermSet             = "Department"
+            UserOverridePrivacy = $false
         }
 
         $testParamsUpdateProperty = @{
-            Name                  = "WorkEmailUpdate"
-            UserProfileService    = "User Profile Service Application"
-            DisplayName           = "WorkEmailUpdate"
-            Type                  = "String (Single Value)"
-            Description           = ""
-            PolicySetting         = "Optin"
-            PrivacySetting        = "Private"
-            Ensure                = "Present"
-            MappingConnectionName = "contoso"
-            MappingPropertyName   = "mail"
-            MappingDirection      = "Import"
-            Length                = 25
-            DisplayOrder          = 5401
-            IsEventLog            = $true
-            IsVisibleOnEditor     = $True
-            IsVisibleOnViewer     = $true
-            IsUserEditable        = $true
-            IsAlias               = $true
-            IsSearchable          = $true
-            TermStore             = "Managed Metadata service"
-            TermGroup             = "People"
-            TermSet               = "Location"
-            UserOverridePrivacy   = $false
+            Name                = "WorkEmailUpdate"
+            UserProfileService  = "User Profile Service Application"
+            DisplayName         = "WorkEmailUpdate"
+            Type                = "String (Single Value)"
+            Description         = ""
+            PolicySetting       = "Optin"
+            PrivacySetting      = "Private"
+            Ensure              = "Present"
+            PropertyMappings    = @(
+                (New-CimInstance -ClassName MSFT_SPUserProfilePropertyMapping -ClientOnly -Property @{
+                        ConnectionName = "contoso"
+                        PropertyName   = "department"
+                        Direction      = "Import"
+                    })
+            )
+            Length              = 25
+            DisplayOrder        = 5401
+            IsEventLog          = $true
+            IsVisibleOnEditor   = $True
+            IsVisibleOnViewer   = $true
+            IsUserEditable      = $true
+            IsAlias             = $true
+            IsSearchable        = $true
+            TermStore           = "Managed Metadata service"
+            TermGroup           = "People"
+            TermSet             = "Location"
+            UserOverridePrivacy = $false
         }
 
         try
