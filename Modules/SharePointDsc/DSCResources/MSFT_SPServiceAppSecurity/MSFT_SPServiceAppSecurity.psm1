@@ -394,8 +394,8 @@ function Test-TargetResource
         $params = $args[0]
         $CurrentValues = $args[1]
 
-        $serviceApp = Get-SPServiceApplication -Name $ServiceAppName
-        switch ($SecurityType)
+        $serviceApp = Get-SPServiceApplication -Name $params.ServiceAppName
+        switch ($params.SecurityType)
         {
             "Administrators" {
                 $security = $serviceApp | Get-SPServiceApplicationSecurity -Admin
@@ -405,13 +405,13 @@ function Test-TargetResource
             }
         }
 
-        if ($null -ne $Members)
+        if ($null -ne $params.Members)
         {
             Write-Verbose -Message "Processing Members parameter"
 
             if ($CurrentValues.Members.Count -eq 0)
             {
-                if ($Members.Count -gt 0)
+                if ($params.Members.Count -gt 0)
                 {
                     Write-Verbose -Message "Security list does not match"
                     return $false
@@ -422,21 +422,21 @@ function Test-TargetResource
                     return $true
                 }
             }
-            elseif($Members.Count -eq 0)
+            elseif($params.Members.Count -eq 0)
             {
                 Write-Verbose -Message "Security list does not match"
                 return $false
             }
 
             $differences = Compare-Object -ReferenceObject $CurrentValues.Members.Username `
-                                            -DifferenceObject $Members.Username
+                                            -DifferenceObject $params.Members.Username
 
             if ($null -eq $differences)
             {
                 Write-Verbose -Message "Security list matches - checking that permissions match on each object"
                 foreach($currentMember in $CurrentValues.Members)
                 {
-                    $expandedAccessLevels = ExpandAccessLevel -Security $security -AccessLevels ($Members | Where-Object -FilterScript {
+                    $expandedAccessLevels = ExpandAccessLevel -Security $security -AccessLevels ($params.Members | Where-Object -FilterScript {
                         $_.Username -eq $currentMember.Username
                     } | Select-Object -First 1).AccessLevels
                     if ($null -ne (Compare-Object -DifferenceObject $currentMember.AccessLevels -ReferenceObject $expandedAccessLevels))
@@ -455,10 +455,10 @@ function Test-TargetResource
         }
 
         $result = $true
-        if ($MembersToInclude)
+        if ($params.MembersToInclude)
         {
             Write-Verbose -Message "Processing MembersToInclude parameter"
-            foreach ($member in $MembersToInclude)
+            foreach ($member in $params.MembersToInclude)
             {
                 if (-not($CurrentValues.Members.Username -contains $member.Username))
                 {
@@ -481,10 +481,10 @@ function Test-TargetResource
             }
         }
 
-        if ($MembersToExclude)
+        if ($params.MembersToExclude)
         {
             Write-Verbose -Message "Processing MembersToExclude parameter"
-            foreach ($member in $MembersToExclude)
+            foreach ($member in $params.MembersToExclude)
             {
                 if ($CurrentValues.Members.Username -contains $member)
                 {
