@@ -158,11 +158,8 @@ function Get-TargetResource
             $termSet.TermGroup = $userProfileProperty.CoreProperty.TermSet.Group.Name
             $termSet.TermStore = $userProfileProperty.CoreProperty.TermSet.TermStore.Name
         }
-        $mapping = @{
-            ConectionName = ""
-            PropertyName  = ""
-            Direction     = ""
-        }
+
+        $userProfilePropertyMappings = @()
 
         $userProfileConfigManager = New-Object -TypeName "Microsoft.Office.Server.UserProfiles.UserProfileConfigManager" `
             -ArgumentList $context
@@ -172,63 +169,82 @@ function Get-TargetResource
             return $nullReturn
         }
 
-        $syncConnection = $userProfileConfigManager.ConnectionManager | `
-            Where-Object -FilterScript {
-            $null -ne $_.PropertyMapping -and $null -ne $_.PropertyMapping.Item($params.Name)
-        }
-
-        if ($null -ne $syncConnection)
+        foreach ($propertyMapping in $params.PropertyMappings)
         {
-
-            #ToDO
-            if ($syncConnection.Type -eq "ActiveDirectoryImport" )
+            try
             {
-                $adImportConnection = [Microsoft.Office.Server.UserProfiles.ActiveDirectoryImportConnection]$connection
+                $connection = $userProfileConfigManager.ConnectionManager[$propertyMapping.ConnectionName]
 
-                $propertyFlags = [System.Reflection.BindingFlags]::Instance -bor `
-                    [System.Reflection.BindingFlags]::NonPublic
-
-                $propMembers = $adImportConnection.GetType().GetMethods($propertyFlags)
-
-                $adImportPropertyMappingsMethod = $propMembers | Where-Object -FilterScript {
-                    $_.Name -eq "ADImportPropertyMappings"
-                }
-                $propertyMappings = $adImportPropertyMappingsMethod.Invoke($adImportConnection, $null)
-
-                $propertyMappings | ForEach-Object -Process {
-                    $currentMappingMembers = $_.GetType().GetMembers($propertyFlags)
-
-                    $profileProperty = $currentMappingMembers | Where-Object -FilterScript {
-                        $_.Name -eq "ProfileProperty"
-                    }
-
-                    $profilePropertyValue = $profileProperty.GetValue($_)
-                    if ($profilePropertyValue -eq "SPS-ClaimID")
-                    {
-                        $adAttributeProperty = $currentMappingMembers | Where-Object -FilterScript {
-                            $_.Name -eq "ADAttribute"
-                        }
-
-                        Write-Host "ADAttribute : $($adAttributeProperty.GetValue($_))"
-                        Write-Host "MappingDirection : Import"
-                    }
+                # This only works with SharePoint 2013 and AD Sync Connections.
+                $syncConnection = $connection | Where-Object -FilterScript {
+                    $null -ne $_.PropertyMapping -and $null -ne $_.PropertyMapping.Item($params.Name)
                 }
 
-                $userProfilePropertyMappings #TODO
-            }
-            #ToDo End
-
-
-            $currentMapping = $syncConnection.PropertyMapping.Item($params.Name)
-            if ($null -ne $currentMapping)
-            {
-                $mapping.Direction = "Import"
-                $mapping.ConnectionName = $params.MappingConnectionName
-                if ($currentMapping.IsExport)
+                if ($null -ne $syncConnection)
                 {
-                    $mapping.Direction = "Export"
+                    # This code will only be reached with SP 2013 and AD Sync Connections.
+                    $currentMapping = $syncConnection.PropertyMapping.Item($params.Name)
+                    if ($null -ne $currentMapping)
+                    {
+                        $mapping = @{}
+                        $mapping.Direction = "Import"
+                        $mapping.ConnectionName = $params.MappingConnectionName
+                        if ($currentMapping.IsExport)
+                        {
+                            $mapping.Direction = "Export"
+                        }
+                        $mapping.PropertyName = $currentMapping.DataSourcePropertyName
+
+                        $userProfilePropertyMappings += (New-CimInstance -ClassName MSFT_SPUserProfilePropertyMapping -ClientOnly -Property @{
+                                ConnectionName = $propertyMapping.ConnectionName
+                                PropertyName   = $mapping.ConnectionName
+                                Direction      = $mapping.Direction
+                            })
+                    }
                 }
-                $mapping.PropertyName = $currentMapping.DataSourcePropertyName
+                else
+                {
+                    # This code is for SP 2013, 2016 and 2019 with AD Import Connections.
+                    if ($connection.Type -eq "ActiveDirectoryImport")
+                    {
+                        $adImportConnection = [Microsoft.Office.Server.UserProfiles.ActiveDirectoryImportConnection]$connection
+
+                        $propertyFlags = [System.Reflection.BindingFlags]::Instance -bor `
+                            [System.Reflection.BindingFlags]::NonPublic
+
+                        $propMembers = $adImportConnection.GetType().GetMethods($propertyFlags)
+
+                        $adImportPropertyMappingsMethod = $propMembers | Where-Object -FilterScript {
+                            $_.Name -eq "ADImportPropertyMappings"
+                        }
+                        $propertyMappings = $adImportPropertyMappingsMethod.Invoke($adImportConnection, $null)
+
+                        $propertyMappings | ForEach-Object -Process {
+                            $currentMappingMembers = $_.GetType().GetMembers($propertyFlags)
+
+                            $profileProperty = $currentMappingMembers | Where-Object -FilterScript {
+                                $_.Name -eq "ProfileProperty"
+                            }
+
+                            $profilePropertyValue = $profileProperty.GetValue($_)
+                            if ($profilePropertyValue -eq $params.Name)
+                            {
+                                $adAttributeProperty = $currentMappingMembers | Where-Object -FilterScript {
+                                    $_.Name -eq $propertyMapping.PropertyName
+                                }
+                                $userProfilePropertyMappings += (New-CimInstance -ClassName MSFT_SPUserProfilePropertyMapping -ClientOnly -Property @{
+                                        ConnectionName = $propertyMapping.ConnectionName
+                                        PropertyName   = $adAttributeProperty.GetValue($_)
+                                        Direction      = "Import"
+                                    })
+                            }
+                        }
+                    }
+                }
+            }
+            catch [Exception]
+            {
+                Write-Verbose "An unecpexted error occured. Please report an issue! $_"
             }
         }
 
@@ -380,9 +396,8 @@ function Set-TargetResource
 
     $PSBoundParameters.Ensure = $Ensure
 
-    $test = $PSBoundParameters
     Invoke-SPDSCCommand -Credential $InstallAccount `
-        -Arguments $test `
+        -Arguments $PSBoundParameters `
         -ScriptBlock {
 
         $params = $args[0]
@@ -591,70 +606,67 @@ function Set-TargetResource
         {
             foreach ($propertyMapping in $PropertyMappings)
             {
+                # try
+                # {
+                $syncConnection = $userProfileConfigManager.ConnectionManager[$propertyMapping.ConnectionName]
+
+                if ($null -eq $syncConnection)
+                {
+                    throw "connection not found"
+                }
+
+                if ($null -ne $syncConnection.PropertyMapping)
+                {
+                    $currentMapping = $syncConnection.PropertyMapping.Item($params.Name)
+                }
+
+                if ($null -eq $currentMapping `
+                        -or ($currentMapping.DataSourcePropertyName -ne $params.MappingPropertyName) `
+                        -or ($currentMapping.IsImport `
+                            -and $propertyMapping.Direction -eq "Export")
+                )
+                {
+                    if ($null -ne $currentMapping)
+                    {
+                        $currentMapping.Delete() #API allows updating, but UI doesn't do that.
+                    }
+
+                    $export = $propertyMapping.Direction -eq "Export"
+                    if ($syncConnection.Type -eq "ActiveDirectoryImport")
+                    {
+                        if ($export)
+                        {
+                            throw "not implemented"
+                        }
+                        else
+                        {
+                            $syncConnection.AddPropertyMapping($propertyMapping.PropertyName, $params.Name)
+                            $syncConnection.Update()
+                        }
+                    }
+                    else
+                    {
+                        if ($export)
+                        {
+                            $syncConnection.PropertyMapping.AddNewExportMapping([Microsoft.Office.Server.UserProfiles.ProfileType]::User,
+                                $params.Name,
+                                $propertyMapping.PropertyName)
+                        }
+                        else
+                        {
+                            $syncConnection.PropertyMapping.AddNewMapping([Microsoft.Office.Server.UserProfiles.ProfileType]::User,
+                                $params.Name,
+                                $propertyMapping.PropertyName)
+                        }
+                    }
+                }
+                # }
+                # catch [Exception]
+                # {
+                #     Write-Verbose "An unecpexted error occured. Please report an issue! $_"
+                # }
             }
         }
-        # if ($params.ContainsKey("MappingConnectionName") `
-        #         -and $params.ContainsKey("MappingPropertyName"))
-        # {
-        #     $syncConnection = $userProfileConfigManager.ConnectionManager | Where-Object -FilterScript {
-        #         $_.DisplayName -eq $params.MappingConnectionName
-        #     }
-
-        #     if ($null -eq $syncConnection )
-        #     {
-        #         throw "connection not found"
-        #     }
-        #     $syncConnection = $userProfileConfigManager.ConnectionManager | Where-Object -FilterScript {
-        #         $_.DisplayName -eq $params.MappingConnectionName
-        #     }
-
-        #     if ($null -ne $syncConnection.PropertyMapping)
-        #     {
-        #         $currentMapping = $syncConnection.PropertyMapping.Item($params.Name)
-        #     }
-
-        #     if ($null -eq $currentMapping `
-        #             -or ($currentMapping.DataSourcePropertyName -ne $params.MappingPropertyName) `
-        #             -or ($currentMapping.IsImport `
-        #                 -and $params.ContainsKey("MappingDirection") `
-        #                 -and $params.MappingDirection -eq "Export")
-        #     )
-        #     {
-        #         if ($null -ne $currentMapping)
-        #         {
-        #             $currentMapping.Delete() #API allows updating, but UI doesn't do that.
-        #         }
-
-        #         $export = $params.ContainsKey("MappingDirection") -and $params.MappingDirection -eq "Export"
-        #         if ($syncConnection.Type -eq "ActiveDirectoryImport")
-        #         {
-        #             if ($export)
-        #             {
-        #                 throw "not implemented"
-        #             }
-        #             else
-        #             {
-        #                 $syncConnection.AddPropertyMapping($params.MappingPropertyName, $params.Name)
-        #                 $syncConnection.Update()
-        #             }
-        #         }
-        #         else
-        #         {
-        #             if ($export)
-        #             {
-        #                 $syncConnection.PropertyMapping.AddNewExportMapping([Microsoft.Office.Server.UserProfiles.ProfileType]::User,
-        #                     $params.Name,
-        #                     $params.MappingPropertyName)
-        #             }
-        #             else
-        #             {
-        #                 $syncConnection.PropertyMapping.AddNewMapping([Microsoft.Office.Server.UserProfiles.ProfileType]::User,
-        #                     $params.Name,
-        #                     $params.MappingPropertyName)
-        #             }
-        #         }
-        #     }
-        # }
     }
 }
 
@@ -789,7 +801,7 @@ function Test-TargetResource
             "Description",
             "PolicySetting",
             "PrivacySetting",
-            "PropertyNapping",
+            "PropertyNappings",
             "Length",
             "DisplayOrder",
             "IsEventLog",
