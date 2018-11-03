@@ -329,7 +329,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             return $true
         } -PassThru
 
-        $propertyMapping = @{}| Add-Member ScriptMethod Item {
+        $propertyMapping = @{} | Add-Member ScriptMethod Item {
             param(
                 [string]
                 $property
@@ -339,13 +339,14 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             {
                 return $propertyMappingItem
             }
-        } -PassThru -force | Add-Member ScriptMethod AddNewExportMapping {
+        } -PassThru -Force | Add-Member ScriptMethod AddNewExportMapping {
             $Global:UpsMappingAddNewExportCalled = $true
             return $true
-        } -PassThru | Add-Member ScriptMethod AddNewMapping {
+        } -PassThru -Force | Add-Member ScriptMethod AddNewMapping {
             $Global:UpsMappingAddNewMappingCalled = $true
             return $true
-        } -PassThru
+        } -PassThru -Force
+
         $connection = @{
             DisplayName     = "Contoso"
             Server          = "contoso.com"
@@ -355,29 +356,30 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             PropertyMapping = $propertyMapping
         }
 
-        $connection = $connection   | Add-Member ScriptMethod Update {
+        $connection = $connection | Add-Member ScriptMethod Update {
             $Global:SPUPSSyncConnectionUpdateCalled = $true
         } -PassThru  | Add-Member ScriptMethod AddPropertyMapping {
             $Global:SPUPSSyncConnectionAddPropertyMappingCalled = $true
         } -PassThru
 
 
-        $ConnnectionManager = @($connection) | Add-Member ScriptMethod  AddActiveDirectoryConnection {
-            param(
-                [Microsoft.Office.Server.UserProfiles.ConnectionType]
-                $connectionType,
-                $name,
-                $forest,
-                $useSSL,
-                $userName,
-                $pwd,
-                $namingContext,
-                $p1,
-                $p2
-            )
-            $Global:SPUPSAddActiveDirectoryConnectionCalled = $true
-        } -PassThru
-
+        $ConnnectionManager = @{
+            $($connection.DisplayName) = @($connection) | Add-Member ScriptMethod  AddActiveDirectoryConnection {
+                param(
+                    [Microsoft.Office.Server.UserProfiles.ConnectionType]
+                    $connectionType,
+                    $name,
+                    $forest,
+                    $useSSL,
+                    $userName,
+                    $pwd,
+                    $namingContext,
+                    $p1,
+                    $p2
+                )
+                $Global:SPUPSAddActiveDirectoryConnectionCalled = $true
+            } -PassThru
+        }
 
         Mock -CommandName New-Object -MockWith {
             $ProfilePropertyManager = @{
@@ -698,7 +700,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             It "Should throw an error if the MappingDirection is set to Export" {
                 $testParamsExport = $testParamsUpdateProperty
                 $connection.Type = "ActiveDirectoryImport"
-                $testParamsExport.MappingDirection = "Export"
+                $testParamsExport.PropertyMappings[0].Direction = "Export"
                 $propertyMappingItem.IsImport = $true
 
                 { Set-TargetResource @testParamsExport } | Should throw "not implemented"
@@ -795,6 +797,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 $Global:SPUPSMappingItemCalled | Should be $true
             }
         }
+
         Context -Name "When property exists and mapping does not exist" {
             $propertyMappingItem = $null
             Mock -CommandName Get-SPDSCUserProfileSubTypeManager -MockWith {
