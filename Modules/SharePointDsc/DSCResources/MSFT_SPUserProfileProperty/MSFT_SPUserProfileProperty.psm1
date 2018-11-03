@@ -56,7 +56,7 @@ function Get-TargetResource
         $PrivacySetting,
 
         [Parameter()]
-        [Microsoft.Management.Infrastructure.CimInstance]
+        [Microsoft.Management.Infrastructure.CimInstance[]]
         $PropertyMappings,
 
         [Parameter()]
@@ -317,7 +317,7 @@ function Set-TargetResource
         $PrivacySetting,
 
         [Parameter()]
-        [Microsoft.Management.Infrastructure.CimInstance]
+        [Microsoft.Management.Infrastructure.CimInstance[]]
         $PropertyMappings,
 
         [Parameter()]
@@ -716,7 +716,7 @@ function Test-TargetResource
         $PrivacySetting,
 
         [Parameter()]
-        [Microsoft.Management.Infrastructure.CimInstance]
+        [Microsoft.Management.Infrastructure.CimInstance[]]
         $PropertyMappings,
 
         [Parameter()]
