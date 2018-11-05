@@ -5,6 +5,7 @@
 * Changes to SharePointDsc
   * Added support for SharePoint 2019
   * Added CredSSP requirement to the Readme files
+  * Added VSCode Support for running SharePoint 2019 unit tests
   * Removed the deprecated resources SPCreateFarm and SPJoinFarm (replaced
     in v2.0 by SPFarm)
 * SPBlobCacheSettings
