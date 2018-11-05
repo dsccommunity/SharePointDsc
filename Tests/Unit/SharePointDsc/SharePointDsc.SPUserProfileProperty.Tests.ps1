@@ -465,7 +465,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 } -PassThru
                 return (@{
                         ProfilePropertyManager = $ProfilePropertyManager
-                        ConnectionManager      = $()
+                        ConnectionManager      = @{}
                     } | Add-Member ScriptMethod IsSynchronizationRunning {
                         $Global:UpsSyncIsSynchronizationRunning = $true
                         return $false
@@ -685,7 +685,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
             It "Should return false when the Test method is called" {
                 $Global:SPUPGetPropertyByNameCalled = $false
-                Test-TargetResource @testParamsUpdateProperty | Should Be $true
+                Test-TargetResource @testParamsUpdateProperty | Should Be $false
                 $Global:SPUPGetPropertyByNameCalled | Should be $true
             }
 
@@ -755,7 +755,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "When property exists and mapping exists, mapping config does not match" {
 
-            $propertyMappingItem.DataSourcePropertyName = "property"
+            #$propertyMappingItem.DataSourcePropertyName = "property"
 
             Mock -CommandName Get-SPDSCUserProfileSubTypeManager -MockWith {
                 $result = @{}| Add-Member ScriptMethod GetProfileSubtype {

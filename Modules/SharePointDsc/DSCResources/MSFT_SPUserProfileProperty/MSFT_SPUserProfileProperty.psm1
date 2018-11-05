@@ -801,7 +801,7 @@ function Test-TargetResource
             "Description",
             "PolicySetting",
             "PrivacySetting",
-            "PropertyNappings",
+            "PropertyMappings",
             "Length",
             "DisplayOrder",
             "IsEventLog",
