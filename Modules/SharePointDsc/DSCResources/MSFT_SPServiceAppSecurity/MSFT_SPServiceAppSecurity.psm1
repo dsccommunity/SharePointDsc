@@ -90,12 +90,19 @@ function Get-TargetResource
                 }
             }
 
-            $accessLevel = $securityEntry.AllowedRights.ToString()
-            $accessLevel = $accessLevel.Replace("FullControl", "Full Control")
-            $accessLevel = $accessLevel.Replace("ChangePermissions", "Change Permissions")
+            $accessLevels = @()
+
+            foreach ($namedAccessRight in $security.NamedAccessRights)
+            {
+                if($namedAccessRight.Rights.IsSubsetOf($securityEntry.AllowedObjectRights))
+                {
+                    $accessLevels += $namedAccessRight.Name
+                }
+            }
+
             $members += @{
                 Username    = $user
-                AccessLevel = $accessLevel
+                AccessLevels = $accessLevels
             }
         }
 
@@ -208,21 +215,19 @@ function Set-TargetResource
 
                 if ($CurrentValues.Members.Username -contains $desiredMember.Username)
                 {
-                    if (($CurrentValues.Members | Where-Object -FilterScript {
+                    if ($null -ne (Compare-Object -ReferenceObject ($CurrentValues.Members | Where-Object -FilterScript {
                             $_.Username -eq $desiredMember.Username
-                        } | Select-Object -First 1).AccessLevel -ne $desiredMember.AccessLevel)
+                        } | Select-Object -First 1).AccessLevels -DifferenceObject $desiredMember.AccessLevels))
                     {
-                        Revoke-SPObjectSecurity -Identity $security `
-                                                -Principal $claim
-
                         Grant-SPObjectSecurity -Identity $security `
                                                -Principal $claim `
-                                               -Rights $desiredMember.AccessLevel
+                                               -Rights $desiredMember.AccessLevels `
+                                               -Replace
                     }
                 }
                 else
                 {
-                    Grant-SPObjectSecurity -Identity $security -Principal $claim -Rights $desiredMember.AccessLevel
+                    Grant-SPObjectSecurity -Identity $security -Principal $claim -Rights $desiredMember.AccessLevels
                 }
             }
 
@@ -280,23 +285,21 @@ function Set-TargetResource
 
                 if ($CurrentValues.Members.Username -contains $desiredMember.Username)
                 {
-                    if (($CurrentValues.Members | Where-Object -FilterScript {
+                    if ($null -ne (Compare-Object -ReferenceObject ($CurrentValues.Members | Where-Object -FilterScript {
                             $_.Username -eq $desiredMember.Username
-                        } | Select-Object -First 1).AccessLevel -ne $desiredMember.AccessLevel)
+                        } | Select-Object -First 1).AccessLevels -DifferenceObject $desiredMember.AccessLevels))
                     {
-                        Revoke-SPObjectSecurity -Identity $security `
-                                                -Principal $claim
-
                         Grant-SPObjectSecurity -Identity $security `
                                                -Principal $claim `
-                                               -Rights $desiredMember.AccessLevel
+                                               -Rights $desiredMember.AccessLevels `
+                                               -Replace
                     }
                 }
                 else
                 {
                     Grant-SPObjectSecurity -Identity $security `
                                            -Principal $claim `
-                                           -Rights $desiredMember.AccessLevel
+                                           -Rights $desiredMember.AccessLevels
                 }
             }
         }
@@ -385,97 +388,150 @@ function Test-TargetResource
         return $false
     }
 
-    if ($null -ne $Members)
-    {
-        Write-Verbose -Message "Processing Members parameter"
+    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+                        -Arguments @($PSBoundParameters, $CurrentValues) `
+                        -ScriptBlock {
+        $params = $args[0]
+        $CurrentValues = $args[1]
 
-        if ($CurrentValues.Members.Count -eq 0)
+        $serviceApp = Get-SPServiceApplication -Name $params.ServiceAppName
+        switch ($params.SecurityType)
         {
-            if ($Members.Count -gt 0)
+            "Administrators" {
+                $security = $serviceApp | Get-SPServiceApplicationSecurity -Admin
+            }
+            "SharingPermissions" {
+                $security = $serviceApp | Get-SPServiceApplicationSecurity
+            }
+        }
+
+        if ($null -ne $params.Members)
+        {
+            Write-Verbose -Message "Processing Members parameter"
+
+            if ($CurrentValues.Members.Count -eq 0)
+            {
+                if ($params.Members.Count -gt 0)
+                {
+                    Write-Verbose -Message "Security list does not match"
+                    return $false
+                }
+                else
+                {
+                    Write-Verbose -Message "Configured and specified security lists are both empty"
+                    return $true
+                }
+            }
+            elseif($params.Members.Count -eq 0)
             {
                 Write-Verbose -Message "Security list does not match"
                 return $false
             }
-            else
+
+            $differences = Compare-Object -ReferenceObject $CurrentValues.Members.Username `
+                                            -DifferenceObject $params.Members.Username
+
+            if ($null -eq $differences)
             {
-                Write-Verbose -Message "Configured and specified security lists are both empty"
+                Write-Verbose -Message "Security list matches - checking that permissions match on each object"
+                foreach($currentMember in $CurrentValues.Members)
+                {
+                    $expandedAccessLevels = ExpandAccessLevel -Security $security -AccessLevels ($params.Members | Where-Object -FilterScript {
+                        $_.Username -eq $currentMember.Username
+                    } | Select-Object -First 1).AccessLevels
+                    if ($null -ne (Compare-Object -DifferenceObject $currentMember.AccessLevels -ReferenceObject $expandedAccessLevels))
+                    {
+                        Write-Verbose -Message "$($currentMember.Username) has incorrect permission level. Test failed."
+                        return $false
+                    }
+                }
                 return $true
             }
-        }
-        elseif($Members.Count -eq 0)
-        {
-            Write-Verbose -Message "Security list does not match"
-            return $false
-        }
-
-        $differences = Compare-Object -ReferenceObject $CurrentValues.Members.Username `
-                                          -DifferenceObject $Members.Username
-
-        if ($null -eq $differences)
-        {
-            Write-Verbose -Message "Security list matches - checking that permissions match on each object"
-            foreach($currentMember in $CurrentValues.Members)
-            {
-                if ($currentMember.AccessLevel -ne ($Members | Where-Object -FilterScript {
-                        $_.Username -eq $currentMember.Username
-                    } | Select-Object -First 1).AccessLevel)
-                {
-                    Write-Verbose -Message "$($currentMember.Username) has incorrect permission level. Test failed."
-                    return $false
-                }
-            }
-            return $true
-        }
-        else
-        {
-            Write-Verbose -Message "Security list does not match"
-            return $false
-        }
-    }
-
-    $result = $true
-    if ($MembersToInclude)
-    {
-        Write-Verbose -Message "Processing MembersToInclude parameter"
-        foreach ($member in $MembersToInclude)
-        {
-            if (-not($CurrentValues.Members.Username -contains $member.Username))
-            {
-                Write-Verbose -Message "$($member.Username) does not have access. Set result to false"
-                $result = $false
-            }
             else
             {
-                Write-Verbose -Message "$($member.Username) already has access. Checking permission..."
-                if ($member.AccessLevel -ne ($CurrentValues.Members | Where-Object -FilterScript {
-                        $_.Username -eq $member.Username
-                    } | Select-Object -First 1).AccessLevel)
+                Write-Verbose -Message "Security list does not match"
+                return $false
+            }
+        }
+
+        $result = $true
+        if ($params.MembersToInclude)
+        {
+            Write-Verbose -Message "Processing MembersToInclude parameter"
+            foreach ($member in $params.MembersToInclude)
+            {
+                if (-not($CurrentValues.Members.Username -contains $member.Username))
                 {
-                    Write-Verbose -Message "$($member.Username) has incorrect permission level. Test failed."
-                    return $false
+                    Write-Verbose -Message "$($member.Username) does not have access. Set result to false"
+                    $result = $false
+                }
+                else
+                {
+                    Write-Verbose -Message "$($member.Username) already has access. Checking permission..."
+                    $expandedAccessLevels = ExpandAccessLevel -Security $security -AccessLevels $member.AccessLevels
+
+                    if ($null -ne (Compare-Object -DifferenceObject $expandedAccessLevels -ReferenceObject ($CurrentValues.Members | Where-Object -FilterScript {
+                            $_.Username -eq $member.Username
+                        } | Select-Object -First 1).AccessLevels))
+                    {
+                        Write-Verbose -Message "$($member.Username) has incorrect permission level. Test failed."
+                        return $false
+                    }
                 }
             }
         }
-    }
 
-    if ($MembersToExclude)
-    {
-        Write-Verbose -Message "Processing MembersToExclude parameter"
-        foreach ($member in $MembersToExclude)
+        if ($params.MembersToExclude)
         {
-            if ($CurrentValues.Members.Username -contains $member)
+            Write-Verbose -Message "Processing MembersToExclude parameter"
+            foreach ($member in $params.MembersToExclude)
             {
-                Write-Verbose -Message "$member already has access. Set result to false"
-                $result = $false
-            }
-            else
-            {
-                Write-Verbose -Message "$member does not have access. Skipping"
+                if ($CurrentValues.Members.Username -contains $member)
+                {
+                    Write-Verbose -Message "$member already has access. Set result to false"
+                    $result = $false
+                }
+                else
+                {
+                    Write-Verbose -Message "$member does not have access. Skipping"
+                }
             }
         }
+
+        return $result
     }
 
     return $result
+}
+
+function ExpandAccessLevel
+{
+    [OutputType([System.String[]])]
+    param(
+        [Parameter()]
+        $Security,
+
+        [Parameter()]
+        [System.String[]]
+        $AccessLevels
+)
+    $expandedAccessLevels = $AccessLevels
+
+    foreach ($namedAccessRight in $Security.NamedAccessRights)
+    {
+        if($AccessLevels -contains $namedAccessRight.Name)
+        {
+            foreach ($namedAccessRight2 in $Security.NamedAccessRights)
+            {
+                if($expandedAccessLevels -notcontains $namedAccessRight2.Name -and
+                    $namedAccessRight2.Rights.IsSubsetOf($namedAccessRight.Rights))
+                {
+                    $expandedAccessLevels += $namedAccessRight2.Name
+                }
+            }
+        }
+    }
+    return $expandedAccessLevels
 }
 
 Export-ModuleMember -Function *-TargetResource

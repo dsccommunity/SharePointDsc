@@ -24,6 +24,13 @@
 * SPUserProfileServiceApp
   * Updated the check for successful creation of the service app to throw an
     error if this is not done correctly
+* SPServiceAppSecurity
+  * Added support for specifying array of access levels.
+  * Changed implementation to use Grant-SPObjectSecurity with Replace switch
+    instead of using a combination of Revoke-SPObjectSecurity and
+    Grant-SPObjectSecurity
+  * Added all supported access levels as available values.
+  * Removed unknown access levels: Change Permissions, Write, and Read
 
 The following changes will break v2.x and earlier configurations that use these
 resources:
@@ -59,6 +66,8 @@ resources:
   * SPWebAppWorkflowSettings
 * Introduced new mandatory parameters
   * SPSearchResultSource: Added option to create Result Sources at different scopes.
+  * SPServiceAppSecurity: Changed parameter AccessLevel to AccessLevels in
+    MSFT_SPServiceAppSecurityEntry to support array of access levels.
 
 ## 2.6
 
