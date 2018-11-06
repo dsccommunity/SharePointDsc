@@ -21,6 +21,9 @@
     checked and created if it does not exist
 * SPSecurityTokenServiceConfig
   * The resource only tested for the Ensure parameter. Added more parameters
+* SPUserProfileProperty
+  * Removed obsolete parameters (MappingConnectionName, MappingPropertyName,
+    MappingDirection) and introduced new parameter PropertyMappings
 * SPUserProfileServiceApp
   * Updated the check for successful creation of the service app to throw an
     error if this is not done correctly
@@ -68,6 +71,7 @@ resources:
   * SPSearchResultSource: Added option to create Result Sources at different scopes.
   * SPServiceAppSecurity: Changed parameter AccessLevel to AccessLevels in
     MSFT_SPServiceAppSecurityEntry to support array of access levels.
+  * SPUserProfileProperty: new parameter PropertyMappings
 
 ## 2.6
 
