@@ -74,6 +74,7 @@ function Get-TargetResource
         Import-Module -Name (Join-Path -Path $ScriptRoot -ChildPath $relPath -Resolve)
 
         $result = Get-SPDSCWebApplicationThrottlingConfig -WebApplication $wa
+        $result.Add("WebAppUrl", $params.WebAppUrl)
         $result.Add("InstallAccount", $params.InstallAccount)
         return $result
     }
