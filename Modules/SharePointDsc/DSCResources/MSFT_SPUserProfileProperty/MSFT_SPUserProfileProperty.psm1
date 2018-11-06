@@ -207,7 +207,14 @@ function Get-TargetResource
                     # This code is for SP 2013, 2016 and 2019 with AD Import Connections.
                     if ($connection.Type -eq "ActiveDirectoryImport")
                     {
-                        $adImportConnection = [Microsoft.Office.Server.UserProfiles.ActiveDirectoryImportConnection]$connection
+                        try
+                        {
+                            $adImportConnection = [Microsoft.Office.Server.UserProfiles.ActiveDirectoryImportConnection]$connection
+                        }
+                        catch [Exception]
+                        {
+                            $adImportConnection = $connection
+                        }
 
                         $propertyFlags = [System.Reflection.BindingFlags]::Instance -bor `
                             [System.Reflection.BindingFlags]::NonPublic
@@ -221,22 +228,26 @@ function Get-TargetResource
 
                         $propertyMappings | ForEach-Object -Process {
                             $currentMappingMembers = $_.GetType().GetMembers($propertyFlags)
-
                             $profileProperty = $currentMappingMembers | Where-Object -FilterScript {
                                 $_.Name -eq "ProfileProperty"
                             }
-
-                            $profilePropertyValue = $profileProperty.GetValue($_)
-                            if ($profilePropertyValue -eq $params.Name)
+                            if ($null -ne $profileProperty)
                             {
-                                $adAttributeProperty = $currentMappingMembers | Where-Object -FilterScript {
-                                    $_.Name -eq $propertyMapping.PropertyName
+                                $profilePropertyValue = $profileProperty.GetValue($_)
+                                if ($profilePropertyValue -eq $params.Name)
+                                {
+                                    $adAttributeProperty = $currentMappingMembers | Where-Object -FilterScript {
+                                        $_.Name -eq "ADAttribute"
+                                    }
+                                    if ($null -ne $adAttributeProperty)
+                                    {
+                                        $userProfilePropertyMappings += (New-CimInstance -ClassName MSFT_SPUserProfilePropertyMapping -ClientOnly -Property @{
+                                                ConnectionName = $propertyMapping.ConnectionName
+                                                PropertyName   = $adAttributeProperty.GetValue($_)
+                                                Direction      = "Import"
+                                            })
+                                    }
                                 }
-                                $userProfilePropertyMappings += (New-CimInstance -ClassName MSFT_SPUserProfilePropertyMapping -ClientOnly -Property @{
-                                        ConnectionName = $propertyMapping.ConnectionName
-                                        PropertyName   = $adAttributeProperty.GetValue($_)
-                                        Direction      = "Import"
-                                    })
                             }
                         }
                     }

@@ -852,7 +852,9 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
                 return $result
             }
+
             $testParamsUpdateProperty.Ensure = "Absent"
+
             It "deletes an user profile property in the set method" {
                 $Global:SPUPGetProfileSubtypeCalled = $false
                 $Global:SPUPGetPropertyByNameCalled = $false
@@ -865,6 +867,114 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 $Global:SPUPGetPropertyByNameCalled | Should be $true
                 $Global:SPUPSMappingItemCalled | Should be $false
                 $Global:SPUPCoreRemovePropertyByNameCalled | Should be $true
+            }
+        }
+
+        Context -Name "When a AD Import Connection should be configured" {
+
+            # Mocks for AD Import Connection
+
+            Mock -CommandName Get-SPDSCUserProfileSubTypeManager -MockWith {
+                $result = @{}| Add-Member ScriptMethod GetProfileSubtype {
+                    $Global:SPUPGetProfileSubtypeCalled = $true
+                    return @{
+                        Properties = $userProfileSubTypePropertiesUpdateProperty
+                    }
+                } -PassThru
+
+                return $result
+            }
+
+            $propertyMapping = ([PSCustomObject]@{}) | Add-Member ScriptMethod Item {
+                param(
+                    [string]
+                    $property
+                )
+                $Global:SPUPSMappingItemCalled = $true
+            } -PassThru -Force | Add-Member ScriptMethod AddNewExportMapping {
+                $Global:UpsMappingAddNewExportCalled = $true
+                return $true
+            } -PassThru -Force | Add-Member ScriptMethod AddNewMapping {
+                $Global:UpsMappingAddNewMappingCalled = $true
+                return $true
+            } -PassThru -Force
+
+            $connection = [PSCustomObject]@{
+                DisplayName        = "Contoso"
+                IsDirectorySerivce = $true
+                Type               = "ActiveDirectoryImport"
+                PropertyMapping    = $propertyMapping
+            } | Add-Member -MemberType ScriptMethod -Name GetType -Value {
+                return @{
+                    FullName = "Microsoft.Office.Server.UserProfiles.ActiveDirectoryImportConnection"
+                } | Add-Member -MemberType ScriptMethod -Name GetMethods -Value {
+                    return @{
+                        Name = "ADImportPropertyMappings"
+                    } | Add-Member -MemberType ScriptMethod -Name Invoke -Value {
+                        return @(
+                            (([PSCustomObject]"Microsoft.Office.Server.UserProfiles.ADImport.UserProfileADImportPropertyMapping") `
+                                    | Add-Member -MemberType ScriptMethod -Name GetType -Value {
+                                    return @{
+                                        FullName = ""
+                                    } | Add-Member -MemberType ScriptMethod -Name GetMembers -Value {
+                                        return @(
+                                            (@{
+                                                    MemberType = "Property"
+                                                    Name       = "ProfileProperty"
+                                                } | Add-Member -MemberType ScriptMethod -Name GetValue -Value {
+                                                    return "WorkEmailUpdate"
+                                                } -PassThru -Force),
+                                            (@{
+                                                    MemberType = "Property"
+                                                    Name       = "ADAttribute"
+                                                } | Add-Member -MemberType ScriptMethod -Name GetValue -Value {
+                                                    return "department"
+                                                } -PassThru -Force)
+                                        )
+                                    } -PassThru -Force
+                                } -PassThru -Force
+                            ),
+                            (([PSCustomObject]"Microsoft.Office.Server.UserProfiles.ADImport.UserProfileADImportPropertyMapping") `
+                                    | Add-Member -MemberType ScriptMethod -Name GetType -Value {
+                                    return @{
+                                        FullName = ""
+                                    } | Add-Member -MemberType ScriptMethod -Name GetMembers -Value {
+                                        return @()
+                                    } -PassThru -Force
+                                } -PassThru -Force
+                            )
+                        )
+                    } -PassThru -Force
+                } -PassThru -Force
+            } -PassThru -Force
+
+            $ConnnectionManager = @{
+                $($connection.DisplayName) = $connection
+            }
+            Mock -CommandName New-Object -MockWith {
+                $ProfilePropertyManager = @{
+                    "Contoso" = $connection
+                } | Add-Member ScriptMethod GetCoreProperties {
+                    $Global:UpsConfigManagerGetCorePropertiesCalled = $true
+                    return ($coreProperties)
+                } -PassThru | Add-Member ScriptMethod GetProfileTypeProperties {
+                    $Global:UpsConfigManagerGetProfileTypePropertiesCalled = $true
+                    return $userProfileSubTypePropertiesUpdateProperty
+                } -PassThru
+                return (@{
+                        ProfilePropertyManager = $ProfilePropertyManager
+                        ConnectionManager      = $ConnnectionManager
+                    } | Add-Member ScriptMethod IsSynchronizationRunning {
+                        $Global:UpsSyncIsSynchronizationRunning = $true
+                        return $false
+                    } -PassThru   )
+            } -ParameterFilter {
+                $TypeName -eq "Microsoft.Office.Server.UserProfiles.UserProfileConfigManager" }
+
+
+            It "Should return true when the Test method is called" {
+                $testresults = Test-TargetResource @testParamsUpdateProperty
+                $testresults | Should be $true
             }
         }
     }
