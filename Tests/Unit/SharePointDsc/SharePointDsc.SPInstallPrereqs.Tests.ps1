@@ -25,13 +25,29 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             (
                 [Parameter(Mandatory = $true)]
                 [String]
-                $Name
+                $Name,
+
+                [Parameter()]
+                [String[]]
+                $BundleUpgradeCode,
+
+                [Parameter()]
+                [String]
+                $DisplayVersion
             )
             $object = New-Object -TypeName System.Object
-            $object = $object | Add-Member -Type NoteProperty `
+            $object | Add-Member -Type NoteProperty `
                                            -Name "DisplayName" `
-                                           -Value $Name `
-                                           -PassThru
+                                           -Value $Name
+
+            $object | Add-Member -Type NoteProperty `
+                                           -Name "BundleUpgradeCode" `
+                                           -Value $BundleUpgradeCode
+
+            $object | Add-Member -Type NoteProperty `
+                                           -Name "DisplayVersion" `
+                                           -Value $DisplayVersion
+
             return $object
         }
 
@@ -216,8 +232,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                                 (New-SPDscMockPrereq -Name "Microsoft ODBC Driver 11 for SQL Server"),
                                 (New-SPDscMockPrereq -Name "Microsoft Visual C++ 2012 x64 Minimum Runtime - 11.0.61030"),
                                 (New-SPDscMockPrereq -Name "Microsoft Visual C++ 2012 x64 Additional Runtime - 11.0.61030"),
-                                (New-SPDscMockPrereq -Name "Microsoft Visual C++ 2015 x64 Minimum Runtime - 14.0.23026"),
-                                (New-SPDscMockPrereq -Name "Microsoft Visual C++ 2015 x64 Additional Runtime - 14.0.23026"),
+                                (New-SPDscMockPrereq -Name "Microsoft Visual C++ 2015 Redistributable (x64) - 14.0.23026" -BundleUpgradeCode @("{C146EF48-4D31-3C3D-A2C5-1E91AF8A0A9B}") -DisplayVersion "14.0.23026.0"),
                                 (New-SPDscMockPrereq -Name "Microsoft SQL Server 2012 Native Client"),
                                 (New-SPDscMockPrereq -Name "Active Directory Rights Management Services Client 2.1"),
                                 (New-SPDscMockPrereq -Name "Microsoft Identity Extensions")
@@ -238,7 +253,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                                 (New-SPDscMockPrereq -Name "Microsoft Identity Extensions"),
                                 (New-SPDscMockPrereq -Name "Active Directory Rights Management Services Client 2.1"),
                                 (New-SPDscMockPrereq -Name "Microsoft SQL Server 2012 Native Client"),
-                                (New-SPDscMockPrereq -Name "Microsoft Visual C++ 2017 x64 Additional Runtime - 14.14.10")
+                                (New-SPDscMockPrereq -Name "Microsoft Visual C++ 2017 Redistributable (x64) - 14.13.26020" -BundleUpgradeCode @("{C146EF48-4D31-3C3D-A2C5-1E91AF8A0A9B}") -DisplayVersion "14.13.26020.0")
                             )
                         }
                     }
@@ -261,6 +276,73 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
             It "Should return true from the test method" {
                 Test-TargetResource @testParams | Should Be $true
+            }
+        }
+
+        if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 16)
+        {
+            Context -Name "Microsoft Visual C++ 2015/2017 prerequisite is installed with lower version than required" -Fixture {
+                $testParams = @{
+                    IsSingleInstance = "Yes"
+                    InstallerPath = "C:\SPInstall\Prerequisiteinstaller.exe"
+                    OnlineMode = $true
+                    Ensure = "Present"
+                }
+
+                if ($Global:SPDscHelper.CurrentStubBuildNumber.Build -lt 10000)
+                {
+                    # SharePoint 2016
+                    Mock -CommandName Get-ItemProperty -ParameterFilter {
+                        $Path -eq "HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall\*"
+                    } -MockWith {
+                        return @(
+                            (New-SPDscMockPrereq -Name "Microsoft CCR and DSS Runtime 2008 R3"),
+                            (New-SPDscMockPrereq -Name "Microsoft Sync Framework Runtime v1.0 SP1 (x64)"),
+                            (New-SPDscMockPrereq -Name "AppFabric 1.1 for Windows Server"),
+                            (New-SPDscMockPrereq -Name "WCF Data Services 5.6.0 Runtime"),
+                            (New-SPDscMockPrereq -Name "Microsoft ODBC Driver 11 for SQL Server"),
+                            (New-SPDscMockPrereq -Name "Microsoft Visual C++ 2012 x64 Minimum Runtime - 11.0.61030"),
+                            (New-SPDscMockPrereq -Name "Microsoft Visual C++ 2012 x64 Additional Runtime - 11.0.61030"),
+                            (New-SPDscMockPrereq -Name "Microsoft Visual C++ 2015 Redistributable (x64) - 14.0.23026" -BundleUpgradeCode @("{C146EF48-4D31-3C3D-A2C5-1E91AF8A0A9B}") -DisplayVersion "14.0.0.0"),
+                            (New-SPDscMockPrereq -Name "Microsoft SQL Server 2012 Native Client"),
+                            (New-SPDscMockPrereq -Name "Active Directory Rights Management Services Client 2.1"),
+                            (New-SPDscMockPrereq -Name "Microsoft Identity Extensions")
+                        )
+                    }
+                }
+                else
+                {
+                    # SharePoint 2019
+                    Mock -CommandName Get-ItemProperty -ParameterFilter {
+                        $Path -eq "HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall\*"
+                    } -MockWith {
+                        return @(
+                            (New-SPDscMockPrereq -Name "Microsoft CCR and DSS Runtime 2008 R3"),
+                            (New-SPDscMockPrereq -Name "Microsoft Sync Framework Runtime v1.0 SP1 (x64)"),
+                            (New-SPDscMockPrereq -Name "AppFabric 1.1 for Windows Server"),
+                            (New-SPDscMockPrereq -Name "WCF Data Services 5.6.0 Runtime"),
+                            (New-SPDscMockPrereq -Name "Microsoft Identity Extensions"),
+                            (New-SPDscMockPrereq -Name "Active Directory Rights Management Services Client 2.1"),
+                            (New-SPDscMockPrereq -Name "Microsoft SQL Server 2012 Native Client"),
+                            (New-SPDscMockPrereq -Name "Microsoft Visual C++ 2017 Redistributable (x64) - 14.13.26020" -BundleUpgradeCode @("{C146EF48-4D31-3C3D-A2C5-1E91AF8A0A9B}") -DisplayVersion "14.10.0.0")
+                        )
+                    }
+                }
+
+                Mock -CommandName Get-WindowsFeature -MockWith {
+                    return @(@{
+                        Name = "ExampleFeature"
+                        Installed = $true
+                    })
+                }
+
+                It "Should return absent from the get method" {
+                    (Get-TargetResource @testParams).Ensure | Should Be "Absent"
+                }
+
+                It "Should return false from the test method" {
+                    Test-TargetResource @testParams | Should Be $false
+                }
             }
         }
 
