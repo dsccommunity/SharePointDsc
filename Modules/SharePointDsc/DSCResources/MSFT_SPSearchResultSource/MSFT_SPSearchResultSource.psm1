@@ -17,6 +17,10 @@ function Get-TargetResource
 
         [Parameter(Mandatory = $true)]
         [System.String]
+        $ScopeUrl,
+
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $SearchServiceAppName,
 
         [Parameter(Mandatory = $true)]
@@ -32,10 +36,6 @@ function Get-TargetResource
                      "Remote SharePoint Provider")]
         [System.String]
         $ProviderType,
-
-        [Parameter()]
-        [System.String]
-        $ScopeUrl,
 
         [Parameter()]
         [System.String]
@@ -138,6 +138,10 @@ function Set-TargetResource
 
         [Parameter(Mandatory = $true)]
         [System.String]
+        $ScopeUrl,
+
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $SearchServiceAppName,
 
         [Parameter(Mandatory = $true)]
@@ -153,10 +157,6 @@ function Set-TargetResource
                      "Remote SharePoint Provider")]
         [System.String]
         $ProviderType,
-
-        [Parameter()]
-        [System.String]
-        $ScopeUrl,
 
         [Parameter()]
         [System.String]
@@ -272,6 +272,10 @@ function Test-TargetResource
 
         [Parameter(Mandatory = $true)]
         [System.String]
+        $ScopeUrl,
+
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $SearchServiceAppName,
 
         [Parameter(Mandatory = $true)]
@@ -287,10 +291,6 @@ function Test-TargetResource
                      "Remote SharePoint Provider")]
         [System.String]
         $ProviderType,
-
-        [Parameter()]
-        [System.String]
-        $ScopeUrl,
 
         [Parameter()]
         [System.String]
