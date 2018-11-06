@@ -14,6 +14,7 @@ Configuration Example
     Import-DscResource -ModuleName SharePointDsc
 
     node localhost {
+
         SPUserProfileProperty WorkEmailProperty
         {
             Name                 = "WorkEmail2"

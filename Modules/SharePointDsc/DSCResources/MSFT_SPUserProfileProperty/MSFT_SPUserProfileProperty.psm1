@@ -617,8 +617,6 @@ function Set-TargetResource
         {
             foreach ($propertyMapping in $PropertyMappings)
             {
-                # try
-                # {
                 $syncConnection = $userProfileConfigManager.ConnectionManager[$propertyMapping.ConnectionName]
 
                 if ($null -eq $syncConnection)
@@ -671,11 +669,6 @@ function Set-TargetResource
                         }
                     }
                 }
-                # }
-                # catch [Exception]
-                # {
-                #     Write-Verbose "An unecpexted error occured. Please report an issue! $_"
-                # }
             }
         }
     }

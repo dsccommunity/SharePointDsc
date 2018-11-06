@@ -973,6 +973,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
 
             It "Should return true when the Test method is called" {
+                $testParamsUpdateProperty.Ensure = "Present"
+                $testParamsUpdateProperty.PropertyMappings[0].Direction = "Import"
                 $testresults = Test-TargetResource @testParamsUpdateProperty
                 $testresults | Should be $true
             }

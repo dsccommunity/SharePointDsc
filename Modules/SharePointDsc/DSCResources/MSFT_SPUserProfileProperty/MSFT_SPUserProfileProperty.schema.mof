@@ -1,4 +1,4 @@
-[ClassVersion("1.0.0.0"), FriendlyName("SPUserProfilePropertyMapping")]
+[ClassVersion("1.0.0.0")]
 class MSFT_SPUserProfilePropertyMapping
 {
     [Required, Description("The name of the UPS connect to map this property to")] string ConnectionName;
