@@ -927,7 +927,7 @@ function Test-SPDscPrereqInstallStatus
 
                     [int[]]$minimumRequiredVersion = $itemToCheck.MinimumRequiredVersion.Split('.')
                     [int[]]$installedVersion = $installedItem.DisplayVersion.Split('.')
-                    for ([int]$index = 0 ; $index -lt $minimumRequiredVersion.Length -and $index -lt $installedVersion.Length; $index++)
+                    for ([int]$index = 0; $index -lt $minimumRequiredVersion.Length -and $index -lt $installedVersion.Length; $index++)
                     {
                         if($minimumRequiredVersion[$index] -gt $installedVersion[$index])
                         {
