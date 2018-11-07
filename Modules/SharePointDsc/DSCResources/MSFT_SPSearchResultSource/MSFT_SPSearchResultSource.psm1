@@ -17,6 +17,10 @@ function Get-TargetResource
 
         [Parameter(Mandatory = $true)]
         [System.String]
+        $ScopeUrl,
+
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $SearchServiceAppName,
 
         [Parameter(Mandatory = $true)]
@@ -35,10 +39,6 @@ function Get-TargetResource
 
         [Parameter()]
         [System.String]
-        $ScopeUrl,
-
-        [Parameter()]
-        [System.String]
         $ConnectionUrl,
 
         [Parameter()]
@@ -52,11 +52,6 @@ function Get-TargetResource
     )
 
     Write-Verbose -Message "Getting search result source '$Name'"
-    if ($ScopeName -ne "SSA" -and "" -eq $ScopeUrl)
-    {
-        throw "When specifying a ScopeName of type $($ScopeName) you also need to provide" + `
-        " a ScopeUrl value."
-    }
 
     $result = Invoke-SPDSCCommand -Credential $InstallAccount `
                                   -Arguments $PSBoundParameters `
@@ -138,6 +133,10 @@ function Set-TargetResource
 
         [Parameter(Mandatory = $true)]
         [System.String]
+        $ScopeUrl,
+
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $SearchServiceAppName,
 
         [Parameter(Mandatory = $true)]
@@ -156,10 +155,6 @@ function Set-TargetResource
 
         [Parameter()]
         [System.String]
-        $ScopeUrl,
-
-        [Parameter()]
-        [System.String]
         $ConnectionUrl,
 
         [Parameter()]
@@ -175,12 +170,6 @@ function Set-TargetResource
     Write-Verbose -Message "Setting search result source '$Name'"
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
-
-    if ($ScopeName -ne "SSA" -and $null -eq $ScopeUrl)
-    {
-        throw "When specifying a ScopeName of type $($ScopeName) you also need to provide" + `
-        " a ScopeUrl value."
-    }
 
     if ($CurrentValues.Ensure -eq "Absent" -and $Ensure -eq "Present")
     {
@@ -272,6 +261,10 @@ function Test-TargetResource
 
         [Parameter(Mandatory = $true)]
         [System.String]
+        $ScopeUrl,
+
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $SearchServiceAppName,
 
         [Parameter(Mandatory = $true)]
@@ -287,10 +280,6 @@ function Test-TargetResource
                      "Remote SharePoint Provider")]
         [System.String]
         $ProviderType,
-
-        [Parameter()]
-        [System.String]
-        $ScopeUrl,
 
         [Parameter()]
         [System.String]
