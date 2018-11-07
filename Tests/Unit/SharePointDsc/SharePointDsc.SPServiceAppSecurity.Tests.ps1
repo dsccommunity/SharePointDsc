@@ -60,13 +60,13 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                                      -ClientOnly `
                                      -Property @{
                                                    Username = "CONTOSO\user1"
-                                                   AccessLevel = "Full Control"
+                                                   AccessLevels = "Full Control"
                                                }),
                     (New-CimInstance -ClassName "MSFT_SPServiceAppSecurityEntry" `
                                      -ClientOnly `
                                      -Property @{
                                                    Username = "CONTOSO\user2"
-                                                   AccessLevel = "Full Control"
+                                                   AccessLevels = "Full Control"
                                                })
                 )
             }
@@ -112,7 +112,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                                     -ClientOnly `
                                     -Property @{
                                                   Username = "CONTOSO\user1"
-                                                  AccessLevel = "Full Control"
+                                                  AccessLevels = "Full Control"
                                                })
                 )
                 MembersToInclude = @(
@@ -120,7 +120,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                                     -ClientOnly `
                                     -Property @{
                                                   Username = "CONTOSO\user1"
-                                                  AccessLevel = "Full Control"
+                                                  AccessLevels = "Full Control"
                                                })
                 )
                 MembersToExclude = @("CONTOSO\user2")
@@ -140,17 +140,17 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 ServiceAppName = "Example Service App"
                 SecurityType = "SharingPermissions"
                 Members = @(
-                    (New-CimInstance -ClassName "MSFT_SPServiceAppSecurityEntry" `
+                    (New-CimInstance -ClassName "MSFT_SPSearchServiceAppSecurityEntry" `
                                      -ClientOnly `
                                      -Property @{
                                                    Username = "CONTOSO\user1"
-                                                   AccessLevel = "Full Control"
+                                                   AccessLevels = "Full Control"
                                                }),
-                    (New-CimInstance -ClassName "MSFT_SPServiceAppSecurityEntry" `
+                    (New-CimInstance -ClassName "MSFT_SPSearchServiceAppSecurityEntry" `
                                      -ClientOnly `
                                      -Property @{
                                                    Username = "CONTOSO\user2"
-                                                   AccessLevel = "Full Control"
+                                                   AccessLevels = "Full Control"
                                                })
                 )
             }
@@ -180,8 +180,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
             It "Should call the update cmdlet from the set method" {
                 Set-TargetResource @testParams
-                Assert-MockCalled Grant-SPObjectSecurity
-                Assert-MockCalled Revoke-SPObjectSecurity
+                Assert-MockCalled Grant-SPObjectSecurity -ParameterFilter {$Replace -eq $true}
                 Assert-MockCalled Set-SPServiceApplicationSecurity
             }
         }
@@ -195,13 +194,13 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                                      -ClientOnly `
                                      -Property @{
                                                    Username = "CONTOSO\user1"
-                                                   AccessLevel = "Full Control"
+                                                   AccessLevels = "Full Control"
                                                }),
                     (New-CimInstance -ClassName "MSFT_SPServiceAppSecurityEntry" `
                                      -ClientOnly `
                                      -Property @{
                                                    Username = "CONTOSO\user2"
-                                                   AccessLevel = "Full Control"
+                                                   AccessLevels = "Full Control"
                                                })
                 )
             }
@@ -210,19 +209,42 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 return @{}
             }
 
-            Mock -CommandName Get-SPServiceApplicationSecurity -MockWith {
-                return @{
+            Mock -CommandName Get-SPServiceApplicationSecurity {
+                $security = @{
+                    NamedAccessRights = @(
+                        @{
+                            Name = "Full Control"
+                            Rights = @{
+                                RightsFlags = 0xff
+                            }
+                        }
+                    )
                     AccessRules = @(
                         @{
                             Name = "CONTOSO\user1"
-                            AllowedRights = "FullControl"
-                        },
+                            AllowedObjectRights =
+                            @{
+                                RightsFlags = 0xff
+                            }
+                        }
                         @{
                             Name = "CONTOSO\user2"
-                            AllowedRights = "FullControl"
+                            AllowedObjectRights =
+                            @{
+                                RightsFlags = 0xff
+                            }
                         }
                     )
                 }
+
+                $security.NamedAccessRights | ForEach-Object { $_.Rights } | Add-Member -MemberType ScriptMethod `
+                -Name IsSubsetOf `
+                -Value {
+                    param($objectRights)
+                    return ($objectRights.RightsFlags -band $this.RightsFlags) -eq $this.RightsFlags
+                }
+
+                return $security
             }
 
             It "Should return a list of current members from the get method" {
@@ -243,7 +265,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                                      -ClientOnly `
                                      -Property @{
                                                     Username = "CONTOSO\user1"
-                                                    AccessLevel = "Full Control"
+                                                    AccessLevels = "Full Control"
                                                 })
                 )
                 MembersToExclude = @("CONTOSO\user2")
@@ -326,7 +348,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                                      -ClientOnly `
                                      -Property @{
                                                     Username = "CONTOSO\user1"
-                                                    AccessLevel = "Full Control"
+                                                    AccessLevels = "Full Control"
                                                 })
                 )
                 MembersToExclude = @("CONTOSO\user2")
@@ -336,15 +358,35 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 return @{}
             }
 
-            Mock -CommandName Get-SPServiceApplicationSecurity -MockWith {
-                return @{
+            Mock -CommandName Get-SPServiceApplicationSecurity {
+                $security = @{
+                    NamedAccessRights = @(
+                        @{
+                            Name = "Full Control"
+                            Rights = @{
+                                RightsFlags = 0xff
+                            }
+                        }
+                    )
                     AccessRules = @(
                         @{
                             Name = "CONTOSO\user1"
-                            AllowedRights = "FullControl"
+                            AllowedObjectRights =
+                            @{
+                                RightsFlags = 0xff
+                            }
                         }
                     )
                 }
+
+                $security.NamedAccessRights | ForEach-Object { $_.Rights } | Add-Member -MemberType ScriptMethod `
+                -Name IsSubsetOf `
+                -Value {
+                    param($objectRights)
+                    return ($objectRights.RightsFlags -band $this.RightsFlags) -eq $this.RightsFlags
+                }
+
+                return $security
             }
 
             It "Should return a list of current members from the get method" {
@@ -365,7 +407,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                                      -ClientOnly `
                                      -Property @{
                                                     Username = "CONTOSO\user1"
-                                                    AccessLevel = "Read"
+                                                    AccessLevels = "Read"
                                                 })
                 )
             }
@@ -399,7 +441,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                                      -ClientOnly `
                                      -Property @{
                                                     Username = "CONTOSO\user1"
-                                                    AccessLevel = "Read"
+                                                    AccessLevels = "Read"
                                                 })
                 )
             }
@@ -425,8 +467,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
             It "Should call the update cmdlet from the set method" {
                 Set-TargetResource @testParams
-                Assert-MockCalled Grant-SPObjectSecurity -Times 1
-                Assert-MockCalled Revoke-SPObjectSecurity -Times 1
+                Assert-MockCalled Grant-SPObjectSecurity -Times 1 -ParameterFilter {$Replace -eq $true}
                 Assert-MockCalled Set-SPServiceApplicationSecurity -Times 1
             }
         }
@@ -440,7 +481,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                                      -ClientOnly `
                                      -Property @{
                                                     Username = "CONTOSO\user1"
-                                                    AccessLevel = "Read"
+                                                    AccessLevels = "Read"
                                                 })
                 )
             }
@@ -466,8 +507,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
             It "Should call the update cmdlet from the set method" {
                 Set-TargetResource @testParams
-                Assert-MockCalled Grant-SPObjectSecurity -Times 1
-                Assert-MockCalled Revoke-SPObjectSecurity -Times 1
+                Assert-MockCalled Grant-SPObjectSecurity -Times 1 -ParameterFilter {$Replace -eq $true}
                 Assert-MockCalled Set-SPServiceApplicationSecurity -Times 1
             }
         }
@@ -495,7 +535,6 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             It "Should call the update cmdlet from the set method" {
                 Set-TargetResource @testParams
                 Assert-MockCalled Grant-SPObjectSecurity -Times 0
-                Assert-MockCalled Revoke-SPObjectSecurity -Times 0
                 Assert-MockCalled Set-SPServiceApplicationSecurity -Times 1
             }
         }
@@ -542,7 +581,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                                      -ClientOnly `
                                      -Property @{
                                                     Username = "CONTOSO\user1"
-                                                    AccessLevel = "Full Control"
+                                                    AccessLevels = "Full Control"
                                                 })
                 )
                 MembersToExclude = @("CONTOSO\user2")
@@ -552,14 +591,35 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 return @{}
             }
             Mock -CommandName Get-SPServiceApplicationSecurity {
-                return @{
+                $security = @{
+                    NamedAccessRights = @(
+                        @{
+                            Name = "Full Control"
+                            Rights = @{
+                                RightsFlags = 0xff
+                            }
+
+                        }
+                    )
                     AccessRules = @(
                         @{
                             Name = "i:0#.w|s-1-5-21-2753725054-2932589700-2007370523-2138"
-                            AllowedRights = "FullControl"
+                            AllowedObjectRights =
+                            @{
+                                RightsFlags = 0xff
+                            }
                         }
                     )
                 }
+
+                $security.NamedAccessRights | ForEach-Object { $_.Rights } | Add-Member -MemberType ScriptMethod `
+                -Name IsSubsetOf `
+                -Value {
+                    param($objectRights)
+                    return ($objectRights.RightsFlags -band $this.RightsFlags) -eq $this.RightsFlags
+                }
+
+                return $security
             }
 
             Mock Resolve-SPDscSecurityIdentifier {
@@ -584,7 +644,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                                      -ClientOnly `
                                      -Property @{
                                                    Username = "{LocalFarm}"
-                                                   AccessLevel = "Full Control"
+                                                   AccessLevels = "Full Control"
                                                })
                 )
             }
@@ -593,15 +653,36 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 return @{}
             }
 
-            Mock -CommandName Get-SPServiceApplicationSecurity -MockWith {
-                return @{
+            Mock -CommandName Get-SPServiceApplicationSecurity {
+                $security = @{
+                    NamedAccessRights = @(
+                        @{
+                            Name = "Full Control"
+                            Rights = @{
+                                RightsFlags = 0xff
+                            }
+
+                        }
+                    )
                     AccessRules = @(
                         @{
                             Name = "c:0%.c|system|02a0cea2-d4e0-4e4e-ba2e-e532a433cfef"
-                            AllowedRights = "FullControl"
+                            AllowedObjectRights =
+                            @{
+                                RightsFlags = 0xff
+                            }
                         }
                     )
                 }
+
+                $security.NamedAccessRights | ForEach-Object { $_.Rights } | Add-Member -MemberType ScriptMethod `
+                -Name IsSubsetOf `
+                -Value {
+                    param($objectRights)
+                    return ($objectRights.RightsFlags -band $this.RightsFlags) -eq $this.RightsFlags
+                }
+
+                return $security
             }
 
             It "Should return local farm token in the list of current members from the get method" {
@@ -623,7 +704,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                                      -ClientOnly `
                                      -Property @{
                                                    Username = "{LocalFarm}"
-                                                   AccessLevel = "Full Control"
+                                                   AccessLevels = "Full Control"
                                                })
                 )
             }
@@ -660,7 +741,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                                      -ClientOnly `
                                      -Property @{
                                                     Username = "{LocalFarm}"
-                                                    AccessLevel = "Full Control"
+                                                    AccessLevels = "Full Control"
                                                 })
                 )
             }
@@ -757,6 +838,77 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Assert-MockCalled Grant-SPObjectSecurity -Times 0
                 Assert-MockCalled Revoke-SPObjectSecurity
                 Assert-MockCalled Set-SPServiceApplicationSecurity
+            }
+        }
+        Context -Name "Access level that includes other access levels is specified when multiple named access rights exists" -Fixture {
+            $testParams = @{
+                ServiceAppName = "Example Service App"
+                SecurityType = "SharingPermissions"
+                MembersToInclude = @(
+                    (New-CimInstance -ClassName "MSFT_SPServiceAppSecurityEntry" `
+                                     -ClientOnly `
+                                     -Property @{
+                                                    Username = "CONTOSO\user1"
+                                                    AccessLevels = "Contribute"
+                                                })
+                )
+            }
+
+            Mock -CommandName Get-SPServiceApplication -MockWith {
+                return @{}
+            }
+
+            Mock -CommandName Get-SPServiceApplicationSecurity {
+                $security = @{
+                    NamedAccessRights = @(
+                        @{
+                            Name = "Full Control"
+                            Rights = @{
+                                RightsFlags = 0xff
+                            }
+                        }
+                        @{
+                            Name = "Contribute"
+                            Rights = @{
+                                RightsFlags = 0x0f
+                            }
+                        }
+                        @{
+                            Name = "Read"
+                            Rights = @{
+                                RightsFlags = 0x01
+                            }
+                        }
+                    )
+                    AccessRules = @(
+                        @{
+                            Name = "CONTOSO\user1"
+                            AllowedObjectRights =
+                            @{
+                                RightsFlags = 0x0f
+                            }
+                        }
+                    )
+                }
+
+                $security.NamedAccessRights | ForEach-Object { $_.Rights } | Add-Member -MemberType ScriptMethod `
+                -Name IsSubsetOf `
+                -Value {
+                    param($objectRights)
+                    return ($objectRights.RightsFlags -band $this.RightsFlags) -eq $this.RightsFlags
+                }
+
+                return $security
+            }
+
+            It "Should return list of all named access rights included for user" {
+                $result = Get-TargetResource @testParams
+                $result.Members | Should Not BeNullOrEmpty
+                $result.Members[0].AccessLevels | Should Be @("Contribute", "Read")
+            }
+
+            It "Should return true from the test method" {
+                Test-TargetResource @testParams | Should Be $true
             }
         }
     }
