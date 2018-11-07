@@ -34,6 +34,9 @@
     Grant-SPObjectSecurity
   * Added all supported access levels as available values.
   * Removed unknown access levels: Change Permissions, Write, and Read
+* SPInstallPrereqs
+  * Added support for detecting updated installation of Microsoft Visual C++
+    2015/2017 Redistributable (x64) for SharePoint 2016 and SharePoint 2019.
 
 The following changes will break v2.x and earlier configurations that use these
 resources:
