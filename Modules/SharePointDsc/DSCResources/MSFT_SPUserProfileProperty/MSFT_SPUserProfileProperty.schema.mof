@@ -1,3 +1,11 @@
+[ClassVersion("1.0.0.0")]
+class MSFT_SPUserProfilePropertyMapping
+{
+    [Required, Description("The name of the UPS connect to map this property to")] string ConnectionName;
+    [Required, Description("The name of the property from the UPS connection to map to")] string PropertyName;
+    [Required, Description("The direction of the mapping, either Import or Export"), ValueMap{"Import","Export"}, Values{"Import","Export"}] string Direction;
+};
+
 [ClassVersion("1.0.0.0"), FriendlyName("SPUserProfileProperty")]
 class MSFT_SPUserProfileProperty : OMI_BaseResource
 {
@@ -9,9 +17,7 @@ class MSFT_SPUserProfileProperty : OMI_BaseResource
     [Write, Description("The description of the property")] string Description;
     [Write, Description("The policy setting to apply to the property"), ValueMap{"Mandatory","Optin","Optout","Disabled"}, Values{"Mandatory","Optin","Optout","Disabled"}] string PolicySetting;
     [Write, Description("The privacy setting for the property"), ValueMap{"Public","Contacts","Organization","Manager","Private"}, Values{"Public","Contacts","Organization","Manager","Private"}] string PrivacySetting;
-    [Write, Description("The name of the UPS connect to map this property to")] string MappingConnectionName;
-    [Write, Description("The name of the property from the UPS connection to map to")] string MappingPropertyName;
-    [Write, Description("The direction of the mapping, either Import or Export")] string MappingDirection;
+    [Write, Description("The details about the property mapping"), EmbeddedInstance("MSFT_SPUserProfilePropertyMapping")] string PropertyMappings[];
     [Write, Description("The length of the field")] uint32 Length;
     [Write, Description("The display order to put the property in to the list at")] uint32 DisplayOrder;
     [Write, Description("Is this field used for event logging")] boolean IsEventLog;
@@ -24,5 +30,5 @@ class MSFT_SPUserProfileProperty : OMI_BaseResource
     [Write, Description("The name of the term store to look up managed terms from")] string TermStore;
     [Write, Description("The name of the term store group that terms are in for this field")] string TermGroup;
     [Write, Description("The name of the term set to allow values to be selected from")] string TermSet;
-    [Write, Description("POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5"), EmbeddedInstance("MSFT_Credential")] String InstallAccount;
+    [Write, Description("POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5"), EmbeddedInstance("MSFT_Credential")] string InstallAccount;
 };

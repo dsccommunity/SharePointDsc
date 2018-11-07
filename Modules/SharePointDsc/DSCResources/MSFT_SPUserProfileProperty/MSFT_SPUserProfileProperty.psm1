@@ -9,7 +9,7 @@ function Get-TargetResource
         $Name,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present",
 
@@ -23,21 +23,21 @@ function Get-TargetResource
 
         [Parameter()]
         [ValidateSet("Big Integer",
-                     "Binary",
-                     "Boolean",
-                     "Date",
-                     "DateNoYear",
-                     "Date Time",
-                     "Email",
-                     "Float",
-                     "HTML",
-                     "Integer",
-                     "Person",
-                     "String (Single Value)",
-                     "String (Multi Value)",
-                     "TimeZone",
-                     "Unique Identifier",
-                     "URL")]
+            "Binary",
+            "Boolean",
+            "Date",
+            "DateNoYear",
+            "Date Time",
+            "Email",
+            "Float",
+            "HTML",
+            "Integer",
+            "Person",
+            "String (Single Value)",
+            "String (Multi Value)",
+            "TimeZone",
+            "Unique Identifier",
+            "URL")]
         [System.string]
         $Type,
 
@@ -46,7 +46,7 @@ function Get-TargetResource
         $Description,
 
         [Parameter()]
-        [ValidateSet("Mandatory", "Optin","Optout", "Disabled")]
+        [ValidateSet("Mandatory", "Optin", "Optout", "Disabled")]
         [System.string]
         $PolicySetting,
 
@@ -56,16 +56,8 @@ function Get-TargetResource
         $PrivacySetting,
 
         [Parameter()]
-        [System.string]
-        $MappingConnectionName,
-
-        [Parameter()]
-        [System.string]
-        $MappingPropertyName,
-
-        [Parameter()]
-        [System.string]
-        $MappingDirection,
+        [Microsoft.Management.Infrastructure.CimInstance[]]
+        $PropertyMappings,
 
         [Parameter()]
         [System.uint32]
@@ -123,16 +115,16 @@ function Get-TargetResource
     Write-Verbose -Message "Getting user profile property $Name"
 
     $result = Invoke-SPDSCCommand -Credential $InstallAccount `
-                                  -Arguments $PSBoundParameters `
-                                  -ScriptBlock {
+        -Arguments $PSBoundParameters `
+        -ScriptBlock {
         $params = $args[0]
 
         $upsa = Get-SPServiceApplication -Name $params.UserProfileService `
-                                         -ErrorAction SilentlyContinue
+            -ErrorAction SilentlyContinue
         $nullReturn = @{
-            Name = $params.Name
+            Name               = $params.Name
             UserProfileService = $params.UserProfileService
-            Ensure = "Absent"
+            Ensure             = "Absent"
         }
         if ($null -eq $upsa)
         {
@@ -140,8 +132,8 @@ function Get-TargetResource
         }
 
         $caURL = (Get-SPWebApplication -IncludeCentralAdministration | Where-Object -FilterScript {
-            $_.IsAdministrationWebApplication -eq $true
-        }).Url
+                $_.IsAdministrationWebApplication -eq $true
+            }).Url
 
         $context = Get-SPServiceContext -Site $caURL
 
@@ -155,8 +147,8 @@ function Get-TargetResource
         }
 
         $termSet = @{
-            TermSet = ""
-            TermGroup =""
+            TermSet   = ""
+            TermGroup = ""
             TermStore = ""
         }
 
@@ -166,64 +158,129 @@ function Get-TargetResource
             $termSet.TermGroup = $userProfileProperty.CoreProperty.TermSet.Group.Name
             $termSet.TermStore = $userProfileProperty.CoreProperty.TermSet.TermStore.Name
         }
-        $mapping  = @{
-            ConectionName = ""
-            PropertyName =""
-            Direction = ""
-        }
 
-        $userProfileConfigManager  = New-Object -TypeName "Microsoft.Office.Server.UserProfiles.UserProfileConfigManager" `
-                                                -ArgumentList $context
+        $userProfilePropertyMappings = @()
+
+        $userProfileConfigManager = New-Object -TypeName "Microsoft.Office.Server.UserProfiles.UserProfileConfigManager" `
+            -ArgumentList $context
 
         if ($null -eq $userProfileConfigManager.ConnectionManager)
         {
             return $nullReturn
         }
 
-        $syncConnection  = $userProfileConfigManager.ConnectionManager | `
-            Where-Object -FilterScript {
-                $null -ne  $_.PropertyMapping -and $null -ne $_.PropertyMapping.Item($params.Name)
-            }
-
-        if($null -ne $syncConnection)
+        foreach ($propertyMapping in $params.PropertyMappings)
         {
-            $currentMapping  = $syncConnection.PropertyMapping.Item($params.Name)
-            if($null -ne $currentMapping)
+            try
             {
-                $mapping.Direction = "Import"
-                $mapping.ConnectionName = $params.MappingConnectionName
-                if($currentMapping.IsExport)
-                {
-                    $mapping.Direction = "Export"
+                $connection = $userProfileConfigManager.ConnectionManager[$propertyMapping.ConnectionName]
+
+                # This only works with SharePoint 2013 and AD Sync Connections.
+                $syncConnection = $connection | Where-Object -FilterScript {
+                    $null -ne $_.PropertyMapping -and $null -ne $_.PropertyMapping.Item($params.Name)
                 }
-                $mapping.PropertyName = $currentMapping.DataSourcePropertyName
+
+                if ($null -ne $syncConnection)
+                {
+                    # This code will only be reached with SP 2013 and AD Sync Connections.
+                    $currentMapping = $syncConnection.PropertyMapping.Item($params.Name)
+                    if ($null -ne $currentMapping)
+                    {
+                        $mapping = @{}
+                        $mapping.Direction = "Import"
+                        $mapping.ConnectionName = $params.MappingConnectionName
+                        if ($currentMapping.IsExport)
+                        {
+                            $mapping.Direction = "Export"
+                        }
+                        $mapping.PropertyName = $currentMapping.DataSourcePropertyName
+
+                        $userProfilePropertyMappings += (New-CimInstance -ClassName MSFT_SPUserProfilePropertyMapping -ClientOnly -Property @{
+                                ConnectionName = $propertyMapping.ConnectionName
+                                PropertyName   = $mapping.ConnectionName
+                                Direction      = $mapping.Direction
+                            })
+                    }
+                }
+                else
+                {
+                    # This code is for SP 2013, 2016 and 2019 with AD Import Connections.
+                    if ($connection.Type -eq "ActiveDirectoryImport")
+                    {
+                        try
+                        {
+                            $adImportConnection = [Microsoft.Office.Server.UserProfiles.ActiveDirectoryImportConnection]$connection
+                        }
+                        catch [Exception]
+                        {
+                            $adImportConnection = $connection
+                        }
+
+                        $propertyFlags = [System.Reflection.BindingFlags]::Instance -bor `
+                            [System.Reflection.BindingFlags]::NonPublic
+
+                        $propMembers = $adImportConnection.GetType().GetMethods($propertyFlags)
+
+                        $adImportPropertyMappingsMethod = $propMembers | Where-Object -FilterScript {
+                            $_.Name -eq "ADImportPropertyMappings"
+                        }
+                        $propertyMappings = $adImportPropertyMappingsMethod.Invoke($adImportConnection, $null)
+
+                        $propertyMappings | ForEach-Object -Process {
+                            $currentMappingMembers = $_.GetType().GetMembers($propertyFlags)
+                            $profileProperty = $currentMappingMembers | Where-Object -FilterScript {
+                                $_.Name -eq "ProfileProperty"
+                            }
+                            if ($null -ne $profileProperty)
+                            {
+                                $profilePropertyValue = $profileProperty.GetValue($_)
+                                if ($profilePropertyValue -eq $params.Name)
+                                {
+                                    $adAttributeProperty = $currentMappingMembers | Where-Object -FilterScript {
+                                        $_.Name -eq "ADAttribute"
+                                    }
+                                    if ($null -ne $adAttributeProperty)
+                                    {
+                                        $userProfilePropertyMappings += (New-CimInstance -ClassName MSFT_SPUserProfilePropertyMapping -ClientOnly -Property @{
+                                                ConnectionName = $propertyMapping.ConnectionName
+                                                PropertyName   = $adAttributeProperty.GetValue($_)
+                                                Direction      = "Import"
+                                            })
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            catch [Exception]
+            {
+                Write-Verbose "An unecpexted error occured. Please report an issue! $_"
             }
         }
 
         return @{
-            Name = $userProfileProperty.Name
-            UserProfileService = $params.UserProfileService
-            DisplayName = $userProfileProperty.DisplayName
-            Type = $userProfileProperty.CoreProperty.Type
-            Description = $userProfileProperty.Description
-            PolicySetting = $userProfileProperty.PrivacyPolicy
-            PrivacySetting = $userProfileProperty.DefaultPrivacy
-            MappingConnectionName = $mapping.ConnectionName
-            MappingPropertyName = $mapping.PropertyName
-            MappingDirection = $Mapping.Direction
-            Length = $userProfileProperty.CoreProperty.Length
-            DisplayOrder =$userProfileProperty.DisplayOrder
-            IsEventLog =$userProfileProperty.TypeProperty.IsEventLog
-            IsVisibleOnEditor=$userProfileProperty.TypeProperty.IsVisibleOnEditor
-            IsVisibleOnViewer  =$userProfileProperty.TypeProperty.IsVisibleOnViewer
-            IsUserEditable = $userProfileProperty.IsUserEditable
-            IsAlias = $userProfileProperty.IsAlias
-            IsSearchable = $userProfileProperty.CoreProperty.IsSearchable
-            TermStore = $termSet.TermStore
-            TermGroup = $termSet.TermGroup
-            TermSet = $termSet.TermSet
+            Name                = $userProfileProperty.Name
+            UserProfileService  = $params.UserProfileService
+            DisplayName         = $userProfileProperty.DisplayName
+            Type                = $userProfileProperty.CoreProperty.Type
+            Description         = $userProfileProperty.Description
+            PolicySetting       = $userProfileProperty.PrivacyPolicy
+            PrivacySetting      = $userProfileProperty.DefaultPrivacy
+            PropertyMappings    = $userProfilePropertyMappings
+            Length              = $userProfileProperty.CoreProperty.Length
+            DisplayOrder        = $userProfileProperty.DisplayOrder
+            IsEventLog          = $userProfileProperty.TypeProperty.IsEventLog
+            IsVisibleOnEditor   = $userProfileProperty.TypeProperty.IsVisibleOnEditor
+            IsVisibleOnViewer   = $userProfileProperty.TypeProperty.IsVisibleOnViewer
+            IsUserEditable      = $userProfileProperty.IsUserEditable
+            IsAlias             = $userProfileProperty.IsAlias
+            IsSearchable        = $userProfileProperty.CoreProperty.IsSearchable
+            TermStore           = $termSet.TermStore
+            TermGroup           = $termSet.TermGroup
+            TermSet             = $termSet.TermSet
             UserOverridePrivacy = $userProfileProperty.UserOverridePrivacy
-            Ensure = "Present"
+            Ensure              = "Present"
         }
 
     }
@@ -240,7 +297,7 @@ function Set-TargetResource
         $Name,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present",
 
@@ -254,21 +311,21 @@ function Set-TargetResource
 
         [Parameter()]
         [ValidateSet("Big Integer",
-                     "Binary",
-                     "Boolean",
-                     "Date",
-                     "DateNoYear",
-                     "Date Time",
-                     "Email",
-                     "Float",
-                     "HTML",
-                     "Integer",
-                     "Person",
-                     "String (Single Value)",
-                     "String (Multi Value)",
-                     "TimeZone",
-                     "Unique Identifier",
-                     "URL")]
+            "Binary",
+            "Boolean",
+            "Date",
+            "DateNoYear",
+            "Date Time",
+            "Email",
+            "Float",
+            "HTML",
+            "Integer",
+            "Person",
+            "String (Single Value)",
+            "String (Multi Value)",
+            "TimeZone",
+            "Unique Identifier",
+            "URL")]
         [System.string]
         $Type,
 
@@ -277,7 +334,7 @@ function Set-TargetResource
         $Description,
 
         [Parameter()]
-        [ValidateSet("Mandatory", "Optin","Optout", "Disabled")]
+        [ValidateSet("Mandatory", "Optin", "Optout", "Disabled")]
         [System.string]
         $PolicySetting,
 
@@ -287,16 +344,8 @@ function Set-TargetResource
         $PrivacySetting,
 
         [Parameter()]
-        [System.string]
-        $MappingConnectionName,
-
-        [Parameter()]
-        [System.string]
-        $MappingPropertyName,
-
-        [Parameter()]
-        [System.string]
-        $MappingDirection,
+        [Microsoft.Management.Infrastructure.CimInstance[]]
+        $PropertyMappings,
 
         [Parameter()]
         [System.uint32]
@@ -358,33 +407,32 @@ function Set-TargetResource
 
     $PSBoundParameters.Ensure = $Ensure
 
-    $test = $PSBoundParameters
     Invoke-SPDSCCommand -Credential $InstallAccount `
-                        -Arguments $test `
-                        -ScriptBlock {
+        -Arguments $PSBoundParameters `
+        -ScriptBlock {
 
         $params = $args[0]
 
-        if( ($params.ContainsKey("TermSet")  `
-            -or $params.ContainsKey("TermGroup") `
-            -or $params.ContainsKey("TermSet") ) `
-            -and ($params.ContainsKey("TermSet") `
+        if ( ($params.ContainsKey("TermSet")  `
+                    -or $params.ContainsKey("TermGroup") `
+                    -or $params.ContainsKey("TermSet") ) `
+                -and ($params.ContainsKey("TermSet") `
                     -and $params.ContainsKey("TermGroup") `
                     -and $params.ContainsKey("TermSet") -eq $false)
-            )
+        )
         {
             throw ("You have to provide all 3 parameters Termset, TermGroup and TermStore " + `
-                   "when providing any of the 3.")
+                    "when providing any of the 3.")
         }
 
         if ($params.ContainsKey("TermSet") `
-            -and (@("string (single value)","string (multi value)").Contains($params.Type.ToLower()) -eq $false))
+                -and (@("string (single value)", "string (multi value)").Contains($params.Type.ToLower()) -eq $false))
         {
             throw "Only String and String Multivalue can use Termsets"
         }
 
         $ups = Get-SPServiceApplication -Name $params.UserProfileService `
-                                        -ErrorAction SilentlyContinue
+            -ErrorAction SilentlyContinue
 
         if ($null -eq $ups)
         {
@@ -392,18 +440,18 @@ function Set-TargetResource
         }
 
         $caURL = (Get-SPWebApplication -IncludeCentralAdministration | Where-Object -FilterScript {
-            $_.IsAdministrationWebApplication -eq $true
-        }).Url
+                $_.IsAdministrationWebApplication -eq $true
+            }).Url
         $context = Get-SPServiceContext $caURL
 
-        $userProfileConfigManager  = New-Object -TypeName "Microsoft.Office.Server.UserProfiles.UserProfileConfigManager" `
-                                                -ArgumentList $context
+        $userProfileConfigManager = New-Object -TypeName "Microsoft.Office.Server.UserProfiles.UserProfileConfigManager" `
+            -ArgumentList $context
 
         if ($null -eq $userProfileConfigManager)
         {
             #if config manager returns when ups is available then isuee is permissions
             throw ("Account running process needs admin permissions on the user profile " + `
-                   "service application")
+                    "service application")
         }
         $coreProperties = $userProfileConfigManager.ProfilePropertyManager.GetCoreProperties()
 
@@ -413,10 +461,10 @@ function Set-TargetResource
         $userProfileProperty = $userProfileSubType.Properties.GetPropertyByName($params.Name)
 
         if ($null -ne $userProfileProperty `
-            -and $userProfileProperty.CoreProperty.Type -ne $params.Type)
+                -and $userProfileProperty.CoreProperty.Type -ne $params.Type)
         {
             throw ("Can't change property type. Current Type is " + `
-                   "$($userProfileProperty.CoreProperty.Type)")
+                    "$($userProfileProperty.CoreProperty.Type)")
         }
 
         $termSet = $null
@@ -424,12 +472,12 @@ function Set-TargetResource
         if ($params.ContainsKey("TermSet"))
         {
             $currentTermSet = $userProfileProperty.CoreProperty.TermSet;
-            if($currentTermSet.Name -ne $params.TermSet -or
+            if ($currentTermSet.Name -ne $params.TermSet -or
                 $currentTermSet.Group.Name -ne $params.TermGroup -or
                 $currentTermSet.TermStore.Name -ne $params.TermStore)
             {
                 $session = New-Object -TypeName Microsoft.SharePoint.Taxonomy.TaxonomySession `
-                                      -ArgumentList $caURL
+                    -ArgumentList $caURL
 
                 $termStore = $session.TermStores[$params.TermStore]
 
@@ -440,13 +488,13 @@ function Set-TargetResource
 
                 $group = $termStore.Groups[$params.TermGroup]
 
-                if($null -eq $group)
+                if ($null -eq $group)
                 {
                     throw "Term Group $($params.termGroup) not found"
                 }
 
                 $termSet = $group.TermSets[$params.TermSet]
-                if($null -eq $termSet)
+                if ($null -eq $termSet)
                 {
                     throw "Term Set $($params.termSet) not found"
                 }
@@ -461,24 +509,24 @@ function Set-TargetResource
                 return
             }
         }
-        elseif($null -eq $userProfileProperty)
+        elseif ($null -eq $userProfileProperty)
         {
             $coreProperty = $coreProperties.Create($false)
             $coreProperty.Name = $params.Name
             $coreProperty.DisplayName = $params.DisplayName
 
             Set-SPDscObjectPropertyIfValuePresent -ObjectToSet $coreProperty `
-                                                  -PropertyToSet "Length" `
-                                                  -ParamsValue $params `
-                                                  -ParamKey "Length"
+                -PropertyToSet "Length" `
+                -ParamsValue $params `
+                -ParamKey "Length"
 
-            if($params.Type -eq "String (Multi Value)")
+            if ($params.Type -eq "String (Multi Value)")
             {
                 $coreProperty.IsMultivalued = $true
             }
 
             $coreProperty.Type = $params.Type
-            if($null -ne $termSet)
+            if ($null -ne $termSet)
             {
                 $coreProperty.TermSet = $termSet
             }
@@ -500,54 +548,54 @@ function Set-TargetResource
         $coreProperty = $userProfileProperty.CoreProperty
         $userProfileTypeProperty = $userProfileProperty.TypeProperty
         Set-SPDscObjectPropertyIfValuePresent -ObjectToSet $coreProperty `
-                                              -PropertyToSet "DisplayName" `
-                                              -ParamsValue $params `
-                                              -ParamKey "DisplayName"
+            -PropertyToSet "DisplayName" `
+            -ParamsValue $params `
+            -ParamKey "DisplayName"
 
         Set-SPDscObjectPropertyIfValuePresent -ObjectToSet $coreProperty `
-                                              -PropertyToSet "Description" `
-                                              -ParamsValue $params `
-                                              -ParamKey "Description"
+            -PropertyToSet "Description" `
+            -ParamsValue $params `
+            -ParamKey "Description"
 
         Set-SPDscObjectPropertyIfValuePresent -ObjectToSet $userProfileTypeProperty `
-                                              -PropertyToSet "IsVisibleOnViewer" `
-                                              -ParamsValue $params `
-                                              -ParamKey "IsVisibleOnViewer"
+            -PropertyToSet "IsVisibleOnViewer" `
+            -ParamsValue $params `
+            -ParamKey "IsVisibleOnViewer"
 
         Set-SPDscObjectPropertyIfValuePresent -ObjectToSet $userProfileTypeProperty `
-                                              -PropertyToSet "IsVisibleOnEditor" `
-                                              -ParamsValue $params `
-                                              -ParamKey "IsVisibleOnEditor"
+            -PropertyToSet "IsVisibleOnEditor" `
+            -ParamsValue $params `
+            -ParamKey "IsVisibleOnEditor"
 
         Set-SPDscObjectPropertyIfValuePresent -ObjectToSet $userProfileTypeProperty `
-                                              -PropertyToSet "IsEventLog" `
-                                              -ParamsValue $params `
-                                              -ParamKey "IsEventLog"
+            -PropertyToSet "IsEventLog" `
+            -ParamsValue $params `
+            -ParamKey "IsEventLog"
 
         Set-SPDscObjectPropertyIfValuePresent -ObjectToSet $coreProperty `
-                                              -PropertyToSet "IsSearchable" `
-                                              -ParamsValue $params `
-                                              -ParamKey "IsSearchable"
+            -PropertyToSet "IsSearchable" `
+            -ParamsValue $params `
+            -ParamKey "IsSearchable"
 
         Set-SPDscObjectPropertyIfValuePresent -ObjectToSet $userProfileProperty `
-                                              -PropertyToSet "DefaultPrivacy" `
-                                              -ParamsValue $params `
-                                              -ParamKey "PrivacySetting"
+            -PropertyToSet "DefaultPrivacy" `
+            -ParamsValue $params `
+            -ParamKey "PrivacySetting"
 
         Set-SPDscObjectPropertyIfValuePresent -ObjectToSet $userProfileProperty `
-                                              -PropertyToSet "PrivacyPolicy" `
-                                              -ParamsValue $params `
-                                              -ParamKey "PolicySetting"
+            -PropertyToSet "PrivacyPolicy" `
+            -ParamsValue $params `
+            -ParamKey "PolicySetting"
 
         Set-SPDscObjectPropertyIfValuePresent -ObjectToSet $userProfileProperty `
-                                              -PropertyToSet "IsUserEditable" `
-                                              -ParamsValue $params `
-                                              -ParamKey "IsUserEditable"
+            -PropertyToSet "IsUserEditable" `
+            -ParamsValue $params `
+            -ParamKey "IsUserEditable"
 
         Set-SPDscObjectPropertyIfValuePresent -ObjectToSet $userProfileProperty `
-                                              -PropertyToSet "UserOverridePrivacy" `
-                                              -ParamsValue $params `
-                                              -ParamKey "UserOverridePrivacy"
+            -PropertyToSet "UserOverridePrivacy" `
+            -ParamsValue $params `
+            -ParamKey "UserOverridePrivacy"
         if ($termSet)
         {
             $coreProperty.TermSet = $termSet
@@ -560,69 +608,65 @@ function Set-TargetResource
         if ($params.ContainsKey("DisplayOrder"))
         {
             $profileManager = New-Object -TypeName "Microsoft.Office.Server.UserProfiles.UserProfileManager" `
-                                         -ArgumentList $context
+                -ArgumentList $context
             $profileManager.Properties.SetDisplayOrderByPropertyName($params.Name, $params.DisplayOrder)
             $profileManager.Properties.CommitDisplayOrder()
         }
 
-        if ($params.ContainsKey("MappingConnectionName") `
-            -and $params.ContainsKey("MappingPropertyName"))
+        if ($params.ContainsKey("PropertyMappings"))
         {
-            $syncConnection  = $userProfileConfigManager.ConnectionManager | Where-Object -FilterScript {
-                $_.DisplayName -eq $params.MappingConnectionName
-            }
-
-            if ($null -eq $syncConnection )
+            foreach ($propertyMapping in $PropertyMappings)
             {
-                throw "connection not found"
-            }
-            $syncConnection = $userProfileConfigManager.ConnectionManager | Where-Object -FilterScript {
-                $_.DisplayName -eq $params.MappingConnectionName
-            }
+                $syncConnection = $userProfileConfigManager.ConnectionManager[$propertyMapping.ConnectionName]
 
-            if($null -ne $syncConnection.PropertyMapping)
-            {
-                $currentMapping  = $syncConnection.PropertyMapping.Item($params.Name)
-            }
-
-            if($null -eq $currentMapping `
-                -or ($currentMapping.DataSourcePropertyName -ne $params.MappingPropertyName) `
-                -or ($currentMapping.IsImport `
-                        -and $params.ContainsKey("MappingDirection") `
-                        -and $params.MappingDirection -eq "Export")
-               )
-            {
-                if ($null -ne $currentMapping)
+                if ($null -eq $syncConnection)
                 {
-                    $currentMapping.Delete() #API allows updating, but UI doesn't do that.
+                    throw "connection not found"
                 }
 
-                $export = $params.ContainsKey("MappingDirection") -and $params.MappingDirection -eq "Export"
-                if ($syncConnection.Type -eq "ActiveDirectoryImport")
+                if ($null -ne $syncConnection.PropertyMapping)
                 {
-                    if ($export)
+                    $currentMapping = $syncConnection.PropertyMapping.Item($params.Name)
+                }
+
+                if ($null -eq $currentMapping `
+                        -or ($currentMapping.DataSourcePropertyName -ne $params.MappingPropertyName) `
+                        -or ($currentMapping.IsImport `
+                            -and $propertyMapping.Direction -eq "Export")
+                )
+                {
+                    if ($null -ne $currentMapping)
                     {
-                        throw "not implemented"
+                        $currentMapping.Delete() #API allows updating, but UI doesn't do that.
+                    }
+
+                    $export = $propertyMapping.Direction -eq "Export"
+                    if ($syncConnection.Type -eq "ActiveDirectoryImport")
+                    {
+                        if ($export)
+                        {
+                            throw "not implemented"
+                        }
+                        else
+                        {
+                            $syncConnection.AddPropertyMapping($propertyMapping.PropertyName, $params.Name)
+                            $syncConnection.Update()
+                        }
                     }
                     else
                     {
-                        $syncConnection.AddPropertyMapping($params.MappingPropertyName,$params.Name)
-                        $syncConnection.Update()
-                    }
-                }
-                else
-                {
-                    if ($export)
-                    {
-                        $syncConnection.PropertyMapping.AddNewExportMapping([Microsoft.Office.Server.UserProfiles.ProfileType]::User,
-                                                                            $params.Name,
-                                                                            $params.MappingPropertyName)
-                    }
-                    else
-                    {
-                        $syncConnection.PropertyMapping.AddNewMapping([Microsoft.Office.Server.UserProfiles.ProfileType]::User,
-                                                                      $params.Name,
-                                                                      $params.MappingPropertyName)
+                        if ($export)
+                        {
+                            $syncConnection.PropertyMapping.AddNewExportMapping([Microsoft.Office.Server.UserProfiles.ProfileType]::User,
+                                $params.Name,
+                                $propertyMapping.PropertyName)
+                        }
+                        else
+                        {
+                            $syncConnection.PropertyMapping.AddNewMapping([Microsoft.Office.Server.UserProfiles.ProfileType]::User,
+                                $params.Name,
+                                $propertyMapping.PropertyName)
+                        }
                     }
                 }
             }
@@ -641,7 +685,7 @@ function Test-TargetResource
         $Name,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present",
 
@@ -655,21 +699,21 @@ function Test-TargetResource
 
         [Parameter()]
         [ValidateSet("Big Integer",
-                     "Binary",
-                     "Boolean",
-                     "Date",
-                     "DateNoYear",
-                     "Date Time",
-                     "Email",
-                     "Float",
-                     "HTML",
-                     "Integer",
-                     "Person",
-                     "String (Single Value)",
-                     "String (Multi Value)",
-                     "TimeZone",
-                     "Unique Identifier",
-                     "URL")]
+            "Binary",
+            "Boolean",
+            "Date",
+            "DateNoYear",
+            "Date Time",
+            "Email",
+            "Float",
+            "HTML",
+            "Integer",
+            "Person",
+            "String (Single Value)",
+            "String (Multi Value)",
+            "TimeZone",
+            "Unique Identifier",
+            "URL")]
         [System.string]
         $Type,
 
@@ -678,7 +722,7 @@ function Test-TargetResource
         $Description,
 
         [Parameter()]
-        [ValidateSet("Mandatory", "Optin","Optout", "Disabled")]
+        [ValidateSet("Mandatory", "Optin", "Optout", "Disabled")]
         [System.string]
         $PolicySetting,
 
@@ -688,16 +732,8 @@ function Test-TargetResource
         $PrivacySetting,
 
         [Parameter()]
-        [System.string]
-        $MappingConnectionName,
-
-        [Parameter()]
-        [System.string]
-        $MappingPropertyName,
-
-        [Parameter()]
-        [System.string]
-        $MappingDirection,
+        [Microsoft.Management.Infrastructure.CimInstance[]]
+        $PropertyMappings,
 
         [Parameter()]
         [System.uint32]
@@ -762,35 +798,33 @@ function Test-TargetResource
     if ($Ensure -eq "Present")
     {
         return Test-SPDscParameterState -CurrentValues $CurrentValues `
-                                        -DesiredValues $PSBoundParameters `
-                                        -ValuesToCheck @("Name",
-                                                         "DisplayName",
-                                                         "Type",
-                                                         "Description",
-                                                         "PolicySetting",
-                                                         "PrivacySetting",
-                                                         "MappingConnectionName",
-                                                         "MappingPropertyName",
-                                                         "MappingDirection",
-                                                         "Length",
-                                                         "DisplayOrder",
-                                                         "IsEventLog",
-                                                         "IsVisibleOnEditor",
-                                                         "IsVisibleOnViewer",
-                                                         "IsUserEditable",
-                                                         "IsAlias",
-                                                         "IsSearchabe",
-                                                         "UserOverridePrivacy",
-                                                         "TermGroup",
-                                                         "TermStore",
-                                                         "TermSet",
-                                                         "Ensure")
+            -DesiredValues $PSBoundParameters `
+            -ValuesToCheck @("Name",
+            "DisplayName",
+            "Type",
+            "Description",
+            "PolicySetting",
+            "PrivacySetting",
+            "PropertyMappings",
+            "Length",
+            "DisplayOrder",
+            "IsEventLog",
+            "IsVisibleOnEditor",
+            "IsVisibleOnViewer",
+            "IsUserEditable",
+            "IsAlias",
+            "IsSearchabe",
+            "UserOverridePrivacy",
+            "TermGroup",
+            "TermStore",
+            "TermSet",
+            "Ensure")
     }
     else
     {
         return Test-SPDscParameterState -CurrentValues $CurrentValues `
-                                        -DesiredValues $PSBoundParameters `
-                                        -ValuesToCheck @("Ensure")
+            -DesiredValues $PSBoundParameters `
+            -ValuesToCheck @("Ensure")
     }
 }
 

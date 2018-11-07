@@ -14,7 +14,5 @@ adds it as the last property of section X.
 
 Length is only relevant if Field type is "String".
 
-This Resource doesn't currently support removing existing user profile
-
 The default value for the Ensure parameter is Present. When not specifying this
 parameter, the user profile property is created.

@@ -43,7 +43,7 @@ function Get-TargetResource
         Import-Module -Name (Join-Path -Path $ScriptRoot -ChildPath $modulePath -Resolve)
 
         $result = Get-SPDSCWebApplicationBlockedFileTypeConfig -WebApplication $wa
-        $result.Add("Url", $params.WebAppUrl)
+        $result.Add("WebAppUrl", $params.WebAppUrl)
         $result.Add("InstallAccount", $params.InstallAccount)
         return $result
     }
