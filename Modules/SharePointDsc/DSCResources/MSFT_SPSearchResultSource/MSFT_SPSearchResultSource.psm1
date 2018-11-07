@@ -52,11 +52,6 @@ function Get-TargetResource
     )
 
     Write-Verbose -Message "Getting search result source '$Name'"
-    if ($ScopeName -ne "SSA" -and "" -eq $ScopeUrl)
-    {
-        throw "When specifying a ScopeName of type $($ScopeName) you also need to provide" + `
-        " a ScopeUrl value."
-    }
 
     $result = Invoke-SPDSCCommand -Credential $InstallAccount `
                                   -Arguments $PSBoundParameters `
@@ -175,12 +170,6 @@ function Set-TargetResource
     Write-Verbose -Message "Setting search result source '$Name'"
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
-
-    if ($ScopeName -ne "SSA" -and $null -eq $ScopeUrl)
-    {
-        throw "When specifying a ScopeName of type $($ScopeName) you also need to provide" + `
-        " a ScopeUrl value."
-    }
 
     if ($CurrentValues.Ensure -eq "Absent" -and $Ensure -eq "Present")
     {
