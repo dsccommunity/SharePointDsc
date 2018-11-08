@@ -1,5 +1,9 @@
 # Change log for SharePointDsc
 
+## Unreleased
+
+* Updated LICENSE file to match the Microsoft Open Source Team standard. Fixes [Issue #969](https://github.com/PowerShell/SharePointDsc/issues/969)
+
 ## v3.0
 
 * Changes to SharePointDsc
