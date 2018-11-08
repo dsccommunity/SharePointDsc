@@ -4,12 +4,18 @@
 # Description
     
     **Type:** Distributed
+    **Requires CredSSP:** No
     
     This resource is used to enable a Project Server license in to a SharePoint
-    2016 farm.
+    2016 or 2019 farm.
     
+.PARAMETER IsSingleInstance
+    Key - String
+    Allowed values: Yes
+    Specifies the resource is a single instance, the value must be 'Yes'
+
 .PARAMETER Ensure
-    Key - string
+    Write - string
     Allowed values: Present, Absent
     Should a Project Server license be enabled or disabled
 
@@ -26,7 +32,7 @@
     This example enables Project Server in the current environment
 
 
-Configuration Example 
+Configuration Example
 {
     param(
         [Parameter(Mandatory = $true)]
@@ -38,7 +44,7 @@ Configuration Example
     node localhost {
         SPProjectServerLicense ProjectLicense
         {
-            Ensure               = "Present"
+            IsSingleInstance     = "Yes"
             ProductKey           = "XXXXX-XXXXX-XXXXX-XXXXX-XXXXX"
             PsDscRunAsCredential = $SetupAccount
         }
@@ -50,7 +56,7 @@ Configuration Example
     This example disables Project Server in the current environment
 
 
-Configuration Example 
+Configuration Example
 {
     param(
         [Parameter(Mandatory = $true)]
@@ -62,6 +68,7 @@ Configuration Example
     node localhost {
         SPProjectServerLicense ProjectLicense
         {
+            IsSingleInstance     = "Yes"
             Ensure               = "Absent"
             PsDscRunAsCredential = $SetupAccount
         }

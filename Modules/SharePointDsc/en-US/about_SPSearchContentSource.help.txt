@@ -4,6 +4,7 @@
 # Description
     
     **Type:** Distributed
+    **Requires CredSSP:** No
     
     This resource will deploy and configure a content source in a specified search
     service application.
@@ -21,15 +22,15 @@
 
 .PARAMETER ContentSourceType
     Required - String
-    Allowed values: SharePoint, Website, FileShare
-    The type of content source - currently only SharePoint, Website and File Shares are supported
+    Allowed values: SharePoint, Website, FileShare, Business
+    The type of content source - currently only SharePoint, Website, File Shares and Business are supported
 
 .PARAMETER Addresses
-    Required - String
+    Write - String
     A list of the addresses this content source includes
 
 .PARAMETER CrawlSetting
-    Required - String
+    Write - String
     Allowed values: CrawlEverything, CrawlFirstOnly, Custom
     Should the crawler index everything, just the first site or page, or a custom depth (applies to websites only)
 
@@ -57,6 +58,10 @@
 .PARAMETER LimitServerHops
     Write - Uint32
     How many server hops should the crawler make (-1 = unlimtied, website sources only)
+
+.PARAMETER LOBSystemSet
+    Write - String
+    Line of Business System and System Instance names
 
 .PARAMETER Ensure
     Write - string

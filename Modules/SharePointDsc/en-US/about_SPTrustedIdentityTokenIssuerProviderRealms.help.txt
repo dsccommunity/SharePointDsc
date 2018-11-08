@@ -4,6 +4,7 @@
 # Description
     
     **Type:** Distributed
+    **Requires CredSSP:** No
     
     This resource is used to add or remove provider realms to
     SPTrustedIdentityTokenIssuer in a SharePoint farm. The "ProviderRealms"

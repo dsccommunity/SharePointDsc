@@ -4,6 +4,7 @@
 # Description
     
     **Type:** Specific
+    **Requires CredSSP:** No
     
     This resource is used to configure the Blob Cache settings for a web
     application.

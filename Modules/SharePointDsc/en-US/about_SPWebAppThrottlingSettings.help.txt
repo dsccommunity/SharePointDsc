@@ -4,6 +4,7 @@
 # Description
     
     **Type:** Distributed
+    **Requires CredSSP:** No
     
     This resource is responsible for setting web application settings that are
     found under the "resource throttling" screen in central admin. The web
@@ -13,7 +14,7 @@
     is the setting used to control the window where threshold do not apply
     throughout the day. You can specify the start time of this window as well as
     
-.PARAMETER Url
+.PARAMETER WebAppUrl
     Key - string
     The URL of the web application
 
@@ -70,7 +71,7 @@
     This example shows how to apply throttling settings to a specific web app
 
 
-    Configuration Example 
+    Configuration Example
     {
         param(
             [Parameter(Mandatory = $true)]
@@ -82,7 +83,7 @@
         node localhost {
             SPWebAppThrottlingSettings PrimaryWebAppThrottlingSettings
             {
-                Url                      = "http://exmaple.contoso.local"
+                WebAppUrl                = "http://exmaple.contoso.local"
                 ListViewThreshold        = 5000
                 AllowObjectModelOverride = $false
                 HappyHourEnabled         = $true

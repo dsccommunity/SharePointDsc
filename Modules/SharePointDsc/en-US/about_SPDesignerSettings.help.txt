@@ -4,6 +4,7 @@
 # Description
     
     **Type:** Distributed
+    **Requires CredSSP:** No
     
     This resource is used to set the SharePoint Designer settings for the local
     farm or site collections. These settings will be used to control if users are
@@ -22,7 +23,7 @@
     changing the Site Collection settings results in an Access Denied error.
     Consider implementing PowerShell v5 and switching to the PsDscRunAsCredential
     
-.PARAMETER Url
+.PARAMETER WebAppUrl
     Key - string
     The URL of the web application or site collection to configure
 
@@ -65,11 +66,11 @@
 
 
 .EXAMPLE
-    This example applies settings to disable SharePoint Designer access to the 
+    This example applies settings to disable SharePoint Designer access to the
     specified web application.
 
 
-    Configuration Example 
+    Configuration Example
     {
         param(
             [Parameter(Mandatory = $true)]
@@ -81,7 +82,7 @@
         node localhost {
             SPDesignerSettings MainWebAppSPDSettings
             {
-                Url                                     = "https://intranet.sharepoint.contoso.com"
+                WebAppUrl                               = "https://intranet.sharepoint.contoso.com"
                 SettingsScope                           = "WebApplication"
                 AllowSharePointDesigner                 = $false
                 AllowDetachPagesFromDefinition          = $false

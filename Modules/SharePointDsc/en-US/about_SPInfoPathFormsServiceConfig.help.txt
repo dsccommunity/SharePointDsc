@@ -4,13 +4,19 @@
 # Description
     
     **Type:** Distributed
+    **Requires CredSSP:** No
     
     This resource is responsible for configuring the InfoPath Forms service within
     the local SharePoint farm. Using Ensure equals to Absent is not supported.
     This resource can only apply configuration, not ensure they don't exist.
     
+.PARAMETER IsSingleInstance
+    Key - String
+    Allowed values: Yes
+    Specifies the resource is a single instance, the value must be 'Yes'
+
 .PARAMETER Ensure
-    Key - string
+    Write - string
     Allowed values: Present, Absent
     Present ensures the settings are applied
 
@@ -88,7 +94,7 @@
         node localhost {
             SPInfoPathFormsServiceConfig InfoPathFormsServiceConfig
             {
-                Ensure                                   = "Present"
+                IsSingleInstance                         = "Yes"
                 AllowUserFormBrowserEnabling             = $true
                 AllowUserFormBrowserRendering            = $true
                 MaxDataConnectionTimeout                 = 20000

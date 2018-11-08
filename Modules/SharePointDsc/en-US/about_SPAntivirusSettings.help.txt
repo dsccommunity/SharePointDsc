@@ -4,6 +4,7 @@
 # Description
     
     **Type:** Distributed
+    **Requires CredSSP:** No
     
     This resource is used to set the global antivirus settings for the local farm.
     These settings will be used to control the behavior of an external anti-virus
@@ -11,8 +12,13 @@
     not scan documents for viruses on it's own, an external tool still needs to be
     installed on the servers that integrates with SharePoint.
     
+.PARAMETER IsSingleInstance
+    Key - String
+    Allowed values: Yes
+    Specifies the resource is a single instance, the value must be 'Yes'
+
 .PARAMETER ScanOnDownload
-    Key - Boolean
+    Write - Boolean
     Should documents be scanned before being downloaded
 
 .PARAMETER ScanOnUpload
@@ -44,7 +50,7 @@
     This example shows how to apply specific anti-virus configuration to the farm
 
 
-    Configuration Example 
+    Configuration Example
     {
         param(
             [Parameter(Mandatory = $true)]
@@ -56,6 +62,7 @@
         node localhost {
             SPAntivirusSettings AVSettings
             {
+                IsSingleInstance      = "Yes"
                 ScanOnDownload        = $true
                 ScanOnUpload          = $true
                 AllowDownloadInfected = $false

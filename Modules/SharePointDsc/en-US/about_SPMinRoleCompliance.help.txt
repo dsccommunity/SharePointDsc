@@ -4,6 +4,7 @@
 # Description
     
     **Type:** Utility
+    **Requires CredSSP:** No
     
     This resource will help manage compliance of MinRole based servers. Each time
     the resource runs it will investigate which service instances should be running
@@ -11,8 +12,13 @@
     compliant state it will tell SharePoint to create timer jobs to make the
     necesssary modifications to make the farm compliant again.
     
+.PARAMETER IsSingleInstance
+    Key - String
+    Allowed values: Yes
+    Specifies the resource is a single instance, the value must be 'Yes'
+
 .PARAMETER State
-    Key - string
+    Required - string
     Allowed values: Compliant,  NonCompliant
     Should the state be set to compliant
 
@@ -25,7 +31,7 @@
     This example shows how to ensure the farm is always compliant with MinRole settings
 
 
-    Configuration Example 
+    Configuration Example
     {
         param(
             [Parameter(Mandatory = $true)]
@@ -35,8 +41,9 @@
         Import-DscResource -ModuleName SharePointDsc
 
         node localhost {
-            SPMinRoleCompliance MinRoleCompliance 
+            SPMinRoleCompliance MinRoleCompliance
             {
+                IsSingleInstance     = "Yes"
                 State                = "Compliant"
                 PSDscRunAsCredential = $SetupAccount
             }

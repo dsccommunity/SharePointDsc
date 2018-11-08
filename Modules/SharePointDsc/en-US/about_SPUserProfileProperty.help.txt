@@ -4,6 +4,7 @@
 # Description
     
     **Type:** Distributed
+    **Requires CredSSP:** No
     
     This resource will create a property in a user profile service application. It
     creates, update or delete a property using the parameters that are passed in to
@@ -15,8 +16,6 @@
     adds it as the last property of section X.
     
     Length is only relevant if Field type is "String".
-    
-    This Resource doesn't currently support removing existing user profile
     
     The default value for the Ensure parameter is Present. When not specifying this
     parameter, the user profile property is created.
@@ -57,17 +56,9 @@
     Allowed values: Public, Contacts, Organization, Manager, Private
     The privacy setting for the property
 
-.PARAMETER MappingConnectionName
+.PARAMETER PropertyMappings
     Write - string
-    The name of the UPS connect to map this property to
-
-.PARAMETER MappingPropertyName
-    Write - string
-    The name of the property from the UPS connection to map to
-
-.PARAMETER MappingDirection
-    Write - string
-    The direction of the mapping, either Import or Export
+    The details about the property mapping
 
 .PARAMETER Length
     Write - uint32
@@ -118,7 +109,7 @@
     The name of the term set to allow values to be selected from
 
 .PARAMETER InstallAccount
-    Write - String
+    Write - string
     POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5
 
 
@@ -127,44 +118,49 @@
     app
 
 
-    Configuration Example 
-    {
-        param(
-            [Parameter(Mandatory = $true)]
-            [PSCredential]
-            $SetupAccount
-        )
-        Import-DscResource -ModuleName SharePointDsc
+Configuration Example
+{
+    param(
+        [Parameter(Mandatory = $true)]
+        [PSCredential]
+        $SetupAccount
+    )
+    Import-DscResource -ModuleName SharePointDsc
 
-        node localhost {
-            SPUserProfileProperty WorkEmailProperty
-            {
-                Name = "WorkEmail2"
-                Ensure = "Present"
-                UserProfileService = "User Profile Service Application"
-                DisplayName = "Work Email"
-                Type = "Email"
-                Description = "" #implementation isn't using it yet
-                PolicySetting = "Mandatory"
-                PrivacySetting = "Public"
-                MappingConnectionName = "contoso.com"
-                MappingPropertyName = "mail"
-                MappingDirection = "Import"
-                Length = 10
-                DisplayOrder =25 
-                IsEventLog =$false
-                IsVisibleOnEditor=$true
-                IsVisibleOnViewer = $true
-                IsUserEditable = $true
-                IsAlias = $false 
-                IsSearchable = $false 
-                TermStore = ""
-                TermGroup = ""
-                TermSet = "" 
-                UserOverridePrivacy = $false
-                PsDscRunAsCredential = $SetupAccount
-            }
+    node localhost {
+
+        SPUserProfileProperty WorkEmailProperty
+        {
+            Name                 = "WorkEmail2"
+            Ensure               = "Present"
+            UserProfileService   = "User Profile Service Application"
+            DisplayName          = "Work Email"
+            Type                 = "Email"
+            Description          = "" #implementation isn't using it yet
+            PolicySetting        = "Mandatory"
+            PrivacySetting       = "Public"
+            PropertyMappings     = @(
+                MSFT_SPUserProfilePropertyMapping {
+                    ConnectionName = "contoso.com"
+                    PropertyName   = "mail"
+                    Direction      = "Import"
+                }
+            )
+            Length               = 10
+            DisplayOrder         = 25
+            IsEventLog           = $false
+            IsVisibleOnEditor    = $true
+            IsVisibleOnViewer    = $true
+            IsUserEditable       = $true
+            IsAlias              = $false
+            IsSearchable         = $false
+            TermStore            = ""
+            TermGroup            = ""
+            TermSet              = ""
+            UserOverridePrivacy  = $false
+            PsDscRunAsCredential = $SetupAccount
         }
     }
+}
 
 
