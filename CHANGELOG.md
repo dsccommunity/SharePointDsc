@@ -12,6 +12,9 @@
   * Updated the Service Instance retrieval to be language independent
 * SPConfigWizard
   * Fixed check for Ensure=Absent in the Set method
+* SPInstallPrereqs
+  * Added support for detecting updated installation of Microsoft Visual C++
+    2015/2017 Redistributable (x64) for SharePoint 2016 and SharePoint 2019.
 * SPSearchContentSource
   * Added support for Business Content Source Type
 * SPSearchMetadataCategory
@@ -21,12 +24,6 @@
     checked and created if it does not exist
 * SPSecurityTokenServiceConfig
   * The resource only tested for the Ensure parameter. Added more parameters
-* SPUserProfileProperty
-  * Removed obsolete parameters (MappingConnectionName, MappingPropertyName,
-    MappingDirection) and introduced new parameter PropertyMappings
-* SPUserProfileServiceApp
-  * Updated the check for successful creation of the service app to throw an
-    error if this is not done correctly
 * SPServiceAppSecurity
   * Added support for specifying array of access levels.
   * Changed implementation to use Grant-SPObjectSecurity with Replace switch
@@ -34,9 +31,12 @@
     Grant-SPObjectSecurity
   * Added all supported access levels as available values.
   * Removed unknown access levels: Change Permissions, Write, and Read
-* SPInstallPrereqs
-  * Added support for detecting updated installation of Microsoft Visual C++
-    2015/2017 Redistributable (x64) for SharePoint 2016 and SharePoint 2019.
+* SPUserProfileProperty
+  * Removed obsolete parameters (MappingConnectionName, MappingPropertyName,
+    MappingDirection) and introduced new parameter PropertyMappings
+* SPUserProfileServiceApp
+  * Updated the check for successful creation of the service app to throw an
+    error if this is not done correctly
 
 The following changes will break v2.x and earlier configurations that use these
 resources:
@@ -74,7 +74,7 @@ resources:
   * SPSearchResultSource: Added option to create Result Sources at different scopes.
   * SPServiceAppSecurity: Changed parameter AccessLevel to AccessLevels in
     MSFT_SPServiceAppSecurityEntry to support array of access levels.
-  * SPUserProfileProperty: new parameter PropertyMappings
+  * SPUserProfileProperty: New parameter PropertyMappings
 
 ## 2.6
 

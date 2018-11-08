@@ -128,56 +128,80 @@ PrivateData = @{
 
         # ReleaseNotes of this module
         ReleaseNotes = "
-      * SPFarm
-        * Fixed issue where Central Admin service was not starting for non-english farms
-      * SPManagedMetadataServiceApp
-        * Added additional content type settings (ContentTypePushdownEnabled &
-          ContentTypeSyndicationEnabled).
-        * Fixed issue where Get method would throw an error when the proxy did not exist.
-        * Fixed an issue where the resource checks if the proxy exists and if not, it is
-          created.
+      * Changes to SharePointDsc
+        * Added support for SharePoint 2019
+        * Added CredSSP requirement to the Readme files
+        * Added VSCode Support for running SharePoint 2019 unit tests
+        * Removed the deprecated resources SPCreateFarm and SPJoinFarm (replaced
+          in v2.0 by SPFarm)
+      * SPBlobCacheSettings
+        * Updated the Service Instance retrieval to be language independent
+      * SPConfigWizard
+        * Fixed check for Ensure=Absent in the Set method
+      * SPInstallPrereqs
+        * Added support for detecting updated installation of Microsoft Visual C++
+          2015/2017 Redistributable (x64) for SharePoint 2016 and SharePoint 2019.
       * SPSearchContentSource
-        * Fixed issue with numerical Content Sources name
-        * Fixed issue where the code throws an error when the content source cannot be
-          successfully created
-      * SPSearchManagedProperty
-        * Added a new resource to support Search Managed Properties
-        * Fix for multiple aliases
-      * SPSearchResultSource
-        * Added a new ScopeUrl parameter to allow for local source creation
-      * SPSearchTopology
-        * Updated Readme.md to remove some incorrect information
-        * Fixed logic to handle the FirstPartitionDirectory in Get-TargetResource
-      * SPSelfServiceSiteCreation
-        * New resource to manage self-service site creation
-      * SPServiceAppSecurity
-        * Added local farm token.
-        * Fixed issues that prevented the resource to work as expected in many situations.
-      * SPSite
-        * Added the possibility for creating the default site groups
-        * Added the possibility to set AdministrationSiteType
-        * Fixed test method that in some cases always would return false
-        * Fixed a typo in the values to check for AdministrationSiteType
-        * Fixed an access denied issue when creating default site groups
-          when the run as account does not have proper permissions for the site
-      * SPTrustedIdentityTokenIssuer
-        * Added parameter UseWReplyParameter
+        * Added support for Business Content Source Type
+      * SPSearchMetadataCategory
+        * New resource added
+      * SPSearchServiceApp
+        * Updated resource to make sure the presence of the service app proxy is
+          checked and created if it does not exist
+      * SPSecurityTokenServiceConfig
+        * The resource only tested for the Ensure parameter. Added more parameters
+        * SPServiceAppSecurity
+        * Added support for specifying array of access levels.
+        * Changed implementation to use Grant-SPObjectSecurity with Replace switch
+          instead of using a combination of Revoke-SPObjectSecurity and
+          Grant-SPObjectSecurity
+        * Added all supported access levels as available values.
+        * Removed unknown access levels: Change Permissions, Write, and Read
+      * SPUserProfileProperty
+        * Removed obsolete parameters (MappingConnectionName, MappingPropertyName,
+          MappingDirection) and introduced new parameter PropertyMappings
       * SPUserProfileServiceApp
-        * Fixed issue which was introduced in v2.5 where the service application proxy
-          was not created.
-        * Updated resource to grant the InstallAccount permissions to a newly created service
-          application to prevent issues in the Get method.
-      * SPUserProfileSyncConnection
-        * Fixed issue where empty IncludedOUs and ExcludedOUs would throw an error
-      * SPWebAppClientCallableSettings
-        * New resource to manage web application client callable settings including
-          proxy libraries.
-      * SPWebAppPropertyBag
-        * New resource to manage web application property bag
-      * SPWebAppSuiteBar
-        * Fixed incorrect test method that resulted in this resource to never apply changes.
-        * Enable usage of SuiteBarBrandingElementHtml for SharePoint 2016
-          (only supported if using a SharePoint 2013 masterpage)            "
+        * Updated the check for successful creation of the service app to throw an
+          error if this is not done correctly
+
+      The following changes will break v2.x and earlier configurations that use these
+      resources:
+
+      * Implemented IsSingleInstance parameter to force that the resource can only
+        be used once in a configuration for the following resources:
+        * SPAntivirusSettings
+        * SPConfigWizard
+        * SPDiagnosticLoggingSettings
+        * SPFarm
+        * SPFarmAdministrators
+        * SPInfoPathFormsServiceConfig
+        * SPInstall
+        * SPInstallPrereqs
+        * SPIrmSettings
+        * SPMinRoleCompliance
+        * SPPasswordChangeSettings
+        * SPProjectServerLicense
+        * SPSecurityTokenServiceConfig
+        * SPShellAdmin
+      * Standardized Url/WebApplication parameter to default WebAppUrl parameter
+        for the following resources:
+        * SPDesignerSettings
+        * SPFarmSolution
+        * SPSelfServiceSiteCreation
+        * SPWebAppBlockedFileTypes
+        * SPWebAppClientCallableSettings
+        * SPWebAppGeneralSettings
+        * SPWebApplication
+        * SPWebApplicationAppDomain
+        * SPWebAppSiteUseAndDeletion
+        * SPWebAppThrottlingSettings
+        * SPWebAppWorkflowSettings
+      * Introduced new mandatory parameters
+        * SPSearchResultSource: Added option to create Result Sources at different scopes.
+        * SPServiceAppSecurity: Changed parameter AccessLevel to AccessLevels in
+          MSFT_SPServiceAppSecurityEntry to support array of access levels.
+        * SPUserProfileProperty: New parameter PropertyMappings
+      "
     } # End of PSData hashtable
 
 } # End of PrivateData hashtable
