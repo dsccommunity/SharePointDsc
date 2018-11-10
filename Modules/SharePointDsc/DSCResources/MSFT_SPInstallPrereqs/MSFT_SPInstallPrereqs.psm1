@@ -258,12 +258,12 @@ function Get-TargetResource
     Write-Verbose -Message "Checking windows packages from the registry"
 
     $x86Path = "HKLM:\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*"
-    $installedItemsX86 = Get-ItemProperty -Path $x86Path | Select-Object -Property DisplayName
+    $installedItemsX86 = Get-ItemProperty -Path $x86Path | Select-Object -Property DisplayName, BundleUpgradeCode, DisplayVersion
 
     $x64Path = "HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall\*"
-    $installedItemsX64 = Get-ItemProperty -Path $x64Path | Select-Object -Property DisplayName
+    $installedItemsX64 = Get-ItemProperty -Path $x64Path | Select-Object -Property DisplayName, BundleUpgradeCode, DisplayVersion
 
-    $installedItems = $installedItemsX86 + $installedItemsX64 | Select-Object -Property DisplayName -Unique
+    $installedItems = $installedItemsX86 + $installedItemsX64 | Select-Object -Property DisplayName, BundleUpgradeCode, DisplayVersion -Unique
 
     # Common prereqs
     $prereqsToTest = @(
@@ -349,14 +349,10 @@ function Get-TargetResource
                     SearchValue = "Microsoft Visual C++ 2012 x64 Additional Runtime - 11.0.*"
                 },
                 [PSObject]@{
-                    Name = "Microsoft Visual C++ 2015 x64 Minimum Runtime - 14.0"
-                    SearchType = "Like"
-                    SearchValue = "Microsoft Visual C++ 2015 x64 Minimum Runtime - 14.0.*"
-                },
-                [PSObject]@{
-                    Name = "Microsoft Visual C++ 2015 x64 Additional Runtime - 14.0"
-                    SearchType = "Like"
-                    SearchValue = "Microsoft Visual C++ 2015 x64 Additional Runtime - 14.0.*"
+                    Name = "Microsoft Visual C++ 2015 Redistributable (x64)"
+                    SearchType = "BundleUpgradeCode"
+                    SearchValue = "{C146EF48-4D31-3C3D-A2C5-1E91AF8A0A9B}"
+                    MinimumRequiredVersion = "14.0.23026.0"
                 }
             )
         }
@@ -375,9 +371,10 @@ function Get-TargetResource
                     SearchValue = "Microsoft SQL Server 2012 Native Client"
                 },
                 [PSObject]@{
-                    Name = "Microsoft Visual C++ 2017 x64 Additional Runtime - 14"
-                    SearchType = "Like"
-                    SearchValue = "Microsoft Visual C++ 2017 x64 Additional Runtime - 14.*"
+                    Name = "Microsoft Visual C++ 2017 Redistributable (x64)"
+                    SearchType = "BundleUpgradeCode"
+                    SearchValue = "{C146EF48-4D31-3C3D-A2C5-1E91AF8A0A9B}"
+                    MinimumRequiredVersion = "14.13.26020.0"
                 }
             )
         }
@@ -913,10 +910,43 @@ function Test-SPDscPrereqInstallStatus
                                             "on this system")
                 }
             }
+            "BundleUpgradeCode"
+            {
+                $installedItem = $InstalledItems | Where-Object -FilterScript {
+                    $null -ne $_.BundleUpgradeCode -and (($_.BundleUpgradeCode.Trim() | Compare-Object $itemToCheck.SearchValue) -eq $null)
+                }
+                if ($null -eq $installedItem)
+                {
+                    $itemsInstalled = $false
+                    Write-Verbose -Message ("Prerequisite $($itemToCheck.Name) was not found " + `
+                                            "on this system")
+                }
+                else
+                {
+                    $isRequiredVersionInstalled = $true;
+
+                    [int[]]$minimumRequiredVersion = $itemToCheck.MinimumRequiredVersion.Split('.')
+                    [int[]]$installedVersion = $installedItem.DisplayVersion.Split('.')
+                    for ([int]$index = 0; $index -lt $minimumRequiredVersion.Length -and $index -lt $installedVersion.Length; $index++)
+                    {
+                        if($minimumRequiredVersion[$index] -gt $installedVersion[$index])
+                        {
+                            $isRequiredVersionInstalled = $false;
+                        }
+                    }
+                    if ($installedVersion.Length -eq 0 -or -not $isRequiredVersionInstalled)
+                    {
+                        $itemsInstalled = $false
+                        Write-Verbose -Message ("Prerequisite $($itemToCheck.Name) was found but had " + `
+                                                "unexpected version. Expected minimum version $($itemToCheck.MinimumVersion) " + `
+                                                "but found version $($installedItem.DisplayVersion).")
+                    }
+                }
+            }
             Default
             {
                 throw ("Unable to search for a prereq with mode '$($itemToCheck.SearchType)'. " + `
-                       "please use either 'Equals', 'Like' or 'Match'")
+                       "please use either 'Equals', 'Like' or 'Match', or 'BundleUpgradeCode'")
             }
         }
     }

@@ -16,12 +16,16 @@
 * Changes to SharePointDsc
   * Added support for SharePoint 2019
   * Added CredSSP requirement to the Readme files
+  * Added VSCode Support for running SharePoint 2019 unit tests
   * Removed the deprecated resources SPCreateFarm and SPJoinFarm (replaced
     in v2.0 by SPFarm)
 * SPBlobCacheSettings
   * Updated the Service Instance retrieval to be language independent
 * SPConfigWizard
   * Fixed check for Ensure=Absent in the Set method
+* SPInstallPrereqs
+  * Added support for detecting updated installation of Microsoft Visual C++
+    2015/2017 Redistributable (x64) for SharePoint 2016 and SharePoint 2019.
 * SPSearchContentSource
   * Added support for Business Content Source Type
 * SPSearchMetadataCategory
@@ -31,6 +35,16 @@
     checked and created if it does not exist
 * SPSecurityTokenServiceConfig
   * The resource only tested for the Ensure parameter. Added more parameters
+* SPServiceAppSecurity
+  * Added support for specifying array of access levels.
+  * Changed implementation to use Grant-SPObjectSecurity with Replace switch
+    instead of using a combination of Revoke-SPObjectSecurity and
+    Grant-SPObjectSecurity
+  * Added all supported access levels as available values.
+  * Removed unknown access levels: Change Permissions, Write, and Read
+* SPUserProfileProperty
+  * Removed obsolete parameters (MappingConnectionName, MappingPropertyName,
+    MappingDirection) and introduced new parameter PropertyMappings
 * SPUserProfileServiceApp
   * Updated the check for successful creation of the service app to throw an
     error if this is not done correctly
@@ -69,6 +83,9 @@ resources:
   * SPWebAppWorkflowSettings
 * Introduced new mandatory parameters
   * SPSearchResultSource: Added option to create Result Sources at different scopes.
+  * SPServiceAppSecurity: Changed parameter AccessLevel to AccessLevels in
+    MSFT_SPServiceAppSecurityEntry to support array of access levels.
+  * SPUserProfileProperty: New parameter PropertyMappings
 
 ## 2.6
 

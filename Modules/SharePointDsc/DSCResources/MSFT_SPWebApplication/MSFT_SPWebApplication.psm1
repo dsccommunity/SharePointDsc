@@ -89,7 +89,7 @@ function Get-TargetResource
             Name = $wa.DisplayName
             ApplicationPool = $wa.ApplicationPool.Name
             ApplicationPoolAccount = $wa.ApplicationPool.Username
-            WebAppUrl = $wa.WebAppUrl
+            WebAppUrl = $wa.Url
             AllowAnonymous = $authProvider.AllowAnonymous
             DatabaseName = $wa.ContentDatabases[0].Name
             DatabaseServer = $wa.ContentDatabases[0].Server

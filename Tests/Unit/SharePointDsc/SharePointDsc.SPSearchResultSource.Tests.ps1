@@ -146,6 +146,7 @@ catch {
             $testParams = @{
                 Name = "New source"
                 ScopeName = "SSA"
+                ScopeUrl = "Global"
                 SearchServiceAppName = "Search Service Application"
                 ProviderType = "Remote SharePoint Provider"
                 Query = "{searchTerms}"
@@ -168,30 +169,11 @@ catch {
             }
         }
 
-        Context -Name "Invalid parameters are specified" -Fixture {
-            $testParams = @{
-                Name = "Test source"
-                ScopeName = "SPSite"
-                SearchServiceAppName = "Search Service Application"
-                ProviderType = "Remote SharePoint Provider"
-                Query = "{searchTerms}"
-                ConnectionUrl = "https://sharepoint.contoso.com"
-                Ensure = "Present"
-            }
-
-            It "Should throw an error from the get method" {
-                { Get-TargetResource @testParams } | Should Throw "When specifying a ScopeName of type SPSite you also need to provide a ScopeUrl value."
-            }
-
-            It "Should thow an error from the set method" {
-                { Set-TargetResource @testParams } | Should Throw "When specifying a ScopeName of type SPSite you also need to provide a ScopeUrl value."
-            }
-        }
-
         Context -Name "A search result source exists and should" -Fixture {
             $testParams = @{
                 Name = "Test source"
                 ScopeName = "SSA"
+                ScopeUrl = "https://sharepoint.contoso.com"
                 SearchServiceAppName = "Search Service Application"
                 ProviderType = "Remote SharePoint Provider"
                 Query = "{searchTerms}"
@@ -219,6 +201,7 @@ catch {
         Context -Name "A search result source exists and shouldn't" -Fixture {
             $testParams = @{
                 Name = "Test source"
+                ScopeUrl = "Global"
                 SearchServiceAppName = "Search Service Application"
                 ProviderType = "Remote SharePoint Provider"
                 Query = "{searchTerms}"
@@ -252,6 +235,7 @@ catch {
             $testParams = @{
                 Name = "Non-Existing source"
                 ScopeName = "SSA"
+                ScopeUrl = "Global"
                 SearchServiceAppName = "Search Service Application"
                 ProviderType = "Remote SharePoint Provider"
                 Query = "{searchTerms}"
@@ -303,7 +287,7 @@ catch {
                 Query = "{searchTerms}"
                 ConnectionUrl = "https://sharepoint.contoso.com"
                 ScopeName = "SSA"
-                ScopeUrl = "https://sharepoint.contoso.com"
+                ScopeUrl = "Global"
                 Ensure = "Present"
             }
 
