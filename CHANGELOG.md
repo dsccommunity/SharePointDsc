@@ -1,5 +1,16 @@
 # Change log for SharePointDsc
 
+## Unreleased
+
+* SPInstallPrereqs
+  * Updated links in the Readme.md file to docs.microsoft.com
+* SPManagedMetadataServiceApp
+  * Fixed issue where Get-TargetResource method throws an error when the
+    service app proxy does not exist.
+* SPSearchServiceApp
+  * Fixed issue where Get-TargetResource method throws an error when the
+    service application pool does not exist.
+
 ## v3.0
 
 * Changes to SharePointDsc

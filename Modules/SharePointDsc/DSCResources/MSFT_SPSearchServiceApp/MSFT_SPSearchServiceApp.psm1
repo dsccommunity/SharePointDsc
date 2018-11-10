@@ -69,7 +69,8 @@ function Get-TargetResource
         [void][System.Reflection.Assembly]::LoadWithPartialName("Microsoft.Office.Server.Search")
         [void][System.Reflection.Assembly]::LoadWithPartialName("Microsoft.Office.Server")
 
-        $serviceAppPool = Get-SPServiceApplicationPool $params.ApplicationPool
+        $serviceAppPool = Get-SPServiceApplicationPool -Identity $params.ApplicationPool `
+                                                       -ErrorAction SilentlyContinue
         if ($null -eq $serviceAppPool)
         {
             Write-Verbose -Message ("Specified service application pool $($params.ApplicationPool) " + `
@@ -264,9 +265,14 @@ function Set-TargetResource
                 {
                     $pName = $params.ProxyName
                 }
+
+                Write-Verbose -Message "Creating proxy with name $pName"
                 New-SPEnterpriseSearchServiceApplicationProxy -Name $pName -SearchApplication $app
+
                 if ($params.ContainsKey("DefaultContentAccessAccount") -eq $true)
                 {
+                    Write-Verbose -Message ("Setting DefaultContentAccessAccount to " + `
+                                            $params.DefaultContentAccessAccount.UserName)
                     $appPool = Get-SPServiceApplicationPool -Identity $params.ApplicationPool
                     $account = $params.DefaultContentAccessAccount
                     $setParams = @{
@@ -280,6 +286,7 @@ function Set-TargetResource
 
                 if ($params.ContainsKey("SearchCenterUrl") -eq $true)
                 {
+                    Write-Verbose -Message "Setting SearchCenterUrl to $($params.SearchCenterUrl)"
                     $serviceApp = Get-SPServiceApplication -Name $params.Name | `
                         Where-Object -FilterScript {
                             $_.GetType().FullName -eq "Microsoft.Office.Server.Search.Administration.SearchServiceApplication"
@@ -290,7 +297,10 @@ function Set-TargetResource
 
                 if ($params.ContainsKey("WindowsServiceAccount") -eq $true)
                 {
-                    Set-SPEnterpriseSearchService -ServiceAccount $params.WindowsServiceAccount.UserName `
+                    Write-Verbose -Message ("Setting WindowsServiceAccount to " + `
+                                            $params.WindowsServiceAccount.UserName)
+                    Set-SPEnterpriseSearchService -Identity $params.Name `
+                                                  -ServiceAccount $params.WindowsServiceAccount.UserName `
                                                   -ServicePassword $params.WindowsServiceAccount.Password
                 }
             }
@@ -325,10 +335,12 @@ function Set-TargetResource
             {
                 if ($null -eq $result.ProxyName)
                 {
+                    Write-Verbose -Message "Creating proxy with name $pName"
                     New-SPEnterpriseSearchServiceApplicationProxy -Name $pName -SearchApplication $serviceApp
                 }
                 else
                 {
+                    Write-Verbose -Message "Updating proxy name to $pName"
                     $serviceAppProxy = Get-SPServiceApplicationProxy | Where-Object -FilterScript {
                                            $_.Name -eq $result.ProxyName
                                        }
@@ -337,21 +349,38 @@ function Set-TargetResource
                 }
             }
 
-            $appPool = Get-SPServiceApplicationPool -Identity $params.ApplicationPool
             $setParams = @{
-                ApplicationPool = $appPool
                 Identity = $serviceApp
             }
-            if ($params.ContainsKey("DefaultContentAccessAccount") -eq $true)
+
+            if ($result.ApplicationPool -ne $params.ApplicationPool)
             {
+                Write-Verbose -Message "Updating ApplicationPool to $($params.ApplicationPool)"
+
+                $appPool = Get-SPServiceApplicationPool -Identity $params.ApplicationPool
+                $setParams.Add("ApplicationPool", $appPool)
+            }
+
+            if ($params.ContainsKey("DefaultContentAccessAccount") -eq $true -and `
+                $result.DefaultContentAccessAccount.UserName -ne $params.DefaultContentAccessAccount.UserName)
+            {
+                Write-Verbose -Message ("Updating DefaultContentAccessAccount to " + `
+                                        $params.DefaultContentAccessAccount.UserName)
+
                 $account = $params.DefaultContentAccessAccount
                 $setParams.Add("DefaultContentAccessAccountName", $account.UserName)
                 $setParams.Add("DefaultContentAccessAccountPassword", $account.Password)
             }
-            Set-SPEnterpriseSearchServiceApplication @setParams
 
-            if ($params.ContainsKey("SearchCenterUrl") -eq $true)
+            if ($setParams.Count -gt 1)
             {
+                Set-SPEnterpriseSearchServiceApplication @setParams
+            }
+
+            if ($params.ContainsKey("SearchCenterUrl") -eq $true -and `
+                $result.SearchCenterUrl -ne $params.SearchCenterUrl)
+            {
+                Write-Verbose -Message "Updating SearchCenterUrl to $($params.SearchCenterUrl)"
                 $serviceApp = Get-SPServiceApplication -Name $params.Name | `
                     Where-Object -FilterScript {
                         $_.GetType().FullName -eq "Microsoft.Office.Server.Search.Administration.SearchServiceApplication"
@@ -363,7 +392,10 @@ function Set-TargetResource
             if ($params.ContainsKey("WindowsServiceAccount") -eq $true -and `
                 $result.WindowsServiceAccount.UserName -ne $params.WindowsServiceAccount.UserName)
             {
-                Set-SPEnterpriseSearchService -ServiceAccount $params.WindowsServiceAccount.UserName `
+                Write-Verbose -Message ("Updating WindowsServiceAccount to " + `
+                                        $params.WindowsServiceAccount.UserName)
+                Set-SPEnterpriseSearchService -Identity $params.Name `
+                                              -ServiceAccount $params.WindowsServiceAccount.UserName `
                                               -ServicePassword $params.WindowsServiceAccount.Password
             }
         }
@@ -458,10 +490,13 @@ function Test-TargetResource
     if ($PSBoundParameters.ContainsKey("DefaultContentAccessAccount") `
         -and $Ensure -eq "Present")
     {
-        if ($DefaultContentAccessAccount.UserName `
-            -ne $CurrentValues.DefaultContentAccessAccount.UserName)
+        $desired = $DefaultContentAccessAccount.UserName
+        $current = $CurrentValues.DefaultContentAccessAccount.UserName
+
+        if ($desired -ne $current)
         {
             Write-Verbose -Message "Default content access account is different, returning false"
+            Write-Verbose -Message "Desired: $desired. Current: $current."
             return $false
         }
     }
@@ -469,10 +504,13 @@ function Test-TargetResource
     if ($PSBoundParameters.ContainsKey("WindowsServiceAccount") `
         -and $Ensure -eq "Present")
     {
-        if ($WindowsServiceAccount.UserName `
-            -ne $CurrentValues.WindowsServiceAccount.UserName)
+        $desired = $WindowsServiceAccount.UserName
+        $current = $CurrentValues.WindowsServiceAccount.UserName
+
+        if ($desired -ne $current)
         {
             Write-Verbose -Message "Windows service account is different, returning false"
+            Write-Verbose -Message "Desired: $desired. Current: $current."
             return $false
         }
     }
