@@ -10,6 +10,8 @@
 * SPSearchServiceApp
   * Fixed issue where Get-TargetResource method throws an error when the
     service application pool does not exist.
+  * Implemented check to make sure cmdlets are only executed when it actually
+    has something to update.
 
 ## v3.0
 
