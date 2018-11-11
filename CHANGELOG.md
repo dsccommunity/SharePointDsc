@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+* Changes to SharePointDsc
+  * Updated LICENSE file to match the Microsoft Open Source Team standard.
 * SPInstallPrereqs
   * Updated links in the Readme.md file to docs.microsoft.com
 * SPManagedMetadataServiceApp
