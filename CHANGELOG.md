@@ -1,5 +1,10 @@
 # Change log for SharePointDsc
 
+## Unreleased
+
+* Changes to SharePointDsc
+  * Updated LICENSE file to match the Microsoft Open Source Team standard.
+
 ## v3.0
 
 * Changes to SharePointDsc
