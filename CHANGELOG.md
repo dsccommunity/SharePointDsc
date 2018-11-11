@@ -1,9 +1,5 @@
 # Change log for SharePointDsc
 
-## Unreleased
-
-* Updated LICENSE file to match the Microsoft Open Source Team standard. Fixes [Issue #969](https://github.com/PowerShell/SharePointDsc/issues/969)
-
 ## v3.0
 
 * Changes to SharePointDsc
@@ -12,6 +8,7 @@
   * Added VSCode Support for running SharePoint 2019 unit tests
   * Removed the deprecated resources SPCreateFarm and SPJoinFarm (replaced
     in v2.0 by SPFarm)
+  * Updated LICENSE file to match the Microsoft Open Source Team standard.
 * SPBlobCacheSettings
   * Updated the Service Instance retrieval to be language independent
 * SPConfigWizard
