@@ -129,10 +129,6 @@ function Get-TargetResource
                 }
             }
 
-            $searchService = Get-SPEnterpriseSearchService
-            $windowsAccount = New-Object -TypeName System.Management.Automation.PSCredential `
-                                         -ArgumentList @($searchService.ProcessIdentity, $dummyPassword)
-
             $returnVal =  @{
                 Name                        = $serviceApp.DisplayName
                 ProxyName                   = $pName
@@ -143,7 +139,7 @@ function Get-TargetResource
                 SearchCenterUrl             = $serviceApp.SearchCenterUrl
                 DefaultContentAccessAccount = $defaultAccount
                 CloudIndex                  = $cloudIndex
-                WindowsServiceAccount       = $windowsAccount
+                WindowsServiceAccount       = $params.WindowsServiceAccount
                 InstallAccount              = $params.InstallAccount
             }
             return $returnVal
@@ -294,15 +290,6 @@ function Set-TargetResource
                     $serviceApp.SearchCenterUrl = $params.SearchCenterUrl
                     $serviceApp.Update()
                 }
-
-                if ($params.ContainsKey("WindowsServiceAccount") -eq $true)
-                {
-                    Write-Verbose -Message ("Setting WindowsServiceAccount to " + `
-                                            $params.WindowsServiceAccount.UserName)
-                    Set-SPEnterpriseSearchService -Identity $params.Name `
-                                                  -ServiceAccount $params.WindowsServiceAccount.UserName `
-                                                  -ServicePassword $params.WindowsServiceAccount.Password
-                }
             }
         }
     }
@@ -387,16 +374,6 @@ function Set-TargetResource
                     }
                 $serviceApp.SearchCenterUrl = $params.SearchCenterUrl
                 $serviceApp.Update()
-            }
-
-            if ($params.ContainsKey("WindowsServiceAccount") -eq $true -and `
-                $result.WindowsServiceAccount.UserName -ne $params.WindowsServiceAccount.UserName)
-            {
-                Write-Verbose -Message ("Updating WindowsServiceAccount to " + `
-                                        $params.WindowsServiceAccount.UserName)
-                Set-SPEnterpriseSearchService -Identity $params.Name `
-                                              -ServiceAccount $params.WindowsServiceAccount.UserName `
-                                              -ServicePassword $params.WindowsServiceAccount.Password
             }
         }
     }
@@ -496,20 +473,6 @@ function Test-TargetResource
         if ($desired -ne $current)
         {
             Write-Verbose -Message "Default content access account is different, returning false"
-            Write-Verbose -Message "Desired: $desired. Current: $current."
-            return $false
-        }
-    }
-
-    if ($PSBoundParameters.ContainsKey("WindowsServiceAccount") `
-        -and $Ensure -eq "Present")
-    {
-        $desired = $WindowsServiceAccount.UserName
-        $current = $CurrentValues.WindowsServiceAccount.UserName
-
-        if ($desired -ne $current)
-        {
-            Write-Verbose -Message "Windows service account is different, returning false"
             Write-Verbose -Message "Desired: $desired. Current: $current."
             return $false
         }
