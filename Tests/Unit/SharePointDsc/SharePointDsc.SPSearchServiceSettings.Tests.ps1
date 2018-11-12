@@ -27,6 +27,54 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         # Mocks for all contexts
 
         # Test contexts
+        Context -Name "The server is not part of SharePoint farm" -Fixture {
+            $testParams = @{
+                IsSingleInstance      = "Yes"
+                PerformanceLevel      = "Maximum"
+                ContactEmail          = "sharepoint@contoso.com"
+                WindowsServiceAccount = $mockCredential
+            }
+
+            Mock -CommandName Get-SPFarm -MockWith {
+                throw "Unable to detect local farm"
+            }
+
+            It "Should return null from the get method" {
+                $result = Get-TargetResource @testParams
+                $result.PerformanceLevel | Should BeNullOrEmpty
+                $result.ContactEmail | Should BeNullOrEmpty
+                $result.WindowsServiceAccount | Should BeNullOrEmpty
+            }
+
+            It "Should return false from the test method" {
+                Test-TargetResource @testParams | Should Be $false
+            }
+
+            It "Should throw an exception in the set method to say there is no local farm" {
+                { Set-TargetResource @testParams } | Should throw "No local SharePoint farm was detected"
+            }
+        }
+
+        Context -Name "No optional parameters are specified" -Fixture {
+            $testParams = @{
+                IsSingleInstance      = "Yes"
+            }
+
+            It "Should return null from the get method" {
+                $result = Get-TargetResource @testParams
+                $result.PerformanceLevel | Should BeNullOrEmpty
+                $result.ContactEmail | Should BeNullOrEmpty
+                $result.WindowsServiceAccount | Should BeNullOrEmpty
+            }
+
+            It "Should return false from the test method" {
+                Test-TargetResource @testParams | Should Be $false
+            }
+
+            It "Should throw an exception in the set method to say parameters are required" {
+                { Set-TargetResource @testParams } | Should throw "You have to specify at least one of the following parameters:"
+            }
+        }
 
         Context -Name "When the configured settings are correct" -Fixture {
             $testParams = @{

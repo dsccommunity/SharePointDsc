@@ -32,10 +32,42 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting Search service settings"
 
+    if ($PSBoundParameters.ContainsKey("PerformanceLevel") -eq $false -and
+        $PSBoundParameters.ContainsKey("ContactEmail") -eq $false  -and `
+        $PSBoundParameters.ContainsKey("WindowsServiceAccount") -eq $false)
+    {
+        Write-Verbose -Message ("You have to specify at least one of the following parameters: " + `
+                                "PerformanceLevel, ContactEmail or WindowsServiceAccount")
+        return @{
+            IsSingleInstance      = "Yes"
+            PerformanceLevel      = $null
+            ContactEmail          = $null
+            WindowsServiceAccount = $null
+            InstallAccount        = $InstallAccount
+        }
+    }
+
     $result = Invoke-SPDSCCommand -Credential $InstallAccount `
                                   -Arguments $PSBoundParameters `
                                   -ScriptBlock {
         $params = $args[0]
+
+        try
+        {
+            $spFarm = Get-SPFarm
+        }
+        catch
+        {
+            Write-Verbose -Message ("No local SharePoint farm was detected. Search service " + `
+                                    "settings will not be applied")
+            return @{
+                IsSingleInstance      = "Yes"
+                PerformanceLevel      = $null
+                ContactEmail          = $null
+                WindowsServiceAccount = $null
+                InstallAccount        = $params.InstallAccount
+            }
+        }
 
         $searchService = Get-SPEnterpriseSearchService
 
@@ -85,6 +117,14 @@ function Set-TargetResource
 
     Write-Verbose -Message "Setting Search service settings"
 
+    if ($PSBoundParameters.ContainsKey("PerformanceLevel") -eq $false -and
+        $PSBoundParameters.ContainsKey("ContactEmail") -eq $false  -and `
+        $PSBoundParameters.ContainsKey("WindowsServiceAccount") -eq $false)
+    {
+        throw ("You have to specify at least one of the following parameters: " + `
+               "PerformanceLevel, ContactEmail or WindowsServiceAccount")
+    }
+
     $result = Get-TargetResource @PSBoundParameters
 
     # Update the service app that already exists
@@ -93,6 +133,16 @@ function Set-TargetResource
                         -ScriptBlock {
         $params = $args[0]
         $result = $args[1]
+
+        try
+        {
+            $spFarm = Get-SPFarm
+        }
+        catch
+        {
+            throw ("No local SharePoint farm was detected. Search service " + `
+                   "settings will not be applied")
+        }
 
         $setParams = @{}
 
@@ -156,6 +206,15 @@ function Test-TargetResource
     )
 
     Write-Verbose -Message "Testing Search service settings"
+
+    if ($PSBoundParameters.ContainsKey("PerformanceLevel") -eq $false -and
+        $PSBoundParameters.ContainsKey("ContactEmail") -eq $false  -and `
+        $PSBoundParameters.ContainsKey("WindowsServiceAccount") -eq $false)
+    {
+        Write-Verbose -Message ("You have to specify at least one of the following parameters: " + `
+                                "PerformanceLevel, ContactEmail or WindowsServiceAccount")
+        return $false
+    }
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
