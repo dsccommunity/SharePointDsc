@@ -14,6 +14,8 @@
     service application pool does not exist.
   * Implemented check to make sure cmdlets are only executed when it actually
     has something to update.
+  * Deprecated WindowsServiceAccount parameter and moved functionality to
+    new resource (SPSearchServiceSettings)
 * SPSearchServiceSettings
   * Added new resource to configure search service settings
 
