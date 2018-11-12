@@ -4,6 +4,7 @@
 # Description
     
     **Type:** Distributed
+    **Requires CredSSP:** No
     
     This resource is responsible for controlling the blocked file type setting on a
     specific web application. It has two modes of operation, the first is to use
@@ -17,7 +18,7 @@
     properties will only make changes to the file types in their list and will
     leave the full list as it is otherwise, whereas the blocked property resets
     
-.PARAMETER Url
+.PARAMETER WebAppUrl
     Key - string
     The URL of the web application to set blocked file types for
 
@@ -39,12 +40,12 @@
 
 
 .EXAMPLE
-    This example shows how to ensure that specific file types are always blocked while 
+    This example shows how to ensure that specific file types are always blocked while
     others will always be allowed. Any file types not mentioned in this config will be
     able to be managed manually.
 
 
-    Configuration Example 
+    Configuration Example
     {
         param(
             [Parameter(Mandatory = $true)]
@@ -56,7 +57,7 @@
         node localhost {
             SPWebAppBlockedFileTypes PrimaryWebAppBlockedFileTypes
             {
-                Url                    = "http://exmaple.contoso.local"
+                WebAppUrl              = "http://exmaple.contoso.local"
                 EnsureBlocked          = @("exe", "dll", "msi")
                 EnsureAllowed          = @("pdf", "docx", "xlsx")
                 PsDscRunAsCredential   = $SetupAccount
@@ -70,7 +71,7 @@
     specifically matches this list.
 
 
-    Configuration Example 
+    Configuration Example
     {
         param(
             [Parameter(Mandatory = $true)]
@@ -82,7 +83,7 @@
         node localhost {
             SPWebAppBlockedFileTypes PrimaryWebAppBlockedFileTypes
             {
-                Url                    = "http://exmaple.contoso.local"
+                WebAppUrl              = "http://exmaple.contoso.local"
                 Blocked                = @("exe", "dll", "msi")
                 PsDscRunAsCredential   = $SetupAccount
             }

@@ -7,7 +7,7 @@ Class MSFT_SPProxyLibraryEntry
 [ClassVersion("1.0.0"), FriendlyName("SPWebAppClientCallableSettings")]
 class MSFT_SPWebAppClientCallableSettings : OMI_BaseResource
 {
-    [Key, Description("The URL of the web application to set blocked file types for")] string Url;
+    [Key, Description("The URL of the web application to set blocked file types for")] string WebAppUrl;
     [write, Description("A list of proxy libraries to set. Those not in this list will be removed"), EmbeddedInstance("MSFT_SPProxyLibraryEntry")] string ProxyLibraries[];
     [write, Description("A list of proxy libraries to add. Proxy libraries not in this list will be kept"), EmbeddedInstance("MSFT_SPProxyLibraryEntry")] string ProxyLibrariesToInclude[];
     [write, Description("A list of proxy libraries to remove. Proxy libraries not in this list will be kept")] string ProxyLibrariesToExclude[];

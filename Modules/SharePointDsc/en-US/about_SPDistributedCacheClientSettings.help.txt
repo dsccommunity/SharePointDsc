@@ -4,6 +4,7 @@
 # Description
     
     **Type:** Distributed
+    **Requires CredSSP:** No
     
     This resource is responsible for configuring the distributed cache client
     settings. It only accepts Ensure='Present' as a key. The resource can

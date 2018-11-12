@@ -1,6 +1,7 @@
 # Description
 
 **Type:** Distributed
+**Requires CredSSP:** No
 
 This resource will configure the site url for a host named site collection.
 There are four available zones to configure: Intranet, Internet, Extranet

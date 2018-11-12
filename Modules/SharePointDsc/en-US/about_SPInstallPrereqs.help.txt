@@ -4,6 +4,7 @@
 # Description
     
     **Type:** Common
+    **Requires CredSSP:** No
     
     This resource is responsible for ensuring the installation of all SharePoint
     prerequisites. It makes use of the PrerequisiteInstaller.exe file that is part
@@ -49,8 +50,15 @@
     SharePoint 2016:
     https://technet.microsoft.com/en-us/library/cc262485(v=office.16).aspx#section5
     
-.PARAMETER InstallerPath
+    SharePoint 2019:
+    
+.PARAMETER IsSingleInstance
     Key - String
+    Allowed values: Yes
+    Specifies the resource is a single instance, the value must be 'Yes'
+
+.PARAMETER InstallerPath
+    Required - String
     The full path to prerequisiteinstaller.exe
 
 .PARAMETER OnlineMode
@@ -125,6 +133,14 @@
     Write - String
     The path to the installer for this prerequisite (SP2016 only)
 
+.PARAMETER DotNet472
+    Write - String
+    The path to the installer for this prerequisite (SP2019 only)
+
+.PARAMETER MSVCRT141
+    Write - String
+    The path to the installer for this prerequisite (SP2019 only)
+
 .PARAMETER Ensure
     Write - string
     Allowed values: Present, Absent
@@ -136,7 +152,7 @@
     online mode, looking to download all prerequisites from the internet.
 
 
-    Configuration Example 
+    Configuration Example
     {
         param(
             [Parameter(Mandatory = $true)]
@@ -148,6 +164,7 @@
         node localhost {
             SPInstallPrereqs InstallPrerequisites
             {
+                IsSingleInstance  = "Yes"
                 InstallerPath     = "C:\SPInstall\Prerequisiteinstaller.exe"
                 OnlineMode        = $true
             }
@@ -160,7 +177,7 @@
     offline mode, running all prerequisite installations from the specified paths.
 
 
-    Configuration Example 
+    Configuration Example
     {
         param(
             [Parameter(Mandatory = $true)]
@@ -172,6 +189,7 @@
         node localhost {
             SPInstallPrereqs InstallPrerequisites
             {
+                IsSingleInstance  = "Yes"
                 InstallerPath     = "C:\SPInstall\Prerequisiteinstaller.exe"
                 OnlineMode        = $false
                 SXSpath          = "c:\SPInstall\Windows2012r2-SXS"
@@ -192,7 +210,7 @@
 
 
 .EXAMPLE
-    This module will install the prerequisites for SharePoint 2016. This resource will run in
+    This module will install the prerequisites for SharePoint 2016/2019. This resource will run in
     offline mode, running all prerequisite installations from the specified paths.
 
 
@@ -208,6 +226,7 @@
         node localhost {
             SPInstallPrereqs InstallPrerequisites
             {
+                IsSingleInstance  = "Yes"
                 InstallerPath     = "C:\SPInstall\Prerequisiteinstaller.exe"
                 OnlineMode        = $false
                 SXSpath           = "C:\SPInstall\Windows2012r2-SXS"

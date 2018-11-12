@@ -9,6 +9,17 @@ function Get-TargetResource
         $Name,
 
         [Parameter(Mandatory = $true)]
+        [ValidateSet("SSA",
+                     "SPSite",
+                     "SPWeb")]
+        [System.String]
+        $ScopeName,
+
+        [Parameter(Mandatory = $true)]
+        [System.String]
+        $ScopeUrl,
+
+        [Parameter(Mandatory = $true)]
         [System.String]
         $SearchServiceAppName,
 
@@ -31,10 +42,6 @@ function Get-TargetResource
         $ConnectionUrl,
 
         [Parameter()]
-        [System.String]
-        $ScopeUrl,
-
-        [Parameter()]
         [ValidateSet("Present","Absent")]
         [System.String]
         $Ensure = "Present",
@@ -54,6 +61,7 @@ function Get-TargetResource
 
         $nullReturn = @{
             Name = $params.Name
+            ScopeName = $params.ScopeName
             SearchServiceAppName = $params.SearchServiceAppName
             Query = $null
             ProviderType = $null
@@ -63,43 +71,22 @@ function Get-TargetResource
             InstallAccount = $params.InstallAccount
         }
         $serviceApp = Get-SPEnterpriseSearchServiceApplication -Identity $params.SearchServiceAppName
-        $searchSiteUrl = $serviceApp.SearchCenterUrl -replace "/pages"
-        $searchSite = Get-SPWeb -Identity $searchSiteUrl -ErrorAction SilentlyContinue
 
-        if ($null -eq $searchSite)
+        $fedManager = New-Object Microsoft.Office.Server.Search.Administration.Query.FederationManager($serviceApp)
+        $searchOwner = $null
+        if ("ssa" -eq $params.ScopeName.ToLower())
         {
-            Write-Verbose -Message ("Search centre site collection does not exist at " + `
-                                    "$searchSiteUrl. Unable to create search context " + `
-                                    "to determine result source details.")
-            return $nullReturn
-        }
-
-        $adminNamespace = "Microsoft.Office.Server.Search.Administration"
-        $queryNamespace = "Microsoft.Office.Server.Search.Administration.Query"
-        $objectLevel = [Microsoft.Office.Server.Search.Administration.SearchObjectLevel]
-
-        $fedManager = $null
-        if ($null -eq $params.ScopeUrl)
-        {
-            $fedManager = New-Object -TypeName "$queryNamespace.FederationManager" `
-                                    -ArgumentList $serviceApp
-            $searchOwner = New-Object -TypeName "$adminNamespace.SearchObjectOwner" `
-                                    -ArgumentList @(
-                                        $objectLevel::Ssa,
-                                        $searchSite
-                                    )
-
-            $source = $fedManager.GetSourceByName($params.Name, $searchOwner)
+            $searchOwner = Get-SPEnterpriseSearchOwner -Level SSA
         }
         else
         {
-            $fedManager = New-Object Microsoft.Office.Server.Search.Administration.Query.FederationManager($serviceApp)
-            $searchOwner = Get-SPEnterpriseSearchOwner -Level SPWeb -SPWeb $params.ScopeUrl
-            $filter = New-Object Microsoft.Office.Server.Search.Administration.SearchObjectFilter($searchOwner)
-            $filter.IncludeHigherLevel = $false
-            $source = $fedManager.ListSources($filter,$true) | Where-Object -FilterScript {
-                $_.Name -eq $params.Name
-            }
+            $searchOwner = Get-SPEnterpriseSearchOwner -Level $params.ScopeName -SPWeb $params.ScopeUrl
+        }
+        $filter = New-Object Microsoft.Office.Server.Search.Administration.SearchObjectFilter($searchOwner)
+        $filter.IncludeHigherLevel = $true
+
+        $source = $fedManager.ListSources($filter,$true) | Where-Object -FilterScript {
+            $_.Name -eq $params.Name
         }
 
         if ($null -ne $source)
@@ -110,9 +97,10 @@ function Get-TargetResource
             }
             return @{
                 Name = $params.Name
+                ScopeName = $params.ScopeName
                 SearchServiceAppName = $params.SearchServiceAppName
                 Query = $source.QueryTransform.QueryTemplate
-                ProviderType = $provider.Name
+                ProviderType = $provider.DisplayName
                 ConnectionUrl = $source.ConnectionUrlTemplate
                 ScopeUrl = $params.ScopeUrl
                 Ensure = "Present"
@@ -137,6 +125,17 @@ function Set-TargetResource
         $Name,
 
         [Parameter(Mandatory = $true)]
+        [ValidateSet("SSA",
+                     "SPSite",
+                     "SPWeb")]
+        [System.String]
+        $ScopeName,
+
+        [Parameter(Mandatory = $true)]
+        [System.String]
+        $ScopeUrl,
+
+        [Parameter(Mandatory = $true)]
         [System.String]
         $SearchServiceAppName,
 
@@ -157,10 +156,6 @@ function Set-TargetResource
         [Parameter()]
         [System.String]
         $ConnectionUrl,
-
-        [Parameter()]
-        [System.String]
-        $ScopeUrl,
 
         [Parameter()]
         [ValidateSet("Present","Absent")]
@@ -188,46 +183,25 @@ function Set-TargetResource
             $serviceApp = Get-SPEnterpriseSearchServiceApplication `
                             -Identity $params.SearchServiceAppName
 
-            $searchSiteUrl = $serviceApp.SearchCenterUrl -replace "/pages"
-            $searchSite = Get-SPWeb -Identity $searchSiteUrl -ErrorAction SilentlyContinue
 
-            if ($null -eq $searchSite)
+            $fedManager =  New-Object Microsoft.Office.Server.Search.Administration.Query.FederationManager($serviceApp)
+            $searchOwner = $null
+            if ("ssa" -eq $params.ScopeName.ToLower())
             {
-                throw ("Search centre site collection does not exist at " + `
-                       "$searchSiteUrl. Unable to create search context " + `
-                       "to set result source.")
-                return
-            }
-
-            $fedManager = $null
-            if ($null -eq $params.ScopeUrl)
-            {
-                $adminNamespace = "Microsoft.Office.Server.Search.Administration"
-                $queryNamespace = "Microsoft.Office.Server.Search.Administration.Query"
-                $objectLevel = [Microsoft.Office.Server.Search.Administration.SearchObjectLevel]
-                $fedManager = New-Object -TypeName "$queryNamespace.FederationManager" `
-                                        -ArgumentList $serviceApp
-                $searchOwner = New-Object -TypeName "$adminNamespace.SearchObjectOwner" `
-                                        -ArgumentList @(
-                                            $objectLevel::Ssa,
-                                            $searchSite
-                                        )
-
-                $transformType = "Microsoft.Office.Server.Search.Query.Rules.QueryTransformProperties"
-                $queryProperties = New-Object -TypeName $transformType
-                $resultSource = $fedManager.CreateSource($searchOwner)
+                $searchOwner = Get-SPEnterpriseSearchOwner -Level SSA
             }
             else {
-                $fedManager = New-Object Microsoft.Office.Server.Search.Administration.Query.FederationManager($serviceApp)
-                $searchOwner = Get-SPEnterpriseSearchOwner -Level SPWeb -SPWeb $params.ScopeUrl
-                $transformType = "Microsoft.Office.Server.Search.Query.Rules.QueryTransformProperties"
-                $queryProperties = New-Object -TypeName $transformType
-                $resultSource = $fedManager.CreateSource($searchOwner)
+                $searchOwner = Get-SPEnterpriseSearchOwner -Level $params.ScopeName -SPWeb $params.ScopeUrl
             }
+
+            $transformType = "Microsoft.Office.Server.Search.Query.Rules.QueryTransformProperties"
+            $queryProperties = New-Object -TypeName $transformType
+            $resultSource = $fedManager.CreateSource($searchOwner)
+
             $resultSource.Name = $params.Name
             $providers = $fedManager.ListProviders()
             $provider = $providers.Values | Where-Object -FilterScript {
-                $_.Name -eq $params.ProviderType
+                $_.DisplayName -eq $params.ProviderType
             }
             $resultSource.ProviderId = $provider.Id
             $resultSource.CreateQueryTransform($queryProperties, $params.Query)
@@ -249,19 +223,15 @@ function Set-TargetResource
             $serviceApp = Get-SPEnterpriseSearchServiceApplication `
                             -Identity $params.SearchServiceAppName
 
-            $searchSiteUrl = $serviceApp.SearchCenterUrl -replace "/pages"
-            $searchSite = Get-SPWeb -Identity $searchSiteUrl
-
-            $adminNamespace = "Microsoft.Office.Server.Search.Administration"
-            $queryNamespace = "Microsoft.Office.Server.Search.Administration.Query"
-            $objectLevel = [Microsoft.Office.Server.Search.Administration.SearchObjectLevel]
-            $fedManager = New-Object -TypeName "$queryNamespace.FederationManager" `
-                                     -ArgumentList $serviceApp
-            $searchOwner = New-Object -TypeName "$adminNamespace.SearchObjectOwner" `
-                                      -ArgumentList @(
-                                          $objectLevel::Ssa,
-                                          $searchSite
-                                      )
+            $fedManager = New-Object Microsoft.Office.Server.Search.Administration.Query.FederationManager($serviceApp)
+            $searchOwner = $null
+            if ("ssa" -eq $params.ScopeName.ToLower())
+            {
+                $searchOwner = Get-SPEnterpriseSearchOwner -Level SSA
+            }
+            else {
+                $searchOwner = Get-SPEnterpriseSearchOwner -Level $params.ScopeName -SPWeb $params.ScopeUrl
+            }
 
             $source = $fedManager.GetSourceByName($params.Name, $searchOwner)
             if ($null -ne $source)
@@ -281,6 +251,17 @@ function Test-TargetResource
         [Parameter(Mandatory = $true)]
         [System.String]
         $Name,
+
+        [Parameter(Mandatory = $true)]
+        [ValidateSet("SSA",
+                     "SPSite",
+                     "SPWeb")]
+        [System.String]
+        $ScopeName,
+
+        [Parameter(Mandatory = $true)]
+        [System.String]
+        $ScopeUrl,
 
         [Parameter(Mandatory = $true)]
         [System.String]
@@ -303,10 +284,6 @@ function Test-TargetResource
         [Parameter()]
         [System.String]
         $ConnectionUrl,
-
-        [Parameter()]
-        [System.String]
-        $ScopeUrl,
 
         [Parameter()]
         [ValidateSet("Present","Absent")]

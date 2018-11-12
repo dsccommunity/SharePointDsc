@@ -4,6 +4,7 @@
 # Description
     
     **Type:** Common
+    **Requires CredSSP:** No
     
     This resource is used to install the SharePoint binaries. The BinaryDir
     parameter should point to the path that setup.exe is located (not to setup.exe
@@ -35,8 +36,13 @@
     deployments. However due to constraints in how we set up and install the
     product, only English ISOs are supported for installing SharePoint.
     
-.PARAMETER BinaryDir
+.PARAMETER IsSingleInstance
     Key - String
+    Allowed values: Yes
+    Specifies the resource is a single instance, the value must be 'Yes'
+
+.PARAMETER BinaryDir
+    Required - String
     The directory that contains all of the SharePoint binaries
 
 .PARAMETER ProductKey
@@ -63,7 +69,7 @@
     C:\SPInstall\Setup.exe)
 
 
-    Configuration Example 
+    Configuration Example
     {
         param(
             [Parameter(Mandatory = $true)]
@@ -75,8 +81,9 @@
         node localhost {
             SPInstall InstallBinaries
             {
-                BinaryDir  = "C:\SPInstall"
-                ProductKey = "XXXXX-XXXXX-XXXXX-XXXXX-XXXXX"
+                IsSingleInstance = "Yes"
+                BinaryDir        = "C:\SPInstall"
+                ProductKey       = "XXXXX-XXXXX-XXXXX-XXXXX-XXXXX"
             }
         }
     }
@@ -84,10 +91,10 @@
 
 .EXAMPLE
     This module will install SharePoint to the specific locations set for the
-    InstallPath and DataPath directories. 
+    InstallPath and DataPath directories.
 
 
-    Configuration Example 
+    Configuration Example
     {
         param(
             [Parameter(Mandatory = $true)]
@@ -99,10 +106,11 @@
         node localhost {
             SPInstall InstallBinaries
             {
-                BinaryDir   = "D:\SharePoint\Binaries"
-                InstallPath = "D:\SharePoint\Install"
-                DataPath    = "D:\SharePoint\Data"
-                ProductKey  = "XXXXX-XXXXX-XXXXX-XXXXX-XXXXX"
+                IsSingleInstance = "Yes"
+                BinaryDir        = "D:\SharePoint\Binaries"
+                InstallPath      = "D:\SharePoint\Install"
+                DataPath         = "D:\SharePoint\Data"
+                ProductKey       = "XXXXX-XXXXX-XXXXX-XXXXX-XXXXX"
             }
         }
     }
@@ -112,7 +120,7 @@
     This module will install SharePoint Foundation 2013 to the local server
 
 
-    Configuration Example 
+    Configuration Example
     {
         param(
             [Parameter(Mandatory = $true)]

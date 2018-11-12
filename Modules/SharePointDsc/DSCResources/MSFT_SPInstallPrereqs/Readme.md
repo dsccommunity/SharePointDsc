@@ -1,6 +1,7 @@
 # Description
 
 **Type:** Common
+**Requires CredSSP:** No
 
 This resource is responsible for ensuring the installation of all SharePoint
 prerequisites. It makes use of the PrerequisiteInstaller.exe file that is part
@@ -45,3 +46,5 @@ https://technet.microsoft.com/library/a88d3f72-7ac3-4f08-b302-c4ca0a796268%28v=o
 
 SharePoint 2016:
 https://technet.microsoft.com/en-us/library/cc262485(v=office.16).aspx#section5
+
+SharePoint 2019:

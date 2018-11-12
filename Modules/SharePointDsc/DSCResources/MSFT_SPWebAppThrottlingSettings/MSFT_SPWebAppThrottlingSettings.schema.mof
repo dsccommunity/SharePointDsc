@@ -9,9 +9,9 @@ Class MSFT_SPWebApplicationHappyHour
 [ClassVersion("1.0.0.0"), FriendlyName("SPWebAppThrottlingSettings")]
 class MSFT_SPWebAppThrottlingSettings : OMI_BaseResource
 {
-    [Key, Description("The URL of the web application")] string Url;
+    [Key, Description("The URL of the web application")] string WebAppUrl;
     [Write, Description("What should the list view threshold for this site be set to")] uint32 ListViewThreshold;
-    [Write, Description("Should object model code be able to be override the list view threshold")] boolean AllowObjectModelOverride; 
+    [Write, Description("Should object model code be able to be override the list view threshold")] boolean AllowObjectModelOverride;
     [Write, Description("What is the list view threshold for site administrators")] uint32 AdminThreshold;
     [Write, Description("What is the maximum number of lookup fields in a single list view")] uint32 ListViewLookupThreshold;
     [Write, Description("Should the happy hour window be enabled for this web app")] boolean HappyHourEnabled;

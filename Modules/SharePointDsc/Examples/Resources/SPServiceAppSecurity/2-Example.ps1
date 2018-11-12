@@ -1,11 +1,11 @@
 <#
 .EXAMPLE
-    This example shows how to use the local farm token to grant 
-    full control permission to the local farm to the 
+    This example shows how to use the local farm token to grant
+    full control permission to the local farm to the
     user profile service app's sharing permission.
 #>
 
-    Configuration Example 
+    Configuration Example
     {
         param(
             [Parameter(Mandatory = $true)]
@@ -17,15 +17,15 @@
         node localhost {
             $members = @()
             $members += MSFT_SPServiceAppSecurityEntry {
-                                    Username    = "{LocalFarm}"
-                                    AccessLevel = "Full Control"
+                                    Username     = "{LocalFarm}"
+                                    AccessLevels = @("Full Control")
                                 }
             SPServiceAppSecurity UserProfileServiceSecurity
             {
                 ServiceAppName       = "User Profile Service Application"
                 SecurityType         = "SharingPermissions"
                 Members              = $members
-                PsDscRunAsCredential = $SetupAccount 
+                PsDscRunAsCredential = $SetupAccount
             }
         }
     }

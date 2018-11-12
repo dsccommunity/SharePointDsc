@@ -13,15 +13,15 @@ function Get-TargetResource
         $ServiceAppName,
 
         [Parameter(Mandatory = $true)]
-        [ValidateSet("SharePoint","Website","FileShare")]
+        [ValidateSet("SharePoint","Website","FileShare","Business")]
         [System.String]
         $ContentSourceType,
 
-        [Parameter(Mandatory = $true)]
+        [Parameter()]
         [System.String[]]
         $Addresses,
 
-        [Parameter(Mandatory = $true)]
+        [Parameter()]
         [ValidateSet("CrawlEverything","CrawlFirstOnly","Custom")]
         [System.String]
         $CrawlSetting,
@@ -50,6 +50,10 @@ function Get-TargetResource
         [Parameter()]
         [System.UInt32]
         $LimitServerHops,
+
+        [Parameter()]
+        [System.String[]]
+        $LOBSystemSet,
 
         [Parameter()]
         [ValidateSet("Present","Absent")]
@@ -177,9 +181,34 @@ function Get-TargetResource
                     Priority = $source.CrawlPriority
                 }
             }
+            "Business" {
+                $result = @{
+                    Name = $params.Name
+                    ServiceAppName = $params.ServiceAppName
+                    Ensure = "Present"
+                    ContentSourceType = "Business"
+                    CrawlSetting = $crawlSetting
+                    IncrementalSchedule = $incrementalSchedule
+                    FullSchedule = $fullSchedule
+                    Priority = $source.CrawlPriority
+                }
+
+                if($null -ne $params.LOBSystemSet)
+                {
+                    $bdcSegments = $source.StartAddresses[0].Segments
+                    if($bdcSegments.Length -ge 5)
+                    {
+                        [Reflection.Assembly]::LoadWithPartialName("System.Web") | Out-Null
+                        $LOBSystemName = [System.Web.HttpUtility]::UrlDecode($bdcSegments[4].Replace("/", ""))
+                        $LOBSystemInstanceName = [System.Web.HttpUtility]::UrlDecode($bdcSegments[5].Split('&')[0])
+                        $LOBSystemSet = @($LOBSystemName, $LOBSystemInstanceName)
+                        $result.Add("LOBSystemSet", $LOBSystemSet)
+                    }
+                }
+            }
             Default {
                 throw ("SharePointDsc does not currently support '$($source.Type)' content " + `
-                       "sources. Please use only 'SharePoint', 'FileShare' or 'Website'.")
+                       "sources. Please use only 'SharePoint', 'FileShare', 'Website' or 'Business'.")
             }
         }
         return $result
@@ -201,15 +230,15 @@ function Set-TargetResource
         $ServiceAppName,
 
         [Parameter(Mandatory = $true)]
-        [ValidateSet("SharePoint","Website","FileShare")]
+        [ValidateSet("SharePoint","Website","FileShare","Business")]
         [System.String]
         $ContentSourceType,
 
-        [Parameter(Mandatory = $true)]
+        [Parameter()]
         [System.String[]]
         $Addresses,
 
-        [Parameter(Mandatory = $true)]
+        [Parameter()]
         [ValidateSet("CrawlEverything","CrawlFirstOnly","Custom")]
         [System.String]
         $CrawlSetting,
@@ -238,6 +267,10 @@ function Set-TargetResource
         [Parameter()]
         [System.UInt32]
         $LimitServerHops,
+
+        [Parameter()]
+        [System.String[]]
+        $LOBSystemSet,
 
         [Parameter()]
         [ValidateSet("Present","Absent")]
@@ -274,7 +307,7 @@ function Set-TargetResource
             }
             if ($CrawlSetting -eq "Custom")
             {
-                throw ("Parameter 'CrawlSetting' can only be set to custom for website content " + `
+                throw ("Parameter CrawlSetting can only be set to custom for website content " + `
                        "sources")
             }
         }
@@ -299,7 +332,21 @@ function Set-TargetResource
             }
             if ($CrawlSetting -eq "Custom")
             {
-                throw "Parameter 'CrawlSetting' can only be set to custom for website content sources"
+                throw "Parameter CrawlSetting can only be set to custom for website content sources"
+            }
+        }
+        "Business" {
+            if ($PSBoundParameters.ContainsKey("ContinuousCrawl") -eq $true)
+            {
+                throw "Parameter ContinuousCrawl is not valid for Business content sources"
+            }
+            if ($PSBoundParameters.ContainsKey("LimitPageDepth") -eq $true)
+            {
+                throw "Parameter LimitPageDepth is not valid for Business content sources"
+            }
+            if ($PSBoundParameters.ContainsKey("LimitServerHops") -eq $true)
+            {
+                throw "Parameter LimitServerHops is not valid for Business content sources"
             }
         }
     }
@@ -357,7 +404,29 @@ function Set-TargetResource
                     "FileShare" {
                         $newType = "File"
                     }
+                    "Business" {
+                        $newType = "Business"
+                    }
                 }
+                if($params.ContentSourceType -ne "Business")
+                {
+                    $source = New-SPEnterpriseSearchCrawlContentSource `
+                                    -SearchApplication $params.ServiceAppName `
+                                    -Type $newType `
+                                    -Name $params.Name `
+                                    -StartAddresses $startAddresses
+                }
+                else
+                {
+                    $proxyGroup = Get-SPServiceApplicationProxyGroup -Default
+                    $source = New-SPEnterpriseSearchCrawlContentSource `
+                                    -SearchApplication $params.ServiceAppName `
+                                    -Type $newType `
+                                    -Name $params.Name `
+                                    -BDCApplicationProxyGroup $proxyGroup `
+                                    -LOBSystemSet $params.LOBSystemSet
+                }
+
                 $source = New-SPEnterpriseSearchCrawlContentSource `
                                 -SearchApplication $params.ServiceAppName `
                                 -Type $newType `
@@ -632,15 +701,15 @@ function Test-TargetResource
         $ServiceAppName,
 
         [Parameter(Mandatory = $true)]
-        [ValidateSet("SharePoint","Website","FileShare")]
+        [ValidateSet("SharePoint","Website","FileShare","Business")]
         [System.String]
         $ContentSourceType,
 
-        [Parameter(Mandatory = $true)]
+        [Parameter()]
         [System.String[]]
         $Addresses,
 
-        [Parameter(Mandatory = $true)]
+        [Parameter()]
         [ValidateSet("CrawlEverything","CrawlFirstOnly","Custom")]
         [System.String]
         $CrawlSetting,
@@ -669,6 +738,10 @@ function Test-TargetResource
         [Parameter()]
         [System.UInt32]
         $LimitServerHops,
+
+        [Parameter()]
+        [System.String[]]
+        $LOBSystemSet,
 
         [Parameter()]
         [ValidateSet("Present","Absent")]
@@ -707,7 +780,7 @@ function Test-TargetResource
             }
             if ($CrawlSetting -eq "Custom")
             {
-                throw ("Parameter 'CrawlSetting' can only be set to custom for website content " + `
+                throw ("Parameter CrawlSetting can only be set to custom for website content " + `
                        "sources")
             }
         }
@@ -732,7 +805,21 @@ function Test-TargetResource
             }
             if ($CrawlSetting -eq "Custom")
             {
-                throw "Parameter 'CrawlSetting' can only be set to custom for website content sources"
+                throw "Parameter CrawlSetting can only be set to custom for website content sources"
+            }
+        }
+        "Business" {
+            if ($PSBoundParameters.ContainsKey("ContinuousCrawl") -eq $true)
+            {
+                throw "Parameter ContinuousCrawl is not valid for Business content sources"
+            }
+            if ($PSBoundParameters.ContainsKey("LimitPageDepth") -eq $true)
+            {
+                throw "Parameter LimitPageDepth is not valid for Business content sources"
+            }
+            if ($PSBoundParameters.ContainsKey("LimitServerHops") -eq $true)
+            {
+                throw "Parameter LimitServerHops is not valid for Business content sources"
             }
         }
     }
@@ -797,6 +884,7 @@ function Test-TargetResource
                                                          "Priority",
                                                          "LimitPageDepth",
                                                          "LimitServerHops",
+                                                         "LOBSystemSet",
                                                          "Ensure")
 }
 

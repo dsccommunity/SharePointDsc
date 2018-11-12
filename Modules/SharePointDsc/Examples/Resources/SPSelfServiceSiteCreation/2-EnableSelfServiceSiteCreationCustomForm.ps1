@@ -1,6 +1,6 @@
 <#
 .EXAMPLE
-    This example shows how to disable self-service site creation for a web application
+    This example shows how to configure self-service site creation with a custom form for a web application
 #>
 
     Configuration Example
@@ -15,8 +15,10 @@
         node localhost {
             SPSelfServiceSiteCreation SSC
             {
-                Url                     = "http://example.contoso.local"
-                Enabled                 = $false
+                WebAppUrl               = "http://example.contoso.local"
+                Enabled                 = $true
+                ShowStartASiteMenuItem  = $true
+                CustomFormUrl           = "http://ssc.contoso.com.local/ssc"
                 PsDscRunAsCredential    = $SetupAccount
             }
         }

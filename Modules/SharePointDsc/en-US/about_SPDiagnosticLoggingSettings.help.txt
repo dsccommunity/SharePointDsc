@@ -4,14 +4,20 @@
 # Description
     
     **Type:** Distributed
+    **Requires CredSSP:** No
     
     This resource is responsible for configuring settings to do with the diagnostic
     (ULS) logging on servers in the farm. These settings are applied to the
     diagnostic logging service for the farm and do not need to be applied to each
     server individually, the settings will be propagated throughout the farm when
     
+.PARAMETER IsSingleInstance
+    Key - String
+    Allowed values: Yes
+    Specifies the resource is a single instance, the value must be 'Yes'
+
 .PARAMETER LogPath
-    Key - string
+    Required - string
     The physical path on each server to store ULS logs
 
 .PARAMETER LogSpaceInGB
@@ -93,7 +99,7 @@
     whatever value has been manually configured outside of DSC.
 
 
-    Configuration Example 
+    Configuration Example
     {
         param(
             [Parameter(Mandatory = $true)]
@@ -105,7 +111,7 @@
         node localhost {
             SPDiagnosticLoggingSettings ApplyDiagnosticLogSettings
             {
-                PsDscRunAsCredential                        = $SetupAccount
+                IsSingleInstance                            = "Yes"
                 LogPath                                     = "L:\ULSLogs"
                 LogSpaceInGB                                = 10
                 AppAnalyticsAutomaticUploadEnabled          = $false
@@ -124,6 +130,7 @@
                 ScriptErrorReportingDelay                   = 30
                 ScriptErrorReportingEnabled                 = $true
                 ScriptErrorReportingRequireAuth             = $true
+                PsDscRunAsCredential                        = $SetupAccount
             }
         }
     }

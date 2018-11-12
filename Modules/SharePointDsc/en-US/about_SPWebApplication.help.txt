@@ -4,6 +4,7 @@
 # Description
     
     **Type:** Distributed
+    **Requires CredSSP:** No
     
     This resource is responsible for creating a web application within the local
     SharePoint farm. The resource will provision the web application with all of
@@ -33,7 +34,7 @@
     Required - string
     The name of the managed account to run the app pool with
 
-.PARAMETER Url
+.PARAMETER WebAppUrl
     Required - string
     The URL of the web application
 
@@ -97,7 +98,7 @@
                 AllowAnonymous         = $false
                 DatabaseName           = "SP_Content_01"
                 DatabaseServer         = "SQL.contoso.local\SQLINSTANCE"
-                Url                    = "http://example.contoso.local"
+                WebAppUrl              = "http://example.contoso.local"
                 Port                   = 80
                 Ensure                 = "Present"
                 PsDscRunAsCredential   = $SetupAccount

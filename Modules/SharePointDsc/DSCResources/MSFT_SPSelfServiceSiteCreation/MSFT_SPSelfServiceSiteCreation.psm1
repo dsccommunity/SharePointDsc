@@ -6,7 +6,7 @@ function Get-TargetResource
     (
         [Parameter(Mandatory = $true)]
         [System.String]
-        $Url,
+        $WebAppUrl,
 
         [Parameter(Mandatory = $true)]
         [System.Boolean]
@@ -50,20 +50,20 @@ function Get-TargetResource
         $InstallAccount
     )
 
-    Write-Verbose -Message "Getting self service site creation settings for Web Application '$Url'"
+    Write-Verbose -Message "Getting self service site creation settings for Web Application '$WebAppUrl'"
 
     $result = Invoke-SPDSCCommand -Credential $InstallAccount `
                                   -Arguments $PSBoundParameters `
                                   -ScriptBlock {
         $params = $args[0]
 
-        $webApplication = Get-SPWebApplication -Identity $params.Url -ErrorAction SilentlyContinue
+        $webApplication = Get-SPWebApplication -Identity $params.WebAppUrl -ErrorAction SilentlyContinue
 
         if ($null -eq $webApplication)
         {
-            Write-Verbose "Web application $($params.Url) was not found"
+            Write-Verbose "Web application $($params.WebAppUrl) was not found"
             return @{
-                Url = $null
+                WebAppUrl = $null
                 Enabled = $null
                 OnlineEnabled = $null
                 QuotaTemplate = $null
@@ -87,7 +87,7 @@ function Get-TargetResource
         }
 
         return @{
-            Url = $params.Url
+            WebAppUrl = $params.WebAppUrl
             Enabled = $webApplication.SelfServiceSiteCreationEnabled
             OnlineEnabled = $webApplication.SelfServiceSiteCreationOnlineEnabled
             QuotaTemplate = $webApplication.SelfServiceCreationQuotaTemplate
@@ -109,7 +109,7 @@ function Set-TargetResource
     (
         [Parameter(Mandatory = $true)]
         [System.String]
-        $Url,
+        $WebAppUrl,
 
         [Parameter(Mandatory = $true)]
         [System.Boolean]
@@ -153,14 +153,14 @@ function Set-TargetResource
         $InstallAccount
     )
 
-    Write-Verbose -Message "Setting self service site creation settings for Web Application '$Url'"
+    Write-Verbose -Message "Setting self service site creation settings for Web Application '$WebAppUrl'"
 
     Invoke-SPDSCCommand -Credential $InstallAccount `
                         -Arguments $PSBoundParameters `
                         -ScriptBlock {
         $params = $args[0]
 
-        $webApplication = Get-SPWebApplication -Identity $params.Url -ErrorAction SilentlyContinue
+        $webApplication = Get-SPWebApplication -Identity $params.WebAppUrl -ErrorAction SilentlyContinue
 
         if ($null -eq $webApplication)
         {
@@ -278,7 +278,7 @@ function Test-TargetResource
     (
         [Parameter(Mandatory = $true)]
         [System.String]
-        $Url,
+        $WebAppUrl,
 
         [Parameter(Mandatory = $true)]
         [System.Boolean]
@@ -322,7 +322,7 @@ function Test-TargetResource
         $InstallAccount
     )
 
-    Write-Verbose -Message "Testing self service site creation settings for Web Application '$Url'"
+    Write-Verbose -Message "Testing self service site creation settings for Web Application '$WebAppUrl'"
 
     if ($Enabled -eq $false)
     {
@@ -345,7 +345,7 @@ function Test-TargetResource
     {
         return Test-SPDscParameterState -CurrentValues $currentValues `
                                         -DesiredValues $PSBoundParameters `
-                                        -ValuesToCheck @("Url", `
+                                        -ValuesToCheck @("WebAppUrl", `
                                                          "Enabled", `
                                                          "OnlineEnabled", `
                                                          "ShowStartASiteMenuItem", `
@@ -359,7 +359,7 @@ function Test-TargetResource
     {
         return Test-SPDscParameterState -CurrentValues $currentValues `
                                         -DesiredValues $PSBoundParameters `
-                                        -ValuesToCheck @("Url", `
+                                        -ValuesToCheck @("WebAppUrl", `
                                                          "Enabled", `
                                                          "ShowStartASiteMenuItem")
     }

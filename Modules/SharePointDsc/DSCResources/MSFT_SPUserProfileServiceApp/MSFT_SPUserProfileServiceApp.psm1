@@ -406,12 +406,14 @@ function Set-TargetResource
             if ($null -eq $serviceApps)
             {
                 $app = New-SPProfileServiceApplication @params
-                if ($null -ne $app)
+                if ($null -eq $app)
                 {
-                    New-SPProfileServiceApplicationProxy -Name $pName `
-                                                         -ServiceApplication $app `
-                                                         -DefaultProxyGroup
+                    throw ("An error occurred during creation of the service application: " + `
+                           $_.Exception.Message)
                 }
+                New-SPProfileServiceApplicationProxy -Name $pName `
+                                                     -ServiceApplication $app `
+                                                     -DefaultProxyGroup
 
                 $claimsPrincipal = New-SPClaimsPrincipal -Identity $setupAccount `
                                                          -IdentityType WindowsSamAccountName

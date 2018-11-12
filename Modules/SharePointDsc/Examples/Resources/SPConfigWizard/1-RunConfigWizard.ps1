@@ -3,7 +3,7 @@
     This example runs the Configuration Wizard as soon as it is applied.
 #>
 
-    Configuration Example 
+    Configuration Example
     {
         param(
             [Parameter(Mandatory = $true)]
@@ -15,7 +15,7 @@
         node localhost {
             SPConfigWizard RunConfigWizard
             {
-                Ensure               = "Present"
+                IsSingleInstance     = "Yes"
                 PsDscRunAsCredential = $SetupAccount
             }
         }

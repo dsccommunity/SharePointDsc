@@ -45,6 +45,14 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             return $service
         }
 
+        Mock -CommandName Get-SPDSCInstalledProductVersion {
+            return @{
+                FileMajorPart = $Global:SPDscHelper.CurrentStubBuildNumber.Major
+                FileBuildPart = $Global:SPDscHelper.CurrentStubBuildNumber.Build
+                ProductBuildPart = $Global:SPDscHelper.CurrentStubBuildNumber.Build
+            }
+        }
+
         Mock -CommandName Set-Service {
             return $null
         }
@@ -183,7 +191,14 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 }
                 else
                 {
-                    return @("Microsoft SharePoint Server 2016")
+                    if($Global:SPDscHelper.CurrentStubBuildNumber.Minor.ToString().Length -le 4)
+                    {
+                        return @("Microsoft SharePoint Server 2016")
+                    }
+                    else
+                    {
+                        return @("Microsoft SharePoint Server 2019")
+                    }
                 }
             }
 
@@ -219,7 +234,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 {
                     return @{
                         VersionInfo = @{
-                            FileVersion = "16.0.8000"
+                            FileVersion = "16.0.15000"
                             FileDescription = "Cumulative Update"
                         }
                         Name = "serverlpksp2016-kb2880554-fullfile-x64-en-us.exe"
@@ -234,7 +249,14 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 }
                 else
                 {
-                    return @("Microsoft SharePoint Server 2016")
+                    if($Global:SPDscHelper.CurrentStubBuildNumber.Minor.ToString().Length -le 4)
+                    {
+                        return @("Microsoft SharePoint Server 2016")
+                    }
+                    else
+                    {
+                        return @("Microsoft SharePoint Server 2019")
+                    }
                 }
             }
 
@@ -275,7 +297,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 {
                     return @{
                         VersionInfo = @{
-                            FileVersion = "16.0.8000"
+                            FileVersion = "16.0.15000"
                             FileDescription = "Cumulative Update"
                         }
                         Name = "serverlpksp2016-kb2880554-fullfile-x64-en-us.exe"
@@ -290,7 +312,14 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 }
                 else
                 {
-                    return @("Microsoft SharePoint Server 2016")
+                    if($Global:SPDscHelper.CurrentStubBuildNumber.Minor.ToString().Length -le 4)
+                    {
+                        return @("Microsoft SharePoint Server 2016")
+                    }
+                    else
+                    {
+                        return @("Microsoft SharePoint Server 2019")
+                    }
                 }
             }
 
@@ -337,7 +366,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 {
                     return @{
                         VersionInfo = @{
-                            FileVersion = "16.0.8000"
+                            FileVersion = "16.0.15000"
                             FileDescription = "Cumulative Update"
                         }
                         Name = "serverlpksp2016-kb2880554-fullfile-x64-en-us.exe"
@@ -352,7 +381,14 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 }
                 else
                 {
-                    return @("Microsoft SharePoint Server 2016")
+                    if($Global:SPDscHelper.CurrentStubBuildNumber.Minor.ToString().Length -le 4)
+                    {
+                        return @("Microsoft SharePoint Server 2016")
+                    }
+                    else
+                    {
+                        return @("Microsoft SharePoint Server 2019")
+                    }
                 }
             }
 
@@ -414,7 +450,14 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 }
                 else
                 {
-                    return @("Microsoft SharePoint Server 2016")
+                    if($Global:SPDscHelper.CurrentStubBuildNumber.Minor.ToString().Length -le 4)
+                    {
+                        return @("Microsoft SharePoint Server 2016")
+                    }
+                    else
+                    {
+                        return @("Microsoft SharePoint Server 2019")
+                    }
                 }
             }
 
@@ -450,7 +493,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 {
                     return @{
                         VersionInfo = @{
-                            FileVersion = "16.0.8000"
+                            FileVersion = "16.0.15000"
                             FileDescription = "Service Pack"
                         }
                         Name = "serverlpksp2016-kb2880554-fullfile-x64-en-us.exe"
@@ -465,7 +508,14 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 }
                 else
                 {
-                    return @("Microsoft SharePoint Server 2016")
+                    if($Global:SPDscHelper.CurrentStubBuildNumber.Minor.ToString().Length -le 4)
+                    {
+                        return @("Microsoft SharePoint Server 2016")
+                    }
+                    else
+                    {
+                        return @("Microsoft SharePoint Server 2019")
+                    }
                 }
             }
 
@@ -549,7 +599,14 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 }
                 else
                 {
-                    return @("Microsoft SharePoint Server 2016", "Language Pack for SharePoint and Project Server 2016  - Dutch/Nederlands")
+                    if($Global:SPDscHelper.CurrentStubBuildNumber.Minor.ToString().Length -le 4)
+                    {
+                        return @("Microsoft SharePoint Server 2016", "Language Pack for SharePoint and Project Server 2016  - Dutch/Nederlands")
+                    }
+                    else
+                    {
+                        return @("Microsoft SharePoint Server 2019", "Language Pack for SharePoint and Project Server 2019  - Dutch/Nederlands")
+                    }
                 }
             }
 
@@ -585,7 +642,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 {
                     return @{
                         VersionInfo = @{
-                            FileVersion = "16.0.8000"
+                            FileVersion = "16.0.15000"
                             FileDescription = "Service Pack Language Pack"
                         }
                         Name = "serverlpksp2016-kb2880554-fullfile-x64-nl-nl.exe"
@@ -600,7 +657,14 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 }
                 else
                 {
-                    return @("Microsoft SharePoint Server 2016", "Language Pack for SharePoint and Project Server 2016  - Dutch/Nederlands")
+                    if($Global:SPDscHelper.CurrentStubBuildNumber.Minor.ToString().Length -le 4)
+                    {
+                        return @("Microsoft SharePoint Server 2016", "Language Pack for SharePoint and Project Server 2016  - Dutch/Nederlands")
+                    }
+                    else
+                    {
+                        return @("Microsoft SharePoint Server 2019", "Language Pack for SharePoint and Project Server 2016\9  - Dutch/Nederlands")
+                    }
                 }
             }
 
@@ -641,7 +705,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 {
                     return @{
                         VersionInfo = @{
-                            FileVersion = "16.0.8000"
+                            FileVersion = "16.0.15000"
                             FileDescription = "Service Pack Language Pack"
                         }
                         Name = "serverlpksp2016-kb2880554-fullfile-x64.exe"
@@ -687,7 +751,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 {
                     return @{
                         VersionInfo = @{
-                            FileVersion = "16.0.8000"
+                            FileVersion = "16.0.15000"
                             FileDescription = "Service Pack Language Pack"
                         }
                         Name = "serverlpksp2016-kb2880554-fullfile-x64-ab-yz.exe"
@@ -733,7 +797,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 {
                     return @{
                         VersionInfo = @{
-                            FileVersion = "16.0.8000"
+                            FileVersion = "16.0.15000"
                             FileDescription = "Service Pack Language Pack"
                         }
                         Name = "serverlpksp2016-kb2880554-fullfile-x64-fr-fr.exe"
@@ -779,7 +843,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 {
                     return @{
                         VersionInfo = @{
-                            FileVersion = "16.0.8000"
+                            FileVersion = "16.0.15000"
                             FileDescription = "Service Pack Language Pack"
                         }
                         Name = "serverlpksp2016-kb2880554-fullfile-x64-fr-fr.exe"

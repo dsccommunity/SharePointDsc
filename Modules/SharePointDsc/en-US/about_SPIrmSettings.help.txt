@@ -4,6 +4,7 @@
 # Description
     
     **Type:** Distributed
+    **Requires CredSSP:** No
     
     This resource is used to manipulate the IRM settings in SharePoint, integrating
     it with AD RMS
@@ -11,8 +12,13 @@
     The default value for the Ensure parameter is Present. When not specifying this
     parameter, IRM is configured.
     
-.PARAMETER Ensure
+.PARAMETER IsSingleInstance
     Key - String
+    Allowed values: Yes
+    Specifies the resource is a single instance, the value must be 'Yes'
+
+.PARAMETER Ensure
+    Write - String
     Allowed values: Present, Absent
     Enable or Disable IRM on this farm
 
@@ -34,7 +40,7 @@
     a specific RMS server
 
 
-    Configuration Example 
+    Configuration Example
     {
         param(
             [Parameter(Mandatory = $true)]
@@ -46,7 +52,7 @@
         node localhost {
             SPIrmSettings RMSSettings
             {
-                Ensure               = "Present"
+                IsSingleInstance     = "Yes"
                 RMSserver            = "https://rms.contoso.com"
                 PsDscRunAsCredential = $SetupAccount
             }

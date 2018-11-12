@@ -1,6 +1,7 @@
 # Description
 
 **Type:** Common
+**Requires CredSSP:** No
 
 This resource is used to manage the membership of the farm administrators
 group. There are a number of approaches to how this can be implemented. The

@@ -48,10 +48,30 @@ namespace Microsoft.SharePoint.Administration {
         }
 
         Mock -CommandName Get-SPServiceInstance -MockWith {
-            return @(@{
-                TypeName = "Microsoft SharePoint Foundation Web Application"
-            })
+            return @(
+                @{
+                    Name = ""
+                    TypeName = "Microsoft SharePoint Foundation Web Application"
+                } | Add-Member -MemberType ScriptMethod `
+                    -Name GetType `
+                    -Value {
+                        return @{
+                            Name = "SPWebServiceInstance"
+                        }
+            } -PassThru -Force | Add-Member -Name Name `
+            -MemberType ScriptProperty `
+            -PassThru `
+            {
+                # get
+                ""
+            }`
+            {
+                # set
+                param ( $arg )
+            }
+            )
         }
+
 
         function Update-SPDscTestConfigFile
         {
@@ -97,7 +117,7 @@ namespace Microsoft.SharePoint.Administration {
                 Zone        = "Default"
                 EnableCache = $true
                 Location    = "c:\BlobCache"
-                MaxSizeInGB     = 30
+                MaxSizeInGB = 30
                 FileTypes   = "\.(gif|jpg|jpeg)$"
             }
 
@@ -330,7 +350,27 @@ namespace Microsoft.SharePoint.Administration {
 </configuration>'
 
             Mock -CommandName Test-Path -MockWith { return $true }
-            Mock -CommandName Get-SPServiceInstance -MockWith { return $null }
+            Mock -CommandName Get-SPServiceInstance -MockWith {
+                return @(
+                    $null | Add-Member -MemberType ScriptMethod `
+                        -Name GetType `
+                        -Value {
+                            return @{
+                                Name = "SPWebServiceInstance"
+                            }
+                } -PassThru -Force | Add-Member -Name Name `
+                -MemberType ScriptProperty `
+                -PassThru `
+                {
+                    # get
+                    ""
+                }`
+                {
+                    # set
+                    param ( $arg )
+                }
+                )
+            }
 
             It "Should return values from the get method" {
                 (Get-TargetResource @testParams).WebAppUrl | Should BeNullOrEmpty

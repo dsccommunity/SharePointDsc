@@ -124,7 +124,7 @@ function Get-TargetResource
                 }
                 if ($null -ne $serviceAppProxy)
                 {
-                    $proxyName = $serviceAppProxy.Name
+                    $pName = $serviceAppProxy.Name
                 }
             }
 
@@ -134,7 +134,7 @@ function Get-TargetResource
 
             $returnVal =  @{
                 Name                        = $serviceApp.DisplayName
-                ProxyName                   = $proxyName
+                ProxyName                   = $pName
                 ApplicationPool             = $serviceApp.ApplicationPool.Name
                 DatabaseName                = $serviceApp.SearchAdminDatabase.Name
                 DatabaseServer              = $serviceApp.SearchAdminDatabase.NormalizedDataSource
@@ -247,7 +247,7 @@ function Set-TargetResource
                 }
                 else
                 {
-                    throw ("Please install SharePoint 2016 or SharePoint 2013 with August " + `
+                    throw ("Please install SharePoint 2019, 2016 or SharePoint 2013 with August " + `
                            "2015 CU or higher before attempting to create a cloud enabled " + `
                            "search service application")
                 }
@@ -311,6 +311,32 @@ function Set-TargetResource
                 Where-Object -FilterScript {
                     $_.GetType().FullName -eq "Microsoft.Office.Server.Search.Administration.SearchServiceApplication"
                 }
+
+            if ($null -eq $params.ProxyName)
+            {
+                $pName = "$($params.Name) Proxy"
+            }
+            else
+            {
+                $pName = $params.ProxyName
+            }
+
+            if ($result.ProxyName -ne $pName)
+            {
+                if ($null -eq $result.ProxyName)
+                {
+                    New-SPEnterpriseSearchServiceApplicationProxy -Name $pName -SearchApplication $serviceApp
+                }
+                else
+                {
+                    $serviceAppProxy = Get-SPServiceApplicationProxy | Where-Object -FilterScript {
+                                           $_.Name -eq $result.ProxyName
+                                       }
+                    $serviceAppProxy.Name = $pName
+                    $serviceAppProxy.Update()
+                }
+            }
+
             $appPool = Get-SPServiceApplicationPool -Identity $params.ApplicationPool
             $setParams = @{
                 ApplicationPool = $appPool
@@ -457,7 +483,8 @@ function Test-TargetResource
                                         -DesiredValues $PSBoundParameters `
                                         -ValuesToCheck @("Ensure",
                                                          "ApplicationPool",
-                                                         "SearchCenterUrl")
+                                                         "SearchCenterUrl",
+                                                         "ProxyName")
     }
     else
     {

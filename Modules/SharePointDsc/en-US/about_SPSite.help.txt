@@ -4,6 +4,7 @@
 # Description
     
     **Type:** Distributed
+    **Requires CredSSP:** No
     
     This resource will provision a site collection to the current farm, based on
     the settings that are passed through. These settings map to the New-SPSite
@@ -89,7 +90,7 @@
 .PARAMETER AdministrationSiteType
     Write - string
     Allowed values: TenantAdministration, None
-    The administration site type
+    Specifies the type of the site collection: Regular site or tenant administration site
 
 .PARAMETER InstallAccount
     Write - String

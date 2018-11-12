@@ -24,6 +24,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             $testParams = @{
+                IsSingleInstance = "Yes"
                 Name = "Security Token Service"
             }
 
@@ -34,6 +35,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "When setting the configurations for the Security Token Service" {
             $params = @{
+                IsSingleInstance = "Yes"
                 Name = "New name"
                 Ensure = "Present"
             }

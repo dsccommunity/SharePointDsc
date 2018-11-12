@@ -4,6 +4,7 @@
 # Description
     
     **Type:** Common
+    **Requires CredSSP:** No
     
     This resource is used to manage the membership of the farm administrators
     group. There are a number of approaches to how this can be implemented. The
@@ -15,9 +16,10 @@
     group already that may not be specified here, allowing for some manual
     management outside of this configuration resource.
     
-.PARAMETER Name
+.PARAMETER IsSingleInstance
     Key - String
-    A generic name for this resource, its value is not important
+    Allowed values: Yes
+    Specifies the resource is a single instance, the value must be 'Yes'
 
 .PARAMETER Members
     Write - String
@@ -38,10 +40,10 @@
 
 .EXAMPLE
     This example shows how to set a specific list of members for the farm admins group.
-    Any members not in this list will be removed. 
+    Any members not in this list will be removed.
 
 
-    Configuration Example 
+    Configuration Example
     {
         param(
             [Parameter(Mandatory = $true)]
@@ -53,7 +55,7 @@
         node localhost {
             SPFarmAdministrators LocalFarmAdmins
             {
-                Name                 = "Farm Administrators"
+                IsSingleInstance     = "Yes"
                 Members              = @("CONTOSO\user1", "CONTOSO\user2")
                 PsDscRunAsCredential = $SetupAccount
             }
@@ -68,7 +70,7 @@
     in either of these properties are left alone.
 
 
-    Configuration Example 
+    Configuration Example
     {
         param(
             [Parameter(Mandatory = $true)]
@@ -80,7 +82,7 @@
         node localhost {
             SPFarmAdministrators LocalFarmAdmins
             {
-                Name                 = "Farm Administrators"
+                IsSingleInstance     = "Yes"
                 MembersToInclude     = @("CONTOSO\user1")
                 MembersToExclude     = @("CONTOSO\user2")
                 PsDscRunAsCredential = $SetupAccount

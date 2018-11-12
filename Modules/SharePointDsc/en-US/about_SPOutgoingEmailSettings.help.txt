@@ -4,6 +4,7 @@
 # Description
     
     **Type:** Distributed
+    **Requires CredSSP:** No
     
     This resource is used to set the outgoing email settings for either a single
     web application, or the whole farm. To configure the resource for a specific
@@ -34,11 +35,11 @@
 
 .PARAMETER UseTLS
     Write - boolean
-    Use TLS when connecting to the SMTP server (SharePoint 2016 only)
+    Use TLS when connecting to the SMTP server (SharePoint 2016 and 2019 only)
 
 .PARAMETER SMTPPort
     Write - uint32
-    The port which is used to connect to the SMTP server (SharePoint 2016 only)
+    The port which is used to connect to the SMTP server (SharePoint 2016 and 2019 only)
 
 .PARAMETER InstallAccount
     Write - String

@@ -6,7 +6,7 @@ function Get-TargetResource
     (
         [Parameter(Mandatory = $true)]
         [System.String]
-        $Url,
+        $WebAppUrl,
 
         [Parameter()]
         [System.UInt32]
@@ -94,7 +94,7 @@ function Get-TargetResource
         $InstallAccount
     )
 
-    Write-Verbose -Message "Getting web application '$Url' general settings"
+    Write-Verbose -Message "Getting web application '$WebAppUrl' general settings"
 
     $result = Invoke-SPDSCCommand -Credential $InstallAccount `
                                   -Arguments @($PSBoundParameters,$PSScriptRoot) `
@@ -102,11 +102,11 @@ function Get-TargetResource
         $params = $args[0]
         $ScriptRoot = $args[1]
 
-        $wa = Get-SPWebApplication -Identity $params.Url -ErrorAction SilentlyContinue
+        $wa = Get-SPWebApplication -Identity $params.WebAppUrl -ErrorAction SilentlyContinue
         if ($null -eq $wa)
         {
             return @{
-                Url = $params.Url
+                WebAppUrl = $params.WebAppUrl
                 TimeZone = $null
                 Alerts = $null
                 AlertsLimit = $null
@@ -134,7 +134,7 @@ function Get-TargetResource
         Import-Module -Name (Join-Path -Path $ScriptRoot -ChildPath $modulePath -Resolve)
 
         $result = Get-SPDSCWebApplicationGeneralConfig -WebApplication $wa
-        $result.Add("Url", $params.Url)
+        $result.Add("WebAppUrl", $params.WebAppUrl)
         $result.Add("InstallAccount", $params.InstallAccount)
         return $result
     }
@@ -148,7 +148,7 @@ function Set-TargetResource
        (
         [Parameter(Mandatory = $true)]
         [System.String]
-        $Url,
+        $WebAppUrl,
 
         [Parameter()]
         [System.UInt32]
@@ -236,7 +236,7 @@ function Set-TargetResource
         $InstallAccount
     )
 
-    Write-Verbose -Message "Setting web application '$url' general settings"
+    Write-Verbose -Message "Setting web application '$WebAppUrl' general settings"
 
     Invoke-SPDSCCommand -Credential $InstallAccount `
                         -Arguments @($PSBoundParameters,$PSScriptRoot) `
@@ -244,10 +244,10 @@ function Set-TargetResource
         $params = $args[0]
         $ScriptRoot = $args[1]
 
-        $wa = Get-SPWebApplication -Identity $params.Url -ErrorAction SilentlyContinue
+        $wa = Get-SPWebApplication -Identity $params.WebAppUrl -ErrorAction SilentlyContinue
         if ($null -eq $wa)
         {
-            throw "Web application $($params.Url) was not found"
+            throw "Web application $($params.WebAppUrl) was not found"
         }
 
         if ($params.ContainsKey("DefaultQuotaTemplate"))
@@ -277,7 +277,7 @@ function Test-TargetResource
      (
         [Parameter(Mandatory = $true)]
         [System.String]
-        $Url,
+        $WebAppUrl,
 
         [Parameter()]
         [System.UInt32]
@@ -365,7 +365,7 @@ function Test-TargetResource
         $InstallAccount
     )
 
-    Write-Verbose -Message "Testing web application '$url' general settings"
+    Write-Verbose -Message "Testing web application '$WebAppUrl' general settings"
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
 

@@ -6,7 +6,7 @@ function Get-TargetResource
     (
         [Parameter(Mandatory = $true)]
         [System.String]
-        $Url,
+        $WebAppUrl,
 
         [Parameter()]
         [System.UInt32]
@@ -57,14 +57,14 @@ function Get-TargetResource
         $InstallAccount
     )
 
-    Write-Verbose -Message "Getting web application '$url' throttling settings"
+    Write-Verbose -Message "Getting web application '$WebAppUrl' throttling settings"
 
     $paramArgs = @($PSBoundParameters,$PSScriptRoot)
     $result = Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $paramArgs -ScriptBlock {
         $params = $args[0]
         $ScriptRoot = $args[1]
 
-        $wa = Get-SPWebApplication -Identity $params.Url -ErrorAction SilentlyContinue
+        $wa = Get-SPWebApplication -Identity $params.WebAppUrl -ErrorAction SilentlyContinue
         if ($null -eq $wa)
         {
             return $null
@@ -74,7 +74,7 @@ function Get-TargetResource
         Import-Module -Name (Join-Path -Path $ScriptRoot -ChildPath $relPath -Resolve)
 
         $result = Get-SPDSCWebApplicationThrottlingConfig -WebApplication $wa
-        $result.Add("Url", $params.Url)
+        $result.Add("WebAppUrl", $params.WebAppUrl)
         $result.Add("InstallAccount", $params.InstallAccount)
         return $result
     }
@@ -88,7 +88,7 @@ function Set-TargetResource
     (
         [Parameter(Mandatory = $true)]
         [System.String]
-        $Url,
+        $WebAppUrl,
 
         [Parameter()]
         [System.UInt32]
@@ -139,7 +139,7 @@ function Set-TargetResource
         $InstallAccount
     )
 
-    Write-Verbose -Message "Setting web application '$Url' throttling settings"
+    Write-Verbose -Message "Setting web application '$WebAppUrl' throttling settings"
 
     $paramArgs = @($PSBoundParameters,$PSScriptRoot)
 
@@ -147,10 +147,10 @@ function Set-TargetResource
         $params = $args[0]
         $ScriptRoot = $args[1]
 
-        $wa = Get-SPWebApplication -Identity $params.Url -ErrorAction SilentlyContinue
+        $wa = Get-SPWebApplication -Identity $params.WebAppUrl -ErrorAction SilentlyContinue
         if ($null -eq $wa)
         {
-            throw "Web application $($params.Url) was not found"
+            throw "Web application $($params.WebAppUrl) was not found"
             return
         }
 
@@ -164,7 +164,7 @@ function Set-TargetResource
         if ($params.ContainsKey("HappyHour") -eq $true)
         {
             # Happy hour settins use separate update method so use a fresh web app to update these
-            $wa2 = Get-SPWebApplication -Identity $params.Url
+            $wa2 = Get-SPWebApplication -Identity $params.WebAppUrl
             Set-SPDSCWebApplicationHappyHourConfig -WebApplication $wa2 -Settings $params.HappyHour
             $wa2.Update()
         }
@@ -179,7 +179,7 @@ function Test-TargetResource
     (
         [Parameter(Mandatory = $true)]
         [System.String]
-        $Url,
+        $WebAppUrl,
 
         [Parameter()]
         [System.UInt32]
@@ -230,7 +230,7 @@ function Test-TargetResource
         $InstallAccount
     )
 
-    Write-Verbose -Message "Testing web application '$url' throttling settings"
+    Write-Verbose -Message "Testing web application '$WebAppUrl' throttling settings"
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
 

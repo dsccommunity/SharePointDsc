@@ -4,6 +4,7 @@
 # Description
     
     **Type:** Distributed
+    **Requires CredSSP:** No
     
     This resource is used to manage the users with Shell Admin permissions. There
     are a number of approaches to how this can be implemented. The "Members"
@@ -42,9 +43,10 @@
     cannot add it to the Shell Admins (common for AllContentDatabases parameter)
     and the resource will throw an error. Workaround: Change database owner in SQL
     
-.PARAMETER Name
+.PARAMETER IsSingleInstance
     Key - String
-    Name for the config, used for administration purposes
+    Allowed values: Yes
+    Specifies the resource is a single instance, the value must be 'Yes'
 
 .PARAMETER Members
     Write - String
@@ -80,7 +82,7 @@
     all content databases in the local farm.
 
 
-    Configuration Example 
+    Configuration Example
     {
         param(
             [Parameter(Mandatory = $true)]
@@ -92,9 +94,9 @@
         node localhost {
             SPShellAdmins ShellAdmins
             {
-                Name         = "Shell Admins"
-                Members      = "CONTOSO\user1", "CONTOSO\user2"
-                AllDatabases = $true
+                IsSingleInstance = "Yes"
+                Members          = "CONTOSO\user1", "CONTOSO\user2"
+                AllDatabases     = $true
             }
         }
     }
@@ -105,7 +107,7 @@
     all content databases in the local farm.
 
 
-    Configuration Example 
+    Configuration Example
     {
         param(
             [Parameter(Mandatory = $true)]
@@ -117,9 +119,9 @@
         node localhost {
             SPShellAdmins ShellAdmins
             {
-                Name         = "Shell Admins"
-                Members      = "CONTOSO\user1", "CONTOSO\user2"
-                Databases    = @(
+                IsSingleInstance = "Yes"
+                Members          = "CONTOSO\user1", "CONTOSO\user2"
+                Databases        = @(
                     @(MSFT_SPDatabasePermissions {
                         Name = "SharePoint_Content_1"
                         Members = "CONTOSO\user2", "CONTOSO\user3"
@@ -152,7 +154,7 @@
         node localhost {
             SPShellAdmins ShellAdmins
             {
-                Name             = "Shell Admins"
+                IsSingleInstance = "Yes"
                 Members          = "CONTOSO\user1", "CONTOSO\user2"
                 AllDatabases     = $true
                 ExcludeDatabases = "WSS_Content_Portal"

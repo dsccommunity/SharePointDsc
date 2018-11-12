@@ -16,7 +16,7 @@
         node localhost {
             SPInfoPathFormsServiceConfig InfoPathFormsServiceConfig
             {
-                Ensure                                   = "Present"
+                IsSingleInstance                         = "Yes"
                 AllowUserFormBrowserEnabling             = $true
                 AllowUserFormBrowserRendering            = $true
                 MaxDataConnectionTimeout                 = 20000

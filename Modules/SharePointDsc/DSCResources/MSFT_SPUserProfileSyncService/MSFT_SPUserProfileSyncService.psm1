@@ -30,7 +30,7 @@ function Get-TargetResource
     if ((Get-SPDSCInstalledProductVersion).FileMajorPart -ne 15)
     {
         throw [Exception] ("Only SharePoint 2013 is supported to deploy the user profile sync " + `
-                           "service via DSC, as 2016 does not use the FIM based sync service.")
+                           "service via DSC, as 2016/2019 do not use the FIM based sync service.")
     }
 
     $farmAccount = Invoke-SPDSCCommand -Credential $InstallAccount `
@@ -173,7 +173,7 @@ function Set-TargetResource
     if ((Get-SPDSCInstalledProductVersion).FileMajorPart -ne 15)
     {
         throw [Exception] ("Only SharePoint 2013 is supported to deploy the user profile sync " + `
-                           "service via DSC, as 2016 does not use the FIM based sync service.")
+                           "service via DSC, as 2016/2019 do not use the FIM based sync service.")
     }
 
     $farmAccount = Invoke-SPDSCCommand -Credential $InstallAccount `
@@ -381,7 +381,7 @@ function Test-TargetResource
     if ((Get-SPDSCInstalledProductVersion).FileMajorPart -ne 15)
     {
         throw [Exception] ("Only SharePoint 2013 is supported to deploy the user profile sync " + `
-                           "service via DSC, as 2016 does not use the FIM based sync service.")
+                           "service via DSC, as 2016/2019 do not use the FIM based sync service.")
     }
 
     $CurrentValues = Get-TargetResource @PSBoundParameters

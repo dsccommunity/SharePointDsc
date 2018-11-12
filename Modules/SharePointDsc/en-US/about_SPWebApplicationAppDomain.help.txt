@@ -4,6 +4,7 @@
 # Description
     
     **Type:** Distributed
+    **Requires CredSSP:** No
     
     This resource will configure the App Domain at a specific zone for the given
     Web Application. The configuration is done per zone on the specified web
@@ -11,7 +12,7 @@
     of a web application. The app prefix should still be set using the SPAppDomain
     resource before this is applied to customise a specific zone.
     
-.PARAMETER WebApplication
+.PARAMETER WebAppUrl
     Key - string
     The URL of the web application to set the app domain for
 
@@ -41,7 +42,7 @@
     This example shows how to set the app domain for a specified web application
 
 
-    Configuration Example 
+    Configuration Example
     {
         param(
             [Parameter(Mandatory = $true)]
@@ -54,7 +55,7 @@
             SPWebApplicationAppDomain Domain
             {
                 AppDomain = "contosointranetapps.com"
-                WebApplication ="http://portal.contoso.com";
+                WebAppUrl ="http://portal.contoso.com";
                 Zone = "Default";
                 Port = 80;
                 SSL = $false;

@@ -4,6 +4,7 @@
 # Description
     
     **Type:** Distributed
+    **Requires CredSSP:** No
     
     This resource is used to configure search result sources in the SharePoint
     search service application. Result sources can be configured to be of the
@@ -19,9 +20,21 @@
     The default value for the Ensure parameter is Present. When not specifying this
     parameter, the result source is created.
     
+    To define a result source as global, use the value 'SSA' as the ScopeName
+    value.
+    
 .PARAMETER Name
     Key - String
     The name of the result source
+
+.PARAMETER ScopeName
+    Key - String
+    Allowed values: SSA, SPSite, SPWeb
+    The scope at which the Result Source will be created. Options are SSA, SPSite or SPWeb
+
+.PARAMETER ScopeUrl
+    Key - String
+    The URI of the site where to create the result source. Leave empty to have it created globally
 
 .PARAMETER SearchServiceAppName
     Required - String
@@ -40,10 +53,6 @@
     Write - String
     The URI to connect to the remote location
 
-.PARAMETER ScopeUrl
-    Write - String
-    The URI of the site where to create the result source. Leave empty to have it created globally
-
 .PARAMETER Ensure
     Write - string
     Allowed values: Present, Absent
@@ -58,7 +67,7 @@
     This example shows how to create a remote sharepoint search result source
 
 
-    Configuration Example 
+    Configuration Example
     {
         param(
             [Parameter(Mandatory = $true)]
@@ -66,11 +75,13 @@
             $SetupAccount
         )
         Import-DscResource -ModuleName SharePointDsc
-    
+
         node localhost {
             SPSearchResultSource RemoteSharePointFarm
             {
                 Name = "External SharePoint results"
+                ScopeName = "SPSite"
+                ScopeUrl = "https://SharePoint.contoso.com"
                 SearchServiceAppName = "Search Service Application"
                 Query = "{searchTerms}"
                 ProviderType = "Remote SharePoint Provider"

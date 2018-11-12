@@ -203,12 +203,21 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value {
                     return @{ FullName = $getTypeFullName }
                 } -PassThru -Force
+                $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name IsConnected -Value {
+                    return $true
+                } -PassThru -Force
                 return $spServiceApp
             }
 
             Mock -CommandName Get-SPServiceApplicationPool -MockWith {
                 return @{
                     Name = $testParams.ApplicationPool
+                }
+            }
+
+            Mock -CommandName Get-SPServiceApplicationProxy -MockWith {
+                return @{
+                    Name = "$($testParams.Name) Proxy"
                 }
             }
 
@@ -221,6 +230,107 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
                 Assert-MockCalled Get-SPServiceApplicationPool
                 Assert-MockCalled Set-SPEnterpriseSearchServiceApplication
+            }
+        }
+
+        Context -Name "When a service application exists and the Proxy Name is not configured correctly" -Fixture {
+            $testParams = @{
+                Name = "Search Service Application"
+                ProxyName = "Search SA Proxy"
+                ApplicationPool = "SharePoint Search Services"
+                Ensure = "Present"
+            }
+
+            Mock -CommandName Get-SPServiceApplication -MockWith {
+                $spServiceApp = [PSCustomObject]@{
+                    TypeName = "Search Service Application"
+                    DisplayName = $testParams.Name
+                    ApplicationPool = @{ Name = $testParams.ApplicationPool }
+                    Database = @{
+                        Name = $testParams.DatabaseName
+                        NormalizedDataSource = $testParams.DatabaseServer
+                    }
+                }
+                $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value {
+                    return @{ FullName = $getTypeFullName }
+                } -PassThru -Force
+                $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name IsConnected -Value {
+                    return $true
+                } -PassThru -Force
+                return $spServiceApp
+            }
+
+            Mock -CommandName Get-SPServiceApplicationPool -MockWith {
+                return @{
+                    Name = $testParams.ApplicationPool
+                }
+            }
+
+            Mock -CommandName Get-SPServiceApplicationProxy -MockWith {
+                $returnval =  @{
+                    Name = "$($testParams.Name) Proxy"
+                }
+                $returnval = $returnval | Add-Member -MemberType ScriptMethod -Name Update -Value {
+                    $global:SPDscProxyUpdateCalled = $true
+                } -PassThru -Force
+                return $returnval
+            }
+
+            It "Should return false when the Test method is called" {
+                Test-TargetResource @testParams | Should Be $false
+            }
+
+            $global:SPDscProxyUpdateCalled = $false
+            It "Should update the service app proxy name in the set method" {
+                Set-TargetResource @testParams
+                $global:SPDscProxyUpdateCalled | Should Be $true
+            }
+        }
+
+        Context -Name "When a service application exists, but the Proxy doesn't" -Fixture {
+            $testParams = @{
+                Name = "Search Service Application"
+                ProxyName = "Search SA Proxy"
+                ApplicationPool = "SharePoint Search Services"
+                Ensure = "Present"
+            }
+
+            Mock -CommandName Get-SPServiceApplication -MockWith {
+                $spServiceApp = [PSCustomObject]@{
+                    TypeName = "Search Service Application"
+                    DisplayName = $testParams.Name
+                    ApplicationPool = @{ Name = $testParams.ApplicationPool }
+                    Database = @{
+                        Name = $testParams.DatabaseName
+                        NormalizedDataSource = $testParams.DatabaseServer
+                    }
+                }
+                $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value {
+                    return @{ FullName = $getTypeFullName }
+                } -PassThru -Force
+                $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name IsConnected -Value {
+                    return $false
+                } -PassThru -Force
+                return $spServiceApp
+            }
+
+            Mock -CommandName Get-SPServiceApplicationPool -MockWith {
+                return @{
+                    Name = $testParams.ApplicationPool
+                }
+            }
+
+            Mock -CommandName Get-SPServiceApplicationProxy -MockWith {
+                return $null
+            }
+
+            It "Should return false when the Test method is called" {
+                Test-TargetResource @testParams | Should Be $false
+            }
+
+            It "Should create a new proxy in the set method" {
+                Set-TargetResource @testParams
+                Assert-MockCalled New-SPEnterpriseSearchServiceApplicationProxy
             }
         }
 
@@ -245,6 +355,9 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value {
                     return @{ FullName = $getTypeFullName }
                 } -PassThru -Force
+                $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name IsConnected -Value {
+                    return $true
+                } -PassThru -Force
                 return $spServiceApp
             }
 
@@ -254,6 +367,12 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 }
             } -ParameterFilter {
                 $TypeName -eq "Microsoft.Office.Server.Search.Administration.Content"
+            }
+
+            Mock -CommandName Get-SPServiceApplicationProxy -MockWith {
+                return @{
+                    Name = "$($testParams.Name) Proxy"
+                }
             }
 
             It "Should return false from the test method" {
@@ -334,6 +453,9 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value {
                     return @{ FullName = $getTypeFullName }
                 } -PassThru -Force
+                $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name IsConnected -Value {
+                    return $true
+                } -PassThru -Force
                 return $spServiceApp
             }
 
@@ -349,6 +471,12 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 }
             } -ParameterFilter {
                 $TypeName -eq "Microsoft.Office.Server.Search.Administration.Content"
+            }
+
+            Mock -CommandName Get-SPServiceApplicationProxy -MockWith {
+                return @{
+                    Name = "$($testParams.Name) Proxy"
+                }
             }
 
             It "Should return false from the test method" {
@@ -570,11 +698,11 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 return $spServiceApp
             }
 
-            it "Should return the current value in the get method" {
+            It "Should return the current value in the get method" {
                 (Get-TargetResource @testParams).WindowsServiceAccount | Should Not BeNullOrEmpty
             }
 
-            it "Should return true in the test method" {
+            It "Should return true in the test method" {
                 Test-TargetResource @testParams | Should Be $true
             }
         }
@@ -600,6 +728,9 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value {
                     return @{ FullName = $getTypeFullName }
                 } -PassThru -Force
+                $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name IsConnected -Value {
+                    return $true
+                } -PassThru -Force
                 return $spServiceApp
             }
 
@@ -609,15 +740,21 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 }
             }
 
-            it "Should return the current value in the get method" {
+            Mock -CommandName Get-SPServiceApplicationProxy -MockWith {
+                return @{
+                    Name = "$($testParams.Name) Proxy"
+                }
+            }
+
+            It "Should return the current value in the get method" {
                 (Get-TargetResource @testParams).WindowsServiceAccount | Should Not BeNullOrEmpty
             }
 
-            it "Should return false in the test method" {
+            It "Should return false in the test method" {
                 Test-TargetResource @testParams | Should Be $false
             }
 
-            it "Should update the account in the set method" {
+            It "Should update the account in the set method" {
                 Set-TargetResource @testParams
 
                 Assert-MockCalled -CommandName "Set-SPEnterpriseSearchService"

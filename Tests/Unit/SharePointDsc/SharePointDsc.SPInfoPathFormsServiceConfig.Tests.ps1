@@ -44,7 +44,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             $testParams = @{
-                Ensure = "Present"
+                IsSingleInstance                         = "Yes"
+                Ensure                                   = "Present"
                 AllowUserFormBrowserEnabling             = $false
                 AllowUserFormBrowserRendering            = $true
                 MaxDataConnectionTimeout                 = 20000
@@ -67,7 +68,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "When trying to remove configurations" -Fixture {
             $testParams = @{
-                Ensure = "Absent"
+                IsSingleInstance                         = "Yes"
+                Ensure                                   = "Absent"
                 AllowUserFormBrowserEnabling             = $false
                 AllowUserFormBrowserRendering            = $true
                 MaxDataConnectionTimeout                 = 20000
@@ -91,7 +93,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "When the InfoPath Form Services is properly configured" -Fixture {
             $testParams = @{
-                Ensure = "Present"
+                IsSingleInstance                         = "Yes"
+                Ensure                                   = "Present"
                 AllowUserFormBrowserEnabling             = $true
                 AllowUserFormBrowserRendering            = $true
                 MaxDataConnectionTimeout                 = 20000
