@@ -8,7 +8,11 @@
         param(
             [Parameter(Mandatory = $true)]
             [PSCredential]
-            $SetupAccount
+            $SetupAccount,
+
+            [Parameter(Mandatory = $true)]
+            [PSCredential]
+            $SearchAccount
         )
         Import-DscResource -ModuleName SharePointDsc
 
@@ -18,7 +22,7 @@
                 IsSingleInstance      = "Yes"
                 PerformanceLevel      = "Maximum"
                 ContactEmail          = "sharepoint@contoso.com"
-                WindowsServiceAccount = $credential
+                WindowsServiceAccount = $SearchAccount
                 PsDscRunAsCredential  = $SetupAccount
             }
         }
