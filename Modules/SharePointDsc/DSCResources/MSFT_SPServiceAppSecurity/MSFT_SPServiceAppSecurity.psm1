@@ -389,10 +389,14 @@ function Test-TargetResource
     }
 
     $result = Invoke-SPDSCCommand -Credential $InstallAccount `
-                        -Arguments @($PSBoundParameters, $CurrentValues) `
+                        -Arguments @($PSBoundParameters, $CurrentValues, $PSScriptRoot) `
                         -ScriptBlock {
         $params = $args[0]
         $CurrentValues = $args[1]
+        $ScriptRoot = $args[2]
+
+        $relPath = "..\..\Modules\SharePointDsc.ServiceAppSecurity\SPServiceAppSecurity.psm1"
+        Import-Module (Join-Path $ScriptRoot $relPath -Resolve)
 
         $serviceApp = Get-SPServiceApplication -Name $params.ServiceAppName
         switch ($params.SecurityType)
@@ -436,7 +440,7 @@ function Test-TargetResource
                 Write-Verbose -Message "Security list matches - checking that permissions match on each object"
                 foreach($currentMember in $CurrentValues.Members)
                 {
-                    $expandedAccessLevels = ExpandAccessLevel -Security $security -AccessLevels ($params.Members | Where-Object -FilterScript {
+                    $expandedAccessLevels = Expand-AccessLevel -Security $security -AccessLevels ($params.Members | Where-Object -FilterScript {
                         $_.Username -eq $currentMember.Username
                     } | Select-Object -First 1).AccessLevels
                     if ($null -ne (Compare-Object -DifferenceObject $currentMember.AccessLevels -ReferenceObject $expandedAccessLevels))
@@ -468,7 +472,7 @@ function Test-TargetResource
                 else
                 {
                     Write-Verbose -Message "$($member.Username) already has access. Checking permission..."
-                    $expandedAccessLevels = ExpandAccessLevel -Security $security -AccessLevels $member.AccessLevels
+                    $expandedAccessLevels = Expand-AccessLevel -Security $security -AccessLevels $member.AccessLevels
 
                     if ($null -ne (Compare-Object -DifferenceObject $expandedAccessLevels -ReferenceObject ($CurrentValues.Members | Where-Object -FilterScript {
                             $_.Username -eq $member.Username
@@ -502,36 +506,6 @@ function Test-TargetResource
     }
 
     return $result
-}
-
-function ExpandAccessLevel
-{
-    [OutputType([System.String[]])]
-    param(
-        [Parameter()]
-        $Security,
-
-        [Parameter()]
-        [System.String[]]
-        $AccessLevels
-)
-    $expandedAccessLevels = $AccessLevels
-
-    foreach ($namedAccessRight in $Security.NamedAccessRights)
-    {
-        if($AccessLevels -contains $namedAccessRight.Name)
-        {
-            foreach ($namedAccessRight2 in $Security.NamedAccessRights)
-            {
-                if($expandedAccessLevels -notcontains $namedAccessRight2.Name -and
-                    $namedAccessRight2.Rights.IsSubsetOf($namedAccessRight.Rights))
-                {
-                    $expandedAccessLevels += $namedAccessRight2.Name
-                }
-            }
-        }
-    }
-    return $expandedAccessLevels
 }
 
 Export-ModuleMember -Function *-TargetResource
