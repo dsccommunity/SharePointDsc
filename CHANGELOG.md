@@ -14,6 +14,8 @@
     service application pool does not exist.
   * Implemented check to make sure cmdlets are only executed when it actually
     has something to update.
+* SPServiceAppSecurity
+  * Fixed unavailable utility method (ExpandAccessLevel).
 
 ## v3.0
 
