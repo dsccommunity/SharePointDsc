@@ -76,7 +76,7 @@ function Get-TargetResource
             $user = $securityEntry.Name
             if ($user -like "i:*|*" -or $user -like "c:*|*")
             {
-                if($user.Chars(3) -eq "%" -and $user -ilike "*$((Get-SPFarm).Id.ToString())")
+                if ($user.Chars(3) -eq "%" -and $user -ilike "*$((Get-SPFarm).Id.ToString())")
                 {
                     $user = "{LocalFarm}"
                 }
@@ -94,7 +94,7 @@ function Get-TargetResource
 
             foreach ($namedAccessRight in $security.NamedAccessRights)
             {
-                if($namedAccessRight.Rights.IsSubsetOf($securityEntry.AllowedObjectRights))
+                if ($namedAccessRight.Rights.IsSubsetOf($securityEntry.AllowedObjectRights))
                 {
                     $accessLevels += $namedAccessRight.Name
                 }
@@ -193,7 +193,7 @@ function Set-TargetResource
         {
             foreach($desiredMember in $params.Members)
             {
-                if($desiredMember.Username -eq "{LocalFarm}")
+                if ($desiredMember.Username -eq "{LocalFarm}")
                 {
                     $claim = New-SPClaimsPrincipal -Identity $localFarmEncodedClaim `
                                                    -IdentityType EncodedClaim
@@ -235,7 +235,7 @@ function Set-TargetResource
             {
                 if ($params.Members.Username -notcontains $currentMember.Username)
                 {
-                    if($currentMember.UserName -eq "{LocalFarm}")
+                    if ($currentMember.UserName -eq "{LocalFarm}")
                     {
                         $claim = New-SPClaimsPrincipal -Identity $localFarmEncodedClaim `
                                                     -IdentityType EncodedClaim
@@ -261,9 +261,9 @@ function Set-TargetResource
 
         if ($params.ContainsKey("MembersToInclude") -eq $true)
         {
-            foreach($desiredMember in $params.MembersToInclude)
+            foreach ($desiredMember in $params.MembersToInclude)
             {
-                if($desiredMember.Username -eq "{LocalFarm}")
+                if ($desiredMember.Username -eq "{LocalFarm}")
                 {
                     $claim = New-SPClaimsPrincipal -Identity $localFarmEncodedClaim `
                                                    -IdentityType EncodedClaim
@@ -306,11 +306,11 @@ function Set-TargetResource
 
         if ($params.ContainsKey("MembersToExclude") -eq $true)
         {
-            foreach($excludeMember in $params.MembersToExclude)
+            foreach ($excludeMember in $params.MembersToExclude)
             {
                 if ($CurrentValues.Members.Username -contains $excludeMember)
                 {
-                    if($excludeMember -eq "{LocalFarm}")
+                    if ($excludeMember -eq "{LocalFarm}")
                     {
                         $claim = New-SPClaimsPrincipal -Identity $localFarmEncodedClaim `
                                                        -IdentityType EncodedClaim
@@ -396,7 +396,7 @@ function Test-TargetResource
         $ScriptRoot = $args[2]
 
         $relPath = "..\..\Modules\SharePointDsc.ServiceAppSecurity\SPServiceAppSecurity.psm1"
-        Import-Module (Join-Path $ScriptRoot $relPath -Resolve)
+        Import-Module (Join-Path -Path $ScriptRoot -ChildPath $relPath -Resolve)
 
         $serviceApp = Get-SPServiceApplication -Name $params.ServiceAppName
         switch ($params.SecurityType)
@@ -426,7 +426,7 @@ function Test-TargetResource
                     return $true
                 }
             }
-            elseif($params.Members.Count -eq 0)
+            elseif ($params.Members.Count -eq 0)
             {
                 Write-Verbose -Message "Security list does not match"
                 return $false

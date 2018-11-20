@@ -14,11 +14,11 @@ function Expand-AccessLevel
 
     foreach ($namedAccessRight in $Security.NamedAccessRights)
     {
-        if($AccessLevels -contains $namedAccessRight.Name)
+        if ($AccessLevels -contains $namedAccessRight.Name)
         {
             foreach ($namedAccessRight2 in $Security.NamedAccessRights)
             {
-                if($expandedAccessLevels -notcontains $namedAccessRight2.Name -and
+                if ($expandedAccessLevels -notcontains $namedAccessRight2.Name -and
                     $namedAccessRight2.Rights.IsSubsetOf($namedAccessRight.Rights))
                 {
                     $expandedAccessLevels += $namedAccessRight2.Name
