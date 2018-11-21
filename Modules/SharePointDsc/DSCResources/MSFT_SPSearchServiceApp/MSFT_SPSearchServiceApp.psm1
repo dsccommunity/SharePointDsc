@@ -55,6 +55,12 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting Search service application '$Name'"
 
+    if ($PSBoundParameters.ContainsKey("WindowsServiceAccount"))
+    {
+        Write-Verbose -Message ("This parameter is deprecated in this resource. Please use " + `
+                                "SPSearchServiceSettings instead.")
+    }
+
     $result = Invoke-SPDSCCommand -Credential $InstallAccount `
                                   -Arguments @($PSBoundParameters, $PSScriptRoot) `
                                   -ScriptBlock {
@@ -200,6 +206,12 @@ function Set-TargetResource
     )
 
     Write-Verbose -Message "Setting Search service application '$Name'"
+
+    if ($PSBoundParameters.ContainsKey("WindowsServiceAccount"))
+    {
+        Write-Verbose -Message ("This parameter is deprecated in this resource. Please use " + `
+                                "SPSearchServiceSettings instead.")
+    }
 
     $result = Get-TargetResource @PSBoundParameters
 
@@ -459,6 +471,12 @@ function Test-TargetResource
     )
 
     Write-Verbose -Message "Testing Search service application '$Name'"
+
+    if ($PSBoundParameters.ContainsKey("WindowsServiceAccount"))
+    {
+        Write-Verbose -Message ("This parameter is deprecated in this resource. Please use " + `
+                                "SPSearchServiceSettings instead.")
+    }
 
     $PSBoundParameters.Ensure = $Ensure
 
