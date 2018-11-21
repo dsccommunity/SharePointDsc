@@ -54,6 +54,11 @@ function Get-TargetResource
         $ConnectionType,
 
         [Parameter()]
+        [ValidateSet("Present","Absent")]
+        [System.String]
+        $Ensure = "Present",
+
+        [Parameter()]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
@@ -266,11 +271,18 @@ function Set-TargetResource
         $ConnectionType,
 
         [Parameter()]
+        [ValidateSet("Present","Absent")]
+        [System.String]
+        $Ensure = "Present",
+
+        [Parameter()]
         [System.Management.Automation.PSCredential]
         $InstallAccount
    )
 
     Write-Verbose -Message "Setting user profile service sync connection $Name"
+
+    $PSBoundParameters.Ensure = $Ensure
 
     if ($PSBoundParameters.ContainsKey("UseSSL") -eq $false)
     {
@@ -358,139 +370,155 @@ function Set-TargetResource
             $_.DisplayName -eq $Name
         } | Select-Object -first 1
 
-        if ($null -ne $connection -and $params.Forest -ieq  $connection.Server)
+        if ($params.Ensure -eq "Present")
         {
-            $domain = $params.ConnectionCredentials.UserName.Split("\")[0]
-            $userName= $params.ConnectionCredentials.UserName.Split("\")[1]
-            $connection.SetCredentials($domain, $userName, $params.ConnectionCredentials.Password)
+            if ($null -ne $connection -and $params.Forest -ieq  $connection.Server)
+            {
+                $domain = $params.ConnectionCredentials.UserName.Split("\")[0]
+                $userName= $params.ConnectionCredentials.UserName.Split("\")[1]
+                $connection.SetCredentials($domain, $userName, $params.ConnectionCredentials.Password)
 
-            $connection.NamingContexts | ForEach-Object -Process {
-                $namingContext = $_
-                if ($params.ContainsKey("IncludedOUs"))
-                {
-                    $namingContext.ContainersIncluded.Clear()
-                    $params.IncludedOUs| ForEach-Object -Process {
-                        $namingContext.ContainersIncluded.Add($_)
+                $connection.NamingContexts | ForEach-Object -Process {
+                    $namingContext = $_
+                    if ($params.ContainsKey("IncludedOUs"))
+                    {
+                        $namingContext.ContainersIncluded.Clear()
+                        $params.IncludedOUs| ForEach-Object -Process {
+                            $namingContext.ContainersIncluded.Add($_)
+                        }
+                    }
+                    $namingContext.ContainersExcluded.Clear()
+                    if ($params.ContainsKey("ExcludedOUs"))
+                    {
+                        $params.IncludedOUs| ForEach-Object -Process {
+                            $namingContext.ContainersExcluded.Add($_)
+                        }
                     }
                 }
-                $namingContext.ContainersExcluded.Clear()
-                if ($params.ContainsKey("ExcludedOUs"))
+                $connection.Update()
+                $connection.RefreshSchema($params.ConnectionCredentials.Password)
+
+                return
+            }
+            else
+            {
+                Write-Verbose -Message "Creating a new connection "
+                if ($null -ne $connection -and $params.Forest -ine  $connection.Server)
                 {
-                    $params.IncludedOUs| ForEach-Object -Process {
-                        $namingContext.ContainersExcluded.Add($_)
+                    if ($params.ContainsKey("Force") -and $params.Force -eq $true)
+                    {
+                        Write-Verbose -Message "Force specified, deleting already existing connection"
+                        $connection.Delete()
+                    }
+                    else
+                    {
+                        throw "connection exists and forest is different. use force"
+                    }
+
+                }
+
+                $servers = New-Object -TypeName "System.Collections.Generic.List[[System.String]]"
+                if ($params.ContainsKey("Server"))
+                {
+                    $servers.add($params.Server)
+                }
+                $listIncludedOUs = New-Object -TypeName "System.Collections.Generic.List[[System.String]]"
+                $params.IncludedOUs | ForEach-Object -Process {
+                    $listIncludedOUs.Add($_)
+                }
+
+                $listExcludedOUs = New-Object -TypeName "System.Collections.Generic.List[[System.String]]"
+                if ($params.ContainsKey("ExcludedOus"))
+                {
+                    $params.ExcludedOus | ForEach-Object -Process {
+                        $listExcludedOUs.Add($_)
+                    }
+                }
+                $list = New-Object -TypeName System.Collections.Generic.List[[Microsoft.Office.Server.UserProfiles.DirectoryServiceNamingContext]]
+
+                $partition = Get-SPDSCADSIObject -LdapPath ("LDAP://" +("DC=" + $params.Forest.Replace(".", ",DC=")))
+                $list.Add((New-Object -TypeName "Microsoft.Office.Server.UserProfiles.DirectoryServiceNamingContext" `
+                                    -ArgumentList @(
+                                                $partition.distinguishedName,
+                                                $params.Forest,
+                                                $false,
+                                                (New-Object -TypeName "System.Guid" `
+                                                            -ArgumentList $partition.objectGUID),
+                                                $listIncludedOUs,
+                                                $listExcludedOUs,
+                                                $null ,
+                                                $false)))
+                $partition = Get-SPDSCADSIObject -LdapPath ("LDAP://CN=Configuration," + ("DC=" + $params.Forest.Replace(".", ",DC=")))
+                $list.Add((New-Object -TypeName "Microsoft.Office.Server.UserProfiles.DirectoryServiceNamingContext" `
+                                    -ArgumentList @(
+                                                $partition.distinguishedName,
+                                                $params.Forest,
+                                                $true,
+                                                (New-Object -TypeName "System.Guid" `
+                                                            -ArgumentList $partition.objectGUID),
+                                                $listIncludedOUs ,
+                                                $listExcludedOUs ,
+                                                $null ,
+                                                $false)))
+
+                $userDomain = $params.ConnectionCredentials.UserName.Split("\")[0]
+                $userName= $params.ConnectionCredentials.UserName.Split("\")[1]
+
+                $installedVersion = Get-SPDSCInstalledProductVersion
+
+                switch($installedVersion.FileMajorPart)
+                {
+                    15
+                    {
+                        Write-Verbose -Message "Creating the new connection via object model (SP2013)"
+                        $upcm.ConnectionManager.AddActiveDirectoryConnection( [Microsoft.Office.Server.UserProfiles.ConnectionType]::ActiveDirectory,  `
+                                                $params.Name, `
+                                                $params.Forest, `
+                                                $params.UseSSL, `
+                                                $userDomain, `
+                                                $userName, `
+                                                $params.ConnectionCredentials.Password, `
+                                                $list, `
+                                                $null,`
+                                                $null) | Out-Null
+                    }
+                    16
+                    {
+                        Write-Verbose -Message "Creating the new connection via cmdlet (SP2016)"
+                        Write-Verbose -Message "Adding IncludedOUs to the connection"
+                        foreach($ou in $params.IncludedOUs)
+                        {
+                            Add-SPProfileSyncConnection -ProfileServiceApplication $ups `
+                                                        -ConnectionForestName $params.Forest `
+                                                        -ConnectionDomain $userDomain `
+                                                        -ConnectionUserName $userName `
+                                                        -ConnectionPassword $params.ConnectionCredentials.Password `
+                                                        -ConnectionUseSSL $params.UseSSL `
+                                                        -ConnectionSynchronizationOU $ou `
+                                                        -ConnectionPort $params.Port `
+                                                        -ConnectionUseDisabledFilter $params.UseDisabledFilter
+                        }
+
+                        Write-Verbose -Message "Removing ExcludedOUs from the connection"
+                        foreach($ou in $params.ExcludedOUs)
+                        {
+                            Remove-SPProfilesyncConnection -ProfileServiceApplication $ups `
+                                                           -ConnectionForestName $params.Forest `
+                                                           -ConnectionDomain $userDomain `
+                                                           -ConnectionUserName $userName `
+                                                           -ConnectionPassword $params.ConnectionCredentials.Password `
+                                                           -ConnectionSynchronizationOU $ou
+                        }
                     }
                 }
             }
-            $connection.Update()
-            $connection.RefreshSchema($params.ConnectionCredentials.Password)
-
-            return
         }
         else
         {
-            Write-Verbose -Message "Creating a new connection "
-            if ($null -ne $connection -and $params.Forest -ine  $connection.Server)
+            Write-Verbose -Message "Removing the new connection "
+            if ($null -ne $connection -and $params.Forest -ine $connection.Server)
             {
-                if ($params.ContainsKey("Force") -and $params.Force -eq $true)
-                {
-                    $connection.Delete()
-                }
-                else
-                {
-                    throw "connection exists and forest is different. use force"
-                }
-
-            }
-
-            $servers = New-Object -TypeName "System.Collections.Generic.List[[System.String]]"
-            if ($params.ContainsKey("Server"))
-            {
-                $servers.add($params.Server)
-            }
-            $listIncludedOUs = New-Object -TypeName "System.Collections.Generic.List[[System.String]]"
-            $params.IncludedOUs | ForEach-Object -Process {
-                $listIncludedOUs.Add($_)
-            }
-
-            $listExcludedOUs = New-Object -TypeName "System.Collections.Generic.List[[System.String]]"
-            if ($params.ContainsKey("ExcludedOus"))
-            {
-                $params.ExcludedOus | ForEach-Object -Process {
-                    $listExcludedOUs.Add($_)
-                }
-            }
-            $list = New-Object -TypeName System.Collections.Generic.List[[Microsoft.Office.Server.UserProfiles.DirectoryServiceNamingContext]]
-
-            $partition = Get-SPDSCADSIObject -LdapPath ("LDAP://" +("DC=" + $params.Forest.Replace(".", ",DC=")))
-            $list.Add((New-Object -TypeName "Microsoft.Office.Server.UserProfiles.DirectoryServiceNamingContext" `
-                                  -ArgumentList @(
-                                            $partition.distinguishedName,
-                                            $params.Forest,
-                                            $false,
-                                            (New-Object -TypeName "System.Guid" `
-                                                        -ArgumentList $partition.objectGUID),
-                                            $listIncludedOUs,
-                                            $listExcludedOUs,
-                                            $null ,
-                                            $false)))
-            $partition = Get-SPDSCADSIObject -LdapPath ("LDAP://CN=Configuration," + ("DC=" + $params.Forest.Replace(".", ",DC=")))
-            $list.Add((New-Object -TypeName "Microsoft.Office.Server.UserProfiles.DirectoryServiceNamingContext" `
-                                  -ArgumentList @(
-                                            $partition.distinguishedName,
-                                            $params.Forest,
-                                            $true,
-                                            (New-Object -TypeName "System.Guid" `
-                                                        -ArgumentList $partition.objectGUID),
-                                            $listIncludedOUs ,
-                                            $listExcludedOUs ,
-                                            $null ,
-                                            $false)))
-
-            $userDomain = $params.ConnectionCredentials.UserName.Split("\")[0]
-            $userName= $params.ConnectionCredentials.UserName.Split("\")[1]
-
-            $installedVersion = Get-SPDSCInstalledProductVersion
-
-            switch($installedVersion.FileMajorPart)
-            {
-                15
-                {
-                    $upcm.ConnectionManager.AddActiveDirectoryConnection( [Microsoft.Office.Server.UserProfiles.ConnectionType]::ActiveDirectory,  `
-                                            $params.Name, `
-                                            $params.Forest, `
-                                            $params.UseSSL, `
-                                            $userDomain, `
-                                            $userName, `
-                                            $params.ConnectionCredentials.Password, `
-                                            $list, `
-                                            $null,`
-                                            $null) | Out-Null
-               }
-               16
-               {
-                    foreach($ou in $params.IncludedOUs)
-                    {
-                        Add-SPProfileSyncConnection -ProfileServiceApplication $ups `
-                                                    -ConnectionForestName $params.Forest `
-                                                    -ConnectionDomain $userDomain `
-                                                    -ConnectionUserName $userName `
-                                                    -ConnectionPassword $params.ConnectionCredentials.Password `
-                                                    -ConnectionUseSSL $params.UseSSL `
-                                                    -ConnectionSynchronizationOU $ou `
-                                                    -ConnectionPort $params.Port `
-                                                    -ConnectionUseDisabledFilter $params.UseDisabledFilter
-                    }
-
-                    foreach($ou in $params.ExcludedOUs)
-                    {
-                        Remove-SPProfilesyncConnection -ProfileServiceApplication $ups `
-                                                       -ConnectionForestName $params.Forest `
-                                                       -ConnectionDomain $userDomain `
-                                                       -ConnectionUserName $userName `
-                                                       -ConnectionPassword $params.ConnectionCredentials.Password `
-                                                       -ConnectionSynchronizationOU $ou
-                    }
-               }
+                $connection.Delete()
             }
         }
     }
@@ -552,11 +580,18 @@ function Test-TargetResource
         $ConnectionType,
 
         [Parameter()]
+        [ValidateSet("Present","Absent")]
+        [System.String]
+        $Ensure = "Present",
+
+        [Parameter()]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 
     Write-Verbose -Message "Testing for user profile service sync connection $Name"
+
+    $PSBoundParameters.Ensure = $Ensure
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
@@ -577,7 +612,8 @@ function Test-TargetResource
                                                      "Server",
                                                      "UseSSL",
                                                      "IncludedOUs",
-                                                     "ExcludedOUs")
+                                                     "ExcludedOUs",
+                                                     "Ensure")
 }
 
 <#

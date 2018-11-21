@@ -427,12 +427,6 @@ function Set-TargetResource
                                     -LOBSystemSet $params.LOBSystemSet
                 }
 
-                $source = New-SPEnterpriseSearchCrawlContentSource `
-                                -SearchApplication $params.ServiceAppName `
-                                -Type $newType `
-                                -Name $params.Name `
-                                -StartAddresses $startAddresses
-
                 if ($null -eq $source)
                 {
                     throw ("An error occurred during creation of the Content Source, " + `

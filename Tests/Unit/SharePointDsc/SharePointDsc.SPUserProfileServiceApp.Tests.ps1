@@ -27,9 +27,14 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         $mockFarmCredential = New-Object -TypeName System.Management.Automation.PSCredential `
                                          -ArgumentList @("DOMAIN\sp_farm", $mockPassword)
 
-        try { [Microsoft.Office.Server.UserProfiles.UserProfileManager] }
-        catch {
-            try {
+        try
+        {
+            [Microsoft.Office.Server.UserProfiles.UserProfileManager]
+        }
+        catch
+        {
+            try
+            {
                 Add-Type -TypeDefinition @"
                     namespace Microsoft.Office.Server.UserProfiles {
                         public class UserProfileManager {
@@ -51,10 +56,31 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     }
 "@ -ErrorAction SilentlyContinue
             }
-            catch {
+            catch
+            {
                 Write-Verbose -Message "The Type Microsoft.Office.Server.UserProfiles.DirectoryServiceNamingContext was already added."
             }
         }
+
+        Add-Type -TypeDefinition @"
+using System.Collections;
+
+namespace Microsoft.SharePoint.Administration.AccessControl {
+    public class SPNamedIisWebServiceApplicationRights
+    {
+        public static Hashtable FullControl
+        {
+            get
+            {
+                Hashtable returnval = new Hashtable();
+                returnval.Add("Name","Full Control");
+                return returnval;
+            }
+        }
+    }
+}
+"@
+
         # Mocks for all contexts
         Mock -CommandName Get-SPDSCFarmAccount -MockWith {
             return $mockFarmCredential

@@ -419,9 +419,10 @@ function Set-TargetResource
                                                          -IdentityType WindowsSamAccountName
 
                 $serviceAppSecurity = Get-SPServiceApplicationSecurity $app
+                $acl = [Microsoft.SharePoint.Administration.AccessControl.SPNamedIisWebServiceApplicationRights]::FullControl.Name
                 Grant-SPObjectSecurity -Identity $serviceAppSecurity `
                                        -Principal $claimsPrincipal `
-                                       -Rights "Full Control"
+                                       -Rights $acl
                 Set-SPServiceApplicationSecurity -Identity $app `
                                                  -ObjectSecurity $serviceAppSecurity
 

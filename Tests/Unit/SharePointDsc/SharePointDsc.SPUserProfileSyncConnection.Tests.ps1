@@ -650,6 +650,95 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
         }
 
+        Context -Name "Connection exists, but shouldn't" -Fixture {
+            $testParams = @{
+                UserProfileService = "User Profile Service Application"
+                Ensure = "Absent"
+                Forest = "contoso.com"
+                Name = "contoso.com"
+                ConnectionCredentials = $mockCredential
+                Server = "server.contoso.com"
+                IncludedOUs = @("OU=SharePoint Users,DC=Contoso,DC=com")
+                ConnectionType = "ActiveDirectory"
+            }
+
+            $litWareconnection = @{
+                DisplayName = "contoso.com"
+                Server = "litware.net"
+                NamingContexts=  New-Object -TypeName System.Collections.ArrayList
+                AccountDomain = "Contoso"
+                AccountUsername = "TestAccount"
+                UseDisabledFilter = $false
+                Type= "ActiveDirectory"
+            }
+            $litWareconnection = $litWareconnection | Add-Member -MemberType ScriptMethod `
+                                                                 -Name Delete `
+                                                                 -Value {
+                                                                        $Global:SPDscUPSSyncConnectionDeleteCalled = $true
+                                                                    } -PassThru
+            $userProfileServiceValidConnection =  @{
+                Name = "User Profile Service Application"
+                TypeName = "User Profile Service Application"
+                ApplicationPool = "SharePoint Service Applications"
+                FarmAccount = $mockCredential
+                ServiceApplicationProxyGroup = "Proxy Group"
+                ConnectionManager=  New-Object -TypeName System.Collections.ArrayList
+            } | Add-Member -MemberType ScriptMethod -Name GetMethod -Value {
+                return (@{
+                    FullName = $getTypeFullName
+                }) | Add-Member -MemberType ScriptMethod -Name GetMethods -Value {
+                return (@{
+                        Name = "get_NamingContexts"
+                    }) | Add-Member -MemberType ScriptMethod -Name Invoke -Value {
+                    return @{
+                        AbsoluteUri = "http://contoso.sharepoint.com/sites/ct"
+                    }
+                } -PassThru -Force
+                } -PassThru -Force
+            } -PassThru -Force
+            $userProfileServiceValidConnection.ConnectionManager.Add($connection)
+
+            Mock -CommandName Get-SPServiceApplication -MockWith {
+                return $userProfileServiceValidConnection
+            }
+
+            $litwareConnnectionManager = New-Object -TypeName System.Collections.ArrayList | Add-Member -MemberType ScriptMethod  AddActiveDirectoryConnection{ `
+                param([Microsoft.Office.Server.UserProfiles.ConnectionType] $connectionType,  `
+                $name, `
+                $forest, `
+                $useSSL, `
+                $userName, `
+                $securePassword, `
+                $namingContext, `
+                $p1, $p2 `
+                )
+
+                $Global:SPDscUPSAddActiveDirectoryConnectionCalled =$true
+            } -PassThru
+            $litwareConnnectionManager.Add($litWareconnection)
+
+            Mock -CommandName New-Object -MockWith {
+                return (@{} | Add-Member -MemberType ScriptMethod IsSynchronizationRunning {
+                    $Global:SPDscUpsSyncIsSynchronizationRunning=$true;
+                    return $false;
+                } -PassThru   |  Add-Member  ConnectionManager $litwareConnnectionManager  -PassThru )
+            } -ParameterFilter { $TypeName -eq "Microsoft.Office.Server.UserProfiles.UserProfileConfigManager" }
+
+            It "Should return Ensure Present from the get method" {
+                (Get-TargetResource @testParams).Ensure | Should Be "Present"
+            }
+
+            It "Should return false when the Test method is called" {
+                Test-TargetResource @testParams | Should Be $false
+            }
+
+            It "Should remove the existing connection in the set method" {
+                $Global:SPDscUPSSyncConnectionDeleteCalled=$false
+                Set-TargetResource @testParams
+                $Global:SPDscUPSSyncConnectionDeleteCalled | Should be $true
+            }
+        }
+
         if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 16)
         {
             Context -Name "When naming context is null (ADImport for SP2016)" -Fixture {
