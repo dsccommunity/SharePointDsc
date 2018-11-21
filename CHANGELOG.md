@@ -18,6 +18,8 @@
     new resource (SPSearchServiceSettings)
 * SPSearchServiceSettings
   * Added new resource to configure search service settings
+* SPServiceAppSecurity
+  * Fixed unavailable utility method (ExpandAccessLevel).
 
 ## v3.0
 

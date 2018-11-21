@@ -76,7 +76,7 @@ function Get-TargetResource
             $user = $securityEntry.Name
             if ($user -like "i:*|*" -or $user -like "c:*|*")
             {
-                if($user.Chars(3) -eq "%" -and $user -ilike "*$((Get-SPFarm).Id.ToString())")
+                if ($user.Chars(3) -eq "%" -and $user -ilike "*$((Get-SPFarm).Id.ToString())")
                 {
                     $user = "{LocalFarm}"
                 }
@@ -94,7 +94,7 @@ function Get-TargetResource
 
             foreach ($namedAccessRight in $security.NamedAccessRights)
             {
-                if($namedAccessRight.Rights.IsSubsetOf($securityEntry.AllowedObjectRights))
+                if ($namedAccessRight.Rights.IsSubsetOf($securityEntry.AllowedObjectRights))
                 {
                     $accessLevels += $namedAccessRight.Name
                 }
@@ -193,7 +193,7 @@ function Set-TargetResource
         {
             foreach($desiredMember in $params.Members)
             {
-                if($desiredMember.Username -eq "{LocalFarm}")
+                if ($desiredMember.Username -eq "{LocalFarm}")
                 {
                     $claim = New-SPClaimsPrincipal -Identity $localFarmEncodedClaim `
                                                    -IdentityType EncodedClaim
@@ -235,7 +235,7 @@ function Set-TargetResource
             {
                 if ($params.Members.Username -notcontains $currentMember.Username)
                 {
-                    if($currentMember.UserName -eq "{LocalFarm}")
+                    if ($currentMember.UserName -eq "{LocalFarm}")
                     {
                         $claim = New-SPClaimsPrincipal -Identity $localFarmEncodedClaim `
                                                     -IdentityType EncodedClaim
@@ -261,9 +261,9 @@ function Set-TargetResource
 
         if ($params.ContainsKey("MembersToInclude") -eq $true)
         {
-            foreach($desiredMember in $params.MembersToInclude)
+            foreach ($desiredMember in $params.MembersToInclude)
             {
-                if($desiredMember.Username -eq "{LocalFarm}")
+                if ($desiredMember.Username -eq "{LocalFarm}")
                 {
                     $claim = New-SPClaimsPrincipal -Identity $localFarmEncodedClaim `
                                                    -IdentityType EncodedClaim
@@ -306,11 +306,11 @@ function Set-TargetResource
 
         if ($params.ContainsKey("MembersToExclude") -eq $true)
         {
-            foreach($excludeMember in $params.MembersToExclude)
+            foreach ($excludeMember in $params.MembersToExclude)
             {
                 if ($CurrentValues.Members.Username -contains $excludeMember)
                 {
-                    if($excludeMember -eq "{LocalFarm}")
+                    if ($excludeMember -eq "{LocalFarm}")
                     {
                         $claim = New-SPClaimsPrincipal -Identity $localFarmEncodedClaim `
                                                        -IdentityType EncodedClaim
@@ -389,10 +389,14 @@ function Test-TargetResource
     }
 
     $result = Invoke-SPDSCCommand -Credential $InstallAccount `
-                        -Arguments @($PSBoundParameters, $CurrentValues) `
+                        -Arguments @($PSBoundParameters, $CurrentValues, $PSScriptRoot) `
                         -ScriptBlock {
         $params = $args[0]
         $CurrentValues = $args[1]
+        $ScriptRoot = $args[2]
+
+        $relPath = "..\..\Modules\SharePointDsc.ServiceAppSecurity\SPServiceAppSecurity.psm1"
+        Import-Module (Join-Path -Path $ScriptRoot -ChildPath $relPath -Resolve)
 
         $serviceApp = Get-SPServiceApplication -Name $params.ServiceAppName
         switch ($params.SecurityType)
@@ -422,7 +426,7 @@ function Test-TargetResource
                     return $true
                 }
             }
-            elseif($params.Members.Count -eq 0)
+            elseif ($params.Members.Count -eq 0)
             {
                 Write-Verbose -Message "Security list does not match"
                 return $false
@@ -436,7 +440,7 @@ function Test-TargetResource
                 Write-Verbose -Message "Security list matches - checking that permissions match on each object"
                 foreach($currentMember in $CurrentValues.Members)
                 {
-                    $expandedAccessLevels = ExpandAccessLevel -Security $security -AccessLevels ($params.Members | Where-Object -FilterScript {
+                    $expandedAccessLevels = Expand-AccessLevel -Security $security -AccessLevels ($params.Members | Where-Object -FilterScript {
                         $_.Username -eq $currentMember.Username
                     } | Select-Object -First 1).AccessLevels
                     if ($null -ne (Compare-Object -DifferenceObject $currentMember.AccessLevels -ReferenceObject $expandedAccessLevels))
@@ -468,7 +472,7 @@ function Test-TargetResource
                 else
                 {
                     Write-Verbose -Message "$($member.Username) already has access. Checking permission..."
-                    $expandedAccessLevels = ExpandAccessLevel -Security $security -AccessLevels $member.AccessLevels
+                    $expandedAccessLevels = Expand-AccessLevel -Security $security -AccessLevels $member.AccessLevels
 
                     if ($null -ne (Compare-Object -DifferenceObject $expandedAccessLevels -ReferenceObject ($CurrentValues.Members | Where-Object -FilterScript {
                             $_.Username -eq $member.Username
@@ -502,36 +506,6 @@ function Test-TargetResource
     }
 
     return $result
-}
-
-function ExpandAccessLevel
-{
-    [OutputType([System.String[]])]
-    param(
-        [Parameter()]
-        $Security,
-
-        [Parameter()]
-        [System.String[]]
-        $AccessLevels
-)
-    $expandedAccessLevels = $AccessLevels
-
-    foreach ($namedAccessRight in $Security.NamedAccessRights)
-    {
-        if($AccessLevels -contains $namedAccessRight.Name)
-        {
-            foreach ($namedAccessRight2 in $Security.NamedAccessRights)
-            {
-                if($expandedAccessLevels -notcontains $namedAccessRight2.Name -and
-                    $namedAccessRight2.Rights.IsSubsetOf($namedAccessRight.Rights))
-                {
-                    $expandedAccessLevels += $namedAccessRight2.Name
-                }
-            }
-        }
-    }
-    return $expandedAccessLevels
 }
 
 Export-ModuleMember -Function *-TargetResource
