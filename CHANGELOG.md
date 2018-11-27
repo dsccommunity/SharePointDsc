@@ -21,6 +21,7 @@
   * Implemented check to make sure cmdlets are only executed when it actually
     has something to update.
 * SPServiceAppSecurity
+  * Fixed unavailable utility method (ExpandAccessLevel).
   * Updated the schema to no longer specify username as key for the sub class.
 * SPUserProfileServiceApp
   * Fixed issue where localized versions of Windows and SharePoint would throw
