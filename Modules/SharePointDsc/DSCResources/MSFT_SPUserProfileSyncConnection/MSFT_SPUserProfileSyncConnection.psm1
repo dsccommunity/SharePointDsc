@@ -359,7 +359,7 @@ function Set-TargetResource
         $installedVersion = Get-SPDSCInstalledProductVersion
         if ($installedVersion.FileMajorPart -eq 16)
         {
-            $Name = $Forest -replace "\.", "-"
+            $Name = $params.Forest -replace "\.", "-"
         }
         else
         {

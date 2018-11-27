@@ -662,15 +662,31 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 ConnectionType = "ActiveDirectory"
             }
 
-            $litWareconnection = @{
-                DisplayName = "contoso.com"
-                Server = "litware.net"
-                NamingContexts=  New-Object -TypeName System.Collections.ArrayList
-                AccountDomain = "Contoso"
-                AccountUsername = "TestAccount"
-                UseDisabledFilter = $false
-                Type= "ActiveDirectory"
+            if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 15)
+            {
+                $litWareconnection = @{
+                    DisplayName = "contoso.com"
+                    Server = "litware.net"
+                    NamingContexts=  New-Object -TypeName System.Collections.ArrayList
+                    AccountDomain = "Contoso"
+                    AccountUsername = "TestAccount"
+                    UseDisabledFilter = $false
+                    Type= "ActiveDirectory"
+                }
             }
+            else
+            {
+                $litWareconnection = @{
+                    DisplayName = "contoso-com"
+                    Server = "litware.net"
+                    NamingContexts=  New-Object -TypeName System.Collections.ArrayList
+                    AccountDomain = "Contoso"
+                    AccountUsername = "TestAccount"
+                    UseDisabledFilter = $false
+                    Type= "ActiveDirectory"
+                }
+            }
+
             $litWareconnection = $litWareconnection | Add-Member -MemberType ScriptMethod `
                                                                  -Name Delete `
                                                                  -Value {
