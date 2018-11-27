@@ -608,7 +608,7 @@ function Set-TargetResource
         {
             Write-Verbose -Message "Version: SharePoint 2019"
             $requiredParams = @("SQLNCli","Sync","AppFabric","IDFX11","MSIPCClient","KB3092423",
-            "WCFDataServices56","DotNet472","MSVCRT141")
+            "WCFDataServices56","DotNet472","MSVCRT11","MSVCRT141")
 
             if ($osVersion.Major -eq 11)
             {

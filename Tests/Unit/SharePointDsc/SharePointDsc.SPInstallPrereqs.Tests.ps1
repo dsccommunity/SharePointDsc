@@ -444,7 +444,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     else
                     {
                         # SharePoint 2019
-                        $requiredParams = @("SQLNCli","Sync","AppFabric","IDFX11","MSIPCClient","KB3092423","WCFDataServices56","DotNet472","MSVCRT141")
+                        $requiredParams = @("SQLNCli","Sync","AppFabric","IDFX11","MSIPCClient","KB3092423","WCFDataServices56","DotNet472","MSVCRT11","MSVCRT141")
                     }
                 }
                 Default {

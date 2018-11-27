@@ -7,8 +7,11 @@
 * ProjectServerConnector
   * Added a file hash validation check to prevent the ability to load custom code
     into the module.
+* SPFarm
+  * Fixed localization issue where TypeName was in the local language.
 * SPInstallPrereqs
   * Updated links in the Readme.md file to docs.microsoft.com.
+  * Fixed required prereqs for SharePoint 2019, added MSVCRT11.
 * SPManagedMetadataServiceApp
   * Fixed issue where Get-TargetResource method throws an error when the
     service app proxy does not exist.
@@ -20,6 +23,10 @@
     service application pool does not exist.
   * Implemented check to make sure cmdlets are only executed when it actually
     has something to update.
+  * Deprecated WindowsServiceAccount parameter and moved functionality to
+    new resource (SPSearchServiceSettings).
+* SPSearchServiceSettings
+  * Added new resource to configure search service settings.
 * SPServiceAppSecurity
   * Fixed unavailable utility method (ExpandAccessLevel).
   * Updated the schema to no longer specify username as key for the sub class.
