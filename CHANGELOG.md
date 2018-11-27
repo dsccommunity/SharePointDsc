@@ -4,6 +4,9 @@
 
 * Changes to SharePointDsc
   * Updated LICENSE file to match the Microsoft Open Source Team standard.
+* ProjectServerConnector
+  * Added a file hash validation check to prevent the ability to load custom code
+    into the module.
 * SPFarm
   * Fixed localization issue where TypeName was in the local language.
 * SPInstallPrereqs
@@ -12,6 +15,9 @@
 * SPManagedMetadataServiceApp
   * Fixed issue where Get-TargetResource method throws an error when the
     service app proxy does not exist.
+* SPSearchContentSource
+  * Corrected issue where the New-SPEnterpriseSearchCrawlContentSource cmdlet
+    was called twice.
 * SPSearchServiceApp
   * Fixed issue where Get-TargetResource method throws an error when the
     service application pool does not exist.
@@ -23,6 +29,12 @@
   * Added new resource to configure search service settings.
 * SPServiceAppSecurity
   * Fixed unavailable utility method (ExpandAccessLevel).
+  * Updated the schema to no longer specify username as key for the sub class.
+* SPUserProfileServiceApp
+  * Fixed issue where localized versions of Windows and SharePoint would throw
+    an error.
+* SPUserProfileSyncConnection
+  * Corrected implementation of Ensure parameter.
 
 ## v3.0
 
