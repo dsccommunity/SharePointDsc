@@ -706,61 +706,6 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Test-TargetResource @testParams | Should Be $true
             }
         }
-
-        Context "A service app exists that has an incorrect windows service account in use" -Fixture {
-            $testParams = @{
-                Name = "Search Service Application"
-                ApplicationPool = "SharePoint Search Services"
-                Ensure = "Present"
-                WindowsServiceAccount = $mockCredential
-            }
-
-            Mock -CommandName Get-SPServiceApplication -MockWith {
-                $spServiceApp = [PSCustomObject]@{
-                    TypeName = "Search Service Application"
-                    DisplayName = $testParams.Name
-                    ApplicationPool = @{ Name = $testParams.ApplicationPool }
-                    Database = @{
-                        Name = $testParams.DatabaseName
-                        NormalizedDataSource = $testParams.DatabaseServer
-                    }
-                }
-                $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value {
-                    return @{ FullName = $getTypeFullName }
-                } -PassThru -Force
-                $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name IsConnected -Value {
-                    return $true
-                } -PassThru -Force
-                return $spServiceApp
-            }
-
-            Mock -CommandName Get-SPEnterpriseSearchService -MockWith {
-                return @{
-                    ProcessIdentity = "WrongUserName"
-                }
-            }
-
-            Mock -CommandName Get-SPServiceApplicationProxy -MockWith {
-                return @{
-                    Name = "$($testParams.Name) Proxy"
-                }
-            }
-
-            It "Should return the current value in the get method" {
-                (Get-TargetResource @testParams).WindowsServiceAccount | Should Not BeNullOrEmpty
-            }
-
-            It "Should return false in the test method" {
-                Test-TargetResource @testParams | Should Be $false
-            }
-
-            It "Should update the account in the set method" {
-                Set-TargetResource @testParams
-
-                Assert-MockCalled -CommandName "Set-SPEnterpriseSearchService"
-            }
-        }
-
     }
 }
 

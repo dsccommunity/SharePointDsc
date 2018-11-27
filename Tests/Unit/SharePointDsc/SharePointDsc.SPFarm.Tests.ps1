@@ -213,9 +213,25 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             Mock -CommandName "Get-SPServiceInstance" -MockWith {
                 if ($global:SPDscCentralAdminCheckDone -eq $true)
                 {
-                    return @(@{
-                        TypeName = "Central Administration"
-                    })
+                    return @(
+                        $null | Add-Member -MemberType ScriptMethod `
+                            -Name GetType `
+                            -Value {
+                                return @{
+                                    Name = "SPWebServiceInstance"
+                                }
+                    } -PassThru -Force | Add-Member -Name Name `
+                    -MemberType ScriptProperty `
+                    -PassThru `
+                    {
+                        # get
+                        ""
+                    }`
+                    {
+                        # set
+                        param ( $arg )
+                    }
+                    )
                 }
                 else
                 {
@@ -294,9 +310,17 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             Mock -CommandName "Get-SPServiceInstance" -MockWith {
                 if ($global:SPDscCentralAdminCheckDone -eq $true)
                 {
-                    return @(@{
-                        TypeName = "Central Administration"
-                    })
+                    return @(
+                        @{
+                            Name = "WSS_Administration"
+                        } | Add-Member -MemberType ScriptMethod `
+                                       -Name GetType `
+                                       -Value {
+                                           return @{
+                                               Name = "SPWebServiceInstance"
+                                           }
+                                       } -PassThru -Force
+                    )
                 }
                 else
                 {
@@ -450,10 +474,18 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     { 2 -contains $_ }
                         {
                             $global:SPDscSIRunCount++
-                            return @(@{
-                                TypeName = "Central Administration"
-                                Status = "Online"
-                            })
+                            return @(
+                                @{
+                                    Name = "WSS_Administration"
+                                    Status = "Online"
+                                } | Add-Member -MemberType ScriptMethod `
+                                               -Name GetType `
+                                               -Value {
+                                                   return @{
+                                                       Name = "SPWebServiceInstance"
+                                                   }
+                                               } -PassThru -Force
+                            )
                         }
                     { 0,1 -contains $_ }
                         {
@@ -539,10 +571,18 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             Mock -CommandName Get-SPServiceInstance -MockWith {
-                return @(@{
-                    TypeName = "Central Administration"
-                    Status = "Online"
-                })
+                return @(
+                    @{
+                        Name = "WSS_Administration"
+                        Status = "Online"
+                    } | Add-Member -MemberType ScriptMethod `
+                                   -Name GetType `
+                                   -Value {
+                                       return @{
+                                           Name = "SPWebServiceInstance"
+                                       }
+                                   } -PassThru -Force
+                )
             }
 
             Mock -CommandName Set-SPCentralAdministration -MockWith {}
@@ -624,10 +664,18 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     { 0,2 -contains $_ }
                         {
                             $global:SPDscSIRunCount++
-                            return @(@{
-                                TypeName = "Central Administration"
-                                Status = "Online"
-                            })
+                            return @(
+                                @{
+                                    Name = "WSS_Administration"
+                                    Status = "Online"
+                                } | Add-Member -MemberType ScriptMethod `
+                                               -Name GetType `
+                                               -Value {
+                                                   return @{
+                                                       Name = "SPWebServiceInstance"
+                                                   }
+                                               } -PassThru -Force
+                            )
                         }
                     { 1 -contains $_ }
                         {
@@ -640,17 +688,19 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
             $global:SPDscSIRunCount = 0
             It "Should return present from the get method" {
-                (Get-TargetResource @testParams).Ensure | Should Be "Present"
+                $result = Get-TargetResource @testParams
+                $result.Ensure | Should Be "Present"
+                $result.RunCentralAdmin | Should Be $true
             }
 
             $global:SPDscSIRunCount = 0
-            It "Should return present from the get method" {
+            It "Should stop the CA instance in the set method" {
                 Set-TargetResource @testParams
                 Assert-MockCalled Stop-SPServiceInstance
             }
 
             $global:SPDscSIRunCount = 0
-            It "Should return true from the test method" {
+            It "Should return false from the test method" {
                 Test-TargetResource @testParams | Should be $false
             }
         }
@@ -714,10 +764,18 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             Mock -CommandName "Get-SPServiceInstance" -MockWith {
                 if ($global:SPDscCentralAdminCheckDone -eq $true)
                 {
-                    return @(@{
-                        TypeName = "Central Administration"
-                        Status = "Online"
-                    })
+                    return @(
+                        @{
+                            Name = "WSS_Administration"
+                            Status = "Online"
+                        } | Add-Member -MemberType ScriptMethod `
+                                       -Name GetType `
+                                       -Value {
+                                           return @{
+                                               Name = "SPWebServiceInstance"
+                                           }
+                                       } -PassThru -Force
+                    )
                 }
                 else
                 {
@@ -1079,10 +1137,18 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             Mock -CommandName "Get-SPServiceInstance" -MockWith {
                 if ($global:SPDscCentralAdminCheckDone -eq $true)
                 {
-                    return @(@{
-                        TypeName = "Central Administration"
-                        Status = "Online"
-                    })
+                    return @(
+                        @{
+                            Name = "WSS_Administration"
+                            Status = "Online"
+                        } | Add-Member -MemberType ScriptMethod `
+                                       -Name GetType `
+                                       -Value {
+                                           return @{
+                                               Name = "SPWebServiceInstance"
+                                           }
+                                       } -PassThru -Force
+                    )
                 }
                 else
                 {
@@ -1172,10 +1238,18 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             Mock -CommandName "Get-SPServiceInstance" -MockWith {
                 if ($global:SPDscCentralAdminCheckDone -eq $true)
                 {
-                    return @(@{
-                        TypeName = "Central Administration"
-                        Status = "Online"
-                    })
+                    return @(
+                        @{
+                            Name = "WSS_Administration"
+                            Status = "Online"
+                        } | Add-Member -MemberType ScriptMethod `
+                                       -Name GetType `
+                                       -Value {
+                                           return @{
+                                               Name = "SPWebServiceInstance"
+                                           }
+                                       } -PassThru -Force
+                    )
                 }
                 else
                 {
