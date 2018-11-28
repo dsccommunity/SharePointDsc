@@ -174,10 +174,16 @@ function Get-TargetResource
                                 }
 
             $centralAdminProvisioned = $false
-            $ca = Get-SPServiceInstance -Server $env:ComputerName `
-                  | Where-Object -Filterscript {
-                        $_.TypeName -eq "Central Administration" -and $_.Status -eq "Online"
-                    }
+            $ca = Get-SPServiceInstance -Server $env:ComputerName
+            if ($null -ne $ca)
+            {
+                $ca = $ca | Where-Object -Filterscript {
+                          $_.GetType().Name -eq "SPWebServiceInstance" -and `
+                          $_.Name -eq "WSS_Administration" -and `
+                          $_.Status -eq "Online"
+                      }
+            }
+
             if ($null -ne $ca)
             {
                 $centralAdminProvisioned = $true
@@ -376,19 +382,22 @@ function Set-TargetResource
                 # Provision central administration
                 if ($params.RunCentralAdmin -eq $true)
                 {
-                    $serviceInstance = Get-SPServiceInstance -Server $env:COMPUTERNAME `
-                                            | Where-Object -FilterScript {
-                                                $_.TypeName -eq "Central Administration"
-                                            }
+                    $serviceInstance = Get-SPServiceInstance -Server $env:COMPUTERNAME
                     if ($null -eq $serviceInstance)
                     {
                         $domain = (Get-CimInstance -ClassName Win32_ComputerSystem).Domain
                         $fqdn = "$($env:COMPUTERNAME).$domain"
                         $serviceInstance = Get-SPServiceInstance -Server $fqdn `
-                                            | Where-Object -FilterScript {
-                                                $_.TypeName -eq "Central Administration"
-                                            }
                     }
+
+                    if ($null -ne $serviceInstance)
+                    {
+                        $serviceInstance = $serviceInstance | Where-Object -FilterScript {
+                                               $_.GetType().Name -eq "SPWebServiceInstance" -and `
+                                               $_.Name -eq "WSS_Administration"
+                                           }
+                    }
+
                     if ($null -eq $serviceInstance)
                     {
                         throw [Exception] "Unable to locate Central Admin service instance on this server"
@@ -398,19 +407,22 @@ function Set-TargetResource
                 else
                 {
                     # Unprovision central administration
-                    $serviceInstance = Get-SPServiceInstance -Server $env:COMPUTERNAME `
-                                                | Where-Object -FilterScript {
-                                                    $_.TypeName -eq "Central Administration"
-                                                }
+                    $serviceInstance = Get-SPServiceInstance -Server $env:COMPUTERNAME
                     if ($null -eq $serviceInstance)
                     {
                         $domain = (Get-CimInstance -ClassName Win32_ComputerSystem).Domain
                         $fqdn = "$($env:COMPUTERNAME).$domain"
-                        $serviceInstance = Get-SPServiceInstance -Server $fqdn `
-                                            | Where-Object -FilterScript {
-                                                $_.TypeName -eq "Central Administration"
-                                            }
+                        $serviceInstance = Get-SPServiceInstance -Server $fqdn
                     }
+
+                    if ($null -ne $serviceInstance)
+                    {
+                        $serviceInstance = $serviceInstance | Where-Object -FilterScript {
+                                               $_.GetType().Name -eq "SPWebServiceInstance" -and `
+                                               $_.Name -eq "WSS_Administration"
+                                           }
+                    }
+
                     if ($null -eq $serviceInstance)
                     {
                         throw "Unable to locate Central Admin service instance on this server"
@@ -644,19 +656,22 @@ function Set-TargetResource
                 }
                 else
                 {
-                    $serviceInstance = Get-SPServiceInstance -Server $env:COMPUTERNAME `
-                                            | Where-Object -FilterScript {
-                                                $_.TypeName -eq "Central Administration"
-                                            }
+                    $serviceInstance = Get-SPServiceInstance -Server $env:COMPUTERNAME
                     if ($null -eq $serviceInstance)
                     {
                         $domain = (Get-CimInstance -ClassName Win32_ComputerSystem).Domain
                         $fqdn = "$($env:COMPUTERNAME).$domain"
-                        $serviceInstance = Get-SPServiceInstance -Server $fqdn `
-                                            | Where-Object -FilterScript {
-                                                $_.TypeName -eq "Central Administration"
-                                            }
+                        $serviceInstance = Get-SPServiceInstance -Server $fqdn
                     }
+
+                    if ($null -ne $serviceInstance)
+                    {
+                        $serviceInstance = $serviceInstance | Where-Object -FilterScript {
+                            $_.GetType().Name -eq "SPWebServiceInstance" -and `
+                            $_.Name -eq "WSS_Administration"
+                        }
+                    }
+
                     if ($null -eq $serviceInstance)
                     {
                         throw [Exception] "Unable to locate Central Admin service instance on this server"

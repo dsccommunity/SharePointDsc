@@ -12,7 +12,7 @@
 # RootModule = ''
 
 # Version number of this module.
-ModuleVersion = '3.0.0.0'
+ModuleVersion = '3.1.0.0'
 
 # ID used to uniquely identify this module
 GUID = '6c1176a0-4fac-4134-8ca2-3fa8a21a7b90'
@@ -129,78 +129,38 @@ PrivateData = @{
         # ReleaseNotes of this module
         ReleaseNotes = "
       * Changes to SharePointDsc
-        * Added support for SharePoint 2019
-        * Added CredSSP requirement to the Readme files
-        * Added VSCode Support for running SharePoint 2019 unit tests
-        * Removed the deprecated resources SPCreateFarm and SPJoinFarm (replaced
-          in v2.0 by SPFarm)
-      * SPBlobCacheSettings
-        * Updated the Service Instance retrieval to be language independent
-      * SPConfigWizard
-        * Fixed check for Ensure=Absent in the Set method
+        * Updated LICENSE file to match the Microsoft Open Source Team standard.
+      * ProjectServerConnector
+        * Added a file hash validation check to prevent the ability to load custom code
+          into the module.
+      * SPFarm
+        * Fixed localization issue where TypeName was in the local language.
       * SPInstallPrereqs
-        * Added support for detecting updated installation of Microsoft Visual C++
-          2015/2017 Redistributable (x64) for SharePoint 2016 and SharePoint 2019.
+        * Updated links in the Readme.md file to docs.microsoft.com.
+        * Fixed required prereqs for SharePoint 2019, added MSVCRT11.
+      * SPManagedMetadataServiceApp
+        * Fixed issue where Get-TargetResource method throws an error when the
+          service app proxy does not exist.
       * SPSearchContentSource
-        * Added support for Business Content Source Type
-      * SPSearchMetadataCategory
-        * New resource added
+        * Corrected issue where the New-SPEnterpriseSearchCrawlContentSource cmdlet
+          was called twice.
       * SPSearchServiceApp
-        * Updated resource to make sure the presence of the service app proxy is
-          checked and created if it does not exist
-      * SPSecurityTokenServiceConfig
-        * The resource only tested for the Ensure parameter. Added more parameters
-        * SPServiceAppSecurity
-        * Added support for specifying array of access levels.
-        * Changed implementation to use Grant-SPObjectSecurity with Replace switch
-          instead of using a combination of Revoke-SPObjectSecurity and
-          Grant-SPObjectSecurity
-        * Added all supported access levels as available values.
-        * Removed unknown access levels: Change Permissions, Write, and Read
-      * SPUserProfileProperty
-        * Removed obsolete parameters (MappingConnectionName, MappingPropertyName,
-          MappingDirection) and introduced new parameter PropertyMappings
+        * Fixed issue where Get-TargetResource method throws an error when the
+          service application pool does not exist.
+        * Implemented check to make sure cmdlets are only executed when it actually
+          has something to update.
+        * Deprecated WindowsServiceAccount parameter and moved functionality to
+          new resource (SPSearchServiceSettings).
+      * SPSearchServiceSettings
+        * Added new resource to configure search service settings.
+      * SPServiceAppSecurity
+        * Fixed unavailable utility method (ExpandAccessLevel).
+        * Updated the schema to no longer specify username as key for the sub class.
       * SPUserProfileServiceApp
-        * Updated the check for successful creation of the service app to throw an
-          error if this is not done correctly
-
-      The following changes will break v2.x and earlier configurations that use these
-      resources:
-
-      * Implemented IsSingleInstance parameter to force that the resource can only
-        be used once in a configuration for the following resources:
-        * SPAntivirusSettings
-        * SPConfigWizard
-        * SPDiagnosticLoggingSettings
-        * SPFarm
-        * SPFarmAdministrators
-        * SPInfoPathFormsServiceConfig
-        * SPInstall
-        * SPInstallPrereqs
-        * SPIrmSettings
-        * SPMinRoleCompliance
-        * SPPasswordChangeSettings
-        * SPProjectServerLicense
-        * SPSecurityTokenServiceConfig
-        * SPShellAdmin
-      * Standardized Url/WebApplication parameter to default WebAppUrl parameter
-        for the following resources:
-        * SPDesignerSettings
-        * SPFarmSolution
-        * SPSelfServiceSiteCreation
-        * SPWebAppBlockedFileTypes
-        * SPWebAppClientCallableSettings
-        * SPWebAppGeneralSettings
-        * SPWebApplication
-        * SPWebApplicationAppDomain
-        * SPWebAppSiteUseAndDeletion
-        * SPWebAppThrottlingSettings
-        * SPWebAppWorkflowSettings
-      * Introduced new mandatory parameters
-        * SPSearchResultSource: Added option to create Result Sources at different scopes.
-        * SPServiceAppSecurity: Changed parameter AccessLevel to AccessLevels in
-          MSFT_SPServiceAppSecurityEntry to support array of access levels.
-        * SPUserProfileProperty: New parameter PropertyMappings
+        * Fixed issue where localized versions of Windows and SharePoint would throw
+          an error.
+      * SPUserProfileSyncConnection
+        * Corrected implementation of Ensure parameter.
       "
     } # End of PSData hashtable
 

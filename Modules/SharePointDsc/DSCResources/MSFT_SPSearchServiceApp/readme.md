@@ -13,3 +13,7 @@ the admin database which matches the name, and then
 
 The default value for the Ensure parameter is Present. When not specifying this
 parameter, the service application is provisioned.
+
+NOTE: The WindowsServiceAccount parameter is deprecated and no longer does
+anything. The functionality for changing this account has been moved to
+SPSearchServiceSettings.

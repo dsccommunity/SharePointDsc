@@ -19,7 +19,7 @@ function Get-SPDscProjectServerGlobalPermissionId
     {
         $errorString = ""
         [Microsoft.Office.Project.Server.Library.PSSecurityGlobalPermission] `
-          | Get-Member -Static -MemberType Property | ForEach-Object -Process { 
+          | Get-Member -Static -MemberType Property | ForEach-Object -Process {
                 if ($errorString -eq "")
                 {
                     $errorString += "$($_.Name)"
@@ -31,7 +31,7 @@ function Get-SPDscProjectServerGlobalPermissionId
         }
         throw "Unable to find permission '$PermissionName' - acceptable values are: $errorString"
     }
-    
+
     return $result
 }
 
@@ -109,7 +109,7 @@ function Get-SPDscProjectServerResourceId
                                         $ResourceName
                                       )
         $filter.Criteria = $nameFieldFilter
-        
+
         $filterXml = $filter.GetXml()
 
         $resourceDs = $resourceService.ReadResources($filterXml, $false)
@@ -123,7 +123,7 @@ function Get-SPDscProjectServerResourceId
             }
             if ($null -eq $script:SPDscReturnVal)
             {
-                throw "Resource '$ResourceName' not found"    
+                throw "Resource '$ResourceName' not found"
             }
         }
         else
@@ -170,10 +170,10 @@ function New-SPDscProjectServerWebService
 
         [Parameter(Mandatory = $true)]
         [System.String]
-        [ValidateSet("Admin", "Archive", "Calendar", "CubeAdmin", "CustomFields", 
-                     "Driver", "Events", "LookupTable", "Notifications", "ObjectLinkProvider", 
-                     "PortfolioAnalyses", "Project", "QueueSystem", "ResourcePlan", "Resource", 
-                     "Security", "Statusing", "TimeSheet", "Workflow", "WssInterop")] 
+        [ValidateSet("Admin", "Archive", "Calendar", "CubeAdmin", "CustomFields",
+                     "Driver", "Events", "LookupTable", "Notifications", "ObjectLinkProvider",
+                     "PortfolioAnalyses", "Project", "QueueSystem", "ResourcePlan", "Resource",
+                     "Security", "Statusing", "TimeSheet", "Workflow", "WssInterop")]
         $EndpointName,
 
         [Parameter()]
@@ -183,19 +183,26 @@ function New-SPDscProjectServerWebService
 
     [System.Reflection.Assembly]::LoadWithPartialName("System.ServiceModel") | Out-Null
     $psDllPath = Join-Path -Path $PSScriptRoot -ChildPath "ProjectServerServices.dll"
+
+    $filehash = "44CC60C2227011D08F36A7954C317195C0A44F3D52D51B0F54009AA03EF97E1B2F80A162D76F177E70D1756E42484DF367FACB25920C2C93FB8DFB8A8F5F08A5"
+    if ($filehash -ne (Get-FileHash -Path $psDllPath -Algorithm SHA512).Hash)
+    {
+        throw ("The hash for ProjectServerServices.dll isn't the expected value. Please make " + `
+               "sure the correct file exists on the file system.")
+    }
     $bytes = [System.IO.File]::ReadAllBytes($psDllPath)
     [System.Reflection.Assembly]::Load($bytes) | Out-Null
 
     $maxSize = 500000000
     $svcRouter = "_vti_bin/PSI/ProjectServer.svc"
     $pwaUri = New-Object -TypeName "System.Uri" -ArgumentList $pwaUrl
-    
+
     if ($pwaUri.Scheme -eq [System.Uri]::UriSchemeHttps)
     {
         $binding = New-Object -TypeName "System.ServiceModel.BasicHttpBinding" `
                               -ArgumentList ([System.ServiceModel.BasicHttpSecurityMode]::Transport)
     }
-    else 
+    else
     {
         $binding = New-Object -TypeName "System.ServiceModel.BasicHttpBinding" `
                               -ArgumentList ([System.ServiceModel.BasicHttpSecurityMode]::TransportCredentialOnly)
@@ -206,22 +213,22 @@ function New-SPDscProjectServerWebService
     $binding.ReaderQuotas.MaxNameTableCharCount = $maxSize
     $binding.MessageEncoding = [System.ServiceModel.WSMessageEncoding]::Text
 
-    if ($UseKerberos.IsPresent -eq $false) 
-    { 
-        $binding.Security.Transport.ClientCredentialType = [System.ServiceModel.HttpClientCredentialType]::Ntlm 
-    } 
-    else 
-    { 
+    if ($UseKerberos.IsPresent -eq $false)
+    {
+        $binding.Security.Transport.ClientCredentialType = [System.ServiceModel.HttpClientCredentialType]::Ntlm
+    }
+    else
+    {
         $binding.Security.Transport.ClientCredentialType = [System.ServiceModel.HttpClientCredentialType]::Windows
     }
-    
+
     if ($pwaUrl.EndsWith('/') -eq $false)
     {
         $pwaUrl = $pwaUrl + "/"
     }
     $address = New-Object -TypeName "System.ServiceModel.EndpointAddress" `
                           -ArgumentList ($pwaUrl + $svcRouter)
-    
+
     $webService = New-Object -TypeName "Svc$($EndpointName).$($EndpointName)Client" `
                              -ArgumentList @($binding, $address)
 
@@ -235,14 +242,14 @@ function Use-SPDscProjectServerWebService
     param
     (
         [Parameter(Mandatory = $true)]
-        [System.IDisposable] 
+        [System.IDisposable]
         $Service,
-        
+
         [Parameter(Mandatory = $true)]
-        [ScriptBlock] 
+        [ScriptBlock]
         $ScriptBlock
     )
- 
+
     try
     {
         Invoke-Command -ScriptBlock $ScriptBlock

@@ -13,5 +13,6 @@ class MSFT_SPUserProfileSyncConnection : OMI_BaseResource
     [Write, Description("Should disabled accounts be filtered")] boolean UseDisabledFilter;
     [Write, Description("Set to true to run the set method on every call to this resource")] boolean Force;
     [Write, Description("The type of the connection - currently only Active Directory is supported"), ValueMap{"ActiveDirectory","BusinessDataCatalog"}, Values{"ActiveDirectory","BusinessDataCatalog"}] string ConnectionType;
+    [Write, Description("Present if the connection should exist, absent if it should not"), ValueMap{"Present","Absent"}, Values{"Present","Absent"}] string Ensure;
     [Write, Description("POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5"), EmbeddedInstance("MSFT_Credential")] string InstallAccount;
 };

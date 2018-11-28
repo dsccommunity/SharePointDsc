@@ -104,7 +104,8 @@ function Get-TargetResource
                 }
             }
 
-            $proxy = Get-SPMetadataServiceApplicationProxy -Identity $proxyName
+            $proxy = Get-SPMetadataServiceApplicationProxy -Identity $proxyName `
+                                                           -ErrorAction SilentlyContinue
             if ($null -ne $proxy)
             {
                 $contentTypePushDownEnabled = $proxy.Properties["IsContentTypePushdownEnabled"]
