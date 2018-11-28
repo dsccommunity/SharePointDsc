@@ -45,12 +45,13 @@
     The SharePoint prerequisites can be downloaded from the following locations:
     
     SharePoint 2013:
-    https://technet.microsoft.com/library/a88d3f72-7ac3-4f08-b302-c4ca0a796268%28v=office.16%29.aspx?#section5
+    https://docs.microsoft.com/en-us/SharePoint/install/hardware-and-software-requirements-0#section5
     
     SharePoint 2016:
-    https://technet.microsoft.com/en-us/library/cc262485(v=office.16).aspx#section5
+    https://docs.microsoft.com/en-us/SharePoint/install/hardware-and-software-requirements#section5
     
     SharePoint 2019:
+    https://docs.microsoft.com/en-us/sharepoint/install/hardware-and-software-requirements-2019#links-to-applicable-software
     
 .PARAMETER IsSingleInstance
     Key - String

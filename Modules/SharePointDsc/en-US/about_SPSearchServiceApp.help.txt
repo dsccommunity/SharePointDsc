@@ -17,6 +17,10 @@
     The default value for the Ensure parameter is Present. When not specifying this
     parameter, the service application is provisioned.
     
+    NOTE: The WindowsServiceAccount parameter is deprecated and no longer does
+    anything. The functionality for changing this account has been moved to
+    SPSearchServiceSettings.
+    
 .PARAMETER Name
     Key - string
     The name of the search service application
@@ -56,7 +60,7 @@
 
 .PARAMETER WindowsServiceAccount
     Write - string
-    Sets the windows services for search to run as this account
+    This setting is moved to SPSearchServiceSettings and deprecated here.
 
 .PARAMETER InstallAccount
     Write - String

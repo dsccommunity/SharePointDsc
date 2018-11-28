@@ -60,6 +60,11 @@
     Allowed values: ActiveDirectory, BusinessDataCatalog
     The type of the connection - currently only Active Directory is supported
 
+.PARAMETER Ensure
+    Write - string
+    Allowed values: Present, Absent
+    Present if the connection should exist, absent if it should not
+
 .PARAMETER InstallAccount
     Write - string
     POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5
