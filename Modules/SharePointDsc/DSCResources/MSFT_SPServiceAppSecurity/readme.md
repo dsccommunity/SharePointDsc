@@ -69,6 +69,7 @@ will include all other permissions. It is not required to specify all
 available permissions if Full Control is specified.
 
 ## Script
+
 ```
 $serviceApp = Get-SPServiceApplication -Name "ServiceAppName"
 

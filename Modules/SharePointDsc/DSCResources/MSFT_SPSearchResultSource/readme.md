@@ -26,6 +26,7 @@ To define a result source as global, use the value 'SSA' as the ScopeName
 value.
 
 ## Script
+
 ```
 $serviceApp = Get-SPEnterpriseSearchServiceApplication -Identity "SearchServiceAppName"
 
