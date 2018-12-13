@@ -282,10 +282,12 @@ function Set-TargetResource
 
         if ($null -eq $site)
         {
+            Write-Verbose -Message ("Starting New-SPSite with the following parameters: " + `
+                                    "$(Convert-SPDscHashtableToString $params)")
             $site = New-SPSite @params
             if ($CreateDefaultGroups -eq $true)
             {
-                $doCreateDefaultGroups = $true;
+                $doCreateDefaultGroups = $true
 
             }
             else
@@ -335,6 +337,8 @@ function Set-TargetResource
             if ($newParams.Count -gt 1)
             {
                 Write-Verbose -Message "Updating existing site collection"
+                Write-Verbose -Message ("Starting Set-SPSite with the following parameters: " + `
+                                        "$(Convert-SPDscHashtableToString $newParams)")
                 Set-SPSite @newParams
             }
 
@@ -342,7 +346,7 @@ function Set-TargetResource
             {
                 if ($CreateDefaultGroups -eq $true)
                 {
-                    $doCreateDefaultGroups = $true;
+                    $doCreateDefaultGroups = $true
                 }
                 else
                 {
@@ -362,7 +366,7 @@ function Set-TargetResource
 
             if($null -eq $systemAccountSite.SecondaryContact)
             {
-                $secondaryOwnerLogin = $null;
+                $secondaryOwnerLogin = $null
             }
             else
             {
@@ -463,10 +467,10 @@ function Test-TargetResource
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
                                     -DesiredValues $PSBoundParameters `
                                     -ValuesToCheck @("Url",
-                                                        "QuotaTemplate",
-                                                        "OwnerAlias",
-                                                        "SecondaryOwnerAlias",
-                                                        "AdministrationSiteType")
+                                                     "QuotaTemplate",
+                                                     "OwnerAlias",
+                                                     "SecondaryOwnerAlias",
+                                                     "AdministrationSiteType")
 }
 
 Export-ModuleMember -Function *-TargetResource

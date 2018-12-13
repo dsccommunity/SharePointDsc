@@ -46,30 +46,42 @@ catch {
             return @{}
         }
 
-        $Global:SPDscResultSourceProvicers = @(
+        $Global:SPDscResultSourceProviders = @(
             @{
-                Id = "c1e2843d-1825-4a37-ad15-dce5d50f46d2"
-                Name = "Exchange Search Provider"
+                "Exchange Search Provider" = @{
+                    Id = "c1e2843d-1825-4a37-ad15-dce5d50f46d2"
+                    Name = "Exchange Search Provider"
+                }
             },
             @{
-                Id = "5acc53f4-64b1-4f5d-ad16-7e9ab7372f93"
-                Name = "Local People Provider"
+                "Local People Provider" = @{
+                    Id = "5acc53f4-64b1-4f5d-ad16-7e9ab7372f93"
+                    Name = "Local People Provider"
+                }
             },
             @{
-                Id = "2d443d0a-61ba-472d-9964-ef27b14c8a07"
-                Name = "Local SharePoint Provider"
+                "Local SharePoint Provider" = @{
+                    Id = "2d443d0a-61ba-472d-9964-ef27b14c8a07"
+                    Name = "Local SharePoint Provider"
+                }
             },
             @{
-                Id = "eec636ac-013c-4dea-b794-dadcb4136dfe"
-                Name = "OpenSearch Provider"
+                "OpenSearch Provider" = @{
+                    Id = "eec636ac-013c-4dea-b794-dadcb4136dfe"
+                    Name = "OpenSearch Provider"
+                }
             },
             @{
-                Id = "bb76bb0b-035d-4981-86ae-bd9587f3b0e4"
-                Name = "Remote People Provider"
+                "Remote People Provider" = @{
+                    Id = "bb76bb0b-035d-4981-86ae-bd9587f3b0e4"
+                    Name = "Remote People Provider"
+                }
             },
             @{
-                Id = "f7a3db86-fb85-40e4-a178-7ad85c732ba6"
-                Name = "Remote SharePoint Provider"
+                "Remote SharePoint Provider" = @{
+                    Id = "f7a3db86-fb85-40e4-a178-7ad85c732ba6"
+                    Name = "Remote SharePoint Provider"
+                }
             }
         )
 
@@ -301,6 +313,34 @@ catch {
 
             It "Should create the result source in the set method" {
                 Set-TargetResource @testParams
+            }
+        }
+
+        Context -Name "The specified ProviderType doesn't exist" -Fixture {
+            $testParams = @{
+                Name = "New source"
+                ScopeName = "SSA"
+                ScopeUrl = "Global"
+                SearchServiceAppName = "Search Service Application"
+                ProviderType = "DoesNotExist"
+                Query = "{searchTerms}"
+                ConnectionUrl = "https://sharepoint.contoso.com"
+                Ensure = "Present"
+            }
+
+            $Global:SPDscCurrentResultSourceMocks = $null
+            $Global:SPDscResultSourceProviders = @()
+
+            It "Should return absent from the get method" {
+                (Get-TargetResource @testParams).Ensure | Should Be "Absent"
+            }
+
+            It "Should return false from the test method" {
+                Test-TargetResource @testParams | Should Be $false
+            }
+
+            It "Should create the result source in the set method" {
+                { Set-TargetResource @testParams } | Should Throw "Unknown ProviderType"
             }
         }
     }

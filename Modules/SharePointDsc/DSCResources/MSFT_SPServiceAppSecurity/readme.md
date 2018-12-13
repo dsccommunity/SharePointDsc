@@ -22,6 +22,13 @@ as the username. The token is case sensitive.
 
 ## Permission overview
 
+> **Important**
+> When using localized versions of Windows and/or SharePoint, it is possible
+> that permissions levels are also in the local language. In that case, use
+> the localized permissions levels. All possible values can be retrieved using
+> the script at the bottom of this page. The below permissions are the English
+> versions.
+
 Available permissions for Administrators are Full Control except for these
 service applications:
 
@@ -60,3 +67,14 @@ NOTE:
 Multiple permissions can be specified for each principal. Full Control
 will include all other permissions. It is not required to specify all
 available permissions if Full Control is specified.
+
+## Script
+```
+$serviceApp = Get-SPServiceApplication -Name "ServiceAppName"
+
+$perms = Get-SPServiceApplicationSecurity -Identity $serviceApp
+$perms.NamedAccessRights.Name
+
+$perms = Get-SPServiceApplicationSecurity  -Identity $serviceApp -Admin
+$perms.NamedAccessRights.Name
+```

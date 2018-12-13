@@ -1,5 +1,18 @@
 # Change log for SharePointDsc
 
+## Unreleased
+
+* SPFarm
+  * Improved logging
+* SPInstallPrereqs
+  * Improved logging
+* SPSearchResultSource
+  * Updated resource to allow localized ProviderTypes
+* SPServiceAppSecurity
+  * Updated resource to allow localized permission levels
+* SPSite
+  * Improved logging
+
 ## v3.1
 
 * Changes to SharePointDsc

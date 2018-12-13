@@ -372,6 +372,8 @@ function Set-TargetResource
 
     if ($CurrentValues.Ensure -eq "Present")
     {
+        Write-Verbose -Message "Server already part of farm, updating settings"
+
         if ($CurrentValues.RunCentralAdmin -ne $RunCentralAdmin)
         {
             Invoke-SPDSCCommand -Credential $InstallAccount `
@@ -382,6 +384,7 @@ function Set-TargetResource
                 # Provision central administration
                 if ($params.RunCentralAdmin -eq $true)
                 {
+                    Write-Verbose -Message "RunCentralAdmin set to true, provisioning Central Admin"
                     $serviceInstance = Get-SPServiceInstance -Server $env:COMPUTERNAME
                     if ($null -eq $serviceInstance)
                     {
@@ -406,7 +409,7 @@ function Set-TargetResource
                 }
                 else
                 {
-                    # Unprovision central administration
+                    Write-Verbose -Message "RunCentralAdmin set to false, unprovisioning Central Admin"
                     $serviceInstance = Get-SPServiceInstance -Server $env:COMPUTERNAME
                     if ($null -eq $serviceInstance)
                     {
@@ -438,6 +441,7 @@ function Set-TargetResource
                                 -ScriptBlock {
                 $params = $args[0]
 
+                Write-Verbose -Message "Updating Central Admin port"
                 Set-SPCentralAdministration -Port $params.CentralAdministrationPort
             }
         }
@@ -445,6 +449,8 @@ function Set-TargetResource
     }
     else
     {
+        Write-Verbose -Message "Server not part of farm, creating or joining farm"
+
         $actionResult = Invoke-SPDSCCommand -Credential $InstallAccount `
                                             -Arguments @($PSBoundParameters, $PSScriptRoot) `
                                             -ScriptBlock {
@@ -477,7 +483,6 @@ function Set-TargetResource
             if ($dbStatus.ValidPermissions -eq $false)
             {
                 throw "The current user does not have sufficient permissions to SQL Server"
-                return
             }
 
             $executeArgs = @{
@@ -561,8 +566,7 @@ function Set-TargetResource
             $farmAction = ""
             if ($createFarm -eq $false)
             {
-                # The database exists, so attempt to join the farm to the server
-
+                Write-Verbose -Message "The database exists, so attempt to join the server to the farm"
 
                 # Remove the server role optional attribute as it is only used when creating
                 # a new farm
@@ -607,6 +611,10 @@ function Set-TargetResource
             }
             else
             {
+                Write-Verbose -Message "The database does not exist, so create a new farm"
+
+                Write-Verbose -Message ("Creating Lock database to prevent two servers creating " + `
+                                        "the same farm")
                 Add-SPDscConfigDBLock -SQLServer $params.DatabaseServer `
                                     -Database $params.FarmConfigDatabaseName
 
@@ -617,26 +625,36 @@ function Set-TargetResource
                         AdministrationContentDatabaseName = $params.AdminContentDatabaseName
                     }
 
+                    Write-Verbose -Message "Creating new Config database"
                     New-SPConfigurationDatabase @executeArgs
 
                     $farmAction = "CreatedFarm"
                 }
                 finally
                 {
+                    Write-Verbose -Message "Removing Lock database"
                     Remove-SPDscConfigDBLock -SQLServer $params.DatabaseServer `
                                             -Database $params.FarmConfigDatabaseName
                 }
             }
 
             # Run common tasks for a new server
+            Write-Verbose -Message "Starting Install-SPHelpCollection"
             Install-SPHelpCollection -All | Out-Null
+
+            Write-Verbose -Message "Starting Initialize-SPResourceSecurity"
             Initialize-SPResourceSecurity | Out-Null
+
+            Write-Verbose -Message "Starting Install-SPService"
             Install-SPService | Out-Null
+
+            Write-Verbose -Message "Starting Install-SPFeature"
             Install-SPFeature -AllExistingFeatures -Force | Out-Null
 
             # Provision central administration
             if ($params.RunCentralAdmin -eq $true)
             {
+                Write-Verbose -Message "RunCentralAdmin is True, provisioning Central Admin"
                 $centralAdminSite = Get-SPWebApplication -IncludeCentralAdministration `
                                     | Where-Object -FilterScript {
                                         $_.IsAdministrationWebApplication -eq $true
@@ -680,6 +698,7 @@ function Set-TargetResource
                 }
             }
 
+            Write-Verbose -Message "Starting Install-SPApplicationContent"
             Install-SPApplicationContent | Out-Null
 
             return $farmAction
