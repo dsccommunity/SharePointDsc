@@ -70,7 +70,7 @@ available permissions if Full Control is specified.
 
 ## Script
 
-```
+``` PowerShell
 $serviceApp = Get-SPServiceApplication -Name "ServiceAppName"
 
 $perms = Get-SPServiceApplicationSecurity -Identity $serviceApp

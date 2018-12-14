@@ -27,7 +27,7 @@ value.
 
 ## Script
 
-```
+``` PowerShell
 $serviceApp = Get-SPEnterpriseSearchServiceApplication -Identity "SearchServiceAppName"
 
 $fedManager = New-Object Microsoft.Office.Server.Search.Administration.Query.FederationManager($serviceApp)

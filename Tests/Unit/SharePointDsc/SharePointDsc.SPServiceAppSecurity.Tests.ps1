@@ -135,11 +135,60 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
         }
 
-        Context -Name "A specified access level does not match the allowed list of (localized) access levels" -Fixture {
+        Context -Name "A specified access level does not match the allowed list of (localized) access levels (Members)" -Fixture {
             $testParams = @{
                 ServiceAppName = "Example Service App"
                 SecurityType = "SharingPermissions"
                 Members = @(
+                    (New-CimInstance -ClassName "MSFT_SPSearchServiceAppSecurityEntry" `
+                                     -ClientOnly `
+                                     -Property @{
+                                                   Username = "CONTOSO\user1"
+                                                   AccessLevels = "Read"
+                                               }),
+                    (New-CimInstance -ClassName "MSFT_SPSearchServiceAppSecurityEntry" `
+                                     -ClientOnly `
+                                     -Property @{
+                                                   Username = "CONTOSO\user2"
+                                                   AccessLevels = "Full Control"
+                                               })
+                )
+            }
+
+            Mock -CommandName Get-SPServiceApplication -MockWith {
+                return @{
+                    Name = $testParams.ServiceAppName
+                }
+            }
+
+            Mock -CommandName Get-SPServiceApplicationSecurity -MockWith {
+                return @{
+                    NamedAccessRights = @(
+                        @{
+                            Name = "Full Control"
+                        }
+                    )
+                }
+            }
+
+            It "Should return en empty ServiceAppName from the get method" {
+                (Get-TargetResource @testParams).ServiceAppName | Should Be ""
+            }
+
+            It "Should return False from the test method" {
+                Test-TargetResource @testParams | Should Be $false
+            }
+
+            It "Should throw an exception in the set method" {
+                { Set-TargetResource @testParams } | Should Throw "Unknown AccessLevel is used"
+            }
+        }
+
+        Context -Name "A specified access level does not match the allowed list of (localized) access levels (MembersToInclude)" -Fixture {
+            $testParams = @{
+                ServiceAppName = "Example Service App"
+                SecurityType = "SharingPermissions"
+                MembersToInclude = @(
                     (New-CimInstance -ClassName "MSFT_SPSearchServiceAppSecurityEntry" `
                                      -ClientOnly `
                                      -Property @{

@@ -308,22 +308,6 @@ function Set-TargetResource
             }
         }
 
-        if ($params.ContainsKey("MembersToExclude") -eq $true)
-        {
-            Write-Verbose -Message "Checking AccessLevels in MembersToExclude parameter"
-            foreach($member in $params.MembersToExclude)
-            {
-                foreach ($accessLevel in $member.AccessLevels)
-                {
-                    if ($availablePerms -notcontains $accessLevel)
-                    {
-                        throw ("Unknown AccessLevel is used ($accessLevel). Allowed values are " + `
-                               "'" + ($availablePerms -join "', '") + "'")
-                    }
-                }
-            }
-        }
-
         switch ($params.SecurityType)
         {
             "Administrators" {
