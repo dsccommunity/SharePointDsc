@@ -246,9 +246,17 @@ function Set-TargetResource
 
                 Add-SPDistributedCacheServiceInstance
 
-                Get-SPServiceInstance | Where-Object -FilterScript {
-                    $_.GetType().Name -eq "SPDistributedCacheServiceInstance"
-                } | Stop-SPServiceInstance -Confirm:$false
+                try
+                {
+                    Get-SPServiceInstance | Where-Object -FilterScript {
+                        $_.GetType().Name -eq "SPDistributedCacheServiceInstance"
+                    } | Stop-SPServiceInstance -Confirm:$false
+                }
+                catch
+                {
+                    # In SharePoint 2019, Stop-SPServiceInstance throws an exception if service
+                    # is not running on the server, try/catch handles this scenario
+                }
 
                 $count = 0
                 $maxCount = 30
