@@ -49,14 +49,92 @@ function Get-TargetResource
                                   -ScriptBlock {
         $params = $args[0]
 
+        Write-Verbose -Message "Getting Service Application $($params.ServiceAppName)"
         $serviceApp = Get-SPServiceApplication -Name $params.ServiceAppName
+
+        $nullReturn =  @{
+            ServiceAppName = ""
+            SecurityType = $params.SecurityType
+            InstallAccount = $params.InstallAccount
+        }
 
         if ($null -eq $serviceApp)
         {
-            return @{
-                ServiceAppName = ""
-                SecurityType = $params.SecurityType
-                InstallAccount = $params.InstallAccount
+            return $nullReturn
+        }
+
+        Write-Verbose -Message "Checking if valid AccessLevels are used"
+        Write-Verbose -Message "Retrieving all available localized AccessLevels"
+        $availablePerms = New-Object System.Collections.ArrayList
+        $appSecurity = Get-SPServiceApplicationSecurity -Identity $serviceApp
+        foreach ($right in $appSecurity.NamedAccessRights)
+        {
+            if (-not $availablePerms.Contains($right.Name))
+            {
+                $availablePerms.Add($right.Name) | Out-Null
+            }
+        }
+
+        $appSecurity = Get-SPServiceApplicationSecurity -Identity $serviceApp -Admin
+        foreach ($right in $appSecurity.NamedAccessRights)
+        {
+            if (-not $availablePerms.Contains($right.Name))
+            {
+                $availablePerms.Add($right.Name) | Out-Null
+            }
+        }
+
+        if ($params.ContainsKey("Members") -eq $true)
+        {
+            Write-Verbose -Message "Checking AccessLevels in Members parameter"
+            foreach($member in $params.Members)
+            {
+                foreach ($accessLevel in $member.AccessLevels)
+                {
+                    if ($availablePerms -notcontains $accessLevel)
+                    {
+                        Write-Verbose -Message ("Unknown AccessLevel is used ($accessLevel). " + `
+                                                "Allowed values are '" + `
+                                                ($availablePerms -join "', '") + "'")
+                        return $nullReturn
+                    }
+                }
+            }
+        }
+
+        if ($params.ContainsKey("MembersToInclude") -eq $true)
+        {
+            Write-Verbose -Message "Checking AccessLevels in MembersToInclude parameter"
+            foreach($member in $params.MembersToInclude)
+            {
+                foreach ($accessLevel in $member.AccessLevels)
+                {
+                    if ($availablePerms -notcontains $accessLevel)
+                    {
+                        Write-Verbose -Message ("Unknown AccessLevel is used ($accessLevel). " + `
+                                                "Allowed values are '" + `
+                                                ($availablePerms -join "', '") + "'")
+                        return $nullReturn
+                    }
+                }
+            }
+        }
+
+        if ($params.ContainsKey("MembersToExclude") -eq $true)
+        {
+            Write-Verbose -Message "Checking AccessLevels in MembersToExclude parameter"
+            foreach($member in $params.MembersToExclude)
+            {
+                foreach ($accessLevel in $member.AccessLevels)
+                {
+                    if ($availablePerms -notcontains $accessLevel)
+                    {
+                        Write-Verbose -Message ("Unknown AccessLevel is used ($accessLevel). " + `
+                                                "Allowed values are '" + `
+                                                ($availablePerms -join "', '") + "'")
+                        return $nullReturn
+                    }
+                }
             }
         }
 
@@ -165,11 +243,6 @@ function Set-TargetResource
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
-    if ([System.String]::IsNullOrEmpty($CurrentValues.ServiceAppName) -eq $true)
-    {
-        throw "Unable to locate service application $ServiceAppName"
-    }
-
     Invoke-SPDSCCommand -Credential $InstallAccount `
                         -Arguments @($PSBoundParameters, $CurrentValues) `
                         -ScriptBlock {
@@ -177,6 +250,64 @@ function Set-TargetResource
         $CurrentValues = $args[1]
 
         $serviceApp = Get-SPServiceApplication -Name $params.ServiceAppName
+        if ($null -eq $serviceApp)
+        {
+            throw "Unable to locate service application $($params.ServiceAppName)"
+        }
+
+        Write-Verbose -Message "Checking if valid AccessLevels are used"
+        Write-Verbose -Message "Retrieving all available localized AccessLevels"
+        $availablePerms = New-Object System.Collections.ArrayList
+        $appSecurity = Get-SPServiceApplicationSecurity -Identity $serviceApp
+        foreach ($right in $appSecurity.NamedAccessRights)
+        {
+            if (-not $availablePerms.Contains($right.Name))
+            {
+                $availablePerms.Add($right.Name) | Out-Null
+            }
+        }
+
+        $appSecurity = Get-SPServiceApplicationSecurity -Identity $serviceApp -Admin
+        foreach ($right in $appSecurity.NamedAccessRights)
+        {
+            if (-not $availablePerms.Contains($right.Name))
+            {
+                $availablePerms.Add($right.Name) | Out-Null
+            }
+        }
+
+        if ($params.ContainsKey("Members") -eq $true)
+        {
+            Write-Verbose -Message "Checking AccessLevels in Members parameter"
+            foreach($member in $params.Members)
+            {
+                foreach ($accessLevel in $member.AccessLevels)
+                {
+                    if ($availablePerms -notcontains $accessLevel)
+                    {
+                        throw ("Unknown AccessLevel is used ($accessLevel). Allowed values are " + `
+                               "'" + ($availablePerms -join "', '") + "'")
+                    }
+                }
+            }
+        }
+
+        if ($params.ContainsKey("MembersToInclude") -eq $true)
+        {
+            Write-Verbose -Message "Checking AccessLevels in MembersToInclude parameter"
+            foreach($member in $params.MembersToInclude)
+            {
+                foreach ($accessLevel in $member.AccessLevels)
+                {
+                    if ($availablePerms -notcontains $accessLevel)
+                    {
+                        throw ("Unknown AccessLevel is used ($accessLevel). Allowed values are " + `
+                               "'" + ($availablePerms -join "', '") + "'")
+                    }
+                }
+            }
+        }
+
         switch ($params.SecurityType)
         {
             "Administrators" {
@@ -391,9 +522,9 @@ function Test-TargetResource
     $result = Invoke-SPDSCCommand -Credential $InstallAccount `
                         -Arguments @($PSBoundParameters, $CurrentValues, $PSScriptRoot) `
                         -ScriptBlock {
-        $params = $args[0]
+        $params        = $args[0]
         $CurrentValues = $args[1]
-        $ScriptRoot = $args[2]
+        $ScriptRoot    = $args[2]
 
         $relPath = "..\..\Modules\SharePointDsc.ServiceAppSecurity\SPServiceAppSecurity.psm1"
         Import-Module (Join-Path -Path $ScriptRoot -ChildPath $relPath -Resolve)

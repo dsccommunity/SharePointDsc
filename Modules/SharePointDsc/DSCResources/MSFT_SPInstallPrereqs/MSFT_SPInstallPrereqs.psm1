@@ -534,9 +534,39 @@ function Set-TargetResource
     $majorVersion = Get-SPDSCAssemblyVersion -PathToAssembly $InstallerPath
     $buildVersion = (Get-SPDSCBuildVersion -PathToAssembly $InstallerPath)
     $osVersion = Get-SPDscOSVersion
+    switch ($osVersion.Major)
+    {
+        6 {
+            switch ($osVersion.Minor) {
+                0 {
+                    Write-Verbose -Message "Operating System: Windows Server 2008"
+                }
+                1 {
+                    Write-Verbose -Message "Operating System: Windows Server 2008 R2"
+                }
+                2 {
+                    Write-Verbose -Message "Operating System: Windows Server 2012"
+                }
+                3 {
+                    Write-Verbose -Message "Operating System: Windows Server 2012 R2"
+                }
+            }
+        }
+        10 {
+            Write-Verbose -Message "Operating System: Windows Server 2016"
+        }
+        11 {
+            Write-Verbose -Message "Operating System: Windows Server 2019"
+        }
+    }
 
     if ($majorVersion -eq 15)
     {
+        if ($osVersion.Major -ne 6)
+        {
+            throw "SharePoint 2013 only supports Windows Server 2012 R2 and below"
+        }
+
         $BinaryDir = Split-Path -Path $InstallerPath
         $svrsetupDll = Join-Path -Path $BinaryDir -ChildPath "updates\svrsetup.dll"
         $checkDotNet = $true
@@ -572,7 +602,6 @@ function Set-TargetResource
                 throw [Exception] ("A known issue prevents installation of SharePoint 2013 on " + `
                                    "servers that have .NET 4.6 already installed. See details " + `
                                    "at https://support.microsoft.com/en-us/kb/3087184")
-                return
             }
         }
 
@@ -583,7 +612,7 @@ function Set-TargetResource
     }
     elseif ($majorVersion -eq 16)
     {
-        if($buildVersion -lt 5000)
+        if ($buildVersion -lt 5000)
         {
             Write-Verbose -Message "Version: SharePoint 2016"
             $requiredParams = @("SQLNCli","Sync","AppFabric","IDFX11","MSIPCClient","KB3092423",
@@ -604,7 +633,7 @@ function Set-TargetResource
             }
         }
         # SharePoint 2019
-        elseif($buildVersion -ge 5000)
+        elseif ($buildVersion -ge 5000)
         {
             Write-Verbose -Message "Version: SharePoint 2019"
             $requiredParams = @("SQLNCli","Sync","AppFabric","IDFX11","MSIPCClient","KB3092423",

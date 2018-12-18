@@ -14,8 +14,23 @@ following provider types:
 * Remote People Provider
 * Remote SharePoint Provider
 
+> **Important:**
+> The above provider types are specific to the used localized version of SharePoint.
+> Please make sure you use the correct localized values. Use the below script to
+> check of all possible values.
+
 The default value for the Ensure parameter is Present. When not specifying this
 parameter, the result source is created.
 
 To define a result source as global, use the value 'SSA' as the ScopeName
 value.
+
+## Script
+
+``` PowerShell
+$serviceApp = Get-SPEnterpriseSearchServiceApplication -Identity "SearchServiceAppName"
+
+$fedManager = New-Object Microsoft.Office.Server.Search.Administration.Query.FederationManager($serviceApp)
+$providers = $fedManager.ListProviders()
+$providers.Keys
+```
