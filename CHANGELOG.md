@@ -12,6 +12,19 @@
   * Updated resource to allow localized permission levels
 * SPSite
   * Improved logging
+* SPFarmSolution
+  * Fixed issue where uninstalling a solution would not work as expected if it
+    contained web application resources.
+* SPProductUpgrade
+  * Fixed issue where upgrading SP2013 would not properly detect the installed
+    version
+* SPSearchAuthorativePage
+  * Fixed issue where modifying search query would not target the correct
+    search application
+* SPUserProfileSyncService
+  * Fixed issue where failure to configure the sync service would not throw error
+* SPWebAppPolicy
+  * Fixed issue where parameter MembersToExclude did not work as expected
 
 ## v3.1
 
