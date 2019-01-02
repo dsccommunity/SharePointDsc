@@ -72,6 +72,8 @@ function Get-TargetResource
         else
         {
             $ensureResult = "Absent"
+            $templateResult = $null
+            $parentTopNav = $null
         }
 
         return @{

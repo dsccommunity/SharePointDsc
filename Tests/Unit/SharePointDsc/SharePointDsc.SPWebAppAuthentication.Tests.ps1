@@ -1,7 +1,7 @@
 [CmdletBinding()]
 param(
     [Parameter()]
-    [string] 
+    [string]
     $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
                                          -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
                                          -Resolve)
@@ -20,7 +20,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         # Initialize tests
 
-        # Mocks for all contexts   
+        # Mocks for all contexts
         Mock -CommandName Set-SPWebApplication {}
 
         # Test contexts
@@ -52,6 +52,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 $result.Extranet | Should BeNullOrEmpty
                 $result.Internet | Should BeNullOrEmpty
                 $result.Custom | Should BeNullOrEmpty
+                $result.WebAppUrl | Should BeNullOrEmpty
             }
 
             It "Should return false from the test method" {
@@ -93,7 +94,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 { Set-TargetResource @testParams } | Should throw "You cannot use AuthenticationProvider, MembershipProvider or RoleProvider when using NTLM"
             }
         }
-        
+
         Context -Name "AuthenticationMethod=Kerberos used with MembershipProvider parameter" -Fixture {
             $testParams = @{
                 WebAppUrl   = "http://sharepoint.contoso.com"
@@ -282,7 +283,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             It "Should throw exception in the set method" {
                 { Set-TargetResource @testParams } | Should throw "You cannot use both NTLM and Kerberos in the same zone"
             }
-        }        
+        }
 
         Context -Name "No zones are specified" -Fixture {
             $testParams = @{
@@ -308,7 +309,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 { Set-TargetResource @testParams } | Should throw "You have to specify at least one zone."
             }
         }
-        
+
         Context -Name "WebApplication is Classic, but Default Zone config is Claims" -Fixture {
             $testParams = @{
                 WebAppUrl   = "http://sharepoint.contoso.com"
@@ -330,7 +331,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
             Mock -CommandName New-SPAuthenticationProvider -MockWith { return @{} }
             Mock -CommandName Get-SPTrustedIdentityTokenIssuer -MockWith { return @{} }
-            
+
             It "Should return null from the get method" {
                 $result = Get-TargetResource @testParams
                 $result.Default[0].AuthenticationMethod | Should Be "Classic"
@@ -387,7 +388,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     }
                 )
             }
-            
+
             It "Should return null from the get method" {
                 $result = Get-TargetResource @testParams
                 $result.Default[0].AuthenticationMethod | Should Be "NTLM"
@@ -437,7 +438,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 { Set-TargetResource @testParams } | Should Throw "Specified AuthenticationProvider ADFS does not exist"
             }
         }
-        
+
         Context -Name "Default Zone of Web application is not configured as specified" -Fixture {
             $testParams = @{
                 WebAppUrl   = "http://sharepoint.contoso.com"
@@ -480,7 +481,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
             Mock -CommandName New-SPAuthenticationProvider -MockWith { return @{} }
             Mock -CommandName Get-SPTrustedIdentityTokenIssuer -MockWith { return @{} }
-            
+
             It "Should return null from the get method" {
                 $result = Get-TargetResource @testParams
                 $result.Default[0].AuthenticationMethod | Should Be "NTLM"
@@ -494,7 +495,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             It "Should run the Set-SPWebApplication cmdlet in the set method" {
                 Set-TargetResource @testParams
 
-                Assert-MockCalled Set-SPWebApplication                
+                Assert-MockCalled Set-SPWebApplication
             }
         }
 
@@ -540,7 +541,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     }
                 )
             }
-            
+
             It "Should return null from the get method" {
                 $result = Get-TargetResource @testParams
                 $result.Intranet[0].AuthenticationMethod | Should Be "NTLM"
@@ -595,7 +596,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
             Mock -CommandName New-SPAuthenticationProvider -MockWith { return @{} }
             Mock -CommandName Get-SPTrustedIdentityTokenIssuer -MockWith { return @{} }
-            
+
             It "Should return null from the get method" {
                 $result = Get-TargetResource @testParams
                 $result.Intranet[0].AuthenticationMethod | Should Be "NTLM"
@@ -609,7 +610,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             It "Should run the Set-SPWebApplication cmdlet in the set method" {
                 Set-TargetResource @testParams
 
-                Assert-MockCalled Set-SPWebApplication                
+                Assert-MockCalled Set-SPWebApplication
             }
         }
 
@@ -655,7 +656,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     }
                 )
             }
-            
+
             It "Should return null from the get method" {
                 $result = Get-TargetResource @testParams
                 $result.Internet[0].AuthenticationMethod | Should Be "NTLM"
@@ -710,7 +711,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
             Mock -CommandName New-SPAuthenticationProvider -MockWith { return @{} }
             Mock -CommandName Get-SPTrustedIdentityTokenIssuer -MockWith { return @{} }
-            
+
             It "Should return null from the get method" {
                 $result = Get-TargetResource @testParams
                 $result.Internet[0].AuthenticationMethod | Should Be "NTLM"
@@ -724,7 +725,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             It "Should run the Set-SPWebApplication cmdlet in the set method" {
                 Set-TargetResource @testParams
 
-                Assert-MockCalled Set-SPWebApplication                
+                Assert-MockCalled Set-SPWebApplication
             }
         }
 
@@ -770,7 +771,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     }
                 )
             }
-            
+
             It "Should return null from the get method" {
                 $result = Get-TargetResource @testParams
                 $result.Extranet[0].AuthenticationMethod | Should Be "NTLM"
@@ -823,7 +824,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
             Mock -CommandName New-SPAuthenticationProvider -MockWith { return @{} }
             Mock -CommandName Get-SPTrustedIdentityTokenIssuer -MockWith { return @{} }
-            
+
             It "Should return null from the get method" {
                 $result = Get-TargetResource @testParams
                 $result.Extranet[0].AuthenticationMethod | Should Be "NTLM"
@@ -837,7 +838,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             It "Should run the Set-SPWebApplication cmdlet in the set method" {
                 Set-TargetResource @testParams
 
-                Assert-MockCalled Set-SPWebApplication                
+                Assert-MockCalled Set-SPWebApplication
             }
         }
 
@@ -883,7 +884,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     }
                 )
             }
-            
+
             It "Should return null from the get method" {
                 $result = Get-TargetResource @testParams
                 $result.Custom[0].AuthenticationMethod | Should Be "NTLM"
@@ -938,7 +939,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
             Mock -CommandName New-SPAuthenticationProvider -MockWith { return @{} }
             Mock -CommandName Get-SPTrustedIdentityTokenIssuer -MockWith { return @{} }
-            
+
             It "Should return null from the get method" {
                 $result = Get-TargetResource @testParams
                 $result.Custom[0].AuthenticationMethod | Should Be "Kerberos"
@@ -952,10 +953,10 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             It "Should run the Set-SPWebApplication cmdlet in the set method" {
                 Set-TargetResource @testParams
 
-                Assert-MockCalled Set-SPWebApplication                
+                Assert-MockCalled Set-SPWebApplication
             }
         }
-        
+
     }
 }
 

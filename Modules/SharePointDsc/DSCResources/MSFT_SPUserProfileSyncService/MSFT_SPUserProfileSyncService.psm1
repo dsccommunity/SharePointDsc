@@ -324,6 +324,11 @@ function Set-TargetResource
                 }
                 $count++
             }
+
+            if($syncService.Status -ne $desiredState)
+            {
+                throw "An error occured. We couldn't properly set the User Profile Sync Service on the server."
+            }
         }
     }
     finally
@@ -340,10 +345,6 @@ function Set-TargetResource
 
             Clear-SPDscKerberosToken -Account $farmAccount.UserName
         }
-    }
-    if($syncService.Status -ne $desiredState)
-    {
-        throw "An error occured. We couldn't properly set the User Profile Sync Service on the server."
     }
 }
 
