@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+* Changes to SharePointDsc unit testing
+  * Implemented Strict Mode version 1 for all code run during unit tests.
 * SPFarm
   * Improved logging
 * SPInstallPrereqs
