@@ -1,0 +1,6 @@
+[ClassVersion("1.0.0.0"), FriendlyName("SPAuthenticationRealm")]
+class MSFT_SPAuthenticationRealm : OMI_BaseResource
+{
+    [Key, Description("Specifies the resource is a single instance, the value must be 'Yes'"), ValueMap{"Yes"}, Values{"Yes"}] String IsSingleInstance;
+    [Required, Description("A GUID that is the authentication realm to be set")] String AuthenticationRealm;
+};

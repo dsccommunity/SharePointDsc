@@ -12,6 +12,8 @@
   * Updated resource to allow localized permission levels
 * SPSite
   * Improved logging
+* SPAuthenticationRealm
+  * New resource for setting farm authentication realm
 
 ## v3.1
 
