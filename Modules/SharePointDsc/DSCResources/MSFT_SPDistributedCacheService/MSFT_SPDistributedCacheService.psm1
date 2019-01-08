@@ -317,7 +317,14 @@ function Set-TargetResource
                     $account = Get-SPManagedAccount -Identity $params.ServiceAccount
                     $cacheService.ProcessIdentity.ManagedAccount = $account
                     $cacheService.ProcessIdentity.Update()
-                    $cacheService.ProcessIdentity.Deploy()
+                    try
+                    {
+                        $cacheService.ProcessIdentity.Deploy()
+                    }
+                    catch
+                    {
+                        # In SharePoint 2019, ProcessIdentity.Deploy() may throw an exception
+                    }
                 }
             }
         }
