@@ -13,6 +13,10 @@ function Get-TargetResource
         $SPSiteUrl,
 
         [Parameter()]
+        [System.String]
+        $ScopeName,
+
+        [Parameter()]
         [System.Boolean]
         $AllowOAuthHttp,
 
@@ -31,6 +35,7 @@ function Get-TargetResource
         $returnval = @{
             WorkflowHostUri = $null
             SPSiteUrl = $null
+            ScopeName = $null
             AllowOAuthHttp = $null
         }
         $workflowProxy = Get-SPWorkflowServiceApplicationProxy
@@ -40,6 +45,7 @@ function Get-TargetResource
             $returnval = @{
                 WorkflowHostUri = $workflowProxy.GetHostname($SPSiteUrl)
                 SPSiteUrl = $params.SPSiteUrl
+                ScopeName = $workflowProxy.GetWorkflowScopeName($SPSiteUrl)
                 AllowOAuthHttp = $params.AllowOAuthHttp
             }
         }
@@ -61,6 +67,10 @@ function Set-TargetResource
         [Parameter(Mandatory = $true)]
         [System.String]
         $SPSiteUrl,
+
+        [Parameter()]
+        [System.String]
+        $ScopeName,
 
         [Parameter()]
         [System.Boolean]
@@ -88,9 +98,18 @@ function Set-TargetResource
 
         Write-Verbose -Message "Processing changes"
 
-        Register-SPWorkflowService -WorkflowHostUri $params.WorkflowHostUri `
-            -SPSite $params.SPSiteUrl `
-            -AllowOAuthHttp:$params.AllowOAuthHttp -Force
+        $workflowServiceParams = @{
+            WorkflowHostUri = $params.WorkflowHostUri
+            SPSite = $params.SPSiteUrl
+            AllowOAuthHttp = $params.AllowOAuthHttp
+        }
+
+        if($params.ScopeName)
+        {
+            $workflowServiceParams.Add("ScopeName", $params.ScopeName)
+        }
+
+        Register-SPWorkflowService @workflowServiceParams -Force
     }
 }
 
@@ -107,6 +126,10 @@ function Test-TargetResource
         [Parameter(Mandatory = $true)]
         [System.String]
         $SPSiteUrl,
+
+        [Parameter()]
+        [System.String]
+        $ScopeName,
 
         [Parameter()]
         [System.Boolean]
@@ -126,9 +149,17 @@ function Test-TargetResource
         return $false
     }
 
+    $valuesToCheck = @("Ensure",
+    "WorkflowHostUri")
+
+    if ($ScopeName)
+    {
+        $valuesToCheck += "ScopeName"
+    }
+
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
     -DesiredValues $PSBoundParameters `
-    -ValuesToCheck @("Ensure")
+    -ValuesToCheck $valuesToCheck
 }
 
 Export-ModuleMember -Function *-TargetResource
