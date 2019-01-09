@@ -52,7 +52,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 $result.Extranet | Should BeNullOrEmpty
                 $result.Internet | Should BeNullOrEmpty
                 $result.Custom | Should BeNullOrEmpty
-                $result.WebAppUrl | Should BeNullOrEmpty
+                $result.WebAppUrl | Should Not BeNullOrEmpty
             }
 
             It "Should return false from the test method" {
