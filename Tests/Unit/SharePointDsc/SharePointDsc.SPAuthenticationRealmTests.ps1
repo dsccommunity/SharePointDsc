@@ -27,7 +27,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         }
 
         Context -Name "Authentication realm matches the farm's current atuhentication realm" -Fixture {
-            $Global:SPAuthenticationRealm = [System.Guid]"14757a87-4d74-4323-83b9-fb1e77e8f22f"
+            $Global:SPAuthenticationRealm = "14757a87-4d74-4323-83b9-fb1e77e8f22f"
             $testParams = @{
                 IsSingleInstance = "Yes"
                 AuthenticationRealm = $Global:SPAuthenticationRealm
@@ -39,11 +39,11 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         }
 
         Context -Name "Authentication realm does not match the farm's current atuhentication realm" -Fixture {
-            $Global:SPAuthenticationRealm = [System.Guid]"11111111-1111-1111-1111-111111111111"
+            $Global:SPAuthenticationRealm = "11111111-1111-1111-1111-111111111111"
 
             $testParams = @{
                 IsSingleInstance = "Yes"
-                AuthenticationRealm = [System.Guid]"14757a87-4d74-4323-83b9-fb1e77e8f22f"
+                AuthenticationRealm = "14757a87-4d74-4323-83b9-fb1e77e8f22f"
             }
 
             It "Should return false from the set method" {

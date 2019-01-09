@@ -9,7 +9,7 @@ function Get-TargetResource()
         $IsSingleInstance,
 
         [Parameter(Mandatory = $true)]
-        [System.Guid]
+        [String]
         $AuthenticationRealm,
 
         [Parameter()]
@@ -44,7 +44,7 @@ function Set-TargetResource()
         $IsSingleInstance,
 
         [Parameter(Mandatory = $true)]
-        [System.Guid]
+        [String]
         $AuthenticationRealm,
 
         [Parameter()]
@@ -77,7 +77,7 @@ function Test-TargetResource()
         $IsSingleInstance,
 
         [Parameter(Mandatory = $true)]
-        [System.Guid]
+        [String]
         $AuthenticationRealm,
 
         [Parameter()]
