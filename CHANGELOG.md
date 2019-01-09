@@ -12,6 +12,10 @@
   * Updated resource to allow localized permission levels
 * SPSite
   * Improved logging
+* SPWorkflowService
+  * Added support for specifying scope name.
+  * Added support for detecting incorrect configuration for scope name and
+    WorkflowHostUri
 
 ## v3.1
 
