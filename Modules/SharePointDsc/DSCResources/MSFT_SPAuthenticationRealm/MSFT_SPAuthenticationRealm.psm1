@@ -2,7 +2,7 @@ function Get-TargetResource()
 {
     [CmdletBinding()]
     [OutputType([System.Collections.HashTable])]
-    param(
+    param (
         [Parameter(Mandatory = $true)]
         [ValidateSet('Yes')]
         [String]
@@ -37,7 +37,7 @@ function Get-TargetResource()
 function Set-TargetResource()
 {
     [CmdletBinding()]
-    param(
+    param (
         [Parameter(Mandatory = $true)]
         [ValidateSet('Yes')]
         [String]
@@ -54,15 +54,13 @@ function Set-TargetResource()
 
     Write-Verbose -Message "Setting farm authentication realm to $AuthenticationRealm"
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+    Invoke-SPDSCCommand -Credential $InstallAccount `
         -Arguments $PSBoundParameters `
         -ScriptBlock {
 
         $params = $args[0]
         Set-SPAuthenticationRealm -Realm $params.AuthenticationRealm
     }
-
-    return $result
 }
 
 function Test-TargetResource()
@@ -70,7 +68,7 @@ function Test-TargetResource()
     [CmdletBinding()]
     [OutputType([System.Boolean])]
     [CmdletBinding()]
-    param(
+    param (
         [Parameter(Mandatory = $true)]
         [ValidateSet('Yes')]
         [String]
