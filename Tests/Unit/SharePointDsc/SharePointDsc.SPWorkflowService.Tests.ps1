@@ -140,6 +140,18 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Test-TargetResource @testParams |  Should Be $false
             }
         }
+
+        Context -Name "workflow host URL contains a trailing forward slash" -Fixture {
+            $testParams = @{
+                WorkflowHostUri = "http://workflow.sharepoint.com/"
+                SPSiteUrl = "http://sites.sharepoint.com"
+                AllowOAuthHttp = $true
+            }
+
+            It "return true from the test method"{
+                Test-TargetResource @testParams |  Should Be $true
+            }
+        }
     }
 }
 

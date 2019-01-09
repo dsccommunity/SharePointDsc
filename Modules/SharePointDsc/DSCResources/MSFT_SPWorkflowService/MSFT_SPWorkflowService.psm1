@@ -43,7 +43,7 @@ function Get-TargetResource
         if($null -ne $workflowProxy)
         {
             $returnval = @{
-                WorkflowHostUri = $workflowProxy.GetHostname($SPSiteUrl)
+                WorkflowHostUri = $workflowProxy.GetHostname($SPSiteUrl).TrimEnd("/")
                 SPSiteUrl = $params.SPSiteUrl
                 ScopeName = $workflowProxy.GetWorkflowScopeName($SPSiteUrl)
                 AllowOAuthHttp = $params.AllowOAuthHttp
@@ -99,7 +99,7 @@ function Set-TargetResource
         Write-Verbose -Message "Processing changes"
 
         $workflowServiceParams = @{
-            WorkflowHostUri = $params.WorkflowHostUri
+            WorkflowHostUri = $params.WorkflowHostUri.TrimEnd("/")
             SPSite = $params.SPSiteUrl
             AllowOAuthHttp = $params.AllowOAuthHttp
         }
@@ -149,6 +149,7 @@ function Test-TargetResource
         return $false
     }
 
+    $PSBoundParameters.WorkflowHostUri = $PSBoundParameters.WorkflowHostUri.TrimEnd("/")
     $valuesToCheck = @("Ensure",
     "WorkflowHostUri")
 
