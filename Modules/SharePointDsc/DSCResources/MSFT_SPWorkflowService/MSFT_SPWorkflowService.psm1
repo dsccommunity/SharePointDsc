@@ -40,12 +40,12 @@ function Get-TargetResource
         }
         $workflowProxy = Get-SPWorkflowServiceApplicationProxy
 
-        if($null -ne $workflowProxy)
+        if ($null -ne $workflowProxy)
         {
             $returnval = @{
-                WorkflowHostUri = $workflowProxy.GetHostname($SPSiteUrl).TrimEnd("/")
+                WorkflowHostUri = $workflowProxy.GetHostname($params.SPSiteUrl).TrimEnd("/")
                 SPSiteUrl = $params.SPSiteUrl
-                ScopeName = $workflowProxy.GetWorkflowScopeName($SPSiteUrl)
+                ScopeName = $workflowProxy.GetWorkflowScopeName($params.SPSiteUrl)
                 AllowOAuthHttp = $params.AllowOAuthHttp
             }
         }
@@ -104,7 +104,7 @@ function Set-TargetResource
             AllowOAuthHttp = $params.AllowOAuthHttp
         }
 
-        if($params.ScopeName)
+        if ($params.ContainsKey("ScopeName"))
         {
             $workflowServiceParams.Add("ScopeName", $params.ScopeName)
         }
@@ -151,7 +151,7 @@ function Test-TargetResource
 
     $PSBoundParameters.WorkflowHostUri = $PSBoundParameters.WorkflowHostUri.TrimEnd("/")
     $valuesToCheck = @("Ensure",
-    "WorkflowHostUri")
+                       "WorkflowHostUri")
 
     if ($ScopeName)
     {
