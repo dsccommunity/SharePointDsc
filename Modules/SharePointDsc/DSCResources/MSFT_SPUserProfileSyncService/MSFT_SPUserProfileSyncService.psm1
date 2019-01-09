@@ -325,7 +325,7 @@ function Set-TargetResource
                 $count++
             }
 
-            if($syncService.Status -ne $desiredState)
+            if ($syncService.Status -ne $desiredState)
             {
                 throw "An error occured. We couldn't properly set the User Profile Sync Service on the server."
             }

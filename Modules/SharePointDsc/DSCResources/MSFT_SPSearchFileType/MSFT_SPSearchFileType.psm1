@@ -42,10 +42,9 @@ function Get-TargetResource
     {
         Write-Verbose -Message "Ensure is configured as Present, but MimeType and/or Description is missing"
         $nullReturn = @{
-            FileType = $null
-            ServiceAppName = $null
+            FileType = $ServiceAppName
+            ServiceAppName = $ServiceAppName
             Ensure = "Absent"
-            InstallAccount = $null
         }
         return $nullReturn
     }
