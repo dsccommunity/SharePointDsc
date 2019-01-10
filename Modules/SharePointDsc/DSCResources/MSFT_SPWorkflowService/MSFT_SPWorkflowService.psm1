@@ -38,14 +38,22 @@ function Get-TargetResource
             ScopeName = $null
             AllowOAuthHttp = $null
         }
+
+        $site = Get-SPSite $params.SPSiteUrl
+
+        if ($null -eq $site)
+        {
+            throw "Specified site collection could not be found."
+        }
+
         $workflowProxy = Get-SPWorkflowServiceApplicationProxy
 
         if ($null -ne $workflowProxy)
         {
             $returnval = @{
-                WorkflowHostUri = $workflowProxy.GetHostname($params.SPSiteUrl).TrimEnd("/")
+                WorkflowHostUri = $workflowProxy.GetHostname($site).TrimEnd("/")
                 SPSiteUrl = $params.SPSiteUrl
-                ScopeName = $workflowProxy.GetWorkflowScopeName($params.SPSiteUrl)
+                ScopeName = $workflowProxy.GetWorkflowScopeName($site)
                 AllowOAuthHttp = $params.AllowOAuthHttp
             }
         }
@@ -100,7 +108,7 @@ function Set-TargetResource
 
         $workflowServiceParams = @{
             WorkflowHostUri = $params.WorkflowHostUri.TrimEnd("/")
-            SPSite = $params.SPSiteUrl
+            SPSite = $site
             AllowOAuthHttp = $params.AllowOAuthHttp
         }
 

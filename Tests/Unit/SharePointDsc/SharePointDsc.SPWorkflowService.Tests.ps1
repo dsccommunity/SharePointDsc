@@ -36,6 +36,14 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                                     } -PassThru)
         }
 
+        Mock -CommandName Get-SPSite -MockWith {
+            return @(
+                @{
+                    Url = "http://sites.sharepoint.com"
+                }
+            )
+        }
+
         Mock -CommandName Register-SPWorkflowService -MockWith{ }
 
         # Test contexts
@@ -57,11 +65,11 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             It "return empty workflow service instance"{
-                (Get-TargetResource @testParams).WorkflowHostUri  | Should Be $null
+                { Get-TargetResource @testParams } | Should Throw "Specified site collection could not be found."
             }
 
             It "return false from the test method"{
-                Test-TargetResource @testParams | Should Be $false
+                { Test-TargetResource @testParams } | Should Throw "Specified site collection could not be found."
             }
         }
 
@@ -71,11 +79,6 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 SPSiteUrl = "http://sites.sharepoint.com"
                 AllowOAuthHttp = $true
             }
-
-            Mock -CommandName Get-SPSite -MockWith {return @(@{
-                    Url = "http://sites.sharepoint.com"
-                }
-            )}
 
             Mock -CommandName Register-SPWorkflowService -MockWith{
                 return @(@{
@@ -91,6 +94,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             It "returns the workflow service instance" {
                 $result = Get-TargetResource @testParams
                 $result.WorkflowHostUri | Should Be "http://workflow.sharepoint.com"
+                $result.SPSiteUrl = "http://sites.sharepoint.com"
                 $result.ScopeName | Should Be "SharePoint"
                 Assert-MockCalled Get-SPWorkflowServiceApplicationProxy
             }
@@ -107,11 +111,6 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 SPSiteUrl = "http://sites.sharepoint.com"
                 AllowOAuthHttp = $true
             }
-
-            Mock -CommandName Get-SPSite -MockWith {return @(@{
-                    Url = "http://sites.sharepoint.com"
-                }
-            )}
 
             It "properly creates the workflow service proxy" {
                 Set-TargetResource @testParams
@@ -130,11 +129,6 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 SPSiteUrl = "http://sites.sharepoint.com"
                 AllowOAuthHttp = $true
             }
-
-            Mock -CommandName Get-SPSite -MockWith {return @(@{
-                    Url = "http://sites.sharepoint.com"
-                }
-            )}
 
             It "return false from the test method"{
                 Test-TargetResource @testParams |  Should Be $false
