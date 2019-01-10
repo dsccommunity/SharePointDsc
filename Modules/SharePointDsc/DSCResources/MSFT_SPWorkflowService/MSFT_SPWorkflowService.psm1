@@ -158,8 +158,7 @@ function Test-TargetResource
     }
 
     $PSBoundParameters.WorkflowHostUri = $PSBoundParameters.WorkflowHostUri.TrimEnd("/")
-    $valuesToCheck = @("Ensure",
-                       "WorkflowHostUri")
+    $valuesToCheck = @("WorkflowHostUri")
 
     if ($ScopeName)
     {
