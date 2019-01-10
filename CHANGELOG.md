@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+* SPAuthenticationRealm
+  * New resource for setting farm authentication realm
 * SPFarm
   * Improved logging
 * SPInstallPrereqs
