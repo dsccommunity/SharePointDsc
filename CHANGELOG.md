@@ -31,6 +31,10 @@
   * Fixed issue where failure to configure the sync service would not throw error
 * SPWebAppPolicy
   * Fixed issue where parameter MembersToExclude did not work as expected
+* SPWorkflowService
+  * Added support for specifying scope name.
+  * Added support for detecting incorrect configuration for scope name and
+    WorkflowHostUri
 
 ## v3.1
 
