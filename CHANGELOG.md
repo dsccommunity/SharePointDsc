@@ -14,6 +14,8 @@
   * Updated resource to allow localized permission levels
 * SPSite
   * Improved logging
+* SPDistributedCacheService
+  * Fixed exception on Stop-SPServiceInstance with SharePoint 2019
 
 ## v3.1
 
