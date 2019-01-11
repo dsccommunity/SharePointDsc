@@ -4,28 +4,28 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [Parameter(Mandatory = $true)]  
-        [System.String] 
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $WebAppUrl,
 
-        [Parameter()] 
-        [Microsoft.Management.Infrastructure.CimInstance[]] 
+        [Parameter()]
+        [Microsoft.Management.Infrastructure.CimInstance[]]
         $Members,
 
-        [Parameter()] 
-        [Microsoft.Management.Infrastructure.CimInstance[]] 
+        [Parameter()]
+        [Microsoft.Management.Infrastructure.CimInstance[]]
         $MembersToInclude,
 
-        [Parameter()] 
-        [Microsoft.Management.Infrastructure.CimInstance[]] 
+        [Parameter()]
+        [Microsoft.Management.Infrastructure.CimInstance[]]
         $MembersToExclude,
 
-        [Parameter()] 
-        [System.Boolean] 
+        [Parameter()]
+        [System.Boolean]
         $SetCacheAccountsPolicy,
 
-        [Parameter()] 
-        [System.Management.Automation.PSCredential] 
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 
@@ -67,7 +67,7 @@ function Get-TargetResource
             return $null
         }
     }
-    
+
     $result = Invoke-SPDSCCommand -Credential $InstallAccount `
                                   -Arguments $PSBoundParameters `
                                   -ScriptBlock {
@@ -78,7 +78,7 @@ function Get-TargetResource
 
         if ($null -eq $wa)
         {
-            return $null 
+            return $null
         }
 
         $SetCacheAccountsPolicy = $false
@@ -96,7 +96,7 @@ function Get-TargetResource
                 {
                     if ($psu.PolicyRoleBindings.Type -eq 'FullControl')
                     {
-                        $correctPSU = $true 
+                        $correctPSU = $true
                     }
                 }
 
@@ -105,7 +105,7 @@ function Get-TargetResource
                 {
                     if ($psr.PolicyRoleBindings.Type -eq 'FullRead')
                     {
-                        $correctPSR = $true 
+                        $correctPSR = $true
                     }
                 }
 
@@ -115,7 +115,7 @@ function Get-TargetResource
                 }
             }
         }
-           
+
         $members = @()
         foreach ($policy in $wa.Policies)
         {
@@ -174,7 +174,7 @@ function Get-TargetResource
                 SetCacheAccountsPolicy = $SetCacheAccountsPolicy
                 InstallAccount = $params.InstallAccount
         }
-        
+
         return $returnval
     }
     return $result
@@ -185,28 +185,28 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [Parameter(Mandatory = $true)]  
-        [System.String] 
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $WebAppUrl,
 
-        [Parameter()] 
-        [Microsoft.Management.Infrastructure.CimInstance[]] 
+        [Parameter()]
+        [Microsoft.Management.Infrastructure.CimInstance[]]
         $Members,
 
-        [Parameter()] 
-        [Microsoft.Management.Infrastructure.CimInstance[]] 
+        [Parameter()]
+        [Microsoft.Management.Infrastructure.CimInstance[]]
         $MembersToInclude,
 
-        [Parameter()] 
-        [Microsoft.Management.Infrastructure.CimInstance[]] 
+        [Parameter()]
+        [Microsoft.Management.Infrastructure.CimInstance[]]
         $MembersToExclude,
 
-        [Parameter()] 
-        [System.Boolean] 
+        [Parameter()]
+        [System.Boolean]
         $SetCacheAccountsPolicy,
 
-        [Parameter()] 
-        [System.Management.Automation.PSCredential] 
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 
@@ -249,14 +249,14 @@ function Set-TargetResource
 
     $modulePath = "..\..\Modules\SharePointDsc.WebAppPolicy\SPWebAppPolicy.psm1"
     Import-Module -Name (Join-Path -Path $PSScriptRoot -ChildPath $modulePath -Resolve)
-    
+
     if ($null -eq $CurrentValues)
     {
         throw "Web application does not exist"
     }
 
     $cacheAccounts = Get-SPDSCCacheAccountConfiguration -InputParameters $WebAppUrl
-    
+
     if ($SetCacheAccountsPolicy)
     {
         if ($cacheAccounts.SuperUserAccount -eq "" -or $cacheAccounts.SuperReaderAccount -eq "")
@@ -276,8 +276,8 @@ function Set-TargetResource
         if ($wa.UseClaimsAuthentication -eq $true)
         {
             return "Claims"
-        } 
-        else 
+        }
+        else
         {
             return "Native"
         }
@@ -314,7 +314,7 @@ function Set-TargetResource
                 IdentityMode = $cacheAccounts.IdentityMode
             }
             $allMembers += $psuAccount
-            
+
             $psrAccount = @{
                 UserName = $cacheAccounts.SuperReaderAccount
                 PermissionLevel = "Full Read"
@@ -333,7 +333,7 @@ function Set-TargetResource
             switch ($difference.Status)
             {
                 Additional {
-                    # Only remove users if the "Members" property was set 
+                    # Only remove users if the "Members" property was set
                     # instead of "MembersToInclude"
                     if ($Members)
                     {
@@ -359,7 +359,7 @@ function Set-TargetResource
                         Username = $difference.Username
                         PermissionLevel    = $difference.DesiredPermissionLevel
                         ActAsSystemAccount = $difference.DesiredActAsSystemSetting
-                        IdentityMode = $difference.IdentityType 
+                        IdentityMode = $difference.IdentityType
                     }
                 }
             }
@@ -375,7 +375,7 @@ function Set-TargetResource
         foreach ($member in $MembersToExclude)
         {
             $policy = $CurrentValues.Members | Where-Object -FilterScript {
-                $_.UserName -eq $member.UserName -and $_.IdentityType -eq $identityType
+                $_.UserName -eq $member.UserName -and $_.IdentityType -eq $member.IdentityType
             }
 
             if (($cacheAccounts.SuperUserAccount -eq $member.Username) -or `
@@ -390,11 +390,11 @@ function Set-TargetResource
                     Type     = "Delete"
                     Username = $member.UserName
                 }
+                $changeUsers += $user
             }
-            $changeUsers += $user
         }
     }
-    
+
     ## Perform changes
     Invoke-SPDSCCommand -Credential $InstallAccount `
                         -Arguments @($PSBoundParameters,$PSScriptRoot,$changeUsers) `
@@ -427,7 +427,7 @@ function Set-TargetResource
                 "Add" {
                     # User does not exist. Add user
                     Write-Verbose -Message "Adding $($user.Username)"
-                    
+
                     $userToAdd = $user.Username
                     if ($user.IdentityMode -eq "Claims")
                     {
@@ -437,13 +437,13 @@ function Set-TargetResource
                             $principal = New-SPClaimsPrincipal -Identity $user.Username `
                                                                -IdentityType WindowsSamAccountName
                             $userToAdd = $principal.ToEncodedString()
-                        } 
-                        else 
+                        }
+                        else
                         {
                             $principal = New-SPClaimsPrincipal -Identity $user.Username `
                                                                -IdentityType WindowsSecurityGroupName
                             $userToAdd = $principal.ToEncodedString()
-                        }    
+                        }
                     }
                     $newPolicy = $wa.Policies.Add($userToAdd, $user.UserName)
                     foreach ($permissionLevel in $user.PermissionLevel)
@@ -480,8 +480,8 @@ function Set-TargetResource
                             $principal = New-SPClaimsPrincipal -Identity $user.Username `
                                                                -IdentityType WindowsSamAccountName
                             $userToChange = $principal.ToEncodedString()
-                        } 
-                        else 
+                        }
+                        else
                         {
                             $principal = New-SPClaimsPrincipal -Identity $user.Username `
                                                                -IdentityType WindowsSecurityGroupName
@@ -489,13 +489,13 @@ function Set-TargetResource
                         }
                     }
                     $policy = $wa.Policies | Where-Object -FilterScript {
-                        $_.UserName -eq $userToChange 
+                        $_.UserName -eq $userToChange
                     }
 
                     Write-Verbose -Message "User $($user.Username) exists, checking permissions"
                     if ($user.ActAsSystemAccount -ne $policy.IsSystemUser)
                     {
-                        $policy.IsSystemUser = $user.ActAsSystemAccount 
+                        $policy.IsSystemUser = $user.ActAsSystemAccount
                     }
 
                     switch ($policy.PolicyRoleBindings.Type)
@@ -543,7 +543,7 @@ function Set-TargetResource
                         }
                     }
                 }
-                "Delete" 
+                "Delete"
                 {
                     Write-Verbose -Message "Removing $($user.Username)"
                     $userToDrop = $user.Username
@@ -555,13 +555,13 @@ function Set-TargetResource
                             $principal = New-SPClaimsPrincipal -Identity $user.Username `
                                                                -IdentityType WindowsSamAccountName
                             $userToDrop = $principal.ToEncodedString()
-                        } 
-                        else 
+                        }
+                        else
                         {
                             $principal = New-SPClaimsPrincipal -Identity $user.Username `
                                                                -IdentityType WindowsSecurityGroupName
                             $userToDrop = $principal.ToEncodedString()
-                        }    
+                        }
                     }
                     Remove-SPDSCGenericObject -SourceCollection $wa.Policies `
                                               -Target $userToDrop `
@@ -579,41 +579,41 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [Parameter(Mandatory = $true)]  
-        [System.String] 
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $WebAppUrl,
 
-        [Parameter()] 
-        [Microsoft.Management.Infrastructure.CimInstance[]] 
+        [Parameter()]
+        [Microsoft.Management.Infrastructure.CimInstance[]]
         $Members,
 
-        [Parameter()] 
-        [Microsoft.Management.Infrastructure.CimInstance[]] 
+        [Parameter()]
+        [Microsoft.Management.Infrastructure.CimInstance[]]
         $MembersToInclude,
 
-        [Parameter()] 
-        [Microsoft.Management.Infrastructure.CimInstance[]] 
+        [Parameter()]
+        [Microsoft.Management.Infrastructure.CimInstance[]]
         $MembersToExclude,
 
-        [Parameter()] 
-        [System.Boolean] 
+        [Parameter()]
+        [System.Boolean]
         $SetCacheAccountsPolicy,
 
-        [Parameter()] 
-        [System.Management.Automation.PSCredential] 
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 
     Write-Verbose -Message "Testing web app policy for $WebAppUrl"
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
-    
+
     $modulePath = "..\..\Modules\SharePointDsc.WebAppPolicy\SPWebAppPolicy.psm1"
     Import-Module -Name (Join-Path -Path $PSScriptRoot -ChildPath $modulePath -Resolve)
 
     if ($null -eq $CurrentValues)
     {
-        return $false 
+        return $false
     }
 
     $cacheAccounts = Get-SPDSCCacheAccountConfiguration -InputParameters $WebAppUrl
@@ -637,14 +637,14 @@ function Test-TargetResource
         if ($wa.UseClaimsAuthentication -eq $true)
         {
             return "Claims"
-        } 
-        else 
+        }
+        else
         {
             return "Native"
         }
     }
-    
-    # If checking the full members list, or the list of members to include then build the 
+
+    # If checking the full members list, or the list of members to include then build the
     # appropriate members list and check for the output of Compare-SPDSCWebAppPolicy
     if ($Members -or $MembersToInclude)
     {
@@ -675,7 +675,7 @@ function Test-TargetResource
                 IdentityMode = $cacheAccounts.IdentityMode
             }
             $allMembers += $psuAccount
-            
+
             $psrAccount = @{
                 UserName = $cacheAccounts.SuperReaderAccount
                 PermissionLevel = "Full Read"
@@ -688,18 +688,18 @@ function Test-TargetResource
         $differences = Compare-SPDSCWebAppPolicy -WAPolicies $CurrentValues.Members `
                                                  -DSCSettings $allMembers `
                                                  -DefaultIdentityType $defaultIdentityType
-        
+
         # If checking members, any difference counts as a fail
         if ($Members)
         {
             if ($differences.Count -eq 0)
             {
-                return $true 
-            } 
-            else 
+                return $true
+            }
+            else
             {
-                Write-Verbose -Message "Differences in the policy were found, returning false" 
-                return $false 
+                Write-Verbose -Message "Differences in the policy were found, returning false"
+                return $false
             }
         }
 
@@ -707,15 +707,15 @@ function Test-TargetResource
         if ($MembersToInclude)
         {
             if (($differences | Where-Object -FilterScript {
-                    $_.Status -eq "Different" -or $_.Status -eq "Missing" 
+                    $_.Status -eq "Different" -or $_.Status -eq "Missing"
                 }).Count -eq 0)
             {
-                return $true 
-            } 
-            else 
+                return $true
+            }
+            else
             {
-                Write-Verbose -Message "Different or Missing policy was found, returning false" 
-                return $false 
+                Write-Verbose -Message "Different or Missing policy was found, returning false"
+                return $false
             }
         }
     }
@@ -733,7 +733,7 @@ function Test-TargetResource
             {
                 throw "You cannot exclude the Cache accounts from the Web Application Policy"
             }
-            
+
             foreach ($policy in $CurrentValues.Members)
             {
                 if ($policy.Username -eq $member.Username)
@@ -752,10 +752,10 @@ function Get-SPDSCCacheAccountConfiguration()
     [OutputType([System.Collections.Hashtable])]
     param (
         [Parameter()]
-        [Object[]]  
+        [Object[]]
         $InputParameters
     )
-    
+
     $cacheAccounts = Invoke-SPDSCCommand -Credential $InstallAccount `
                                          -Arguments $InputParameters `
                                          -ScriptBlock {
@@ -770,7 +770,7 @@ function Get-SPDSCCacheAccountConfiguration()
         }
 
         $returnval = @{
-            SuperUserAccount = ""               
+            SuperUserAccount = ""
             SuperReaderAccount = ""
         }
 
@@ -808,12 +808,12 @@ function Get-SPDSCCacheAccountConfiguration()
         if ($wa.UseClaimsAuthentication -eq $true)
         {
             $returnval.IdentityMode = "Claims"
-        } 
-        else 
+        }
+        else
         {
             $returnval.IdentityMode = "Native"
         }
-        
+
         return $returnval
     }
 
