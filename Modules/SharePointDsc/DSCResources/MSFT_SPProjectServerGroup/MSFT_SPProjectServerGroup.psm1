@@ -122,10 +122,11 @@ function Get-TargetResource
                 $adGroup = Convert-SPDscADGroupIDToName -GroupId $script:groupDataSet.SecurityGroups.WSEC_GRP_AD_GUID
             }
 
+            $groupMembers = @()
+
             if ($adGroup -eq "")
             {
                 # No AD group is set, check for individual members
-                $groupMembers = @()
                 $script:groupDataSet.GroupMembers.Rows | ForEach-Object -Process {
                     $groupMembers += Get-SPDscProjectServerResourceName -ResourceId $_["RES_UID"] -PwaUrl $params.Url
                 }

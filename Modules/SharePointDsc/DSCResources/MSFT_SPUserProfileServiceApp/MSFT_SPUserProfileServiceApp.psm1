@@ -390,14 +390,12 @@ function Set-TargetResource
                                              -oldName "SyncDBServer" `
                                              -newName "ProfileSyncDBServer"
 
-            if ($params.ContainsKey("ProxyName"))
+            $pName = "$($params.Name) Proxy"
+
+            if ($params.ContainsKey("ProxyName") -and $null -ne $params.ProxyName)
             {
                 $pName = $params.ProxyName
                 $params.Remove("ProxyName") | Out-Null
-            }
-            if ($null -eq $pName)
-            {
-                $pName = "$($params.Name) Proxy"
             }
 
             $serviceApps = Get-SPServiceApplication -Name $params.Name `
