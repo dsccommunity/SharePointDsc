@@ -43,18 +43,20 @@ function Get-TargetResource
 
         if ($null -eq $site)
         {
-            throw "Specified site collection could not be found."
+            Write-Verbose "Specified site collection could not be found."
         }
-
-        $workflowProxy = Get-SPWorkflowServiceApplicationProxy
-
-        if ($null -ne $workflowProxy)
+        else
         {
-            $returnval = @{
-                WorkflowHostUri = $workflowProxy.GetHostname($site).TrimEnd("/")
-                SPSiteUrl = $params.SPSiteUrl
-                ScopeName = $workflowProxy.GetWorkflowScopeName($site)
-                AllowOAuthHttp = $params.AllowOAuthHttp
+            $workflowProxy = Get-SPWorkflowServiceApplicationProxy
+
+            if ($null -ne $workflowProxy)
+            {
+                $returnval = @{
+                    WorkflowHostUri = $workflowProxy.GetHostname($site).TrimEnd("/")
+                    SPSiteUrl = $params.SPSiteUrl
+                    ScopeName = $workflowProxy.GetWorkflowScopeName($site)
+                    AllowOAuthHttp = $params.AllowOAuthHttp
+                }
             }
         }
 

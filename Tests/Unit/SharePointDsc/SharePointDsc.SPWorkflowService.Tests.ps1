@@ -65,11 +65,14 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             It "return empty workflow service instance"{
-                { Get-TargetResource @testParams } | Should Throw "Specified site collection could not be found."
+                $result = Get-TargetResource @testParams
+                $result.WorkflowHostUri | Should Be $null
+                $result.SPSiteUrl | Should Be $null
+                $result.ScopeName | Should Be $null
             }
 
             It "return false from the test method"{
-                { Test-TargetResource @testParams } | Should Throw "Specified site collection could not be found."
+                Test-TargetResource @testParams | Should Be $false
             }
         }
 
