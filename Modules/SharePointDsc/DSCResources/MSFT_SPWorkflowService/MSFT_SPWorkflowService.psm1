@@ -34,7 +34,7 @@ function Get-TargetResource
 
         $returnval = @{
             WorkflowHostUri = $null
-            SPSiteUrl = $null
+            SPSiteUrl = $params.SPSiteUrl
             ScopeName = $null
             AllowOAuthHttp = $null
         }

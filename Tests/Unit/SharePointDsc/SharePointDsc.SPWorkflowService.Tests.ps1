@@ -67,7 +67,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             It "return empty workflow service instance"{
                 $result = Get-TargetResource @testParams
                 $result.WorkflowHostUri | Should Be $null
-                $result.SPSiteUrl | Should Be $null
+                $result.SPSiteUrl | Should Be "http://sites.sharepoint.com"
                 $result.ScopeName | Should Be $null
             }
 
