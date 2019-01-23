@@ -17,16 +17,12 @@ $Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointC
 
 Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
-    # Pester seems to have an issue with the mocks of New-Object when this sits inside the ModuleName
-    # scope. I have no idea why and it drives me nuts that this is here because it breaks the simple
-    # test template I had, but I didnt wanna hold things up on the rest of the test refactoring, so
-    # here it is. Will resolve later when I can understand what is going on here. - Brian
-    $mockPassword = ConvertTo-SecureString -String "password" -AsPlainText -Force
-    $farmAccount = New-Object -TypeName "System.Management.Automation.PSCredential" `
-        -ArgumentList @("username", $mockPassword)
-
     InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
         Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
+
+        $mockPassword = ConvertTo-SecureString -String "password" -AsPlainText -Force
+        $farmAccount = New-Object -TypeName "System.Management.Automation.PSCredential" `
+            -ArgumentList @("username", $mockPassword)
 
         $testParamsNewProperty = @{
             Name                = "WorkEmailNew"

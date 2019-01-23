@@ -33,7 +33,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             return $mockFarmCredential
         }
         Mock -CommandName Start-SPServiceInstance -MockWith { }
-        Mock -CommandName Stop-SPServiceInstance -MockWith { }
+        Mock -CommandName Stop-SPServiceInstance -MockWith { $Global:ServiceStatus = "Disabled" }
         Mock -CommandName Restart-Service -MockWith { }
         Mock -CommandName Add-SPDSCUserToLocalAdmin -MockWith { }
         Mock -CommandName Test-SPDSCUserIsLocalAdmin -MockWith {
@@ -436,6 +436,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                         Ensure = "Present"
                         RunOnlyWhenWriteable = $true
                     }
+                    $Global:ServiceStatus = "Online"
 
                     Mock -CommandName Get-SPServiceInstance -MockWith {
                         $spSvcInstance = [pscustomobject]@{
@@ -445,7 +446,9 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                         $spSvcInstance = $spSvcInstance | Add-Member ScriptMethod GetType {
                             return @{ Name = "ProfileSynchronizationServiceInstance" }
                         } -PassThru -Force
-                        $spSvcInstance = $spSvcInstance | Add-Member NoteProperty Status "Online" -PassThru
+                        $spSvcInstance | Add-Member ScriptProperty Status {
+                            return $Global:ServiceStatus
+                        }
                         $spSvcInstance = $spSvcInstance | Add-Member NoteProperty UserProfileApplicationGuid ([Guid]::NewGuid()) -PassThru
                         return $spSvcInstance
                     }

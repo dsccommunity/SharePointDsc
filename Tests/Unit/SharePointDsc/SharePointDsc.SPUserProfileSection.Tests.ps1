@@ -97,10 +97,10 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         }
 
         Mock -CommandName New-Object -MockWith {
-            $ProfilePropertyManager = @{"Contoso"  = $connection}
+            $ProfilePropertyManager = @{"Contoso"  = $null} # $connection is never set, so it will always be $null
             return (@{
             ProfilePropertyManager = $ProfilePropertyManager
-            ConnectionManager = $ConnnectionManager
+            ConnectionManager = $null # $ConnnectionManager is never set, so it will always be $null
             } | Add-Member -MemberType ScriptMethod GetPropertiesWithSection {
                 $Global:UpsConfigManagerGetPropertiesWithSectionCalled=$true;
 
@@ -121,13 +121,13 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                             }
                             $Global:UpsConfigManagerGetSectionByNameCalled=$true
                             return $result
-                return $userProfileSubTypePropertiesUpdateProperty;
+                return $null # $userProfileSubTypePropertiesUpdateProperty is never set, so it will always be $null;
             } -PassThru | Add-Member -MemberType ScriptMethod SetDisplayOrderBySectionName {
                 $Global:UpsConfigManagerSetDisplayOrderBySectionNameCalled=$true;
-                return $userProfileSubTypePropertiesUpdateProperty;
+                return $null # $userProfileSubTypePropertiesUpdateProperty is never set, so it will always be $null;
             } -PassThru | Add-Member -MemberType ScriptMethod CommitDisplayOrder {
                 $Global:UpsConfigManagerCommitDisplayOrderCalled=$true;
-                return $userProfileSubTypePropertiesUpdateProperty;
+                return $null # $userProfileSubTypePropertiesUpdateProperty is never set, so it will always be $null;
             } -PassThru| Add-Member -MemberType ScriptMethod RemoveSectionByName {
                 $Global:UpsConfigManagerRemoveSectionByNameCalled=$true;
                 return ($coreProperties);

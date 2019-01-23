@@ -831,6 +831,8 @@ namespace Microsoft.Office.Server.Search.Administration {
                 } -ClientOnly)
             }
 
+            $Global:SPDscContentSourceLoopCount = 0
+
             Mock -CommandName Get-SPEnterpriseSearchCrawlContentSource -MockWith {
                 $schedule = New-Object -TypeName Microsoft.Office.Server.Search.Administration.DailySchedule
                 $schedule.RepeatDuration = 1439
