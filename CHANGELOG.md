@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+* SPIncomingEmailSettings
+  * New resource for configuring incoming email settings
 * Changes to SharePointDsc unit testing
   * Implemented Strict Mode version 1 for all code run during unit tests.
 * SPAuthenticationRealm
