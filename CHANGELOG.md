@@ -12,6 +12,8 @@
   * Updated resource to allow localized permission levels
 * SPSite
   * Improved logging
+* SPServiceInstance
+  * Added -All switch to resolve "Unable to locate service application" in SP2013
 
 ## v3.1
 
