@@ -22,6 +22,8 @@
 * SPProductUpgrade
   * Fixed issue where upgrading SP2013 would not properly detect the installed
     version
+  * Fixed issue where the localized SharePoint 2019 CU was detected as a
+    Service Pack for a Language Pack
 * SPSearchAuthorativePage
   * Fixed issue where modifying search query would not target the correct
     search application
