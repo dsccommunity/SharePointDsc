@@ -33,6 +33,10 @@
   * Updated resource to allow localized permission levels
 * SPSite
   * Improved logging
+* SPUserProfileServiceApp
+  * Added warning message when MySiteHostLocation is not specified. This is
+    currently not required, which results in an error. Will be corrected in
+    SPDsc v4.0 (is a breaking change).
 * SPUserProfileSyncService
   * Fixed issue where failure to configure the sync service would not throw error
 * SPWebAppPolicy
