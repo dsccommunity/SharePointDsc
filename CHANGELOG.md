@@ -6,6 +6,8 @@
   * Implemented Strict Mode version 1 for all code run during unit tests.
 * SPAuthenticationRealm
   * New resource for setting farm authentication realm
+* SPConfigWizard
+  * Updated PSConfig parameters according recommendations in blog post of Stefan Gossner
 * SPDistributedCacheService
   * Fixed exception on Stop-SPServiceInstance with SharePoint 2019
 * SPFarm
