@@ -17,6 +17,21 @@ $Script:SP2013Features = @("Application-Server", "AS-NET-Framework",
                             "Windows-Identity-Foundation", "PowerShell-V2", "WAS", "WAS-Process-Model",
                             "WAS-NET-Environment", "WAS-Config-APIs", "XPS-Viewer")
 
+$Script:SP2016Win19Features = @("Web-Server", "Web-WebServer",
+                            "Web-Common-Http", "Web-Default-Doc", "Web-Dir-Browsing",
+                            "Web-Http-Errors", "Web-Static-Content", "Web-Health",
+                            "Web-Http-Logging", "Web-Log-Libraries", "Web-Request-Monitor",
+                            "Web-Http-Tracing", "Web-Performance", "Web-Stat-Compression",
+                            "Web-Dyn-Compression", "Web-Security", "Web-Filtering", "Web-Basic-Auth",
+                            "Web-Digest-Auth", "Web-Windows-Auth", "Web-App-Dev", "Web-Net-Ext",
+                            "Web-Net-Ext45", "Web-Asp-Net", "Web-Asp-Net45", "Web-ISAPI-Ext",
+                            "Web-ISAPI-Filter", "Web-Mgmt-Tools", "Web-Mgmt-Console",
+                            "Web-Mgmt-Compat", "Web-Metabase", "Web-Lgcy-Scripting", "Web-WMI",
+                            "NET-Framework-Features", "NET-HTTP-Activation", "NET-Non-HTTP-Activ",
+                            "NET-Framework-45-ASPNET", "NET-WCF-Pipe-Activation45",
+                            "Windows-Identity-Foundation", "WAS", "WAS-Process-Model",
+                            "WAS-NET-Environment", "WAS-Config-APIs", "XPS-Viewer")
+
 $Script:SP2016Win16Features = @("Web-Server", "Web-WebServer",
                                 "Web-Common-Http", "Web-Default-Doc", "Web-Dir-Browsing",
                                 "Web-Http-Errors", "Web-Static-Content", "Web-Health",
@@ -204,6 +219,11 @@ function Get-TargetResource
     $osVersion = Get-SPDscOSVersion
     if ($majorVersion -eq 15)
     {
+        if ($osVersion.Major -ne 6)
+        {
+            throw "SharePoint 2013 only supports Windows Server 2012 R2 and below"
+        }
+
         $WindowsFeatures = Get-WindowsFeature -Name $Script:SP2013Features
     }
     elseif ($majorVersion -eq 16)
@@ -212,31 +232,42 @@ function Get-TargetResource
         {
             if ($osVersion.Major -eq 10)
             {
-                # Server 2016
-                $WindowsFeatures = Get-WindowsFeature -Name $Script:SP2016Win16Features
+                if ($osVersion.Build -lt 17763)
+                {
+                    Write-Verbose -Message "OS Version: Windows Server 2016"
+                    $WindowsFeatures = Get-WindowsFeature -Name $Script:SP2016Win16Features
+                }
+                else
+                {
+                    Write-Verbose -Message "OS Version: Windows Server 2019"
+                    $WindowsFeatures = Get-WindowsFeature -Name $Script:SP2016Win19Features
+                }
             }
             elseif ($osVersion.Major -eq 6 -and $osVersion.Minor -eq 3)
             {
-                # Server 2012 R2
+                Write-Verbose -Message "OS Version: Windows Server 2012 R2"
                 $WindowsFeatures = Get-WindowsFeature -Name $Script:SP2016Win12r2Features
             }
             else
             {
-                throw "SharePoint 2016 only supports Windows Server 2016 or 2012 R2"
+                throw "SharePoint 2016 only supports Windows Server 2019, 2016 or 2012 R2"
             }
         }
         # SharePoint 2019
         elseif($buildVersion -ge 5000)
         {
-            if ($osVersion.Major -eq 11)
+            if ($osVersion.Major -eq 10)
             {
-                # Server 2019
-                $WindowsFeatures = Get-WindowsFeature -Name $Script:SP2019Win19Features
-            }
-            elseif ($osVersion.Major -eq 10)
-            {
-                # Server 2016
-                $WindowsFeatures = Get-WindowsFeature -Name $Script:SP2019Win16Features
+                if ($osVersion.Build -lt 17763)
+                {
+                    Write-Verbose -Message "OS Version: Windows Server 2016"
+                    $WindowsFeatures = Get-WindowsFeature -Name $Script:SP2019Win16Features
+                }
+                else
+                {
+                    Write-Verbose -Message "OS Version: Windows Server 2019"
+                    $WindowsFeatures = Get-WindowsFeature -Name $Script:SP2019Win19Features
+                }
             }
             else
             {
@@ -553,10 +584,14 @@ function Set-TargetResource
             }
         }
         10 {
-            Write-Verbose -Message "Operating System: Windows Server 2016"
-        }
-        11 {
-            Write-Verbose -Message "Operating System: Windows Server 2019"
+            if ($osVersion.Build -lt 17763)
+            {
+                Write-Verbose -Message "Operating System: Windows Server 2016"
+            }
+            else
+            {
+                Write-Verbose -Message "Operating System: Windows Server 2019"
+            }
         }
     }
 
@@ -619,8 +654,16 @@ function Set-TargetResource
                                 "WCFDataServices56","DotNetFx","MSVCRT11","MSVCRT14","ODBC")
             if ($osVersion.Major -eq 10)
             {
-                # Server 2016
-                $WindowsFeatures = Get-WindowsFeature -Name $Script:SP2016Win16Features
+                if ($osVersion.Build -lt 17763)
+                {
+                    # Server 2016
+                    $WindowsFeatures = Get-WindowsFeature -Name $Script:SP2016Win16Features
+                }
+                else
+                {
+                    # Server 2019
+                    $WindowsFeatures = Get-WindowsFeature -Name $Script:SP2016Win19Features
+                }
             }
             elseif ($osVersion.Major -eq 6 -and $osVersion.Minor -eq 3)
             {
@@ -639,15 +682,18 @@ function Set-TargetResource
             $requiredParams = @("SQLNCli","Sync","AppFabric","IDFX11","MSIPCClient","KB3092423",
             "WCFDataServices56","DotNet472","MSVCRT11","MSVCRT141")
 
-            if ($osVersion.Major -eq 11)
+            if ($osVersion.Major -eq 10)
             {
-                # Server 2019
-                $WindowsFeatures = Get-WindowsFeature -Name $Script:SP2019Win19Features
-            }
-            elseif ($osVersion.Major -eq 10)
-            {
-                # Server 2016
-                $WindowsFeatures = Get-WindowsFeature -Name $Script:SP2019Win16Features
+                if ($osVersion.Build -lt 17763)
+                {
+                    # Server 2016
+                    $WindowsFeatures = Get-WindowsFeature -Name $Script:SP2019Win16Features
+                }
+                else
+                {
+                    # Server 2019
+                    $WindowsFeatures = Get-WindowsFeature -Name $Script:SP2019Win19Features
+                }
             }
             else
             {

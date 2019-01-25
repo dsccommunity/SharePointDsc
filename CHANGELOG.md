@@ -17,6 +17,8 @@
     contained web application resources.
 * SPInstallPrereqs
   * Improved logging
+  * Corrected detection for Windows Server 2019
+  * Corrected support for Windows Server 2019 for SharePoint 2016
 * SPProductUpgrade
   * Fixed issue where upgrading SP2013 would not properly detect the installed
     version
