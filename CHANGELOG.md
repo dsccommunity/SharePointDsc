@@ -27,6 +27,8 @@
   * Updated resource to allow localized permission levels
 * SPSite
   * Improved logging
+* SPUserProfileProperty
+  * Fix user profile property mappings does not work
 * SPUserProfileSyncService
   * Fixed issue where failure to configure the sync service would not throw error
 * SPWebAppPolicy
