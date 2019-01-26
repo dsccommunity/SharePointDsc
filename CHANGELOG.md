@@ -12,6 +12,7 @@
   * Fixed exception on Stop-SPServiceInstance with SharePoint 2019
 * SPFarm
   * Improved logging
+  * Added ability to manage the Developer Dashboard settings
 * SPFarmSolution
   * Fixed issue where uninstalling a solution would not work as expected if it
     contained web application resources.
