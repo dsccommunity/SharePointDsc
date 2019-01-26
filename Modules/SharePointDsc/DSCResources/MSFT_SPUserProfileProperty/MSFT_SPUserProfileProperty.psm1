@@ -460,7 +460,7 @@ function Set-TargetResource
 
         $userProfileProperty = $userProfileSubType.Properties.GetPropertyByName($params.Name)
 
-        if ($null -ne $userProfileProperty `
+        if ($null -ne $userProfileProperty -and $params.ContainsKey("Type") `
                 -and $userProfileProperty.CoreProperty.Type -ne $params.Type)
         {
             throw ("Can't change property type. Current Type is " + `
@@ -615,7 +615,7 @@ function Set-TargetResource
 
         if ($params.ContainsKey("PropertyMappings"))
         {
-            foreach ($propertyMapping in $PropertyMappings)
+            foreach ($propertyMapping in $params.PropertyMappings)
             {
                 $syncConnection = $userProfileConfigManager.ConnectionManager[$propertyMapping.ConnectionName]
 
@@ -630,7 +630,7 @@ function Set-TargetResource
                 }
 
                 if ($null -eq $currentMapping `
-                        -or ($currentMapping.DataSourcePropertyName -ne $params.MappingPropertyName) `
+                        -or ($currentMapping.DataSourcePropertyName -ne $propertyMapping.PropertyName) `
                         -or ($currentMapping.IsImport `
                             -and $propertyMapping.Direction -eq "Export")
                 )

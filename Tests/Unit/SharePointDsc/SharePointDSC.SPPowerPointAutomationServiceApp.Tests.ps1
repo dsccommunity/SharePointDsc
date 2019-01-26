@@ -1,7 +1,7 @@
 [CmdletBinding()]
 param(
     [Parameter()]
-    [string] 
+    [string]
     $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
                                          -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
                                          -Resolve)
@@ -21,7 +21,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         # Initialize tests
         $getTypeFullName = "Microsoft.Office.Server.PowerPoint.Administration.PowerPointConversionServiceApplication"
 
-        # Mocks for all 
+        # Mocks for all
         Mock -CommandName Get-SPServiceApplication -MockWith { }
         Mock -CommandName Get-SPServiceApplicationPool -MockWith { }
         Mock -CommandName Get-SPServiceApplicationProxy -MockWith { }
@@ -30,7 +30,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         Mock -CommandName New-SPPowerPointConversionServiceApplicationProxy -MockWith { }
         Mock -CommandName Remove-SPServiceApplication -MockWith { }
 
-        # Test contexts 
+        # Test contexts
         Context -Name "When Ensure is Absent and we specify additional paramters" -Fixture {
             $testParams = @{
                 Name = "Power Point Automation Service Application"
@@ -43,12 +43,12 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 WorkerTimeoutInSeconds = 300
                 Ensure = "Absent"
             }
-  
-            It "Should throw an exception as additional parameters are not allowed when Ensure = 'Absent'" { 
+
+            It "Should throw an exception as additional parameters are not allowed when Ensure = 'Absent'" {
                 { Get-TargetResource @testParams } | Should throw "You cannot use any of the parameters when Ensure is specified as Absent"
                 { Test-TargetResource @testParams } | Should throw "You cannot use any of the parameters when Ensure is specified as Absent"
-                { Set-TargetResource @testParams } | Should throw "You cannot use any of the parameters when Ensure is specified as Absent"    
-            } 
+                { Set-TargetResource @testParams } | Should throw "You cannot use any of the parameters when Ensure is specified as Absent"
+            }
         }
 
         Context -Name "When Ensure is Present but we don't specify an ApplicationPool" -Fixture {
@@ -63,18 +63,18 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Ensure = "Present"
             }
 
-            Mock -CommandName Get-SPServiceApplicationPool -MockWith { 
+            Mock -CommandName Get-SPServiceApplicationPool -MockWith {
                 return $null
-            } 
-  
-            It "Should throw an exception as additional parameters are not allowed when Ensure = 'Absent'" { 
+            }
+
+            It "Should throw an exception as additional parameters are not allowed when Ensure = 'Absent'" {
                 { Get-TargetResource @testParams } | Should throw "An Application Pool is required to configure the PowerPoint Automation Service Application"
                 { Test-TargetResource @testParams } | Should throw "An Application Pool is required to configure the PowerPoint Automation Service Application"
                 { Set-TargetResource @testParams } | Should throw "An Application Pool is required to configure the PowerPoint Automation Service Application"
-            } 
+            }
         }
 
-        
+
 
         Context -Name "When no service applications exist in the current farm" -Fixture {
             $testParams = @{
@@ -89,14 +89,14 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Ensure = "Present"
             }
 
-            Mock -CommandName Get-SPServiceApplicationPool -MockWith { 
-                return @{ 
-                    Name = $testParams.ApplicationPool 
-                } 
+            Mock -CommandName Get-SPServiceApplicationPool -MockWith {
+                return @{
+                    Name = $testParams.ApplicationPool
+                }
             }
-                              
-            Mock -CommandName New-SPPowerPointConversionServiceApplication -MockWith { 
-                 $spServiceApp = [PSCustomObject]@{ 
+
+            Mock -CommandName New-SPPowerPointConversionServiceApplication -MockWith {
+                 $spServiceApp = [PSCustomObject]@{
                     DisplayName = $testParams.Name
                     ApplicationPool = @{ Name = $testParams.ApplicationPool }
                     CacheExpirationPeriodInSeconds = 0
@@ -107,8 +107,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 }
                 $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod `
                                            -Name Update `
-                                           -Value {  
-                                                return @{ 
+                                           -Value {
+                                                return @{
                                                     DisplayName = $testParams.Name
                                                     ApplicationPool = @{ Name = $testParams.ApplicationPool }
                                                     CacheExpirationPeriodInSeconds = $testParams.CacheExpirationPeriodInSeconds
@@ -116,18 +116,18 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                                                     WorkerKeepAliveTimeoutInSeconds = $testParams.WorkerKeepAliveTimeoutInSeconds
                                                     WorkerProcessCount = $testParams.WorkerProcessCount
                                                     WorkerTimeoutInSeconds = $testParams.WorkerTimeoutInSeconds
-                                                }  
-                                            } -PassThru -Force 
+                                                }
+                                            } -PassThru -Force
                 return $($spServiceApp)
-                
+
             }
             Mock -CommandName New-SPPowerPointConversionServiceApplicationProxy -MockWith { }
-            Mock -CommandName Get-SPServiceApplication -MockWith { 
-                return $null 
+            Mock -CommandName Get-SPServiceApplication -MockWith {
+                return $null
             }
-            
+
             It "Should return absent from the Get method" {
-                (Get-TargetResource @testParams).Ensure | Should Be "Absent" 
+                (Get-TargetResource @testParams).Ensure | Should Be "Absent"
             }
             It "Should return false when the Test method is called" {
                 Test-TargetResource @testParams | Should Be $false
@@ -154,15 +154,15 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Ensure = "Present"
             }
 
-          
-            Mock -CommandName Get-SPServiceApplicationPool -MockWith { 
-                return @{ 
-                    Name = $testParams.ApplicationPool 
-                } 
+
+            Mock -CommandName Get-SPServiceApplicationPool -MockWith {
+                return @{
+                    Name = $testParams.ApplicationPool
+                }
             }
 
-            Mock -CommandName New-SPPowerPointConversionServiceApplication -MockWith { 
-                 $spServiceApp = [PSCustomObject]@{ 
+            Mock -CommandName New-SPPowerPointConversionServiceApplication -MockWith {
+                 $spServiceApp = [PSCustomObject]@{
                     DisplayName = $testParams.Name
                     ApplicationPool = @{ Name = $testParams.ApplicationPool }
                     CacheExpirationPeriodInSeconds = 0
@@ -173,8 +173,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 }
                 $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod `
                                            -Name Update `
-                                           -Value {  
-                                                return @{ 
+                                           -Value {
+                                                return @{
                                                     DisplayName = $testParams.Name
                                                     ApplicationPool = @{ Name = $testParams.ApplicationPool }
                                                     CacheExpirationPeriodInSeconds = $testParams.CacheExpirationPeriodInSeconds
@@ -182,35 +182,35 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                                                     WorkerKeepAliveTimeoutInSeconds = $testParams.WorkerKeepAliveTimeoutInSeconds
                                                     WorkerProcessCount = $testParams.WorkerProcessCount
                                                     WorkerTimeoutInSeconds = $testParams.WorkerTimeoutInSeconds
-                                                }  
-                                            } -PassThru -Force 
+                                                }
+                                            } -PassThru -Force
                 return $($spServiceApp)
-                
+
             }
-            
+
             Mock -CommandName New-SPPowerPointConversionServiceApplicationProxy -MockWith { }
-            
+
             Mock -CommandName Get-SPServiceApplication -MockWith {
-                $spServiceApp = [PSCustomObject]@{ 
-                                    DisplayName = $testParams.Name 
+                $spServiceApp = [PSCustomObject]@{
+                                    DisplayName = $testParams.Name
                                     ApplicationPool = @{ Name = $testParams.ApplicationPool }
-                                } 
+                                }
                 $spServiceApp | Add-Member -MemberType ScriptMethod `
                                            -Name GetType `
-                                           -Value {  
-                                                return @{ 
-                                                    FullName = "Microsoft.Office.UnKnownWebServiceApplication" 
-                                                }  
-                                            } -PassThru -Force 
-                return $($spServiceApp) 
+                                           -Value {
+                                                return @{
+                                                    FullName = "Microsoft.Office.UnKnownWebServiceApplication"
+                                                }
+                                            } -PassThru -Force
+                return $($spServiceApp)
             }
 
             It "Should return 'Absent' from the Get method" {
-                (Get-TargetResource @testParams).Ensure | Should Be "Absent" 
+                (Get-TargetResource @testParams).Ensure | Should Be "Absent"
             }
             It "Should return 'false' from the Test method" {
-                Test-TargetResource @testParams | Should Be $false 
-            }  
+                Test-TargetResource @testParams | Should Be $false
+            }
             It "Should create a new Power Point Automation Service Application from the Set method" {
                 Set-TargetResource @testParams
                 Assert-MockCalled  Get-SPServiceApplicationPool
@@ -232,17 +232,17 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Ensure = "Present"
             }
 
-            Mock -CommandName Get-SPServiceApplication -MockWith { 
-                $spServiceApp = [PSCustomObject]@{ 
-                                    DisplayName = $testParams.Name 
-                                } 
+            Mock -CommandName Get-SPServiceApplication -MockWith {
+                $spServiceApp = [PSCustomObject]@{
+                                    DisplayName = $testParams.Name
+                                }
                 $spServiceApp | Add-Member -MemberType ScriptMethod `
                                            -Name GetType `
-                                           -Value {  
-                                                return @{ 
-                                                    FullName = "Microsoft.Office.UnKnownWebServiceApplication" 
-                                                }  
-                                            } -PassThru -Force 
+                                           -Value {
+                                                return @{
+                                                    FullName = "Microsoft.Office.UnKnownWebServiceApplication"
+                                                }
+                                            } -PassThru -Force
                 return $($spServiceApp)
             }
 
@@ -251,11 +251,11 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             It "Should return 'Absent' from the Get method" {
-                (Get-TargetResource @testParams).Ensure | Should Be "Absent" 
+                (Get-TargetResource @testParams).Ensure | Should Be "Absent"
             }
             It "Should return 'false' from the Test method" {
-                Test-TargetResource @testParams | Should Be $false 
-            }  
+                Test-TargetResource @testParams | Should Be $false
+            }
             It "Should create a new Power Point Automation Service Application from the Set method" {
                  { Set-TargetResource @testParams } | Should throw "Specified application pool does not exist"
             }
@@ -274,8 +274,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Ensure = "Present"
             }
 
-            Mock -CommandName Get-SPServiceApplication -MockWith { 
-                $spServiceApp = [PSCustomObject]@{ 
+            Mock -CommandName Get-SPServiceApplication -MockWith {
+                $spServiceApp = [PSCustomObject]@{
                     DisplayName = $testParams.Name
                     ApplicationPool = @{ Name = $testParams.ApplicationPool }
                     CacheExpirationPeriodInSeconds =  $testParams.CacheExpirationPeriodInSeconds
@@ -286,12 +286,12 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 }
                 $spServiceApp | Add-Member -MemberType ScriptMethod `
                                            -Name GetType `
-                                           -Value {  
-                                                return @{ 
-                                                    FullName = $getTypeFullName 
-                                                }  
-                                            } -PassThru -Force 
-                
+                                           -Value {
+                                                return @{
+                                                    FullName = $getTypeFullName
+                                                }
+                                            } -PassThru -Force
+
                 $spServiceApp | Add-Member -MemberType ScriptMethod `
                                             -Name IsConnected `
                                             -Value {
@@ -329,8 +329,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Ensure = "Present"
             }
 
-            Mock -CommandName Get-SPServiceApplication -MockWith { 
-                $spServiceApp = [PSCustomObject]@{ 
+            Mock -CommandName Get-SPServiceApplication -MockWith {
+                $spServiceApp = [PSCustomObject]@{
                     DisplayName = $testParams.Name
                     ApplicationPool = @{ Name = $testParams.ApplicationPool }
                     CacheExpirationPeriodInSeconds = $testParams.CacheExpirationPeriodInSeconds
@@ -338,15 +338,15 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     WorkerKeepAliveTimeoutInSeconds = $testParams.WorkerKeepAliveTimeoutInSeconds
                     WorkerProcessCount = $testParams.WorkerProcessCount
                     WorkerTimeoutInSeconds = $testParams.WorkerTimeoutInSeconds
-             
+
                 }
                 $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod `
                                            -Name GetType `
-                                           -Value {  
-                                                return @{ 
-                                                    FullName = $getTypeFullName 
-                                                }  
-                                            } -PassThru -Force 
+                                           -Value {
+                                                return @{
+                                                    FullName = $getTypeFullName
+                                                }
+                                            } -PassThru -Force
                  $spServiceApp = $spServiceApp | Add-Member -MemberType SCriptMethod `
                                             -Name IsConnected `
                                             -Value {
@@ -354,8 +354,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                                             } -PassThru -Force
                 $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod `
                                            -Name Update `
-                                           -Value {  
-                                                return @{ 
+                                           -Value {
+                                                return @{
                                                     DisplayName = $testParams.Name
                                                     ApplicationPool = @{ Name = $testParams.ApplicationPool }
                                                     CacheExpirationPeriodInSeconds = $testParams.CacheExpirationPeriodInSeconds
@@ -363,19 +363,19 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                                                     WorkerKeepAliveTimeoutInSeconds = $testParams.WorkerKeepAliveTimeoutInSeconds
                                                     WorkerProcessCount = $testParams.WorkerProcessCount
                                                     WorkerTimeoutInSeconds = $testParams.WorkerTimeoutInSeconds
-                                                }  
-                                            } -PassThru -Force 
-                
+                                                }
+                                            } -PassThru -Force
+
                 return $($spServiceApp)
             }
 
-             Mock -CommandName Get-SPServiceApplicationPool -MockWith { 
-                return @{ 
-                    Name = $testParams.ApplicationPool 
-                } 
+             Mock -CommandName Get-SPServiceApplicationPool -MockWith {
+                return @{
+                    Name = $testParams.ApplicationPool
+                }
             }
 
-            
+
 
             Mock -CommandName Get-SPServiceApplicationProxy -MockWith {
                 $spServiceAppProxy = [PSCustomObject]@{
@@ -386,7 +386,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                                         -Value {
                                             return $null
                                         } -PassThru -Force
-                
+
                 return $spServiceAppProxy
             }
 
@@ -416,18 +416,18 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Ensure = "Present"
             }
 
-            Mock -CommandName Get-SPServiceApplication -MockWith { 
-                $spServiceApp = [PSCustomObject]@{ 
+            Mock -CommandName Get-SPServiceApplication -MockWith {
+                $spServiceApp = [PSCustomObject]@{
                     DisplayName = $testParams.Name
                     ApplicationPool = @{ Name = "Other SharePoint Services App Pool" }
                 }
                 $spServiceApp | Add-Member -MemberType ScriptMethod `
                                            -Name GetType `
-                                           -Value {  
-                                                return @{ 
-                                                    FullName = $getTypeFullName 
-                                                }  
-                                            } -PassThru -Force 
+                                           -Value {
+                                                return @{
+                                                    FullName = $getTypeFullName
+                                                }
+                                            } -PassThru -Force
                 return $spServiceApp
             }
 
@@ -438,56 +438,56 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Test-TargetResource @testParams | Should Be $false
             }
         }
-        
+
         Context -Name "When the service application exists but it shouldn't" -Fixture {
             $testParams = @{
                 Name = "Power Point Automation Service Application"
                 Ensure = "Absent"
             }
 
-            Mock -CommandName Get-SPServiceApplication -MockWith { 
-                $spServiceApp = [PSCustomObject]@{ 
+            Mock -CommandName Get-SPServiceApplication -MockWith {
+                $spServiceApp = [PSCustomObject]@{
                     DisplayName = $testParams.Name
                     ApplicationPool = @{ Name = $testParams.ApplicationPool }
                 }
                 $spServiceApp | Add-Member -MemberType ScriptMethod `
                                            -Name GetType `
-                                           -Value {  
-                                                return @{ 
-                                                    FullName = $getTypeFullName 
-                                                }  
-                                            } -PassThru -Force 
+                                           -Value {
+                                                return @{
+                                                    FullName = $getTypeFullName
+                                                }
+                                            } -PassThru -Force
                 return $spServiceApp
             }
-            
+
             It "Should return present from the Get method" {
-                (Get-TargetResource @testParams).Ensure | Should Be "Present" 
+                (Get-TargetResource @testParams).Ensure | Should Be "Present"
             }
-            
+
             It "Should return false when the Test method is called" {
                 Test-TargetResource @testParams | Should Be $false
             }
-            
+
             It "Should call the remove service application cmdlet in the set method" {
                 Set-TargetResource @testParams
                 Assert-MockCalled Remove-SPServiceApplication
             }
         }
-        
+
         Context -Name "When the service application doesn't exist and it shouldn't" -Fixture {
             $testParams = @{
                 Name = "Power Point Automation Service Application"
                 Ensure = "Absent"
             }
 
-            Mock -CommandName Get-SPServiceApplication -MockWith { 
-                return $null 
+            Mock -CommandName Get-SPServiceApplication -MockWith {
+                return $null
             }
-            
+
             It "Should return absent from the Get method" {
-                (Get-TargetResource @testParams).Ensure | Should Be "Absent" 
+                (Get-TargetResource @testParams).Ensure | Should Be "Absent"
             }
-            
+
             It "Should return true when the Test method is called" {
                 Test-TargetResource @testParams | Should Be $true
             }
@@ -506,8 +506,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Ensure = "Present"
             }
 
-            Mock -CommandName Get-SPServiceApplication -MockWith { 
-                return $nulls
+            Mock -CommandName Get-SPServiceApplication -MockWith {
+                return $null
             }
 
             It "Should return Absent from the get method" {
@@ -518,7 +518,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Test-TargetResource @testParams | Should Be $false
             }
         }
-        
+
     }
 }
 

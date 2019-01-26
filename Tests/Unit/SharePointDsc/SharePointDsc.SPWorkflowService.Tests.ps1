@@ -21,6 +21,30 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         # Initialize tests
 
         # Mocks for all contexts
+        Mock -CommandName Get-SPWorkflowServiceApplicationProxy -MockWith{
+            return @(@{
+                Value = $true
+            } | Add-Member -MemberType ScriptMethod `
+                                     -Name GetHostname `
+                                     -Value {
+                                        return "http://workflow.sharepoint.com"
+                                    } -PassThru `
+              | Add-Member -MemberType ScriptMethod `
+                                    -Name GetWorkflowScopeName `
+                                    -Value {
+                                        return "SharePoint"
+                                    } -PassThru)
+        }
+
+        Mock -CommandName Get-SPSite -MockWith {
+            return @(
+                @{
+                    Url = "http://sites.sharepoint.com"
+                }
+            )
+        }
+
+        Mock -CommandName Register-SPWorkflowService -MockWith{ }
 
         # Test contexts
         Context -Name "Specified Site Collection does not exist" -Fixture {
@@ -41,7 +65,10 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             It "return empty workflow service instance"{
-                (Get-TargetResource @testParams).WorkflowHostUri  | Should Be $null
+                $result = Get-TargetResource @testParams
+                $result.WorkflowHostUri | Should Be $null
+                $result.SPSiteUrl | Should Be "http://sites.sharepoint.com"
+                $result.ScopeName | Should Be $null
             }
 
             It "return false from the test method"{
@@ -56,35 +83,66 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 AllowOAuthHttp = $true
             }
 
-            Mock -CommandName Get-SPSite -MockWith {return @(@{
-                    Url = "http://sites.sharepoint.com"
-                }
-            )}
-
             Mock -CommandName Register-SPWorkflowService -MockWith{
                 return @(@{
                     Value = $true
                 })
             }
 
-            Mock -CommandName Get-SPWorkflowServiceApplicationProxy -MockWith{
-                return @(@{
-                    Value = $true
-                } | Add-Member -MemberType ScriptMethod `
-                                         -Name GetHostname `
-                                         -Value {
-                                            return "http://workflow.sharepoint.com"
-                                        } -PassThru)
+            It "properly creates the workflow service proxy" {
+                Set-TargetResource @testParams
+                Assert-MockCalled Register-SPWorkflowService -ParameterFilter {$ScopeName -eq $null -and $WorkflowHostUri -eq "http://workflow.sharepoint.com"}
+            }
+
+            It "returns the workflow service instance" {
+                $result = Get-TargetResource @testParams
+                $result.WorkflowHostUri | Should Be "http://workflow.sharepoint.com"
+                $result.SPSiteUrl = "http://sites.sharepoint.com"
+                $result.ScopeName | Should Be "SharePoint"
+                Assert-MockCalled Get-SPWorkflowServiceApplicationProxy
+            }
+
+            It "return true from the test method"{
+                Test-TargetResource @testParams |  Should Be $true
+            }
+        }
+
+        Context -Name "workflow host URL is incorrect" -Fixture {
+            $testParams = @{
+                WorkflowHostUri = "http://new-workflow.sharepoint.com"
+                ScopeName = "SharePoint"
+                SPSiteUrl = "http://sites.sharepoint.com"
+                AllowOAuthHttp = $true
             }
 
             It "properly creates the workflow service proxy" {
                 Set-TargetResource @testParams
-                Assert-MockCalled Register-SPWorkflowService
+                Assert-MockCalled Register-SPWorkflowService -ParameterFilter {$ScopeName -eq "SharePoint" -and $WorkflowHostUri -eq "http://new-workflow.sharepoint.com"}
             }
 
-            It "returns the workflow service instance" {
-                (Get-TargetResource @testParams).WorkflowHostUri | Should Be "http://workflow.sharepoint.com"
-                Assert-MockCalled Get-SPWorkflowServiceApplicationProxy
+            It "return false from the test method"{
+                Test-TargetResource @testParams |  Should Be $false
+            }
+        }
+
+        Context -Name "workflow scope name is incorrect" -Fixture {
+            $testParams = @{
+                WorkflowHostUri = "http://workflow.sharepoint.com"
+                ScopeName = "AnotherScope"
+                SPSiteUrl = "http://sites.sharepoint.com"
+                AllowOAuthHttp = $true
+            }
+
+            It "return false from the test method"{
+                Test-TargetResource @testParams |  Should Be $false
+            }
+        }
+
+        Context -Name "workflow host URL contains a trailing forward slash" -Fixture {
+            $testParams = @{
+                WorkflowHostUri = "http://workflow.sharepoint.com/"
+                SPSiteUrl = "http://sites.sharepoint.com"
+                AllowOAuthHttp = $true
             }
 
             It "return true from the test method"{

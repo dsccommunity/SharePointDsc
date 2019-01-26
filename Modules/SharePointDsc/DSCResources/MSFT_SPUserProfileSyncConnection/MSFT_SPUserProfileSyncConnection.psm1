@@ -299,6 +299,8 @@ function Set-TargetResource
         }
     }
 
+    $installedVersion = Get-SPDSCInstalledProductVersion
+
     if ($PSBoundParameters.ContainsKey("Port") -eq $false)
     {
         $PSBoundParameters.Port = $Port

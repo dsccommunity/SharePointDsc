@@ -393,7 +393,7 @@ function Invoke-SPDSCCommand
 
         try
         {
-            $result = Invoke-Command @invokeArgs -Verbose
+            return Invoke-Command @invokeArgs -Verbose
         }
         catch
         {
@@ -408,7 +408,6 @@ function Invoke-SPDSCCommand
                 throw $_
             }
         }
-        return $result
     }
     else
     {
@@ -443,7 +442,7 @@ function Invoke-SPDSCCommand
 
         try
         {
-            $result = Invoke-Command @invokeArgs -Verbose
+            return Invoke-Command @invokeArgs -Verbose
         }
         catch
         {
@@ -463,7 +462,6 @@ function Invoke-SPDSCCommand
         {
             Remove-PSSession -Session $session
         }
-        return $result
     }
 }
 

@@ -36,7 +36,7 @@ function Get-TargetResource
     Write-Verbose -Message "Getting web application authentication for '$WebAppUrl'"
 
     $nullreturn = @{
-        WebAppUrl = $params.Name
+        WebAppUrl = $WebAppUrl
         Default   = $null
         Intranet  = $null
         Internet  = $null
@@ -108,7 +108,7 @@ function Get-TargetResource
         if ($null -eq $wa)
         {
             return @{
-                WebAppUrl = $params.Name
+                WebAppUrl = $params.WebAppUrl
                 Default   = $null
                 Intranet  = $null
                 Internet  = $null

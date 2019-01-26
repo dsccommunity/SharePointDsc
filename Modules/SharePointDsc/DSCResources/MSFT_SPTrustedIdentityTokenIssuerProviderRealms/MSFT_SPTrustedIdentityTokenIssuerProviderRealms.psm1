@@ -304,14 +304,15 @@ function Get-ProviderRealmsStatus()
         }
         else
         {
+            $update = @{ }
+            $inclusion = @{ }
+
             if ($includeRealms.Count -gt 0)
             {
-                $inclusion = @{ }
                 $includeRealms.Keys | Where-Object {
                     !$currentRealms.ContainsKey($_) -and $currentRealms[$_] -ne $includeRealms[$_]
                 } | ForEach-Object { $inclusion.Add("$($_)", "$($includeRealms[$_])") }
 
-                $update = @{ }
                 $includeRealms.Keys | Where-Object {
                     $currentRealms.ContainsKey($_) -and $currentRealms[$_] -ne $includeRealms[$_]
                 } | ForEach-Object { $update.Add("$($_)", "$($includeRealms[$_])") }
@@ -327,9 +328,10 @@ function Get-ProviderRealmsStatus()
                 $inclusion.Keys | ForEach-Object { $currentRealms.Add($_, $inclusion[$_]) }
             }
 
+            $exclusion = @{ }
+
             if ($excludeRealms.Count -gt 0)
             {
-                $exclusion = @{ }
 
                 $excludeRealms.Keys | Where-Object {
                     $currentRealms.ContainsKey($_) -and $currentRealms[$_] -eq $excludeRealms[$_]
