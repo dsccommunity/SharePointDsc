@@ -243,6 +243,8 @@ function Set-TargetResource
                 $runParams.Add("Confirm", $false)
                 $runParams.Add("Verbose", $false)
 
+                $solution = Get-SPSolution -Identity $params.Name -Verbose:$false
+
                 if ($solution.ContainsWebApplicationResource)
                 {
                     if ($null -eq $webApps -or $webApps.Length -eq 0)

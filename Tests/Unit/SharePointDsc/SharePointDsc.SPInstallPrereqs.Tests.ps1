@@ -514,7 +514,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
         }
 
-        if ($majorBuildNumber -eq 15)
+        if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 15)
         {
             Context -Name "SharePoint 2013 is installing on a server with .NET 4.6" -Fixture {
                 $testParams = @{

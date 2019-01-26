@@ -200,14 +200,13 @@ function Set-TargetResource
             {
                 $params.Remove("InstallAccount") | Out-Null
             }
-            if ($params.ContainsKey("ProxyName"))
+
+            $pName = "$($params.Name) Proxy"
+
+            if ($params.ContainsKey("ProxyName") -and $null -ne $params.ProxyName)
             {
                 $pName = $params.ProxyName
                 $params.Remove("ProxyName") | Out-Null
-            }
-            if ($null -eq $pName)
-            {
-                $pName = "$($params.Name) Proxy"
             }
 
             $app = New-SPWorkManagementServiceApplication @params

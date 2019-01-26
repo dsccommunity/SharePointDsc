@@ -13,6 +13,10 @@ function Get-TargetResource
         $SPSiteUrl,
 
         [Parameter()]
+        [System.String]
+        $ScopeName,
+
+        [Parameter()]
         [System.Boolean]
         $AllowOAuthHttp,
 
@@ -30,17 +34,29 @@ function Get-TargetResource
 
         $returnval = @{
             WorkflowHostUri = $null
-            SPSiteUrl = $null
+            SPSiteUrl = $params.SPSiteUrl
+            ScopeName = $null
             AllowOAuthHttp = $null
         }
-        $workflowProxy = Get-SPWorkflowServiceApplicationProxy
 
-        if($null -ne $workflowProxy)
+        $site = Get-SPSite $params.SPSiteUrl
+
+        if ($null -eq $site)
         {
-            $returnval = @{
-                WorkflowHostUri = $workflowProxy.GetHostname($SPSiteUrl)
-                SPSiteUrl = $params.SPSiteUrl
-                AllowOAuthHttp = $params.AllowOAuthHttp
+            Write-Verbose "Specified site collection could not be found."
+        }
+        else
+        {
+            $workflowProxy = Get-SPWorkflowServiceApplicationProxy
+
+            if ($null -ne $workflowProxy)
+            {
+                $returnval = @{
+                    WorkflowHostUri = $workflowProxy.GetHostname($site).TrimEnd("/")
+                    SPSiteUrl = $params.SPSiteUrl
+                    ScopeName = $workflowProxy.GetWorkflowScopeName($site)
+                    AllowOAuthHttp = $params.AllowOAuthHttp
+                }
             }
         }
 
@@ -61,6 +77,10 @@ function Set-TargetResource
         [Parameter(Mandatory = $true)]
         [System.String]
         $SPSiteUrl,
+
+        [Parameter()]
+        [System.String]
+        $ScopeName,
 
         [Parameter()]
         [System.Boolean]
@@ -88,9 +108,18 @@ function Set-TargetResource
 
         Write-Verbose -Message "Processing changes"
 
-        Register-SPWorkflowService -WorkflowHostUri $params.WorkflowHostUri `
-            -SPSite $params.SPSiteUrl `
-            -AllowOAuthHttp:$params.AllowOAuthHttp -Force
+        $workflowServiceParams = @{
+            WorkflowHostUri = $params.WorkflowHostUri.TrimEnd("/")
+            SPSite = $site
+            AllowOAuthHttp = $params.AllowOAuthHttp
+        }
+
+        if ($params.ContainsKey("ScopeName"))
+        {
+            $workflowServiceParams.Add("ScopeName", $params.ScopeName)
+        }
+
+        Register-SPWorkflowService @workflowServiceParams -Force
     }
 }
 
@@ -107,6 +136,10 @@ function Test-TargetResource
         [Parameter(Mandatory = $true)]
         [System.String]
         $SPSiteUrl,
+
+        [Parameter()]
+        [System.String]
+        $ScopeName,
 
         [Parameter()]
         [System.Boolean]
@@ -126,9 +159,17 @@ function Test-TargetResource
         return $false
     }
 
+    $PSBoundParameters.WorkflowHostUri = $PSBoundParameters.WorkflowHostUri.TrimEnd("/")
+    $valuesToCheck = @("WorkflowHostUri")
+
+    if ($ScopeName)
+    {
+        $valuesToCheck += "ScopeName"
+    }
+
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
     -DesiredValues $PSBoundParameters `
-    -ValuesToCheck @("Ensure")
+    -ValuesToCheck $valuesToCheck
 }
 
 Export-ModuleMember -Function *-TargetResource
