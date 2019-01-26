@@ -34,6 +34,8 @@
   * Updated resource to allow localized permission levels
 * SPSite
   * Improved logging
+* SPUserProfileProperty
+  * Fix user profile property mappings does not work
 * SPUserProfileServiceApp
   * Added warning message when MySiteHostLocation is not specified. This is
     currently not required, which results in an error. Will be corrected in
