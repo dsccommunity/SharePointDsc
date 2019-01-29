@@ -29,6 +29,10 @@
   * Updated resource to allow localized permission levels
 * SPSite
   * Improved logging
+* SPServiceInstance
+  * Added -All switch to resolve "Unable to locate service application" in SP2013
+* SPUserProfileProperty
+  * Fix user profile property mappings does not work
 * SPUserProfileSyncService
   * Fixed issue where failure to configure the sync service would not throw error
 * SPWebAppPolicy

@@ -207,7 +207,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             DisplayName         = $testParamsNewProperty.DisplayName
             Description         = $testParamsNewProperty.Description
             PrivacyPolicy       = $testParamsNewProperty.PolicySetting
-            DefaultPrivacy      = $testParamsNewProperty.PrivateSetting
+            DefaultPrivacy      = $testParamsNewProperty.PrivacySetting
             DisplayOrder        = $testParamsNewProperty.DisplayOrder
             IsUserEditable      = $testParamsNewProperty.IsUserEditable
             IsAlias             = $testParamsNewProperty.IsAlias
