@@ -27,10 +27,12 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 16)
         {
             $name = "contoso-com"
+            $defaultDistinguishedName = "DC=litware,DC=net"
         }
         else
         {
             $name = "contoso"
+            $defaultDistinguishedName = "litware.net"
         }
 
         try { [Microsoft.Office.Server.UserProfiles] }
@@ -422,10 +424,15 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Test-TargetResource @testParams | Should Be $false
             }
 
-            It "Should throw exception as force isn't specified" {
-                $Global:SPDscUPSSyncConnectionDeleteCalled=$false
-                {Set-TargetResource @testParams} | should throw
-                $Global:SPDscUPSSyncConnectionDeleteCalled | Should be $false
+            switch ($Global:SPDscHelper.CurrentStubBuildNumber.Major)
+            {
+                15 {
+                    It "Should throw exception as force isn't specified" {
+                        $Global:SPDscUPSSyncConnectionDeleteCalled=$false
+                        {Set-TargetResource @testParams} | should throw
+                        $Global:SPDscUPSSyncConnectionDeleteCalled | Should be $false
+                    }
+                }
             }
 
             $forceTestParams = @{
@@ -440,12 +447,17 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 ConnectionType = "ActiveDirectory"
             }
 
-            It "delete and create as force is specified" {
-                $Global:SPDscUPSSyncConnectionDeleteCalled=$false
-                $Global:SPDscUPSAddActiveDirectoryConnectionCalled =$false
-                Set-TargetResource @forceTestParams
-                $Global:SPDscUPSSyncConnectionDeleteCalled | Should be $true
-                $Global:SPDscUPSAddActiveDirectoryConnectionCalled | Should be $true
+            switch ($Global:SPDscHelper.CurrentStubBuildNumber.Major)
+            {
+                15 {
+                    It "delete and create as force is specified" {
+                        $Global:SPDscUPSSyncConnectionDeleteCalled=$false
+                        $Global:SPDscUPSAddActiveDirectoryConnectionCalled =$false
+                        Set-TargetResource @forceTestParams
+                        $Global:SPDscUPSSyncConnectionDeleteCalled | Should be $true
+                        $Global:SPDscUPSAddActiveDirectoryConnectionCalled | Should be $true
+                    }
+                }
             }
 
             It "returns false in Test method as force is specified" {
@@ -589,6 +601,12 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Type= "ActiveDirectory"
             }
 
+            $namingContext =@{
+                DistinguishedName = $defaultDistinguishedName
+            }
+
+            $litWareconnection.NamingContexts.Add($namingContext);
+
             $userProfileServiceValidConnection =  @{
                 Name = "User Profile Service Application"
                 TypeName = "User Profile Service Application"
@@ -687,6 +705,12 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 }
             }
 
+            $namingContext =@{
+                DistinguishedName = $defaultDistinguishedName
+            }
+
+            $litWareconnection.NamingContexts.Add($namingContext);
+
             $litWareconnection = $litWareconnection | Add-Member -MemberType ScriptMethod `
                                                                  -Name Delete `
                                                                  -Value {
@@ -779,6 +803,12 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     Type= "ActiveDirectory"
                 }
 
+                $namingContext =@{
+                    DistinguishedName = "DC=LITWARE,DC=NET"
+                }
+
+                $litWareconnection.NamingContexts.Add($namingContext);
+
                 $userProfileServiceValidConnection =  @{
                     Name = "User Profile Service Application"
                     TypeName = "User Profile Service Application"
@@ -852,6 +882,12 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     UseDisabledFilter = $false
                     Type= "ActiveDirectory"
                 }
+
+                $namingContext =@{
+                    DistinguishedName = "DC=LITWARE,DC=NET"
+                }
+
+                $litWareconnection.NamingContexts.Add($namingContext);
 
                 $userProfileServiceValidConnection =  @{
                     Name = "User Profile Service Application"
