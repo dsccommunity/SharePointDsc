@@ -13,6 +13,8 @@
 * SPFarmSolution
   * Fixed issue where uninstalling a solution would not work as expected if it
     contained web application resources.
+* SPIncomingEmailSettings
+  * New resource for configuring incoming email settings
 * SPInstallPrereqs
   * Improved logging
 * SPProductUpgrade
