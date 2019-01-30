@@ -2,8 +2,6 @@
 
 ## Unreleased
 
-* SPIncomingEmailSettings
-  * New resource for configuring incoming email settings
 * Changes to SharePointDsc unit testing
   * Implemented Strict Mode version 1 for all code run during unit tests.
 * SPAuthenticationRealm
@@ -15,6 +13,8 @@
 * SPFarmSolution
   * Fixed issue where uninstalling a solution would not work as expected if it
     contained web application resources.
+* SPIncomingEmailSettings
+  * New resource for configuring incoming email settings
 * SPInstallPrereqs
   * Improved logging
 * SPProductUpgrade

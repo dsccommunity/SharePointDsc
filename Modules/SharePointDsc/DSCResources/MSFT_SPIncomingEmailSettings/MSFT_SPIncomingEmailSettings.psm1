@@ -60,11 +60,11 @@
 
     $result = Invoke-SPDSCCommand -Credential $InstallAccount `
         -ScriptBlock {
-        $spEmailServiceInstance = (Get-SPServiceInstance | Where-Object {$_.TypeName -eq "Microsoft SharePoint Foundation Incoming E-Mail" }) | Select-Object -First 1
+        $spEmailServiceInstance = (Get-SPServiceInstance | Where-Object {$_.GetType().FullName -eq "Microsoft.SharePoint.Administration.SPIncomingEmailServiceInstance" }) | Select-Object -First 1
         $spEmailService = $spEmailServiceInstance.service
 
         # some simple error checking, just incase we didn't capture the service for some reason
-        if ($spEmailService.TypeName -ne "Microsoft SharePoint Foundation Incoming E-Mail")
+        if ($null -eq $spEmailService)
         {
             Write-Verbose "Error getting the SharePoint Incoming Email Service"
             return @{
@@ -196,16 +196,45 @@ function Set-TargetResource
 
     Write-Verbose -Message "Setting SharePoint Incoming Email Settings"
 
+    if ($Ensure -eq 'Present')
+    {
+        if (-not $PSBoundParameters.containskey("UseAutomaticSettings"))
+            {
+                throw "UseAutomaticSettings parameter must be specified when enabling incoming email."
+            }
+
+            if (-not $PSBoundParameters.containskey("ServerDisplayAddress"))
+            {
+                throw "ServerDisplayAddress parameter must be specified when enabling incoming email"
+            }
+
+            if (($PSBoundParameters.UseDirectoryManagementService -eq 'Remote' -and $null -eq $PSBoundParameters.RemoteDirectoryManagementURL) `
+                    -or ($PSBoundParameters.containskey('RemoteDirectoryManagementURL') -and $PSBoundParameters.UseDirectoryManagementService -ne 'Remote'))
+            {
+                throw "RemoteDirectoryManagementURL must be specified only when UseDirectoryManagementService is set to 'Remote'"
+            }
+
+            if ($PSBoundParameters.UseAutomaticSettings -eq $true -and $PSBoundParameters.containskey("DropFolder"))
+            {
+                throw "DropFolder parameter is not valid when using Automatic Mode"
+            }
+
+            if ($PSBoundParameters.UseAutomaticSettings -eq $false -and  (-not $PSBoundParameters.containskey("DropFolder")))
+            {
+                throw "DropFolder parameter must be specified when not using Automatic Mode"
+            }
+    }
+
     Invoke-SPDSCCommand -Credential $InstallAccount `
         -Arguments $PSBoundParameters `
         -ScriptBlock {
         $params = $args[0]
 
-        $spEmailServiceInstance = (Get-SPServiceInstance | Where-Object {$_.TypeName -eq "Microsoft SharePoint Foundation Incoming E-Mail" }) | Select-Object -First 1
+        $spEmailServiceInstance = (Get-SPServiceInstance | Where-Object {$_.GetType().FullName -eq "Microsoft.SharePoint.Administration.SPIncomingEmailServiceInstance" }) | Select-Object -First 1
         $spEmailService = $spEmailServiceInstance.service
 
         #some simple error checking, just incase we didn't capture the service for some reason
-        if ($spEmailService.TypeName -ne "Microsoft SharePoint Foundation Incoming E-Mail")
+        if ($null -eq $spEmailService)
         {
             throw "Error getting the SharePoint Incoming Email Service"
         }
@@ -216,25 +245,10 @@ function Set-TargetResource
             $spEmailService.Enabled = $false
 
         }
-        elseif ($params.Ensure -eq "Present")
+        else #Present
         {
             Write-Verbose -Message "Enabling SharePoint Incoming Email"
 
-            if (-not $params.containskey("UseAutomaticSettings"))
-            {
-                throw "UseAutomaticSettings parameter must be specified when enabling incoming email."
-            }
-
-            if (-not $params.containskey("ServerDisplayAddress"))
-            {
-                throw "ServerDisplayAddress parameter must be specified when enabling incoming email"
-            }
-
-            if (($params.UseDirectoryManagementService -eq 'Remote' -and $null -eq $params.RemoteDirectoryManagementURL) `
-                    -or ($params.containskey('RemoteDirectoryManagementURL') -and $params.UseDirectoryManagementService -ne 'Remote'))
-            {
-                throw "RemoteDirectoryManagementURL must be specified only when UseDirectoryManagementService is set to 'Remote'"
-            }
 
 
             $spEmailService.Enabled = $true
@@ -242,27 +256,14 @@ function Set-TargetResource
 
             if ($params.UseAutomaticSettings -eq $true)
             {
-                if ($params.containskey("DropFolder"))
-                {
-                    throw "DropFolder parameter is not valid when using Automatic Mode"
-                }
-                
                 Write-Verbose -Message "Setting Incoming Email Service to use Automatic Settings"
                 $spEmailService.UseAutomaticSettings = $true
-
             }
             else
             {
                 Write-Verbose -Message "Setting Incoming Email Service to use Advanced Settings"
                 $spEmailService.UseAutomaticSettings = $false
-
-                if (-not $params.containskey("DropFolder"))
-                {
-                    throw "DropFolder parameter must be specified when not using Automatic Mode"
-                }
-
                 $spEmailService.DropFolder = $params.DropFolder
-
             }
 
             #Configure Directory Management modes
