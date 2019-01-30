@@ -189,7 +189,7 @@ function Set-TargetResource
                     if ($null -ne $prop)
                     {
                         $adsearchobj.LoginName = $searchADDomain.AccessAccount.UserName
-                        $adsearchobj.SetPassword($searchADDomain.AccessAccount.Password)
+                        $adsearchobj.SetPassword($(ConvertTo-SecureString $searchADDomain.AccessAccount.Password -AsPlainText -Force))
                     }
                     $wa.PeoplePickerSettings.SearchActiveDirectoryDomains.Add($adsearchobj)
                 }

@@ -33,6 +33,10 @@
   * Fix user profile property mappings does not work
 * SPUserProfileSyncService
   * Fixed issue where failure to configure the sync service would not throw error
+* SPWebAppPeoplePickerSettings
+  * Converted password for access account to secure string. Previsouly
+    the resource would fail setting the password and an exeption was thrown that
+    printed the password in clear text.
 * SPWebAppPolicy
   * Fixed issue where parameter MembersToExclude did not work as expected
 * SPWorkflowService
