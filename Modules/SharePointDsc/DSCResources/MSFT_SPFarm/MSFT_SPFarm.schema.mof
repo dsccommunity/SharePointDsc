@@ -12,6 +12,6 @@ class MSFT_SPFarm : OMI_BaseResource
     [Write, Description("What port will Central Admin be provisioned to - default is 9999")] Uint32 CentralAdministrationPort;
     [Write, Description("The authentication provider of the CentralAdministration web application"), ValueMap{"NTLM","Kerberos"}, Values{"NTLM","Kerberos"}] String CentralAdministrationAuth;
     [Write, Description("SharePoint 2016 & 2019 only - the MinRole role to enroll this server as"), ValueMap{"Application","ApplicationWithSearch","Custom","DistributedCache","Search","SingleServer","SingleServerFarm","WebFrontEnd","WebFrontEndWithDistributedCache"}, Values{"Application","ApplicationWithSearch","Custom","DistributedCache","Search","SingleServer","SingleServerFarm","WebFrontEnd","WebFrontEndWithDistributedCache"}] String ServerRole;
-    [Write, Description("Specifies the state of the Developer Dashboard"), ValueMap{"Off","On","OnDemand"}, Values{"Off","On","OnDemand"}] String DeveloperDashboard;
+    [Write, Description("Specifies the state of the Developer Dashboard ('OnDemand' is SP2013 only)"), ValueMap{"Off","On","OnDemand"}, Values{"Off","On","OnDemand"}] String DeveloperDashboard;
     [Write, Description("POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5"), EmbeddedInstance("MSFT_Credential")] String InstallAccount;
 };
