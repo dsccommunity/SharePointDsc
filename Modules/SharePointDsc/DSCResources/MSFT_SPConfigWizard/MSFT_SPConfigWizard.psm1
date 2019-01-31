@@ -194,7 +194,7 @@ function Set-TargetResource
                                   -ScriptBlock {
         $psconfigExe = $args[0]
         $psconfig = Start-Process -FilePath $psconfigExe `
-                                  -ArgumentList "-cmd upgrade -inplace b2b -wait -force -cmd installcheck -noinstallcheck" `
+                                  -ArgumentList "-cmd upgrade -inplace b2b -wait -cmd applicationcontent -install -cmd installfeatures -cmd secureresources -cmd services -install" `
                                   -Wait `
                                   -PassThru
 

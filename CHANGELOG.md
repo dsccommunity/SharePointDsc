@@ -6,10 +6,14 @@
   * Implemented Strict Mode version 1 for all code run during unit tests.
 * SPAuthenticationRealm
   * New resource for setting farm authentication realm
+* SPConfigWizard
+  * Updated PSConfig parameters according recommendations in blog post of
+    Stefan Gossner
 * SPDistributedCacheService
   * Fixed exception on Stop-SPServiceInstance with SharePoint 2019
 * SPFarm
   * Improved logging
+  * Added ability to manage the Developer Dashboard settings
 * SPFarmSolution
   * Fixed issue where uninstalling a solution would not work as expected if it
     contained web application resources.
@@ -17,9 +21,13 @@
   * New resource for configuring incoming email settings
 * SPInstallPrereqs
   * Improved logging
+  * Corrected detection for Windows Server 2019
+  * Corrected support for Windows Server 2019 for SharePoint 2016
 * SPProductUpgrade
   * Fixed issue where upgrading SP2013 would not properly detect the installed
     version
+  * Fixed issue where the localized SharePoint 2019 CU was detected as a
+    Service Pack for a Language Pack
 * SPSearchAuthorativePage
   * Fixed issue where modifying search query would not target the correct
     search application
@@ -33,6 +41,10 @@
   * Added -All switch to resolve "Unable to locate service application" in SP2013
 * SPUserProfileProperty
   * Fix user profile property mappings does not work
+* SPUserProfileServiceApp
+  * Added warning message when MySiteHostLocation is not specified. This is
+    currently not required, which results in an error. Will be corrected in
+    SPDsc v4.0 (is a breaking change).
 * SPUserProfileSyncService
   * Fixed issue where failure to configure the sync service would not throw error
 * SPWebAppPolicy
