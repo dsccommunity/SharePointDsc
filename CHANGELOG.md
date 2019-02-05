@@ -45,6 +45,13 @@
   * Added warning message when MySiteHostLocation is not specified. This is
     currently not required, which results in an error. Will be corrected in
     SPDsc v4.0 (is a breaking change).
+* SPUserProfileSyncConnection
+  * Fixed issue where test resource never would return true for any configurations
+    on SharePoint 2016/2019
+  * Fixed issue where updating existing connection never would work for any
+    configurations on SharePoint 2016/2019
+  * Updated documentation to reflect that Fore will not impact configurations for
+    SharePoint 2016/2019. Updated the test method accordingly.
 * SPUserProfileSyncService
   * Fixed issue where failure to configure the sync service would not throw error
 * SPWebAppPolicy
