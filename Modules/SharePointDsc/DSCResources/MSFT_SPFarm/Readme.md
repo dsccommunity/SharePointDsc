@@ -33,3 +33,11 @@ designate it as a cache server.
 CentralAdministrationAuth can be specified as "NTLM" or "KERBEROS". If not
 specified, it defaults to NTLM. If using Kerberos, make sure to have
 appropriate SPNs setup for Farm account and Central Administration URI.
+
+DeveloperDashboard can be specified as "On", "Off" and (only when using
+SharePoint 2013) to "OnDemand".
+
+NOTE:
+When using SharePoint 2016 and later and enabling the Developer Dashboard,
+please make sure you also provision the Usage and Health service application
+to make sure the Developer Dashboard works properly.
