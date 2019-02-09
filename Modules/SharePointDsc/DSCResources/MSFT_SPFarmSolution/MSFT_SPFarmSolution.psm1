@@ -53,16 +53,16 @@ function Get-TargetResource
         if ($null -ne $solution)
         {
             $currentState = "Present"
-            $deployed = $solution.Deployed
-            $version = $Solution.Properties["Version"]
+            $deployed     = $solution.Deployed
+            $version      = $Solution.Properties["Version"]
             $deployedWebApplications = @($solution.DeployedWebApplications `
                                          | Select-Object -ExpandProperty Url)
         }
         else
         {
             $currentState = "Absent"
-            $deployed = $false
-            $version = "0.0.0.0"
+            $deployed     = $false
+            $version      = "0.0.0.0"
             $deployedWebApplications = @()
         }
 
@@ -123,8 +123,8 @@ function Set-TargetResource
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
-    $PSBoundParameters.Ensure = $Ensure
-    $PSBoundParameters.Version = $Version
+    $PSBoundParameters.Ensure   = $Ensure
+    $PSBoundParameters.Version  = $Version
     $PSBoundParameters.Deployed = $Deployed
 
     if ($Ensure -eq "Present")
@@ -222,7 +222,7 @@ function Set-TargetResource
     }
     else
     {
-        #If ensure is absent we should also retract the solution first
+        # If ensure is absent we should also retract the solution first
         $Deployed = $false
     }
 
@@ -327,8 +327,8 @@ function Set-TargetResource
 
             $runParams = @{
                 Identity = $params.Name
-                Confirm = $false
-                Verbose = $false
+                Confirm  = $false
+                Verbose  = $false
             }
 
             Remove-SPSolution @runParams
@@ -437,7 +437,6 @@ function Wait-SPDSCSolutionJob
 
             Write-Verbose -Message "Result: $($solution.LastOperationResult)"
             Write-Verbose -Message "Details: $($solution.LastOperationDetails)"
-
         }
         else
         {
@@ -451,7 +450,7 @@ function Wait-SPDSCSolutionJob
         Stop-SPAssignment $gc -Verbose:$false
 
         return @{
-            LastOperationResult = $solution.LastOperationResult
+            LastOperationResult  = $solution.LastOperationResult
             LastOperationDetails = $solution.LastOperationDetails
         }
     }

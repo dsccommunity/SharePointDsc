@@ -49,22 +49,22 @@ function Get-TargetResource
     {
         return @{
             IsSingleInstance = "Yes"
-            BinaryDir = $BinaryDir
-            ProductKey = $ProductKey
-            InstallPath = $InstallPath
-            DataPath = $DataPath
-            Ensure = "Present"
+            BinaryDir        = $BinaryDir
+            ProductKey       = $ProductKey
+            InstallPath      = $InstallPath
+            DataPath         = $DataPath
+            Ensure           = "Present"
         }
     }
     else
     {
         return @{
             IsSingleInstance = "Yes"
-            BinaryDir = $BinaryDir
-            ProductKey = $ProductKey
-            InstallPath = $InstallPath
-            DataPath = $DataPath
-            Ensure = "Absent"
+            BinaryDir        = $BinaryDir
+            ProductKey       = $ProductKey
+            InstallPath      = $InstallPath
+            DataPath         = $DataPath
+            Ensure           = "Absent"
         }
     }
 }
@@ -110,7 +110,6 @@ function Set-TargetResource
     {
         throw [Exception] ("SharePointDsc does not support uninstalling SharePoint or " + `
                            "its prerequisites. Please remove this manually.")
-        return
     }
 
     $InstallerPath = Join-Path $BinaryDir "setup.exe"
@@ -158,7 +157,7 @@ function Set-TargetResource
 
     Write-Verbose -Message "Writing install config file"
 
-    $configPath = "$env:temp\SPInstallConfig.xml"
+    $configPath = Join-Path -Path $env:temp -ChildPath "SPInstallConfig.xml"
 
     $configData = "<Configuration>
     <Package Id=`"sts`">
@@ -278,7 +277,6 @@ function Test-TargetResource
     {
         throw [Exception] ("SharePointDsc does not support uninstalling SharePoint or " + `
                            "its prerequisites. Please remove this manually.")
-        return
     }
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
