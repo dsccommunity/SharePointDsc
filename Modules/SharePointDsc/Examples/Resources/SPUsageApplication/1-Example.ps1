@@ -3,7 +3,7 @@
     This example deploys a usage application to the local farm
 #>
 
-    Configuration Example 
+    Configuration Example
     {
         param(
             [Parameter(Mandatory = $true)]
@@ -13,7 +13,7 @@
         Import-DscResource -ModuleName SharePointDsc
 
         node localhost {
-            SPUsageApplication UsageApplication 
+            SPUsageApplication UsageApplication
             {
                 Name                  = "Usage Service Application"
                 DatabaseName          = "SP_Usage"
@@ -21,7 +21,7 @@
                 UsageLogLocation      = "L:\UsageLogs"
                 UsageLogMaxFileSizeKB = 1024
                 Ensure                = "Present"
-                InstallAccount        = $SetupAccount
+                PsDscRunAsCredential  = $SetupAccount
             }
         }
     }

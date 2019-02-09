@@ -1,13 +1,13 @@
 <#
 .EXAMPLE
 
-    This example shows how to remove a specific managed metadata service app from the 
+    This example shows how to remove a specific managed metadata service app from the
     local SharePoint farm. Because Application pool parameter is required
-    but is not acutally needed to remove the app, any text value can 
-    be supplied for these as it will be ignored. 
+    but is not acutally needed to remove the app, any text value can
+    be supplied for these as it will be ignored.
 #>
 
-    Configuration Example 
+    Configuration Example
     {
         param(
             [Parameter(Mandatory = $true)]
@@ -19,10 +19,10 @@
         node localhost {
             SPManagedMetaDataServiceApp ManagedMetadataServiceApp
             {
-                Name              = "Managed Metadata Service Application"
-                InstallAccount    = $SetupAccount
-                ApplicationPool   = "none"
-                Ensure            = "Absent"
+                Name                 = "Managed Metadata Service Application"
+                ApplicationPool      = "none"
+                Ensure               = "Absent"
+                PsDscRunAsCredential = $SetupAccount
             }
         }
     }

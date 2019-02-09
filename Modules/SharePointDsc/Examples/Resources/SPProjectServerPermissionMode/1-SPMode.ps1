@@ -3,7 +3,7 @@
     This example shows how to a specific PWA site to use SharePoint permission mode.
 #>
 
-Configuration Example 
+Configuration Example
 {
     param(
         [Parameter(Mandatory = $true)]
@@ -15,9 +15,9 @@ Configuration Example
     node localhost {
         SPProjectServerPermissionMode PermissionMode
         {
-            Url = "http://projects.contoso.com"
-            PermissionMode = "SharePoint"
-            InstallAccount  = $SetupAccount
+            Url                  = "http://projects.contoso.com"
+            PermissionMode       = "SharePoint"
+            PsDscRunAsCredential = $SetupAccount
         }
     }
 }
