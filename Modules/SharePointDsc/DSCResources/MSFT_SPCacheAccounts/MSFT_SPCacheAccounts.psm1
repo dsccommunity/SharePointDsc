@@ -27,7 +27,9 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting cache accounts for $WebAppUrl"
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+                                  -Arguments $PSBoundParameters `
+                                  -ScriptBlock {
         $params = $args[0]
 
         $wa = Get-SPWebApplication -Identity $params.WebAppUrl -ErrorAction SilentlyContinue
@@ -35,17 +37,17 @@ function Get-TargetResource
         if ($null -eq $wa)
         {
             return @{
-                WebAppUrl = $params.WebAppUrl
-                SuperUserAlias = $null
+                WebAppUrl        = $params.WebAppUrl
+                SuperUserAlias   = $null
                 SuperReaderAlias = $null
-                SetWebAppPolicy = $false
-                InstallAccount = $params.InstallAccount
+                SetWebAppPolicy  = $false
+                InstallAccount   = $params.InstallAccount
             }
         }
 
         $returnVal = @{
             InstallAccount = $params.InstallAccount
-            WebAppUrl = $params.WebAppUrl
+            WebAppUrl      = $params.WebAppUrl
         }
 
         $policiesSet = $true
@@ -198,7 +200,7 @@ function Set-TargetResource
                 {
                     $wa.Policies.Remove($claimsReader)
                 }
-                $policy = $wa.Policies.Add($claimsReader, "Super Reader (Claims)")
+                $policy     = $wa.Policies.Add($claimsReader, "Super Reader (Claims)")
                 $policyRole = $wa.PolicyRoles.GetSpecialRole([Microsoft.SharePoint.Administration.SPPolicyRoleType]::FullRead)
                 $policy.PolicyRoleBindings.Add($policyRole)
 
@@ -208,7 +210,7 @@ function Set-TargetResource
                 {
                     $wa.Policies.Remove($claimsSuper)
                 }
-                $policy = $wa.Policies.Add($claimsSuper, "Super User (Claims)")
+                $policy     = $wa.Policies.Add($claimsSuper, "Super User (Claims)")
                 $policyRole = $wa.PolicyRoles.GetSpecialRole([Microsoft.SharePoint.Administration.SPPolicyRoleType]::FullControl)
                 $policy.PolicyRoleBindings.Add($policyRole)
             }
@@ -219,7 +221,7 @@ function Set-TargetResource
                     $wa.Policies.Remove($params.SuperReaderAlias)
                 }
 
-                $readPolicy = $wa.Policies.Add($params.SuperReaderAlias, "Super Reader")
+                $readPolicy     = $wa.Policies.Add($params.SuperReaderAlias, "Super Reader")
                 $readPolicyRole = $wa.PolicyRoles.GetSpecialRole([Microsoft.SharePoint.Administration.SPPolicyRoleType]::FullRead)
                 $readPolicy.PolicyRoleBindings.Add($readPolicyRole)
 
@@ -227,7 +229,7 @@ function Set-TargetResource
                 {
                     $wa.Policies.Remove($params.SuperUserAlias)
                 }
-                $policy = $wa.Policies.Add($params.SuperUserAlias, "Super User")
+                $policy     = $wa.Policies.Add($params.SuperUserAlias, "Super User")
                 $policyRole = $wa.PolicyRoles.GetSpecialRole([Microsoft.SharePoint.Administration.SPPolicyRoleType]::FullControl)
                 $policy.PolicyRoleBindings.Add($policyRole)
             }
@@ -275,15 +277,15 @@ function Test-TargetResource
         return Test-SPDscParameterState -CurrentValues $CurrentValues `
                                         -DesiredValues $PSBoundParameters `
                                         -ValuesToCheck @("SuperUserAlias", `
-                                                        "SuperReaderAlias", `
-                                                        "SetWebAppPolicy")
+                                                         "SuperReaderAlias", `
+                                                         "SetWebAppPolicy")
     }
     else
     {
         return Test-SPDscParameterState -CurrentValues $CurrentValues `
                                         -DesiredValues $PSBoundParameters `
                                         -ValuesToCheck @("SuperUserAlias", `
-                                                        "SuperReaderAlias")
+                                                         "SuperReaderAlias")
     }
 }
 

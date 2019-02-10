@@ -2,7 +2,7 @@
 .EXAMPLE
     This example applies the distributed cache service to both "server1" and
     "server2". The ServerProvisionOrder will ensure that it applies it to
-    server1 first and then server2, making sure they don't both attempt to 
+    server1 first and then server2, making sure they don't both attempt to
     create the cache at the same time, resuling in errors.
 
     Note: Do not allow plain text passwords in production environments.
@@ -21,7 +21,7 @@
         )
     }
 
-    Configuration Example 
+    Configuration Example
     {
         param(
             [Parameter(Mandatory = $true)]
@@ -29,8 +29,8 @@
             $SetupAccount
         )
         Import-DscResource -ModuleName SharePointDsc
-        
-        node "Server1" 
+
+        node "Server1"
         {
             SPDistributedCacheService EnableDistributedCache
             {
@@ -39,7 +39,7 @@
                 ServiceAccount       = "DEMO\ServiceAccount"
                 ServerProvisionOrder = @("Server1","Server2")
                 CreateFirewallRules  = $true
-                InstallAccount       = $SetupAccount
+                PsDscRunAsCredential = $SetupAccount
             }
         }
 
@@ -52,7 +52,7 @@
                 ServiceAccount       = "DEMO\ServiceAccount"
                 ServerProvisionOrder = @("Server1","Server2")
                 CreateFirewallRules  = $true
-                InstallAccount       = $SetupAccount
+                PsDscRunAsCredential = $SetupAccount
             }
         }
     }

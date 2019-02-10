@@ -16,7 +16,7 @@
         node localhost {
             SPWebAppGeneralSettings PrimaryWebAppGeneralSettings
             {
-                WebAppUrl              = "http://exmaple.contoso.local"
+                WebAppUrl              = "http://example.contoso.local"
                 TimeZone               = 76
                 Alerts                 = $true
                 RSS                    = $false

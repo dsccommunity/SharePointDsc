@@ -144,15 +144,15 @@ function Get-TargetResource
 
     # Determine if a connection to a farm already exists
     $majorVersion = $installedVersion.FileMajorPart
-    $regPath = "hklm:SOFTWARE\Microsoft\Shared Tools\Web Server Extensions\$majorVersion.0\Secure\ConfigDB"
-    $dsnValue = Get-SPDSCRegistryKey -Key $regPath -Value "dsn" -ErrorAction SilentlyContinue
+    $regPath      = "hklm:SOFTWARE\Microsoft\Shared Tools\Web Server Extensions\$majorVersion.0\Secure\ConfigDB"
+    $dsnValue     = Get-SPDSCRegistryKey -Key $regPath -Value "dsn" -ErrorAction SilentlyContinue
 
     if ($null -ne $dsnValue)
     {
         # This node has already been connected to a farm
         $result = Invoke-SPDSCCommand -Credential $InstallAccount `
-                                  -Arguments $PSBoundParameters `
-                                  -ScriptBlock {
+                                      -Arguments $PSBoundParameters `
+                                      -ScriptBlock {
             $params = $args[0]
 
             try
@@ -234,10 +234,10 @@ function Get-TargetResource
                 DeveloperDashboard        = $developerDashboardStatus
             }
             $installedVersion = Get-SPDSCInstalledProductVersion
-            if($installedVersion.FileMajorPart -eq 16)
+            if ($installedVersion.FileMajorPart -eq 16)
             {
                 $server = Get-SPServer -Identity $env:COMPUTERNAME -ErrorAction SilentlyContinue
-                if($null -ne $server -and $null -ne $server.Role)
+                if ($null -ne $server -and $null -ne $server.Role)
                 {
                     $returnValue.Add("ServerRole", $server.Role)
                 }
@@ -247,7 +247,7 @@ function Get-TargetResource
                     $currentServer = "$($env:COMPUTERNAME).$domain"
 
                     $server = Get-SPServer -Identity $currentServer -ErrorAction SilentlyContinue
-                    if($null -ne $server -and $null -ne $server.Role)
+                    if ($null -ne $server -and $null -ne $server.Role)
                     {
                         $returnValue.Add("ServerRole", $server.Role)
                     }
@@ -416,7 +416,7 @@ function Set-TargetResource
                     if ($null -eq $serviceInstance)
                     {
                         $domain = (Get-CimInstance -ClassName Win32_ComputerSystem).Domain
-                        $fqdn = "$($env:COMPUTERNAME).$domain"
+                        $fqdn   = "$($env:COMPUTERNAME).$domain"
                         $serviceInstance = Get-SPServiceInstance -Server $fqdn `
                     }
 
@@ -441,7 +441,7 @@ function Set-TargetResource
                     if ($null -eq $serviceInstance)
                     {
                         $domain = (Get-CimInstance -ClassName Win32_ComputerSystem).Domain
-                        $fqdn = "$($env:COMPUTERNAME).$domain"
+                        $fqdn   = "$($env:COMPUTERNAME).$domain"
                         $serviceInstance = Get-SPServiceInstance -Server $fqdn
                     }
 
@@ -497,7 +497,7 @@ function Set-TargetResource
         $actionResult = Invoke-SPDSCCommand -Credential $InstallAccount `
                                             -Arguments @($PSBoundParameters, $PSScriptRoot) `
                                             -ScriptBlock {
-            $params = $args[0]
+            $params     = $args[0]
             $scriptRoot = $args[1]
 
             $modulePath = "..\..\Modules\SharePointDsc.Farm\SPFarm.psm1"
@@ -536,7 +536,7 @@ function Set-TargetResource
             }
 
             $installedVersion = Get-SPDSCInstalledProductVersion
-            switch($installedVersion.FileMajorPart)
+            switch ($installedVersion.FileMajorPart)
             {
                 15 {
                     Write-Verbose -Message "Detected Version: SharePoint 2013"
@@ -544,7 +544,7 @@ function Set-TargetResource
                 16 {
                     if ($params.ContainsKey("ServerRole") -eq $true)
                     {
-                        if($installedVersion.ProductBuildPart.ToString().Length -eq 4)
+                        if ($installedVersion.ProductBuildPart.ToString().Length -eq 4)
                         {
                             Write-Verbose -Message ("Detected Version: SharePoint 2016 - " + `
                                                     "configuring server as $($params.ServerRole)")
@@ -558,7 +558,7 @@ function Set-TargetResource
                     }
                     else
                     {
-                        if($installedVersion.ProductBuildPart.ToString().Length -eq 4)
+                        if ($installedVersion.ProductBuildPart.ToString().Length -eq 4)
                         {
                             Write-Verbose -Message ("Detected Version: SharePoint 2016 - no server " + `
                                                     "role provided, configuring server without a " + `
@@ -620,9 +620,9 @@ function Set-TargetResource
 
                 Write-Verbose -Message ("The server will attempt to join the farm now once every " + `
                                         "60 seconds for the next 15 minutes.")
-                $loopCount = 0
+                $loopCount       = 0
                 $connectedToFarm = $false
-                $lastException = $null
+                $lastException   = $null
                 while ($connectedToFarm -eq $false -and $loopCount -lt 15)
                 {
                     try
@@ -648,7 +648,6 @@ function Set-TargetResource
                 {
                     Write-Verbose -Message ("Unable to join config database. Throwing exception.")
                     throw $lastException
-                    return
                 }
                 $farmAction = "JoinedFarm"
             }
@@ -659,7 +658,7 @@ function Set-TargetResource
                 Write-Verbose -Message ("Creating Lock database to prevent two servers creating " + `
                                         "the same farm")
                 Add-SPDscConfigDBLock -SQLServer $params.DatabaseServer `
-                                    -Database $params.FarmConfigDatabaseName
+                                      -Database $params.FarmConfigDatabaseName
 
                 try
                 {
@@ -677,7 +676,7 @@ function Set-TargetResource
                 {
                     Write-Verbose -Message "Removing Lock database"
                     Remove-SPDscConfigDBLock -SQLServer $params.DatabaseServer `
-                                            -Database $params.FarmConfigDatabaseName
+                                             -Database $params.FarmConfigDatabaseName
                 }
             }
 
