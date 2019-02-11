@@ -3,7 +3,7 @@
     This example shows how to deploy Excel Services to the local SharePoint farm.
 #>
 
-    Configuration Example 
+    Configuration Example
     {
         param(
             [Parameter(Mandatory = $true)]
@@ -15,9 +15,9 @@
         node localhost {
             SPExcelServiceApp ExcelServices
             {
-                Name            = "Excel Services Service Application"
-                ApplicationPool = "SharePoint Service Applications"
-                InstallAccount  = $SetupAccount
+                Name                 = "Excel Services Service Application"
+                ApplicationPool      = "SharePoint Service Applications"
+                PsDscRunAsCredential = $SetupAccount
             }
         }
     }

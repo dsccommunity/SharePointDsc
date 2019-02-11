@@ -3,7 +3,7 @@
     This example shows how to deploy an explicit managed path to a specifici web application
 #>
 
-    Configuration Example 
+    Configuration Example
     {
         param(
             [Parameter(Mandatory = $true)]
@@ -13,13 +13,13 @@
         Import-DscResource -ModuleName SharePointDsc
 
         node localhost {
-            SPManagedPath TestManagedPath 
+            SPManagedPath TestManagedPath
             {
-                WebAppUrl      = "http://sharepoint.contoso.com"
-                InstallAccount = $SetupAccount
-                RelativeUrl    = "example"
-                Explicit       = $true
-                HostHeader     = $false
+                WebAppUrl            = "http://sharepoint.contoso.com"
+                RelativeUrl          = "example"
+                Explicit             = $true
+                HostHeader           = $false
+                PsDscRunAsCredential = $SetupAccount
             }
         }
     }

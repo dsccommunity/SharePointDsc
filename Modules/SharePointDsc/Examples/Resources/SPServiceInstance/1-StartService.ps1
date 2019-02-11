@@ -1,10 +1,10 @@
 <#
 .EXAMPLE
     This example shows how to ensure that the managed metadata service is running
-    on the local server. 
+    on the local server.
 #>
 
-    Configuration Example 
+    Configuration Example
     {
         param(
             [Parameter(Mandatory = $true)]
@@ -16,9 +16,9 @@
         node localhost {
             SPServiceInstance ManagedMetadataServiceInstance
             {
-                Name           = "Managed Metadata Web Service"
-                Ensure         = "Present"
-                InstallAccount = $SetupAccount
+                Name                 = "Managed Metadata Web Service"
+                Ensure               = "Present"
+                PsDscRunAsCredential = $SetupAccount
             }
         }
     }

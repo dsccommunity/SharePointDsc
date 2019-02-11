@@ -31,3 +31,7 @@ retrieve the Farm account from the Managed Accounts.
 This does however mean that CredSSP is required, which has some security
 implications. More information about these risks can be found at:
 http://www.powershellmagazine.com/2014/03/06/accidental-sabotage-beware-of-credssp/
+
+NOTE2:
+You should always specify the MySiteHostLocation parameter. Currently this is not
+a required parameter, but will be as of SharePointDsc v4.0.
