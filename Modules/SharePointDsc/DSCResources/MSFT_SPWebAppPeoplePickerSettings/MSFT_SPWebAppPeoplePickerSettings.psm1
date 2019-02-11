@@ -79,6 +79,7 @@ function Get-TargetResource
 
 function Set-TargetResource
 {
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingConvertToSecureStringWithPlainText", "", Justification  =  "Ignoring this because the used AccessAccount does not use SecureString to handle the password")]
     [CmdletBinding()]
     param
     (
