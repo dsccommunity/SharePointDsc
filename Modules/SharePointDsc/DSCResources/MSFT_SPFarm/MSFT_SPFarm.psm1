@@ -111,8 +111,8 @@ function Get-TargetResource
             if ($DeveloperDashboard -eq "On")
             {
                 Write-Verbose -Message ("Please make sure you also provision the Usage and Health " + `
-                        "service application to make sure the Developer Dashboard " + `
-                        "works properly")
+                                        "service application to make sure the Developer Dashboard " + `
+                                        "works properly")
             }
 
             if ($installedVersion.ProductBuildPart.ToString().Length -eq 4)
