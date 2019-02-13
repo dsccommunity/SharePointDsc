@@ -87,6 +87,14 @@ function Get-TargetResource
         }
     }
 
+    if ($PSBoundParameters.ContainsKey("CentralAdministrationUrl"))
+    {
+        if ($CentralAdministrationUrl -match ':\d+')
+        {
+            throw ("CentralAdministrationUrl should not specify port. Use CentralAdministrationPort instead.")
+        }
+    }
+
     if ($Ensure -eq "Absent")
     {
         throw ("SharePointDsc does not support removing a server from a farm, please set the " + `
@@ -182,20 +190,6 @@ function Get-TargetResource
                                 | Where-Object -FilterScript {
                 $_.IsAdministrationWebApplication -eq $true
             }
-            $centralAdminIsSsl = ($null -ne $centralAdminSite -and `
-                (New-Object -TypeName System.Uri $centralAdminSite.Url).Scheme -eq "https")
-
-            # if central admin is SSL, there should be an entry in the SecureBindings
-            # object of the SPWebApplication's IisSettings for the default zone
-            $centralAdminSslHostHeader = $null
-            if ($centralAdminIsSsl)
-            {
-                $secureBindings = $centralAdminSite.GetIisSettingsWithFallback("Default").SecureBindings
-                if ($null -ne $secureBindings[0] -and (-not [string]::IsNullOrEmpty($secureBindings[0].HostHeader)))
-                {
-                    $centralAdminSslHostHeader = $secureBindings[0].HostHeader
-                }
-            }
 
             if ($params.FarmAccount.UserName -eq $spFarm.DefaultServiceAccount.Name)
             {
@@ -236,18 +230,17 @@ function Get-TargetResource
             $developerDashboardStatus   = $developerDashboardSettings.DisplayLevel
 
             $returnValue = @{
-                IsSingleInstance                   = "Yes"
-                FarmConfigDatabaseName             = $spFarm.Name
-                DatabaseServer                     = $configDb.NormalizedDataSource
-                FarmAccount                        = $farmAccount # Need to return this as a credential to match the type expected
-                Passphrase                         = $null
-                AdminContentDatabaseName           = $centralAdminSite.ContentDatabases[0].Name
-                RunCentralAdmin                    = $centralAdminProvisioned
-                CentralAdministrationIsSsl         = $centralAdminIsSsl
-                CentralAdministrationSslHostHeader = $centralAdminSslHostHeader
-                CentralAdministrationPort          = (New-Object -TypeName System.Uri $centralAdminSite.Url).Port
-                CentralAdministrationAuth          = $centralAdminAuth
-                DeveloperDashboard                 = $developerDashboardStatus
+                IsSingleInstance          = "Yes"
+                FarmConfigDatabaseName    = $spFarm.Name
+                DatabaseServer            = $configDb.NormalizedDataSource
+                FarmAccount               = $farmAccount # Need to return this as a credential to match the type expected
+                Passphrase                = $null
+                AdminContentDatabaseName  = $centralAdminSite.ContentDatabases[0].Name
+                RunCentralAdmin           = $centralAdminProvisioned
+                CentralAdministrationUrl  = $centralAdminSite.Url
+                CentralAdministrationPort = (New-Object -TypeName System.Uri $centralAdminSite.Url).Port
+                CentralAdministrationAuth = $centralAdminAuth
+                DeveloperDashboard        = $developerDashboardStatus
             }
             $installedVersion = Get-SPDSCInstalledProductVersion
             if ($installedVersion.FileMajorPart -eq 16)
@@ -282,18 +275,17 @@ function Get-TargetResource
                                     "incomplete, however the 'Ensure' property should be " + `
                                     "considered correct")
             return @{
-                IsSingleInstance                   = "Yes"
-                FarmConfigDatabaseName             = $null
-                DatabaseServer                     = $null
-                FarmAccount                        = $null
-                Passphrase                         = $null
-                AdminContentDatabaseName           = $null
-                RunCentralAdmin                    = $null
-                CentralAdministrationIsSsl         = $null
-                CentralAdministrationSslHostHeader = $null
-                CentralAdministrationPort          = $null
-                CentralAdministrationAuth          = $null
-                Ensure                             = "Present"
+                IsSingleInstance          = "Yes"
+                FarmConfigDatabaseName    = $null
+                DatabaseServer            = $null
+                FarmAccount               = $null
+                Passphrase                = $null
+                AdminContentDatabaseName  = $null
+                RunCentralAdmin           = $null
+                CentralAdministrationUrl  = $null
+                CentralAdministrationPort = $null
+                CentralAdministrationAuth = $null
+                Ensure                    = "Present"
             }
         }
         else
@@ -306,18 +298,17 @@ function Get-TargetResource
     {
         # This node has never been connected to a farm, return the null return object
         return @{
-            IsSingleInstance                   = "Yes"
-            FarmConfigDatabaseName             = $null
-            DatabaseServer                     = $null
-            FarmAccount                        = $null
-            Passphrase                         = $null
-            AdminContentDatabaseName           = $null
-            RunCentralAdmin                    = $null
-            CentralAdministrationIsSsl         = $null
-            CentralAdministrationSslHostHeader = $null
-            CentralAdministrationPort          = $null
-            CentralAdministrationAuth          = $null
-            Ensure                             = "Absent"
+            IsSingleInstance          = "Yes"
+            FarmConfigDatabaseName    = $null
+            DatabaseServer            = $null
+            FarmAccount               = $null
+            Passphrase                = $null
+            AdminContentDatabaseName  = $null
+            RunCentralAdmin           = $null
+            CentralAdministrationUrl  = $null
+            CentralAdministrationPort = $null
+            CentralAdministrationAuth = $null
+            Ensure                    = "Absent"
         }
     }
 }
@@ -414,11 +405,11 @@ function Set-TargetResource
     # Set default values to ensure they are passed to Invoke-SPDSCCommand
     if (-not $PSBoundParameters.ContainsKey("CentralAdministrationPort"))
     {
-        # If SSL and host header specified, let's default to port 443 and assume SNI will be used
-        if ($CentralAdministrationIsSsl -and `
-            (-not [string]::IsNullOrEmpty($CentralAdministrationSslHostHeader)))
+        # If CentralAdministrationUrl is specified and is SSL, let's infer the port from the Url
+        if ($PSBoundParameters.ContainsKey("CentralAdministrationUrl") -and `
+            (New-Object -TypeName System.Uri $CentralAdministrationUrl).Scheme -eq 'https')
         {
-            $PSBoundParameters.Add("CentralAdministrationPort", 443)
+            $PSBoundParameters.Add("CentralAdministrationPort", (New-Object -TypeName System.Uri $CentralAdministrationUrl).Port)
         }
         else
         {
@@ -427,10 +418,10 @@ function Set-TargetResource
     }
 
     # if we're not passing Ssl Host Header in, let's set it to $null for comparison to Current Values
-    if (-not $PSBoundParameters.ContainsKey("CentralAdministrationSslHostHeader"))
-    {
-        $CentralAdministrationSslHostHeader = $null
-    }
+    # if (-not $PSBoundParameters.ContainsKey("CentralAdministrationSslHostHeader"))
+    # {
+    #     $CentralAdministrationSslHostHeader = $null
+    # }
 
     if (-not $PSBoundParameters.ContainsKey("CentralAdministrationAuth"))
     {
@@ -502,37 +493,63 @@ function Set-TargetResource
             }
         }
         # For the following SSL scenarios, we should remove the CA web application and recreate it
-        #   CentralAdministrationIsSsl = $true
-        #   AND     Current CentralAdministrationIsSsl is $false
-        #       OR  Current SSL HostHeader -ne desired SSL HostHeader (and desired host header is not null or empty)
-        #       OR  Current SecureBindings does not exist or doesn't match desired port
-        # The last condition might not be applicable if we rely on host header to be specified for SSL bindings
-        if ($CentralAdministrationIsSsl -and `
-            ((-not $CurrentValues.CentralAdministrationIsSsl) -or `
-                ($CurrentValues.CentralAdministrationSslHostHeader -ne $CentralAdministrationSslHostHeader -and `
-                    (-not [string]::IsNullOrEmpty($CentralAdministrationSslHostHeader)))))
+        #   CentralAdministrationUrl is HTTPS
+        #   AND     Current CentralAdministrationUrl is not equal to new CentralAdministrationUrl
+        #       OR  Current SecureBindings does not exist or doesn't match desired url and port
+        if ((New-Object -TypeName System.Uri $CentralAdministrationUrl).Scheme -eq 'https')
         {
             Invoke-SPDSCCommand -Credential $InstallAccount `
                 -Arguments $PSBoundParameters `
                 -ScriptBlock {
                 $params = $args[0]
 
-                Write-Verbose -Message "Removing Central Admin web application in order to reprovision it"
-                $centralAdmin = Get-SPWebApplication -IncludeCentralAdministration | Where-Object -FilterScript {
+                $reprovisionCentralAdmin = $false
+                $centralAdminSite = Get-SPWebApplication -IncludeCentralAdministration | Where-Object -FilterScript {
                     $_.IsAdministrationWebApplication
                 }
-                Remove-SPWebApplication -Identity $centralAdmin.Url -Zone Default -DeleteIisSite
-
-                Write-Verbose -Message "Re-provisioning Central Admin web application with SSL"
-                $webAppParams = @{
-                    Identity           = "https://$($params.CentralAdministrationSslHostHeader)"
-                    Name               = "SharePoint Central Administration v4"
-                    Zone               = "Default"
-                    HostHeader         = $params.CentralAdministrationSslHostHeader
-                    Port               = $params.CentralAdministrationPort
-                    SecureSocketsLayer = $true
+                if ($centralAdminSite.Url -ne $params.CentralAdministrationUrl)
+                {
+                    $reprovisionCentralAdmin = $true
                 }
-                New-SPWebApplication @webAppParams
+                else
+                {
+                    # check securebindings
+                    # there should be an entry in the SecureBindings object of the
+                    # SPWebApplication's IisSettings for the default zone
+                    $secureBindings = $centralAdminSite.GetIisSettingsWithFallback("Default").SecureBindings
+                    if ($null -ne $secureBindings[0] -and (-not [string]::IsNullOrEmpty($secureBindings[0].HostHeader)))
+                    {
+                        # check to see if secureBindings host header and port match what we want them to be
+                        if (([System.Uri]$params.CentralAdministrationUrl).Host -ne $secureBindings[0].HostHeader -or `
+                            $params.CentralAdministrationPort -ne $secureBindings[0].Port)
+                        {
+                            $reprovisionCentralAdmin = $true
+                        }
+                    }
+                    else
+                    {
+                        # secureBindings did not exist or did not contain a valid hostheader
+                        $reprovisionCentralAdmin = $true
+                    }
+                }
+
+                if ($reprovisionCentralAdmin)
+                {
+                    Write-Verbose -Message "Removing Central Admin web application in order to reprovision it"
+                    Remove-SPWebApplication -Identity $centralAdminSite.Url -Zone Default -DeleteIisSite
+
+                    Write-Verbose -Message "Re-provisioning Central Admin web application with SSL"
+                    $webAppParams = @{
+                        Identity            = $params.CentralAdministrationUrl
+                        Name                = "SharePoint Central Administration v4"
+                        Zone                = "Default"
+                        HostHeader          = ([System.Uri]$params.CentralAdministrationUrl).Host
+                        Port                = $params.CentralAdministrationPort
+                        WindowsAuthProvider = $params.CentralAdministrationAuth
+                        SecureSocketsLayer  = $true
+                    }
+                    New-SPWebApplication @webAppParams
+                }
             }
         }
         elseif ($CurrentValues.CentralAdministrationPort -ne $CentralAdministrationPort)
@@ -787,9 +804,9 @@ function Set-TargetResource
                     New-SPCentralAdministration -Port $params.CentralAdministrationPort `
                                                 -WindowsAuthProvider $params.CentralAdministrationAuth
 
-                    # if central admin is to be SSL and has a host name specified, let's remove and re-provision
-                    if ($params.CentralAdministrationIsSsl -and `
-                            -not [string]::IsNullOrEmpty($params.CentralAdministrationSslHostHeader))
+                    # if central admin is to be SSL, let's remove and re-provision
+                    if (-not [string]::IsNullOrEmpty($params.CentralAdministrationUrl) -and `
+                        ([System.Uri]$params.CentralAdministrationUrl).Scheme -eq 'https')
                     {
                         Write-Verbose -Message "Removing Central Admin to properly provision as SSL"
 
@@ -803,12 +820,13 @@ function Set-TargetResource
                         Write-Verbose -Message "Reprovisioning Central Admin with SSL"
 
                         $webAppParams = @{
-                            Identity           = "https://$($params.CentralAdministrationSslHostHeader)"
-                            Name               = "SharePoint Central Administration v4"
-                            Zone               = "Default"
-                            HostHeader         = $params.CentralAdministrationSslHostHeader
-                            Port               = $params.CentralAdministrationPort
-                            SecureSocketsLayer = $true
+                            Identity            = $params.CentralAdministrationUrl
+                            Name                = "SharePoint Central Administration v4"
+                            Zone                = "Default"
+                            HostHeader          = ([System.Uri]$params.CentralAdministrationUrl).Host
+                            Port                = $params.CentralAdministrationPort
+                            WindowsAuthProvider = $params.CentralAdministrationAuth
+                            SecureSocketsLayer  = $true
                         }
 
                         New-SPWebApplicationExtension @webAppParams
