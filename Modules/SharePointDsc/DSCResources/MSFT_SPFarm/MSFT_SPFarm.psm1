@@ -10,7 +10,7 @@ function Get-TargetResource
         $IsSingleInstance,
 
         [Parameter()]
-        [ValidateSet("Present", "Absent")]
+        [ValidateSet("Present","Absent")]
         [System.String]
         $Ensure = "Present",
 
@@ -49,7 +49,7 @@ function Get-TargetResource
 
         [Parameter()]
         [System.String]
-        [ValidateSet("NTLM", "Kerberos")]
+        [ValidateSet("NTLM","Kerberos")]
         $CentralAdministrationAuth,
 
         [Parameter()]
@@ -66,7 +66,7 @@ function Get-TargetResource
         $ServerRole,
 
         [Parameter()]
-        [ValidateSet("Off", "On", "OnDemand")]
+        [ValidateSet("Off","On","OnDemand")]
         [System.String]
         $DeveloperDashboard,
 
@@ -96,12 +96,10 @@ function Get-TargetResource
     $installedVersion = Get-SPDSCInstalledProductVersion
     switch ($installedVersion.FileMajorPart)
     {
-        15
-        {
+        15 {
             Write-Verbose -Message "Detected installation of SharePoint 2013"
         }
-        16
-        {
+        16 {
             if ($DeveloperDashboard -eq "OnDemand")
             {
                 throw ("The DeveloperDashboard value 'OnDemand' is not allowed in SharePoint " + `
@@ -124,8 +122,7 @@ function Get-TargetResource
                 Write-Verbose -Message "Detected installation of SharePoint 2019"
             }
         }
-        default
-        {
+        default {
             throw ("Detected an unsupported major version of SharePoint. SharePointDsc only " + `
                    "supports SharePoint 2013, 2016 or 2019.")
         }
@@ -338,7 +335,7 @@ function Set-TargetResource
         $IsSingleInstance,
 
         [Parameter()]
-        [ValidateSet("Present", "Absent")]
+        [ValidateSet("Present","Absent")]
         [System.String]
         $Ensure = "Present",
 
@@ -377,7 +374,7 @@ function Set-TargetResource
 
         [Parameter()]
         [System.String]
-        [ValidateSet("NTLM", "Kerberos")]
+        [ValidateSet("NTLM","Kerberos")]
         $CentralAdministrationAuth,
 
         [Parameter()]
@@ -394,7 +391,7 @@ function Set-TargetResource
         $ServerRole,
 
         [Parameter()]
-        [ValidateSet("Off", "On", "OnDemand")]
+        [ValidateSet("Off","On","OnDemand")]
         [System.String]
         $DeveloperDashboard,
 
@@ -615,12 +612,10 @@ function Set-TargetResource
             $installedVersion = Get-SPDSCInstalledProductVersion
             switch ($installedVersion.FileMajorPart)
             {
-                15
-                {
+                15 {
                     Write-Verbose -Message "Detected Version: SharePoint 2013"
                 }
-                16
-                {
+                16 {
                     if ($params.ContainsKey("ServerRole") -eq $true)
                     {
                         if ($installedVersion.ProductBuildPart.ToString().Length -eq 4)
@@ -652,8 +647,7 @@ function Set-TargetResource
                         $executeArgs.Add("ServerRoleOptional", $true)
                     }
                 }
-                Default
-                {
+                Default {
                     throw [Exception] ("An unknown version of SharePoint (Major version $_) " + `
                                        "was detected. Only versions 15 (SharePoint 2013) and" + `
                                        "16 (SharePoint 2016 or SharePoint 2019) are supported.")
@@ -903,7 +897,7 @@ function Test-TargetResource
         $IsSingleInstance,
 
         [Parameter()]
-        [ValidateSet("Present", "Absent")]
+        [ValidateSet("Present","Absent")]
         [System.String]
         $Ensure = "Present",
 
@@ -942,7 +936,7 @@ function Test-TargetResource
 
         [Parameter()]
         [System.String]
-        [ValidateSet("NTLM", "Kerberos")]
+        [ValidateSet("NTLM","Kerberos")]
         $CentralAdministrationAuth,
 
         [Parameter()]
@@ -959,7 +953,7 @@ function Test-TargetResource
         $ServerRole,
 
         [Parameter()]
-        [ValidateSet("Off", "On", "OnDemand")]
+        [ValidateSet("Off","On","OnDemand")]
         [System.String]
         $DeveloperDashboard,
 
