@@ -183,16 +183,20 @@ function Set-TargetResource
                     }
 
                     $adsearchobj.IsForest = $searchADDomain.IsForest
-                    $adsearchobj.LoginName = $searchADDomain.AccessAccount.UserName
 
-                    if([string]::IsNullOrEmpty($searchADDomain.AccessAccount.Password))
+                    if ($null -ne $searchADDomain.AccessAccount)
                     {
-                        $adsearchobj.SetPassword($null)
-                    }
-                    else
-                    {
-                        $accessAccountPassword = ConvertTo-SecureString $searchADDomain.AccessAccount.Password -AsPlainText -Force
-                        $adsearchobj.SetPassword($accessAccountPassword)
+                        $adsearchobj.LoginName = $searchADDomain.AccessAccount.UserName
+
+                        if([string]::IsNullOrEmpty($searchADDomain.AccessAccount.Password))
+                        {
+                            $adsearchobj.SetPassword($null)
+                        }
+                        else
+                        {
+                            $accessAccountPassword = ConvertTo-SecureString $searchADDomain.AccessAccount.Password -AsPlainText -Force
+                            $adsearchobj.SetPassword($accessAccountPassword)
+                        }
                     }
 
                     $wa.PeoplePickerSettings.SearchActiveDirectoryDomains.Add($adsearchobj)
