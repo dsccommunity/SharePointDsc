@@ -11,6 +11,13 @@
     
     This resource currently supports AD only.
     
+    Force only works with SharePoint 2013. For SharePoint 2016/2019
+    the resource is not able to remove existing OUs.
+    You will have to use the ExcludedOUs for this. This means you need
+    to know which OUs to remove. If any extra OUs exists after the
+    configuration has run the test method will report the resource not
+    in desired state.
+    
 .PARAMETER Name
     Key - string
     The name of the connection
@@ -29,11 +36,11 @@
 
 .PARAMETER IncludedOUs
     Required - string
-    A list of the OUs to import users from
+    A list of the OUs to import users from. For SharePoint 2016/2019 existing OUs will not be removed if not included in this list. Use ExludedOUs for removing OUs in SharePoint 2016/2019
 
 .PARAMETER ExcludedOUs
     Write - string
-    A list of the OUs to ignore users from
+    A list of the OUs to ignore users from. For SharePoint 2016/2019 matching existing OUs to include are removed.
 
 .PARAMETER Server
     Write - string
@@ -53,7 +60,7 @@
 
 .PARAMETER Force
     Write - boolean
-    Set to true to run the set method on every call to this resource
+    Set to true to run the set method on every call to this resource. Only has effect on SharePoint 2013
 
 .PARAMETER ConnectionType
     Write - string

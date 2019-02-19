@@ -37,13 +37,21 @@
     specified, it defaults to NTLM. If using Kerberos, make sure to have
     appropriate SPNs setup for Farm account and Central Administration URI.
     
+    DeveloperDashboard can be specified as "On", "Off" and (only when using
+    SharePoint 2013) to "OnDemand".
+    
+    NOTE:
+    When using SharePoint 2016 and later and enabling the Developer Dashboard,
+    please make sure you also provision the Usage and Health service application
+    to make sure the Developer Dashboard works properly.
+    
 .PARAMETER IsSingleInstance
     Key - String
     Allowed values: Yes
     Specifies the resource is a single instance, the value must be 'Yes'
 
 .PARAMETER Ensure
-    Write - string
+    Write - String
     Allowed values: Present, Absent
     Present to create/join the farm. Absent is currently not supported
 
@@ -72,7 +80,7 @@
     Should the central admin site run on this specific server?
 
 .PARAMETER CentralAdministrationPort
-    Write - uint32
+    Write - Uint32
     What port will Central Admin be provisioned to - default is 9999
 
 .PARAMETER CentralAdministrationAuth
@@ -81,9 +89,14 @@
     The authentication provider of the CentralAdministration web application
 
 .PARAMETER ServerRole
-    Write - string
+    Write - String
     Allowed values: Application, ApplicationWithSearch, Custom, DistributedCache, Search, SingleServer, SingleServerFarm, WebFrontEnd, WebFrontEndWithDistributedCache
     SharePoint 2016 & 2019 only - the MinRole role to enroll this server as
+
+.PARAMETER DeveloperDashboard
+    Write - String
+    Allowed values: Off, On, OnDemand
+    Specifies the state of the Developer Dashboard ('OnDemand' is SP2013 only)
 
 .PARAMETER InstallAccount
     Write - String

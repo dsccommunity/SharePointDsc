@@ -130,7 +130,7 @@ PrivateData = @{
         ReleaseNotes = "
       * Changes to SharePointDsc unit testing
         * Implemented Strict Mode version 1 for all code run during unit tests.
-        * Changed InstallAccount into PSDscRunAsCredential parameter
+        * Changed InstallAccount into PSDscRunAsCredential parameter in examples
       * SPAuthenticationRealm
         * New resource for setting farm authentication realm
       * SPConfigWizard

@@ -77,7 +77,7 @@
     This example creates a new secure store service app.
 
 
-    Configuration Example 
+    Configuration Example
     {
         param(
             [Parameter(Mandatory = $true)]
@@ -89,12 +89,12 @@
         node localhost {
             SPSecureStoreServiceApp SecureStoreServiceApp
             {
-                Name            = "Secure Store Service Application"
-                ApplicationPool = "SharePoint Service Applications"
-                AuditingEnabled = $true
-                AuditlogMaxSize = 30
-                DatabaseName    = "SP_SecureStore"
-                InstallAccount  = $SetupAccount
+                Name                 = "Secure Store Service Application"
+                ApplicationPool      = "SharePoint Service Applications"
+                AuditingEnabled      = $true
+                AuditlogMaxSize      = 30
+                DatabaseName         = "SP_SecureStore"
+                PsDscRunAsCredential = $SetupAccount
             }
         }
     }
@@ -106,7 +106,7 @@
     are able to be set to anything.
 
 
-    Configuration Example 
+    Configuration Example
     {
         param(
             [Parameter(Mandatory = $true)]
@@ -118,11 +118,11 @@
         node localhost {
             SPSecureStoreServiceApp SecureStoreServiceApp
             {
-                Name            = "Secure Store Service Application"
-                ApplicationPool = "n/a"
-                AuditingEnabled = $false
-                InstallAccount  = $SetupAccount
-                Ensure          = "Absent"
+                Name                 = "Secure Store Service Application"
+                ApplicationPool      = "n/a"
+                AuditingEnabled      = $false
+                Ensure               = "Absent"
+                PsDscRunAsCredential = $SetupAccount
             }
         }
     }
