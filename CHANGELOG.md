@@ -1,6 +1,6 @@
 # Change log for SharePointDsc
 
-## Unreleased
+## v3.2
 
 * Changes to SharePointDsc unit testing
   * Implemented Strict Mode version 1 for all code run during unit tests.
@@ -36,10 +36,10 @@
   * Updated resource to allow localized ProviderTypes
 * SPServiceAppSecurity
   * Updated resource to allow localized permission levels
-* SPSite
-  * Improved logging
 * SPServiceInstance
   * Added -All switch to resolve "Unable to locate service application" in SP2013
+* SPSite
+  * Improved logging
 * SPUserProfileProperty
   * Fix user profile property mappings does not work
 * SPUserProfileServiceApp
