@@ -1,12 +1,12 @@
 <#
 .EXAMPLE
     This example applies the distributed cache service to the current server,
-    but will not apply the rules to allow it to communicate with other cache 
+    but will not apply the rules to allow it to communicate with other cache
     hosts to the Windows Firewall. Use this approach if you have an alternate
     firewall solution.
 #>
 
-    Configuration Example 
+    Configuration Example
     {
         param(
             [Parameter(Mandatory = $true)]
@@ -21,7 +21,7 @@
                 Name                 = "AppFabricCachingService"
                 CacheSizeInMB        = 8192
                 ServiceAccount       = "DEMO\ServiceAccount"
-                InstallAccount       = $SetupAccount
+                PsDscRunAsCredential = $SetupAccount
                 CreateFirewallRules  = $false
             }
         }

@@ -3,7 +3,7 @@
     This example shows how to create a new visio services service app in the local farm
 #>
 
-    Configuration Example 
+    Configuration Example
     {
         param(
             [Parameter(Mandatory = $true)]
@@ -15,9 +15,9 @@
         node localhost {
             SPVisioServiceApp VisioServices
             {
-                Name = "Visio Graphics Service Application"
-                ApplicationPool = "SharePoint Web Services"
-                InstallAccount  = $SetupAccount
+                Name                 = "Visio Graphics Service Application"
+                ApplicationPool      = "SharePoint Web Services"
+                PsDscRunAsCredential = $SetupAccount
             }
         }
     }

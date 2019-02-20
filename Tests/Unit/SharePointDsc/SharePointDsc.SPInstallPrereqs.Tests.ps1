@@ -292,6 +292,14 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 if ($Global:SPDscHelper.CurrentStubBuildNumber.Build -lt 10000)
                 {
                     # SharePoint 2016
+                    Mock -CommandName Get-SPDscOSVersion -MockWith {
+                        # SharePoint 2016
+                        return @{
+                            Major = 10
+                            Build = 16000
+                        }
+                    }
+
                     Mock -CommandName Get-ItemProperty -ParameterFilter {
                         $Path -eq "HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall\*"
                     } -MockWith {
@@ -313,6 +321,14 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 else
                 {
                     # SharePoint 2019
+                    Mock -CommandName Get-SPDscOSVersion -MockWith {
+                        # SharePoint 2016
+                        return @{
+                            Major = 10
+                            Build = 17763
+                        }
+                    }
+
                     Mock -CommandName Get-ItemProperty -ParameterFilter {
                         $Path -eq "HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall\*"
                     } -MockWith {
@@ -514,7 +530,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
         }
 
-        if ($majorBuildNumber -eq 15)
+        if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 15)
         {
             Context -Name "SharePoint 2013 is installing on a server with .NET 4.6" -Fixture {
                 $testParams = @{

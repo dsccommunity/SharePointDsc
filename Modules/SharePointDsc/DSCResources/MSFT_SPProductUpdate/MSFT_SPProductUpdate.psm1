@@ -66,7 +66,7 @@ function Get-TargetResource
         return Get-SPDscFarmProductsInfo
     }
 
-    if ($setupFileInfo.VersionInfo.FileDescription -match "Language Pack")
+    if ($setupFileInfo.VersionInfo.FileDescription -match "Service Pack.*Language Pack")
     {
         Write-Verbose -Message "Update is a Language Pack Service Pack."
         # Retrieve language from file and check version for that language pack.
@@ -154,9 +154,7 @@ function Get-TargetResource
         # Check SharePoint version information.
         $servicepack = $true
         $versionInfo = Invoke-SPDSCCommand -Credential $InstallAccount `
-                                      -Arguments $productName `
                                       -ScriptBlock {
-            $productToCheck = $args[0]
             return Get-SPDscFarmVersionInfo -ProductToCheck "Microsoft SharePoint Server 2013"
         }
     }
@@ -165,9 +163,7 @@ function Get-TargetResource
         Write-Verbose -Message "Update is a Cumulative Update."
         # Cumulative Update is multi-lingual. Check version information of all products.
         $versionInfo = Invoke-SPDSCCommand -Credential $InstallAccount `
-                                      -Arguments $productName `
                                       -ScriptBlock {
-            $productToCheck = $args[0]
             return Get-SPDscFarmVersionInfo
         }
     }
@@ -327,7 +323,7 @@ function Set-TargetResource
 
     # To prevent an endless loop: Check if an upgrade is required.
     $installedVersion = Get-SPDSCInstalledProductVersion
-    if ($spVersion.FileMajorPart -eq 15)
+    if ($installedVersion.FileMajorPart -eq 15)
     {
         $wssRegKey ="hklm:SOFTWARE\Microsoft\Shared Tools\Web Server Extensions\15.0\WSS"
     }

@@ -1,10 +1,10 @@
 <#
 .EXAMPLE
     This example shows how to ensure that the managed metadata service is published
-    within the farm. 
+    within the farm.
 #>
 
-    Configuration Example 
+    Configuration Example
     {
         param(
             [Parameter(Mandatory = $true)]
@@ -16,9 +16,9 @@
         node localhost {
             SPPublishServiceApplication PublishManagedMetadataServiceApp
             {
-                Name           = "Managed Metadata Service Application"
-                Ensure         = "Present"
-                InstallAccount = $SetupAccount
+                Name                 = "Managed Metadata Service Application"
+                Ensure               = "Present"
+                PsDscRunAsCredential = $SetupAccount
             }
         }
     }

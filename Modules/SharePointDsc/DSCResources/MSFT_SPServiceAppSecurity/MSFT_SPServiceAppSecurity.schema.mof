@@ -2,7 +2,7 @@
 class MSFT_SPServiceAppSecurityEntry
 {
     [Required, Description("The username for the entry")] String Username;
-    [Required, Description("The access levels for the entry"), ValueMap{"Create Target Application", "Delete Target Application", "Manage Target Application", "All Target Applications", "Manage Profiles", "Manage Audiences", "Manage Permissions", "Retrieve People Data for Search Crawlers", "Manage Social Data", "Full Control", "Read (Diagnostics Pages Only)", "Read Access to Term Store", "Read and Restricted Write Access to Term Store","Full Access to Term Store"}, Values{"Create Target Application", "Delete Target Application", "Manage Target Application", "All Target Applications", "Manage Profiles", "Manage Audiences", "Manage Permissions", "Retrieve People Data for Search Crawlers", "Manage Social Data", "Full Control", "Read (Diagnostics Pages Only)", "Read Access to Term Store", "Read and Restricted Write Access to Term Store","Full Access to Term Store"}] String AccessLevels[];
+    [Required, Description("The access levels for the entry")] String AccessLevels[];
 };
 [ClassVersion("1.0.0.0"), FriendlyName("SPServiceAppSecurity")]
 class MSFT_SPServiceAppSecurity : OMI_BaseResource

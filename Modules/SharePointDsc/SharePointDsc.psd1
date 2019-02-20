@@ -12,7 +12,7 @@
 # RootModule = ''
 
 # Version number of this module.
-ModuleVersion = '3.1.0.0'
+ModuleVersion = '3.2.0.0'
 
 # ID used to uniquely identify this module
 GUID = '6c1176a0-4fac-4134-8ca2-3fa8a21a7b90'
@@ -128,40 +128,70 @@ PrivateData = @{
 
         # ReleaseNotes of this module
         ReleaseNotes = "
-      * Changes to SharePointDsc
-        * Updated LICENSE file to match the Microsoft Open Source Team standard.
-      * ProjectServerConnector
-        * Added a file hash validation check to prevent the ability to load custom code
-          into the module.
+      * Changes to SharePointDsc unit testing
+        * Implemented Strict Mode version 1 for all code run during unit tests.
+        * Changed InstallAccount into PSDscRunAsCredential parameter in examples
+      * SPAuthenticationRealm
+        * New resource for setting farm authentication realm
+      * SPConfigWizard
+        * Updated PSConfig parameters according recommendations in blog post of
+          Stefan Gossner
+      * SPDistributedCacheService
+        * Fixed exception on Stop-SPServiceInstance with SharePoint 2019
       * SPFarm
-        * Fixed localization issue where TypeName was in the local language.
+        * Improved logging
+        * Added ability to manage the Developer Dashboard settings
+      * SPFarmSolution
+        * Fixed issue where uninstalling a solution would not work as expected if it
+          contained web application resources.
+      * SPIncomingEmailSettings
+        * New resource for configuring incoming email settings
       * SPInstallPrereqs
-        * Updated links in the Readme.md file to docs.microsoft.com.
-        * Fixed required prereqs for SharePoint 2019, added MSVCRT11.
-      * SPManagedMetadataServiceApp
-        * Fixed issue where Get-TargetResource method throws an error when the
-          service app proxy does not exist.
-      * SPSearchContentSource
-        * Corrected issue where the New-SPEnterpriseSearchCrawlContentSource cmdlet
-          was called twice.
-      * SPSearchServiceApp
-        * Fixed issue where Get-TargetResource method throws an error when the
-          service application pool does not exist.
-        * Implemented check to make sure cmdlets are only executed when it actually
-          has something to update.
-        * Deprecated WindowsServiceAccount parameter and moved functionality to
-          new resource (SPSearchServiceSettings).
-      * SPSearchServiceSettings
-        * Added new resource to configure search service settings.
+        * Improved logging
+        * Corrected detection for Windows Server 2019
+        * Corrected support for Windows Server 2019 for SharePoint 2016
+      * SPProductUpgrade
+        * Fixed issue where upgrading SP2013 would not properly detect the installed
+          version
+        * Fixed issue where the localized SharePoint 2019 CU was detected as a
+          Service Pack for a Language Pack
+      * SPSearchAuthorativePage
+        * Fixed issue where modifying search query would not target the correct
+          search application
+      * SPSearchResultSource
+        * Updated resource to allow localized ProviderTypes
       * SPServiceAppSecurity
-        * Fixed unavailable utility method (ExpandAccessLevel).
-        * Updated the schema to no longer specify username as key for the sub class.
+        * Updated resource to allow localized permission levels
+      * SPServiceInstance
+        * Added -All switch to resolve 'Unable to locate service application' in SP2013
+      * SPSite
+        * Improved logging
+      * SPUserProfileProperty
+        * Fix user profile property mappings does not work
       * SPUserProfileServiceApp
-        * Fixed issue where localized versions of Windows and SharePoint would throw
-          an error.
+        * Added warning message when MySiteHostLocation is not specified. This is
+          currently not required, which results in an error. Will be corrected in
+          SPDsc v4.0 (is a breaking change).
       * SPUserProfileSyncConnection
-        * Corrected implementation of Ensure parameter.
-      "
+        * Fixed issue where test resource never would return true for any configurations
+          on SharePoint 2016/2019
+        * Fixed issue where updating existing connection never would work for any
+          configurations on SharePoint 2016/2019
+        * Updated documentation to reflect that Fore will not impact configurations for
+          SharePoint 2016/2019. Updated the test method accordingly.
+      * SPUserProfileSyncService
+        * Fixed issue where failure to configure the sync service would not throw error
+      * SPWebAppPeoplePickerSettings
+        * Converted password for access account to secure string. Previsouly
+          the resource would fail setting the password and an exeption was thrown that
+          printed the password in clear text.
+      * SPWebAppPolicy
+        * Fixed issue where parameter MembersToExclude did not work as expected
+      * SPWorkflowService
+        * Added support for specifying scope name.
+        * Added support for detecting incorrect configuration for scope name and
+          WorkflowHostUri
+"
     } # End of PSData hashtable
 
 } # End of PrivateData hashtable

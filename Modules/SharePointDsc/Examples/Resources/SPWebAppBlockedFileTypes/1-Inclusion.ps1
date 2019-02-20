@@ -17,7 +17,7 @@
         node localhost {
             SPWebAppBlockedFileTypes PrimaryWebAppBlockedFileTypes
             {
-                WebAppUrl              = "http://exmaple.contoso.local"
+                WebAppUrl              = "http://example.contoso.local"
                 EnsureBlocked          = @("exe", "dll", "msi")
                 EnsureAllowed          = @("pdf", "docx", "xlsx")
                 PsDscRunAsCredential   = $SetupAccount

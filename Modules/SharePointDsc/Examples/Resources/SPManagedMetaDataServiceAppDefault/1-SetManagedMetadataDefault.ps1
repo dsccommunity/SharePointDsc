@@ -18,7 +18,7 @@ Configuration Example
             IsSingleInstance               = "Yes"
             DefaultSiteCollectionProxyName = "Managed Metadata Service Application Proxy"
             DefaultKeywordProxyName        = "Managed Metadata Service Application Proxy"
-            InstallAccount                 = $SetupAccount
+            PsDscRunAsCredential           = $SetupAccount
         }
     }
 }

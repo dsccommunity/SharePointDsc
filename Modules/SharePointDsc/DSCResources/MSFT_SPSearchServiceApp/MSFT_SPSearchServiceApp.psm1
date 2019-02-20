@@ -123,6 +123,7 @@ function Get-TargetResource
                 $cloudIndex = $serviceApp.CloudIndex
             }
 
+            $pName = $null;
             $serviceAppProxies = Get-SPServiceApplicationProxy -ErrorAction SilentlyContinue
             if ($null -ne $serviceAppProxies)
             {

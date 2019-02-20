@@ -135,6 +135,104 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
         }
 
+        Context -Name "A specified access level does not match the allowed list of (localized) access levels (Members)" -Fixture {
+            $testParams = @{
+                ServiceAppName = "Example Service App"
+                SecurityType = "SharingPermissions"
+                Members = @(
+                    (New-CimInstance -ClassName "MSFT_SPSearchServiceAppSecurityEntry" `
+                                     -ClientOnly `
+                                     -Property @{
+                                                   Username = "CONTOSO\user1"
+                                                   AccessLevels = "Read"
+                                               }),
+                    (New-CimInstance -ClassName "MSFT_SPSearchServiceAppSecurityEntry" `
+                                     -ClientOnly `
+                                     -Property @{
+                                                   Username = "CONTOSO\user2"
+                                                   AccessLevels = "Full Control"
+                                               })
+                )
+            }
+
+            Mock -CommandName Get-SPServiceApplication -MockWith {
+                return @{
+                    Name = $testParams.ServiceAppName
+                }
+            }
+
+            Mock -CommandName Get-SPServiceApplicationSecurity -MockWith {
+                return @{
+                    NamedAccessRights = @(
+                        @{
+                            Name = "Full Control"
+                        }
+                    )
+                }
+            }
+
+            It "Should return en empty ServiceAppName from the get method" {
+                (Get-TargetResource @testParams).ServiceAppName | Should Be ""
+            }
+
+            It "Should return False from the test method" {
+                Test-TargetResource @testParams | Should Be $false
+            }
+
+            It "Should throw an exception in the set method" {
+                { Set-TargetResource @testParams } | Should Throw "Unknown AccessLevel is used"
+            }
+        }
+
+        Context -Name "A specified access level does not match the allowed list of (localized) access levels (MembersToInclude)" -Fixture {
+            $testParams = @{
+                ServiceAppName = "Example Service App"
+                SecurityType = "SharingPermissions"
+                MembersToInclude = @(
+                    (New-CimInstance -ClassName "MSFT_SPSearchServiceAppSecurityEntry" `
+                                     -ClientOnly `
+                                     -Property @{
+                                                   Username = "CONTOSO\user1"
+                                                   AccessLevels = "Read"
+                                               }),
+                    (New-CimInstance -ClassName "MSFT_SPSearchServiceAppSecurityEntry" `
+                                     -ClientOnly `
+                                     -Property @{
+                                                   Username = "CONTOSO\user2"
+                                                   AccessLevels = "Full Control"
+                                               })
+                )
+            }
+
+            Mock -CommandName Get-SPServiceApplication -MockWith {
+                return @{
+                    Name = $testParams.ServiceAppName
+                }
+            }
+
+            Mock -CommandName Get-SPServiceApplicationSecurity -MockWith {
+                return @{
+                    NamedAccessRights = @(
+                        @{
+                            Name = "Full Control"
+                        }
+                    )
+                }
+            }
+
+            It "Should return en empty ServiceAppName from the get method" {
+                (Get-TargetResource @testParams).ServiceAppName | Should Be ""
+            }
+
+            It "Should return False from the test method" {
+                Test-TargetResource @testParams | Should Be $false
+            }
+
+            It "Should throw an exception in the set method" {
+                { Set-TargetResource @testParams } | Should Throw "Unknown AccessLevel is used"
+            }
+        }
+
         Context -Name "The service app exists and a fixed members list is provided that does not match the current settings" -Fixture {
             $testParams = @{
                 ServiceAppName = "Example Service App"
@@ -159,25 +257,43 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 return @{}
             }
 
-            Mock -CommandName Get-SPServiceApplicationSecurity {
-                return @{
-                    AccessRules = @(
-                        @{
-                            Name = "CONTOSO\user1"
-                            AllowedRights = "Read"
-                        }
-                    )
+            Mock -CommandName Get-SPServiceApplicationSecurity -MockWith {
+                if ($Global:SPDscRunCount -in 0,1,3,4)
+                {
+                    $Global:SPDscRunCount++
+                    return @{
+                        NamedAccessRights = @(
+                            @{
+                                Name = "Full Control"
+                            }
+                        )
+                    }
+                }
+                else
+                {
+                    $Global:SPDscRunCount++
+                    return @{
+                        AccessRules = @(
+                            @{
+                                Name = "CONTOSO\user1"
+                                AllowedRights = "Read"
+                            }
+                        )
+                    }
                 }
             }
 
+            $Global:SPDscRunCount = 0
             It "Should return a list of current members from the get method" {
                 (Get-TargetResource @testParams).Members | Should Not BeNullOrEmpty
             }
 
+            $Global:SPDscRunCount = 0
             It "Should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $false
             }
 
+            $Global:SPDscRunCount = 0
             It "Should call the update cmdlet from the set method" {
                 Set-TargetResource @testParams
                 Assert-MockCalled Grant-SPObjectSecurity -ParameterFilter {$Replace -eq $true}
@@ -209,7 +325,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 return @{}
             }
 
-            Mock -CommandName Get-SPServiceApplicationSecurity {
+            Mock -CommandName Get-SPServiceApplicationSecurity -MockWith {
                 $security = @{
                     NamedAccessRights = @(
                         @{
@@ -276,24 +392,42 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             Mock -CommandName Get-SPServiceApplicationSecurity -MockWith {
-                return @{
-                    AccessRules = @(
-                        @{
-                            Name = "CONTOSO\user2"
-                            AllowedRights = "FullControl"
-                        }
-                    )
+                if ($Global:SPDscRunCount -in 0,1,3,4)
+                {
+                    $Global:SPDscRunCount++
+                    return @{
+                        NamedAccessRights = @(
+                            @{
+                                Name = "Full Control"
+                            }
+                        )
+                    }
+                }
+                else
+                {
+                    $Global:SPDscRunCount++
+                    return @{
+                        AccessRules = @(
+                            @{
+                                Name = "CONTOSO\user2"
+                                AllowedRights = "FullControl"
+                            }
+                        )
+                    }
                 }
             }
 
+            $Global:SPDscRunCount = 0
             It "Should return a list of current members from the get method" {
                 (Get-TargetResource @testParams).Members | Should Not BeNullOrEmpty
             }
 
+            $Global:SPDscRunCount = 0
             It "Should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $false
             }
 
+            $Global:SPDscRunCount = 0
             It "Should call the update cmdlet from the set method" {
                 Set-TargetResource @testParams
                 Assert-MockCalled Grant-SPObjectSecurity
@@ -417,16 +551,35 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             Mock -CommandName Get-SPServiceApplicationSecurity -MockWith {
-                return @{
-                    AccessRules = @(
-                        @{
-                            Name = "CONTOSO\user1"
-                            AllowedRights = "FullControl"
-                        }
-                    )
+                if ($Global:SPDscRunCount -in 0,1)
+                {
+                    $Global:SPDscRunCount++
+                    return @{
+                        NamedAccessRights = @(
+                            @{
+                                Name = "Full Control"
+                            },
+                            @{
+                                Name = "Read"
+                            }
+                        )
+                    }
+                }
+                else
+                {
+                    $Global:SPDscRunCount++
+                    return @{
+                        AccessRules = @(
+                            @{
+                                Name = "CONTOSO\user1"
+                                AllowedRights = "FullControl"
+                            }
+                        )
+                    }
                 }
             }
 
+            $Global:SPDscRunCount = 0
             It "Should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $false
             }
@@ -451,20 +604,37 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             Mock -CommandName Get-SPServiceApplicationSecurity -MockWith {
-                return @{
-                    AccessRules = @(
-                        @{
-                            Name = "CONTOSO\user1"
-                            AllowedRights = "FullControl"
-                        }
-                    )
+                if ($Global:SPDscRunCount -in 0,1,3,4)
+                {
+                    $Global:SPDscRunCount++
+                    return @{
+                        NamedAccessRights = @(
+                            @{
+                                Name = "Read"
+                            }
+                        )
+                    }
+                }
+                else
+                {
+                    $Global:SPDscRunCount++
+                    return @{
+                        AccessRules = @(
+                            @{
+                                Name = "CONTOSO\user1"
+                                AllowedRights = "FullControl"
+                            }
+                        )
+                    }
                 }
             }
 
+            $Global:SPDscRunCount = 0
             It "Should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $false
             }
 
+            $Global:SPDscRunCount = 0
             It "Should call the update cmdlet from the set method" {
                 Set-TargetResource @testParams
                 Assert-MockCalled Grant-SPObjectSecurity -Times 1 -ParameterFilter {$Replace -eq $true}
@@ -491,20 +661,37 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             Mock -CommandName Get-SPServiceApplicationSecurity -MockWith {
-                return @{
-                    AccessRules = @(
-                        @{
-                            Name = "CONTOSO\user1"
-                            AllowedRights = "FullControl"
-                        }
-                    )
+                if ($Global:SPDscRunCount -in 0,1,3,4)
+                {
+                    $Global:SPDscRunCount++
+                    return @{
+                        NamedAccessRights = @(
+                            @{
+                                Name = "Read"
+                            }
+                        )
+                    }
+                }
+                else
+                {
+                    $Global:SPDscRunCount++
+                    return @{
+                        AccessRules = @(
+                            @{
+                                Name = "CONTOSO\user1"
+                                AllowedRights = "FullControl"
+                            }
+                        )
+                    }
                 }
             }
 
+            $Global:SPDscRunCount = 0
             It "Should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $false
             }
 
+            $Global:SPDscRunCount = 0
             It "Should call the update cmdlet from the set method" {
                 Set-TargetResource @testParams
                 Assert-MockCalled Grant-SPObjectSecurity -Times 1 -ParameterFilter {$Replace -eq $true}
@@ -714,16 +901,33 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             Mock -CommandName Get-SPServiceApplicationSecurity -MockWith {
-                return @{
-                    AccessRules = @(
-                    )
+                if ($Global:SPDscRunCount -in 0,1,3,4)
+                {
+                    $Global:SPDscRunCount++
+                    return @{
+                        NamedAccessRights = @(
+                            @{
+                                Name = "Full Control"
+                            }
+                        )
+                    }
+                }
+                else
+                {
+                    $Global:SPDscRunCount++
+                    return @{
+                        AccessRules = @(
+                        )
+                    }
                 }
             }
 
+            $Global:SPDscRunCount = 0
             It "Should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $false
             }
 
+            $Global:SPDscRunCount = 0
             It "Should call the update cmdlet from the set method" {
                 Set-TargetResource @testParams
                 Assert-MockCalled Grant-SPObjectSecurity
@@ -751,20 +955,37 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             Mock -CommandName Get-SPServiceApplicationSecurity -MockWith {
-                return @{
-                    AccessRules = @(
-                        @{
-                            Name = "CONTOSO\user2"
-                            AllowedRights = "FullControl"
-                        }
-                    )
+                if ($Global:SPDscRunCount -in 0,1,3,4)
+                {
+                    $Global:SPDscRunCount++
+                    return @{
+                        NamedAccessRights = @(
+                            @{
+                                Name = "Full Control"
+                            }
+                        )
+                    }
+                }
+                else
+                {
+                    $Global:SPDscRunCount++
+                    return @{
+                        AccessRules = @(
+                            @{
+                                Name = "CONTOSO\user2"
+                                AllowedRights = "FullControl"
+                            }
+                        )
+                    }
                 }
             }
 
+            $Global:SPDscRunCount = 0
             It "Should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $false
             }
 
+            $Global:SPDscRunCount = 0
             It "Should call the update cmdlet from the set method" {
                 Set-TargetResource @testParams
                 Assert-MockCalled Grant-SPObjectSecurity

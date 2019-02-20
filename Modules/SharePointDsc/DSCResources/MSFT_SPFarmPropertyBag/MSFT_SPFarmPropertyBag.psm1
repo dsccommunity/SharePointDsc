@@ -12,13 +12,13 @@ function Get-TargetResource()
         [System.String]
         $Value,
 
-        [Parameter()] 
-        [ValidateSet("Present","Absent")] 
-        [System.String] 
+        [Parameter()]
+        [ValidateSet("Present","Absent")]
+        [System.String]
         $Ensure = 'Present',
 
         [Parameter()]
-        [System.Management.Automation.PSCredential] 
+        [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 
@@ -29,16 +29,16 @@ function Get-TargetResource()
                                   -ScriptBlock {
         $params = $args[0]
 
-        try 
+        try
         {
             $spFarm = Get-SPFarm -ErrorAction SilentlyContinue
-        } 
-        catch 
+        }
+        catch
         {
             Write-Verbose -Message ("No local SharePoint farm was detected.")
             return @{
-                Key = $params.Key
-                Value = $null
+                Key    = $params.Key
+                Value  = $null
                 Ensure = 'Absent'
             }
         }
@@ -49,29 +49,29 @@ function Get-TargetResource()
             {
                 if ($spFarm.Properties.Contains($params.Key) -eq $true)
                 {
-                    $localEnsure = "Present"
+                    $localEnsure  = "Present"
                     $currentValue = $spFarm.Properties[$params.Key]
                 }
                 else
                 {
-                    $localEnsure = "Absent"
+                    $localEnsure  = "Absent"
                     $currentValue = $null
                 }
             }
         }
         else
         {
-            $null = $currentValue
-            $localEnsure = 'Absent'
+            $currentValue = $null
+            $localEnsure  = 'Absent'
         }
 
         return @{
-            Key = $params.Key
-            Value = $currentValue
+            Key    = $params.Key
+            Value  = $currentValue
             Ensure = $localEnsure
         }
     }
-    return $result    
+    return $result
 }
 
 function Set-TargetResource()
@@ -87,13 +87,13 @@ function Set-TargetResource()
         [System.String]
         $Value,
 
-        [Parameter()] 
-        [ValidateSet("Present","Absent")] 
-        [System.String] 
+        [Parameter()]
+        [ValidateSet("Present","Absent")]
+        [System.String]
         $Ensure = 'Present',
 
         [Parameter()]
-        [System.Management.Automation.PSCredential] 
+        [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 
@@ -104,14 +104,13 @@ function Set-TargetResource()
                         -ScriptBlock {
         $params = $args[0]
 
-        try 
+        try
         {
             $spFarm = Get-SPFarm -ErrorAction SilentlyContinue
-        } 
-        catch 
+        }
+        catch
         {
             throw "No local SharePoint farm was detected."
-            return
         }
 
         if ($params.Ensure -eq 'Present')
@@ -125,7 +124,7 @@ function Set-TargetResource()
             else
             {
                 Write-Warning -Message 'Ensure = Present, value parameter cannot be null'
-            }  
+            }
         }
         else
         {
@@ -151,13 +150,13 @@ function Test-TargetResource()
         [System.String]
         $Value,
 
-        [Parameter()] 
-        [ValidateSet("Present","Absent")] 
-        [System.String] 
+        [Parameter()]
+        [ValidateSet("Present","Absent")]
+        [System.String]
         $Ensure = 'Present',
 
         [Parameter()]
-        [System.Management.Automation.PSCredential] 
+        [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 

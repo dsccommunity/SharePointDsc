@@ -33,6 +33,7 @@ function Get-TargetResource
         $nonCompliantServices = Get-SPService | Where-Object -FilterScript {
             $_.CompliantWithMinRole -eq $false
         }
+        $params = $args[0];
 
         if ($null -eq $nonCompliantServices)
         {

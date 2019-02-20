@@ -95,6 +95,29 @@ function Convert-SPDscADGroupNameToID
     return ([Guid]::new($result.objectGUID.Value))
 }
 
+function Convert-SPDscHashtableToString
+{
+    param
+    (
+        [System.Collections.Hashtable]
+        $Hashtable
+    )
+    $first = $true
+    foreach($pair in $Hashtable.GetEnumerator())
+    {
+        if ($first)
+        {
+            $first = $false
+        }
+        else
+        {
+            $output += '; '
+        }
+        $output+="{0}={1}" -f $($pair.key),$($pair.Value)
+    }
+    return $output
+}
+
 function Get-SPDscOSVersion
 {
     [CmdletBinding()]
@@ -370,7 +393,7 @@ function Invoke-SPDSCCommand
 
         try
         {
-            $result = Invoke-Command @invokeArgs -Verbose
+            return Invoke-Command @invokeArgs -Verbose
         }
         catch
         {
@@ -385,7 +408,6 @@ function Invoke-SPDSCCommand
                 throw $_
             }
         }
-        return $result
     }
     else
     {
@@ -420,7 +442,7 @@ function Invoke-SPDSCCommand
 
         try
         {
-            $result = Invoke-Command @invokeArgs -Verbose
+            return Invoke-Command @invokeArgs -Verbose
         }
         catch
         {
@@ -440,7 +462,6 @@ function Invoke-SPDSCCommand
         {
             Remove-PSSession -Session $session
         }
-        return $result
     }
 }
 

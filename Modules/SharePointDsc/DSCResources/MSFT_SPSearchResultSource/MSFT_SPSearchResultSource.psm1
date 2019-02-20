@@ -28,12 +28,6 @@ function Get-TargetResource
         $Query,
 
         [Parameter(Mandatory = $true)]
-        [ValidateSet("Exchange Search Provider",
-                     "Local People Provider",
-                     "Local SharePoint Provider",
-                     "OpenSearch Provider",
-                     "Remote People Provider",
-                     "Remote SharePoint Provider")]
         [System.String]
         $ProviderType,
 
@@ -71,8 +65,22 @@ function Get-TargetResource
             InstallAccount = $params.InstallAccount
         }
         $serviceApp = Get-SPEnterpriseSearchServiceApplication -Identity $params.SearchServiceAppName
+        if ($null -eq $serviceApp)
+        {
+            Write-Verbose -Message ("Specified Search service application $($params.SearchServiceAppName)" + `
+                                    "does not exist.")
+            return $nullReturn
+        }
 
         $fedManager = New-Object Microsoft.Office.Server.Search.Administration.Query.FederationManager($serviceApp)
+        $providers = $fedManager.ListProviders()
+        if ($providers.Keys -notcontains $params.ProviderType)
+        {
+            Write-Verbose -Message ("Unknown ProviderType ($($params.ProviderType)) is used. Allowed " + `
+                                    "values are: '" + ($providers.Keys -join "', '") + "'")
+            return $nullReturn
+        }
+
         $searchOwner = $null
         if ("ssa" -eq $params.ScopeName.ToLower())
         {
@@ -144,12 +152,6 @@ function Set-TargetResource
         $Query,
 
         [Parameter(Mandatory = $true)]
-        [ValidateSet("Exchange Search Provider",
-                     "Local People Provider",
-                     "Local SharePoint Provider",
-                     "OpenSearch Provider",
-                     "Remote People Provider",
-                     "Remote SharePoint Provider")]
         [System.String]
         $ProviderType,
 
@@ -182,15 +184,27 @@ function Set-TargetResource
 
             $serviceApp = Get-SPEnterpriseSearchServiceApplication `
                             -Identity $params.SearchServiceAppName
-
+            if ($null -eq $serviceApp)
+            {
+                throw ("Specified Search service application $($params.SearchServiceAppName)" + `
+                       "does not exist.")
+            }
 
             $fedManager =  New-Object Microsoft.Office.Server.Search.Administration.Query.FederationManager($serviceApp)
+            $providers = $fedManager.ListProviders()
+            if ($providers.Keys -notcontains $params.ProviderType)
+            {
+                throw ("Unknown ProviderType ($($params.ProviderType)) is used. Allowed " + `
+                       "values are: '" + ($providers.Keys -join "', '") + "'")
+            }
+
             $searchOwner = $null
             if ("ssa" -eq $params.ScopeName.ToLower())
             {
                 $searchOwner = Get-SPEnterpriseSearchOwner -Level SSA
             }
-            else {
+            else
+            {
                 $searchOwner = Get-SPEnterpriseSearchOwner -Level $params.ScopeName -SPWeb $params.ScopeUrl
             }
 
@@ -229,7 +243,8 @@ function Set-TargetResource
             {
                 $searchOwner = Get-SPEnterpriseSearchOwner -Level SSA
             }
-            else {
+            else
+            {
                 $searchOwner = Get-SPEnterpriseSearchOwner -Level $params.ScopeName -SPWeb $params.ScopeUrl
             }
 
@@ -272,12 +287,6 @@ function Test-TargetResource
         $Query,
 
         [Parameter(Mandatory = $true)]
-        [ValidateSet("Exchange Search Provider",
-                     "Local People Provider",
-                     "Local SharePoint Provider",
-                     "OpenSearch Provider",
-                     "Remote People Provider",
-                     "Remote SharePoint Provider")]
         [System.String]
         $ProviderType,
 
