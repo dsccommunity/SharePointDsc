@@ -511,8 +511,9 @@ function Set-TargetResource
                     $centralAdminSite = Get-SPWebApplication -IncludeCentralAdministration | Where-Object -FilterScript {
                         $_.IsAdministrationWebApplication
                     }
-                    if ($centralAdminSite.Url -ne $params.CentralAdministrationUrl)
+                    if ($centralAdminSite.Url.TrimEnd('/') -ne $params.CentralAdministrationUrl.TrimEnd('/'))
                     {
+                        Write-Verbose -Message "Re-provisioning CA because $($centralAdminSite.Url.TrimEnd('/')) does not equal $($params.CentralAdministrationUrl.TrimEnd('/'))"
                         $reprovisionCentralAdmin = $true
                     }
                     else
@@ -527,24 +528,26 @@ function Set-TargetResource
                             if (([System.Uri]$params.CentralAdministrationUrl).Host -ne $secureBindings[0].HostHeader -or `
                                 $params.CentralAdministrationPort -ne $secureBindings[0].Port)
                             {
+                                Write-Verbose -Message "Re-provisioning CA because $(([System.Uri]$params.CentralAdministrationUrl).Host) does not equal $($secureBindings[0].HostHeader)"
                                 $reprovisionCentralAdmin = $true
                             }
                         }
                         else
                         {
                             # secureBindings did not exist or did not contain a valid hostheader
+                            Write-Verbose -Message "Re-provisioning CA because secureBindings does not exist or does not contain a valid host header"
                             $reprovisionCentralAdmin = $true
                         }
                     }
 
                     if ($reprovisionCentralAdmin)
                     {
-                        Write-Verbose -Message "Removing Central Admin web application in order to reprovision it"
+                        # Write-Verbose -Message "Removing Central Admin web application in order to reprovision it"
                         Remove-SPWebApplication -Identity $centralAdminSite.Url -Zone Default -DeleteIisSite
 
                         Write-Verbose -Message "Re-provisioning Central Admin web application with SSL"
                         $webAppParams = @{
-                            Identity             = $params.CentralAdministrationUrl
+                            Identity             = $centralAdminSite.Url
                             Name                 = "SharePoint Central Administration v4"
                             Zone                 = "Default"
                             HostHeader           = ([System.Uri]$params.CentralAdministrationUrl).Host
@@ -839,7 +842,7 @@ function Set-TargetResource
                         Write-Verbose -Message "Reprovisioning Central Admin with SSL"
 
                         $webAppParams = @{
-                            Identity             = $params.CentralAdministrationUrl
+                            Identity             = $centralAdminSite.Url
                             Name                 = "SharePoint Central Administration v4"
                             Zone                 = "Default"
                             HostHeader           = ([System.Uri]$params.CentralAdministrationUrl).Host
