@@ -79,6 +79,7 @@ function Get-TargetResource
 
 function Set-TargetResource
 {
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingConvertToSecureStringWithPlainText", "", Justification  =  "Ignoring this because the used AccessAccount does not use SecureString to handle the password")]
     [CmdletBinding()]
     param
     (
@@ -183,14 +184,21 @@ function Set-TargetResource
 
                     $adsearchobj.IsForest = $searchADDomain.IsForest
 
-                    $prop = $searchADDomain.CimInstanceProperties | Where-Object -FilterScript {
-                        $_.Name -eq "AccessAccount"
-                    }
-                    if ($null -ne $prop)
+                    if ($null -ne $searchADDomain.AccessAccount)
                     {
                         $adsearchobj.LoginName = $searchADDomain.AccessAccount.UserName
-                        $adsearchobj.SetPassword($searchADDomain.AccessAccount.Password)
+
+                        if([string]::IsNullOrEmpty($searchADDomain.AccessAccount.Password))
+                        {
+                            $adsearchobj.SetPassword($null)
+                        }
+                        else
+                        {
+                            $accessAccountPassword = ConvertTo-SecureString $searchADDomain.AccessAccount.Password -AsPlainText -Force
+                            $adsearchobj.SetPassword($accessAccountPassword)
+                        }
                     }
+
                     $wa.PeoplePickerSettings.SearchActiveDirectoryDomains.Add($adsearchobj)
                 }
             }

@@ -60,10 +60,10 @@ function Get-TargetResource
         $farmAdministratorsGroup = $caWeb.SiteGroups.GetByName($farmAdminGroup)
         return @{
             IsSingleInstance = "Yes"
-            Members = $farmAdministratorsGroup.users.UserLogin
+            Members          = $farmAdministratorsGroup.users.UserLogin
             MembersToInclude = $params.MembersToInclude
             MembersToExclude = $params.MembersToExclude
-            InstallAccount = $params.InstallAccount
+            InstallAccount   = $params.InstallAccount
         }
     }
     return $result
@@ -134,7 +134,7 @@ function Set-TargetResource
         else
         {
             Write-Verbose "Farm Administrators group does not match. Perform corrective action"
-            $addUsers = @()
+            $addUsers    = @()
             $removeUsers = @()
             foreach ($difference in $differences)
             {
@@ -154,14 +154,14 @@ function Set-TargetResource
                 }
             }
 
-            if($addUsers.count -gt 0)
+            if ($addUsers.count -gt 0)
             {
                 Write-Verbose "Adding $($addUsers.Count) users to the Farm Administrators group"
                 $changeUsers.Add = $addUsers
                 $runChange = $true
             }
 
-            if($removeUsers.count -gt 0)
+            if ($removeUsers.count -gt 0)
             {
                 Write-Verbose "Removing $($removeUsers.Count) users from the Farm Administrators group"
                 $changeUsers.Remove = $removeUsers
@@ -188,7 +188,7 @@ function Set-TargetResource
             }
         }
 
-        if($addUsers.count -gt 0)
+        if ($addUsers.count -gt 0)
         {
             Write-Verbose "Adding $($addUsers.Count) users to the Farm Administrators group"
             $changeUsers.Add = $addUsers
@@ -214,7 +214,7 @@ function Set-TargetResource
             }
         }
 
-        if($removeUsers.count -gt 0)
+        if ($removeUsers.count -gt 0)
         {
             Write-Verbose "Removing $($removeUsers.Count) users from the Farm Administrators group"
             $changeUsers.Remove = $removeUsers
@@ -343,7 +343,9 @@ function Merge-SPDscFarmAdminList
         $changeUsers
     )
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $changeUsers -ScriptBlock {
+    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+                                  -Arguments $changeUsers `
+                                  -ScriptBlock {
         $changeUsers = $args[0]
 
         $webApps = Get-SPwebapplication -IncludeCentralAdministration

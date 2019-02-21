@@ -5,7 +5,7 @@
     other cache hosts.
 #>
 
-    Configuration Example 
+    Configuration Example
     {
         param(
             [Parameter(Mandatory = $true)]
@@ -20,7 +20,7 @@
                 Name                 = "AppFabricCachingService"
                 CacheSizeInMB        = 8192
                 ServiceAccount       = "DEMO\ServiceAccount"
-                InstallAccount       = $SetupAccount
+                PsDscRunAsCredential = $SetupAccount
                 CreateFirewallRules  = $true
             }
         }

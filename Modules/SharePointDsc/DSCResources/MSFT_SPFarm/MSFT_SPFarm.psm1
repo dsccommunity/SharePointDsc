@@ -26,10 +26,6 @@ function Get-TargetResource
         [System.Management.Automation.PSCredential]
         $FarmAccount,
 
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount,
-
         [Parameter(Mandatory = $true)]
         [System.Management.Automation.PSCredential]
         $Passphrase,
@@ -62,7 +58,17 @@ function Get-TargetResource
                      "SingleServerFarm",
                      "WebFrontEnd",
                      "WebFrontEndWithDistributedCache")]
-        $ServerRole
+        $ServerRole,
+
+        [Parameter()]
+        [ValidateSet("Off","On","OnDemand")]
+        [System.String]
+        $DeveloperDashboard,
+
+
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
+        $InstallAccount
     )
 
     Write-Verbose -Message "Getting the settings of the current local SharePoint Farm (if any)"
@@ -89,7 +95,20 @@ function Get-TargetResource
             Write-Verbose -Message "Detected installation of SharePoint 2013"
         }
         16 {
-            if($installedVersion.ProductBuildPart.ToString().Length -eq 4)
+            if ($DeveloperDashboard -eq "OnDemand")
+            {
+                throw ("The DeveloperDashboard value 'OnDemand' is not allowed in SharePoint " + `
+                       "2016 and 2019")
+            }
+
+            if ($DeveloperDashboard -eq "On")
+            {
+                Write-Verbose -Message ("Please make sure you also provision the Usage and Health " + `
+                                        "service application to make sure the Developer Dashboard " + `
+                                        "works properly")
+            }
+
+            if ($installedVersion.ProductBuildPart.ToString().Length -eq 4)
             {
                 Write-Verbose -Message "Detected installation of SharePoint 2016"
             }
@@ -119,21 +138,21 @@ function Get-TargetResource
         throw [Exception] ("ServerRole values of 'ApplicationWithSearch' or " + `
                            "'WebFrontEndWithDistributedCache' require the SharePoint 2016 " + `
                            "Feature Pack 1 to be installed. See " + `
-                           "https://support.microsoft.com/en-au/kb/3127940")
+                           "https://support.microsoft.com/en-us/kb/3127940")
     }
 
 
     # Determine if a connection to a farm already exists
     $majorVersion = $installedVersion.FileMajorPart
-    $regPath = "hklm:SOFTWARE\Microsoft\Shared Tools\Web Server Extensions\$majorVersion.0\Secure\ConfigDB"
-    $dsnValue = Get-SPDSCRegistryKey -Key $regPath -Value "dsn" -ErrorAction SilentlyContinue
+    $regPath      = "hklm:SOFTWARE\Microsoft\Shared Tools\Web Server Extensions\$majorVersion.0\Secure\ConfigDB"
+    $dsnValue     = Get-SPDSCRegistryKey -Key $regPath -Value "dsn" -ErrorAction SilentlyContinue
 
     if ($null -ne $dsnValue)
     {
         # This node has already been connected to a farm
         $result = Invoke-SPDSCCommand -Credential $InstallAccount `
-                                  -Arguments $PSBoundParameters `
-                                  -ScriptBlock {
+                                      -Arguments $PSBoundParameters `
+                                      -ScriptBlock {
             $params = $args[0]
 
             try
@@ -198,23 +217,27 @@ function Get-TargetResource
                 $centralAdminAuth = "NTLM"
             }
 
+            $admService                 = Get-SPDSCContentService
+            $developerDashboardSettings = $admService.DeveloperDashboardSettings
+            $developerDashboardStatus   = $developerDashboardSettings.DisplayLevel
+
             $returnValue = @{
-                IsSingleInstance = "Yes"
-                FarmConfigDatabaseName = $spFarm.Name
-                DatabaseServer = $configDb.NormalizedDataSource
-                FarmAccount = $farmAccount # Need to return this as a credential to match the type expected
-                InstallAccount = $null
-                Passphrase = $null
-                AdminContentDatabaseName = $centralAdminSite.ContentDatabases[0].Name
-                RunCentralAdmin = $centralAdminProvisioned
+                IsSingleInstance          = "Yes"
+                FarmConfigDatabaseName    = $spFarm.Name
+                DatabaseServer            = $configDb.NormalizedDataSource
+                FarmAccount               = $farmAccount # Need to return this as a credential to match the type expected
+                Passphrase                = $null
+                AdminContentDatabaseName  = $centralAdminSite.ContentDatabases[0].Name
+                RunCentralAdmin           = $centralAdminProvisioned
                 CentralAdministrationPort = (New-Object -TypeName System.Uri $centralAdminSite.Url).Port
                 CentralAdministrationAuth = $centralAdminAuth
+                DeveloperDashboard        = $developerDashboardStatus
             }
             $installedVersion = Get-SPDSCInstalledProductVersion
-            if($installedVersion.FileMajorPart -eq 16)
+            if ($installedVersion.FileMajorPart -eq 16)
             {
                 $server = Get-SPServer -Identity $env:COMPUTERNAME -ErrorAction SilentlyContinue
-                if($null -ne $server -and $null -ne $server.Role)
+                if ($null -ne $server -and $null -ne $server.Role)
                 {
                     $returnValue.Add("ServerRole", $server.Role)
                 }
@@ -224,7 +247,7 @@ function Get-TargetResource
                     $currentServer = "$($env:COMPUTERNAME).$domain"
 
                     $server = Get-SPServer -Identity $currentServer -ErrorAction SilentlyContinue
-                    if($null -ne $server -and $null -ne $server.Role)
+                    if ($null -ne $server -and $null -ne $server.Role)
                     {
                         $returnValue.Add("ServerRole", $server.Role)
                     }
@@ -243,17 +266,16 @@ function Get-TargetResource
                                     "incomplete, however the 'Ensure' property should be " + `
                                     "considered correct")
             return @{
-                IsSingleInstance = "Yes"
-                FarmConfigDatabaseName = $null
-                DatabaseServer = $null
-                FarmAccount = $null
-                InstallAccount = $null
-                Passphrase = $null
-                AdminContentDatabaseName = $null
-                RunCentralAdmin = $null
+                IsSingleInstance          = "Yes"
+                FarmConfigDatabaseName    = $null
+                DatabaseServer            = $null
+                FarmAccount               = $null
+                Passphrase                = $null
+                AdminContentDatabaseName  = $null
+                RunCentralAdmin           = $null
                 CentralAdministrationPort = $null
                 CentralAdministrationAuth = $null
-                Ensure = "Present"
+                Ensure                    = "Present"
             }
         }
         else
@@ -266,17 +288,16 @@ function Get-TargetResource
     {
         # This node has never been connected to a farm, return the null return object
         return @{
-            IsSingleInstance = "Yes"
-            FarmConfigDatabaseName = $null
-            DatabaseServer = $null
-            FarmAccount = $null
-            InstallAccount = $null
-            Passphrase = $null
-            AdminContentDatabaseName = $null
-            RunCentralAdmin = $null
+            IsSingleInstance          = "Yes"
+            FarmConfigDatabaseName    = $null
+            DatabaseServer            = $null
+            FarmAccount               = $null
+            Passphrase                = $null
+            AdminContentDatabaseName  = $null
+            RunCentralAdmin           = $null
             CentralAdministrationPort = $null
             CentralAdministrationAuth = $null
-            Ensure = "Absent"
+            Ensure                    = "Absent"
         }
     }
 }
@@ -310,10 +331,6 @@ function Set-TargetResource
         [System.Management.Automation.PSCredential]
         $FarmAccount,
 
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount,
-
         [Parameter(Mandatory = $true)]
         [System.Management.Automation.PSCredential]
         $Passphrase,
@@ -346,7 +363,17 @@ function Set-TargetResource
                      "SingleServerFarm",
                      "WebFrontEnd",
                      "WebFrontEndWithDistributedCache")]
-        $ServerRole
+        $ServerRole,
+
+        [Parameter()]
+        [ValidateSet("Off","On","OnDemand")]
+        [System.String]
+        $DeveloperDashboard,
+
+
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
+        $InstallAccount
     )
 
     Write-Verbose -Message "Setting local SP Farm settings"
@@ -389,7 +416,7 @@ function Set-TargetResource
                     if ($null -eq $serviceInstance)
                     {
                         $domain = (Get-CimInstance -ClassName Win32_ComputerSystem).Domain
-                        $fqdn = "$($env:COMPUTERNAME).$domain"
+                        $fqdn   = "$($env:COMPUTERNAME).$domain"
                         $serviceInstance = Get-SPServiceInstance -Server $fqdn `
                     }
 
@@ -414,7 +441,7 @@ function Set-TargetResource
                     if ($null -eq $serviceInstance)
                     {
                         $domain = (Get-CimInstance -ClassName Win32_ComputerSystem).Domain
-                        $fqdn = "$($env:COMPUTERNAME).$domain"
+                        $fqdn   = "$($env:COMPUTERNAME).$domain"
                         $serviceInstance = Get-SPServiceInstance -Server $fqdn
                     }
 
@@ -445,6 +472,22 @@ function Set-TargetResource
                 Set-SPCentralAdministration -Port $params.CentralAdministrationPort
             }
         }
+
+        if ($CurrentValues.DeveloperDashboard -ne $DeveloperDashboard)
+        {
+            Invoke-SPDSCCommand -Credential $InstallAccount `
+                                -Arguments $PSBoundParameters `
+                                -ScriptBlock {
+                $params = $args[0]
+
+                Write-Verbose -Message "Updating Developer Dashboard setting"
+                $admService                 = Get-SPDSCContentService
+                $developerDashboardSettings = $admService.DeveloperDashboardSettings
+                $developerDashboardSettings.DisplayLevel = [Microsoft.SharePoint.Administration.SPDeveloperDashboardLevel]::$params.DeveloperDashboard
+                $developerDashboardSettings.Update()
+            }
+        }
+
         return
     }
     else
@@ -454,7 +497,7 @@ function Set-TargetResource
         $actionResult = Invoke-SPDSCCommand -Credential $InstallAccount `
                                             -Arguments @($PSBoundParameters, $PSScriptRoot) `
                                             -ScriptBlock {
-            $params = $args[0]
+            $params     = $args[0]
             $scriptRoot = $args[1]
 
             $modulePath = "..\..\Modules\SharePointDsc.Farm\SPFarm.psm1"
@@ -486,14 +529,14 @@ function Set-TargetResource
             }
 
             $executeArgs = @{
-                DatabaseServer = $params.DatabaseServer
-                DatabaseName = $params.FarmConfigDatabaseName
-                Passphrase = $params.Passphrase.Password
+                DatabaseServer                     = $params.DatabaseServer
+                DatabaseName                       = $params.FarmConfigDatabaseName
+                Passphrase                         = $params.Passphrase.Password
                 SkipRegisterAsDistributedCacheHost = $true
             }
 
             $installedVersion = Get-SPDSCInstalledProductVersion
-            switch($installedVersion.FileMajorPart)
+            switch ($installedVersion.FileMajorPart)
             {
                 15 {
                     Write-Verbose -Message "Detected Version: SharePoint 2013"
@@ -501,7 +544,7 @@ function Set-TargetResource
                 16 {
                     if ($params.ContainsKey("ServerRole") -eq $true)
                     {
-                        if($installedVersion.ProductBuildPart.ToString().Length -eq 4)
+                        if ($installedVersion.ProductBuildPart.ToString().Length -eq 4)
                         {
                             Write-Verbose -Message ("Detected Version: SharePoint 2016 - " + `
                                                     "configuring server as $($params.ServerRole)")
@@ -515,7 +558,7 @@ function Set-TargetResource
                     }
                     else
                     {
-                        if($installedVersion.ProductBuildPart.ToString().Length -eq 4)
+                        if ($installedVersion.ProductBuildPart.ToString().Length -eq 4)
                         {
                             Write-Verbose -Message ("Detected Version: SharePoint 2016 - no server " + `
                                                     "role provided, configuring server without a " + `
@@ -577,9 +620,9 @@ function Set-TargetResource
 
                 Write-Verbose -Message ("The server will attempt to join the farm now once every " + `
                                         "60 seconds for the next 15 minutes.")
-                $loopCount = 0
+                $loopCount       = 0
                 $connectedToFarm = $false
-                $lastException = $null
+                $lastException   = $null
                 while ($connectedToFarm -eq $false -and $loopCount -lt 15)
                 {
                     try
@@ -605,7 +648,6 @@ function Set-TargetResource
                 {
                     Write-Verbose -Message ("Unable to join config database. Throwing exception.")
                     throw $lastException
-                    return
                 }
                 $farmAction = "JoinedFarm"
             }
@@ -616,7 +658,7 @@ function Set-TargetResource
                 Write-Verbose -Message ("Creating Lock database to prevent two servers creating " + `
                                         "the same farm")
                 Add-SPDscConfigDBLock -SQLServer $params.DatabaseServer `
-                                    -Database $params.FarmConfigDatabaseName
+                                      -Database $params.FarmConfigDatabaseName
 
                 try
                 {
@@ -634,7 +676,7 @@ function Set-TargetResource
                 {
                     Write-Verbose -Message "Removing Lock database"
                     Remove-SPDscConfigDBLock -SQLServer $params.DatabaseServer `
-                                            -Database $params.FarmConfigDatabaseName
+                                             -Database $params.FarmConfigDatabaseName
                 }
             }
 
@@ -701,6 +743,15 @@ function Set-TargetResource
             Write-Verbose -Message "Starting Install-SPApplicationContent"
             Install-SPApplicationContent | Out-Null
 
+            if ($params.DeveloperDashboard -ne "Off")
+            {
+                Write-Verbose -Message "Updating Developer Dashboard setting"
+                $admService                 = Get-SPDSCContentService
+                $developerDashboardSettings = $admService.DeveloperDashboardSettings
+                $developerDashboardSettings.DisplayLevel = [Microsoft.SharePoint.Administration.SPDeveloperDashboardLevel]::$params.DeveloperDashboard
+                $developerDashboardSettings.Update()
+            }
+
             return $farmAction
         }
 
@@ -748,10 +799,6 @@ function Test-TargetResource
         [System.Management.Automation.PSCredential]
         $FarmAccount,
 
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount,
-
         [Parameter(Mandatory = $true)]
         [System.Management.Automation.PSCredential]
         $Passphrase,
@@ -784,7 +831,17 @@ function Test-TargetResource
                      "SingleServerFarm",
                      "WebFrontEnd",
                      "WebFrontEndWithDistributedCache")]
-        $ServerRole
+        $ServerRole,
+
+        [Parameter()]
+        [ValidateSet("Off","On","OnDemand")]
+        [System.String]
+        $DeveloperDashboard,
+
+
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
+        $InstallAccount
     )
 
     Write-Verbose -Message "Testing local SP Farm settings"
@@ -797,7 +854,8 @@ function Test-TargetResource
                                     -DesiredValues $PSBoundParameters `
                                     -ValuesToCheck @("Ensure",
                                                      "RunCentralAdmin",
-                                                     "CentralAdministrationPort")
+                                                     "CentralAdministrationPort",
+                                                     "DeveloperDashboard")
 }
 
 Export-ModuleMember -Function *-TargetResource

@@ -1,0 +1,16 @@
+
+[ClassVersion("1.0.0.0"), FriendlyName("SPIncomingEmailSettings")]
+class MSFT_SPIncomingEmailSettings : OMI_BaseResource
+{
+    [Key, Description("Specifies the resource is a single instance, the value must be 'Yes'"), ValueMap{"Yes"}, Values{"Yes"}] String IsSingleInstance;
+    [Required, Description("Present ensures Incoming Email is enabled. Absent disables incoming email"), ValueMap{"Present","Absent"}, Values{"Present","Absent"}] String Ensure;
+    [Write, Description("Automatic Settings enables a local SMTP service on the SharePoint server. Set to False to use an external drop folder")] Boolean UseAutomaticSettings;
+    [Write, Description("Set to Yes, the service supports the creation and management of e-mail distribution groups from SharePoint Sites, and creates mail contacts mail enabled SharePoint lists. Set to Remote to use a remote SharePoint Directory Management Web Service"), ValueMap{"Yes","No","Remote"}, Values{"Yes","No","Remote"}] string UseDirectoryManagementService;
+    [Write, Description("URL to the remote SharePoint Directory Management Web Service")] String RemoteDirectoryManagementURL;
+    [Write, Description("SMTP Server Address when Directory Managment Service mode is used")] String ServerAddress;
+    [Write, Description("SharePoint Distribution lists accept from authenticated senders only")] Boolean DLsRequireAuthenticatedSenders;
+    [Write, Description("Allow creation of distribution groups from within SharePoint")] Boolean DistributionGroupsEnabled;
+    [Write, Description("Email server display address 'mylist@example.com'")] String ServerDisplayAddress;
+    [Write, Description("Path to email drop folder if not using Automatic Settings")] String DropFolder;
+    [Write, Description("POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5"), EmbeddedInstance("MSFT_Credential")] String InstallAccount;
+};

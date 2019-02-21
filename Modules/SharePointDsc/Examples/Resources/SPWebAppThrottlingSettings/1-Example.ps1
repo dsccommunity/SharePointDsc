@@ -15,7 +15,7 @@
         node localhost {
             SPWebAppThrottlingSettings PrimaryWebAppThrottlingSettings
             {
-                WebAppUrl                = "http://exmaple.contoso.local"
+                WebAppUrl                = "http://example.contoso.local"
                 ListViewThreshold        = 5000
                 AllowObjectModelOverride = $false
                 HappyHourEnabled         = $true

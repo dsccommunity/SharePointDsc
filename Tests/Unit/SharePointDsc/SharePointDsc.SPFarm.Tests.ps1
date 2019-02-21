@@ -28,6 +28,19 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         $modulePath = "Modules\SharePointDsc\Modules\SharePointDsc.Farm\SPFarm.psm1"
         Import-Module -Name (Join-Path -Path $Global:SPDscHelper.RepoRoot -ChildPath $modulePath -Resolve)
 
+        try
+        {
+            [Microsoft.SharePoint.Administration.SPDeveloperDashboardLevel]
+        }
+        catch
+        {
+            Add-Type -TypeDefinition @"
+namespace Microsoft.SharePoint.Administration {
+    public enum SPDeveloperDashboardLevel { On, OnDemand, Off };
+}
+"@
+        }
+
         # Mocks for all contexts
         Mock -CommandName Add-SPDscConfigDBLock -MockWith { }
         Mock -CommandName Remove-SPDscConfigDBLock -MockWith { }
@@ -49,7 +62,20 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 ProductBuildPart = $Global:SPDscHelper.CurrentStubBuildNumber.Build
             }
         }
+        Mock -CommandName Get-SPDSCContentService -MockWith {
+            $developerDashboardSettings = @{
+                DisplayLevel = "Off"
+            }
 
+            $developerDashboardSettings = $developerDashboardSettings | Add-Member -MemberType ScriptMethod -Name Update -Value {
+                $Global:SPDscDevDashUpdated = $true
+            } -PassThru
+
+            $returnVal = @{
+                DeveloperDashboardSettings = $developerDashboardSettings
+            }
+            return $returnVal
+        }
 
         # Test Contexts
         Context -Name "No config databases exists, and this server should be connected to one" -Fixture {
@@ -705,6 +731,101 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
         }
 
+        Context -Name "Server is connected to a farm, but Developer Dashboard settings are incorrect" -Fixture {
+            $testParams = @{
+                IsSingleInstance = "Yes"
+                Ensure = "Present"
+                FarmConfigDatabaseName = "SP_Config"
+                DatabaseServer = "sql.contoso.com"
+                FarmAccount = $mockFarmAccount
+                Passphrase = $mockPassphrase
+                AdminContentDatabaseName = "SP_AdminContent"
+                RunCentralAdmin = $true
+                DeveloperDashboard = "On"
+            }
+
+            Mock -CommandName "Get-SPDSCRegistryKey" -MockWith {
+                return "Connection string example"
+            }
+
+            Mock -CommandName "Get-SPFarm" -MockWith {
+                return @{
+                    Name = $testParams.FarmConfigDatabaseName
+                    DatabaseServer = @{
+                        Name = $testParams.DatabaseServer
+                    }
+                    AdminContentDatabaseName = $testParams.AdminContentDatabaseName
+                }
+            }
+            Mock -CommandName "Get-SPDSCConfigDBStatus" -MockWith {
+                return @{
+                    Locked = $false
+                    ValidPermissions = $true
+                    DatabaseExists = $true
+                }
+            }
+            Mock -CommandName "Get-SPDSCSQLInstanceStatus" -MockWith {
+                return @{
+                    MaxDOPCorrect = $true
+                }
+            }
+            Mock -CommandName "Get-SPDatabase" -MockWith {
+                return @(@{
+                    Name = $testParams.FarmConfigDatabaseName
+                    Type = "Configuration Database"
+                    NormalizedDataSource = $testParams.DatabaseServer
+                })
+            }
+            Mock -CommandName "Get-SPWebApplication" -MockWith {
+                return @{
+                    IsAdministrationWebApplication = $true
+                    ContentDatabases = @(@{
+                        Name = $testParams.AdminContentDatabaseName
+                    })
+                    IISSettings = @(@{
+                        DisableKerberos = $true
+                    })
+                    Url = "http://localhost:9999"
+                }
+            }
+            Mock -CommandName "Get-SPServiceInstance" -MockWith {
+                if ($global:SPDscCentralAdminCheckDone -eq $true)
+                {
+                    return @(
+                        @{
+                            Name = "WSS_Administration"
+                            Status = "Online"
+                        } | Add-Member -MemberType ScriptMethod `
+                                       -Name GetType `
+                                       -Value {
+                                           return @{
+                                               Name = "SPWebServiceInstance"
+                                           }
+                                       } -PassThru -Force
+                    )
+                }
+                else
+                {
+                    $global:SPDscCentralAdminCheckDone = $true
+                    return $null
+                }
+            }
+
+            It "Should return present from the get method" {
+                (Get-TargetResource @testParams).DeveloperDashboard | Should Be "Off"
+            }
+
+            $Global:SPDscDevDashUpdated = $false
+            It "Should update DevDashboard settings in the set method" {
+                Set-TargetResource @testParams
+                $Global:SPDscDevDashUpdated | Should Be $true
+            }
+
+            It "Should return true from the test method" {
+                Test-TargetResource @testParams | Should be $false
+            }
+        }
+
         Context -Name "A config database exists, and this server is connected to it and should be" -Fixture {
             $testParams = @{
                 IsSingleInstance = "Yes"
@@ -1003,6 +1124,99 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
                 It "Should throw if an invalid server role is used in the set method" {
                     { Set-TargetResource @testParams } | Should Not Throw
+                }
+            }
+
+            Context -Name "DeveloperDashboard is set to OnDemand, which is not allowed in SP2016 and above" -Fixture {
+                $testParams = @{
+                    IsSingleInstance = "Yes"
+                    Ensure = "Present"
+                    FarmConfigDatabaseName = "SP_Config"
+                    DatabaseServer = "sql.contoso.com"
+                    FarmAccount = $mockFarmAccount
+                    Passphrase = $mockPassphrase
+                    AdminContentDatabaseName = "SP_AdminContent"
+                    RunCentralAdmin = $true
+                    DeveloperDashboard = "OnDemand"
+                }
+
+                Mock -CommandName "Get-SPDSCRegistryKey" -MockWith {
+                    return "Connection string example"
+                }
+
+                Mock -CommandName "Get-SPFarm" -MockWith {
+                    return @{
+                        Name = $testParams.FarmConfigDatabaseName
+                        DatabaseServer = @{
+                            Name = $testParams.DatabaseServer
+                        }
+                        AdminContentDatabaseName = $testParams.AdminContentDatabaseName
+                    }
+                }
+                Mock -CommandName "Get-SPDSCConfigDBStatus" -MockWith {
+                    return @{
+                        Locked = $false
+                        ValidPermissions = $true
+                        DatabaseExists = $true
+                    }
+                }
+                Mock -CommandName "Get-SPDSCSQLInstanceStatus" -MockWith {
+                    return @{
+                        MaxDOPCorrect = $true
+                    }
+                }
+                Mock -CommandName "Get-SPDatabase" -MockWith {
+                    return @(@{
+                        Name = $testParams.FarmConfigDatabaseName
+                        Type = "Configuration Database"
+                        NormalizedDataSource = $testParams.DatabaseServer
+                    })
+                }
+                Mock -CommandName "Get-SPWebApplication" -MockWith {
+                    return @{
+                        IsAdministrationWebApplication = $true
+                        ContentDatabases = @(@{
+                            Name = $testParams.AdminContentDatabaseName
+                        })
+                        IISSettings = @(@{
+                            DisableKerberos = $true
+                        })
+                        Url = "http://localhost:9999"
+                    }
+                }
+                Mock -CommandName "Get-SPServiceInstance" -MockWith {
+                    if ($global:SPDscCentralAdminCheckDone -eq $true)
+                    {
+                        return @(
+                            @{
+                                Name = "WSS_Administration"
+                                Status = "Online"
+                            } | Add-Member -MemberType ScriptMethod `
+                                           -Name GetType `
+                                           -Value {
+                                               return @{
+                                                   Name = "SPWebServiceInstance"
+                                               }
+                                           } -PassThru -Force
+                        )
+                    }
+                    else
+                    {
+                        $global:SPDscCentralAdminCheckDone = $true
+                        return $null
+                    }
+                }
+
+                It "Should throw and exception in the get method" {
+                    { Get-TargetResource @testParams } | Should Throw "The DeveloperDashboard value 'OnDemand' is not allowed in SharePoint 2016 and 2019"
+                }
+
+                It "Should throw and exception in the set method" {
+                    { Set-TargetResource @testParams } | Should Throw "The DeveloperDashboard value 'OnDemand' is not allowed in SharePoint 2016 and 2019"
+                }
+
+                It "Should throw and exception in the test method" {
+                    { Test-TargetResource @testParams } | Should Throw "The DeveloperDashboard value 'OnDemand' is not allowed in SharePoint 2016 and 2019"
                 }
             }
         }

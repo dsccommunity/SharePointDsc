@@ -66,7 +66,7 @@ function Get-TargetResource
         return Get-SPDscFarmProductsInfo
     }
 
-    if ($setupFileInfo.VersionInfo.FileDescription -match "Language Pack")
+    if ($setupFileInfo.VersionInfo.FileDescription -match "Service Pack.*Language Pack")
     {
         Write-Verbose -Message "Update is a Language Pack Service Pack."
         # Retrieve language from file and check version for that language pack.

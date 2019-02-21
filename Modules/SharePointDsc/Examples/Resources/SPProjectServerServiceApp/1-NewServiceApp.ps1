@@ -4,7 +4,7 @@
     in the local farm
 #>
 
-    Configuration Example 
+    Configuration Example
     {
         param(
             [Parameter(Mandatory = $true)]
@@ -16,9 +16,9 @@
         node localhost {
             SPProjectServerServiceApp ProjectServiceApp
             {
-                Name = "Project Server Service Application"
-                ApplicationPool = "SharePoint Web Services"
-                InstallAccount  = $SetupAccount
+                Name                 = "Project Server Service Application"
+                ApplicationPool      = "SharePoint Web Services"
+                PsDscRunAsCredential = $SetupAccount
             }
         }
     }

@@ -78,7 +78,7 @@ namespace Microsoft.SharePoint.Administration {
                         AccessAccount  = (New-CimInstance -ClassName MSFT_Credential `
                                                     -Property @{
                                                         Username=[string]$mockAccount.UserName;
-                                                        Password=[string]$null
+                                                        Password=[string]$mockAccount.Password;
                                                     } `
                                                     -Namespace root/microsoft/windows/desiredstateconfiguration `
                                                     -ClientOnly)
@@ -199,7 +199,7 @@ namespace Microsoft.SharePoint.Administration {
                         AccessAccount  = (New-CimInstance -ClassName MSFT_Credential `
                                                     -Property @{
                                                         Username=[string]$mockAccount.UserName;
-                                                        Password=[string]$null
+                                                        Password=[string]$mockAccount.Password;
                                                     } `
                                                     -Namespace root/microsoft/windows/desiredstateconfiguration `
                                                     -ClientOnly)

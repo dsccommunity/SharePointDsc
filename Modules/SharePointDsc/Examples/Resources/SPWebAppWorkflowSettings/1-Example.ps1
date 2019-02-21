@@ -15,7 +15,7 @@
         node localhost {
             SPWebAppWorkflowSettings PrimaryWebAppWorkflowSettings
             {
-                WebAppUrl                                     = "Shttp://exmaple.contoso.local"
+                WebAppUrl                                     = "Shttp://example.contoso.local"
                 ExternalWorkflowParticipantsEnabled           = $false
                 EmailToNoPermissionWorkflowParticipantsEnable = $false
                 PsDscRunAsCredential                          = $SetupAccount
