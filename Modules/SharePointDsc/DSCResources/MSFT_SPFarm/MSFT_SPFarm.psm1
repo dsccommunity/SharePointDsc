@@ -237,7 +237,7 @@ function Get-TargetResource
                 Passphrase                = $null
                 AdminContentDatabaseName  = $centralAdminSite.ContentDatabases[0].Name
                 RunCentralAdmin           = $centralAdminProvisioned
-                CentralAdministrationUrl  = $centralAdminSite.Url
+                CentralAdministrationUrl  = $centralAdminSite.Url.TrimEnd('/')
                 CentralAdministrationPort = (New-Object -TypeName System.Uri $centralAdminSite.Url).Port
                 CentralAdministrationAuth = $centralAdminAuth
                 DeveloperDashboard        = $developerDashboardStatus
