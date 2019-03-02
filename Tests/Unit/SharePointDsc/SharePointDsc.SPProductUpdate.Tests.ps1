@@ -3,16 +3,16 @@ param(
     [Parameter()]
     [string]
     $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
-                                         -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
-                                         -Resolve)
+            -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
+            -Resolve)
 )
 
 Import-Module -Name (Join-Path -Path $PSScriptRoot `
-                                -ChildPath "..\UnitTestHelper.psm1" `
-                                -Resolve)
+        -ChildPath "..\UnitTestHelper.psm1" `
+        -Resolve)
 
 $Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointCmdletModule `
-                                              -DscResource "SPProductUpdate"
+    -DscResource "SPProductUpdate"
 
 Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
     InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
@@ -25,30 +25,30 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Mock -CommandName Get-Service -MockWith {
             $service = @{
-                    Status = "Running"
+                Status = "Running"
             }
             $service = $service | Add-Member -MemberType ScriptMethod `
-                                                -Name Stop `
-                                                -Value {
-                                                    return $null
-                                                } -PassThru
+                -Name Stop `
+                -Value {
+                return $null
+            } -PassThru
             $service = $service | Add-Member -MemberType ScriptMethod `
-                                                -Name Start `
-                                                -Value {
-                                                    return $null
-                                                } -PassThru
+                -Name Start `
+                -Value {
+                return $null
+            } -PassThru
             $service = $service | Add-Member -MemberType ScriptMethod `
-                                                -Name WaitForStatus `
-                                                -Value {
-                                                    return $null
-                                                } -PassThru
+                -Name WaitForStatus `
+                -Value {
+                return $null
+            } -PassThru
             return $service
         }
 
         Mock -CommandName Get-SPDSCInstalledProductVersion {
             return @{
-                FileMajorPart = $Global:SPDscHelper.CurrentStubBuildNumber.Major
-                FileBuildPart = $Global:SPDscHelper.CurrentStubBuildNumber.Build
+                FileMajorPart    = $Global:SPDscHelper.CurrentStubBuildNumber.Major
+                FileBuildPart    = $Global:SPDscHelper.CurrentStubBuildNumber.Build
                 ProductBuildPart = $Global:SPDscHelper.CurrentStubBuildNumber.Build
             }
         }
@@ -84,9 +84,9 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         # Test contexts
         Context -Name "Specified update file not found" -Fixture {
             $testParams = @{
-                SetupFile            = "C:\Install\CUMay2016\ubersrv2013-kb3115029-fullfile-x64-glb.exe"
-                ShutdownServices     = $true
-                Ensure               = "Present"
+                SetupFile        = "C:\Install\CUMay2016\ubersrv2013-kb3115029-fullfile-x64-glb.exe"
+                ShutdownServices = $true
+                Ensure           = "Present"
             }
 
             Mock -CommandName Test-Path -MockWith {
@@ -101,16 +101,16 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 { Set-TargetResource @testParams } | Should Throw "Setup file cannot be found."
             }
 
-            It "Should throw exception in the test method"  {
+            It "Should throw exception in the test method" {
                 { Test-TargetResource @testParams } | Should Throw "Setup file cannot be found."
             }
         }
 
         Context -Name "Specified update file is blocked" -Fixture {
             $testParams = @{
-                SetupFile            = "C:\Install\CUMay2016\ubersrv2013-kb3115029-fullfile-x64-glb.exe"
-                ShutdownServices     = $true
-                Ensure               = "Present"
+                SetupFile        = "C:\Install\CUMay2016\ubersrv2013-kb3115029-fullfile-x64-glb.exe"
+                ShutdownServices = $true
+                Ensure           = "Present"
             }
 
             Mock -CommandName Test-Path -MockWith {
@@ -129,16 +129,16 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 { Set-TargetResource @testParams } | Should Throw "Setup file is blocked! Please use Unblock-File to unblock the file"
             }
 
-            It "Should throw exception in the test method"  {
+            It "Should throw exception in the test method" {
                 { Test-TargetResource @testParams } | Should Throw "Setup file is blocked! Please use Unblock-File to unblock the file"
             }
         }
 
         Context -Name "Ensure is set to Absent" -Fixture {
             $testParams = @{
-                SetupFile            = "C:\Install\CUMay2016\ubersrv2013-kb3115029-fullfile-x64-glb.exe"
-                ShutdownServices     = $true
-                Ensure               = "Absent"
+                SetupFile        = "C:\Install\CUMay2016\ubersrv2013-kb3115029-fullfile-x64-glb.exe"
+                ShutdownServices = $true
+                Ensure           = "Absent"
             }
 
             It "Should throw exception in the get method" {
@@ -149,107 +149,120 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 { Set-TargetResource @testParams } | Should Throw "SharePoint does not support uninstalling updates."
             }
 
-            It "Should throw exception in the test method"  {
+            It "Should throw exception in the test method" {
                 { Test-TargetResource @testParams } | Should Throw "SharePoint does not support uninstalling updates."
             }
         }
 
         Context -Name "Update CU has lower version, update not required" -Fixture {
             $testParams = @{
-                SetupFile            = "C:\Install\CUMay2016\ubersrv2013-kb3115029-fullfile-x64-glb.exe"
-                ShutdownServices     = $true
-                Ensure               = "Present"
+                SetupFile        = "C:\Install\CUMay2016\ubersrv2013-kb3115029-fullfile-x64-glb.exe"
+                ShutdownServices = $true
+                Ensure           = "Present"
             }
 
             Mock -CommandName Get-ItemProperty -MockWith {
-                if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq  15)
+                if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 15)
                 {
                     return @{
                         VersionInfo = @{
-                            FileVersion = $Global:SPDscHelper.CurrentStubBuildNumber
+                            FileVersion     = $Global:SPDscHelper.CurrentStubBuildNumber
                             FileDescription = "Cumulative Update"
                         }
-                        Name = "serverlpksp2013-kb2880554-fullfile-x64-en-us.exe"
+                        Name        = "serverlpksp2013-kb2880554-fullfile-x64-en-us.exe"
                     }
                 }
                 else
                 {
-                    return @{
-                        VersionInfo = @{
-                            FileVersion = $Global:SPDscHelper.CurrentStubBuildNumber
-                            FileDescription = "Cumulative Update"
+                    if ($Global:SPDscHelper.CurrentStubBuildNumber.Build.ToString().Length -eq 4)
+                    {
+                        return @{
+                            VersionInfo = @{
+                                FileVersion     = $Global:SPDscHelper.CurrentStubBuildNumber
+                                FileDescription = "Cumulative Update"
+                            }
+                            Name        = "serverlpksp2016-kb2880554-fullfile-x64-en-us.exe"
                         }
-                        Name = "serverlpksp2016-kb2880554-fullfile-x64-en-us.exe"
+                    }
+                    else
+                    {
+                        return @{
+                            VersionInfo = @{
+                                FileVersion     = $Global:SPDscHelper.CurrentStubBuildNumber
+                                FileDescription = "Cumulative Update"
+                            }
+                            Name        = "serverlpksp2019-kb2880554-fullfile-x64-en-us.exe"
+                        }
                     }
                 }
             }
 
-            Mock -CommandName Get-SPDscFarmProductsInfo -MockWith {
-                if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq  15)
-                {
-                    return @("Microsoft SharePoint Server 2013")
-                }
-                else
-                {
-                    if($Global:SPDscHelper.CurrentStubBuildNumber.Minor.ToString().Length -le 4)
-                    {
-                        return @("Microsoft SharePoint Server 2016")
-                    }
-                    else
-                    {
-                        return @("Microsoft SharePoint Server 2019")
-                    }
-                }
-            }
+            # Mock -CommandName Get-SPDscFarmProductsInfo -MockWith {
+            #     if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 15)
+            #     {
+            #         return @("Microsoft SharePoint Server 2013")
+            #     }
+            #     else
+            #     {
+            #         if ($Global:SPDscHelper.CurrentStubBuildNumber.Minor.ToString().Length -le 4)
+            #         {
+            #             return @("Microsoft SharePoint Server 2016")
+            #         }
+            #         else
+            #         {
+            #             return @("Microsoft SharePoint Server 2019")
+            #         }
+            #     }
+            # }
 
             It "Should return Ensure is Present from the get method" {
                 $result = Get-TargetResource @testParams
                 $result.Ensure | Should Be "Present"
             }
 
-            It "Should return true from the test method"  {
+            It "Should return true from the test method" {
                 Test-TargetResource @testParams | Should Be $true
             }
         }
 
         Context -Name "Update CU has higher version, update executed successfully" -Fixture {
             $testParams = @{
-                SetupFile            = "C:\Install\CUMay2016\ubersrv2013-kb3115029-fullfile-x64-glb.exe"
-                ShutdownServices     = $true
-                Ensure               = "Present"
+                SetupFile        = "C:\Install\CUMay2016\ubersrv2013-kb3115029-fullfile-x64-glb.exe"
+                ShutdownServices = $true
+                Ensure           = "Present"
             }
 
             Mock -CommandName Get-ItemProperty -MockWith {
-                if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq  15)
+                if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 15)
                 {
                     return @{
                         VersionInfo = @{
-                            FileVersion = "15.0.8000"
+                            FileVersion     = "15.0.8000"
                             FileDescription = "Cumulative Update"
                         }
-                        Name = "serverlpksp2013-kb2880554-fullfile-x64-en-us.exe"
+                        Name        = "serverlpksp2013-kb2880554-fullfile-x64-en-us.exe"
                     }
                 }
                 else
                 {
                     return @{
                         VersionInfo = @{
-                            FileVersion = "16.0.15000"
+                            FileVersion     = "16.0.15000"
                             FileDescription = "Cumulative Update"
                         }
-                        Name = "serverlpksp2016-kb2880554-fullfile-x64-en-us.exe"
+                        Name        = "serverlpksp2016-kb2880554-fullfile-x64-en-us.exe"
                     }
                 }
             }
 
             Mock -CommandName Get-SPDscFarmProductsInfo -MockWith {
-                if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq  15)
+                if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 15)
                 {
                     return @("Microsoft SharePoint Server 2013")
                 }
                 else
                 {
-                    if($Global:SPDscHelper.CurrentStubBuildNumber.Minor.ToString().Length -le 4)
+                    if ($Global:SPDscHelper.CurrentStubBuildNumber.Minor.ToString().Length -le 4)
                     {
                         return @("Microsoft SharePoint Server 2016")
                     }
@@ -270,49 +283,49 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Assert-MockCalled Start-Process
             }
 
-            It "Should return true from the test method"  {
+            It "Should return true from the test method" {
                 Test-TargetResource @testParams | Should Be $false
             }
         }
 
         Context -Name "Update CU has higher version, update executed, reboot required" -Fixture {
             $testParams = @{
-                SetupFile            = "C:\Install\CUMay2016\ubersrv2013-kb3115029-fullfile-x64-glb.exe"
-                ShutdownServices     = $true
-                Ensure               = "Present"
+                SetupFile        = "C:\Install\CUMay2016\ubersrv2013-kb3115029-fullfile-x64-glb.exe"
+                ShutdownServices = $true
+                Ensure           = "Present"
             }
 
             Mock -CommandName Get-ItemProperty -MockWith {
-                if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq  15)
+                if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 15)
                 {
                     return @{
                         VersionInfo = @{
-                            FileVersion = "15.0.8000"
+                            FileVersion     = "15.0.8000"
                             FileDescription = "Cumulative Update"
                         }
-                        Name = "serverlpksp2013-kb2880554-fullfile-x64-en-us.exe"
+                        Name        = "serverlpksp2013-kb2880554-fullfile-x64-en-us.exe"
                     }
                 }
                 else
                 {
                     return @{
                         VersionInfo = @{
-                            FileVersion = "16.0.15000"
+                            FileVersion     = "16.0.15000"
                             FileDescription = "Cumulative Update"
                         }
-                        Name = "serverlpksp2016-kb2880554-fullfile-x64-en-us.exe"
+                        Name        = "serverlpksp2016-kb2880554-fullfile-x64-en-us.exe"
                     }
                 }
             }
 
             Mock -CommandName Get-SPDscFarmProductsInfo -MockWith {
-                if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq  15)
+                if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 15)
                 {
                     return @("Microsoft SharePoint Server 2013")
                 }
                 else
                 {
-                    if($Global:SPDscHelper.CurrentStubBuildNumber.Minor.ToString().Length -le 4)
+                    if ($Global:SPDscHelper.CurrentStubBuildNumber.Minor.ToString().Length -le 4)
                     {
                         return @("Microsoft SharePoint Server 2016")
                     }
@@ -339,49 +352,49 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Assert-MockCalled Start-Process
             }
 
-            It "Should return true from the test method"  {
+            It "Should return true from the test method" {
                 Test-TargetResource @testParams | Should Be $false
             }
         }
 
         Context -Name "Update CU has higher version, update executed, which failed" -Fixture {
             $testParams = @{
-                SetupFile            = "C:\Install\CUMay2016\ubersrv2013-kb3115029-fullfile-x64-glb.exe"
-                ShutdownServices     = $true
-                Ensure               = "Present"
+                SetupFile        = "C:\Install\CUMay2016\ubersrv2013-kb3115029-fullfile-x64-glb.exe"
+                ShutdownServices = $true
+                Ensure           = "Present"
             }
 
             Mock -CommandName Get-ItemProperty -MockWith {
-                if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq  15)
+                if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 15)
                 {
                     return @{
                         VersionInfo = @{
-                            FileVersion = "15.0.8000"
+                            FileVersion     = "15.0.8000"
                             FileDescription = "Cumulative Update"
                         }
-                        Name = "serverlpksp2013-kb2880554-fullfile-x64-en-us.exe"
+                        Name        = "serverlpksp2013-kb2880554-fullfile-x64-en-us.exe"
                     }
                 }
                 else
                 {
                     return @{
                         VersionInfo = @{
-                            FileVersion = "16.0.15000"
+                            FileVersion     = "16.0.15000"
                             FileDescription = "Cumulative Update"
                         }
-                        Name = "serverlpksp2016-kb2880554-fullfile-x64-en-us.exe"
+                        Name        = "serverlpksp2016-kb2880554-fullfile-x64-en-us.exe"
                     }
                 }
             }
 
             Mock -CommandName Get-SPDscFarmProductsInfo -MockWith {
-                if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq  15)
+                if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 15)
                 {
                     return @("Microsoft SharePoint Server 2013")
                 }
                 else
                 {
-                    if($Global:SPDscHelper.CurrentStubBuildNumber.Minor.ToString().Length -le 4)
+                    if ($Global:SPDscHelper.CurrentStubBuildNumber.Minor.ToString().Length -le 4)
                     {
                         return @("Microsoft SharePoint Server 2016")
                     }
@@ -408,49 +421,49 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Assert-MockCalled Start-Process
             }
 
-            It "Should return true from the test method"  {
+            It "Should return true from the test method" {
                 Test-TargetResource @testParams | Should Be $false
             }
         }
 
         Context -Name "Update SP has lower version, update not required" -Fixture {
             $testParams = @{
-                SetupFile            = "C:\Install\CUMay2016\ubersrv2013-kb3115029-fullfile-x64-glb.exe"
-                ShutdownServices     = $true
-                Ensure               = "Present"
+                SetupFile        = "C:\Install\CUMay2016\ubersrv2013-kb3115029-fullfile-x64-glb.exe"
+                ShutdownServices = $true
+                Ensure           = "Present"
             }
 
             Mock -CommandName Get-ItemProperty -MockWith {
-                if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq  15)
+                if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 15)
                 {
                     return @{
                         VersionInfo = @{
-                            FileVersion = $Global:SPDscHelper.CurrentStubBuildNumber
+                            FileVersion     = $Global:SPDscHelper.CurrentStubBuildNumber
                             FileDescription = "Service Pack"
                         }
-                        Name = "serverlpksp2013-kb2880554-fullfile-x64-en-us.exe"
+                        Name        = "serverlpksp2013-kb2880554-fullfile-x64-en-us.exe"
                     }
                 }
                 else
                 {
                     return @{
                         VersionInfo = @{
-                            FileVersion = $Global:SPDscHelper.CurrentStubBuildNumber
+                            FileVersion     = $Global:SPDscHelper.CurrentStubBuildNumber
                             FileDescription = "Service Pack"
                         }
-                        Name = "serverlpksp2016-kb2880554-fullfile-x64-en-us.exe"
+                        Name        = "serverlpksp2016-kb2880554-fullfile-x64-en-us.exe"
                     }
                 }
             }
 
             Mock -CommandName Get-SPDscFarmProductsInfo -MockWith {
-                if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq  15)
+                if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 15)
                 {
                     return @("Microsoft SharePoint Server 2013")
                 }
                 else
                 {
-                    if($Global:SPDscHelper.CurrentStubBuildNumber.Minor.ToString().Length -le 4)
+                    if ($Global:SPDscHelper.CurrentStubBuildNumber.Minor.ToString().Length -le 4)
                     {
                         return @("Microsoft SharePoint Server 2016")
                     }
@@ -466,49 +479,49 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 $result.Ensure | Should Be "Present"
             }
 
-            It "Should return true from the test method"  {
+            It "Should return true from the test method" {
                 Test-TargetResource @testParams | Should Be $true
             }
         }
 
         Context -Name "Update SP has higher version, update executed" -Fixture {
             $testParams = @{
-                SetupFile            = "C:\Install\CUMay2016\ubersrv2013-kb3115029-fullfile-x64-glb.exe"
-                ShutdownServices     = $true
-                Ensure               = "Present"
+                SetupFile        = "C:\Install\CUMay2016\ubersrv2013-kb3115029-fullfile-x64-glb.exe"
+                ShutdownServices = $true
+                Ensure           = "Present"
             }
 
             Mock -CommandName Get-ItemProperty -MockWith {
-                if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq  15)
+                if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 15)
                 {
                     return @{
                         VersionInfo = @{
-                            FileVersion = "15.0.8000"
+                            FileVersion     = "15.0.8000"
                             FileDescription = "Service Pack"
                         }
-                        Name = "serverlpksp2013-kb2880554-fullfile-x64-en-us.exe"
+                        Name        = "serverlpksp2013-kb2880554-fullfile-x64-en-us.exe"
                     }
                 }
                 else
                 {
                     return @{
                         VersionInfo = @{
-                            FileVersion = "16.0.15000"
+                            FileVersion     = "16.0.15000"
                             FileDescription = "Service Pack"
                         }
-                        Name = "serverlpksp2016-kb2880554-fullfile-x64-en-us.exe"
+                        Name        = "serverlpksp2016-kb2880554-fullfile-x64-en-us.exe"
                     }
                 }
             }
 
             Mock -CommandName Get-SPDscFarmProductsInfo -MockWith {
-                if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq  15)
+                if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 15)
                 {
                     return @("Microsoft SharePoint Server 2013")
                 }
                 else
                 {
-                    if($Global:SPDscHelper.CurrentStubBuildNumber.Minor.ToString().Length -le 4)
+                    if ($Global:SPDscHelper.CurrentStubBuildNumber.Minor.ToString().Length -le 4)
                     {
                         return @("Microsoft SharePoint Server 2016")
                     }
@@ -522,27 +535,27 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             Mock -CommandName Get-SPEnterpriseSearchServiceApplication -MockWith {
                 $returnval = @{}
                 $returnval = $returnval | Add-Member -MemberType ScriptMethod `
-                                                     -Name IsPaused `
-                                                     -Value {
-                                                        if ($Global:SPDscSearchPaused -eq $false)
-                                                        {
-                                                            return 0
-                                                        }
-                                                        else
-                                                        {
-                                                            return 128
-                                                        }
-                                                     } -PassThru -Force
+                    -Name IsPaused `
+                    -Value {
+                    if ($Global:SPDscSearchPaused -eq $false)
+                    {
+                        return 0
+                    }
+                    else
+                    {
+                        return 128
+                    }
+                } -PassThru -Force
                 $returnval = $returnval | Add-Member -MemberType ScriptMethod `
-                                                     -Name Pause `
-                                                     -Value {
-                                                        $Global:SPDscSearchPaused = $true
-                                                     } -PassThru -Force
+                    -Name Pause `
+                    -Value {
+                    $Global:SPDscSearchPaused = $true
+                } -PassThru -Force
                 $returnval = $returnval | Add-Member -MemberType ScriptMethod `
-                                                     -Name Resume `
-                                                     -Value {
-                                                        $Global:SPDscSearchPaused = $false
-                                                     } -PassThru -Force
+                    -Name Resume `
+                    -Value {
+                    $Global:SPDscSearchPaused = $false
+                } -PassThru -Force
                 return $returnval
             }
 
@@ -557,49 +570,49 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Assert-MockCalled Start-Process
             }
 
-            It "Should return true from the test method"  {
+            It "Should return true from the test method" {
                 Test-TargetResource @testParams | Should Be $false
             }
         }
 
         Context -Name "Update SP for LP has lower version, update not required" -Fixture {
             $testParams = @{
-                SetupFile            = "C:\Install\CUMay2016\ubersrv2013-kb3115029-fullfile-x64-glb.exe"
-                ShutdownServices     = $true
-                Ensure               = "Present"
+                SetupFile        = "C:\Install\CUMay2016\ubersrv2013-kb3115029-fullfile-x64-glb.exe"
+                ShutdownServices = $true
+                Ensure           = "Present"
             }
 
             Mock -CommandName Get-ItemProperty -MockWith {
-                if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq  15)
+                if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 15)
                 {
                     return @{
                         VersionInfo = @{
-                            FileVersion = $Global:SPDscHelper.CurrentStubBuildNumber
+                            FileVersion     = $Global:SPDscHelper.CurrentStubBuildNumber
                             FileDescription = "Service Pack Language Pack"
                         }
-                        Name = "serverlpksp2013-kb2880554-fullfile-x64-nl-nl.exe"
+                        Name        = "serverlpksp2013-kb2880554-fullfile-x64-nl-nl.exe"
                     }
                 }
                 else
                 {
                     return @{
                         VersionInfo = @{
-                            FileVersion = $Global:SPDscHelper.CurrentStubBuildNumber
+                            FileVersion     = $Global:SPDscHelper.CurrentStubBuildNumber
                             FileDescription = "Service Pack Language Pack"
                         }
-                        Name = "serverlpksp2016-kb2880554-fullfile-x64-nl-nl.exe"
+                        Name        = "serverlpksp2016-kb2880554-fullfile-x64-nl-nl.exe"
                     }
                 }
             }
 
             Mock -CommandName Get-SPDscFarmProductsInfo -MockWith {
-                if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq  15)
+                if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 15)
                 {
                     return @("Microsoft SharePoint Server 2013", "Language Pack for SharePoint and Project Server 2013  - Dutch/Nederlands")
                 }
                 else
                 {
-                    if($Global:SPDscHelper.CurrentStubBuildNumber.Minor.ToString().Length -le 4)
+                    if ($Global:SPDscHelper.CurrentStubBuildNumber.Minor.ToString().Length -le 4)
                     {
                         return @("Microsoft SharePoint Server 2016", "Language Pack for SharePoint and Project Server 2016  - Dutch/Nederlands")
                     }
@@ -615,49 +628,49 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 $result.Ensure | Should Be "Present"
             }
 
-            It "Should return true from the test method"  {
+            It "Should return true from the test method" {
                 Test-TargetResource @testParams | Should Be $true
             }
         }
 
         Context -Name "Update SP for LP has higher version, update required" -Fixture {
             $testParams = @{
-                SetupFile            = "C:\Install\CUMay2016\ubersrv2013-kb3115029-fullfile-x64-glb.exe"
-                ShutdownServices     = $true
-                Ensure               = "Present"
+                SetupFile        = "C:\Install\CUMay2016\ubersrv2013-kb3115029-fullfile-x64-glb.exe"
+                ShutdownServices = $true
+                Ensure           = "Present"
             }
 
             Mock -CommandName Get-ItemProperty -MockWith {
-                if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq  15)
+                if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 15)
                 {
                     return @{
                         VersionInfo = @{
-                            FileVersion = "15.0.8000"
+                            FileVersion     = "15.0.8000"
                             FileDescription = "Service Pack Language Pack"
                         }
-                        Name = "serverlpksp2013-kb2880554-fullfile-x64-nl-nl.exe"
+                        Name        = "serverlpksp2013-kb2880554-fullfile-x64-nl-nl.exe"
                     }
                 }
                 else
                 {
                     return @{
                         VersionInfo = @{
-                            FileVersion = "16.0.15000"
+                            FileVersion     = "16.0.15000"
                             FileDescription = "Service Pack Language Pack"
                         }
-                        Name = "serverlpksp2016-kb2880554-fullfile-x64-nl-nl.exe"
+                        Name        = "serverlpksp2016-kb2880554-fullfile-x64-nl-nl.exe"
                     }
                 }
             }
 
             Mock -CommandName Get-SPDscFarmProductsInfo -MockWith {
-                if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq  15)
+                if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 15)
                 {
                     return @("Microsoft SharePoint Server 2013", "Language Pack for SharePoint and Project Server 2013  - Dutch/Nederlands")
                 }
                 else
                 {
-                    if($Global:SPDscHelper.CurrentStubBuildNumber.Minor.ToString().Length -le 4)
+                    if ($Global:SPDscHelper.CurrentStubBuildNumber.Minor.ToString().Length -le 4)
                     {
                         return @("Microsoft SharePoint Server 2016", "Language Pack for SharePoint and Project Server 2016  - Dutch/Nederlands")
                     }
@@ -678,43 +691,43 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Assert-MockCalled Start-Process
             }
 
-            It "Should return true from the test method"  {
+            It "Should return true from the test method" {
                 Test-TargetResource @testParams | Should Be $false
             }
         }
 
         Context -Name "Update SP LP does not have language in the name, throws exception" -Fixture {
             $testParams = @{
-                SetupFile            = "C:\Install\CUMay2016\ubersrv2013-kb3115029-fullfile-x64-glb.exe"
-                ShutdownServices     = $true
-                Ensure               = "Present"
+                SetupFile        = "C:\Install\CUMay2016\ubersrv2013-kb3115029-fullfile-x64-glb.exe"
+                ShutdownServices = $true
+                Ensure           = "Present"
             }
 
             Mock -CommandName Get-ItemProperty -MockWith {
-                if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq  15)
+                if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 15)
                 {
                     return @{
                         VersionInfo = @{
-                            FileVersion = "15.0.8000"
+                            FileVersion     = "15.0.8000"
                             FileDescription = "Service Pack Language Pack"
                         }
-                        Name = "serverlpksp2013-kb2880554-fullfile-x64.exe"
+                        Name        = "serverlpksp2013-kb2880554-fullfile-x64.exe"
                     }
                 }
                 else
                 {
                     return @{
                         VersionInfo = @{
-                            FileVersion = "16.0.15000"
+                            FileVersion     = "16.0.15000"
                             FileDescription = "Service Pack Language Pack"
                         }
-                        Name = "serverlpksp2016-kb2880554-fullfile-x64.exe"
+                        Name        = "serverlpksp2016-kb2880554-fullfile-x64.exe"
                     }
                 }
             }
 
             Mock -CommandName Get-SPDscFarmProductsInfo -MockWith {
-                if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq  15)
+                if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 15)
                 {
                     return @("Microsoft SharePoint Server 2013", "Language Pack for SharePoint and Project Server 2013  - Dutch/Nederlands")
                 }
@@ -731,36 +744,36 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "Update SP LP has unknown language in the name, throws exception" -Fixture {
             $testParams = @{
-                SetupFile            = "C:\Install\CUMay2016\ubersrv2013-kb3115029-fullfile-x64-glb.exe"
-                ShutdownServices     = $true
-                Ensure               = "Present"
+                SetupFile        = "C:\Install\CUMay2016\ubersrv2013-kb3115029-fullfile-x64-glb.exe"
+                ShutdownServices = $true
+                Ensure           = "Present"
             }
 
             Mock -CommandName Get-ItemProperty -MockWith {
-                if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq  15)
+                if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 15)
                 {
                     return @{
                         VersionInfo = @{
-                            FileVersion = "15.0.8000"
+                            FileVersion     = "15.0.8000"
                             FileDescription = "Service Pack Language Pack"
                         }
-                        Name = "serverlpksp2013-kb2880554-fullfile-x64-ab-yz.exe"
+                        Name        = "serverlpksp2013-kb2880554-fullfile-x64-ab-yz.exe"
                     }
                 }
                 else
                 {
                     return @{
                         VersionInfo = @{
-                            FileVersion = "16.0.15000"
+                            FileVersion     = "16.0.15000"
                             FileDescription = "Service Pack Language Pack"
                         }
-                        Name = "serverlpksp2016-kb2880554-fullfile-x64-ab-yz.exe"
+                        Name        = "serverlpksp2016-kb2880554-fullfile-x64-ab-yz.exe"
                     }
                 }
             }
 
             Mock -CommandName Get-SPDscFarmProductsInfo -MockWith {
-                if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq  15)
+                if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 15)
                 {
                     return @("Microsoft SharePoint Server 2013", "Language Pack for SharePoint and Project Server 2013  - Dutch/Nederlands")
                 }
@@ -777,36 +790,36 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "Update SP LP specified language is not installed, throws exception" -Fixture {
             $testParams = @{
-                SetupFile            = "C:\Install\CUMay2016\ubersrv2013-kb3115029-fullfile-x64-glb.exe"
-                ShutdownServices     = $true
-                Ensure               = "Present"
+                SetupFile        = "C:\Install\CUMay2016\ubersrv2013-kb3115029-fullfile-x64-glb.exe"
+                ShutdownServices = $true
+                Ensure           = "Present"
             }
 
             Mock -CommandName Get-ItemProperty -MockWith {
-                if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq  15)
+                if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 15)
                 {
                     return @{
                         VersionInfo = @{
-                            FileVersion = "15.0.8000"
+                            FileVersion     = "15.0.8000"
                             FileDescription = "Service Pack Language Pack"
                         }
-                        Name = "serverlpksp2013-kb2880554-fullfile-x64-fr-fr.exe"
+                        Name        = "serverlpksp2013-kb2880554-fullfile-x64-fr-fr.exe"
                     }
                 }
                 else
                 {
                     return @{
                         VersionInfo = @{
-                            FileVersion = "16.0.15000"
+                            FileVersion     = "16.0.15000"
                             FileDescription = "Service Pack Language Pack"
                         }
-                        Name = "serverlpksp2016-kb2880554-fullfile-x64-fr-fr.exe"
+                        Name        = "serverlpksp2016-kb2880554-fullfile-x64-fr-fr.exe"
                     }
                 }
             }
 
             Mock -CommandName Get-SPDscFarmProductsInfo -MockWith {
-                if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq  15)
+                if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 15)
                 {
                     return @("Microsoft SharePoint Server 2013", "Language Pack for SharePoint and Project Server 2013  - Dutch/Nederlands")
                 }
@@ -823,30 +836,30 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "Upgrade pending - Skipping install" -Fixture {
             $testParams = @{
-                SetupFile            = "C:\Install\CUMay2016\ubersrv2013-kb3115029-fullfile-x64-glb.exe"
-                ShutdownServices     = $true
-                Ensure               = "Present"
+                SetupFile        = "C:\Install\CUMay2016\ubersrv2013-kb3115029-fullfile-x64-glb.exe"
+                ShutdownServices = $true
+                Ensure           = "Present"
             }
 
             Mock -CommandName Get-ItemProperty -MockWith {
-                if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq  15)
+                if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 15)
                 {
                     return @{
                         VersionInfo = @{
-                            FileVersion = "15.0.8000"
+                            FileVersion     = "15.0.8000"
                             FileDescription = "Service Pack Language Pack"
                         }
-                        Name = "serverlpksp2013-kb2880554-fullfile-x64-fr-fr.exe"
+                        Name        = "serverlpksp2013-kb2880554-fullfile-x64-fr-fr.exe"
                     }
                 }
                 else
                 {
                     return @{
                         VersionInfo = @{
-                            FileVersion = "16.0.15000"
+                            FileVersion     = "16.0.15000"
                             FileDescription = "Service Pack Language Pack"
                         }
-                        Name = "serverlpksp2016-kb2880554-fullfile-x64-fr-fr.exe"
+                        Name        = "serverlpksp2016-kb2880554-fullfile-x64-fr-fr.exe"
                     }
                 }
             }
@@ -870,16 +883,16 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "BinaryInstallDays outside range" -Fixture {
             $testParams = @{
-                SetupFile            = "C:\Install\CUMay2016\ubersrv2013-kb3115029-fullfile-x64-glb.exe"
-                ShutdownServices     = $true
-                BinaryInstallDays    = "mon"
-                Ensure               = "Present"
+                SetupFile         = "C:\Install\CUMay2016\ubersrv2013-kb3115029-fullfile-x64-glb.exe"
+                ShutdownServices  = $true
+                BinaryInstallDays = "mon"
+                Ensure            = "Present"
             }
 
             $testDate = Get-Date -Day 17 -Month 7 -Year 2016 -Hour 12 -Minute 00 -Second 00
 
             Mock -CommandName Get-Date -MockWith {
-                 return $testDate
+                return $testDate
             }
 
             It "Should return null from the set method" {
@@ -889,17 +902,17 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "BinaryInstallTime outside range" -Fixture {
             $testParams = @{
-                SetupFile            = "C:\Install\CUMay2016\ubersrv2013-kb3115029-fullfile-x64-glb.exe"
-                ShutdownServices     = $true
-                BinaryInstallDays    = "sun"
-                BinaryInstallTime    = "3:00am to 5:00am"
-                Ensure               = "Present"
+                SetupFile         = "C:\Install\CUMay2016\ubersrv2013-kb3115029-fullfile-x64-glb.exe"
+                ShutdownServices  = $true
+                BinaryInstallDays = "sun"
+                BinaryInstallTime = "3:00am to 5:00am"
+                Ensure            = "Present"
             }
 
             $testDate = Get-Date -Day 17 -Month 7 -Year 2016 -Hour 12 -Minute 00 -Second 00
 
             Mock -CommandName Get-Date -MockWith {
-                 return $testDate
+                return $testDate
             }
 
             It "Should return null from the set method" {
@@ -909,17 +922,17 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "BinaryInstallTime incorrectly formatted, too many arguments" -Fixture {
             $testParams = @{
-                SetupFile            = "C:\Install\CUMay2016\ubersrv2013-kb3115029-fullfile-x64-glb.exe"
-                ShutdownServices     = $true
-                BinaryInstallDays    = "sun"
-                BinaryInstallTime    = "error 3:00am to 5:00am"
-                Ensure               = "Present"
+                SetupFile         = "C:\Install\CUMay2016\ubersrv2013-kb3115029-fullfile-x64-glb.exe"
+                ShutdownServices  = $true
+                BinaryInstallDays = "sun"
+                BinaryInstallTime = "error 3:00am to 5:00am"
+                Ensure            = "Present"
             }
 
             $testDate = Get-Date -Day 17 -Month 7 -Year 2016 -Hour 12 -Minute 00 -Second 00
 
             Mock -CommandName Get-Date -MockWith {
-                 return $testDate
+                return $testDate
             }
 
             It "Should throw exception in the set method" {
@@ -929,17 +942,17 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "BinaryInstallTime incorrectly formatted, incorrect start time" -Fixture {
             $testParams = @{
-                SetupFile            = "C:\Install\CUMay2016\ubersrv2013-kb3115029-fullfile-x64-glb.exe"
-                ShutdownServices     = $true
-                BinaryInstallDays    = "sun"
-                BinaryInstallTime    = "3:00xm to 5:00am"
-                Ensure               = "Present"
+                SetupFile         = "C:\Install\CUMay2016\ubersrv2013-kb3115029-fullfile-x64-glb.exe"
+                ShutdownServices  = $true
+                BinaryInstallDays = "sun"
+                BinaryInstallTime = "3:00xm to 5:00am"
+                Ensure            = "Present"
             }
 
             $testDate = Get-Date -Day 17 -Month 7 -Year 2016 -Hour 12 -Minute 00 -Second 00
 
             Mock -CommandName Get-Date -MockWith {
-                 return $testDate
+                return $testDate
             }
 
             It "Should throw exception in the set method" {
@@ -949,17 +962,17 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "BinaryInstallTime incorrectly formatted, incorrect end time" -Fixture {
             $testParams = @{
-                SetupFile            = "C:\Install\CUMay2016\ubersrv2013-kb3115029-fullfile-x64-glb.exe"
-                ShutdownServices     = $true
-                BinaryInstallDays    = "sun"
-                BinaryInstallTime    = "3:00am to 5:00xm"
-                Ensure               = "Present"
+                SetupFile         = "C:\Install\CUMay2016\ubersrv2013-kb3115029-fullfile-x64-glb.exe"
+                ShutdownServices  = $true
+                BinaryInstallDays = "sun"
+                BinaryInstallTime = "3:00am to 5:00xm"
+                Ensure            = "Present"
             }
 
             $testDate = Get-Date -Day 17 -Month 7 -Year 2016 -Hour 12 -Minute 00 -Second 00
 
             Mock -CommandName Get-Date -MockWith {
-                 return $testDate
+                return $testDate
             }
 
             It "Should throw exception in the set method" {
@@ -969,17 +982,17 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "BinaryInstallTime start time larger than end time" -Fixture {
             $testParams = @{
-                SetupFile            = "C:\Install\CUMay2016\ubersrv2013-kb3115029-fullfile-x64-glb.exe"
-                ShutdownServices     = $true
-                BinaryInstallDays    = "sun"
-                BinaryInstallTime    = "3:00pm to 5:00am"
-                Ensure               = "Present"
+                SetupFile         = "C:\Install\CUMay2016\ubersrv2013-kb3115029-fullfile-x64-glb.exe"
+                ShutdownServices  = $true
+                BinaryInstallDays = "sun"
+                BinaryInstallTime = "3:00pm to 5:00am"
+                Ensure            = "Present"
             }
 
             $testDate = Get-Date -Day 17 -Month 7 -Year 2016 -Hour 12 -Minute 00 -Second 00
 
             Mock -CommandName Get-Date -MockWith {
-                 return $testDate
+                return $testDate
             }
 
             It "Should throw exception in the set method" {

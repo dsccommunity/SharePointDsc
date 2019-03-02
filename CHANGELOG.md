@@ -1,5 +1,10 @@
 # Change log for SharePointDsc
 
+## Unreleased
+
+* SPProductUpdate
+  * Added support for several product updates before a farm exists.
+
 ## v3.2
 
 * Changes to SharePointDsc unit testing

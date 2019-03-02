@@ -180,6 +180,135 @@ function Get-SPDscFarmAccountName
     return $spFarm.DefaultServiceAccount.Name
 }
 
+function Get-SPDscLocalVersionInfo
+{
+    [OutputType([System.Version])]
+    param
+    (
+        # Parameter help description
+        [Parameter(Mandatory = $true)]
+        [ValidateSet(2013, 2016, 2019)]
+        [System.Int32]
+        $ProductVersion,
+
+        [Parameter()]
+        [System.Int32]
+        $Lcid,
+
+        [Parameter()]
+        [Switch]
+        $IsWssPackage
+    )
+
+    $productNameRegEx = "Microsoft SharePoint Foundation $($ProductVersion) Core"
+
+    if (0 -ne $Lcid)
+    {
+        $productNameRegEx = "Microsoft SharePoint Foundation $($ProductVersion) $($Lcid) Lang Pack"
+    }
+
+    if ($IsWssPackage)
+    {
+        $productNameRegEx = "Microsoft SharePoint Foundation $($ProductVersion) \d{4} Lang Pack"
+    }
+    Write-Verbose "Product Name RegEx: $($productNameRegEx)"
+
+    $installerRegistryPath = "Registry::HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Installer\UserData\S-1-5-18\Products"
+
+    $patchRegistryPath = "Registry::HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Installer\UserData\S-1-5-18\Patches"
+
+    $installerEntries = Get-ChildItem $installerRegistryPath
+
+    $officeProductKeys = $installerEntries | Where-Object -FilterScript {$_.PsPath -like "*00000000F01FEC"}
+
+    $nullVersion = New-Object -TypeName System.Version
+    $versionInfoValue = New-Object -TypeName System.Version
+
+    # $null - one command returns an empty value
+    $null = $officeProductKeys | ForEach-Object -Process {
+        $officeProductKey = $_
+
+        $productInfo = Get-ItemProperty "Registry::$($officeProductKey)\InstallProperties"
+
+        $prodName = $productInfo.DisplayName
+
+        if ($prodName -match $productNameRegEx)
+        {
+            Write-Verbose "Gathering Information for $($prodName)"
+            $patchInformationFolder = Get-ItemProperty "Registry::$($officeProductKey)\Patches"
+            # SharePoint 2013 with SP 1 has a minimum of two Items in this key
+            if ($patchInformationFolder.AllPatches.GetType().Name -eq "String[]" -and $patchInformationFolder.AllPatches.Length -gt 0)
+            {
+                $patchGuid = $patchInformationFolder.AllPatches[$patchInformationFolder.AllPatches.Length - 1]
+            }
+            else
+            {
+                $patchGuid = $patchInformationFolder.AllPatches
+            }
+
+            if ($null -ne $patchGuid)
+            {
+                $detailedPatchInformation = Get-ItemProperty "$($patchRegistryPath)\$($patchGuid)"
+                $localPackage = $detailedPatchInformation.LocalPackage
+
+                if ($null -ne $localPackage)
+                {
+                    $patchFileInformation = New-Object -TypeName System.IO.FileInfo -ArgumentList $localPackage
+                    if ($patchFileInformation.Extension -eq ".msp")
+                    {
+                        try
+                        {
+                            $windowsInstaller = New-Object -ComObject WindowsInstaller.Installer
+                            $installerDatabase = $windowsInstaller.GetType().InvokeMember("OpenDatabase", "InvokeMethod", $null, $windowsInstaller, ($localPackage , 32))
+                            $databaseQuery = "SELECT Value FROM MsiPatchMetadata WHERE Property = 'BuildNumber'"
+                            $databaseView = $installerDatabase.GetType().InvokeMember("OpenView", "InvokeMethod", $null, $installerDatabase, ($databaseQuery))
+                            $databaseView.GetType().InvokeMember("Execute", "InvokeMethod", $null, $databaseView, $null)
+                            $value = $databaseView.GetType().InvokeMember("Fetch", "InvokeMethod", $null, $databaseView, $null)
+                            $versionInfo = [System.Version]$value.GetType().InvokeMember("StringData", "GetProperty", $null, $value, 1)
+
+                            # https://github.com/PowerShell/DscResources/issues/383
+
+                            $null = [System.Runtime.InteropServices.Marshal]::ReleaseComObject($databaseView)
+                            $null = [System.Runtime.InteropServices.Marshal]::ReleaseComObject($value)
+                            $null = [System.Runtime.InteropServices.Marshal]::ReleaseComObject($installerDatabase)
+                            $null = [System.Runtime.InteropServices.Marshal]::ReleaseComObject($windowsInstaller)
+                        }
+                        catch [Exception]
+                        {
+                            throw [Exception] "An error occured during the collection of data about installed products in Get-SPDscLocalVersionInfo."
+                        }
+                    }
+                }
+                else
+                {
+                    $versionInfo = New-Object -TypeName System.Version -ArgumentList $productInfo.DisplayVersion
+                }
+            }
+
+            # Collect Information about language packs
+            if ($IsWssPackage `
+                    -and (  $versionInfoValue -eq $nullVersion `
+                        -or $versionInfoValue -gt $versionInfo) `
+            )
+            {
+                $versionInfoValue = $versionInfo
+            }
+            else
+            {
+                $versionInfoValue = $versionInfo
+            }
+            Write-Verbose "Version Information for $($prodName): $($versionInfoValue)"
+
+        }
+    }
+
+    if ($nullVersion -ne $versionInfoValue)
+    {
+        return $versionInfoValue
+    }
+
+    return $nullVersion
+}
 
 function Get-SPDscFarmVersionInfo
 {
@@ -340,6 +469,9 @@ function Get-SPDSCUserProfileSubTypeManager
 
 function Get-SPDSCInstalledProductVersion
 {
+    [OutputType([System.Version])]
+    param()
+
     $pathToSearch = "C:\Program Files\Common Files\microsoft shared\Web Server Extensions\*\ISAPI\Microsoft.SharePoint.dll"
     $fullPath = Get-Item $pathToSearch | Sort-Object { $_.Directory } -Descending | Select-Object -First 1
     return (Get-Command $fullPath).FileVersionInfo
