@@ -81,6 +81,21 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
         }
 
+        Mock -CommandName Get-ChildItem -MockWith {
+            $getChildItemCmdlet = Get-Command Get-ChildItem -CommandType Cmdlet
+            return & $getChildItemCmdlet -Path "$($Path[0].Replace("Registry::HKEY_LOCAL_MACHINE","TestRegistry:\"))"
+        } -ParameterFilter {
+            $Path -and $Path.Length -eq 1 -and $Path[0].Contains("HKEY_LOCAL_MACHINE")
+        }
+
+
+        Mock -CommandName Get-ItemProperty -MockWith {
+            $getItemPropertyCmdlet = Get-Command Get-ItemProperty -CommandType Cmdlet
+            return & $getItemPropertyCmdlet -Path "$($Path[0].Replace("Registry::HKEY_LOCAL_MACHINE","TestRegistry:\"))"
+        } -ParameterFilter {
+            $Path -and $Path.Length -eq 1 -and $Path[0].Contains("HKEY_LOCAL_MACHINE")
+        }
+
         # Test contexts
         Context -Name "Specified update file not found" -Fixture {
             $testParams = @{
@@ -195,6 +210,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                         }
                     }
                 }
+            } -ParameterFilter {
+                $Path -and $Path.Length -eq 1 -and $Path[0].StartsWith("C:\")
             }
 
             # Mock -CommandName Get-SPDscFarmProductsInfo -MockWith {

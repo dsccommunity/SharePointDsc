@@ -88,7 +88,6 @@ CmdletsToExport = @("Invoke-SPDSCCommand",
                     "Resolve-SPDscSecurityIdentifier",
                     "Get-SPDscFarmProductsInfo",
                     "Get-SPDscFarmVersionInfo",
-                    "Get-SPDscLocalVersionInfo",
                     "Convert-SPDscADGroupIDToName",
                     "Convert-SPDscADGroupNameToID")
 
