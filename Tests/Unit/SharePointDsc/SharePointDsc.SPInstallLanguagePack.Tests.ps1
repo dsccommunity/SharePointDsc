@@ -624,7 +624,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "Language Pack is not installed, installation executed successfully using UNC path" -Fixture {
             $testParams = @{
-                BinaryDir = "C:\SPInstall"
+                BinaryDir = "\\server\install\SPInstall"
                 Ensure    = "Present"
             }
 
@@ -666,6 +666,10 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                         return @("Microsoft SharePoint Server 2019")
                     }
                 }
+            }
+
+            Mock -CommandName Get-Item -MockWith {
+                return $null
             }
 
             Mock -CommandName Start-Process -MockWith {
