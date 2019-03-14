@@ -4,22 +4,22 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [Parameter(Mandatory = $true)]  
-        [System.String] 
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $BinaryDir,
 
         [Parameter()]
         [ValidateSet("mon","tue","wed","thu","fri","sat","sun")]
         [System.String[]]
         $BinaryInstallDays,
-        
+
         [Parameter()]
         [System.String]
         $BinaryInstallTime,
-        
-        [Parameter()] 
-        [ValidateSet("Present","Absent")] 
-        [System.String] 
+
+        [Parameter()]
+        [ValidateSet("Present","Absent")]
+        [System.String]
         $Ensure = "Present",
 
         [Parameter()]
@@ -33,6 +33,20 @@ function Get-TargetResource
     if (-not(Test-Path -Path $BinaryDir))
     {
         throw "Specified path cannot be found."
+    }
+
+    Write-Verbose -Message "Checking file status of setup.exe"
+    $setupExe = Join-Path -Path $BinaryDir -ChildPath "setup.exe"
+    if (-not(Test-Path -Path $setupExe))
+    {
+        throw "Setup.exe cannot be found in {$BinaryDir}"
+    }
+
+    $zone = Get-Item $setupExe -Stream "Zone.Identifier" -EA SilentlyContinue
+    if ($null -ne $zone)
+    {
+        throw ("Setup file is blocked! Please use Unblock-File to unblock the file " + `
+               "before continuing.")
     }
 
     $osrvFolder = Get-ChildItem -Path (Join-Path -Path $BinaryDir `
@@ -110,7 +124,7 @@ function Get-TargetResource
     {
         throw "Error while converting language information: $language"
     }
-            
+
     # Extract English name of the language code
     $updateLanguage = $cultureInfo.EnglishName
     switch ($cultureInfo.EnglishName)
@@ -122,6 +136,7 @@ function Get-TargetResource
         "Portuguese (Portugal)" { $languageEnglish = "Portuguese (Portugal)" }
         "Serbian (Cyrillic, Serbia)" { $languageEnglish = "Serbian (Cyrillic)" }
         "Serbian (Latin, Serbia)" { $languageEnglish = "Serbian (Latin)" }
+        "Norwegian Bokmål (Norway)" { $languageEnglish = "Norwegian" }
         Default {
             if ($cultureInfo.EnglishName -match "(\w*,*\s*\w*) \([^)]*\)")
             {
@@ -132,10 +147,10 @@ function Get-TargetResource
                     $languages = $languageEnglish.Split(",")
                     $languageEnglish = $languages[0]
                 }
-            }  
+            }
         }
     }
-    
+
     Write-Verbose -Message "Update is for the $languageEnglish language"
 
     if ($englishProducts -contains $languageEnglish -eq $true)
@@ -168,22 +183,22 @@ function Set-TargetResource
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidGlobalVars", "")]
     param
     (
-        [Parameter(Mandatory = $true)]  
-        [System.String] 
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $BinaryDir,
 
         [Parameter()]
         [ValidateSet("mon","tue","wed","thu","fri","sat","sun")]
         [System.String[]]
         $BinaryInstallDays,
-        
+
         [Parameter()]
         [System.String]
         $BinaryInstallTime,
-        
-        [Parameter()] 
-        [ValidateSet("Present","Absent")] 
-        [System.String] 
+
+        [Parameter()]
+        [ValidateSet("Present","Absent")]
+        [System.String]
         $Ensure = "Present",
 
         [Parameter()]
@@ -193,7 +208,7 @@ function Set-TargetResource
 
     Write-Verbose -Message "Setting install status of SharePoint Language Pack"
 
-    if ($Ensure -eq "Absent") 
+    if ($Ensure -eq "Absent")
     {
         throw [Exception] ("SharePointDsc does not support uninstalling SharePoint " + `
                            "Language Packs. Please remove this manually.")
@@ -204,6 +219,20 @@ function Set-TargetResource
     if (-not(Test-Path -Path $BinaryDir))
     {
         throw "Specified path cannot be found."
+    }
+
+    Write-Verbose -Message "Checking file status of setup.exe"
+    $setupExe = Join-Path -Path $BinaryDir -ChildPath "setup.exe"
+    if (-not(Test-Path -Path $setupExe))
+    {
+        throw "Setup.exe cannot be found in {$BinaryDir}"
+    }
+
+    $zone = Get-Item $setupExe -Stream "Zone.Identifier" -EA SilentlyContinue
+    if ($null -ne $zone)
+    {
+        throw ("Setup file is blocked! Please use Unblock-File to unblock the file " + `
+               "before continuing.")
     }
 
     $now = Get-Date
@@ -287,9 +316,29 @@ function Set-TargetResource
         $wssRegKey ="hklm:SOFTWARE\Microsoft\Shared Tools\Web Server Extensions\16.0\WSS"
     }
 
+    Write-Verbose -Message "Checking if BinaryDir is an UNC path"
+    $uncInstall = $false
+    if ($BinaryDir.StartsWith("\\"))
+    {
+        Write-Verbose -Message "Specified BinaryDir is an UNC path. Adding path to Local Intranet Zone"
+
+        $uncInstall = $true
+
+        if ($BinaryDir -match "\\\\(.*?)\\.*")
+        {
+            $serverName = $Matches[1]
+        }
+        else
+        {
+            throw "Cannot extract servername from UNC path. Check if it is in the correct format."
+        }
+
+        Set-SPDscZoneMap -Server $serverName
+    }
+
     Write-Verbose -Message "Writing install config file"
 
-    $configPath = "$env:temp\SPInstallLanguagePackConfig.xml" 
+    $configPath = "$env:temp\SPInstallLanguagePackConfig.xml"
 
     $configData = "<Configuration>
     <Setting Id=`"OSERVERLPK`" Value=`"1`"/>
@@ -321,14 +370,18 @@ function Set-TargetResource
 
     Write-Verbose -Message "Beginning installation of the SharePoint Language Pack"
 
-    $setupExe = Join-Path -Path $BinaryDir -ChildPath "setup.exe"
-    
     $setup = Start-Process -FilePath $setupExe `
                            -ArgumentList "/config `"$configPath`"" `
                            -Wait `
                            -PassThru
 
-    switch ($setup.ExitCode) 
+    if ($uncInstall -eq $true)
+    {
+        Write-Verbose -Message "Removing added path from the Local Intranet Zone"
+        Remove-SPDscZoneMap -ServerName $serverName
+    }
+
+    switch ($setup.ExitCode)
     {
         0 {
             Write-Verbose -Message "SharePoint Language Pack binary installation complete"
@@ -350,22 +403,22 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [Parameter(Mandatory = $true)]  
-        [System.String] 
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $BinaryDir,
 
         [Parameter()]
         [ValidateSet("mon","tue","wed","thu","fri","sat","sun")]
         [System.String[]]
         $BinaryInstallDays,
-        
+
         [Parameter()]
         [System.String]
         $BinaryInstallTime,
-        
-        [Parameter()] 
-        [ValidateSet("Present","Absent")] 
-        [System.String] 
+
+        [Parameter()]
+        [ValidateSet("Present","Absent")]
+        [System.String]
         $Ensure = "Present",
 
         [Parameter()]
@@ -377,7 +430,7 @@ function Test-TargetResource
 
     $PSBoundParameters.Ensure = $Ensure
 
-    if ($Ensure -eq "Absent") 
+    if ($Ensure -eq "Absent")
     {
         throw [Exception] ("SharePointDsc does not support uninstalling SharePoint " + `
                            "Language Packs. Please remove this manually.")

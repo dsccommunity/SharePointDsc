@@ -424,10 +424,36 @@ function Set-TargetResource
                                   -ScriptBlock {
         $setupFile = $args[0]
 
+        Write-Verbose -Message "Checking if SetupFile is an UNC path"
+        $uncInstall = $false
+        if ($setupFile.StartsWith("\\"))
+        {
+            Write-Verbose -Message "Specified BinaryDir is an UNC path. Adding path to Local Intranet Zone"
+
+            $uncInstall = $true
+
+            if ($setupFile -match "\\\\(.*?)\\.*")
+            {
+                $serverName = $Matches[1]
+            }
+            else
+            {
+                throw "Cannot extract servername from UNC path. Check if it is in the correct format."
+            }
+
+            Set-SPDscZoneMap -Server $serverName
+        }
+
         $setup = Start-Process -FilePath $setupFile `
                                -ArgumentList "/quiet /passive" `
                                -Wait `
                                -PassThru
+
+        if ($uncInstall -eq $true)
+        {
+            Write-Verbose -Message "Removing added path from the Local Intranet Zone"
+            Remove-SPDscZoneMap -ServerName $serverName
+        }
 
         # Error codes: https://aka.ms/installerrorcodes
         switch ($setup.ExitCode)

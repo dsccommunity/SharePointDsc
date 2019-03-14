@@ -1,5 +1,21 @@
 # Change log for SharePointDsc
 
+## Unreleased
+
+* SPFarm
+  * Corrected issue where the resource would try to join a farm, even when
+    the farm was not yet created
+  * Fixed issue where an error was thrown when no DeveloperDashboard
+    parameter was specfied
+* SPInstall
+  * Added check to unblock setup file it is blocked because it is coming
+    from a network location. This to prevent endless wait
+* SPInstallLanguagePack
+  * Added check to unblock setup file it is blocked because it is coming
+    from a network location. This to prevent endless wait
+  * Corrected issue with Norwegian language pack not being correctly
+    detected
+
 ## v3.2
 
 * Changes to SharePointDsc unit testing
