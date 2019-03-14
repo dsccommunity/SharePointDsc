@@ -45,16 +45,24 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
         }
 
+        Mock -CommandName Test-Path -MockWith {
+            return $true
+        } -ParameterFilter { $Path -eq $testParams.BinaryDir }
+
+        Mock -CommandName Test-Path -MockWith {
+            return $true
+        } -ParameterFilter { $Path -eq (Join-Path -Path $testParams.BinaryDir -ChildPath "setup.exe") }
+
         # Test contexts
-        Context -Name "Specified update file not found" -Fixture {
+        Context -Name "Specified BinaryDir not found" -Fixture {
             $testParams = @{
                 BinaryDir = "C:\SPInstall"
                 Ensure    = "Present"
             }
 
-            Mock -CommandName Test-Path {
+            Mock -CommandName Test-Path -MockWith {
                 return $false
-            }
+            } -ParameterFilter { $Path -eq $testParams.BinaryDir }
 
             It "Should throw exception in the get method" {
                 { Get-TargetResource @testParams } | Should Throw "Specified path cannot be found"
@@ -66,6 +74,52 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
             It "Should throw exception in the test method"  {
                 { Test-TargetResource @testParams } | Should Throw "Specified path cannot be found"
+            }
+        }
+
+        Context -Name "Setup.exe file not found in BinaryDir" -Fixture {
+            $testParams = @{
+                BinaryDir = "C:\SPInstall"
+                Ensure    = "Present"
+            }
+
+            Mock -CommandName Test-Path -MockWith {
+                return $false
+            } -ParameterFilter { $Path -eq (Join-Path -Path $testParams.BinaryDir -ChildPath "setup.exe") }
+
+            It "Should throw exception in the get method" {
+                { Get-TargetResource @testParams } | Should Throw "Setup.exe cannot be found"
+            }
+
+            It "Should throw exception in the set method" {
+                { Set-TargetResource @testParams } | Should Throw "Setup.exe cannot be found"
+            }
+
+            It "Should throw exception in the test method"  {
+                { Test-TargetResource @testParams } | Should Throw "Setup.exe cannot be found"
+            }
+        }
+
+        Context -Name "Setup.exe file is blocked" -Fixture {
+            $testParams = @{
+                BinaryDir = "C:\SPInstall"
+                Ensure    = "Present"
+            }
+
+            Mock -CommandName Get-Item -MockWith {
+                return "data"
+            }
+
+            It "Should throw exception in the get method" {
+                { Get-TargetResource @testParams } | Should Throw "Setup file is blocked!"
+            }
+
+            It "Should throw exception in the set method" {
+                { Set-TargetResource @testParams } | Should Throw "Setup file is blocked!"
+            }
+
+            It "Should throw exception in the test method"  {
+                { Test-TargetResource @testParams } | Should Throw "Setup file is blocked!"
             }
         }
 
@@ -565,6 +619,64 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
             It "Should return true from the test method"  {
                 Test-TargetResource @testParams | Should Be $false
+            }
+        }
+
+        Context -Name "Language Pack is not installed, installation executed successfully using UNC path" -Fixture {
+            $testParams = @{
+                BinaryDir = "C:\SPInstall"
+                Ensure    = "Present"
+            }
+
+            Mock -CommandName Get-SPDscFarmProductsInfo -MockWith {
+                switch ($Global:SPDscHelper.CurrentStubBuildNumber.Major)
+                {
+                    15 {
+                        return @("Microsoft SharePoint Server 2013")
+                    }
+                    16 {
+                        if($Global:SPDscHelper.CurrentStubBuildNumber.Minor.ToString().Length -le 4)
+                        {
+                            return @("Microsoft SharePoint Server 2016")
+                        }
+                        else
+                        {
+                            return @("Microsoft SharePoint Server 2019")
+                        }
+                    }
+                    Default {
+                        throw [Exception] "A supported version of SharePoint was not used in testing"
+                    }
+                }
+            }
+
+            Mock -CommandName Get-SPDscRegProductsInfo -MockWith {
+                if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq  15)
+                {
+                    return @("Microsoft SharePoint Server 2013")
+                }
+                else
+                {
+                    if($Global:SPDscHelper.CurrentStubBuildNumber.Minor.ToString().Length -le 4)
+                    {
+                        return @("Microsoft SharePoint Server 2016")
+                    }
+                    else
+                    {
+                        return @("Microsoft SharePoint Server 2019")
+                    }
+                }
+            }
+
+            Mock -CommandName Start-Process -MockWith {
+                return @{
+                    ExitCode = 0
+                }
+            }
+
+            It "Should run the Start-Process function in the set method" {
+                Set-TargetResource @testParams
+                Assert-MockCalled Start-Process
             }
         }
 
