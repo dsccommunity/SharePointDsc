@@ -510,6 +510,30 @@ function Remove-SPDSCUserToLocalAdmin
     ([ADSI]"WinNT://$($env:computername)/Administrators,group").Remove("WinNT://$domainName/$accountName") | Out-Null
 }
 
+function Remove-SPDscZoneMap
+{
+    [CmdletBinding()]
+    param(
+        [parameter(Mandatory = $true)]
+        [string]
+        $ServerName
+    )
+
+    $zoneMap = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Internet Settings\ZoneMap"
+
+    $escDomainsPath = Join-Path -Path $zoneMap -ChildPath "\EscDomains\$ServerName"
+    if (Test-Path -Path $escDomainsPath)
+    {
+        Remove-Item -Path $escDomainsPath
+    }
+
+    $domainsPath = Join-Path -Path $zoneMap -ChildPath "\Domains\$ServerName"
+    if (Test-Path -Path $domainsPath)
+    {
+        Remove-Item -Path $domainsPath
+    }
+}
+
 function Resolve-SPDscSecurityIdentifier
 {
     [CmdletBinding()]
@@ -522,6 +546,40 @@ function Resolve-SPDscSecurityIdentifier
     $memberName = ([wmi]"Win32_SID.SID='$SID'").AccountName
     $memberName = "$($env:USERDOMAIN)\$memberName"
     return $memberName
+}
+
+function Set-SPDscZoneMap
+{
+    [CmdletBinding()]
+    param(
+        [parameter(Mandatory = $true)]
+        [string]
+        $ServerName
+    )
+
+    $zoneMap = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Internet Settings\ZoneMap"
+
+    $escDomainsPath = Join-Path -Path $zoneMap -ChildPath "\EscDomains\$ServerName"
+    if (-not (Test-Path -Path $escDomainsPath))
+    {
+        $null = New-Item -Path $escDomainsPath -Force
+    }
+
+    if ((Get-ItemProperty -Path $escDomainsPath).File -ne 1)
+    {
+        Set-ItemProperty -Path $escDomainsPath -Name file -Value 1 -Type DWord
+    }
+
+    $domainsPath = Join-Path -Path $zoneMap -ChildPath "\Domains\$ServerName"
+    if (-not (Test-Path -Path $domainsPath))
+    {
+        $null = New-Item -Path $domainsPath -Force
+    }
+
+    if ((Get-ItemProperty -Path $domainsPath).File -ne 1)
+    {
+        Set-ItemProperty -Path $domainsPath -Name file -Value 1 -Type DWord
+    }
 }
 
 function Test-SPDSCObjectHasProperty

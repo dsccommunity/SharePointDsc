@@ -1,5 +1,33 @@
 # Change log for SharePointDsc
 
+## Unreleased
+
+* SPConfigWizard
+  * Improved logging
+* SPFarm
+  * Corrected issue where the resource would try to join a farm, even when
+    the farm was not yet created
+  * Fixed issue where an error was thrown when no DeveloperDashboard
+    parameter was specfied
+* SPInstall
+  * Added check to unblock setup file if it is blocked because it is coming
+    from a network location. This to prevent endless wait
+  * Added ability to install from a UNC path, by adding server
+    to IE Local Intranet Zone. This will prevent an endless wait
+    caused by security warning
+* SPInstallLanguagePack
+  * Added check to unblock setup file if it is blocked because it is coming
+    from a network location. This to prevent endless wait
+  * Corrected issue with Norwegian language pack not being correctly
+    detected
+  * Added ability to install from a UNC path, by adding server
+    to IE Local Intranet Zone. This will prevent an endless wait
+    caused by security warning
+* SPProductInstall
+  * Added ability to install from a UNC path, by adding server
+    to IE Local Intranet Zone. This will prevent an endless wait
+    caused by security warning
+
 ## v3.2
 
 * Changes to SharePointDsc unit testing

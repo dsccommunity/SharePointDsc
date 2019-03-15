@@ -609,6 +609,20 @@ function Set-TargetResource
             $farmAction = ""
             if ($createFarm -eq $false)
             {
+                $dbStatus = Get-SPDSCConfigDBStatus -SQLServer $params.DatabaseServer `
+                                                    -Database $params.FarmConfigDatabaseName
+                $loopCount = 0
+                while ($dbStatus.DatabaseExists -eq $false -and $loopCount -lt 15)
+                {
+                    Write-Verbose -Message ("The configuration database is not yet provisioned " + `
+                                            "by a remote server, this server will wait for up to " + `
+                                            "15 minutes for this to complete")
+                    Start-Sleep -Seconds 60
+                    $loopCount++
+                    $dbStatus = Get-SPDSCConfigDBStatus -SQLServer $params.DatabaseServer `
+                                                        -Database $params.FarmConfigDatabaseName
+                }
+
                 Write-Verbose -Message "The database exists, so attempt to join the server to the farm"
 
                 # Remove the server role optional attribute as it is only used when creating
@@ -743,7 +757,7 @@ function Set-TargetResource
             Write-Verbose -Message "Starting Install-SPApplicationContent"
             Install-SPApplicationContent | Out-Null
 
-            if ($params.DeveloperDashboard -ne "Off")
+            if ($params.ContainsKey("DeveloperDashboard") -and $params.DeveloperDashboard -ne "Off")
             {
                 Write-Verbose -Message "Updating Developer Dashboard setting"
                 $admService                 = Get-SPDSCContentService
