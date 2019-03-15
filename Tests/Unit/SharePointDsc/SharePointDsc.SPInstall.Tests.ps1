@@ -81,15 +81,15 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             } -ParameterFilter { $Path -eq $testParams.BinaryDir }
 
             It "Should throw exception in the get method" {
-                { Get-TargetResource @testParams } | Should Throw "Specified path cannot be found."
+                { Get-TargetResource @testParams } | Should Throw "Specified path cannot be found"
             }
 
             It "Should throw exception in the set method" {
-                { Set-TargetResource @testParams } | Should Throw "Specified path cannot be found."
+                { Set-TargetResource @testParams } | Should Throw "Specified path cannot be found"
             }
 
             It "Should throw exception in the test method"  {
-                { Test-TargetResource @testParams } | Should Throw "Specified path cannot be found."
+                { Test-TargetResource @testParams } | Should Throw "Specified path cannot be found"
             }
         }
 

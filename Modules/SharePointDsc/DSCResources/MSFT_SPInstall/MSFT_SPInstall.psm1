@@ -36,7 +36,7 @@ function Get-TargetResource
     # Check if Binary folder exists
     if (-not(Test-Path -Path $BinaryDir))
     {
-        throw "Specified path cannot be found. {$BinaryDir}"
+        throw "Specified path cannot be found: {$BinaryDir}"
     }
 
     $InstallerPath = Join-Path -Path $BinaryDir -ChildPath "setup.exe"
@@ -49,8 +49,8 @@ function Get-TargetResource
     $zone = Get-Item $InstallerPath -Stream "Zone.Identifier" -EA SilentlyContinue
     if ($null -ne $zone)
     {
-        throw ("Setup file is blocked! Please use Unblock-File to unblock the file " + `
-               "before continuing.")
+        throw ("Setup file is blocked! Please use 'Unblock-File -Path $InstallerPath' " + `
+               "to unblock the file before continuing.")
     }
 
     $x86Path = "HKLM:\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*"
@@ -135,7 +135,7 @@ function Set-TargetResource
     # Check if Binary folder exists
     if (-not(Test-Path -Path $BinaryDir))
     {
-        throw "Specified path cannot be found. {$BinaryDir}"
+        throw "Specified path cannot be found: {$BinaryDir}"
     }
 
     $InstallerPath = Join-Path -Path $BinaryDir -ChildPath "setup.exe"
@@ -191,8 +191,8 @@ function Set-TargetResource
 
     if ($null -ne $zone)
     {
-        throw ("Setup file is blocked! Please use Unblock-File to unblock the file " + `
-               "before continuing.")
+        throw ("Setup file is blocked! Please use 'Unblock-File -Path $InstallerPath' " + `
+               "to unblock the file before continuing.")
     }
 
     Write-Verbose -Message "Checking if Path is an UNC path"

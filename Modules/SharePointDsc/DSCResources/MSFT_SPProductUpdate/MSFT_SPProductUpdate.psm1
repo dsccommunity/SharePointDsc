@@ -46,7 +46,7 @@ function Get-TargetResource
     # Get file information from setup file
     if (-not(Test-Path $SetupFile))
     {
-        throw "Setup file cannot be found."
+        throw "Setup file cannot be found: {$SetupFile}"
     }
 
     Write-Verbose -Message "Checking file status of $SetupFile"
@@ -54,8 +54,8 @@ function Get-TargetResource
 
     if ($null -ne $zone)
     {
-        throw ("Setup file is blocked! Please use Unblock-File to unblock the file " + `
-               "before continuing.")
+        throw ("Setup file is blocked! Please use 'Unblock-File -Path $SetupFile' " + `
+               "to unblock the file before continuing.")
     }
 
     $setupFileInfo = Get-ItemProperty -Path $SetupFile
@@ -238,7 +238,7 @@ function Set-TargetResource
     # Check if setup file exists
     if (-not(Test-Path $SetupFile))
     {
-        throw "Setup file cannot be found."
+        throw "Setup file cannot be found: {$SetupFile}"
     }
 
     Write-Verbose -Message "Checking file status of $SetupFile"
@@ -246,8 +246,8 @@ function Set-TargetResource
 
     if ($null -ne $zone)
     {
-        throw ("Setup file is blocked! Please use Unblock-File to unblock the file " + `
-               "before continuing.")
+        throw ("Setup file is blocked! Please use 'Unblock-File -Path $SetupFile' " + `
+               "to unblock the file before continuing.")
     }
 
     $now = Get-Date

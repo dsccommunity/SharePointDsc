@@ -32,7 +32,7 @@ function Get-TargetResource
     # Check if Binary folder exists
     if (-not(Test-Path -Path $BinaryDir))
     {
-        throw "Specified path cannot be found."
+        throw "Specified path cannot be found: {$BinaryDir}"
     }
 
     Write-Verbose -Message "Checking file status of setup.exe"
@@ -45,8 +45,8 @@ function Get-TargetResource
     $zone = Get-Item $setupExe -Stream "Zone.Identifier" -EA SilentlyContinue
     if ($null -ne $zone)
     {
-        throw ("Setup file is blocked! Please use Unblock-File to unblock the file " + `
-               "before continuing.")
+        throw ("Setup file is blocked! Please use 'Unblock-File -Path $setupExe' " + `
+               "to unblock the file before continuing.")
     }
 
     $osrvFolder = Get-ChildItem -Path (Join-Path -Path $BinaryDir `
@@ -218,7 +218,7 @@ function Set-TargetResource
     # Check if Binary folder exists
     if (-not(Test-Path -Path $BinaryDir))
     {
-        throw "Specified path cannot be found."
+        throw "Specified path cannot be found: {$BinaryDir}"
     }
 
     Write-Verbose -Message "Checking file status of setup.exe"
@@ -231,8 +231,8 @@ function Set-TargetResource
     $zone = Get-Item $setupExe -Stream "Zone.Identifier" -EA SilentlyContinue
     if ($null -ne $zone)
     {
-        throw ("Setup file is blocked! Please use Unblock-File to unblock the file " + `
-               "before continuing.")
+        throw ("Setup file is blocked! Please use 'Unblock-File -Path $setupExe' " + `
+               "to unblock the file before continuing.")
     }
 
     $now = Get-Date
