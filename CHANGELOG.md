@@ -1,6 +1,7 @@
 # Change log for SharePointDsc
 
 ## Unreleased
+
 * Invoke-SPDSCCommand in SharePointDsc.Util module
   * Fixed issue where powershell session was never removed and may lead to memory leak
 * SPConfigWizard
