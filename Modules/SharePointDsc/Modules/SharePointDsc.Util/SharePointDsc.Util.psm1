@@ -426,7 +426,7 @@ function Invoke-SPDSCCommand
 
         # Running garbage collection to resolve issues related to Azure DSC extention use
         [GC]::Collect()
-
+        $result = $null
         $session = New-PSSession -ComputerName $env:COMPUTERNAME `
                                  -Credential $Credential `
                                  -Authentication CredSSP `
