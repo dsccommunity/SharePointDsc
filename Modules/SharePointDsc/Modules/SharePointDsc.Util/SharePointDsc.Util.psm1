@@ -457,10 +457,12 @@ function Invoke-SPDSCCommand
                 throw $_
             }
         }
-
-        if ($session)
+        finally
         {
-            Remove-PSSession -Session $session
+            if ($session)
+            {
+                Remove-PSSession -Session $session
+            }
         }
     }
 }
