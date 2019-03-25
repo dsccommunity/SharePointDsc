@@ -1,6 +1,7 @@
 function Get-TargetResource
 {
     [CmdletBinding()]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSDSCUseIdenticalMandatoryParametersForDSC", "", Justification  =  "Temporary workaround for issue introduced in PSSA v1.18")]
     [OutputType([System.Collections.Hashtable])]
     param
     (
@@ -79,8 +80,9 @@ function Get-TargetResource
 
 function Set-TargetResource
 {
-    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingConvertToSecureStringWithPlainText", "", Justification  =  "Ignoring this because the used AccessAccount does not use SecureString to handle the password")]
     [CmdletBinding()]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingConvertToSecureStringWithPlainText", "", Justification  =  "Ignoring this because the used AccessAccount does not use SecureString to handle the password")]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSDSCUseIdenticalMandatoryParametersForDSC", "", Justification  =  "Temporary workaround for issue introduced in PSSA v1.18")]
     param
     (
         [Parameter(Mandatory = $true)]
@@ -231,6 +233,7 @@ function Set-TargetResource
 function Test-TargetResource
 {
     [CmdletBinding()]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSDSCUseIdenticalMandatoryParametersForDSC", "", Justification  =  "Temporary workaround for issue introduced in PSSA v1.18")]
     [OutputType([System.Boolean])]
     param
     (
