@@ -30,7 +30,12 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 [Parameter(Mandatory = $true)]
                 [ValidateSet("RTM", "CU", "SP1")]
                 [System.String]
-                $PatchLevel
+                $PatchLevel,
+
+                # Use this Parameter to export only Office Reg Keys from TestRegistry
+                [Parameter]
+                [Switch]
+                $PrepDataForTests
             )
 
             $productVersion = 2013
@@ -67,16 +72,15 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             $modifiedFileDestination = $(Join-Path $testDrivePath.FullName -ChildPath $tempFileName)
             $registryFileContent.Replace("[HKEY_LOCAL_MACHINE\", "[$($testRegistryPath.Name)\HKEY_LOCAL_MACHINE\") | Out-File -FilePath $modifiedFileDestination
 
-            $null = reg import $modifiedFileDestination
+            reg import $modifiedFileDestination *>&1 | Out-Null
 
-            $PrepDataForTests = $true
             if($PrepDataForTests)
             {
                 Get-Childitem "Registry::$($testRegistryPath)\HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Installer\UserData\S-1-5-18\Products" | Where-Object -FilterScript {
                     $_.PsPath -notlike "*00000000F01FEC"
                 } | Remove-Item -Confirm:$false -Force -Recurse
 
-                reg export "$($testRegistryPath)\HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Installer\UserData\S-1-5-18\Products" "C:\temp\$($tempFileName)"
+                reg export "$($testRegistryPath)\HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Installer\UserData\S-1-5-18\Products" "C:\temp\$($tempFileName)"  *>&1 | Out-Null
             }
         }
 
@@ -145,7 +149,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Mock -CommandName Get-ChildItem -MockWith {
             $getChildItemCmdlet = Get-Command Get-ChildItem -CommandType Cmdlet
-            return & $getChildItemCmdlet -Path "$($Path[0].Replace("Registry::HKEY_LOCAL_MACHINE", "TestRegistry:\"))"
+            return & $getChildItemCmdlet -Path "$($Path[0].Replace("Registry::HKEY_LOCAL_MACHINE", "TestRegistry:\HKEY_LOCAL_MACHINE"))"
         } -ParameterFilter {
             $Path -and $Path.Length -eq 1 -and $Path[0].Contains("HKEY_LOCAL_MACHINE")
         }
@@ -153,7 +157,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Mock -CommandName Get-ItemProperty -MockWith {
             $getItemPropertyCmdlet = Get-Command Get-ItemProperty -CommandType Cmdlet
-            return & $getItemPropertyCmdlet -Path "$($Path[0].Replace("Registry::HKEY_LOCAL_MACHINE", "TestRegistry:\"))"
+            return & $getItemPropertyCmdlet -Path "$($Path[0].Replace("Registry::HKEY_LOCAL_MACHINE", "TestRegistry:\HKEY_LOCAL_MACHINE"))"
         } -ParameterFilter {
             $Path -and $Path.Length -eq 1 -and $Path[0].Contains("HKEY_LOCAL_MACHINE")
         }
@@ -238,6 +242,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Ensure           = "Present"
             }
 
+            Add-TestRegistryData -PatchLevel "RTM"
+
             Mock -CommandName Get-ItemProperty -MockWith {
                 if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 15)
                 {
@@ -276,24 +282,6 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 $Path -and $Path.Length -eq 1 -and $Path[0].StartsWith("C:\")
             }
 
-            # Mock -CommandName Get-SPDscFarmProductsInfo -MockWith {
-            #     if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 15)
-            #     {
-            #         return @("Microsoft SharePoint Server 2013")
-            #     }
-            #     else
-            #     {
-            #         if ($Global:SPDscHelper.CurrentStubBuildNumber.Minor.ToString().Length -le 4)
-            #         {
-            #             return @("Microsoft SharePoint Server 2016")
-            #         }
-            #         else
-            #         {
-            #             return @("Microsoft SharePoint Server 2019")
-            #         }
-            #     }
-            # }
-
             It "Should return Ensure is Present from the get method" {
                 $result = Get-TargetResource @testParams
                 $result.Ensure | Should Be "Present"
@@ -311,6 +299,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Ensure           = "Present"
             }
 
+            Add-TestRegistryData -PatchLevel "RTM"
+
             Mock -CommandName Get-ItemProperty -MockWith {
                 if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 15)
                 {
@@ -332,27 +322,11 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                         Name        = "serverlpksp2016-kb2880554-fullfile-x64-en-us.exe"
                     }
                 }
+            } -ParameterFilter {
+                $Path -and $Path.Length -eq 1 -and $Path[0].StartsWith("C:\")
             }
 
-            Mock -CommandName Get-SPDscFarmProductsInfo -MockWith {
-                if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 15)
-                {
-                    return @("Microsoft SharePoint Server 2013")
-                }
-                else
-                {
-                    if ($Global:SPDscHelper.CurrentStubBuildNumber.Minor.ToString().Length -le 4)
-                    {
-                        return @("Microsoft SharePoint Server 2016")
-                    }
-                    else
-                    {
-                        return @("Microsoft SharePoint Server 2019")
-                    }
-                }
-            }
-
-            It "Should return Ensure is Present from the get method" {
+            It "Should return Ensure is Absent from the get method" {
                 $result = Get-TargetResource @testParams
                 $result.Ensure | Should Be "Absent"
             }
@@ -362,7 +336,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Assert-MockCalled Start-Process
             }
 
-            It "Should return true from the test method" {
+            It "Should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $false
             }
         }
@@ -374,6 +348,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Ensure           = "Present"
             }
 
+            Add-TestRegistryData -PatchLevel "RTM"
+
             Mock -CommandName Get-ItemProperty -MockWith {
                 if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 15)
                 {
@@ -395,24 +371,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                         Name        = "serverlpksp2016-kb2880554-fullfile-x64-en-us.exe"
                     }
                 }
-            }
-
-            Mock -CommandName Get-SPDscFarmProductsInfo -MockWith {
-                if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 15)
-                {
-                    return @("Microsoft SharePoint Server 2013")
-                }
-                else
-                {
-                    if ($Global:SPDscHelper.CurrentStubBuildNumber.Minor.ToString().Length -le 4)
-                    {
-                        return @("Microsoft SharePoint Server 2016")
-                    }
-                    else
-                    {
-                        return @("Microsoft SharePoint Server 2019")
-                    }
-                }
+            } -ParameterFilter {
+                $Path -and $Path.Length -eq 1 -and $Path[0].StartsWith("C:\")
             }
 
             Mock -CommandName Start-Process {
@@ -421,7 +381,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 }
             }
 
-            It "Should return Ensure is Present from the get method" {
+            It "Should return Ensure is Absent from the get method" {
                 $result = Get-TargetResource @testParams
                 $result.Ensure | Should Be "Absent"
             }
@@ -431,7 +391,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Assert-MockCalled Start-Process
             }
 
-            It "Should return true from the test method" {
+            It "Should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $false
             }
         }
@@ -443,6 +403,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Ensure           = "Present"
             }
 
+            Add-TestRegistryData -PatchLevel "RTM"
+
             Mock -CommandName Get-ItemProperty -MockWith {
                 if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 15)
                 {
@@ -464,24 +426,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                         Name        = "serverlpksp2016-kb2880554-fullfile-x64-en-us.exe"
                     }
                 }
-            }
-
-            Mock -CommandName Get-SPDscFarmProductsInfo -MockWith {
-                if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 15)
-                {
-                    return @("Microsoft SharePoint Server 2013")
-                }
-                else
-                {
-                    if ($Global:SPDscHelper.CurrentStubBuildNumber.Minor.ToString().Length -le 4)
-                    {
-                        return @("Microsoft SharePoint Server 2016")
-                    }
-                    else
-                    {
-                        return @("Microsoft SharePoint Server 2019")
-                    }
-                }
+            } -ParameterFilter {
+                $Path -and $Path.Length -eq 1 -and $Path[0].StartsWith("C:\")
             }
 
             Mock -CommandName Start-Process {
@@ -490,7 +436,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 }
             }
 
-            It "Should return Ensure is Present from the get method" {
+            It "Should return Ensure is Absent from the get method" {
                 $result = Get-TargetResource @testParams
                 $result.Ensure | Should Be "Absent"
             }
@@ -500,7 +446,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Assert-MockCalled Start-Process
             }
 
-            It "Should return true from the test method" {
+            It "Should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $false
             }
         }
@@ -511,6 +457,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 ShutdownServices = $true
                 Ensure           = "Present"
             }
+
+            Add-TestRegistryData -PatchLevel "RTM"
 
             Mock -CommandName Get-ItemProperty -MockWith {
                 if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 15)
@@ -533,24 +481,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                         Name        = "serverlpksp2016-kb2880554-fullfile-x64-en-us.exe"
                     }
                 }
-            }
-
-            Mock -CommandName Get-SPDscFarmProductsInfo -MockWith {
-                if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 15)
-                {
-                    return @("Microsoft SharePoint Server 2013")
-                }
-                else
-                {
-                    if ($Global:SPDscHelper.CurrentStubBuildNumber.Minor.ToString().Length -le 4)
-                    {
-                        return @("Microsoft SharePoint Server 2016")
-                    }
-                    else
-                    {
-                        return @("Microsoft SharePoint Server 2019")
-                    }
-                }
+            } -ParameterFilter {
+                $Path -and $Path.Length -eq 1 -and $Path[0].StartsWith("C:\")
             }
 
             It "Should return Ensure is Present from the get method" {
@@ -570,6 +502,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Ensure           = "Present"
             }
 
+            Add-TestRegistryData -PatchLevel "RTM"
+
             Mock -CommandName Get-ItemProperty -MockWith {
                 if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 15)
                 {
@@ -591,24 +525,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                         Name        = "serverlpksp2016-kb2880554-fullfile-x64-en-us.exe"
                     }
                 }
-            }
-
-            Mock -CommandName Get-SPDscFarmProductsInfo -MockWith {
-                if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 15)
-                {
-                    return @("Microsoft SharePoint Server 2013")
-                }
-                else
-                {
-                    if ($Global:SPDscHelper.CurrentStubBuildNumber.Minor.ToString().Length -le 4)
-                    {
-                        return @("Microsoft SharePoint Server 2016")
-                    }
-                    else
-                    {
-                        return @("Microsoft SharePoint Server 2019")
-                    }
-                }
+            } -ParameterFilter {
+                $Path -and $Path.Length -eq 1 -and $Path[0].StartsWith("C:\")
             }
 
             Mock -CommandName Get-SPEnterpriseSearchServiceApplication -MockWith {
@@ -661,6 +579,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Ensure           = "Present"
             }
 
+            Add-TestRegistryData -PatchLevel "RTM"
+
             Mock -CommandName Get-ItemProperty -MockWith {
                 if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 15)
                 {
@@ -682,24 +602,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                         Name        = "serverlpksp2016-kb2880554-fullfile-x64-nl-nl.exe"
                     }
                 }
-            }
-
-            Mock -CommandName Get-SPDscFarmProductsInfo -MockWith {
-                if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 15)
-                {
-                    return @("Microsoft SharePoint Server 2013", "Language Pack for SharePoint and Project Server 2013  - Dutch/Nederlands")
-                }
-                else
-                {
-                    if ($Global:SPDscHelper.CurrentStubBuildNumber.Minor.ToString().Length -le 4)
-                    {
-                        return @("Microsoft SharePoint Server 2016", "Language Pack for SharePoint and Project Server 2016  - Dutch/Nederlands")
-                    }
-                    else
-                    {
-                        return @("Microsoft SharePoint Server 2019", "Language Pack for SharePoint and Project Server 2019  - Dutch/Nederlands")
-                    }
-                }
+            } -ParameterFilter {
+                $Path -and $Path.Length -eq 1 -and $Path[0].StartsWith("C:\")
             }
 
             It "Should return Ensure is Present from the get method" {
@@ -740,27 +644,11 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                         Name        = "serverlpksp2016-kb2880554-fullfile-x64-nl-nl.exe"
                     }
                 }
+            } -ParameterFilter {
+                $Path -and $Path.Length -eq 1 -and $Path[0].StartsWith("C:\")
             }
 
-            Mock -CommandName Get-SPDscFarmProductsInfo -MockWith {
-                if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 15)
-                {
-                    return @("Microsoft SharePoint Server 2013", "Language Pack for SharePoint and Project Server 2013  - Dutch/Nederlands")
-                }
-                else
-                {
-                    if ($Global:SPDscHelper.CurrentStubBuildNumber.Minor.ToString().Length -le 4)
-                    {
-                        return @("Microsoft SharePoint Server 2016", "Language Pack for SharePoint and Project Server 2016  - Dutch/Nederlands")
-                    }
-                    else
-                    {
-                        return @("Microsoft SharePoint Server 2019", "Language Pack for SharePoint and Project Server 2016\9  - Dutch/Nederlands")
-                    }
-                }
-            }
-
-            It "Should return Ensure is Present from the get method" {
+            It "Should return Ensure is Abenst from the get method" {
                 $result = Get-TargetResource @testParams
                 $result.Ensure | Should Be "Absent"
             }
@@ -770,7 +658,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Assert-MockCalled Start-Process
             }
 
-            It "Should return true from the test method" {
+            It "Should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $false
             }
         }
@@ -803,17 +691,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                         Name        = "serverlpksp2016-kb2880554-fullfile-x64.exe"
                     }
                 }
-            }
-
-            Mock -CommandName Get-SPDscFarmProductsInfo -MockWith {
-                if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 15)
-                {
-                    return @("Microsoft SharePoint Server 2013", "Language Pack for SharePoint and Project Server 2013  - Dutch/Nederlands")
-                }
-                else
-                {
-                    return @("Microsoft SharePoint Server 2016", "Language Pack for SharePoint and Project Server 2016  - Dutch/Nederlands")
-                }
+            } -ParameterFilter {
+                $Path -and $Path.Length -eq 1 -and $Path[0].StartsWith("C:\")
             }
 
             It "Should throw exception in the get method" {
@@ -849,17 +728,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                         Name        = "serverlpksp2016-kb2880554-fullfile-x64-ab-yz.exe"
                     }
                 }
-            }
-
-            Mock -CommandName Get-SPDscFarmProductsInfo -MockWith {
-                if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 15)
-                {
-                    return @("Microsoft SharePoint Server 2013", "Language Pack for SharePoint and Project Server 2013  - Dutch/Nederlands")
-                }
-                else
-                {
-                    return @("Microsoft SharePoint Server 2016", "Language Pack for SharePoint and Project Server 2016  - Dutch/Nederlands")
-                }
+            } -ParameterFilter {
+                $Path -and $Path.Length -eq 1 -and $Path[0].StartsWith("C:\")
             }
 
             It "Should throw exception in the get method" {
@@ -895,17 +765,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                         Name        = "serverlpksp2016-kb2880554-fullfile-x64-fr-fr.exe"
                     }
                 }
-            }
-
-            Mock -CommandName Get-SPDscFarmProductsInfo -MockWith {
-                if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 15)
-                {
-                    return @("Microsoft SharePoint Server 2013", "Language Pack for SharePoint and Project Server 2013  - Dutch/Nederlands")
-                }
-                else
-                {
-                    return @("Microsoft SharePoint Server 2016", "Language Pack for SharePoint and Project Server 2016  - Dutch/Nederlands")
-                }
+            } -ParameterFilter {
+                $Path -and $Path.Length -eq 1 -and $Path[0].StartsWith("C:\")
             }
 
             It "Should throw exception in the get method" {
@@ -941,6 +802,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                         Name        = "serverlpksp2016-kb2880554-fullfile-x64-fr-fr.exe"
                     }
                 }
+            } -ParameterFilter {
+                $Path -and $Path.Length -eq 1 -and $Path[0].StartsWith("C:\")
             }
 
             Mock -CommandName Get-SPDSCRegistryKey -MockWith {
