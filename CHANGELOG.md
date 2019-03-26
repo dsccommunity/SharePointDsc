@@ -5,6 +5,8 @@
 * SharePointDsc generic
   * Implemented workaround for PSSA v1.18 issue. No further impact for
     the rest of the resources
+  * Fixed issue where powershell session was never removed and leaded to
+    memory leak
 * SPConfigWizard
   * Improved logging
 * SPFarm
