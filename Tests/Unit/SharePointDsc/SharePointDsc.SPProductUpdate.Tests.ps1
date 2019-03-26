@@ -14,9 +14,71 @@ Import-Module -Name (Join-Path -Path $PSScriptRoot `
 $Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointCmdletModule `
     -DscResource "SPProductUpdate"
 
+   # Write-Host $PSScriptRoot
+$Global:TestRegistryData = Import-PowerShellDataFile -Path (Join-Path -Path $PSScriptRoot `
+    -ChildPath "SharePointDsc.SPProductUpdate.Tests.psd1" `
+    -Resolve)
+
 Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
     InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
         Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
+
+        function Add-TestRegistryData
+        {
+            param(
+                # Use Registry Values with an update
+                [Parameter(Mandatory = $true)]
+                [ValidateSet("RTM", "CU", "SP1")]
+                [System.String]
+                $PatchLevel
+            )
+
+            $productVersion = 2013
+            if($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 16) {
+                if ($Global:SPDscHelper.CurrentStubBuildNumber.Build.ToString().Length -eq 4)
+                {
+                    $productVersion = 2016
+                }
+                else
+                {
+                    $productVersion = 2019
+                }
+            }
+
+            if ($productVersion -ne 2013 -and $PatchLevel -eq "SP1")
+            {
+                throw "Invalid Parameter Set. 'SP1' can only be used with SharePoint Server 2013. Server version was $productVersion"
+            }
+
+            $registryValuesToImport = @(
+                "Windows Registry Editor Version 5.00"
+            )
+            $registryValuesToImport += $Global:TestRegistryData["$($productVersion)"]["$($PatchLevel)"].Keys | ForEach-Object -Process {
+                return $Global:TestRegistryData["$($productVersion)"]["$($PatchLevel)"]["$($_)"]
+            }
+            $registryFileContent = $registryValuesToImport -join "`n`n"
+
+            $testRegistryPath = Get-Item "TestRegistry:\\"
+
+            $testDrivePath = Get-Item "TestDrive:\"
+
+            $tempFileName = "$($productVersion)_$($PatchLevel).reg"
+
+            $modifiedFileDestination = $(Join-Path $testDrivePath.FullName -ChildPath $tempFileName)
+            $registryFileContent.Replace("[HKEY_LOCAL_MACHINE\", "[$($testRegistryPath.Name)\HKEY_LOCAL_MACHINE\") | Out-File -FilePath $modifiedFileDestination
+
+            $null = reg import $modifiedFileDestination
+
+            $PrepDataForTests = $true
+            if($PrepDataForTests)
+            {
+                Get-Childitem "Registry::$($testRegistryPath)\HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Installer\UserData\S-1-5-18\Products" | Where-Object -FilterScript {
+                    $_.PsPath -notlike "*00000000F01FEC"
+                } | Remove-Item -Confirm:$false -Force -Recurse
+
+                reg export "$($testRegistryPath)\HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Installer\UserData\S-1-5-18\Products" "C:\temp\$($tempFileName)"
+            }
+        }
 
         # Mocks for all contexts
         Mock -CommandName Test-Path {
@@ -83,7 +145,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Mock -CommandName Get-ChildItem -MockWith {
             $getChildItemCmdlet = Get-Command Get-ChildItem -CommandType Cmdlet
-            return & $getChildItemCmdlet -Path "$($Path[0].Replace("Registry::HKEY_LOCAL_MACHINE","TestRegistry:\"))"
+            return & $getChildItemCmdlet -Path "$($Path[0].Replace("Registry::HKEY_LOCAL_MACHINE", "TestRegistry:\"))"
         } -ParameterFilter {
             $Path -and $Path.Length -eq 1 -and $Path[0].Contains("HKEY_LOCAL_MACHINE")
         }
@@ -91,7 +153,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Mock -CommandName Get-ItemProperty -MockWith {
             $getItemPropertyCmdlet = Get-Command Get-ItemProperty -CommandType Cmdlet
-            return & $getItemPropertyCmdlet -Path "$($Path[0].Replace("Registry::HKEY_LOCAL_MACHINE","TestRegistry:\"))"
+            return & $getItemPropertyCmdlet -Path "$($Path[0].Replace("Registry::HKEY_LOCAL_MACHINE", "TestRegistry:\"))"
         } -ParameterFilter {
             $Path -and $Path.Length -eq 1 -and $Path[0].Contains("HKEY_LOCAL_MACHINE")
         }
