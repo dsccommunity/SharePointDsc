@@ -8,7 +8,6 @@
 * SharePointDsc generic
   * Implemented workaround for PSSA v1.18 issue. No further impact for
     the rest of the resources
->>>>>>> dev
 * SPConfigWizard
   * Improved logging
 * SPFarm
