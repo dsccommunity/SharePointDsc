@@ -7,6 +7,8 @@
     the rest of the resources
   * Fixed issue where powershell session was never removed and leaded to
     memory leak
+  * Added readme.md file to Examples folder, which directs users to the
+    Wiki on Github
 * SPAppManagementServiceApp
   * Added ability to create Service App Proxy if this is not present
 * SPConfigWizard
@@ -36,6 +38,8 @@
     caused by security warning
 * SPSearchServiceApp
   * Added possibility to manage AlertsEnabled setting
+* SPSelfServiceSiteCreation
+  * Added new SharePoint 2019 properties
 * SPSitePropertyBag
   * Added new resource
 
