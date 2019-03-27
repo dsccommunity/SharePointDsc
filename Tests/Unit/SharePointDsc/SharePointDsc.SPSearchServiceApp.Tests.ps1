@@ -489,6 +489,69 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
         }
 
+        Context -Name "When AlertsEnabled does not match" -Fixture {
+            $testParams = @{
+                Name = "Search Service Application"
+                ApplicationPool = "SharePoint Search Services"
+                Ensure = "Present"
+                AlertsEnabled = $true
+            }
+
+            $Global:SPDscAlertsEnabledUpdated = $false
+
+            Mock -CommandName Get-SPServiceApplication -MockWith {
+                $spServiceApp = [PSCustomObject]@{
+                    TypeName = "Search Service Application"
+                    DisplayName = $testParams.Name
+                    ApplicationPool = @{ Name = $testParams.ApplicationPool }
+                    AlertsEnabled = $false
+                    Database = @{
+                        Name = $testParams.DatabaseName
+                        NormalizedDataSource = $testParams.DatabaseServer
+                    }
+                }
+                $spServiceApp = $spServiceApp | Add-Member ScriptMethod Update {
+                    $Global:SPDscAlertsEnabledUpdated = $true
+                } -PassThru
+                $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value {
+                    return @{ FullName = $getTypeFullName }
+                } -PassThru -Force
+                $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name IsConnected -Value {
+                    return $true
+                } -PassThru -Force
+                return $spServiceApp
+            }
+
+            Mock -CommandName Get-SPServiceApplicationPool -MockWith {
+                return @{
+                    Name = $testParams.ApplicationPool
+                }
+            }
+
+            Mock -CommandName New-Object -MockWith {
+                return @{
+                    DefaultGatheringAccount = "Domain\username"
+                }
+            } -ParameterFilter {
+                $TypeName -eq "Microsoft.Office.Server.Search.Administration.Content"
+            }
+
+            Mock -CommandName Get-SPServiceApplicationProxy -MockWith {
+                return @{
+                    Name = "$($testParams.Name) Proxy"
+                }
+            }
+
+            It "Should return false from the test method" {
+                Test-TargetResource @testParams | Should Be $false
+            }
+
+            It "Should update the service app in the set method" {
+                Set-TargetResource @testParams
+                $Global:SPDscAlertsEnabledUpdated | Should Be $true
+            }
+        }
+
         Context -Name "When the search center URL does match" -Fixture {
             $testParams = @{
                 Name = "Search Service Application"

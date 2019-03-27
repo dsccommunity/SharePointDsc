@@ -4,33 +4,33 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [Parameter(Mandatory = $true)]  
-        [System.String] 
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $Name,
 
-        [Parameter()] 
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $ProxyName,
 
-        [Parameter(Mandatory = $true)]  
-        [System.String] 
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $ApplicationPool,
 
-        [Parameter()] 
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $DatabaseName,
 
-        [Parameter()] 
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $DatabaseServer,
 
-        [Parameter()] 
-        [ValidateSet("Present","Absent")] 
-        [System.String] 
+        [Parameter()]
+        [ValidateSet("Present","Absent")]
+        [System.String]
         $Ensure = "Present",
 
-        [Parameter()] 
-        [System.Management.Automation.PSCredential] 
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 
@@ -40,39 +40,42 @@ function Get-TargetResource
                                   -Arguments $PSBoundParameters `
                                   -ScriptBlock {
         $params = $args[0]
-        
+
         $serviceApps = Get-SPServiceApplication -Name $params.Name -ErrorAction SilentlyContinue
         $nullReturn = @{
             Name = $params.Name
             ApplicationPool = $params.ApplicationPool
             Ensure = "Absent"
             InstallAccount = $params.InstallAccount
-        } 
+        }
         if ($null -eq $serviceApps)
         {
             return $nullReturn
         }
         $serviceApp = $serviceApps | Where-Object -FilterScript {
-            $_.GetType().FullName -eq "Microsoft.SharePoint.AppManagement.AppManagementServiceApplication"            
+            $_.GetType().FullName -eq "Microsoft.SharePoint.AppManagement.AppManagementServiceApplication"
         }
 
-        if ($null -eq $serviceApp) 
+        if ($null -eq $serviceApp)
         {
             return  $nullReturn
-        } 
-        else 
+        }
+        else
         {
+            $proxyName = ""
+
             $serviceAppProxies = Get-SPServiceApplicationProxy -ErrorAction SilentlyContinue
             if ($null -ne $serviceAppProxies)
             {
                 $serviceAppProxy = $serviceAppProxies | Where-Object -FilterScript {
                     $serviceApp.IsConnected($_)
                 }
-                if ($null -ne $serviceAppProxy) 
+                if ($null -ne $serviceAppProxy)
                 {
                     $proxyName = $serviceAppProxy.Name
                 }
             }
+
             return  @{
                 Name = $serviceApp.DisplayName
                 ProxyName = $proxyName
@@ -93,33 +96,33 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [Parameter(Mandatory = $true)]  
-        [System.String] 
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $Name,
 
-        [Parameter()] 
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $ProxyName,
 
-        [Parameter(Mandatory = $true)]  
-        [System.String] 
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $ApplicationPool,
 
-        [Parameter()] 
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $DatabaseName,
 
-        [Parameter()] 
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $DatabaseServer,
 
-        [Parameter()] 
-        [ValidateSet("Present","Absent")] 
-        [System.String] 
+        [Parameter()]
+        [ValidateSet("Present","Absent")]
+        [System.String]
         $Ensure = "Present",
 
-        [Parameter()] 
-        [System.Management.Automation.PSCredential] 
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 
@@ -127,35 +130,35 @@ function Set-TargetResource
 
     $result = Get-TargetResource @PSBoundParameters
 
-    if ($result.Ensure -eq "Absent" -and $Ensure -eq "Present") 
+    if ($result.Ensure -eq "Absent" -and $Ensure -eq "Present")
     {
         # The service app doesn't exist but should
-        
+
         Write-Verbose -Message "Creating App management Service Application $Name"
         Invoke-SPDSCCommand -Credential $InstallAccount `
                             -Arguments $PSBoundParameters `
                             -ScriptBlock {
             $params = $args[0]
-            
+
             $newParams = @{
-                Name = $params.Name 
+                Name = $params.Name
                 ApplicationPool = $params.ApplicationPool
             }
-            if ($params.ContainsKey("DatabaseName") -eq $true) 
+            if ($params.ContainsKey("DatabaseName") -eq $true)
             {
-                $newParams.Add("DatabaseName", $params.DatabaseName) 
+                $newParams.Add("DatabaseName", $params.DatabaseName)
             }
-            if ($params.ContainsKey("DatabaseServer") -eq $true) 
+            if ($params.ContainsKey("DatabaseServer") -eq $true)
             {
-                $newParams.Add("DatabaseServer", $params.DatabaseServer) 
+                $newParams.Add("DatabaseServer", $params.DatabaseServer)
             }
 
             $appService = New-SPAppManagementServiceApplication @newParams
-            if ($null -eq $params.ProxyName) 
+            if ($null -eq $params.ProxyName)
             {
                 $pName = "$($params.Name) Proxy"
-            } 
-            else 
+            }
+            else
             {
                 $pName = $params.ProxyName
             }
@@ -166,21 +169,50 @@ function Set-TargetResource
         }
     }
 
-    if ($result.Ensure -eq "Present" -and $Ensure -eq "Present") 
+    if ($result.Ensure -eq "Present" -and $Ensure -eq "Present")
     {
-        # The service app exists but has the wrong application pool
-         
-        if ($ApplicationPool -ne $result.ApplicationPool) 
+        Write-Verbose -Message "Updating App management Service Application $Name"
+
+        # Check if the service app has a proxy
+        if ($result.ProxyName -eq "")
         {
-            Write-Verbose -Message "Updating App management Service Application $Name"
+            Write-Verbose -Message "Proxy not found, creating proxy"
+            Invoke-SPDSCCommand -Credential $InstallAccount `
+                                -Arguments $PSBoundParameters `
+                                -ScriptBlock {
+                $params = $args[0]
+
+                $app = Get-SPServiceApplication -Name $params.Name | Where-Object -FilterScript {
+                    $_.GetType().FullName -eq "Microsoft.SharePoint.AppManagement.AppManagementServiceApplication"
+                }
+
+                if ($null -eq $params.ProxyName)
+                {
+                    $pName = "$($params.Name) Proxy"
+                }
+                else
+                {
+                    $pName = $params.ProxyName
+                }
+                New-SPAppManagementServiceApplicationProxy -Name $pName `
+                                                           -UseDefaultProxyGroup `
+                                                           -ServiceApplication $app `
+                                                           -ErrorAction Stop | Out-Null
+            }
+        }
+
+        # Check if the service app has the correct application pool
+        if ($ApplicationPool -ne $result.ApplicationPool)
+        {
+            Write-Verbose -Message "Updating Application Pool"
             Invoke-SPDSCCommand -Credential $InstallAccount `
                                 -Arguments $PSBoundParameters `
                                 -ScriptBlock {
                 $params = $args[0]
                 $appPool = Get-SPServiceApplicationPool -Identity $params.ApplicationPool
-                
+
                 $app = Get-SPServiceApplication -Name $params.Name | Where-Object -FilterScript {
-                    $_.GetType().FullName -eq "Microsoft.SharePoint.AppManagement.AppManagementServiceApplication"   
+                    $_.GetType().FullName -eq "Microsoft.SharePoint.AppManagement.AppManagementServiceApplication"
                 }
                 $app.ApplicationPool = $appPool
                 $app.Update()
@@ -188,7 +220,7 @@ function Set-TargetResource
         }
     }
 
-    if ($Ensure -eq "Absent") 
+    if ($Ensure -eq "Absent")
     {
         # The service app should not exit
         Write-Verbose -Message "Removing App management Service Application $Name"
@@ -196,9 +228,9 @@ function Set-TargetResource
                             -Arguments $PSBoundParameters `
                             -ScriptBlock {
             $params = $args[0]
-            
+
             $app = Get-SPServiceApplication -Name $params.Name | Where-Object -FilterScript {
-                $_.GetType().FullName -eq "Microsoft.SharePoint.AppManagement.AppManagementServiceApplication"   
+                $_.GetType().FullName -eq "Microsoft.SharePoint.AppManagement.AppManagementServiceApplication"
             }
 
             $proxies = Get-SPServiceApplicationProxy
@@ -221,43 +253,51 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [Parameter(Mandatory = $true)]  
-        [System.String] 
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $Name,
 
-        [Parameter()] 
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $ProxyName,
 
-        [Parameter(Mandatory = $true)]  
-        [System.String] 
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $ApplicationPool,
 
-        [Parameter()] 
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $DatabaseName,
 
-        [Parameter()] 
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $DatabaseServer,
 
-        [Parameter()] 
-        [ValidateSet("Present","Absent")] 
-        [System.String] 
+        [Parameter()]
+        [ValidateSet("Present","Absent")]
+        [System.String]
         $Ensure = "Present",
 
-        [Parameter()] 
-        [System.Management.Automation.PSCredential] 
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
         $InstallAccount
     )
-    
+
     Write-Verbose -Message "Testing App management service app '$Name'"
-    
+
     $PSBoundParameters.Ensure = $Ensure
 
-    return Test-SPDscParameterState -CurrentValues (Get-TargetResource @PSBoundParameters) `
+    $CurrentValues = Get-TargetResource @PSBoundParameters
+
+    if ($CurrentValues.ProxyName -eq "")
+    {
+        return $false
+    }
+
+    return Test-SPDscParameterState -CurrentValues $CurrentValues `
                                     -DesiredValues $PSBoundParameters `
-                                    -ValuesToCheck @("ApplicationPool", "Ensure")
+                                    -ValuesToCheck @("ApplicationPool",
+                                                     "Ensure")
 }
 
 Export-ModuleMember -Function *-TargetResource

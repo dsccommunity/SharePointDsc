@@ -7,6 +7,8 @@
     the rest of the resources
   * Fixed issue where powershell session was never removed and leaded to
     memory leak
+* SPAppManagementServiceApp
+  * Added ability to create Service App Proxy if this is not present
 * SPConfigWizard
   * Improved logging
 * SPFarm
@@ -32,6 +34,10 @@
   * Added ability to install from a UNC path, by adding server
     to IE Local Intranet Zone. This will prevent an endless wait
     caused by security warning
+* SPSearchServiceApp
+  * Added possibility to manage AlertsEnabled setting
+* SPSitePropertyBag
+  * Added new resource
 
 ## v3.2
 
