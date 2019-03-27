@@ -20,6 +20,18 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
         # Mocks for all contexts
+        try
+        {
+            [Microsoft.SharePoint.Administration.SiteCreationUserExperienceVersion]
+        }
+        catch
+        {
+            Add-Type -TypeDefinition @"
+namespace Microsoft.SharePoint.Administration {
+    public enum SiteCreationUserExperienceVersion { Version1, Version2, Latest };
+}
+"@
+        }
 
         $webAppImplementation = {
             $webApp = @{
@@ -40,6 +52,14 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 $this.UpdateCalled = $true
             }
             return $webApp
+        }
+
+        Mock -CommandName Get-SPDSCInstalledProductVersion {
+            return @{
+                FileMajorPart = $Global:SPDscHelper.CurrentStubBuildNumber.Major
+                FileBuildPart = $Global:SPDscHelper.CurrentStubBuildNumber.Build
+                ProductBuildPart = $Global:SPDscHelper.CurrentStubBuildNumber.Build
+            }
         }
 
         # Test contexts
@@ -69,6 +89,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 $webApp.SelfServiceCreationParentSiteUrl = "/sites/SSC"
                 $webApp.SelfServiceSiteCustomFormUrl = ""
                 $webApp.RequireContactForSelfServiceSiteCreation = $true
+                $webapp.SiteCreationUserExperienceVersion = "Version2"
                 $webApp.Properties = @{
                     PolicyOption = "CanHavePolicy"
                 }
@@ -101,7 +122,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
         }
 
-        Context -Name "Self service site creation settings does not matches the current state" -Fixture {
+        Context -Name "Self service site creation settings does not match the current state" -Fixture {
             $testParams = @{
                 WebAppUrl = "http://sites.sharepoint.com"
                 Enabled = $true
@@ -248,6 +269,90 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
         }
 
+        # SP2013/2016
+        if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 15 -or $Global:SPDscHelper.CurrentStubBuildNumber.Build -lt 10000)
+        {
+            Context -Name "Using SP2019 parameters in SP2013/2016" -Fixture {
+                $testParams = @{
+                    WebAppUrl = "http://sites.sharepoint.com"
+                    Enabled = $true
+                    OnlineEnabled = $false
+                    QuotaTemplate = "SSCQoutaTemplate"
+                    ShowStartASiteMenuItem = $true
+                    CreateIndividualSite = $false
+                    ParentSiteUrl = "/sites/SSC"
+                    CustomFormUrl = ""
+                    ManagedPath = "CANNOT BE USED"
+                    PolicyOption = "CanHavePolicy"
+                    RequireSecondaryContact = $true
+                }
+
+                It "Should throw and execption for ManagedPath from the set method" {
+                    { Set-TargetResource @testParams } | Should Throw "Parameter ManagedPath is only supported in SharePoint 2019"
+                }
+
+                $testParams = @{
+                    WebAppUrl = "http://sites.sharepoint.com"
+                    Enabled = $true
+                    OnlineEnabled = $false
+                    QuotaTemplate = "SSCQoutaTemplate"
+                    ShowStartASiteMenuItem = $true
+                    CreateIndividualSite = $false
+                    ParentSiteUrl = "/sites/SSC"
+                    CustomFormUrl = ""
+                    AlternateUrl = "CANNOT BE USED"
+                    PolicyOption = "CanHavePolicy"
+                    RequireSecondaryContact = $true
+                }
+
+                It "Should throw and execption for AlternateUrl from the set method" {
+                    { Set-TargetResource @testParams } | Should Throw "Parameter AlternateUrl is only supported in SharePoint 2019"
+                }
+
+                $testParams = @{
+                    WebAppUrl = "http://sites.sharepoint.com"
+                    Enabled = $true
+                    OnlineEnabled = $false
+                    QuotaTemplate = "SSCQoutaTemplate"
+                    ShowStartASiteMenuItem = $true
+                    CreateIndividualSite = $false
+                    ParentSiteUrl = "/sites/SSC"
+                    CustomFormUrl = ""
+                    UserExperienceVersion = "Modern" # CANNOT BE USED
+                    PolicyOption = "CanHavePolicy"
+                    RequireSecondaryContact = $true
+                }
+
+                It "Should throw and execption for UserExperienceVersion from the set method" {
+                    { Set-TargetResource @testParams } | Should Throw "Parameter UserExperienceVersion is only supported in SharePoint 2019"
+                }
+            }
+        }
+
+        # SP2019
+        if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 16 -and $Global:SPDscHelper.CurrentStubBuildNumber.Build -gt 10000)
+        {
+            Context -Name "Using both ManagedPath and AlternateUrl" -Fixture {
+                $testParams = @{
+                    WebAppUrl = "http://sites.sharepoint.com"
+                    Enabled = $true
+                    OnlineEnabled = $false
+                    QuotaTemplate = "SSCQoutaTemplate"
+                    ShowStartASiteMenuItem = $true
+                    CreateIndividualSite = $false
+                    ParentSiteUrl = "/sites/SSC"
+                    CustomFormUrl = ""
+                    ManagedPath = "sites"
+                    AlternateUrl = "sharepoint.contoso.com"
+                    PolicyOption = "CanHavePolicy"
+                    RequireSecondaryContact = $true
+                }
+
+                It "Should throw and execption for ManagedPath from the set method" {
+                    { Set-TargetResource @testParams } | Should Throw "You cannot specify both AlternateUrl and ManagedPath. Please use just one of these."
+                }
+            }
+        }
     }
 }
 

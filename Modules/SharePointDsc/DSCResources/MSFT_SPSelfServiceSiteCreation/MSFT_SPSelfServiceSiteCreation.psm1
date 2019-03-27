@@ -46,11 +46,51 @@ function Get-TargetResource
         $CustomFormUrl,
 
         [Parameter()]
+        [System.String]
+        $ManagedPath,
+
+        [Parameter()]
+        [System.String]
+        $AlternateUrl,
+
+        [Parameter()]
+        [ValidateSet("Modern","Classic","Latest")]
+        [System.String]
+        $UserExperienceVersion = "Modern",
+
+        [Parameter()]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 
     Write-Verbose -Message "Getting self service site creation settings for Web Application '$WebAppUrl'"
+
+    $installedVersion = Get-SPDSCInstalledProductVersion
+    if ($installedVersion.FileMajorPart -eq 15 -or $installedVersion.FileBuildPart.ToString().Length -eq 4)
+    {
+        if($PSBoundParameters.ContainsKey("ManagedPath") -eq $true)
+        {
+            Write-Verbose -Message "Parameter ManagedPath is only supported in SharePoint 2019"
+        }
+
+        if($PSBoundParameters.ContainsKey("AlternateUrl") -eq $true)
+        {
+            Write-Verbose -Message "Parameter AlternateUrl is only supported in SharePoint 2019"
+        }
+
+        if($PSBoundParameters.ContainsKey("UserExperienceVersion") -eq $true)
+        {
+            Write-Verbose -Message "Parameter UserExperienceVersion is only supported in SharePoint 2019"
+        }
+    }
+    else
+    {
+        if($PSBoundParameters.ContainsKey("AlternateUrl") -eq $true -and
+           $PSBoundParameters.ContainsKey("ManagedPath") -eq $true)
+        {
+            throw "You cannot specify both AlternateUrl and ManagedPath. Please use just one of these."
+        }
+    }
 
     $result = Invoke-SPDSCCommand -Credential $InstallAccount `
                                   -Arguments $PSBoundParameters `
@@ -63,15 +103,18 @@ function Get-TargetResource
         {
             Write-Verbose "Web application $($params.WebAppUrl) was not found"
             return @{
-                WebAppUrl = $null
-                Enabled = $null
+                WebAppUrl     = $null
+                Enabled       = $null
                 OnlineEnabled = $null
                 QuotaTemplate = $null
                 ShowStartASiteMenuItem = $null
-                CreateIndividualSite = $null
+                CreateIndividualSite   = $null
                 ParentSiteUrl = $null
                 CustomFormUrl = $null
-                PolicyOption = $null
+                ManagedPath   = $null
+                AlternateUrl  = $null
+                UserExperienceVersion   = $null
+                PolicyOption  = $null
                 RequireSecondaryContact = $null
             }
         }
@@ -86,16 +129,30 @@ function Get-TargetResource
             }
         }
 
+        $userExperienceVersion = $null
+        if($webApplication.SiteCreationUserExperienceVersion -ne $null)
+        {
+            switch ($webApplication.SiteCreationUserExperienceVersion)
+            {
+                "Version1" { $userExperienceVersion = "Classic" }
+                "Version2" { $userExperienceVersion = "Modern" }
+                "Latest"   { $userExperienceVersion = "Latest" }
+            }
+        }
+
         return @{
-            WebAppUrl = $params.WebAppUrl
-            Enabled = $webApplication.SelfServiceSiteCreationEnabled
+            WebAppUrl     = $params.WebAppUrl
+            Enabled       = $webApplication.SelfServiceSiteCreationEnabled
             OnlineEnabled = $webApplication.SelfServiceSiteCreationOnlineEnabled
             QuotaTemplate = $webApplication.SelfServiceCreationQuotaTemplate
             ShowStartASiteMenuItem = $webApplication.ShowStartASiteMenuItem
-            CreateIndividualSite = $webApplication.SelfServiceCreateIndividualSite
+            CreateIndividualSite   = $webApplication.SelfServiceCreateIndividualSite
             ParentSiteUrl = $webApplication.SelfServiceCreationParentSiteUrl
             CustomFormUrl = $webApplication.SelfServiceSiteCustomFormUrl
-            PolicyOption = $policyOption
+            ManagedPath   = $webApplication.SelfServiceCreationManagedPath
+            AlternateUrl  = $webApplication.SelfServiceCreationAlternateUrl
+            UserExperienceVersion   = $userExperienceVersion
+            PolicyOption  = $policyOption
             RequireSecondaryContact = $webApplication.RequireContactForSelfServiceSiteCreation
         }
     }
@@ -149,16 +206,65 @@ function Set-TargetResource
         $CustomFormUrl,
 
         [Parameter()]
+        [System.String]
+        $ManagedPath,
+
+        [Parameter()]
+        [System.String]
+        $AlternateUrl,
+
+        [Parameter()]
+        [ValidateSet("Modern","Classic","Latest")]
+        [System.String]
+        $UserExperienceVersion = "Modern",
+
+        [Parameter()]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 
     Write-Verbose -Message "Setting self service site creation settings for Web Application '$WebAppUrl'"
 
+    $installedVersion = Get-SPDSCInstalledProductVersion
+    if ($installedVersion.FileMajorPart -eq 15 -or $installedVersion.ProductBuildPart.ToString().Length -eq 4)
+    {
+        if($PSBoundParameters.ContainsKey("ManagedPath") -eq $true)
+        {
+            throw "Parameter ManagedPath is only supported in SharePoint 2019"
+        }
+
+        if($PSBoundParameters.ContainsKey("AlternateUrl") -eq $true)
+        {
+            throw "Parameter AlternateUrl is only supported in SharePoint 2019"
+        }
+
+        if($PSBoundParameters.ContainsKey("UserExperienceVersion") -eq $true)
+        {
+            throw "Parameter UserExperienceVersion is only supported in SharePoint 2019"
+        }
+    }
+    else
+    {
+        if($PSBoundParameters.ContainsKey("AlternateUrl") -eq $true -and
+           $PSBoundParameters.ContainsKey("ManagedPath") -eq $true)
+        {
+            throw "You cannot specify both AlternateUrl and ManagedPath. Please use just one of these."
+        }
+
+        $PSBoundParameters.UserExperienceVersion = $UserExperienceVersion
+    }
+
     Invoke-SPDSCCommand -Credential $InstallAccount `
                         -Arguments $PSBoundParameters `
                         -ScriptBlock {
         $params = $args[0]
+
+        if ($params.ContainsKey("AlternateUrl") -and
+            $params.AlternateUrl.TrimEnd("/") -in (Get-SPWebApplication).Url.TrimEnd("/"))
+        {
+            throw ("Specified AlternateUrl is unknown as web application URL. " + `
+                    "Please specify an existing URL")
+        }
 
         $webApplication = Get-SPWebApplication -Identity $params.WebAppUrl -ErrorAction SilentlyContinue
 
@@ -244,6 +350,40 @@ function Set-TargetResource
             }
         }
 
+        if ($params.ContainsKey("ManagedPath") -eq $true)
+        {
+            if ($params.ManagedPath -ne $webApplication.SelfServiceCreationManagedPath)
+            {
+                $webApplication.SelfServiceCreationManagedPath = $params.ManagedPath
+                $webApplicationNeedsUpdate = $true
+            }
+        }
+
+        if ($params.ContainsKey("AlternateUrl") -eq $true)
+        {
+            if ($params.AlternateUrl -ne $webApplication.SelfServiceCreationAlternateUrl)
+            {
+                $webApplication.SelfServiceCreationAlternateUrl = $params.AlternateUrl
+                $webApplicationNeedsUpdate = $true
+            }
+        }
+
+        if ($params.ContainsKey("UserExperienceVersion") -eq $true)
+        {
+            switch ($params.UserExperienceVersion)
+            {
+                "Modern"  { $newValue = [Microsoft.SharePoint.Administration.SiteCreationUserExperienceVersion]::Version2 }
+                "Classic" { $newValue = [Microsoft.SharePoint.Administration.SiteCreationUserExperienceVersion]::Version1 }
+                "Latest"  { $newValue = [Microsoft.SharePoint.Administration.SiteCreationUserExperienceVersion]::Latest }
+            }
+
+            if ($newValue -ne $webApplication.SiteCreationUserExperienceVersion)
+            {
+                $webApplication.SiteCreationUserExperienceVersion = $newValue
+                $webApplicationNeedsUpdate = $true
+            }
+        }
+
         if ($params.ContainsKey("PolicyOption") -eq $true)
         {
             if ($params.PolicyOption -ne $webApplication.Properties["PolicyOption"])
@@ -318,6 +458,19 @@ function Test-TargetResource
         $CustomFormUrl,
 
         [Parameter()]
+        [System.String]
+        $ManagedPath,
+
+        [Parameter()]
+        [System.String]
+        $AlternateUrl,
+
+        [Parameter()]
+        [ValidateSet("Modern","Classic","Latest")]
+        [System.String]
+        $UserExperienceVersion = "Modern",
+
+        [Parameter()]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
@@ -326,9 +479,9 @@ function Test-TargetResource
 
     if ($Enabled -eq $false)
     {
-        if($PSBoundParameters.ContainsKey("ShowStartASiteMenuItem"))
+        if ($PSBoundParameters.ContainsKey("ShowStartASiteMenuItem") -eq $true)
         {
-            if($ShowStartASiteMenuItem -eq $true)
+            if ($ShowStartASiteMenuItem -eq $true)
             {
                 throw ("It is not allowed to set the ShowStartASiteMenuItem to true when self service site creation is disabled.")
             }
@@ -352,6 +505,9 @@ function Test-TargetResource
                                                          "CreateIndividualSite", `
                                                          "ParentSiteUrl", `
                                                          "CustomFormUrl", `
+                                                         "ManagedPath", `
+                                                         "AlternateUrl", `
+                                                         "UserExperienceVersion", `
                                                          "PolicyOption", `
                                                          "RequireSecondaryContact")
     }

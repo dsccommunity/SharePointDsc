@@ -296,7 +296,7 @@ function Test-TargetResource
 
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
                                     -DesiredValues $PSBoundParameters `
-                                    -ValuesToCheck @("ApplicationPool",
+                                    -ValuesToCheck @("ApplicationPool", `
                                                      "Ensure")
 }
 
