@@ -61,11 +61,10 @@ function Set-SPDSCWebApplicationThrottlingConfig
                                           -ParamKey "RequestThrottling"
 
     # Create time span object separately
-    if ((Test-SPDSCObjectHasProperty $Settings "ChangeLogExpiryDays") -eq $true)
+    if (($Settings.ContainsKey("ChangeLogExpiryDays")) -eq $true)
     {
         $days = New-TimeSpan -Days $Settings.ChangeLogExpiryDays
         $WebApplication.ChangeLogRetentionPeriod = $days
-        $WebApplication.Update()
     }
 }
 
