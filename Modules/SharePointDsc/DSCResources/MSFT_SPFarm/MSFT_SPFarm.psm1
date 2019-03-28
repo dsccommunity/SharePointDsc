@@ -39,7 +39,6 @@ function Get-TargetResource
         $RunCentralAdmin,
 
         [Parameter()]
-        [ValidateNotNullOrEmpty()]
         [System.String]
         $CentralAdministrationUrl,
 
@@ -355,7 +354,6 @@ function Set-TargetResource
         $RunCentralAdmin,
 
         [Parameter()]
-        [ValidateNotNullOrEmpty()]
         [System.String]
         $CentralAdministrationUrl,
 
@@ -401,6 +399,13 @@ function Set-TargetResource
     }
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
+
+    # If CentralAdministrationUrl is passed but IsNullOrEmpty, remove it from the $PSBoundParameters hashtable
+    if ($PSBoundParameters.ContainsKey("CentralAdministrationUrl") -and `
+        [string]::IsNullOrEmpty($CentralAdministrationUrl))
+    {
+        $PSBoundParameters.Remove("CentralAdministrationUrl") | Out-Null
+    }
 
     # Set default values to ensure they are passed to Invoke-SPDSCCommand
     if (-not $PSBoundParameters.ContainsKey("CentralAdministrationPort"))
@@ -952,7 +957,6 @@ function Test-TargetResource
         $RunCentralAdmin,
 
         [Parameter()]
-        [ValidateNotNullOrEmpty()]
         [System.String]
         $CentralAdministrationUrl,
 
@@ -990,6 +994,13 @@ function Test-TargetResource
     )
 
     Write-Verbose -Message "Testing local SP Farm settings"
+
+    # If CentralAdministrationUrl is passed but IsNullOrEmpty, remove it from the $PSBoundParameters hashtable
+    if ($PSBoundParameters.ContainsKey("CentralAdministrationUrl") -and `
+        [string]::IsNullOrEmpty($CentralAdministrationUrl))
+    {
+        $PSBoundParameters.Remove("CentralAdministrationUrl") | Out-Null
+    }
 
     $PSBoundParameters.Ensure = $Ensure
 
