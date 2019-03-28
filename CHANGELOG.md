@@ -42,6 +42,8 @@
   * Added new SharePoint 2019 properties
 * SPSitePropertyBag
   * Added new resource
+* SPWebAppThrottlingSettings
+  * Fixed issue with ChangeLogRetentionDays not being applied
 
 ## v3.2
 
