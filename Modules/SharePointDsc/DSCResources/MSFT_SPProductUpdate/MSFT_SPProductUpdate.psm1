@@ -46,7 +46,7 @@ function Get-TargetResource
     # Get file information from setup file
     if (-not(Test-Path $SetupFile))
     {
-        throw "Setup file cannot be found."
+        throw "Setup file cannot be found: {$SetupFile}"
     }
 
     Write-Verbose -Message "Checking file status of $SetupFile"
@@ -54,8 +54,8 @@ function Get-TargetResource
 
     if ($null -ne $zone)
     {
-        throw ("Setup file is blocked! Please use Unblock-File to unblock the file " + `
-                "before continuing.")
+        throw ("Setup file is blocked! Please use 'Unblock-File -Path $SetupFile' " + `
+               "to unblock the file before continuing.")
     }
 
     $nullVersion = New-Object -TypeName System.Version
@@ -243,7 +243,7 @@ function Set-TargetResource
     # Check if setup file exists
     if (-not(Test-Path $SetupFile))
     {
-        throw "Setup file cannot be found."
+        throw "Setup file cannot be found: {$SetupFile}"
     }
 
     Write-Verbose -Message "Checking file status of $SetupFile"
@@ -251,8 +251,8 @@ function Set-TargetResource
 
     if ($null -ne $zone)
     {
-        throw ("Setup file is blocked! Please use Unblock-File to unblock the file " + `
-                "before continuing.")
+        throw ("Setup file is blocked! Please use 'Unblock-File -Path $SetupFile' " + `
+               "to unblock the file before continuing.")
     }
 
     $now = Get-Date
@@ -407,10 +407,36 @@ function Set-TargetResource
         -ScriptBlock {
         $setupFile = $args[0]
 
+        Write-Verbose -Message "Checking if SetupFile is an UNC path"
+        $uncInstall = $false
+        if ($setupFile.StartsWith("\\"))
+        {
+            Write-Verbose -Message "Specified BinaryDir is an UNC path. Adding path to Local Intranet Zone"
+
+            $uncInstall = $true
+
+            if ($setupFile -match "\\\\(.*?)\\.*")
+            {
+                $serverName = $Matches[1]
+            }
+            else
+            {
+                throw "Cannot extract servername from UNC path. Check if it is in the correct format."
+            }
+
+            Set-SPDscZoneMap -Server $serverName
+        }
+
         $setup = Start-Process -FilePath $setupFile `
             -ArgumentList "/quiet /passive" `
             -Wait `
             -PassThru
+
+        if ($uncInstall -eq $true)
+        {
+            Write-Verbose -Message "Removing added path from the Local Intranet Zone"
+            Remove-SPDscZoneMap -ServerName $serverName
+        }
 
         # Error codes: https://aka.ms/installerrorcodes
         switch ($setup.ExitCode)

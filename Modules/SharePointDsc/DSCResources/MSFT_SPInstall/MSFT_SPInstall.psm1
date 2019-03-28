@@ -33,6 +33,26 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting install status of SharePoint"
 
+    # Check if Binary folder exists
+    if (-not(Test-Path -Path $BinaryDir))
+    {
+        throw "Specified path cannot be found: {$BinaryDir}"
+    }
+
+    $InstallerPath = Join-Path -Path $BinaryDir -ChildPath "setup.exe"
+    if (-not(Test-Path -Path $InstallerPath))
+    {
+        throw "Setup.exe cannot be found in {$BinaryDir}"
+    }
+
+    Write-Verbose -Message "Checking file status of $InstallerPath"
+    $zone = Get-Item $InstallerPath -Stream "Zone.Identifier" -EA SilentlyContinue
+    if ($null -ne $zone)
+    {
+        throw ("Setup file is blocked! Please use 'Unblock-File -Path $InstallerPath' " + `
+               "to unblock the file before continuing.")
+    }
+
     $x86Path = "HKLM:\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*"
     $installedItemsX86 = Get-ItemProperty -Path $x86Path | Select-Object -Property DisplayName
 
@@ -112,8 +132,19 @@ function Set-TargetResource
                            "its prerequisites. Please remove this manually.")
     }
 
-    $InstallerPath = Join-Path $BinaryDir "setup.exe"
-    $majorVersion = (Get-SPDSCAssemblyVersion -PathToAssembly $InstallerPath)
+    # Check if Binary folder exists
+    if (-not(Test-Path -Path $BinaryDir))
+    {
+        throw "Specified path cannot be found: {$BinaryDir}"
+    }
+
+    $InstallerPath = Join-Path -Path $BinaryDir -ChildPath "setup.exe"
+    if (-not(Test-Path -Path $InstallerPath))
+    {
+        throw "Setup.exe cannot be found in {$BinaryDir}"
+    }
+
+    $majorVersion  = (Get-SPDSCAssemblyVersion -PathToAssembly $InstallerPath)
     if ($majorVersion -eq 15)
     {
         $svrsetupDll = Join-Path -Path $BinaryDir -ChildPath "updates\svrsetup.dll"
@@ -153,6 +184,36 @@ function Set-TargetResource
                 return
             }
         }
+    }
+
+    Write-Verbose -Message "Checking file status of $InstallerPath"
+    $zone = Get-Item $InstallerPath -Stream "Zone.Identifier" -EA SilentlyContinue
+
+    if ($null -ne $zone)
+    {
+        throw ("Setup file is blocked! Please use 'Unblock-File -Path $InstallerPath' " + `
+               "to unblock the file before continuing.")
+    }
+
+    Write-Verbose -Message "Checking if Path is an UNC path"
+    $uncInstall = $false
+    if ($BinaryDir.StartsWith("\\"))
+    {
+        Write-Verbose -Message ("Specified BinaryDir is an UNC path. Adding servername to Local " +
+                                "Intranet Zone")
+
+        $uncInstall = $true
+
+        if ($BinaryDir -match "\\\\(.*?)\\.*")
+        {
+            $serverName = $Matches[1]
+        }
+        else
+        {
+            throw "Cannot extract servername from UNC path. Check if it is in the correct format."
+        }
+
+        Set-SPDscZoneMap -Server $serverName
     }
 
     Write-Verbose -Message "Writing install config file"
@@ -199,6 +260,12 @@ function Set-TargetResource
                            -ArgumentList "/config `"$configPath`"" `
                            -Wait `
                            -PassThru
+
+    if ($uncInstall -eq $true)
+    {
+        Write-Verbose -Message "Removing added path from the Local Intranet Zone"
+        Remove-SPDscZoneMap -ServerName $serverName
+    }
 
     switch ($setup.ExitCode)
     {

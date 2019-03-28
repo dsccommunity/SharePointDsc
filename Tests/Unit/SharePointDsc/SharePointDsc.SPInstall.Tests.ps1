@@ -58,8 +58,123 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             return $Global:SPDscHelper.CurrentStubBuildNumber.Major
         }
 
+        Mock -CommandName Test-Path -MockWith {
+            return $true
+        } -ParameterFilter { $Path -eq $testParams.BinaryDir }
+
+        Mock -CommandName Test-Path -MockWith {
+            return $true
+        } -ParameterFilter { $Path -eq (Join-Path -Path $testParams.BinaryDir -ChildPath "setup.exe") }
+
 
         # Test contexts
+        Context -Name "Specified BinaryDir does not exist" -Fixture {
+            $testParams = @{
+                IsSingleInstance = "Yes"
+                BinaryDir = "C:\SPInstall"
+                ProductKey = "XXXXX-XXXXX-XXXXX-XXXXX-XXXXX"
+                Ensure = "Present"
+            }
+
+            Mock -CommandName Test-Path -MockWith {
+                return $false
+            } -ParameterFilter { $Path -eq $testParams.BinaryDir }
+
+            It "Should throw exception in the get method" {
+                { Get-TargetResource @testParams } | Should Throw "Specified path cannot be found"
+            }
+
+            It "Should throw exception in the set method" {
+                { Set-TargetResource @testParams } | Should Throw "Specified path cannot be found"
+            }
+
+            It "Should throw exception in the test method"  {
+                { Test-TargetResource @testParams } | Should Throw "Specified path cannot be found"
+            }
+        }
+
+        Context -Name "Setup.exe does not exist in BinaryDir" -Fixture {
+            $testParams = @{
+                IsSingleInstance = "Yes"
+                BinaryDir = "C:\SPInstall"
+                ProductKey = "XXXXX-XXXXX-XXXXX-XXXXX-XXXXX"
+                Ensure = "Present"
+            }
+
+            Mock -CommandName Test-Path -MockWith {
+                return $false
+            } -ParameterFilter { $Path -eq (Join-Path -Path $testParams.BinaryDir -ChildPath "setup.exe") }
+
+            It "Should throw exception in the get method" {
+                { Get-TargetResource @testParams } | Should Throw "Setup.exe cannot be found"
+            }
+
+            It "Should throw exception in the set method" {
+                { Set-TargetResource @testParams } | Should Throw "Setup.exe cannot be found"
+            }
+
+            It "Should throw exception in the test method"  {
+                { Test-TargetResource @testParams } | Should Throw "Setup.exe cannot be found"
+            }
+        }
+
+        Context -Name "Setup.exe file is blocked" -Fixture {
+            $testParams = @{
+                IsSingleInstance = "Yes"
+                BinaryDir = "C:\SPInstall"
+                ProductKey = "XXXXX-XXXXX-XXXXX-XXXXX-XXXXX"
+                Ensure = "Present"
+            }
+
+            Mock -CommandName Get-Item -MockWith {
+                return "data"
+            }
+
+            It "Should throw exception in the get method" {
+                { Get-TargetResource @testParams } | Should Throw "Setup file is blocked!"
+            }
+
+            It "Should throw exception in the set method" {
+                { Set-TargetResource @testParams } | Should Throw "Setup file is blocked!"
+            }
+
+            It "Should throw exception in the test method"  {
+                { Test-TargetResource @testParams } | Should Throw "Setup file is blocked!"
+            }
+        }
+
+        Context -Name "SharePoint binaries are not installed but should be using UNC path" -Fixture {
+            $testParams = @{
+                IsSingleInstance = "Yes"
+                BinaryDir = "\\server\install\SPInstall"
+                ProductKey = "XXXXX-XXXXX-XXXXX-XXXXX-XXXXX"
+                Ensure = "Present"
+            }
+
+            Mock -CommandName Test-Path -MockWith {
+                return $false
+            } -ParameterFilter { $Path -eq (Join-Path -Path $BinaryDir -ChildPath "updates\svrsetup.dll") }
+
+            Mock -CommandName Get-Item -MockWith {
+                return $null
+            }
+
+            Mock -CommandName Get-ItemProperty -MockWith {
+                return $null
+            }
+
+            Mock -CommandName Start-Process -MockWith {
+                return @{
+                    ExitCode = 0
+                }
+            }
+
+            It "Should return absent from the get method" {
+                Set-TargetResource @testParams
+                Assert-MockCalled Start-Process
+            }
+        }
+
         Context -Name "SharePoint binaries are not installed but should be" -Fixture {
             $testParams = @{
                 IsSingleInstance = "Yes"
