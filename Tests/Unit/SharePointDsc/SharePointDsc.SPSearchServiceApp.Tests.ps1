@@ -93,12 +93,41 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             $testParams = @{
                 Name = "Search Service Application"
                 ApplicationPool = "SharePoint Search Services"
+                AlertsEnabled = $true
                 Ensure = "Present"
                 WindowsServiceAccount = $mockCredential
             }
 
+            $global:SPDscCounter = 0
             Mock -CommandName Get-SPServiceApplication -MockWith {
-                return $null
+                if ($global:SPDscCounter -eq 0)
+                {
+                    $global:SPDscCounter++
+                    return $null
+                }
+                else
+                {
+                    $spServiceApp = [PSCustomObject]@{
+                        TypeName = "Search Service Application"
+                        DisplayName = $testParams.Name
+                        ApplicationPool = @{ Name = $testParams.ApplicationPool }
+                        AlertsEnabled = $false
+                        Database = @{
+                            Name = $testParams.DatabaseName
+                            NormalizedDataSource = $testParams.DatabaseServer
+                        }
+                    }
+                    $spServiceApp = $spServiceApp | Add-Member ScriptMethod Update {
+                        $Global:SPDscAlertsEnabledUpdated = $true
+                    } -PassThru
+                    $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value {
+                        return @{ FullName = $getTypeFullName }
+                    } -PassThru -Force
+                    $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name IsConnected -Value {
+                        return $true
+                    } -PassThru -Force
+                    return $spServiceApp
+                }
             }
 
             It "Should return absent from the Get method" {
@@ -109,6 +138,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Test-TargetResource @testParams | Should Be $false
             }
 
+            $global:SPDscCounter = 0
             It "Should create a new service application in the set method" {
                 Set-TargetResource @testParams
                 Assert-MockCalled New-SPEnterpriseSearchServiceApplication
