@@ -410,7 +410,7 @@ function Set-TargetResource
             }
 
             if ($params.ContainsKey("AlertsEnabled") -eq $true -and `
-                $result.AlertsEnabled -ne $params.SearchCenterUrAlertsEnabledl)
+                $result.AlertsEnabled -ne $params.AlertsEnabled)
             {
                 Write-Verbose -Message "Updating AlertsEnabled to $($params.AlertsEnabled)"
                 $serviceApp = Get-SPServiceApplication -Name $params.Name | `
