@@ -65,6 +65,7 @@ function Set-SPDSCWebApplicationThrottlingConfig
     {
         $days = New-TimeSpan -Days $Settings.ChangeLogExpiryDays
         $WebApplication.ChangeLogRetentionPeriod = $days
+        $WebApplication.Update()
     }
 }
 
