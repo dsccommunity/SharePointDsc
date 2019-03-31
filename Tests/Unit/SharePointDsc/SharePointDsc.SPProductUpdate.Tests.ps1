@@ -177,15 +177,15 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             It "Should throw exception in the get method" {
-                { Get-TargetResource @testParams } | Should Throw "Setup file cannot be found."
+                { Get-TargetResource @testParams } | Should Throw "Setup file cannot be found"
             }
 
             It "Should throw exception in the set method" {
-                { Set-TargetResource @testParams } | Should Throw "Setup file cannot be found."
+                { Set-TargetResource @testParams } | Should Throw "Setup file cannot be found"
             }
 
-            It "Should throw exception in the test method" {
-                { Test-TargetResource @testParams } | Should Throw "Setup file cannot be found."
+            It "Should throw exception in the test method"  {
+                { Test-TargetResource @testParams } | Should Throw "Setup file cannot be found"
             }
         }
 
@@ -205,15 +205,15 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             It "Should throw exception in the get method" {
-                { Get-TargetResource @testParams } | Should Throw "Setup file is blocked! Please use Unblock-File to unblock the file"
+                { Get-TargetResource @testParams } | Should Throw "Setup file is blocked!"
             }
 
             It "Should throw exception in the set method" {
-                { Set-TargetResource @testParams } | Should Throw "Setup file is blocked! Please use Unblock-File to unblock the file"
+                { Set-TargetResource @testParams } | Should Throw "Setup file is blocked!"
             }
 
-            It "Should throw exception in the test method" {
-                { Test-TargetResource @testParams } | Should Throw "Setup file is blocked! Please use Unblock-File to unblock the file"
+            It "Should throw exception in the test method"  {
+                { Test-TargetResource @testParams } | Should Throw "Setup file is blocked!"
             }
         }
 
@@ -1118,6 +1118,64 @@ And Lang Pack Updates (ALL)
 
             It "Should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $false
+            }
+        }
+
+        Context -Name "Update CU has higher version, update executed successfully from UNC path" -Fixture {
+            $testParams = @{
+                SetupFile            = "\\server\Install\CUMay2016\ubersrv2013-kb3115029-fullfile-x64-glb.exe"
+                ShutdownServices     = $true
+                Ensure               = "Present"
+            }
+
+            Mock -CommandName Get-Item -MockWith {
+                return $null
+            }
+
+            Mock -CommandName Get-ItemProperty -MockWith {
+                if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq  15)
+                {
+                    return @{
+                        VersionInfo = @{
+                            FileVersion = "15.0.8000"
+                            FileDescription = "Cumulative Update"
+                        }
+                        Name = "serverlpksp2013-kb2880554-fullfile-x64-en-us.exe"
+                    }
+                }
+                else
+                {
+                    return @{
+                        VersionInfo = @{
+                            FileVersion = "16.0.15000"
+                            FileDescription = "Cumulative Update"
+                        }
+                        Name = "serverlpksp2016-kb2880554-fullfile-x64-en-us.exe"
+                    }
+                }
+            }
+
+            Mock -CommandName Get-SPDscFarmProductsInfo -MockWith {
+                if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq  15)
+                {
+                    return @("Microsoft SharePoint Server 2013")
+                }
+                else
+                {
+                    if($Global:SPDscHelper.CurrentStubBuildNumber.Minor.ToString().Length -le 4)
+                    {
+                        return @("Microsoft SharePoint Server 2016")
+                    }
+                    else
+                    {
+                        return @("Microsoft SharePoint Server 2019")
+                    }
+                }
+            }
+
+            It "Should run the Start-Process function in the set method" {
+                Set-TargetResource @testParams
+                Assert-MockCalled Start-Process
             }
         }
 

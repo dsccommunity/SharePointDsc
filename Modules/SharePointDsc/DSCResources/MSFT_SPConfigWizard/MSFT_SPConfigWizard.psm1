@@ -193,11 +193,23 @@ function Set-TargetResource
                                   -Arguments $psconfigExe `
                                   -ScriptBlock {
         $psconfigExe = $args[0]
+
+        $stdOutTempFile = "$env:TEMP\$((New-Guid).Guid)"
         $psconfig = Start-Process -FilePath $psconfigExe `
                                   -ArgumentList "-cmd upgrade -inplace b2b -wait -cmd applicationcontent -install -cmd installfeatures -cmd secureresources -cmd services -install" `
+                                  -RedirectStandardOutput $stdOutTempFile `
                                   -Wait `
                                   -PassThru
 
+        $cmdOutput = Get-Content -Path $stdOutTempFile -Raw
+        Remove-Item -Path $stdOutTempFile
+
+        if ($null -ne $cmdOutput)
+        {
+            Write-Verbose -Message $cmdOutput.Trim()
+        }
+
+        Write-Verbose -Message "PSConfig Exit Code: $($psconfig.ExitCode)"
         return $psconfig.ExitCode
     }
 

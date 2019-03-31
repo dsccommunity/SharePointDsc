@@ -1,6 +1,7 @@
 ﻿function Get-TargetResource
 {
     [CmdletBinding()]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSDSCUseIdenticalMandatoryParametersForDSC", "", Justification  =  "Temporary workaround for issue introduced in PSSA v1.18")]
     [OutputType([System.Collections.Hashtable])]
     param
     (
@@ -68,7 +69,7 @@
         $claimsMappings = @()
         $spTrust = Get-SPTrustedIdentityTokenIssuer -Identity $params.Name `
                                                     -ErrorAction SilentlyContinue
-        if ($spTrust) 
+        if ($spTrust)
         {
             $description = $spTrust.Description
             $realm = $spTrust.DefaultProviderRealm
@@ -86,8 +87,8 @@
                     LocalClaimType = $_.MappedClaimType
                 }
             }
-        } 
-        else 
+        }
+        else
         {
             $description = ""
             $realm = ""
@@ -113,7 +114,7 @@
             ClaimProviderName            = $claimProviderName
             ProviderSignOutUri           = $providerSignOutUri
             UseWReplyParameter           = $useWReplyParameter
-        }        
+        }
     }
     return $result
 }
@@ -121,6 +122,7 @@
 function Set-TargetResource
 {
     [CmdletBinding()]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSDSCUseIdenticalMandatoryParametersForDSC", "", Justification  =  "Temporary workaround for issue introduced in PSSA v1.18")]
     param
     (
         [Parameter(Mandatory = $true)]
@@ -139,7 +141,7 @@ function Set-TargetResource
         [String]
         $SignInUrl,
 
-        [Parameter(Mandatory = $true)] 
+        [Parameter(Mandatory = $true)]
         [String]
         $IdentifierClaim,
 
@@ -181,7 +183,7 @@ function Set-TargetResource
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
-    if ($Ensure -eq "Present") 
+    if ($Ensure -eq "Present")
     {
         if ($CurrentValues.Ensure -eq "Absent")
         {
@@ -220,14 +222,14 @@ function Set-TargetResource
                         $_.Thumbprint -match $params.SigningCertificateThumbprint
                     }
 
-                    if (!$cert) 
+                    if (!$cert)
                     {
                         throw ("Signing certificate with thumbprint $($params.SigningCertificateThumbprint) " + `
                             "was not found in certificate store 'LocalMachine\My'.")
                         return
                     }
 
-                    if ($cert.HasPrivateKey) 
+                    if ($cert.HasPrivateKey)
                     {
                         throw ("SharePoint requires that the private key of the signing certificate" + `
                             " is not installed in the certificate store.")
@@ -248,17 +250,17 @@ function Set-TargetResource
                         return
                     }
                 }
-                
+
                 $claimsMappingsArray = @()
                 $params.ClaimsMappings| Foreach-Object -Process {
                     $runParams = @{}
                     $runParams.Add("IncomingClaimTypeDisplayName", $_.Name)
                     $runParams.Add("IncomingClaimType", $_.IncomingClaimType)
-                    if ($null -eq $_.LocalClaimType) 
+                    if ($null -eq $_.LocalClaimType)
                     {
                         $runParams.Add("LocalClaimType", $_.IncomingClaimType)
                     }
-                    else 
+                    else
                     {
                         $runParams.Add("LocalClaimType", $_.LocalClaimType)
                     }
@@ -269,7 +271,7 @@ function Set-TargetResource
 
                 if (!($claimsMappingsArray | Where-Object -FilterScript {
                         $_.MappedClaimType -like $params.IdentifierClaim
-                    })) 
+                    }))
                 {
                     throw ("IdentifierClaim does not match any claim type specified in ClaimsMappings.")
                     return
@@ -293,14 +295,14 @@ function Set-TargetResource
 
                 if ((Get-SPClaimProvider| Where-Object -FilterScript {
                     $_.DisplayName -eq $params.ClaimProviderName
-                })) 
+                }))
                 {
                     $trust.ClaimProviderName = $params.ClaimProviderName
                 }
 
-                if ($params.ProviderSignOutUri) 
+                if ($params.ProviderSignOutUri)
                 {
-                    $trust.ProviderSignOutUri = New-Object -TypeName System.Uri ($params.ProviderSignOutUri) 
+                    $trust.ProviderSignOutUri = New-Object -TypeName System.Uri ($params.ProviderSignOutUri)
                 }
                 $trust.Update()
              }
@@ -314,7 +316,7 @@ function Set-TargetResource
                                       -ScriptBlock {
             $params = $args[0]
             $Name = $params.Name
-            # SPTrustedIdentityTokenIssuer must be removed from each zone of each web app before 
+            # SPTrustedIdentityTokenIssuer must be removed from each zone of each web app before
             # it can be deleted
             Get-SPWebApplication | Foreach-Object -Process {
                 $wa = $_
@@ -334,7 +336,7 @@ function Set-TargetResource
                         $_ -is [Microsoft.SharePoint.Administration.SPTrustedAuthenticationProvider] `
                         -and $_.LoginProviderName -like $params.Name
                     }
-                    if ($trustedProviderToRemove) 
+                    if ($trustedProviderToRemove)
                     {
                         Write-Verbose -Message ("Removing SPTrustedAuthenticationProvider " + `
                                                 "'$Name' from web app '$webAppUrl' in zone " + `
@@ -343,12 +345,12 @@ function Set-TargetResource
                         $update = $true
                     }
                 }
-                if ($update) 
+                if ($update)
                 {
                     $wa.Update()
                 }
             }
-        
+
             $runParams = @{
                 Identity = $params.Name
                 Confirm = $false
@@ -361,6 +363,7 @@ function Set-TargetResource
 function Test-TargetResource
 {
     [CmdletBinding()]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSDSCUseIdenticalMandatoryParametersForDSC", "", Justification  =  "Temporary workaround for issue introduced in PSSA v1.18")]
     [OutputType([Boolean])]
     param
     (
@@ -380,7 +383,7 @@ function Test-TargetResource
         [String]
         $SignInUrl,
 
-        [Parameter(Mandatory = $true)] 
+        [Parameter(Mandatory = $true)]
         [String]
         $IdentifierClaim,
 
