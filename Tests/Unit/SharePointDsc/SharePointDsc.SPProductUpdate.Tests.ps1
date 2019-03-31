@@ -162,6 +162,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             $Path -and $Path.Length -eq 1 -and $Path[0].Contains("HKEY_LOCAL_MACHINE")
         }
 
+        Mock -CommandName Clear-ComObject -MockWith {}
+
         # Test contexts
         Context -Name "Specified update file not found" -Fixture {
             $testParams = @{
@@ -235,6 +237,783 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
         }
 
+        Context -Name "Deploying CU to RTM, update executed successfully" -Fixture {
+            $testParams = @{
+                SetupFile        = "C:\Install\CUMarch2019\ubersrv2013-kb3115029-fullfile-x64-glb.exe"
+                ShutdownServices = $true
+                Ensure           = "Present"
+            }
+
+            Add-TestRegistryData -PatchLevel "RTM"
+
+            Mock -CommandName Get-ItemProperty -MockWith {
+                if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 15)
+                {
+                    # 2013
+                    return @{
+                        VersionInfo = @{
+                            FileVersion     = "15.0.5119"
+                            FileDescription = "Cumulative Update"
+                        }
+                        Name        = "ubersrv2013-kb3115029-fullfile-x64-glb.exe"
+                    }
+                }
+                else
+                {
+                    if ($Global:SPDscHelper.CurrentStubBuildNumber.Build.ToString().Length -eq 4)
+                    {
+                        # 2016
+                        return @{
+                            VersionInfo = @{
+                                FileVersion     = "16.0.4822"
+                                FileDescription = "Cumulative Update"
+                            }
+                            Name        = "ubersrv2016-kb3115029-fullfile-x64-glb.exe"
+                        }
+                    }
+                    else
+                    {
+                        # 2019
+                        return @{
+                            VersionInfo = @{
+                                FileVersion     = "16.0.10342"
+                                FileDescription = "Cumulative Update"
+                            }
+                            Name        = "ubersrv2019-kb3115029-fullfile-x64-glb.exe"
+                        }
+                    }
+                }
+            } -ParameterFilter {
+                $Path -and $Path.Length -eq 1 -and $Path[0].StartsWith("C:\")
+            }
+
+            It "Should return Ensure is Absent from the get method" {
+                $result = Get-TargetResource @testParams
+                $result.Ensure | Should Be "Absent"
+            }
+
+            It "Should run the Start-Process function in the set method" {
+                Set-TargetResource @testParams
+                Assert-MockCalled Start-Process
+            }
+
+            It "Should return false from the test method" {
+                Test-TargetResource @testParams | Should Be $false
+            }
+        }
+
+        Context -Name "Update CU has same version, update not required" -Fixture {
+            $testParams = @{
+                SetupFile        = "C:\Install\CUMay2016\ubersrv2013-kb3115029-fullfile-x64-glb.exe"
+                ShutdownServices = $true
+                Ensure           = "Present"
+            }
+
+            Add-TestRegistryData -PatchLevel "CU"
+
+            Mock -CommandName Get-ItemProperty -MockWith {
+                if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 15)
+                {
+                    return @{
+                        VersionInfo = @{
+                            FileVersion     = "15.0.5119"
+                            FileDescription = "Cumulative Update"
+                        }
+                        Name        = "serverlpksp2013-kb2880554-fullfile-x64-en-us.exe"
+                    }
+                }
+                else
+                {
+                    if ($Global:SPDscHelper.CurrentStubBuildNumber.Build.ToString().Length -eq 4)
+                    {
+                        return @{
+                            VersionInfo = @{
+                                FileVersion     = "16.0.4882"
+                                FileDescription = "Cumulative Update"
+                            }
+                            Name        = "serverlpksp2016-kb2880554-fullfile-x64-en-us.exe"
+                        }
+                    }
+                    else
+                    {
+                        return @{
+                            VersionInfo = @{
+                                FileVersion     = "16.0.10342"
+                                FileDescription = "Cumulative Update"
+                            }
+                            Name        = "serverlpksp2019-kb2880554-fullfile-x64-en-us.exe"
+                        }
+                    }
+                }
+            } -ParameterFilter {
+                $Path -and $Path.Length -eq 1 -and $Path[0].StartsWith("C:\")
+            }
+
+            $installerMock = New-Module -AsCustomObject -ScriptBlock {
+                function GetType { # Installer
+                    New-Module -AsCustomObject -ScriptBlock {
+                        function InvokeMember {
+                            New-Module -AsCustomObject -ScriptBlock {
+                                function GetType { # InstallerDB
+                                    New-Module -AsCustomObject -ScriptBlock {
+                                        function InvokeMember {
+                                            New-Module -AsCustomObject -ScriptBlock {
+                                                function GetType { # DBView
+                                                    New-Module -AsCustomObject -ScriptBlock {
+                                                        function InvokeMember {
+                                                            param ($a, $b, $c, $d, $e)
+                                                            if ($a -eq "Fetch")
+                                                            {
+                                                                New-Module -AsCustomObject -ScriptBlock {
+                                                                    function GetType { # Value
+                                                                        New-Module -AsCustomObject -ScriptBlock {
+                                                                            function InvokeMember {
+                                                                                param ($a, $b, $c, $d, $e)
+                                                                                if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 15)
+                                                                                {
+                                                                                    return "15.0.5119"
+                                                                                }
+                                                                                else
+                                                                                {
+                                                                                    if ($Global:SPDscHelper.CurrentStubBuildNumber.Build.ToString().Length -eq 4)
+                                                                                    {
+                                                                                        return "16.0.4882"
+                                                                                    }
+                                                                                    else
+                                                                                    {
+                                                                                        return "16.0.10342"
+                                                                                    }
+                                                                                }
+                                                                            }
+                                                                        }
+                                                                    }
+                                                                }
+                                                            }
+                                                            else
+                                                            {
+                                                                return $null
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                Export-ModuleMember -Variable * -Function *
+            }
+
+            Mock New-Object { return $installerMock } -ParameterFilter { $ComObject -eq 'WindowsInstaller.Installer' }
+
+            It "Should return Ensure is Present from the get method" {
+                $result = Get-TargetResource @testParams
+                Assert-MockCalled Get-ChildItem
+                $result.Ensure | Should Be "Present"
+            }
+
+            It "Should return true from the test method" {
+                Test-TargetResource @testParams | Should Be $true
+            }
+        }
+
+        Context -Name "Update CU has lower version, update not required" -Fixture {
+            $testParams = @{
+                SetupFile        = "C:\Install\CUMay2016\ubersrv2013-kb3115029-fullfile-x64-glb.exe"
+                ShutdownServices = $true
+                Ensure           = "Present"
+            }
+
+            Add-TestRegistryData -PatchLevel "CU"
+
+            Mock -CommandName Get-ItemProperty -MockWith {
+                if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 15)
+                {
+                    return @{
+                        VersionInfo = @{
+                            FileVersion     = "15.0.5075"
+                            FileDescription = "Cumulative Update"
+                        }
+                        Name        = "serverlpksp2013-kb2880554-fullfile-x64-en-us.exe"
+                    }
+                }
+                else
+                {
+                    if ($Global:SPDscHelper.CurrentStubBuildNumber.Build.ToString().Length -eq 4)
+                    {
+                        return @{
+                            VersionInfo = @{
+                                FileVersion     = "16.0.4705"
+                                FileDescription = "Cumulative Update"
+                            }
+                            Name        = "serverlpksp2016-kb2880554-fullfile-x64-en-us.exe"
+                        }
+                    }
+                    else
+                    {
+                        return @{
+                            VersionInfo = @{
+                                FileVersion     = "16.0.10340"
+                                FileDescription = "Cumulative Update"
+                            }
+                            Name        = "serverlpksp2019-kb2880554-fullfile-x64-en-us.exe"
+                        }
+                    }
+                }
+            } -ParameterFilter {
+                $Path -and $Path.Length -eq 1 -and $Path[0].StartsWith("C:\")
+            }
+
+            $installerMock = New-Module -AsCustomObject -ScriptBlock {
+                function GetType { # Installer
+                    New-Module -AsCustomObject -ScriptBlock {
+                        function InvokeMember {
+                            New-Module -AsCustomObject -ScriptBlock {
+                                function GetType { # InstallerDB
+                                    New-Module -AsCustomObject -ScriptBlock {
+                                        function InvokeMember {
+                                            New-Module -AsCustomObject -ScriptBlock {
+                                                function GetType { # DBView
+                                                    New-Module -AsCustomObject -ScriptBlock {
+                                                        function InvokeMember {
+                                                            param ($a, $b, $c, $d, $e)
+                                                            if ($a -eq "Fetch")
+                                                            {
+                                                                New-Module -AsCustomObject -ScriptBlock {
+                                                                    function GetType { # Value
+                                                                        New-Module -AsCustomObject -ScriptBlock {
+                                                                            function InvokeMember {
+                                                                                param ($a, $b, $c, $d, $e)
+                                                                                if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 15)
+                                                                                {
+                                                                                    return "15.0.5119"
+                                                                                }
+                                                                                else
+                                                                                {
+                                                                                    if ($Global:SPDscHelper.CurrentStubBuildNumber.Build.ToString().Length -eq 4)
+                                                                                    {
+                                                                                        return "16.0.4882"
+                                                                                    }
+                                                                                    else
+                                                                                    {
+                                                                                        return "16.0.10342"
+                                                                                    }
+                                                                                }
+                                                                            }
+                                                                        }
+                                                                    }
+                                                                }
+                                                            }
+                                                            else
+                                                            {
+                                                                return $null
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                Export-ModuleMember -Variable * -Function *
+            }
+
+            Mock New-Object { return $installerMock } -ParameterFilter { $ComObject -eq 'WindowsInstaller.Installer' }
+
+            It "Should return Ensure is Present from the get method" {
+                $result = Get-TargetResource @testParams
+                Assert-MockCalled Get-ChildItem
+                $result.Ensure | Should Be "Present"
+            }
+
+            It "Should return true from the test method" {
+                Test-TargetResource @testParams | Should Be $true
+            }
+        }
+
+        Context -Name "Update CU has higher version, update required" -Fixture {
+            $testParams = @{
+                SetupFile        = "C:\Install\CUMay2016\ubersrv2013-kb3115029-fullfile-x64-glb.exe"
+                ShutdownServices = $true
+                Ensure           = "Present"
+            }
+
+            Add-TestRegistryData -PatchLevel "CU"
+
+            Mock -CommandName Get-ItemProperty -MockWith {
+                if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 15)
+                {
+                    return @{
+                        VersionInfo = @{
+                            FileVersion     = "15.0.5119"
+                            FileDescription = "Cumulative Update"
+                        }
+                        Name        = "serverlpksp2013-kb2880554-fullfile-x64-en-us.exe"
+                    }
+                }
+                else
+                {
+                    if ($Global:SPDscHelper.CurrentStubBuildNumber.Build.ToString().Length -eq 4)
+                    {
+                        return @{
+                            VersionInfo = @{
+                                FileVersion     = "16.0.4882"
+                                FileDescription = "Cumulative Update"
+                            }
+                            Name        = "serverlpksp2016-kb2880554-fullfile-x64-en-us.exe"
+                        }
+                    }
+                    else
+                    {
+                        return @{
+                            VersionInfo = @{
+                                FileVersion     = "16.0.10342"
+                                FileDescription = "Cumulative Update"
+                            }
+                            Name        = "serverlpksp2019-kb2880554-fullfile-x64-en-us.exe"
+                        }
+                    }
+                }
+            } -ParameterFilter {
+                $Path -and $Path.Length -eq 1 -and $Path[0].StartsWith("C:\")
+            }
+
+            $installerMock = New-Module -AsCustomObject -ScriptBlock {
+                function GetType { # Installer
+                    New-Module -AsCustomObject -ScriptBlock {
+                        function InvokeMember {
+                            New-Module -AsCustomObject -ScriptBlock {
+                                function GetType { # InstallerDB
+                                    New-Module -AsCustomObject -ScriptBlock {
+                                        function InvokeMember {
+                                            New-Module -AsCustomObject -ScriptBlock {
+                                                function GetType { # DBView
+                                                    New-Module -AsCustomObject -ScriptBlock {
+                                                        function InvokeMember {
+                                                            param ($a, $b, $c, $d, $e)
+                                                            if ($a -eq "Fetch")
+                                                            {
+                                                                New-Module -AsCustomObject -ScriptBlock {
+                                                                    function GetType { # Value
+                                                                        New-Module -AsCustomObject -ScriptBlock {
+                                                                            function InvokeMember {
+                                                                                param ($a, $b, $c, $d, $e)
+                                                                                if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 15)
+                                                                                {
+                                                                                    return "15.0.5075"
+                                                                                }
+                                                                                else
+                                                                                {
+                                                                                    if ($Global:SPDscHelper.CurrentStubBuildNumber.Build.ToString().Length -eq 4)
+                                                                                    {
+                                                                                        return "16.0.4705"
+                                                                                    }
+                                                                                    else
+                                                                                    {
+                                                                                        return "16.0.10340"
+                                                                                    }
+                                                                                }
+                                                                            }
+                                                                        }
+                                                                    }
+                                                                }
+                                                            }
+                                                            else
+                                                            {
+                                                                return $null
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                Export-ModuleMember -Variable * -Function *
+            }
+
+            Mock New-Object { return $installerMock } -ParameterFilter { $ComObject -eq 'WindowsInstaller.Installer' }
+
+            It "Should return Ensure is Absent from the get method" {
+                $result = Get-TargetResource @testParams
+                $result.Ensure | Should Be "Absent"
+            }
+
+            It "Should run the Start-Process function in the set method" {
+                Set-TargetResource @testParams
+                Assert-MockCalled Start-Process
+            }
+
+            It "Should return false from the test method" {
+                Test-TargetResource @testParams | Should Be $false
+            }
+        }
+
+        # 2016/2019 WSS Loc updates
+        if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 16)
+        {
+            Context -Name "WSS Loc Update CU has higher version, update required" -Fixture {
+                $testParams = @{
+                    SetupFile        = "C:\Install\CUMay2016\wssloc2019-kb4461514-fullfile-x64-glb.exe"
+                    ShutdownServices = $true
+                    Ensure           = "Present"
+                }
+
+                Add-TestRegistryData -PatchLevel "CU"
+
+                Mock -CommandName Get-ItemProperty -MockWith {
+                    if ($Global:SPDscHelper.CurrentStubBuildNumber.Build.ToString().Length -eq 4)
+                    {
+                        # 2016
+                        return @{
+                            VersionInfo = @{
+                                FileVersion     = "16.0.4882"
+                                FileDescription = "Update for Microsoft SharePoint Enterprise Server 2016 (KB4092463) 64-Bit Edition"
+                            }
+                            Name        = "wssloc2016-kb4461514-fullfile-x64-glb.exe"
+                        }
+                    }
+                    else
+                    {
+                        # 2019
+                        return @{
+                            VersionInfo = @{
+                                FileVersion     = "16.0.10342"
+                                FileDescription = "Update for Microsoft SharePoint Server 2019 Language Pack (KB4461514)"
+                            }
+                            Name        = "wssloc2019-kb4461514-fullfile-x64-glb.exe"
+                        }
+                    }
+                } -ParameterFilter {
+                    $Path -and $Path.Length -eq 1 -and $Path[0].StartsWith("C:\")
+                }
+
+                $installerMock = New-Module -AsCustomObject -ScriptBlock {
+                    function GetType { # Installer
+                        New-Module -AsCustomObject -ScriptBlock {
+                            function InvokeMember {
+                                New-Module -AsCustomObject -ScriptBlock {
+                                    function GetType { # InstallerDB
+                                        New-Module -AsCustomObject -ScriptBlock {
+                                            function InvokeMember {
+                                                New-Module -AsCustomObject -ScriptBlock {
+                                                    function GetType { # DBView
+                                                        New-Module -AsCustomObject -ScriptBlock {
+                                                            function InvokeMember {
+                                                                param ($a, $b, $c, $d, $e)
+                                                                if ($a -eq "Fetch")
+                                                                {
+                                                                    New-Module -AsCustomObject -ScriptBlock {
+                                                                        function GetType { # Value
+                                                                            New-Module -AsCustomObject -ScriptBlock {
+                                                                                function InvokeMember {
+                                                                                    param ($a, $b, $c, $d, $e)
+                                                                                    if ($Global:SPDscHelper.CurrentStubBuildNumber.Build.ToString().Length -eq 4)
+                                                                                    {
+                                                                                        return "16.0.4705"
+                                                                                    }
+                                                                                    else
+                                                                                    {
+                                                                                        return "16.0.10340"
+                                                                                    }
+                                                                                }
+                                                                            }
+                                                                        }
+                                                                    }
+                                                                }
+                                                                else
+                                                                {
+                                                                    return $null
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    Export-ModuleMember -Variable * -Function *
+                }
+
+                Mock New-Object { return $installerMock } -ParameterFilter { $ComObject -eq 'WindowsInstaller.Installer' }
+
+                It "Should return Ensure is Absent from the get method" {
+                    $result = Get-TargetResource @testParams
+                    $result.Ensure | Should Be "Absent"
+                }
+
+                It "Should run the Start-Process function in the set method" {
+                    Set-TargetResource @testParams
+                    Assert-MockCalled Start-Process
+                }
+
+                It "Should return false from the test method" {
+                    Test-TargetResource @testParams | Should Be $false
+                }
+            }
+        }
+
+        # Test 2013 SP1 install
+        if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 15)
+        {
+            Context -Name "Service Pack has same version, update not required" -Fixture {
+                $testParams = @{
+                    SetupFile        = "C:\Install\CUMay2016\ubersrv2013-kb3115029-fullfile-x64-glb.exe"
+                    ShutdownServices = $true
+                    Ensure           = "Present"
+                }
+
+                Add-TestRegistryData -PatchLevel "SP1"
+
+                Mock -CommandName Get-ItemProperty -MockWith {
+                    return @{
+                        VersionInfo = @{
+                            FileVersion     = "15.0.4569"
+                            FileDescription = "Service Pack"
+                        }
+                        Name        = "serverlpksp2013-kb2880554-fullfile-x64-en-us.exe"
+                    }
+                } -ParameterFilter {
+                    $Path -and $Path.Length -eq 1 -and $Path[0].StartsWith("C:\")
+                }
+
+                $installerMock = New-Module -AsCustomObject -ScriptBlock {
+                    function GetType { # Installer
+                        New-Module -AsCustomObject -ScriptBlock {
+                            function InvokeMember {
+                                New-Module -AsCustomObject -ScriptBlock {
+                                    function GetType { # InstallerDB
+                                        New-Module -AsCustomObject -ScriptBlock {
+                                            function InvokeMember {
+                                                New-Module -AsCustomObject -ScriptBlock {
+                                                    function GetType { # DBView
+                                                        New-Module -AsCustomObject -ScriptBlock {
+                                                            function InvokeMember {
+                                                                param ($a, $b, $c, $d, $e)
+                                                                if ($a -eq "Fetch")
+                                                                {
+                                                                    New-Module -AsCustomObject -ScriptBlock {
+                                                                        function GetType { # Value
+                                                                            New-Module -AsCustomObject -ScriptBlock {
+                                                                                function InvokeMember {
+                                                                                    param ($a, $b, $c, $d, $e)
+                                                                                    return "15.0.4569"
+                                                                                }
+                                                                            }
+                                                                        }
+                                                                    }
+                                                                }
+                                                                else
+                                                                {
+                                                                    return $null
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    Export-ModuleMember -Variable * -Function *
+                }
+
+                Mock New-Object { return $installerMock } -ParameterFilter { $ComObject -eq 'WindowsInstaller.Installer' }
+
+                It "Should return Ensure is Present from the get method" {
+                    $result = Get-TargetResource @testParams
+                    Assert-MockCalled Get-ChildItem
+                    $result.Ensure | Should Be "Present"
+                }
+
+                It "Should return true from the test method" {
+                    Test-TargetResource @testParams | Should Be $true
+                }
+            }
+
+            Context -Name "Update CU has lower version than SP1, update not required" -Fixture {
+                $testParams = @{
+                    SetupFile        = "C:\Install\CUMay2016\ubersrv2013-kb3115029-fullfile-x64-glb.exe"
+                    ShutdownServices = $true
+                    Ensure           = "Present"
+                }
+
+                Add-TestRegistryData -PatchLevel "SP1"
+
+                Mock -CommandName Get-ItemProperty -MockWith {
+                    return @{
+                        VersionInfo = @{
+                            FileVersion     = "15.0.4535"
+                            FileDescription = "Cumulative Update"
+                        }
+                        Name        = "serverlpksp2013-kb2880554-fullfile-x64-en-us.exe"
+                    }
+                } -ParameterFilter {
+                    $Path -and $Path.Length -eq 1 -and $Path[0].StartsWith("C:\")
+                }
+
+                $installerMock = New-Module -AsCustomObject -ScriptBlock {
+                    function GetType { # Installer
+                        New-Module -AsCustomObject -ScriptBlock {
+                            function InvokeMember {
+                                New-Module -AsCustomObject -ScriptBlock {
+                                    function GetType { # InstallerDB
+                                        New-Module -AsCustomObject -ScriptBlock {
+                                            function InvokeMember {
+                                                New-Module -AsCustomObject -ScriptBlock {
+                                                    function GetType { # DBView
+                                                        New-Module -AsCustomObject -ScriptBlock {
+                                                            function InvokeMember {
+                                                                param ($a, $b, $c, $d, $e)
+                                                                if ($a -eq "Fetch")
+                                                                {
+                                                                    New-Module -AsCustomObject -ScriptBlock {
+                                                                        function GetType { # Value
+                                                                            New-Module -AsCustomObject -ScriptBlock {
+                                                                                function InvokeMember {
+                                                                                    param ($a, $b, $c, $d, $e)
+                                                                                    return "15.0.4571"
+                                                                                }
+                                                                            }
+                                                                        }
+                                                                    }
+                                                                }
+                                                                else
+                                                                {
+                                                                    return $null
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    Export-ModuleMember -Variable * -Function *
+                }
+
+                Mock New-Object { return $installerMock } -ParameterFilter { $ComObject -eq 'WindowsInstaller.Installer' }
+
+                It "Should return Ensure is Present from the get method" {
+                    $result = Get-TargetResource @testParams
+                    Assert-MockCalled Get-ChildItem
+                    $result.Ensure | Should Be "Present"
+                }
+
+                It "Should return true from the test method" {
+                    Test-TargetResource @testParams | Should Be $true
+                }
+            }
+
+            Context -Name "Update CU has higher version than SP1, update required" -Fixture {
+                $testParams = @{
+                    SetupFile        = "C:\Install\CUMay2016\ubersrv2013-kb3115029-fullfile-x64-glb.exe"
+                    ShutdownServices = $true
+                    Ensure           = "Present"
+                }
+
+                Add-TestRegistryData -PatchLevel "CU"
+
+                Mock -CommandName Get-ItemProperty -MockWith {
+                    return @{
+                        VersionInfo = @{
+                            FileVersion     = "15.0.5119"
+                            FileDescription = "Cumulative Update"
+                        }
+                        Name        = "serverlpksp2013-kb2880554-fullfile-x64-en-us.exe"
+                    }
+                } -ParameterFilter {
+                    $Path -and $Path.Length -eq 1 -and $Path[0].StartsWith("C:\")
+                }
+
+                $installerMock = New-Module -AsCustomObject -ScriptBlock {
+                    function GetType { # Installer
+                        New-Module -AsCustomObject -ScriptBlock {
+                            function InvokeMember {
+                                New-Module -AsCustomObject -ScriptBlock {
+                                    function GetType { # InstallerDB
+                                        New-Module -AsCustomObject -ScriptBlock {
+                                            function InvokeMember {
+                                                New-Module -AsCustomObject -ScriptBlock {
+                                                    function GetType { # DBView
+                                                        New-Module -AsCustomObject -ScriptBlock {
+                                                            function InvokeMember {
+                                                                param ($a, $b, $c, $d, $e)
+                                                                if ($a -eq "Fetch")
+                                                                {
+                                                                    New-Module -AsCustomObject -ScriptBlock {
+                                                                        function GetType { # Value
+                                                                            New-Module -AsCustomObject -ScriptBlock {
+                                                                                function InvokeMember {
+                                                                                    param ($a, $b, $c, $d, $e)
+                                                                                    return "15.0.4571"
+                                                                                }
+                                                                            }
+                                                                        }
+                                                                    }
+                                                                }
+                                                                else
+                                                                {
+                                                                    return $null
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    Export-ModuleMember -Variable * -Function *
+                }
+
+                Mock New-Object { return $installerMock } -ParameterFilter { $ComObject -eq 'WindowsInstaller.Installer' }
+
+                It "Should return Ensure is Absent from the get method" {
+                    $result = Get-TargetResource @testParams
+                    $result.Ensure | Should Be "Absent"
+                }
+
+                It "Should run the Start-Process function in the set method" {
+                    Set-TargetResource @testParams
+                    Assert-MockCalled Start-Process
+                }
+
+                It "Should return false from the test method" {
+                    Test-TargetResource @testParams | Should Be $false
+                }
+            }
+        }
+
+<#
+And Lang Pack Updates (ALL)
+
+
         Context -Name "Update CU has lower version, update not required" -Fixture {
             $testParams = @{
                 SetupFile        = "C:\Install\CUMay2016\ubersrv2013-kb3115029-fullfile-x64-glb.exe"
@@ -284,6 +1063,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
             It "Should return Ensure is Present from the get method" {
                 $result = Get-TargetResource @testParams
+                Assert-MockCalled Get-ChildItem
                 $result.Ensure | Should Be "Present"
             }
 
@@ -662,7 +1442,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Test-TargetResource @testParams | Should Be $false
             }
         }
-
+#>
         Context -Name "Update SP LP does not have language in the name, throws exception" -Fixture {
             $testParams = @{
                 SetupFile        = "C:\Install\CUMay2016\ubersrv2013-kb3115029-fullfile-x64-glb.exe"

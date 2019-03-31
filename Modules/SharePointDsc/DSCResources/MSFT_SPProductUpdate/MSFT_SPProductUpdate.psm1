@@ -563,16 +563,16 @@ function Get-SPDscLocalVersionInfo
         $IsWssPackage
     )
 
-    $productNameRegEx = "Microsoft SharePoint Foundation $($ProductVersion) Core"
+    $productNameRegEx = "Microsoft SharePoint (Foundation|Server) $($ProductVersion) Core"
 
     if (0 -ne $Lcid)
     {
-        $productNameRegEx = "Microsoft SharePoint Foundation $($ProductVersion) $($Lcid) Lang Pack"
+        $productNameRegEx = "Microsoft SharePoint (Foundation|Server) $($ProductVersion) $($Lcid) (Lang|Language) Pack"
     }
 
     if ($IsWssPackage)
     {
-        $productNameRegEx = "Microsoft SharePoint Foundation $($ProductVersion) \d{4} Lang Pack"
+        $productNameRegEx = "Microsoft SharePoint (Foundation|Server) $($ProductVersion) \d{4} (Lang|Language) Pack"
     }
     Write-Verbose "Product Name RegEx: $($productNameRegEx)"
 
@@ -580,7 +580,7 @@ function Get-SPDscLocalVersionInfo
 
     $patchRegistryPath = "Registry::HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Installer\UserData\S-1-5-18\Patches"
 
-    $installerEntries = Get-ChildItem $installerRegistryPath -ErrorAction SilentlyContinue
+    $installerEntries = Get-ChildItem -Path $installerRegistryPath -ErrorAction SilentlyContinue
 
     $nullVersion = New-Object -TypeName System.Version
     $versionInfoValue = New-Object -TypeName System.Version
@@ -639,10 +639,10 @@ function Get-SPDscLocalVersionInfo
 
                             # https://github.com/PowerShell/DscResources/issues/383
 
-                            $null = [System.Runtime.InteropServices.Marshal]::ReleaseComObject($databaseView)
-                            $null = [System.Runtime.InteropServices.Marshal]::ReleaseComObject($value)
-                            $null = [System.Runtime.InteropServices.Marshal]::ReleaseComObject($installerDatabase)
-                            $null = [System.Runtime.InteropServices.Marshal]::ReleaseComObject($windowsInstaller)
+                            Clear-ComObject -ComObject $databaseView
+                            Clear-ComObject -ComObject $value
+                            Clear-ComObject -ComObject $installerDatabase
+                            Clear-ComObject -ComObject $windowsInstaller
                         }
                         catch [Exception]
                         {
@@ -679,6 +679,19 @@ function Get-SPDscLocalVersionInfo
     }
 
     return $nullVersion
+}
+
+# Function required for Mocking the static .Net call
+function Clear-ComObject
+{
+    param
+    (
+        [Parameter(Mandatory=$true)]
+        [System.Object]
+        $ComObject
+    )
+
+    $null = [System.Runtime.InteropServices.Marshal]::ReleaseComObject($ComObject)
 }
 
 Export-ModuleMember -Function *-TargetResource
