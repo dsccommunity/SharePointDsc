@@ -56,7 +56,7 @@ function Get-TargetResource
         [Parameter()]
         [ValidateSet("Modern","Classic","Latest")]
         [System.String]
-        $UserExperienceVersion = "Modern",
+        $UserExperienceVersion,
 
         [Parameter()]
         [System.Management.Automation.PSCredential]
@@ -68,19 +68,19 @@ function Get-TargetResource
     $installedVersion = Get-SPDSCInstalledProductVersion
     if ($installedVersion.FileMajorPart -eq 15 -or $installedVersion.FileBuildPart.ToString().Length -eq 4)
     {
-        if($PSBoundParameters.ContainsKey("ManagedPath") -eq $true)
+        if ($PSBoundParameters.ContainsKey("ManagedPath") -eq $true)
         {
-            Write-Verbose -Message "Parameter ManagedPath is only supported in SharePoint 2019"
+            throw "Parameter ManagedPath is only supported in SharePoint 2019"
         }
 
-        if($PSBoundParameters.ContainsKey("AlternateUrl") -eq $true)
+        if ($PSBoundParameters.ContainsKey("AlternateUrl") -eq $true)
         {
-            Write-Verbose -Message "Parameter AlternateUrl is only supported in SharePoint 2019"
+            throw "Parameter AlternateUrl is only supported in SharePoint 2019"
         }
 
-        if($PSBoundParameters.ContainsKey("UserExperienceVersion") -eq $true)
+        if ($PSBoundParameters.ContainsKey("UserExperienceVersion") -eq $true)
         {
-            Write-Verbose -Message "Parameter UserExperienceVersion is only supported in SharePoint 2019"
+            throw "Parameter UserExperienceVersion is only supported in SharePoint 2019"
         }
     }
     else
@@ -216,7 +216,7 @@ function Set-TargetResource
         [Parameter()]
         [ValidateSet("Modern","Classic","Latest")]
         [System.String]
-        $UserExperienceVersion = "Modern",
+        $UserExperienceVersion,
 
         [Parameter()]
         [System.Management.Automation.PSCredential]
@@ -228,30 +228,33 @@ function Set-TargetResource
     $installedVersion = Get-SPDSCInstalledProductVersion
     if ($installedVersion.FileMajorPart -eq 15 -or $installedVersion.ProductBuildPart.ToString().Length -eq 4)
     {
-        if($PSBoundParameters.ContainsKey("ManagedPath") -eq $true)
+        if ($PSBoundParameters.ContainsKey("ManagedPath") -eq $true)
         {
             throw "Parameter ManagedPath is only supported in SharePoint 2019"
         }
 
-        if($PSBoundParameters.ContainsKey("AlternateUrl") -eq $true)
+        if ($PSBoundParameters.ContainsKey("AlternateUrl") -eq $true)
         {
             throw "Parameter AlternateUrl is only supported in SharePoint 2019"
         }
 
-        if($PSBoundParameters.ContainsKey("UserExperienceVersion") -eq $true)
+        if ($PSBoundParameters.ContainsKey("UserExperienceVersion") -eq $true)
         {
             throw "Parameter UserExperienceVersion is only supported in SharePoint 2019"
         }
     }
     else
     {
-        if($PSBoundParameters.ContainsKey("AlternateUrl") -eq $true -and
-           $PSBoundParameters.ContainsKey("ManagedPath") -eq $true)
+        if ($PSBoundParameters.ContainsKey("AlternateUrl") -eq $true -and
+            $PSBoundParameters.ContainsKey("ManagedPath") -eq $true)
         {
             throw "You cannot specify both AlternateUrl and ManagedPath. Please use just one of these."
         }
 
-        $PSBoundParameters.UserExperienceVersion = $UserExperienceVersion
+        if ($PSBoundParameters.ContainsKey("UserExperienceVersion") -eq $false)
+        {
+            $PSBoundParameters.UserExperienceVersion = "Modern"
+        }
     }
 
     Invoke-SPDSCCommand -Credential $InstallAccount `
@@ -468,7 +471,7 @@ function Test-TargetResource
         [Parameter()]
         [ValidateSet("Modern","Classic","Latest")]
         [System.String]
-        $UserExperienceVersion = "Modern",
+        $UserExperienceVersion,
 
         [Parameter()]
         [System.Management.Automation.PSCredential]

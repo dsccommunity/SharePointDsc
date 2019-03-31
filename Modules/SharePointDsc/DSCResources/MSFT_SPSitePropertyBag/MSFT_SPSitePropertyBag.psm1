@@ -17,7 +17,7 @@ function Get-TargetResource()
         $Value,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet('Present','Absent')]
         [System.String]
         $Ensure = 'Present',
 
@@ -46,12 +46,12 @@ function Get-TargetResource()
             {
                 if ($spSite.Properties.Contains($params.Key) -eq $true)
                 {
-                    $localEnsure = "Present"
+                    $localEnsure = 'Present'
                     $currentValue = $spSite.Properties[$params.Key]
                 }
                 else
                 {
-                    $localEnsure = "Absent"
+                    $localEnsure = 'Absent'
                     $currentValue = $null
                 }
             }
@@ -85,7 +85,7 @@ function Set-TargetResource()
         $Value,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet('Present','Absent')]
         [System.String]
         $Ensure = 'Present',
 
@@ -137,7 +137,7 @@ function Test-TargetResource()
         $Value,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet('Present','Absent')]
         [System.String]
         $Ensure = 'Present',
 
