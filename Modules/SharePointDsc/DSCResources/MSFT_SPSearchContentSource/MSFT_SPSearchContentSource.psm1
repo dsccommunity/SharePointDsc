@@ -877,7 +877,7 @@ function Test-TargetResource
                                         -DesiredValues $PSBoundParameters `
                                         -ValuesToCheck @("ContentSourceType",
                                                          "CrawlSetting",
-                                                         "ContinousCrawl",
+                                                         "ContinuousCrawl",
                                                          "Priority",
                                                          "LimitPageDepth",
                                                          "LimitServerHops",

@@ -11,5 +11,8 @@ class MSFT_SPSelfServiceSiteCreation : OMI_BaseResource
     [Write, Description("Specifies what site classification should be displayed"), ValueMap{"MustHavePolicy","CanHavePolicy","NotHavePolicy"}, Values{"MustHavePolicy","CanHavePolicy","NotHavePolicy"}] string PolicyOption;
     [Write, Description("Specifies if users needs to provide one or more additional site administrators")] boolean RequireSecondaryContact;
     [Write, Description("Specifies a custom form URL to use for Self Service Site Creation. This is only used when CreateIndividualSite is true. Must be an absolute URL or empty to use built in form (_layouts/_layouts/15/scsignup.aspx)")] string CustomFormUrl;
+    [Write, Description("Specifies the managed path in which site collections have to be created (SP2019 only)")] string ManagedPath;
+    [Write, Description("Specifies the URL of the web application in which site collections have to be created (SP2019 only)")] string AlternateUrl;
+    [Write, Description("Specifies the if the site collection has to be created as modern or classic site (SP2019 only)"), ValueMap{"Modern","Classic","Latest"}, Values{"Modern","Classic","Latest"}] string UserExperienceVersion;
     [Write, Description("POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5"), EmbeddedInstance("MSFT_Credential")] String InstallAccount;
 };
