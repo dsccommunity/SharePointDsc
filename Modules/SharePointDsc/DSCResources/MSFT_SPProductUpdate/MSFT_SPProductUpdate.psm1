@@ -44,7 +44,7 @@ function Get-TargetResource
     $language = ""
 
     # Get file information from setup file
-    if (-not(Test-Path $SetupFile))
+    if (-not(Test-Path -Path $SetupFile))
     {
         throw "Setup file cannot be found: {$SetupFile}"
     }
@@ -113,7 +113,7 @@ function Get-TargetResource
         }
 
         # Extract English name of the language code
-        if ($cultureInfo.EnglishName -match "(\w*,*\s*\w*) \(\w*\)")
+        if ($cultureInfo.EnglishName -match "(\w*,*\s*\w*) \([a-zA-Z_0-9 ]*\)")
         {
             $languageEnglish = $matches[1]
             if ($languageEnglish.contains(","))
@@ -124,7 +124,7 @@ function Get-TargetResource
         }
 
         # Extract Native name of the language code
-        if ($cultureInfo.NativeName -match "(\w*,*\s*\w*) \(\w*\)")
+        if ($cultureInfo.NativeName -match "(\w*,*\s*\w*) \([a-zA-Z_0-9 ]*\)")
         {
             $languageNative = $matches[1]
             if ($languageNative.contains(","))
@@ -241,13 +241,13 @@ function Set-TargetResource
     }
 
     # Check if setup file exists
-    if (-not(Test-Path $SetupFile))
+    if (-not(Test-Path -Path $SetupFile))
     {
         throw "Setup file cannot be found: {$SetupFile}"
     }
 
     Write-Verbose -Message "Checking file status of $SetupFile"
-    $zone = Get-Item $SetupFile -Stream "Zone.Identifier" -EA SilentlyContinue
+    $zone = Get-Item -Path $SetupFile -Stream "Zone.Identifier" -EA SilentlyContinue
 
     if ($null -ne $zone)
     {
@@ -565,8 +565,8 @@ function Test-TargetResource
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
-        -DesiredValues $PSBoundParameters `
-        -ValuesToCheck @("Ensure")
+                                    -DesiredValues $PSBoundParameters `
+                                    -ValuesToCheck @("Ensure")
 }
 
 function Get-SPDscLocalVersionInfo
