@@ -36,6 +36,8 @@
   * Added ability to install from a UNC path, by adding server
     to IE Local Intranet Zone. This will prevent an endless wait
     caused by security warning
+* SPSearchContentSource
+  * Corrected typo that prevented a correct check for ContinuousCrawl
 * SPSearchServiceApp
   * Added possibility to manage AlertsEnabled setting
 * SPSelfServiceSiteCreation
