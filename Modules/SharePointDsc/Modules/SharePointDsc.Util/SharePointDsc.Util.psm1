@@ -180,7 +180,6 @@ function Get-SPDscFarmAccountName
     return $spFarm.DefaultServiceAccount.Name
 }
 
-
 function Get-SPDscFarmVersionInfo
 {
     param
@@ -340,6 +339,9 @@ function Get-SPDSCUserProfileSubTypeManager
 
 function Get-SPDSCInstalledProductVersion
 {
+    [OutputType([System.Version])]
+    param()
+
     $pathToSearch = "C:\Program Files\Common Files\microsoft shared\Web Server Extensions\*\ISAPI\Microsoft.SharePoint.dll"
     $fullPath = Get-Item $pathToSearch | Sort-Object { $_.Directory } -Descending | Select-Object -First 1
     return (Get-Command $fullPath).FileVersionInfo

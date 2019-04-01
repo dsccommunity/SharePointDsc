@@ -32,10 +32,13 @@
   * Added ability to install from a UNC path, by adding server
     to IE Local Intranet Zone. This will prevent an endless wait
     caused by security warning
-* SPProductInstall
+* SPProductUpdate
   * Added ability to install from a UNC path, by adding server
     to IE Local Intranet Zone. This will prevent an endless wait
     caused by security warning
+  * Major refactor of this resource to remove the dependency on the
+    existence of the farm. This allows the installation of product updates
+    before farm creation.
 * SPSearchContentSource
   * Corrected typo that prevented a correct check for ContinuousCrawl
 * SPSearchServiceApp
