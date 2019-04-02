@@ -1,6 +1,6 @@
 # Change log for SharePointDsc
 
-## Unreleased
+## v3.3
 
 * SharePointDsc generic
   * Implemented workaround for PSSA v1.18 issue. No further impact for
