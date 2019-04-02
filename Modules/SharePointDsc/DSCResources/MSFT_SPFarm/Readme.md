@@ -22,17 +22,24 @@ credential is ignored, only the value of the password is used as the farm
 passphrase.
 
 The port of the Central Admin website can be set by using the
-CentralAdministrationPort property, if this is not defined the site will be
-provisioned on port 9999. However this setting will not impact existing
-deployments that already have Central Admin provisioned on another port. Also
-when a farm is created, the current behavior is to not enroll the server as a
-cache server (which is the default behavior of SharePoint). This means you
-need to use SPDistributedCacheService on at least one server in the farm to
-designate it as a cache server.
+CentralAdministrationPort property. If this is not defined, the site will be
+provisioned on port 9999 unless the CentralAdministrationUrl property is
+specified and begins with https, in which case it will default to port 443.
+However, this setting will not impact existing deployments that already have
+Central Admin provisioned on another port. Also, when a farm is created, the
+current behavior is to not enroll the server as a cache server (which is the
+default behavior of SharePoint). This means you need to use
+SPDistributedCacheService on at least one server in the farm to designate it
+as a cache server.
 
 CentralAdministrationAuth can be specified as "NTLM" or "KERBEROS". If not
 specified, it defaults to NTLM. If using Kerberos, make sure to have
 appropriate SPNs setup for Farm account and Central Administration URI.
+
+To provision Central Admin as an SSL web application, specify a value for
+the CentralAdministrationUrl property that begins with https:// followed
+by the vanity host name or server name you wish to use to access CA.
+(e.g. https://admin.sharepoint.contoso.com).
 
 DeveloperDashboard can be specified as "On", "Off" and (only when using
 SharePoint 2013) to "OnDemand".
