@@ -842,6 +842,8 @@ function Set-TargetResource
                             $_.IsAdministrationWebApplication -eq $true
                         }
 
+                        # Wondering if -DeleteIisSite is necessary. Does this add more risk of ending up in
+                        # a state without CA or a way to recover it?
                         Remove-SPWebApplication -Identity $centralAdminSite.Url -Zone Default -DeleteIisSite
 
                         Write-Verbose -Message "Reprovisioning Central Admin with SSL"
