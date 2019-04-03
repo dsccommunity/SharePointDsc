@@ -1,5 +1,55 @@
 # Change log for SharePointDsc
 
+## v3.3
+
+* SharePointDsc generic
+  * Implemented workaround for PSSA v1.18 issue. No further impact for
+    the rest of the resources
+  * Fixed issue where powershell session was never removed and leaded to
+    memory leak
+  * Added readme.md file to Examples folder, which directs users to the
+    Wiki on Github
+* SPAppManagementServiceApp
+  * Added ability to create Service App Proxy if this is not present
+* SPConfigWizard
+  * Improved logging
+* SPFarm
+  * Corrected issue where the resource would try to join a farm, even when
+    the farm was not yet created
+  * Fixed issue where an error was thrown when no DeveloperDashboard
+    parameter was specfied
+* SPInstall
+  * Added check to unblock setup file if it is blocked because it is coming
+    from a network location. This to prevent endless wait
+  * Added ability to install from a UNC path, by adding server
+    to IE Local Intranet Zone. This will prevent an endless wait
+    caused by security warning
+* SPInstallLanguagePack
+  * Added check to unblock setup file if it is blocked because it is coming
+    from a network location. This to prevent endless wait
+  * Corrected issue with Norwegian language pack not being correctly
+    detected
+  * Added ability to install from a UNC path, by adding server
+    to IE Local Intranet Zone. This will prevent an endless wait
+    caused by security warning
+* SPProductUpdate
+  * Added ability to install from a UNC path, by adding server
+    to IE Local Intranet Zone. This will prevent an endless wait
+    caused by security warning
+  * Major refactor of this resource to remove the dependency on the
+    existence of the farm. This allows the installation of product updates
+    before farm creation.
+* SPSearchContentSource
+  * Corrected typo that prevented a correct check for ContinuousCrawl
+* SPSearchServiceApp
+  * Added possibility to manage AlertsEnabled setting
+* SPSelfServiceSiteCreation
+  * Added new SharePoint 2019 properties
+* SPSitePropertyBag
+  * Added new resource
+* SPWebAppThrottlingSettings
+  * Fixed issue with ChangeLogRetentionDays not being applied
+
 ## v3.2
 
 * Changes to SharePointDsc unit testing

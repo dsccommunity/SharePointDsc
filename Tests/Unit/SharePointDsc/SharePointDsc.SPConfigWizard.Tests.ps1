@@ -18,6 +18,10 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
     InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
         Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
+        # Mocks for all contexts
+        Mock -CommandName Remove-Item -MockWith {}
+        Mock -CommandName Get-Content -MockWith { return "log info" }
+
         # Test contexts
         Context -Name "Upgrade required for Language Pack" -Fixture {
             $testParams = @{

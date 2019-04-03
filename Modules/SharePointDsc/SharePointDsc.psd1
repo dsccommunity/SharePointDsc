@@ -12,7 +12,7 @@
 # RootModule = ''
 
 # Version number of this module.
-ModuleVersion = '3.2.0.0'
+ModuleVersion = '3.3.0.0'
 
 # ID used to uniquely identify this module
 GUID = '6c1176a0-4fac-4134-8ca2-3fa8a21a7b90'
@@ -128,69 +128,53 @@ PrivateData = @{
 
         # ReleaseNotes of this module
         ReleaseNotes = "
-      * Changes to SharePointDsc unit testing
-        * Implemented Strict Mode version 1 for all code run during unit tests.
-        * Changed InstallAccount into PSDscRunAsCredential parameter in examples
-      * SPAuthenticationRealm
-        * New resource for setting farm authentication realm
+      * SharePointDsc generic
+        * Implemented workaround for PSSA v1.18 issue. No further impact for
+          the rest of the resources
+        * Fixed issue where powershell session was never removed and leaded to
+          memory leak
+        * Added readme.md file to Examples folder, which directs users to the
+          Wiki on Github
+      * SPAppManagementServiceApp
+        * Added ability to create Service App Proxy if this is not present
       * SPConfigWizard
-        * Updated PSConfig parameters according recommendations in blog post of
-          Stefan Gossner
-      * SPDistributedCacheService
-        * Fixed exception on Stop-SPServiceInstance with SharePoint 2019
+        * Improved logging
       * SPFarm
-        * Improved logging
-        * Added ability to manage the Developer Dashboard settings
-      * SPFarmSolution
-        * Fixed issue where uninstalling a solution would not work as expected if it
-          contained web application resources.
-      * SPIncomingEmailSettings
-        * New resource for configuring incoming email settings
-      * SPInstallPrereqs
-        * Improved logging
-        * Corrected detection for Windows Server 2019
-        * Corrected support for Windows Server 2019 for SharePoint 2016
-      * SPProductUpgrade
-        * Fixed issue where upgrading SP2013 would not properly detect the installed
-          version
-        * Fixed issue where the localized SharePoint 2019 CU was detected as a
-          Service Pack for a Language Pack
-      * SPSearchAuthorativePage
-        * Fixed issue where modifying search query would not target the correct
-          search application
-      * SPSearchResultSource
-        * Updated resource to allow localized ProviderTypes
-      * SPServiceAppSecurity
-        * Updated resource to allow localized permission levels
-      * SPServiceInstance
-        * Added -All switch to resolve 'Unable to locate service application' in SP2013
-      * SPSite
-        * Improved logging
-      * SPUserProfileProperty
-        * Fix user profile property mappings does not work
-      * SPUserProfileServiceApp
-        * Added warning message when MySiteHostLocation is not specified. This is
-          currently not required, which results in an error. Will be corrected in
-          SPDsc v4.0 (is a breaking change).
-      * SPUserProfileSyncConnection
-        * Fixed issue where test resource never would return true for any configurations
-          on SharePoint 2016/2019
-        * Fixed issue where updating existing connection never would work for any
-          configurations on SharePoint 2016/2019
-        * Updated documentation to reflect that Fore will not impact configurations for
-          SharePoint 2016/2019. Updated the test method accordingly.
-      * SPUserProfileSyncService
-        * Fixed issue where failure to configure the sync service would not throw error
-      * SPWebAppPeoplePickerSettings
-        * Converted password for access account to secure string. Previsouly
-          the resource would fail setting the password and an exeption was thrown that
-          printed the password in clear text.
-      * SPWebAppPolicy
-        * Fixed issue where parameter MembersToExclude did not work as expected
-      * SPWorkflowService
-        * Added support for specifying scope name.
-        * Added support for detecting incorrect configuration for scope name and
-          WorkflowHostUri
+        * Corrected issue where the resource would try to join a farm, even when
+          the farm was not yet created
+        * Fixed issue where an error was thrown when no DeveloperDashboard
+          parameter was specfied
+      * SPInstall
+        * Added check to unblock setup file if it is blocked because it is coming
+          from a network location. This to prevent endless wait
+        * Added ability to install from a UNC path, by adding server
+          to IE Local Intranet Zone. This will prevent an endless wait
+          caused by security warning
+      * SPInstallLanguagePack
+        * Added check to unblock setup file if it is blocked because it is coming
+          from a network location. This to prevent endless wait
+        * Corrected issue with Norwegian language pack not being correctly
+          detected
+        * Added ability to install from a UNC path, by adding server
+          to IE Local Intranet Zone. This will prevent an endless wait
+          caused by security warning
+      * SPProductUpdate
+        * Added ability to install from a UNC path, by adding server
+          to IE Local Intranet Zone. This will prevent an endless wait
+          caused by security warning
+        * Major refactor of this resource to remove the dependency on the
+          existence of the farm. This allows the installation of product updates
+          before farm creation.
+      * SPSearchContentSource
+        * Corrected typo that prevented a correct check for ContinuousCrawl
+      * SPSearchServiceApp
+        * Added possibility to manage AlertsEnabled setting
+      * SPSelfServiceSiteCreation
+        * Added new SharePoint 2019 properties
+      * SPSitePropertyBag
+        * Added new resource
+      * SPWebAppThrottlingSettings
+        * Fixed issue with ChangeLogRetentionDays not being applied
 "
     } # End of PSData hashtable
 

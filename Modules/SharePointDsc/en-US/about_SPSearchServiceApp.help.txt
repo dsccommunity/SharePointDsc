@@ -53,6 +53,10 @@
     Write - boolean
     Should this search service application be a cloud based service app
 
+.PARAMETER AlertsEnabled
+    Write - boolean
+    Should alerts be enabled for this search service application
+
 .PARAMETER Ensure
     Write - string
     Allowed values: Present, Absent
