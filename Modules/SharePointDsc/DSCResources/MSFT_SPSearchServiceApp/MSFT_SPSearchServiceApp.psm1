@@ -41,6 +41,10 @@ function Get-TargetResource
         $CloudIndex,
 
         [Parameter()]
+        [System.Boolean]
+        $AlertsEnabled,
+
+        [Parameter()]
         [System.Management.Automation.PSCredential]
         $DefaultContentAccessAccount,
 
@@ -146,6 +150,7 @@ function Get-TargetResource
                 SearchCenterUrl             = $serviceApp.SearchCenterUrl
                 DefaultContentAccessAccount = $defaultAccount
                 CloudIndex                  = $cloudIndex
+                AlertsEnabled               = $serviceApp.AlertsEnabled
                 WindowsServiceAccount       = $params.WindowsServiceAccount
                 InstallAccount              = $params.InstallAccount
             }
@@ -192,6 +197,10 @@ function Set-TargetResource
         [Parameter()]
         [System.Boolean]
         $CloudIndex,
+
+        [Parameter()]
+        [System.Boolean]
+        $AlertsEnabled,
 
         [Parameter()]
         [System.Management.Automation.PSCredential]
@@ -303,6 +312,17 @@ function Set-TargetResource
                     $serviceApp.SearchCenterUrl = $params.SearchCenterUrl
                     $serviceApp.Update()
                 }
+
+                if ($params.ContainsKey("AlertsEnabled") -eq $true)
+                {
+                    Write-Verbose -Message "Setting AlertsEnabled to $($params.AlertsEnabled)"
+                    $serviceApp = Get-SPServiceApplication -Name $params.Name | `
+                        Where-Object -FilterScript {
+                            $_.GetType().FullName -eq "Microsoft.Office.Server.Search.Administration.SearchServiceApplication"
+                        }
+                    $serviceApp.AlertsEnabled = $params.AlertsEnabled
+                    $serviceApp.Update()
+                }
             }
         }
     }
@@ -388,6 +408,18 @@ function Set-TargetResource
                 $serviceApp.SearchCenterUrl = $params.SearchCenterUrl
                 $serviceApp.Update()
             }
+
+            if ($params.ContainsKey("AlertsEnabled") -eq $true -and `
+                $result.AlertsEnabled -ne $params.AlertsEnabled)
+            {
+                Write-Verbose -Message "Updating AlertsEnabled to $($params.AlertsEnabled)"
+                $serviceApp = Get-SPServiceApplication -Name $params.Name | `
+                    Where-Object -FilterScript {
+                        $_.GetType().FullName -eq "Microsoft.Office.Server.Search.Administration.SearchServiceApplication"
+                    }
+                $serviceApp.AlertsEnabled = $params.AlertsEnabled
+                $serviceApp.Update()
+            }
         }
     }
 
@@ -459,6 +491,10 @@ function Test-TargetResource
         $CloudIndex,
 
         [Parameter()]
+        [System.Boolean]
+        $AlertsEnabled,
+
+        [Parameter()]
         [System.Management.Automation.PSCredential]
         $DefaultContentAccessAccount,
 
@@ -504,7 +540,8 @@ function Test-TargetResource
                                         -ValuesToCheck @("Ensure",
                                                          "ApplicationPool",
                                                          "SearchCenterUrl",
-                                                         "ProxyName")
+                                                         "ProxyName",
+                                                         "AlertsEnabled")
     }
     else
     {
