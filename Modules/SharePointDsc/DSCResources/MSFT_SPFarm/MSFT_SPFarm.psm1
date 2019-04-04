@@ -422,12 +422,6 @@ function Set-TargetResource
         }
     }
 
-    # if we're not passing Ssl Host Header in, let's set it to $null for comparison to Current Values
-    # if (-not $PSBoundParameters.ContainsKey("CentralAdministrationSslHostHeader"))
-    # {
-    #     $CentralAdministrationSslHostHeader = $null
-    # }
-
     if (-not $PSBoundParameters.ContainsKey("CentralAdministrationAuth"))
     {
         $PSBoundParameters.Add("CentralAdministrationAuth", "NTLM")
