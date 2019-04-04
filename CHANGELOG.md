@@ -1,5 +1,10 @@
 # Change log for SharePointDsc
 
+## Unreleased
+
+* SPFarm
+  * Add support to provision Central Administration on HTTPS
+
 ## v3.3
 
 * SharePointDsc generic
@@ -18,7 +23,6 @@
     the farm was not yet created
   * Fixed issue where an error was thrown when no DeveloperDashboard
     parameter was specfied
-  * Add support to provision Central Administration on HTTPS
 * SPInstall
   * Added check to unblock setup file if it is blocked because it is coming
     from a network location. This to prevent endless wait
