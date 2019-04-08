@@ -510,9 +510,12 @@ function Set-TargetResource
                     $centralAdminSite = Get-SPWebApplication -IncludeCentralAdministration | Where-Object -FilterScript {
                         $_.IsAdministrationWebApplication
                     }
-                    if ($centralAdminSite.Url.TrimEnd('/') -ne $params.CentralAdministrationUrl.TrimEnd('/'))
+
+                    $desiredUri = [System.Uri]("{0}:{1}" -f $params.CentralAdministrationUrl.TrimEnd('/'), $params.CentralAdministrationPort)
+                    $currentUri = [System.Uri]$centralAdminSite.Url
+                    if ($desiredUri.AbsoluteUri -ne $currentUri.AbsoluteUri)
                     {
-                        Write-Verbose -Message "Re-provisioning CA because $($centralAdminSite.Url.TrimEnd('/')) does not equal $($params.CentralAdministrationUrl.TrimEnd('/'))"
+                        Write-Verbose -Message "Re-provisioning CA because $($currentUri.AbsoluteUri) does not equal $($desiredUri.AbsoluteUri)"
                         $reprovisionCentralAdmin = $true
                     }
                     else
@@ -524,10 +527,10 @@ function Set-TargetResource
                         if ($null -ne $secureBindings[0] -and (-not [string]::IsNullOrEmpty($secureBindings[0].HostHeader)))
                         {
                             # check to see if secureBindings host header and port match what we want them to be
-                            if (([System.Uri]$params.CentralAdministrationUrl).Host -ne $secureBindings[0].HostHeader -or `
-                                $params.CentralAdministrationPort -ne $secureBindings[0].Port)
+                            if ($desiredUri.Host -ne $secureBindings[0].HostHeader -or `
+                                $desiredUri.Port -ne $secureBindings[0].Port)
                             {
-                                Write-Verbose -Message "Re-provisioning CA because $(([System.Uri]$params.CentralAdministrationUrl).Host) does not equal $($secureBindings[0].HostHeader)"
+                                Write-Verbose -Message "Re-provisioning CA because $($desiredUri.Host) does not equal $($secureBindings[0].HostHeader) or $($desiredUri.Port) does not equal $($secureBindings[0].Port)"
                                 $reprovisionCentralAdmin = $true
                             }
                         }
@@ -549,8 +552,8 @@ function Set-TargetResource
                             Identity             = $centralAdminSite.Url
                             Name                 = "SharePoint Central Administration v4"
                             Zone                 = "Default"
-                            HostHeader           = ([System.Uri]$params.CentralAdministrationUrl).Host
-                            Port                 = $params.CentralAdministrationPort
+                            HostHeader           = $desiredUri.Host
+                            Port                 = $desiredUri.Port
                             AuthenticationMethod = $params.CentralAdministrationAuth
                             SecureSocketsLayer   = $true
                         }
