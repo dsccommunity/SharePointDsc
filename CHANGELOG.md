@@ -11,6 +11,9 @@
 * SPManagedMetadataServiceApp
   * Fixed issue where Get-TargetResource method throws an error when the
     service app proxy does not exist and no proxy name is specified.
+* SPSubscriptionSettingsServiceApp
+  * Fixed issue where the service app proxy isn't created when it wasn't
+    created during initial deployment.
 
 ## v3.3
 
