@@ -1,5 +1,14 @@
 # Change log for SharePointDsc
 
+## Unreleased
+
+* SPInstallPrereqs
+  * Added check to unblock setup file if it is blocked because it is coming
+    from a network location. This to prevent endless wait
+  * Added ability to install from a UNC path, by adding server
+    to IE Local Intranet Zone. This will prevent an endless wait
+    caused by security warning
+
 ## v3.3
 
 * SharePointDsc generic
