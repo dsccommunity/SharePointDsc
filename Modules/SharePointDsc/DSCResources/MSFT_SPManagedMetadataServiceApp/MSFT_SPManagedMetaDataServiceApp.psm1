@@ -91,7 +91,14 @@ function Get-TargetResource
         {
             $serviceAppProxies = Get-SPServiceApplicationProxy -ErrorAction SilentlyContinue
 
-            $proxyName = $params.ProxyName
+            if ($params.ContainsKey("ProxyName") -eq $true)
+            {
+                $proxyName = $params.ProxyName
+            }
+            else
+            {
+                $proxyName = ""
+            }
 
             if ($null -ne $serviceAppProxies)
             {
