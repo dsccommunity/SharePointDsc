@@ -1,5 +1,27 @@
 # Change log for SharePointDsc
 
+## Unreleased
+
+* SPDistributedCacheClientSettings
+  * Added 15 new SharePoint 2016 parameters.
+* SPInfoPathFormsServiceConfig
+  * Added the AllowEventPropagation parameter.
+* SPInstallPrereqs
+  * Added check to unblock setup file if it is blocked because it is coming
+    from a network location. This to prevent endless wait.
+  * Added ability to install from a UNC path, by adding server
+    to IE Local Intranet Zone. This will prevent an endless wait
+    caused by security warning.
+* SPManagedMetadataServiceApp
+  * Fixed issue where Get-TargetResource method throws an error when the
+    service app proxy does not exist and no proxy name is specified.
+* SPSearchContent Source
+  * Removed check that prevents configuring an incremental schedule when
+    using continuous crawl.
+* SPSubscriptionSettingsServiceApp
+  * Fixed issue where the service app proxy isn't created when it wasn't
+    created during initial deployment.
+
 ## v3.3
 
 * SharePointDsc generic

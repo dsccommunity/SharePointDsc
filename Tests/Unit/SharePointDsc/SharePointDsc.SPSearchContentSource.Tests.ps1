@@ -159,32 +159,6 @@ namespace Microsoft.Office.Server.Search.Administration {
             }
         }
 
-        Context -Name "ContinuousCrawl should not be used with Incremental Schedule" {
-            $testParams = @{
-                Name = "Example content source"
-                ServiceAppName = "Search Service Application"
-                ContentSourceType = "SharePoint"
-                ContinuousCrawl = $true
-                IncrementalSchedule = (New-CimInstance -ClassName MSFT_SPSearchCrawlSchedule -Property @{
-                    ScheduleType = "Weekly"
-                    StartHour = "0"
-                    StartMinute = "0"
-                    CrawlScheduleDaysOfWeek = @("Monday", "Wednesday")
-                } -ClientOnly)
-                Addresses = @("http://site.contoso.com")
-                CrawlSetting = "CrawlEverything"
-                Ensure = "Present"
-            }
-
-            It "Should create the content source in the test method" {
-                { Test-TargetResource @testParams } | Should Throw "You can not specify an incremental crawl schedule on a content source that will use continous crawl"
-            }
-
-            It "Should create the content source in the set method" {
-                { Set-TargetResource @testParams } | Should Throw "You can not specify an incremental crawl schedule on a content source that will use continous crawl"
-            }
-        }
-
         Context -Name "LimitPageDepth should not be used with Content Source Type FileShare" {
             $testParams = @{
                 Name = "Example content source"
@@ -1216,25 +1190,6 @@ namespace Microsoft.Office.Server.Search.Administration {
             It "Should throw Invalid parameter error" {
                 { Set-TargetResource @testParams } | Should Throw "Parameter LimitServerHops is not valid for SharePoint content sources"
                 { Test-TargetResource @testParams } | Should Throw "Parameter LimitServerHops is not valid for SharePoint content sources"
-            }
-
-            $testParams = @{
-                Name = "Example content source"
-                ServiceAppName = "Search Service Application"
-                ContentSourceType = "SharePoint"
-                IncrementalSchedule = (New-CimInstance -ClassName MSFT_SPSearchCrawlSchedule -Property @{
-                    ScheduleType = "Weekly"
-                    StartHour = "0"
-                    StartMinute = "0"
-                    CrawlScheduleDaysOfWeek = @("Monday", "Wednesday", "Friday")
-                } -ClientOnly)
-                ContinuousCrawl = $true
-                Ensure = "Present"
-            }
-
-            It "Should throw Invalid parameter error" {
-                { Set-TargetResource @testParams } | Should Throw "You can not specify an incremental crawl schedule on a content source that will use continous crawl"
-                { Test-TargetResource @testParams } | Should Throw "You can not specify an incremental crawl schedule on a content source that will use continous crawl"
             }
 
             $testParams = @{

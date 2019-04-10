@@ -196,6 +196,19 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting installation status of SharePoint prerequisites"
 
+    if (-not(Test-Path -Path $InstallerPath))
+    {
+        throw "PrerequisitesInstaller cannot be found: {$InstallerPath}"
+    }
+
+    Write-Verbose -Message "Checking file status of $InstallerPath"
+    $zone = Get-Item $InstallerPath -Stream "Zone.Identifier" -EA SilentlyContinue
+    if ($null -ne $zone)
+    {
+        throw ("PrerequisitesInstaller is blocked! Please use 'Unblock-File -Path " + `
+               "$InstallerPath' to unblock the file before continuing.")
+    }
+
     $majorVersion = (Get-SPDSCAssemblyVersion -PathToAssembly $InstallerPath)
     $buildVersion = (Get-SPDSCBuildVersion -PathToAssembly $InstallerPath)
     if ($majorVersion -eq 15)
@@ -560,6 +573,19 @@ function Set-TargetResource
                            "prerequisites. Please remove this manually.")
     }
 
+    if (-not(Test-Path -Path $InstallerPath))
+    {
+        throw "PrerequisitesInstaller cannot be found: {$InstallerPath}"
+    }
+
+    Write-Verbose -Message "Checking file status of $InstallerPath"
+    $zone = Get-Item $InstallerPath -Stream "Zone.Identifier" -EA SilentlyContinue
+    if ($null -ne $zone)
+    {
+        throw ("PrerequisitesInstaller is blocked! Please use 'Unblock-File -Path " + `
+               "$InstallerPath' to unblock the file before continuing.")
+    }
+
     Write-Verbose -Message "Detecting SharePoint version from binaries"
     $majorVersion = Get-SPDSCAssemblyVersion -PathToAssembly $InstallerPath
     $buildVersion = Get-SPDSCBuildVersion -PathToAssembly $InstallerPath
@@ -752,9 +778,37 @@ function Set-TargetResource
         }
     }
 
+    Write-Verbose -Message "Checking if Path is an UNC path"
+    $uncInstall = $false
+    if ($InstallerPath.StartsWith("\\"))
+    {
+        Write-Verbose -Message ("Specified InstallerPath is an UNC path. Adding servername to Local " +
+                                "Intranet Zone")
+
+        $uncInstall = $true
+
+        if ($InstallerPath -match "\\\\(.*?)\\.*")
+        {
+            $serverName = $Matches[1]
+        }
+        else
+        {
+            throw "Cannot extract servername from UNC path. Check if it is in the correct format."
+        }
+
+        Set-SPDscZoneMap -Server $serverName
+    }
+
+
     Write-Verbose -Message "Calling the SharePoint Pre-req installer"
     Write-Verbose -Message "Args for prereq installer are: $prereqArgs"
     $process = Start-Process -FilePath $InstallerPath -ArgumentList $prereqArgs -Wait -PassThru
+
+    if ($uncInstall -eq $true)
+    {
+        Write-Verbose -Message "Removing added path from the Local Intranet Zone"
+        Remove-SPDscZoneMap -ServerName $serverName
+    }
 
     switch ($process.ExitCode)
     {
