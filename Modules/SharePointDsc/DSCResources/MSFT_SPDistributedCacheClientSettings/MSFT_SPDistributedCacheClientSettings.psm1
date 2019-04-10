@@ -368,31 +368,31 @@ function Set-TargetResource
 
         [Parameter()]
         [System.UInt32]
-        $DLTCMaxConnectionsToServer = 1,
+        $DLTCMaxConnectionsToServer = 4,
 
         [Parameter()]
         [System.UInt32]
-        $DLTCRequestTimeout = 3000,
+        $DLTCRequestTimeout = 500,
 
         [Parameter()]
         [System.UInt32]
-        $DLTCChannelOpenTimeOut = 3000,
+        $DLTCChannelOpenTimeOut = 20,
 
         [Parameter()]
         [System.UInt32]
-        $DVSCMaxConnectionsToServer = 1,
+        $DVSCMaxConnectionsToServer = 4,
 
         [Parameter()]
         [System.UInt32]
-        $DVSCRequestTimeout = 3000,
+        $DVSCRequestTimeout = 20,
 
         [Parameter()]
         [System.UInt32]
-        $DVSCChannelOpenTimeOut = 3000,
+        $DVSCChannelOpenTimeOut = 20,
 
         [Parameter()]
         [System.UInt32]
-        $DACMaxConnectionsToServer = 1,
+        $DACMaxConnectionsToServer = 4,
 
         [Parameter()]
         [System.UInt32]
@@ -404,7 +404,7 @@ function Set-TargetResource
 
         [Parameter()]
         [System.UInt32]
-        $DAFMaxConnectionsToServer = 1,
+        $DAFMaxConnectionsToServer = 4,
 
         [Parameter()]
         [System.UInt32]
@@ -416,7 +416,7 @@ function Set-TargetResource
 
         [Parameter()]
         [System.UInt32]
-        $DAFCMaxConnectionsToServer = 1,
+        $DAFCMaxConnectionsToServer = 4,
 
         [Parameter()]
         [System.UInt32]
@@ -428,7 +428,7 @@ function Set-TargetResource
 
         [Parameter()]
         [System.UInt32]
-        $DBCMaxConnectionsToServer = 1,
+        $DBCMaxConnectionsToServer = 4,
 
         [Parameter()]
         [System.UInt32]
@@ -440,7 +440,7 @@ function Set-TargetResource
 
         [Parameter()]
         [System.UInt32]
-        $DDCMaxConnectionsToServer = 1,
+        $DDCMaxConnectionsToServer = 4,
 
         [Parameter()]
         [System.UInt32]
@@ -452,7 +452,7 @@ function Set-TargetResource
 
         [Parameter()]
         [System.UInt32]
-        $DSCMaxConnectionsToServer = 1,
+        $DSCMaxConnectionsToServer = 4,
 
         [Parameter()]
         [System.UInt32]
@@ -464,7 +464,7 @@ function Set-TargetResource
 
         [Parameter()]
         [System.UInt32]
-        $DTCMaxConnectionsToServer = 1,
+        $DTCMaxConnectionsToServer = 4,
 
         [Parameter()]
         [System.UInt32]
@@ -476,7 +476,7 @@ function Set-TargetResource
 
         [Parameter()]
         [System.UInt32]
-        $DSTACMaxConnectionsToServer = 1,
+        $DSTACMaxConnectionsToServer = 4,
 
         [Parameter()]
         [System.UInt32]
@@ -488,7 +488,7 @@ function Set-TargetResource
 
         [Parameter()]
         [System.UInt32]
-        $DFLTCMaxConnectionsToServer = 1,
+        $DFLTCMaxConnectionsToServer = 4,
 
         [Parameter()]
         [System.UInt32]
@@ -500,7 +500,7 @@ function Set-TargetResource
 
         [Parameter()]
         [System.UInt32]
-        $DSWUCMaxConnectionsToServer = 1,
+        $DSWUCMaxConnectionsToServer = 4,
 
         [Parameter()]
         [System.UInt32]
@@ -512,39 +512,39 @@ function Set-TargetResource
 
         [Parameter()]
         [System.UInt32]
-        $DUGCMaxConnectionsToServer = 1,
+        $DUGCMaxConnectionsToServer = 4,
 
         [Parameter()]
         [System.UInt32]
-        $DUGCRequestTimeout = 3000,
+        $DUGCRequestTimeout = 500,
 
         [Parameter()]
         [System.UInt32]
-        $DUGCChannelOpenTimeOut = 3000,
+        $DUGCChannelOpenTimeOut = 100,
 
         [Parameter()]
         [System.UInt32]
-        $DRTCMaxConnectionsToServer = 1,
+        $DRTCMaxConnectionsToServer = 4,
 
         [Parameter()]
         [System.UInt32]
-        $DRTCRequestTimeout = 3000,
+        $DRTCRequestTimeout = 500,
 
         [Parameter()]
         [System.UInt32]
-        $DRTCChannelOpenTimeOut = 3000,
+        $DRTCChannelOpenTimeOut = 20,
 
         [Parameter()]
         [System.UInt32]
-        $DHSCMaxConnectionsToServer = 1,
+        $DHSCMaxConnectionsToServer = 4,
 
         [Parameter()]
         [System.UInt32]
-        $DHSCRequestTimeout = 3000,
+        $DHSCRequestTimeout = 500,
 
         [Parameter()]
         [System.UInt32]
-        $DHSCChannelOpenTimeOut = 3000,
+        $DHSCChannelOpenTimeOut = 20,
 
         [Parameter()]
         [System.Management.Automation.PSCredential]
