@@ -301,12 +301,6 @@ function Set-TargetResource
             {
                 throw "Parameter LimitServerHops is not valid for SharePoint content sources"
             }
-            if ($ContinuousCrawl -eq $true -and `
-                $PSBoundParameters.ContainsKey("IncrementalSchedule") -eq $true)
-            {
-                throw ("You can not specify an incremental crawl schedule on a content source " + `
-                       "that will use continous crawl")
-            }
             if ($CrawlSetting -eq "Custom")
             {
                 throw ("Parameter CrawlSetting can only be set to custom for website content " + `
