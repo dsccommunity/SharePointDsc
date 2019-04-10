@@ -12,7 +12,7 @@ class MSFT_SPInfoPathFormsServiceConfig : OMI_BaseResource
     [Write, Description("True sets the InfoPath Forms Service to allow embedded SQL sonnections in Forms")] Boolean AllowEmbeddedSqlForDataConnections;
     [Write, Description("True sets the InfoPath Forms Service to allow User Defined connections")] Boolean AllowUdcAuthenticationForDataConnections;
     [Write, Description("True sets the InfoPath Forms Service to allow Cross-Domain connections")] Boolean AllowUserFormCrossDomainDataConnections;
-    [Write, Description("True enable the original performance optimization")] Boolean AllowEventPropagation;
+    [Write, Description("True enables the original performance optimization")] Boolean AllowEventPropagation;
     [Write, Description("Maximum number of postback allowed per session")] Uint16 MaxPostbacksPerSession;
     [Write, Description("Maximum number of actions that can be triggered per postback")] Uint16 MaxUserActionsPerPostback;
     [Write, Description("Timeout in minutes for active sessions")] Uint16 ActiveSessionsTimeout;
