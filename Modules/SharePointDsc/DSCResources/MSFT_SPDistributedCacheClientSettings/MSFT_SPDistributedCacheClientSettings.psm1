@@ -195,7 +195,6 @@ function Get-TargetResource
     )
 
     Write-Verbose -Message "Getting the Distributed Cache Client Settings"
-    $test = $PSBoundParameters
 
     if ($PSBoundParameters.ContainsKey("DFLTCMaxConnectionsToServer") -eq $true -or
         $PSBoundParameters.ContainsKey("DFLTCRequestTimeout") -eq $true -or
