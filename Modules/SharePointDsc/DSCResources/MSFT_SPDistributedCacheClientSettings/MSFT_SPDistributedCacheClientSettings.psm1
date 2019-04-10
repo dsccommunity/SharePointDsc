@@ -130,11 +130,100 @@ function Get-TargetResource
         $DSTACChannelOpenTimeOut,
 
         [Parameter()]
+        [System.UInt32]
+        $DFLTCMaxConnectionsToServer,
+
+        [Parameter()]
+        [System.UInt32]
+        $DFLTCRequestTimeout,
+
+        [Parameter()]
+        [System.UInt32]
+        $DFLTCChannelOpenTimeOut,
+
+        [Parameter()]
+        [System.UInt32]
+        $DSWUCMaxConnectionsToServer,
+
+        [Parameter()]
+        [System.UInt32]
+        $DSWUCRequestTimeout,
+
+        [Parameter()]
+        [System.UInt32]
+        $DSWUCChannelOpenTimeOut,
+
+        [Parameter()]
+        [System.UInt32]
+        $DUGCMaxConnectionsToServer,
+
+        [Parameter()]
+        [System.UInt32]
+        $DUGCRequestTimeout,
+
+        [Parameter()]
+        [System.UInt32]
+        $DUGCChannelOpenTimeOut,
+
+        [Parameter()]
+        [System.UInt32]
+        $DRTCMaxConnectionsToServer,
+
+        [Parameter()]
+        [System.UInt32]
+        $DRTCRequestTimeout,
+
+        [Parameter()]
+        [System.UInt32]
+        $DRTCChannelOpenTimeOut,
+
+        [Parameter()]
+        [System.UInt32]
+        $DHSCMaxConnectionsToServer,
+
+        [Parameter()]
+        [System.UInt32]
+        $DHSCRequestTimeout,
+
+        [Parameter()]
+        [System.UInt32]
+        $DHSCChannelOpenTimeOut,
+
+        [Parameter()]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 
     Write-Verbose -Message "Getting the Distributed Cache Client Settings"
+    $test = $PSBoundParameters
+
+    if ($PSBoundParameters.ContainsKey("DFLTCMaxConnectionsToServer") -eq $true -or
+        $PSBoundParameters.ContainsKey("DFLTCRequestTimeout") -eq $true -or
+        $PSBoundParameters.ContainsKey("DFLTCChannelOpenTimeOut") -eq $true -or
+        $PSBoundParameters.ContainsKey("DSWUCMaxConnectionsToServer") -eq $true -or
+        $PSBoundParameters.ContainsKey("DSWUCRequestTimeout") -eq $true -or
+        $PSBoundParameters.ContainsKey("DSWUCChannelOpenTimeOut") -eq $true -or
+        $PSBoundParameters.ContainsKey("DUGCMaxConnectionsToServer") -eq $true -or
+        $PSBoundParameters.ContainsKey("DUGCRequestTimeout") -eq $true -or
+        $PSBoundParameters.ContainsKey("DUGCChannelOpenTimeOut") -eq $true -or
+        $PSBoundParameters.ContainsKey("DRTCMaxConnectionsToServer") -eq $true -or
+        $PSBoundParameters.ContainsKey("DRTCRequestTimeout") -eq $true -or
+        $PSBoundParameters.ContainsKey("DRTCChannelOpenTimeOut") -eq $true -or
+        $PSBoundParameters.ContainsKey("DHSCMaxConnectionsToServer") -eq $true -or
+        $PSBoundParameters.ContainsKey("DHSCRequestTimeout") -eq $true -or
+        $PSBoundParameters.ContainsKey("DHSCChannelOpenTimeOut") -eq $true)
+    {
+        $installedVersion = Get-SPDSCInstalledProductVersion
+        if ($installedVersion.FileMajorPart -eq 15)
+        {
+            throw ("The following parameters are only supported in SharePoint 2016 and above: " + `
+                   "DFLTCMaxConnectionsToServer, DFLTCRequestTimeout, DFLTCChannelOpenTimeOut, " + `
+                   "DSWUCMaxConnectionsToServer, DSWUCRequestTimeout, DSWUCChannelOpenTimeOut, " + `
+                   "DUGCMaxConnectionsToServer, DUGCRequestTimeout, DUGCChannelOpenTimeOut, " + `
+                   "DRTCMaxConnectionsToServer, DRTCRequestTimeout, DRTCChannelOpenTimeOut, " + `
+                   "DHSCMaxConnectionsToServer, DHSCRequestTimeout and DHSCChannelOpenTimeOut")
+        }
+    }
 
     $result = Invoke-SPDSCCommand -Credential $InstallAccount `
                                   -Arguments $PSBoundParameters `
@@ -173,7 +262,21 @@ function Get-TargetResource
             DSTACMaxConnectionsToServer = $null
             DSTACRequestTimeout = $null
             DSTACChannelOpenTimeOut = $null
-            InstallAccount = $params.InstallAccount
+            DFLTCMaxConnectionsToServer = $null
+            DFLTCRequestTimeout = $null
+            DFLTCChannelOpenTimeOut = $null
+            DSWUCMaxConnectionsToServer = $null
+            DSWUCRequestTimeout = $null
+            DSWUCChannelOpenTimeOut = $null
+            DUGCMaxConnectionsToServer = $null
+            DUGCRequestTimeout = $null
+            DUGCChannelOpenTimeOut = $null
+            DRTCMaxConnectionsToServer = $null
+            DRTCRequestTimeout = $null
+            DRTCChannelOpenTimeOut = $null
+            DHSCMaxConnectionsToServer = $null
+            DHSCRequestTimeout = $null
+            DHSCChannelOpenTimeOut = $null
         }
 
         try
@@ -188,6 +291,11 @@ function Get-TargetResource
             $DSC = Get-SPDistributedCacheClientSetting -ContainerType "DistributedSearchCache"
             $DTC = Get-SPDistributedCacheClientSetting -ContainerType "DistributedSecurityTrimmingCache"
             $DSTAC = Get-SPDistributedCacheClientSetting -ContainerType "DistributedServerToAppServerAccessTokenCache"
+            $DFLTC = Get-SPDistributedCacheClientSetting -ContainerType "DistributedFileLockThrottlerCache"
+            $DSWUC = Get-SPDistributedCacheClientSetting -ContainerType "DistributedSharedWithUserCache"
+            $DUGC = Get-SPDistributedCacheClientSetting -ContainerType "DistributedUnifiedGroupsCache"
+            $DRTC = Get-SPDistributedCacheClientSetting -ContainerType "DistributedResourceTallyCache"
+            $DHSC = Get-SPDistributedCacheClientSetting -ContainerType "DistributedHealthScoreCache"
 
             $returnValue = @{
                 IsSingleInstance = "Yes"
@@ -221,6 +329,21 @@ function Get-TargetResource
                 DSTACMaxConnectionsToServer = $DSTAC.MaxConnectionsToServer
                 DSTACRequestTimeout = $DSTAC.RequestTimeout
                 DSTACChannelOpenTimeOut = $DSTAC.ChannelOpenTimeOut
+                DFLTCMaxConnectionsToServer = $DFLTC.MaxConnectionsToServer
+                DFLTCRequestTimeout = $DFLTC.RequestTimeout
+                DFLTCChannelOpenTimeOut = $DFLTC.ChannelOpenTimeOut
+                DSWUCMaxConnectionsToServer = $DSWUC.MaxConnectionsToServer
+                DSWUCRequestTimeout = $DSWUC.RequestTimeout
+                DSWUCChannelOpenTimeOut = $DSWUC.ChannelOpenTimeOut
+                DUGCMaxConnectionsToServer = $DUGC.MaxConnectionsToServer
+                DUGCRequestTimeout = $DUGC.RequestTimeout
+                DUGCChannelOpenTimeOut = $DUGC.ChannelOpenTimeOut
+                DRTCMaxConnectionsToServer = $DRTC.MaxConnectionsToServer
+                DRTCRequestTimeout = $DRTC.RequestTimeout
+                DRTCChannelOpenTimeOut = $DRTC.ChannelOpenTimeOut
+                DHSCMaxConnectionsToServer = $DHSC.MaxConnectionsToServer
+                DHSCRequestTimeout = $DHSC.RequestTimeout
+                DHSCChannelOpenTimeOut = $DHSC.ChannelOpenTimeOut
                 InstallAccount = $params.InstallAccount
             }
             return $returnValue
@@ -365,11 +488,99 @@ function Set-TargetResource
         $DSTACChannelOpenTimeOut = 3000,
 
         [Parameter()]
+        [System.UInt32]
+        $DFLTCMaxConnectionsToServer = 1,
+
+        [Parameter()]
+        [System.UInt32]
+        $DFLTCRequestTimeout = 3000,
+
+        [Parameter()]
+        [System.UInt32]
+        $DFLTCChannelOpenTimeOut = 3000,
+
+        [Parameter()]
+        [System.UInt32]
+        $DSWUCMaxConnectionsToServer = 1,
+
+        [Parameter()]
+        [System.UInt32]
+        $DSWUCRequestTimeout = 3000,
+
+        [Parameter()]
+        [System.UInt32]
+        $DSWUCChannelOpenTimeOut = 3000,
+
+        [Parameter()]
+        [System.UInt32]
+        $DUGCMaxConnectionsToServer = 1,
+
+        [Parameter()]
+        [System.UInt32]
+        $DUGCRequestTimeout = 3000,
+
+        [Parameter()]
+        [System.UInt32]
+        $DUGCChannelOpenTimeOut = 3000,
+
+        [Parameter()]
+        [System.UInt32]
+        $DRTCMaxConnectionsToServer = 1,
+
+        [Parameter()]
+        [System.UInt32]
+        $DRTCRequestTimeout = 3000,
+
+        [Parameter()]
+        [System.UInt32]
+        $DRTCChannelOpenTimeOut = 3000,
+
+        [Parameter()]
+        [System.UInt32]
+        $DHSCMaxConnectionsToServer = 1,
+
+        [Parameter()]
+        [System.UInt32]
+        $DHSCRequestTimeout = 3000,
+
+        [Parameter()]
+        [System.UInt32]
+        $DHSCChannelOpenTimeOut = 3000,
+
+        [Parameter()]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 
     Write-Verbose -Message "Setting the Distributed Cache Client Settings"
+
+    if ($PSBoundParameters.ContainsKey("DFLTCMaxConnectionsToServer") -or
+        $PSBoundParameters.ContainsKey("DFLTCRequestTimeout") -or
+        $PSBoundParameters.ContainsKey("DFLTCChannelOpenTimeOut") -or
+        $PSBoundParameters.ContainsKey("DSWUCMaxConnectionsToServer") -or
+        $PSBoundParameters.ContainsKey("DSWUCRequestTimeout") -or
+        $PSBoundParameters.ContainsKey("DSWUCChannelOpenTimeOut") -or
+        $PSBoundParameters.ContainsKey("DUGCMaxConnectionsToServer") -or
+        $PSBoundParameters.ContainsKey("DUGCRequestTimeout") -or
+        $PSBoundParameters.ContainsKey("DUGCChannelOpenTimeOut") -or
+        $PSBoundParameters.ContainsKey("DRTCMaxConnectionsToServer") -or
+        $PSBoundParameters.ContainsKey("DRTCRequestTimeout") -or
+        $PSBoundParameters.ContainsKey("DRTCChannelOpenTimeOut") -or
+        $PSBoundParameters.ContainsKey("DHSCMaxConnectionsToServer") -or
+        $PSBoundParameters.ContainsKey("DHSCRequestTimeout") -or
+        $PSBoundParameters.ContainsKey("DHSCChannelOpenTimeOut"))
+    {
+        $installedVersion = Get-SPDSCInstalledProductVersion
+        if ($installedVersion.FileMajorPart -eq 15)
+        {
+            throw ("The following parameters are only supported in SharePoint 2016 and above: " + `
+                   "DFLTCMaxConnectionsToServer, DFLTCRequestTimeout, DFLTCChannelOpenTimeOut, " + `
+                   "DSWUCMaxConnectionsToServer, DSWUCRequestTimeout, DSWUCChannelOpenTimeOut, " + `
+                   "DUGCMaxConnectionsToServer, DUGCRequestTimeout, DUGCChannelOpenTimeOut, " + `
+                   "DRTCMaxConnectionsToServer, DRTCRequestTimeout, DRTCChannelOpenTimeOut, " + `
+                   "DHSCMaxConnectionsToServer, DHSCRequestTimeout and DHSCChannelOpenTimeOut")
+        }
+    }
 
     Invoke-SPDSCCommand -Credential $InstallAccount `
                     -Arguments $PSBoundParameters `
@@ -536,6 +747,91 @@ function Set-TargetResource
             $DSTAC.ChannelOpenTimeOut = $params.DSTACChannelOpenTimeOut
         }
         Set-SPDistributedCacheClientSetting -ContainerType "DistributedServerToAppServerAccessTokenCache" $DSTAC
+
+        # The following parameters are only required on SharePoint 2016 and above
+        $installedVersion = Get-SPDSCInstalledProductVersion
+        if ($installedVersion.FileMajorPart -ne 15)
+        {
+            #DistributedFileLockThrottlerCache
+            $DFLTC = Get-SPDistributedCacheClientSetting -ContainerType "DistributedFileLockThrottlerCache"
+            if($params.DFLTCMaxConnectionsToServer)
+            {
+                $DFLTC.MaxConnectionsToServer = $params.DFLTCMaxConnectionsToServer
+            }
+            if($params.DFLTCRequestTimeout)
+            {
+                $DFLTC.RequestTimeout = $params.DFLTCRequestTimeout
+            }
+            if($params.DFLTCChannelOpenTimeOut)
+            {
+                $DFLTC.ChannelOpenTimeOut = $params.DFLTCChannelOpenTimeOut
+            }
+            Set-SPDistributedCacheClientSetting -ContainerType "DistributedFileLockThrottlerCache" $DFLTC
+
+            #DistributedSharedWithUserCache
+            $DSWUC = Get-SPDistributedCacheClientSetting -ContainerType "DistributedSharedWithUserCache"
+            if($params.DSWUCMaxConnectionsToServer)
+            {
+                $DSWUC.MaxConnectionsToServer = $params.DSWUCMaxConnectionsToServer
+            }
+            if($params.DSWUCRequestTimeout)
+            {
+                $DSWUC.RequestTimeout = $params.DSWUCRequestTimeout
+            }
+            if($params.DSWUCChannelOpenTimeOut)
+            {
+                $DSWUC.ChannelOpenTimeOut = $params.DSWUCChannelOpenTimeOut
+            }
+            Set-SPDistributedCacheClientSetting -ContainerType "DistributedSharedWithUserCache" $DSWUC
+
+            #DistributedUnifiedGroupsCache
+            $DUGC = Get-SPDistributedCacheClientSetting -ContainerType "DistributedUnifiedGroupsCache"
+            if($params.DUGCMaxConnectionsToServer)
+            {
+                $DUGC.MaxConnectionsToServer = $params.DUGCMaxConnectionsToServer
+            }
+            if($params.DUGCRequestTimeout)
+            {
+                $DUGC.RequestTimeout = $params.DUGCRequestTimeout
+            }
+            if($params.DUGCChannelOpenTimeOut)
+            {
+                $DUGC.ChannelOpenTimeOut = $params.DUGCChannelOpenTimeOut
+            }
+            Set-SPDistributedCacheClientSetting -ContainerType "DistributedUnifiedGroupsCache" $DUGC
+
+            #DistributedResourceTallyCache
+            $DRTC = Get-SPDistributedCacheClientSetting -ContainerType "DistributedResourceTallyCache"
+            if($params.DRTCMaxConnectionsToServer)
+            {
+                $DRTC.MaxConnectionsToServer = $params.DRTCMaxConnectionsToServer
+            }
+            if($params.DRTCRequestTimeout)
+            {
+                $DRTC.RequestTimeout = $params.DRTCRequestTimeout
+            }
+            if($params.DRTCChannelOpenTimeOut)
+            {
+                $DRTC.ChannelOpenTimeOut = $params.DRTCChannelOpenTimeOut
+            }
+            Set-SPDistributedCacheClientSetting -ContainerType "DistributedResourceTallyCache" $DRTC
+
+            #DistributedHealthScoreCache
+            $DHSC = Get-SPDistributedCacheClientSetting -ContainerType "DistributedHealthScoreCache"
+            if($params.DHSCMaxConnectionsToServer)
+            {
+                $DHSC.MaxConnectionsToServer = $params.DHSCMaxConnectionsToServer
+            }
+            if($params.DHSCRequestTimeout)
+            {
+                $DHSC.RequestTimeout = $params.DHSCRequestTimeout
+            }
+            if($params.DHSCChannelOpenTimeOut)
+            {
+                $DHSC.ChannelOpenTimeOut = $params.DHSCChannelOpenTimeOut
+            }
+            Set-SPDistributedCacheClientSetting -ContainerType "DistributedHealthScoreCache" $DHSC
+        }
     }
 }
 
@@ -671,6 +967,66 @@ function Test-TargetResource
         $DSTACChannelOpenTimeOut,
 
         [Parameter()]
+        [System.UInt32]
+        $DFLTCMaxConnectionsToServer,
+
+        [Parameter()]
+        [System.UInt32]
+        $DFLTCRequestTimeout,
+
+        [Parameter()]
+        [System.UInt32]
+        $DFLTCChannelOpenTimeOut,
+
+        [Parameter()]
+        [System.UInt32]
+        $DSWUCMaxConnectionsToServer,
+
+        [Parameter()]
+        [System.UInt32]
+        $DSWUCRequestTimeout,
+
+        [Parameter()]
+        [System.UInt32]
+        $DSWUCChannelOpenTimeOut,
+
+        [Parameter()]
+        [System.UInt32]
+        $DUGCMaxConnectionsToServer,
+
+        [Parameter()]
+        [System.UInt32]
+        $DUGCRequestTimeout,
+
+        [Parameter()]
+        [System.UInt32]
+        $DUGCChannelOpenTimeOut,
+
+        [Parameter()]
+        [System.UInt32]
+        $DRTCMaxConnectionsToServer,
+
+        [Parameter()]
+        [System.UInt32]
+        $DRTCRequestTimeout,
+
+        [Parameter()]
+        [System.UInt32]
+        $DRTCChannelOpenTimeOut,
+
+        [Parameter()]
+        [System.UInt32]
+        $DHSCMaxConnectionsToServer,
+
+        [Parameter()]
+        [System.UInt32]
+        $DHSCRequestTimeout,
+
+        [Parameter()]
+        [System.UInt32]
+        $DHSCChannelOpenTimeOut,
+
+        [Parameter()]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
@@ -682,35 +1038,50 @@ function Test-TargetResource
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
                                     -DesiredValues $PSBoundParameters `
                                     -ValuesToCheck @("DLTCMaxConnectionsToServer",
-                                    "DLTCRequestTimeout",
-                                    "DLTCChannelOpenTimeOut",
-                                    "DVSCMaxConnectionsToServer",
-                                    "DVSCRequestTimeout",
-                                    "DVSCChannelOpenTimeOut",
-                                    "DACMaxConnectionsToServer",
-                                    "DACRequestTimeout",
-                                    "DACChannelOpenTimeOut",
-                                    "DAFMaxConnectionsToServer",
-                                    "DAFRequestTimeout",
-                                    "DAFChannelOpenTimeOut",
-                                    "DAFCMaxConnectionsToServer",
-                                    "DAFCRequestTimeout",
-                                    "DAFCChannelOpenTimeOut",
-                                    "DBCMaxConnectionsToServer",
-                                    "DBCRequestTimeout",
-                                    "DBCChannelOpenTimeOut",
-                                    "DDCMaxConnectionsToServer",
-                                    "DDCRequestTimeout",
-                                    "DDCChannelOpenTimeOut",
-                                    "DSCMaxConnectionsToServer",
-                                    "DSCRequestTimeout",
-                                    "DSCChannelOpenTimeOut",
-                                    "DTCMaxConnectionsToServer",
-                                    "DTCRequestTimeout",
-                                    "DTCChannelOpenTimeOut",
-                                    "DSTACMaxConnectionsToServer",
-                                    "DSTACRequestTimeout",
-                                    "DSTACChannelOpenTimeOut"
+                                                     "DLTCRequestTimeout",
+                                                     "DLTCChannelOpenTimeOut",
+                                                     "DVSCMaxConnectionsToServer",
+                                                     "DVSCRequestTimeout",
+                                                     "DVSCChannelOpenTimeOut",
+                                                     "DACMaxConnectionsToServer",
+                                                     "DACRequestTimeout",
+                                                     "DACChannelOpenTimeOut",
+                                                     "DAFMaxConnectionsToServer",
+                                                     "DAFRequestTimeout",
+                                                     "DAFChannelOpenTimeOut",
+                                                     "DAFCMaxConnectionsToServer",
+                                                     "DAFCRequestTimeout",
+                                                     "DAFCChannelOpenTimeOut",
+                                                     "DBCMaxConnectionsToServer",
+                                                     "DBCRequestTimeout",
+                                                     "DBCChannelOpenTimeOut",
+                                                     "DDCMaxConnectionsToServer",
+                                                     "DDCRequestTimeout",
+                                                     "DDCChannelOpenTimeOut",
+                                                     "DSCMaxConnectionsToServer",
+                                                     "DSCRequestTimeout",
+                                                     "DSCChannelOpenTimeOut",
+                                                     "DTCMaxConnectionsToServer",
+                                                     "DTCRequestTimeout",
+                                                     "DTCChannelOpenTimeOut",
+                                                     "DSTACMaxConnectionsToServer",
+                                                     "DSTACRequestTimeout",
+                                                     "DSTACChannelOpenTimeOut",
+                                                     "DFLTCMaxConnectionsToServer",
+                                                     "DFLTCRequestTimeout",
+                                                     "DFLTCChannelOpenTimeOut",
+                                                     "DSWUCMaxConnectionsToServer",
+                                                     "DSWUCRequestTimeout",
+                                                     "DSWUCChannelOpenTimeOut",
+                                                     "DUGCMaxConnectionsToServer",
+                                                     "DUGCRequestTimeout",
+                                                     "DUGCChannelOpenTimeOut",
+                                                     "DRTCMaxConnectionsToServer",
+                                                     "DRTCRequestTimeout",
+                                                     "DRTCChannelOpenTimeOut",
+                                                     "DHSCMaxConnectionsToServer",
+                                                     "DHSCRequestTimeout",
+                                                     "DHSCChannelOpenTimeOut"
                                     )
 }
 

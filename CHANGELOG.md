@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+* SPDistributedCacheClientSettings
+  * Added 15 new SharePoint 2016 parameters
+* SPInfoPathFormsServiceConfig
+  * Added the AllowEventPropagation parameter
 * SPInstallPrereqs
   * Added check to unblock setup file if it is blocked because it is coming
     from a network location. This to prevent endless wait
