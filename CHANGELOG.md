@@ -13,7 +13,7 @@
     to IE Local Intranet Zone. This will prevent an endless wait
     caused by security warning.
   * Fixed an issue that would prevent the resource failing a test when the
-    prerequisites have been install successfully on Windows Server 2019
+    prerequisites have been installed successfully on Windows Server 2019
 * SPManagedMetadataServiceApp
   * Fixed issue where Get-TargetResource method throws an error when the
     service app proxy does not exist and no proxy name is specified.
