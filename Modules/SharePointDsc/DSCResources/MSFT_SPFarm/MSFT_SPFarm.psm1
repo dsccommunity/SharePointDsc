@@ -149,7 +149,7 @@ function Get-TargetResource
 
     if ($null -ne $dsnValue)
     {
-        # This node has already been connected to a farm
+        Write-Verbose -Message "This node has already been connected to a farm"
         $result = Invoke-SPDSCCommand -Credential $InstallAccount `
                                       -Arguments $PSBoundParameters `
                                       -ScriptBlock {
@@ -172,10 +172,6 @@ function Get-TargetResource
 
             $configDb = Get-SPDatabase | Where-Object -FilterScript {
                 $_.Name -eq $spFarm.Name -and $_.Type -eq "Configuration Database"
-            }
-            $centralAdminSite = Get-SPWebApplication -IncludeCentralAdministration `
-                                | Where-Object -FilterScript {
-                $_.IsAdministrationWebApplication -eq $true
             }
 
             if ($params.FarmAccount.UserName -eq $spFarm.DefaultServiceAccount.Name)
@@ -208,7 +204,9 @@ function Get-TargetResource
                 $centralAdminProvisioned = $true
             }
 
-            if ($centralAdminSite.IisSettings[0].DisableKerberos -eq $false)
+            $centralAdminAuth = $null
+            if ($null -ne $centralAdminSite -and `
+                $centralAdminSite.IisSettings[0].DisableKerberos -eq $false)
             {
                 $centralAdminAuth = "Kerberos"
             }
@@ -286,7 +284,8 @@ function Get-TargetResource
     }
     else
     {
-        # This node has never been connected to a farm, return the null return object
+        Write-Verbose -Message "This node has never been connected to a farm"
+        # Return the null return object
         return @{
             IsSingleInstance          = "Yes"
             FarmConfigDatabaseName    = $null
@@ -463,6 +462,7 @@ function Set-TargetResource
         }
         if ($CurrentValues.CentralAdministrationPort -ne $CentralAdministrationPort)
         {
+            Write-Verbose -Message "Updating CentralAdmin port to $CentralAdministrationPort"
             Invoke-SPDSCCommand -Credential $InstallAccount `
                                 -Arguments $PSBoundParameters `
                                 -ScriptBlock {
@@ -475,6 +475,7 @@ function Set-TargetResource
 
         if ($CurrentValues.DeveloperDashboard -ne $DeveloperDashboard)
         {
+            Write-Verbose -Message "Updating DeveloperDashboard to $DeveloperDashboard"
             Invoke-SPDSCCommand -Credential $InstallAccount `
                                 -Arguments $PSBoundParameters `
                                 -ScriptBlock {

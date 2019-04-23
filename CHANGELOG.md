@@ -4,6 +4,8 @@
 
 * SPDistributedCacheClientSettings
   * Added 15 new SharePoint 2016 parameters.
+* SPFarm
+  * Implemented Null check in Get method to prevent errors
 * SPInfoPathFormsServiceConfig
   * Added the AllowEventPropagation parameter.
 * SPInstallPrereqs
