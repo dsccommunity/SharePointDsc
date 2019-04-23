@@ -196,13 +196,14 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting installation status of SharePoint prerequisites"
 
+    Write-Verbose -Message "Check if InstallerPath folder exists"
     if (-not(Test-Path -Path $InstallerPath))
     {
         throw "PrerequisitesInstaller cannot be found: {$InstallerPath}"
     }
 
     Write-Verbose -Message "Checking file status of $InstallerPath"
-    $zone = Get-Item $InstallerPath -Stream "Zone.Identifier" -EA SilentlyContinue
+    $zone = Get-Item -Path $InstallerPath -Stream "Zone.Identifier" -EA SilentlyContinue
     if ($null -ne $zone)
     {
         throw ("PrerequisitesInstaller is blocked! Please use 'Unblock-File -Path " + `
@@ -573,13 +574,14 @@ function Set-TargetResource
                            "prerequisites. Please remove this manually.")
     }
 
+    Write-Verbose -Message "Check if InstallerPath folder exists"
     if (-not(Test-Path -Path $InstallerPath))
     {
         throw "PrerequisitesInstaller cannot be found: {$InstallerPath}"
     }
 
     Write-Verbose -Message "Checking file status of $InstallerPath"
-    $zone = Get-Item $InstallerPath -Stream "Zone.Identifier" -EA SilentlyContinue
+    $zone = Get-Item -Path $InstallerPath -Stream "Zone.Identifier" -EA SilentlyContinue
     if ($null -ne $zone)
     {
         throw ("PrerequisitesInstaller is blocked! Please use 'Unblock-File -Path " + `

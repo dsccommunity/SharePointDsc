@@ -43,7 +43,7 @@ function Get-TargetResource
     $servicepack = $false
     $language = ""
 
-    # Get file information from setup file
+    Write-Verbose -Message "Check if the setup file exists"
     if (-not(Test-Path -Path $SetupFile))
     {
         throw "Setup file cannot be found: {$SetupFile}"
@@ -60,6 +60,7 @@ function Get-TargetResource
 
     $nullVersion = New-Object -TypeName System.Version
 
+    Write-Verbose -Message "Get file information from setup file"
     $setupFileInfo = Get-ItemProperty -Path $SetupFile
     $fileVersion = $setupFileInfo.VersionInfo.FileVersion
     Write-Verbose -Message "Update has version $fileVersion"
@@ -240,7 +241,7 @@ function Set-TargetResource
         return
     }
 
-    # Check if setup file exists
+    Write-Verbose -Message "Check if the setup file exists"
     if (-not(Test-Path -Path $SetupFile))
     {
         throw "Setup file cannot be found: {$SetupFile}"
@@ -256,9 +257,10 @@ function Set-TargetResource
     }
 
     $now = Get-Date
+    Write-Verbose -Message "Check if BinaryInstallDays is specified"
     if ($BinaryInstallDays)
     {
-        # BinaryInstallDays parameter exists, check if current day is specified
+        Write-Verbose -Message "BinaryInstallDays parameter exists, check if current day is specified"
         $currentDayOfWeek = $now.DayOfWeek.ToString().ToLower().Substring(0, 3)
 
         if ($BinaryInstallDays -contains $currentDayOfWeek)
@@ -278,10 +280,11 @@ function Set-TargetResource
         Write-Verbose -Message "No BinaryInstallDays specified, Update can be ran on any day."
     }
 
-    # Check if BinaryInstallTime parameter exists
+    Write-Verbose -Message "Check if BinaryInstallTime is specified"
     if ($BinaryInstallTime)
     {
-        # Check if current time is inside of time window
+        Write-Verbose -Message ("BinaryInstallTime parameter exists, check if current time is inside " + `
+                                "of time window")
         $upgradeTimes = $BinaryInstallTime.Split(" ")
         $starttime = 0
         $endtime = 0
