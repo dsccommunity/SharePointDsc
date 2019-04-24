@@ -233,8 +233,8 @@ function Get-TargetResource
         $zone = Get-Item -Path $InstallerPath -Stream "Zone.Identifier" -EA SilentlyContinue
         if ($null -ne $zone)
         {
-            throw ("Setup file is blocked! Please use 'Unblock-File -Path $InstallerPath' " + `
-                   "to unblock the file before continuing.")
+            throw ("PrerequisitesInstaller is blocked! Please use 'Unblock-File -Path " + `
+                   "$InstallerPath' to unblock the file before continuing.")
         }
     }
 
@@ -639,8 +639,8 @@ function Set-TargetResource
         $zone = Get-Item -Path $InstallerPath -Stream "Zone.Identifier" -EA SilentlyContinue
         if ($null -ne $zone)
         {
-            throw ("Setup file is blocked! Please use 'Unblock-File -Path $InstallerPath' " + `
-                   "to unblock the file before continuing.")
+            throw ("PrerequisitesInstaller is blocked! Please use 'Unblock-File -Path " + `
+                   "$InstallerPath' to unblock the file before continuing.")
         }
     }
 
