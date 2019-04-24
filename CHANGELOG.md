@@ -10,23 +10,31 @@
   * Added the AllowEventPropagation parameter.
 * SPInstall
   * Improved logging ouput
+  * Updated blocked setup file check to prevent errors when BinaryDir
+    is a CD-ROM drive or mounted ISO
 * SPInstallLanguagePack
   * Improved logging ouput
+  * Updated blocked setup file check to prevent errors when BinaryDir
+    is a CD-ROM drive or mounted ISO
 * SPInstallPrereqs
-  * Added check to unblock setup file if it is blocked because it is coming
-    from a network location. This to prevent endless wait.
+  * Improved logging ouput
+  * Added the updated check to unblock setup file if it is blocked because
+    it is coming from a network location. This to prevent endless wait.
   * Added ability to install from a UNC path, by adding server
     to IE Local Intranet Zone. This will prevent an endless wait
     caused by security warning.
-  * Improved logging ouput
 * SPManagedMetadataServiceApp
   * Fixed issue where Get-TargetResource method throws an error when the
     service app proxy does not exist and no proxy name is specified.
 * SPProductUpdate
   * Improved logging ouput
+  * Updated blocked setup file check to prevent errors when SetupFile
+    is a CD-ROM drive or mounted ISO
 * SPSearchContent Source
   * Removed check that prevents configuring an incremental schedule when
     using continuous crawl.
+* SPSitePropertyBag
+  * Fixed issue where properties were set on the wrong level.
 * SPSubscriptionSettingsServiceApp
   * Fixed issue where the service app proxy isn't created when it wasn't
     created during initial deployment.

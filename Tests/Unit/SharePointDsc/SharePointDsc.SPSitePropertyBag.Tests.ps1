@@ -20,8 +20,10 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Mock -CommandName Get-SPSite -MockWith {
             $spSite = [pscustomobject]@{
-                Properties = @{
-                    PropertyKey = 'PropertyValue'
+                RootWeb = @{
+                    Properties = @{
+                        PropertyKey = 'PropertyValue'
+                    }
                 }
             }
             $spSite = $spSite | Add-Member ScriptMethod Update {

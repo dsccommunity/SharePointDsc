@@ -42,11 +42,40 @@ function Get-TargetResource
         throw "Setup.exe cannot be found in {$BinaryDir}"
     }
 
-    $zone = Get-Item -Path $setupExe -Stream "Zone.Identifier" -EA SilentlyContinue
-    if ($null -ne $zone)
+    Write-Verbose -Message "Checking file status of $setupExe"
+    $checkBlockedFile = $true
+    if (Split-Path -Path $setupExe -IsAbsolute)
     {
-        throw ("Setup file is blocked! Please use 'Unblock-File -Path $setupExe' " + `
-               "to unblock the file before continuing.")
+        $driveLetter = (Split-Path -Path $setupExe -Qualifier).TrimEnd(":")
+        Write-Verbose -Message "BinaryDir refers to drive $driveLetter"
+
+        $volume = Get-Volume -DriveLetter $driveLetter -ErrorAction SilentlyContinue
+        if ($null -ne $volume)
+        {
+            if ($volume.DriveType -ne "CD-ROM")
+            {
+                Write-Verbose -Message "Volume is a fixed drive: Perform Blocked File test"
+            }
+            else
+            {
+                Write-Verbose -Message "Volume is a CD-ROM drive: Skipping Blocked File test"
+                $checkBlockedFile = $false
+            }
+        }
+        else
+        {
+            Write-Verbose -Message "Volume not found. Unable to determine the type. Continuing."
+        }
+    }
+
+    if ($checkBlockedFile -eq $true)
+    {
+        $zone = Get-Item -Path $setupExe -Stream "Zone.Identifier" -EA SilentlyContinue
+        if ($null -ne $zone)
+        {
+            throw ("Setup file is blocked! Please use 'Unblock-File -Path $setupExe' " + `
+                   "to unblock the file before continuing.")
+        }
     }
 
     $osrvFolder = Get-ChildItem -Path (Join-Path -Path $BinaryDir `
@@ -228,11 +257,40 @@ function Set-TargetResource
         throw "Setup.exe cannot be found in {$BinaryDir}"
     }
 
-    $zone = Get-Item -Path $setupExe -Stream "Zone.Identifier" -EA SilentlyContinue
-    if ($null -ne $zone)
+    Write-Verbose -Message "Checking file status of $setupExe"
+    $checkBlockedFile = $true
+    if (Split-Path -Path $setupExe -IsAbsolute)
     {
-        throw ("Setup file is blocked! Please use 'Unblock-File -Path $setupExe' " + `
-               "to unblock the file before continuing.")
+        $driveLetter = (Split-Path -Path $setupExe -Qualifier).TrimEnd(":")
+        Write-Verbose -Message "BinaryDir refers to drive $driveLetter"
+
+        $volume = Get-Volume -DriveLetter $driveLetter -ErrorAction SilentlyContinue
+        if ($null -ne $volume)
+        {
+            if ($volume.DriveType -ne "CD-ROM")
+            {
+                Write-Verbose -Message "Volume is a fixed drive: Perform Blocked File test"
+            }
+            else
+            {
+                Write-Verbose -Message "Volume is a CD-ROM drive: Skipping Blocked File test"
+                $checkBlockedFile = $false
+            }
+        }
+        else
+        {
+            Write-Verbose -Message "Volume not found. Unable to determine the type. Continuing."
+        }
+    }
+
+    if ($checkBlockedFile -eq $true)
+    {
+        $zone = Get-Item -Path $setupExe -Stream "Zone.Identifier" -EA SilentlyContinue
+        if ($null -ne $zone)
+        {
+            throw ("Setup file is blocked! Please use 'Unblock-File -Path $setupExe' " + `
+                   "to unblock the file before continuing.")
+        }
     }
 
     $now = Get-Date

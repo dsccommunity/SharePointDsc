@@ -50,12 +50,40 @@ function Get-TargetResource
     }
 
     Write-Verbose -Message "Checking file status of $SetupFile"
-    $zone = Get-Item -Path $SetupFile -Stream "Zone.Identifier" -EA SilentlyContinue
-
-    if ($null -ne $zone)
+    $checkBlockedFile = $true
+    if (Split-Path -Path $SetupFile -IsAbsolute)
     {
-        throw ("Setup file is blocked! Please use 'Unblock-File -Path $SetupFile' " + `
-               "to unblock the file before continuing.")
+        $driveLetter = (Split-Path -Path $SetupFile -Qualifier).TrimEnd(":")
+        Write-Verbose -Message "SetupFile refers to drive $driveLetter"
+
+        $volume = Get-Volume -DriveLetter $driveLetter -ErrorAction SilentlyContinue
+        if ($null -ne $volume)
+        {
+            if ($volume.DriveType -ne "CD-ROM")
+            {
+                Write-Verbose -Message "Volume is a fixed drive: Perform Blocked File test"
+            }
+            else
+            {
+                Write-Verbose -Message "Volume is a CD-ROM drive: Skipping Blocked File test"
+                $checkBlockedFile = $false
+            }
+        }
+        else
+        {
+            Write-Verbose -Message "Volume not found. Unable to determine the type. Continuing."
+        }
+    }
+
+    if ($checkBlockedFile -eq $true)
+    {
+        $zone = Get-Item -Path $SetupFile -Stream "Zone.Identifier" -EA SilentlyContinue
+
+        if ($null -ne $zone)
+        {
+            throw ("Setup file is blocked! Please use 'Unblock-File -Path $SetupFile' " + `
+                   "to unblock the file before continuing.")
+        }
     }
 
     $nullVersion = New-Object -TypeName System.Version
@@ -248,12 +276,40 @@ function Set-TargetResource
     }
 
     Write-Verbose -Message "Checking file status of $SetupFile"
-    $zone = Get-Item -Path $SetupFile -Stream "Zone.Identifier" -EA SilentlyContinue
-
-    if ($null -ne $zone)
+    $checkBlockedFile = $true
+    if (Split-Path -Path $SetupFile -IsAbsolute)
     {
-        throw ("Setup file is blocked! Please use 'Unblock-File -Path $SetupFile' " + `
-               "to unblock the file before continuing.")
+        $driveLetter = (Split-Path -Path $SetupFile -Qualifier).TrimEnd(":")
+        Write-Verbose -Message "SetupFile refers to drive $driveLetter"
+
+        $volume = Get-Volume -DriveLetter $driveLetter -ErrorAction SilentlyContinue
+        if ($null -ne $volume)
+        {
+            if ($volume.DriveType -ne "CD-ROM")
+            {
+                Write-Verbose -Message "Volume is a fixed drive: Perform Blocked File test"
+            }
+            else
+            {
+                Write-Verbose -Message "Volume is a CD-ROM drive: Skipping Blocked File test"
+                $checkBlockedFile = $false
+            }
+        }
+        else
+        {
+            Write-Verbose -Message "Volume not found. Unable to determine the type. Continuing."
+        }
+    }
+
+    if ($checkBlockedFile -eq $true)
+    {
+        $zone = Get-Item -Path $SetupFile -Stream "Zone.Identifier" -EA SilentlyContinue
+
+        if ($null -ne $zone)
+        {
+            throw ("Setup file is blocked! Please use 'Unblock-File -Path $SetupFile' " + `
+                   "to unblock the file before continuing.")
+        }
     }
 
     $now = Get-Date

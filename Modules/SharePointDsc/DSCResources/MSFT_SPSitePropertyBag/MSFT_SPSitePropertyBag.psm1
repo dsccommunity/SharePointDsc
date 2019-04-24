@@ -42,12 +42,12 @@ function Get-TargetResource()
         }
         else
         {
-            if ($spSite.Properties)
+            if ($spSite.RootWeb.Properties)
             {
-                if ($spSite.Properties.Contains($params.Key) -eq $true)
+                if ($spSite.RootWeb.Properties.Contains($params.Key) -eq $true)
                 {
                     $localEnsure = 'Present'
-                    $currentValue = $spSite.Properties[$params.Key]
+                    $currentValue = $spSite.RootWeb.Properties[$params.Key]
                 }
                 else
                 {
@@ -105,14 +105,14 @@ function Set-TargetResource()
 
         if ($params.Ensure -eq 'Present')
         {
-            Write-Verbose -Message "Adding property '$($params.Key)'='$($params.value)' to SPSite.Properties"
-            $spSite.Properties[$params.Key] = $params.Value
+            Write-Verbose -Message "Adding property '$($params.Key)'='$($params.value)' to SPSite.RootWeb.Properties"
+            $spSite.RootWeb.Properties[$params.Key] = $params.Value
             $spSite.Update()
         }
         else
         {
-            Write-Verbose -Message "Removing property '$($params.Key)' from SPSite.Properties"
-            $spSite.Properties.Remove($params.Key)
+            Write-Verbose -Message "Removing property '$($params.Key)' from SPSite.RootWeb.Properties"
+            $spSite.RootWeb.Properties.Remove($params.Key)
             $spSite.Update()
         }
     }

@@ -46,11 +46,39 @@ function Get-TargetResource
     }
 
     Write-Verbose -Message "Checking file status of $InstallerPath"
-    $zone = Get-Item -Path $InstallerPath -Stream "Zone.Identifier" -EA SilentlyContinue
-    if ($null -ne $zone)
+    $checkBlockedFile = $true
+    if (Split-Path -Path $InstallerPath -IsAbsolute)
     {
-        throw ("Setup file is blocked! Please use 'Unblock-File -Path $InstallerPath' " + `
-               "to unblock the file before continuing.")
+        $driveLetter = (Split-Path -Path $InstallerPath -Qualifier).TrimEnd(":")
+        Write-Verbose -Message "BinaryDir refers to drive $driveLetter"
+
+        $volume = Get-Volume -DriveLetter $driveLetter -ErrorAction SilentlyContinue
+        if ($null -ne $volume)
+        {
+            if ($volume.DriveType -ne "CD-ROM")
+            {
+                Write-Verbose -Message "Volume is a fixed drive: Perform Blocked File test"
+            }
+            else
+            {
+                Write-Verbose -Message "Volume is a CD-ROM drive: Skipping Blocked File test"
+                $checkBlockedFile = $false
+            }
+        }
+        else
+        {
+            Write-Verbose -Message "Volume not found. Unable to determine the type. Continuing."
+        }
+    }
+
+    if ($checkBlockedFile -eq $true)
+    {
+        $zone = Get-Item -Path $InstallerPath -Stream "Zone.Identifier" -EA SilentlyContinue
+        if ($null -ne $zone)
+        {
+            throw ("Setup file is blocked! Please use 'Unblock-File -Path $InstallerPath' " + `
+                   "to unblock the file before continuing.")
+        }
     }
 
     $x86Path = "HKLM:\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*"
@@ -187,12 +215,39 @@ function Set-TargetResource
     }
 
     Write-Verbose -Message "Checking file status of $InstallerPath"
-    $zone = Get-Item -Path $InstallerPath -Stream "Zone.Identifier" -EA SilentlyContinue
-
-    if ($null -ne $zone)
+    $checkBlockedFile = $true
+    if (Split-Path -Path $InstallerPath -IsAbsolute)
     {
-        throw ("Setup file is blocked! Please use 'Unblock-File -Path $InstallerPath' " + `
-               "to unblock the file before continuing.")
+        $driveLetter = (Split-Path -Path $InstallerPath -Qualifier).TrimEnd(":")
+        Write-Verbose -Message "BinaryDir refers to drive $driveLetter"
+
+        $volume = Get-Volume -DriveLetter $driveLetter -ErrorAction SilentlyContinue
+        if ($null -ne $volume)
+        {
+            if ($volume.DriveType -ne "CD-ROM")
+            {
+                Write-Verbose -Message "Volume is a fixed drive: Perform Blocked File test"
+            }
+            else
+            {
+                Write-Verbose -Message "Volume is a CD-ROM drive: Skipping Blocked File test"
+                $checkBlockedFile = $false
+            }
+        }
+        else
+        {
+            Write-Verbose -Message "Volume not found. Unable to determine the type. Continuing."
+        }
+    }
+
+    if ($checkBlockedFile -eq $true)
+    {
+        $zone = Get-Item -Path $InstallerPath -Stream "Zone.Identifier" -EA SilentlyContinue
+        if ($null -ne $zone)
+        {
+            throw ("Setup file is blocked! Please use 'Unblock-File -Path $InstallerPath' " + `
+                   "to unblock the file before continuing.")
+        }
     }
 
     Write-Verbose -Message "Checking if Path is an UNC path"
