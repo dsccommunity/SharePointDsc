@@ -51,6 +51,8 @@ namespace Microsoft.SharePoint.Administration {
         Mock -CommandName Install-SPService -MockWith { }
         Mock -CommandName Install-SPFeature -MockWith { }
         Mock -CommandName New-SPCentralAdministration -MockWith { }
+        Mock -CommandName Remove-SPWebApplication -MockWith { }
+        Mock -CommandName New-SPWebApplicationExtension -MockWith { }
         Mock -CommandName Start-Sleep -MockWith { }
         Mock -CommandName Start-Service -MockWith { }
         Mock -CommandName Stop-Service -MockWith { }
@@ -102,8 +104,9 @@ namespace Microsoft.SharePoint.Administration {
             It "Should throw exception in the set method" {
                 { Set-TargetResource @testParams } | Should Throw "An invalid value for CentralAdministrationPort is specified:"
             }
+        }
 
-            # Repeat tests for invalid URL
+        Context -Name "Invalid CA URL has been passed in" -Fixture {
             $testParams = @{
                 IsSingleInstance = "Yes"
                 Ensure = "Present"
@@ -735,8 +738,42 @@ namespace Microsoft.SharePoint.Administration {
                 })
             }
             Mock -CommandName Get-SPWebApplication -MockWith {
-                return [fake_sp_web_application]::new($testParams.CentralAdministrationUrl, "different.contoso.com")
+                # return [fake_sp_web_application]::new($testParams.CentralAdministrationUrl, "different.contoso.com")
+                $webapp = @{
+                    ContentDatabases = @(
+                        @{
+                            Name = $testParams.AdminContentDatabaseName
+                        }
+                    )
+                    Url = $testParams.CentralAdministrationUrl
+                    IsAdministrationWebApplication = $true
+                    IisSettings = [ordered]@{
+                        Default = @{
+                            DisableKerberos = $true
+                            SecureBindings = @(
+                                @{
+                                    HostHeader = "different.contoso.com"
+                                    Port = "443"
+                                }
+                            )
+                        }
+                    }
+                }
+
+                $webapp | Add-Member -MemberType ScriptMethod -Name GetIisSettingsWithFallback -Value {
+                    [CmdletBinding()]
+                    param(
+                        [Parameter(Mandatory = $true)]
+                        [string]
+                        $Zone
+                    )
+
+                    return $this.IisSettings[$Zone]
+                }
+
+                return $webapp
             }
+
             Mock -CommandName Get-CimInstance -MockWith {
                 return @{
                     Domain = "domain.com"
@@ -787,6 +824,82 @@ namespace Microsoft.SharePoint.Administration {
             $global:SPDscCentralAdminCheckDone = $false
             It "Should return false from the test method" {
                 Test-TargetResource @testParams | Should be $false
+            }
+        }
+
+        Context -Name "Server not yet part of the farm, and will run Central Admin on HTTPS" -Fixture {
+            $testParams = @{
+                IsSingleInstance = "Yes"
+                Ensure = "Present"
+                FarmConfigDatabaseName = "SP_Config"
+                DatabaseServer = "sql.contoso.com"
+                FarmAccount = $mockFarmAccount
+                Passphrase = $mockPassphrase
+                AdminContentDatabaseName = "SP_AdminContent"
+                CentralAdministrationUrl = "https://admin.contoso.com"
+                RunCentralAdmin = $true
+            }
+
+            Mock -CommandName "Get-SPDSCRegistryKey" -MockWith { return $null }
+            Mock -CommandName "Get-SPFarm" -MockWith { return $null }
+            Mock -CommandName "Get-SPDSCConfigDBStatus" -MockWith {
+                return @{
+                    Locked = $false
+                    ValidPermissions = $true
+                    DatabaseExists = $true
+                }
+            }
+            Mock -CommandName "Get-SPDSCSQLInstanceStatus" -MockWith {
+                return @{
+                    MaxDOPCorrect = $true
+                }
+            }
+
+            Mock -CommandName "Get-SPWebApplication" -MockWith {
+                return @{
+                    IsAdministrationWebApplication = $true
+                    ContentDatabases = @(@{
+                        Name = $testParams.AdminContentDatabaseName
+                    })
+                    Url = "http://localhost:9999"
+                }
+            }
+            Mock -CommandName "Get-SPServiceInstance" -MockWith {
+                if ($global:SPDscCentralAdminCheckDone -eq $true)
+                {
+                    return @(
+                        @{
+                            Name = "WSS_Administration"
+                        } | Add-Member -MemberType ScriptMethod `
+                                       -Name GetType `
+                                       -Value {
+                                           return @{
+                                               Name = "SPWebServiceInstance"
+                                           }
+                                       } -PassThru -Force
+                    )
+                }
+                else
+                {
+                    $global:SPDscCentralAdminCheckDone = $true
+                    return $null
+                }
+            }
+
+            It "Should return absent from the get method" {
+                (Get-TargetResource @testParams).Ensure | Should Be "Absent"
+            }
+
+            It "Should return false from the test method" {
+                Test-TargetResource @testParams | Should be $false
+            }
+
+            $global:SPDscCentralAdminCheckDone = $false
+            It "Should provision, remove, and re-extend CA web application in the set method" {
+                Set-TargetResource @testParams
+                Assert-MockCalled -CommandName "New-SPCentralAdministration"
+                Assert-MockCalled -CommandName "Remove-SPWebApplication"
+                Assert-MockCalled -CommandName "New-SPWebApplicationExtension"
             }
         }
 
