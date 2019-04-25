@@ -4,6 +4,8 @@
 
 * SPDistributedCacheClientSettings
   * Added 15 new SharePoint 2016 parameters.
+* SPFarm
+  * Add support to provision Central Administration on HTTPS
 * SPInfoPathFormsServiceConfig
   * Added the AllowEventPropagation parameter.
 * SPInstallPrereqs
