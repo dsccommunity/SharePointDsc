@@ -37,24 +37,19 @@ function Get-TargetResource()
 
         if ($null -eq $spSite)
         {
-            $currentValue = $null
-            $localEnsure = 'Absent'
+            throw "Specified site collection could not be found."
+        }
+
+        if ($null -ne $spSite.RootWeb.Properties -and `
+            $spSite.RootWeb.Properties.ContainsKey($params.Key) -eq $true)
+        {
+            $localEnsure = 'Present'
+            $currentValue = $spSite.RootWeb.Properties[$params.Key]
         }
         else
         {
-            if ($spSite.RootWeb.Properties)
-            {
-                if ($spSite.RootWeb.Properties.Contains($params.Key) -eq $true)
-                {
-                    $localEnsure = 'Present'
-                    $currentValue = $spSite.RootWeb.Properties[$params.Key]
-                }
-                else
-                {
-                    $localEnsure = 'Absent'
-                    $currentValue = $null
-                }
-            }
+            $localEnsure = 'Absent'
+            $currentValue = $null
         }
 
         return @{
@@ -103,17 +98,32 @@ function Set-TargetResource()
 
         $spSite = Get-SPSite -Identity $params.Url -ErrorAction SilentlyContinue
 
-        if ($params.Ensure -eq 'Present')
+        if ($null -eq $spSite)
         {
-            Write-Verbose -Message "Adding property '$($params.Key)'='$($params.value)' to SPSite.RootWeb.Properties"
-            $spSite.RootWeb.Properties[$params.Key] = $params.Value
-            $spSite.Update()
+            throw "Specified site collection could not be found."
+        }
+
+        $spWeb = $spSite.OpenWeb()
+
+        if ($null -ne $spWeb.Properties)
+        {
+            if ($params.Ensure -eq 'Present')
+            {
+                Write-Verbose -Message "Adding property '$($params.Key)'='$($params.value)' to SPWeb.Properties"
+                $spWeb.Properties[$params.Key] = $params.Value
+                $spWeb.Properties.Update()
+                $spWeb.Update()
+            }
+            else
+            {
+                Write-Verbose -Message "Removing property '$($params.Key)' from SPWeb.AllProperties"
+                $spWeb.AllProperties.Remove($params.Key.ToLower())
+                $spWeb.Update()
+            }
         }
         else
         {
-            Write-Verbose -Message "Removing property '$($params.Key)' from SPSite.RootWeb.Properties"
-            $spSite.RootWeb.Properties.Remove($params.Key)
-            $spSite.Update()
+            throw "Cannot retrieve the property bag. Please check if you have the correct permissions."
         }
     }
 }

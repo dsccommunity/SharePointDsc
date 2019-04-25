@@ -230,12 +230,14 @@ function Get-TargetResource
 
     if ($checkBlockedFile -eq $true)
     {
+        Write-Verbose -Message "Checking status now"
         $zone = Get-Item -Path $InstallerPath -Stream "Zone.Identifier" -EA SilentlyContinue
         if ($null -ne $zone)
         {
             throw ("PrerequisitesInstaller is blocked! Please use 'Unblock-File -Path " + `
                    "$InstallerPath' to unblock the file before continuing.")
         }
+        Write-Verbose -Message "File not blocked, continuing."
     }
 
     $majorVersion = (Get-SPDSCAssemblyVersion -PathToAssembly $InstallerPath)
@@ -636,12 +638,14 @@ function Set-TargetResource
 
     if ($checkBlockedFile -eq $true)
     {
+        Write-Verbose -Message "Checking status now"
         $zone = Get-Item -Path $InstallerPath -Stream "Zone.Identifier" -EA SilentlyContinue
         if ($null -ne $zone)
         {
             throw ("PrerequisitesInstaller is blocked! Please use 'Unblock-File -Path " + `
                    "$InstallerPath' to unblock the file before continuing.")
         }
+        Write-Verbose -Message "File not blocked, continuing."
     }
 
     Write-Verbose -Message "Detecting SharePoint version from binaries"

@@ -77,6 +77,7 @@ function Get-TargetResource
 
     if ($checkBlockedFile -eq $true)
     {
+        Write-Verbose -Message "Checking status now"
         $zone = Get-Item -Path $SetupFile -Stream "Zone.Identifier" -EA SilentlyContinue
 
         if ($null -ne $zone)
@@ -84,6 +85,7 @@ function Get-TargetResource
             throw ("Setup file is blocked! Please use 'Unblock-File -Path $SetupFile' " + `
                    "to unblock the file before continuing.")
         }
+        Write-Verbose -Message "File not blocked, continuing."
     }
 
     $nullVersion = New-Object -TypeName System.Version
@@ -303,6 +305,7 @@ function Set-TargetResource
 
     if ($checkBlockedFile -eq $true)
     {
+        Write-Verbose -Message "Checking status now"
         $zone = Get-Item -Path $SetupFile -Stream "Zone.Identifier" -EA SilentlyContinue
 
         if ($null -ne $zone)
@@ -310,6 +313,7 @@ function Set-TargetResource
             throw ("Setup file is blocked! Please use 'Unblock-File -Path $SetupFile' " + `
                    "to unblock the file before continuing.")
         }
+        Write-Verbose -Message "File not blocked, continuing."
     }
 
     $now = Get-Date

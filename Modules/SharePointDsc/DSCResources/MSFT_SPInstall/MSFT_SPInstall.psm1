@@ -73,12 +73,14 @@ function Get-TargetResource
 
     if ($checkBlockedFile -eq $true)
     {
+        Write-Verbose -Message "Checking status now"
         $zone = Get-Item -Path $InstallerPath -Stream "Zone.Identifier" -EA SilentlyContinue
         if ($null -ne $zone)
         {
             throw ("Setup file is blocked! Please use 'Unblock-File -Path $InstallerPath' " + `
                    "to unblock the file before continuing.")
         }
+        Write-Verbose -Message "File not blocked, continuing."
     }
 
     $x86Path = "HKLM:\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*"
@@ -242,12 +244,14 @@ function Set-TargetResource
 
     if ($checkBlockedFile -eq $true)
     {
+        Write-Verbose -Message "Checking status now"
         $zone = Get-Item -Path $InstallerPath -Stream "Zone.Identifier" -EA SilentlyContinue
         if ($null -ne $zone)
         {
             throw ("Setup file is blocked! Please use 'Unblock-File -Path $InstallerPath' " + `
                    "to unblock the file before continuing.")
         }
+        Write-Verbose -Message "File not blocked, continuing."
     }
 
     Write-Verbose -Message "Checking if Path is an UNC path"

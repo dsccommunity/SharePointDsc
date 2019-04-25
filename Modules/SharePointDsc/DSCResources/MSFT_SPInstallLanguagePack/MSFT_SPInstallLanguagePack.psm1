@@ -70,12 +70,14 @@ function Get-TargetResource
 
     if ($checkBlockedFile -eq $true)
     {
+        Write-Verbose -Message "Checking status now"
         $zone = Get-Item -Path $setupExe -Stream "Zone.Identifier" -EA SilentlyContinue
         if ($null -ne $zone)
         {
             throw ("Setup file is blocked! Please use 'Unblock-File -Path $setupExe' " + `
                    "to unblock the file before continuing.")
         }
+        Write-Verbose -Message "File not blocked, continuing."
     }
 
     $osrvFolder = Get-ChildItem -Path (Join-Path -Path $BinaryDir `
@@ -285,12 +287,14 @@ function Set-TargetResource
 
     if ($checkBlockedFile -eq $true)
     {
+        Write-Verbose -Message "Checking status now"
         $zone = Get-Item -Path $setupExe -Stream "Zone.Identifier" -EA SilentlyContinue
         if ($null -ne $zone)
         {
             throw ("Setup file is blocked! Please use 'Unblock-File -Path $setupExe' " + `
                    "to unblock the file before continuing.")
         }
+        Write-Verbose -Message "File not blocked, continuing."
     }
 
     $now = Get-Date
