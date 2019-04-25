@@ -659,38 +659,6 @@ namespace Microsoft.SharePoint.Administration {
             }
         }
 
-        class fake_sp_iis_settings {
-            [hashtable[]] $SecureBindings = @(
-                @{
-                    HostHeader = "admin.contoso.com"
-                    Port = "443"
-                }
-            )
-            [bool] $DisableKerberos = $true
-
-            fake_sp_iis_settings([string] $HostHeader) {
-                $this.SecureBindings[0].HostHeader = $HostHeader
-            }
-        }
-
-        class fake_sp_web_application {
-            [fake_sp_iis_settings] $IisSettings
-            [bool] $IsAdministrationWebApplication = $true
-            [string] $Url
-            [hashtable[]] $ContentDatabases = @(@{
-                        Name = "SP_AdminContent"
-                    })
-
-            fake_sp_web_application([string] $Url, [string] $IisHostHeader) {
-                $this.Url = $Url
-                $this.IisSettings = [fake_sp_iis_settings]::new($IisHostHeader)
-            }
-
-            [fake_sp_iis_settings] GetIisSettingsWithFallback([string] $Zone) {
-                return $this.IisSettings
-            }
-        }
-
         Context -Name "This server is running CA on HTTPS, but secure bindings do not match CA URL" -Fixture {
             $testParams = @{
                 IsSingleInstance = "Yes"
@@ -738,7 +706,6 @@ namespace Microsoft.SharePoint.Administration {
                 })
             }
             Mock -CommandName Get-SPWebApplication -MockWith {
-                # return [fake_sp_web_application]::new($testParams.CentralAdministrationUrl, "different.contoso.com")
                 $webapp = @{
                     ContentDatabases = @(
                         @{
@@ -950,7 +917,39 @@ namespace Microsoft.SharePoint.Administration {
                 })
             }
             Mock -CommandName Get-SPWebApplication -MockWith {
-                return [fake_sp_web_application]::new($testParams.CentralAdministrationUrl, "")
+                $webapp = @{
+                    ContentDatabases = @(
+                        @{
+                            Name = $testParams.AdminContentDatabaseName
+                        }
+                    )
+                    Url = $testParams.CentralAdministrationUrl
+                    IsAdministrationWebApplication = $true
+                    IisSettings = [ordered]@{
+                        Default = @{
+                            DisableKerberos = $true
+                            SecureBindings = @(
+                                @{
+                                    HostHeader = ""
+                                    Port = "443"
+                                }
+                            )
+                        }
+                    }
+                }
+
+                $webapp | Add-Member -MemberType ScriptMethod -Name GetIisSettingsWithFallback -Value {
+                    [CmdletBinding()]
+                    param(
+                        [Parameter(Mandatory = $true)]
+                        [string]
+                        $Zone
+                    )
+
+                    return $this.IisSettings[$Zone]
+                }
+
+                return $webapp
             }
             Mock -CommandName Get-CimInstance -MockWith {
                 return @{
