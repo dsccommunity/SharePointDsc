@@ -6,6 +6,7 @@
   * Added 15 new SharePoint 2016 parameters.
 * SPFarm
   * Implemented Null check in Get method to prevent errors
+  * Add support to provision Central Administration on HTTPS
 * SPInfoPathFormsServiceConfig
   * Added the AllowEventPropagation parameter.
 * SPInstall
