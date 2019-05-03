@@ -195,6 +195,11 @@ function Get-TargetResource
                 $farmAccount = $spFarm.DefaultServiceAccount.Name
             }
 
+            $centralAdminSite = Get-SPWebApplication -IncludeCentralAdministration `
+                                    | Where-Object -FilterScript {
+                                        $_.IsAdministrationWebApplication -eq $true
+                                    }
+
             $centralAdminProvisioned = $false
             $ca = Get-SPServiceInstance -Server $env:ComputerName
             if ($null -ne $ca)
