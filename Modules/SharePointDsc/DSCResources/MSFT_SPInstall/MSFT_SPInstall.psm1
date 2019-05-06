@@ -33,7 +33,7 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting install status of SharePoint"
 
-    # Check if Binary folder exists
+    Write-Verbose -Message "Check if Binary folder exists"
     if (-not(Test-Path -Path $BinaryDir))
     {
         throw "Specified path cannot be found: {$BinaryDir}"
@@ -46,11 +46,41 @@ function Get-TargetResource
     }
 
     Write-Verbose -Message "Checking file status of $InstallerPath"
-    $zone = Get-Item $InstallerPath -Stream "Zone.Identifier" -EA SilentlyContinue
-    if ($null -ne $zone)
+    $checkBlockedFile = $true
+    if (Split-Path -Path $InstallerPath -IsAbsolute)
     {
-        throw ("Setup file is blocked! Please use 'Unblock-File -Path $InstallerPath' " + `
-               "to unblock the file before continuing.")
+        $driveLetter = (Split-Path -Path $InstallerPath -Qualifier).TrimEnd(":")
+        Write-Verbose -Message "BinaryDir refers to drive $driveLetter"
+
+        $volume = Get-Volume -DriveLetter $driveLetter -ErrorAction SilentlyContinue
+        if ($null -ne $volume)
+        {
+            if ($volume.DriveType -ne "CD-ROM")
+            {
+                Write-Verbose -Message "Volume is a fixed drive: Perform Blocked File test"
+            }
+            else
+            {
+                Write-Verbose -Message "Volume is a CD-ROM drive: Skipping Blocked File test"
+                $checkBlockedFile = $false
+            }
+        }
+        else
+        {
+            Write-Verbose -Message "Volume not found. Unable to determine the type. Continuing."
+        }
+    }
+
+    if ($checkBlockedFile -eq $true)
+    {
+        Write-Verbose -Message "Checking status now"
+        $zone = Get-Item -Path $InstallerPath -Stream "Zone.Identifier" -EA SilentlyContinue
+        if ($null -ne $zone)
+        {
+            throw ("Setup file is blocked! Please use 'Unblock-File -Path $InstallerPath' " + `
+                   "to unblock the file before continuing.")
+        }
+        Write-Verbose -Message "File not blocked, continuing."
     }
 
     $x86Path = "HKLM:\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*"
@@ -132,7 +162,7 @@ function Set-TargetResource
                            "its prerequisites. Please remove this manually.")
     }
 
-    # Check if Binary folder exists
+    Write-Verbose -Message "Check if Binary folder exists"
     if (-not(Test-Path -Path $BinaryDir))
     {
         throw "Specified path cannot be found: {$BinaryDir}"
@@ -187,12 +217,41 @@ function Set-TargetResource
     }
 
     Write-Verbose -Message "Checking file status of $InstallerPath"
-    $zone = Get-Item $InstallerPath -Stream "Zone.Identifier" -EA SilentlyContinue
-
-    if ($null -ne $zone)
+    $checkBlockedFile = $true
+    if (Split-Path -Path $InstallerPath -IsAbsolute)
     {
-        throw ("Setup file is blocked! Please use 'Unblock-File -Path $InstallerPath' " + `
-               "to unblock the file before continuing.")
+        $driveLetter = (Split-Path -Path $InstallerPath -Qualifier).TrimEnd(":")
+        Write-Verbose -Message "BinaryDir refers to drive $driveLetter"
+
+        $volume = Get-Volume -DriveLetter $driveLetter -ErrorAction SilentlyContinue
+        if ($null -ne $volume)
+        {
+            if ($volume.DriveType -ne "CD-ROM")
+            {
+                Write-Verbose -Message "Volume is a fixed drive: Perform Blocked File test"
+            }
+            else
+            {
+                Write-Verbose -Message "Volume is a CD-ROM drive: Skipping Blocked File test"
+                $checkBlockedFile = $false
+            }
+        }
+        else
+        {
+            Write-Verbose -Message "Volume not found. Unable to determine the type. Continuing."
+        }
+    }
+
+    if ($checkBlockedFile -eq $true)
+    {
+        Write-Verbose -Message "Checking status now"
+        $zone = Get-Item -Path $InstallerPath -Stream "Zone.Identifier" -EA SilentlyContinue
+        if ($null -ne $zone)
+        {
+            throw ("Setup file is blocked! Please use 'Unblock-File -Path $InstallerPath' " + `
+                   "to unblock the file before continuing.")
+        }
+        Write-Verbose -Message "File not blocked, continuing."
     }
 
     Write-Verbose -Message "Checking if Path is an UNC path"
@@ -279,9 +338,9 @@ function Set-TargetResource
             $pr2 = ("HKLM:\Software\Microsoft\Windows\CurrentVersion\" + `
                     "WindowsUpdate\Auto Update\RebootRequired")
             $pr3 = "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager"
-            if (    ($null -ne (Get-Item $pr1 -ErrorAction SilentlyContinue)) `
-                -or ($null -ne (Get-Item $pr2 -ErrorAction SilentlyContinue)) `
-                -or ((Get-Item $pr3 | Get-ItemProperty).PendingFileRenameOperations.count -gt 0) `
+            if (    ($null -ne (Get-Item -Path $pr1 -ErrorAction SilentlyContinue)) `
+                -or ($null -ne (Get-Item -Path $pr2 -ErrorAction SilentlyContinue)) `
+                -or ((Get-Item -Path $pr3 | Get-ItemProperty).PendingFileRenameOperations.count -gt 0) `
                 )
             {
 

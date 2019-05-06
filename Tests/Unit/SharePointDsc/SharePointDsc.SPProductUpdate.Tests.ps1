@@ -1136,6 +1136,139 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
         }
 
+        Context -Name "Update CU has higher version, update required - Install from CDROM" -Fixture {
+            $testParams = @{
+                SetupFile        = "C:\ubersrv2013-kb3115029-fullfile-x64-glb.exe"
+                ShutdownServices = $true
+                Ensure           = "Present"
+            }
+
+            Add-TestRegistryData -PatchLevel "CU"
+
+            Mock -CommandName Get-Item -MockWith {
+                return $null
+            }
+
+            Mock -CommandName Get-Volume -MockWith {
+                return @{
+                    DriveType = "CD-ROM"
+                }
+            }
+
+            Mock -CommandName Get-ItemProperty -MockWith {
+                if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 15)
+                {
+                    return @{
+                        VersionInfo = @{
+                            FileVersion     = "15.0.5119"
+                            FileDescription = "Cumulative Update"
+                        }
+                        Name        = "serverlpksp2013-kb2880554-fullfile-x64-en-us.exe"
+                    }
+                }
+                else
+                {
+                    if ($Global:SPDscHelper.CurrentStubBuildNumber.Build.ToString().Length -eq 4)
+                    {
+                        return @{
+                            VersionInfo = @{
+                                FileVersion     = "16.0.4882"
+                                FileDescription = "Cumulative Update"
+                            }
+                            Name        = "serverlpksp2016-kb2880554-fullfile-x64-en-us.exe"
+                        }
+                    }
+                    else
+                    {
+                        return @{
+                            VersionInfo = @{
+                                FileVersion     = "16.0.10342"
+                                FileDescription = "Cumulative Update"
+                            }
+                            Name        = "serverlpksp2019-kb2880554-fullfile-x64-en-us.exe"
+                        }
+                    }
+                }
+            } -ParameterFilter {
+                $Path -and $Path.Length -eq 1 -and $Path[0].StartsWith("C:\")
+            }
+
+            $installerMock = New-Module -AsCustomObject -ScriptBlock {
+                function GetType { # Installer
+                    New-Module -AsCustomObject -ScriptBlock {
+                        function InvokeMember {
+                            New-Module -AsCustomObject -ScriptBlock {
+                                function GetType { # InstallerDB
+                                    New-Module -AsCustomObject -ScriptBlock {
+                                        function InvokeMember {
+                                            New-Module -AsCustomObject -ScriptBlock {
+                                                function GetType { # DBView
+                                                    New-Module -AsCustomObject -ScriptBlock {
+                                                        function InvokeMember {
+                                                            param ($a, $b, $c, $d, $e)
+                                                            if ($a -eq "Fetch")
+                                                            {
+                                                                New-Module -AsCustomObject -ScriptBlock {
+                                                                    function GetType { # Value
+                                                                        New-Module -AsCustomObject -ScriptBlock {
+                                                                            function InvokeMember {
+                                                                                param ($a, $b, $c, $d, $e)
+                                                                                if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 15)
+                                                                                {
+                                                                                    return "15.0.5075"
+                                                                                }
+                                                                                else
+                                                                                {
+                                                                                    if ($Global:SPDscHelper.CurrentStubBuildNumber.Build.ToString().Length -eq 4)
+                                                                                    {
+                                                                                        return "16.0.4705"
+                                                                                    }
+                                                                                    else
+                                                                                    {
+                                                                                        return "16.0.10340"
+                                                                                    }
+                                                                                }
+                                                                            }
+                                                                        }
+                                                                    }
+                                                                }
+                                                            }
+                                                            else
+                                                            {
+                                                                return $null
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                Export-ModuleMember -Variable * -Function *
+            }
+
+            Mock New-Object { return $installerMock } -ParameterFilter { $ComObject -eq 'WindowsInstaller.Installer' }
+
+            It "Should return Ensure is Absent from the get method" {
+                $result = Get-TargetResource @testParams
+                $result.Ensure | Should Be "Absent"
+            }
+
+            It "Should run the Start-Process function in the set method" {
+                Set-TargetResource @testParams
+                Assert-MockCalled Get-Item -Times 0
+                Assert-MockCalled Start-Process
+            }
+
+            It "Should return false from the test method" {
+                Test-TargetResource @testParams | Should Be $false
+            }
+        }
+
         Context -Name "Update CU has higher version, update required - Update requires reboot" -Fixture {
             $testParams = @{
                 SetupFile        = "C:\Install\CUMay2016\ubersrv2013-kb3115029-fullfile-x64-glb.exe"

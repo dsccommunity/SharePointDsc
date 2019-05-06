@@ -684,6 +684,75 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
         }
 
+        Context -Name "Language Pack is not installed, installation executed successfully using CDROM drive" -Fixture {
+            $testParams = @{
+                BinaryDir = "C:\SPInstall"
+                Ensure    = "Present"
+            }
+
+            Mock -CommandName Get-SPDscFarmProductsInfo -MockWith {
+                switch ($Global:SPDscHelper.CurrentStubBuildNumber.Major)
+                {
+                    15 {
+                        return @("Microsoft SharePoint Server 2013")
+                    }
+                    16 {
+                        if($Global:SPDscHelper.CurrentStubBuildNumber.Minor.ToString().Length -le 4)
+                        {
+                            return @("Microsoft SharePoint Server 2016")
+                        }
+                        else
+                        {
+                            return @("Microsoft SharePoint Server 2019")
+                        }
+                    }
+                    Default {
+                        throw [Exception] "A supported version of SharePoint was not used in testing"
+                    }
+                }
+            }
+
+            Mock -CommandName Get-SPDscRegProductsInfo -MockWith {
+                if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq  15)
+                {
+                    return @("Microsoft SharePoint Server 2013")
+                }
+                else
+                {
+                    if($Global:SPDscHelper.CurrentStubBuildNumber.Minor.ToString().Length -le 4)
+                    {
+                        return @("Microsoft SharePoint Server 2016")
+                    }
+                    else
+                    {
+                        return @("Microsoft SharePoint Server 2019")
+                    }
+                }
+            }
+
+            Mock -CommandName Get-Volume -MockWith {
+                return @{
+                    DriveType = "CD-ROM"
+                }
+            }
+
+            Mock -CommandName Get-Item -MockWith {
+                return $null
+            }
+
+            Mock -CommandName Start-Process -MockWith {
+                return @{
+                    ExitCode = 0
+                }
+            }
+
+            It "Should not unblock file and run the Start-Process function in the set method" {
+                Set-TargetResource @testParams
+                Assert-MockCalled Get-Item -Times 0
+                Assert-MockCalled Start-Process
+            }
+        }
+
         Context -Name "Language Pack is not installed, installation executed, reboot required" -Fixture {
             $testParams = @{
                 BinaryDir = "C:\SPInstall"
