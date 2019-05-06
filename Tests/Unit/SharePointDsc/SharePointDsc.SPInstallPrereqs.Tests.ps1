@@ -537,6 +537,70 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
         }
 
+        Context -Name "Prerequisites are not installed but should be and are to be installed in offline mode from CDROM" -Fixture {
+            $testParams = @{
+                IsSingleInstance = "Yes"
+                InstallerPath = "C:\SPInstall\Prerequisiteinstaller.exe"
+                OnlineMode = $false
+                Ensure = "Present"
+            }
+
+            Mock -CommandName Get-ItemProperty -MockWith {
+                return @()
+            } -ParameterFilter { $null -ne $Path }
+
+            Mock -CommandName Get-Item -MockWith {
+                return $null
+            } -ParameterFilter { $Path.StartsWith("C:\") }
+
+            Mock -CommandName Get-Volume -MockWith {
+                return @{
+                    DriveType = "CD-ROM"
+                }
+            }
+
+            Mock -CommandName Start-Process -MockWith {
+                return @{
+                    ExitCode = 0
+                }
+            }
+            Mock -CommandName Test-Path -MockWith {
+                return $true
+            }
+
+            switch ($Global:SPDscHelper.CurrentStubBuildNumber.Major)
+            {
+                15 {
+                    $requiredParams = @("SQLNCli","PowerShell","NETFX","IDFX","Sync","AppFabric","IDFX11","MSIPCClient","WCFDataServices","KB2671763","WCFDataServices56")
+                }
+                16 {
+                    if ($Global:SPDscHelper.CurrentStubBuildNumber.Build -lt 10000)
+                    {
+                        # SharePoint 2016
+                        $requiredParams = @("SQLNCli","Sync","AppFabric","IDFX11","MSIPCClient","KB3092423","WCFDataServices56","DotNetFx","MSVCRT11","MSVCRT14","ODBC")
+                    }
+                    else
+                    {
+                        # SharePoint 2019
+                        $requiredParams = @("SQLNCli","Sync","AppFabric","IDFX11","MSIPCClient","KB3092423","WCFDataServices56","DotNet472","MSVCRT11","MSVCRT141")
+                    }
+                }
+                Default {
+                    throw [Exception] "A supported version of SharePoint was not used in testing"
+                }
+            }
+
+            $requiredParams | ForEach-Object -Process {
+                $testParams.Add($_, "C:\fake\value.exe")
+            }
+
+            It "does not throw an exception where the required parameters are included" {
+                Set-TargetResource @testParams
+                Assert-MockCalled Get-Item -Times 0
+                Assert-MockCalled Start-Process
+            }
+        }
+
         Context -Name "Prerequisites are not installed but should be and are to be installed in offline mode, but invalid paths have been passed" -Fixture {
             $testParams = @{
                 IsSingleInstance = "Yes"
