@@ -1,7 +1,7 @@
 [CmdletBinding()]
 param(
     [Parameter()]
-    [string] 
+    [string]
     $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
                                          -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
                                          -Resolve)
@@ -18,7 +18,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
     InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
         Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
-        # Mocks for all contexts   
+        # Mocks for all contexts
         Mock -CommandName Get-ChildItem -MockWith {
             return @(
                 @{
@@ -49,31 +49,31 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             })
         }
 
-        try 
-        { 
-            [Microsoft.SharePoint.Administration.SPUrlZone] 
+        try
+        {
+            [Microsoft.SharePoint.Administration.SPUrlZone]
         }
-        catch 
+        catch
         {
             Add-Type -TypeDefinition @"
 namespace Microsoft.SharePoint.Administration {
     public enum SPUrlZone { Default, Intranet, Internet, Custom, Extranet };
-}        
+}
 "@
         }
 
-        try 
-        { 
-            [Microsoft.SharePoint.Administration.SPTrustedAuthenticationProvider] 
+        try
+        {
+            [Microsoft.SharePoint.Administration.SPTrustedAuthenticationProvider]
         }
-        catch 
+        catch
         {
             Add-Type -TypeDefinition @"
 namespace Microsoft.SharePoint.Administration {
     public class SPTrustedAuthenticationProvider {}
-}        
+}
 "@
-        }        
+        }
 
         # Test contexts
         Context -Name "The SPTrustedLoginProvider does not exist but should, using a signing certificate in the certificate store" -Fixture {
@@ -185,7 +185,7 @@ namespace Microsoft.SharePoint.Administration {
                 ClaimProviderName            = "LDAPCP"
                 ProviderSignOutUri           = "https://adfs.contoso.com/adfs/ls/"
                 Ensure                       = "Present"
-            }            
+            }
 
             It "should fail validation of signing certificate parameters in the set method" {
                 { Set-TargetResource @testParams } | Should Throw "Cannot use both parameters SigningCertificateThumbprint and SigningCertificateFilePath at the same time."
@@ -213,7 +213,7 @@ namespace Microsoft.SharePoint.Administration {
                 ClaimProviderName            = "LDAPCP"
                 ProviderSignOutUri           = "https://adfs.contoso.com/adfs/ls/"
                 Ensure                       = "Present"
-            }            
+            }
 
             It "should fail validation of signing certificate parameters in the set method" {
                 { Set-TargetResource @testParams } | Should Throw "At least one of the following parameters must be specified: SigningCertificateThumbprint, SigningCertificateFilePath."
@@ -286,7 +286,7 @@ namespace Microsoft.SharePoint.Administration {
                 { Set-TargetResource @testParams } | Should Throw "SharePoint requires that the private key of the signing certificate is not installed in the certificate store."
             }
         }
-        
+
         Context -Name "The SPTrustedLoginProvider does not exist but should, with a claims provider that exists on the farm" -Fixture {
             $testParams = @{
                 Name                         = "Contoso"
@@ -319,7 +319,7 @@ namespace Microsoft.SharePoint.Administration {
                 $sptrust| Add-Member -Name Update -MemberType ScriptMethod -Value { }
                 return $sptrust
             }
-            
+
             It "Should create the SPTrustedLoginProvider with claims provider set" {
                 Set-TargetResource @testParams
                 $getResults = Get-TargetResource @testParams
@@ -417,11 +417,11 @@ namespace Microsoft.SharePoint.Administration {
                 $spAP | Add-Member -Name Update -MemberType ScriptMethod -Value { }
                 $spAP | Add-Member -MemberType ScriptMethod `
                                     -Name GetType `
-                                    -Value {  
-                                        return @{ 
-                                            FullName = "Microsoft.SharePoint.Administration.SPTrustedAuthenticationProvider" 
-                                        }  
-                                    } -PassThru -Force 
+                                    -Value {
+                                        return @{
+                                            FullName = "Microsoft.SharePoint.Administration.SPTrustedAuthenticationProvider"
+                                        }
+                                    } -PassThru -Force
                 return $spAP
             }
 

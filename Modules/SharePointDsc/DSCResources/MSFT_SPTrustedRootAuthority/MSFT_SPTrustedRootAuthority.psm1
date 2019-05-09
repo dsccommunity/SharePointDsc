@@ -8,9 +8,13 @@ function Get-TargetResource
         [System.String]
         $Name,
 
-        [Parameter(Mandatory = $true)]
+        [Parameter()]
         [System.String]
         $CertificateThumbprint,
+
+        [Parameter()]
+        [String]
+        $CertificateFilePath,
 
         [Parameter()]
         [ValidateSet("Present","Absent")]
@@ -23,6 +27,29 @@ function Get-TargetResource
     )
 
     Write-Verbose "Getting Trusted Root Authority with name '$Name'"
+
+    if ($PSBoundParameters.ContainsKey("CertificateThumbprint") -and `
+        $PSBoundParameters.ContainsKey("CertificateFilePath"))
+    {
+        Write-Verbose -Message ("Cannot use both parameters CertificateThumbprint and " + `
+                                "CertificateFilePath at the same time.")
+    }
+
+    if (-not ($PSBoundParameters.ContainsKey("CertificateThumbprint")) -and `
+        -not($PSBoundParameters.ContainsKey("CertificateFilePath")))
+    {
+        Write-Verbose -Message ("At least one of the following parameters must be specified: " + `
+                                "CertificateThumbprint, CertificateFilePath.")
+    }
+
+    if ($PSBoundParameters.ContainsKey("CertificateFilePath"))
+    {
+        if (-not(Test-Path -Path $CertificateFilePath))
+        {
+            throw ("Specified CertificateFilePath does not exist: $CertificateFilePath")
+        }
+    }
+
     $result = Invoke-SPDSCCommand -Credential $InstallAccount `
                                   -Arguments $PSBoundParameters `
                                   -ScriptBlock {
@@ -32,12 +59,13 @@ function Get-TargetResource
 
         $ensure = "Absent"
 
-        if($null -eq $rootCert)
+        if ($null -eq $rootCert)
         {
             return @{
-                Name = $params.Name
+                Name                  = $params.Name
                 CertificateThumbprint = [string]::Empty
-                Ensure = $ensure
+                CertificateFilePath   = ""
+                Ensure                = $ensure
             }
         }
         else
@@ -45,9 +73,10 @@ function Get-TargetResource
             $ensure = "Present"
 
             return @{
-                Name = $params.Name
+                Name                  = $params.Name
                 CertificateThumbprint = $rootCert.Certificate.Thumbprint
-                Ensure = $ensure
+                CertificateFilePath   = ""
+                Ensure                = $ensure
             }
         }
     }
@@ -64,9 +93,13 @@ function Set-TargetResource
         [System.String]
         $Name,
 
-        [Parameter(Mandatory = $true)]
+        [Parameter()]
         [System.String]
         $CertificateThumbprint,
+
+        [Parameter()]
+        [String]
+        $CertificateFilePath,
 
         [Parameter()]
         [ValidateSet("Present","Absent")]
@@ -80,6 +113,28 @@ function Set-TargetResource
 
     Write-Verbose -Message "Setting SPTrustedRootAuthority '$Name'"
 
+    if ($PSBoundParameters.ContainsKey("CertificateThumbprint") -and `
+        $PSBoundParameters.ContainsKey("CertificateFilePath"))
+    {
+        throw ("Cannot use both parameters CertificateThumbprint and CertificateFilePath " + `
+               "at the same time.")
+    }
+
+    if (-not ($PSBoundParameters.ContainsKey("CertificateThumbprint")) -and `
+        -not($PSBoundParameters.ContainsKey("CertificateFilePath")))
+    {
+        throw ("At least one of the following parameters must be specified: " + `
+               "CertificateThumbprint, CertificateFilePath.")
+    }
+
+    if ($PSBoundParameters.ContainsKey("CertificateFilePath"))
+    {
+        if (-not(Test-Path -Path $CertificateFilePath))
+        {
+            throw ("Specified CertificateFilePath does not exist: $CertificateFilePath")
+        }
+    }
+
     $CurrentValues = Get-TargetResource @PSBoundParameters
     if ($Ensure -eq "Present" -and $CurrentValues.Ensure -eq "Present")
     {
@@ -88,25 +143,52 @@ function Set-TargetResource
                                       -Arguments $PSBoundParameters `
                                       -ScriptBlock {
             $params = $args[0]
-            $cert = Get-Item -Path "CERT:\LocalMachine\My\$($params.CertificateThumbprint)" `
-                             -ErrorAction SilentlyContinue
 
-            if ($null -eq $cert)
+            if ($params.ContainsKey("CertificateThumbprint"))
             {
-                throw "Certificate not found in the local Certificate Store"
+                Write-Verbose -Message "Importing certificate from CertificateThumbprint"
+                $cert = Get-Item -Path "CERT:\LocalMachine\My\$($params.CertificateThumbprint)" `
+                                 -ErrorAction SilentlyContinue
+
+                if ($null -eq $cert)
+                {
+                    throw "Certificate not found in the local Certificate Store"
+                }
+            }
+
+            if ($params.ContainsKey("CertificateFilePath"))
+            {
+                Write-Verbose -Message "Importing certificate from CertificateFilePath"
+                try
+                {
+                    $cert = New-Object System.Security.Cryptography.X509Certificates.X509Certificate2
+                    $cert.Import($CertificateFilePath)
+                }
+                catch
+                {
+                    throw "An error occured: $($_.Exception.Message)"
+                }
+
+                if ($null -eq $cert)
+                {
+                    throw "Import of certificate failed."
+                }
             }
 
             if ($cert.HasPrivateKey)
             {
+                Write-Verbose -Message "Certificate has private key. Removing private key."
                 $pubKeyBytes = $cert.Export("cert")
                 $cert2 = New-Object System.Security.Cryptography.X509Certificates.X509Certificate2
                 $cert2.Import($pubKeyBytes)
                 $cert = $cert2
             }
 
+            Write-Verbose -Message "Updating Root Authority"
             Set-SPTrustedRootAuthority -Identity $params.Name -Certificate $cert
         }
     }
+
     if ($Ensure -eq "Present" -and $CurrentValues.Ensure -eq "Absent")
     {
         Write-Verbose -Message "Adding SPTrustedRootAuthority '$Name'"
@@ -115,22 +197,47 @@ function Set-TargetResource
                                       -ScriptBlock {
             $params = $args[0]
 
-            $cert = Get-Item -Path "CERT:\LocalMachine\My\$($params.CertificateThumbprint)" `
-                             -ErrorAction SilentlyContinue
-
-            if($null -eq $cert)
+            if ($params.ContainsKey("CertificateThumbprint"))
             {
-                throw "Certificate not found in the local Certificate Store"
+                Write-Verbose -Message "Importing certificate from CertificateThumbprint"
+                $cert = Get-Item -Path "CERT:\LocalMachine\My\$($params.CertificateThumbprint)" `
+                                 -ErrorAction SilentlyContinue
+
+                if ($null -eq $cert)
+                {
+                    throw "Certificate not found in the local Certificate Store"
+                }
             }
 
-            if($cert.HasPrivateKey)
+            if ($params.ContainsKey("CertificateFilePath"))
             {
+                Write-Verbose -Message "Importing certificate from CertificateFilePath"
+                try
+                {
+                    $cert = New-Object System.Security.Cryptography.X509Certificates.X509Certificate2
+                    $cert.Import($CertificateFilePath)
+                }
+                catch
+                {
+                    throw "An error occured: $($_.Exception.Message)"
+                }
+
+                if ($null -eq $cert)
+                {
+                    throw "Import of certificate failed."
+                }
+            }
+
+            if ($cert.HasPrivateKey)
+            {
+                Write-Verbose -Message "Certificate has private key. Removing private key."
                 $pubKeyBytes = $cert.Export("cert")
                 $cert2 = New-Object System.Security.Cryptography.X509Certificates.X509Certificate2
                 $cert2.Import($pubKeyBytes)
                 $cert = $cert2
             }
 
+            Write-Verbose -Message "Creating Root Authority"
             New-SPTrustedRootAuthority -Name $params.Name -Certificate $cert
         }
     }
@@ -157,9 +264,13 @@ function Test-TargetResource
         [System.String]
         $Name,
 
-        [Parameter(Mandatory = $true)]
+        [Parameter()]
         [System.String]
         $CertificateThumbprint,
+
+        [Parameter()]
+        [String]
+        $CertificateFilePath,
 
         [Parameter()]
         [ValidateSet("Present","Absent")]
@@ -173,8 +284,33 @@ function Test-TargetResource
 
     Write-Verbose -Message "Testing SPTrustedRootAuthority '$Name'"
 
+    if ($PSBoundParameters.ContainsKey("CertificateThumbprint") -and `
+        $PSBoundParameters.ContainsKey("CertificateFilePath"))
+    {
+        throw ("Cannot use both parameters CertificateThumbprint and CertificateFilePath " + `
+            "at the same time.")
+    }
+
+    if (-not ($PSBoundParameters.ContainsKey("CertificateThumbprint")) -and `
+        -not($PSBoundParameters.ContainsKey("CertificateFilePath")))
+    {
+        throw ("At least one of the following parameters must be specified: " + `
+            "CertificateThumbprint, CertificateFilePath.")
+    }
+
     $CurrentValues = Get-TargetResource @PSBoundParameters
-    if($Ensure -eq "Present")
+
+    if ($PSBoundParameters.ContainsKey("CertificateFilePath"))
+    {
+        Write-Verbose "Retrieving thumbprint of CertificateFilePath"
+        $cert = New-Object System.Security.Cryptography.X509Certificates.X509Certificate2
+        $cert.Import($CertificateFilePath)
+
+        Write-Verbose "Thumbprint is $($cert.Thumbprint)"
+        $PSBoundParameters.CertificateThumbprint = $cert.Thumbprint
+    }
+
+    if ($Ensure -eq "Present")
     {
         return Test-SPDscParameterState -CurrentValues $CurrentValues `
                                         -DesiredValues $PSBoundParameters `
