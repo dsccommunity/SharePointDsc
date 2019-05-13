@@ -1,6 +1,6 @@
 # Change log for SharePointDsc
 
-## Unreleased
+## v3.4
 
 * SPDistributedCacheClientSettings
   * Added 15 new SharePoint 2016 parameters.
