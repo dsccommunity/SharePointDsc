@@ -41,6 +41,8 @@
 * SPSubscriptionSettingsServiceApp
   * Fixed issue where the service app proxy isn't created when it wasn't
     created during initial deployment.
+* SPTrustedRootAuthority
+  * Added possibility to get certificate from file.
 
 ## v3.3
 
