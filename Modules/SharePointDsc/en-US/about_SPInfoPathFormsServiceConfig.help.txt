@@ -56,6 +56,10 @@
     Write - Boolean
     True sets the InfoPath Forms Service to allow Cross-Domain connections
 
+.PARAMETER AllowEventPropagation
+    Write - Boolean
+    True enables the original performance optimization
+
 .PARAMETER MaxPostbacksPerSession
     Write - Uint16
     Maximum number of postback allowed per session
