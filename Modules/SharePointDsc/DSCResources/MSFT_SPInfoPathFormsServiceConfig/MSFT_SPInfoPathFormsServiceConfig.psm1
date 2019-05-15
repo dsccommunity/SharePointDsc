@@ -51,6 +51,10 @@ function Get-TargetResource
         $AllowUserFormCrossDomainDataConnections,
 
         [Parameter()]
+        [System.Boolean]
+        $AllowEventPropagation,
+
+        [Parameter()]
         [System.UInt16]
         $MaxPostbacksPerSession,
 
@@ -90,6 +94,7 @@ function Get-TargetResource
             AllowEmbeddedSqlForDataConnections = $params.AllowEmbeddedSqlForDataConnections
             AllowUdcAuthenticationForDataConnections = $params.AllowUdcAuthenticationForDataConnections
             AllowUserFormCrossDomainDataConnections = $params.AllowUserFormCrossDomainDataConnections
+            AllowEventPropagation = $params.AllowEventPropagation
             MaxPostbacksPerSession = $params.MaxPostbacksPerSession
             MaxUserActionsPerPostback = $params.MaxUserActionsPerPostback
             ActiveSessionsTimeout = $params.ActiveSessionsTimeout
@@ -113,6 +118,7 @@ function Get-TargetResource
             AllowEmbeddedSqlForDataConnections = $config.AllowEmbeddedSqlForDataConnections
             AllowUdcAuthenticationForDataConnections = $config.AllowUdcAuthenticationForDataConnections
             AllowUserFormCrossDomainDataConnections = $config.AllowUserFormCrossDomainDataConnections
+            AllowEventPropagation = $config.AllowEventPropagation
             MaxPostbacksPerSession = $config.MaxPostbacksPerSession
             MaxUserActionsPerPostback = $config.MaxUserActionsPerPostback
             ActiveSessionsTimeout = $config.ActiveSessionsTimeout
@@ -174,6 +180,10 @@ function Set-TargetResource
         [Parameter()]
         [System.Boolean]
         $AllowUserFormCrossDomainDataConnections,
+
+        [Parameter()]
+        [System.Boolean]
+        $AllowEventPropagation,
 
         [Parameter()]
         [System.UInt16]
@@ -255,6 +265,11 @@ function Set-TargetResource
             $config.AllowUserFormCrossDomainDataConnections = $params.AllowUserFormCrossDomainDataConnections
         }
 
+        if($params.ContainsKey("AllowEventPropagation"))
+        {
+            $config.AllowEventPropagation = $params.AllowEventPropagation
+        }
+
         if($params.ContainsKey("MaxPostbacksPerSession"))
         {
             $config.MaxPostbacksPerSession = $params.MaxPostbacksPerSession
@@ -332,6 +347,10 @@ function Test-TargetResource
         $AllowUserFormCrossDomainDataConnections,
 
         [Parameter()]
+        [System.Boolean]
+        $AllowEventPropagation,
+
+        [Parameter()]
         [System.UInt16]
         $MaxPostbacksPerSession,
 
@@ -370,6 +389,7 @@ function Test-TargetResource
                                                      "AllowEmbeddedSqlForDataConnections",
                                                      "AllowUdcAuthenticationForDataConnections",
                                                      "AllowUserFormCrossDomainDataConnections",
+                                                     "AllowEventPropagation",
                                                      "MaxPostbacksPerSession",
                                                      "MaxUserActionsPerPostback",
                                                      "ActiveSessionsTimeout",

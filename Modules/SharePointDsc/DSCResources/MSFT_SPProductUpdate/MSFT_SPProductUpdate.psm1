@@ -43,23 +43,54 @@ function Get-TargetResource
     $servicepack = $false
     $language = ""
 
-    # Get file information from setup file
+    Write-Verbose -Message "Check if the setup file exists"
     if (-not(Test-Path -Path $SetupFile))
     {
         throw "Setup file cannot be found: {$SetupFile}"
     }
 
     Write-Verbose -Message "Checking file status of $SetupFile"
-    $zone = Get-Item -Path $SetupFile -Stream "Zone.Identifier" -EA SilentlyContinue
-
-    if ($null -ne $zone)
+    $checkBlockedFile = $true
+    if (Split-Path -Path $SetupFile -IsAbsolute)
     {
-        throw ("Setup file is blocked! Please use 'Unblock-File -Path $SetupFile' " + `
-               "to unblock the file before continuing.")
+        $driveLetter = (Split-Path -Path $SetupFile -Qualifier).TrimEnd(":")
+        Write-Verbose -Message "SetupFile refers to drive $driveLetter"
+
+        $volume = Get-Volume -DriveLetter $driveLetter -ErrorAction SilentlyContinue
+        if ($null -ne $volume)
+        {
+            if ($volume.DriveType -ne "CD-ROM")
+            {
+                Write-Verbose -Message "Volume is a fixed drive: Perform Blocked File test"
+            }
+            else
+            {
+                Write-Verbose -Message "Volume is a CD-ROM drive: Skipping Blocked File test"
+                $checkBlockedFile = $false
+            }
+        }
+        else
+        {
+            Write-Verbose -Message "Volume not found. Unable to determine the type. Continuing."
+        }
+    }
+
+    if ($checkBlockedFile -eq $true)
+    {
+        Write-Verbose -Message "Checking status now"
+        $zone = Get-Item -Path $SetupFile -Stream "Zone.Identifier" -EA SilentlyContinue
+
+        if ($null -ne $zone)
+        {
+            throw ("Setup file is blocked! Please use 'Unblock-File -Path $SetupFile' " + `
+                   "to unblock the file before continuing.")
+        }
+        Write-Verbose -Message "File not blocked, continuing."
     }
 
     $nullVersion = New-Object -TypeName System.Version
 
+    Write-Verbose -Message "Get file information from setup file"
     $setupFileInfo = Get-ItemProperty -Path $SetupFile
     $fileVersion = $setupFileInfo.VersionInfo.FileVersion
     Write-Verbose -Message "Update has version $fileVersion"
@@ -240,25 +271,56 @@ function Set-TargetResource
         return
     }
 
-    # Check if setup file exists
+    Write-Verbose -Message "Check if the setup file exists"
     if (-not(Test-Path -Path $SetupFile))
     {
         throw "Setup file cannot be found: {$SetupFile}"
     }
 
     Write-Verbose -Message "Checking file status of $SetupFile"
-    $zone = Get-Item -Path $SetupFile -Stream "Zone.Identifier" -EA SilentlyContinue
-
-    if ($null -ne $zone)
+    $checkBlockedFile = $true
+    if (Split-Path -Path $SetupFile -IsAbsolute)
     {
-        throw ("Setup file is blocked! Please use 'Unblock-File -Path $SetupFile' " + `
-               "to unblock the file before continuing.")
+        $driveLetter = (Split-Path -Path $SetupFile -Qualifier).TrimEnd(":")
+        Write-Verbose -Message "SetupFile refers to drive $driveLetter"
+
+        $volume = Get-Volume -DriveLetter $driveLetter -ErrorAction SilentlyContinue
+        if ($null -ne $volume)
+        {
+            if ($volume.DriveType -ne "CD-ROM")
+            {
+                Write-Verbose -Message "Volume is a fixed drive: Perform Blocked File test"
+            }
+            else
+            {
+                Write-Verbose -Message "Volume is a CD-ROM drive: Skipping Blocked File test"
+                $checkBlockedFile = $false
+            }
+        }
+        else
+        {
+            Write-Verbose -Message "Volume not found. Unable to determine the type. Continuing."
+        }
+    }
+
+    if ($checkBlockedFile -eq $true)
+    {
+        Write-Verbose -Message "Checking status now"
+        $zone = Get-Item -Path $SetupFile -Stream "Zone.Identifier" -EA SilentlyContinue
+
+        if ($null -ne $zone)
+        {
+            throw ("Setup file is blocked! Please use 'Unblock-File -Path $SetupFile' " + `
+                   "to unblock the file before continuing.")
+        }
+        Write-Verbose -Message "File not blocked, continuing."
     }
 
     $now = Get-Date
+    Write-Verbose -Message "Check if BinaryInstallDays is specified"
     if ($BinaryInstallDays)
     {
-        # BinaryInstallDays parameter exists, check if current day is specified
+        Write-Verbose -Message "BinaryInstallDays parameter exists, check if current day is specified"
         $currentDayOfWeek = $now.DayOfWeek.ToString().ToLower().Substring(0, 3)
 
         if ($BinaryInstallDays -contains $currentDayOfWeek)
@@ -278,10 +340,11 @@ function Set-TargetResource
         Write-Verbose -Message "No BinaryInstallDays specified, Update can be ran on any day."
     }
 
-    # Check if BinaryInstallTime parameter exists
+    Write-Verbose -Message "Check if BinaryInstallTime is specified"
     if ($BinaryInstallTime)
     {
-        # Check if current time is inside of time window
+        Write-Verbose -Message ("BinaryInstallTime parameter exists, check if current time is inside " + `
+                                "of time window")
         $upgradeTimes = $BinaryInstallTime.Split(" ")
         $starttime = 0
         $endtime = 0

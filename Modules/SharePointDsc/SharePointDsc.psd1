@@ -12,7 +12,7 @@
 # RootModule = ''
 
 # Version number of this module.
-ModuleVersion = '3.3.0.0'
+ModuleVersion = '3.4.0.0'
 
 # ID used to uniquely identify this module
 GUID = '6c1176a0-4fac-4134-8ca2-3fa8a21a7b90'
@@ -128,53 +128,47 @@ PrivateData = @{
 
         # ReleaseNotes of this module
         ReleaseNotes = "
-      * SharePointDsc generic
-        * Implemented workaround for PSSA v1.18 issue. No further impact for
-          the rest of the resources
-        * Fixed issue where powershell session was never removed and leaded to
-          memory leak
-        * Added readme.md file to Examples folder, which directs users to the
-          Wiki on Github
-      * SPAppManagementServiceApp
-        * Added ability to create Service App Proxy if this is not present
-      * SPConfigWizard
-        * Improved logging
+      * SPDistributedCacheClientSettings
+        * Added 15 new SharePoint 2016 parameters.
       * SPFarm
-        * Corrected issue where the resource would try to join a farm, even when
-          the farm was not yet created
-        * Fixed issue where an error was thrown when no DeveloperDashboard
-          parameter was specfied
+        * Implemented Null check in Get method to prevent errors
+        * Add support to provision Central Administration on HTTPS
+      * SPInfoPathFormsServiceConfig
+        * Added the AllowEventPropagation parameter.
       * SPInstall
-        * Added check to unblock setup file if it is blocked because it is coming
-          from a network location. This to prevent endless wait
-        * Added ability to install from a UNC path, by adding server
-          to IE Local Intranet Zone. This will prevent an endless wait
-          caused by security warning
+        * Improved logging ouput
+        * Updated blocked setup file check to prevent errors when BinaryDir
+          is a CD-ROM drive or mounted ISO
       * SPInstallLanguagePack
-        * Added check to unblock setup file if it is blocked because it is coming
-          from a network location. This to prevent endless wait
-        * Corrected issue with Norwegian language pack not being correctly
-          detected
+        * Improved logging ouput
+        * Updated blocked setup file check to prevent errors when BinaryDir
+          is a CD-ROM drive or mounted ISO
+      * SPInstallPrereqs
+        * Improved logging ouput
+        * Added the updated check to unblock setup file if it is blocked because
+          it is coming from a network location. This to prevent endless wait.
         * Added ability to install from a UNC path, by adding server
           to IE Local Intranet Zone. This will prevent an endless wait
-          caused by security warning
+          caused by security warning.
+        * Fixed an issue that would prevent the resource failing a test when the
+          prerequisites have been installed successfully on Windows Server 2019
+      * SPManagedMetadataServiceApp
+        * Fixed issue where Get-TargetResource method throws an error when the
+          service app proxy does not exist and no proxy name is specified.
       * SPProductUpdate
-        * Added ability to install from a UNC path, by adding server
-          to IE Local Intranet Zone. This will prevent an endless wait
-          caused by security warning
-        * Major refactor of this resource to remove the dependency on the
-          existence of the farm. This allows the installation of product updates
-          before farm creation.
-      * SPSearchContentSource
-        * Corrected typo that prevented a correct check for ContinuousCrawl
-      * SPSearchServiceApp
-        * Added possibility to manage AlertsEnabled setting
-      * SPSelfServiceSiteCreation
-        * Added new SharePoint 2019 properties
+        * Improved logging ouput
+        * Updated blocked setup file check to prevent errors when SetupFile
+          is a CD-ROM drive or mounted ISO
+      * SPSearchContent Source
+        * Removed check that prevents configuring an incremental schedule when
+          using continuous crawl.
       * SPSitePropertyBag
-        * Added new resource
-      * SPWebAppThrottlingSettings
-        * Fixed issue with ChangeLogRetentionDays not being applied
+        * Fixed issue where properties were set on the wrong level.
+      * SPSubscriptionSettingsServiceApp
+        * Fixed issue where the service app proxy isn't created when it wasn't
+          created during initial deployment.
+      * SPTrustedRootAuthority
+        * Added possibility to get certificate from file.
 "
     } # End of PSData hashtable
 

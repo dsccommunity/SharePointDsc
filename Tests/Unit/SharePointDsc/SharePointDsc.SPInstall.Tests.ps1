@@ -169,8 +169,47 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 }
             }
 
-            It "Should return absent from the get method" {
+            It "Should add unc as trusted source and run install in the set method" {
                 Set-TargetResource @testParams
+                Assert-MockCalled Start-Process
+            }
+        }
+
+        Context -Name "SharePoint binaries are not installed but should be using CDROM drive" -Fixture {
+            $testParams = @{
+                IsSingleInstance = "Yes"
+                BinaryDir = "C:\SPInstall"
+                ProductKey = "XXXXX-XXXXX-XXXXX-XXXXX-XXXXX"
+                Ensure = "Present"
+            }
+
+            Mock -CommandName Test-Path -MockWith {
+                return $false
+            } -ParameterFilter { $Path -eq (Join-Path -Path $BinaryDir -ChildPath "updates\svrsetup.dll") }
+
+            Mock -CommandName Get-Item -MockWith {
+                return $null
+            }
+
+            Mock -CommandName Get-Volume -MockWith {
+                return @{
+                    DriveType = "CD-ROM"
+                }
+            }
+
+            Mock -CommandName Get-ItemProperty -MockWith {
+                return $null
+            }
+
+            Mock -CommandName Start-Process -MockWith {
+                return @{
+                    ExitCode = 0
+                }
+            }
+
+            It "Should not run unblock test and run install in the set method" {
+                Set-TargetResource @testParams
+                Assert-MockCalled Get-Item -Times 0
                 Assert-MockCalled Start-Process
             }
         }

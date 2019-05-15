@@ -65,10 +65,34 @@ Configuration Example
             FarmAccount               = $FarmAccount
             PsDscRunAsCredential      = $SPSetupAccount
             AdminContentDatabaseName  = "SP_AdminContent"
-            CentralAdministrationPort = 9999
+            CentralAdministrationUrl  = "https://admin.contoso.com"
+            CentralAdministrationPort = 443
             RunCentralAdmin           = $true
             DependsOn                 = "[SPInstall]InstallSharePoint"
         }
+
+        #**********************************************************
+        # Now set up binding Central Admin
+        #**********************************************************
+        xWebsite SslWebAppCentralAdmin
+        {
+            Ensure      = 'Present'
+            Name        = 'SharePoint Central Administration v4'
+            BindingInfo = @(
+                MSFT_xWebBindingInformation
+                {
+                    Protocol              = 'https'
+                    IPAddress             = '*'
+                    Port                  = '443'
+                    CertificateThumbprint = '<SSL certificate thumbprint>'
+                    CertificateStoreName  = 'My'
+                    HostName              = 'admin.contoso.com'
+                    SslFlags              = 1
+                }
+            )
+            DependsOn   = '[SPFarm]CreateSPFarm'
+        }
+
         SPManagedAccount ServicePoolManagedAccount
         {
             AccountName          = $ServicePoolManagedAccount.UserName
@@ -200,38 +224,6 @@ Configuration Example
             DependsOn                = "[SPWebApplication]SharePointSites"
         }
 
-        #**********************************************************
-        # Now set up binding and AAM for Central Admin
-        #**********************************************************
-        xWebsite SslWebAppCentralAdmin
-        {
-            Ensure      = 'Present'
-            Name        = 'SharePoint Central Administration v4'
-            BindingInfo = @(
-                MSFT_xWebBindingInformation
-                {
-                    Protocol              = 'https'
-                    IPAddress             = '*'
-                    Port                  = '443'
-                    CertificateThumbprint = '<SSL certificate thumbprint>'
-                    CertificateStoreName  = 'My'
-                    HostName              = 'admin.contoso.com'
-                    SslFlags              = 1
-                }
-            )
-            DependsOn   = '[xWebsite]SslWebAppSharePointSites'
-        }
-
-        # Change AAM for Central Admin
-        SPAlternateUrl CentralAdminAam
-        {
-            WebAppName           = "SharePoint Central Administration v4"
-            Zone                 = "Default"
-            Url                  = 'https://admin.contoso.com'
-            Ensure               = "Present"
-            PsDscRunAsCredential = $SPSetupAccount
-            DependsOn            = "[xWebsite]SslWebAppCentralAdmin"
-        }
 
 
         #**********************************************************

@@ -29,7 +29,7 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting install status of SharePoint Language Pack"
 
-    # Check if Binary folder exists
+    Write-Verbose -Message "Check if Binary folder exists"
     if (-not(Test-Path -Path $BinaryDir))
     {
         throw "Specified path cannot be found: {$BinaryDir}"
@@ -42,11 +42,42 @@ function Get-TargetResource
         throw "Setup.exe cannot be found in {$BinaryDir}"
     }
 
-    $zone = Get-Item $setupExe -Stream "Zone.Identifier" -EA SilentlyContinue
-    if ($null -ne $zone)
+    Write-Verbose -Message "Checking file status of $setupExe"
+    $checkBlockedFile = $true
+    if (Split-Path -Path $setupExe -IsAbsolute)
     {
-        throw ("Setup file is blocked! Please use 'Unblock-File -Path $setupExe' " + `
-               "to unblock the file before continuing.")
+        $driveLetter = (Split-Path -Path $setupExe -Qualifier).TrimEnd(":")
+        Write-Verbose -Message "BinaryDir refers to drive $driveLetter"
+
+        $volume = Get-Volume -DriveLetter $driveLetter -ErrorAction SilentlyContinue
+        if ($null -ne $volume)
+        {
+            if ($volume.DriveType -ne "CD-ROM")
+            {
+                Write-Verbose -Message "Volume is a fixed drive: Perform Blocked File test"
+            }
+            else
+            {
+                Write-Verbose -Message "Volume is a CD-ROM drive: Skipping Blocked File test"
+                $checkBlockedFile = $false
+            }
+        }
+        else
+        {
+            Write-Verbose -Message "Volume not found. Unable to determine the type. Continuing."
+        }
+    }
+
+    if ($checkBlockedFile -eq $true)
+    {
+        Write-Verbose -Message "Checking status now"
+        $zone = Get-Item -Path $setupExe -Stream "Zone.Identifier" -EA SilentlyContinue
+        if ($null -ne $zone)
+        {
+            throw ("Setup file is blocked! Please use 'Unblock-File -Path $setupExe' " + `
+                   "to unblock the file before continuing.")
+        }
+        Write-Verbose -Message "File not blocked, continuing."
     }
 
     $osrvFolder = Get-ChildItem -Path (Join-Path -Path $BinaryDir `
@@ -99,7 +130,7 @@ function Get-TargetResource
         $englishProducts += $languageEN
     }
 
-    # Extract language from filename
+    Write-Verbose -Message "Extract language from filename"
     if ($osrvFolder.Name -match "\w*.(\w{2,3}-\w*-?\w*)")
     {
         $language = $matches[1]
@@ -125,7 +156,7 @@ function Get-TargetResource
         throw "Error while converting language information: $language"
     }
 
-    # Extract English name of the language code
+    Write-Verbose -Message "Extract English name of the language code"
     $updateLanguage = $cultureInfo.EnglishName
     switch ($cultureInfo.EnglishName)
     {
@@ -215,7 +246,7 @@ function Set-TargetResource
         return
     }
 
-    # Check if Binary folder exists
+    Write-Verbose -Message "Check if Binary folder exists"
     if (-not(Test-Path -Path $BinaryDir))
     {
         throw "Specified path cannot be found: {$BinaryDir}"
@@ -228,17 +259,49 @@ function Set-TargetResource
         throw "Setup.exe cannot be found in {$BinaryDir}"
     }
 
-    $zone = Get-Item $setupExe -Stream "Zone.Identifier" -EA SilentlyContinue
-    if ($null -ne $zone)
+    Write-Verbose -Message "Checking file status of $setupExe"
+    $checkBlockedFile = $true
+    if (Split-Path -Path $setupExe -IsAbsolute)
     {
-        throw ("Setup file is blocked! Please use 'Unblock-File -Path $setupExe' " + `
-               "to unblock the file before continuing.")
+        $driveLetter = (Split-Path -Path $setupExe -Qualifier).TrimEnd(":")
+        Write-Verbose -Message "BinaryDir refers to drive $driveLetter"
+
+        $volume = Get-Volume -DriveLetter $driveLetter -ErrorAction SilentlyContinue
+        if ($null -ne $volume)
+        {
+            if ($volume.DriveType -ne "CD-ROM")
+            {
+                Write-Verbose -Message "Volume is a fixed drive: Perform Blocked File test"
+            }
+            else
+            {
+                Write-Verbose -Message "Volume is a CD-ROM drive: Skipping Blocked File test"
+                $checkBlockedFile = $false
+            }
+        }
+        else
+        {
+            Write-Verbose -Message "Volume not found. Unable to determine the type. Continuing."
+        }
+    }
+
+    if ($checkBlockedFile -eq $true)
+    {
+        Write-Verbose -Message "Checking status now"
+        $zone = Get-Item -Path $setupExe -Stream "Zone.Identifier" -EA SilentlyContinue
+        if ($null -ne $zone)
+        {
+            throw ("Setup file is blocked! Please use 'Unblock-File -Path $setupExe' " + `
+                   "to unblock the file before continuing.")
+        }
+        Write-Verbose -Message "File not blocked, continuing."
     }
 
     $now = Get-Date
+    Write-Verbose -Message "Check if BinaryInstallDays parameter exists"
     if ($BinaryInstallDays)
     {
-        # BinaryInstallDays parameter exists, check if current day is specified
+        Write-Verbose -Message "BinaryInstallDays parameter exists, check if current day is specified"
         $currentDayOfWeek = $now.DayOfWeek.ToString().ToLower().Substring(0,3)
 
         if ($BinaryInstallDays -contains $currentDayOfWeek)
@@ -258,10 +321,10 @@ function Set-TargetResource
         Write-Verbose -Message "No BinaryInstallDays specified, Update can be ran on any day."
     }
 
-    # Check if BinaryInstallTime parameter exists
+    Write-Verbose -Message "Check if BinaryInstallTime parameter exists"
     if ($BinaryInstallTime)
     {
-        # Check if current time is inside of time window
+        Write-Verbose -Message "BinaryInstallTime parameter exists, check if current time is inside of time window"
         $upgradeTimes = $BinaryInstallTime.Split(" ")
         $starttime = 0
         $endtime = 0
@@ -306,7 +369,7 @@ function Set-TargetResource
                                 "any time. Starting update.")
     }
 
-    # To prevent an endless loop: Check if an upgrade is required.
+    Write-Verbose -Message "To prevent an endless loop: Check if an upgrade is required."
     if ((Get-SPDSCInstalledProductVersion).FileMajorPart -eq 15)
     {
         $wssRegKey ="hklm:SOFTWARE\Microsoft\Shared Tools\Web Server Extensions\15.0\WSS"

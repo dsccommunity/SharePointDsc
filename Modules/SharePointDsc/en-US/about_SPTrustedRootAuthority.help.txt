@@ -16,8 +16,12 @@
     Specifies the name of the trusted root authority to create.
 
 .PARAMETER CertificateThumbprint
-    Required - String
+    Write - String
     Specifies the X.509 certificate of the trusted root authority, as a certificate thumbprint.
+
+.PARAMETER CertificateFilePath
+    Write - String
+    Specify the file path to the certificate if it is not stored in the local certificate store already. Private key should not be present.
 
 .PARAMETER Ensure
     Write - String
@@ -33,7 +37,7 @@
     This example deploys a SP Trusted Root Authority to the local farm.
 
 
-    Configuration Example 
+    Configuration Example
     {
         param(
             [Parameter(Mandatory = $true)]
@@ -45,10 +49,35 @@
         node localhost {
             SPTrustedRootAuthority SampleRootAuthority
             {
-                Name                         = "Contoso"
-                CertificateThumbprint        = "770515261D1AB169057E246E0EE6431D557C3AFB"
-                Ensure                       = "Present"
-                PsDscRunAsCredential         = $SetupAccount
+                Name                  = "Contoso"
+                CertificateThumbprint = "770515261D1AB169057E246E0EE6431D557C3AFB"
+                Ensure                = "Present"
+                PsDscRunAsCredential  = $SetupAccount
+            }
+        }
+    }
+
+
+.EXAMPLE
+    This example deploys a SP Trusted Root Authority to the local farm.
+
+
+    Configuration Example
+    {
+        param(
+            [Parameter(Mandatory = $true)]
+            [PSCredential]
+            $SetupAccount
+        )
+        Import-DscResource -ModuleName SharePointDsc
+
+        node localhost {
+            SPTrustedRootAuthority SampleRootAuthority
+            {
+                Name                 = "Contoso"
+                CertificateFilePath  = "C:\Certificates\RootAuthority.cer"
+                Ensure               = "Present"
+                PsDscRunAsCredential = $SetupAccount
             }
         }
     }
@@ -58,7 +87,7 @@
     This example removes a SP Trusted Root Authority from the local farm.
 
 
-    Configuration Example 
+    Configuration Example
     {
         param(
             [Parameter(Mandatory = $true)]
@@ -70,10 +99,10 @@
         node localhost {
             SPTrustedRootAuthority SampleRootAuthority
             {
-                Name                         = "Contoso"
-                CertificateThumbprint        = "770515261D1AB169057E246E0EE6431D557C3AFB"
-                Ensure                       = "Absent"
-                PsDscRunAsCredential         = $SetupAccount
+                Name                  = "Contoso"
+                CertificateThumbprint = "770515261D1AB169057E246E0EE6431D557C3AFB"
+                Ensure                = "Absent"
+                PsDscRunAsCredential  = $SetupAccount
             }
         }
     }

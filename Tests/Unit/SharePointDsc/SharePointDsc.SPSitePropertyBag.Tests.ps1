@@ -20,15 +20,30 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Mock -CommandName Get-SPSite -MockWith {
             $spSite = [pscustomobject]@{
-                Properties = @{
-                    PropertyKey = 'PropertyValue'
+                RootWeb = @{
+                    Properties = @{
+                        PropertyKey = 'PropertyValue'
+                    }
                 }
             }
-            $spSite = $spSite | Add-Member ScriptMethod Update {
-                $Global:SPDscSitePropertyUpdated = $true
-            } -PassThru
-            $spSite = $spSite | Add-Member ScriptMethod Remove {
-                $Global:SPDscSitePropertyUpdated = $true
+
+            $spSite = $spSite | Add-Member ScriptMethod OpenWeb {
+                $prop = @{
+                    PropertyKey = 'PropertyValue'
+                }
+                $prop = $prop | Add-Member ScriptMethod Update {
+                } -PassThru
+
+                $returnval = @{
+                    Properties = $prop
+                    AllProperties = @{}
+                }
+
+                $returnval = $returnval | Add-Member ScriptMethod Update {
+                    $Global:SPDscSitePropertyUpdated = $true
+                } -PassThru
+
+                return $returnval
             } -PassThru
             return $spSite
         }
@@ -43,14 +58,16 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 return $null
             }
 
-            $result = Get-TargetResource @testParams
-
-            It 'Should return absent from the get method' {
-                $result.Ensure | Should Be 'absent'
+            It 'Should throw exception in the get method' {
+                { Get-TargetResource @testParams } | Should Throw "Specified site collection could not be found."
             }
 
-            It 'Should return null value from the get method' {
-                $result.Value | Should Be $null
+            It 'Should throw exception in the set method' {
+                { Set-TargetResource @testParams } | Should Throw "Specified site collection could not be found."
+            }
+
+            It 'Should throw exception in the test method' {
+                { Test-TargetResource @testParams } | Should Throw "Specified site collection could not be found."
             }
         }
 
@@ -62,14 +79,10 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Ensure ='Present'
             }
 
-            $result = Get-TargetResource @testParams
-
             It 'Should return present from the get method' {
-                $result.Ensure | Should Be 'present'
-            }
-
-            It 'Should return the same key value as passed as parameter' {
-                $result.Key | Should Be $testParams.Key
+                $result = Get-TargetResource @testParams
+                $result.Ensure | Should Be 'Present'
+                $result.Key    | Should Be $testParams.Key
             }
 
             It 'Should return false from the test method' {

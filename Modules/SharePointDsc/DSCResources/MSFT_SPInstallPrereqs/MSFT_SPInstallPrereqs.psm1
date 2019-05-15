@@ -85,7 +85,7 @@ $Script:SP2019Win19Features = @("Web-Server", "Web-WebServer",
                                 "Web-Http-Logging", "Web-Log-Libraries", "Web-Request-Monitor",
                                 "Web-Http-Tracing", "Web-Performance", "Web-Stat-Compression",
                                 "Web-Dyn-Compression", "Web-Security", "Web-Filtering", "Web-Basic-Auth",
-                                "Web-Digest-Auth", "Web-Windows-Auth", "Web-App-Dev", "Web-Net-Ext",
+                                "Web-Windows-Auth", "Web-App-Dev", "Web-Net-Ext",
                                 "Web-Net-Ext45", "Web-Asp-Net", "Web-Asp-Net45", "Web-ISAPI-Ext",
                                 "Web-ISAPI-Filter", "Web-Mgmt-Tools", "Web-Mgmt-Console",
                                 "NET-Framework-Features", "NET-HTTP-Activation", "NET-Non-HTTP-Activ",
@@ -195,6 +195,50 @@ function Get-TargetResource
     )
 
     Write-Verbose -Message "Getting installation status of SharePoint prerequisites"
+
+    Write-Verbose -Message "Check if InstallerPath folder exists"
+    if (-not(Test-Path -Path $InstallerPath))
+    {
+        throw "PrerequisitesInstaller cannot be found: {$InstallerPath}"
+    }
+
+    Write-Verbose -Message "Checking file status of $InstallerPath"
+    $checkBlockedFile = $true
+    if (Split-Path -Path $InstallerPath -IsAbsolute)
+    {
+        $driveLetter = (Split-Path -Path $InstallerPath -Qualifier).TrimEnd(":")
+        Write-Verbose -Message "InstallerPath refers to drive $driveLetter"
+
+        $volume = Get-Volume -DriveLetter $driveLetter -ErrorAction SilentlyContinue
+        if ($null -ne $volume)
+        {
+            if ($volume.DriveType -ne "CD-ROM")
+            {
+                Write-Verbose -Message "Volume is a fixed drive: Perform Blocked File test"
+            }
+            else
+            {
+                Write-Verbose -Message "Volume is a CD-ROM drive: Skipping Blocked File test"
+                $checkBlockedFile = $false
+            }
+        }
+        else
+        {
+            Write-Verbose -Message "Volume not found. Unable to determine the type. Continuing."
+        }
+    }
+
+    if ($checkBlockedFile -eq $true)
+    {
+        Write-Verbose -Message "Checking status now"
+        $zone = Get-Item -Path $InstallerPath -Stream "Zone.Identifier" -EA SilentlyContinue
+        if ($null -ne $zone)
+        {
+            throw ("PrerequisitesInstaller is blocked! Please use 'Unblock-File -Path " + `
+                   "$InstallerPath' to unblock the file before continuing.")
+        }
+        Write-Verbose -Message "File not blocked, continuing."
+    }
 
     $majorVersion = (Get-SPDSCAssemblyVersion -PathToAssembly $InstallerPath)
     $buildVersion = (Get-SPDSCBuildVersion -PathToAssembly $InstallerPath)
@@ -560,6 +604,50 @@ function Set-TargetResource
                            "prerequisites. Please remove this manually.")
     }
 
+    Write-Verbose -Message "Check if InstallerPath folder exists"
+    if (-not(Test-Path -Path $InstallerPath))
+    {
+        throw "PrerequisitesInstaller cannot be found: {$InstallerPath}"
+    }
+
+    Write-Verbose -Message "Checking file status of $InstallerPath"
+    $checkBlockedFile = $true
+    if (Split-Path -Path $InstallerPath -IsAbsolute)
+    {
+        $driveLetter = (Split-Path -Path $InstallerPath -Qualifier).TrimEnd(":")
+        Write-Verbose -Message "InstallerPath refers to drive $driveLetter"
+
+        $volume = Get-Volume -DriveLetter $driveLetter -ErrorAction SilentlyContinue
+        if ($null -ne $volume)
+        {
+            if ($volume.DriveType -ne "CD-ROM")
+            {
+                Write-Verbose -Message "Volume is a fixed drive: Perform Blocked File test"
+            }
+            else
+            {
+                Write-Verbose -Message "Volume is a CD-ROM drive: Skipping Blocked File test"
+                $checkBlockedFile = $false
+            }
+        }
+        else
+        {
+            Write-Verbose -Message "Volume not found. Unable to determine the type. Continuing."
+        }
+    }
+
+    if ($checkBlockedFile -eq $true)
+    {
+        Write-Verbose -Message "Checking status now"
+        $zone = Get-Item -Path $InstallerPath -Stream "Zone.Identifier" -EA SilentlyContinue
+        if ($null -ne $zone)
+        {
+            throw ("PrerequisitesInstaller is blocked! Please use 'Unblock-File -Path " + `
+                   "$InstallerPath' to unblock the file before continuing.")
+        }
+        Write-Verbose -Message "File not blocked, continuing."
+    }
+
     Write-Verbose -Message "Detecting SharePoint version from binaries"
     $majorVersion = Get-SPDSCAssemblyVersion -PathToAssembly $InstallerPath
     $buildVersion = Get-SPDSCBuildVersion -PathToAssembly $InstallerPath
@@ -752,9 +840,37 @@ function Set-TargetResource
         }
     }
 
+    Write-Verbose -Message "Checking if Path is an UNC path"
+    $uncInstall = $false
+    if ($InstallerPath.StartsWith("\\"))
+    {
+        Write-Verbose -Message ("Specified InstallerPath is an UNC path. Adding servername to Local " +
+                                "Intranet Zone")
+
+        $uncInstall = $true
+
+        if ($InstallerPath -match "\\\\(.*?)\\.*")
+        {
+            $serverName = $Matches[1]
+        }
+        else
+        {
+            throw "Cannot extract servername from UNC path. Check if it is in the correct format."
+        }
+
+        Set-SPDscZoneMap -Server $serverName
+    }
+
+
     Write-Verbose -Message "Calling the SharePoint Pre-req installer"
     Write-Verbose -Message "Args for prereq installer are: $prereqArgs"
     $process = Start-Process -FilePath $InstallerPath -ArgumentList $prereqArgs -Wait -PassThru
+
+    if ($uncInstall -eq $true)
+    {
+        Write-Verbose -Message "Removing added path from the Local Intranet Zone"
+        Remove-SPDscZoneMap -ServerName $serverName
+    }
 
     switch ($process.ExitCode)
     {
