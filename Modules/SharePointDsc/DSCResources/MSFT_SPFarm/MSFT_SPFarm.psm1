@@ -88,9 +88,19 @@ function Get-TargetResource
 
     if ($PSBoundParameters.ContainsKey("CentralAdministrationUrl"))
     {
+        $uri = $CentralAdministrationUrl -as [System.Uri]
+        if ($null -eq $uri.AbsoluteUri)
+        {
+            throw "CentralAdministrationUrl is not a valid URI. It should include the scheme (http/https) and address."
+        }
+        if ($uri.scheme -ne 'https')
+        {
+            throw "Currently, the CentralAdministrationUrl parameter can only be used with HTTPS. To provision CA on " + `
+                  "HTTP, omit the CentralAdministrationUrl parameter to provision CA on http://servername:port."
+        }
         if ($CentralAdministrationUrl -match ':\d+')
         {
-            throw ("CentralAdministrationUrl should not specify port. Use CentralAdministrationPort instead.")
+            throw "CentralAdministrationUrl should not specify port. Use CentralAdministrationPort instead."
         }
     }
 
@@ -403,13 +413,6 @@ function Set-TargetResource
     }
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
-
-    # If CentralAdministrationUrl is passed but IsNullOrEmpty, remove it from the $PSBoundParameters hashtable
-    if ($PSBoundParameters.ContainsKey("CentralAdministrationUrl") -and `
-        [string]::IsNullOrEmpty($CentralAdministrationUrl))
-    {
-        $PSBoundParameters.Remove("CentralAdministrationUrl") | Out-Null
-    }
 
     # Set default values to ensure they are passed to Invoke-SPDSCCommand
     if (-not $PSBoundParameters.ContainsKey("CentralAdministrationPort"))
@@ -1000,13 +1003,6 @@ function Test-TargetResource
     )
 
     Write-Verbose -Message "Testing local SP Farm settings"
-
-    # If CentralAdministrationUrl is passed but IsNullOrEmpty, remove it from the $PSBoundParameters hashtable
-    if ($PSBoundParameters.ContainsKey("CentralAdministrationUrl") -and `
-        [string]::IsNullOrEmpty($CentralAdministrationUrl))
-    {
-        $PSBoundParameters.Remove("CentralAdministrationUrl") | Out-Null
-    }
 
     $PSBoundParameters.Ensure = $Ensure
 
