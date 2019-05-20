@@ -54,7 +54,7 @@ function Get-TargetResource
 
         try
         {
-            $spFarm = Get-SPFarm
+            $null = Get-SPFarm
         }
         catch
         {
@@ -136,7 +136,7 @@ function Set-TargetResource
 
         try
         {
-            $spFarm = Get-SPFarm
+            $null = Get-SPFarm
         }
         catch
         {
@@ -217,6 +217,9 @@ function Test-TargetResource
     }
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
+
+    Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
+    Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
 
     if ($PSBoundParameters.ContainsKey("WindowsServiceAccount"))
     {

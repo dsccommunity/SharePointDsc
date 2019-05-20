@@ -50,7 +50,7 @@ function Get-TargetResource
             Ensure = "Absent"
         }
 
-        if($null -eq $serviceApps)
+        if ($null -eq $serviceApps)
         {
             return $nullReturn
         }
@@ -59,7 +59,7 @@ function Get-TargetResource
             $_.GetType().FullName -eq "Microsoft.Office.TranslationServices.TranslationServiceApplication"
         }
 
-        if($null -eq $serviceApp)
+        if ($null -eq $serviceApp)
         {
             return $nullReturn
         }
@@ -129,13 +129,13 @@ function Set-TargetResource
     Write-Verbose "Setting Machine Translation Service Application."
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
-    if($CurrentValues.Ensure -eq "Present" -and $Ensure -eq "Present")
+    if ($CurrentValues.Ensure -eq "Present" -and $Ensure -eq "Present")
     {
         Write-Verbose "Resetting Machine Translation Service Application."
 
-        $result = Invoke-SPDSCCommand -Credential $InstallAccount `
-                                  -Arguments $PSBoundParameters `
-                                  -ScriptBlock {
+        Invoke-SPDSCCommand -Credential $InstallAccount `
+                            -Arguments $PSBoundParameters `
+                            -ScriptBlock {
             $params = $args[0]
             $serviceApps = Get-SPServiceApplication -Identity $params.Name
 
@@ -148,7 +148,7 @@ function Set-TargetResource
                                                               -DatabaseServer $params.DatabaseServer
         }
     }
-    if($CurrentValues.Ensure -eq "Absent" -and $Ensure -eq "Present")
+    if ($CurrentValues.Ensure -eq "Absent" -and $Ensure -eq "Present")
     {
         Write-Verbose "Creating Machine Translation Service Application."
 
@@ -167,9 +167,9 @@ function Set-TargetResource
                 # The New-SPTranslationServiceApplication cmdlet creates a proxy by default
                 # If a name is specified, we first need to delete the created one
                 $proxies = Get-SPServiceApplicationProxy
-                foreach($proxyInstance in $proxies)
+                foreach ($proxyInstance in $proxies)
                 {
-                    if($tsServiceApp.IsConnected($proxyInstance))
+                    if ($tsServiceApp.IsConnected($proxyInstance))
                     {
                         $proxyInstance.Delete()
                     }
@@ -181,7 +181,7 @@ function Set-TargetResource
 
         }
     }
-    if($Ensure -eq "Absent")
+    if ($Ensure -eq "Absent")
     {
         Write-Verbose "Removing Machine Translation Service Application."
 
@@ -242,6 +242,9 @@ function Test-TargetResource
     $PSBoundParameters.Ensure = $Ensure
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
+
+    Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
+    Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
 
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
                                     -DesiredValues $PSBoundParameters `

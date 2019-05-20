@@ -85,7 +85,9 @@ function Get-TargetResource
 
             $site = New-Object "Microsoft.SharePoint.SPSite" -ArgumentList @($params.Url, $centralAdminSite.SystemAccount.UserToken)
         }
-        catch [System.Exception] {}
+        catch [System.Exception]
+        {
+        }
 
         if ($null -eq $site)
         {
@@ -266,9 +268,9 @@ function Set-TargetResource
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
-                                  -Arguments @($PSBoundParameters,$CurrentValues) `
-                                  -ScriptBlock {
+    $null = Invoke-SPDSCCommand -Credential $InstallAccount `
+                                -Arguments @($PSBoundParameters,$CurrentValues) `
+                                -ScriptBlock {
         $params = $args[0]
         $CurrentValues = $args[1]
         $doCreateDefaultGroups = $false
@@ -364,7 +366,7 @@ function Set-TargetResource
             $centralAdminSite = Get-SPSite -Identity $centralAdminWebApp.Url
             $systemAccountSite = New-Object "Microsoft.SharePoint.SPSite" -ArgumentList @($site.Id, $centralAdminSite.SystemAccount.UserToken)
 
-            if($null -eq $systemAccountSite.SecondaryContact)
+            if ($null -eq $systemAccountSite.SecondaryContact)
             {
                 $secondaryOwnerLogin = $null
             }
@@ -455,6 +457,9 @@ function Test-TargetResource
     Write-Verbose -Message "Testing site collection $Url"
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
+
+    Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
+    Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
 
     if ($CreateDefaultGroups -eq $true)
     {

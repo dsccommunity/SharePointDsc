@@ -99,23 +99,30 @@ function Convert-SPDscHashtableToString
 {
     param
     (
+        [Parameter()]
         [System.Collections.Hashtable]
         $Hashtable
     )
-    $first = $true
-    foreach($pair in $Hashtable.GetEnumerator())
+    $values = @()
+    foreach ($pair in $Hashtable.GetEnumerator())
     {
-        if ($first)
+        if ($pair.Value -is [System.Array])
         {
-            $first = $false
+            $str = "$($pair.Key)=($($pair.Value -join ","))"
+        }
+        elseif ($pair.Value -is [System.Collections.Hashtable])
+        {
+            $str = "$($pair.Key)={$(Convert-SPDscHashtableToString -Hashtable $pair.Value)}"
         }
         else
         {
-            $output += '; '
+            $str = "$($pair.Key)=$($pair.Value)"
         }
-        $output+="{0}={1}" -f $($pair.key),$($pair.Value)
+        $values += $str
     }
-    return $output
+
+    [array]::Sort($values)
+    return ($values -join "; ")
 }
 
 function Get-SPDscOSVersion
@@ -541,6 +548,7 @@ function Remove-SPDscZoneMap
 function Resolve-SPDscSecurityIdentifier
 {
     [CmdletBinding()]
+    [OutputType([System.String])]
     param
     (
         [Parameter(Mandatory = $true)]
@@ -987,7 +995,7 @@ function Format-OfficePatchGUID
     )
 
     $guidParts = $PatchGUID.Split("-")
-    if($guidParts.Count -ne 5 `
+    if ($guidParts.Count -ne 5 `
         -or $guidParts[0].Length -ne 8 `
         -or $guidParts[1].Length -ne 4 `
         -or $guidParts[2].Length -ne 4 `
@@ -1016,7 +1024,7 @@ function ConvertTo-TwoDigitFlipString
         $InputString
     )
 
-    if($InputString.Length % 2 -ne 0)
+    if ($InputString.Length % 2 -ne 0)
     {
         throw "The input string was not in the correct format. It needs to have an even length."
     }

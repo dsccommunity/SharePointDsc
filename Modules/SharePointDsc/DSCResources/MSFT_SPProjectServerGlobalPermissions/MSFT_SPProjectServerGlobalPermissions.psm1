@@ -4,17 +4,17 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [Parameter(Mandatory = $true)]  
-        [System.String] 
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $Url,
 
-        [Parameter(Mandatory = $true)]  
-        [System.String] 
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $EntityName,
 
         [Parameter(Mandatory = $true)]
-        [ValidateSet("User", "Group")]  
-        [System.String] 
+        [ValidateSet("User", "Group")]
+        [System.String]
         $EntityType,
 
         [Parameter()]
@@ -25,14 +25,14 @@ function Get-TargetResource
         [System.String[]]
         $DenyPermissions,
 
-        [Parameter()] 
-        [System.Management.Automation.PSCredential] 
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 
     Write-Verbose -Message "Getting global permissions for $EntityType '$EntityName' at '$Url'"
 
-    if ((Get-SPDSCInstalledProductVersion).FileMajorPart -lt 16) 
+    if ((Get-SPDSCInstalledProductVersion).FileMajorPart -lt 16)
     {
         throw [Exception] ("Support for Project Server in SharePointDsc is only valid for " + `
                            "SharePoint 2016 and 2019.")
@@ -49,7 +49,7 @@ function Get-TargetResource
             throw [Exception] ("SPProjectServerGlobalPermissions is designed for Project Server " + `
                                "permissions mode only, and this site is set to SharePoint mode")
         }
-        
+
         $modulePath = "..\..\Modules\SharePointDsc.ProjectServer\ProjectServerConnector.psm1"
         Import-Module -Name (Join-Path -Path $scriptRoot -ChildPath $modulePath -Resolve)
 
@@ -65,7 +65,7 @@ function Get-TargetResource
                 $resourceService = New-SPDscProjectServerWebService -PwaUrl $params.Url `
                                                                     -EndpointName Resource `
                                                                     -UseKerberos:$useKerberos
-                
+
                 $userId = Get-SPDscProjectServerResourceId -PwaUrl $params.Url -ResourceName $params.EntityName
                 Use-SPDscProjectServerWebService -Service $resourceService -ScriptBlock {
                     $script:resultDataSet = $resourceService.ReadResourceAuthorization($userId)
@@ -116,17 +116,17 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [Parameter(Mandatory = $true)]  
-        [System.String] 
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $Url,
 
-        [Parameter(Mandatory = $true)]  
-        [System.String] 
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $EntityName,
 
         [Parameter(Mandatory = $true)]
-        [ValidateSet("User", "Group")]  
-        [System.String] 
+        [ValidateSet("User", "Group")]
+        [System.String]
         $EntityType,
 
         [Parameter()]
@@ -137,8 +137,8 @@ function Set-TargetResource
         [System.String[]]
         $DenyPermissions,
 
-        [Parameter()] 
-        [System.Management.Automation.PSCredential] 
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 
@@ -198,7 +198,7 @@ function Set-TargetResource
                 }
             }
         }
-        
+
         switch($params.EntityType)
         {
             "User" {
@@ -207,7 +207,7 @@ function Set-TargetResource
                 $resourceService = New-SPDscProjectServerWebService -PwaUrl $params.Url `
                                                                     -EndpointName Resource `
                                                                     -UseKerberos:$useKerberos
-                
+
                 $userId = Get-SPDscProjectServerResourceId -PwaUrl $params.Url -ResourceName $params.EntityName
                 Use-SPDscProjectServerWebService -Service $resourceService -ScriptBlock {
                     $dataSet = $resourceService.ReadResourceAuthorization($userId)
@@ -307,17 +307,17 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [Parameter(Mandatory = $true)]  
-        [System.String] 
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $Url,
 
-        [Parameter(Mandatory = $true)]  
-        [System.String] 
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $EntityName,
 
         [Parameter(Mandatory = $true)]
-        [ValidateSet("User", "Group")]  
-        [System.String] 
+        [ValidateSet("User", "Group")]
+        [System.String]
         $EntityType,
 
         [Parameter()]
@@ -328,14 +328,17 @@ function Test-TargetResource
         [System.String[]]
         $DenyPermissions,
 
-        [Parameter()] 
-        [System.Management.Automation.PSCredential] 
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 
     Write-Verbose -Message "Testing global permissions for $EntityType '$EntityName' at '$Url'"
 
-    $currentValues = Get-TargetResource @PSBoundParameters
+    $CurrentValues = Get-TargetResource @PSBoundParameters
+
+    Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
+    Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
 
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
                                     -DesiredValues $PSBoundParameters `

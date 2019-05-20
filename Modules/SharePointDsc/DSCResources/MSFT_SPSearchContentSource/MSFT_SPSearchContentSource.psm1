@@ -194,10 +194,10 @@ function Get-TargetResource
                     Priority = $source.CrawlPriority
                 }
 
-                if($null -ne $params.LOBSystemSet)
+                if ($null -ne $params.LOBSystemSet)
                 {
                     $bdcSegments = $source.StartAddresses[0].Segments
-                    if($bdcSegments.Length -ge 5)
+                    if ($bdcSegments.Length -ge 5)
                     {
                         [Reflection.Assembly]::LoadWithPartialName("System.Web") | Out-Null
                         $LOBSystemName = [System.Web.HttpUtility]::UrlDecode($bdcSegments[4].Replace("/", ""))
@@ -404,7 +404,7 @@ function Set-TargetResource
                         $newType = "Business"
                     }
                 }
-                if($params.ContentSourceType -ne "Business")
+                if ($params.ContentSourceType -ne "Business")
                 {
                     $source = New-SPEnterpriseSearchCrawlContentSource `
                                     -SearchApplication $params.ServiceAppName `
@@ -808,7 +808,11 @@ function Test-TargetResource
             }
         }
     }
+
     $CurrentValues = Get-TargetResource @PSBoundParameters
+
+    Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
+    Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
 
     if ($Ensure -eq "Absent" -or $CurrentValues.Ensure -eq "Absent")
     {

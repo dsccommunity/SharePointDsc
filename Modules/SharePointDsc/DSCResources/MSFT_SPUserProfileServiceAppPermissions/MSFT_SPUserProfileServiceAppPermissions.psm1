@@ -195,7 +195,7 @@ function Set-TargetResource
             if (($null -ne $noneDiff) -and ($noneDiff.SideIndicator -eq "=>"))
             {
                 # Need to remove everyone
-                foreach($user in $CurrentValues.$permission)
+                foreach ($user in $CurrentValues.$permission)
                 {
                     if ($user -ne "Everyone" -and $user -ne "None" -and $user)
                     {
@@ -229,7 +229,7 @@ function Set-TargetResource
             {
                 # Need to add everyone, so remove all the permissions that exist currently of this type
                 # and then add the everyone permissions
-                foreach($user in $CurrentValues.$permission)
+                foreach ($user in $CurrentValues.$permission)
                 {
                     if ($user -ne "Everyone" -and $user -ne "None" -and $user)
                     {
@@ -332,6 +332,9 @@ function Test-TargetResource
     Confirm-SPDscUpaPermissionsConfig -Parameters $PSBoundParameters
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
+
+    Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
+    Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
 
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
                                         -DesiredValues $PSBoundParameters `

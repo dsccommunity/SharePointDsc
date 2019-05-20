@@ -88,7 +88,7 @@ function Get-TargetResource
         if ($params.ContainsKey("Members") -eq $true)
         {
             Write-Verbose -Message "Checking AccessLevels in Members parameter"
-            foreach($member in $params.Members)
+            foreach ($member in $params.Members)
             {
                 foreach ($accessLevel in $member.AccessLevels)
                 {
@@ -106,7 +106,7 @@ function Get-TargetResource
         if ($params.ContainsKey("MembersToInclude") -eq $true)
         {
             Write-Verbose -Message "Checking AccessLevels in MembersToInclude parameter"
-            foreach($member in $params.MembersToInclude)
+            foreach ($member in $params.MembersToInclude)
             {
                 foreach ($accessLevel in $member.AccessLevels)
                 {
@@ -124,7 +124,7 @@ function Get-TargetResource
         if ($params.ContainsKey("MembersToExclude") -eq $true)
         {
             Write-Verbose -Message "Checking AccessLevels in MembersToExclude parameter"
-            foreach($member in $params.MembersToExclude)
+            foreach ($member in $params.MembersToExclude)
             {
                 foreach ($accessLevel in $member.AccessLevels)
                 {
@@ -281,7 +281,7 @@ function Set-TargetResource
         if ($params.ContainsKey("Members") -eq $true)
         {
             Write-Verbose -Message "Checking AccessLevels in Members parameter"
-            foreach($member in $params.Members)
+            foreach ($member in $params.Members)
             {
                 foreach ($accessLevel in $member.AccessLevels)
                 {
@@ -297,7 +297,7 @@ function Set-TargetResource
         if ($params.ContainsKey("MembersToInclude") -eq $true)
         {
             Write-Verbose -Message "Checking AccessLevels in MembersToInclude parameter"
-            foreach($member in $params.MembersToInclude)
+            foreach ($member in $params.MembersToInclude)
             {
                 foreach ($accessLevel in $member.AccessLevels)
                 {
@@ -324,7 +324,7 @@ function Set-TargetResource
 
         if ($params.ContainsKey("Members") -eq $true)
         {
-            foreach($desiredMember in $params.Members)
+            foreach ($desiredMember in $params.Members)
             {
                 if ($desiredMember.Username -eq "{LocalFarm}")
                 {
@@ -364,7 +364,7 @@ function Set-TargetResource
                 }
             }
 
-            foreach($currentMember in $CurrentValues.Members)
+            foreach ($currentMember in $CurrentValues.Members)
             {
                 if ($params.Members.Username -notcontains $currentMember.Username)
                 {
@@ -517,6 +517,9 @@ function Test-TargetResource
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
+    Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
+    Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
+
     if ([System.String]::IsNullOrEmpty($CurrentValues.ServiceAppName) -eq $true)
     {
         return $false
@@ -572,7 +575,7 @@ function Test-TargetResource
             if ($null -eq $differences)
             {
                 Write-Verbose -Message "Security list matches - checking that permissions match on each object"
-                foreach($currentMember in $CurrentValues.Members)
+                foreach ($currentMember in $CurrentValues.Members)
                 {
                     $expandedAccessLevels = Expand-AccessLevel -Security $security -AccessLevels ($params.Members | Where-Object -FilterScript {
                         $_.Username -eq $currentMember.Username

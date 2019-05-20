@@ -143,7 +143,7 @@ function Set-TargetResource
 
     $paramArgs = @($PSBoundParameters,$PSScriptRoot)
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $paramArgs -ScriptBlock {
+    $null = Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $paramArgs -ScriptBlock {
         $params = $args[0]
         $ScriptRoot = $args[1]
 
@@ -233,6 +233,9 @@ function Test-TargetResource
     Write-Verbose -Message "Testing web application '$WebAppUrl' throttling settings"
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
+
+    Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
+    Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
 
     if ($null -eq $CurrentValues)
     {

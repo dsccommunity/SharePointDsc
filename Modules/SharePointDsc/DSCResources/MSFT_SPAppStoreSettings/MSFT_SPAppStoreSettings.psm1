@@ -4,20 +4,20 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [Parameter(Mandatory = $true)]  
-        [System.String] 
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $WebAppUrl,
 
-        [Parameter()]  
-        [System.Boolean] 
+        [Parameter()]
+        [System.Boolean]
         $AllowAppPurchases,
 
-        [Parameter()]  
-        [System.Boolean] 
+        [Parameter()]
+        [System.Boolean]
         $AllowAppsForOffice,
 
-        [Parameter()] 
-        [System.Management.Automation.PSCredential] 
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 
@@ -34,7 +34,7 @@ function Get-TargetResource
         }
 
         $wa = Get-SPWebApplication -Identity $params.WebAppUrl -ErrorAction SilentlyContinue
-        if ($null -eq $wa) 
+        if ($null -eq $wa)
         {
             return $nullreturn
         }
@@ -59,20 +59,20 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [Parameter(Mandatory = $true)]  
-        [System.String] 
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $WebAppUrl,
 
-        [Parameter()]  
-        [System.Boolean] 
+        [Parameter()]
+        [System.Boolean]
         $AllowAppPurchases,
 
-        [Parameter()]  
-        [System.Boolean] 
+        [Parameter()]
+        [System.Boolean]
         $AllowAppsForOffice,
 
-        [Parameter()] 
-        [System.Management.Automation.PSCredential] 
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 
@@ -84,7 +84,7 @@ function Set-TargetResource
         $params = $args[0]
 
         $wa = Get-SPWebApplication -Identity $params.WebAppUrl -ErrorAction SilentlyContinue
-        if ($null -eq $wa) 
+        if ($null -eq $wa)
         {
             throw ("Specified web application does not exist.")
         }
@@ -119,26 +119,29 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [Parameter(Mandatory = $true)]  
-        [System.String] 
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $WebAppUrl,
 
-        [Parameter()]  
-        [System.Boolean] 
+        [Parameter()]
+        [System.Boolean]
         $AllowAppPurchases,
 
-        [Parameter()]  
-        [System.Boolean] 
+        [Parameter()]
+        [System.Boolean]
         $AllowAppsForOffice,
 
-        [Parameter()] 
-        [System.Management.Automation.PSCredential] 
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 
     Write-Verbose -Message "Testing app store settings of $WebAppUrl"
 
-    $currentValues = Get-TargetResource @PSBoundParameters
+    $CurrentValues = Get-TargetResource @PSBoundParameters
+
+    Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
+    Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
 
     if ($null -eq $currentValues.WebAppUrl)
     {
@@ -148,7 +151,7 @@ function Test-TargetResource
 
     if ($PSBoundParameters.ContainsKey("AllowAppPurchases"))
     {
-        if ($AllowAppPurchases -ne $currentValues.AllowAppPurchases)
+        if ($AllowAppPurchases -ne $CurrentValues.AllowAppPurchases)
         {
             return $false
         }
@@ -156,7 +159,7 @@ function Test-TargetResource
 
     if ($PSBoundParameters.ContainsKey("AllowAppsForOffice"))
     {
-        if ($AllowAppsForOffice -ne $currentValues.AllowAppsForOffice)
+        if ($AllowAppsForOffice -ne $CurrentValues.AllowAppsForOffice)
         {
             return $false
         }

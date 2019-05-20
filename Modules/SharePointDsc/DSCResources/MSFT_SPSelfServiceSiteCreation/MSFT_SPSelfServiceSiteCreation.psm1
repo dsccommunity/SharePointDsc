@@ -85,7 +85,7 @@ function Get-TargetResource
     }
     else
     {
-        if($PSBoundParameters.ContainsKey("AlternateUrl") -eq $true -and
+        if ($PSBoundParameters.ContainsKey("AlternateUrl") -eq $true -and
            $PSBoundParameters.ContainsKey("ManagedPath") -eq $true)
         {
             throw "You cannot specify both AlternateUrl and ManagedPath. Please use just one of these."
@@ -120,17 +120,17 @@ function Get-TargetResource
         }
 
         $policyOption = "NotHavePolicy"
-        if($webApplication.Properties.Contains("PolicyOption"))
+        if ($webApplication.Properties.Contains("PolicyOption"))
         {
             $policyOptionProperty = $webApplication.Properties["PolicyOption"]
-            if($policyOptionProperty -eq "CanHavePolicy" -or $policyOptionProperty -eq "MustHavePolicy")
+            if ($policyOptionProperty -eq "CanHavePolicy" -or $policyOptionProperty -eq "MustHavePolicy")
             {
                 $policyOption = $policyOptionProperty
             }
         }
 
         $userExperienceVersion = $null
-        if($webApplication.SiteCreationUserExperienceVersion -ne $null)
+        if ($null -ne $webApplication.SiteCreationUserExperienceVersion)
         {
             switch ($webApplication.SiteCreationUserExperienceVersion)
             {
@@ -280,9 +280,9 @@ function Set-TargetResource
 
         if ($params.Enabled -eq $false)
         {
-            if($params.ContainsKey("ShowStartASiteMenuItem"))
+            if ($params.ContainsKey("ShowStartASiteMenuItem"))
             {
-                if($ShowStartASiteMenuItem -eq $true)
+                if ($ShowStartASiteMenuItem -eq $true)
                 {
                     throw ("It is not allowed to set the ShowStartASiteMenuItem to true when self service site creation is disabled.")
                 }
@@ -495,7 +495,10 @@ function Test-TargetResource
         }
     }
 
-    $currentValues = Get-TargetResource @PSBoundParameters
+    $CurrentValues = Get-TargetResource @PSBoundParameters
+
+    Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
+    Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
 
     if ($Enabled)
     {

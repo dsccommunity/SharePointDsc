@@ -79,7 +79,7 @@ function Set-TargetResource
 
     Write-Verbose -Message "Setting web application '$WebAppUrl' blocked file types"
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+    $null = Invoke-SPDSCCommand -Credential $InstallAccount `
                                   -Arguments @($PSBoundParameters,$PSScriptRoot) `
                                   -ScriptBlock {
         $params = $args[0]
@@ -130,6 +130,9 @@ function Test-TargetResource
     Write-Verbose -Message "Testing for web application '$WebAppUrl' blocked file types"
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
+
+    Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
+    Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
 
     if ($null -eq $CurrentValues)
     {

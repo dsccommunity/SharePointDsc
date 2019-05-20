@@ -589,15 +589,15 @@ function Set-TargetResource
         #DistributedLogonTokenCache
         $DLTC = Get-SPDistributedCacheClientSetting -ContainerType "DistributedLogonTokenCache"
 
-        if($params.DLTCMaxConnectionsToServer)
+        if ($params.DLTCMaxConnectionsToServer)
         {
             $DLTC.MaxConnectionsToServer = $params.DLTCMaxConnectionsToServer
         }
-        if($params.DLTCRequestTimeout)
+        if ($params.DLTCRequestTimeout)
         {
             $DLTC.RequestTimeout = $params.DLTCRequestTimeout
         }
-        if($params.DLTCChannelOpenTimeOut)
+        if ($params.DLTCChannelOpenTimeOut)
         {
             $DLTC.ChannelOpenTimeOut = $params.DLTCChannelOpenTimeOut
         }
@@ -605,15 +605,15 @@ function Set-TargetResource
 
         #DistributedViewStateCache
         $DVSC = Get-SPDistributedCacheClientSetting -ContainerType "DistributedViewStateCache"
-        if($params.DVSCMaxConnectionsToServer)
+        if ($params.DVSCMaxConnectionsToServer)
         {
             $DVSC.MaxConnectionsToServer = $params.DVSCMaxConnectionsToServer
         }
-        if($params.DVSCRequestTimeout)
+        if ($params.DVSCRequestTimeout)
         {
             $DVSC.RequestTimeout = $params.DVSCRequestTimeout
         }
-        if($params.DVSCChannelOpenTimeOut)
+        if ($params.DVSCChannelOpenTimeOut)
         {
             $DVSC.ChannelOpenTimeOut = $params.DVSCChannelOpenTimeOut
         }
@@ -621,15 +621,15 @@ function Set-TargetResource
 
         #DistributedAccessCache
         $DAC = Get-SPDistributedCacheClientSetting -ContainerType "DistributedAccessCache"
-        if($params.DACMaxConnectionsToServer)
+        if ($params.DACMaxConnectionsToServer)
         {
             $DAC.MaxConnectionsToServer = $params.DACMaxConnectionsToServer
         }
-        if($params.DACRequestTimeout)
+        if ($params.DACRequestTimeout)
         {
             $DAC.RequestTimeout = $params.DACRequestTimeout
         }
-        if($params.DACChannelOpenTimeOut)
+        if ($params.DACChannelOpenTimeOut)
         {
             $DAC.ChannelOpenTimeOut = $params.DACChannelOpenTimeOut
         }
@@ -637,15 +637,15 @@ function Set-TargetResource
 
         #DistributedActivityFeedCache
         $DAF = Get-SPDistributedCacheClientSetting -ContainerType "DistributedActivityFeedCache"
-        if($params.DAFMaxConnectionsToServer)
+        if ($params.DAFMaxConnectionsToServer)
         {
             $DAF.MaxConnectionsToServer = $params.DAFMaxConnectionsToServer
         }
-        if($params.DAFRequestTimeout)
+        if ($params.DAFRequestTimeout)
         {
             $DAF.RequestTimeout = $params.DAFRequestTimeout
         }
-        if($params.DAFChannelOpenTimeOut)
+        if ($params.DAFChannelOpenTimeOut)
         {
             $DAF.ChannelOpenTimeOut = $params.DAFChannelOpenTimeOut
         }
@@ -653,15 +653,15 @@ function Set-TargetResource
 
         #DistributedActivityFeedLMTCache
         $DAFC = Get-SPDistributedCacheClientSetting -ContainerType "DistributedActivityFeedLMTCache"
-        if($params.DAFCMaxConnectionsToServer)
+        if ($params.DAFCMaxConnectionsToServer)
         {
             $DAFC.MaxConnectionsToServer = $params.DAFCMaxConnectionsToServer
         }
-        if($params.DAFCRequestTimeout)
+        if ($params.DAFCRequestTimeout)
         {
             $DAFC.RequestTimeout = $params.DAFCRequestTimeout
         }
-        if($params.DAFCChannelOpenTimeOut)
+        if ($params.DAFCChannelOpenTimeOut)
         {
             $DAFC.ChannelOpenTimeOut = $params.DAFCChannelOpenTimeOut
         }
@@ -669,15 +669,15 @@ function Set-TargetResource
 
         #DistributedBouncerCache
         $DBC = Get-SPDistributedCacheClientSetting -ContainerType "DistributedBouncerCache"
-        if($params.DBCMaxConnectionsToServer)
+        if ($params.DBCMaxConnectionsToServer)
         {
             $DBC.MaxConnectionsToServer = $params.DBCMaxConnectionsToServer
         }
-        if($params.DBCRequestTimeout)
+        if ($params.DBCRequestTimeout)
         {
             $DBC.RequestTimeout = $params.DBCRequestTimeout
         }
-        if($params.DBCChannelOpenTimeOut)
+        if ($params.DBCChannelOpenTimeOut)
         {
             $DBC.ChannelOpenTimeOut = $params.DBCChannelOpenTimeOut
         }
@@ -685,15 +685,15 @@ function Set-TargetResource
 
         #DistributedDefaultCache
         $DDC = Get-SPDistributedCacheClientSetting -ContainerType "DistributedDefaultCache"
-        if($params.DDCMaxConnectionsToServer)
+        if ($params.DDCMaxConnectionsToServer)
         {
             $DDC.MaxConnectionsToServer = $params.DDCMaxConnectionsToServer
         }
-        if($params.DDCRequestTimeout)
+        if ($params.DDCRequestTimeout)
         {
             $DDC.RequestTimeout = $params.DDCRequestTimeout
         }
-        if($params.DDCChannelOpenTimeOut)
+        if ($params.DDCChannelOpenTimeOut)
         {
             $DDC.ChannelOpenTimeOut = $params.DDCChannelOpenTimeOut
         }
@@ -701,15 +701,15 @@ function Set-TargetResource
 
         #DistributedSearchCache
         $DSC = Get-SPDistributedCacheClientSetting -ContainerType "DistributedSearchCache"
-        if($params.DSCMaxConnectionsToServer)
+        if ($params.DSCMaxConnectionsToServer)
         {
             $DSC.MaxConnectionsToServer = $params.DSCMaxConnectionsToServer
         }
-        if($params.DSCRequestTimeout)
+        if ($params.DSCRequestTimeout)
         {
             $DSC.RequestTimeout = $params.DSCRequestTimeout
         }
-        if($params.DSCChannelOpenTimeOut)
+        if ($params.DSCChannelOpenTimeOut)
         {
             $DSC.ChannelOpenTimeOut = $params.DSCChannelOpenTimeOut
         }
@@ -717,15 +717,15 @@ function Set-TargetResource
 
         #DistributedSecurityTrimmingCache
         $DTC = Get-SPDistributedCacheClientSetting -ContainerType "DistributedSecurityTrimmingCache"
-        if($params.DTCMaxConnectionsToServer)
+        if ($params.DTCMaxConnectionsToServer)
         {
             $DTC.MaxConnectionsToServer = $params.DTCMaxConnectionsToServer
         }
-        if($params.DTCRequestTimeout)
+        if ($params.DTCRequestTimeout)
         {
             $DTC.RequestTimeout = $params.DTCRequestTimeout
         }
-        if($params.DTCChannelOpenTimeOut)
+        if ($params.DTCChannelOpenTimeOut)
         {
             $DTC.ChannelOpenTimeOut = $params.DTCChannelOpenTimeOut
         }
@@ -733,15 +733,15 @@ function Set-TargetResource
 
         #DistributedServerToAppServerAccessTokenCache
         $DSTAC = Get-SPDistributedCacheClientSetting -ContainerType "DistributedServerToAppServerAccessTokenCache"
-        if($params.DSTACMaxConnectionsToServer)
+        if ($params.DSTACMaxConnectionsToServer)
         {
             $DSTAC.MaxConnectionsToServer = $params.DSTACMaxConnectionsToServer
         }
-        if($params.DSTACRequestTimeout)
+        if ($params.DSTACRequestTimeout)
         {
             $DSTAC.RequestTimeout = $params.DSTACRequestTimeout
         }
-        if($params.DSTACChannelOpenTimeOut)
+        if ($params.DSTACChannelOpenTimeOut)
         {
             $DSTAC.ChannelOpenTimeOut = $params.DSTACChannelOpenTimeOut
         }
@@ -753,15 +753,15 @@ function Set-TargetResource
         {
             #DistributedFileLockThrottlerCache
             $DFLTC = Get-SPDistributedCacheClientSetting -ContainerType "DistributedFileLockThrottlerCache"
-            if($params.DFLTCMaxConnectionsToServer)
+            if ($params.DFLTCMaxConnectionsToServer)
             {
                 $DFLTC.MaxConnectionsToServer = $params.DFLTCMaxConnectionsToServer
             }
-            if($params.DFLTCRequestTimeout)
+            if ($params.DFLTCRequestTimeout)
             {
                 $DFLTC.RequestTimeout = $params.DFLTCRequestTimeout
             }
-            if($params.DFLTCChannelOpenTimeOut)
+            if ($params.DFLTCChannelOpenTimeOut)
             {
                 $DFLTC.ChannelOpenTimeOut = $params.DFLTCChannelOpenTimeOut
             }
@@ -769,15 +769,15 @@ function Set-TargetResource
 
             #DistributedSharedWithUserCache
             $DSWUC = Get-SPDistributedCacheClientSetting -ContainerType "DistributedSharedWithUserCache"
-            if($params.DSWUCMaxConnectionsToServer)
+            if ($params.DSWUCMaxConnectionsToServer)
             {
                 $DSWUC.MaxConnectionsToServer = $params.DSWUCMaxConnectionsToServer
             }
-            if($params.DSWUCRequestTimeout)
+            if ($params.DSWUCRequestTimeout)
             {
                 $DSWUC.RequestTimeout = $params.DSWUCRequestTimeout
             }
-            if($params.DSWUCChannelOpenTimeOut)
+            if ($params.DSWUCChannelOpenTimeOut)
             {
                 $DSWUC.ChannelOpenTimeOut = $params.DSWUCChannelOpenTimeOut
             }
@@ -785,15 +785,15 @@ function Set-TargetResource
 
             #DistributedUnifiedGroupsCache
             $DUGC = Get-SPDistributedCacheClientSetting -ContainerType "DistributedUnifiedGroupsCache"
-            if($params.DUGCMaxConnectionsToServer)
+            if ($params.DUGCMaxConnectionsToServer)
             {
                 $DUGC.MaxConnectionsToServer = $params.DUGCMaxConnectionsToServer
             }
-            if($params.DUGCRequestTimeout)
+            if ($params.DUGCRequestTimeout)
             {
                 $DUGC.RequestTimeout = $params.DUGCRequestTimeout
             }
-            if($params.DUGCChannelOpenTimeOut)
+            if ($params.DUGCChannelOpenTimeOut)
             {
                 $DUGC.ChannelOpenTimeOut = $params.DUGCChannelOpenTimeOut
             }
@@ -801,15 +801,15 @@ function Set-TargetResource
 
             #DistributedResourceTallyCache
             $DRTC = Get-SPDistributedCacheClientSetting -ContainerType "DistributedResourceTallyCache"
-            if($params.DRTCMaxConnectionsToServer)
+            if ($params.DRTCMaxConnectionsToServer)
             {
                 $DRTC.MaxConnectionsToServer = $params.DRTCMaxConnectionsToServer
             }
-            if($params.DRTCRequestTimeout)
+            if ($params.DRTCRequestTimeout)
             {
                 $DRTC.RequestTimeout = $params.DRTCRequestTimeout
             }
-            if($params.DRTCChannelOpenTimeOut)
+            if ($params.DRTCChannelOpenTimeOut)
             {
                 $DRTC.ChannelOpenTimeOut = $params.DRTCChannelOpenTimeOut
             }
@@ -817,15 +817,15 @@ function Set-TargetResource
 
             #DistributedHealthScoreCache
             $DHSC = Get-SPDistributedCacheClientSetting -ContainerType "DistributedHealthScoreCache"
-            if($params.DHSCMaxConnectionsToServer)
+            if ($params.DHSCMaxConnectionsToServer)
             {
                 $DHSC.MaxConnectionsToServer = $params.DHSCMaxConnectionsToServer
             }
-            if($params.DHSCRequestTimeout)
+            if ($params.DHSCRequestTimeout)
             {
                 $DHSC.RequestTimeout = $params.DHSCRequestTimeout
             }
-            if($params.DHSCChannelOpenTimeOut)
+            if ($params.DHSCChannelOpenTimeOut)
             {
                 $DHSC.ChannelOpenTimeOut = $params.DHSCChannelOpenTimeOut
             }
@@ -1033,6 +1033,9 @@ function Test-TargetResource
     Write-Verbose -Message "Testing the Distributed Cache Client Settings"
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
+
+    Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
+    Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
 
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
                                     -DesiredValues $PSBoundParameters `

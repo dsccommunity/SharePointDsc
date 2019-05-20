@@ -4,98 +4,98 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [Parameter(Mandatory = $true)]  
-        [System.String] 
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $Url,
-        
-        [Parameter()]  
+
+        [Parameter()]
         [System.Boolean]
         $EnableOvertimeAndNonBillableTracking,
 
-        [Parameter()] 
+        [Parameter()]
         [ValidateSet("CurrentTaskAssignments","CurrentProjects","NoPrepopulation")]
-        [System.String] 
+        [System.String]
         $DefaultTimesheetCreationMode,
 
         [Parameter()]
         [ValidateSet("Days","Weeks")]
-        [System.String] 
+        [System.String]
         $DefaultTrackingUnit,
 
         [Parameter()]
         [ValidateSet("Hours","Days")]
-        [System.String] 
+        [System.String]
         $DefaultReportingUnit,
 
-        [Parameter()]  
-        [System.Single] 
+        [Parameter()]
+        [System.Single]
         $HoursInStandardDay,
 
-        [Parameter()]  
-        [System.Single] 
+        [Parameter()]
+        [System.Single]
         $HoursInStandardWeek,
 
-        [Parameter()]  
-        [System.Single] 
+        [Parameter()]
+        [System.Single]
         $MaxHoursPerTimesheet,
 
-        [Parameter()]  
-        [System.Single] 
+        [Parameter()]
+        [System.Single]
         $MinHoursPerTimesheet,
 
-        [Parameter()]  
-        [System.Single] 
+        [Parameter()]
+        [System.Single]
         $MaxHoursPerDay,
 
-        [Parameter()]  
+        [Parameter()]
         [System.Boolean]
         $AllowFutureTimeReporting,
 
-        [Parameter()]  
+        [Parameter()]
         [System.Boolean]
         $AllowNewPersonalTasks,
 
-        [Parameter()]  
+        [Parameter()]
         [System.Boolean]
         $AllowTopLevelTimeReporting,
 
-        [Parameter()]  
+        [Parameter()]
         [System.Boolean]
         $RequireTaskStatusManagerApproval,
 
-        [Parameter()]  
+        [Parameter()]
         [System.Boolean]
         $RequireLineApprovalBeforeTimesheetApproval,
 
-        [Parameter()]  
+        [Parameter()]
         [System.Boolean]
         $EnableTimesheetAuditing,
 
-        [Parameter()]  
+        [Parameter()]
         [System.Boolean]
         $FixedApprovalRouting,
 
-        [Parameter()]  
+        [Parameter()]
         [System.Boolean]
         $SingleEntryMode,
 
         [Parameter()]
         [ValidateSet("PercentComplete","ActualDoneAndRemaining","HoursPerPeriod","FreeForm")]
-        [System.String] 
+        [System.String]
         $DefaultTrackingMode,
 
-        [Parameter()]  
+        [Parameter()]
         [System.Boolean]
         $ForceTrackingModeForAllProjects,
 
-        [Parameter()] 
-        [System.Management.Automation.PSCredential] 
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 
     Write-Verbose -Message "Getting Timesheet settings for $Url"
 
-    if ((Get-SPDSCInstalledProductVersion).FileMajorPart -lt 16) 
+    if ((Get-SPDSCInstalledProductVersion).FileMajorPart -lt 16)
     {
         throw [Exception] ("Support for Project Server in SharePointDsc is only valid for " + `
                            "SharePoint 2016 and 2019.")
@@ -106,7 +106,7 @@ function Get-TargetResource
                                   -ScriptBlock {
         $params = $args[0]
         $scriptRoot = $args[1]
-        
+
         $modulePath = "..\..\Modules\SharePointDsc.ProjectServer\ProjectServerConnector.psm1"
         Import-Module -Name (Join-Path -Path $scriptRoot -ChildPath $modulePath -Resolve)
 
@@ -247,98 +247,98 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [Parameter(Mandatory = $true)]  
-        [System.String] 
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $Url,
-        
-        [Parameter()]  
+
+        [Parameter()]
         [System.Boolean]
         $EnableOvertimeAndNonBillableTracking,
 
-        [Parameter()] 
+        [Parameter()]
         [ValidateSet("CurrentTaskAssignments","CurrentProjects","NoPrepopulation")]
-        [System.String] 
+        [System.String]
         $DefaultTimesheetCreationMode,
 
         [Parameter()]
         [ValidateSet("Days","Weeks")]
-        [System.String] 
+        [System.String]
         $DefaultTrackingUnit,
 
         [Parameter()]
         [ValidateSet("Hours","Days")]
-        [System.String] 
+        [System.String]
         $DefaultReportingUnit,
 
-        [Parameter()]  
-        [System.Single] 
+        [Parameter()]
+        [System.Single]
         $HoursInStandardDay,
 
-        [Parameter()]  
-        [System.Single] 
+        [Parameter()]
+        [System.Single]
         $HoursInStandardWeek,
 
-        [Parameter()]  
-        [System.Single] 
+        [Parameter()]
+        [System.Single]
         $MaxHoursPerTimesheet,
 
-        [Parameter()]  
-        [System.Single] 
+        [Parameter()]
+        [System.Single]
         $MinHoursPerTimesheet,
 
-        [Parameter()]  
-        [System.Single] 
+        [Parameter()]
+        [System.Single]
         $MaxHoursPerDay,
 
-        [Parameter()]  
+        [Parameter()]
         [System.Boolean]
         $AllowFutureTimeReporting,
 
-        [Parameter()]  
+        [Parameter()]
         [System.Boolean]
         $AllowNewPersonalTasks,
 
-        [Parameter()]  
+        [Parameter()]
         [System.Boolean]
         $AllowTopLevelTimeReporting,
 
-        [Parameter()]  
+        [Parameter()]
         [System.Boolean]
         $RequireTaskStatusManagerApproval,
 
-        [Parameter()]  
+        [Parameter()]
         [System.Boolean]
         $RequireLineApprovalBeforeTimesheetApproval,
 
-        [Parameter()]  
+        [Parameter()]
         [System.Boolean]
         $EnableTimesheetAuditing,
 
-        [Parameter()]  
+        [Parameter()]
         [System.Boolean]
         $FixedApprovalRouting,
 
-        [Parameter()]  
+        [Parameter()]
         [System.Boolean]
         $SingleEntryMode,
 
         [Parameter()]
         [ValidateSet("PercentComplete","ActualDoneAndRemaining","HoursPerPeriod","FreeForm")]
-        [System.String] 
+        [System.String]
         $DefaultTrackingMode,
 
-        [Parameter()]  
+        [Parameter()]
         [System.Boolean]
         $ForceTrackingModeForAllProjects,
 
-        [Parameter()] 
-        [System.Management.Automation.PSCredential] 
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 
     Write-Verbose -Message "Setting Timesheet settings for $Url"
 
-    if ((Get-SPDSCInstalledProductVersion).FileMajorPart -lt 16) 
+    if ((Get-SPDSCInstalledProductVersion).FileMajorPart -lt 16)
     {
         throw [Exception] ("Support for Project Server in SharePointDsc is only valid for " + `
                            "SharePoint 2016 and 2019.")
@@ -497,98 +497,101 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [Parameter(Mandatory = $true)]  
-        [System.String] 
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $Url,
-        
-        [Parameter()]  
+
+        [Parameter()]
         [System.Boolean]
         $EnableOvertimeAndNonBillableTracking,
 
-        [Parameter()] 
+        [Parameter()]
         [ValidateSet("CurrentTaskAssignments","CurrentProjects","NoPrepopulation")]
-        [System.String] 
+        [System.String]
         $DefaultTimesheetCreationMode,
 
         [Parameter()]
         [ValidateSet("Days","Weeks")]
-        [System.String] 
+        [System.String]
         $DefaultTrackingUnit,
 
         [Parameter()]
         [ValidateSet("Hours","Days")]
-        [System.String] 
+        [System.String]
         $DefaultReportingUnit,
 
-        [Parameter()]  
-        [System.Single] 
+        [Parameter()]
+        [System.Single]
         $HoursInStandardDay,
 
-        [Parameter()]  
-        [System.Single] 
+        [Parameter()]
+        [System.Single]
         $HoursInStandardWeek,
 
-        [Parameter()]  
-        [System.Single] 
+        [Parameter()]
+        [System.Single]
         $MaxHoursPerTimesheet,
 
-        [Parameter()]  
-        [System.Single] 
+        [Parameter()]
+        [System.Single]
         $MinHoursPerTimesheet,
 
-        [Parameter()]  
-        [System.Single] 
+        [Parameter()]
+        [System.Single]
         $MaxHoursPerDay,
 
-        [Parameter()]  
+        [Parameter()]
         [System.Boolean]
         $AllowFutureTimeReporting,
 
-        [Parameter()]  
+        [Parameter()]
         [System.Boolean]
         $AllowNewPersonalTasks,
 
-        [Parameter()]  
+        [Parameter()]
         [System.Boolean]
         $AllowTopLevelTimeReporting,
 
-        [Parameter()]  
+        [Parameter()]
         [System.Boolean]
         $RequireTaskStatusManagerApproval,
 
-        [Parameter()]  
+        [Parameter()]
         [System.Boolean]
         $RequireLineApprovalBeforeTimesheetApproval,
 
-        [Parameter()]  
+        [Parameter()]
         [System.Boolean]
         $EnableTimesheetAuditing,
 
-        [Parameter()]  
+        [Parameter()]
         [System.Boolean]
         $FixedApprovalRouting,
 
-        [Parameter()]  
+        [Parameter()]
         [System.Boolean]
         $SingleEntryMode,
 
         [Parameter()]
         [ValidateSet("PercentComplete","ActualDoneAndRemaining","HoursPerPeriod","FreeForm")]
-        [System.String] 
+        [System.String]
         $DefaultTrackingMode,
 
-        [Parameter()]  
+        [Parameter()]
         [System.Boolean]
         $ForceTrackingModeForAllProjects,
 
-        [Parameter()] 
-        [System.Management.Automation.PSCredential] 
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 
     Write-Verbose -Message "Testing Timesheet settings for $Url"
 
-    $currentValues = Get-TargetResource @PSBoundParameters
+    $CurrentValues = Get-TargetResource @PSBoundParameters
+
+    Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
+    Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
 
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
                                     -DesiredValues $PSBoundParameters

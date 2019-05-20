@@ -118,7 +118,7 @@ function Set-TargetResource
 
     Write-Verbose -Message "Setting Security Token Service Configuration"
 
-    if($Ensure -eq "Absent")
+    if ($Ensure -eq "Absent")
     {
         throw "This resource cannot undo Security Token Service Configuration changes. `
         Please set Ensure to Present or omit the resource"
@@ -131,22 +131,22 @@ function Set-TargetResource
         $config = Get-SPSecurityTokenServiceConfig
         $config.Name = $params.Name
 
-        if($params.ContainsKey("NameIdentifier"))
+        if ($params.ContainsKey("NameIdentifier"))
         {
             $config.NameIdentifier = $params.NameIdentifier
         }
 
-        if($params.ContainsKey("UseSessionCookies"))
+        if ($params.ContainsKey("UseSessionCookies"))
         {
             $config.UseSessionCookies = $params.UseSessionCookies
         }
 
-        if($params.ContainsKey("AllowOAuthOverHttp"))
+        if ($params.ContainsKey("AllowOAuthOverHttp"))
         {
             $config.AllowOAuthOverHttp = $params.AllowOAuthOverHttp
         }
 
-        if($params.ContainsKey("AllowMetadataOverHttp"))
+        if ($params.ContainsKey("AllowMetadataOverHttp"))
         {
             $config.AllowMetadataOverHttp = $params.AllowMetadataOverHttp
         }
@@ -201,6 +201,9 @@ function Test-TargetResource
     $PSBoundParameters.Ensure = $Ensure
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
+
+    Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
+    Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
 
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
                                     -DesiredValues $PSBoundParameters `

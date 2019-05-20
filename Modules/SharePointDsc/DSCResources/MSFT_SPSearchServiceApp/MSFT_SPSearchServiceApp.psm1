@@ -121,7 +121,7 @@ function Get-TargetResource
 
             $cloudIndex = $false
             $version = Get-SPDSCInstalledProductVersion
-            if(($version.FileMajorPart -gt 15) `
+            if (($version.FileMajorPart -gt 15) `
                 -or ($version.FileMajorPart -eq 15 -and $version.FileBuildPart -ge 4745))
             {
                 $cloudIndex = $serviceApp.CloudIndex
@@ -438,9 +438,9 @@ function Set-TargetResource
             }
 
             $proxies = Get-SPServiceApplicationProxy
-            foreach($proxyInstance in $proxies)
+            foreach ($proxyInstance in $proxies)
             {
-                if($serviceApp.IsConnected($proxyInstance))
+                if ($serviceApp.IsConnected($proxyInstance))
                 {
                     $proxyInstance.Delete()
                 }
@@ -518,6 +518,9 @@ function Test-TargetResource
     $PSBoundParameters.Ensure = $Ensure
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
+
+    Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
+    Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
 
     if ($PSBoundParameters.ContainsKey("DefaultContentAccessAccount") `
         -and $Ensure -eq "Present")

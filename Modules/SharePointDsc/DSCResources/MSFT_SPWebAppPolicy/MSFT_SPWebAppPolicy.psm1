@@ -611,6 +611,9 @@ function Test-TargetResource
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
+    Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
+    Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
+
     $modulePath = "..\..\Modules\SharePointDsc.WebAppPolicy\SPWebAppPolicy.psm1"
     Import-Module -Name (Join-Path -Path $PSScriptRoot -ChildPath $modulePath -Resolve)
 
@@ -785,7 +788,7 @@ function Get-SPDSCCacheAccountConfiguration()
                 $convertedClaim = New-SPClaimsPrincipal -Identity $memberName `
                                                         -IdentityType EncodedClaim `
                                                         -ErrorAction SilentlyContinue
-                if($null -ne $convertedClaim)
+                if ($null -ne $convertedClaim)
                 {
                     $memberName = $convertedClaim.Value
                 }
@@ -800,7 +803,7 @@ function Get-SPDSCCacheAccountConfiguration()
                 $convertedClaim = New-SPClaimsPrincipal -Identity $memberName `
                                                         -IdentityType EncodedClaim `
                                                         -ErrorAction SilentlyContinue
-                if($null -ne $convertedClaim)
+                if ($null -ne $convertedClaim)
                 {
                     $memberName = $convertedClaim.Value
                 }

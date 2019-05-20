@@ -42,7 +42,7 @@ function Set-SPDSCWebApplicationBlockedFileTypeConfig
                "'EnsureBlocked' or 'EnsureAllowed')")
     }
 
-    if($Settings.ContainsKey("Blocked") -eq $true)
+    if ($Settings.ContainsKey("Blocked") -eq $true)
     {
         $WebApplication.BlockedFileExtensions.Clear();
         $Settings.Blocked | ForEach-Object -Process {
@@ -50,19 +50,19 @@ function Set-SPDSCWebApplicationBlockedFileTypeConfig
         }
     }
 
-    if($Settings.ContainsKey("EnsureBlocked") -eq $true)
+    if ($Settings.ContainsKey("EnsureBlocked") -eq $true)
     {
         $Settings.EnsureBlocked | ForEach-Object -Process {
-            if(!$WebApplication.BlockedFileExtensions.Contains($_.ToLower())){
+            if (!$WebApplication.BlockedFileExtensions.Contains($_.ToLower())){
                 $WebApplication.BlockedFileExtensions.Add($_.ToLower());
             }
         }
     }
 
-    if($Settings.ContainsKey("EnsureAllowed") -eq $true)
+    if ($Settings.ContainsKey("EnsureAllowed") -eq $true)
     {
         $Settings.EnsureAllowed | ForEach-Object -Process {
-            if($WebApplication.BlockedFileExtensions.Contains($_.ToLower())){
+            if ($WebApplication.BlockedFileExtensions.Contains($_.ToLower())){
                 $WebApplication.BlockedFileExtensions.Remove($_.ToLower());
             }
         }

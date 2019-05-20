@@ -113,7 +113,7 @@ function Get-TargetResource
 
         try
         {
-            $spFarm = Get-SPFarm
+            $null = Get-SPFarm
         }
         catch
         {
@@ -249,7 +249,7 @@ function Set-TargetResource
                "ExcludeDatabases parameter")
     }
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+    $null = Invoke-SPDSCCommand -Credential $InstallAccount `
                                   -Arguments @($PSBoundParameters, $PSScriptRoot) `
                                   -ScriptBlock {
         $params = $args[0]
@@ -259,7 +259,7 @@ function Set-TargetResource
 
         try
         {
-            $spFarm = Get-SPFarm
+            $null = Get-SPFarm
         }
         catch
         {
@@ -766,8 +766,10 @@ function Test-TargetResource
 
     Write-Verbose -Message "Testing Shell Admin settings"
 
-    # Start checking
     $CurrentValues = Get-TargetResource @PSBoundParameters
+
+    Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
+    Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
 
     if ($null -eq $CurrentValues.Members -and `
         $null -eq $CurrentValues.MembersToInclude -and `

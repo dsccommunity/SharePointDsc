@@ -208,7 +208,7 @@ function Set-TargetResource
 
     Write-Verbose -Message "Setting InfoPath Forms Service Configuration"
 
-    if($Ensure -eq "Absent")
+    if ($Ensure -eq "Absent")
     {
         throw "This resource cannot undo InfoPath Forms Service Configuration changes. `
         Please set Ensure to Present or omit the resource"
@@ -220,72 +220,72 @@ function Set-TargetResource
         $params = $args[0]
         $config = Get-SPInfoPathFormsService
 
-        if($params.ContainsKey("AllowUserFormBrowserEnabling"))
+        if ($params.ContainsKey("AllowUserFormBrowserEnabling"))
         {
             $config.AllowUserFormBrowserEnabling = $params.AllowUserFormBrowserEnabling
         }
 
-        if($params.ContainsKey("AllowUserFormBrowserRendering"))
+        if ($params.ContainsKey("AllowUserFormBrowserRendering"))
         {
             $config.AllowUserFormBrowserRendering = $params.AllowUserFormBrowserRendering
         }
 
-        if($params.ContainsKey("MaxDataConnectionTimeout"))
+        if ($params.ContainsKey("MaxDataConnectionTimeout"))
         {
             $config.MaxDataConnectionTimeout = $params.MaxDataConnectionTimeout
         }
 
-        if($params.ContainsKey("DefaultDataConnectionTimeout"))
+        if ($params.ContainsKey("DefaultDataConnectionTimeout"))
         {
             $config.DefaultDataConnectionTimeout = $params.DefaultDataConnectionTimeout
         }
 
-        if($params.ContainsKey("MaxDataConnectionResponseSize"))
+        if ($params.ContainsKey("MaxDataConnectionResponseSize"))
         {
             $config.MaxDataConnectionResponseSize = $params.MaxDataConnectionResponseSize
         }
 
-        if($params.ContainsKey("RequireSslForDataConnections"))
+        if ($params.ContainsKey("RequireSslForDataConnections"))
         {
             $config.RequireSslForDataConnections = $params.RequireSslForDataConnections
         }
 
-        if($params.ContainsKey("AllowEmbeddedSqlForDataConnections"))
+        if ($params.ContainsKey("AllowEmbeddedSqlForDataConnections"))
         {
             $config.AllowEmbeddedSqlForDataConnections = $params.AllowEmbeddedSqlForDataConnections
         }
 
-        if($params.ContainsKey("AllowUdcAuthenticationForDataConnections"))
+        if ($params.ContainsKey("AllowUdcAuthenticationForDataConnections"))
         {
             $config.AllowUdcAuthenticationForDataConnections = $params.AllowUdcAuthenticationForDataConnections
         }
 
-        if($params.ContainsKey("AllowUserFormCrossDomainDataConnections"))
+        if ($params.ContainsKey("AllowUserFormCrossDomainDataConnections"))
         {
             $config.AllowUserFormCrossDomainDataConnections = $params.AllowUserFormCrossDomainDataConnections
         }
 
-        if($params.ContainsKey("AllowEventPropagation"))
+        if ($params.ContainsKey("AllowEventPropagation"))
         {
             $config.AllowEventPropagation = $params.AllowEventPropagation
         }
 
-        if($params.ContainsKey("MaxPostbacksPerSession"))
+        if ($params.ContainsKey("MaxPostbacksPerSession"))
         {
             $config.MaxPostbacksPerSession = $params.MaxPostbacksPerSession
         }
 
-        if($params.ContainsKey("MaxUserActionsPerPostback"))
+        if ($params.ContainsKey("MaxUserActionsPerPostback"))
         {
             $config.MaxUserActionsPerPostback = $params.MaxUserActionsPerPostback
         }
 
-        if($params.ContainsKey("ActiveSessionsTimeout"))
+        if ($params.ContainsKey("ActiveSessionsTimeout"))
         {
             $config.ActiveSessionsTimeout = $params.ActiveSessionsTimeout
         }
 
-        if($params.ContainsKey("MaxSizeOfUserFormState"))
+        if ($params.ContainsKey("MaxSizeOfUserFormState"))
         {
             $config.MaxSizeOfUserFormState = ($params.MaxSizeOfUserFormState * 1024)
         }
@@ -376,6 +376,9 @@ function Test-TargetResource
     $PSBoundParameters.Ensure = $Ensure
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
+
+    Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
+    Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
 
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
                                     -DesiredValues $PSBoundParameters `

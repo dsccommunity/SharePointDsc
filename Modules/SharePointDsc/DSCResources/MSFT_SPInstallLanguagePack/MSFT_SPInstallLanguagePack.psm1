@@ -415,7 +415,7 @@ function Set-TargetResource
     }
     else
     {
-        if($InstalledVersion.ProductBuildPart.ToString().Length -eq 4)
+        if ($InstalledVersion.ProductBuildPart.ToString().Length -eq 4)
         {
             $configData += "2016"
         }
@@ -501,6 +501,9 @@ function Test-TargetResource
     }
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
+
+    Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
+    Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
 
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
                                     -DesiredValues $PSBoundParameters `

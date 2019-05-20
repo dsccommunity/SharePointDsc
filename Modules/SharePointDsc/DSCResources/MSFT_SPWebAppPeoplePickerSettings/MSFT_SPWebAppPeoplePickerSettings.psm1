@@ -190,7 +190,7 @@ function Set-TargetResource
                     {
                         $adsearchobj.LoginName = $searchADDomain.AccessAccount.UserName
 
-                        if([string]::IsNullOrEmpty($searchADDomain.AccessAccount.Password))
+                        if ([string]::IsNullOrEmpty($searchADDomain.AccessAccount.Password))
                         {
                             $adsearchobj.SetPassword($null)
                         }
@@ -269,6 +269,9 @@ function Test-TargetResource
     Write-Verbose -Message "Testing People Picker Settings for $WebAppUrl"
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
+
+    Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
+    Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
 
     # Testing SearchActiveDirectoryDomains against configured values
     foreach ($searchADDomain in $SearchActiveDirectoryDomains)

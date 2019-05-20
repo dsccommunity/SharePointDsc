@@ -61,12 +61,12 @@ function Get-TargetResource
 
         $installedVersion = Get-SPDSCInstalledProductVersion
 
-        if($installedVersion.FileMajorPart -ge 15)
+        if ($installedVersion.FileMajorPart -ge 15)
         {
             $returnval.SuiteBarBrandingElementHtml = $wa.SuiteBarBrandingElementHtml
         }
 
-        if($installedVersion.FileMajorPart -ge 16)
+        if ($installedVersion.FileMajorPart -ge 16)
         {
             $returnval.SuiteNavBrandingLogoNavigationUrl = $wa.SuiteNavBrandingLogoNavigationUrl
             $returnval.SuiteNavBrandingLogoTitle = $wa.SuiteNavBrandingLogoTitle
@@ -123,7 +123,7 @@ function Set-TargetResource
         15
         {
             <# Exception: One of the SP2016/SP2019 specific parameter was passed with SP2013 #>
-            if($PSBoundParameters.ContainsKey("SuiteNavBrandingLogoNavigationUrl") `
+            if ($PSBoundParameters.ContainsKey("SuiteNavBrandingLogoNavigationUrl") `
             -or $PSBoundParameters.ContainsKey("SuiteNavBrandingLogoTitle") `
             -or $PSBoundParameters.ContainsKey("SuiteNavBrandingLogoUrl") `
             -or $PSBoundParameters.ContainsKey("SuiteNavBrandingText"))
@@ -134,7 +134,7 @@ function Set-TargetResource
             }
 
             <# Exception: The SP2013 optional parameter is null. #>
-            if(!$PSBoundParameters.ContainsKey("SuiteBarBrandingElementHtml"))
+            if (!$PSBoundParameters.ContainsKey("SuiteBarBrandingElementHtml"))
             {
                 throw ("You need to specify a value for the SuiteBarBrandingElementHtml parameter with" + `
                                         " SharePoint 2013")
@@ -142,14 +142,14 @@ function Set-TargetResource
         }
         16
         {
-            if($PSBoundParameters.ContainsKey("SuiteBarBrandingElementHtml"))
+            if ($PSBoundParameters.ContainsKey("SuiteBarBrandingElementHtml"))
             {
                 Write-Verbose ("SuiteBarBrandingElementHtml with SharePoint 2016 and 2019 only works " + `
                                "if using a SharePoint 2013 masterpage")
             }
 
             <# Exception: All the optional parameters are null for SP2016/SP2019. #>
-            if(!$PSBoundParameters.ContainsKey("SuiteNavBrandingLogoNavigationUrl") `
+            if (!$PSBoundParameters.ContainsKey("SuiteNavBrandingLogoNavigationUrl") `
             -and !$PSBoundParameters.ContainsKey("SuiteNavBrandingLogoTitle") `
             -and !$PSBoundParameters.ContainsKey("SuiteNavBrandingLogoUrl") `
             -and !$PSBoundParameters.ContainsKey("SuiteNavBrandingText") `
@@ -186,12 +186,12 @@ function Set-TargetResource
 
         Write-Verbose -Message "Processing changes"
 
-        if($installedVersion.FileMajorPart -ge 15)
+        if ($installedVersion.FileMajorPart -ge 15)
         {
             $wa.SuiteBarBrandingElementHtml = $params.SuiteBarBrandingElementHtml
         }
 
-        if($installedVersion.FileMajorPart -ge 16)
+        if ($installedVersion.FileMajorPart -ge 16)
         {
             $wa.SuiteNavBrandingLogoNavigationUrl = $params.SuiteNavBrandingLogoNavigationUrl
             $wa.SuiteNavBrandingLogoTitle = $params.SuiteNavBrandingLogoTitle
@@ -241,6 +241,9 @@ function Test-TargetResource
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
+    Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
+    Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
+
     if ($null -eq $CurrentValues.WebAppUrl)
     {
         return $false
@@ -248,7 +251,7 @@ function Test-TargetResource
 
     $installedVersion = Get-SPDSCInstalledProductVersion
 
-    if($installedVersion.FileMajorPart -eq 15)
+    if ($installedVersion.FileMajorPart -eq 15)
     {
         return Test-SPDscParameterState -CurrentValues $CurrentValues `
                                         -DesiredValues $PSBoundParameters `

@@ -32,7 +32,7 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting Crawler Impact Rule Setting for '$Name'"
 
-    if(($RequestLimit -gt 0) -and ($WaitTime -gt 0))
+    if (($RequestLimit -gt 0) -and ($WaitTime -gt 0))
     {
         throw "Only one Crawler Impact Rule HitRate argument (RequestLimit, WaitTime) can be specified"
     }
@@ -54,7 +54,7 @@ function Get-TargetResource
 
 
         $serviceApp = Get-SPEnterpriseSearchServiceApplication -Identity $params.ServiceAppName
-        if($null -eq $serviceApp)
+        if ($null -eq $serviceApp)
         {
             $nullReturn.ServiceAppName = $null
             return $nullReturn
@@ -62,13 +62,13 @@ function Get-TargetResource
         else
         {
             $crawlerImpactRule = Get-SPEnterpriseSearchSiteHitRule -Identity $params.Name -SearchService $params.ServiceAppName
-            if($null -eq $crawlerImpactRule)
+            if ($null -eq $crawlerImpactRule)
             {
                 return $nullReturn
             }
             else
             {
-                if($crawlerImpactRule.Behavior -eq "0")
+                if ($crawlerImpactRule.Behavior -eq "0")
                 {
                     return @{
                         ServiceAppName = $params.ServiceAppName
@@ -133,7 +133,7 @@ function Set-TargetResource
 
     Write-Verbose -Message "Setting Crawler Impact Rule Setting for '$Name'"
 
-    if(($RequestLimit -gt 0) -and ($WaitTime -gt 0))
+    if (($RequestLimit -gt 0) -and ($WaitTime -gt 0))
     {
         throw "Only one Crawler Impact Rule HitRate argument (RequestLimit, WaitTime) can be specified"
     }
@@ -149,7 +149,7 @@ function Set-TargetResource
             $params = $args[0]
             $behavior = "0"
             $hitRate = 0
-            if($null -eq $params.RequestLimit)
+            if ($null -eq $params.RequestLimit)
             {
                 $behavior = "1"
                 $hitRate = $params.WaitTime
@@ -161,7 +161,7 @@ function Set-TargetResource
             }
 
             $serviceApp = Get-SPEnterpriseSearchServiceApplication -Identity $params.ServiceAppName
-            if($null -eq $serviceApp)
+            if ($null -eq $serviceApp)
             {
                 throw "The Search Service Application does not exist."
             }
@@ -180,7 +180,7 @@ function Set-TargetResource
             $params = $args[0]
             $behavior = "0"
             $hitRate = 0
-            if($null -eq $params.RequestLimit)
+            if ($null -eq $params.RequestLimit)
             {
                 $behavior = "1"
                 $hitRate = $params.WaitTime
@@ -191,7 +191,7 @@ function Set-TargetResource
                 $hitRate = $params.RequestLimit
             }
             $serviceApp = Get-SPEnterpriseSearchServiceApplication -Identity $params.ServiceAppName
-            if($null -eq $serviceApp)
+            if ($null -eq $serviceApp)
             {
                 throw "The Search Service Application does not exist."
             }
@@ -207,7 +207,7 @@ function Set-TargetResource
 
         }
     }
-    if($Ensure -eq "Absent")
+    if ($Ensure -eq "Absent")
     {
         Write-Verbose -Message "Removing Crawler Impact Rule $Name"
         Invoke-SPDSCCommand -Credential $InstallAccount `
@@ -215,7 +215,7 @@ function Set-TargetResource
                             -ScriptBlock {
             $params = $args[0]
             $serviceApp = Get-SPEnterpriseSearchServiceApplication -Identity $params.ServiceAppName
-            if($null -eq $serviceApp)
+            if ($null -eq $serviceApp)
             {
                 throw "The Search Service Application does not exist."
             }
@@ -261,13 +261,13 @@ function Test-TargetResource
     )
     Write-Verbose -Message "Testing Crawler Impact Rule Setting for '$Name'"
 
-    if(($RequestLimit -gt 0) -and ($WaitTime -gt 0))
+    if (($RequestLimit -gt 0) -and ($WaitTime -gt 0))
     {
         throw "Only one Crawler Impact Rule HitRate argument (RequestLimit, WaitTime) can be specified"
     }
 
     $behavior = ""
-    if($RequestLimit -ne 0)
+    if ($RequestLimit -ne 0)
     {
         $behavior = "RequestLimit"
     }
@@ -278,7 +278,10 @@ function Test-TargetResource
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
-    if($Ensure -eq "Present")
+    Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
+    Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
+
+    if ($Ensure -eq "Present")
     {
         return Test-SPDscParameterState -CurrentValues $CurrentValues `
                                         -DesiredValues $PSBoundParameters `

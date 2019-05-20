@@ -4,30 +4,30 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [Parameter(Mandatory = $true)]  
-        [System.String] 
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $Url,
 
-        [Parameter(Mandatory = $true)]  
-        [System.Boolean] 
+        [Parameter(Mandatory = $true)]
+        [System.Boolean]
         $EnableProjectWebAppSync,
 
-        [Parameter(Mandatory = $true)]  
-        [System.Boolean] 
+        [Parameter(Mandatory = $true)]
+        [System.Boolean]
         $EnableProjectSiteSync,
 
-        [Parameter(Mandatory = $true)]  
-        [System.Boolean] 
+        [Parameter(Mandatory = $true)]
+        [System.Boolean]
         $EnableProjectSiteSyncForSPTaskLists,
 
-        [Parameter()] 
-        [System.Management.Automation.PSCredential] 
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 
     Write-Verbose -Message "Getting User Sync settings for $Url"
 
-    if ((Get-SPDSCInstalledProductVersion).FileMajorPart -lt 16) 
+    if ((Get-SPDSCInstalledProductVersion).FileMajorPart -lt 16)
     {
         throw [Exception] ("Support for Project Server in SharePointDsc is only valid for " + `
                            "SharePoint 2016 and 2019.")
@@ -38,7 +38,7 @@ function Get-TargetResource
                                   -ScriptBlock {
         $params = $args[0]
         $scriptRoot = $args[1]
-        
+
         $modulePath = "..\..\Modules\SharePointDsc.ProjectServer\ProjectServerConnector.psm1"
         Import-Module -Name (Join-Path -Path $scriptRoot -ChildPath $modulePath -Resolve)
 
@@ -89,24 +89,24 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [Parameter(Mandatory = $true)]  
-        [System.String] 
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $Url,
 
-        [Parameter(Mandatory = $true)]  
-        [System.Boolean] 
+        [Parameter(Mandatory = $true)]
+        [System.Boolean]
         $EnableProjectWebAppSync,
 
-        [Parameter(Mandatory = $true)]  
-        [System.Boolean] 
+        [Parameter(Mandatory = $true)]
+        [System.Boolean]
         $EnableProjectSiteSync,
 
-        [Parameter(Mandatory = $true)]  
-        [System.Boolean] 
+        [Parameter(Mandatory = $true)]
+        [System.Boolean]
         $EnableProjectSiteSyncForSPTaskLists,
 
-        [Parameter()] 
-        [System.Management.Automation.PSCredential] 
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 
@@ -152,33 +152,36 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [Parameter(Mandatory = $true)]  
-        [System.String] 
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $Url,
 
-        [Parameter(Mandatory = $true)]  
-        [System.Boolean] 
+        [Parameter(Mandatory = $true)]
+        [System.Boolean]
         $EnableProjectWebAppSync,
 
-        [Parameter(Mandatory = $true)]  
-        [System.Boolean] 
+        [Parameter(Mandatory = $true)]
+        [System.Boolean]
         $EnableProjectSiteSync,
 
-        [Parameter(Mandatory = $true)]  
-        [System.Boolean] 
+        [Parameter(Mandatory = $true)]
+        [System.Boolean]
         $EnableProjectSiteSyncForSPTaskLists,
 
-        [Parameter()] 
-        [System.Management.Automation.PSCredential] 
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 
     Write-Verbose -Message "Testing User Sync settings for $Url"
 
-    $currentValues = Get-TargetResource @PSBoundParameters
+    $CurrentValues = Get-TargetResource @PSBoundParameters
+
+    Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
+    Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
 
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
-                                    -DesiredValues $PSBoundParameters 
+                                    -DesiredValues $PSBoundParameters
 }
 
 Export-ModuleMember -Function *-TargetResource

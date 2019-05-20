@@ -4,82 +4,82 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [Parameter(Mandatory = $true)]  
-        [System.String] 
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $Path,
-        
-        [Parameter(Mandatory = $true)]  
-        [System.String] 
+
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $ServiceAppName,
-        
-        [Parameter()] 
-        [ValidateSet("DefaultRuleAccess", 
-                     "BasicAccountRuleAccess", 
-                     "CertificateRuleAccess", 
-                     "NTLMAccountRuleAccess", 
-                     "FormRuleAccess", 
-                     "CookieRuleAccess", 
-                     "AnonymousAccess")] 
-        [System.String] 
+
+        [Parameter()]
+        [ValidateSet("DefaultRuleAccess",
+                     "BasicAccountRuleAccess",
+                     "CertificateRuleAccess",
+                     "NTLMAccountRuleAccess",
+                     "FormRuleAccess",
+                     "CookieRuleAccess",
+                     "AnonymousAccess")]
+        [System.String]
         $AuthenticationType,
-        
-        [Parameter()] 
-        [ValidateSet("InclusionRule","ExclusionRule")] 
-        [System.String] 
+
+        [Parameter()]
+        [ValidateSet("InclusionRule","ExclusionRule")]
+        [System.String]
         $RuleType,
-        
-        [Parameter()] 
+
+        [Parameter()]
         [ValidateSet("FollowLinksNoPageCrawl",
-                     "CrawlComplexUrls", 
-                     "CrawlAsHTTP")] 
-        [System.String[]] 
+                     "CrawlComplexUrls",
+                     "CrawlAsHTTP")]
+        [System.String[]]
         $CrawlConfigurationRules,
-        
-        [Parameter()] 
-        [System.Management.Automation.PSCredential] 
+
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
         $AuthenticationCredentials,
-        
-        [Parameter()]  
-        [System.String] 
+
+        [Parameter()]
+        [System.String]
         $CertificateName,
-        
-        [Parameter()] 
-        [ValidateSet("Present","Absent")] 
-        [System.String] 
+
+        [Parameter()]
+        [ValidateSet("Present","Absent")]
+        [System.String]
         $Ensure = "Present",
-        
-        [Parameter()] 
-        [System.Management.Automation.PSCredential] 
+
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 
     Write-Verbose -Message "Getting Search Crawl Rule '$Path'"
 
     # AuthenticationType=CertificateName and CertificateRuleAccess parameters not specified
-    if ($AuthenticationType -eq "CertificateRuleAccess" -and -not $CertificateName) 
+    if ($AuthenticationType -eq "CertificateRuleAccess" -and -not $CertificateName)
     {
         throw ("When AuthenticationType=CertificateRuleAccess, the parameter " + `
                "CertificateName is required")
     }
 
-    # AuthenticationType=CertificateName and CertificateRuleAccess parameters not 
+    # AuthenticationType=CertificateName and CertificateRuleAccess parameters not
     # specified correctly
     if ($AuthenticationType -ne "CertificateRuleAccess" -and $CertificateName)
     {
         throw "When specifying CertificateName, the AuthenticationType parameter is required"
     }
 
-    # AuthenticationType=NTLMAccountRuleAccess and AuthenticationCredentialsparameters 
+    # AuthenticationType=NTLMAccountRuleAccess and AuthenticationCredentialsparameters
     # not specified
     if (($AuthenticationType -eq "NTLMAccountRuleAccess" `
         -or $AuthenticationType -eq "BasicAccountRuleAccess") `
-        -and -not $AuthenticationCredentials) 
+        -and -not $AuthenticationCredentials)
     {
         throw ("When AuthenticationType is NTLMAccountRuleAccess or BasicAccountRuleAccess, " + `
                "the parameter AuthenticationCredentials is required")
     }
 
-    # AuthenticationCredentials parameters, but AuthenticationType is not NTLMAccountRuleAccess 
+    # AuthenticationCredentials parameters, but AuthenticationType is not NTLMAccountRuleAccess
     # or BasicAccountRuleAccess
     if ($AuthenticationCredentials `
         -and $AuthenticationType -ne "NTLMAccountRuleAccess" `
@@ -88,20 +88,20 @@ function Get-TargetResource
         throw ("When specifying AuthenticationCredentials, the AuthenticationType " + `
                "parameter is required")
     }
-    
+
     # ExclusionRule only with CrawlConfigurationRules=CrawlComplexUrls
     if ($RuleType -eq "ExclusionRule" `
         -and ($CrawlConfigurationRules -contains "CrawlAsHTTP" `
-            -or $CrawlConfigurationRules -contains "FollowLinksNoPageCrawl")) 
+            -or $CrawlConfigurationRules -contains "FollowLinksNoPageCrawl"))
     {
         throw ("When RuleType=ExclusionRule, CrawlConfigurationRules cannot contain " + `
                "the values FollowLinksNoPageCrawl or CrawlAsHTTP")
     }
 
-    # ExclusionRule cannot be used with AuthenticationCredentials, CertificateName or 
+    # ExclusionRule cannot be used with AuthenticationCredentials, CertificateName or
     # AuthenticationType parameters
     if ($RuleType -eq "ExclusionRule" `
-        -and ($AuthenticationCredentials -or $CertificateName -or $AuthenticationType)) 
+        -and ($AuthenticationCredentials -or $CertificateName -or $AuthenticationType))
     {
         throw ("When Type=ExclusionRule, parameters AuthenticationCredentials, " + `
                "CertificateName or AuthenticationType are not allowed")
@@ -114,60 +114,60 @@ function Get-TargetResource
 
         $serviceApps = Get-SPServiceApplication -Name $params.ServiceAppName `
                                                 -ErrorAction SilentlyContinue
-        
+
         $nullReturn = @{
             Path = $params.Path
             ServiceAppName = $params.ServiceAppName
             Ensure = "Absent"
             InstallAccount = $params.InstallAccount
         }
-         
-        if ($null -eq $serviceApps) 
-        {
-            Write-Verbose -Message "Service Application $($params.ServiceAppName) not found"
-            return $nullReturn 
-        }
-        
-        $serviceApp = $serviceApps | Where-Object -FilterScript {
-            $_.GetType().FullName -eq "Microsoft.Office.Server.Search.Administration.SearchServiceApplication" 
-        }
 
-        if ($null -eq $serviceApp) 
+        if ($null -eq $serviceApps)
         {
             Write-Verbose -Message "Service Application $($params.ServiceAppName) not found"
             return $nullReturn
-        } 
-        else 
+        }
+
+        $serviceApp = $serviceApps | Where-Object -FilterScript {
+            $_.GetType().FullName -eq "Microsoft.Office.Server.Search.Administration.SearchServiceApplication"
+        }
+
+        if ($null -eq $serviceApp)
+        {
+            Write-Verbose -Message "Service Application $($params.ServiceAppName) not found"
+            return $nullReturn
+        }
+        else
         {
             $crawlRule = Get-SPEnterpriseSearchCrawlRule `
                           -SearchApplication $params.ServiceAppName | Where-Object -FilterScript {
-                              $_.Path -eq $params.Path 
+                              $_.Path -eq $params.Path
                           }
 
-            if ($null -eq $crawlRule) 
+            if ($null -eq $crawlRule)
             {
                 Write-Verbose -Message "Crawl rule $($params.Path) not found"
                 return $nullReturn
-            } 
-            else 
+            }
+            else
             {
                 $crawlConfigurationRules = @()
-                if ($crawlRule.SuppressIndexing) 
+                if ($crawlRule.SuppressIndexing)
                 {
-                    $crawlConfigurationRules += "FollowLinksNoPageCrawl" 
+                    $crawlConfigurationRules += "FollowLinksNoPageCrawl"
                 }
-                if ($crawlRule.FollowComplexUrls) 
+                if ($crawlRule.FollowComplexUrls)
                 {
-                    $crawlConfigurationRules += "CrawlComplexUrls" 
+                    $crawlConfigurationRules += "CrawlComplexUrls"
                 }
-                if ($crawlRule.CrawlAsHttp) 
+                if ($crawlRule.CrawlAsHttp)
                 {
-                    $crawlConfigurationRules += "CrawlAsHTTP" 
+                    $crawlConfigurationRules += "CrawlAsHTTP"
                 }
 
-                switch ($crawlRule.AuthenticationType) 
+                switch ($crawlRule.AuthenticationType)
                 {
-                    {@("BasicAccountRuleAccess", 
+                    {@("BasicAccountRuleAccess",
                        "NTLMAccountRuleAccess") -contains $_ } {
                         $returnVal = @{
                             Path = $params.Path
@@ -178,7 +178,7 @@ function Get-TargetResource
                             AuthenticationCredentials = $crawlRule.AccountName
                             Ensure = "Present"
                             InstallAccount = $params.InstallAccount
-                        } 
+                        }
                     }
                     "CertificateRuleAccess" {
                         $returnVal = @{
@@ -190,11 +190,11 @@ function Get-TargetResource
                             CertificateName = $crawlRule.AccountName
                             Ensure = "Present"
                             InstallAccount = $params.InstallAccount
-                        } 
+                        }
                     }
-                    { @("DefaultRuleAccess", 
-                        "FormRuleAccess", 
-                        "CookieRuleAccess", 
+                    { @("DefaultRuleAccess",
+                        "FormRuleAccess",
+                        "CookieRuleAccess",
                         "AnonymousAccess") -contains $_ } {
                         $returnVal = @{
                             Path = $params.Path
@@ -204,7 +204,7 @@ function Get-TargetResource
                             CrawlConfigurationRules = $crawlConfigurationRules
                             Ensure = "Present"
                             InstallAccount = $params.InstallAccount
-                        }                
+                        }
                     }
                     default {
                             Path = $params.Path
@@ -228,84 +228,84 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [Parameter(Mandatory = $true)]  
-        [System.String] 
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $Path,
-        
-        [Parameter(Mandatory = $true)]  
-        [System.String] 
+
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $ServiceAppName,
-        
-        [Parameter()] 
-        [ValidateSet("DefaultRuleAccess", 
-                     "BasicAccountRuleAccess", 
-                     "CertificateRuleAccess", 
-                     "NTLMAccountRuleAccess", 
-                     "FormRuleAccess", 
-                     "CookieRuleAccess", 
-                     "AnonymousAccess")] 
-        [System.String] 
+
+        [Parameter()]
+        [ValidateSet("DefaultRuleAccess",
+                     "BasicAccountRuleAccess",
+                     "CertificateRuleAccess",
+                     "NTLMAccountRuleAccess",
+                     "FormRuleAccess",
+                     "CookieRuleAccess",
+                     "AnonymousAccess")]
+        [System.String]
         $AuthenticationType,
-        
-        [Parameter()] 
-        [ValidateSet("InclusionRule","ExclusionRule")] 
-        [System.String] 
+
+        [Parameter()]
+        [ValidateSet("InclusionRule","ExclusionRule")]
+        [System.String]
         $RuleType,
-        
-        [Parameter()] 
+
+        [Parameter()]
         [ValidateSet("FollowLinksNoPageCrawl",
-                     "CrawlComplexUrls", 
-                     "CrawlAsHTTP")] 
-        [System.String[]] 
+                     "CrawlComplexUrls",
+                     "CrawlAsHTTP")]
+        [System.String[]]
         $CrawlConfigurationRules,
-        
-        [Parameter()] 
-        [System.Management.Automation.PSCredential] 
+
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
         $AuthenticationCredentials,
-        
-        [Parameter()]  
-        [System.String] 
+
+        [Parameter()]
+        [System.String]
         $CertificateName,
-        
-        [Parameter()] 
-        [ValidateSet("Present","Absent")] 
-        [System.String] 
+
+        [Parameter()]
+        [ValidateSet("Present","Absent")]
+        [System.String]
         $Ensure = "Present",
-        
-        [Parameter()] 
-        [System.Management.Automation.PSCredential] 
+
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 
     Write-Verbose -Message "Setting Search Crawl Rule '$Path'"
-    
+
     $result = Get-TargetResource @PSBoundParameters
 
     # AuthenticationType=CertificateName and CertificateRuleAccess parameters not specified
-    if ($AuthenticationType -eq "CertificateRuleAccess" -and -not $CertificateName) 
+    if ($AuthenticationType -eq "CertificateRuleAccess" -and -not $CertificateName)
     {
         throw ("When AuthenticationType=CertificateRuleAccess, the parameter " + `
                "CertificateName is required")
     }
 
-    # AuthenticationType=CertificateName and CertificateRuleAccess parameters not 
+    # AuthenticationType=CertificateName and CertificateRuleAccess parameters not
     # specified correctly
     if ($AuthenticationType -ne "CertificateRuleAccess" -and $CertificateName)
     {
         throw "When specifying CertificateName, the AuthenticationType parameter is required"
     }
 
-    # AuthenticationType=NTLMAccountRuleAccess and AuthenticationCredentialsparameters 
+    # AuthenticationType=NTLMAccountRuleAccess and AuthenticationCredentialsparameters
     # not specified
     if (($AuthenticationType -eq "NTLMAccountRuleAccess" `
         -or $AuthenticationType -eq "BasicAccountRuleAccess") `
-        -and -not $AuthenticationCredentials) 
+        -and -not $AuthenticationCredentials)
     {
         throw ("When AuthenticationType is NTLMAccountRuleAccess or BasicAccountRuleAccess, " + `
                "the parameter AuthenticationCredentials is required")
     }
 
-    # AuthenticationCredentials parameters, but AuthenticationType is not NTLMAccountRuleAccess 
+    # AuthenticationCredentials parameters, but AuthenticationType is not NTLMAccountRuleAccess
     # or BasicAccountRuleAccess
     if ($AuthenticationCredentials `
         -and $AuthenticationType -ne "NTLMAccountRuleAccess" `
@@ -314,135 +314,135 @@ function Set-TargetResource
         throw ("When specifying AuthenticationCredentials, the AuthenticationType " + `
                "parameter is required")
     }
-    
+
     # ExclusionRule only with CrawlConfigurationRules=CrawlComplexUrls
     if ($RuleType -eq "ExclusionRule" `
         -and ($CrawlConfigurationRules -contains "CrawlAsHTTP" `
-            -or $CrawlConfigurationRules -contains "FollowLinksNoPageCrawl")) 
+            -or $CrawlConfigurationRules -contains "FollowLinksNoPageCrawl"))
     {
         throw ("When RuleType=ExclusionRule, CrawlConfigurationRules cannot contain " + `
                "the values FollowLinksNoPageCrawl or CrawlAsHTTP")
     }
 
-    # ExclusionRule cannot be used with AuthenticationCredentials, CertificateName or 
+    # ExclusionRule cannot be used with AuthenticationCredentials, CertificateName or
     # AuthenticationType parameters
     if ($RuleType -eq "ExclusionRule" `
-        -and ($AuthenticationCredentials -or $CertificateName -or $AuthenticationType)) 
+        -and ($AuthenticationCredentials -or $CertificateName -or $AuthenticationType))
     {
         throw ("When Type=ExclusionRule, parameters AuthenticationCredentials, " + `
                "CertificateName or AuthenticationType are not allowed")
     }
 
-    if ($result.Ensure -eq "Absent" -and $Ensure -eq "Present") 
+    if ($result.Ensure -eq "Absent" -and $Ensure -eq "Present")
     {
         Write-Verbose -Message "Creating Crawl Rule $Path"
         Invoke-SPDSCCommand -Credential $InstallAccount `
                             -Arguments $PSBoundParameters `
                             -ScriptBlock {
             $params = $args[0]
-            
+
             $newParams = @{
                 Path = $params.Path
                 SearchApplication = $params.ServiceAppName
             }
-            if ($params.ContainsKey("AuthenticationType") -eq $true) 
+            if ($params.ContainsKey("AuthenticationType") -eq $true)
             {
-                $newParams.Add("AuthenticationType", $params.AuthenticationType) 
+                $newParams.Add("AuthenticationType", $params.AuthenticationType)
             }
-            if ($params.ContainsKey("RuleType") -eq $true) 
+            if ($params.ContainsKey("RuleType") -eq $true)
             {
-                $newParams.Add("Type", $params.RuleType) 
+                $newParams.Add("Type", $params.RuleType)
             }
-            if ($params.ContainsKey("CrawlConfigurationRules") -eq $true) 
+            if ($params.ContainsKey("CrawlConfigurationRules") -eq $true)
             {
-                if($params.CrawlConfigurationRules -contains "FollowLinksNoPageCrawl") 
+                if ($params.CrawlConfigurationRules -contains "FollowLinksNoPageCrawl")
                 {
-                    $newParams.Add("SuppressIndexing",1) 
+                    $newParams.Add("SuppressIndexing",1)
                 }
-                if($params.CrawlConfigurationRules -contains "CrawlComplexUrls") 
+                if ($params.CrawlConfigurationRules -contains "CrawlComplexUrls")
                 {
-                    $newParams.Add("FollowComplexUrls",1) 
+                    $newParams.Add("FollowComplexUrls",1)
                 }
-                if($params.CrawlConfigurationRules -contains "CrawlAsHTTP") 
+                if ($params.CrawlConfigurationRules -contains "CrawlAsHTTP")
                 {
-                    $newParams.Add("CrawlAsHttp",1) 
+                    $newParams.Add("CrawlAsHttp",1)
                 }
             }
-            if ($params.ContainsKey("AuthenticationCredentials") -eq $true) 
+            if ($params.ContainsKey("AuthenticationCredentials") -eq $true)
             {
                 $newParams.Add("AccountName", $params.AuthenticationCredentials.UserName)
                 $newParams.Add("AccountPassword", $params.AuthenticationCredentials.Password)
             }
-            if ($params.ContainsKey("CertificateName") -eq $true) 
+            if ($params.ContainsKey("CertificateName") -eq $true)
             {
-                $newParams.Add("CertificateName", $params.CertificateName) 
+                $newParams.Add("CertificateName", $params.CertificateName)
             }
-            
-            New-SPEnterpriseSearchCrawlRule @newParams 
+
+            New-SPEnterpriseSearchCrawlRule @newParams
         }
     }
-    if ($result.Ensure -eq "Present" -and $Ensure -eq "Present") 
+    if ($result.Ensure -eq "Present" -and $Ensure -eq "Present")
     {
         Write-Verbose -Message "Updating Crawl Rule $Path"
         Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
             $params = $args[0]
-            
+
             $crawlRule = Get-SPEnterpriseSearchCrawlRule `
                             -SearchApplication $params.ServiceAppName | Where-Object -FilterScript {
-                                $_.Path -eq $params.Path 
+                                $_.Path -eq $params.Path
                             }
 
-            if ($null -ne $crawlRule) 
+            if ($null -ne $crawlRule)
             {
                 $setParams = @{
                     Identity = $params.Path
                     SearchApplication = $params.ServiceAppName
                 }
-                if ($params.ContainsKey("AuthenticationType") -eq $true) 
+                if ($params.ContainsKey("AuthenticationType") -eq $true)
                 {
-                    $setParams.Add("AuthenticationType", $params.AuthenticationType) 
+                    $setParams.Add("AuthenticationType", $params.AuthenticationType)
                 }
-                if ($params.ContainsKey("RuleType") -eq $true) 
+                if ($params.ContainsKey("RuleType") -eq $true)
                 {
-                    $setParams.Add("Type", $params.RuleType) 
+                    $setParams.Add("Type", $params.RuleType)
                 }
-                if ($params.ContainsKey("CrawlConfigurationRules") -eq $true) 
+                if ($params.ContainsKey("CrawlConfigurationRules") -eq $true)
                 {
-                    if($params.CrawlConfigurationRules -contains "FollowLinksNoPageCrawl") 
+                    if ($params.CrawlConfigurationRules -contains "FollowLinksNoPageCrawl")
                     {
-                        $setParams.Add("SuppressIndexing",1) 
+                        $setParams.Add("SuppressIndexing",1)
                     }
-                    if($params.CrawlConfigurationRules -contains "CrawlComplexUrls") 
+                    if ($params.CrawlConfigurationRules -contains "CrawlComplexUrls")
                     {
-                        $setParams.Add("FollowComplexUrls",1) 
+                        $setParams.Add("FollowComplexUrls",1)
                     }
-                    if($params.CrawlConfigurationRules -contains "CrawlAsHTTP") 
+                    if ($params.CrawlConfigurationRules -contains "CrawlAsHTTP")
                     {
-                        $setParams.Add("CrawlAsHttp",1) 
+                        $setParams.Add("CrawlAsHttp",1)
                     }
                 }
-                if ($params.ContainsKey("AuthenticationCredentials") -eq $true) 
+                if ($params.ContainsKey("AuthenticationCredentials") -eq $true)
                 {
                     $setParams.Add("AccountName", $params.AuthenticationCredentials.UserName)
                     $setParams.Add("AccountPassword", $params.AuthenticationCredentials.Password)
                 }
-                if ($params.ContainsKey("CertificateName") -eq $true) 
+                if ($params.ContainsKey("CertificateName") -eq $true)
                 {
-                    $setParams.Add("AccountName", $params.CertificateName) 
+                    $setParams.Add("AccountName", $params.CertificateName)
                 }
-                Set-SPEnterpriseSearchCrawlRule @setParams 
+                Set-SPEnterpriseSearchCrawlRule @setParams
             }
         }
     }
-    
-    if ($Ensure -eq "Absent") 
+
+    if ($Ensure -eq "Absent")
     {
         Write-Verbose -Message "Removing Crawl Rule $Path"
         Invoke-SPDSCCommand -Credential $InstallAccount `
                             -Arguments $PSBoundParameters `
                             -ScriptBlock {
             $params = $args[0]
-            
+
             Remove-SPEnterpriseSearchCrawlRule -SearchApplication $params.ServiceAppName `
                                                -Identity $params.Path `
                                                -Confirm:$false
@@ -456,52 +456,52 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [Parameter(Mandatory = $true)]  
-        [System.String] 
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $Path,
-        
-        [Parameter(Mandatory = $true)]  
-        [System.String] 
+
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $ServiceAppName,
-        
-        [Parameter()] 
-        [ValidateSet("DefaultRuleAccess", 
-                     "BasicAccountRuleAccess", 
-                     "CertificateRuleAccess", 
-                     "NTLMAccountRuleAccess", 
-                     "FormRuleAccess", 
-                     "CookieRuleAccess", 
-                     "AnonymousAccess")] 
-        [System.String] 
+
+        [Parameter()]
+        [ValidateSet("DefaultRuleAccess",
+                     "BasicAccountRuleAccess",
+                     "CertificateRuleAccess",
+                     "NTLMAccountRuleAccess",
+                     "FormRuleAccess",
+                     "CookieRuleAccess",
+                     "AnonymousAccess")]
+        [System.String]
         $AuthenticationType,
-        
-        [Parameter()] 
-        [ValidateSet("InclusionRule","ExclusionRule")] 
-        [System.String] 
+
+        [Parameter()]
+        [ValidateSet("InclusionRule","ExclusionRule")]
+        [System.String]
         $RuleType,
-        
-        [Parameter()] 
+
+        [Parameter()]
         [ValidateSet("FollowLinksNoPageCrawl",
-                     "CrawlComplexUrls", 
-                     "CrawlAsHTTP")] 
-        [System.String[]] 
+                     "CrawlComplexUrls",
+                     "CrawlAsHTTP")]
+        [System.String[]]
         $CrawlConfigurationRules,
-        
-        [Parameter()] 
-        [System.Management.Automation.PSCredential] 
+
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
         $AuthenticationCredentials,
-        
-        [Parameter()]  
-        [System.String] 
+
+        [Parameter()]
+        [System.String]
         $CertificateName,
-        
-        [Parameter()] 
-        [ValidateSet("Present","Absent")] 
-        [System.String] 
+
+        [Parameter()]
+        [ValidateSet("Present","Absent")]
+        [System.String]
         $Ensure = "Present",
-        
-        [Parameter()] 
-        [System.Management.Automation.PSCredential] 
+
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 
@@ -510,41 +510,44 @@ function Test-TargetResource
     $PSBoundParameters.Ensure = $Ensure
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
-        
-    if ($Ensure -eq "Present") 
+
+    Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
+    Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
+
+    if ($Ensure -eq "Present")
     {
-        if ($CrawlConfigurationRules) 
+        if ($CrawlConfigurationRules)
         {
-            if ($CurrentValues.ContainsKey("CrawlConfigurationRules")) 
+            if ($CurrentValues.ContainsKey("CrawlConfigurationRules"))
             {
                 $compareObject = Compare-Object `
                                     -ReferenceObject $CrawlConfigurationRules `
                                     -DifferenceObject $CurrentValues.CrawlConfigurationRules
                 if ($null -ne $compareObject)
                 {
-                    return $false 
+                    return $false
                 }
-            } 
-            else 
+            }
+            else
             {
-                return $false 
+                return $false
             }
         }
 
-        if ($CurrentValues.ContainsKey("AuthenticationCredentials") -and $AuthenticationCredentials) 
+        if ($CurrentValues.ContainsKey("AuthenticationCredentials") -and $AuthenticationCredentials)
         {
-            if ($AuthenticationCredentials.UserName -ne $CurrentValues.AuthenticationCredentials) 
+            if ($AuthenticationCredentials.UserName -ne $CurrentValues.AuthenticationCredentials)
             {
-                return $false 
+                return $false
             }
         }
-        
+
         return Test-SPDscParameterState -CurrentValues $CurrentValues `
                                         -DesiredValues $PSBoundParameters `
-                                        -ValuesToCheck @("Ensure", 
-                                                         "AuthenticationType", 
-                                                         "RuleType", 
-                                                         "CertificateName")    
+                                        -ValuesToCheck @("Ensure",
+                                                         "AuthenticationType",
+                                                         "RuleType",
+                                                         "CertificateName")
     } else {
         return Test-SPDscParameterState -CurrentValues $CurrentValues `
                                         -DesiredValues $PSBoundParameters `

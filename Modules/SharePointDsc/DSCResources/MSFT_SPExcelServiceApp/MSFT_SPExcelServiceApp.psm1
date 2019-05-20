@@ -459,9 +459,9 @@ function Set-TargetResource
             }
 
             $proxies = Get-SPServiceApplicationProxy
-            foreach($proxyInstance in $proxies)
+            foreach ($proxyInstance in $proxies)
             {
-                if($serviceApp.IsConnected($proxyInstance))
+                if ($serviceApp.IsConnected($proxyInstance))
                 {
                     $proxyInstance.Delete()
                 }
@@ -583,27 +583,30 @@ function Test-TargetResource
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
+    Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
+    Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
+
     $mainCheck = Test-SPDscParameterState -CurrentValues $CurrentValues `
-                                            -DesiredValues $PSBoundParameters `
-                                            -ValuesToCheck @(
-                                                "Ensure",
-                                                "CachingOfUnusedFilesEnable",
-                                                "CrossDomainAccessAllowed",
-                                                "EncryptedUserConnectionRequired",
-                                                "ExternalDataConnectionLifetime",
-                                                "FileAccessMethod",
-                                                "LoadBalancingScheme",
-                                                "MemoryCacheThreshold",
-                                                "PrivateBytesMax",
-                                                "SessionsPerUserMax",
-                                                "SiteCollectionAnonymousSessionsMax",
-                                                "TerminateProcessOnAccessViolation",
-                                                "ThrottleAccessViolationsPerSiteCollection",
-                                                "UnattendedAccountApplicationId",
-                                                "UnusedObjectAgeMax",
-                                                "WorkbookCache",
-                                                "WorkbookCacheSizeMax"
-                                                )
+                                          -DesiredValues $PSBoundParameters `
+                                          -ValuesToCheck @(
+                                              "Ensure",
+                                              "CachingOfUnusedFilesEnable",
+                                              "CrossDomainAccessAllowed",
+                                              "EncryptedUserConnectionRequired",
+                                              "ExternalDataConnectionLifetime",
+                                              "FileAccessMethod",
+                                              "LoadBalancingScheme",
+                                              "MemoryCacheThreshold",
+                                              "PrivateBytesMax",
+                                              "SessionsPerUserMax",
+                                              "SiteCollectionAnonymousSessionsMax",
+                                              "TerminateProcessOnAccessViolation",
+                                              "ThrottleAccessViolationsPerSiteCollection",
+                                              "UnattendedAccountApplicationId",
+                                              "UnusedObjectAgeMax",
+                                              "WorkbookCache",
+                                              "WorkbookCacheSizeMax"
+                                          )
 
 
     if ($Ensure -eq "Present" -and $mainCheck -eq $true -and $null -ne $TrustedFileLocations)

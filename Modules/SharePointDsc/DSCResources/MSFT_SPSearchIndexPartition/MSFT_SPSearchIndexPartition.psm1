@@ -103,10 +103,10 @@ function Set-TargetResource
         $AllSearchServers = $params.Servers
 
         # Ensure the search service instance is running on all servers
-        foreach($searchServer in $AllSearchServers)
+        foreach ($searchServer in $AllSearchServers)
         {
             $searchService = Get-SPEnterpriseSearchServiceInstance -Identity $searchServer
-            if($searchService.Status -eq "Offline")
+            if ($searchService.Status -eq "Offline")
             {
                 Write-Verbose -Message "Start Search Service Instance"
                 Start-SPEnterpriseSearchServiceInstance -Identity $searchService
@@ -128,7 +128,7 @@ function Set-TargetResource
         if ($params.ContainsKey("RootDirectory") -eq $true)
         {
             # Create the index partition directory on each remote server
-            foreach($IndexPartitionServer in $params.Servers)
+            foreach ($IndexPartitionServer in $params.Servers)
             {
                 $networkPath = "\\$IndexPartitionServer\" + $params.RootDirectory.Replace(":\", "$\")
                 New-Item -Path $networkPath -ItemType Directory -Force
@@ -177,19 +177,19 @@ function Set-TargetResource
                 $components = $params.$CurrentSearchProperty | Where-Object -FilterScript {
                     $CurrentValues.$CurrentSearchProperty.Contains($_) -eq $false
                 }
-                foreach($component in $components)
+                foreach ($component in $components)
                 {
                     $ComponentsToAdd += $component
                 }
                 $components = $CurrentValues.$CurrentSearchProperty | Where-Object -FilterScript {
                     $params.$CurrentSearchProperty.Contains($_) -eq $false
                 }
-                foreach($component in $components)
+                foreach ($component in $components)
                 {
                     $ComponentsToRemove += $component
                 }
             }
-            foreach($componentToAdd in $ComponentsToAdd)
+            foreach ($componentToAdd in $ComponentsToAdd)
             {
                 $NewComponentParams = @{
                     SearchTopology = $newTopology
@@ -210,7 +210,7 @@ function Set-TargetResource
                     }
                 }
             }
-            foreach($componentToRemove in $ComponentsToRemove)
+            foreach ($componentToRemove in $ComponentsToRemove)
             {
                 $component = Get-SPEnterpriseSearchComponent -SearchTopology $newTopology | `
                     Where-Object -FilterScript {
@@ -262,6 +262,9 @@ function Test-TargetResource
     Write-Verbose -Message "Testing Search Index Partition '$Index' settings"
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
+
+    Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
+    Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
 
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
                                               -DesiredValues $PSBoundParameters `

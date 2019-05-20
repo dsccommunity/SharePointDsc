@@ -254,9 +254,9 @@ function Set-TargetResource
                             })
 
         # Ensure the search service instance is running on all servers
-        foreach($searchServer in $AllSearchServers)
+        foreach ($searchServer in $AllSearchServers)
         {
-            if($searchServer -like '*.*')
+            if ($searchServer -like '*.*')
             {
                 Write-Verbose -Message "Server name specified in FQDN, extracting just server name."
                 $searchServer = $searchServer.Split('.')[0]
@@ -292,7 +292,7 @@ function Set-TargetResource
         }
 
         # Create the index partition directory on each remote server
-        foreach($IndexPartitionServer in $params.IndexPartition)
+        foreach ($IndexPartitionServer in $params.IndexPartition)
         {
             $networkPath = "\\$IndexPartitionServer\" + `
                            $params.FirstPartitionDirectory.Replace(":\", "$\")
@@ -309,7 +309,7 @@ function Set-TargetResource
         $AllSearchServiceInstances = @{}
         foreach ($server in $AllSearchServers)
         {
-            if($server -like '*.*')
+            if ($server -like '*.*')
             {
                 Write-Verbose -Message "Server name specified in FQDN, extracting just server name."
                 $server = $server.Split('.')[0]
@@ -377,7 +377,7 @@ function Set-TargetResource
                     $params.$CurrentSearchProperty -contains $_ -eq $false
                 }
             }
-            foreach($ComponentToAdd in $ComponentsToAdd)
+            foreach ($ComponentToAdd in $ComponentsToAdd)
             {
                 $NewComponentParams = @{
                     SearchTopology = $newTopology
@@ -414,7 +414,7 @@ function Set-TargetResource
                     }
                 }
             }
-            foreach($ComponentToRemove in $ComponentsToRemove)
+            foreach ($ComponentToRemove in $ComponentsToRemove)
             {
                 if ($componentTypes.$CurrentSearchProperty -eq "IndexComponent")
                 {
@@ -507,6 +507,9 @@ function Test-TargetResource
     Write-Verbose -Message "Testing Search Topology for '$ServiceAppName'"
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
+
+    Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
+    Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
 
     if ($null -eq $CurrentValues)
     {

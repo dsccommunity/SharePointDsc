@@ -4,25 +4,25 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [Parameter(Mandatory = $true)]  
-        [System.String] 
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $DatabaseName,
 
-        [Parameter(Mandatory = $true)]  
-        [System.String] 
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $AGName,
 
-        [Parameter()] 
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $FileShare,
 
-        [Parameter()] 
-        [ValidateSet("Present","Absent")] 
-        [System.String] 
+        [Parameter()]
+        [ValidateSet("Present","Absent")]
+        [System.String]
         $Ensure = "Present",
 
-        [Parameter()] 
-        [System.Management.Automation.PSCredential] 
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 
@@ -37,7 +37,7 @@ function Get-TargetResource
                            "http://support.microsoft.com/kb/2880551")
     }
 
-    if ($Ensure -eq "Present") 
+    if ($Ensure -eq "Present")
     {
         Write-Verbose -Message "Database(s) must be included in AAG $AGName"
         $result = Invoke-SPDSCCommand -Credential $InstallAccount `
@@ -47,18 +47,18 @@ function Get-TargetResource
 
             $Ensure = "Present"
             $databases = Get-SPDatabase | Where-Object -FilterScript {
-                $_.Name -like $params.DatabaseName 
+                $_.Name -like $params.DatabaseName
             }
 
             $dbname = $params.DatabaseName
-            if ($null -ne $databases) 
+            if ($null -ne $databases)
             {
                 foreach ($database in $databases)
                 {
                     $ag = $database.AvailabilityGroup
-                    if ($null -ne $ag) 
+                    if ($null -ne $ag)
                     {
-                        if ($ag.Name -ne $params.AGName) 
+                        if ($ag.Name -ne $params.AGName)
                         {
                             $Ensure = "Absent"
                         }
@@ -82,28 +82,28 @@ function Get-TargetResource
                 Ensure = $Ensure
                 InstallAccount = $params.InstallAccount
             }
-        } 
+        }
     }
-    else 
+    else
     {
         Write-Verbose -Message "Database(s) must not be included in an AAG $AGName"
         $result = Invoke-SPDSCCommand -Credential $InstallAccount `
                                     -Arguments $PSBoundParameters `
                                     -ScriptBlock {
             $params = $args[0]
-            
+
             $Ensure = "Absent"
             $databases = Get-SPDatabase | Where-Object -FilterScript {
                 $_.Name -like $params.DatabaseName
             }
 
             $dbname = $params.DatabaseName
-            if ($null -ne $databases) 
+            if ($null -ne $databases)
             {
                 foreach ($database in $databases)
                 {
                     $ag = $database.AvailabilityGroup
-                    if ($null -ne $ag) 
+                    if ($null -ne $ag)
                     {
                         $Ensure = "Present"
                     }
@@ -132,25 +132,25 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [Parameter(Mandatory = $true)]  
-        [System.String] 
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $DatabaseName,
 
-        [Parameter(Mandatory = $true)]  
-        [System.String] 
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $AGName,
 
-        [Parameter()] 
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $FileShare,
 
-        [Parameter()] 
-        [ValidateSet("Present","Absent")] 
-        [System.String] 
+        [Parameter()]
+        [ValidateSet("Present","Absent")]
+        [System.String]
         $Ensure = "Present",
 
-        [Parameter()] 
-        [System.Management.Automation.PSCredential] 
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 
@@ -165,7 +165,7 @@ function Set-TargetResource
                            "http://support.microsoft.com/kb/2880551")
     }
 
-    if ($Ensure -eq "Present") 
+    if ($Ensure -eq "Present")
     {
         Write-Verbose -Message "Checking AAG settings for $DatabaseName"
         Invoke-SPDSCCommand -Credential $InstallAccount `
@@ -177,14 +177,14 @@ function Set-TargetResource
                 $_.Name -like $params.DatabaseName
             }
 
-            if ($null -ne $databases) 
+            if ($null -ne $databases)
             {
                 foreach ($database in $databases)
                 {
                     $ag = $database.AvailabilityGroup
-                    if ($null -ne $ag) 
+                    if ($null -ne $ag)
                     {
-                        if ($ag.Name -ne $params.AGName) 
+                        if ($ag.Name -ne $params.AGName)
                         {
                             # Remove it from the current AAG first
                             Remove-DatabaseFromAvailabilityGroup -AGName $params.AGName `
@@ -196,7 +196,7 @@ function Set-TargetResource
                                 AGName = $params.AGName
                                 DatabaseName = $database.Name
                             }
-                            if ($params.ContainsKey("FileShare")) 
+                            if ($params.ContainsKey("FileShare"))
                             {
                                 $addParams.Add("FileShare", $params.FileShare)
                             }
@@ -210,7 +210,7 @@ function Set-TargetResource
                             AGName = $params.AGName
                             DatabaseName = $database.Name
                         }
-                        if ($params.ContainsKey("FileShare")) 
+                        if ($params.ContainsKey("FileShare"))
                         {
                             $cmdParams.Add("FileShare", $params.FileShare)
                         }
@@ -223,8 +223,8 @@ function Set-TargetResource
                 throw "Specified database(s) not found."
             }
         }
-    } 
-    else 
+    }
+    else
     {
         Write-Verbose -Message "Removing $DatabaseName from $AGName"
         Invoke-SPDSCCommand -Credential $InstallAccount `
@@ -259,25 +259,25 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [Parameter(Mandatory = $true)]  
-        [System.String] 
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $DatabaseName,
 
-        [Parameter(Mandatory = $true)]  
-        [System.String] 
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $AGName,
 
-        [Parameter()] 
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $FileShare,
 
-        [Parameter()] 
-        [ValidateSet("Present","Absent")] 
-        [System.String] 
+        [Parameter()]
+        [ValidateSet("Present","Absent")]
+        [System.String]
         $Ensure = "Present",
 
-        [Parameter()] 
-        [System.Management.Automation.PSCredential] 
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 
@@ -286,7 +286,10 @@ function Test-TargetResource
     $PSBoundParameters.Ensure = $Ensure
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
-    
+
+    Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
+    Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
+
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
                                     -DesiredValues $PSBoundParameters `
                                     -ValuesToCheck @("Ensure", "DatabaseName")

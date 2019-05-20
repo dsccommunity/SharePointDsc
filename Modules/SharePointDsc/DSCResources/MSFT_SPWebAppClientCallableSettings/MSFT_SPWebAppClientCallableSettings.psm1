@@ -102,7 +102,7 @@ function Get-TargetResource
             $proxyLibraries += $_
         }
 
-        if($params.ContainsKey("ProxyLibrariesToInclude"))
+        if ($params.ContainsKey("ProxyLibrariesToInclude"))
         {
             $include = $params.ProxyLibrariesToInclude
         }
@@ -111,7 +111,7 @@ function Get-TargetResource
             $include = $null;
         }
 
-        if($params.ContainsKey("ProxyLibrariesToExclude"))
+        if ($params.ContainsKey("ProxyLibrariesToExclude"))
         {
             $exclude = $params.ProxyLibrariesToExclude
         }
@@ -228,7 +228,7 @@ function Set-TargetResource
 
         if ($params.ContainsKey("ProxyLibraries") -eq $true)
         {
-            foreach($desiredProxyLibrary in $params.ProxyLibraries)
+            foreach ($desiredProxyLibrary in $params.ProxyLibraries)
             {
                 if ($clientCallableSettings.ProxyLibraries.AssemblyName -contains $desiredProxyLibrary.AssemblyName)
                 {
@@ -253,7 +253,7 @@ function Set-TargetResource
             }
 
             [System.Collections.ObjectModel.Collection[System.Object]]$proxyLibrariesToRemove = @{}
-            foreach($currentProxyLibrary in $clientCallableSettings.ProxyLibraries)
+            foreach ($currentProxyLibrary in $clientCallableSettings.ProxyLibraries)
             {
                 if ($params.ProxyLibraries.Count -eq 0 -or (-not ($params.ProxyLibraries.AssemblyName -contains $currentProxyLibrary.AssemblyName)))
                 {
@@ -261,7 +261,7 @@ function Set-TargetResource
                 }
             }
 
-            foreach($proxyLibraryToRemove in $proxyLibrariesToRemove)
+            foreach ($proxyLibraryToRemove in $proxyLibrariesToRemove)
             {
                     $clientCallableSettings.ProxyLibraries.Remove($proxyLibraryToRemove)
                     $webApplicationNeedsUpdate = $true
@@ -270,7 +270,7 @@ function Set-TargetResource
 
         if ($params.ContainsKey("ProxyLibrariesToInclude") -eq $true)
         {
-            foreach($desiredProxyLibrary in $params.ProxyLibrariesToInclude)
+            foreach ($desiredProxyLibrary in $params.ProxyLibrariesToInclude)
             {
                 if ($clientCallableSettings.ProxyLibraries.AssemblyName -contains $desiredProxyLibrary.AssemblyName)
                 {
@@ -297,12 +297,12 @@ function Set-TargetResource
 
         if ($params.ContainsKey("ProxyLibrariesToExclude") -eq $true)
         {
-            foreach($excludeProxyLibrary in $params.ProxyLibrariesToExclude)
+            foreach ($excludeProxyLibrary in $params.ProxyLibrariesToExclude)
             {
                 $existingProxyLibrary = $clientCallableSettings.ProxyLibraries | Where-Object -FilterScript {
                     $_.AssemblyName -eq $excludeProxyLibrary
                 } | Select-Object -First 1
-                if($null -ne $existingProxyLibrary)
+                if ($null -ne $existingProxyLibrary)
                 {
                     $clientCallableSettings.ProxyLibraries.Remove($existingProxyLibrary)
                     $webApplicationNeedsUpdate = $true
@@ -466,7 +466,10 @@ function Test-TargetResource
 
     Write-Verbose -Message "Testing for web application '$WebAppUrl' client callable settings"
 
-    $currentValues = Get-TargetResource @PSBoundParameters
+    $CurrentValues = Get-TargetResource @PSBoundParameters
+
+    Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
+    Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
 
     if ($null -eq $currentValues.ProxyLibraries)
     {
@@ -500,7 +503,7 @@ function Test-TargetResource
             if ($null -eq $differences)
             {
                 Write-Verbose -Message "Proxy library list matches - checking that SupportAppAuthentication match on each object"
-                foreach($currentProxyLibrary in $currentValues.ProxyLibraries)
+                foreach ($currentProxyLibrary in $currentValues.ProxyLibraries)
                 {
                     if ($currentProxyLibrary.SupportAppAuthentication -ne ($ProxyLibraries | Where-Object -FilterScript {
                             $_.AssemblyName -eq $currentProxyLibrary.AssemblyName

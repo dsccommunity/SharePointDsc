@@ -62,7 +62,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                             $Global:SPUPSubTypeCreateCalled = $true
                         } -PassThru  | Add-Member -MemberType ScriptMethod GetSectionByName {
                             $result = $null
-                            if($Global:SPUPGetSectionByNameCalled -eq $TRUE){
+                            if ($Global:SPUPGetSectionByNameCalled -eq $TRUE){
                                 $result = $subTypeProperty
                             }
                             $Global:SPUPGetSectionByNameCalled  = $true
@@ -116,7 +116,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     return $result
                 } -PassThru -Force | Add-Member -MemberType ScriptMethod GetSectionByName {
                            $result = $null
-                            if($Global:UpsConfigManagerGetSectionByNameCalled -eq $TRUE){
+                            if ($Global:UpsConfigManagerGetSectionByNameCalled -eq $TRUE){
                                 $result = $subTypeProperty
                             }
                             $Global:UpsConfigManagerGetSectionByNameCalled=$true

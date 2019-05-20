@@ -135,7 +135,7 @@ function Get-TargetResource
                 $useDisabledFilter = $METHOD_GET_USEDISABLEDFILTER.Invoke($connection, $null)
                 $useSSL = $METHOD_GET_USESSL.Invoke($connection, $null)
 
-                if($null -eq $namingContexts)
+                if ($null -eq $namingContexts)
                 {
                     return $nullreturn
                 }
@@ -489,7 +489,7 @@ function Set-TargetResource
                     {
                         Write-Verbose -Message "Creating the new connection via cmdlet (SP2016)"
                         Write-Verbose -Message "Adding IncludedOUs to the connection"
-                        foreach($ou in $params.IncludedOUs)
+                        foreach ($ou in $params.IncludedOUs)
                         {
                             Add-SPProfileSyncConnection -ProfileServiceApplication $ups `
                                                         -ConnectionForestName $params.Forest `
@@ -503,7 +503,7 @@ function Set-TargetResource
                         }
 
                         Write-Verbose -Message "Removing ExcludedOUs from the connection"
-                        foreach($ou in $params.ExcludedOUs)
+                        foreach ($ou in $params.ExcludedOUs)
                         {
                             Remove-SPProfilesyncConnection -ProfileServiceApplication $ups `
                                                            -ConnectionForestName $params.Forest `
@@ -598,6 +598,9 @@ function Test-TargetResource
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
+    Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
+    Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
+
     if ($null -eq $CurrentValues.UserProfileService)
     {
         return $false
@@ -605,13 +608,12 @@ function Test-TargetResource
 
     $installedVersion = Get-SPDSCInstalledProductVersion
     $valuesToCheck = @("Forest",
-    "UserProfileService",
-    "Server",
-    "UseSSL",
-    "IncludedOUs",
-    "Ensure")
+                       "UserProfileService",
+                       "UseSSL",
+                       "IncludedOUs",
+                       "Ensure")
 
-    if($installedVersion.FileMajorPart -eq 15)
+    if ($installedVersion.FileMajorPart -eq 15)
     {
         if ($Force -eq $true)
         {
@@ -619,6 +621,7 @@ function Test-TargetResource
         }
 
         $valuesToCheck += "ExcludedOUs"
+        $valuesToCheck += "Server"
     }
 
     return Test-SPDscParameterState -CurrentValues $CurrentValues `

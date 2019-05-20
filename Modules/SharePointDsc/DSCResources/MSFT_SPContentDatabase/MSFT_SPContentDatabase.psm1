@@ -388,6 +388,9 @@ function Test-TargetResource
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
+    Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
+    Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
+
     if ($CurrentValues.DatabaseServer -ne $DatabaseServer)
     {
         Write-Verbose -Message ("Specified database server does not match the actual " + `

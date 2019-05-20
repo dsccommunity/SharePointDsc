@@ -203,9 +203,9 @@ function Set-TargetResource
             }
 
             Write-Verbose -Message "Creating SPTrustedIdentityTokenIssuer '$Name'"
-            $result = Invoke-SPDSCCommand -Credential $InstallAccount `
-                                          -Arguments $PSBoundParameters `
-                                          -ScriptBlock {
+            $null = Invoke-SPDSCCommand -Credential $InstallAccount `
+                                        -Arguments $PSBoundParameters `
+                                        -ScriptBlock {
                 $params = $args[0]
                 if ($params.SigningCertificateThumbprint)
                 {
@@ -215,7 +215,6 @@ function Set-TargetResource
                     if ($params.SigningCertificateThumbprint -notmatch "^[A-Fa-f0-9]{40}$")
                     {
                         throw ("Parameter SigningCertificateThumbprint does not match valid format '^[A-Fa-f0-9]{40}$'.")
-                        return
                     }
 
                     $cert = Get-ChildItem -Path Cert:\LocalMachine\My | Where-Object -FilterScript {
@@ -225,15 +224,13 @@ function Set-TargetResource
                     if (!$cert)
                     {
                         throw ("Signing certificate with thumbprint $($params.SigningCertificateThumbprint) " + `
-                            "was not found in certificate store 'LocalMachine\My'.")
-                        return
+                               "was not found in certificate store 'LocalMachine\My'.")
                     }
 
                     if ($cert.HasPrivateKey)
                     {
                         throw ("SharePoint requires that the private key of the signing certificate" + `
-                            " is not installed in the certificate store.")
-                        return
+                               " is not installed in the certificate store.")
                     }
                 }
                 else
@@ -242,12 +239,11 @@ function Set-TargetResource
                     try
                     {
                         $cert = New-Object -TypeName "System.Security.Cryptography.X509Certificates.X509Certificate2" `
-                            -ArgumentList @($params.SigningCertificateFilePath)
+                                           -ArgumentList @($params.SigningCertificateFilePath)
                     }
                     catch
                     {
                         throw ("Signing certificate was not found in path '$($params.SigningCertificateFilePath)'.")
-                        return
                     }
                 }
 
@@ -256,6 +252,7 @@ function Set-TargetResource
                     $runParams = @{}
                     $runParams.Add("IncomingClaimTypeDisplayName", $_.Name)
                     $runParams.Add("IncomingClaimType", $_.IncomingClaimType)
+
                     if ($null -eq $_.LocalClaimType)
                     {
                         $runParams.Add("LocalClaimType", $_.IncomingClaimType)
@@ -274,7 +271,6 @@ function Set-TargetResource
                     }))
                 {
                     throw ("IdentifierClaim does not match any claim type specified in ClaimsMappings.")
-                    return
                 }
 
                 $runParams = @{}
@@ -311,7 +307,7 @@ function Set-TargetResource
     else
     {
         Write-Verbose "Removing SPTrustedIdentityTokenIssuer '$Name'"
-        $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+        $null = Invoke-SPDSCCommand -Credential $InstallAccount `
                                       -Arguments $PSBoundParameters `
                                       -ScriptBlock {
             $params = $args[0]
@@ -430,8 +426,8 @@ function Test-TargetResource
         return
     }
 
-    if (!$PSBoundParameters.ContainsKey("SigningCertificateThumbprint") -and `
-        !$PSBoundParameters.ContainsKey("SigningCertificateFilePath"))
+    if ($PSBoundParameters.ContainsKey("SigningCertificateThumbprint") -eq $false -and `
+        $PSBoundParameters.ContainsKey("SigningCertificateFilePath") -eq $false)
     {
         throw ("At least one of the following parameters must be specified: " + `
             "SigningCertificateThumbprint, SigningCertificateFilePath.")
@@ -439,6 +435,9 @@ function Test-TargetResource
     }
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
+
+    Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
+    Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
 
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
                                     -DesiredValues $PSBoundParameters `

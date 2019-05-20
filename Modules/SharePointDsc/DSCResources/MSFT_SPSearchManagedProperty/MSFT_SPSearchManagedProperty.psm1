@@ -316,10 +316,10 @@ function Set-TargetResource
         # If alias doesn't already exist, add it
         $currentAliases = $managedProperty.GetAliases()
 
-        foreach($alias in $params.Aliases)
+        foreach ($alias in $params.Aliases)
         {
             $currentAlias = $managedProperty.GetAliases() | Where-Object {$_ -eq $alias}
-            if(!$currentAlias)
+            if (!$currentAlias)
             {
                 $managedProperty.AddAlias($alias)
             }
@@ -330,9 +330,9 @@ function Set-TargetResource
         # which means we need to remove them.
         $currentAliases = $managedProperty.GetAliases()
 
-        foreach($alias in $currentAliases)
+        foreach ($alias in $currentAliases)
         {
-            if(!$params.Aliases.Contains($alias))
+            if (!$params.Aliases.Contains($alias))
             {
                 $managedProperty.DeleteAlias($alias)
             }
@@ -436,7 +436,11 @@ function Test-TargetResource
     Write-Verbose -Message "Testing Managed Property Setting for '$Name'"
 
     $PSBoundParameters.Ensure = $Ensure
+
     $CurrentValues = Get-TargetResource @PSBoundParameters
+
+    Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
+    Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
 
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
                                     -DesiredValues $PSBoundParameters `

@@ -49,7 +49,7 @@ function Get-TargetResource
         }
 
           $serviceApp = Get-SPEnterpriseSearchServiceApplication -Identity $params.ServiceAppName
-        if($null -eq $serviceApp)
+        if ($null -eq $serviceApp)
         {
             return $nullReturn
         }
@@ -57,13 +57,13 @@ function Get-TargetResource
         $searchObjectLevel = [Microsoft.Office.Server.Search.Administration.SearchObjectLevel]::Ssa
         $searchOwner = New-Object -TypeName "Microsoft.Office.Server.Search.Administration.SearchObjectOwner" -ArgumentList $searchObjectLevel
 
-        if($params.Action -eq "Authoratative")
+        if ($params.Action -eq "Authoratative")
         {
             $queryAuthority = Get-SPEnterpriseSearchQueryAuthority -Identity $params.Path `
                                                                    -Owner $searchOwner `
                                                                    -SearchApplication $serviceApp `
                                                                    -ErrorAction SilentlyContinue
-            if($null -eq $queryAuthority)
+            if ($null -eq $queryAuthority)
             {
                 return $nullReturn
             }
@@ -86,7 +86,7 @@ function Get-TargetResource
                                                                              -Owner $searchOwner `
                                                                              -SearchApplication $serviceApp `
                                                                              -ErrorAction SilentlyContinue
-            if($null -eq $queryDemoted)
+            if ($null -eq $queryDemoted)
             {
                 return $nullReturn
             }
@@ -145,9 +145,9 @@ function Set-TargetResource
 
     $CurrentResults = Get-TargetResource @PSBoundParameters
 
-    if($CurrentResults.Ensure -eq "Absent" -and $Ensure -eq "Present")
+    if ($CurrentResults.Ensure -eq "Absent" -and $Ensure -eq "Present")
     {
-        $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+        $null = Invoke-SPDSCCommand -Credential $InstallAccount `
                                     -Arguments $PSBoundParameters `
                                     -ScriptBlock {
             $params = $args[0]
@@ -156,11 +156,11 @@ function Set-TargetResource
             $searchObjectLevel = [Microsoft.Office.Server.Search.Administration.SearchObjectLevel]::Ssa
             $searchOwner = New-Object -TypeName "Microsoft.Office.Server.Search.Administration.SearchObjectOwner" -ArgumentList $searchObjectLevel
 
-            if($null -eq $serviceApp)
+            if ($null -eq $serviceApp)
             {
                 throw "Search Service App was not available."
             }
-            if($params.Action -eq "Authoratative")
+            if ($params.Action -eq "Authoratative")
             {
                  New-SPEnterpriseSearchQueryAuthority -Url $params.Path `
                                                       -SearchApplication $serviceApp `
@@ -173,9 +173,9 @@ function Set-TargetResource
             }
         }
     }
-    if($CurrentResults.Ensure -eq "Present" -and $Ensure -eq "Present")
+    if ($CurrentResults.Ensure -eq "Present" -and $Ensure -eq "Present")
     {
-        $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+        $null = Invoke-SPDSCCommand -Credential $InstallAccount `
                                     -Arguments $PSBoundParameters `
                                     -ScriptBlock {
             $params = $args[0]
@@ -184,12 +184,12 @@ function Set-TargetResource
             $searchObjectLevel = [Microsoft.Office.Server.Search.Administration.SearchObjectLevel]::Ssa
             $searchOwner = New-Object -TypeName "Microsoft.Office.Server.Search.Administration.SearchObjectOwner" -ArgumentList $searchObjectLevel
 
-            if($null -eq $serviceApp)
+            if ($null -eq $serviceApp)
             {
                 throw "Search Service App was not available."
             }
 
-            if($params.Action -eq "Authoratative")
+            if ($params.Action -eq "Authoratative")
             {
                 Set-SPEnterpriseSearchQueryAuthority -Identity $params.ServiceAppName `
                                                      -SearchApplication $serviceApp `
@@ -198,9 +198,9 @@ function Set-TargetResource
             }
         }
     }
-    if($Ensure -eq "Absent")
+    if ($Ensure -eq "Absent")
     {
-        $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+        $null = Invoke-SPDSCCommand -Credential $InstallAccount `
                                     -Arguments $PSBoundParameters `
                                     -ScriptBlock {
             $params = $args[0]
@@ -209,11 +209,11 @@ function Set-TargetResource
             $searchObjectLevel = [Microsoft.Office.Server.Search.Administration.SearchObjectLevel]::Ssa
             $searchOwner = New-Object -TypeName "Microsoft.Office.Server.Search.Administration.SearchObjectOwner" -ArgumentList $searchObjectLevel
 
-            if($null -eq $serviceApp)
+            if ($null -eq $serviceApp)
             {
                 throw "Search Service App was not available."
             }
-            if($params.Action -eq "Authoratative")
+            if ($params.Action -eq "Authoratative")
             {
                 Remove-SPEnterpriseSearchQueryAuthority -Identity $params.ServiceAppName `
                                                         -SearchApplication $serviceApp `
@@ -271,6 +271,10 @@ function Test-TargetResource
     $PSBoundParameters.Ensure = $Ensure
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
+
+    Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
+    Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
+
     if ($Ensure -eq "Present")
     {
         if ($Action -eq "Authoratative")

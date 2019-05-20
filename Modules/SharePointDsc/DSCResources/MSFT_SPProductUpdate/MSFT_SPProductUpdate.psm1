@@ -411,8 +411,9 @@ function Set-TargetResource
         $osearchSvc = Get-Service -Name $searchServiceName
         $hostControllerSvc = Get-Service -Name "SPSearchHostController"
 
-        $result = Invoke-SPDSCCommand -Credential $InstallAccount `
-            -ScriptBlock {
+        Invoke-SPDSCCommand -Credential $InstallAccount `
+                            -ScriptBlock
+        {
             $searchSAs = Get-SPEnterpriseSearchServiceApplication
             foreach ($searchSA in $searchSAs)
             {
@@ -451,10 +452,10 @@ function Set-TargetResource
         }
         Set-Service -Name "SPTimerV4" -StartupType Disabled
 
-        $iisreset = Start-Process -FilePath "iisreset.exe" `
-            -ArgumentList "-stop -noforce" `
-            -Wait `
-            -PassThru
+        $null = Start-Process -FilePath "iisreset.exe" `
+                              -ArgumentList "-stop -noforce" `
+                              -Wait `
+                              -PassThru
 
         $timerSvc = Get-Service -Name "SPTimerV4"
         if ($timerSvc.Status -eq "Running")
@@ -465,9 +466,10 @@ function Set-TargetResource
 
     Write-Verbose -Message "Beginning installation of the SharePoint update"
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
-        -Arguments $SetupFile `
-        -ScriptBlock {
+    Invoke-SPDSCCommand -Credential $InstallAccount `
+                        -Arguments $SetupFile `
+                        -ScriptBlock
+    {
         $setupFile = $args[0]
 
         Write-Verbose -Message "Checking if SetupFile is an UNC path"
@@ -541,10 +543,10 @@ function Set-TargetResource
         $timerSvc = Get-Service -Name "SPTimerV4"
         $timerSvc.Start()
 
-        $iisreset = Start-Process -FilePath "iisreset.exe" `
-            -ArgumentList "-start" `
-            -Wait `
-            -PassThru
+        Start-Process -FilePath "iisreset.exe" `
+                      -ArgumentList "-start" `
+                      -Wait `
+                      -PassThru
 
         $osearchSvc = Get-Service -Name $searchServiceName
         $hostControllerSvc = Get-Service -Name "SPSearchHostController"
@@ -565,8 +567,9 @@ function Set-TargetResource
         if ($searchPaused -eq $true)
         {
             # Resuming Search Service Application if paused###
-            $result = Invoke-SPDSCCommand -Credential $InstallAccount `
-                -ScriptBlock {
+            Invoke-SPDSCCommand -Credential $InstallAccount `
+                                -ScriptBlock
+            {
                 $searchSAs = Get-SPEnterpriseSearchServiceApplication
                 foreach ($searchSA in $searchSAs)
                 {
@@ -627,6 +630,9 @@ function Test-TargetResource
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
+    Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
+    Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
+
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
                                     -DesiredValues $PSBoundParameters `
                                     -ValuesToCheck @("Ensure")
@@ -676,7 +682,7 @@ function Get-SPDscLocalVersionInfo
 
     $officeProductKeys = $installerEntries | Where-Object -FilterScript {$_.PsPath -like "*00000000F01FEC"}
 
-    if($null -eq $installerEntries -or $null -eq $officeProductKeys ){
+    if ($null -eq $installerEntries -or $null -eq $officeProductKeys ){
         return $nullVersion
     }
 
@@ -686,7 +692,7 @@ function Get-SPDscLocalVersionInfo
 
         $productInfo = Get-ItemProperty "Registry::$($officeProductKey)\InstallProperties" -ErrorAction SilentlyContinue
 
-        if($null -eq $productInfo){
+        if ($null -eq $productInfo){
             break
         }
 

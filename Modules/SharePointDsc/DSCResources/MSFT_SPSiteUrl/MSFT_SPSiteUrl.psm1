@@ -307,6 +307,9 @@ function Test-TargetResource
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
+    Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
+    Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
+
     if ($null -eq $CurrentValues.Intranet -and
         $null -eq $CurrentValues.Internet -and
         $null -eq $CurrentValues.Extranet -and

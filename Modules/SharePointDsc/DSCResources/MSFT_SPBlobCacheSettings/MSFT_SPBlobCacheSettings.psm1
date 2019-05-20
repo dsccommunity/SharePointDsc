@@ -360,6 +360,11 @@ function Test-TargetResource
 
     Write-Verbose -Message "Testing blob cache settings for $WebAppUrl"
 
+    $CurrentValues = Get-TargetResource @PSBoundParameters
+
+    Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
+    Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
+
     if ($Location)
     {
         if (-not (Test-Path -Path $Location))
@@ -369,7 +374,7 @@ function Test-TargetResource
         }
     }
 
-    return Test-SPDscParameterState -CurrentValues (Get-TargetResource @PSBoundParameters) `
+    return Test-SPDscParameterState -CurrentValues $CurrentValues `
                                     -DesiredValues $PSBoundParameters `
                                     -ValuesToCheck @("EnableCache",
                                                      "Location",

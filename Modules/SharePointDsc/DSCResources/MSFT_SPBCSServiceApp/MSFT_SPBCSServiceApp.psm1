@@ -156,9 +156,9 @@ function Set-TargetResource
                 # The New-SPBusinessDataCatalogServiceApplication cmdlet creates a proxy by default
                 # If a name is specified, we first need to delete the created one
                 $proxies = Get-SPServiceApplicationProxy
-                foreach($proxyInstance in $proxies)
+                foreach ($proxyInstance in $proxies)
                 {
-                    if($bcsServiceApp.IsConnected($proxyInstance))
+                    if ($bcsServiceApp.IsConnected($proxyInstance))
                     {
                         $proxyInstance.Delete()
                     }
@@ -206,9 +206,9 @@ function Set-TargetResource
             }
 
             $proxies = Get-SPServiceApplicationProxy
-            foreach($proxyInstance in $proxies)
+            foreach ($proxyInstance in $proxies)
             {
-                if($app.IsConnected($proxyInstance))
+                if ($app.IsConnected($proxyInstance))
                 {
                     $proxyInstance.Delete()
                 }
@@ -259,7 +259,12 @@ function Test-TargetResource
 
     $PSBoundParameters.Ensure = $Ensure
 
-    return Test-SPDscParameterState -CurrentValues (Get-TargetResource @PSBoundParameters) `
+    $CurrentValues = Get-TargetResource @PSBoundParameters
+
+    Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
+    Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
+
+    return Test-SPDscParameterState -CurrentValues $CurrentValues `
                                     -DesiredValues $PSBoundParameters `
                                     -ValuesToCheck @("ApplicationPool", "Ensure")
 }

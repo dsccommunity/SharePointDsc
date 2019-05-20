@@ -233,7 +233,7 @@ function Set-TargetResource
                 $params.Remove("InstallAccount") | Out-Null
             }
 
-            if($params.ContainsKey("DatabaseAuthenticationType"))
+            if ($params.ContainsKey("DatabaseAuthenticationType"))
             {
                 if ($params.DatabaseAuthenticationType -eq "SQL")
                 {
@@ -305,9 +305,9 @@ function Set-TargetResource
 
             # Remove the connected proxy(ies)
             $proxies = Get-SPServiceApplicationProxy
-            foreach($proxyInstance in $proxies)
+            foreach ($proxyInstance in $proxies)
             {
-                if($serviceApp.IsConnected($proxyInstance))
+                if ($serviceApp.IsConnected($proxyInstance))
                 {
                     $proxyInstance.Delete()
                 }
@@ -388,6 +388,9 @@ function Test-TargetResource
     $PSBoundParameters.Ensure = $Ensure
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
+
+    Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
+    Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
 
     if ($PSBoundParameters.ContainsKey("DatabaseServer") -and `
        ($CurrentValues.DatabaseServer -ne $DatabaseServer))

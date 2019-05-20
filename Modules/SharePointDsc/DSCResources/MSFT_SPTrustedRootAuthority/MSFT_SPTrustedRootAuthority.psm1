@@ -139,9 +139,9 @@ function Set-TargetResource
     if ($Ensure -eq "Present" -and $CurrentValues.Ensure -eq "Present")
     {
         Write-Verbose -Message "Updating SPTrustedRootAuthority '$Name'"
-        $result = Invoke-SPDSCCommand -Credential $InstallAccount `
-                                      -Arguments $PSBoundParameters `
-                                      -ScriptBlock {
+        $null = Invoke-SPDSCCommand -Credential $InstallAccount `
+                                    -Arguments $PSBoundParameters `
+                                    -ScriptBlock {
             $params = $args[0]
 
             if ($params.ContainsKey("CertificateThumbprint"))
@@ -192,7 +192,7 @@ function Set-TargetResource
     if ($Ensure -eq "Present" -and $CurrentValues.Ensure -eq "Absent")
     {
         Write-Verbose -Message "Adding SPTrustedRootAuthority '$Name'"
-        $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+        $null = Invoke-SPDSCCommand -Credential $InstallAccount `
                                       -Arguments $PSBoundParameters `
                                       -ScriptBlock {
             $params = $args[0]
@@ -244,7 +244,7 @@ function Set-TargetResource
     if ($Ensure -eq "Absent")
     {
         Write-Verbose -Message "Removing SPTrustedRootAuthority '$Name'"
-        $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+        $null = Invoke-SPDSCCommand -Credential $InstallAccount `
                                       -Arguments $PSBoundParameters `
                                       -ScriptBlock {
             $params = $args[0]
@@ -299,6 +299,9 @@ function Test-TargetResource
     }
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
+
+    Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
+    Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
 
     if ($PSBoundParameters.ContainsKey("CertificateFilePath"))
     {

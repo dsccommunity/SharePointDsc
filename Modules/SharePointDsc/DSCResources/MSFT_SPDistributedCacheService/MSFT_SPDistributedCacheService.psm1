@@ -420,7 +420,7 @@ function Set-TargetResource
             Invoke-SPDSCCommand -Credential $InstallAccount -ScriptBlock {
                 $firewallRule = Get-NetFirewallRule -DisplayName "SharePoint Distribute Cache" `
                                                     -ErrorAction SilentlyContinue
-                if($null -ne $firewallRule)
+                if ($null -ne $firewallRule)
                 {
                     Write-Verbose -Message "Disabling firewall rules."
                     Disable-NetFirewallRule -DisplayName "SharePoint Distribute Cache"
@@ -472,6 +472,9 @@ function Test-TargetResource
     $PSBoundParameters.Ensure = $Ensure
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
+
+    Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
+    Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
 
     if ($Ensure -eq "Present")
     {

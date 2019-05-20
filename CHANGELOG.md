@@ -1,5 +1,14 @@
 # Change log for SharePointDsc
 
+## Unreleased
+
+* SharePointDsc generic
+  * Improved logging in all resource. They are now outputting
+    the current and targeted values in the Test method.
+* SPUserProfileSyncConnection
+  * Fixed issue where the parameter Server was checked in SP2016
+    but isn't used there.
+
 ## v3.4
 
 * SPDistributedCacheClientSettings
