@@ -1107,7 +1107,7 @@ function Test-SPDscPrereqInstallStatus
             "BundleUpgradeCode"
             {
                 $installedItem = $InstalledItems | Where-Object -FilterScript {
-                    $null -ne $_.BundleUpgradeCode -and (($_.BundleUpgradeCode.Trim() | Compare-Object $itemToCheck.SearchValue) -eq $null)
+                    $null -ne $_.BundleUpgradeCode -and ($null -eq ($_.BundleUpgradeCode.Trim() | Compare-Object $itemToCheck.SearchValue))
                 }
                 if ($null -eq $installedItem)
                 {
@@ -1119,14 +1119,11 @@ function Test-SPDscPrereqInstallStatus
                 {
                     $isRequiredVersionInstalled = $true;
 
-                    [int[]]$minimumRequiredVersion = $itemToCheck.MinimumRequiredVersion.Split('.')
-                    [int[]]$installedVersion = $installedItem.DisplayVersion.Split('.')
-                    for ([int]$index = 0; $index -lt $minimumRequiredVersion.Length -and $index -lt $installedVersion.Length; $index++)
+                    [System.Version]$minimumRequiredVersion = $itemToCheck.MinimumRequiredVersion
+                    [System.Version]$installedVersion = $installedItem.DisplayVersion
+                    if ($minimumRequiredVersion -gt $installedVersion)
                     {
-                        if ($minimumRequiredVersion[$index] -gt $installedVersion[$index])
-                        {
-                            $isRequiredVersionInstalled = $false;
-                        }
+                        $isRequiredVersionInstalled = $false;
                     }
                     if ($installedVersion.Length -eq 0 -or -not $isRequiredVersionInstalled)
                     {

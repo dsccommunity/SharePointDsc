@@ -5,9 +5,12 @@
 * SharePointDsc generic
   * Improved logging in all resource. They are now outputting
     the current and targeted values in the Test method.
+* SPInstallPrereqs
+  * Fixed bug in version check, where lower versions would be
+    detected as higher versions.
 * SPUserProfileSyncConnection
   * Fixed issue where the parameter Server was checked in SP2016
-    but isn't used there.
+    but isn't used there and therefore always fails.
 
 ## v3.4
 
