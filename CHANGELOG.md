@@ -1,5 +1,10 @@
 # Change log for SharePointDsc
 
+## Unreleased
+
+* SPFarm
+  * Throw error in Get method if CentralAdministrationUrl is HTTP
+
 ## v3.4
 
 * SPDistributedCacheClientSettings

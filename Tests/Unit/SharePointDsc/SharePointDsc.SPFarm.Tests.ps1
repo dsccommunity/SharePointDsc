@@ -106,7 +106,34 @@ namespace Microsoft.SharePoint.Administration {
             }
         }
 
-        Context -Name "Invalid CA URL has been passed in" -Fixture {
+        Context -Name "CA URL passed in cannot be parsed as System.Uri" -Fixture {
+            $testParams = @{
+                IsSingleInstance = "Yes"
+                Ensure = "Present"
+                FarmConfigDatabaseName = "SP_Config"
+                CentralAdministrationPort = 443
+                CentralAdministrationUrl = "admin.contoso.com"
+                DatabaseServer = "sql.contoso.com"
+                FarmAccount = $mockFarmAccount
+                Passphrase = $mockPassphrase
+                AdminContentDatabaseName = "SP_AdminContent"
+                RunCentralAdmin = $true
+            }
+
+            It "Should throw exception in the get method" {
+                { Get-TargetResource @testParams } | Should Throw "CentralAdministrationUrl is not a valid URI. It should include the scheme (http/https) and address."
+            }
+
+            It "Should throw exception in the test method" {
+                { Test-TargetResource @testParams } | Should Throw "CentralAdministrationUrl is not a valid URI. It should include the scheme (http/https) and address."
+            }
+
+            It "Should throw exception in the set method" {
+                { Set-TargetResource @testParams } | Should Throw "CentralAdministrationUrl is not a valid URI. It should include the scheme (http/https) and address."
+            }
+        }
+
+        Context -Name "Invalid CA URL has been passed in with port included" -Fixture {
             $testParams = @{
                 IsSingleInstance = "Yes"
                 Ensure = "Present"
@@ -130,6 +157,33 @@ namespace Microsoft.SharePoint.Administration {
 
             It "Should throw exception in the set method" {
                 { Set-TargetResource @testParams } | Should Throw "CentralAdministrationUrl should not specify port. Use CentralAdministrationPort instead."
+            }
+        }
+
+        Context -Name "Invalid CA URL has been passed in (HTTP currently not supported)" -Fixture {
+            $testParams = @{
+                IsSingleInstance = "Yes"
+                Ensure = "Present"
+                FarmConfigDatabaseName = "SP_Config"
+                CentralAdministrationPort = 443
+                CentralAdministrationUrl = "http://admin.contoso.com"
+                DatabaseServer = "sql.contoso.com"
+                FarmAccount = $mockFarmAccount
+                Passphrase = $mockPassphrase
+                AdminContentDatabaseName = "SP_AdminContent"
+                RunCentralAdmin = $true
+            }
+
+            It "Should throw exception in the get method" {
+                { Get-TargetResource @testParams } | Should Throw "CentralAdministrationUrl parameter can only be used with HTTPS"
+            }
+
+            It "Should throw exception in the test method" {
+                { Test-TargetResource @testParams } | Should Throw "CentralAdministrationUrl parameter can only be used with HTTPS"
+            }
+
+            It "Should throw exception in the set method" {
+                { Set-TargetResource @testParams } | Should Throw "CentralAdministrationUrl parameter can only be used with HTTPS"
             }
         }
 
@@ -329,7 +383,6 @@ namespace Microsoft.SharePoint.Administration {
                 FarmAccount = $mockFarmAccount
                 Passphrase = $mockPassphrase
                 AdminContentDatabaseName = "SP_AdminContent"
-                CentralAdministrationUrl = ""
                 RunCentralAdmin = $true
             }
 

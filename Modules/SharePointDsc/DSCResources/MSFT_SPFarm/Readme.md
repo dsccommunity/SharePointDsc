@@ -39,7 +39,8 @@ appropriate SPNs setup for Farm account and Central Administration URI.
 To provision Central Admin as an SSL web application, specify a value for
 the CentralAdministrationUrl property that begins with https:// followed
 by the vanity host name or server name you wish to use to access CA.
-(e.g. https://admin.sharepoint.contoso.com).
+(e.g. https://admin.sharepoint.contoso.com). This parameter does not
+currently support HTTP.
 
 DeveloperDashboard can be specified as "On", "Off" and (only when using
 SharePoint 2013) to "OnDemand".
