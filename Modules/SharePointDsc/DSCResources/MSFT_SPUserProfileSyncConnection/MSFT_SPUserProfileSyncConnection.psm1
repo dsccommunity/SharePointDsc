@@ -73,25 +73,25 @@ function Get-TargetResource
         $ups = Get-SPServiceApplication -Name $params.UserProfileService `
                                         -ErrorAction SilentlyContinue
 
-        $nullreturn = @{
-            Name = $params.Name
-            UserProfileService = $null
-            Forest = $null
+        $nullReturn = @{
+            Name                  = $params.Name
+            UserProfileService    = $null
+            Forest                = $null
             ConnectionCredentials = $null
-            IncludedOUs = $null
-            ExcludedOUs = $null
-            Server = $null
-            Port = $null
-            UseSSL = $null
-            UseDisabledFilter = $null
-            ConnectionType = $null
-            Force = $null
-            Ensure = "Absent"
+            IncludedOUs           = $null
+            ExcludedOUs           = $null
+            Server                = $null
+            Port                  = $null
+            UseSSL                = $null
+            UseDisabledFilter     = $null
+            ConnectionType        = $null
+            Force                 = $null
+            Ensure                = "Absent"
         }
 
         if ($null -eq $ups)
         {
-            return $nullreturn
+            return $nullReturn
         }
         else
         {
@@ -116,7 +116,7 @@ function Get-TargetResource
 
             if ($null -eq $connection)
             {
-                return $nullreturn
+                return $nullReturn
             }
             $namingContext = $connection.NamingContexts | Select-Object -First 1
             if ($null -eq $namingContext)
@@ -137,7 +137,7 @@ function Get-TargetResource
 
                 if ($null -eq $namingContexts)
                 {
-                    return $nullreturn
+                    return $nullReturn
                 }
 
                 if ($null -eq $namingContexts.ContainersIncluded)
@@ -159,19 +159,19 @@ function Get-TargetResource
                 }
 
                 return @{
-                    Name = $params.Name
-                    UserProfileService = $params.UserProfileService
-                    Forest = $namingContexts.DistinguishedName.Replace(",DC=", ".").Replace("DC=", "");
+                    Name                  = $params.Name
+                    UserProfileService    = $params.UserProfileService
+                    Forest                = $namingContexts.DistinguishedName.Replace(",DC=", ".").Replace("DC=", "");
                     ConnectionCredentials = $accountCredentials
-                    IncludedOUs = $inclOUs
-                    ExcludedOUs = $exclOUs
-                    Server = $null
-                    Port = $params.Port
-                    UseSSL = $useSSL
-                    UseDisabledFilter = $useDisabledFilter
-                    ConnectionType = $connection.Type -replace "Import",""
-                    Force = $params.Force
-                    Ensure = "Present"
+                    IncludedOUs           = $inclOUs
+                    ExcludedOUs           = $exclOUs
+                    Server                = $null
+                    Port                  = $params.Port
+                    UseSSL                = $useSSL
+                    UseDisabledFilter     = $useDisabledFilter
+                    ConnectionType        = $connection.Type -replace "Import",""
+                    Force                 = $params.Force
+                    Ensure                = "Present"
                 }
             }
 
@@ -197,19 +197,19 @@ function Get-TargetResource
             }
 
             return @{
-                UserProfileService = $params.UserProfileService
-                Forest = $connection.Server
-                Name = $params.Name
+                Name                  = $params.Name
+                UserProfileService    = $params.UserProfileService
+                Forest                = $connection.Server
                 ConnectionCredentials = $accountCredentials
-                IncludedOUs = $inclOUs
-                ExcludedOUs = $exclOUs
-                Server = $domainController
-                UseSSL = $connection.UseSSL
-                UseDisabledFilter = $connection.UseDisabledFilter
-                Port = $params.Port
-                ConnectionType = $connection.Type.ToString()
-                Force = $params.Force
-                Ensure = "Present"
+                IncludedOUs           = $inclOUs
+                ExcludedOUs           = $exclOUs
+                Server                = $domainController
+                UseSSL                = $connection.UseSSL
+                UseDisabledFilter     = $connection.UseDisabledFilter
+                Port                  = $params.Port
+                ConnectionType        = $connection.Type.ToString()
+                Force                 = $params.Force
+                Ensure                = "Present"
             }
         }
     }
@@ -600,11 +600,6 @@ function Test-TargetResource
 
     Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
     Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
-
-    if ($null -eq $CurrentValues.UserProfileService)
-    {
-        return $false
-    }
 
     $installedVersion = Get-SPDscInstalledProductVersion
     $valuesToCheck = @("Forest",

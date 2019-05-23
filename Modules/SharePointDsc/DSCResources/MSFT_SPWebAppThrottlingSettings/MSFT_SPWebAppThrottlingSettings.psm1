@@ -67,7 +67,20 @@ function Get-TargetResource
         $wa = Get-SPWebApplication -Identity $params.WebAppUrl -ErrorAction SilentlyContinue
         if ($null -eq $wa)
         {
-            return $null
+            return @{
+                WebAppUrl                 = $null
+                ListViewThreshold         = $null
+                AllowObjectModelOverride  = $null
+                AdminThreshold            = $null
+                ListViewLookupThreshold   = $null
+                HappyHourEnabled          = $null
+                HappyHour                 = $null
+                UniquePermissionThreshold = $null
+                RequestThrottling         = $null
+                ChangeLogEnabled          = $null
+                ChangeLogExpiryDays       = $null
+                EventHandlersEnabled      = $null
+            }
         }
 
         $relPath = "..\..\Modules\SharePointDsc.WebApplication\SPWebApplication.Throttling.psm1"
@@ -151,7 +164,6 @@ function Set-TargetResource
         if ($null -eq $wa)
         {
             throw "Web application $($params.WebAppUrl) was not found"
-            return
         }
 
         $relPath = "..\..\Modules\SharePointDsc.WebApplication\SPWebApplication.Throttling.psm1"
@@ -236,11 +248,6 @@ function Test-TargetResource
 
     Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
     Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
-
-    if ($null -eq $CurrentValues)
-    {
-        return $false
-    }
 
     $relPath = "..\..\Modules\SharePointDsc.WebApplication\SPWebApplication.Throttling.psm1"
     Import-Module -Name (Join-Path -Path $PSScriptRoot -ChildPath $relPath -Resolve)

@@ -51,7 +51,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             It "Should return null from the get method" {
-                Get-TargetResource @testParams | Should BeNullOrEmpty
+                (Get-TargetResource @testParams).LogPath | Should BeNullOrEmpty
             }
 
             It "Should return false from the test method" {

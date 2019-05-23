@@ -32,18 +32,26 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting web app policy for $WebAppUrl"
 
+    $nullReturn = @{
+        WebAppUrl              = $null
+        Members                = $null
+        MembersToInclude       = $null
+        MembersToExclude       = $null
+        SetCacheAccountsPolicy = $null
+    }
+
     if ($Members -and (($MembersToInclude) -or ($MembersToExclude)))
     {
         Write-Verbose -Message ("Cannot use the Members parameter together with " + `
                                "the MembersToInclude or MembersToExclude parameters")
-        return $null
+        return $nullReturn
     }
 
     if (!$Members -and !$MembersToInclude -and !$MembersToExclude)
     {
         Write-Verbose -Message ("At least one of the following parameters must be specified: " + `
                                "Members, MembersToInclude, MembersToExclude")
-        return $null
+        return $nullReturn
     }
 
     foreach ($member in $Members)
@@ -53,7 +61,7 @@ function Get-TargetResource
         {
             Write-Verbose -Message ("Members Parameter: You cannot specify ActAsSystemAccount " + `
                                    "with any other permission than Full Control")
-            return $null
+            return $nullReturn
         }
     }
 
@@ -65,7 +73,7 @@ function Get-TargetResource
             Write-Verbose -Message ("MembersToInclude Parameter: You cannot specify " + `
                                     "ActAsSystemAccount with any other permission than Full " + `
                                     "Control")
-            return $null
+            return $nullReturn
         }
     }
 
@@ -74,12 +82,20 @@ function Get-TargetResource
                                   -ScriptBlock {
         $params = $args[0]
 
+        $nullReturn = @{
+            WebAppUrl              = $null
+            Members                = $null
+            MembersToInclude       = $null
+            MembersToExclude       = $null
+            SetCacheAccountsPolicy = $null
+        }
+
         $wa = Get-SPWebApplication -Identity $params.WebAppUrl `
                                    -ErrorAction SilentlyContinue
 
         if ($null -eq $wa)
         {
-            return $null
+            return $nullReturn
         }
 
         $SetCacheAccountsPolicy = $false
@@ -252,7 +268,7 @@ function Set-TargetResource
     $modulePath = "..\..\Modules\SharePointDsc.WebAppPolicy\SPWebAppPolicy.psm1"
     Import-Module -Name (Join-Path -Path $PSScriptRoot -ChildPath $modulePath -Resolve)
 
-    if ($null -eq $CurrentValues)
+    if ($null -eq $CurrentValues.WebAppUrl)
     {
         throw "Web application does not exist"
     }
@@ -617,7 +633,7 @@ function Test-TargetResource
     $modulePath = "..\..\Modules\SharePointDsc.WebAppPolicy\SPWebAppPolicy.psm1"
     Import-Module -Name (Join-Path -Path $PSScriptRoot -ChildPath $modulePath -Resolve)
 
-    if ($null -eq $CurrentValues)
+    if ($null -eq $CurrentValues.WebAppUrl)
     {
         return $false
     }

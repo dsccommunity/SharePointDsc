@@ -37,6 +37,15 @@ function Get-TargetResource
                                   -ScriptBlock {
         $params = $args[0]
 
+        $nullReturn = @{
+            # Set the Site Use and Deletion settings
+            WebAppUrl                                = $params.WebAppUrl
+            SendUnusedSiteCollectionNotifications    = $null
+            UnusedSiteNotificationPeriod             = $null
+            AutomaticallyDeleteUnusedSiteCollections = $null
+            UnusedSiteNotificationsBeforeDeletion    = $null
+        }
+
         try
         {
             $null = Get-SPFarm
@@ -45,24 +54,24 @@ function Get-TargetResource
         {
             Write-Verbose -Message ("No local SharePoint farm was detected. Site Use and " + `
                                     "Deletion settings will not be applied")
-            return $null
+            return $nullReturn
         }
 
         $wa = Get-SPWebApplication -Identity $params.WebAppUrl `
                                    -ErrorAction SilentlyContinue
         if ($null -eq $wa)
         {
-            return $null
+            return $nullReturn
         }
 
         return @{
             # Set the Site Use and Deletion settings
-            WebAppUrl = $params.WebAppUrl
-            SendUnusedSiteCollectionNotifications = $wa.SendUnusedSiteCollectionNotifications
-            UnusedSiteNotificationPeriod = $wa.UnusedSiteNotificationPeriod.TotalDays
+            WebAppUrl                                = $params.WebAppUrl
+            SendUnusedSiteCollectionNotifications    = $wa.SendUnusedSiteCollectionNotifications
+            UnusedSiteNotificationPeriod             = $wa.UnusedSiteNotificationPeriod.TotalDays
             AutomaticallyDeleteUnusedSiteCollections = $wa.AutomaticallyDeleteUnusedSiteCollections
-            UnusedSiteNotificationsBeforeDeletion = $wa.UnusedSiteNotificationsBeforeDeletion
-            InstallAccount = $params.InstallAccount
+            UnusedSiteNotificationsBeforeDeletion    = $wa.UnusedSiteNotificationsBeforeDeletion
+            InstallAccount                           = $params.InstallAccount
         }
     }
 
@@ -226,11 +235,6 @@ function Test-TargetResource
 
     Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
     Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
-
-    if ($null -eq $CurrentValues)
-    {
-        return $false
-    }
 
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
                                     -DesiredValues $PSBoundParameters

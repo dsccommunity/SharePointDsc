@@ -28,7 +28,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             Mock -CommandName Get-SPwebapplication -MockWith { return $null }
 
             It "Should return null from the get method" {
-                Get-TargetResource @testParams | Should BeNullOrEmpty
+                (Get-TargetResource @testParams).Members | Should BeNullOrEmpty
             }
 
             It "Should return false from the test method" {
@@ -46,7 +46,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Members = @("Demo\User1", "Demo\User2")
             }
 
-            Mock -CommandName Get-SPwebapplication -MockWith {
+            Mock -CommandName Get-SPWebApplication -MockWith {
                 return @{
                     IsAdministrationWebApplication = $true
                     Url = "http://admin.shareopoint.contoso.local"
@@ -70,7 +70,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             It "Should return values from the get method" {
-                Get-TargetResource @testParams | Should Not BeNullOrEmpty
+                (Get-TargetResource @testParams).Members.Count | Should Be 2
             }
 
             It "Should return true from the test method" {
@@ -84,7 +84,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Members = @("Demo\User1", "Demo\User2")
             }
 
-            Mock -CommandName Get-SPwebapplication -MockWith {
+            Mock -CommandName Get-SPWebApplication -MockWith {
                 return @{
                     IsAdministrationWebApplication = $true
                     Url = "http://admin.shareopoint.contoso.local"
@@ -126,7 +126,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             It "Should return values from the get method" {
-                Get-TargetResource @testParams | Should Not BeNullOrEmpty
+                (Get-TargetResource @testParams).Members.Count | Should Be 1
             }
 
             It "Should return false from the test method" {
@@ -184,7 +184,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             It "Should return values from the get method" {
-                Get-TargetResource @testParams | Should Not BeNullOrEmpty
+                (Get-TargetResource @testParams).Members.Count | Should Be 2
             }
 
             It "Should return true from the test method" {
@@ -235,7 +235,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             It "Should return values from the get method" {
-                Get-TargetResource @testParams | Should Not BeNullOrEmpty
+                (Get-TargetResource @testParams).Members.Count | Should Be 1
             }
 
             It "Should return true from the test method" {
@@ -293,7 +293,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             It "Should return values from the get method" {
-                Get-TargetResource @testParams | Should Not BeNullOrEmpty
+                (Get-TargetResource @testParams).Members.Count | Should Be 2
             }
 
             It "Should return false from the test method" {
@@ -345,7 +345,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             It "Should return values from the get method" {
-                Get-TargetResource @testParams | Should Not BeNullOrEmpty
+                (Get-TargetResource @testParams).Members.Count | Should Be 1
             }
 
             It "Should return true from the test method" {

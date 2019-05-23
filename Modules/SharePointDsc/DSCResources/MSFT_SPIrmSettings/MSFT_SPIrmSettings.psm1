@@ -36,18 +36,18 @@ function Get-TargetResource
 
         try
         {
-            $spFarm = Get-SPFarm
+            $null = Get-SPFarm
         }
         catch
         {
             Write-Verbose -Message ("No local SharePoint farm was detected. IRM settings " + `
                                     "will not be applied")
             return @{
-                    IsSingleInstance = "Yes"
-                    Ensure = "Absent"
-                    UseADRMS =  $UseADRMS
-                    RMSserver = $RMSserver
-                   }
+                IsSingleInstance = "Yes"
+                Ensure           = "Absent"
+                UseADRMS         = $UseADRMS
+                RMSserver        = $RMSserver
+            }
         }
 
         # Get a reference to the Administration WebService
@@ -64,12 +64,13 @@ function Get-TargetResource
 
         return @{
             IsSingleInstance = "Yes"
-            Ensure = $Ensure
-            UseADRMS =  $admService.IrmSettings.IrmRMSUseAD
-            RMSserver = $admService.IrmSettings.IrmRMSCertServer
+            Ensure           = $Ensure
+            UseADRMS         = $admService.IrmSettings.IrmRMSUseAD
+            RMSserver        = $admService.IrmSettings.IrmRMSCertServer
         }
    }
-   return $Result
+
+   return $result
 }
 
 function Set-TargetResource
@@ -109,7 +110,7 @@ function Set-TargetResource
 
         try
         {
-            $spFarm = Get-SPFarm
+            $null = Get-SPFarm
         }
         catch
         {
@@ -180,11 +181,6 @@ function Test-TargetResource
 
     Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
     Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
-
-    if ($null -eq $CurrentValues)
-    {
-        return $false
-    }
 
     if ($UseADRMS -ne $true)
     {

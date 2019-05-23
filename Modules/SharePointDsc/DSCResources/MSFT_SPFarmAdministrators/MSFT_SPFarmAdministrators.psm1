@@ -45,6 +45,13 @@ function Get-TargetResource
                                   -ScriptBlock {
         $params = $args[0]
 
+        $nullReturn = @{
+            IsSingleInstance = "Yes"
+            Members          = $null
+            MembersToInclude = $null
+            MembersToExclude = $null
+        }
+
         $webApps = Get-SPwebapplication -IncludeCentralAdministration
         $caWebapp = $webApps | Where-Object -FilterScript {
             $_.IsAdministrationWebApplication
@@ -53,11 +60,12 @@ function Get-TargetResource
         if ($null -eq $caWebapp)
         {
             Write-Verbose "Unable to locate central administration website"
-            return $null
+            return $nullReturn
         }
-        $caWeb = Get-SPweb($caWebapp.Url)
+        $caWeb = Get-SPWeb($caWebapp.Url)
         $farmAdminGroup = $caWeb.AssociatedOwnerGroup
         $farmAdministratorsGroup = $caWeb.SiteGroups.GetByName($farmAdminGroup)
+
         return @{
             IsSingleInstance = "Yes"
             Members          = $farmAdministratorsGroup.users.UserLogin
@@ -112,7 +120,7 @@ function Set-TargetResource
     }
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
-    if ($null -eq $CurrentValues)
+    if ($null -eq $CurrentValues.Members)
     {
         throw "Unable to locate central administration website"
     }
@@ -277,7 +285,7 @@ function Test-TargetResource
     Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
     Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
 
-    if ($null -eq $CurrentValues)
+    if ($null -eq $CurrentValues.Members)
     {
         return $false
     }
@@ -346,12 +354,12 @@ function Merge-SPDscFarmAdminList
         $changeUsers
     )
 
-    $result = Invoke-SPDscCommand -Credential $InstallAccount `
-                                  -Arguments $changeUsers `
-                                  -ScriptBlock {
+    $null = Invoke-SPDscCommand -Credential $InstallAccount `
+                                -Arguments $changeUsers `
+                                -ScriptBlock {
         $changeUsers = $args[0]
 
-        $webApps = Get-SPwebapplication -IncludeCentralAdministration
+        $webApps = Get-SPWebApplication -IncludeCentralAdministration
         $caWebapp = $webApps | Where-Object -FilterScript {
             $_.IsAdministrationWebApplication
         }
@@ -359,7 +367,7 @@ function Merge-SPDscFarmAdminList
         {
             throw "Unable to locate central administration website"
         }
-        $caWeb = Get-SPweb($caWebapp.Url)
+        $caWeb = Get-SPWeb($caWebapp.Url)
         $farmAdminGroup = $caWeb.AssociatedOwnerGroup
 
         if ($changeUsers.ContainsKey("Add"))

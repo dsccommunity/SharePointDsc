@@ -38,15 +38,24 @@ function Get-TargetResource
                                   -ScriptBlock {
         $params = $args[0]
 
+        $nullReturn = @{
+            # Set the Health Analyzer Rule settings
+            Name             = $null
+            Enabled          = $null
+            RuleScope        = $null
+            Schedule         = $null
+            FixAutomatically = $null
+        }
+
         try
         {
-            $spFarm = Get-SPFarm
+            $null = Get-SPFarm
         }
         catch
         {
             Write-Verbose -Message ("No local SharePoint farm was detected. Health " + `
                                     "Analyzer Rule settings will not be applied")
-            return $null
+            return $nullReturn
         }
 
         $caWebapp = Get-SPwebapplication -IncludeCentralAdministration `
@@ -57,7 +66,7 @@ function Get-TargetResource
         if ($null -eq $caWebapp)
         {
             Write-Verbose -Message "Unable to locate central administration website"
-            return $null
+            return $nullReturn
         }
 
         # Get CA SPWeb
@@ -99,13 +108,13 @@ function Get-TargetResource
             {
                 Write-Verbose -Message ("Unable to find specified Health Analyzer Rule. Make " + `
                                         "sure any related service applications exists.")
-                return $null
+                return $nullReturn
             }
         }
         else
         {
             Write-Verbose -Message "Unable to locate Health Analyzer Rules list"
-            return $null
+            return $nullReturn
         }
     }
     return $result
@@ -153,13 +162,12 @@ function Set-TargetResource
 
         try
         {
-            $spFarm = Get-SPFarm
+            $null = Get-SPFarm
         }
         catch
         {
             throw ("No local SharePoint farm was detected. Health Analyzer Rule " + `
                    "settings will not be applied")
-            return
         }
 
         $caWebapp = Get-SPwebapplication -IncludeCentralAdministration `
@@ -171,7 +179,6 @@ function Set-TargetResource
         {
             throw ("No Central Admin web application was found. Health Analyzer Rule " + `
                    "settings will not be applied")
-            return
         }
 
         # Get Central Admin SPWeb
@@ -212,14 +219,12 @@ function Set-TargetResource
                 throw ("Could not find specified Health Analyzer Rule. Health Analyzer Rule " + `
                        "settings will not be applied. Make sure any related service " + `
                        "applications exists")
-                return
             }
         }
         else
         {
             throw ("Could not find Health Analyzer Rules list. Health Analyzer Rule settings " + `
                    "will not be applied")
-            return
         }
     }
 }
@@ -265,10 +270,10 @@ function Test-TargetResource
     Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
     Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
 
-    if ($null -eq $CurrentValues)
+<#    if ($null -eq $CurrentValues.Name)
     {
         return $false
-    }
+    }#>
 
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
                                     -DesiredValues $PSBoundParameters

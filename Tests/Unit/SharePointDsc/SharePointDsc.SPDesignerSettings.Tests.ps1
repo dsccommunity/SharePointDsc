@@ -42,7 +42,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             It "Should return null from the get method" {
-                Get-TargetResource @testParams | Should Be $null
+                (Get-TargetResource @testParams).AllowSharePointDesigner | Should Be $null
             }
 
             It "Should return false from the test method" {
@@ -91,7 +91,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             It "Should return values from the get method" {
-                Get-TargetResource @testParams | Should Not BeNullOrEmpty
+                (Get-TargetResource @testParams).AllowSharePointDesigner | Should Be $true
             }
 
             It "Should return false from the test method" {
@@ -134,7 +134,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             Mock -CommandName Test-SPDscRunAsCredential { return $true }
 
             It "Should return values from the get method" {
-                Get-TargetResource @testParams | Should Not BeNullOrEmpty
+                (Get-TargetResource @testParams).AllowSharePointDesigner | Should Be $true
             }
 
             It "Should return false from the test method" {
@@ -226,7 +226,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             It "Should return values from the get method" {
-                Get-TargetResource @testParams | Should Not BeNullOrEmpty
+                (Get-TargetResource @testParams).AllowSharePointDesigner | Should Be $false
             }
 
             It "Should return true from the test method" {
@@ -267,7 +267,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             Mock -CommandName Test-SPDscRunAsCredential -MockWith { return $true }
 
             It "Should return values from the get method" {
-                Get-TargetResource @testParams | Should Not BeNullOrEmpty
+                (Get-TargetResource @testParams).AllowSharePointDesigner | Should Be $false
             }
 
             It "Should return true from the test method" {

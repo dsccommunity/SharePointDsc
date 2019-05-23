@@ -5,6 +5,14 @@
 * SharePointDsc generic
   * Improved logging in all resource. They are now outputting
     the current and targeted values in the Test method.
+  * Updated the following resources to not return Null from the Get
+    method anymore, but an hashtable which a null values:
+    SPDesignerSettings, SPDiagnosticLoggingSettings, SPFarmAdministrators,
+    SPHealthAnalyzerRuleState, SPIrmSettings, SPOutgoingEmailSettings,
+    SPPasswordChangeSettings, SPSearchTopology, SPTimerJobState,
+    SPUserProfileSection, SPUserProfileSyncConnection, SPWebAppBlockedFileTypes,
+    SPWebApplicationAppDomain, SPWebAppPolicy, SPWebAppSiteUseAndDeletion,
+    SPWebAppThrottlingSettings, SPWordAutomationServiceApp
 * SPConfigWizard
   * Added check to make sure the Config Wizard is only executed when all
     servers have the binaries installed.

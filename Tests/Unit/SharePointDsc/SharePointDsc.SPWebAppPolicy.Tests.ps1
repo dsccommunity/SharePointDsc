@@ -70,8 +70,8 @@ namespace Microsoft.SharePoint.Administration {
 
             Mock -CommandName Get-SPWebapplication -MockWith { return $null }
 
-            It "Should return null from the get method" {
-                Get-TargetResource @testParams | Should BeNullOrEmpty
+            It "Should return WebAppUrl=null from the get method" {
+                (Get-TargetResource @testParams).WebAppUrl | Should BeNullOrEmpty
             }
 
             It "Should return false from the test method" {
@@ -102,8 +102,8 @@ namespace Microsoft.SharePoint.Administration {
                 )
             }
 
-            It "Should return null from the get method" {
-                Get-TargetResource @testParams | Should BeNullOrEmpty
+            It "Should return WebAppUrl=null from the get method" {
+                (Get-TargetResource @testParams).WebAppUrl | Should BeNullOrEmpty
             }
 
             It "Should return false from the test method" {
@@ -120,8 +120,8 @@ namespace Microsoft.SharePoint.Administration {
                 WebAppUrl   = "http://sharepoint.contoso.com"
             }
 
-            It "Should return null from the get method" {
-                Get-TargetResource @testParams | Should BeNullOrEmpty
+            It "Should return WebAppUrl=null from the get method" {
+                (Get-TargetResource @testParams).WebAppUrl | Should BeNullOrEmpty
             }
 
             It "Should return false from the test method" {
@@ -145,8 +145,8 @@ namespace Microsoft.SharePoint.Administration {
                 )
             }
 
-            It "Should return null from the get method" {
-                Get-TargetResource @testParams | Should BeNullOrEmpty
+            It "Should return WebAppUrl=null from the get method" {
+                (Get-TargetResource @testParams).WebAppUrl | Should BeNullOrEmpty
             }
 
             It "Should return false from the test method" {
@@ -170,8 +170,8 @@ namespace Microsoft.SharePoint.Administration {
                 )
             }
 
-            It "Should return null from the get method" {
-                Get-TargetResource @testParams | Should BeNullOrEmpty
+            It "Should return WebAppUrl=null from the get method" {
+                (Get-TargetResource @testParams).WebAppUrl | Should BeNullOrEmpty
             }
 
             It "Should return false from the test method" {
@@ -243,8 +243,8 @@ namespace Microsoft.SharePoint.Administration {
                 return @($webApp)
             }
 
-            It "Should return null from the get method" {
-                Get-TargetResource @testParams | Should Not BeNullOrEmpty
+            It "Should return a set of 1 Members from the get method" {
+                (Get-TargetResource @testParams).Members.Count | Should Be 1
             }
 
             It "Should return false from the test method" {
@@ -318,8 +318,8 @@ namespace Microsoft.SharePoint.Administration {
                 return @($webApp)
             }
 
-            It "Should return null from the get method" {
-                Get-TargetResource @testParams | Should Not BeNullOrEmpty
+            It "Should return a set of 1 Members from the get method" {
+                (Get-TargetResource @testParams).Members.Count | Should Be 1
             }
 
             It "Should return false from the test method" {
@@ -391,8 +391,8 @@ namespace Microsoft.SharePoint.Administration {
                 return @($webApp)
             }
 
-            It "Should return null from the get method" {
-                Get-TargetResource @testParams | Should Not BeNullOrEmpty
+            It "Should return a set of 1 Members from the get method" {
+                (Get-TargetResource @testParams).Members.Count | Should Be 1
             }
 
             It "Should throw exception in the test method" {
@@ -462,8 +462,8 @@ namespace Microsoft.SharePoint.Administration {
                 return @($webApp)
             }
 
-            It "Should return null from the get method" {
-                Get-TargetResource @testParams | Should Not BeNullOrEmpty
+            It "Should return a set of 1 Members from the get method" {
+                (Get-TargetResource @testParams).Members.Count | Should Be 1
             }
 
             It "Should throw exception in the test method" {
@@ -554,8 +554,8 @@ namespace Microsoft.SharePoint.Administration {
                 return @($webApp)
             }
 
-            It "Should return null from the get method" {
-                Get-TargetResource @testParams | Should Not BeNullOrEmpty
+            It "Should return a set of 3 Members from the get method" {
+                (Get-TargetResource @testParams).Members.Count | Should Be 3
             }
 
             It "Should return true from the test method" {
@@ -643,8 +643,8 @@ namespace Microsoft.SharePoint.Administration {
                 return @($webApp)
             }
 
-            It "Should return null from the get method" {
-                Get-TargetResource @testParams | Should Not BeNullOrEmpty
+            It "Should return a set of 3 Members from the get method" {
+                (Get-TargetResource @testParams).Members.Count | Should Be 3
             }
 
             It "Should return false from the test method" {
@@ -731,8 +731,8 @@ namespace Microsoft.SharePoint.Administration {
                 return @($webApp)
             }
 
-            It "Should return null from the get method" {
-                Get-TargetResource @testParams | Should Not BeNullOrEmpty
+            It "Should return a set of 3 Members from the get method" {
+                (Get-TargetResource @testParams).Members.Count | Should Be 3
             }
 
             It "Should throw exception in the test method" {
@@ -804,8 +804,8 @@ namespace Microsoft.SharePoint.Administration {
                 return @($webApp)
             }
 
-            It "Should return null from the get method" {
-                Get-TargetResource @testParams | Should Not BeNullOrEmpty
+            It "Should return a set of 1 Members from the get method" {
+                (Get-TargetResource @testParams).Members.Count | Should Be 1
             }
 
             It "Should return false from the set method" {
@@ -869,8 +869,8 @@ namespace Microsoft.SharePoint.Administration {
                 return @($webApp)
             }
 
-            It "Should return null from the get method" {
-                Get-TargetResource @testParams | Should Not BeNullOrEmpty
+            It "Should return a set of 2 Members from the get method" {
+                (Get-TargetResource @testParams).Members.Count | Should Be 2
             }
 
             It "Should return false from the test method" {
@@ -944,8 +944,8 @@ namespace Microsoft.SharePoint.Administration {
                 return @($webApp)
             }
 
-            It "Should return null from the get method" {
-                Get-TargetResource @testParams | Should Not BeNullOrEmpty
+            It "Should return a set of 1 Members from the get method" {
+                (Get-TargetResource @testParams).Members.Count | Should Be 1
             }
 
             It "Should return false from the test method" {
@@ -1003,10 +1003,8 @@ namespace Microsoft.SharePoint.Administration {
                 return @($webApp)
             }
 
-
-
-            It "Should return null from the get method" {
-                Get-TargetResource @testParams | Should Not BeNullOrEmpty
+            It "Should return a set of 2 Members from the get method" {
+                (Get-TargetResource @testParams).Members.Count | Should Be 2
             }
 
             It "Should return false from the test method" {
@@ -1062,8 +1060,8 @@ namespace Microsoft.SharePoint.Administration {
                 return @($webApp)
             }
 
-            It "Should return null from the get method" {
-                Get-TargetResource @testParams | Should Not BeNullOrEmpty
+            It "Should return a set of 2 Members from the get method" {
+                (Get-TargetResource @testParams).Members.Count | Should Be 2
             }
 
             It "Should return false from the test method" {
@@ -1134,8 +1132,8 @@ namespace Microsoft.SharePoint.Administration {
                 return @($webApp)
             }
 
-            It "Should return null from the get method" {
-                Get-TargetResource @testParams | Should Not BeNullOrEmpty
+            It "Should return a set of 1 Members from the get method" {
+                (Get-TargetResource @testParams).Members.Count | Should Be 1
             }
 
             It "Should return false from the test method" {
@@ -1206,8 +1204,8 @@ namespace Microsoft.SharePoint.Administration {
                 return @($webApp)
             }
 
-            It "Should return null from the get method" {
-                Get-TargetResource @testParams | Should Not BeNullOrEmpty
+            It "Should return a set of 1 Members from the get method" {
+                (Get-TargetResource @testParams).Members.Count | Should Be 1
             }
 
             It "Should return false from the test method" {
@@ -1278,8 +1276,8 @@ namespace Microsoft.SharePoint.Administration {
                 return @($webApp)
             }
 
-            It "Should return null from the get method" {
-                Get-TargetResource @testParams | Should Not BeNullOrEmpty
+            It "Should return a set of 1 Members from the get method" {
+                (Get-TargetResource @testParams).Members.Count | Should Be 1
             }
 
             It "Should return false from the test method" {
@@ -1350,8 +1348,8 @@ namespace Microsoft.SharePoint.Administration {
                 return @($webApp)
             }
 
-            It "Should return null from the get method" {
-                Get-TargetResource @testParams | Should Not BeNullOrEmpty
+            It "Should return a set of 1 Members from the get method" {
+                (Get-TargetResource @testParams).Members.Count | Should Be 1
             }
 
             It "Should return false from the test method" {
@@ -1404,8 +1402,8 @@ namespace Microsoft.SharePoint.Administration {
                 return @($webApp)
             }
 
-            It "Should return null from the get method" {
-                Get-TargetResource @testParams | Should Not BeNullOrEmpty
+            It "Should return a set of 1 Members from the get method" {
+                (Get-TargetResource @testParams).Members.Count | Should Be 1
             }
 
             It "Should return false from the test method" {
@@ -1452,8 +1450,8 @@ namespace Microsoft.SharePoint.Administration {
                 return @($webApp)
             }
 
-            It "Should return null from the get method" {
-                Get-TargetResource @testParams | Should Not BeNullOrEmpty
+            It "Should return a set of 1 Members from the get method" {
+                (Get-TargetResource @testParams).Members.Count | Should Be 1
             }
 
             It "Should return false from the test method" {
@@ -1499,8 +1497,8 @@ namespace Microsoft.SharePoint.Administration {
                 return @($webApp)
             }
 
-            It "Should return null from the get method" {
-                Get-TargetResource @testParams | Should Not BeNullOrEmpty
+            It "Should return a set of 1 Members from the get method" {
+                (Get-TargetResource @testParams).Members.Count | Should Be 1
             }
 
             It "Should return false from the test method" {
@@ -1544,8 +1542,8 @@ namespace Microsoft.SharePoint.Administration {
                 return @($webApp)
             }
 
-            It "Should return null from the get method" {
-                Get-TargetResource @testParams | Should Not BeNullOrEmpty
+            It "Should return a set of 1 Members from the get method" {
+                (Get-TargetResource @testParams).Members.Count | Should Be 1
             }
 
             It "Should return false from the test method" {
@@ -1595,8 +1593,8 @@ namespace Microsoft.SharePoint.Administration {
                 return "contoso\group1"
             }
 
-            It "Should return null from the get method" {
-                Get-TargetResource @testParams | Should Not BeNullOrEmpty
+            It "Should return a set of 1 Members from the get method" {
+                (Get-TargetResource @testParams).Members.Count | Should Be 1
             }
 
             It "Should return false from the test method" {

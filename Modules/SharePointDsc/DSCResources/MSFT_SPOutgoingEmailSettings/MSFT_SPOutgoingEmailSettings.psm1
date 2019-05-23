@@ -40,14 +40,14 @@ function Get-TargetResource
     Write-Verbose -Message "Getting outgoing email settings configuration for $WebAppUrl"
 
     $installedVersion = Get-SPDscInstalledProductVersion
-    if (($PSBoundParameters.ContainsKey("UseTLS") -eq $true) `
-        -and $installedVersion.FileMajorPart -ne 16)
+    if (($PSBoundParameters.ContainsKey("UseTLS") -eq $true) -and `
+        $installedVersion.FileMajorPart -ne 16)
     {
         throw [Exception] "UseTLS is only supported in SharePoint 2016 and SharePoint 2019."
     }
 
-    if (($PSBoundParameters.ContainsKey("SMTPPort") -eq $true) `
-        -and $installedVersion.FileMajorPart -ne 16)
+    if (($PSBoundParameters.ContainsKey("SMTPPort") -eq $true) -and `
+        $installedVersion.FileMajorPart -ne 16)
     {
         throw [Exception] "SMTPPort is only supported in SharePoint 2016 and SharePoint 2019."
     }
@@ -62,7 +62,15 @@ function Get-TargetResource
 
         if ($null -eq $webApp)
         {
-            return $null
+            return @{
+                WebAppUrl      = $null
+                SMTPServer     = $null
+                FromAddress    = $null
+                ReplyToAddress = $null
+                CharacterSet   = $null
+                UseTLS         = $null
+                SMTPPort       = $null
+            }
         }
 
         $mailServer = $null
@@ -72,15 +80,16 @@ function Get-TargetResource
         }
 
         return @{
-            WebAppUrl = $webApp.Url
-            SMTPServer= $mailServer
-            FromAddress= $webApp.OutboundMailSenderAddress
-            ReplyToAddress= $webApp.OutboundMailReplyToAddress
-            CharacterSet = $webApp.OutboundMailCodePage
-            UseTLS = $webApp.OutboundMailEnableSsl
-            SMTPPort = $webApp.OutboundMailPort
+            WebAppUrl      = $webApp.Url
+            SMTPServer     = $mailServer
+            FromAddress    = $webApp.OutboundMailSenderAddress
+            ReplyToAddress = $webApp.OutboundMailReplyToAddress
+            CharacterSet   = $webApp.OutboundMailCodePage
+            UseTLS         = $webApp.OutboundMailEnableSsl
+            SMTPPort       = $webApp.OutboundMailPort
         }
     }
+
     return $result
 }
 
@@ -125,14 +134,14 @@ function Set-TargetResource
     Write-Verbose -Message "Setting outgoing email settings configuration for $WebAppUrl"
 
     $installedVersion = Get-SPDscInstalledProductVersion
-    if (($PSBoundParameters.ContainsKey("UseTLS") -eq $true) `
-        -and $installedVersion.FileMajorPart -lt 16)
+    if (($PSBoundParameters.ContainsKey("UseTLS") -eq $true) -and `
+        $installedVersion.FileMajorPart -lt 16)
     {
         throw [Exception] "UseTLS is only supported in SharePoint 2016 and SharePoint 2019."
     }
 
-    if (($PSBoundParameters.ContainsKey("SMTPPort") -eq $true) `
-        -and $installedVersion.FileMajorPart -lt 16)
+    if (($PSBoundParameters.ContainsKey("SMTPPort") -eq $true) -and `
+        $installedVersion.FileMajorPart -lt 16)
     {
         throw [Exception] "SMTPPort is only supported in SharePoint 2016 and SharePoint 2019."
     }
@@ -143,7 +152,7 @@ function Set-TargetResource
         $params = $args[0]
         $webApp = $null
 
-        Write-Verbose -Message "Retrieving $($params.WebAppUrl)  settings"
+        Write-Verbose -Message "Retrieving $($params.WebAppUrl) settings"
 
         $webApp = Get-SPWebApplication $params.WebAppUrl -IncludeCentralAdministration
         if ($null -eq $webApp)
@@ -239,11 +248,6 @@ function Test-TargetResource
 
     Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
     Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
-
-    if ($null -eq $CurrentValues)
-    {
-        return $false
-    }
 
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
                                     -DesiredValues $PSBoundParameters `

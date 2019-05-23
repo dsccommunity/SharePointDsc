@@ -97,6 +97,7 @@ function Get-TargetResource
         }
         return $returnval
     }
+
     return $result
 }
 
@@ -146,7 +147,6 @@ function Set-TargetResource
         catch
         {
             throw "No local SharePoint farm was detected. Timer job settings will not be applied"
-            return $null
         }
 
         Write-Verbose -Message "Start update"
@@ -342,11 +342,6 @@ function Test-TargetResource
 
     Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
     Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
-
-    if ($null -eq $CurrentValues)
-    {
-        return $false
-    }
 
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
                                     -DesiredValues $PSBoundParameters

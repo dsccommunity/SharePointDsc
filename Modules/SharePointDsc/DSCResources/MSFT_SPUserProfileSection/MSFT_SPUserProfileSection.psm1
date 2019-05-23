@@ -40,8 +40,8 @@ function Get-TargetResource
         $upsa = Get-SPServiceApplication -Name $params.UserProfileService `
                                          -ErrorAction SilentlyContinue
         $nullReturn = @{
-            Name = $params.Name
-            Ensure = "Absent"
+            Name               = $params.Name
+            Ensure             = "Absent"
             UserProfileService = $params.UserProfileService
         }
 
@@ -65,14 +65,14 @@ function Get-TargetResource
         }
 
         return @{
-            Name = $userProfileProperty.Name
+            Name               = $userProfileProperty.Name
             UserProfileService = $params.UserProfileService
-            DisplayName = $userProfileProperty.DisplayName
-            DisplayOrder =$userProfileProperty.DisplayOrder
-            Ensure = "Present"
+            DisplayName        = $userProfileProperty.DisplayName
+            DisplayOrder       = $userProfileProperty.DisplayOrder
+            Ensure             = "Present"
         }
-
     }
+
     return $result
 }
 
@@ -218,11 +218,6 @@ function Test-TargetResource
 
     Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
     Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
-
-    if ($null -eq $CurrentValues)
-    {
-        return $false
-    }
 
     if ($Ensure -eq "Present")
     {

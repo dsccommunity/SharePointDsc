@@ -96,23 +96,23 @@ function Get-TargetResource
 
     $PSBoundParameters.Ensure = $Ensure
 
-    if (($ApplicationPool `
-            -or $DatabaseName `
-            -or $DatabaseServer `
-            -or $SupportedFileFormats `
-            -or $DisableEmbeddedFonts `
-            -or $MaximumMemoryUsage `
-            -or $RecycleThreshold `
-            -or $DisableBinaryFileScan `
-            -or $ConversionProcesses `
-            -or $JobConversionFrequency `
-            -or $NumberOfConversionsPerProcess `
-            -or $TimeBeforeConversionIsMonitored `
-            -or $MaximumConversionAttempts `
-            -or $MaximumSyncConversionRequests `
-            -or $KeepAliveTimeout `
-            -or $MaximumConversionTime) `
-        -and ($Ensure -eq "Absent"))
+    if (($ApplicationPool -or `
+         $DatabaseName -or `
+         $DatabaseServer -or `
+         $SupportedFileFormats -or `
+         $DisableEmbeddedFonts -or `
+         $MaximumMemoryUsage -or `
+         $RecycleThreshold -or `
+         $DisableBinaryFileScan -or `
+         $ConversionProcesses -or `
+         $JobConversionFrequency -or `
+         $NumberOfConversionsPerProcess -or `
+         $TimeBeforeConversionIsMonitored -or `
+         $MaximumConversionAttempts -or `
+         $MaximumSyncConversionRequests -or `
+         $KeepAliveTimeout -or `
+         $MaximumConversionTime) -and `
+        ($Ensure -eq "Absent"))
     {
         throw "You cannot use any of the parameters when Ensure is specified as Absent"
     }
@@ -173,25 +173,25 @@ function Get-TargetResource
         }
 
         $returnVal =  @{
-            Name = $serviceApp.DisplayName
-            Ensure = "Present"
-            ApplicationPool = $serviceApp.ApplicationPool.Name
-            DatabaseName = $serviceApp.Database.Name
-            DatabaseServer = $serviceApp.Database.NormalizedDataSource
-            SupportedFileFormats = $supportedFileFormats
-            DisableEmbeddedFonts = $serviceApp.DisableEmbeddedFonts
-            MaximumMemoryUsage = $serviceApp.MaximumMemoryUsage
-            RecycleThreshold = $serviceApp.RecycleProcessThreshold
-            DisableBinaryFileScan = $serviceApp.DisableBinaryFileScan
-            ConversionProcesses = $serviceApp.TotalActiveProcesses
+            Name                   = $serviceApp.DisplayName
+            Ensure                 = "Present"
+            ApplicationPool        = $serviceApp.ApplicationPool.Name
+            DatabaseName           = $serviceApp.Database.Name
+            DatabaseServer         = $serviceApp.Database.NormalizedDataSource
+            SupportedFileFormats   = $supportedFileFormats
+            DisableEmbeddedFonts   = $serviceApp.DisableEmbeddedFonts
+            MaximumMemoryUsage     = $serviceApp.MaximumMemoryUsage
+            RecycleThreshold       = $serviceApp.RecycleProcessThreshold
+            DisableBinaryFileScan  = $serviceApp.DisableBinaryFileScan
+            ConversionProcesses    = $serviceApp.TotalActiveProcesses
             JobConversionFrequency = $serviceApp.TimerJobFrequency.TotalMinutes
-            NumberOfConversionsPerProcess = $serviceApp.ConversionsPerInstance
+            NumberOfConversionsPerProcess   = $serviceApp.ConversionsPerInstance
             TimeBeforeConversionIsMonitored = $serviceApp.ConversionTimeout.TotalMinutes
-            MaximumConversionAttempts = $serviceApp.MaximumConversionAttempts
-            MaximumSyncConversionRequests = $serviceApp.MaximumSyncConversionRequests
-            KeepAliveTimeout = $serviceApp.KeepAliveTimeout.TotalSeconds
-            MaximumConversionTime = $serviceApp.MaximumConversionTime.TotalSeconds
-            InstallAccount = $params.InstallAccount
+            MaximumConversionAttempts       = $serviceApp.MaximumConversionAttempts
+            MaximumSyncConversionRequests   = $serviceApp.MaximumSyncConversionRequests
+            KeepAliveTimeout       = $serviceApp.KeepAliveTimeout.TotalSeconds
+            MaximumConversionTime  = $serviceApp.MaximumConversionTime.TotalSeconds
+            InstallAccount         = $params.InstallAccount
         }
         return $returnVal
     }
@@ -294,23 +294,23 @@ function Set-TargetResource
 
     Write-Verbose -Message "Setting Word Automation service app '$Name'"
 
-    if (($ApplicationPool `
-            -or $DatabaseName `
-            -or $DatabaseServer `
-            -or $SupportedFileFormats `
-            -or $DisableEmbeddedFonts `
-            -or $MaximumMemoryUsage `
-            -or $RecycleThreshold `
-            -or $DisableBinaryFileScan `
-            -or $ConversionProcesses `
-            -or $JobConversionFrequency `
-            -or $NumberOfConversionsPerProcess `
-            -or $TimeBeforeConversionIsMonitored `
-            -or $MaximumConversionAttempts `
-            -or $MaximumSyncConversionRequests `
-            -or $KeepAliveTimeout `
-            -or $MaximumConversionTime) `
-        -and ($Ensure -eq "Absent"))
+    if (($ApplicationPool -or `
+         $DatabaseName -or `
+         $DatabaseServer -or `
+         $SupportedFileFormats -or `
+         $DisableEmbeddedFonts -or `
+         $MaximumMemoryUsage -or `
+         $RecycleThreshold -or `
+         $DisableBinaryFileScan -or `
+         $ConversionProcesses -or `
+         $JobConversionFrequency -or `
+         $NumberOfConversionsPerProcess -or `
+         $TimeBeforeConversionIsMonitored -or `
+         $MaximumConversionAttempts -or `
+         $MaximumSyncConversionRequests -or `
+         $KeepAliveTimeout -or `
+         $MaximumConversionTime) -and `
+        ($Ensure -eq "Absent"))
     {
         throw "You cannot use any of the parameters when Ensure is specified as Absent"
     }
@@ -636,23 +636,23 @@ function Test-TargetResource
 
     $PSBoundParameters.Ensure = $Ensure
 
-    if (($ApplicationPool `
-            -or $DatabaseName `
-            -or $DatabaseServer `
-            -or $SupportedFileFormats `
-            -or $DisableEmbeddedFonts `
-            -or $MaximumMemoryUsage `
-            -or $RecycleThreshold `
-            -or $DisableBinaryFileScan `
-            -or $ConversionProcesses `
-            -or $JobConversionFrequency `
-            -or $NumberOfConversionsPerProcess `
-            -or $TimeBeforeConversionIsMonitored `
-            -or $MaximumConversionAttempts `
-            -or $MaximumSyncConversionRequests `
-            -or $KeepAliveTimeout `
-            -or $MaximumConversionTime) `
-        -and ($Ensure -eq "Absent"))
+    if (($ApplicationPool -or `
+         $DatabaseName -or `
+         $DatabaseServer -or `
+         $SupportedFileFormats -or `
+         $DisableEmbeddedFonts -or `
+         $MaximumMemoryUsage -or `
+         $RecycleThreshold -or `
+         $DisableBinaryFileScan -or `
+         $ConversionProcesses -or `
+         $JobConversionFrequency -or `
+         $NumberOfConversionsPerProcess -or `
+         $TimeBeforeConversionIsMonitored -or `
+         $MaximumConversionAttempts -or `
+         $MaximumSyncConversionRequests -or `
+         $KeepAliveTimeout -or `
+         $MaximumConversionTime) -and `
+        ($Ensure -eq "Absent"))
     {
         throw "You cannot use any of the parameters when Ensure is specified as Absent"
     }
@@ -668,10 +668,6 @@ function Test-TargetResource
     Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
     Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
 
-    if ($null -eq $CurrentValues)
-    {
-        return $false
-    }
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
                                     -DesiredValues $PSBoundParameters
 }

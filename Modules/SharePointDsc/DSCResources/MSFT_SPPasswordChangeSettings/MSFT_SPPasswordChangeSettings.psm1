@@ -38,19 +38,24 @@ function Get-TargetResource
     $result = Invoke-SPDscCommand -Credential $InstallAccount `
                                   -Arguments $PSBoundParameters `
                                   -ScriptBlock {
-        $params = $args[0]
-
         $farm = Get-SPFarm
         if ($null -eq $farm )
         {
-            return $null
+            return @{
+                IsSingleInstance              = "Yes"
+                MailAddress                   = $null
+                PasswordChangeWaitTimeSeconds = $null
+                NumberOfRetries               = $null
+                DaysBeforeExpiry              = $null
+            }
         }
+
         return @{
-            IsSingleInstance = "Yes"
-            MailAddress = $farm.PasswordChangeEmailAddress
-            PasswordChangeWaitTimeSeconds= $farm.PasswordChangeGuardTime
-            NumberOfRetries= $farm.PasswordChangeMaximumTries
-            DaysBeforeExpiry = $farm.DaysBeforePasswordExpirationToSendEmail
+            IsSingleInstance              = "Yes"
+            MailAddress                   = $farm.PasswordChangeEmailAddress
+            PasswordChangeWaitTimeSeconds = $farm.PasswordChangeGuardTime
+            NumberOfRetries               = $farm.PasswordChangeMaximumTries
+            DaysBeforeExpiry              = $farm.DaysBeforePasswordExpirationToSendEmail
         }
     }
     return $result
@@ -161,11 +166,6 @@ function Test-TargetResource
 
     Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
     Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
-
-    if ($null -eq $CurrentValues)
-    {
-        return $false
-    }
 
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
                                     -DesiredValues $PSBoundParameters `

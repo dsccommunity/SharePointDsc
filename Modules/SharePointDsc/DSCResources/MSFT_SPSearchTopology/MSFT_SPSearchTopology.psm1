@@ -54,8 +54,18 @@ function Get-TargetResource
 
         if ($null -eq $ssa)
         {
-            return $null
+            return @{
+                ServiceAppName          = $params.ServiceAppName
+                Admin                   = $null
+                Crawler                 = $null
+                ContentProcessing       = $null
+                AnalyticsProcessing     = $null
+                QueryProcessing         = $null
+                FirstPartitionDirectory = $null
+                IndexPartition          = $null
+            }
         }
+
         $currentTopology = $ssa.ActiveTopology
 
         $allServers = Get-SPServer | ForEach-Object -Process {
@@ -165,17 +175,18 @@ function Get-TargetResource
         }
 
         return @{
-            ServiceAppName = $params.ServiceAppName
-            Admin = $AdminComponents -replace ".$domain"
-            Crawler = $CrawlComponents -replace ".$domain"
-            ContentProcessing = $ContentProcessingComponents -replace ".$domain"
-            AnalyticsProcessing = $AnalyticsProcessingComponents -replace ".$domain"
-            QueryProcessing = $QueryProcessingComponents -replace ".$domain"
-            InstallAccount = $params.InstallAccount
+            ServiceAppName          = $params.ServiceAppName
+            Admin                   = $AdminComponents -replace ".$domain"
+            Crawler                 = $CrawlComponents -replace ".$domain"
+            ContentProcessing       = $ContentProcessingComponents -replace ".$domain"
+            AnalyticsProcessing     = $AnalyticsProcessingComponents -replace ".$domain"
+            QueryProcessing         = $QueryProcessingComponents -replace ".$domain"
             FirstPartitionDirectory = $firstPartition
-            IndexPartition = $IndexComponents -replace ".$domain"
+            IndexPartition          = $IndexComponents -replace ".$domain"
+            InstallAccount          = $params.InstallAccount
         }
     }
+
     return $result
 }
 
@@ -510,11 +521,6 @@ function Test-TargetResource
 
     Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
     Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
-
-    if ($null -eq $CurrentValues)
-    {
-        return $false
-    }
 
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
                                         -DesiredValues $PSBoundParameters `

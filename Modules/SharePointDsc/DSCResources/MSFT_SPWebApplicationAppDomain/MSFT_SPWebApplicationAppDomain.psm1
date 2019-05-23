@@ -41,16 +41,22 @@ function Get-TargetResource
 
         if ($null -eq $webAppAppDomain)
         {
-            return $null
+            return @{
+                WebAppUrl = $params.WebAppUrl
+                AppDomain = $null
+                Zone      = $null
+                Port      = $null
+                SSL       = $null
+            }
         }
         else
         {
             return @{
-                AppDomain = $webAppAppDomain.AppDomain
-                WebAppUrl = $params.WebAppUrl
-                Zone = $webAppAppDomain.UrlZone
-                Port = $webAppAppDomain.Port
-                SSL = $webAppAppDomain.IsSchemeSSL
+                WebAppUrl      = $params.WebAppUrl
+                AppDomain      = $webAppAppDomain.AppDomain
+                Zone           = $webAppAppDomain.UrlZone
+                Port           = $webAppAppDomain.Port
+                SSL            = $webAppAppDomain.IsSchemeSSL
                 InstallAccount = $params.InstallAccount
             }
         }
@@ -99,7 +105,7 @@ function Set-TargetResource
         $params = $args[0]
         $CurrentValues = $args[1]
 
-        if ($null -ne $CurrentValues)
+        if ($null -ne $CurrentValues.AppDomain)
         {
             Get-SPWebApplicationAppDomain -WebApplication $params.WebAppUrl `
                                           -Zone $params.Zone | Remove-SPWebApplicationAppDomain
@@ -162,11 +168,6 @@ function Test-TargetResource
 
     Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
     Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
-
-    if ($null -eq $CurrentValues)
-    {
-        return $false
-    }
 
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
                                     -DesiredValues $PSBoundParameters `

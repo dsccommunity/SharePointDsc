@@ -87,7 +87,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             })}
 
             It "Should return the current data from the get method" {
-                Get-TargetResource @testParams | Should Not BeNullOrEmpty
+                (Get-TargetResource @testParams).ListViewThreshold | Should Be $testParams.ListViewThreshold
             }
 
             It "Should return true from the test method" {
@@ -164,7 +164,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             It "Should return the current data from the get method" {
-                Get-TargetResource @testParams | Should Not BeNullOrEmpty
+                (Get-TargetResource @testParams).ListViewThreshold | Should Be 1
             }
 
             It "Should return false from the test method" {
