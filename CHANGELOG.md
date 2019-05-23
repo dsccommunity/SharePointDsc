@@ -16,6 +16,8 @@
 * SPConfigWizard
   * Added check to make sure the Config Wizard is only executed when all
     servers have the binaries installed.
+* SPFarm
+  * Throw error in Get method if CentralAdministrationUrl is HTTP
 * SPInstallPrereqs
   * Fixed bug in version check, where lower versions would be
     detected as higher versions.
