@@ -393,7 +393,8 @@ function Test-TargetResource
     Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
 
     if ($PSBoundParameters.ContainsKey("DatabaseServer") -and `
-       ($CurrentValues.DatabaseServer -ne $DatabaseServer))
+        ($null -ne $CurrentValues.DatabaseServer) -and `
+        ($CurrentValues.DatabaseServer -ne $DatabaseServer))
     {
         Write-Verbose -Message ("Specified database server does not match the actual " + `
                                 "database server. This resource cannot move the database " + `
@@ -402,7 +403,8 @@ function Test-TargetResource
     }
 
     if ($PSBoundParameters.ContainsKey("DatabaseName") -and `
-       ($CurrentValues.DatabaseName -ne $DatabaseName))
+        ($null -ne $CurrentValues.DatabaseName) -and `
+        ($CurrentValues.DatabaseName -ne $DatabaseName))
     {
         Write-Verbose -Message ("Specified database name does not match the actual " + `
                                 "database name. This resource cannot rename the database.")
