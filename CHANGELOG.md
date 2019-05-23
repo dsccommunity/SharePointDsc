@@ -5,6 +5,9 @@
 * SharePointDsc generic
   * Improved logging in all resource. They are now outputting
     the current and targeted values in the Test method.
+* SPConfigWizard
+  * Added check to make sure the Config Wizard is only executed when all
+    servers have the binaries installed.
 * SPInstallPrereqs
   * Fixed bug in version check, where lower versions would be
     detected as higher versions.
