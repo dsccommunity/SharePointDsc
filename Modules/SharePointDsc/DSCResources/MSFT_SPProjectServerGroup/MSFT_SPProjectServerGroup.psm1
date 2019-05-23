@@ -132,7 +132,7 @@ function Get-TargetResource
                 }
             }
 
-            for($i = 0; $i -lt $groupMembers.Count; $i++)
+            for ($i = 0; $i -lt $groupMembers.Count; $i++)
             {
                 if ($groupMembers[$i].Contains(":0") -eq $true)
                 {

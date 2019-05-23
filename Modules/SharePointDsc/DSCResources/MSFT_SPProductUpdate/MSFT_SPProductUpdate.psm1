@@ -412,8 +412,7 @@ function Set-TargetResource
         $hostControllerSvc = Get-Service -Name "SPSearchHostController"
 
         Invoke-SPDscCommand -Credential $InstallAccount `
-                            -ScriptBlock
-        {
+                            -ScriptBlock {
             $searchSAs = Get-SPEnterpriseSearchServiceApplication
             foreach ($searchSA in $searchSAs)
             {
@@ -468,8 +467,7 @@ function Set-TargetResource
 
     Invoke-SPDscCommand -Credential $InstallAccount `
                         -Arguments $SetupFile `
-                        -ScriptBlock
-    {
+                        -ScriptBlock {
         $setupFile = $args[0]
 
         Write-Verbose -Message "Checking if SetupFile is an UNC path"
@@ -568,8 +566,7 @@ function Set-TargetResource
         {
             # Resuming Search Service Application if paused###
             Invoke-SPDscCommand -Credential $InstallAccount `
-                                -ScriptBlock
-            {
+                                -ScriptBlock {
                 $searchSAs = Get-SPEnterpriseSearchServiceApplication
                 foreach ($searchSA in $searchSAs)
                 {

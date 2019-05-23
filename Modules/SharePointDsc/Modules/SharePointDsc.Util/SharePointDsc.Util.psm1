@@ -1053,7 +1053,7 @@ function ConvertTo-TwoDigitFlipString
 
     $flippedString = ""
 
-    for($i = 0; $i -lt $InputString.Length; $i++)
+    for ($i = 0; $i -lt $InputString.Length; $i++)
     {
         $flippedString += $InputString[$i+1] + $InputString[$i]
         $i++
@@ -1071,7 +1071,7 @@ function ConvertTo-ReverseString
     )
 
     $reverseString = ""
-    for($i = $InputString.Length - 1; $i -ge 0; $i--)
+    for ($i = $InputString.Length - 1; $i -ge 0; $i--)
     {
         $reverseString += $InputString[$i]
     }
