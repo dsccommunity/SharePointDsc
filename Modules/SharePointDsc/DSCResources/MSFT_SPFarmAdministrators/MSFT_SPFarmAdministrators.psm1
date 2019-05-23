@@ -40,7 +40,7 @@ function Get-TargetResource
                "Members, MembersToInclude, MembersToExclude")
     }
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+    $result = Invoke-SPDscCommand -Credential $InstallAccount `
                                   -Arguments $PSBoundParameters `
                                   -ScriptBlock {
         $params = $args[0]
@@ -346,7 +346,7 @@ function Merge-SPDscFarmAdminList
         $changeUsers
     )
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+    $result = Invoke-SPDscCommand -Credential $InstallAccount `
                                   -Arguments $changeUsers `
                                   -ScriptBlock {
         $changeUsers = $args[0]

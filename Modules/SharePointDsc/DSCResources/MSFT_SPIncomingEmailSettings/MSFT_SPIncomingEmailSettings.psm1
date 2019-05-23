@@ -58,7 +58,7 @@
 
     Write-Verbose -Message "Getting SharePoint Incoming Email Settings"
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+    $result = Invoke-SPDscCommand -Credential $InstallAccount `
         -ScriptBlock {
         $spEmailServiceInstance = (Get-SPServiceInstance | Where-Object {$_.GetType().FullName -eq "Microsoft.SharePoint.Administration.SPIncomingEmailServiceInstance" }) | Select-Object -First 1
         $spEmailService = $spEmailServiceInstance.service
@@ -225,7 +225,7 @@ function Set-TargetResource
             }
     }
 
-    Invoke-SPDSCCommand -Credential $InstallAccount `
+    Invoke-SPDscCommand -Credential $InstallAccount `
         -Arguments $PSBoundParameters `
         -ScriptBlock {
         $params = $args[0]

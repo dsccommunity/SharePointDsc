@@ -51,7 +51,7 @@ function Get-TargetResource
     switch ($SettingsScope)
     {
         "WebApplication" {
-            $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+            $result = Invoke-SPDscCommand -Credential $InstallAccount `
                                           -Arguments $PSBoundParameters `
                                           -ScriptBlock {
                 $params = $args[0]
@@ -101,9 +101,9 @@ function Get-TargetResource
             }
         }
         "SiteCollection" {
-            if ((Test-SPDSCRunAsCredential -Credential $InstallAccount) -eq $true)
+            if ((Test-SPDscRunAsCredential -Credential $InstallAccount) -eq $true)
             {
-                $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+                $result = Invoke-SPDscCommand -Credential $InstallAccount `
                                               -Arguments $PSBoundParameters `
                                               -ScriptBlock {
                     $params = $args[0]
@@ -211,7 +211,7 @@ function Set-TargetResource
     switch ($SettingsScope)
     {
         "WebApplication" {
-            Invoke-SPDSCCommand -Credential $InstallAccount `
+            Invoke-SPDscCommand -Credential $InstallAccount `
                                 -Arguments $PSBoundParameters `
                                 -ScriptBlock {
                 $params = $args[0]
@@ -278,9 +278,9 @@ function Set-TargetResource
             }
         }
         "SiteCollection" {
-            if ((Test-SPDSCRunAsCredential -Credential $InstallAccount) -eq $true)
+            if ((Test-SPDscRunAsCredential -Credential $InstallAccount) -eq $true)
             {
-                Invoke-SPDSCCommand -Credential $InstallAccount `
+                Invoke-SPDscCommand -Credential $InstallAccount `
                                     -Arguments $PSBoundParameters `
                                     -ScriptBlock {
                     $params = $args[0]

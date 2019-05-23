@@ -96,7 +96,7 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting web application '$WebAppUrl' general settings"
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+    $result = Invoke-SPDscCommand -Credential $InstallAccount `
                                   -Arguments @($PSBoundParameters,$PSScriptRoot) `
                                   -ScriptBlock {
         $params = $args[0]
@@ -133,7 +133,7 @@ function Get-TargetResource
         $modulePath = "..\..\Modules\SharePointDsc.WebApplication\SPWebApplication.GeneralSettings.psm1"
         Import-Module -Name (Join-Path -Path $ScriptRoot -ChildPath $modulePath -Resolve)
 
-        $result = Get-SPDSCWebApplicationGeneralConfig -WebApplication $wa
+        $result = Get-SPDscWebApplicationGeneralConfig -WebApplication $wa
         $result.Add("WebAppUrl", $params.WebAppUrl)
         $result.Add("InstallAccount", $params.InstallAccount)
         return $result
@@ -238,7 +238,7 @@ function Set-TargetResource
 
     Write-Verbose -Message "Setting web application '$WebAppUrl' general settings"
 
-    Invoke-SPDSCCommand -Credential $InstallAccount `
+    Invoke-SPDscCommand -Credential $InstallAccount `
                         -Arguments @($PSBoundParameters,$PSScriptRoot) `
                         -ScriptBlock {
         $params = $args[0]
@@ -252,7 +252,7 @@ function Set-TargetResource
 
         if ($params.ContainsKey("DefaultQuotaTemplate"))
         {
-            $admService = Get-SPDSCContentService
+            $admService = Get-SPDscContentService
 
             $quotaTemplate = $admService.QuotaTemplates[$params.DefaultQuotaTemplate]
             if ($null -eq $quotaTemplate)
@@ -264,7 +264,7 @@ function Set-TargetResource
         $modulePath = "..\..\Modules\SharePointDsc.WebApplication\SPWebApplication.GeneralSettings.psm1"
         Import-Module -Name (Join-Path -Path $ScriptRoot -ChildPath $modulePath -Resolve)
 
-        Set-SPDSCWebApplicationGeneralConfig -WebApplication $wa -Settings $params
+        Set-SPDscWebApplicationGeneralConfig -WebApplication $wa -Settings $params
         $wa.Update()
     }
 }
@@ -375,7 +375,7 @@ function Test-TargetResource
     $modulePath = "..\..\Modules\SharePointDsc.WebApplication\SPWebApplication.GeneralSettings.psm1"
     Import-Module -Name (Join-Path -Path $PSScriptRoot -ChildPath $modulePath -Resolve)
 
-    return Test-SPDSCWebApplicationGeneralConfig -CurrentSettings $CurrentValues -DesiredSettings $PSBoundParameters
+    return Test-SPDscWebApplicationGeneralConfig -CurrentSettings $CurrentValues -DesiredSettings $PSBoundParameters
 }
 
 Export-ModuleMember -Function *-TargetResource

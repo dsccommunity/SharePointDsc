@@ -29,17 +29,17 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         # Mocks for all contexts
         Mock -CommandName Clear-SPDscKerberosToken -MockWith { }
-        Mock -CommandName Get-SPDSCFarmAccount -MockWith {
+        Mock -CommandName Get-SPDscFarmAccount -MockWith {
             return $mockFarmCredential
         }
         Mock -CommandName Start-SPServiceInstance -MockWith { }
         Mock -CommandName Stop-SPServiceInstance -MockWith { $Global:ServiceStatus = "Disabled" }
         Mock -CommandName Restart-Service -MockWith { }
-        Mock -CommandName Add-SPDSCUserToLocalAdmin -MockWith { }
-        Mock -CommandName Test-SPDSCUserIsLocalAdmin -MockWith {
+        Mock -CommandName Add-SPDscUserToLocalAdmin -MockWith { }
+        Mock -CommandName Test-SPDscUserIsLocalAdmin -MockWith {
             return $false
         }
-        Mock -CommandName Remove-SPDSCUserToLocalAdmin -MockWith { }
+        Mock -CommandName Remove-SPDscUserToLocalAdmin -MockWith { }
         Mock -CommandName Start-Sleep -MockWith { }
         Mock -CommandName Get-SPServiceApplication -MockWith {
             return @(
@@ -136,7 +136,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                         Ensure = "Present"
                     }
 
-                    Mock -CommandName Get-SPDSCFarmAccount -MockWith {
+                    Mock -CommandName Get-SPDscFarmAccount -MockWith {
                         return $mockCredential
                     }
 
@@ -214,9 +214,9 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                         $spSvcInstance = $spSvcInstance | Add-Member ScriptMethod GetType {
                             return @{ Name = "ProfileSynchronizationServiceInstance" }
                         } -PassThru -Force
-                        if ($Global:SPDSCUPACheck -eq $false)
+                        if ($Global:SPDscUPACheck -eq $false)
                         {
-                            $Global:SPDSCUPACheck = $true
+                            $Global:SPDscUPACheck = $true
                             $spSvcInstance = $spSvcInstance | Add-Member NoteProperty Status "Disabled" -PassThru
                             $spSvcInstance = $spSvcInstance | Add-Member NoteProperty UserProfileApplicationGuid [Guid]::Empty -PassThru
                         }
@@ -329,9 +329,9 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                         $spSvcInstance = $spSvcInstance | Add-Member ScriptMethod GetType {
                             return @{ Name = "ProfileSynchronizationServiceInstance" }
                         } -PassThru -Force
-                        if ($Global:SPDSCUPACheck -eq $false)
+                        if ($Global:SPDscUPACheck -eq $false)
                         {
-                            $Global:SPDSCUPACheck = $true
+                            $Global:SPDscUPACheck = $true
                             $spSvcInstance = $spSvcInstance | Add-Member NoteProperty Status "Online" -PassThru
                             $spSvcInstance = $spSvcInstance | Add-Member NoteProperty UserProfileApplicationGuid ([Guid]::NewGuid()) -PassThru
                         }
@@ -512,7 +512,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                         RunOnlyWhenWriteable = $true
                     }
 
-                    Mock -CommandName Get-SPDSCFarmAccount -MockWith{
+                    Mock -CommandName Get-SPDscFarmAccount -MockWith{
                         return $null
                     }
 

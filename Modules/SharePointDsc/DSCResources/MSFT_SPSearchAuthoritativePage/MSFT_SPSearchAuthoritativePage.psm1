@@ -34,7 +34,7 @@ function Get-TargetResource
 
      Write-Verbose -Message "Getting Authoratative Page Setting for '$Path'"
 
-     $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+     $result = Invoke-SPDscCommand -Credential $InstallAccount `
                                   -Arguments $PSBoundParameters `
                                   -ScriptBlock {
         $params = $args[0]
@@ -147,7 +147,7 @@ function Set-TargetResource
 
     if ($CurrentResults.Ensure -eq "Absent" -and $Ensure -eq "Present")
     {
-        $null = Invoke-SPDSCCommand -Credential $InstallAccount `
+        $null = Invoke-SPDscCommand -Credential $InstallAccount `
                                     -Arguments $PSBoundParameters `
                                     -ScriptBlock {
             $params = $args[0]
@@ -175,7 +175,7 @@ function Set-TargetResource
     }
     if ($CurrentResults.Ensure -eq "Present" -and $Ensure -eq "Present")
     {
-        $null = Invoke-SPDSCCommand -Credential $InstallAccount `
+        $null = Invoke-SPDscCommand -Credential $InstallAccount `
                                     -Arguments $PSBoundParameters `
                                     -ScriptBlock {
             $params = $args[0]
@@ -200,7 +200,7 @@ function Set-TargetResource
     }
     if ($Ensure -eq "Absent")
     {
-        $null = Invoke-SPDSCCommand -Credential $InstallAccount `
+        $null = Invoke-SPDscCommand -Credential $InstallAccount `
                                     -Arguments $PSBoundParameters `
                                     -ScriptBlock {
             $params = $args[0]

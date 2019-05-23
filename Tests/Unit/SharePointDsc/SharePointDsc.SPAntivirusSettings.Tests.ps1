@@ -64,7 +64,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 NumberOfThreads = 5
             }
 
-            Mock -CommandName Get-SPDSCContentService -MockWith {
+            Mock -CommandName Get-SPDscContentService -MockWith {
                 $returnVal = @{
                     AntivirusSettings = @{
                         AllowDownload = $false
@@ -110,7 +110,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 NumberOfThreads = 5
             }
 
-            Mock -CommandName Get-SPDSCContentService -MockWith {
+            Mock -CommandName Get-SPDscContentService -MockWith {
                 $returnVal = @{
                     AntivirusSettings = @{
                         AllowDownload = $true

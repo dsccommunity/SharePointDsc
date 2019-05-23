@@ -24,7 +24,7 @@ function Get-TargetResource()
 
     Write-Verbose -Message "Looking for SPFarm property '$Name'"
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+    $result = Invoke-SPDscCommand -Credential $InstallAccount `
                                   -Arguments $PSBoundParameters `
                                   -ScriptBlock {
         $params = $args[0]
@@ -99,7 +99,7 @@ function Set-TargetResource()
 
     Write-Verbose -Message "Setting SPFarm property '$Name'"
 
-    Invoke-SPDSCCommand -Credential $InstallAccount `
+    Invoke-SPDscCommand -Credential $InstallAccount `
                         -Arguments $PSBoundParameters `
                         -ScriptBlock {
         $params = $args[0]

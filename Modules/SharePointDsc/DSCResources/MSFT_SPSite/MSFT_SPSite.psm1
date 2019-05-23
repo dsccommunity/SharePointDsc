@@ -72,7 +72,7 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting site collection $Url"
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+    $result = Invoke-SPDscCommand -Credential $InstallAccount `
                                   -Arguments $PSBoundParameters `
                                   -ScriptBlock {
         $params = $args[0]
@@ -151,7 +151,7 @@ function Get-TargetResource
                 }
             }
 
-            $admService = Get-SPDSCContentService
+            $admService = Get-SPDscContentService
             $quota = ($admService.QuotaTemplates | `
                       Where-Object -FilterScript {
                           $_.QuotaID -eq $site.Quota.QuotaID
@@ -268,7 +268,7 @@ function Set-TargetResource
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
-    $null = Invoke-SPDSCCommand -Credential $InstallAccount `
+    $null = Invoke-SPDscCommand -Credential $InstallAccount `
                                 -Arguments @($PSBoundParameters,$CurrentValues) `
                                 -ScriptBlock {
         $params = $args[0]

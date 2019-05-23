@@ -39,7 +39,7 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting outgoing email settings configuration for $WebAppUrl"
 
-    $installedVersion = Get-SPDSCInstalledProductVersion
+    $installedVersion = Get-SPDscInstalledProductVersion
     if (($PSBoundParameters.ContainsKey("UseTLS") -eq $true) `
         -and $installedVersion.FileMajorPart -ne 16)
     {
@@ -52,7 +52,7 @@ function Get-TargetResource
         throw [Exception] "SMTPPort is only supported in SharePoint 2016 and SharePoint 2019."
     }
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+    $result = Invoke-SPDscCommand -Credential $InstallAccount `
                                   -Arguments $PSBoundParameters `
                                   -ScriptBlock {
         $params = $args[0]
@@ -124,7 +124,7 @@ function Set-TargetResource
 
     Write-Verbose -Message "Setting outgoing email settings configuration for $WebAppUrl"
 
-    $installedVersion = Get-SPDSCInstalledProductVersion
+    $installedVersion = Get-SPDscInstalledProductVersion
     if (($PSBoundParameters.ContainsKey("UseTLS") -eq $true) `
         -and $installedVersion.FileMajorPart -lt 16)
     {
@@ -137,7 +137,7 @@ function Set-TargetResource
         throw [Exception] "SMTPPort is only supported in SharePoint 2016 and SharePoint 2019."
     }
 
-    $null = Invoke-SPDSCCommand -Credential $InstallAccount `
+    $null = Invoke-SPDscCommand -Credential $InstallAccount `
                                 -Arguments $PSBoundParameters `
                                 -ScriptBlock {
         $params = $args[0]
@@ -151,7 +151,7 @@ function Set-TargetResource
             throw "Web Application $webAppUrl not found"
         }
 
-        $installedVersion = Get-SPDSCInstalledProductVersion
+        $installedVersion = Get-SPDscInstalledProductVersion
         switch ($installedVersion.FileMajorPart)
         {
             15 {

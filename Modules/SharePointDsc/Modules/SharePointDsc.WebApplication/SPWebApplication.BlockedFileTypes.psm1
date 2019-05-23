@@ -1,4 +1,4 @@
-function Get-SPDSCWebApplicationBlockedFileTypeConfig
+function Get-SPDscWebApplicationBlockedFileTypeConfig
 {
     [CmdletBinding()]
     [OutputType([System.Collections.Hashtable])]
@@ -15,7 +15,7 @@ function Get-SPDSCWebApplicationBlockedFileTypeConfig
     }
 }
 
-function Set-SPDSCWebApplicationBlockedFileTypeConfig
+function Set-SPDscWebApplicationBlockedFileTypeConfig
 {
     [CmdletBinding()]
     param(
@@ -69,7 +69,7 @@ function Set-SPDSCWebApplicationBlockedFileTypeConfig
     }
 }
 
-function Test-SPDSCWebApplicationBlockedFileTypeConfig
+function Test-SPDscWebApplicationBlockedFileTypeConfig
 {
     [CmdletBinding()]
     [OutputType([System.Boolean])]

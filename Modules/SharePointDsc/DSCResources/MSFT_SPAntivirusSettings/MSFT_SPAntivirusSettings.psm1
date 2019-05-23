@@ -40,7 +40,7 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting antivirus configuration settings"
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+    $result = Invoke-SPDscCommand -Credential $InstallAccount `
                                   -Arguments $PSBoundParameters `
                                   -ScriptBlock {
         $params = $args[0]
@@ -67,7 +67,7 @@ function Get-TargetResource
         }
 
         # Get a reference to the Administration WebService
-        $admService = Get-SPDSCContentService
+        $admService = Get-SPDscContentService
 
         return @{
             IsSingleInstance = "Yes"
@@ -125,7 +125,7 @@ function Set-TargetResource
 
     Write-Verbose -Message "Setting antivirus configuration settings"
 
-    Invoke-SPDSCCommand -Credential $InstallAccount `
+    Invoke-SPDscCommand -Credential $InstallAccount `
                         -Arguments $PSBoundParameters `
                         -ScriptBlock {
         $params = $args[0]
@@ -141,7 +141,7 @@ function Set-TargetResource
         }
 
         Write-Verbose -Message "Start update"
-        $admService = Get-SPDSCContentService
+        $admService = Get-SPDscContentService
 
         # Set the antivirus settings
         if ($params.ContainsKey("AllowDownloadInfected"))

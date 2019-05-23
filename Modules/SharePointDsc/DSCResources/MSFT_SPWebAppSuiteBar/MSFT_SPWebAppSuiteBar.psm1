@@ -35,7 +35,7 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting web app suite bar properties for $WebAppUrl"
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+    $result = Invoke-SPDscCommand -Credential $InstallAccount `
                                   -Arguments $PSBoundParameters `
                                   -ScriptBlock {
         $params = $args[0]
@@ -59,7 +59,7 @@ function Get-TargetResource
 
         $returnval.WebAppUrl = $wa.Url
 
-        $installedVersion = Get-SPDSCInstalledProductVersion
+        $installedVersion = Get-SPDscInstalledProductVersion
 
         if ($installedVersion.FileMajorPart -ge 15)
         {
@@ -115,7 +115,7 @@ function Set-TargetResource
 
     Write-Verbose -Message "Setting web app suite bar properties for $WebAppUrl"
 
-    $installedVersion = Get-SPDSCInstalledProductVersion
+    $installedVersion = Get-SPDscInstalledProductVersion
 
     <# Handle SP2013 #>
     switch($installedVersion.FileMajorPart)
@@ -170,12 +170,12 @@ function Set-TargetResource
     }
 
     ## Perform changes
-    Invoke-SPDSCCommand -Credential $InstallAccount `
+    Invoke-SPDscCommand -Credential $InstallAccount `
                         -Arguments @($PSBoundParameters) `
                         -ScriptBlock {
         $params = $args[0]
 
-        $installedVersion = Get-SPDSCInstalledProductVersion
+        $installedVersion = Get-SPDscInstalledProductVersion
 
         $wa = Get-SPWebApplication -Identity $params.WebAppUrl -ErrorAction SilentlyContinue
 
@@ -249,7 +249,7 @@ function Test-TargetResource
         return $false
     }
 
-    $installedVersion = Get-SPDSCInstalledProductVersion
+    $installedVersion = Get-SPDscInstalledProductVersion
 
     if ($installedVersion.FileMajorPart -eq 15)
     {

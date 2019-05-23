@@ -100,7 +100,7 @@ function Get-TargetResource
         }
     }
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+    $result = Invoke-SPDscCommand -Credential $InstallAccount `
                                   -Arguments $PSBoundParameters `
                                   -ScriptBlock {
         $params = $args[0]
@@ -286,7 +286,7 @@ function Set-TargetResource
     }
 
     # Get current authentication method
-    $authMethod = Invoke-SPDSCCommand -Credential $InstallAccount `
+    $authMethod = Invoke-SPDscCommand -Credential $InstallAccount `
                                       -Arguments $PSBoundParameters `
                                       -ScriptBlock {
         $params = $args[0]
@@ -769,7 +769,7 @@ function Set-ZoneConfiguration()
         $DesiredConfig
     )
 
-    Invoke-SPDSCCommand -Credential $InstallAccount `
+    Invoke-SPDscCommand -Credential $InstallAccount `
                         -Arguments $PSBoundParameters `
                         -ScriptBlock {
         $params = $args[0]

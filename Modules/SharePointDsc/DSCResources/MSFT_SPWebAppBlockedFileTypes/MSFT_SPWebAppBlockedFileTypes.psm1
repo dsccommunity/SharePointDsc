@@ -27,7 +27,7 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting web application '$WebAppUrl' blocked file types"
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+    $result = Invoke-SPDscCommand -Credential $InstallAccount `
                                   -Arguments @($PSBoundParameters,$PSScriptRoot) `
                                   -ScriptBlock {
         $params = $args[0]
@@ -42,7 +42,7 @@ function Get-TargetResource
         $modulePath = "..\..\Modules\SharePointDsc.WebApplication\SPWebApplication.BlockedFileTypes.psm1"
         Import-Module -Name (Join-Path -Path $ScriptRoot -ChildPath $modulePath -Resolve)
 
-        $result = Get-SPDSCWebApplicationBlockedFileTypeConfig -WebApplication $wa
+        $result = Get-SPDscWebApplicationBlockedFileTypeConfig -WebApplication $wa
         $result.Add("WebAppUrl", $params.WebAppUrl)
         $result.Add("InstallAccount", $params.InstallAccount)
         return $result
@@ -79,7 +79,7 @@ function Set-TargetResource
 
     Write-Verbose -Message "Setting web application '$WebAppUrl' blocked file types"
 
-    $null = Invoke-SPDSCCommand -Credential $InstallAccount `
+    $null = Invoke-SPDscCommand -Credential $InstallAccount `
                                   -Arguments @($PSBoundParameters,$PSScriptRoot) `
                                   -ScriptBlock {
         $params = $args[0]
@@ -95,7 +95,7 @@ function Set-TargetResource
         $modulePath = "..\..\Modules\SharePointDsc.WebApplication\SPWebApplication.BlockedFileTypes.psm1"
         Import-Module -Name (Join-Path -Path $ScriptRoot -ChildPath $modulePath -Resolve)
 
-        Set-SPDSCWebApplicationBlockedFileTypeConfig -WebApplication $wa -Settings $params
+        Set-SPDscWebApplicationBlockedFileTypeConfig -WebApplication $wa -Settings $params
         $wa.Update()
     }
 }
@@ -142,7 +142,7 @@ function Test-TargetResource
     $modulePath = "..\..\Modules\SharePointDsc.WebApplication\SPWebApplication.BlockedFileTypes.psm1"
     Import-Module -Name (Join-Path -Path $PSScriptRoot -ChildPath $modulePath -Resolve)
 
-    return Test-SPDSCWebApplicationBlockedFileTypeConfig -CurrentSettings $CurrentValues `
+    return Test-SPDscWebApplicationBlockedFileTypeConfig -CurrentSettings $CurrentValues `
                                                          -DesiredSettings $PSBoundParameters
 }
 

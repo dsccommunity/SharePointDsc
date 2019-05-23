@@ -65,7 +65,7 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting user profile service sync connection $Name"
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+    $result = Invoke-SPDscCommand -Credential $InstallAccount `
                                   -Arguments $PSBoundParameters `
                                   -ScriptBlock {
         $params = $args[0]
@@ -95,7 +95,7 @@ function Get-TargetResource
         }
         else
         {
-            $context = Get-SPDSCServiceContext -ProxyGroup $ups.ServiceApplicationProxyGroup
+            $context = Get-SPDscServiceContext -ProxyGroup $ups.ServiceApplicationProxyGroup
             $upcm = New-Object -TypeName "Microsoft.Office.Server.UserProfiles.UserProfileConfigManager" `
                                -ArgumentList $context
 
@@ -105,7 +105,7 @@ function Get-TargetResource
             }
 
             # In SP2016, the forest name is used as name but the dot is replaced by a dash
-            $installedVersion = Get-SPDSCInstalledProductVersion
+            $installedVersion = Get-SPDscInstalledProductVersion
             if ($installedVersion.FileMajorPart -eq 16 -and $null -eq $connection)
             {
                 $Name = $params.Forest -replace "\.", "-"
@@ -299,7 +299,7 @@ function Set-TargetResource
         }
     }
 
-    $installedVersion = Get-SPDSCInstalledProductVersion
+    $installedVersion = Get-SPDscInstalledProductVersion
 
     if ($PSBoundParameters.ContainsKey("Port") -eq $false)
     {
@@ -327,7 +327,7 @@ function Set-TargetResource
         }
     }
 
-    Invoke-SPDSCCommand -Credential $InstallAccount `
+    Invoke-SPDscCommand -Credential $InstallAccount `
                         -Arguments @($PSBoundParameters, $PSScriptRoot) `
                         -ScriptBlock {
 
@@ -346,7 +346,7 @@ function Set-TargetResource
         {
             throw "User Profile Service Application $($params.UserProfileService) not found"
         }
-        $context = Get-SPDSCServiceContext -ProxyGroup $ups.ServiceApplicationProxyGroup
+        $context = Get-SPDscServiceContext -ProxyGroup $ups.ServiceApplicationProxyGroup
 
         Write-Verbose -Message "retrieving UserProfileConfigManager "
         $upcm = New-Object -TypeName "Microsoft.Office.Server.UserProfiles.UserProfileConfigManager" `
@@ -358,7 +358,7 @@ function Set-TargetResource
         }
 
         # In SP2016, the forest name is used as name but the dot is replaced by a dash
-        $installedVersion = Get-SPDSCInstalledProductVersion
+        $installedVersion = Get-SPDscInstalledProductVersion
         if ($installedVersion.FileMajorPart -eq 16)
         {
             $Name = $params.Forest -replace "\.", "-"
@@ -409,7 +409,7 @@ function Set-TargetResource
                 $userDomain = $params.ConnectionCredentials.UserName.Split("\")[0]
                 $userName= $params.ConnectionCredentials.UserName.Split("\")[1]
 
-                $installedVersion = Get-SPDSCInstalledProductVersion
+                $installedVersion = Get-SPDscInstalledProductVersion
 
                 switch($installedVersion.FileMajorPart)
                 {
@@ -448,7 +448,7 @@ function Set-TargetResource
 
                         $list = New-Object -TypeName System.Collections.Generic.List[[Microsoft.Office.Server.UserProfiles.DirectoryServiceNamingContext]]
 
-                        $partition = Get-SPDSCADSIObject -LdapPath ("LDAP://" +("DC=" + $params.Forest.Replace(".", ",DC=")))
+                        $partition = Get-SPDscADSIObject -LdapPath ("LDAP://" +("DC=" + $params.Forest.Replace(".", ",DC=")))
                         $list.Add((New-Object -TypeName "Microsoft.Office.Server.UserProfiles.DirectoryServiceNamingContext" `
                                             -ArgumentList @(
                                                         $partition.distinguishedName,
@@ -460,7 +460,7 @@ function Set-TargetResource
                                                         $listExcludedOUs,
                                                         $null ,
                                                         $false)))
-                        $partition = Get-SPDSCADSIObject -LdapPath ("LDAP://CN=Configuration," + ("DC=" + $params.Forest.Replace(".", ",DC=")))
+                        $partition = Get-SPDscADSIObject -LdapPath ("LDAP://CN=Configuration," + ("DC=" + $params.Forest.Replace(".", ",DC=")))
                         $list.Add((New-Object -TypeName "Microsoft.Office.Server.UserProfiles.DirectoryServiceNamingContext" `
                                             -ArgumentList @(
                                                         $partition.distinguishedName,
@@ -606,7 +606,7 @@ function Test-TargetResource
         return $false
     }
 
-    $installedVersion = Get-SPDSCInstalledProductVersion
+    $installedVersion = Get-SPDscInstalledProductVersion
     $valuesToCheck = @("Forest",
                        "UserProfileService",
                        "UseSSL",
@@ -634,7 +634,7 @@ function Test-TargetResource
 
 This method is not intensed for public use, and was created to facilitate unit testing
 #>
-function Get-SPDSCADSIObject
+function Get-SPDscADSIObject
 {
     param(
         [Parameter()]
@@ -643,4 +643,4 @@ function Get-SPDSCADSIObject
     return [ADSI]($LdapPath)
 }
 
-Export-ModuleMember -Function *-TargetResource, Get-SPDSCADSIObject
+Export-ModuleMember -Function *-TargetResource, Get-SPDscADSIObject

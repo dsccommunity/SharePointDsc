@@ -40,7 +40,7 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting blob cache settings for $WebAppUrl"
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+    $result = Invoke-SPDscCommand -Credential $InstallAccount `
                                   -Arguments $PSBoundParameters `
                                   -ScriptBlock {
         $params = $args[0]
@@ -231,7 +231,7 @@ function Set-TargetResource
     if ($changes.Count -ne 0)
     {
         ## Perform changes
-        Invoke-SPDSCCommand -Credential $InstallAccount `
+        Invoke-SPDscCommand -Credential $InstallAccount `
                             -Arguments @($PSBoundParameters, $changes) `
                             -ScriptBlock {
             $params  = $args[0]

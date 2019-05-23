@@ -64,7 +64,7 @@ function Get-TargetResource
                "Automation Service Application")
     }
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+    $result = Invoke-SPDscCommand -Credential $InstallAccount `
                                   -Arguments $PSBoundParameters `
                                   -ScriptBlock {
         $params = $args[0]
@@ -190,7 +190,7 @@ function Set-TargetResource
      if ($result.Ensure -eq "Absent" -and $Ensure -eq "Present")
      {
         Write-Verbose -Message "Creating PowerPoint Automation Service Application $Name"
-        Invoke-SPDSCCommand -Credential $InstallAccount `
+        Invoke-SPDscCommand -Credential $InstallAccount `
                             -Arguments $PSBoundParameters `
                             -ScriptBlock {
             $params = $args[0]
@@ -238,7 +238,7 @@ function Set-TargetResource
      if ($result.Ensure -eq "Present" -and $Ensure -eq "Present")
      {
         Write-Verbose -Message "Updating PowerPoint Automation Service Application $Name"
-        Invoke-SPDSCCommand -Credential $InstallAccount `
+        Invoke-SPDscCommand -Credential $InstallAccount `
                             -Arguments $PSBoundParameters, $result `
                             -ScriptBlock {
             $params = $args[0]
@@ -307,7 +307,7 @@ function Set-TargetResource
      if ($Ensure -eq "Absent")
      {
         Write-Verbose -Message "Removing PowerPoint Automation Service Application $Name"
-        Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+        Invoke-SPDscCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
             $params = $args[0]
 
             $serviceApps = Get-SPServiceApplication -Name $params.Name -ErrorAction SilentlyContinue

@@ -35,7 +35,7 @@ function Get-TargetResource
     )
     Write-Verbose -Message "Getting Machine Translation Service Application '$Name'"
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+    $result = Invoke-SPDscCommand -Credential $InstallAccount `
                                   -Arguments $PSBoundParameters `
                                   -ScriptBlock {
         $params = $args[0]
@@ -133,7 +133,7 @@ function Set-TargetResource
     {
         Write-Verbose "Resetting Machine Translation Service Application."
 
-        Invoke-SPDSCCommand -Credential $InstallAccount `
+        Invoke-SPDscCommand -Credential $InstallAccount `
                             -Arguments $PSBoundParameters `
                             -ScriptBlock {
             $params = $args[0]
@@ -152,7 +152,7 @@ function Set-TargetResource
     {
         Write-Verbose "Creating Machine Translation Service Application."
 
-        $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+        $result = Invoke-SPDscCommand -Credential $InstallAccount `
                                   -Arguments $PSBoundParameters `
                                   -ScriptBlock {
             $params = $args[0]
@@ -185,7 +185,7 @@ function Set-TargetResource
     {
         Write-Verbose "Removing Machine Translation Service Application."
 
-        $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+        $result = Invoke-SPDscCommand -Credential $InstallAccount `
                                       -Arguments $PSBoundParameters `
                                       -ScriptBlock {
             $params = $args[0]

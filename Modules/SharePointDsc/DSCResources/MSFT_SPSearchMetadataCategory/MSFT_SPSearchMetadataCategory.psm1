@@ -36,7 +36,7 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting Metadata Category Setting for '$Name'"
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+    $result = Invoke-SPDscCommand -Credential $InstallAccount `
                                   -Arguments @($PSBoundParameters) `
                                   -ScriptBlock {
         $params = $args[0]
@@ -114,7 +114,7 @@ function Set-TargetResource
     Write-Verbose -Message "Setting Metadata Category Setting for '$Name'"
 
     # Validate that the specified crawled properties are all valid and existing
-    Invoke-SPDSCCommand -Credential $InstallAccount `
+    Invoke-SPDscCommand -Credential $InstallAccount `
                         -Arguments @($PSBoundParameters) `
                         -ScriptBlock {
         $params = $args[0]

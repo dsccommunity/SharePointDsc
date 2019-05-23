@@ -25,7 +25,7 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting Office Online Server details for '$Zone' zone"
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+    $result = Invoke-SPDscCommand -Credential $InstallAccount `
                                   -Arguments $PSBoundParameters `
                                   -ScriptBlock {
         $params = $args[0]
@@ -92,7 +92,7 @@ function Set-TargetResource
             {
                 Write-Verbose -Message ("Removing bindings for zone '$Zone' so new bindings " + `
                                         "can be added")
-                Invoke-SPDSCCommand -Credential $InstallAccount `
+                Invoke-SPDscCommand -Credential $InstallAccount `
                                     -Arguments $PSBoundParameters `
                                     -ScriptBlock {
                     $params = $args[0]
@@ -100,7 +100,7 @@ function Set-TargetResource
                 }
             }
             Write-Verbose -Message "Creating new bindings for '$DnsName' and setting zone to '$Zone'"
-            Invoke-SPDSCCommand -Credential $InstallAccount `
+            Invoke-SPDscCommand -Credential $InstallAccount `
                                 -Arguments $PSBoundParameters `
                                 -ScriptBlock {
                 $params = $args[0]
@@ -121,7 +121,7 @@ function Set-TargetResource
     if ($Ensure -eq "Absent")
     {
         Write-Verbose -Message "Removing bindings for zone '$Zone'"
-        Invoke-SPDSCCommand -Credential $InstallAccount `
+        Invoke-SPDscCommand -Credential $InstallAccount `
                             -Arguments $PSBoundParameters `
                             -ScriptBlock {
             $params = $args[0]

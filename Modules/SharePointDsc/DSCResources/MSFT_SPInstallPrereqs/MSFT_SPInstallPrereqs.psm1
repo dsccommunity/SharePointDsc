@@ -240,8 +240,8 @@ function Get-TargetResource
         Write-Verbose -Message "File not blocked, continuing."
     }
 
-    $majorVersion = (Get-SPDSCAssemblyVersion -PathToAssembly $InstallerPath)
-    $buildVersion = (Get-SPDSCBuildVersion -PathToAssembly $InstallerPath)
+    $majorVersion = (Get-SPDscAssemblyVersion -PathToAssembly $InstallerPath)
+    $buildVersion = (Get-SPDscBuildVersion -PathToAssembly $InstallerPath)
     if ($majorVersion -eq 15)
     {
         Write-Verbose -Message "Version: SharePoint 2013"
@@ -649,8 +649,8 @@ function Set-TargetResource
     }
 
     Write-Verbose -Message "Detecting SharePoint version from binaries"
-    $majorVersion = Get-SPDSCAssemblyVersion -PathToAssembly $InstallerPath
-    $buildVersion = Get-SPDSCBuildVersion -PathToAssembly $InstallerPath
+    $majorVersion = Get-SPDscAssemblyVersion -PathToAssembly $InstallerPath
+    $buildVersion = Get-SPDscBuildVersion -PathToAssembly $InstallerPath
     $osVersion = Get-SPDscOSVersion
     switch ($osVersion.Major)
     {

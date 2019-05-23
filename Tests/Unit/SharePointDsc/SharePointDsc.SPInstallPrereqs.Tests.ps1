@@ -122,11 +122,11 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             })
         }
 
-        Mock -CommandName Get-SPDSCAssemblyVersion {
+        Mock -CommandName Get-SPDscAssemblyVersion {
             return $Global:SPDscHelper.CurrentStubBuildNumber.Major
         }
 
-        Mock -CommandName Get-SPDSCBuildVersion {
+        Mock -CommandName Get-SPDscBuildVersion {
             return $Global:SPDscHelper.CurrentStubBuildNumber.Build
         }
 

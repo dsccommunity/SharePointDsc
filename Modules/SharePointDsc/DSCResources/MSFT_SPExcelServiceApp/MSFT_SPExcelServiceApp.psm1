@@ -121,7 +121,7 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting Excel Services Application '$Name'"
 
-    if ((Get-SPDSCInstalledProductVersion).FileMajorPart -ne 15)
+    if ((Get-SPDscInstalledProductVersion).FileMajorPart -ne 15)
     {
         throw [Exception] ("Only SharePoint 2013 is supported to deploy Excel Services " + `
                            "service applications via DSC, as SharePoint 2016 and SharePoint 2019 deprecated " + `
@@ -130,7 +130,7 @@ function Get-TargetResource
                            "for more info.")
     }
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+    $result = Invoke-SPDscCommand -Credential $InstallAccount `
                                   -Arguments @($PSBoundParameters, $Script:ServiceAppObjectType) `
                                   -ScriptBlock {
         $params = $args[0]
@@ -313,7 +313,7 @@ function Set-TargetResource
 
     Write-Verbose -Message "Setting Excel Services Application '$Name'"
 
-    if ((Get-SPDSCInstalledProductVersion).FileMajorPart -ne 15)
+    if ((Get-SPDscInstalledProductVersion).FileMajorPart -ne 15)
     {
         throw [Exception] ("Only SharePoint 2013 is supported to deploy Excel Services " + `
                            "service applications via DSC, as SharePoint 2016 and SharePoint 2019 are deprecated " + `
@@ -326,7 +326,7 @@ function Set-TargetResource
     if ($result.Ensure -eq "Absent" -and $Ensure -eq "Present")
     {
         Write-Verbose -Message "Creating Excel Services Application $Name"
-        Invoke-SPDSCCommand -Credential $InstallAccount `
+        Invoke-SPDscCommand -Credential $InstallAccount `
                             -Arguments $PSBoundParameters `
                             -ScriptBlock {
             $params = $args[0]
@@ -340,7 +340,7 @@ function Set-TargetResource
     if ($Ensure -eq "Present")
     {
         Write-Verbose -Message "Updating settings for Excel Services Application $Name"
-        Invoke-SPDSCCommand -Credential $InstallAccount `
+        Invoke-SPDscCommand -Credential $InstallAccount `
                             -Arguments $PSBoundParameters `
                             -ScriptBlock {
             $params = $args[0]
@@ -371,7 +371,7 @@ function Set-TargetResource
                 if ($null -eq $matchingCurrentValue)
                 {
                     Write-Verbose -Message "Adding trusted location '$($desiredLocation.Address)' to service app"
-                    Invoke-SPDSCCommand -Credential $InstallAccount `
+                    Invoke-SPDscCommand -Credential $InstallAccount `
                                         -Arguments @($PSBoundParameters, $desiredLocation, $Script:TrustLocationProperties, $Script:ServiceAppObjectType) `
                                         -ScriptBlock {
                         $params = $args[0]
@@ -397,7 +397,7 @@ function Set-TargetResource
                 else
                 {
                     Write-Verbose -Message "Updating trusted location '$($desiredLocation.Address)' in service app"
-                    Invoke-SPDSCCommand -Credential $InstallAccount `
+                    Invoke-SPDscCommand -Credential $InstallAccount `
                                         -Arguments @($PSBoundParameters, $desiredLocation, $Script:TrustLocationProperties, $Script:ServiceAppObjectType) `
                                         -ScriptBlock {
                         $params = $args[0]
@@ -432,7 +432,7 @@ function Set-TargetResource
                 if ($null -eq $matchingDesiredValue)
                 {
                     Write-Verbose -Message "Removing trusted location '$($currentLocation.Address)' from service app"
-                    Invoke-SPDSCCommand -Credential $InstallAccount `
+                    Invoke-SPDscCommand -Credential $InstallAccount `
                                         -Arguments @($Name, $currentLocation) `
                                         -ScriptBlock {
                         $name = $args[0]
@@ -448,7 +448,7 @@ function Set-TargetResource
     if ($Ensure -eq "Absent")
     {
         Write-Verbose -Message "Removing Excel Service Application $Name"
-        Invoke-SPDSCCommand -Credential $InstallAccount `
+        Invoke-SPDscCommand -Credential $InstallAccount `
                             -Arguments @($PSBoundParameters, $Script:ServiceAppObjectType) `
                             -ScriptBlock {
             $params = $args[0]
@@ -572,7 +572,7 @@ function Test-TargetResource
 
     $PSBoundParameters.Ensure = $Ensure
 
-    if ((Get-SPDSCInstalledProductVersion).FileMajorPart -ne 15)
+    if ((Get-SPDscInstalledProductVersion).FileMajorPart -ne 15)
     {
         throw [Exception] ("Only SharePoint 2013 is supported to deploy Excel Services " + `
                            "service applications via DSC, as SharePoint 2016 and SharePoint 2019 are deprecated " + `

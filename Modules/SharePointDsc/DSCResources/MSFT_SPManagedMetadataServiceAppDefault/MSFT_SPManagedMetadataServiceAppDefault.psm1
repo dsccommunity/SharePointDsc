@@ -24,7 +24,7 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting the default site collection and keyword term store settings"
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+    $result = Invoke-SPDscCommand -Credential $InstallAccount `
         -Arguments $PSBoundParameters `
         -ScriptBlock {
 
@@ -117,7 +117,7 @@ function Set-TargetResource
 
     $result = Get-TargetResource @PSBoundParameters
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+    $result = Invoke-SPDscCommand -Credential $InstallAccount `
         -Arguments $PSBoundParameters `
         -ScriptBlock {
 

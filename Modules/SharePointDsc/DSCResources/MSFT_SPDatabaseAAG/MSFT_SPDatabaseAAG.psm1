@@ -29,8 +29,8 @@ function Get-TargetResource
     Write-Verbose -Message "Getting AAG configuration for $DatabaseName"
 
     # Check if the April 2014 CU has been installed. The cmdlets have been added in this CU
-    if ((Get-SPDSCInstalledProductVersion).FileMajorPart -eq 15 `
-        -and (Get-SPDSCInstalledProductVersion).FileBuildPart -lt 4605)
+    if ((Get-SPDscInstalledProductVersion).FileMajorPart -eq 15 `
+        -and (Get-SPDscInstalledProductVersion).FileBuildPart -lt 4605)
     {
         throw [Exception] ("Adding databases to SQL Always-On Availability Groups " + `
                            "require the SharePoint 2013 April 2014 CU to be installed. " + `
@@ -40,7 +40,7 @@ function Get-TargetResource
     if ($Ensure -eq "Present")
     {
         Write-Verbose -Message "Database(s) must be included in AAG $AGName"
-        $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+        $result = Invoke-SPDscCommand -Credential $InstallAccount `
                                       -Arguments ($PSBoundParameters) `
                                       -ScriptBlock {
             $params = $args[0]
@@ -87,7 +87,7 @@ function Get-TargetResource
     else
     {
         Write-Verbose -Message "Database(s) must not be included in an AAG $AGName"
-        $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+        $result = Invoke-SPDscCommand -Credential $InstallAccount `
                                     -Arguments $PSBoundParameters `
                                     -ScriptBlock {
             $params = $args[0]
@@ -157,8 +157,8 @@ function Set-TargetResource
     Write-Verbose -Message "Setting AAG configuration for $DatabaseName"
 
     # Check if the April 2014 CU has been installed. The cmdlets have been added in this CU
-    if ((Get-SPDSCInstalledProductVersion).FileMajorPart -eq 15 `
-        -and (Get-SPDSCInstalledProductVersion).FileBuildPart -lt 4605)
+    if ((Get-SPDscInstalledProductVersion).FileMajorPart -eq 15 `
+        -and (Get-SPDscInstalledProductVersion).FileBuildPart -lt 4605)
     {
         throw [Exception] ("Adding databases to SQL Always-On Availability Groups " + `
                            "require the SharePoint 2013 April 2014 CU to be installed. " + `
@@ -168,7 +168,7 @@ function Set-TargetResource
     if ($Ensure -eq "Present")
     {
         Write-Verbose -Message "Checking AAG settings for $DatabaseName"
-        Invoke-SPDSCCommand -Credential $InstallAccount `
+        Invoke-SPDscCommand -Credential $InstallAccount `
                             -Arguments ($PSBoundParameters) `
                             -ScriptBlock {
             $params = $args[0]
@@ -227,7 +227,7 @@ function Set-TargetResource
     else
     {
         Write-Verbose -Message "Removing $DatabaseName from $AGName"
-        Invoke-SPDSCCommand -Credential $InstallAccount `
+        Invoke-SPDscCommand -Credential $InstallAccount `
                             -Arguments $PSBoundParameters `
                             -ScriptBlock {
             $params = $args[0]

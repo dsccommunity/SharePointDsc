@@ -28,7 +28,7 @@ function Get-TargetResource
     Write-Verbose -Message "Getting web application '$WebAppUrl' workflow settings"
 
     $paramArgs = @($PSBoundParameters,$PSScriptRoot)
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $paramArgs -ScriptBlock {
+    $result = Invoke-SPDscCommand -Credential $InstallAccount -Arguments $paramArgs -ScriptBlock {
         $params = $args[0]
         $ScriptRoot = $args[1]
 
@@ -42,7 +42,7 @@ function Get-TargetResource
         $relPath = "..\..\Modules\SharePointDsc.WebApplication\SPWebApplication.Workflow.psm1"
         Import-Module (Join-Path $ScriptRoot $relPath -Resolve)
 
-        $result = Get-SPDSCWebApplicationWorkflowConfig -WebApplication $wa
+        $result = Get-SPDscWebApplicationWorkflowConfig -WebApplication $wa
         $result.Add("WebAppUrl", $params.WebAppUrl)
         $result.Add("InstallAccount", $params.InstallAccount)
         return $result
@@ -79,7 +79,7 @@ function Set-TargetResource
     Write-Verbose -Message "Setting web application '$WebAppUrl' workflow settings"
 
     $paramArgs = @($PSBoundParameters,$PSScriptRoot)
-    $null = Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $paramArgs -ScriptBlock {
+    $null = Invoke-SPDscCommand -Credential $InstallAccount -Arguments $paramArgs -ScriptBlock {
         $params = $args[0]
         $ScriptRoot = $args[1]
 
@@ -92,7 +92,7 @@ function Set-TargetResource
 
         $relpath = "..\..\Modules\SharePointDsc.WebApplication\SPWebApplication.Workflow.psm1"
         Import-Module (Join-Path $ScriptRoot $relPath -Resolve)
-        Set-SPDSCWebApplicationWorkflowConfig -WebApplication $wa -Settings $params
+        Set-SPDscWebApplicationWorkflowConfig -WebApplication $wa -Settings $params
     }
 }
 
@@ -137,7 +137,7 @@ function Test-TargetResource
 
     $relPath = "..\..\Modules\SharePointDsc.WebApplication\SPWebApplication.Workflow.psm1"
         Import-Module (Join-Path $PSScriptRoot $relPath -Resolve)
-    return Test-SPDSCWebApplicationWorkflowConfig -CurrentSettings $CurrentValues `
+    return Test-SPDscWebApplicationWorkflowConfig -CurrentSettings $CurrentValues `
                                                   -DesiredSettings $PSBoundParameters
 }
 

@@ -103,7 +103,7 @@ function Get-TargetResource
         return $nullreturn
     }
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+    $result = Invoke-SPDscCommand -Credential $InstallAccount `
                                   -Arguments @($PSBoundParameters, $PSScriptRoot) `
                                   -ScriptBlock {
         $params = $args[0]
@@ -249,7 +249,7 @@ function Set-TargetResource
                "ExcludeDatabases parameter")
     }
 
-    $null = Invoke-SPDSCCommand -Credential $InstallAccount `
+    $null = Invoke-SPDscCommand -Credential $InstallAccount `
                                   -Arguments @($PSBoundParameters, $PSScriptRoot) `
                                   -ScriptBlock {
         $params = $args[0]

@@ -212,7 +212,7 @@ function Get-TargetResource
         $PSBoundParameters.ContainsKey("DHSCRequestTimeout") -eq $true -or
         $PSBoundParameters.ContainsKey("DHSCChannelOpenTimeOut") -eq $true)
     {
-        $installedVersion = Get-SPDSCInstalledProductVersion
+        $installedVersion = Get-SPDscInstalledProductVersion
         if ($installedVersion.FileMajorPart -eq 15)
         {
             throw ("The following parameters are only supported in SharePoint 2016 and above: " + `
@@ -224,7 +224,7 @@ function Get-TargetResource
         }
     }
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+    $result = Invoke-SPDscCommand -Credential $InstallAccount `
                                   -Arguments $PSBoundParameters `
                                   -ScriptBlock {
         $params = $args[0]
@@ -569,7 +569,7 @@ function Set-TargetResource
         $PSBoundParameters.ContainsKey("DHSCRequestTimeout") -or
         $PSBoundParameters.ContainsKey("DHSCChannelOpenTimeOut"))
     {
-        $installedVersion = Get-SPDSCInstalledProductVersion
+        $installedVersion = Get-SPDscInstalledProductVersion
         if ($installedVersion.FileMajorPart -eq 15)
         {
             throw ("The following parameters are only supported in SharePoint 2016 and above: " + `
@@ -581,7 +581,7 @@ function Set-TargetResource
         }
     }
 
-    Invoke-SPDSCCommand -Credential $InstallAccount `
+    Invoke-SPDscCommand -Credential $InstallAccount `
                     -Arguments $PSBoundParameters `
                     -ScriptBlock {
         $params = $args[0]
@@ -748,7 +748,7 @@ function Set-TargetResource
         Set-SPDistributedCacheClientSetting -ContainerType "DistributedServerToAppServerAccessTokenCache" $DSTAC
 
         # The following parameters are only required on SharePoint 2016 and above
-        $installedVersion = Get-SPDSCInstalledProductVersion
+        $installedVersion = Get-SPDscInstalledProductVersion
         if ($installedVersion.FileMajorPart -ne 15)
         {
             #DistributedFileLockThrottlerCache

@@ -26,7 +26,7 @@ function Get-TargetResource()
 
     Write-Verbose -Message "Getting remote farm trust '$Name'"
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+    $result = Invoke-SPDscCommand -Credential $InstallAccount `
                                   -Arguments $PSBoundParameters `
                                   -ScriptBlock {
         $params = $args[0]
@@ -97,7 +97,7 @@ function Set-TargetResource()
     {
         Write-Verbose -Message "Adding remote farm trust '$Name'"
 
-        Invoke-SPDSCCommand -Credential $InstallAccount `
+        Invoke-SPDscCommand -Credential $InstallAccount `
                             -Arguments $PSBoundParameters `
                             -ScriptBlock {
             $params = $args[0]
@@ -148,7 +148,7 @@ function Set-TargetResource()
     {
         Write-Verbose -Message "Removing remote farm trust '$Name'"
 
-        Invoke-SPDSCCommand -Credential $InstallAccount `
+        Invoke-SPDscCommand -Credential $InstallAccount `
                             -Arguments $PSBoundParameters `
                             -ScriptBlock {
             $params = $args[0]

@@ -61,7 +61,7 @@
 
     Write-Verbose -Message "Getting SPTrustedIdentityTokenIssuer '$Name' settings"
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+    $result = Invoke-SPDscCommand -Credential $InstallAccount `
                                   -Arguments $PSBoundParameters `
                                   -ScriptBlock {
         $params = $args[0]
@@ -203,7 +203,7 @@ function Set-TargetResource
             }
 
             Write-Verbose -Message "Creating SPTrustedIdentityTokenIssuer '$Name'"
-            $null = Invoke-SPDSCCommand -Credential $InstallAccount `
+            $null = Invoke-SPDscCommand -Credential $InstallAccount `
                                         -Arguments $PSBoundParameters `
                                         -ScriptBlock {
                 $params = $args[0]
@@ -307,7 +307,7 @@ function Set-TargetResource
     else
     {
         Write-Verbose "Removing SPTrustedIdentityTokenIssuer '$Name'"
-        $null = Invoke-SPDSCCommand -Credential $InstallAccount `
+        $null = Invoke-SPDscCommand -Credential $InstallAccount `
                                       -Arguments $PSBoundParameters `
                                       -ScriptBlock {
             $params = $args[0]

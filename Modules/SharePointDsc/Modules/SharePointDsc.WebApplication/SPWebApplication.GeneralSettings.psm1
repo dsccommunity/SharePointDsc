@@ -1,4 +1,4 @@
-function Get-SPDSCWebApplicationGeneralConfig
+function Get-SPDscWebApplicationGeneralConfig
 {
     [CmdletBinding()]
     [OutputType([System.Collections.Hashtable])]
@@ -40,7 +40,7 @@ function Get-SPDSCWebApplicationGeneralConfig
     }
 }
 
-function Set-SPDSCWebApplicationGeneralConfig
+function Set-SPDscWebApplicationGeneralConfig
 {
     [CmdletBinding()]
     param(
@@ -102,7 +102,7 @@ function Set-SPDSCWebApplicationGeneralConfig
                                           -ParamKey "SecurityValidationTimeOutMinutes"
 }
 
-function Test-SPDSCWebApplicationGeneralConfig
+function Test-SPDscWebApplicationGeneralConfig
 {
     [CmdletBinding()]
     [OutputType([System.Boolean])]

@@ -56,7 +56,7 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting SPWeb '$Url'"
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+    $result = Invoke-SPDscCommand -Credential $InstallAccount `
         -Arguments $PSBoundParameters `
         -ScriptBlock {
         $params = $args[0]
@@ -151,7 +151,7 @@ function Set-TargetResource
 
     $PSBoundParameters.Ensure = $Ensure
 
-    Invoke-SPDSCCommand -Credential $InstallAccount `
+    Invoke-SPDscCommand -Credential $InstallAccount `
         -Arguments $PSBoundParameters `
         -ScriptBlock {
         $params = $args[0]

@@ -69,7 +69,7 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting SP Log Level Settings for provided Areas"
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+    $result = Invoke-SPDscCommand -Credential $InstallAccount `
                                  -Arguments $PSBoundParameters `
                                  -ScriptBlock {
          $params = $args[0]
@@ -209,7 +209,7 @@ function Set-TargetResource
 
     Write-Verbose -Message "Setting SP Log Level settings for the provided areas"
 
-    Invoke-SPDSCCommand -Credential $InstallAccount `
+    Invoke-SPDscCommand -Credential $InstallAccount `
                         -Arguments $PSBoundParameters `
                         -ScriptBlock {
         $params = $args[0]

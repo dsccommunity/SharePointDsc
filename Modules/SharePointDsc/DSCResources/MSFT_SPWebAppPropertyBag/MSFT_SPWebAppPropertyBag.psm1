@@ -28,7 +28,7 @@ function Get-TargetResource()
 
     Write-Verbose -Message "Looking for SPWebApplication property '$Key'"
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+    $result = Invoke-SPDscCommand -Credential $InstallAccount `
                                   -Arguments $PSBoundParameters `
                                   -ScriptBlock {
         $params = $args[0]
@@ -96,7 +96,7 @@ function Set-TargetResource()
 
     Write-Verbose -Message "Setting SPWebApplication property '$Key'"
 
-    Invoke-SPDSCCommand -Credential $InstallAccount `
+    Invoke-SPDscCommand -Credential $InstallAccount `
                         -Arguments $PSBoundParameters `
                         -ScriptBlock {
         $params = $args[0]

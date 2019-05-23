@@ -41,7 +41,7 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting Security Token Service Configuration"
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+    $result = Invoke-SPDscCommand -Credential $InstallAccount `
                                   -Arguments $PSBoundParameters `
                                   -ScriptBlock {
         $params = $args[0]
@@ -124,7 +124,7 @@ function Set-TargetResource
         Please set Ensure to Present or omit the resource"
     }
 
-    Invoke-SPDSCCommand -Credential $InstallAccount `
+    Invoke-SPDscCommand -Credential $InstallAccount `
                         -Arguments $PSBoundParameters `
                         -ScriptBlock {
         $params = $args[0]

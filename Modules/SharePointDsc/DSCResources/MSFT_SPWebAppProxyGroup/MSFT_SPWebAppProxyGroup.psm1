@@ -19,7 +19,7 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting $WebAppUrl Service Proxy Group Association"
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+    $result = Invoke-SPDscCommand -Credential $InstallAccount `
                                   -Arguments $PSBoundParameters `
                                   -ScriptBlock {
         $params = $args[0]
@@ -73,7 +73,7 @@ function Set-TargetResource
 
     Write-Verbose -Message "Setting $WebAppUrl Service Proxy Group Association"
 
-    Invoke-SPDSCCommand -Credential $InstallAccount `
+    Invoke-SPDscCommand -Credential $InstallAccount `
                         -Arguments $PSBoundParameters `
                         -ScriptBlock {
         $params = $args[0]

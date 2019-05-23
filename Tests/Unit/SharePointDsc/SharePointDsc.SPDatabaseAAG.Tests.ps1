@@ -1,7 +1,7 @@
 ﻿[CmdletBinding()]
 param(
     [Parameter()]
-    [string] 
+    [string]
     $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
                                          -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
                                          -Resolve)
@@ -18,19 +18,19 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
     InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
         Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
-        # Mocks for all contexts   
+        # Mocks for all contexts
         Mock -CommandName Add-DatabaseToAvailabilityGroup -MockWith { }
         Mock -CommandName Remove-DatabaseFromAvailabilityGroup -MockWith { }
-        if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 15) 
+        if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 15)
         {
-            Mock -CommandName Get-SPDSCInstalledProductVersion { 
-                return @{ 
+            Mock -CommandName Get-SPDscInstalledProductVersion {
+                return @{
                     FileMajorPart = 15
                     FileBuildPart = 4805
-                } 
+                }
             }
         }
-        
+
         # Test contexts
         Context -Name "The database is not in an availability group, but should be" -Fixture {
             $testParams = @{
@@ -138,7 +138,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 AGName = "AGName"
                 Ensure = "Absent"
             }
-            
+
             Mock -CommandName Get-SPDatabase -MockWith {
                 return @(
                     @{
@@ -163,7 +163,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 AGName = "AGName"
                 Ensure = "Absent"
             }
-            
+
             Mock -CommandName Get-SPDatabase -MockWith {
                 return @(
                     @{
@@ -192,7 +192,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 AGName = "AGName"
                 Ensure = "Present"
             }
-            
+
             Mock -CommandName Get-SPDatabase -MockWith {
                 return @(
                     @{
@@ -219,7 +219,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 AGName = "AGName"
                 Ensure = "Present"
             }
-            
+
             Mock -CommandName Get-SPDatabase -MockWith {
                 return @(
                     @{
@@ -252,7 +252,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 AGName = "AGName"
                 Ensure = "Absent"
             }
-            
+
             Mock -CommandName Get-SPDatabase -MockWith {
                 return @(
                     @{
@@ -284,7 +284,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 AGName = "AGName"
                 Ensure = "Absent"
             }
-            
+
             Mock -CommandName Get-SPDatabase -MockWith {
                 return @(
                     @{
@@ -322,7 +322,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 AGName = "AGName"
                 Ensure = "Absent"
             }
-            
+
             Mock -CommandName Get-SPDatabase -MockWith {
                 return @(
                     @{
@@ -360,7 +360,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 AGName = "AGName"
                 Ensure = "Present"
             }
-            
+
             Mock -CommandName Get-SPDatabase -MockWith {
                 return @(
                     @{
@@ -393,7 +393,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 AGName = "AGName"
                 Ensure = "Present"
             }
-            
+
             Mock -CommandName Get-SPDatabase -MockWith {
                 return @(
                     @{
@@ -432,7 +432,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 AGName = "AGName"
                 Ensure = "Present"
             }
-            
+
             Mock -CommandName Get-SPDatabase -MockWith {
                 return @(
                     @{
@@ -457,7 +457,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
         }
 
-        if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 15) 
+        if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 15)
         {
             Context -Name "An unsupported version of SharePoint is installed on the server" {
                 $testParams = @{
@@ -465,12 +465,12 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     AGName = "AGName"
                     Ensure = "Present"
                 }
-                
-                Mock -CommandName Get-SPDSCInstalledProductVersion { 
+
+                Mock -CommandName Get-SPDscInstalledProductVersion {
                     return @{
                         FileMajorPart = 15
                         FileBuildPart = 4000
-                    } 
+                    }
                 }
 
                 It "Should throw when an unsupported version is installed and get is called" {
@@ -484,7 +484,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 It "Should throw when an unsupported version is installed and set is called" {
                     { Set-TargetResource @testParams } | Should throw "Adding databases to SQL Always-On Availability Groups require the SharePoint 2013 April 2014 CU to be installed"
                 }
-            }            
+            }
         }
     }
 }

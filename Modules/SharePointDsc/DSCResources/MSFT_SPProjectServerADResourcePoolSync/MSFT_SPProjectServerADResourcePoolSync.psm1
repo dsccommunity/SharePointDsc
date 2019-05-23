@@ -28,13 +28,13 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting AD Resource Pool Sync settings for $Url"
 
-    if ((Get-SPDSCInstalledProductVersion).FileMajorPart -lt 16)
+    if ((Get-SPDscInstalledProductVersion).FileMajorPart -lt 16)
     {
         throw [Exception] ("Support for Project Server in SharePointDsc is only valid for " + `
                            "SharePoint 2016 and 2019.")
     }
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+    $result = Invoke-SPDscCommand -Credential $InstallAccount `
                                   -Arguments @($PSBoundParameters, $PSScriptRoot) `
                                   -ScriptBlock {
         $params = $args[0]
@@ -130,7 +130,7 @@ function Set-TargetResource
 
     Write-Verbose -Message "Setting AD Resource Pool Sync settings for $Url"
 
-    if ((Get-SPDSCInstalledProductVersion).FileMajorPart -lt 16)
+    if ((Get-SPDscInstalledProductVersion).FileMajorPart -lt 16)
     {
         throw [Exception] ("Support for Project Server in SharePointDsc is only valid for " + `
                            "SharePoint 2016 and 2019.")
@@ -138,7 +138,7 @@ function Set-TargetResource
 
     if ($Ensure -eq "Present")
     {
-        Invoke-SPDSCCommand -Credential $InstallAccount `
+        Invoke-SPDscCommand -Credential $InstallAccount `
                             -Arguments $PSBoundParameters `
                             -ScriptBlock {
 
@@ -172,7 +172,7 @@ function Set-TargetResource
     }
     else
     {
-        Invoke-SPDSCCommand -Credential $InstallAccount `
+        Invoke-SPDscCommand -Credential $InstallAccount `
                             -Arguments $PSBoundParameters `
                             -ScriptBlock {
 

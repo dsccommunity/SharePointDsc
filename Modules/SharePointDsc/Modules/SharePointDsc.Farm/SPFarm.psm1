@@ -2,11 +2,11 @@
 
 .SYNOPSIS
 
-Get-SPDSCConfigDBStatus is used to determine the state of a configuration database
+Get-SPDscConfigDBStatus is used to determine the state of a configuration database
 
 .DESCRIPTION
 
-Get-SPDSCConfigDBStatus will determine two things - firstly, if the config database
+Get-SPDscConfigDBStatus will determine two things - firstly, if the config database
 exists, and secondly if the user executing the script has appropriate permissions
 to the instance to create the database. These values are used by the SPFarm resource
 to determine what actions to take in it's set method.
@@ -21,10 +21,10 @@ The name of the database to validate as the configuration database
 
 .EXAMPLE
 
-Get-SPDSCConfigDBStatus -SQLServer sql.contoso.com -Database SP_Config
+Get-SPDscConfigDBStatus -SQLServer sql.contoso.com -Database SP_Config
 
 #>
-function Get-SPDSCConfigDBStatus
+function Get-SPDscConfigDBStatus
 {
     param(
         [Parameter(Mandatory = $true)]
@@ -40,7 +40,7 @@ function Get-SPDSCConfigDBStatus
     $connection.ConnectionString = "Server=$SQLServer;Integrated Security=SSPI;Database=Master"
     $command = New-Object -TypeName "System.Data.SqlClient.SqlCommand"
 
-    try 
+    try
     {
         $currentUser = ([Security.Principal.WindowsIdentity]::GetCurrent()).Name
         $connection.Open()
@@ -72,7 +72,7 @@ function Get-SPDSCConfigDBStatus
     }
     finally
     {
-        if ($connection.State -eq "Open") 
+        if ($connection.State -eq "Open")
         {
             $connection.Close()
             $connection.Dispose()
@@ -84,11 +84,11 @@ function Get-SPDSCConfigDBStatus
 
 .SYNOPSIS
 
-Get-SPDSCSQLInstanceStatus is used to determine the state of the SQL instance
+Get-SPDscSQLInstanceStatus is used to determine the state of the SQL instance
 
 .DESCRIPTION
 
-Get-SPDSCSQLInstanceStatus will determine the state of the MaxDOP setting. This
+Get-SPDscSQLInstanceStatus will determine the state of the MaxDOP setting. This
 value is used by the SPFarm resource to determine if the SQL instance is ready
 for SharePoint deployment.
 
@@ -98,10 +98,10 @@ The name of the SQL server to check against
 
 .EXAMPLE
 
-Get-SPDSCConfigDBStatus -SQLServer sql.contoso.com
+Get-SPDscConfigDBStatus -SQLServer sql.contoso.com
 
 #>
-function Get-SPDSCSQLInstanceStatus
+function Get-SPDscSQLInstanceStatus
 {
     param(
         [Parameter(Mandatory = $true)]
@@ -113,7 +113,7 @@ function Get-SPDSCSQLInstanceStatus
     $connection.ConnectionString = "Server=$SQLServer;Integrated Security=SSPI;Database=Master"
     $command = New-Object -TypeName "System.Data.SqlClient.SqlCommand"
 
-    try 
+    try
     {
         $currentUser = ([Security.Principal.WindowsIdentity]::GetCurrent()).Name
         $connection.Open()
@@ -128,7 +128,7 @@ function Get-SPDSCSQLInstanceStatus
     }
     finally
     {
-        if ($connection.State -eq "Open") 
+        if ($connection.State -eq "Open")
         {
             $connection.Close()
             $connection.Dispose()
@@ -140,13 +140,13 @@ function Get-SPDSCSQLInstanceStatus
 
 .SYNOPSIS
 
-Add-SPDSCConfigDBLock is used to create a lock to tell other servers that the
+Add-SPDscConfigDBLock is used to create a lock to tell other servers that the
 config DB is currently provisioning
 
 .DESCRIPTION
 
-Add-SPDSCConfigDBLock will create an empty database with the same name as the
-config DB but suffixed with "_Lock". The presences of this database will 
+Add-SPDscConfigDBLock will create an empty database with the same name as the
+config DB but suffixed with "_Lock". The presences of this database will
 indicate to other servers that the config database is in the process of being
 provisioned as the database is removed at the end of the process.
 
@@ -160,10 +160,10 @@ The name of the database to validate as the configuration database
 
 .EXAMPLE
 
-Add-SPDSCConfigDBLock -SQLServer sql.contoso.com -Database SP_Config
+Add-SPDscConfigDBLock -SQLServer sql.contoso.com -Database SP_Config
 
 #>
-function Add-SPDSCConfigDBLock
+function Add-SPDscConfigDBLock
 {
     param(
         [Parameter(Mandatory = $true)]
@@ -181,7 +181,7 @@ function Add-SPDSCConfigDBLock
     $connection.ConnectionString = "Server=$SQLServer;Integrated Security=SSPI;Database=Master"
     $command = New-Object -TypeName "System.Data.SqlClient.SqlCommand"
 
-    try 
+    try
     {
         $connection.Open()
         $command.Connection = $connection
@@ -191,7 +191,7 @@ function Add-SPDSCConfigDBLock
     }
     finally
     {
-        if ($connection.State -eq "Open") 
+        if ($connection.State -eq "Open")
         {
             $connection.Close()
             $connection.Dispose()
@@ -203,13 +203,13 @@ function Add-SPDSCConfigDBLock
 
 .SYNOPSIS
 
-Remove-SPDSCConfigDBLock is used to create a lock to tell other servers that the
+Remove-SPDscConfigDBLock is used to create a lock to tell other servers that the
 config DB is currently provisioning
 
 .DESCRIPTION
 
-Remove-SPDSCConfigDBLock will cremove the lock database created by the
-Add-SPDSCConfigDBLock command.
+Remove-SPDscConfigDBLock will cremove the lock database created by the
+Add-SPDscConfigDBLock command.
 
 .PARAMETER SQLServer
 
@@ -221,10 +221,10 @@ The name of the database to validate as the configuration database
 
 .EXAMPLE
 
-Remove-SPDSCConfigDBLock -SQLServer sql.contoso.com -Database SP_Config
+Remove-SPDscConfigDBLock -SQLServer sql.contoso.com -Database SP_Config
 
 #>
-function Remove-SPDSCConfigDBLock
+function Remove-SPDscConfigDBLock
 {
     param(
         [Parameter(Mandatory = $true)]
@@ -242,7 +242,7 @@ function Remove-SPDSCConfigDBLock
     $connection.ConnectionString = "Server=$SQLServer;Integrated Security=SSPI;Database=Master"
     $command = New-Object -TypeName "System.Data.SqlClient.SqlCommand"
 
-    try 
+    try
     {
         $connection.Open()
         $command.Connection = $connection
@@ -252,7 +252,7 @@ function Remove-SPDSCConfigDBLock
     }
     finally
     {
-        if ($connection.State -eq "Open") 
+        if ($connection.State -eq "Open")
         {
             $connection.Close()
             $connection.Dispose()

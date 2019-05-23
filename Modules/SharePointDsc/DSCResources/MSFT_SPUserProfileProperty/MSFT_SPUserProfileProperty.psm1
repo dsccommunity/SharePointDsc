@@ -115,7 +115,7 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting user profile property $Name"
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+    $result = Invoke-SPDscCommand -Credential $InstallAccount `
         -Arguments $PSBoundParameters `
         -ScriptBlock {
         $params = $args[0]
@@ -138,7 +138,7 @@ function Get-TargetResource
 
         $context = Get-SPServiceContext -Site $caURL
 
-        $userProfileSubTypeManager = Get-SPDSCUserProfileSubTypeManager -Context $context
+        $userProfileSubTypeManager = Get-SPDscUserProfileSubTypeManager -Context $context
         $userProfileSubType = $userProfileSubTypeManager.GetProfileSubtype("UserProfile")
 
         $userProfileProperty = $userProfileSubType.Properties.GetPropertyByName($params.Name)
@@ -409,7 +409,7 @@ function Set-TargetResource
 
     $PSBoundParameters.Ensure = $Ensure
 
-    Invoke-SPDSCCommand -Credential $InstallAccount `
+    Invoke-SPDscCommand -Credential $InstallAccount `
         -Arguments $PSBoundParameters `
         -ScriptBlock {
 
@@ -457,7 +457,7 @@ function Set-TargetResource
         }
         $coreProperties = $userProfileConfigManager.ProfilePropertyManager.GetCoreProperties()
 
-        $userProfileSubTypeManager = Get-SPDSCUserProfileSubTypeManager $context
+        $userProfileSubTypeManager = Get-SPDscUserProfileSubTypeManager $context
         $userProfileSubType = $userProfileSubTypeManager.GetProfileSubtype("UserProfile")
 
         $userProfileProperty = $userProfileSubType.Properties.GetPropertyByName($params.Name)

@@ -111,7 +111,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             return $service
         }
 
-        Mock -CommandName Get-SPDSCInstalledProductVersion {
+        Mock -CommandName Get-SPDscInstalledProductVersion {
             return @{
                 FileMajorPart    = $Global:SPDscHelper.CurrentStubBuildNumber.Major
                 FileBuildPart    = $Global:SPDscHelper.CurrentStubBuildNumber.Build
@@ -129,7 +129,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
         }
 
-        Mock -CommandName Get-SPDSCRegistryKey -MockWith {
+        Mock -CommandName Get-SPDscRegistryKey -MockWith {
             if ($Value -eq "SetupType")
             {
                 return "CLEAN_INSTALL"

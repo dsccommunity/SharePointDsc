@@ -19,7 +19,7 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting identity for service instance '$Name'"
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+    $result = Invoke-SPDscCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
 
         if ($params.Name -eq "SharePoint Server Search")
@@ -77,7 +77,7 @@ function Set-TargetResource
 
     Write-Verbose -Message "Setting service instance '$Name' to '$ManagedAccount'"
 
-    Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+    Invoke-SPDscCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
 
         if ($params.Name -eq "SharePoint Server Search")

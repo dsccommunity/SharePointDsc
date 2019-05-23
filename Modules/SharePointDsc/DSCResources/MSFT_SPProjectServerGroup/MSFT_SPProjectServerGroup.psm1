@@ -44,7 +44,7 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting group settings for '$Name' at '$Url'"
 
-    if ((Get-SPDSCInstalledProductVersion).FileMajorPart -lt 16)
+    if ((Get-SPDscInstalledProductVersion).FileMajorPart -lt 16)
     {
         throw [Exception] ("Support for Project Server in SharePointDsc is only valid for " + `
                            "SharePoint 2016 and 2019.")
@@ -67,7 +67,7 @@ function Get-TargetResource
                "MembersToInclude or MembersToExclude")
     }
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+    $result = Invoke-SPDscCommand -Credential $InstallAccount `
                                   -Arguments @($PSBoundParameters, $PSScriptRoot) `
                                   -ScriptBlock {
         $params = $args[0]
@@ -208,7 +208,7 @@ function Set-TargetResource
 
     if ($Ensure -eq "Present")
     {
-        Invoke-SPDSCCommand -Credential $InstallAccount `
+        Invoke-SPDscCommand -Credential $InstallAccount `
                             -Arguments @($PSBoundParameters, $PSScriptRoot, $currentSettings) `
                             -ScriptBlock {
 
@@ -312,7 +312,7 @@ function Set-TargetResource
     }
     else
     {
-        Invoke-SPDSCCommand -Credential $InstallAccount `
+        Invoke-SPDscCommand -Credential $InstallAccount `
                             -Arguments @($PSBoundParameters, $PSScriptRoot) `
                             -ScriptBlock {
 

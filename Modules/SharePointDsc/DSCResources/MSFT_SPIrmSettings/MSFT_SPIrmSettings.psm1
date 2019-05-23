@@ -29,7 +29,7 @@ function Get-TargetResource
 
     Write-Verbose "Getting SharePoint IRM Settings"
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+    $result = Invoke-SPDscCommand -Credential $InstallAccount `
                                   -Arguments $PSBoundParameters `
                                   -ScriptBlock {
         $params = $args[0]
@@ -51,7 +51,7 @@ function Get-TargetResource
         }
 
         # Get a reference to the Administration WebService
-        $admService = Get-SPDSCContentService
+        $admService = Get-SPDscContentService
 
         if ($admService.IrmSettings.IrmRMSEnabled)
         {
@@ -102,7 +102,7 @@ function Set-TargetResource
 
     Write-Verbose "Setting SharePoint IRM Settings"
 
-    Invoke-SPDSCCommand -Credential $InstallAccount `
+    Invoke-SPDscCommand -Credential $InstallAccount `
                         -Arguments $PSBoundParameters `
                         -ScriptBlock {
         $params = $args[0]
@@ -117,7 +117,7 @@ function Set-TargetResource
             return
         }
 
-        $admService = Get-SPDSCContentService
+        $admService = Get-SPDscContentService
 
         if ($params.UseADRMS -and ($null -ne $params.RMSserver))
         {

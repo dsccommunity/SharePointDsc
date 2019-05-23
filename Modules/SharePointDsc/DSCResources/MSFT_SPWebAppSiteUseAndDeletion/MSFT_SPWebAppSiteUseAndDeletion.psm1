@@ -32,7 +32,7 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting web application '$WebAppUrl' site use and deletion settings"
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+    $result = Invoke-SPDscCommand -Credential $InstallAccount `
                                   -Arguments $PSBoundParameters `
                                   -ScriptBlock {
         $params = $args[0]
@@ -102,7 +102,7 @@ function Set-TargetResource
 
     Write-Verbose -Message "Setting web application '$WebAppUrl' Site Use and Deletion settings"
 
-    Invoke-SPDSCCommand -Credential $InstallAccount `
+    Invoke-SPDscCommand -Credential $InstallAccount `
                         -Arguments $PSBoundParameters `
                         -ScriptBlock {
         $params = $args[0]

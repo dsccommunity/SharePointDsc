@@ -52,7 +52,7 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting Work management service app '$Name'"
 
-    $installedVersion = Get-SPDSCInstalledProductVersion
+    $installedVersion = Get-SPDscInstalledProductVersion
     if ($installedVersion.FileMajorPart -eq 16)
     {
         throw [Exception] ("Work Management Service Application is no longer available " + `
@@ -60,7 +60,7 @@ function Get-TargetResource
                            "https://technet.microsoft.com/en-us/library/mt346112(v=office.16).aspx")
     }
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+    $result = Invoke-SPDscCommand -Credential $InstallAccount `
                                   -Arguments $PSBoundParameters `
                                   -ScriptBlock {
         $params = $args[0]
@@ -170,7 +170,7 @@ function Set-TargetResource
     Write-Verbose -Message "Setting Work management service app '$Name'"
     $PSBoundParameters.Ensure = $Ensure
 
-    $installedVersion = Get-SPDSCInstalledProductVersion
+    $installedVersion = Get-SPDscInstalledProductVersion
     if ($installedVersion.FileMajorPart -eq 16)
     {
         throw [Exception] ("Work Management Service Application is no longer available " + `
@@ -188,7 +188,7 @@ function Set-TargetResource
     if ($result.Ensure -eq "Absent" -and $Ensure -eq "Present")
     {
         Write-Verbose -Message "Creating work management Service Application $Name"
-        Invoke-SPDSCCommand -Credential $InstallAccount `
+        Invoke-SPDscCommand -Credential $InstallAccount `
                             -Arguments $PSBoundParameters `
                             -ScriptBlock {
             $params = $args[0]
@@ -226,7 +226,7 @@ function Set-TargetResource
             -and $ApplicationPool -ne $result.ApplicationPool)
         {
             Write-Verbose -Message "Updating Application Pool of Work Management Service Application $Name"
-            Invoke-SPDSCCommand -Credential $InstallAccount `
+            Invoke-SPDscCommand -Credential $InstallAccount `
                                 -Arguments $PSBoundParameters `
                                 -ScriptBlock {
                 $params = $args[0]
@@ -240,7 +240,7 @@ function Set-TargetResource
         }
 
         Write-Verbose -Message "Updating Application Pool of Work Management Service Application $Name"
-            Invoke-SPDSCCommand -Credential $InstallAccount `
+            Invoke-SPDscCommand -Credential $InstallAccount `
                                 -Arguments $PSBoundParameters `
                                 -ScriptBlock {
             $params = $args[0]
@@ -305,7 +305,7 @@ function Set-TargetResource
     {
         # The service app should not exit
         Write-Verbose -Message "Removing Work Management Service Application $Name"
-        Invoke-SPDSCCommand -Credential $InstallAccount `
+        Invoke-SPDscCommand -Credential $InstallAccount `
                             -Arguments $PSBoundParameters `
                             -ScriptBlock {
             $params = $args[0]
@@ -382,7 +382,7 @@ function Test-TargetResource
 
     Write-Verbose -Message "Testing Work management service app '$Name'"
 
-    $installedVersion = Get-SPDSCInstalledProductVersion
+    $installedVersion = Get-SPDscInstalledProductVersion
     if ($installedVersion.FileMajorPart -eq 16)
     {
         throw [Exception] ("Work Management Service Application is no longer available " + `

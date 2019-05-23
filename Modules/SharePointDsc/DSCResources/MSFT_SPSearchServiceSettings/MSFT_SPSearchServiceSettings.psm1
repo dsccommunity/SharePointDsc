@@ -47,7 +47,7 @@ function Get-TargetResource
         }
     }
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+    $result = Invoke-SPDscCommand -Credential $InstallAccount `
                                   -Arguments $PSBoundParameters `
                                   -ScriptBlock {
         $params = $args[0]
@@ -128,7 +128,7 @@ function Set-TargetResource
     $result = Get-TargetResource @PSBoundParameters
 
     # Update the service app that already exists
-    Invoke-SPDSCCommand -Credential $InstallAccount `
+    Invoke-SPDscCommand -Credential $InstallAccount `
                         -Arguments @($PSBoundParameters, $result) `
                         -ScriptBlock {
         $params = $args[0]

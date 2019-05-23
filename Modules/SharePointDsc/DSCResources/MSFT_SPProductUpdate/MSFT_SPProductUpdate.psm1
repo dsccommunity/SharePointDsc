@@ -389,7 +389,7 @@ function Set-TargetResource
                 "any time. Starting update.")
     }
 
-    $installedVersion = Get-SPDSCInstalledProductVersion
+    $installedVersion = Get-SPDscInstalledProductVersion
 
     if ($ShutdownServices)
     {
@@ -411,7 +411,7 @@ function Set-TargetResource
         $osearchSvc = Get-Service -Name $searchServiceName
         $hostControllerSvc = Get-Service -Name "SPSearchHostController"
 
-        Invoke-SPDSCCommand -Credential $InstallAccount `
+        Invoke-SPDscCommand -Credential $InstallAccount `
                             -ScriptBlock
         {
             $searchSAs = Get-SPEnterpriseSearchServiceApplication
@@ -466,7 +466,7 @@ function Set-TargetResource
 
     Write-Verbose -Message "Beginning installation of the SharePoint update"
 
-    Invoke-SPDSCCommand -Credential $InstallAccount `
+    Invoke-SPDscCommand -Credential $InstallAccount `
                         -Arguments $SetupFile `
                         -ScriptBlock
     {
@@ -567,7 +567,7 @@ function Set-TargetResource
         if ($searchPaused -eq $true)
         {
             # Resuming Search Service Application if paused###
-            Invoke-SPDSCCommand -Credential $InstallAccount `
+            Invoke-SPDscCommand -Credential $InstallAccount `
                                 -ScriptBlock
             {
                 $searchSAs = Get-SPEnterpriseSearchServiceApplication

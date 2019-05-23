@@ -82,7 +82,7 @@ namespace Microsoft.SharePoint.Administration.AccessControl {
 "@
 
         # Mocks for all contexts
-        Mock -CommandName Get-SPDSCFarmAccount -MockWith {
+        Mock -CommandName Get-SPDscFarmAccount -MockWith {
             return $mockFarmCredential
         }
         Mock -CommandName New-SPProfileServiceApplication -MockWith {
@@ -93,9 +93,9 @@ namespace Microsoft.SharePoint.Administration.AccessControl {
             )
         }
         Mock -CommandName New-SPProfileServiceApplicationProxy -MockWith { }
-        Mock -CommandName Add-SPDSCUserToLocalAdmin -MockWith { }
-        Mock -CommandName Test-SPDSCUserIsLocalAdmin -MockWith { return $false }
-        Mock -CommandName Remove-SPDSCUserToLocalAdmin -MockWith { }
+        Mock -CommandName Add-SPDscUserToLocalAdmin -MockWith { }
+        Mock -CommandName Test-SPDscUserIsLocalAdmin -MockWith { return $false }
+        Mock -CommandName Remove-SPDscUserToLocalAdmin -MockWith { }
         Mock -CommandName Remove-SPServiceApplication -MockWith { }
 
         Mock -CommandName Get-SPWebApplication -MockWith {
@@ -119,7 +119,7 @@ namespace Microsoft.SharePoint.Administration.AccessControl {
                 Ensure = "Present"
             }
 
-            Mock -CommandName Get-SPDSCFarmAccount -MockWith {
+            Mock -CommandName Get-SPDscFarmAccount -MockWith {
                 return $mockCredential
             }
 
@@ -149,7 +149,7 @@ namespace Microsoft.SharePoint.Administration.AccessControl {
                 Ensure = "Present"
             }
 
-            Mock -CommandName Get-SPDSCFarmAccount -MockWith {
+            Mock -CommandName Get-SPDscFarmAccount -MockWith {
                 return $mockCredential
             }
 

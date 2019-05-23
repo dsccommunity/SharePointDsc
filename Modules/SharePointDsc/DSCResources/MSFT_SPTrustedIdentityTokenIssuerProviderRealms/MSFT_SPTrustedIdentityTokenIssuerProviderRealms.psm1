@@ -69,7 +69,7 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting SPTrustedIdentityTokenIssuer ProviderRealms"
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+    $result = Invoke-SPDscCommand -Credential $InstallAccount `
                                   -Arguments $PSBoundParameters `
                                   -ScriptBlock {
         $params = $args[0]
@@ -161,7 +161,7 @@ function Set-TargetResource
         $PSBoundParameters.Add('RealmsToAdd', $CurrentValues.RealmsToAdd)
 
         Write-Verbose -Message "Setting SPTrustedIdentityTokenIssuer provider realms"
-        $null = Invoke-SPDSCCommand -Credential $InstallAccount `
+        $null = Invoke-SPDscCommand -Credential $InstallAccount `
                                     -Arguments $PSBoundParameters `
                                     -ScriptBlock {
             $params = $args[0]

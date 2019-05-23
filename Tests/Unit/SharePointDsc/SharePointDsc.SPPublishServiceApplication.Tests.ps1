@@ -7,7 +7,7 @@ $ErrorActionPreference = 'stop'
 Set-StrictMode -Version latest
 
 $RepoRoot = (Resolve-Path $PSScriptRoot\..\..\..).Path
-$Global:CurrentSharePointStubModule = $SharePointCmdletModule 
+$Global:CurrentSharePointStubModule = $SharePointCmdletModule
 
 $ModuleName = "MSFT_SPPublishServiceApplication"
 Import-Module (Join-Path $RepoRoot "Modules\SharePointDsc\DSCResources\$ModuleName\$ModuleName.psm1") -Force
@@ -19,13 +19,13 @@ Describe "SPPublishServiceApplication - SharePoint Build $((Get-Item $SharePoint
             Ensure = "Present"
         }
         Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..\..).Path) "Modules\SharePointDsc")
-        
-        Mock Invoke-SPDSCCommand { 
+
+        Mock Invoke-SPDscCommand {
             return Invoke-Command -ScriptBlock $ScriptBlock -ArgumentList $Arguments -NoNewScope
         }
-        
+
         Remove-Module -Name "Microsoft.SharePoint.PowerShell" -Force -ErrorAction SilentlyContinue
-        Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue 
+        Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue
         Mock Publish-SPServiceApplication { }
         Mock Unpublish-SPServiceApplication { }
 
@@ -96,7 +96,7 @@ Describe "SPPublishServiceApplication - SharePoint Build $((Get-Item $SharePoint
 
         Context -Name "The service application specified does not exist" {
             Mock -CommandName Get-SPServiceApplication  { return $null }
-                        
+
             It "Should return absent from the get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Absent"
             }
@@ -155,5 +155,5 @@ Describe "SPPublishServiceApplication - SharePoint Build $((Get-Item $SharePoint
                 Assert-MockCalled Unpublish-SPServiceApplication
             }
         }
-    }    
+    }
 }

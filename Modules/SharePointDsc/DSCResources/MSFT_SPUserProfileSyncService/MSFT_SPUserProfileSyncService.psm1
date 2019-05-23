@@ -27,13 +27,13 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting user profile sync service for $UserProfileServiceAppName"
 
-    if ((Get-SPDSCInstalledProductVersion).FileMajorPart -ne 15)
+    if ((Get-SPDscInstalledProductVersion).FileMajorPart -ne 15)
     {
         throw [Exception] ("Only SharePoint 2013 is supported to deploy the user profile sync " + `
                            "service via DSC, as 2016/2019 do not use the FIM based sync service.")
     }
 
-    $farmAccount = Invoke-SPDSCCommand -Credential $InstallAccount `
+    $farmAccount = Invoke-SPDscCommand -Credential $InstallAccount `
                                        -Arguments $PSBoundParameters `
                                        -ScriptBlock {
         return Get-SPDscFarmAccount
@@ -71,7 +71,7 @@ function Get-TargetResource
         throw ("Unable to retrieve the Farm Account. Check if the farm exists.")
     }
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+    $result = Invoke-SPDscCommand -Credential $InstallAccount `
                                   -Arguments $PSBoundParameters `
                                   -ScriptBlock {
         $params = $args[0]
@@ -170,13 +170,13 @@ function Set-TargetResource
 
     $PSBoundParameters.Ensure = $Ensure
 
-    if ((Get-SPDSCInstalledProductVersion).FileMajorPart -ne 15)
+    if ((Get-SPDscInstalledProductVersion).FileMajorPart -ne 15)
     {
         throw [Exception] ("Only SharePoint 2013 is supported to deploy the user profile sync " + `
                            "service via DSC, as 2016/2019 do not use the FIM based sync service.")
     }
 
-    $farmAccount = Invoke-SPDSCCommand -Credential $InstallAccount `
+    $farmAccount = Invoke-SPDscCommand -Credential $InstallAccount `
                                            -Arguments $PSBoundParameters `
                                            -ScriptBlock {
         return Get-SPDscFarmAccount
@@ -233,12 +233,12 @@ function Set-TargetResource
     }
 
     # Add the Farm Account to the local Admins group, if it's not already there
-    $isLocalAdmin = Test-SPDSCUserIsLocalAdmin -UserName $farmAccount.UserName
+    $isLocalAdmin = Test-SPDscUserIsLocalAdmin -UserName $farmAccount.UserName
 
     if (!$isLocalAdmin)
     {
         Write-Verbose -Message "Adding farm account to Local Administrators group"
-        Add-SPDSCUserToLocalAdmin -UserName $farmAccount.UserName
+        Add-SPDscUserToLocalAdmin -UserName $farmAccount.UserName
 
         # Cycle the Timer Service and flush Kerberos tickets
         # so that it picks up the local Admin token
@@ -250,7 +250,7 @@ function Set-TargetResource
     $isInDesiredState = $false
     try
     {
-        Invoke-SPDSCCommand -Credential $FarmAccount `
+        Invoke-SPDscCommand -Credential $FarmAccount `
                             -Arguments ($PSBoundParameters,$farmAccount) `
                             -ScriptBlock {
             $params = $args[0]
@@ -337,7 +337,7 @@ function Set-TargetResource
         if (!$isLocalAdmin)
         {
             Write-Verbose -Message "Removing farm account from Local Administrators group"
-            Remove-SPDSCUserToLocalAdmin -UserName $farmAccount.UserName
+            Remove-SPDscUserToLocalAdmin -UserName $farmAccount.UserName
 
             # Cycle the Timer Service and flush Kerberos tickets
             # so that it picks up the local Admin token
@@ -379,7 +379,7 @@ function Test-TargetResource
 
     $PSBoundParameters.Ensure = $Ensure
 
-    if ((Get-SPDSCInstalledProductVersion).FileMajorPart -ne 15)
+    if ((Get-SPDscInstalledProductVersion).FileMajorPart -ne 15)
     {
         throw [Exception] ("Only SharePoint 2013 is supported to deploy the user profile sync " + `
                            "service via DSC, as 2016/2019 do not use the FIM based sync service.")
@@ -427,7 +427,7 @@ function Test-SPDscUserProfileDBReadOnly()
         $InstallAccount
     )
 
-    $databaseReadOnly = Invoke-SPDSCCommand -Credential $InstallAccount `
+    $databaseReadOnly = Invoke-SPDscCommand -Credential $InstallAccount `
                                             -Arguments $UserProfileServiceAppName `
                                             -ScriptBlock {
         $UserProfileServiceAppName = $args[0]

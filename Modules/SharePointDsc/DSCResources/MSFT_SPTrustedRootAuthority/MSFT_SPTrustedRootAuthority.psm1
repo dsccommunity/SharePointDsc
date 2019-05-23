@@ -50,7 +50,7 @@ function Get-TargetResource
         }
     }
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+    $result = Invoke-SPDscCommand -Credential $InstallAccount `
                                   -Arguments $PSBoundParameters `
                                   -ScriptBlock {
         $params = $args[0]
@@ -139,7 +139,7 @@ function Set-TargetResource
     if ($Ensure -eq "Present" -and $CurrentValues.Ensure -eq "Present")
     {
         Write-Verbose -Message "Updating SPTrustedRootAuthority '$Name'"
-        $null = Invoke-SPDSCCommand -Credential $InstallAccount `
+        $null = Invoke-SPDscCommand -Credential $InstallAccount `
                                     -Arguments $PSBoundParameters `
                                     -ScriptBlock {
             $params = $args[0]
@@ -192,7 +192,7 @@ function Set-TargetResource
     if ($Ensure -eq "Present" -and $CurrentValues.Ensure -eq "Absent")
     {
         Write-Verbose -Message "Adding SPTrustedRootAuthority '$Name'"
-        $null = Invoke-SPDSCCommand -Credential $InstallAccount `
+        $null = Invoke-SPDscCommand -Credential $InstallAccount `
                                       -Arguments $PSBoundParameters `
                                       -ScriptBlock {
             $params = $args[0]
@@ -244,7 +244,7 @@ function Set-TargetResource
     if ($Ensure -eq "Absent")
     {
         Write-Verbose -Message "Removing SPTrustedRootAuthority '$Name'"
-        $null = Invoke-SPDSCCommand -Credential $InstallAccount `
+        $null = Invoke-SPDscCommand -Credential $InstallAccount `
                                       -Arguments $PSBoundParameters `
                                       -ScriptBlock {
             $params = $args[0]

@@ -88,7 +88,7 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting diagnostic configuration settings"
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+    $result = Invoke-SPDscCommand -Credential $InstallAccount `
                                   -Arguments $PSBoundParameters `
                                   -ScriptBlock {
         $params = $args[0]
@@ -216,7 +216,7 @@ function Set-TargetResource
 
     Write-Verbose -Message "Setting diagnostic configuration settings"
 
-    Invoke-SPDSCCommand -Credential $InstallAccount `
+    Invoke-SPDscCommand -Credential $InstallAccount `
                         -Arguments $PSBoundParameters `
                         -ScriptBlock {
         $params = $args[0]
@@ -230,9 +230,9 @@ function Set-TargetResource
         {
             $params.Remove("InstallAccount") | Out-Null
         }
-        $params = $params | Rename-SPDSCParamValue -oldName "LogPath" `
+        $params = $params | Rename-SPDscParamValue -oldName "LogPath" `
                                                    -newName "LogLocation" `
-                          | Rename-SPDSCParamValue -oldName "LogSpaceInGB" `
+                          | Rename-SPDscParamValue -oldName "LogSpaceInGB" `
                                                    -newName "LogDiskSpaceUsageGB"
 
         Set-SPDiagnosticConfig @params

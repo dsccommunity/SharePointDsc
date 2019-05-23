@@ -23,7 +23,7 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting app store settings of $WebAppUrl"
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+    $result = Invoke-SPDscCommand -Credential $InstallAccount `
                                   -Arguments $PSBoundParameters `
                                   -ScriptBlock {
         $params = $args[0]
@@ -78,7 +78,7 @@ function Set-TargetResource
 
     Write-Verbose -Message "Setting app store settings of $WebAppUrl"
 
-    Invoke-SPDSCCommand -Credential $InstallAccount `
+    Invoke-SPDscCommand -Credential $InstallAccount `
                         -Arguments $PSBoundParameters `
                         -ScriptBlock {
         $params = $args[0]

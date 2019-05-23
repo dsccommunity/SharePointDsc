@@ -57,14 +57,14 @@ namespace Microsoft.SharePoint.Administration {
         Mock -CommandName Start-Service -MockWith { }
         Mock -CommandName Stop-Service -MockWith { }
         Mock -CommandName Start-SPServiceInstance -MockWith { }
-        Mock -CommandName Get-SPDSCInstalledProductVersion {
+        Mock -CommandName Get-SPDscInstalledProductVersion {
             return @{
                 FileMajorPart = $Global:SPDscHelper.CurrentStubBuildNumber.Major
                 FileBuildPart = $Global:SPDscHelper.CurrentStubBuildNumber.Build
                 ProductBuildPart = $Global:SPDscHelper.CurrentStubBuildNumber.Build
             }
         }
-        Mock -CommandName Get-SPDSCContentService -MockWith {
+        Mock -CommandName Get-SPDscContentService -MockWith {
             $developerDashboardSettings = @{
                 DisplayLevel = "Off"
             }
@@ -145,16 +145,16 @@ namespace Microsoft.SharePoint.Administration {
                 RunCentralAdmin = $true
             }
 
-            Mock -CommandName "Get-SPDSCRegistryKey" -MockWith { return $null }
+            Mock -CommandName "Get-SPDscRegistryKey" -MockWith { return $null }
             Mock -CommandName "Get-SPFarm" -MockWith { return $null }
-            Mock -CommandName "Get-SPDSCConfigDBStatus" -MockWith {
+            Mock -CommandName "Get-SPDscConfigDBStatus" -MockWith {
                 return @{
                     Locked = $false
                     ValidPermissions = $true
                     DatabaseExists = $false
                 }
             }
-            Mock -CommandName "Get-SPDSCSQLInstanceStatus" -MockWith {
+            Mock -CommandName "Get-SPDscSQLInstanceStatus" -MockWith {
                 return @{
                     MaxDOPCorrect = $true
                 }
@@ -193,16 +193,16 @@ namespace Microsoft.SharePoint.Administration {
                 RunCentralAdmin = $false
             }
 
-            Mock -CommandName "Get-SPDSCRegistryKey" -MockWith { return $null }
+            Mock -CommandName "Get-SPDscRegistryKey" -MockWith { return $null }
             Mock -CommandName "Get-SPFarm" -MockWith { return $null }
-            Mock -CommandName "Get-SPDSCConfigDBStatus" -MockWith {
+            Mock -CommandName "Get-SPDscConfigDBStatus" -MockWith {
                 return @{
                     Locked = $false
                     ValidPermissions = $true
                     DatabaseExists = $false
                 }
             }
-            Mock -CommandName "Get-SPDSCSQLInstanceStatus" -MockWith {
+            Mock -CommandName "Get-SPDscSQLInstanceStatus" -MockWith {
                 return @{
                     MaxDOPCorrect = $true
                 }
@@ -240,16 +240,16 @@ namespace Microsoft.SharePoint.Administration {
                 RunCentralAdmin = $false
             }
 
-            Mock -CommandName "Get-SPDSCRegistryKey" -MockWith { return $null }
+            Mock -CommandName "Get-SPDscRegistryKey" -MockWith { return $null }
             Mock -CommandName "Get-SPFarm" -MockWith { return $null }
-            Mock -CommandName "Get-SPDSCConfigDBStatus" -MockWith {
+            Mock -CommandName "Get-SPDscConfigDBStatus" -MockWith {
                 return @{
                     Locked = $false
                     ValidPermissions = $true
                     DatabaseExists = $true
                 }
             }
-            Mock -CommandName "Get-SPDSCSQLInstanceStatus" -MockWith {
+            Mock -CommandName "Get-SPDscSQLInstanceStatus" -MockWith {
                 return @{
                     MaxDOPCorrect = $true
                 }
@@ -333,16 +333,16 @@ namespace Microsoft.SharePoint.Administration {
                 RunCentralAdmin = $true
             }
 
-            Mock -CommandName "Get-SPDSCRegistryKey" -MockWith { return $null }
+            Mock -CommandName "Get-SPDscRegistryKey" -MockWith { return $null }
             Mock -CommandName "Get-SPFarm" -MockWith { return $null }
-            Mock -CommandName "Get-SPDSCConfigDBStatus" -MockWith {
+            Mock -CommandName "Get-SPDscConfigDBStatus" -MockWith {
                 return @{
                     Locked = $false
                     ValidPermissions = $true
                     DatabaseExists = $true
                 }
             }
-            Mock -CommandName "Get-SPDSCSQLInstanceStatus" -MockWith {
+            Mock -CommandName "Get-SPDscSQLInstanceStatus" -MockWith {
                 return @{
                     MaxDOPCorrect = $true
                 }
@@ -413,9 +413,9 @@ namespace Microsoft.SharePoint.Administration {
                 RunCentralAdmin = $true
             }
 
-            Mock -CommandName "Get-SPDSCRegistryKey" -MockWith { return $null }
+            Mock -CommandName "Get-SPDscRegistryKey" -MockWith { return $null }
             Mock -CommandName "Get-SPFarm" -MockWith { return $null }
-            Mock -CommandName "Get-SPDSCConfigDBStatus" -MockWith {
+            Mock -CommandName "Get-SPDscConfigDBStatus" -MockWith {
                 if ($global:SPDscConfigLockTriggered)
                 {
                     return @{
@@ -434,7 +434,7 @@ namespace Microsoft.SharePoint.Administration {
                     }
                 }
             }
-            Mock -CommandName "Get-SPDSCSQLInstanceStatus" -MockWith {
+            Mock -CommandName "Get-SPDscSQLInstanceStatus" -MockWith {
                 return @{
                     MaxDOPCorrect = $true
                 }
@@ -457,7 +457,7 @@ namespace Microsoft.SharePoint.Administration {
             $global:SPDscConfigLockTriggered = $false
             It "Should wait for the lock to be released then join the config DB in the set method" {
                 Set-TargetResource @testParams
-                Assert-MockCalled -CommandName "Get-SPDSCConfigDBStatus" -Times 2
+                Assert-MockCalled -CommandName "Get-SPDscConfigDBStatus" -Times 2
                 Assert-MockCalled -CommandName "Connect-SPConfigurationDatabase"
             }
         }
@@ -476,7 +476,7 @@ namespace Microsoft.SharePoint.Administration {
                 CentralAdministrationUrl = "https://admin.contoso.com"
             }
 
-            Mock -CommandName Get-SPDSCRegistryKey -MockWith {
+            Mock -CommandName Get-SPDscRegistryKey -MockWith {
                 return "Connection string example"
             }
 
@@ -489,14 +489,14 @@ namespace Microsoft.SharePoint.Administration {
                     AdminContentDatabaseName = $testParams.AdminContentDatabaseName
                 }
             }
-            Mock -CommandName Get-SPDSCConfigDBStatus -MockWith {
+            Mock -CommandName Get-SPDscConfigDBStatus -MockWith {
                 return @{
                     Locked = $false
                     ValidPermissions = $true
                     DatabaseExists = $true
                 }
             }
-            Mock -CommandName "Get-SPDSCSQLInstanceStatus" -MockWith {
+            Mock -CommandName "Get-SPDscSQLInstanceStatus" -MockWith {
                 return @{
                     MaxDOPCorrect = $true
                 }
@@ -583,7 +583,7 @@ namespace Microsoft.SharePoint.Administration {
                 CentralAdministrationPort = 8080
             }
 
-            Mock -CommandName Get-SPDSCRegistryKey -MockWith {
+            Mock -CommandName Get-SPDscRegistryKey -MockWith {
                 return "Connection string example"
             }
 
@@ -596,7 +596,7 @@ namespace Microsoft.SharePoint.Administration {
                     AdminContentDatabaseName = $testParams.AdminContentDatabaseName
                 }
             }
-            Mock -CommandName Get-SPDSCConfigDBStatus -MockWith {
+            Mock -CommandName Get-SPDscConfigDBStatus -MockWith {
                 return @{
                     Locked = $false
                     ValidPermissions = $true
@@ -673,7 +673,7 @@ namespace Microsoft.SharePoint.Administration {
                 CentralAdministrationPort = 443
             }
 
-            Mock -CommandName Get-SPDSCRegistryKey -MockWith {
+            Mock -CommandName Get-SPDscRegistryKey -MockWith {
                 return "Connection string example"
             }
 
@@ -686,14 +686,14 @@ namespace Microsoft.SharePoint.Administration {
                     AdminContentDatabaseName = $testParams.AdminContentDatabaseName
                 }
             }
-            Mock -CommandName Get-SPDSCConfigDBStatus -MockWith {
+            Mock -CommandName Get-SPDscConfigDBStatus -MockWith {
                 return @{
                     Locked = $false
                     ValidPermissions = $true
                     DatabaseExists = $true
                 }
             }
-            Mock -CommandName "Get-SPDSCSQLInstanceStatus" -MockWith {
+            Mock -CommandName "Get-SPDscSQLInstanceStatus" -MockWith {
                 return @{
                     MaxDOPCorrect = $true
                 }
@@ -807,16 +807,16 @@ namespace Microsoft.SharePoint.Administration {
                 RunCentralAdmin = $true
             }
 
-            Mock -CommandName "Get-SPDSCRegistryKey" -MockWith { return $null }
+            Mock -CommandName "Get-SPDscRegistryKey" -MockWith { return $null }
             Mock -CommandName "Get-SPFarm" -MockWith { return $null }
-            Mock -CommandName "Get-SPDSCConfigDBStatus" -MockWith {
+            Mock -CommandName "Get-SPDscConfigDBStatus" -MockWith {
                 return @{
                     Locked = $false
                     ValidPermissions = $true
                     DatabaseExists = $true
                 }
             }
-            Mock -CommandName "Get-SPDSCSQLInstanceStatus" -MockWith {
+            Mock -CommandName "Get-SPDscSQLInstanceStatus" -MockWith {
                 return @{
                     MaxDOPCorrect = $true
                 }
@@ -884,7 +884,7 @@ namespace Microsoft.SharePoint.Administration {
                 CentralAdministrationPort = 443
             }
 
-            Mock -CommandName Get-SPDSCRegistryKey -MockWith {
+            Mock -CommandName Get-SPDscRegistryKey -MockWith {
                 return "Connection string example"
             }
 
@@ -897,14 +897,14 @@ namespace Microsoft.SharePoint.Administration {
                     AdminContentDatabaseName = $testParams.AdminContentDatabaseName
                 }
             }
-            Mock -CommandName Get-SPDSCConfigDBStatus -MockWith {
+            Mock -CommandName Get-SPDscConfigDBStatus -MockWith {
                 return @{
                     Locked = $false
                     ValidPermissions = $true
                     DatabaseExists = $true
                 }
             }
-            Mock -CommandName "Get-SPDSCSQLInstanceStatus" -MockWith {
+            Mock -CommandName "Get-SPDscSQLInstanceStatus" -MockWith {
                 return @{
                     MaxDOPCorrect = $true
                 }
@@ -1016,7 +1016,7 @@ namespace Microsoft.SharePoint.Administration {
                 RunCentralAdmin = $false
             }
 
-            Mock -CommandName "Get-SPDSCRegistryKey" -MockWith {
+            Mock -CommandName "Get-SPDscRegistryKey" -MockWith {
                 return "Connection string example"
             }
 
@@ -1029,14 +1029,14 @@ namespace Microsoft.SharePoint.Administration {
                     AdminContentDatabaseName = $testParams.AdminContentDatabaseName
                 }
             }
-            Mock -CommandName "Get-SPDSCConfigDBStatus" -MockWith {
+            Mock -CommandName "Get-SPDscConfigDBStatus" -MockWith {
                 return @{
                     Locked = $false
                     ValidPermissions = $true
                     DatabaseExists = $true
                 }
             }
-            Mock -CommandName "Get-SPDSCSQLInstanceStatus" -MockWith {
+            Mock -CommandName "Get-SPDscSQLInstanceStatus" -MockWith {
                 return @{
                     MaxDOPCorrect = $true
                 }
@@ -1121,7 +1121,7 @@ namespace Microsoft.SharePoint.Administration {
                 DeveloperDashboard = "On"
             }
 
-            Mock -CommandName "Get-SPDSCRegistryKey" -MockWith {
+            Mock -CommandName "Get-SPDscRegistryKey" -MockWith {
                 return "Connection string example"
             }
 
@@ -1134,14 +1134,14 @@ namespace Microsoft.SharePoint.Administration {
                     AdminContentDatabaseName = $testParams.AdminContentDatabaseName
                 }
             }
-            Mock -CommandName "Get-SPDSCConfigDBStatus" -MockWith {
+            Mock -CommandName "Get-SPDscConfigDBStatus" -MockWith {
                 return @{
                     Locked = $false
                     ValidPermissions = $true
                     DatabaseExists = $true
                 }
             }
-            Mock -CommandName "Get-SPDSCSQLInstanceStatus" -MockWith {
+            Mock -CommandName "Get-SPDscSQLInstanceStatus" -MockWith {
                 return @{
                     MaxDOPCorrect = $true
                 }
@@ -1215,7 +1215,7 @@ namespace Microsoft.SharePoint.Administration {
                 RunCentralAdmin = $true
             }
 
-            Mock -CommandName "Get-SPDSCRegistryKey" -MockWith {
+            Mock -CommandName "Get-SPDscRegistryKey" -MockWith {
                 return "Connection string example"
             }
 
@@ -1228,14 +1228,14 @@ namespace Microsoft.SharePoint.Administration {
                     AdminContentDatabaseName = $testParams.AdminContentDatabaseName
                 }
             }
-            Mock -CommandName "Get-SPDSCConfigDBStatus" -MockWith {
+            Mock -CommandName "Get-SPDscConfigDBStatus" -MockWith {
                 return @{
                     Locked = $false
                     ValidPermissions = $true
                     DatabaseExists = $true
                 }
             }
-            Mock -CommandName "Get-SPDSCSQLInstanceStatus" -MockWith {
+            Mock -CommandName "Get-SPDscSQLInstanceStatus" -MockWith {
                 return @{
                     MaxDOPCorrect = $true
                 }
@@ -1358,7 +1358,7 @@ namespace Microsoft.SharePoint.Administration {
                     RunCentralAdmin = $true
                 }
 
-                Mock -CommandName "Get-SPDSCRegistryKey" -MockWith {
+                Mock -CommandName "Get-SPDscRegistryKey" -MockWith {
                     return "Connection string example"
                 }
 
@@ -1371,14 +1371,14 @@ namespace Microsoft.SharePoint.Administration {
                         AdminContentDatabaseName = $testParams.AdminContentDatabaseName
                     }
                 }
-                Mock -CommandName "Get-SPDSCConfigDBStatus" -MockWith {
+                Mock -CommandName "Get-SPDscConfigDBStatus" -MockWith {
                     return @{
                         Locked = $false
                         ValidPermissions = $true
                         DatabaseExists = $true
                     }
                 }
-                Mock -CommandName "Get-SPDSCSQLInstanceStatus" -MockWith {
+                Mock -CommandName "Get-SPDscSQLInstanceStatus" -MockWith {
                     return @{
                         MaxDOPCorrect = $true
                     }
@@ -1412,7 +1412,7 @@ namespace Microsoft.SharePoint.Administration {
                     }
                 }
 
-                Mock -CommandName Get-SPDSCInstalledProductVersion -MockWith { return @{ FileMajorPart = 15 } }
+                Mock -CommandName Get-SPDscInstalledProductVersion -MockWith { return @{ FileMajorPart = 15 } }
 
                 It "Should return WebFrontEnd from the get method"{
                     (Get-TargetResource @testParams).ServerRole | Should Be $null
@@ -1437,7 +1437,7 @@ namespace Microsoft.SharePoint.Administration {
                     RunCentralAdmin = $false
                 }
 
-                Mock -CommandName Get-SPDSCInstalledProductVersion -MockWith {
+                Mock -CommandName Get-SPDscInstalledProductVersion -MockWith {
                     return @{
                         FileMajorPart = 16
                         FileBuildPart = 0
@@ -1470,16 +1470,16 @@ namespace Microsoft.SharePoint.Administration {
                     RunCentralAdmin = $true
                 }
 
-                Mock -CommandName "Get-SPDSCRegistryKey" -MockWith { return $null }
+                Mock -CommandName "Get-SPDscRegistryKey" -MockWith { return $null }
                 Mock -CommandName "Get-SPFarm" -MockWith { return $null }
-                Mock -CommandName "Get-SPDSCConfigDBStatus" -MockWith {
+                Mock -CommandName "Get-SPDscConfigDBStatus" -MockWith {
                     return @{
                         Locked = $false
                         ValidPermissions = $true
                         DatabaseExists = $false
                     }
                 }
-                Mock -CommandName "Get-SPDSCSQLInstanceStatus" -MockWith {
+                Mock -CommandName "Get-SPDscSQLInstanceStatus" -MockWith {
                     return @{
                         MaxDOPCorrect = $true
                     }
@@ -1517,7 +1517,7 @@ namespace Microsoft.SharePoint.Administration {
                     DeveloperDashboard = "OnDemand"
                 }
 
-                Mock -CommandName "Get-SPDSCRegistryKey" -MockWith {
+                Mock -CommandName "Get-SPDscRegistryKey" -MockWith {
                     return "Connection string example"
                 }
 
@@ -1530,14 +1530,14 @@ namespace Microsoft.SharePoint.Administration {
                         AdminContentDatabaseName = $testParams.AdminContentDatabaseName
                     }
                 }
-                Mock -CommandName "Get-SPDSCConfigDBStatus" -MockWith {
+                Mock -CommandName "Get-SPDscConfigDBStatus" -MockWith {
                     return @{
                         Locked = $false
                         ValidPermissions = $true
                         DatabaseExists = $true
                     }
                 }
-                Mock -CommandName "Get-SPDSCSQLInstanceStatus" -MockWith {
+                Mock -CommandName "Get-SPDscSQLInstanceStatus" -MockWith {
                     return @{
                         MaxDOPCorrect = $true
                     }
@@ -1609,7 +1609,7 @@ namespace Microsoft.SharePoint.Administration {
                 AdminContentDatabaseName = "SP_AdminContent"
                 RunCentralAdmin = $true
             }
-            Mock -CommandName "Get-SPDSCRegistryKey" -MockWith {
+            Mock -CommandName "Get-SPDscRegistryKey" -MockWith {
                 return "Connection string example"
             }
 
@@ -1622,14 +1622,14 @@ namespace Microsoft.SharePoint.Administration {
                     AdminContentDatabaseName = $testParams.AdminContentDatabaseName
                 }
             }
-            Mock -CommandName "Get-SPDSCConfigDBStatus" -MockWith {
+            Mock -CommandName "Get-SPDscConfigDBStatus" -MockWith {
                 return @{
                     Locked = $false
                     ValidPermissions = $true
                     DatabaseExists = $true
                 }
             }
-            Mock -CommandName "Get-SPDSCSQLInstanceStatus" -MockWith {
+            Mock -CommandName "Get-SPDscSQLInstanceStatus" -MockWith {
                 return @{
                     MaxDOPCorrect = $true
                 }
@@ -1662,7 +1662,7 @@ namespace Microsoft.SharePoint.Administration {
                 }
             }
 
-            Mock -CommandName Get-SPDSCInstalledProductVersion -MockWith { return @{ FileMajorPart = 16; ProductBuildPart = 4700 } }
+            Mock -CommandName Get-SPDscInstalledProductVersion -MockWith { return @{ FileMajorPart = 16; ProductBuildPart = 4700 } }
 
             It "Should return WebFrontEnd from the get method"{
                 (Get-TargetResource @testParams).ServerRole | Should Be "WebFrontEnd"
@@ -1682,7 +1682,7 @@ namespace Microsoft.SharePoint.Administration {
                 RunCentralAdmin = $true
             }
 
-            Mock -CommandName Get-SPDSCInstalledProductVersion -MockWith { return @{ FileMajorPart = 14 } }
+            Mock -CommandName Get-SPDscInstalledProductVersion -MockWith { return @{ FileMajorPart = 14 } }
 
             It "Should throw when an unsupported version is installed and set is called" {
                 { Set-TargetResource @testParams } | Should throw
@@ -1701,20 +1701,20 @@ namespace Microsoft.SharePoint.Administration {
                 RunCentralAdmin = $true
             }
 
-            Mock -CommandName "Get-SPDSCRegistryKey" -MockWith {
+            Mock -CommandName "Get-SPDscRegistryKey" -MockWith {
                 return "Connection string example"
             }
             Mock -CommandName "Get-SPFarm" -MockWith {
                 return $null
             }
-            Mock -CommandName "Get-SPDSCConfigDBStatus" -MockWith {
+            Mock -CommandName "Get-SPDscConfigDBStatus" -MockWith {
                 return @{
                     Locked = $false
                     ValidPermissions = $false
                     DatabaseExists = $false
                 }
             }
-            Mock -CommandName "Get-SPDSCSQLInstanceStatus" -MockWith {
+            Mock -CommandName "Get-SPDscSQLInstanceStatus" -MockWith {
                 return @{
                     MaxDOPCorrect = $true
                 }
@@ -1782,7 +1782,7 @@ namespace Microsoft.SharePoint.Administration {
                 }
             }
 
-            Mock -CommandName "Get-SPDSCRegistryKey" -MockWith {
+            Mock -CommandName "Get-SPDscRegistryKey" -MockWith {
                 return "Connection string example"
             }
 
@@ -1795,14 +1795,14 @@ namespace Microsoft.SharePoint.Administration {
                     AdminContentDatabaseName = $testParams.AdminContentDatabaseName
                 }
             }
-            Mock -CommandName "Get-SPDSCConfigDBStatus" -MockWith {
+            Mock -CommandName "Get-SPDscConfigDBStatus" -MockWith {
                 return @{
                     Locked = $false
                     ValidPermissions = $true
                     DatabaseExists = $true
                 }
             }
-            Mock -CommandName "Get-SPDSCSQLInstanceStatus" -MockWith {
+            Mock -CommandName "Get-SPDscSQLInstanceStatus" -MockWith {
                 return @{
                     MaxDOPCorrect = $true
                 }

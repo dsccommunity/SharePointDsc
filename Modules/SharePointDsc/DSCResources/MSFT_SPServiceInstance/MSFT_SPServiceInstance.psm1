@@ -26,7 +26,7 @@ function Get-TargetResource
         Credential = $InstallAccount
         Arguments = @($PSBoundParameters, $newName)
     }
-    $result = Invoke-SPDSCCommand @invokeArgs -ScriptBlock {
+    $result = Invoke-SPDscCommand @invokeArgs -ScriptBlock {
         $params = $args[0]
         $newName = $args[1]
 
@@ -104,7 +104,7 @@ function Set-TargetResource
     {
         Write-Verbose -Message "Provisioning service instance '$Name'"
 
-        Invoke-SPDSCCommand @invokeArgs -ScriptBlock {
+        Invoke-SPDscCommand @invokeArgs -ScriptBlock {
             $params = $args[0]
             $newName = $args[1]
 
@@ -135,7 +135,7 @@ function Set-TargetResource
     {
         Write-Verbose -Message "Deprovisioning service instance '$Name'"
 
-        Invoke-SPDSCCommand @invokeArgs -ScriptBlock {
+        Invoke-SPDscCommand @invokeArgs -ScriptBlock {
             $params = $args[0]
             $newName = $args[1]
 

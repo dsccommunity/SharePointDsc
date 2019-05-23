@@ -20,7 +20,7 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting service application publish status '$Name'"
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+    $result = Invoke-SPDscCommand -Credential $InstallAccount `
                                   -Arguments $PSBoundParameters `
                                   -ScriptBlock {
         $params = $args[0]
@@ -82,7 +82,7 @@ function Set-TargetResource
 
     Write-Verbose -Message "Setting service application publish status '$Name'"
 
-    Invoke-SPDSCCommand -Credential $InstallAccount `
+    Invoke-SPDscCommand -Credential $InstallAccount `
                         -Arguments $PSBoundParameters `
                         -ScriptBlock {
         $params = $args[0]

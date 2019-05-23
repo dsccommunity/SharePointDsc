@@ -47,7 +47,7 @@ function Get-TargetResource
                "WarningUsagePointsSolutions.")
     }
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+    $result = Invoke-SPDscCommand -Credential $InstallAccount `
                                   -Arguments $PSBoundParameters `
                                   -ScriptBlock {
         $params = $args[0]
@@ -72,7 +72,7 @@ function Get-TargetResource
         }
 
         # Get a reference to the Administration WebService
-        $admService = Get-SPDSCContentService
+        $admService = Get-SPDscContentService
 
         $template = $admService.QuotaTemplates[$params.Name]
         if ($null -eq $template)
@@ -153,7 +153,7 @@ function Set-TargetResource
     {
         "Present" {
             Write-Verbose "Ensure is set to Present - Add or update template"
-            Invoke-SPDSCCommand -Credential $InstallAccount `
+            Invoke-SPDscCommand -Credential $InstallAccount `
                                 -Arguments $PSBoundParameters `
                                 -ScriptBlock {
                 $params = $args[0]
@@ -171,7 +171,7 @@ function Set-TargetResource
 
                 Write-Verbose -Message "Start update"
                 # Get a reference to the Administration WebService
-                $admService = Get-SPDSCContentService
+                $admService = Get-SPDscContentService
 
                 $template = $admService.QuotaTemplates[$params.Name]
 
@@ -235,7 +235,7 @@ function Set-TargetResource
                        "when Ensure is specified as Absent")
             }
 
-            Invoke-SPDSCCommand -Credential $InstallAccount `
+            Invoke-SPDscCommand -Credential $InstallAccount `
                                 -Arguments $PSBoundParameters `
                                 -ScriptBlock {
                 $params = $args[0]
@@ -253,7 +253,7 @@ function Set-TargetResource
 
                 Write-Verbose -Message "Start update"
                 # Get a reference to the Administration WebService
-                $admService = Get-SPDSCContentService
+                $admService = Get-SPDscContentService
 
                 # Delete template, function does not throw an error when the template does not
                 # exist. So safe to call without error handling.

@@ -60,7 +60,7 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting web application '$Name' config"
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+    $result = Invoke-SPDscCommand -Credential $InstallAccount `
                                   -Arguments $PSBoundParameters `
                                   -ScriptBlock {
         $params = $args[0]
@@ -170,7 +170,7 @@ function Set-TargetResource
 
     if ($Ensure -eq "Present")
     {
-        Invoke-SPDSCCommand -Credential $InstallAccount `
+        Invoke-SPDscCommand -Credential $InstallAccount `
                             -Arguments $PSBoundParameters `
                             -ScriptBlock {
             $params = $args[0]
@@ -185,7 +185,7 @@ function Set-TargetResource
                 }
 
                 # Get a reference to the Administration WebService
-                $admService = Get-SPDSCContentService
+                $admService = Get-SPDscContentService
                 $appPools = $admService.ApplicationPools | Where-Object -FilterScript {
                     $_.Name -eq $params.ApplicationPool
                 }
@@ -258,7 +258,7 @@ function Set-TargetResource
 
     if ($Ensure -eq "Absent")
     {
-        Invoke-SPDSCCommand -Credential $InstallAccount `
+        Invoke-SPDscCommand -Credential $InstallAccount `
                             -Arguments $PSBoundParameters `
                             -ScriptBlock {
             $params = $args[0]

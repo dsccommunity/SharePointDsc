@@ -29,7 +29,7 @@ function Get-TargetResource
 
     Confirm-SPDscUpaPermissionsConfig -Parameters $PSBoundParameters
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+    $result = Invoke-SPDscCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
 
         $proxy = Get-SPServiceApplicationProxy | Where-Object { $_.DisplayName -eq $params.ProxyName }
@@ -150,7 +150,7 @@ function Set-TargetResource
                                 "'NT AUTHORITY\Authenticated Users'. This will be removed as " + `
                                 "identies on service app proxy permissions should be claims based.")
 
-        Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+        Invoke-SPDscCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
             $params = $args[0]
 
             $proxy = Get-SPServiceApplicationProxy | Where-Object { $_.DisplayName -eq $params.ProxyName }
@@ -166,7 +166,7 @@ function Set-TargetResource
         $CurrentValues = Get-TargetResource @PSBoundParameters
     }
 
-    Invoke-SPDSCCommand -Credential $InstallAccount -Arguments @($PSBoundParameters, $CurrentValues) -ScriptBlock {
+    Invoke-SPDscCommand -Credential $InstallAccount -Arguments @($PSBoundParameters, $CurrentValues) -ScriptBlock {
         $params = $args[0]
         $CurrentValues = $args[1]
 
@@ -199,7 +199,7 @@ function Set-TargetResource
                 {
                     if ($user -ne "Everyone" -and $user -ne "None" -and $user)
                     {
-                        $isUser = Test-SPDSCIsADUser -IdentityName $user
+                        $isUser = Test-SPDscIsADUser -IdentityName $user
                         if ($isUser -eq $true)
                         {
                             $claim = New-SPClaimsPrincipal -Identity $user `
@@ -233,7 +233,7 @@ function Set-TargetResource
                 {
                     if ($user -ne "Everyone" -and $user -ne "None" -and $user)
                     {
-                        $isUser = Test-SPDSCIsADUser -IdentityName $user
+                        $isUser = Test-SPDscIsADUser -IdentityName $user
                         if ($isUser -eq $true)
                         {
                             $claim = New-SPClaimsPrincipal -Identity $user `
@@ -264,7 +264,7 @@ function Set-TargetResource
                     if ($permissionChange.InputObject -ne "Everyone" -and `
                         $permissionChange.InputObject -ne "None")
                     {
-                        $isUser = Test-SPDSCIsADUser -IdentityName $permissionChange.InputObject
+                        $isUser = Test-SPDscIsADUser -IdentityName $permissionChange.InputObject
                         if ($isUser -eq $true)
                         {
                             $claim = New-SPClaimsPrincipal -Identity $permissionChange.InputObject `

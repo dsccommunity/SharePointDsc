@@ -174,7 +174,7 @@ function Set-TargetResource
         throw "Setup.exe cannot be found in {$BinaryDir}"
     }
 
-    $majorVersion  = (Get-SPDSCAssemblyVersion -PathToAssembly $InstallerPath)
+    $majorVersion  = (Get-SPDscAssemblyVersion -PathToAssembly $InstallerPath)
     if ($majorVersion -eq 15)
     {
         $svrsetupDll = Join-Path -Path $BinaryDir -ChildPath "updates\svrsetup.dll"

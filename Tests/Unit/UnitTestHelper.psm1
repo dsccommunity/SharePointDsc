@@ -59,17 +59,17 @@ function New-SPDscUnitTestHelper
             Import-Module -Name "$SharePointStubModule" -WarningAction SilentlyContinue
             Import-Module -Name "$moduleToLoad"
 
-            Mock -CommandName Get-SPDSCInstalledProductVersion -MockWith {
+            Mock -CommandName Get-SPDscInstalledProductVersion -MockWith {
                 return @{
                     FileMajorPart = $majorBuildNumber
                 }
             }
 
-            Mock -CommandName Get-SPDSCAssemblyVersion -MockWith {
+            Mock -CommandName Get-SPDscAssemblyVersion -MockWith {
                 return $majorBuildNumber
             }
 
-            Mock -CommandName Get-SPDSCBuildVersion -MockWith {
+            Mock -CommandName Get-SPDscBuildVersion -MockWith {
                 return $minorBuildNumber
             }
 
@@ -78,7 +78,7 @@ function New-SPDscUnitTestHelper
     if ($ExcludeInvokeHelper -eq $false)
     {
         $initScript += @"
-            Mock Invoke-SPDSCCommand {
+            Mock Invoke-SPDscCommand {
                 return Invoke-Command -ScriptBlock `$ScriptBlock -ArgumentList `$Arguments -NoNewScope
             }
 "@
@@ -111,7 +111,7 @@ function New-SPDscUnitTestHelper
     }
 }
 
-function Write-SPDSCStubFile
+function Write-SPDscStubFile
 {
     param
     (

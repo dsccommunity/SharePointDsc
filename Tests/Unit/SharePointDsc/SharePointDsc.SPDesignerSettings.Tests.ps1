@@ -131,7 +131,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 }
             }
 
-            Mock -CommandName Test-SPDSCRunAsCredential { return $true }
+            Mock -CommandName Test-SPDscRunAsCredential { return $true }
 
             It "Should return values from the get method" {
                 Get-TargetResource @testParams | Should Not BeNullOrEmpty
@@ -170,7 +170,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                         AllowSaveDeclarativeWorkflowAsTemplate = $true
                 }
             }
-            Mock -CommandName Test-SPDSCRunAsCredential { return $false }
+            Mock -CommandName Test-SPDscRunAsCredential { return $false }
 
             It "Should throw an exception in the get method to say that this is not supported" {
                 { Get-TargetResource @testParams } | Should throw "http://aka.ms/xSharePointRemoteIssues"
@@ -215,7 +215,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 return $returnVal
             }
 
-            Mock -CommandName Test-SPDSCRunAsCredential { return $true }
+            Mock -CommandName Test-SPDscRunAsCredential { return $true }
 
             Mock -CommandName Get-SPWebApplication -MockWith {
                 $result = @{}
@@ -264,7 +264,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 return $returnVal
             }
 
-            Mock -CommandName Test-SPDSCRunAsCredential -MockWith { return $true }
+            Mock -CommandName Test-SPDscRunAsCredential -MockWith { return $true }
 
             It "Should return values from the get method" {
                 Get-TargetResource @testParams | Should Not BeNullOrEmpty

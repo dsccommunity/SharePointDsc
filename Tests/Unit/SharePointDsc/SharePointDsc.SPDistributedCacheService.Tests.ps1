@@ -40,11 +40,11 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         Mock -CommandName Get-SPManagedAccount -MockWith {
             return @{}
         }
-        Mock -CommandName Add-SPDSCUserToLocalAdmin -MockWith { }
-        Mock -CommandName Test-SPDSCUserIsLocalAdmin -MockWith {
+        Mock -CommandName Add-SPDscUserToLocalAdmin -MockWith { }
+        Mock -CommandName Test-SPDscUserIsLocalAdmin -MockWith {
             return $false
         }
-        Mock -CommandName Remove-SPDSCUserToLocalAdmin -MockWith { }
+        Mock -CommandName Remove-SPDscUserToLocalAdmin -MockWith { }
         Mock Restart-Service -MockWith { }
         Mock -CommandName Get-SPFarm -MockWith {
             return @{

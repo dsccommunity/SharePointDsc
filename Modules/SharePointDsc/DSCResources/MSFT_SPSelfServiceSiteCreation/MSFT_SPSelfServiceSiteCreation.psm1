@@ -65,7 +65,7 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting self service site creation settings for Web Application '$WebAppUrl'"
 
-    $installedVersion = Get-SPDSCInstalledProductVersion
+    $installedVersion = Get-SPDscInstalledProductVersion
     if ($installedVersion.FileMajorPart -eq 15 -or $installedVersion.FileBuildPart.ToString().Length -eq 4)
     {
         if ($PSBoundParameters.ContainsKey("ManagedPath") -eq $true)
@@ -92,7 +92,7 @@ function Get-TargetResource
         }
     }
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+    $result = Invoke-SPDscCommand -Credential $InstallAccount `
                                   -Arguments $PSBoundParameters `
                                   -ScriptBlock {
         $params = $args[0]
@@ -225,7 +225,7 @@ function Set-TargetResource
 
     Write-Verbose -Message "Setting self service site creation settings for Web Application '$WebAppUrl'"
 
-    $installedVersion = Get-SPDSCInstalledProductVersion
+    $installedVersion = Get-SPDscInstalledProductVersion
     if ($installedVersion.FileMajorPart -eq 15 -or $installedVersion.ProductBuildPart.ToString().Length -eq 4)
     {
         if ($PSBoundParameters.ContainsKey("ManagedPath") -eq $true)
@@ -257,7 +257,7 @@ function Set-TargetResource
         }
     }
 
-    Invoke-SPDSCCommand -Credential $InstallAccount `
+    Invoke-SPDscCommand -Credential $InstallAccount `
                         -Arguments $PSBoundParameters `
                         -ScriptBlock {
         $params = $args[0]

@@ -70,7 +70,7 @@ function Get-TargetResource
                "ProxyLibrariesToExclude parameters")
     }
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+    $result = Invoke-SPDscCommand -Credential $InstallAccount `
                                   -Arguments @($PSBoundParameters) `
                                   -ScriptBlock {
         $params = $args[0]
@@ -212,7 +212,7 @@ function Set-TargetResource
                "ProxyLibrariesToExclude parameters")
     }
 
-    Invoke-SPDSCCommand -Credential $InstallAccount `
+    Invoke-SPDscCommand -Credential $InstallAccount `
                         -Arguments @($PSBoundParameters) `
                         -ScriptBlock {
         $params = $args[0]

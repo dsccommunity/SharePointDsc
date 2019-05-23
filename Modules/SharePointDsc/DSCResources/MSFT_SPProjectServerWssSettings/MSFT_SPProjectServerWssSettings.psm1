@@ -20,13 +20,13 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting WSS settings for $Url"
 
-    if ((Get-SPDSCInstalledProductVersion).FileMajorPart -lt 16)
+    if ((Get-SPDscInstalledProductVersion).FileMajorPart -lt 16)
     {
         throw [Exception] ("Support for Project Server in SharePointDsc is only valid for " + `
                            "SharePoint 2016 and 2019.")
     }
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+    $result = Invoke-SPDscCommand -Credential $InstallAccount `
                                   -Arguments @($PSBoundParameters, $PSScriptRoot) `
                                   -ScriptBlock {
         $params = $args[0]
@@ -98,7 +98,7 @@ function Set-TargetResource
 
     Write-Verbose -Message "Setting WSS settings for $Url"
 
-    Invoke-SPDSCCommand -Credential $InstallAccount `
+    Invoke-SPDscCommand -Credential $InstallAccount `
                         -Arguments @($PSBoundParameters, $PSScriptRoot) `
                         -ScriptBlock {
         $params = $args[0]

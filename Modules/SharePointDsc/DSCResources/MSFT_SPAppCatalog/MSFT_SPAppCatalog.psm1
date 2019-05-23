@@ -15,7 +15,7 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting app catalog status of $SiteUrl"
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+    $result = Invoke-SPDscCommand -Credential $InstallAccount `
                                   -Arguments $PSBoundParameters `
                                   -ScriptBlock {
         $params = $args[0]
@@ -64,7 +64,7 @@ function Set-TargetResource
     Write-Verbose -Message "Setting app catalog status of $SiteUrl"
 
     Write-Verbose -Message "Retrieving farm account"
-    $farmAccount = Invoke-SPDSCCommand -Credential $InstallAccount `
+    $farmAccount = Invoke-SPDscCommand -Credential $InstallAccount `
                                        -Arguments $PSBoundParameters `
                                        -ScriptBlock {
         return Get-SPDscFarmAccount
@@ -105,12 +105,12 @@ function Set-TargetResource
     }
 
     # Add the FarmAccount to the local Administrators group, if it's not already there
-    $isLocalAdmin = Test-SPDSCUserIsLocalAdmin -UserName $farmAccount.UserName
+    $isLocalAdmin = Test-SPDscUserIsLocalAdmin -UserName $farmAccount.UserName
 
     if (!$isLocalAdmin)
     {
         Write-Verbose -Message "Adding farm account to Local Administrators group"
-        Add-SPDSCUserToLocalAdmin -UserName $farmAccount.UserName
+        Add-SPDscUserToLocalAdmin -UserName $farmAccount.UserName
 
         # Cycle the Timer Service and flush Kerberos tickets
         # so that it picks up the local Admin token
@@ -119,7 +119,7 @@ function Set-TargetResource
         Clear-SPDscKerberosToken -Account $farmAccount.UserName
     }
 
-    Invoke-SPDSCCommand -Credential $farmAccount `
+    Invoke-SPDscCommand -Credential $farmAccount `
                         -Arguments $PSBoundParameters `
                         -ScriptBlock {
         $params = $args[0]
@@ -139,7 +139,7 @@ function Set-TargetResource
     if (!$isLocalAdmin)
     {
         Write-Verbose -Message "Removing farm account from Local Administrators group"
-        Remove-SPDSCUserToLocalAdmin -UserName $farmAccount.UserName
+        Remove-SPDscUserToLocalAdmin -UserName $farmAccount.UserName
 
         # Cycle the Timer Service and flush Kerberos tickets
         # so that it picks up the local Admin token

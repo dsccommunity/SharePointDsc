@@ -45,7 +45,7 @@ function Get-TargetResource
                "MembersToInclude, MembersToExclude")
     }
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+    $result = Invoke-SPDscCommand -Credential $InstallAccount `
                                   -Arguments $PSBoundParameters `
                                   -ScriptBlock {
         $params = $args[0]
@@ -245,7 +245,7 @@ function Set-TargetResource
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
-    Invoke-SPDSCCommand -Credential $InstallAccount `
+    Invoke-SPDscCommand -Credential $InstallAccount `
                         -Arguments @($PSBoundParameters, $CurrentValues) `
                         -ScriptBlock {
         $params = $args[0]
@@ -333,7 +333,7 @@ function Set-TargetResource
                 }
                 else
                 {
-                    $isUser = Test-SPDSCIsADUser -IdentityName $desiredMember.Username
+                    $isUser = Test-SPDscIsADUser -IdentityName $desiredMember.Username
                     if ($isUser -eq $true)
                     {
                         $claim = New-SPClaimsPrincipal -Identity $desiredMember.Username `
@@ -375,7 +375,7 @@ function Set-TargetResource
                     }
                     else
                     {
-                        $isUser = Test-SPDSCIsADUser -IdentityName $currentMember.Username
+                        $isUser = Test-SPDscIsADUser -IdentityName $currentMember.Username
                         if ($isUser -eq $true)
                         {
                             $claim = New-SPClaimsPrincipal -Identity $currentMember.Username `
@@ -403,7 +403,7 @@ function Set-TargetResource
                 }
                 else
                 {
-                    $isUser = Test-SPDSCIsADUser -IdentityName $desiredMember.Username
+                    $isUser = Test-SPDscIsADUser -IdentityName $desiredMember.Username
                     if ($isUser -eq $true)
                     {
                         $claim = New-SPClaimsPrincipal -Identity $desiredMember.Username `
@@ -450,7 +450,7 @@ function Set-TargetResource
                     }
                     else
                     {
-                        $isUser = Test-SPDSCIsADUser -IdentityName $excludeMember
+                        $isUser = Test-SPDscIsADUser -IdentityName $excludeMember
                         if ($isUser -eq $true)
                         {
                             $claim = New-SPClaimsPrincipal -Identity $excludeMember `
@@ -525,7 +525,7 @@ function Test-TargetResource
         return $false
     }
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+    $result = Invoke-SPDscCommand -Credential $InstallAccount `
                         -Arguments @($PSBoundParameters, $CurrentValues, $PSScriptRoot) `
                         -ScriptBlock {
         $params        = $args[0]

@@ -69,7 +69,7 @@ function Get-TargetResource
         }
     }
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+    $result = Invoke-SPDscCommand -Credential $InstallAccount `
                                   -Arguments $PSBoundParameters `
                                   -ScriptBlock {
         $params = $args[0]
@@ -257,7 +257,7 @@ function Set-TargetResource
         throw "Web application does not exist"
     }
 
-    $cacheAccounts = Get-SPDSCCacheAccountConfiguration -InputParameters $WebAppUrl
+    $cacheAccounts = Get-SPDscCacheAccountConfiguration -InputParameters $WebAppUrl
 
     if ($SetCacheAccountsPolicy)
     {
@@ -269,7 +269,7 @@ function Set-TargetResource
     }
 
     # Determine the default identity type to use for entries that do not have it specified
-    $defaultIdentityType = Invoke-SPDSCCommand -Credential $InstallAccount `
+    $defaultIdentityType = Invoke-SPDscCommand -Credential $InstallAccount `
                                                -Arguments $PSBoundParameters `
                                                -ScriptBlock {
         $params = $args[0]
@@ -326,7 +326,7 @@ function Set-TargetResource
         }
 
         # Get the list of differences from the current configuration
-        $differences = Compare-SPDSCWebAppPolicy -WAPolicies $CurrentValues.Members `
+        $differences = Compare-SPDscWebAppPolicy -WAPolicies $CurrentValues.Members `
                                                  -DSCSettings $allMembers `
                                                  -DefaultIdentityType $defaultIdentityType
 
@@ -398,7 +398,7 @@ function Set-TargetResource
     }
 
     ## Perform changes
-    Invoke-SPDSCCommand -Credential $InstallAccount `
+    Invoke-SPDscCommand -Credential $InstallAccount `
                         -Arguments @($PSBoundParameters,$PSScriptRoot,$changeUsers) `
                         -ScriptBlock {
         $params      = $args[0]
@@ -433,7 +433,7 @@ function Set-TargetResource
                     $userToAdd = $user.Username
                     if ($user.IdentityMode -eq "Claims")
                     {
-                        $isUser = Test-SPDSCIsADUser -IdentityName $user.Username
+                        $isUser = Test-SPDscIsADUser -IdentityName $user.Username
                         if ($isUser -eq $true)
                         {
                             $principal = New-SPClaimsPrincipal -Identity $user.Username `
@@ -476,7 +476,7 @@ function Set-TargetResource
                     $userToChange = $user.Username
                     if ($user.IdentityMode -eq "Claims")
                     {
-                        $isUser = Test-SPDSCIsADUser -IdentityName $user.Username
+                        $isUser = Test-SPDscIsADUser -IdentityName $user.Username
                         if ($isUser -eq $true)
                         {
                             $principal = New-SPClaimsPrincipal -Identity $user.Username `
@@ -551,7 +551,7 @@ function Set-TargetResource
                     $userToDrop = $user.Username
                     if ($user.IdentityMode -eq "Claims")
                     {
-                        $isUser = Test-SPDSCIsADUser -IdentityName $user.Username
+                        $isUser = Test-SPDscIsADUser -IdentityName $user.Username
                         if ($isUser -eq $true)
                         {
                             $principal = New-SPClaimsPrincipal -Identity $user.Username `
@@ -565,7 +565,7 @@ function Set-TargetResource
                             $userToDrop = $principal.ToEncodedString()
                         }
                     }
-                    Remove-SPDSCGenericObject -SourceCollection $wa.Policies `
+                    Remove-SPDscGenericObject -SourceCollection $wa.Policies `
                                               -Target $userToDrop `
                                               -ErrorAction SilentlyContinue
                 }
@@ -622,7 +622,7 @@ function Test-TargetResource
         return $false
     }
 
-    $cacheAccounts = Get-SPDSCCacheAccountConfiguration -InputParameters $WebAppUrl
+    $cacheAccounts = Get-SPDscCacheAccountConfiguration -InputParameters $WebAppUrl
     if ($SetCacheAccountsPolicy)
     {
         if (($cacheAccounts.SuperUserAccount -eq "") -or `
@@ -634,7 +634,7 @@ function Test-TargetResource
     }
 
     # Determine the default identity type to use for entries that do not have it specified
-    $defaultIdentityType = Invoke-SPDSCCommand -Credential $InstallAccount `
+    $defaultIdentityType = Invoke-SPDscCommand -Credential $InstallAccount `
                                                -Arguments $PSBoundParameters `
                                                -ScriptBlock {
         $params = $args[0]
@@ -651,7 +651,7 @@ function Test-TargetResource
     }
 
     # If checking the full members list, or the list of members to include then build the
-    # appropriate members list and check for the output of Compare-SPDSCWebAppPolicy
+    # appropriate members list and check for the output of Compare-SPDscWebAppPolicy
     if ($Members -or $MembersToInclude)
     {
         $allMembers = @()
@@ -691,7 +691,7 @@ function Test-TargetResource
         }
 
         # Get the list of differences from the current configuration
-        $differences = Compare-SPDSCWebAppPolicy -WAPolicies $CurrentValues.Members `
+        $differences = Compare-SPDscWebAppPolicy -WAPolicies $CurrentValues.Members `
                                                  -DSCSettings $allMembers `
                                                  -DefaultIdentityType $defaultIdentityType
 
@@ -752,7 +752,7 @@ function Test-TargetResource
     }
 }
 
-function Get-SPDSCCacheAccountConfiguration()
+function Get-SPDscCacheAccountConfiguration()
 {
     [CmdletBinding()]
     [OutputType([System.Collections.Hashtable])]
@@ -762,7 +762,7 @@ function Get-SPDSCCacheAccountConfiguration()
         $InputParameters
     )
 
-    $cacheAccounts = Invoke-SPDSCCommand -Credential $InstallAccount `
+    $cacheAccounts = Invoke-SPDscCommand -Credential $InstallAccount `
                                          -Arguments $InputParameters `
                                          -ScriptBlock {
         Write-Verbose -Message "Retrieving CacheAccounts"
