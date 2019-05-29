@@ -103,8 +103,7 @@ function Get-TargetResource
         {
             if (($wa.Properties.ContainsKey("portalsuperuseraccount") -eq $true) -and `
                 ($wa.Properties.ContainsKey("portalsuperreaderaccount") -eq $true))
-                {
-
+            {
                 $correctPSU = $false
                 $correctPSR = $false
 

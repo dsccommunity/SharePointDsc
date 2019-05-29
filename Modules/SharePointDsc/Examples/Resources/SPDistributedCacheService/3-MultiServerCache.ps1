@@ -4,22 +4,7 @@
     "server2". The ServerProvisionOrder will ensure that it applies it to
     server1 first and then server2, making sure they don't both attempt to
     create the cache at the same time, resuling in errors.
-
-    Note: Do not allow plain text passwords in production environments.
 #>
-
-    $ConfigurationData = @{
-        AllNodes = @(
-            @{
-                NodeName = 'Server1'
-                PSDscAllowPlainTextPassword = $true
-            },
-            @{
-                NodeName = 'Server2'
-                PSDscAllowPlainTextPassword = $true
-            }
-        )
-    }
 
     Configuration Example
     {
