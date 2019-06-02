@@ -696,9 +696,9 @@ function Test-SPDscParameterState
 
     $returnValue = $true
 
-    if (($DesiredValues.GetType().Name -ne "HashTable") `
-        -and ($DesiredValues.GetType().Name -ne "CimInstance") `
-        -and ($DesiredValues.GetType().Name -ne "PSBoundParametersDictionary"))
+    if (($DesiredValues.GetType().Name -ne "HashTable") -and `
+        ($DesiredValues.GetType().Name -ne "CimInstance") -and `
+        ($DesiredValues.GetType().Name -ne "PSBoundParametersDictionary"))
     {
         throw ("Property 'DesiredValues' in Test-SPDscParameterState must be either a " + `
                "Hashtable or CimInstance. Type detected was $($DesiredValues.GetType().Name)")
@@ -722,9 +722,11 @@ function Test-SPDscParameterState
     $KeyList | ForEach-Object -Process {
         if (($_ -ne "Verbose") -and ($_ -ne "InstallAccount"))
         {
-            if (($CurrentValues.ContainsKey($_) -eq $false) `
-            -or ($CurrentValues.$_ -ne $DesiredValues.$_) `
-            -or (($DesiredValues.ContainsKey($_) -eq $true) -and ($null -ne $DesiredValues.$_ -and $DesiredValues.$_.GetType().IsArray)))
+            if (($CurrentValues.ContainsKey($_) -eq $false) -or `
+                ($CurrentValues.$_ -ne $DesiredValues.$_) -or `
+                (($DesiredValues.ContainsKey($_) -eq $true) -and `
+                 ($null -ne $DesiredValues.$_ -and `
+                 $DesiredValues.$_.GetType().IsArray)))
             {
                 if ($DesiredValues.GetType().Name -eq "HashTable" -or `
                     $DesiredValues.GetType().Name -eq "PSBoundParametersDictionary")
@@ -742,8 +744,8 @@ function Test-SPDscParameterState
                     $fieldName = $_
                     if ($desiredType.IsArray -eq $true)
                     {
-                        if (($CurrentValues.ContainsKey($fieldName) -eq $false) `
-                        -or ($null -eq $CurrentValues.$fieldName))
+                        if (($CurrentValues.ContainsKey($fieldName) -eq $false) -or `
+                            ($null -eq $CurrentValues.$fieldName))
                         {
                             Write-Verbose -Message ("Expected to find an array value for " + `
                                                     "property $fieldName in the current " + `
@@ -774,8 +776,8 @@ function Test-SPDscParameterState
                         switch ($desiredType.Name)
                         {
                             "String" {
-                                if ([string]::IsNullOrEmpty($CurrentValues.$fieldName) `
-                                -and [string]::IsNullOrEmpty($DesiredValues.$fieldName))
+                                if ([string]::IsNullOrEmpty($CurrentValues.$fieldName) -and `
+                                    [string]::IsNullOrEmpty($DesiredValues.$fieldName))
                                 {}
                                 else
                                 {
@@ -789,8 +791,8 @@ function Test-SPDscParameterState
                                 }
                             }
                             "Int32" {
-                                if (($DesiredValues.$fieldName -eq 0) `
-                                -and ($null -eq $CurrentValues.$fieldName))
+                                if (($DesiredValues.$fieldName -eq 0) -and `
+                                    ($null -eq $CurrentValues.$fieldName))
                                 {}
                                 else
                                 {
@@ -804,8 +806,8 @@ function Test-SPDscParameterState
                                 }
                             }
                             "Int16" {
-                                if (($DesiredValues.$fieldName -eq 0) `
-                                -and ($null -eq $CurrentValues.$fieldName))
+                                if (($DesiredValues.$fieldName -eq 0) -and `
+                                    ($null -eq $CurrentValues.$fieldName))
                                 {}
                                 else
                                 {
@@ -831,8 +833,8 @@ function Test-SPDscParameterState
                                 }
                             }
                             "Single" {
-                                if (($DesiredValues.$fieldName -eq 0) `
-                                -and ($null -eq $CurrentValues.$fieldName))
+                                if (($DesiredValues.$fieldName -eq 0) -and `
+                                    ($null -eq $CurrentValues.$fieldName))
                                 {}
                                 else
                                 {

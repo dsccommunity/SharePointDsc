@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+* SPDistributedCacheService
+  * Added ability to check for incorrect service account.
 * SPFarm
   * Throw error in Get method if CentralAdministrationUrl is HTTP
 
