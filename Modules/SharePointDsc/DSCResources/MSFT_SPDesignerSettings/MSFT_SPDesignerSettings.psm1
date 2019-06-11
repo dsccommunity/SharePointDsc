@@ -57,13 +57,13 @@ function Get-TargetResource
                 $params = $args[0]
 
                 $nullReturn = @{
-                    WebAppUrl                       = $params.WebAppUrl
-                    SettingsScope                   = $params.SettingsScope
-                    AllowSharePointDesigner         = $null
-                    AllowDetachPagesFromDefinition  = $null
-                    AllowCustomiseMasterPage        = $null
-                    AllowManageSiteURLStructure     = $null
-                    AllowCreateDeclarativeWorkflow  = $null
+                    WebAppUrl                               = $params.WebAppUrl
+                    SettingsScope                           = $params.SettingsScope
+                    AllowSharePointDesigner                 = $null
+                    AllowDetachPagesFromDefinition          = $null
+                    AllowCustomiseMasterPage                = $null
+                    AllowManageSiteURLStructure             = $null
+                    AllowCreateDeclarativeWorkflow          = $null
                     AllowSavePublishDeclarativeWorkflow     = $null
                     AllowSaveDeclarativeWorkflowAsTemplate  = $null
                 }
@@ -96,13 +96,13 @@ function Get-TargetResource
 
                     return @{
                         # Set the SPD settings
-                        WebAppUrl                       = $params.WebAppUrl
-                        SettingsScope                   = $params.SettingsScope
-                        AllowSharePointDesigner         = $spdSettings.AllowDesigner
-                        AllowDetachPagesFromDefinition  = $spdSettings.AllowRevertFromTemplate
-                        AllowCustomiseMasterPage        = $spdSettings.AllowMasterPageEditing
-                        AllowManageSiteURLStructure     = $spdSettings.ShowURLStructure
-                        AllowCreateDeclarativeWorkflow  = `
+                        WebAppUrl                               = $params.WebAppUrl
+                        SettingsScope                           = $params.SettingsScope
+                        AllowSharePointDesigner                 = $spdSettings.AllowDesigner
+                        AllowDetachPagesFromDefinition          = $spdSettings.AllowRevertFromTemplate
+                        AllowCustomiseMasterPage                = $spdSettings.AllowMasterPageEditing
+                        AllowManageSiteURLStructure             = $spdSettings.ShowURLStructure
+                        AllowCreateDeclarativeWorkflow          = `
                             $spdSettings.AllowCreateDeclarativeWorkflow
                         AllowSavePublishDeclarativeWorkflow     = `
                             $spdSettings.AllowSavePublishDeclarativeWorkflow
@@ -122,13 +122,13 @@ function Get-TargetResource
                     $params = $args[0]
 
                     $nullReturn = @{
-                        WebAppUrl                       = $params.WebAppUrl
-                        SettingsScope                   = $params.SettingsScope
-                        AllowSharePointDesigner         = $null
-                        AllowDetachPagesFromDefinition  = $null
-                        AllowCustomiseMasterPage        = $null
-                        AllowManageSiteURLStructure     = $null
-                        AllowCreateDeclarativeWorkflow  = $null
+                        WebAppUrl                               = $params.WebAppUrl
+                        SettingsScope                           = $params.SettingsScope
+                        AllowSharePointDesigner                 = $null
+                        AllowDetachPagesFromDefinition          = $null
+                        AllowCustomiseMasterPage                = $null
+                        AllowManageSiteURLStructure             = $null
+                        AllowCreateDeclarativeWorkflow          = $null
                         AllowSavePublishDeclarativeWorkflow     = $null
                         AllowSaveDeclarativeWorkflowAsTemplate  = $null
                     }
@@ -156,13 +156,13 @@ function Get-TargetResource
                     {
                         return @{
                             # Set the SPD settings
-                            WebAppUrl                       = $params.WebAppUrl
-                            SettingsScope                   = $params.SettingsScope
-                            AllowSharePointDesigner         = $site.AllowDesigner
-                            AllowDetachPagesFromDefinition  = $site.AllowRevertFromTemplate
-                            AllowCustomiseMasterPage        = $site.AllowMasterPageEditing
-                            AllowManageSiteURLStructure     = $site.ShowURLStructure
-                            AllowCreateDeclarativeWorkflow  = $site.AllowCreateDeclarativeWorkflow
+                            WebAppUrl                               = $params.WebAppUrl
+                            SettingsScope                           = $params.SettingsScope
+                            AllowSharePointDesigner                 = $site.AllowDesigner
+                            AllowDetachPagesFromDefinition          = $site.AllowRevertFromTemplate
+                            AllowCustomiseMasterPage                = $site.AllowMasterPageEditing
+                            AllowManageSiteURLStructure             = $site.ShowURLStructure
+                            AllowCreateDeclarativeWorkflow          = $site.AllowCreateDeclarativeWorkflow
                             AllowSavePublishDeclarativeWorkflow     = `
                                 $site.AllowSavePublishDeclarativeWorkflow
                             AllowSaveDeclarativeWorkflowAsTemplate  = `

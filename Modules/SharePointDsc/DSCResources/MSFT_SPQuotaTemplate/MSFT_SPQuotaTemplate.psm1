@@ -61,13 +61,13 @@ function Get-TargetResource
             Write-Verbose -Message ("No local SharePoint farm was detected. Quota " + `
                                     "template settings will not be applied")
             return @{
-                Name = $params.Name
-                StorageMaxInMB = 0
-                StorageWarningInMB = 0
+                Name                        = $params.Name
+                StorageMaxInMB              = 0
+                StorageWarningInMB          = 0
                 MaximumUsagePointsSolutions = 0
                 WarningUsagePointsSolutions = 0
-                Ensure = "Absent"
-                InstallAccount = $params.InstallAccount
+                Ensure                      = "Absent"
+                InstallAccount              = $params.InstallAccount
             }
         }
 
@@ -78,23 +78,23 @@ function Get-TargetResource
         if ($null -eq $template)
         {
             return @{
-                Name = $params.Name
-                Ensure = "Absent"
+                Name           = $params.Name
+                Ensure         = "Absent"
                 InstallAccount = $params.InstallAccount
             }
         }
         else
         {
             return @{
-                Name = $params.Name
+                Name                        = $params.Name
                 # Convert from bytes to megabytes
-                StorageMaxInMB = ($template.StorageMaximumLevel / 1MB)
+                StorageMaxInMB              = ($template.StorageMaximumLevel / 1MB)
                 # Convert from bytes to megabytes
-                StorageWarningInMB = ($template.StorageWarningLevel / 1MB)
+                StorageWarningInMB          = ($template.StorageWarningLevel / 1MB)
                 MaximumUsagePointsSolutions = $template.UserCodeMaximumLevel
                 WarningUsagePointsSolutions = $template.UserCodeWarningLevel
-                Ensure = "Present"
-                InstallAccount = $params.InstallAccount
+                Ensure                      = "Present"
+                InstallAccount              = $params.InstallAccount
             }
         }
     }

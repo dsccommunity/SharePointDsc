@@ -40,9 +40,9 @@ function Get-TargetResource
         $serviceApps = Get-SPServiceApplication -Name $params.Name `
                                                 -ErrorAction SilentlyContinue
         $nullReturn = @{
-            Name = $params.Name
+            Name            = $params.Name
             ApplicationPool = $params.ApplicationPool
-            Ensure = "Absent"
+            Ensure          = "Absent"
         }
 
         if ($null -eq $serviceApps)
@@ -71,12 +71,12 @@ function Get-TargetResource
             $db = $dbProp.GetValue($serviceApp)
 
             return  @{
-                Name = $serviceApp.DisplayName
+                Name            = $serviceApp.DisplayName
                 ApplicationPool = $serviceApp.ApplicationPool.Name
-                DatabaseName = $db.Name
-                DatabaseServer = $db.NormalizedDataSource
-                InstallAccount = $params.InstallAccount
-                Ensure = "Present"
+                DatabaseName    = $db.Name
+                DatabaseServer  = $db.NormalizedDataSource
+                InstallAccount  = $params.InstallAccount
+                Ensure          = "Present"
             }
         }
     }
@@ -127,7 +127,7 @@ function Set-TargetResource
             $params = $args[0]
 
             $newParams = @{
-                Name = $params.Name
+                Name            = $params.Name
                 ApplicationPool = $params.ApplicationPool
             }
             if ($params.ContainsKey("DatabaseName") -eq $true)

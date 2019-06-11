@@ -135,23 +135,24 @@ function Get-TargetResource
 
         foreach ($database in $databases)
         {
-            $cdbPermission = @{}
-
-            $cdbPermission.Name = $database.Name
             $dbShellAdmins = Get-SPShellAdmin -Database $database.Id
-            $cdbPermission.Members = $dbShellAdmins.UserName
+
+            $cdbPermission = @{
+                Name    = $database.Name
+                Members = $dbShellAdmins.UserName
+            }
 
             $cdbPermissions += $cdbPermission
         }
 
         return @{
             IsSingleInstance = "Yes"
-            Members = $shellAdmins.UserName
+            Members          = $shellAdmins.UserName
             MembersToInclude = $params.MembersToInclude
             MembersToExclude = $params.MembersToExclude
-            Databases = $cdbPermissions
-            AllDatabases = $params.AllDatabases
-            InstallAccount = $params.InstallAccount
+            Databases        = $cdbPermissions
+            AllDatabases     = $params.AllDatabases
+            InstallAccount   = $params.InstallAccount
         }
     }
     return $result

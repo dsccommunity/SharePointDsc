@@ -113,9 +113,9 @@ function Set-TargetResource
         }
 
         $newParams = @{
-            AppDomain = $params.AppDomain
+            AppDomain      = $params.AppDomain
             WebApplication = $params.WebAppUrl
-            Zone = $params.Zone
+            Zone           = $params.Zone
         }
         if ($params.ContainsKey("Port") -eq $true)
         {

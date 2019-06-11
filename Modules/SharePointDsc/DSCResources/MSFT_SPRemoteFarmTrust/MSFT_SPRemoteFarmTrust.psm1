@@ -32,11 +32,11 @@ function Get-TargetResource()
         $params = $args[0]
 
         $returnValue = @{
-            Name = $params.Name
+            Name            = $params.Name
             RemoteWebAppUrl = $params.RemoteWebAppUrl
-            LocalWebAppUrl = $params.LocalWebAppUrl
-            Ensure = "Absent"
-            InstallAccount = $params.InstallAccount
+            LocalWebAppUrl  = $params.LocalWebAppUrl
+            Ensure          = "Absent"
+            InstallAccount  = $params.InstallAccount
         }
 
         $issuer = Get-SPTrustedSecurityTokenIssuer -Identity $params.Name `

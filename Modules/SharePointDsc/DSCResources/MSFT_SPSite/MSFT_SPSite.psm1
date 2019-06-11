@@ -94,20 +94,20 @@ function Get-TargetResource
             Write-Verbose "Site Collection not found"
 
             return @{
-                Url = $params.Url
-                OwnerAlias = $null
-                CompatibilityLevel = $null
-                ContentDatabase = $null
-                Description = $null
+                Url                      = $params.Url
+                OwnerAlias               = $null
+                CompatibilityLevel       = $null
+                ContentDatabase          = $null
+                Description              = $null
                 HostHeaderWebApplication = $null
-                Language = $null
-                Name = $null
-                OwnerEmail = $null
-                QuotaTemplate = $null
-                SecondaryEmail = $null
-                SecondaryOwnerAlias = $null
-                Template = $null
-                CreateDefaultGroups = $null
+                Language                 = $null
+                Name                     = $null
+                OwnerEmail               = $null
+                QuotaTemplate            = $null
+                SecondaryEmail           = $null
+                SecondaryOwnerAlias      = $null
+                Template                 = $null
+                CreateDefaultGroups      = $null
             }
         }
         else
@@ -166,22 +166,22 @@ function Get-TargetResource
             }
 
             return @{
-                Url = $site.Url
-                OwnerAlias = $owner
-                CompatibilityLevel = $site.CompatibilityLevel
-                ContentDatabase = $site.ContentDatabase.Name
-                Description = $site.RootWeb.Description
+                Url                      = $site.Url
+                OwnerAlias               = $owner
+                CompatibilityLevel       = $site.CompatibilityLevel
+                ContentDatabase          = $site.ContentDatabase.Name
+                Description              = $site.RootWeb.Description
                 HostHeaderWebApplication = $HostHeaderWebApplication
-                Language = $site.RootWeb.Language
-                Name = $site.RootWeb.Name
-                OwnerEmail = $site.Owner.Email
-                QuotaTemplate = $quota
-                SecondaryEmail = $site.SecondaryContact.Email
-                SecondaryOwnerAlias = $secondaryOwner
-                Template = "$($site.RootWeb.WebTemplate)#$($site.RootWeb.Configuration)"
-                CreateDefaultGroups = $CreateDefaultGroups
-                AdministrationSiteType = $site.AdministrationSiteType
-                InstallAccount = $params.InstallAccount
+                Language                 = $site.RootWeb.Language
+                Name                     = $site.RootWeb.Name
+                OwnerEmail               = $site.Owner.Email
+                QuotaTemplate            = $quota
+                SecondaryEmail           = $site.SecondaryContact.Email
+                SecondaryOwnerAlias      = $secondaryOwner
+                Template                 = "$($site.RootWeb.WebTemplate)#$($site.RootWeb.Configuration)"
+                CreateDefaultGroups      = $CreateDefaultGroups
+                AdministrationSiteType   = $site.AdministrationSiteType
+                InstallAccount           = $params.InstallAccount
             }
         }
     }

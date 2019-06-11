@@ -28,7 +28,9 @@ function Get-TargetResource
     Write-Verbose -Message "Getting web application '$WebAppUrl' workflow settings"
 
     $paramArgs = @($PSBoundParameters,$PSScriptRoot)
-    $result = Invoke-SPDscCommand -Credential $InstallAccount -Arguments $paramArgs -ScriptBlock {
+    $result = Invoke-SPDscCommand -Credential $InstallAccount `
+                                  -Arguments $paramArgs `
+                                  -ScriptBlock {
         $params = $args[0]
         $ScriptRoot = $args[1]
 
@@ -36,7 +38,12 @@ function Get-TargetResource
         $wa = Get-SPWebApplication -Identity $params.WebAppUrl -ErrorAction SilentlyContinue
         if ($null -eq $wa)
         {
-            return $null
+            return @{
+                WebAppUrl                                     = $params.WebAppUrl
+                ExternalWorkflowParticipantsEnabled           = $null
+                UserDefinedWorkflowsEnabled                   = $null
+                EmailToNoPermissionWorkflowParticipantsEnable = $null
+            }
         }
 
         $relPath = "..\..\Modules\SharePointDsc.WebApplication\SPWebApplication.Workflow.psm1"
@@ -79,7 +86,9 @@ function Set-TargetResource
     Write-Verbose -Message "Setting web application '$WebAppUrl' workflow settings"
 
     $paramArgs = @($PSBoundParameters,$PSScriptRoot)
-    $null = Invoke-SPDscCommand -Credential $InstallAccount -Arguments $paramArgs -ScriptBlock {
+    $null = Invoke-SPDscCommand -Credential $InstallAccount `
+                                -Arguments $paramArgs `
+                                -ScriptBlock {
         $params = $args[0]
         $ScriptRoot = $args[1]
 
@@ -129,11 +138,6 @@ function Test-TargetResource
 
     Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
     Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
-
-    if ($null -eq $CurrentValues)
-    {
-        return $false
-    }
 
     $relPath = "..\..\Modules\SharePointDsc.WebApplication\SPWebApplication.Workflow.psm1"
         Import-Module (Join-Path $PSScriptRoot $relPath -Resolve)

@@ -45,10 +45,10 @@ function Get-TargetResource
         $nullReturn = @{
 
             ServiceAppName = $params.ServiceAppName
-            Name = $params.Name
-            RequestLimit = $null
-            WaitTime = $null
-            Ensure = "Absent"
+            Name           = $params.Name
+            RequestLimit   = $null
+            WaitTime       = $null
+            Ensure         = "Absent"
             InstallAccount = $params.InstallAccount
         }
 
@@ -72,10 +72,10 @@ function Get-TargetResource
                 {
                     return @{
                         ServiceAppName = $params.ServiceAppName
-                        Name = $params.Name
-                        RequestLimit = $crawlerImpactRule.HitRate
-                        WaitTime = 0
-                        Ensure = "Present"
+                        Name           = $params.Name
+                        RequestLimit   = $crawlerImpactRule.HitRate
+                        WaitTime       = 0
+                        Ensure         = "Present"
                         InstallAccount = $params.InstallAccount
                     }
                 }
@@ -83,17 +83,15 @@ function Get-TargetResource
                 {
                     return @{
                         ServiceAppName = $params.ServiceAppName
-                        Name = $params.Name
-                        RequestLimit = 0
-                        WaitTime = $crawlerImpactRule.HitRate
-                        Ensure = "Present"
+                        Name           = $params.Name
+                        RequestLimit   = 0
+                        WaitTime       = $crawlerImpactRule.HitRate
+                        Ensure         = "Present"
                         InstallAccount = $params.InstallAccount
                     }
                 }
             }
         }
-
-
     }
 
     return $result

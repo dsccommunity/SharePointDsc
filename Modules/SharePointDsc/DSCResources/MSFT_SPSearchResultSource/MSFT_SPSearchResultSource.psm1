@@ -54,15 +54,15 @@ function Get-TargetResource
         [void] [Reflection.Assembly]::LoadWithPartialName("Microsoft.Office.Server.Search")
 
         $nullReturn = @{
-            Name = $params.Name
-            ScopeName = $params.ScopeName
+            Name                 = $params.Name
+            ScopeName            = $params.ScopeName
             SearchServiceAppName = $params.SearchServiceAppName
-            Query = $null
-            ProviderType = $null
-            ConnectionUrl = $null
-            ScopeUrl = $null
-            Ensure = "Absent"
-            InstallAccount = $params.InstallAccount
+            Query                = $null
+            ProviderType         = $null
+            ConnectionUrl        = $null
+            ScopeUrl             = $null
+            Ensure               = "Absent"
+            InstallAccount       = $params.InstallAccount
         }
         $serviceApp = Get-SPEnterpriseSearchServiceApplication -Identity $params.SearchServiceAppName
         if ($null -eq $serviceApp)
@@ -104,15 +104,15 @@ function Get-TargetResource
                 $_.Id -eq $source.ProviderId
             }
             return @{
-                Name = $params.Name
-                ScopeName = $params.ScopeName
+                Name                 = $params.Name
+                ScopeName            = $params.ScopeName
                 SearchServiceAppName = $params.SearchServiceAppName
-                Query = $source.QueryTransform.QueryTemplate
-                ProviderType = $provider.DisplayName
-                ConnectionUrl = $source.ConnectionUrlTemplate
-                ScopeUrl = $params.ScopeUrl
-                Ensure = "Present"
-                InstallAccount = $params.InstallAccount
+                Query                = $source.QueryTransform.QueryTemplate
+                ProviderType         = $provider.DisplayName
+                ConnectionUrl        = $source.ConnectionUrlTemplate
+                ScopeUrl             = $params.ScopeUrl
+                Ensure               = "Present"
+                InstallAccount       = $params.InstallAccount
             }
         }
         else

@@ -124,27 +124,27 @@ function Get-TargetResource
         if ($null -eq $script:currentSettings)
         {
             return @{
-                Url = $params.Url
-                EnableOvertimeAndNonBillableTracking = $false
-                DefaultTimesheetCreationMode = ""
-                DefaultTrackingUnit = ""
-                DefaultReportingUnit = ""
-                HoursInStandardDay = 0
-                HoursInStandardWeek = 0
-                MaxHoursPerTimesheet = 0
-                MinHoursPerTimesheet = 0
-                MaxHoursPerDay = 0
-                AllowFutureTimeReporting = $false
-                AllowNewPersonalTasks  = $false
-                AllowTopLevelTimeReporting = $false
-                RequireTaskStatusManagerApproval = $false
+                Url                                        = $params.Url
+                EnableOvertimeAndNonBillableTracking       = $false
+                DefaultTimesheetCreationMode               = ""
+                DefaultTrackingUnit                        = ""
+                DefaultReportingUnit                       = ""
+                HoursInStandardDay                         = 0
+                HoursInStandardWeek                        = 0
+                MaxHoursPerTimesheet                       = 0
+                MinHoursPerTimesheet                       = 0
+                MaxHoursPerDay                             = 0
+                AllowFutureTimeReporting                   = $false
+                AllowNewPersonalTasks                      = $false
+                AllowTopLevelTimeReporting                 = $false
+                RequireTaskStatusManagerApproval           = $false
                 RequireLineApprovalBeforeTimesheetApproval = $false
-                EnableTimesheetAuditing = $false
-                FixedApprovalRouting = $false
-                SingleEntryMode = $false
-                DefaultTrackingMode = ""
-                ForceTrackingModeForAllProjects = $false
-                InstallAccount = $params.InstallAccount
+                EnableTimesheetAuditing                    = $false
+                FixedApprovalRouting                       = $false
+                SingleEntryMode                            = $false
+                DefaultTrackingMode                        = ""
+                ForceTrackingModeForAllProjects            = $false
+                InstallAccount                             = $params.InstallAccount
             }
         }
         else
@@ -214,27 +214,27 @@ function Get-TargetResource
             }
 
             return @{
-                Url = $params.Url
-                EnableOvertimeAndNonBillableTracking = $currentEnableOvertimeAndNonBillableTracking
-                DefaultTimesheetCreationMode = $currentDefaultTimesheetCreationMode
-                DefaultTrackingUnit = $currentDefaultTrackingUnit
-                DefaultReportingUnit = $currentDefaultReportingUnit
-                HoursInStandardDay = ([System.Single]::Parse($script:currentSettings.WADMIN_TS_HOURS_PER_DAY) / 60000)
-                HoursInStandardWeek = ([System.Single]::Parse($script:currentSettings.WADMIN_TS_HOURS_PER_WEEK) / 60000)
-                MaxHoursPerTimesheet = ([System.Single]::Parse($script:currentSettings.WADMIN_TS_MAX_HR_PER_TS) / 60000)
-                MinHoursPerTimesheet = ([System.Single]::Parse($script:currentSettings.WADMIN_TS_MIN_HR_PER_TS) / 60000)
-                MaxHoursPerDay = ([System.Single]::Parse($script:currentSettings.WADMIN_TS_MAX_HR_PER_DAY) / 60000)
-                AllowFutureTimeReporting = $script:currentSettings.WADMIN_TS_IS_FUTURE_REP_ALLOWED
-                AllowNewPersonalTasks = $script:currentSettings.WADMIN_TS_IS_UNVERS_TASK_ALLOWED
-                AllowTopLevelTimeReporting = $script:currentSettings.WADMIN_TS_ALLOW_PROJECT_LEVEL
-                RequireTaskStatusManagerApproval = $script:currentSettings.WADMIN_TS_PROJECT_MANAGER_COORDINATION
+                Url                                        = $params.Url
+                EnableOvertimeAndNonBillableTracking       = $currentEnableOvertimeAndNonBillableTracking
+                DefaultTimesheetCreationMode               = $currentDefaultTimesheetCreationMode
+                DefaultTrackingUnit                        = $currentDefaultTrackingUnit
+                DefaultReportingUnit                       = $currentDefaultReportingUnit
+                HoursInStandardDay                         = ([System.Single]::Parse($script:currentSettings.WADMIN_TS_HOURS_PER_DAY) / 60000)
+                HoursInStandardWeek                        = ([System.Single]::Parse($script:currentSettings.WADMIN_TS_HOURS_PER_WEEK) / 60000)
+                MaxHoursPerTimesheet                       = ([System.Single]::Parse($script:currentSettings.WADMIN_TS_MAX_HR_PER_TS) / 60000)
+                MinHoursPerTimesheet                       = ([System.Single]::Parse($script:currentSettings.WADMIN_TS_MIN_HR_PER_TS) / 60000)
+                MaxHoursPerDay                             = ([System.Single]::Parse($script:currentSettings.WADMIN_TS_MAX_HR_PER_DAY) / 60000)
+                AllowFutureTimeReporting                   = $script:currentSettings.WADMIN_TS_IS_FUTURE_REP_ALLOWED
+                AllowNewPersonalTasks                      = $script:currentSettings.WADMIN_TS_IS_UNVERS_TASK_ALLOWED
+                AllowTopLevelTimeReporting                 = $script:currentSettings.WADMIN_TS_ALLOW_PROJECT_LEVEL
+                RequireTaskStatusManagerApproval           = $script:currentSettings.WADMIN_TS_PROJECT_MANAGER_COORDINATION
                 RequireLineApprovalBeforeTimesheetApproval = $script:currentSettings.WADMIN_TS_PROJECT_MANAGER_APPROVAL
-                EnableTimesheetAuditing = $script:currentSettings.WADMIN_TS_IS_AUDIT_ENABLED
-                FixedApprovalRouting = $script:currentSettings.WADMIN_TS_FIXED_APPROVAL_ROUTING
-                SingleEntryMode = $script:currentSettings.WADMIN_TS_TIED_MODE
-                DefaultTrackingMode = $currentDefaultTrackingMode
-                ForceTrackingModeForAllProjects = $script:currentSettings.WADMIN_IS_TRACKING_METHOD_LOCKED
-                InstallAccount = $params.InstallAccount
+                EnableTimesheetAuditing                    = $script:currentSettings.WADMIN_TS_IS_AUDIT_ENABLED
+                FixedApprovalRouting                       = $script:currentSettings.WADMIN_TS_FIXED_APPROVAL_ROUTING
+                SingleEntryMode                            = $script:currentSettings.WADMIN_TS_TIED_MODE
+                DefaultTrackingMode                        = $currentDefaultTrackingMode
+                ForceTrackingModeForAllProjects            = $script:currentSettings.WADMIN_IS_TRACKING_METHOD_LOCKED
+                InstallAccount                             = $params.InstallAccount
             }
         }
     }

@@ -96,13 +96,13 @@ function Get-TargetResource
     if ($null -eq $result)
     {
         return @{
-            IssuerName = $IssuerName
-            ProviderRealms = $null
+            IssuerName              = $IssuerName
+            ProviderRealms          = $null
             ProviderRealmsToInclude = $null
             ProviderRealmsToExclude = $null
-            CurrentRealms = $null
-            RealmsToAdd = $null
-            Ensure = "Absent"
+            CurrentRealms           = $null
+            RealmsToAdd             = $null
+            Ensure                  = "Absent"
         }
     }
     $currentStatus = Get-ProviderRealmsStatus -currentRealms $result `
@@ -112,13 +112,13 @@ function Get-TargetResource
                                               -Ensure $Ensure
 
     return @{
-            IssuerName = $IssuerName
-            ProviderRealms = $paramRealms
+            IssuerName              = $IssuerName
+            ProviderRealms          = $paramRealms
             ProviderRealmsToInclude = $includeRealms
             ProviderRealmsToExclude = $excludeRealms
-            CurrentRealms = $result
-            RealmsToAdd = $currentStatus.NewRealms
-            Ensure = $currentStatus.CurrentStatus
+            CurrentRealms           = $result
+            RealmsToAdd             = $currentStatus.NewRealms
+            Ensure                  = $currentStatus.CurrentStatus
         }
 }
 

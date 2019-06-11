@@ -52,23 +52,23 @@ function Get-TargetResource
         if ($null -eq $category)
         {
             return @{
-                Name = $params.Name
-                ServiceAppName = $params.ServiceAppName
+                Name                           = $params.Name
+                ServiceAppName                 = $params.ServiceAppName
                 AutoCreateNewManagedProperties = $null
-                DiscoverNewProperties = $null
-                MapToContents = $null
-                Ensure = "Absent"
+                DiscoverNewProperties          = $null
+                MapToContents                  = $null
+                Ensure                         = "Absent"
             }
         }
         else
         {
             $results = @{
-                Name = $params.Name
-                ServiceAppName = $params.ServiceAppName
+                Name                           = $params.Name
+                ServiceAppName                 = $params.ServiceAppName
                 AutoCreateNewManagedProperties = $category.AutoCreateNewManagedProperties
-                DiscoverNewProperties = $category.DiscoverNewProperties
-                MapToContents = $category.MapToContents
-                Ensure = "Present"
+                DiscoverNewProperties          = $category.DiscoverNewProperties
+                MapToContents                  = $category.MapToContents
+                Ensure                         = "Present"
             }
             return $results
         }

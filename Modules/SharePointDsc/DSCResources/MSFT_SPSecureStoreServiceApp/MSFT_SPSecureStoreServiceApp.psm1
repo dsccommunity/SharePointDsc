@@ -71,10 +71,10 @@ function Get-TargetResource
         $params = $args[0]
 
         $nullReturn = @{
-            Name = $params.Name
+            Name            = $params.Name
             ApplicationPool = $params.ApplicationPool
             AuditingEnabled = $false
-            Ensure = "Absent"
+            Ensure          = "Absent"
         }
 
         $serviceApps = Get-SPServiceApplication -Name $params.Name -ErrorAction SilentlyContinue

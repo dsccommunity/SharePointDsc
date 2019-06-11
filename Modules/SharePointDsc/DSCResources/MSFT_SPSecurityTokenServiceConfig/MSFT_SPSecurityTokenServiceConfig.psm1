@@ -48,14 +48,14 @@ function Get-TargetResource
 
         $config = Get-SPSecurityTokenServiceConfig
         $nullReturn = @{
-            IsSingleInstance = "Yes"
-            Name = $params.Name
-            NameIdentifier = $params.NameIdentifier
-            UseSessionCookies = $params.UseSessionCookies
-            AllowOAuthOverHttp = $params.AllowOAuthOverHttp
+            IsSingleInstance      = "Yes"
+            Name                  = $params.Name
+            NameIdentifier        = $params.NameIdentifier
+            UseSessionCookies     = $params.UseSessionCookies
+            AllowOAuthOverHttp    = $params.AllowOAuthOverHttp
             AllowMetadataOverHttp = $params.AllowMetadataOverHttp
-            Ensure = "Absent"
-            InstallAccount = $params.InstallAccount
+            Ensure                = "Absent"
+            InstallAccount        = $params.InstallAccount
         }
         if ($null -eq $config)
         {
@@ -63,14 +63,14 @@ function Get-TargetResource
         }
 
         return @{
-            IsSingleInstance = "Yes"
-            Name = $config.Name
-            NameIdentifier = $config.NameIdentifier
-            UseSessionCookies = $config.UseSessionCookies
-            AllowOAuthOverHttp = $config.AllowOAuthOverHttp
+            IsSingleInstance      = "Yes"
+            Name                  = $config.Name
+            NameIdentifier        = $config.NameIdentifier
+            UseSessionCookies     = $config.UseSessionCookies
+            AllowOAuthOverHttp    = $config.AllowOAuthOverHttp
             AllowMetadataOverHttp = $config.AllowMetadataOverHttp
-            Ensure = "Present"
-            InstallAccount = $params.InstallAccount
+            Ensure                = "Present"
+            InstallAccount        = $params.InstallAccount
         }
     }
     return $result

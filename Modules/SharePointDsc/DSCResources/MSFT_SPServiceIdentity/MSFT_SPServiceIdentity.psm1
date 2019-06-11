@@ -42,14 +42,14 @@ function Get-TargetResource
 
         switch ($processIdentity.CurrentIdentityType)
         {
-            "LocalSystem" { $ManagedAccount = "LocalSystem" }
+            "LocalSystem"    { $ManagedAccount = "LocalSystem" }
             "NetworkService" { $ManagedAccount = "NetworkService" }
-            "LocalService" { $ManagedAccount = "LocalService" }
-            Default { $ManagedAccount = $processIdentity.Username }
+            "LocalService"   { $ManagedAccount = "LocalService" }
+            Default          { $ManagedAccount = $processIdentity.Username }
         }
 
         return @{
-            Name = $params.Name
+            Name           = $params.Name
             ManagedAccount = $ManagedAccount
         }
     }

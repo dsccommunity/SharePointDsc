@@ -69,11 +69,11 @@ function Get-TargetResource
         if ($null -eq $wa)
         {
             return @{
-                Name = $params.Name
-                ApplicationPool = $params.ApplicationPool
+                Name                   = $params.Name
+                ApplicationPool        = $params.ApplicationPool
                 ApplicationPoolAccount = $params.ApplicationPoolAccount
-                WebAppUrl = $params.WebAppUrl
-                Ensure = "Absent"
+                WebAppUrl              = $params.WebAppUrl
+                Ensure                 = "Absent"
             }
         }
 
@@ -86,19 +86,19 @@ function Get-TargetResource
         }
 
         return @{
-            Name = $wa.DisplayName
-            ApplicationPool = $wa.ApplicationPool.Name
+            Name                   = $wa.DisplayName
+            ApplicationPool        = $wa.ApplicationPool.Name
             ApplicationPoolAccount = $wa.ApplicationPool.Username
-            WebAppUrl = $wa.Url
-            AllowAnonymous = $authProvider.AllowAnonymous
-            DatabaseName = $wa.ContentDatabases[0].Name
-            DatabaseServer = $wa.ContentDatabases[0].Server
-            HostHeader = (New-Object -TypeName System.Uri $wa.Url).Host
-            Path = $wa.IisSettings[0].Path
-            Port = (New-Object -TypeName System.Uri $wa.Url).Port
-            UseClassic = $classicAuth
-            InstallAccount = $params.InstallAccount
-            Ensure = "Present"
+            WebAppUrl              = $wa.Url
+            AllowAnonymous         = $authProvider.AllowAnonymous
+            DatabaseName           = $wa.ContentDatabases[0].Name
+            DatabaseServer         = $wa.ContentDatabases[0].Server
+            HostHeader             = (New-Object -TypeName System.Uri $wa.Url).Host
+            Path                   = $wa.IisSettings[0].Path
+            Port                   = (New-Object -TypeName System.Uri $wa.Url).Port
+            UseClassic             = $classicAuth
+            InstallAccount         = $params.InstallAccount
+            Ensure                 = "Present"
         }
     }
     return $result

@@ -28,7 +28,7 @@ function Get-TargetResource
         if (!$WebApp)
         {
              return  @{
-                WebAppUrl = $null
+                WebAppUrl            = $null
                 ServiceAppProxyGroup = $null
                 InstallAccount       = $InstallAccount
              }
@@ -44,7 +44,7 @@ function Get-TargetResource
          }
 
          return @{
-             WebAppUrl = $params.WebAppUrl
+             WebAppUrl            = $params.WebAppUrl
              ServiceAppProxyGroup = $ServiceAppProxyGroup
              InstallAccount       = $InstallAccount
          }

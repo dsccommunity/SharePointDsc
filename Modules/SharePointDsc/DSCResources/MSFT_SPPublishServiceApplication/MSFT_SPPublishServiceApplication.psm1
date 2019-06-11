@@ -52,8 +52,8 @@ function Get-TargetResource
         }
 
         return @{
-            Name = $params.Name
-            Ensure = $sharedEnsure
+            Name           = $params.Name
+            Ensure         = $sharedEnsure
             InstallAccount = $params.InstallAccount
         }
     }

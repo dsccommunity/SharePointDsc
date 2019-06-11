@@ -36,11 +36,11 @@ function Get-TargetResource
         if ($null -eq $proxy)
         {
             return @{
-                ProxyName = $params.ProxyName
-                CreatePersonalSite = $null
+                ProxyName            = $params.ProxyName
+                CreatePersonalSite   = $null
                 FollowAndEditProfile = $null
-                UseTagsAndNotes = $null
-                InstallAccount = $params.InstallAccount
+                UseTagsAndNotes      = $null
+                InstallAccount       = $params.InstallAccount
             }
         }
         $security = Get-SPProfileServiceApplicationSecurity -ProfileServiceApplicationProxy $proxy
@@ -100,11 +100,11 @@ function Get-TargetResource
         }
 
         return @{
-            ProxyName = $params.ProxyName
-            CreatePersonalSite = $createPersonalSite
+            ProxyName            = $params.ProxyName
+            CreatePersonalSite   = $createPersonalSite
             FollowAndEditProfile = $followAndEditProfile
-            UseTagsAndNotes = $useTagsAndNotes
-            InstallAccount = $params.InstallAccount
+            UseTagsAndNotes      = $useTagsAndNotes
+            InstallAccount       = $params.InstallAccount
         }
     }
     return $result
@@ -179,9 +179,9 @@ function Set-TargetResource
         $security = Get-SPProfileServiceApplicationSecurity -ProfileServiceApplicationProxy $proxy
 
         $permissionsToUpdate = @{
-            "CreatePersonalSite" = "Create Personal Site"
+            "CreatePersonalSite"   = "Create Personal Site"
             "FollowAndEditProfile" = "Use Personal Features"
-            "UseTagsAndNotes" = "Use Social Features"
+            "UseTagsAndNotes"      = "Use Social Features"
         }
 
         foreach ($permission in $permissionsToUpdate.Keys)

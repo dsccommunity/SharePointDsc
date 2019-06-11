@@ -34,9 +34,9 @@ function Get-TargetResource
 
         $returnval = @{
             WorkflowHostUri = $null
-            SPSiteUrl = $params.SPSiteUrl
-            ScopeName = $null
-            AllowOAuthHttp = $null
+            SPSiteUrl       = $params.SPSiteUrl
+            ScopeName       = $null
+            AllowOAuthHttp  = $null
         }
 
         $site = Get-SPSite $params.SPSiteUrl
@@ -53,9 +53,9 @@ function Get-TargetResource
             {
                 $returnval = @{
                     WorkflowHostUri = $workflowProxy.GetHostname($site).TrimEnd("/")
-                    SPSiteUrl = $params.SPSiteUrl
-                    ScopeName = $workflowProxy.GetWorkflowScopeName($site)
-                    AllowOAuthHttp = $params.AllowOAuthHttp
+                    SPSiteUrl       = $params.SPSiteUrl
+                    ScopeName       = $workflowProxy.GetWorkflowScopeName($site)
+                    AllowOAuthHttp  = $params.AllowOAuthHttp
                 }
             }
         }
@@ -110,8 +110,8 @@ function Set-TargetResource
 
         $workflowServiceParams = @{
             WorkflowHostUri = $params.WorkflowHostUri.TrimEnd("/")
-            SPSite = $site
-            AllowOAuthHttp = $params.AllowOAuthHttp
+            SPSite          = $site
+            AllowOAuthHttp  = $params.AllowOAuthHttp
         }
 
         if ($params.ContainsKey("ScopeName"))
@@ -171,8 +171,8 @@ function Test-TargetResource
     }
 
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
-    -DesiredValues $PSBoundParameters `
-    -ValuesToCheck $valuesToCheck
+                                    -DesiredValues $PSBoundParameters `
+                                    -ValuesToCheck $valuesToCheck
 }
 
 Export-ModuleMember -Function *-TargetResource

@@ -35,14 +35,14 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         Context -Name "The database is not in an availability group, but should be" -Fixture {
             $testParams = @{
                 DatabaseName = "SampleDatabase"
-                AGName = "AGName"
-                Ensure = "Present"
+                AGName       = "AGName"
+                Ensure       = "Present"
             }
 
             Mock -CommandName Get-SPDatabase -MockWith {
                 return @(
                     @{
-                        Name = $testParams.DatabaseName
+                        Name              = $testParams.DatabaseName
                         AvailabilityGroup = $null
                     }
                 )
@@ -65,18 +65,18 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         Context -Name "Multiple databases matching the name pattern are not in an availability group, but should be" -Fixture {
             $testParams = @{
                 DatabaseName = "Sample*"
-                AGName = "AGName"
-                Ensure = "Present"
+                AGName       = "AGName"
+                Ensure       = "Present"
             }
 
             Mock -CommandName Get-SPDatabase -MockWith {
                 return @(
                     @{
-                        Name = "SampleDatabase1"
+                        Name              = "SampleDatabase1"
                         AvailabilityGroup = $null
                     },
                     @{
-                        Name = "SampleDatabase2"
+                        Name              = "SampleDatabase2"
                         AvailabilityGroup = $null
                     }
                 )
@@ -99,18 +99,18 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         Context -Name "Single database is not in an availability group, but should be" -Fixture {
             $testParams = @{
                 DatabaseName = "Sample*"
-                AGName = "AGName"
-                Ensure = "Present"
+                AGName       = "AGName"
+                Ensure       = "Present"
             }
 
             Mock -CommandName Get-SPDatabase -MockWith {
                 return @(
                     @{
-                        Name = "SampleDatabase1"
+                        Name              = "SampleDatabase1"
                         AvailabilityGroup = $null
                     },
                     @{
-                        Name = "SampleDatabase2"
+                        Name              = "SampleDatabase2"
                         AvailabilityGroup = @{
                             Name = $testParams.AGName
                         }
@@ -135,14 +135,14 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         Context -Name "The database is not in the availability group and should not be" -Fixture {
             $testParams = @{
                 DatabaseName = "SampleDatabase"
-                AGName = "AGName"
-                Ensure = "Absent"
+                AGName       = "AGName"
+                Ensure       = "Absent"
             }
 
             Mock -CommandName Get-SPDatabase -MockWith {
                 return @(
                     @{
-                        Name = $testParams.DatabaseName
+                        Name              = $testParams.DatabaseName
                         AvailabilityGroup = $null
                     }
                 )
@@ -160,18 +160,18 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         Context -Name "Multiple databases matching the name pattern are not in the availability group and should not be" -Fixture {
             $testParams = @{
                 DatabaseName = "SampleDatabase*"
-                AGName = "AGName"
-                Ensure = "Absent"
+                AGName       = "AGName"
+                Ensure       = "Absent"
             }
 
             Mock -CommandName Get-SPDatabase -MockWith {
                 return @(
                     @{
-                        Name = "SampleDatabase1"
+                        Name              = "SampleDatabase1"
                         AvailabilityGroup = $null
                     },
                     @{
-                        Name = "SampleDatabase2"
+                        Name              = "SampleDatabase2"
                         AvailabilityGroup = $null
                     }
                 )
@@ -189,14 +189,14 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         Context -Name "The database is in the correct availability group and should be" -Fixture {
             $testParams = @{
                 DatabaseName = "SampleDatabase"
-                AGName = "AGName"
-                Ensure = "Present"
+                AGName       = "AGName"
+                Ensure       = "Present"
             }
 
             Mock -CommandName Get-SPDatabase -MockWith {
                 return @(
                     @{
-                        Name = $testParams.DatabaseName
+                        Name              = $testParams.DatabaseName
                         AvailabilityGroup = @{
                             Name = $testParams.AGName
                         }
@@ -216,20 +216,20 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         Context -Name "Multiple databases matching the name pattern are in the correct availability group and should be" -Fixture {
             $testParams = @{
                 DatabaseName = "SampleDatabase*"
-                AGName = "AGName"
-                Ensure = "Present"
+                AGName       = "AGName"
+                Ensure       = "Present"
             }
 
             Mock -CommandName Get-SPDatabase -MockWith {
                 return @(
                     @{
-                        Name = "SampleDatabase1"
+                        Name              = "SampleDatabase1"
                         AvailabilityGroup = @{
                             Name = $testParams.AGName
                         }
                     },
                     @{
-                        Name = "SampleDatabase2"
+                        Name              = "SampleDatabase2"
                         AvailabilityGroup = @{
                             Name = $testParams.AGName
                         }
@@ -249,14 +249,14 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         Context -Name "The database is in an availability group and should not be" -Fixture {
             $testParams = @{
                 DatabaseName = "SampleDatabase"
-                AGName = "AGName"
-                Ensure = "Absent"
+                AGName       = "AGName"
+                Ensure       = "Absent"
             }
 
             Mock -CommandName Get-SPDatabase -MockWith {
                 return @(
                     @{
-                        Name = $testParams.DatabaseName
+                        Name              = $testParams.DatabaseName
                         AvailabilityGroup = @{
                             Name = $testParams.AGName
                         }
@@ -281,20 +281,20 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         Context -Name "Multiple databases matching the name pattern are in an availability group and should not be" -Fixture {
             $testParams = @{
                 DatabaseName = "SampleDatabase*"
-                AGName = "AGName"
-                Ensure = "Absent"
+                AGName       = "AGName"
+                Ensure       = "Absent"
             }
 
             Mock -CommandName Get-SPDatabase -MockWith {
                 return @(
                     @{
-                        Name = "SampleDatabase1"
+                        Name              = "SampleDatabase1"
                         AvailabilityGroup = @{
                             Name = $testParams.AGName
                         }
                     },
                     @{
-                        Name = "SampleDatabase2"
+                        Name              = "SampleDatabase2"
                         AvailabilityGroup = @{
                             Name = $testParams.AGName
                         }
@@ -319,20 +319,20 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         Context -Name "Single database is in an availability group and should not be" -Fixture {
             $testParams = @{
                 DatabaseName = "SampleDatabase*"
-                AGName = "AGName"
-                Ensure = "Absent"
+                AGName       = "AGName"
+                Ensure       = "Absent"
             }
 
             Mock -CommandName Get-SPDatabase -MockWith {
                 return @(
                     @{
-                        Name = "SampleDatabase1"
+                        Name              = "SampleDatabase1"
                         AvailabilityGroup = @{
                             Name = $null
                         }
                     },
                     @{
-                        Name = "SampleDatabase2"
+                        Name              = "SampleDatabase2"
                         AvailabilityGroup = @{
                             Name = $testParams.AGName
                         }
@@ -357,14 +357,14 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         Context -Name "The database is in the wrong availability group" -Fixture {
             $testParams = @{
                 DatabaseName = "SampleDatabase"
-                AGName = "AGName"
-                Ensure = "Present"
+                AGName       = "AGName"
+                Ensure       = "Present"
             }
 
             Mock -CommandName Get-SPDatabase -MockWith {
                 return @(
                     @{
-                        Name = $testParams.DatabaseName
+                        Name              = $testParams.DatabaseName
                         AvailabilityGroup = @{
                             Name = "WrongAAG"
                         }
@@ -390,20 +390,20 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         Context -Name "Single database is in the wrong availability group" -Fixture {
             $testParams = @{
                 DatabaseName = "SampleDatabase"
-                AGName = "AGName"
-                Ensure = "Present"
+                AGName       = "AGName"
+                Ensure       = "Present"
             }
 
             Mock -CommandName Get-SPDatabase -MockWith {
                 return @(
                     @{
-                        Name = $testParams.DatabaseName
+                        Name              = $testParams.DatabaseName
                         AvailabilityGroup = @{
                             Name = $testParams.AGName
                         }
                     },
                     @{
-                        Name = $testParams.DatabaseName
+                        Name              = $testParams.DatabaseName
                         AvailabilityGroup = @{
                             Name = "WrongAAG"
                         }
@@ -429,14 +429,14 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         Context -Name "Specified database is not found" -Fixture {
             $testParams = @{
                 DatabaseName = "SampleDatabase"
-                AGName = "AGName"
-                Ensure = "Present"
+                AGName       = "AGName"
+                Ensure       = "Present"
             }
 
             Mock -CommandName Get-SPDatabase -MockWith {
                 return @(
                     @{
-                        Name = "WrongDatabase"
+                        Name              = "WrongDatabase"
                         AvailabilityGroup = @{
                             Name = $testParams.AGName
                         }
@@ -462,8 +462,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             Context -Name "An unsupported version of SharePoint is installed on the server" {
                 $testParams = @{
                     DatabaseName = "SampleDatabase"
-                    AGName = "AGName"
-                    Ensure = "Present"
+                    AGName       = "AGName"
+                    Ensure       = "Present"
                 }
 
                 Mock -CommandName Get-SPDscInstalledProductVersion {

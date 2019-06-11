@@ -69,10 +69,10 @@ function Compare-SPDscWebAppPolicy()
                                                      -UsernameToCheck $policy.Username.ToLower()))
                     {
                         $diff += @{
-                            Username = $policy.Username.ToLower()
-                            Status = "Different"
-                            IdentityType = $policy.IdentityType
-                            DesiredPermissionLevel = $setting.PermissionLevel
+                            Username                  = $policy.Username.ToLower()
+                            Status                    = "Different"
+                            IdentityType              = $policy.IdentityType
+                            DesiredPermissionLevel    = $setting.PermissionLevel
                             DesiredActAsSystemSetting = $setting.ActAsSystemAccount
                         }
                     }
@@ -107,10 +107,10 @@ function Compare-SPDscWebAppPolicy()
                                              -UsernameToCheck $policy.Username.ToLower()))
             {
                 $diff += @{
-                    Username = $policy.Username.ToLower()
-                    Status = "Additional"
-                    IdentityType = $policy.IdentityType
-                    DesiredPermissionLevel = $null
+                    Username                  = $policy.Username.ToLower()
+                    Status                    = "Additional"
+                    IdentityType              = $policy.IdentityType
+                    DesiredPermissionLevel    = $null
                     DesiredActAsSystemSetting = $null
                 }
             }
@@ -143,10 +143,10 @@ function Compare-SPDscWebAppPolicy()
                                                      -UsernameToCheck $policy.Username.ToLower()))
                     {
                         $diff += @{
-                            Username = $setting.Username.ToLower()
-                            Status = "Different"
-                            IdentityType = $identityType
-                            DesiredPermissionLevel = $setting.PermissionLevel
+                            Username                  = $setting.Username.ToLower()
+                            Status                    = "Different"
+                            IdentityType              = $identityType
+                            DesiredPermissionLevel    = $setting.PermissionLevel
                             DesiredActAsSystemSetting = $setting.ActAsSystemAccount
                         }
                     }
@@ -163,10 +163,10 @@ function Compare-SPDscWebAppPolicy()
                                                          -UsernameToCheck $policy.Username.ToLower()))
                         {
                             $diff += @{
-                                Username = $setting.Username.ToLower()
-                                Status = "Different"
-                                IdentityType = $identityType
-                                DesiredPermissionLevel = $setting.PermissionLevel
+                                Username                  = $setting.Username.ToLower()
+                                Status                    = "Different"
+                                IdentityType              = $identityType
+                                DesiredPermissionLevel    = $setting.PermissionLevel
                                 DesiredActAsSystemSetting = $setting.ActAsSystemAccount
                             }
                         }
@@ -181,10 +181,10 @@ function Compare-SPDscWebAppPolicy()
                                              -UsernameToCheck $setting.Username.ToLower()))
             {
                 $diff += @{
-                    Username = $setting.Username.ToLower()
-                    Status = "Missing"
-                    IdentityType = $identityType
-                    DesiredPermissionLevel = $setting.PermissionLevel
+                    Username                  = $setting.Username.ToLower()
+                    Status                    = "Missing"
+                    IdentityType              = $identityType
+                    DesiredPermissionLevel    = $setting.PermissionLevel
                     DesiredActAsSystemSetting = $setting.ActAsSystemAccount
                 }
             }

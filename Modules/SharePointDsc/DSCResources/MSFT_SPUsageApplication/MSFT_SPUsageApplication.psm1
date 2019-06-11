@@ -60,7 +60,7 @@ function Get-TargetResource
         $serviceApps = Get-SPServiceApplication -Name $params.Name `
                                                 -ErrorAction SilentlyContinue
         $nullReturn = @{
-            Name = $params.Name
+            Name   = $params.Name
             Ensure = "Absent"
         }
 
@@ -90,17 +90,17 @@ function Get-TargetResource
 
             $service = Get-SPUsageService
             return @{
-                Name = $serviceApp.DisplayName
-                InstallAccount = $params.InstallAccount
-                DatabaseName = $serviceApp.UsageDatabase.Name
-                DatabaseServer = $serviceApp.UsageDatabase.NormalizedDataSource
-                DatabaseCredentials = $params.DatabaseCredentials
+                Name                   = $serviceApp.DisplayName
+                InstallAccount         = $params.InstallAccount
+                DatabaseName           = $serviceApp.UsageDatabase.Name
+                DatabaseServer         = $serviceApp.UsageDatabase.NormalizedDataSource
+                DatabaseCredentials    = $params.DatabaseCredentials
                 FailoverDatabaseServer = $serviceApp.UsageDatabase.FailoverServer
-                UsageLogCutTime = $service.UsageLogCutTime
-                UsageLogLocation = $service.UsageLogDir
-                UsageLogMaxFileSizeKB = $service.UsageLogMaxFileSize / 1024
-                UsageLogMaxSpaceGB = $service.UsageLogMaxSpaceGB
-                Ensure = $ensure
+                UsageLogCutTime        = $service.UsageLogCutTime
+                UsageLogLocation       = $service.UsageLogDir
+                UsageLogMaxFileSizeKB  = $service.UsageLogMaxFileSize / 1024
+                UsageLogMaxSpaceGB     = $service.UsageLogMaxSpaceGB
+                Ensure                 = $ensure
             }
         }
     }

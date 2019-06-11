@@ -183,12 +183,12 @@ function Get-TargetResource
         }
 
         $returnval = @{
-                WebAppUrl = $params.WebAppUrl
-                Members = $members
-                MembersToInclude = $params.MembersToInclude
-                MembersToExclude = $params.MembersToExclude
+                WebAppUrl              = $params.WebAppUrl
+                Members                = $members
+                MembersToInclude       = $params.MembersToInclude
+                MembersToExclude       = $params.MembersToExclude
                 SetCacheAccountsPolicy = $SetCacheAccountsPolicy
-                InstallAccount = $params.InstallAccount
+                InstallAccount         = $params.InstallAccount
         }
 
         return $returnval

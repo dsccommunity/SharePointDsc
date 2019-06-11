@@ -90,10 +90,10 @@ function Get-TargetResource
         if ($null -eq $source)
         {
             return @{
-                Name = $params.Name
-                ServiceAppName = $params.ServiceAppName
+                Name              = $params.Name
+                ServiceAppName    = $params.ServiceAppName
                 ContentSourceType = $params.ContentSourceType
-                Ensure = "Absent"
+                Ensure            = "Absent"
             }
         }
 
@@ -112,17 +112,17 @@ function Get-TargetResource
                                             -Schedule $source.FullCrawlSchedule
 
                 $result = @{
-                    Name = $params.Name
-                    ServiceAppName = $params.ServiceAppName
-                    Ensure = "Present"
-                    ContentSourceType = "SharePoint"
-                    Addresses = [array] $source.StartAddresses.AbsoluteUri
-                    CrawlSetting = $crawlSetting
-                    ContinuousCrawl = $source.EnableContinuousCrawls
+                    Name                = $params.Name
+                    ServiceAppName      = $params.ServiceAppName
+                    Ensure              = "Present"
+                    ContentSourceType   = "SharePoint"
+                    Addresses           = [array] $source.StartAddresses.AbsoluteUri
+                    CrawlSetting        = $crawlSetting
+                    ContinuousCrawl     = $source.EnableContinuousCrawls
                     IncrementalSchedule = $incrementalSchedule
-                    FullSchedule = $fullSchedule
-                    Priority = $source.CrawlPriority
-                    InstallAccount = $params.InstallAccount
+                    FullSchedule        = $fullSchedule
+                    Priority            = $source.CrawlPriority
+                    InstallAccount      = $params.InstallAccount
                 }
             }
             "Web" {
@@ -142,17 +142,17 @@ function Get-TargetResource
                                             -Schedule $source.FullCrawlSchedule
 
                 $result = @{
-                    Name = $params.Name
-                    ServiceAppName = $params.ServiceAppName
-                    Ensure = "Present"
-                    ContentSourceType = "Website"
-                    Addresses = [array] $source.StartAddresses.AbsoluteUri
-                    CrawlSetting = $crawlSetting
+                    Name                = $params.Name
+                    ServiceAppName      = $params.ServiceAppName
+                    Ensure              = "Present"
+                    ContentSourceType   = "Website"
+                    Addresses           = [array] $source.StartAddresses.AbsoluteUri
+                    CrawlSetting        = $crawlSetting
                     IncrementalSchedule = $incrementalSchedule
-                    FullSchedule = $fullSchedule
-                    LimitPageDepth = $source.MaxPageEnumerationDepth
-                    LimitServerHops = $source.MaxSiteEnumerationDepth
-                    Priority = $source.CrawlPriority
+                    FullSchedule        = $fullSchedule
+                    LimitPageDepth      = $source.MaxPageEnumerationDepth
+                    LimitServerHops     = $source.MaxSiteEnumerationDepth
+                    Priority            = $source.CrawlPriority
                 }
             }
             "File" {
@@ -171,27 +171,27 @@ function Get-TargetResource
                                             -Schedule $source.FullCrawlSchedule
 
                 $result = @{
-                    Name = $params.Name
-                    ServiceAppName = $params.ServiceAppName
-                    Ensure = "Present"
-                    ContentSourceType = "FileShare"
-                    Addresses = $addresses
-                    CrawlSetting = $crawlSetting
+                    Name                = $params.Name
+                    ServiceAppName      = $params.ServiceAppName
+                    Ensure              = "Present"
+                    ContentSourceType   = "FileShare"
+                    Addresses           = $addresses
+                    CrawlSetting        = $crawlSetting
                     IncrementalSchedule = $incrementalSchedule
-                    FullSchedule = $fullSchedule
-                    Priority = $source.CrawlPriority
+                    FullSchedule        = $fullSchedule
+                    Priority            = $source.CrawlPriority
                 }
             }
             "Business" {
                 $result = @{
-                    Name = $params.Name
-                    ServiceAppName = $params.ServiceAppName
-                    Ensure = "Present"
-                    ContentSourceType = "Business"
-                    CrawlSetting = $crawlSetting
+                    Name                = $params.Name
+                    ServiceAppName      = $params.ServiceAppName
+                    Ensure              = "Present"
+                    ContentSourceType   = "Business"
+                    CrawlSetting        = $crawlSetting
                     IncrementalSchedule = $incrementalSchedule
-                    FullSchedule = $fullSchedule
-                    Priority = $source.CrawlPriority
+                    FullSchedule        = $fullSchedule
+                    Priority            = $source.CrawlPriority
                 }
 
                 if ($null -ne $params.LOBSystemSet)

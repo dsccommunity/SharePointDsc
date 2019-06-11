@@ -139,10 +139,10 @@ function Get-TargetResource
         $serviceApps = Get-SPServiceApplication -Name $params.Name `
                                                 -ErrorAction SilentlyContinue
         $nullReturn = @{
-            Name = $params.Name
+            Name            = $params.Name
             ApplicationPool = $params.ApplicationPool
-            Ensure = "Absent"
-            InstallAccount = $params.InstallAccount
+            Ensure          = "Absent"
+            InstallAccount  = $params.InstallAccount
         }
         if ($null -eq $serviceApps)
         {
@@ -162,53 +162,53 @@ function Get-TargetResource
             $fileLocationsToReturn = @()
             $fileLocations | ForEach-Object -Process {
                 $fileLocationsToReturn += @{
-                    Address = $_.Address
-                    LocationType = $_.LocationType
-                    IncludeChildren = [Convert]::ToBoolean($_.IncludeChildren)
-                    SessionTimeout = $_.SessionTimeout
-                    ShortSessionTimeout = $_.ShortSessionTimeout
-                    NewWorkbookSessionTimeout = $_.NewWorkbookSessionTimeout
-                    RequestDurationMax = $_.RequestDurationMax
-                    ChartRenderDurationMax = $_.ChartRenderDurationMax
-                    WorkbookSizeMax = $_.WorkbookSizeMax
-                    ChartAndImageSizeMax = $_.ChartAndImageSizeMax
+                    Address                                = $_.Address
+                    LocationType                           = $_.LocationType
+                    IncludeChildren                        = [Convert]::ToBoolean($_.IncludeChildren)
+                    SessionTimeout                         = $_.SessionTimeout
+                    ShortSessionTimeout                    = $_.ShortSessionTimeout
+                    NewWorkbookSessionTimeout              = $_.NewWorkbookSessionTimeout
+                    RequestDurationMax                     = $_.RequestDurationMax
+                    ChartRenderDurationMax                 = $_.ChartRenderDurationMax
+                    WorkbookSizeMax                        = $_.WorkbookSizeMax
+                    ChartAndImageSizeMax                   = $_.ChartAndImageSizeMax
                     AutomaticVolatileFunctionCacheLifetime = $_.AutomaticVolatileFunctionCacheLifetime
-                    DefaultWorkbookCalcMode = $_.DefaultWorkbookCalcMode
-                    ExternalDataAllowed = $_.ExternalDataAllowed
-                    WarnOnDataRefresh = [Convert]::ToBoolean($_.WarnOnDataRefresh)
-                    DisplayGranularExtDataErrors = [Convert]::ToBoolean($_.DisplayGranularExtDataErrors)
-                    AbortOnRefreshOnOpenFail = [Convert]::ToBoolean($_.AbortOnRefreshOnOpenFail)
-                    PeriodicExtDataCacheLifetime = $_.PeriodicExtDataCacheLifetime
-                    ManualExtDataCacheLifetime = $_.ManualExtDataCacheLifetime
-                    ConcurrentDataRequestsPerSessionMax = $_.ConcurrentDataRequestsPerSessionMax
-                    UdfsAllowed = [Convert]::ToBoolean($_.UdfsAllowed)
-                    Description = $_.Description
-                    RESTExternalDataAllowed = [Convert]::ToBoolean($_.RESTExternalDataAllowed)
+                    DefaultWorkbookCalcMode                = $_.DefaultWorkbookCalcMode
+                    ExternalDataAllowed                    = $_.ExternalDataAllowed
+                    WarnOnDataRefresh                      = [Convert]::ToBoolean($_.WarnOnDataRefresh)
+                    DisplayGranularExtDataErrors           = [Convert]::ToBoolean($_.DisplayGranularExtDataErrors)
+                    AbortOnRefreshOnOpenFail               = [Convert]::ToBoolean($_.AbortOnRefreshOnOpenFail)
+                    PeriodicExtDataCacheLifetime           = $_.PeriodicExtDataCacheLifetime
+                    ManualExtDataCacheLifetime             = $_.ManualExtDataCacheLifetime
+                    ConcurrentDataRequestsPerSessionMax    = $_.ConcurrentDataRequestsPerSessionMax
+                    UdfsAllowed                            = [Convert]::ToBoolean($_.UdfsAllowed)
+                    Description                            = $_.Description
+                    RESTExternalDataAllowed                = [Convert]::ToBoolean($_.RESTExternalDataAllowed)
                 }
             }
 
             $returnVal =  @{
-                Name = $serviceApp.DisplayName
-                ApplicationPool = $serviceApp.ApplicationPool.Name
-                Ensure = "Present"
-                TrustedFileLocations = $fileLocationsToReturn
-                CachingOfUnusedFilesEnable = $serviceApp.CachingOfUnusedFilesEnable
-                CrossDomainAccessAllowed = $serviceApp.CrossDomainAccessAllowed
-                EncryptedUserConnectionRequired = $serviceApp.EncryptedUserConnectionRequired
-                ExternalDataConnectionLifetime = $serviceApp.ExternalDataConnectionLifetime
-                FileAccessMethod = $serviceApp.FileAccessMethod
-                LoadBalancingScheme = $serviceApp.LoadBalancingScheme
-                MemoryCacheThreshold = $serviceApp.MemoryCacheThreshold
-                PrivateBytesMax = $serviceApp.PrivateBytesMax
-                SessionsPerUserMax = $serviceApp.SessionsPerUserMax
-                SiteCollectionAnonymousSessionsMax = $serviceApp.SiteCollectionAnonymousSessionsMax
-                TerminateProcessOnAccessViolation = $serviceApp.TerminateProcessOnAccessViolation
+                Name                                      = $serviceApp.DisplayName
+                ApplicationPool                           = $serviceApp.ApplicationPool.Name
+                Ensure                                    = "Present"
+                TrustedFileLocations                      = $fileLocationsToReturn
+                CachingOfUnusedFilesEnable                = $serviceApp.CachingOfUnusedFilesEnable
+                CrossDomainAccessAllowed                  = $serviceApp.CrossDomainAccessAllowed
+                EncryptedUserConnectionRequired           = $serviceApp.EncryptedUserConnectionRequired
+                ExternalDataConnectionLifetime            = $serviceApp.ExternalDataConnectionLifetime
+                FileAccessMethod                          = $serviceApp.FileAccessMethod
+                LoadBalancingScheme                       = $serviceApp.LoadBalancingScheme
+                MemoryCacheThreshold                      = $serviceApp.MemoryCacheThreshold
+                PrivateBytesMax                           = $serviceApp.PrivateBytesMax
+                SessionsPerUserMax                        = $serviceApp.SessionsPerUserMax
+                SiteCollectionAnonymousSessionsMax        = $serviceApp.SiteCollectionAnonymousSessionsMax
+                TerminateProcessOnAccessViolation         = $serviceApp.TerminateProcessOnAccessViolation
                 ThrottleAccessViolationsPerSiteCollection = $serviceApp.ThrottleAccessViolationsPerSiteCollection
-                UnattendedAccountApplicationId = $serviceApp.UnattendedAccountApplicationId
-                UnusedObjectAgeMax = $serviceApp.UnusedObjectAgeMax
-                WorkbookCache = $serviceApp.WorkbookCache
-                WorkbookCacheSizeMax = $serviceApp.WorkbookCacheSizeMax
-                InstallAccount = $params.InstallAccount
+                UnattendedAccountApplicationId            = $serviceApp.UnattendedAccountApplicationId
+                UnusedObjectAgeMax                        = $serviceApp.UnusedObjectAgeMax
+                WorkbookCache                             = $serviceApp.WorkbookCache
+                WorkbookCacheSizeMax                      = $serviceApp.WorkbookCacheSizeMax
+                InstallAccount                            = $params.InstallAccount
             }
             return $returnVal
         }

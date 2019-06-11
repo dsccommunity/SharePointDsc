@@ -355,12 +355,12 @@ function Set-TargetResource
                                                       -SearchTopology $currentTopology
 
         $componentTypes = @{
-            Admin = "AdminComponent"
-            Crawler = "CrawlComponent"
-            ContentProcessing = "ContentProcessingComponent"
+            Admin               = "AdminComponent"
+            Crawler             = "CrawlComponent"
+            ContentProcessing   = "ContentProcessingComponent"
             AnalyticsProcessing = "AnalyticsProcessingComponent"
-            QueryProcessing = "QueryProcessingComponent"
-            IndexPartition = "IndexComponent"
+            QueryProcessing     = "QueryProcessingComponent"
+            IndexPartition      = "IndexComponent"
         }
 
         # Build up the topology changes for each object type

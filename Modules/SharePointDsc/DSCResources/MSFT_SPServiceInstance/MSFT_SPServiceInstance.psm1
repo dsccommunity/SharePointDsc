@@ -24,7 +24,7 @@ function Get-TargetResource
 
     $invokeArgs = @{
         Credential = $InstallAccount
-        Arguments = @($PSBoundParameters, $newName)
+        Arguments  = @($PSBoundParameters, $newName)
     }
     $result = Invoke-SPDscCommand @invokeArgs -ScriptBlock {
         $params = $args[0]
@@ -65,8 +65,8 @@ function Get-TargetResource
         }
 
         return @{
-            Name = $params.Name
-            Ensure = $localEnsure
+            Name           = $params.Name
+            Ensure         = $localEnsure
             InstallAccount = $params.InstallAccount
         }
     }

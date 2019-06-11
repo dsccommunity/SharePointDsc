@@ -55,9 +55,10 @@ function Get-TargetResource
             -or $WorkerKeepAliveTimeoutInSeconds `
             -or $WorkerProcessCount `
             -or $WorkerTimeoutInSeconds) -and ($Ensure -eq "Absent"))
-            {
-                throw "You cannot use any of the parameters when Ensure is specified as Absent"
-            }
+    {
+        throw "You cannot use any of the parameters when Ensure is specified as Absent"
+    }
+
     if (($Ensure -eq "Present") -and -not $ApplicationPool)
     {
         throw ("An Application Pool is required to configure the PowerPoint " + `
@@ -103,20 +104,20 @@ function Get-TargetResource
             }
         }
 
-         $returnVal = @{
-             Name = $serviceApp.DisplayName
-             ProxyName = $proxyName
-             ApplicationPool = $serviceApp.ApplicationPool.Name
-             CacheExpirationPeriodInSeconds = $serviceApp.CacheExpirationPeriodInSeconds
-             MaximumConversionsPerWorker = $serviceApp.MaximumConversionsPerWorker
-             WorkerKeepAliveTimeoutInSeconds = $serviceApp.WorkerKeepAliveTimeoutInSeconds
-             WorkerProcessCount = $serviceApp.WorkerProcessCount
-             WorkerTimeoutInSeconds = $serviceApp.WorkerTimeoutInSeconds
-             Ensure = "Present"
-             InstallAccount = $params.InstallAccount
+        $returnVal = @{
+            Name                            = $serviceApp.DisplayName
+            ProxyName                       = $proxyName
+            ApplicationPool                 = $serviceApp.ApplicationPool.Name
+            CacheExpirationPeriodInSeconds  = $serviceApp.CacheExpirationPeriodInSeconds
+            MaximumConversionsPerWorker     = $serviceApp.MaximumConversionsPerWorker
+            WorkerKeepAliveTimeoutInSeconds = $serviceApp.WorkerKeepAliveTimeoutInSeconds
+            WorkerProcessCount              = $serviceApp.WorkerProcessCount
+            WorkerTimeoutInSeconds          = $serviceApp.WorkerTimeoutInSeconds
+            Ensure                          = "Present"
+            InstallAccount                  = $params.InstallAccount
 
-         }
-         return $returnVal
+        }
+        return $returnVal
     }
     return $result
 }

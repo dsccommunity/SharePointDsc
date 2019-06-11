@@ -34,17 +34,17 @@ function Get-TargetResource
         if ($null -eq $sap)
         {
             return @{
-                Name = $params.Name
+                Name           = $params.Name
                 ServiceAccount = $params.ProcessAccountName
                 InstallAccount = $params.InstallAccount
-                Ensure = "Absent"
+                Ensure         = "Absent"
             }
         }
         return @{
-            Name = $sap.Name
+            Name           = $sap.Name
             ServiceAccount = $sap.ProcessAccountName
             InstallAccount = $params.InstallAccount
-            Ensure = "Present"
+            Ensure         = "Present"
         }
     }
     return $result

@@ -64,12 +64,12 @@ function Get-TargetResource
         {
             Write-Verbose -Message "WebApplication $($params.WebAppUrl) does not exist"
             return @{
-                WebAppUrl = $params.WebAppUrl
-                Name = $params.Name
-                Url = $null
-                Zone = $null
+                WebAppUrl      = $params.WebAppUrl
+                Name           = $params.Name
+                Url            = $null
+                Zone           = $null
                 AllowAnonymous = $null
-                Ensure = "Absent"
+                Ensure         = "Absent"
             }
         }
 
@@ -79,12 +79,12 @@ function Get-TargetResource
         if ($null -eq $waExt)
         {
             return @{
-                WebAppUrl = $params.WebAppUrl
-                Name = $params.Name
-                Url = $params.Url
-                Zone = $params.zone
+                WebAppUrl      = $params.WebAppUrl
+                Name           = $params.Name
+                Url            = $params.Url
+                Zone           = $params.zone
                 AllowAnonymous = $params.AllowAnonymous
-                Ensure = "Absent"
+                Ensure         = "Absent"
             }
         }
 
@@ -104,17 +104,17 @@ function Get-TargetResource
         }
 
          return @{
-            WebAppUrl = $params.WebAppUrl
-            Name = $waExt.ServerComment
-            Url = $PublicURL
+            WebAppUrl      = $params.WebAppUrl
+            Name           = $waExt.ServerComment
+            Url            = $PublicURL
             AllowAnonymous = $waExt.AllowAnonymous
-            HostHeader = $HostHeader
-            Path = $waExt.Path
-            Port = $Port
-            Zone = $params.zone
-            UseSSL = $UseSSL
+            HostHeader     = $HostHeader
+            Path           = $waExt.Path
+            Port           = $Port
+            Zone           = $params.zone
+            UseSSL         = $UseSSL
             InstallAccount = $params.InstallAccount
-            Ensure = "Present"
+            Ensure         = "Present"
         }
     }
     return $result

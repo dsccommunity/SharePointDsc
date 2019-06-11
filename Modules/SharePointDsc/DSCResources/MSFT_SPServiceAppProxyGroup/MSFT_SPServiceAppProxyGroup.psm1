@@ -88,12 +88,12 @@ function Get-TargetResource
             $ServiceAppProxies = $ProxyGroup.Proxies.DisplayName
 
             return @{
-                Name = $params.name
-                Ensure = $Ensure
-                ServiceAppProxies = $ServiceAppProxies
+                Name                       = $params.name
+                Ensure                     = $Ensure
+                ServiceAppProxies          = $ServiceAppProxies
                 ServiceAppProxiesToInclude = $params.ServiceAppProxiesToInclude
                 ServiceAppProxiesToExclude = $params.ServiceAppProxiesToExclude
-                InstallAccount = $params.InstallAccount
+                InstallAccount             = $params.InstallAccount
             }
     }
 

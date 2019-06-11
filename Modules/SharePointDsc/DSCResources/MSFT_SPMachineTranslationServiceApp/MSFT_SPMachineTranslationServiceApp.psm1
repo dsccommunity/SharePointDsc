@@ -43,11 +43,11 @@ function Get-TargetResource
         $serviceApps = Get-SPServiceApplication -Name $params.Name -ErrorAction SilentlyContinue
 
         $nullReturn = @{
-            Name = $params.Name
-            DatabaseName = $params.DatabaseName
-            DatabaseServer = $params.DatabaseServer
+            Name            = $params.Name
+            DatabaseName    = $params.DatabaseName
+            DatabaseServer  = $params.DatabaseServer
             ApplicationPool = $params.ApplicationPool
-            Ensure = "Absent"
+            Ensure          = "Absent"
         }
 
         if ($null -eq $serviceApps)
@@ -77,12 +77,12 @@ function Get-TargetResource
             }
 
             return @{
-                Name = $params.Name
-                ProxyName = $proxyName
-                DatabaseName = $($serviceApp.Database.Name)
-                DatabaseServer = $($serviceApp.Database.NormalizedDataSource)
+                Name            = $params.Name
+                ProxyName       = $proxyName
+                DatabaseName    = $($serviceApp.Database.Name)
+                DatabaseServer  = $($serviceApp.Database.NormalizedDataSource)
                 ApplicationPool = $($serviceApp.ApplicationPool.Name)
-                Ensure = "Present"
+                Ensure          = "Present"
             }
         }
     }

@@ -93,10 +93,10 @@ function Get-TargetResource
         if ($null -eq $managedProperty)
         {
             return @{
-                Name = $params.Name
+                Name           = $params.Name
                 ServiceAppName = $params.ServiceAppName
-                PropertyType = $params.PropertyType
-                Ensure = "Absent"
+                PropertyType   = $params.PropertyType
+                Ensure         = "Absent"
             }
         }
         else
@@ -110,21 +110,21 @@ function Get-TargetResource
                 $includeAllCrawlProperties = $false
             }
             $results = @{
-                Name = $params.Name
-                ServiceAppName = $params.ServiceAppName
-                PropertyType = $managedProperty.ManagedType
-                Searchable = $managedProperty.Searchable
-                Queryable = $managedPRoperty.Queryable
-                Retrievable = $managedProperty.Retrievable
-                HasMultipleValues = $managedProperty.HasMultipleValues
-                Refinable = $managedProperty.Refinable
-                Sortable = $managedProperty.Sortable
-                SafeForAnonymous = $managedProperty.SafeForAnonymous
-                Aliases = $aliases
-                TokenNormalization = $managedProperty.TokenNormalization
-                NoWordBreaker = $managedProperty.NoWordBreaker
+                Name                        = $params.Name
+                ServiceAppName              = $params.ServiceAppName
+                PropertyType                = $managedProperty.ManagedType
+                Searchable                  = $managedProperty.Searchable
+                Queryable                   = $managedPRoperty.Queryable
+                Retrievable                 = $managedProperty.Retrievable
+                HasMultipleValues           = $managedProperty.HasMultipleValues
+                Refinable                   = $managedProperty.Refinable
+                Sortable                    = $managedProperty.Sortable
+                SafeForAnonymous            = $managedProperty.SafeForAnonymous
+                Aliases                     = $aliases
+                TokenNormalization          = $managedProperty.TokenNormalization
+                NoWordBreaker               = $managedProperty.NoWordBreaker
                 IncludeAllCrawledProperties = $includeAllCrawlProperties
-                Ensure = "Present"
+                Ensure                      = "Present"
             }
 
             if (!$includeAllCrawlProperties)

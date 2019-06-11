@@ -142,10 +142,10 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         # Test contexts
         Context -Name "Distributed cache is not configured" -Fixture {
             $testParams = @{
-                Name = "AppFabricCache"
-                Ensure = "Present"
-                CacheSizeInMB = 1024
-                ServiceAccount = "DOMAIN\user"
+                Name                = "AppFabricCache"
+                Ensure              = "Present"
+                CacheSizeInMB       = 1024
+                ServiceAccount      = "DOMAIN\user"
                 CreateFirewallRules = $true
             }
 
@@ -170,10 +170,10 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "Distributed cache is not configured, waiting for stop of DC" -Fixture {
             $testParams = @{
-                Name = "AppFabricCache"
-                Ensure = "Present"
-                CacheSizeInMB = 1024
-                ServiceAccount = "DOMAIN\user"
+                Name                = "AppFabricCache"
+                Ensure              = "Present"
+                CacheSizeInMB       = 1024
+                ServiceAccount      = "DOMAIN\user"
                 CreateFirewallRules = $true
             }
 
@@ -262,12 +262,12 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "Distributed cache is not configured, ServerProvisionOrder specified" -Fixture {
             $testParams = @{
-                Name = "AppFabricCache"
-                Ensure = "Present"
-                CacheSizeInMB = 1024
-                ServiceAccount = "DOMAIN\user"
+                Name                 = "AppFabricCache"
+                Ensure               = "Present"
+                CacheSizeInMB        = 1024
+                ServiceAccount       = "DOMAIN\user"
                 ServerProvisionOrder = "Server1", $env:COMPUTERNAME
-                CreateFirewallRules = $true
+                CreateFirewallRules  = $true
             }
 
             Mock Start-Sleep -MockWith {}
@@ -310,12 +310,12 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "Distributed cache is not configured, ServerProvisionOrder specified" -Fixture {
             $testParams = @{
-                Name = "AppFabricCache"
-                Ensure = "Present"
-                CacheSizeInMB = 1024
-                ServiceAccount = "DOMAIN\user"
+                Name                 = "AppFabricCache"
+                Ensure               = "Present"
+                CacheSizeInMB        = 1024
+                ServiceAccount       = "DOMAIN\user"
                 ServerProvisionOrder = "Server1", "Server2"
-                CreateFirewallRules = $true
+                CreateFirewallRules  = $true
             }
 
             Mock Start-Sleep -MockWith {}
@@ -349,10 +349,10 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "Distributed cache is configured correctly and running as required" -Fixture {
             $testParams = @{
-                Name = "AppFabricCache"
-                Ensure = "Present"
-                CacheSizeInMB = 1024
-                ServiceAccount = "DOMAIN\user"
+                Name                = "AppFabricCache"
+                Ensure              = "Present"
+                CacheSizeInMB       = 1024
+                ServiceAccount      = "DOMAIN\user"
                 CreateFirewallRules = $true
             }
 
@@ -376,10 +376,10 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "Distributed cache is configured but the cachesize is incorrect" -Fixture {
             $testParams = @{
-                Name = "AppFabricCache"
-                Ensure = "Present"
-                CacheSizeInMB = 1024
-                ServiceAccount = "DOMAIN\user"
+                Name                = "AppFabricCache"
+                Ensure              = "Present"
+                CacheSizeInMB       = 1024
+                ServiceAccount      = "DOMAIN\user"
                 CreateFirewallRules = $true
             }
 
@@ -482,10 +482,10 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "Distributed cache is configured but the required firewall rules are not deployed" -Fixture {
             $testParams = @{
-                Name = "AppFabricCache"
-                Ensure = "Present"
-                CacheSizeInMB = 1024
-                ServiceAccount = "DOMAIN\user"
+                Name                = "AppFabricCache"
+                Ensure              = "Present"
+                CacheSizeInMB       = 1024
+                ServiceAccount      = "DOMAIN\user"
                 CreateFirewallRules = $true
             }
 
@@ -507,10 +507,10 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "Distributed cache is confgured but should not be running on this machine" -Fixture {
             $testParams = @{
-                Name = "AppFabricCache"
-                Ensure = "Absent"
-                CacheSizeInMB = 1024
-                ServiceAccount = "DOMAIN\user"
+                Name                = "AppFabricCache"
+                Ensure              = "Absent"
+                CacheSizeInMB       = 1024
+                ServiceAccount      = "DOMAIN\user"
                 CreateFirewallRules = $true
             }
 

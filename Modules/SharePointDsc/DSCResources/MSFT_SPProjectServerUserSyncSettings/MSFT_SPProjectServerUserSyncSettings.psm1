@@ -60,11 +60,11 @@ function Get-TargetResource
         if ($null -eq $script:currentValue)
         {
             return @{
-                Url = $params.Url
-                EnableProjectWebAppSync = $false
-                EnableProjectSiteSync = $false
+                Url                                 = $params.Url
+                EnableProjectWebAppSync             = $false
+                EnableProjectSiteSync               = $false
                 EnableProjectSiteSyncForSPTaskLists = $false
-                InstallAccount = $params.InstallAccount
+                InstallAccount                      = $params.InstallAccount
             }
         }
         else
@@ -72,11 +72,11 @@ function Get-TargetResource
             $bits = [Convert]::ToString($script:currentValue,2).PadLeft(4, '0').ToCharArray() | Select-Object -Last 4
 
             return @{
-                Url = $params.Url
-                EnableProjectWebAppSync = ($bits[3] -eq "0")
-                EnableProjectSiteSync = ($bits[2] -eq "0")
+                Url                                 = $params.Url
+                EnableProjectWebAppSync             = ($bits[3] -eq "0")
+                EnableProjectSiteSync               = ($bits[2] -eq "0")
                 EnableProjectSiteSyncForSPTaskLists = ($bits[0] -eq "0")
-                InstallAccount = $params.InstallAccount
+                InstallAccount                      = $params.InstallAccount
             }
         }
     }

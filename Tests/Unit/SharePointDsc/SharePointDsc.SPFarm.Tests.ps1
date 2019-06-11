@@ -59,8 +59,8 @@ namespace Microsoft.SharePoint.Administration {
         Mock -CommandName Start-SPServiceInstance -MockWith { }
         Mock -CommandName Get-SPDscInstalledProductVersion {
             return @{
-                FileMajorPart = $Global:SPDscHelper.CurrentStubBuildNumber.Major
-                FileBuildPart = $Global:SPDscHelper.CurrentStubBuildNumber.Build
+                FileMajorPart    = $Global:SPDscHelper.CurrentStubBuildNumber.Major
+                FileBuildPart    = $Global:SPDscHelper.CurrentStubBuildNumber.Build
                 ProductBuildPart = $Global:SPDscHelper.CurrentStubBuildNumber.Build
             }
         }
@@ -82,15 +82,15 @@ namespace Microsoft.SharePoint.Administration {
         # Test Contexts
         Context -Name "No config databases exists, and this server should be connected to one" -Fixture {
             $testParams = @{
-                IsSingleInstance = "Yes"
-                Ensure = "Present"
-                FarmConfigDatabaseName = "SP_Config"
+                IsSingleInstance          = "Yes"
+                Ensure                    = "Present"
+                FarmConfigDatabaseName    = "SP_Config"
                 CentralAdministrationPort = 80000
-                DatabaseServer = "sql.contoso.com"
-                FarmAccount = $mockFarmAccount
-                Passphrase = $mockPassphrase
-                AdminContentDatabaseName = "SP_AdminContent"
-                RunCentralAdmin = $true
+                DatabaseServer            = "sql.contoso.com"
+                FarmAccount               = $mockFarmAccount
+                Passphrase                = $mockPassphrase
+                AdminContentDatabaseName  = "SP_AdminContent"
+                RunCentralAdmin           = $true
             }
 
             It "Should throw exception in the get method" {
@@ -108,16 +108,16 @@ namespace Microsoft.SharePoint.Administration {
 
         Context -Name "CA URL passed in cannot be parsed as System.Uri" -Fixture {
             $testParams = @{
-                IsSingleInstance = "Yes"
-                Ensure = "Present"
-                FarmConfigDatabaseName = "SP_Config"
+                IsSingleInstance          = "Yes"
+                Ensure                    = "Present"
+                FarmConfigDatabaseName    = "SP_Config"
                 CentralAdministrationPort = 443
-                CentralAdministrationUrl = "admin.contoso.com"
-                DatabaseServer = "sql.contoso.com"
-                FarmAccount = $mockFarmAccount
-                Passphrase = $mockPassphrase
-                AdminContentDatabaseName = "SP_AdminContent"
-                RunCentralAdmin = $true
+                CentralAdministrationUrl  = "admin.contoso.com"
+                DatabaseServer            = "sql.contoso.com"
+                FarmAccount               = $mockFarmAccount
+                Passphrase                = $mockPassphrase
+                AdminContentDatabaseName  = "SP_AdminContent"
+                RunCentralAdmin           = $true
             }
 
             It "Should throw exception in the get method" {
@@ -135,16 +135,16 @@ namespace Microsoft.SharePoint.Administration {
 
         Context -Name "Invalid CA URL has been passed in with port included" -Fixture {
             $testParams = @{
-                IsSingleInstance = "Yes"
-                Ensure = "Present"
-                FarmConfigDatabaseName = "SP_Config"
+                IsSingleInstance          = "Yes"
+                Ensure                    = "Present"
+                FarmConfigDatabaseName    = "SP_Config"
                 CentralAdministrationPort = 443
-                CentralAdministrationUrl = "https://admin.contoso.com:443"
-                DatabaseServer = "sql.contoso.com"
-                FarmAccount = $mockFarmAccount
-                Passphrase = $mockPassphrase
-                AdminContentDatabaseName = "SP_AdminContent"
-                RunCentralAdmin = $true
+                CentralAdministrationUrl  = "https://admin.contoso.com:443"
+                DatabaseServer            = "sql.contoso.com"
+                FarmAccount               = $mockFarmAccount
+                Passphrase                = $mockPassphrase
+                AdminContentDatabaseName  = "SP_AdminContent"
+                RunCentralAdmin           = $true
             }
 
             It "Should throw exception in the get method" {
@@ -161,17 +161,17 @@ namespace Microsoft.SharePoint.Administration {
         }
 
         Context -Name "Invalid CA URL has been passed in (HTTP currently not supported)" -Fixture {
-            $testParams = @{
-                IsSingleInstance = "Yes"
-                Ensure = "Present"
-                FarmConfigDatabaseName = "SP_Config"
+            $testParams  = @{
+                IsSingleInstance          = "Yes"
+                Ensure                    = "Present"
+                FarmConfigDatabaseName    = "SP_Config"
                 CentralAdministrationPort = 443
-                CentralAdministrationUrl = "http://admin.contoso.com"
-                DatabaseServer = "sql.contoso.com"
-                FarmAccount = $mockFarmAccount
-                Passphrase = $mockPassphrase
-                AdminContentDatabaseName = "SP_AdminContent"
-                RunCentralAdmin = $true
+                CentralAdministrationUrl  = "http://admin.contoso.com"
+                DatabaseServer            = "sql.contoso.com"
+                FarmAccount               = $mockFarmAccount
+                Passphrase                = $mockPassphrase
+                AdminContentDatabaseName  = "SP_AdminContent"
+                RunCentralAdmin           = $true
             }
 
             It "Should throw exception in the get method" {
@@ -189,23 +189,23 @@ namespace Microsoft.SharePoint.Administration {
 
         Context -Name "No config databaes exists, and this server should be connected to one" -Fixture {
             $testParams = @{
-                IsSingleInstance = "Yes"
-                Ensure = "Present"
-                FarmConfigDatabaseName = "SP_Config"
-                DatabaseServer = "sql.contoso.com"
-                FarmAccount = $mockFarmAccount
-                Passphrase = $mockPassphrase
+                IsSingleInstance         = "Yes"
+                Ensure                   = "Present"
+                FarmConfigDatabaseName   = "SP_Config"
+                DatabaseServer           = "sql.contoso.com"
+                FarmAccount              = $mockFarmAccount
+                Passphrase               = $mockPassphrase
                 AdminContentDatabaseName = "SP_AdminContent"
-                RunCentralAdmin = $true
+                RunCentralAdmin          = $true
             }
 
             Mock -CommandName "Get-SPDscRegistryKey" -MockWith { return $null }
             Mock -CommandName "Get-SPFarm" -MockWith { return $null }
             Mock -CommandName "Get-SPDscConfigDBStatus" -MockWith {
                 return @{
-                    Locked = $false
+                    Locked           = $false
                     ValidPermissions = $true
-                    DatabaseExists = $false
+                    DatabaseExists   = $false
                 }
             }
             Mock -CommandName "Get-SPDscSQLInstanceStatus" -MockWith {
@@ -237,23 +237,23 @@ namespace Microsoft.SharePoint.Administration {
 
         Context -Name "No config databases exists, and this server should be connected to one but won't run central admin" -Fixture {
             $testParams = @{
-                IsSingleInstance = "Yes"
-                Ensure = "Present"
-                FarmConfigDatabaseName = "SP_Config"
-                DatabaseServer = "sql.contoso.com"
-                FarmAccount = $mockFarmAccount
-                Passphrase = $mockPassphrase
+                IsSingleInstance         = "Yes"
+                Ensure                   = "Present"
+                FarmConfigDatabaseName   = "SP_Config"
+                DatabaseServer           = "sql.contoso.com"
+                FarmAccount              = $mockFarmAccount
+                Passphrase               = $mockPassphrase
                 AdminContentDatabaseName = "SP_AdminContent"
-                RunCentralAdmin = $false
+                RunCentralAdmin          = $false
             }
 
             Mock -CommandName "Get-SPDscRegistryKey" -MockWith { return $null }
             Mock -CommandName "Get-SPFarm" -MockWith { return $null }
             Mock -CommandName "Get-SPDscConfigDBStatus" -MockWith {
                 return @{
-                    Locked = $false
+                    Locked           = $false
                     ValidPermissions = $true
-                    DatabaseExists = $false
+                    DatabaseExists   = $false
                 }
             }
             Mock -CommandName "Get-SPDscSQLInstanceStatus" -MockWith {
@@ -284,14 +284,14 @@ namespace Microsoft.SharePoint.Administration {
 
         Context -Name "A config database exists, and this server should be connected to it but isn't and this server won't run central admin" -Fixture {
             $testParams = @{
-                IsSingleInstance = "Yes"
-                Ensure = "Present"
-                FarmConfigDatabaseName = "SP_Config"
-                DatabaseServer = "sql.contoso.com"
-                FarmAccount = $mockFarmAccount
-                Passphrase = $mockPassphrase
+                IsSingleInstance         = "Yes"
+                Ensure                   = "Present"
+                FarmConfigDatabaseName   = "SP_Config"
+                DatabaseServer           = "sql.contoso.com"
+                FarmAccount              = $mockFarmAccount
+                Passphrase               = $mockPassphrase
                 AdminContentDatabaseName = "SP_AdminContent"
-                RunCentralAdmin = $false
+                RunCentralAdmin          = $false
             }
 
             Mock -CommandName "Get-SPDscRegistryKey" -MockWith { return $null }
@@ -352,10 +352,10 @@ namespace Microsoft.SharePoint.Administration {
             Mock -CommandName "Get-SPWebApplication" -MockWith {
                 return @{
                     IsAdministrationWebApplication = $true
-                    ContentDatabases = @(@{
+                    ContentDatabases               = @(@{
                         Name = $testParams.AdminContentDatabaseName
                     })
-                    Url = "http://localhost:9999"
+                    Url                            = "http://localhost:9999"
                 }
             }
 
@@ -376,23 +376,23 @@ namespace Microsoft.SharePoint.Administration {
 
         Context -Name "A config database exists, and this server should be connected to it but isn't and this server will run central admin" -Fixture {
             $testParams = @{
-                IsSingleInstance = "Yes"
-                Ensure = "Present"
-                FarmConfigDatabaseName = "SP_Config"
-                DatabaseServer = "sql.contoso.com"
-                FarmAccount = $mockFarmAccount
-                Passphrase = $mockPassphrase
+                IsSingleInstance         = "Yes"
+                Ensure                   = "Present"
+                FarmConfigDatabaseName   = "SP_Config"
+                DatabaseServer           = "sql.contoso.com"
+                FarmAccount              = $mockFarmAccount
+                Passphrase               = $mockPassphrase
                 AdminContentDatabaseName = "SP_AdminContent"
-                RunCentralAdmin = $true
+                RunCentralAdmin          = $true
             }
 
             Mock -CommandName "Get-SPDscRegistryKey" -MockWith { return $null }
             Mock -CommandName "Get-SPFarm" -MockWith { return $null }
             Mock -CommandName "Get-SPDscConfigDBStatus" -MockWith {
                 return @{
-                    Locked = $false
+                    Locked           = $false
                     ValidPermissions = $true
-                    DatabaseExists = $true
+                    DatabaseExists   = $true
                 }
             }
             Mock -CommandName "Get-SPDscSQLInstanceStatus" -MockWith {
@@ -456,14 +456,14 @@ namespace Microsoft.SharePoint.Administration {
 
         Context -Name "A config and lock database exist, and this server should be connected to it but isn't" -Fixture {
             $testParams = @{
-                IsSingleInstance = "Yes"
-                Ensure = "Present"
-                FarmConfigDatabaseName = "SP_Config"
-                DatabaseServer = "sql.contoso.com"
-                FarmAccount = $mockFarmAccount
-                Passphrase = $mockPassphrase
+                IsSingleInstance         = "Yes"
+                Ensure                   = "Present"
+                FarmConfigDatabaseName   = "SP_Config"
+                DatabaseServer           = "sql.contoso.com"
+                FarmAccount              = $mockFarmAccount
+                Passphrase               = $mockPassphrase
                 AdminContentDatabaseName = "SP_AdminContent"
-                RunCentralAdmin = $true
+                RunCentralAdmin          = $true
             }
 
             Mock -CommandName "Get-SPDscRegistryKey" -MockWith { return $null }
@@ -472,18 +472,18 @@ namespace Microsoft.SharePoint.Administration {
                 if ($global:SPDscConfigLockTriggered)
                 {
                     return @{
-                        Locked = $false
+                        Locked           = $false
                         ValidPermissions = $true
-                        DatabaseExists = $true
+                        DatabaseExists   = $true
                     }
                 }
                 else
                 {
                     $global:SPDscConfigLockTriggered = $true
                     return @{
-                        Locked = $true
+                        Locked           = $true
                         ValidPermissions = $true
-                        DatabaseExists = $true
+                        DatabaseExists   = $true
                     }
                 }
             }
@@ -518,14 +518,14 @@ namespace Microsoft.SharePoint.Administration {
         # Adding coverage here for when CA URL is HTTPS but port is not specified
         Context -Name "Server is connected to farm, but Central Admin isn't started" -Fixture {
             $testParams = @{
-                IsSingleInstance = "Yes"
-                Ensure = "Present"
-                FarmConfigDatabaseName = "SP_Config"
-                DatabaseServer = "sql.contoso.com"
-                FarmAccount = $mockFarmAccount
-                Passphrase = $mockPassphrase
+                IsSingleInstance         = "Yes"
+                Ensure                   = "Present"
+                FarmConfigDatabaseName   = "SP_Config"
+                DatabaseServer           = "sql.contoso.com"
+                FarmAccount              = $mockFarmAccount
+                Passphrase               = $mockPassphrase
                 AdminContentDatabaseName = "SP_AdminContent"
-                RunCentralAdmin = $true
+                RunCentralAdmin          = $true
                 CentralAdministrationUrl = "https://admin.contoso.com"
             }
 
@@ -535,8 +535,8 @@ namespace Microsoft.SharePoint.Administration {
 
             Mock -CommandName Get-SPFarm -MockWith {
                 return @{
-                    Name = $testParams.FarmConfigDatabaseName
-                    DatabaseServer = @{
+                    Name                     = $testParams.FarmConfigDatabaseName
+                    DatabaseServer           = @{
                         Name = $testParams.DatabaseServer
                     }
                     AdminContentDatabaseName = $testParams.AdminContentDatabaseName
@@ -544,9 +544,9 @@ namespace Microsoft.SharePoint.Administration {
             }
             Mock -CommandName Get-SPDscConfigDBStatus -MockWith {
                 return @{
-                    Locked = $false
+                    Locked           = $false
                     ValidPermissions = $true
-                    DatabaseExists = $true
+                    DatabaseExists   = $true
                 }
             }
             Mock -CommandName "Get-SPDscSQLInstanceStatus" -MockWith {
@@ -556,21 +556,21 @@ namespace Microsoft.SharePoint.Administration {
             }
             Mock -CommandName Get-SPDatabase -MockWith {
                 return @(@{
-                    Name = $testParams.FarmConfigDatabaseName
-                    Type = "Configuration Database"
+                    Name                 = $testParams.FarmConfigDatabaseName
+                    Type                 = "Configuration Database"
                     NormalizedDataSource = $testParams.DatabaseServer
                 })
             }
             Mock -CommandName Get-SPWebApplication -MockWith {
                 return @{
                     IsAdministrationWebApplication = $true
-                    ContentDatabases = @(@{
+                    ContentDatabases               = @(@{
                         Name = $testParams.AdminContentDatabaseName
                     })
-                    IISSettings = @(@{
+                    IISSettings                    = @(@{
                         DisableKerberos = $true
                     })
-                    Url = "http://localhost:9999"
+                    Url                            = "http://localhost:9999"
                 }
             }
             Mock -CommandName Get-CimInstance -MockWith {
@@ -625,14 +625,14 @@ namespace Microsoft.SharePoint.Administration {
 
         Context -Name "Server is connected to farm, but CentralAdminPort is different" -Fixture {
             $testParams = @{
-                IsSingleInstance = "Yes"
-                Ensure = "Present"
-                FarmConfigDatabaseName = "SP_Config"
-                DatabaseServer = "sql.contoso.com"
-                FarmAccount = $mockFarmAccount
-                Passphrase = $mockPassphrase
+                IsSingleInstance         = "Yes"
+                Ensure                   = "Present"
+                FarmConfigDatabaseName   = "SP_Config"
+                DatabaseServer           = "sql.contoso.com"
+                FarmAccount              = $mockFarmAccount
+                Passphrase               = $mockPassphrase
                 AdminContentDatabaseName = "SP_AdminContent"
-                RunCentralAdmin = $true
+                RunCentralAdmin          = $true
                 CentralAdministrationPort = 8080
             }
 
@@ -642,8 +642,8 @@ namespace Microsoft.SharePoint.Administration {
 
             Mock -CommandName Get-SPFarm -MockWith {
                 return @{
-                    Name = $testParams.FarmConfigDatabaseName
-                    DatabaseServer = @{
+                    Name                     = $testParams.FarmConfigDatabaseName
+                    DatabaseServer           = @{
                         Name = $testParams.DatabaseServer
                     }
                     AdminContentDatabaseName = $testParams.AdminContentDatabaseName
@@ -651,28 +651,28 @@ namespace Microsoft.SharePoint.Administration {
             }
             Mock -CommandName Get-SPDscConfigDBStatus -MockWith {
                 return @{
-                    Locked = $false
+                    Locked           = $false
                     ValidPermissions = $true
-                    DatabaseExists = $true
+                    DatabaseExists   = $true
                 }
             }
             Mock -CommandName Get-SPDatabase -MockWith {
                 return @(@{
-                    Name = $testParams.FarmConfigDatabaseName
-                    Type = "Configuration Database"
+                    Name                 = $testParams.FarmConfigDatabaseName
+                    Type                 = "Configuration Database"
                     NormalizedDataSource = $testParams.DatabaseServer
                 })
             }
             Mock -CommandName Get-SPWebApplication -MockWith {
                 return @{
                     IsAdministrationWebApplication = $true
-                    ContentDatabases = @(@{
+                    ContentDatabases               = @(@{
                         Name = $testParams.AdminContentDatabaseName
                     })
-                    IISSettings = @(@{
+                    IISSettings                    = @(@{
                         DisableKerberos = $true
                     })
-                    Url = "http://localhost:9999"
+                    Url                            = "http://localhost:9999"
                 }
             }
             Mock -CommandName Get-CimInstance -MockWith {
@@ -684,7 +684,7 @@ namespace Microsoft.SharePoint.Administration {
             Mock -CommandName Get-SPServiceInstance -MockWith {
                 return @(
                     @{
-                        Name = "WSS_Administration"
+                        Name   = "WSS_Administration"
                         Status = "Online"
                     } | Add-Member -MemberType ScriptMethod `
                                    -Name GetType `
@@ -714,15 +714,15 @@ namespace Microsoft.SharePoint.Administration {
 
         Context -Name "This server is running CA on HTTPS, but secure bindings do not match CA URL" -Fixture {
             $testParams = @{
-                IsSingleInstance = "Yes"
-                Ensure = "Present"
-                FarmConfigDatabaseName = "SP_Config"
-                DatabaseServer = "sql.contoso.com"
-                FarmAccount = $mockFarmAccount
-                Passphrase = $mockPassphrase
-                AdminContentDatabaseName = "SP_AdminContent"
-                RunCentralAdmin = $true
-                CentralAdministrationUrl = "https://admin.contoso.com"
+                IsSingleInstance          = "Yes"
+                Ensure                    = "Present"
+                FarmConfigDatabaseName    = "SP_Config"
+                DatabaseServer            = "sql.contoso.com"
+                FarmAccount               = $mockFarmAccount
+                Passphrase                = $mockPassphrase
+                AdminContentDatabaseName  = "SP_AdminContent"
+                RunCentralAdmin           = $true
+                CentralAdministrationUrl  = "https://admin.contoso.com"
                 CentralAdministrationPort = 443
             }
 
@@ -732,8 +732,8 @@ namespace Microsoft.SharePoint.Administration {
 
             Mock -CommandName Get-SPFarm -MockWith {
                 return @{
-                    Name = $testParams.FarmConfigDatabaseName
-                    DatabaseServer = @{
+                    Name                     = $testParams.FarmConfigDatabaseName
+                    DatabaseServer           = @{
                         Name = $testParams.DatabaseServer
                     }
                     AdminContentDatabaseName = $testParams.AdminContentDatabaseName
@@ -741,9 +741,9 @@ namespace Microsoft.SharePoint.Administration {
             }
             Mock -CommandName Get-SPDscConfigDBStatus -MockWith {
                 return @{
-                    Locked = $false
+                    Locked           = $false
                     ValidPermissions = $true
-                    DatabaseExists = $true
+                    DatabaseExists   = $true
                 }
             }
             Mock -CommandName "Get-SPDscSQLInstanceStatus" -MockWith {
@@ -753,24 +753,24 @@ namespace Microsoft.SharePoint.Administration {
             }
             Mock -CommandName Get-SPDatabase -MockWith {
                 return @(@{
-                    Name = $testParams.FarmConfigDatabaseName
-                    Type = "Configuration Database"
+                    Name                 = $testParams.FarmConfigDatabaseName
+                    Type                 = "Configuration Database"
                     NormalizedDataSource = $testParams.DatabaseServer
                 })
             }
             Mock -CommandName Get-SPWebApplication -MockWith {
                 $webapp = @{
-                    ContentDatabases = @(
+                    ContentDatabases               = @(
                         @{
                             Name = $testParams.AdminContentDatabaseName
                         }
                     )
-                    Url = $testParams.CentralAdministrationUrl
+                    Url                            = $testParams.CentralAdministrationUrl
                     IsAdministrationWebApplication = $true
-                    IisSettings = [ordered]@{
+                    IisSettings                    = [ordered]@{
                         Default = @{
                             DisableKerberos = $true
-                            SecureBindings = @(
+                            SecureBindings  = @(
                                 @{
                                     HostHeader = "different.contoso.com"
                                     Port = "443"
@@ -849,24 +849,24 @@ namespace Microsoft.SharePoint.Administration {
 
         Context -Name "Server not yet part of the farm, and will run Central Admin on HTTPS" -Fixture {
             $testParams = @{
-                IsSingleInstance = "Yes"
-                Ensure = "Present"
-                FarmConfigDatabaseName = "SP_Config"
-                DatabaseServer = "sql.contoso.com"
-                FarmAccount = $mockFarmAccount
-                Passphrase = $mockPassphrase
+                IsSingleInstance         = "Yes"
+                Ensure                   = "Present"
+                FarmConfigDatabaseName   = "SP_Config"
+                DatabaseServer           = "sql.contoso.com"
+                FarmAccount              = $mockFarmAccount
+                Passphrase               = $mockPassphrase
                 AdminContentDatabaseName = "SP_AdminContent"
                 CentralAdministrationUrl = "https://admin.contoso.com"
-                RunCentralAdmin = $true
+                RunCentralAdmin          = $true
             }
 
             Mock -CommandName "Get-SPDscRegistryKey" -MockWith { return $null }
             Mock -CommandName "Get-SPFarm" -MockWith { return $null }
             Mock -CommandName "Get-SPDscConfigDBStatus" -MockWith {
                 return @{
-                    Locked = $false
+                    Locked           = $false
                     ValidPermissions = $true
-                    DatabaseExists = $true
+                    DatabaseExists   = $true
                 }
             }
             Mock -CommandName "Get-SPDscSQLInstanceStatus" -MockWith {
@@ -878,10 +878,10 @@ namespace Microsoft.SharePoint.Administration {
             Mock -CommandName "Get-SPWebApplication" -MockWith {
                 return @{
                     IsAdministrationWebApplication = $true
-                    ContentDatabases = @(@{
+                    ContentDatabases               = @(@{
                         Name = $testParams.AdminContentDatabaseName
                     })
-                    Url = "http://localhost:9999"
+                    Url                            = "http://localhost:9999"
                 }
             }
             Mock -CommandName "Get-SPServiceInstance" -MockWith {
@@ -925,15 +925,15 @@ namespace Microsoft.SharePoint.Administration {
 
         Context -Name "This server is running CA on HTTPS, but secure bindings do not contain valid hostname" -Fixture {
             $testParams = @{
-                IsSingleInstance = "Yes"
-                Ensure = "Present"
-                FarmConfigDatabaseName = "SP_Config"
-                DatabaseServer = "sql.contoso.com"
-                FarmAccount = $mockFarmAccount
-                Passphrase = $mockPassphrase
-                AdminContentDatabaseName = "SP_AdminContent"
-                RunCentralAdmin = $true
-                CentralAdministrationUrl = "https://admin.contoso.com"
+                IsSingleInstance          = "Yes"
+                Ensure                    = "Present"
+                FarmConfigDatabaseName    = "SP_Config"
+                DatabaseServer            = "sql.contoso.com"
+                FarmAccount               = $mockFarmAccount
+                Passphrase                = $mockPassphrase
+                AdminContentDatabaseName  = "SP_AdminContent"
+                RunCentralAdmin           = $true
+                CentralAdministrationUrl  = "https://admin.contoso.com"
                 CentralAdministrationPort = 443
             }
 
@@ -943,8 +943,8 @@ namespace Microsoft.SharePoint.Administration {
 
             Mock -CommandName Get-SPFarm -MockWith {
                 return @{
-                    Name = $testParams.FarmConfigDatabaseName
-                    DatabaseServer = @{
+                    Name                     = $testParams.FarmConfigDatabaseName
+                    DatabaseServer           = @{
                         Name = $testParams.DatabaseServer
                     }
                     AdminContentDatabaseName = $testParams.AdminContentDatabaseName
@@ -952,9 +952,9 @@ namespace Microsoft.SharePoint.Administration {
             }
             Mock -CommandName Get-SPDscConfigDBStatus -MockWith {
                 return @{
-                    Locked = $false
+                    Locked           = $false
                     ValidPermissions = $true
-                    DatabaseExists = $true
+                    DatabaseExists   = $true
                 }
             }
             Mock -CommandName "Get-SPDscSQLInstanceStatus" -MockWith {
@@ -964,27 +964,27 @@ namespace Microsoft.SharePoint.Administration {
             }
             Mock -CommandName Get-SPDatabase -MockWith {
                 return @(@{
-                    Name = $testParams.FarmConfigDatabaseName
-                    Type = "Configuration Database"
+                    Name                 = $testParams.FarmConfigDatabaseName
+                    Type                 = "Configuration Database"
                     NormalizedDataSource = $testParams.DatabaseServer
                 })
             }
             Mock -CommandName Get-SPWebApplication -MockWith {
                 $webapp = @{
-                    ContentDatabases = @(
+                    ContentDatabases               = @(
                         @{
                             Name = $testParams.AdminContentDatabaseName
                         }
                     )
-                    Url = $testParams.CentralAdministrationUrl
+                    Url                            = $testParams.CentralAdministrationUrl
                     IsAdministrationWebApplication = $true
-                    IisSettings = [ordered]@{
+                    IisSettings                    = [ordered]@{
                         Default = @{
                             DisableKerberos = $true
-                            SecureBindings = @(
+                            SecureBindings  = @(
                                 @{
                                     HostHeader = ""
-                                    Port = "443"
+                                    Port       = "443"
                                 }
                             )
                         }
@@ -1018,7 +1018,7 @@ namespace Microsoft.SharePoint.Administration {
                             $global:SPDscSIRunCount++
                             return @(
                                 @{
-                                    Name = "WSS_Administration"
+                                    Name   = "WSS_Administration"
                                     Status = "Online"
                                 } | Add-Member -MemberType ScriptMethod `
                                                -Name GetType `
@@ -1059,14 +1059,14 @@ namespace Microsoft.SharePoint.Administration {
 
         Context -Name "This server is connected to the farm and is running CA, but shouldn't" -Fixture {
             $testParams = @{
-                IsSingleInstance = "Yes"
-                Ensure = "Present"
-                FarmConfigDatabaseName = "SP_Config"
-                DatabaseServer = "sql.contoso.com"
-                FarmAccount = $mockFarmAccount
-                Passphrase = $mockPassphrase
+                IsSingleInstance         = "Yes"
+                Ensure                   = "Present"
+                FarmConfigDatabaseName   = "SP_Config"
+                DatabaseServer           = "sql.contoso.com"
+                FarmAccount              = $mockFarmAccount
+                Passphrase               = $mockPassphrase
                 AdminContentDatabaseName = "SP_AdminContent"
-                RunCentralAdmin = $false
+                RunCentralAdmin          = $false
             }
 
             Mock -CommandName "Get-SPDscRegistryKey" -MockWith {
@@ -1075,8 +1075,8 @@ namespace Microsoft.SharePoint.Administration {
 
             Mock -CommandName "Get-SPFarm" -MockWith {
                 return @{
-                    Name = $testParams.FarmConfigDatabaseName
-                    DatabaseServer = @{
+                    Name                     = $testParams.FarmConfigDatabaseName
+                    DatabaseServer           = @{
                         Name = $testParams.DatabaseServer
                     }
                     AdminContentDatabaseName = $testParams.AdminContentDatabaseName
@@ -1084,9 +1084,9 @@ namespace Microsoft.SharePoint.Administration {
             }
             Mock -CommandName "Get-SPDscConfigDBStatus" -MockWith {
                 return @{
-                    Locked = $false
+                    Locked           = $false
                     ValidPermissions = $true
-                    DatabaseExists = $true
+                    DatabaseExists   = $true
                 }
             }
             Mock -CommandName "Get-SPDscSQLInstanceStatus" -MockWith {
@@ -1096,21 +1096,21 @@ namespace Microsoft.SharePoint.Administration {
             }
             Mock -CommandName "Get-SPDatabase" -MockWith {
                 return @(@{
-                    Name = $testParams.FarmConfigDatabaseName
-                    Type = "Configuration Database"
+                    Name                 = $testParams.FarmConfigDatabaseName
+                    Type                 = "Configuration Database"
                     NormalizedDataSource = $testParams.DatabaseServer
                 })
             }
             Mock -CommandName "Get-SPWebApplication" -MockWith {
                 return @{
                     IsAdministrationWebApplication = $true
-                    ContentDatabases = @(@{
+                    ContentDatabases               = @(@{
                         Name = $testParams.AdminContentDatabaseName
                     })
-                    IISSettings = @(@{
+                    IISSettings                    = @(@{
                         DisableKerberos = $true
                     })
-                    Url = "http://localhost:9999"
+                    Url                            = "http://localhost:9999"
                 }
             }
             Mock -CommandName Start-Sleep -MockWith {}
@@ -1163,15 +1163,15 @@ namespace Microsoft.SharePoint.Administration {
 
         Context -Name "Server is connected to a farm, but Developer Dashboard settings are incorrect" -Fixture {
             $testParams = @{
-                IsSingleInstance = "Yes"
-                Ensure = "Present"
-                FarmConfigDatabaseName = "SP_Config"
-                DatabaseServer = "sql.contoso.com"
-                FarmAccount = $mockFarmAccount
-                Passphrase = $mockPassphrase
+                IsSingleInstance         = "Yes"
+                Ensure                   = "Present"
+                FarmConfigDatabaseName   = "SP_Config"
+                DatabaseServer           = "sql.contoso.com"
+                FarmAccount              = $mockFarmAccount
+                Passphrase               = $mockPassphrase
                 AdminContentDatabaseName = "SP_AdminContent"
-                RunCentralAdmin = $true
-                DeveloperDashboard = "On"
+                RunCentralAdmin          = $true
+                DeveloperDashboard       = "On"
             }
 
             Mock -CommandName "Get-SPDscRegistryKey" -MockWith {
@@ -1180,8 +1180,8 @@ namespace Microsoft.SharePoint.Administration {
 
             Mock -CommandName "Get-SPFarm" -MockWith {
                 return @{
-                    Name = $testParams.FarmConfigDatabaseName
-                    DatabaseServer = @{
+                    Name                     = $testParams.FarmConfigDatabaseName
+                    DatabaseServer           = @{
                         Name = $testParams.DatabaseServer
                     }
                     AdminContentDatabaseName = $testParams.AdminContentDatabaseName
@@ -1189,9 +1189,9 @@ namespace Microsoft.SharePoint.Administration {
             }
             Mock -CommandName "Get-SPDscConfigDBStatus" -MockWith {
                 return @{
-                    Locked = $false
+                    Locked           = $false
                     ValidPermissions = $true
-                    DatabaseExists = $true
+                    DatabaseExists   = $true
                 }
             }
             Mock -CommandName "Get-SPDscSQLInstanceStatus" -MockWith {
@@ -1201,21 +1201,21 @@ namespace Microsoft.SharePoint.Administration {
             }
             Mock -CommandName "Get-SPDatabase" -MockWith {
                 return @(@{
-                    Name = $testParams.FarmConfigDatabaseName
-                    Type = "Configuration Database"
+                    Name                 = $testParams.FarmConfigDatabaseName
+                    Type                 = "Configuration Database"
                     NormalizedDataSource = $testParams.DatabaseServer
                 })
             }
             Mock -CommandName "Get-SPWebApplication" -MockWith {
                 return @{
                     IsAdministrationWebApplication = $true
-                    ContentDatabases = @(@{
+                    ContentDatabases               = @(@{
                         Name = $testParams.AdminContentDatabaseName
                     })
-                    IISSettings = @(@{
+                    IISSettings                    = @(@{
                         DisableKerberos = $true
                     })
-                    Url = "http://localhost:9999"
+                    Url                            = "http://localhost:9999"
                 }
             }
             Mock -CommandName "Get-SPServiceInstance" -MockWith {
@@ -1258,14 +1258,14 @@ namespace Microsoft.SharePoint.Administration {
 
         Context -Name "A config database exists, and this server is connected to it and should be" -Fixture {
             $testParams = @{
-                IsSingleInstance = "Yes"
-                Ensure = "Present"
-                FarmConfigDatabaseName = "SP_Config"
-                DatabaseServer = "sql.contoso.com"
-                FarmAccount = $mockFarmAccount
-                Passphrase = $mockPassphrase
+                IsSingleInstance         = "Yes"
+                Ensure                   = "Present"
+                FarmConfigDatabaseName   = "SP_Config"
+                DatabaseServer           = "sql.contoso.com"
+                FarmAccount              = $mockFarmAccount
+                Passphrase               = $mockPassphrase
                 AdminContentDatabaseName = "SP_AdminContent"
-                RunCentralAdmin = $true
+                RunCentralAdmin          = $true
             }
 
             Mock -CommandName "Get-SPDscRegistryKey" -MockWith {
@@ -1274,8 +1274,8 @@ namespace Microsoft.SharePoint.Administration {
 
             Mock -CommandName "Get-SPFarm" -MockWith {
                 return @{
-                    Name = $testParams.FarmConfigDatabaseName
-                    DatabaseServer = @{
+                    Name                     = $testParams.FarmConfigDatabaseName
+                    DatabaseServer           = @{
                         Name = $testParams.DatabaseServer
                     }
                     AdminContentDatabaseName = $testParams.AdminContentDatabaseName
@@ -1283,9 +1283,9 @@ namespace Microsoft.SharePoint.Administration {
             }
             Mock -CommandName "Get-SPDscConfigDBStatus" -MockWith {
                 return @{
-                    Locked = $false
+                    Locked           = $false
                     ValidPermissions = $true
-                    DatabaseExists = $true
+                    DatabaseExists   = $true
                 }
             }
             Mock -CommandName "Get-SPDscSQLInstanceStatus" -MockWith {
@@ -1295,21 +1295,21 @@ namespace Microsoft.SharePoint.Administration {
             }
             Mock -CommandName "Get-SPDatabase" -MockWith {
                 return @(@{
-                    Name = $testParams.FarmConfigDatabaseName
-                    Type = "Configuration Database"
+                    Name                 = $testParams.FarmConfigDatabaseName
+                    Type                 = "Configuration Database"
                     NormalizedDataSource = $testParams.DatabaseServer
                 })
             }
             Mock -CommandName "Get-SPWebApplication" -MockWith {
                 return @{
                     IsAdministrationWebApplication = $true
-                    ContentDatabases = @(@{
+                    ContentDatabases               = @(@{
                         Name = $testParams.AdminContentDatabaseName
                     })
-                    IISSettings = @(@{
+                    IISSettings                    = @(@{
                         DisableKerberos = $true
                     })
-                    Url = "http://localhost:9999"
+                    Url                            = "http://localhost:9999"
                 }
             }
             Mock -CommandName "Get-SPServiceInstance" -MockWith {
@@ -1317,7 +1317,7 @@ namespace Microsoft.SharePoint.Administration {
                 {
                     return @(
                         @{
-                            Name = "WSS_Administration"
+                            Name   = "WSS_Administration"
                             Status = "Online"
                         } | Add-Member -MemberType ScriptMethod `
                                        -Name GetType `
@@ -1346,14 +1346,14 @@ namespace Microsoft.SharePoint.Administration {
 
         Context -Name "Absent is specified for the ensure property" -Fixture {
             $testParams = @{
-                IsSingleInstance = "Yes"
-                Ensure = "Absent"
-                FarmConfigDatabaseName = "SP_Config"
-                DatabaseServer = "sql.contoso.com"
-                FarmAccount = $mockFarmAccount
-                Passphrase = $mockPassphrase
+                IsSingleInstance         = "Yes"
+                Ensure                   = "Absent"
+                FarmConfigDatabaseName   = "SP_Config"
+                DatabaseServer           = "sql.contoso.com"
+                FarmAccount              = $mockFarmAccount
+                Passphrase               = $mockPassphrase
                 AdminContentDatabaseName = "SP_AdminContent"
-                RunCentralAdmin = $true
+                RunCentralAdmin          = $true
             }
 
             It "Should throw an exception from the get method" {
@@ -1373,17 +1373,17 @@ namespace Microsoft.SharePoint.Administration {
         {
             Context -Name "Only valid parameters for SharePoint 2013 are used" -Fixture {
                 $testParams = @{
-                    IsSingleInstance = "Yes"
-                    Ensure = "Present"
-                    FarmConfigDatabaseName = "SP_Config"
-                    DatabaseServer = "DatabaseServer\Instance"
-                    FarmAccount = $mockFarmAccount
-                    Passphrase =  $mockPassphrase
-                    AdminContentDatabaseName = "Admin_Content"
+                    IsSingleInstance          = "Yes"
+                    Ensure                    = "Present"
+                    FarmConfigDatabaseName    = "SP_Config"
+                    DatabaseServer            = "DatabaseServer\Instance"
+                    FarmAccount               = $mockFarmAccount
+                    Passphrase                =  $mockPassphrase
+                    AdminContentDatabaseName  = "Admin_Content"
                     CentralAdministrationAuth = "Kerberos"
                     CentralAdministrationPort = 1234
-                    ServerRole = "WebFrontEnd"
-                    RunCentralAdmin = $true
+                    ServerRole                = "WebFrontEnd"
+                    RunCentralAdmin           = $true
                 }
 
                 It "Should throw if server role is used in the get method" {
@@ -1401,14 +1401,14 @@ namespace Microsoft.SharePoint.Administration {
 
             Context -Name "no serverrole is specified and get-targetresource needs to return null" -Fixture {
                 $testParams = @{
-                    IsSingleInstance = "Yes"
-                    Ensure = "Present"
-                    FarmConfigDatabaseName = "SP_Config"
-                    DatabaseServer = "sql.contoso.com"
-                    FarmAccount = $mockFarmAccount
-                    Passphrase = $mockPassphrase
+                    IsSingleInstance         = "Yes"
+                    Ensure                   = "Present"
+                    FarmConfigDatabaseName   = "SP_Config"
+                    DatabaseServer           = "sql.contoso.com"
+                    FarmAccount              = $mockFarmAccount
+                    Passphrase               = $mockPassphrase
                     AdminContentDatabaseName = "SP_AdminContent"
-                    RunCentralAdmin = $true
+                    RunCentralAdmin          = $true
                 }
 
                 Mock -CommandName "Get-SPDscRegistryKey" -MockWith {
@@ -1417,8 +1417,8 @@ namespace Microsoft.SharePoint.Administration {
 
                 Mock -CommandName "Get-SPFarm" -MockWith {
                     return @{
-                        Name = $testParams.FarmConfigDatabaseName
-                        DatabaseServer = @{
+                        Name                     = $testParams.FarmConfigDatabaseName
+                        DatabaseServer           = @{
                             Name = $testParams.DatabaseServer
                         }
                         AdminContentDatabaseName = $testParams.AdminContentDatabaseName
@@ -1426,9 +1426,9 @@ namespace Microsoft.SharePoint.Administration {
                 }
                 Mock -CommandName "Get-SPDscConfigDBStatus" -MockWith {
                     return @{
-                        Locked = $false
+                        Locked           = $false
                         ValidPermissions = $true
-                        DatabaseExists = $true
+                        DatabaseExists   = $true
                     }
                 }
                 Mock -CommandName "Get-SPDscSQLInstanceStatus" -MockWith {
@@ -1438,8 +1438,8 @@ namespace Microsoft.SharePoint.Administration {
                 }
                 Mock -CommandName "Get-SPDatabase" -MockWith {
                     return @(@{
-                        Name = $testParams.FarmConfigDatabaseName
-                        Type = "Configuration Database"
+                        Name   = $testParams.FarmConfigDatabaseName
+                        Type   = "Configuration Database"
                         Server = @{
                             Name = $testParams.DatabaseServer
                         }
@@ -1448,13 +1448,13 @@ namespace Microsoft.SharePoint.Administration {
                 Mock -CommandName "Get-SPWebApplication" -MockWith {
                     return @{
                         IsAdministrationWebApplication = $true
-                        ContentDatabases = @(@{
+                        ContentDatabases               = @(@{
                             Name = $testParams.AdminContentDatabaseName
                         })
-                        IISSettings = @(@{
+                        IISSettings                    = @(@{
                             DisableKerberos = $true
                         })
-                        Url = "http://localhost:9999"
+                        Url                            = "http://localhost:9999"
                     }
                 }
 
@@ -1477,17 +1477,17 @@ namespace Microsoft.SharePoint.Administration {
         {
             Context -Name "enhanced minrole options fail when Feature Pack 1 is not installed" -Fixture {
                 $testParams = @{
-                    IsSingleInstance = "Yes"
-                    Ensure = "Present"
-                    FarmConfigDatabaseName = "SP_Config"
-                    DatabaseServer = "DatabaseServer\Instance"
-                    FarmAccount = $mockFarmAccount
-                    Passphrase =  $mockPassphrase
-                    AdminContentDatabaseName = "Admin_Content"
+                    IsSingleInstance          = "Yes"
+                    Ensure                    = "Present"
+                    FarmConfigDatabaseName    = "SP_Config"
+                    DatabaseServer            = "DatabaseServer\Instance"
+                    FarmAccount               = $mockFarmAccount
+                    Passphrase                =  $mockPassphrase
+                    AdminContentDatabaseName  = "Admin_Content"
                     CentralAdministrationAuth = "Kerberos"
                     CentralAdministrationPort = 1234
-                    ServerRole = "ApplicationWithSearch"
-                    RunCentralAdmin = $false
+                    ServerRole                = "ApplicationWithSearch"
+                    RunCentralAdmin           = $false
                 }
 
                 Mock -CommandName Get-SPDscInstalledProductVersion -MockWith {
@@ -1512,24 +1512,24 @@ namespace Microsoft.SharePoint.Administration {
 
             Context -Name "enhanced minrole options succeed when Feature Pack 1 is installed" -Fixture {
                 $testParams = @{
-                    IsSingleInstance = "Yes"
-                    Ensure = "Present"
-                    FarmConfigDatabaseName = "SP_Config"
-                    DatabaseServer = "sql.contoso.com"
-                    FarmAccount = $mockFarmAccount
-                    Passphrase = $mockPassphrase
+                    IsSingleInstance         = "Yes"
+                    Ensure                   = "Present"
+                    FarmConfigDatabaseName   = "SP_Config"
+                    DatabaseServer           = "sql.contoso.com"
+                    FarmAccount              = $mockFarmAccount
+                    Passphrase               = $mockPassphrase
                     AdminContentDatabaseName = "SP_AdminContent"
-                    ServerRole = "ApplicationWithSearch"
-                    RunCentralAdmin = $true
+                    ServerRole               = "ApplicationWithSearch"
+                    RunCentralAdmin          = $true
                 }
 
                 Mock -CommandName "Get-SPDscRegistryKey" -MockWith { return $null }
                 Mock -CommandName "Get-SPFarm" -MockWith { return $null }
                 Mock -CommandName "Get-SPDscConfigDBStatus" -MockWith {
                     return @{
-                        Locked = $false
+                        Locked           = $false
                         ValidPermissions = $true
-                        DatabaseExists = $false
+                        DatabaseExists   = $false
                     }
                 }
                 Mock -CommandName "Get-SPDscSQLInstanceStatus" -MockWith {
@@ -1540,7 +1540,7 @@ namespace Microsoft.SharePoint.Administration {
                 Mock -CommandName "Get-SPWebApplication" -MockWith {
                     return @{
                         IsAdministrationWebApplication = $true
-                        Url = "http://localhost:12345"
+                        Url                            = "http://localhost:12345"
                     }
                 }
 
@@ -1559,15 +1559,15 @@ namespace Microsoft.SharePoint.Administration {
 
             Context -Name "DeveloperDashboard is set to OnDemand, which is not allowed in SP2016 and above" -Fixture {
                 $testParams = @{
-                    IsSingleInstance = "Yes"
-                    Ensure = "Present"
-                    FarmConfigDatabaseName = "SP_Config"
-                    DatabaseServer = "sql.contoso.com"
-                    FarmAccount = $mockFarmAccount
-                    Passphrase = $mockPassphrase
+                    IsSingleInstance         = "Yes"
+                    Ensure                   = "Present"
+                    FarmConfigDatabaseName   = "SP_Config"
+                    DatabaseServer           = "sql.contoso.com"
+                    FarmAccount              = $mockFarmAccount
+                    Passphrase               = $mockPassphrase
                     AdminContentDatabaseName = "SP_AdminContent"
-                    RunCentralAdmin = $true
-                    DeveloperDashboard = "OnDemand"
+                    RunCentralAdmin          = $true
+                    DeveloperDashboard       = "OnDemand"
                 }
 
                 Mock -CommandName "Get-SPDscRegistryKey" -MockWith {
@@ -1576,8 +1576,8 @@ namespace Microsoft.SharePoint.Administration {
 
                 Mock -CommandName "Get-SPFarm" -MockWith {
                     return @{
-                        Name = $testParams.FarmConfigDatabaseName
-                        DatabaseServer = @{
+                        Name                     = $testParams.FarmConfigDatabaseName
+                        DatabaseServer           = @{
                             Name = $testParams.DatabaseServer
                         }
                         AdminContentDatabaseName = $testParams.AdminContentDatabaseName
@@ -1585,9 +1585,9 @@ namespace Microsoft.SharePoint.Administration {
                 }
                 Mock -CommandName "Get-SPDscConfigDBStatus" -MockWith {
                     return @{
-                        Locked = $false
+                        Locked           = $false
                         ValidPermissions = $true
-                        DatabaseExists = $true
+                        DatabaseExists   = $true
                     }
                 }
                 Mock -CommandName "Get-SPDscSQLInstanceStatus" -MockWith {
@@ -1597,21 +1597,21 @@ namespace Microsoft.SharePoint.Administration {
                 }
                 Mock -CommandName "Get-SPDatabase" -MockWith {
                     return @(@{
-                        Name = $testParams.FarmConfigDatabaseName
-                        Type = "Configuration Database"
+                        Name                 = $testParams.FarmConfigDatabaseName
+                        Type                 = "Configuration Database"
                         NormalizedDataSource = $testParams.DatabaseServer
                     })
                 }
                 Mock -CommandName "Get-SPWebApplication" -MockWith {
                     return @{
                         IsAdministrationWebApplication = $true
-                        ContentDatabases = @(@{
+                        ContentDatabases               = @(@{
                             Name = $testParams.AdminContentDatabaseName
                         })
-                        IISSettings = @(@{
+                        IISSettings                    = @(@{
                             DisableKerberos = $true
                         })
-                        Url = "http://localhost:9999"
+                        Url                            = "http://localhost:9999"
                     }
                 }
                 Mock -CommandName "Get-SPServiceInstance" -MockWith {
@@ -1653,14 +1653,14 @@ namespace Microsoft.SharePoint.Administration {
 
         Context -Name "no serverrole is specified but get-targetresource needs to identify and return it" -Fixture {
             $testParams = @{
-                IsSingleInstance = "Yes"
-                Ensure = "Present"
-                FarmConfigDatabaseName = "SP_Config"
-                DatabaseServer = "sql.contoso.com"
-                FarmAccount = $mockFarmAccount
-                Passphrase = $mockPassphrase
+                IsSingleInstance         = "Yes"
+                Ensure                   = "Present"
+                FarmConfigDatabaseName   = "SP_Config"
+                DatabaseServer           = "sql.contoso.com"
+                FarmAccount              = $mockFarmAccount
+                Passphrase               = $mockPassphrase
                 AdminContentDatabaseName = "SP_AdminContent"
-                RunCentralAdmin = $true
+                RunCentralAdmin          = $true
             }
             Mock -CommandName "Get-SPDscRegistryKey" -MockWith {
                 return "Connection string example"
@@ -1668,8 +1668,8 @@ namespace Microsoft.SharePoint.Administration {
 
             Mock -CommandName "Get-SPFarm" -MockWith {
                 return @{
-                    Name = $testParams.FarmConfigDatabaseName
-                    DatabaseServer = @{
+                    Name                     = $testParams.FarmConfigDatabaseName
+                    DatabaseServer           = @{
                         Name = $testParams.DatabaseServer
                     }
                     AdminContentDatabaseName = $testParams.AdminContentDatabaseName
@@ -1677,9 +1677,9 @@ namespace Microsoft.SharePoint.Administration {
             }
             Mock -CommandName "Get-SPDscConfigDBStatus" -MockWith {
                 return @{
-                    Locked = $false
+                    Locked           = $false
                     ValidPermissions = $true
-                    DatabaseExists = $true
+                    DatabaseExists   = $true
                 }
             }
             Mock -CommandName "Get-SPDscSQLInstanceStatus" -MockWith {
@@ -1689,8 +1689,8 @@ namespace Microsoft.SharePoint.Administration {
             }
             Mock -CommandName "Get-SPDatabase" -MockWith {
                 return @(@{
-                    Name = $testParams.FarmConfigDatabaseName
-                    Type = "Configuration Database"
+                    Name   = $testParams.FarmConfigDatabaseName
+                    Type   = "Configuration Database"
                     Server = @{
                         Name = $testParams.DatabaseServer
                     }
@@ -1699,13 +1699,13 @@ namespace Microsoft.SharePoint.Administration {
             Mock -CommandName "Get-SPWebApplication" -MockWith {
                 return @{
                     IsAdministrationWebApplication = $true
-                    ContentDatabases = @(@{
+                    ContentDatabases               = @(@{
                         Name = $testParams.AdminContentDatabaseName
                     })
-                    IISSettings = @(@{
+                    IISSettings                    = @(@{
                         DisableKerberos = $true
                     })
-                    Url = "http://localhost:9999"
+                    Url                            = "http://localhost:9999"
                 }
             }
             Mock -CommandName Get-SPServer -MockWith{
@@ -1724,15 +1724,15 @@ namespace Microsoft.SharePoint.Administration {
 
         Context -Name "no farm is configured locally and an unsupported version of SharePoint is installed on the server" -Fixture {
             $testParams = @{
-                IsSingleInstance = "Yes"
-                Ensure = "Present"
-                FarmConfigDatabaseName = "SP_Config"
-                DatabaseServer = "sql.contoso.com"
-                FarmAccount = $mockFarmAccount
-                Passphrase = $mockPassphrase
+                IsSingleInstance         = "Yes"
+                Ensure                   = "Present"
+                FarmConfigDatabaseName   = "SP_Config"
+                DatabaseServer           = "sql.contoso.com"
+                FarmAccount              = $mockFarmAccount
+                Passphrase               = $mockPassphrase
                 AdminContentDatabaseName = "SP_AdminContent"
-                ServerRole = "ApplicationWithSearch"
-                RunCentralAdmin = $true
+                ServerRole               = "ApplicationWithSearch"
+                RunCentralAdmin          = $true
             }
 
             Mock -CommandName Get-SPDscInstalledProductVersion -MockWith { return @{ FileMajorPart = 14 } }
@@ -1744,14 +1744,14 @@ namespace Microsoft.SharePoint.Administration {
 
         Context -Name "The server is joined to the farm, but SQL server is unavailable" -Fixture {
             $testParams = @{
-                IsSingleInstance = "Yes"
-                Ensure = "Present"
-                FarmConfigDatabaseName = "SP_Config"
-                DatabaseServer = "sql.contoso.com"
-                FarmAccount = $mockFarmAccount
-                Passphrase = $mockPassphrase
+                IsSingleInstance         = "Yes"
+                Ensure                   = "Present"
+                FarmConfigDatabaseName   = "SP_Config"
+                DatabaseServer           = "sql.contoso.com"
+                FarmAccount              = $mockFarmAccount
+                Passphrase               = $mockPassphrase
                 AdminContentDatabaseName = "SP_AdminContent"
-                RunCentralAdmin = $true
+                RunCentralAdmin          = $true
             }
 
             Mock -CommandName "Get-SPDscRegistryKey" -MockWith {
@@ -1762,9 +1762,9 @@ namespace Microsoft.SharePoint.Administration {
             }
             Mock -CommandName "Get-SPDscConfigDBStatus" -MockWith {
                 return @{
-                    Locked = $false
+                    Locked           = $false
                     ValidPermissions = $false
-                    DatabaseExists = $false
+                    DatabaseExists   = $false
                 }
             }
             Mock -CommandName "Get-SPDscSQLInstanceStatus" -MockWith {
@@ -1783,7 +1783,7 @@ namespace Microsoft.SharePoint.Administration {
                 {
                     return @(
                         @{
-                            Name = "WSS_Administration"
+                            Name   = "WSS_Administration"
                             Status = "Online"
                         } | Add-Member -MemberType ScriptMethod `
                                        -Name GetType `
@@ -1814,14 +1814,14 @@ namespace Microsoft.SharePoint.Administration {
 
         Context -Name "A config database exists, and this server is connected (with FQDN) to it and should be" -Fixture {
             $testParams = @{
-                IsSingleInstance = "Yes"
-                Ensure = "Present"
-                FarmConfigDatabaseName = "SP_Config"
-                DatabaseServer = "sql.contoso.com"
-                FarmAccount = $mockFarmAccount
-                Passphrase = $mockPassphrase
+                IsSingleInstance         = "Yes"
+                Ensure                   = "Present"
+                FarmConfigDatabaseName   = "SP_Config"
+                DatabaseServer           = "sql.contoso.com"
+                FarmAccount              = $mockFarmAccount
+                Passphrase               = $mockPassphrase
                 AdminContentDatabaseName = "SP_AdminContent"
-                RunCentralAdmin = $true
+                RunCentralAdmin          = $true
             }
 
             Mock -CommandName "Get-SPServer" -MockWith {
@@ -1841,8 +1841,8 @@ namespace Microsoft.SharePoint.Administration {
 
             Mock -CommandName "Get-SPFarm" -MockWith {
                 return @{
-                    Name = $testParams.FarmConfigDatabaseName
-                    DatabaseServer = @{
+                    Name                     = $testParams.FarmConfigDatabaseName
+                    DatabaseServer           = @{
                         Name = $testParams.DatabaseServer
                     }
                     AdminContentDatabaseName = $testParams.AdminContentDatabaseName
@@ -1850,9 +1850,9 @@ namespace Microsoft.SharePoint.Administration {
             }
             Mock -CommandName "Get-SPDscConfigDBStatus" -MockWith {
                 return @{
-                    Locked = $false
+                    Locked           = $false
                     ValidPermissions = $true
-                    DatabaseExists = $true
+                    DatabaseExists   = $true
                 }
             }
             Mock -CommandName "Get-SPDscSQLInstanceStatus" -MockWith {
@@ -1862,21 +1862,21 @@ namespace Microsoft.SharePoint.Administration {
             }
             Mock -CommandName "Get-SPDatabase" -MockWith {
                 return @(@{
-                    Name = $testParams.FarmConfigDatabaseName
-                    Type = "Configuration Database"
+                    Name                 = $testParams.FarmConfigDatabaseName
+                    Type                 = "Configuration Database"
                     NormalizedDataSource = $testParams.DatabaseServer
                 })
             }
             Mock -CommandName "Get-SPWebApplication" -MockWith {
                 return @{
                     IsAdministrationWebApplication = $true
-                    ContentDatabases = @(@{
+                    ContentDatabases               = @(@{
                         Name = $testParams.AdminContentDatabaseName
                     })
-                    IISSettings = @(@{
+                    IISSettings                    = @(@{
                         DisableKerberos = $true
                     })
-                    Url = "http://localhost:9999"
+                    Url                            = "http://localhost:9999"
                 }
             }
             Mock -CommandName "Get-SPServiceInstance" -MockWith {
@@ -1884,7 +1884,7 @@ namespace Microsoft.SharePoint.Administration {
                 {
                     return @(
                         @{
-                            Name = "WSS_Administration"
+                            Name   = "WSS_Administration"
                             Status = "Online"
                         } | Add-Member -MemberType ScriptMethod `
                                        -Name GetType `

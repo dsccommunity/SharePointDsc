@@ -90,9 +90,9 @@ function Get-TargetResource
         $serviceApps = Get-SPServiceApplication -Name $params.Name -ErrorAction SilentlyContinue
 
         $nullReturn = @{
-            Name = $params.Name
+            Name            = $params.Name
             ApplicationPool = $params.ApplicationPool
-            Ensure = "Absent"
+            Ensure          = "Absent"
         }
 
         if ($null -eq $serviceApps)
@@ -244,7 +244,7 @@ function Set-TargetResource
             Start-SPEnterpriseSearchServiceInstance -Identity $serviceInstance `
                                                     -ErrorAction SilentlyContinue
             $newParams = @{
-                Name = $params.Name
+                Name            = $params.Name
                 ApplicationPool = $params.ApplicationPool
             }
             if ($params.ContainsKey("DatabaseServer") -eq $true)
@@ -294,9 +294,9 @@ function Set-TargetResource
                     $appPool = Get-SPServiceApplicationPool -Identity $params.ApplicationPool
                     $account = $params.DefaultContentAccessAccount
                     $setParams = @{
-                        ApplicationPool = $appPool
-                        Identity = $app
-                        DefaultContentAccessAccountName = $account.UserName
+                        ApplicationPool                     = $appPool
+                        Identity                            = $app
+                        DefaultContentAccessAccountName     = $account.UserName
                         DefaultContentAccessAccountPassword = $account.Password
                     }
                     Set-SPEnterpriseSearchServiceApplication @setParams

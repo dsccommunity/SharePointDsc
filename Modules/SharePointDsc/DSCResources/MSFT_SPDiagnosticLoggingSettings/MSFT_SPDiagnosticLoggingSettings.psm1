@@ -94,25 +94,25 @@ function Get-TargetResource
         $params = $args[0]
 
         $nullReturn = @{
-            IsSingleInstance                      = "Yes"
-            AppAnalyticsAutomaticUploadEnabled    = $null
+            IsSingleInstance                            = "Yes"
+            AppAnalyticsAutomaticUploadEnabled          = $null
             CustomerExperienceImprovementProgramEnabled = $null
-            ErrorReportingEnabled                 = $null
-            ErrorReportingAutomaticUploadEnabled  = $null
-            DownloadErrorReportingUpdatesEnabled  = $null
-            DaysToKeepLogs                        = $null
-            LogMaxDiskSpaceUsageEnabled           = $null
-            LogSpaceInGB                          = $null
-            LogPath                               = $null
-            LogCutInterval                        = $null
-            EventLogFloodProtectionEnabled        = $null
-            EventLogFloodProtectionThreshold      = $null
-            EventLogFloodProtectionTriggerPeriod  = $null
-            EventLogFloodProtectionQuietPeriod    = $null
-            EventLogFloodProtectionNotifyInterval = $null
-            ScriptErrorReportingEnabled           = $null
-            ScriptErrorReportingRequireAuth       = $null
-            ScriptErrorReportingDelay             = $null
+            ErrorReportingEnabled                       = $null
+            ErrorReportingAutomaticUploadEnabled        = $null
+            DownloadErrorReportingUpdatesEnabled        = $null
+            DaysToKeepLogs                              = $null
+            LogMaxDiskSpaceUsageEnabled                 = $null
+            LogSpaceInGB                                = $null
+            LogPath                                     = $null
+            LogCutInterval                              = $null
+            EventLogFloodProtectionEnabled              = $null
+            EventLogFloodProtectionThreshold            = $null
+            EventLogFloodProtectionTriggerPeriod        = $null
+            EventLogFloodProtectionQuietPeriod          = $null
+            EventLogFloodProtectionNotifyInterval       = $null
+            ScriptErrorReportingEnabled                 = $null
+            ScriptErrorReportingRequireAuth             = $null
+            ScriptErrorReportingDelay                   = $null
         }
 
         $dc = Get-SPDiagnosticConfig -ErrorAction SilentlyContinue
@@ -122,27 +122,27 @@ function Get-TargetResource
         }
 
         return @{
-            IsSingleInstance                      = "Yes"
-            AppAnalyticsAutomaticUploadEnabled    = $dc.AppAnalyticsAutomaticUploadEnabled
+            IsSingleInstance                            = "Yes"
+            AppAnalyticsAutomaticUploadEnabled          = $dc.AppAnalyticsAutomaticUploadEnabled
             CustomerExperienceImprovementProgramEnabled = `
                 $dc.CustomerExperienceImprovementProgramEnabled
-            ErrorReportingEnabled                 = $dc.ErrorReportingEnabled
-            ErrorReportingAutomaticUploadEnabled  = $dc.ErrorReportingAutomaticUploadEnabled
-            DownloadErrorReportingUpdatesEnabled  = $dc.DownloadErrorReportingUpdatesEnabled
-            DaysToKeepLogs                        = $dc.DaysToKeepLogs
-            LogMaxDiskSpaceUsageEnabled           = $dc.LogMaxDiskSpaceUsageEnabled
-            LogSpaceInGB                          = $dc.LogDiskSpaceUsageGB
-            LogPath                               = $dc.LogLocation
-            LogCutInterval                        = $dc.LogCutInterval
-            EventLogFloodProtectionEnabled        = $dc.EventLogFloodProtectionEnabled
-            EventLogFloodProtectionThreshold      = $dc.EventLogFloodProtectionThreshold
-            EventLogFloodProtectionTriggerPeriod  = $dc.EventLogFloodProtectionTriggerPeriod
-            EventLogFloodProtectionQuietPeriod    = $dc.EventLogFloodProtectionQuietPeriod
-            EventLogFloodProtectionNotifyInterval = $dc.EventLogFloodProtectionNotifyInterval
-            ScriptErrorReportingEnabled           = $dc.ScriptErrorReportingEnabled
-            ScriptErrorReportingRequireAuth       = $dc.ScriptErrorReportingRequireAuth
-            ScriptErrorReportingDelay             = $dc.ScriptErrorReportingDelay
-            InstallAccount                        = $params.InstallAccount
+            ErrorReportingEnabled                       = $dc.ErrorReportingEnabled
+            ErrorReportingAutomaticUploadEnabled        = $dc.ErrorReportingAutomaticUploadEnabled
+            DownloadErrorReportingUpdatesEnabled        = $dc.DownloadErrorReportingUpdatesEnabled
+            DaysToKeepLogs                              = $dc.DaysToKeepLogs
+            LogMaxDiskSpaceUsageEnabled                 = $dc.LogMaxDiskSpaceUsageEnabled
+            LogSpaceInGB                                = $dc.LogDiskSpaceUsageGB
+            LogPath                                     = $dc.LogLocation
+            LogCutInterval                              = $dc.LogCutInterval
+            EventLogFloodProtectionEnabled              = $dc.EventLogFloodProtectionEnabled
+            EventLogFloodProtectionThreshold            = $dc.EventLogFloodProtectionThreshold
+            EventLogFloodProtectionTriggerPeriod        = $dc.EventLogFloodProtectionTriggerPeriod
+            EventLogFloodProtectionQuietPeriod          = $dc.EventLogFloodProtectionQuietPeriod
+            EventLogFloodProtectionNotifyInterval       = $dc.EventLogFloodProtectionNotifyInterval
+            ScriptErrorReportingEnabled                 = $dc.ScriptErrorReportingEnabled
+            ScriptErrorReportingRequireAuth             = $dc.ScriptErrorReportingRequireAuth
+            ScriptErrorReportingDelay                   = $dc.ScriptErrorReportingDelay
+            InstallAccount                              = $params.InstallAccount
         }
     }
     return $result

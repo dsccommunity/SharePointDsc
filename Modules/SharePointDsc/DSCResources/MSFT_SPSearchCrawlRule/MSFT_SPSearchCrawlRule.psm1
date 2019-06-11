@@ -116,9 +116,9 @@ function Get-TargetResource
                                                 -ErrorAction SilentlyContinue
 
         $nullReturn = @{
-            Path = $params.Path
+            Path           = $params.Path
             ServiceAppName = $params.ServiceAppName
-            Ensure = "Absent"
+            Ensure         = "Absent"
             InstallAccount = $params.InstallAccount
         }
 
@@ -170,26 +170,26 @@ function Get-TargetResource
                     {@("BasicAccountRuleAccess",
                        "NTLMAccountRuleAccess") -contains $_ } {
                         $returnVal = @{
-                            Path = $params.Path
-                            ServiceAppName = $params.ServiceAppName
-                            AuthenticationType = $crawlRule.AuthenticationType
-                            RuleType = $crawlRule.Type.ToString()
-                            CrawlConfigurationRules = $crawlConfigurationRules
+                            Path                      = $params.Path
+                            ServiceAppName            = $params.ServiceAppName
+                            AuthenticationType        = $crawlRule.AuthenticationType
+                            RuleType                  = $crawlRule.Type.ToString()
+                            CrawlConfigurationRules   = $crawlConfigurationRules
                             AuthenticationCredentials = $crawlRule.AccountName
-                            Ensure = "Present"
-                            InstallAccount = $params.InstallAccount
+                            Ensure                    = "Present"
+                            InstallAccount            = $params.InstallAccount
                         }
                     }
                     "CertificateRuleAccess" {
                         $returnVal = @{
-                            Path = $params.Path
-                            ServiceAppName = $params.ServiceAppName
-                            AuthenticationType = $crawlRule.AuthenticationType
-                            RuleType = $crawlRule.Type.ToString()
+                            Path                    = $params.Path
+                            ServiceAppName          = $params.ServiceAppName
+                            AuthenticationType      = $crawlRule.AuthenticationType
+                            RuleType                = $crawlRule.Type.ToString()
                             CrawlConfigurationRules = $crawlConfigurationRules
-                            CertificateName = $crawlRule.AccountName
-                            Ensure = "Present"
-                            InstallAccount = $params.InstallAccount
+                            CertificateName         = $crawlRule.AccountName
+                            Ensure                  = "Present"
+                            InstallAccount          = $params.InstallAccount
                         }
                     }
                     { @("DefaultRuleAccess",
@@ -197,23 +197,23 @@ function Get-TargetResource
                         "CookieRuleAccess",
                         "AnonymousAccess") -contains $_ } {
                         $returnVal = @{
-                            Path = $params.Path
-                            ServiceAppName = $params.ServiceAppName
-                            AuthenticationType = $crawlRule.AuthenticationType.ToString()
-                            RuleType = $crawlRule.Type.ToString()
+                            Path                    = $params.Path
+                            ServiceAppName          = $params.ServiceAppName
+                            AuthenticationType      = $crawlRule.AuthenticationType.ToString()
+                            RuleType                = $crawlRule.Type.ToString()
                             CrawlConfigurationRules = $crawlConfigurationRules
-                            Ensure = "Present"
-                            InstallAccount = $params.InstallAccount
+                            Ensure                  = "Present"
+                            InstallAccount          = $params.InstallAccount
                         }
                     }
                     default {
-                            Path = $params.Path
-                            ServiceAppName = $params.ServiceAppName
-                            AuthenticationType = "Unknown"
-                            RuleType = $crawlRule.Type.ToString()
+                            Path                    = $params.Path
+                            ServiceAppName          = $params.ServiceAppName
+                            AuthenticationType      = "Unknown"
+                            RuleType                = $crawlRule.Type.ToString()
                             CrawlConfigurationRules = $crawlConfigurationRules
-                            Ensure = "Present"
-                            InstallAccount = $params.InstallAccount
+                            Ensure                  = "Present"
+                            InstallAccount          = $params.InstallAccount
                     }
                 }
                 return $returnVal

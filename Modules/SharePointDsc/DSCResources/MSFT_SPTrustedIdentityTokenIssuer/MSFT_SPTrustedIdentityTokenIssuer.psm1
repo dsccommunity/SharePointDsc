@@ -71,34 +71,35 @@
                                                     -ErrorAction SilentlyContinue
         if ($spTrust)
         {
-            $description = $spTrust.Description
-            $realm = $spTrust.DefaultProviderRealm
-            $signInUrl = $spTrust.ProviderUri.OriginalString
-            $identifierClaim = $spTrust.IdentityClaimTypeInformation.MappedClaimType
+            $description                  = $spTrust.Description
+            $realm                        = $spTrust.DefaultProviderRealm
+            $signInUrl                    = $spTrust.ProviderUri.OriginalString
+            $identifierClaim              = $spTrust.IdentityClaimTypeInformation.MappedClaimType
             $SigningCertificateThumbprint = $spTrust.SigningCertificate.Thumbprint
-            $currentState = "Present"
-            $claimProviderName = $sptrust.ClaimProviderName
-            $providerSignOutUri = $sptrust.ProviderSignOutUri.OriginalString
-            $useWReplyParameter = $sptrust.UseWReplyParameter
-            $spTrust.ClaimTypeInformation| Foreach-Object -Process {
+            $currentState                 = "Present"
+            $claimProviderName            = $sptrust.ClaimProviderName
+            $providerSignOutUri           = $sptrust.ProviderSignOutUri.OriginalString
+            $useWReplyParameter           = $sptrust.UseWReplyParameter
+
+            $spTrust.ClaimTypeInformation | Foreach-Object -Process {
                 $claimsMappings = $claimsMappings + @{
-                    Name = $_.DisplayName
+                    Name              = $_.DisplayName
                     IncomingClaimType = $_.InputClaimType
-                    LocalClaimType = $_.MappedClaimType
+                    LocalClaimType    = $_.MappedClaimType
                 }
             }
         }
         else
         {
-            $description = ""
-            $realm = ""
-            $signInUrl = ""
-            $identifierClaim = ""
+            $description                  = ""
+            $realm                        = ""
+            $signInUrl                    = ""
+            $identifierClaim              = ""
             $SigningCertificateThumbprint = ""
-            $currentState = "Absent"
-            $claimProviderName = ""
-            $providerSignOutUri = ""
-            $useWReplyParameter = $false
+            $currentState                 = "Absent"
+            $claimProviderName            = ""
+            $providerSignOutUri           = ""
+            $useWReplyParameter           = $false
         }
 
         return @{

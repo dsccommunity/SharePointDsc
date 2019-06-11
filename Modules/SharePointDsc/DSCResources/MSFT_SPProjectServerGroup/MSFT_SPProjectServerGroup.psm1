@@ -103,15 +103,15 @@ function Get-TargetResource
         if ($null -eq $script:groupDataSet)
         {
             return @{
-                Url = $params.Url
-                Name = $params.Name
-                Description = ""
-                ADGroup = ""
-                Members = $null
+                Url              = $params.Url
+                Name             = $params.Name
+                Description      = ""
+                ADGroup          = ""
+                Members          = $null
                 MembersToInclude = $null
                 MembersToExclude = $null
-                Ensure = "Absent"
-                InstallAccount = $params.InstallAccount
+                Ensure           = "Absent"
+                InstallAccount   = $params.InstallAccount
             }
         }
         else
@@ -143,15 +143,15 @@ function Get-TargetResource
             }
 
             return @{
-                Url = $params.Url
-                Name = $script:groupDataSet.SecurityGroups.WSEC_GRP_NAME
-                Description = $script:groupDataSet.SecurityGroups.WSEC_GRP_DESC
-                ADGroup = $adGroup
-                Members = $groupMembers
+                Url              = $params.Url
+                Name             = $script:groupDataSet.SecurityGroups.WSEC_GRP_NAME
+                Description      = $script:groupDataSet.SecurityGroups.WSEC_GRP_DESC
+                ADGroup          = $adGroup
+                Members          = $groupMembers
                 MembersToInclude = $null
                 MembersToExclude = $null
-                Ensure = "Present"
-                InstallAccount = $params.InstallAccount
+                Ensure           = "Present"
+                InstallAccount   = $params.InstallAccount
             }
         }
     }

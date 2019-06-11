@@ -39,9 +39,9 @@ function Get-TargetResource
             Write-Verbose -Message "Search Service Application $($params.ServiceAppName) not found"
             $returnVal = @{
                 ServiceAppName = ""
-                Url = $params.Url
-                Target = ""
-                Ensure = "Absent"
+                Url            = $params.Url
+                Target         = ""
+                Ensure         = "Absent"
                 InstallAccount = $params.InstallAccount
             }
             return $returnVal
@@ -54,9 +54,9 @@ function Get-TargetResource
             Write-Verbose -Message "Search Service Application $($params.ServiceAppName) has no mappings"
             $returnVal = @{
                 ServiceAppName = $params.ServiceAppName
-                Url = $params.Url
-                Target = ""
-                Ensure = "Absent"
+                Url            = $params.Url
+                Target         = ""
+                Ensure         = "Absent"
                 InstallAccount = $params.InstallAccount
             }
             return $returnVal
@@ -69,9 +69,9 @@ function Get-TargetResource
             Write-Verbose "Search Service Application $($params.ServiceAppName) has no matching mapping"
             $returnVal = @{
                 ServiceAppName = $params.ServiceAppName
-                Url = $params.Url
-                Target = ""
-                Ensure = "Absent"
+                Url            = $params.Url
+                Target         = ""
+                Ensure         = "Absent"
                 InstallAccount = $params.InstallAccount
             }
             return $returnVal
@@ -81,19 +81,16 @@ function Get-TargetResource
             Write-Verbose "Search Service Application $($params.ServiceAppName) has a matching mapping"
             $returnVal = @{
                 ServiceAppName = $params.ServiceAppName
-                Url = $mapping.Source
-                Target = $mapping.Target
-                Ensure = "Present"
+                Url            = $mapping.Source
+                Target         = $mapping.Target
+                Ensure         = "Present"
                 InstallAccount = $params.InstallAccount
             }
             return $returnVal
-
         }
-
     }
 
     return $result
-
 }
 
 

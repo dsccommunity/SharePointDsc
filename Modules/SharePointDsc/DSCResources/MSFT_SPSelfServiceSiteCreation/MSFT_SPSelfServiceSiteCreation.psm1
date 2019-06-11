@@ -103,18 +103,18 @@ function Get-TargetResource
         {
             Write-Verbose "Web application $($params.WebAppUrl) was not found"
             return @{
-                WebAppUrl     = $null
-                Enabled       = $null
-                OnlineEnabled = $null
-                QuotaTemplate = $null
-                ShowStartASiteMenuItem = $null
-                CreateIndividualSite   = $null
-                ParentSiteUrl = $null
-                CustomFormUrl = $null
-                ManagedPath   = $null
-                AlternateUrl  = $null
+                WebAppUrl               = $null
+                Enabled                 = $null
+                OnlineEnabled           = $null
+                QuotaTemplate           = $null
+                ShowStartASiteMenuItem  = $null
+                CreateIndividualSite    = $null
+                ParentSiteUrl           = $null
+                CustomFormUrl           = $null
+                ManagedPath             = $null
+                AlternateUrl            = $null
                 UserExperienceVersion   = $null
-                PolicyOption  = $null
+                PolicyOption            = $null
                 RequireSecondaryContact = $null
             }
         }
@@ -141,18 +141,18 @@ function Get-TargetResource
         }
 
         return @{
-            WebAppUrl     = $params.WebAppUrl
-            Enabled       = $webApplication.SelfServiceSiteCreationEnabled
-            OnlineEnabled = $webApplication.SelfServiceSiteCreationOnlineEnabled
-            QuotaTemplate = $webApplication.SelfServiceCreationQuotaTemplate
-            ShowStartASiteMenuItem = $webApplication.ShowStartASiteMenuItem
-            CreateIndividualSite   = $webApplication.SelfServiceCreateIndividualSite
-            ParentSiteUrl = $webApplication.SelfServiceCreationParentSiteUrl
-            CustomFormUrl = $webApplication.SelfServiceSiteCustomFormUrl
-            ManagedPath   = $webApplication.SelfServiceCreationManagedPath
-            AlternateUrl  = $webApplication.SelfServiceCreationAlternateUrl
+            WebAppUrl               = $params.WebAppUrl
+            Enabled                 = $webApplication.SelfServiceSiteCreationEnabled
+            OnlineEnabled           = $webApplication.SelfServiceSiteCreationOnlineEnabled
+            QuotaTemplate           = $webApplication.SelfServiceCreationQuotaTemplate
+            ShowStartASiteMenuItem  = $webApplication.ShowStartASiteMenuItem
+            CreateIndividualSite    = $webApplication.SelfServiceCreateIndividualSite
+            ParentSiteUrl           = $webApplication.SelfServiceCreationParentSiteUrl
+            CustomFormUrl           = $webApplication.SelfServiceSiteCustomFormUrl
+            ManagedPath             = $webApplication.SelfServiceCreationManagedPath
+            AlternateUrl            = $webApplication.SelfServiceCreationAlternateUrl
             UserExperienceVersion   = $userExperienceVersion
-            PolicyOption  = $policyOption
+            PolicyOption            = $policyOption
             RequireSecondaryContact = $webApplication.RequireContactForSelfServiceSiteCreation
         }
     }
@@ -245,7 +245,7 @@ function Set-TargetResource
     }
     else
     {
-        if ($PSBoundParameters.ContainsKey("AlternateUrl") -eq $true -and
+        if ($PSBoundParameters.ContainsKey("AlternateUrl") -eq $true -and `
             $PSBoundParameters.ContainsKey("ManagedPath") -eq $true)
         {
             throw "You cannot specify both AlternateUrl and ManagedPath. Please use just one of these."
@@ -262,7 +262,7 @@ function Set-TargetResource
                         -ScriptBlock {
         $params = $args[0]
 
-        if ($params.ContainsKey("AlternateUrl") -and
+        if ($params.ContainsKey("AlternateUrl") -and `
             $params.AlternateUrl.TrimEnd("/") -in (Get-SPWebApplication).Url.TrimEnd("/"))
         {
             throw ("Specified AlternateUrl is unknown as web application URL. " + `
@@ -502,7 +502,7 @@ function Test-TargetResource
 
     if ($Enabled)
     {
-        return Test-SPDscParameterState -CurrentValues $currentValues `
+        return Test-SPDscParameterState -CurrentValues $CurrentValues `
                                         -DesiredValues $PSBoundParameters `
                                         -ValuesToCheck @("WebAppUrl", `
                                                          "Enabled", `
@@ -519,7 +519,7 @@ function Test-TargetResource
     }
     else
     {
-        return Test-SPDscParameterState -CurrentValues $currentValues `
+        return Test-SPDscParameterState -CurrentValues $CurrentValues `
                                         -DesiredValues $PSBoundParameters `
                                         -ValuesToCheck @("WebAppUrl", `
                                                          "Enabled", `

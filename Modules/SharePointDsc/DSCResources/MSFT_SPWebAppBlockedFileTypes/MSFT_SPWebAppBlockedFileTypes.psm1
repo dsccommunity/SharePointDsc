@@ -85,8 +85,8 @@ function Set-TargetResource
     Write-Verbose -Message "Setting web application '$WebAppUrl' blocked file types"
 
     $null = Invoke-SPDscCommand -Credential $InstallAccount `
-                                  -Arguments @($PSBoundParameters,$PSScriptRoot) `
-                                  -ScriptBlock {
+                                -Arguments @($PSBoundParameters,$PSScriptRoot) `
+                                -ScriptBlock {
         $params = $args[0]
         $ScriptRoot = $args[1]
 

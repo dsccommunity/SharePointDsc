@@ -270,11 +270,6 @@ function Test-TargetResource
     Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
     Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
 
-<#    if ($null -eq $CurrentValues.Name)
-    {
-        return $false
-    }#>
-
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
                                     -DesiredValues $PSBoundParameters
 }

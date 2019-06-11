@@ -41,8 +41,8 @@ function Get-TargetResource
                                   -ScriptBlock {
         $params = $args[0]
         $nullReturnValue = @{
-            Name = $params.Name
-            Ensure = "Absent"
+            Name           = $params.Name
+            Ensure         = "Absent"
             InstallAccount = $params.InstallAccount
         }
 
@@ -68,13 +68,13 @@ function Get-TargetResource
                                                 -ErrorAction SilentlyContinue
 
             return @{
-                Name = $params.Name
-                CacheSizeInMB = $cacheHostConfig.Size
-                ServiceAccount = $windowsService.StartName
-                CreateFirewallRules = ($null -ne $firewallRule)
-                Ensure = "Present"
+                Name                 = $params.Name
+                CacheSizeInMB        = $cacheHostConfig.Size
+                ServiceAccount       = $windowsService.StartName
+                CreateFirewallRules  = ($null -ne $firewallRule)
+                Ensure               = "Present"
                 ServerProvisionOrder = $params.ServerProvisionOrder
-                InstallAccount = $params.InstallAccount
+                InstallAccount       = $params.InstallAccount
             }
         }
         catch

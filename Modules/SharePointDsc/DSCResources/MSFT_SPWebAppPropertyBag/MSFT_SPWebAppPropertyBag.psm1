@@ -59,9 +59,9 @@ function Get-TargetResource()
 
         return @{
             WebAppUrl = $params.WebAppUrl
-            Key = $params.Key
-            Value = $currentValue
-            Ensure = $localEnsure
+            Key       = $params.Key
+            Value     = $currentValue
+            Ensure    = $localEnsure
         }
     }
     return $result

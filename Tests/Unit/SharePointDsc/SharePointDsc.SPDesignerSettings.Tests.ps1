@@ -26,14 +26,14 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         # Test contexts
         Context -Name "The server is not part of SharePoint farm" -Fixture {
             $testParams = @{
-                WebAppUrl = "https://intranet.sharepoint.contoso.com"
-                SettingsScope = "WebApplication"
-                AllowSharePointDesigner = $false
-                AllowDetachPagesFromDefinition = $false
-                AllowCustomiseMasterPage = $false
-                AllowManageSiteURLStructure = $false
-                AllowCreateDeclarativeWorkflow = $false
-                AllowSavePublishDeclarativeWorkflow = $false
+                WebAppUrl                              = "https://intranet.sharepoint.contoso.com"
+                SettingsScope                          = "WebApplication"
+                AllowSharePointDesigner                = $false
+                AllowDetachPagesFromDefinition         = $false
+                AllowCustomiseMasterPage               = $false
+                AllowManageSiteURLStructure            = $false
+                AllowCreateDeclarativeWorkflow         = $false
+                AllowSavePublishDeclarativeWorkflow    = $false
                 AllowSaveDeclarativeWorkflowAsTemplate = $false
             }
 
@@ -56,24 +56,24 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "The server is in a farm, target web application and the incorrect settings have been applied" -Fixture {
             $testParams = @{
-                WebAppUrl = "https://intranet.sharepoint.contoso.com"
-                SettingsScope = "WebApplication"
-                AllowSharePointDesigner = $false
-                AllowDetachPagesFromDefinition = $false
-                AllowCustomiseMasterPage = $false
-                AllowManageSiteURLStructure = $false
-                AllowCreateDeclarativeWorkflow = $false
-                AllowSavePublishDeclarativeWorkflow = $false
+                WebAppUrl                              = "https://intranet.sharepoint.contoso.com"
+                SettingsScope                          = "WebApplication"
+                AllowSharePointDesigner                = $false
+                AllowDetachPagesFromDefinition         = $false
+                AllowCustomiseMasterPage               = $false
+                AllowManageSiteURLStructure            = $false
+                AllowCreateDeclarativeWorkflow         = $false
+                AllowSavePublishDeclarativeWorkflow    = $false
                 AllowSaveDeclarativeWorkflowAsTemplate = $false
             }
 
             Mock -CommandName Get-SPDesignerSettings -MockWith { return @{
-                    AllowDesigner = $true
-                    AllowRevertFromTemplate = $true
-                    AllowMasterPageEditing = $true
-                    ShowURLStructure = $true
-                    AllowCreateDeclarativeWorkflow = $true
-                    AllowSavePublishDeclarativeWorkflow = $true
+                    AllowDesigner                          = $true
+                    AllowRevertFromTemplate                = $true
+                    AllowMasterPageEditing                 = $true
+                    ShowURLStructure                       = $true
+                    AllowCreateDeclarativeWorkflow         = $true
+                    AllowSavePublishDeclarativeWorkflow    = $true
                     AllowSaveDeclarativeWorkflowAsTemplate = $true
                 }
             }
@@ -81,7 +81,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             Mock -CommandName Get-SPWebapplication -MockWith {
                 $result = @{}
                 $result.DisplayName = "Test"
-                $result.Url = "https://intranet.sharepoint.contoso.com"
+                $result.Url         = "https://intranet.sharepoint.contoso.com"
 
                 $result = $result | Add-Member -MemberType ScriptMethod -Name Update -Value {
                     $Global:SPDscDesignerUpdated = $true
@@ -107,26 +107,26 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "The server is in a farm, target site collection and the incorrect settings have been applied" -Fixture {
             $testParams = @{
-                WebAppUrl = "https://intranet.sharepoint.contoso.com"
-                SettingsScope = "SiteCollection"
-                AllowSharePointDesigner = $false
-                AllowDetachPagesFromDefinition = $false
-                AllowCustomiseMasterPage = $false
-                AllowManageSiteURLStructure = $false
-                AllowCreateDeclarativeWorkflow = $false
-                AllowSavePublishDeclarativeWorkflow = $false
+                WebAppUrl                              = "https://intranet.sharepoint.contoso.com"
+                SettingsScope                          = "SiteCollection"
+                AllowSharePointDesigner                = $false
+                AllowDetachPagesFromDefinition         = $false
+                AllowCustomiseMasterPage               = $false
+                AllowManageSiteURLStructure            = $false
+                AllowCreateDeclarativeWorkflow         = $false
+                AllowSavePublishDeclarativeWorkflow    = $false
                 AllowSaveDeclarativeWorkflowAsTemplate = $false
             }
 
             Mock -CommandName Get-SPSite -MockWith {
                 return @{
-                        Url = "https://intranet.sharepoint.contoso.com"
-                        AllowDesigner = $true
-                        AllowRevertFromTemplate = $true
-                        AllowMasterPageEditing = $true
-                        ShowURLStructure = $true
-                        AllowCreateDeclarativeWorkflow = $true
-                        AllowSavePublishDeclarativeWorkflow = $true
+                        Url                                    = "https://intranet.sharepoint.contoso.com"
+                        AllowDesigner                          = $true
+                        AllowRevertFromTemplate                = $true
+                        AllowMasterPageEditing                 = $true
+                        ShowURLStructure                       = $true
+                        AllowCreateDeclarativeWorkflow         = $true
+                        AllowSavePublishDeclarativeWorkflow    = $true
                         AllowSaveDeclarativeWorkflowAsTemplate = $true
                 }
             }
@@ -148,25 +148,25 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "The server is in a farm, target site collection and InstallAccount is used" -Fixture {
             $testParams = @{
-                WebAppUrl = "https://intranet.sharepoint.contoso.com"
-                SettingsScope = "SiteCollection"
-                AllowSharePointDesigner = $false
-                AllowDetachPagesFromDefinition = $false
-                AllowCustomiseMasterPage = $false
-                AllowManageSiteURLStructure = $false
-                AllowCreateDeclarativeWorkflow = $false
-                AllowSavePublishDeclarativeWorkflow = $false
+                WebAppUrl                              = "https://intranet.sharepoint.contoso.com"
+                SettingsScope                          = "SiteCollection"
+                AllowSharePointDesigner                = $false
+                AllowDetachPagesFromDefinition         = $false
+                AllowCustomiseMasterPage               = $false
+                AllowManageSiteURLStructure            = $false
+                AllowCreateDeclarativeWorkflow         = $false
+                AllowSavePublishDeclarativeWorkflow    = $false
                 AllowSaveDeclarativeWorkflowAsTemplate = $false
             }
             Mock -CommandName Get-SPSite -MockWith {
                 return @{
-                        Url = "https://intranet.sharepoint.contoso.com"
-                        AllowDesigner = $true
-                        AllowRevertFromTemplate = $true
-                        AllowMasterPageEditing = $true
-                        ShowURLStructure = $true
-                        AllowCreateDeclarativeWorkflow = $true
-                        AllowSavePublishDeclarativeWorkflow = $true
+                        Url                                    = "https://intranet.sharepoint.contoso.com"
+                        AllowDesigner                          = $true
+                        AllowRevertFromTemplate                = $true
+                        AllowMasterPageEditing                 = $true
+                        ShowURLStructure                       = $true
+                        AllowCreateDeclarativeWorkflow         = $true
+                        AllowSavePublishDeclarativeWorkflow    = $true
                         AllowSaveDeclarativeWorkflowAsTemplate = $true
                 }
             }
@@ -187,26 +187,26 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "The server is in a farm, target is web application and the correct settings have been applied" -Fixture {
             $testParams = @{
-                WebAppUrl = "https://intranet.sharepoint.contoso.com"
-                SettingsScope = "SiteCollection"
-                AllowSharePointDesigner = $false
-                AllowDetachPagesFromDefinition = $false
-                AllowCustomiseMasterPage = $false
-                AllowManageSiteURLStructure = $false
-                AllowCreateDeclarativeWorkflow = $false
-                AllowSavePublishDeclarativeWorkflow = $false
+                WebAppUrl                              = "https://intranet.sharepoint.contoso.com"
+                SettingsScope                          = "SiteCollection"
+                AllowSharePointDesigner                = $false
+                AllowDetachPagesFromDefinition         = $false
+                AllowCustomiseMasterPage               = $false
+                AllowManageSiteURLStructure            = $false
+                AllowCreateDeclarativeWorkflow         = $false
+                AllowSavePublishDeclarativeWorkflow    = $false
                 AllowSaveDeclarativeWorkflowAsTemplate = $false
             }
 
             Mock -CommandName Get-SPSite -MockWith {
                 $returnVal = @{
-                    Url = "https://intranet.sharepoint.contoso.com"
-                    AllowDesigner = $false
-                    AllowRevertFromTemplate = $false
-                    AllowMasterPageEditing = $false
-                    ShowURLStructure = $false
-                    AllowCreateDeclarativeWorkflow = $false
-                    AllowSavePublishDeclarativeWorkflow = $false
+                    Url                                    = "https://intranet.sharepoint.contoso.com"
+                    AllowDesigner                          = $false
+                    AllowRevertFromTemplate                = $false
+                    AllowMasterPageEditing                 = $false
+                    ShowURLStructure                       = $false
+                    AllowCreateDeclarativeWorkflow         = $false
+                    AllowSavePublishDeclarativeWorkflow    = $false
                     AllowSaveDeclarativeWorkflowAsTemplate = $false
                 }
                 $returnVal = $returnVal | Add-Member -MemberType ScriptMethod -Name Update -Value {
@@ -236,26 +236,26 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "The server is in a farm, target is site collection and the correct settings have been applied" -Fixture {
             $testParams = @{
-                WebAppUrl = "https://intranet.sharepoint.contoso.com"
-                SettingsScope = "SiteCollection"
-                AllowSharePointDesigner = $false
-                AllowDetachPagesFromDefinition = $false
-                AllowCustomiseMasterPage = $false
-                AllowManageSiteURLStructure = $false
-                AllowCreateDeclarativeWorkflow = $false
-                AllowSavePublishDeclarativeWorkflow = $false
+                WebAppUrl                              = "https://intranet.sharepoint.contoso.com"
+                SettingsScope                          = "SiteCollection"
+                AllowSharePointDesigner                = $false
+                AllowDetachPagesFromDefinition         = $false
+                AllowCustomiseMasterPage               = $false
+                AllowManageSiteURLStructure            = $false
+                AllowCreateDeclarativeWorkflow         = $false
+                AllowSavePublishDeclarativeWorkflow    = $false
                 AllowSaveDeclarativeWorkflowAsTemplate = $false
             }
 
             Mock -CommandName Get-SPSite -MockWith {
                 $returnVal = @{
-                        Url = "https://intranet.sharepoint.contoso.com"
-                        AllowDesigner = $false
-                        AllowRevertFromTemplate = $false
-                        AllowMasterPageEditing = $false
-                        ShowURLStructure = $false
-                        AllowCreateDeclarativeWorkflow = $false
-                        AllowSavePublishDeclarativeWorkflow = $false
+                        Url                                    = "https://intranet.sharepoint.contoso.com"
+                        AllowDesigner                          = $false
+                        AllowRevertFromTemplate                = $false
+                        AllowMasterPageEditing                 = $false
+                        ShowURLStructure                       = $false
+                        AllowCreateDeclarativeWorkflow         = $false
+                        AllowSavePublishDeclarativeWorkflow    = $false
                         AllowSaveDeclarativeWorkflowAsTemplate = $false
                 }
                 $returnVal = $returnVal | Add-Member -MemberType ScriptMethod -Name Update -Value {

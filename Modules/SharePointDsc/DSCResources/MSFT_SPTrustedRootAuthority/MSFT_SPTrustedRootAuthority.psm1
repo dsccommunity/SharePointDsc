@@ -322,8 +322,8 @@ function Test-TargetResource
     else
     {
          return Test-SPDscParameterState -CurrentValues $CurrentValues `
-                                        -DesiredValues $PSBoundParameters `
-                                        -ValuesToCheck @("Name","Ensure")
+                                         -DesiredValues $PSBoundParameters `
+                                         -ValuesToCheck @("Name","Ensure")
     }
 }
 

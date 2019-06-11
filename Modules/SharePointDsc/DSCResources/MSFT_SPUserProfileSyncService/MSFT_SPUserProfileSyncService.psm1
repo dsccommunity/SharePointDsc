@@ -83,9 +83,9 @@ function Get-TargetResource
         {
             return @{
                 UserProfileServiceAppName = $params.UserProfileServiceAppName
-                Ensure = "Absent"
-                RunOnlyWhenWriteable = $params.RunOnlyWhenWriteable
-                InstallAccount = $params.InstallAccount
+                Ensure                    = "Absent"
+                RunOnlyWhenWriteable      = $params.RunOnlyWhenWriteable
+                InstallAccount            = $params.InstallAccount
             }
         }
 
@@ -108,9 +108,9 @@ function Get-TargetResource
         {
             return @{
                 UserProfileServiceAppName = $params.UserProfileServiceAppName
-                Ensure = "Absent"
-                RunOnlyWhenWriteable = $params.RunOnlyWhenWriteable
-                InstallAccount = $params.InstallAccount
+                Ensure                    = "Absent"
+                RunOnlyWhenWriteable      = $params.RunOnlyWhenWriteable
+                InstallAccount            = $params.InstallAccount
             }
         }
         if ($null -ne $syncService.UserProfileApplicationGuid -and `
@@ -130,10 +130,10 @@ function Get-TargetResource
 
         return @{
             UserProfileServiceAppName = $upa.Name
-            Ensure = $localEnsure
-            FarmAccount = $params.FarmAccount
-            RunOnlyWhenWriteable = $params.RunOnlyWhenWriteable
-            InstallAccount = $params.InstallAccount
+            Ensure                    = $localEnsure
+            FarmAccount               = $params.FarmAccount
+            RunOnlyWhenWriteable      = $params.RunOnlyWhenWriteable
+            InstallAccount            = $params.InstallAccount
         }
     }
     return $result
@@ -407,8 +407,6 @@ function Test-TargetResource
             $PSBoundParameters.Ensure = "Present"
         }
     }
-
-    Write-Verbose -Message "Testing for User Profile Synchronization Service"
 
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
                                     -DesiredValues $PSBoundParameters `

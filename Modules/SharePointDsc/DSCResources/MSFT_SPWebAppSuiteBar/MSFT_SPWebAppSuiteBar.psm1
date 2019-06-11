@@ -44,12 +44,12 @@ function Get-TargetResource
                                    -ErrorAction SilentlyContinue
 
         $returnval = @{
-            WebAppUrl = $null
+            WebAppUrl                         = $null
             SuiteNavBrandingLogoNavigationUrl = $null
-            SuiteNavBrandingLogoTitle = $null
-            SuiteNavBrandingLogoUrl = $null
-            SuiteNavBrandingText = $null
-            SuiteBarBrandingElementHtml = $null
+            SuiteNavBrandingLogoTitle         = $null
+            SuiteNavBrandingLogoUrl           = $null
+            SuiteNavBrandingText              = $null
+            SuiteBarBrandingElementHtml       = $null
         }
 
         if ($null -eq $wa)
@@ -69,9 +69,9 @@ function Get-TargetResource
         if ($installedVersion.FileMajorPart -ge 16)
         {
             $returnval.SuiteNavBrandingLogoNavigationUrl = $wa.SuiteNavBrandingLogoNavigationUrl
-            $returnval.SuiteNavBrandingLogoTitle = $wa.SuiteNavBrandingLogoTitle
-            $returnval.SuiteNavBrandingLogoUrl = $wa.SuiteNavBrandingLogoUrl
-            $returnval.SuiteNavBrandingText = $wa.SuiteNavBrandingText
+            $returnval.SuiteNavBrandingLogoTitle         = $wa.SuiteNavBrandingLogoTitle
+            $returnval.SuiteNavBrandingLogoUrl           = $wa.SuiteNavBrandingLogoUrl
+            $returnval.SuiteNavBrandingText              = $wa.SuiteNavBrandingText
         }
 
         return $returnval

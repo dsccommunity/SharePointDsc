@@ -58,9 +58,9 @@ function Get-TargetResource
                                                 -ErrorAction SilentlyContinue
 
         $nullReturn = @{
-            FileType = $params.FileType
+            FileType       = $params.FileType
             ServiceAppName = $params.ServiceAppName
-            Ensure = "Absent"
+            Ensure         = "Absent"
             InstallAccount = $params.InstallAccount
         }
 
@@ -94,12 +94,12 @@ function Get-TargetResource
             else
             {
                 $returnVal = @{
-                    FileType = $params.FileType
+                    FileType       = $params.FileType
                     ServiceAppName = $params.ServiceAppName
-                    Description = $fileType.Name
-                    MimeType = $fileType.MimeType
-                    Enabled = $fileType.Enabled
-                    Ensure = "Present"
+                    Description    = $fileType.Name
+                    MimeType       = $fileType.MimeType
+                    Enabled        = $fileType.Enabled
+                    Ensure         = "Present"
                     InstallAccount = $params.InstallAccount
                 }
 
@@ -191,10 +191,10 @@ function Set-TargetResource
             $params = $args[0]
 
             $newParams = @{
-                FormatId = $params.FileType
+                FormatId          = $params.FileType
                 SearchApplication = $params.ServiceAppName
-                FormatName = $params.Description
-                MimeType = $params.MimeType
+                FormatName        = $params.Description
+                MimeType          = $params.MimeType
             }
 
             New-SPEnterpriseSearchFileFormat @newParams
@@ -202,9 +202,9 @@ function Set-TargetResource
             if ($params.ContainsKey("Enabled") -eq $true)
             {
                 $stateParams = @{
-                    Identity = $params.FileType
+                    Identity          = $params.FileType
                     SearchApplication = $params.ServiceAppName
-                    Enable = $params.Enabled
+                    Enable            = $params.Enabled
                 }
                 Set-SPEnterpriseSearchFileFormatState @stateParams
             }
@@ -232,10 +232,10 @@ function Set-TargetResource
                                                         -Confirm:$false
 
                     $newParams = @{
-                        FormatId = $params.FileType
+                        FormatId          = $params.FileType
                         SearchApplication = $params.ServiceAppName
-                        FormatName = $params.Description
-                        MimeType = $params.MimeType
+                        FormatName        = $params.Description
+                        MimeType          = $params.MimeType
                     }
 
                     New-SPEnterpriseSearchFileFormat @newParams
@@ -246,7 +246,7 @@ function Set-TargetResource
                     if ($fileType.Enabled -ne $params.Enabled)
                     {
                         $stateParams = @{
-                            Identity = $params.FileType
+                            Identity          = $params.FileType
                             SearchApplication = $params.ServiceAppName
                             Enable            = $params.Enabled
                         }

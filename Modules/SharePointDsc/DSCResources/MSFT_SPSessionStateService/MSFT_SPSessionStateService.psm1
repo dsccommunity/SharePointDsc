@@ -38,9 +38,9 @@ function Get-TargetResource
             $Ensure = "Present"
         }
         return @{
-            DatabaseName = $svc.CatalogName
+            DatabaseName   = $svc.CatalogName
             DatabaseServer = $svc.ServerName
-            Ensure = $Ensure
+            Ensure         = $Ensure
             SessionTimeout = $svc.Timeout.TotalMinutes
         }
     }

@@ -180,7 +180,7 @@ function Get-TargetResource
             }
 
             $returnval = @{
-                WebAppUrl = $params.WebAppUrl
+                WebAppUrl           = $params.WebAppUrl
                 ListPermissions     = $ListPermissions
                 SitePermissions     = $SitePermissions
                 PersonalPermissions = $PersonalPermissions

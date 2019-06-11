@@ -65,9 +65,9 @@ function Get-SPDscConfigDBStatus
         }
 
         return @{
-            DatabaseExists = $configDBexists
+            DatabaseExists   = $configDBexists
             ValidPermissions = $hasPermissions
-            Locked = $lockExists
+            Locked           = $lockExists
         }
     }
     finally

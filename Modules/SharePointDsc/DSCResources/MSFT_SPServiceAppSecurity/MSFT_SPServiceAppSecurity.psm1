@@ -55,7 +55,7 @@ function Get-TargetResource
 
         $nullReturn =  @{
             ServiceAppName = ""
-            SecurityType = $params.SecurityType
+            SecurityType   = $params.SecurityType
             InstallAccount = $params.InstallAccount
         }
 
@@ -180,7 +180,7 @@ function Get-TargetResource
             }
 
             $members += @{
-                Username    = $user
+                Username     = $user
                 AccessLevels = $accessLevels
             }
         }
@@ -407,12 +407,12 @@ function Set-TargetResource
                     if ($isUser -eq $true)
                     {
                         $claim = New-SPClaimsPrincipal -Identity $desiredMember.Username `
-                                                    -IdentityType WindowsSamAccountName
+                                                       -IdentityType WindowsSamAccountName
                     }
                     else
                     {
                         $claim = New-SPClaimsPrincipal -Identity $desiredMember.Username `
-                                                    -IdentityType WindowsSecurityGroupName
+                                                       -IdentityType WindowsSecurityGroupName
                     }
                 }
 
@@ -454,12 +454,12 @@ function Set-TargetResource
                         if ($isUser -eq $true)
                         {
                             $claim = New-SPClaimsPrincipal -Identity $excludeMember `
-                                                        -IdentityType WindowsSamAccountName
+                                                           -IdentityType WindowsSamAccountName
                         }
                         else
                         {
                             $claim = New-SPClaimsPrincipal -Identity $excludeMember `
-                                                        -IdentityType WindowsSecurityGroupName
+                                                           -IdentityType WindowsSecurityGroupName
                         }
                     }
                     Revoke-SPObjectSecurity -Identity $security -Principal $claim

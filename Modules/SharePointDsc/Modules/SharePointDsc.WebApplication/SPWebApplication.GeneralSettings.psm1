@@ -17,26 +17,26 @@ function Get-SPDscWebApplicationGeneralConfig
     }
 
     return @{
-        TimeZone = $timezone
-        Alerts = $WebApplication.AlertsEnabled
-        AlertsLimit = $WebApplication.AlertsMaximum
-        RSS = $WebApplication.SyndicationEnabled
-        BlogAPI = $WebApplication.MetaWeblogEnabled
-        BlogAPIAuthenticated = $WebApplication.MetaWeblogAuthenticationEnabled
-        BrowserFileHandling = $WebApplication.BrowserFileHandling
-        SecurityValidation = $WebApplication.FormDigestSettings.Enabled
-        SecurityValidationExpires = $WebApplication.FormDigestSettings.Expires
+        TimeZone                         = $timezone
+        Alerts                           = $WebApplication.AlertsEnabled
+        AlertsLimit                      = $WebApplication.AlertsMaximum
+        RSS                              = $WebApplication.SyndicationEnabled
+        BlogAPI                          = $WebApplication.MetaWeblogEnabled
+        BlogAPIAuthenticated             = $WebApplication.MetaWeblogAuthenticationEnabled
+        BrowserFileHandling              = $WebApplication.BrowserFileHandling
+        SecurityValidation               = $WebApplication.FormDigestSettings.Enabled
+        SecurityValidationExpires        = $WebApplication.FormDigestSettings.Expires
         SecurityValidationTimeoutMinutes = $WebApplication.FormDigestSettings.Timeout.TotalMinutes
-        RecycleBinEnabled = $WebApplication.RecycleBinEnabled
-        RecycleBinCleanupEnabled = $WebApplication.RecycleBinCleanupEnabled
-        RecycleBinRetentionPeriod = $WebApplication.RecycleBinRetentionPeriod
-        SecondStageRecycleBinQuota = $WebApplication.SecondStageRecycleBinQuota
-        MaximumUploadSize = $WebApplication.MaximumFileSize
-        CustomerExperienceProgram = $WebApplication.BrowserCEIPEnabled
-        PresenceEnabled = $WebApplication.PresenceEnabled
-        AllowOnlineWebPartCatalog = $WebApplication.AllowAccessToWebPartCatalog
-        SelfServiceSiteCreationEnabled = $WebApplication.SelfServiceSiteCreationEnabled
-        DefaultQuotaTemplate = $WebApplication.DefaultQuotaTemplate
+        RecycleBinEnabled                = $WebApplication.RecycleBinEnabled
+        RecycleBinCleanupEnabled         = $WebApplication.RecycleBinCleanupEnabled
+        RecycleBinRetentionPeriod        = $WebApplication.RecycleBinRetentionPeriod
+        SecondStageRecycleBinQuota       = $WebApplication.SecondStageRecycleBinQuota
+        MaximumUploadSize                = $WebApplication.MaximumFileSize
+        CustomerExperienceProgram        = $WebApplication.BrowserCEIPEnabled
+        PresenceEnabled                  = $WebApplication.PresenceEnabled
+        AllowOnlineWebPartCatalog        = $WebApplication.AllowAccessToWebPartCatalog
+        SelfServiceSiteCreationEnabled   = $WebApplication.SelfServiceSiteCreationEnabled
+        DefaultQuotaTemplate             = $WebApplication.DefaultQuotaTemplate
     }
 }
 
@@ -60,23 +60,23 @@ function Set-SPDscWebApplicationGeneralConfig
 
     # Format here is SPWebApplication property = Custom settings property
     $mapping = @{
-        DefaultTimeZone = "TimeZone"
-        AlertsEnabled = "Alerts"
-        AlertsMaximum = "AlertsLimit"
-        SyndicationEnabled = "RSS"
-        MetaWeblogEnabled = "BlogAPI"
+        DefaultTimeZone                 = "TimeZone"
+        AlertsEnabled                   = "Alerts"
+        AlertsMaximum                   = "AlertsLimit"
+        SyndicationEnabled              = "RSS"
+        MetaWeblogEnabled               = "BlogAPI"
         MetaWeblogAuthenticationEnabled = "BlogAPIAuthenticated"
-        BrowserFileHandling = "BrowserFileHandling"
-        MaximumFileSize = "MaximumUploadSize"
-        RecycleBinEnabled = "RecycleBinEnabled"
-        RecycleBinCleanupEnabled = "RecycleBinCleanupEnabled"
-        RecycleBinRetentionPeriod = "RecycleBinRetentionPeriod"
-        SecondStageRecycleBinQuota = "SecondStageRecycleBinQuota"
-        BrowserCEIPEnabled = "CustomerExperienceProgram"
-        PresenceEnabled = "Presence"
-        AllowAccessToWebPartCatalog = "AllowOnlineWebPartCatalog"
-        SelfServiceSiteCreationEnabled = "SelfServiceSiteCreationEnabled"
-        DefaultQuotaTemplate = "DefaultQuotaTemplate"
+        BrowserFileHandling             = "BrowserFileHandling"
+        MaximumFileSize                 = "MaximumUploadSize"
+        RecycleBinEnabled               = "RecycleBinEnabled"
+        RecycleBinCleanupEnabled        = "RecycleBinCleanupEnabled"
+        RecycleBinRetentionPeriod       = "RecycleBinRetentionPeriod"
+        SecondStageRecycleBinQuota      = "SecondStageRecycleBinQuota"
+        BrowserCEIPEnabled              = "CustomerExperienceProgram"
+        PresenceEnabled                 = "Presence"
+        AllowAccessToWebPartCatalog     = "AllowOnlineWebPartCatalog"
+        SelfServiceSiteCreationEnabled  = "SelfServiceSiteCreationEnabled"
+        DefaultQuotaTemplate            = "DefaultQuotaTemplate"
     }
     $mapping.Keys | ForEach-Object -Process {
         Set-SPDscObjectPropertyIfValuePresent -ObjectToSet $WebApplication `

@@ -53,9 +53,9 @@ function Get-TargetResource
         }
 
         return @{
-            Index = $params.Index
-            Servers = $IndexComponents
-            RootDirectory = $rootDirectory
+            Index          = $params.Index
+            Servers        = $IndexComponents
+            RootDirectory  = $rootDirectory
             ServiceAppName = $params.ServiceAppName
             InstallAccount = $params.InstallAccount
         }
@@ -192,7 +192,7 @@ function Set-TargetResource
             foreach ($componentToAdd in $ComponentsToAdd)
             {
                 $NewComponentParams = @{
-                    SearchTopology = $newTopology
+                    SearchTopology        = $newTopology
                     SearchServiceInstance = $AllSearchServiceInstances.$componentToAdd
                 }
                 switch($componentTypes.$CurrentSearchProperty)
@@ -223,7 +223,6 @@ function Set-TargetResource
                     $component | Remove-SPEnterpriseSearchComponent -SearchTopology $newTopology `
                                                                     -Confirm:$false
                 }
-
             }
         }
 

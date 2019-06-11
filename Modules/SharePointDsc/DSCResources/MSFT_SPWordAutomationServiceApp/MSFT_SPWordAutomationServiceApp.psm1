@@ -173,25 +173,25 @@ function Get-TargetResource
         }
 
         $returnVal =  @{
-            Name                   = $serviceApp.DisplayName
-            Ensure                 = "Present"
-            ApplicationPool        = $serviceApp.ApplicationPool.Name
-            DatabaseName           = $serviceApp.Database.Name
-            DatabaseServer         = $serviceApp.Database.NormalizedDataSource
-            SupportedFileFormats   = $supportedFileFormats
-            DisableEmbeddedFonts   = $serviceApp.DisableEmbeddedFonts
-            MaximumMemoryUsage     = $serviceApp.MaximumMemoryUsage
-            RecycleThreshold       = $serviceApp.RecycleProcessThreshold
-            DisableBinaryFileScan  = $serviceApp.DisableBinaryFileScan
-            ConversionProcesses    = $serviceApp.TotalActiveProcesses
-            JobConversionFrequency = $serviceApp.TimerJobFrequency.TotalMinutes
+            Name                            = $serviceApp.DisplayName
+            Ensure                          = "Present"
+            ApplicationPool                 = $serviceApp.ApplicationPool.Name
+            DatabaseName                    = $serviceApp.Database.Name
+            DatabaseServer                  = $serviceApp.Database.NormalizedDataSource
+            SupportedFileFormats            = $supportedFileFormats
+            DisableEmbeddedFonts            = $serviceApp.DisableEmbeddedFonts
+            MaximumMemoryUsage              = $serviceApp.MaximumMemoryUsage
+            RecycleThreshold                = $serviceApp.RecycleProcessThreshold
+            DisableBinaryFileScan           = $serviceApp.DisableBinaryFileScan
+            ConversionProcesses             = $serviceApp.TotalActiveProcesses
+            JobConversionFrequency          = $serviceApp.TimerJobFrequency.TotalMinutes
             NumberOfConversionsPerProcess   = $serviceApp.ConversionsPerInstance
             TimeBeforeConversionIsMonitored = $serviceApp.ConversionTimeout.TotalMinutes
             MaximumConversionAttempts       = $serviceApp.MaximumConversionAttempts
             MaximumSyncConversionRequests   = $serviceApp.MaximumSyncConversionRequests
-            KeepAliveTimeout       = $serviceApp.KeepAliveTimeout.TotalSeconds
-            MaximumConversionTime  = $serviceApp.MaximumConversionTime.TotalSeconds
-            InstallAccount         = $params.InstallAccount
+            KeepAliveTimeout                = $serviceApp.KeepAliveTimeout.TotalSeconds
+            MaximumConversionTime           = $serviceApp.MaximumConversionTime.TotalSeconds
+            InstallAccount                  = $params.InstallAccount
         }
         return $returnVal
     }

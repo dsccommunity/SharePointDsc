@@ -47,9 +47,9 @@ function Get-TargetResource
         if ($null -eq $serviceApp)
         {
             return @{
-                Name = $params.Name
-                DatabaseName = $params.DatabaseName
-                Ensure = "Absent"
+                Name           = $params.Name
+                DatabaseName   = $params.DatabaseName
+                Ensure         = "Absent"
                 InstallAccount = $params.InstallAccount
             }
         }
@@ -67,12 +67,12 @@ function Get-TargetResource
         }
 
         return @{
-            Name = $serviceApp.DisplayName
-            ProxyName = $proxyName
-            DatabaseName = $serviceApp.Databases.Name
+            Name           = $serviceApp.DisplayName
+            ProxyName      = $proxyName
+            DatabaseName   = $serviceApp.Databases.Name
             DatabaseServer = $serviceApp.Databases.NormalizedDataSource
             InstallAccount = $params.InstallAccount
-            Ensure = "Present"
+            Ensure         = "Present"
         }
     }
     return $result

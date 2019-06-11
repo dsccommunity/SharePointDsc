@@ -32,23 +32,23 @@ function Get-TargetResource
         $InstallAccount
     )
 
-     Write-Verbose -Message "Getting Authoratative Page Setting for '$Path'"
+    Write-Verbose -Message "Getting Authoratative Page Setting for '$Path'"
 
-     $result = Invoke-SPDscCommand -Credential $InstallAccount `
+    $result = Invoke-SPDscCommand -Credential $InstallAccount `
                                   -Arguments $PSBoundParameters `
                                   -ScriptBlock {
         $params = $args[0]
 
         $nullReturn = @{
             ServiceAppName = $params.ServiceAppName
-            Path = ""
-            Level = $params.Level
-            Action = $params.Action
-            Ensure = "Absent"
+            Path           = ""
+            Level          = $params.Level
+            Action         = $params.Action
+            Ensure         = "Absent"
             InstallAccount = $params.InstallAccount
         }
 
-          $serviceApp = Get-SPEnterpriseSearchServiceApplication -Identity $params.ServiceAppName
+        $serviceApp = Get-SPEnterpriseSearchServiceApplication -Identity $params.ServiceAppName
         if ($null -eq $serviceApp)
         {
             return $nullReturn
@@ -72,10 +72,10 @@ function Get-TargetResource
 
                 return @{
                     ServiceAppName = $params.ServiceAppName
-                    Path = $params.Path
-                    Level = $queryAuthority.Level
-                    Action = $params.Action
-                    Ensure = "Present"
+                    Path           = $params.Path
+                    Level          = $queryAuthority.Level
+                    Action         = $params.Action
+                    Ensure         = "Present"
                     InstallAccount = $params.InstallAccount
                 }
             }
@@ -94,17 +94,16 @@ function Get-TargetResource
             {
                 return @{
                     ServiceAppName = $params.ServiceAppName
-                    Path = $params.Path
-                    Action = $params.Action
-                    Ensure = "Present"
+                    Path           = $params.Path
+                    Action         = $params.Action
+                    Ensure         = "Present"
                     InstallAccount = $params.InstallAccount
                 }
             }
         }
+    }
 
-     }
     return $result
-
 }
 
 
