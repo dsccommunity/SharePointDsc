@@ -20,7 +20,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
         # Mocks for all contexts
-        Mock Use-CacheCluster -MockWith { }
+        Mock -CommandName Use-CacheCluster -MockWith { }
         Mock -CommandName Get-WmiObject -MockWith {
             return @{
                 StartName = $testParams.ServiceAccount
@@ -45,7 +45,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             return $false
         }
         Mock -CommandName Remove-SPDSCUserToLocalAdmin -MockWith { }
-        Mock Restart-Service -MockWith { }
+        Mock -CommandName Restart-Service -MockWith { }
         Mock -CommandName Get-SPFarm -MockWith {
             return @{
                 Services = @(@{
@@ -149,7 +149,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 CreateFirewallRules = $true
             }
 
-            Mock Use-CacheCluster -MockWith {
+            Mock -CommandName Use-CacheCluster -MockWith {
                 throw [Exception] "ERRPS001 Error in reading provider and connection string values."
             }
             $Global:SPDscDCacheOnline = $false
@@ -177,9 +177,9 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 CreateFirewallRules = $true
             }
 
-            Mock Start-Sleep -MockWith {}
+            Mock -CommandName Start-Sleep -MockWith {}
 
-            Mock Use-CacheCluster -MockWith {
+            Mock -CommandName Use-CacheCluster -MockWith {
                 throw [Exception] "ERRPS001 Error in reading provider and connection string values."
             }
             Mock -CommandName Stop-SPServiceInstance -MockWith {}
@@ -270,19 +270,19 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 CreateFirewallRules = $true
             }
 
-            Mock Start-Sleep -MockWith {}
+            Mock -CommandName Start-Sleep -MockWith {}
 
-            Mock Get-CimInstance -MockWith {
+            Mock -CommandName Get-CimInstance -MockWith {
                 return @{
-                    Domain = "contoso.com"
+                    Domain    = "contoso.com"
                 }
             }
-            Mock Use-CacheCluster -MockWith {
+            Mock -CommandName Use-CacheCluster -MockWith {
                 throw [Exception] "ERRPS001 Error in reading provider and connection string values."
             }
             $Global:SPDscDCacheOnline = $false
 
-            Mock Get-SPServiceInstance -MockWith {
+            Mock -CommandName Get-SPServiceInstance -MockWith {
                 $returnval = @{
                     Status = "Online"
                 }
@@ -318,19 +318,19 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 CreateFirewallRules = $true
             }
 
-            Mock Start-Sleep -MockWith {}
+            Mock -CommandName Start-Sleep -MockWith {}
 
-            Mock Get-CimInstance -MockWith {
+            Mock -CommandName Get-CimInstance -MockWith {
                 return @{
                     Domain = "contoso.com"
                 }
             }
-            Mock Use-CacheCluster -MockWith {
+            Mock -CommandName Use-CacheCluster -MockWith {
                 throw [Exception] "ERRPS001 Error in reading provider and connection string values."
             }
             $Global:SPDscDCacheOnline = $false
 
-            Mock Get-SPServiceInstance -MockWith {
+            Mock -CommandName Get-SPServiceInstance -MockWith {
                 $returnval = @{
                     Status = "Online"
                 }
@@ -366,6 +366,12 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             Mock -CommandName Get-CacheHost -MockWith {
                 return @{
                     PortNo = 22233
+                }
+            }
+
+            Mock -CommandName Get-CimInstance -MockWith {
+                return @{
+                    StartName = "DOMAIN\user"
                 }
             }
 

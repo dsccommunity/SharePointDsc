@@ -514,7 +514,7 @@ function Test-TargetResource
     {
         if ($PSBoundParameters.ContainsKey("ServiceAccount"))
         {
-            if ($ServiceAccount -ne $CurrentValues.ServiceAccount.UserName)
+            if ($ServiceAccount -ne $CurrentValues.ServiceAccount)
             {
                 return $false
             }
