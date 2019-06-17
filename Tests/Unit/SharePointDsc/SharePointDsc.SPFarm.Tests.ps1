@@ -216,7 +216,7 @@ namespace Microsoft.SharePoint.Administration {
             Mock -CommandName "Get-SPWebApplication" -MockWith {
                 return @{
                     IsAdministrationWebApplication = $true
-                    Url = "http://localhost:12345"
+                    Url                            = "http://localhost:12345"
                 }
             }
 
@@ -264,7 +264,7 @@ namespace Microsoft.SharePoint.Administration {
             Mock -CommandName "Get-SPWebApplication" -MockWith {
                 return @{
                     IsAdministrationWebApplication = $true
-                    Url = "http://localhost:12345"
+                    Url                            = "http://localhost:12345"
                 }
             }
 
@@ -311,7 +311,7 @@ namespace Microsoft.SharePoint.Administration {
             Mock -CommandName "Get-SPWebApplication" -MockWith {
                 return @{
                     IsAdministrationWebApplication = $true
-                    Url = "http://localhost:9999"
+                    Url                            = "http://localhost:9999"
                 }
             }
             Mock -CommandName "Get-CimInstance" -MockWith {
@@ -403,7 +403,7 @@ namespace Microsoft.SharePoint.Administration {
             Mock -CommandName "Get-SPWebApplication" -MockWith {
                 return @{
                     IsAdministrationWebApplication = $true
-                    Url = "http://localhost:9999"
+                    Url                            = "http://localhost:9999"
                 }
             }
 
@@ -495,7 +495,7 @@ namespace Microsoft.SharePoint.Administration {
             Mock -CommandName "Get-SPWebApplication" -MockWith {
                 return @{
                     IsAdministrationWebApplication = $true
-                    Url = "http://localhost:12345"
+                    Url                            = "http://localhost:12345"
                 }
             }
 
@@ -587,7 +587,7 @@ namespace Microsoft.SharePoint.Administration {
                             $global:SPDscSIRunCount++
                             return @(
                                 @{
-                                    Name = "WSS_Administration"
+                                    Name   = "WSS_Administration"
                                     Status = "Online"
                                 } | Add-Member -MemberType ScriptMethod `
                                                -Name GetType `
@@ -625,14 +625,14 @@ namespace Microsoft.SharePoint.Administration {
 
         Context -Name "Server is connected to farm, but CentralAdminPort is different" -Fixture {
             $testParams = @{
-                IsSingleInstance         = "Yes"
-                Ensure                   = "Present"
-                FarmConfigDatabaseName   = "SP_Config"
-                DatabaseServer           = "sql.contoso.com"
-                FarmAccount              = $mockFarmAccount
-                Passphrase               = $mockPassphrase
-                AdminContentDatabaseName = "SP_AdminContent"
-                RunCentralAdmin          = $true
+                IsSingleInstance          = "Yes"
+                Ensure                    = "Present"
+                FarmConfigDatabaseName    = "SP_Config"
+                DatabaseServer            = "sql.contoso.com"
+                FarmAccount               = $mockFarmAccount
+                Passphrase                = $mockPassphrase
+                AdminContentDatabaseName  = "SP_AdminContent"
+                RunCentralAdmin           = $true
                 CentralAdministrationPort = 8080
             }
 
@@ -808,7 +808,7 @@ namespace Microsoft.SharePoint.Administration {
                             $global:SPDscSIRunCount++
                             return @(
                                 @{
-                                    Name = "WSS_Administration"
+                                    Name   = "WSS_Administration"
                                     Status = "Online"
                                 } | Add-Member -MemberType ScriptMethod `
                                                -Name GetType `
@@ -1122,7 +1122,7 @@ namespace Microsoft.SharePoint.Administration {
                             $global:SPDscSIRunCount++
                             return @(
                                 @{
-                                    Name = "WSS_Administration"
+                                    Name   = "WSS_Administration"
                                     Status = "Online"
                                 } | Add-Member -MemberType ScriptMethod `
                                                -Name GetType `
@@ -1223,7 +1223,7 @@ namespace Microsoft.SharePoint.Administration {
                 {
                     return @(
                         @{
-                            Name = "WSS_Administration"
+                            Name   = "WSS_Administration"
                             Status = "Online"
                         } | Add-Member -MemberType ScriptMethod `
                                        -Name GetType `
@@ -1619,7 +1619,7 @@ namespace Microsoft.SharePoint.Administration {
                     {
                         return @(
                             @{
-                                Name = "WSS_Administration"
+                                Name   = "WSS_Administration"
                                 Status = "Online"
                             } | Add-Member -MemberType ScriptMethod `
                                            -Name GetType `
