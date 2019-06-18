@@ -57,7 +57,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 RMSserver = "https://myRMSserver.local"
             }
 
-            Mock -CommandName Get-SPDSCContentService -MockWith {
+            Mock -CommandName Get-SPDscContentService -MockWith {
                 $returnVal = @{
                     IrmSettings = @{
                         IrmRMSEnabled = $true
@@ -89,7 +89,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 RMSserver = "https://myRMSserver.local"
             }
 
-            Mock -CommandName Get-SPDSCContentService -MockWith {
+            Mock -CommandName Get-SPDscContentService -MockWith {
                 $returnVal = @{
                     IrmSettings = @{
                         IrmRMSEnabled = $false

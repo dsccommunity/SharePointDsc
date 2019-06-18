@@ -77,7 +77,7 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting Managed Property Setting for '$Name'"
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+    $result = Invoke-SPDscCommand -Credential $InstallAccount `
                                   -Arguments @($PSBoundParameters) `
                                   -ScriptBlock {
         $params = $args[0]
@@ -93,10 +93,10 @@ function Get-TargetResource
         if ($null -eq $managedProperty)
         {
             return @{
-                Name = $params.Name
+                Name           = $params.Name
                 ServiceAppName = $params.ServiceAppName
-                PropertyType = $params.PropertyType
-                Ensure = "Absent"
+                PropertyType   = $params.PropertyType
+                Ensure         = "Absent"
             }
         }
         else
@@ -110,21 +110,21 @@ function Get-TargetResource
                 $includeAllCrawlProperties = $false
             }
             $results = @{
-                Name = $params.Name
-                ServiceAppName = $params.ServiceAppName
-                PropertyType = $managedProperty.ManagedType
-                Searchable = $managedProperty.Searchable
-                Queryable = $managedPRoperty.Queryable
-                Retrievable = $managedProperty.Retrievable
-                HasMultipleValues = $managedProperty.HasMultipleValues
-                Refinable = $managedProperty.Refinable
-                Sortable = $managedProperty.Sortable
-                SafeForAnonymous = $managedProperty.SafeForAnonymous
-                Aliases = $aliases
-                TokenNormalization = $managedProperty.TokenNormalization
-                NoWordBreaker = $managedProperty.NoWordBreaker
+                Name                        = $params.Name
+                ServiceAppName              = $params.ServiceAppName
+                PropertyType                = $managedProperty.ManagedType
+                Searchable                  = $managedProperty.Searchable
+                Queryable                   = $managedPRoperty.Queryable
+                Retrievable                 = $managedProperty.Retrievable
+                HasMultipleValues           = $managedProperty.HasMultipleValues
+                Refinable                   = $managedProperty.Refinable
+                Sortable                    = $managedProperty.Sortable
+                SafeForAnonymous            = $managedProperty.SafeForAnonymous
+                Aliases                     = $aliases
+                TokenNormalization          = $managedProperty.TokenNormalization
+                NoWordBreaker               = $managedProperty.NoWordBreaker
                 IncludeAllCrawledProperties = $includeAllCrawlProperties
-                Ensure = "Present"
+                Ensure                      = "Present"
             }
 
             if (!$includeAllCrawlProperties)
@@ -224,7 +224,7 @@ function Set-TargetResource
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
     # Validate that the specified crawled properties are all valid and existing
-    Invoke-SPDSCCommand -Credential $InstallAccount `
+    Invoke-SPDscCommand -Credential $InstallAccount `
                         -Arguments @($PSBoundParameters, `
                                      $CurrentValues) `
                         -ScriptBlock {
@@ -316,10 +316,10 @@ function Set-TargetResource
         # If alias doesn't already exist, add it
         $currentAliases = $managedProperty.GetAliases()
 
-        foreach($alias in $params.Aliases)
+        foreach ($alias in $params.Aliases)
         {
             $currentAlias = $managedProperty.GetAliases() | Where-Object {$_ -eq $alias}
-            if(!$currentAlias)
+            if (!$currentAlias)
             {
                 $managedProperty.AddAlias($alias)
             }
@@ -330,9 +330,9 @@ function Set-TargetResource
         # which means we need to remove them.
         $currentAliases = $managedProperty.GetAliases()
 
-        foreach($alias in $currentAliases)
+        foreach ($alias in $currentAliases)
         {
-            if(!$params.Aliases.Contains($alias))
+            if (!$params.Aliases.Contains($alias))
             {
                 $managedProperty.DeleteAlias($alias)
             }
@@ -436,7 +436,11 @@ function Test-TargetResource
     Write-Verbose -Message "Testing Managed Property Setting for '$Name'"
 
     $PSBoundParameters.Ensure = $Ensure
+
     $CurrentValues = Get-TargetResource @PSBoundParameters
+
+    Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
+    Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
 
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
                                     -DesiredValues $PSBoundParameters `

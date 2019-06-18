@@ -36,7 +36,7 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting BCS service app '$Name'"
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+    $result = Invoke-SPDscCommand -Credential $InstallAccount `
                                   -Arguments $PSBoundParameters `
                                   -ScriptBlock {
         $params = $args[0]
@@ -141,7 +141,7 @@ function Set-TargetResource
     {
         # The service app doesn't exist but should
         Write-Verbose -Message "Creating BCS Service Application $Name"
-        Invoke-SPDSCCommand -Credential $InstallAccount `
+        Invoke-SPDscCommand -Credential $InstallAccount `
                             -Arguments $PSBoundParameters `
                             -ScriptBlock {
             $params = $args[0]
@@ -156,9 +156,9 @@ function Set-TargetResource
                 # The New-SPBusinessDataCatalogServiceApplication cmdlet creates a proxy by default
                 # If a name is specified, we first need to delete the created one
                 $proxies = Get-SPServiceApplicationProxy
-                foreach($proxyInstance in $proxies)
+                foreach ($proxyInstance in $proxies)
                 {
-                    if($bcsServiceApp.IsConnected($proxyInstance))
+                    if ($bcsServiceApp.IsConnected($proxyInstance))
                     {
                         $proxyInstance.Delete()
                     }
@@ -176,7 +176,7 @@ function Set-TargetResource
         if ($ApplicationPool -ne $result.ApplicationPool)
         {
             Write-Verbose -Message "Updating BCS Service Application $Name"
-            Invoke-SPDSCCommand -Credential $InstallAccount `
+            Invoke-SPDscCommand -Credential $InstallAccount `
                                 -Arguments $PSBoundParameters `
                                 -ScriptBlock {
                 $params = $args[0]
@@ -196,7 +196,7 @@ function Set-TargetResource
     {
         # The service app should not exit
         Write-Verbose -Message "Removing BCS Service Application $Name"
-        Invoke-SPDSCCommand -Credential $InstallAccount `
+        Invoke-SPDscCommand -Credential $InstallAccount `
                             -Arguments $PSBoundParameters `
                             -ScriptBlock {
             $params = $args[0]
@@ -206,9 +206,9 @@ function Set-TargetResource
             }
 
             $proxies = Get-SPServiceApplicationProxy
-            foreach($proxyInstance in $proxies)
+            foreach ($proxyInstance in $proxies)
             {
-                if($app.IsConnected($proxyInstance))
+                if ($app.IsConnected($proxyInstance))
                 {
                     $proxyInstance.Delete()
                 }
@@ -259,7 +259,12 @@ function Test-TargetResource
 
     $PSBoundParameters.Ensure = $Ensure
 
-    return Test-SPDscParameterState -CurrentValues (Get-TargetResource @PSBoundParameters) `
+    $CurrentValues = Get-TargetResource @PSBoundParameters
+
+    Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
+    Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
+
+    return Test-SPDscParameterState -CurrentValues $CurrentValues `
                                     -DesiredValues $PSBoundParameters `
                                     -ValuesToCheck @("ApplicationPool", "Ensure")
 }

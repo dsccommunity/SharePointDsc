@@ -65,7 +65,7 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting self service site creation settings for Web Application '$WebAppUrl'"
 
-    $installedVersion = Get-SPDSCInstalledProductVersion
+    $installedVersion = Get-SPDscInstalledProductVersion
     if ($installedVersion.FileMajorPart -eq 15 -or $installedVersion.FileBuildPart.ToString().Length -eq 4)
     {
         if ($PSBoundParameters.ContainsKey("ManagedPath") -eq $true)
@@ -85,14 +85,14 @@ function Get-TargetResource
     }
     else
     {
-        if($PSBoundParameters.ContainsKey("AlternateUrl") -eq $true -and
+        if ($PSBoundParameters.ContainsKey("AlternateUrl") -eq $true -and
            $PSBoundParameters.ContainsKey("ManagedPath") -eq $true)
         {
             throw "You cannot specify both AlternateUrl and ManagedPath. Please use just one of these."
         }
     }
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+    $result = Invoke-SPDscCommand -Credential $InstallAccount `
                                   -Arguments $PSBoundParameters `
                                   -ScriptBlock {
         $params = $args[0]
@@ -103,34 +103,34 @@ function Get-TargetResource
         {
             Write-Verbose "Web application $($params.WebAppUrl) was not found"
             return @{
-                WebAppUrl     = $null
-                Enabled       = $null
-                OnlineEnabled = $null
-                QuotaTemplate = $null
-                ShowStartASiteMenuItem = $null
-                CreateIndividualSite   = $null
-                ParentSiteUrl = $null
-                CustomFormUrl = $null
-                ManagedPath   = $null
-                AlternateUrl  = $null
+                WebAppUrl               = $null
+                Enabled                 = $null
+                OnlineEnabled           = $null
+                QuotaTemplate           = $null
+                ShowStartASiteMenuItem  = $null
+                CreateIndividualSite    = $null
+                ParentSiteUrl           = $null
+                CustomFormUrl           = $null
+                ManagedPath             = $null
+                AlternateUrl            = $null
                 UserExperienceVersion   = $null
-                PolicyOption  = $null
+                PolicyOption            = $null
                 RequireSecondaryContact = $null
             }
         }
 
         $policyOption = "NotHavePolicy"
-        if($webApplication.Properties.Contains("PolicyOption"))
+        if ($webApplication.Properties.Contains("PolicyOption"))
         {
             $policyOptionProperty = $webApplication.Properties["PolicyOption"]
-            if($policyOptionProperty -eq "CanHavePolicy" -or $policyOptionProperty -eq "MustHavePolicy")
+            if ($policyOptionProperty -eq "CanHavePolicy" -or $policyOptionProperty -eq "MustHavePolicy")
             {
                 $policyOption = $policyOptionProperty
             }
         }
 
         $userExperienceVersion = $null
-        if($webApplication.SiteCreationUserExperienceVersion -ne $null)
+        if ($null -ne $webApplication.SiteCreationUserExperienceVersion)
         {
             switch ($webApplication.SiteCreationUserExperienceVersion)
             {
@@ -141,18 +141,18 @@ function Get-TargetResource
         }
 
         return @{
-            WebAppUrl     = $params.WebAppUrl
-            Enabled       = $webApplication.SelfServiceSiteCreationEnabled
-            OnlineEnabled = $webApplication.SelfServiceSiteCreationOnlineEnabled
-            QuotaTemplate = $webApplication.SelfServiceCreationQuotaTemplate
-            ShowStartASiteMenuItem = $webApplication.ShowStartASiteMenuItem
-            CreateIndividualSite   = $webApplication.SelfServiceCreateIndividualSite
-            ParentSiteUrl = $webApplication.SelfServiceCreationParentSiteUrl
-            CustomFormUrl = $webApplication.SelfServiceSiteCustomFormUrl
-            ManagedPath   = $webApplication.SelfServiceCreationManagedPath
-            AlternateUrl  = $webApplication.SelfServiceCreationAlternateUrl
+            WebAppUrl               = $params.WebAppUrl
+            Enabled                 = $webApplication.SelfServiceSiteCreationEnabled
+            OnlineEnabled           = $webApplication.SelfServiceSiteCreationOnlineEnabled
+            QuotaTemplate           = $webApplication.SelfServiceCreationQuotaTemplate
+            ShowStartASiteMenuItem  = $webApplication.ShowStartASiteMenuItem
+            CreateIndividualSite    = $webApplication.SelfServiceCreateIndividualSite
+            ParentSiteUrl           = $webApplication.SelfServiceCreationParentSiteUrl
+            CustomFormUrl           = $webApplication.SelfServiceSiteCustomFormUrl
+            ManagedPath             = $webApplication.SelfServiceCreationManagedPath
+            AlternateUrl            = $webApplication.SelfServiceCreationAlternateUrl
             UserExperienceVersion   = $userExperienceVersion
-            PolicyOption  = $policyOption
+            PolicyOption            = $policyOption
             RequireSecondaryContact = $webApplication.RequireContactForSelfServiceSiteCreation
         }
     }
@@ -225,7 +225,7 @@ function Set-TargetResource
 
     Write-Verbose -Message "Setting self service site creation settings for Web Application '$WebAppUrl'"
 
-    $installedVersion = Get-SPDSCInstalledProductVersion
+    $installedVersion = Get-SPDscInstalledProductVersion
     if ($installedVersion.FileMajorPart -eq 15 -or $installedVersion.ProductBuildPart.ToString().Length -eq 4)
     {
         if ($PSBoundParameters.ContainsKey("ManagedPath") -eq $true)
@@ -245,7 +245,7 @@ function Set-TargetResource
     }
     else
     {
-        if ($PSBoundParameters.ContainsKey("AlternateUrl") -eq $true -and
+        if ($PSBoundParameters.ContainsKey("AlternateUrl") -eq $true -and `
             $PSBoundParameters.ContainsKey("ManagedPath") -eq $true)
         {
             throw "You cannot specify both AlternateUrl and ManagedPath. Please use just one of these."
@@ -257,12 +257,12 @@ function Set-TargetResource
         }
     }
 
-    Invoke-SPDSCCommand -Credential $InstallAccount `
+    Invoke-SPDscCommand -Credential $InstallAccount `
                         -Arguments $PSBoundParameters `
                         -ScriptBlock {
         $params = $args[0]
 
-        if ($params.ContainsKey("AlternateUrl") -and
+        if ($params.ContainsKey("AlternateUrl") -and `
             $params.AlternateUrl.TrimEnd("/") -in (Get-SPWebApplication).Url.TrimEnd("/"))
         {
             throw ("Specified AlternateUrl is unknown as web application URL. " + `
@@ -280,9 +280,9 @@ function Set-TargetResource
 
         if ($params.Enabled -eq $false)
         {
-            if($params.ContainsKey("ShowStartASiteMenuItem"))
+            if ($params.ContainsKey("ShowStartASiteMenuItem"))
             {
-                if($ShowStartASiteMenuItem -eq $true)
+                if ($ShowStartASiteMenuItem -eq $true)
                 {
                     throw ("It is not allowed to set the ShowStartASiteMenuItem to true when self service site creation is disabled.")
                 }
@@ -495,11 +495,14 @@ function Test-TargetResource
         }
     }
 
-    $currentValues = Get-TargetResource @PSBoundParameters
+    $CurrentValues = Get-TargetResource @PSBoundParameters
+
+    Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
+    Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
 
     if ($Enabled)
     {
-        return Test-SPDscParameterState -CurrentValues $currentValues `
+        return Test-SPDscParameterState -CurrentValues $CurrentValues `
                                         -DesiredValues $PSBoundParameters `
                                         -ValuesToCheck @("WebAppUrl", `
                                                          "Enabled", `
@@ -516,7 +519,7 @@ function Test-TargetResource
     }
     else
     {
-        return Test-SPDscParameterState -CurrentValues $currentValues `
+        return Test-SPDscParameterState -CurrentValues $CurrentValues `
                                         -DesiredValues $PSBoundParameters `
                                         -ValuesToCheck @("WebAppUrl", `
                                                          "Enabled", `

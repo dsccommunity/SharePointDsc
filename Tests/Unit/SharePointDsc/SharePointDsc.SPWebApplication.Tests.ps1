@@ -37,7 +37,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             Mock -CommandName Get-SPWebapplication -MockWith { return $null }
-            Mock -CommandName Get-SPDSCContentService -MockWith {
+            Mock -CommandName Get-SPDscContentService -MockWith {
                 return @{ Name = "PlaceHolder" }
             }
             Mock -CommandName Get-SPManagedAccount -MockWith {
@@ -59,7 +59,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             Mock -CommandName Get-SPWebapplication -MockWith { return $null }
-            Mock -CommandName Get-SPDSCContentService -MockWith {
+            Mock -CommandName Get-SPDscContentService -MockWith {
                 return @{ Name = "PlaceHolder" }
             }
             Mock -CommandName Get-SPManagedAccount -MockWith {
@@ -81,7 +81,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             Mock -CommandName Get-SPWebapplication -MockWith { return $null }
-            Mock -CommandName Get-SPDSCContentService -MockWith {
+            Mock -CommandName Get-SPDscContentService -MockWith {
                 return @{ Name = "PlaceHolder" }
             }
 
@@ -117,7 +117,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             Mock -CommandName Get-SPWebapplication -MockWith { return $null }
-            Mock -CommandName Get-SPDSCContentService -MockWith {
+            Mock -CommandName Get-SPDscContentService -MockWith {
                 return @{ Name = "PlaceHolder" }
             }
             Mock -CommandName Get-SPManagedAccount -MockWith {}
@@ -464,7 +464,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 }
             }
 
-           Mock -CommandName Get-SPDSCContentService -MockWith {
+           Mock -CommandName Get-SPDscContentService -MockWith {
                 @{
                     ApplicationPools = @(
                         @{
@@ -649,7 +649,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
 
-            Mock -CommandName Get-SPDSCContentService -MockWith {
+            Mock -CommandName Get-SPDscContentService -MockWith {
                 ApplicationPools = @(
                      @{
                         Name = $testParams.ApplicationPool

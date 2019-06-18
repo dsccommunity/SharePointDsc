@@ -19,7 +19,7 @@ function Get-TargetResource()
 
     Write-Verbose -Message "Getting farm authentication realm"
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+    $result = Invoke-SPDscCommand -Credential $InstallAccount `
     -ScriptBlock {
         $currentRealm = Get-SPAuthenticationRealm
 
@@ -54,7 +54,7 @@ function Set-TargetResource()
 
     Write-Verbose -Message "Setting farm authentication realm to $AuthenticationRealm"
 
-    Invoke-SPDSCCommand -Credential $InstallAccount `
+    Invoke-SPDscCommand -Credential $InstallAccount `
         -Arguments $PSBoundParameters `
         -ScriptBlock {
 
@@ -86,6 +86,9 @@ function Test-TargetResource()
     Write-Verbose -Message "Testing farm authentication realm"
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
+
+    Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
+    Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
 
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
                                     -DesiredValues $PSBoundParameters `

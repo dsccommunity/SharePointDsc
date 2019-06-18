@@ -121,7 +121,7 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting Excel Services Application '$Name'"
 
-    if ((Get-SPDSCInstalledProductVersion).FileMajorPart -ne 15)
+    if ((Get-SPDscInstalledProductVersion).FileMajorPart -ne 15)
     {
         throw [Exception] ("Only SharePoint 2013 is supported to deploy Excel Services " + `
                            "service applications via DSC, as SharePoint 2016 and SharePoint 2019 deprecated " + `
@@ -130,7 +130,7 @@ function Get-TargetResource
                            "for more info.")
     }
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+    $result = Invoke-SPDscCommand -Credential $InstallAccount `
                                   -Arguments @($PSBoundParameters, $Script:ServiceAppObjectType) `
                                   -ScriptBlock {
         $params = $args[0]
@@ -139,10 +139,10 @@ function Get-TargetResource
         $serviceApps = Get-SPServiceApplication -Name $params.Name `
                                                 -ErrorAction SilentlyContinue
         $nullReturn = @{
-            Name = $params.Name
+            Name            = $params.Name
             ApplicationPool = $params.ApplicationPool
-            Ensure = "Absent"
-            InstallAccount = $params.InstallAccount
+            Ensure          = "Absent"
+            InstallAccount  = $params.InstallAccount
         }
         if ($null -eq $serviceApps)
         {
@@ -162,53 +162,53 @@ function Get-TargetResource
             $fileLocationsToReturn = @()
             $fileLocations | ForEach-Object -Process {
                 $fileLocationsToReturn += @{
-                    Address = $_.Address
-                    LocationType = $_.LocationType
-                    IncludeChildren = [Convert]::ToBoolean($_.IncludeChildren)
-                    SessionTimeout = $_.SessionTimeout
-                    ShortSessionTimeout = $_.ShortSessionTimeout
-                    NewWorkbookSessionTimeout = $_.NewWorkbookSessionTimeout
-                    RequestDurationMax = $_.RequestDurationMax
-                    ChartRenderDurationMax = $_.ChartRenderDurationMax
-                    WorkbookSizeMax = $_.WorkbookSizeMax
-                    ChartAndImageSizeMax = $_.ChartAndImageSizeMax
+                    Address                                = $_.Address
+                    LocationType                           = $_.LocationType
+                    IncludeChildren                        = [Convert]::ToBoolean($_.IncludeChildren)
+                    SessionTimeout                         = $_.SessionTimeout
+                    ShortSessionTimeout                    = $_.ShortSessionTimeout
+                    NewWorkbookSessionTimeout              = $_.NewWorkbookSessionTimeout
+                    RequestDurationMax                     = $_.RequestDurationMax
+                    ChartRenderDurationMax                 = $_.ChartRenderDurationMax
+                    WorkbookSizeMax                        = $_.WorkbookSizeMax
+                    ChartAndImageSizeMax                   = $_.ChartAndImageSizeMax
                     AutomaticVolatileFunctionCacheLifetime = $_.AutomaticVolatileFunctionCacheLifetime
-                    DefaultWorkbookCalcMode = $_.DefaultWorkbookCalcMode
-                    ExternalDataAllowed = $_.ExternalDataAllowed
-                    WarnOnDataRefresh = [Convert]::ToBoolean($_.WarnOnDataRefresh)
-                    DisplayGranularExtDataErrors = [Convert]::ToBoolean($_.DisplayGranularExtDataErrors)
-                    AbortOnRefreshOnOpenFail = [Convert]::ToBoolean($_.AbortOnRefreshOnOpenFail)
-                    PeriodicExtDataCacheLifetime = $_.PeriodicExtDataCacheLifetime
-                    ManualExtDataCacheLifetime = $_.ManualExtDataCacheLifetime
-                    ConcurrentDataRequestsPerSessionMax = $_.ConcurrentDataRequestsPerSessionMax
-                    UdfsAllowed = [Convert]::ToBoolean($_.UdfsAllowed)
-                    Description = $_.Description
-                    RESTExternalDataAllowed = [Convert]::ToBoolean($_.RESTExternalDataAllowed)
+                    DefaultWorkbookCalcMode                = $_.DefaultWorkbookCalcMode
+                    ExternalDataAllowed                    = $_.ExternalDataAllowed
+                    WarnOnDataRefresh                      = [Convert]::ToBoolean($_.WarnOnDataRefresh)
+                    DisplayGranularExtDataErrors           = [Convert]::ToBoolean($_.DisplayGranularExtDataErrors)
+                    AbortOnRefreshOnOpenFail               = [Convert]::ToBoolean($_.AbortOnRefreshOnOpenFail)
+                    PeriodicExtDataCacheLifetime           = $_.PeriodicExtDataCacheLifetime
+                    ManualExtDataCacheLifetime             = $_.ManualExtDataCacheLifetime
+                    ConcurrentDataRequestsPerSessionMax    = $_.ConcurrentDataRequestsPerSessionMax
+                    UdfsAllowed                            = [Convert]::ToBoolean($_.UdfsAllowed)
+                    Description                            = $_.Description
+                    RESTExternalDataAllowed                = [Convert]::ToBoolean($_.RESTExternalDataAllowed)
                 }
             }
 
             $returnVal =  @{
-                Name = $serviceApp.DisplayName
-                ApplicationPool = $serviceApp.ApplicationPool.Name
-                Ensure = "Present"
-                TrustedFileLocations = $fileLocationsToReturn
-                CachingOfUnusedFilesEnable = $serviceApp.CachingOfUnusedFilesEnable
-                CrossDomainAccessAllowed = $serviceApp.CrossDomainAccessAllowed
-                EncryptedUserConnectionRequired = $serviceApp.EncryptedUserConnectionRequired
-                ExternalDataConnectionLifetime = $serviceApp.ExternalDataConnectionLifetime
-                FileAccessMethod = $serviceApp.FileAccessMethod
-                LoadBalancingScheme = $serviceApp.LoadBalancingScheme
-                MemoryCacheThreshold = $serviceApp.MemoryCacheThreshold
-                PrivateBytesMax = $serviceApp.PrivateBytesMax
-                SessionsPerUserMax = $serviceApp.SessionsPerUserMax
-                SiteCollectionAnonymousSessionsMax = $serviceApp.SiteCollectionAnonymousSessionsMax
-                TerminateProcessOnAccessViolation = $serviceApp.TerminateProcessOnAccessViolation
+                Name                                      = $serviceApp.DisplayName
+                ApplicationPool                           = $serviceApp.ApplicationPool.Name
+                Ensure                                    = "Present"
+                TrustedFileLocations                      = $fileLocationsToReturn
+                CachingOfUnusedFilesEnable                = $serviceApp.CachingOfUnusedFilesEnable
+                CrossDomainAccessAllowed                  = $serviceApp.CrossDomainAccessAllowed
+                EncryptedUserConnectionRequired           = $serviceApp.EncryptedUserConnectionRequired
+                ExternalDataConnectionLifetime            = $serviceApp.ExternalDataConnectionLifetime
+                FileAccessMethod                          = $serviceApp.FileAccessMethod
+                LoadBalancingScheme                       = $serviceApp.LoadBalancingScheme
+                MemoryCacheThreshold                      = $serviceApp.MemoryCacheThreshold
+                PrivateBytesMax                           = $serviceApp.PrivateBytesMax
+                SessionsPerUserMax                        = $serviceApp.SessionsPerUserMax
+                SiteCollectionAnonymousSessionsMax        = $serviceApp.SiteCollectionAnonymousSessionsMax
+                TerminateProcessOnAccessViolation         = $serviceApp.TerminateProcessOnAccessViolation
                 ThrottleAccessViolationsPerSiteCollection = $serviceApp.ThrottleAccessViolationsPerSiteCollection
-                UnattendedAccountApplicationId = $serviceApp.UnattendedAccountApplicationId
-                UnusedObjectAgeMax = $serviceApp.UnusedObjectAgeMax
-                WorkbookCache = $serviceApp.WorkbookCache
-                WorkbookCacheSizeMax = $serviceApp.WorkbookCacheSizeMax
-                InstallAccount = $params.InstallAccount
+                UnattendedAccountApplicationId            = $serviceApp.UnattendedAccountApplicationId
+                UnusedObjectAgeMax                        = $serviceApp.UnusedObjectAgeMax
+                WorkbookCache                             = $serviceApp.WorkbookCache
+                WorkbookCacheSizeMax                      = $serviceApp.WorkbookCacheSizeMax
+                InstallAccount                            = $params.InstallAccount
             }
             return $returnVal
         }
@@ -313,7 +313,7 @@ function Set-TargetResource
 
     Write-Verbose -Message "Setting Excel Services Application '$Name'"
 
-    if ((Get-SPDSCInstalledProductVersion).FileMajorPart -ne 15)
+    if ((Get-SPDscInstalledProductVersion).FileMajorPart -ne 15)
     {
         throw [Exception] ("Only SharePoint 2013 is supported to deploy Excel Services " + `
                            "service applications via DSC, as SharePoint 2016 and SharePoint 2019 are deprecated " + `
@@ -326,7 +326,7 @@ function Set-TargetResource
     if ($result.Ensure -eq "Absent" -and $Ensure -eq "Present")
     {
         Write-Verbose -Message "Creating Excel Services Application $Name"
-        Invoke-SPDSCCommand -Credential $InstallAccount `
+        Invoke-SPDscCommand -Credential $InstallAccount `
                             -Arguments $PSBoundParameters `
                             -ScriptBlock {
             $params = $args[0]
@@ -340,7 +340,7 @@ function Set-TargetResource
     if ($Ensure -eq "Present")
     {
         Write-Verbose -Message "Updating settings for Excel Services Application $Name"
-        Invoke-SPDSCCommand -Credential $InstallAccount `
+        Invoke-SPDscCommand -Credential $InstallAccount `
                             -Arguments $PSBoundParameters `
                             -ScriptBlock {
             $params = $args[0]
@@ -371,7 +371,7 @@ function Set-TargetResource
                 if ($null -eq $matchingCurrentValue)
                 {
                     Write-Verbose -Message "Adding trusted location '$($desiredLocation.Address)' to service app"
-                    Invoke-SPDSCCommand -Credential $InstallAccount `
+                    Invoke-SPDscCommand -Credential $InstallAccount `
                                         -Arguments @($PSBoundParameters, $desiredLocation, $Script:TrustLocationProperties, $Script:ServiceAppObjectType) `
                                         -ScriptBlock {
                         $params = $args[0]
@@ -397,7 +397,7 @@ function Set-TargetResource
                 else
                 {
                     Write-Verbose -Message "Updating trusted location '$($desiredLocation.Address)' in service app"
-                    Invoke-SPDSCCommand -Credential $InstallAccount `
+                    Invoke-SPDscCommand -Credential $InstallAccount `
                                         -Arguments @($PSBoundParameters, $desiredLocation, $Script:TrustLocationProperties, $Script:ServiceAppObjectType) `
                                         -ScriptBlock {
                         $params = $args[0]
@@ -432,7 +432,7 @@ function Set-TargetResource
                 if ($null -eq $matchingDesiredValue)
                 {
                     Write-Verbose -Message "Removing trusted location '$($currentLocation.Address)' from service app"
-                    Invoke-SPDSCCommand -Credential $InstallAccount `
+                    Invoke-SPDscCommand -Credential $InstallAccount `
                                         -Arguments @($Name, $currentLocation) `
                                         -ScriptBlock {
                         $name = $args[0]
@@ -448,7 +448,7 @@ function Set-TargetResource
     if ($Ensure -eq "Absent")
     {
         Write-Verbose -Message "Removing Excel Service Application $Name"
-        Invoke-SPDSCCommand -Credential $InstallAccount `
+        Invoke-SPDscCommand -Credential $InstallAccount `
                             -Arguments @($PSBoundParameters, $Script:ServiceAppObjectType) `
                             -ScriptBlock {
             $params = $args[0]
@@ -459,9 +459,9 @@ function Set-TargetResource
             }
 
             $proxies = Get-SPServiceApplicationProxy
-            foreach($proxyInstance in $proxies)
+            foreach ($proxyInstance in $proxies)
             {
-                if($serviceApp.IsConnected($proxyInstance))
+                if ($serviceApp.IsConnected($proxyInstance))
                 {
                     $proxyInstance.Delete()
                 }
@@ -572,7 +572,7 @@ function Test-TargetResource
 
     $PSBoundParameters.Ensure = $Ensure
 
-    if ((Get-SPDSCInstalledProductVersion).FileMajorPart -ne 15)
+    if ((Get-SPDscInstalledProductVersion).FileMajorPart -ne 15)
     {
         throw [Exception] ("Only SharePoint 2013 is supported to deploy Excel Services " + `
                            "service applications via DSC, as SharePoint 2016 and SharePoint 2019 are deprecated " + `
@@ -583,27 +583,30 @@ function Test-TargetResource
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
+    Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
+    Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
+
     $mainCheck = Test-SPDscParameterState -CurrentValues $CurrentValues `
-                                            -DesiredValues $PSBoundParameters `
-                                            -ValuesToCheck @(
-                                                "Ensure",
-                                                "CachingOfUnusedFilesEnable",
-                                                "CrossDomainAccessAllowed",
-                                                "EncryptedUserConnectionRequired",
-                                                "ExternalDataConnectionLifetime",
-                                                "FileAccessMethod",
-                                                "LoadBalancingScheme",
-                                                "MemoryCacheThreshold",
-                                                "PrivateBytesMax",
-                                                "SessionsPerUserMax",
-                                                "SiteCollectionAnonymousSessionsMax",
-                                                "TerminateProcessOnAccessViolation",
-                                                "ThrottleAccessViolationsPerSiteCollection",
-                                                "UnattendedAccountApplicationId",
-                                                "UnusedObjectAgeMax",
-                                                "WorkbookCache",
-                                                "WorkbookCacheSizeMax"
-                                                )
+                                          -DesiredValues $PSBoundParameters `
+                                          -ValuesToCheck @(
+                                              "Ensure",
+                                              "CachingOfUnusedFilesEnable",
+                                              "CrossDomainAccessAllowed",
+                                              "EncryptedUserConnectionRequired",
+                                              "ExternalDataConnectionLifetime",
+                                              "FileAccessMethod",
+                                              "LoadBalancingScheme",
+                                              "MemoryCacheThreshold",
+                                              "PrivateBytesMax",
+                                              "SessionsPerUserMax",
+                                              "SiteCollectionAnonymousSessionsMax",
+                                              "TerminateProcessOnAccessViolation",
+                                              "ThrottleAccessViolationsPerSiteCollection",
+                                              "UnattendedAccountApplicationId",
+                                              "UnusedObjectAgeMax",
+                                              "WorkbookCache",
+                                              "WorkbookCacheSizeMax"
+                                          )
 
 
     if ($Ensure -eq "Present" -and $mainCheck -eq $true -and $null -ne $TrustedFileLocations)

@@ -51,19 +51,32 @@ function Get-TargetResource
     switch ($SettingsScope)
     {
         "WebApplication" {
-            $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+            $result = Invoke-SPDscCommand -Credential $InstallAccount `
                                           -Arguments $PSBoundParameters `
                                           -ScriptBlock {
                 $params = $args[0]
+
+                $nullReturn = @{
+                    WebAppUrl                               = $params.WebAppUrl
+                    SettingsScope                           = $params.SettingsScope
+                    AllowSharePointDesigner                 = $null
+                    AllowDetachPagesFromDefinition          = $null
+                    AllowCustomiseMasterPage                = $null
+                    AllowManageSiteURLStructure             = $null
+                    AllowCreateDeclarativeWorkflow          = $null
+                    AllowSavePublishDeclarativeWorkflow     = $null
+                    AllowSaveDeclarativeWorkflowAsTemplate  = $null
+                }
+
                 try
                 {
-                    $spFarm = Get-SPFarm
+                    $null = Get-SPFarm
                 }
                 catch
                 {
                     Write-Verbose -Message ("No local SharePoint farm was detected. " + `
                                             "SharePoint Designer settings will not be applied")
-                    return $null
+                    return $nullReturn
                 }
 
                 # Check if web application exists
@@ -74,7 +87,7 @@ function Get-TargetResource
                 {
                     Write-Verbose -Message ("Web application not found. SharePoint Designer " + `
                                             "settings will not be applied")
-                    return $null
+                    return $nullReturn
                 }
                 else
                 {
@@ -83,17 +96,17 @@ function Get-TargetResource
 
                     return @{
                         # Set the SPD settings
-                        WebAppUrl = $params.WebAppUrl
-                        SettingsScope = $params.SettingsScope
-                        AllowSharePointDesigner = $spdSettings.AllowDesigner
-                        AllowDetachPagesFromDefinition = $spdSettings.AllowRevertFromTemplate
-                        AllowCustomiseMasterPage = $spdSettings.AllowMasterPageEditing
-                        AllowManageSiteURLStructure = $spdSettings.ShowURLStructure
-                        AllowCreateDeclarativeWorkflow = `
+                        WebAppUrl                               = $params.WebAppUrl
+                        SettingsScope                           = $params.SettingsScope
+                        AllowSharePointDesigner                 = $spdSettings.AllowDesigner
+                        AllowDetachPagesFromDefinition          = $spdSettings.AllowRevertFromTemplate
+                        AllowCustomiseMasterPage                = $spdSettings.AllowMasterPageEditing
+                        AllowManageSiteURLStructure             = $spdSettings.ShowURLStructure
+                        AllowCreateDeclarativeWorkflow          = `
                             $spdSettings.AllowCreateDeclarativeWorkflow
-                        AllowSavePublishDeclarativeWorkflow = `
+                        AllowSavePublishDeclarativeWorkflow     = `
                             $spdSettings.AllowSavePublishDeclarativeWorkflow
-                        AllowSaveDeclarativeWorkflowAsTemplate = `
+                        AllowSaveDeclarativeWorkflowAsTemplate  = `
                             $spdSettings.AllowSaveDeclarativeWorkflowAsTemplate
                         InstallAccount = $params.InstallAccount
                     }
@@ -101,22 +114,34 @@ function Get-TargetResource
             }
         }
         "SiteCollection" {
-            if ((Test-SPDSCRunAsCredential -Credential $InstallAccount) -eq $true)
+            if ((Test-SPDscRunAsCredential -Credential $InstallAccount) -eq $true)
             {
-                $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+                $result = Invoke-SPDscCommand -Credential $InstallAccount `
                                               -Arguments $PSBoundParameters `
                                               -ScriptBlock {
                     $params = $args[0]
 
+                    $nullReturn = @{
+                        WebAppUrl                               = $params.WebAppUrl
+                        SettingsScope                           = $params.SettingsScope
+                        AllowSharePointDesigner                 = $null
+                        AllowDetachPagesFromDefinition          = $null
+                        AllowCustomiseMasterPage                = $null
+                        AllowManageSiteURLStructure             = $null
+                        AllowCreateDeclarativeWorkflow          = $null
+                        AllowSavePublishDeclarativeWorkflow     = $null
+                        AllowSaveDeclarativeWorkflowAsTemplate  = $null
+                    }
+
                     try
                     {
-                        $spFarm = Get-SPFarm
+                        $null = Get-SPFarm
                     }
                     catch
                     {
                         Write-Verbose -Message ("No local SharePoint farm was detected. " + `
                                                 "SharePoint Designer settings will not be applied")
-                        return $null
+                        return $nullReturn
                     }
 
                     # Check if site collections exists
@@ -125,22 +150,22 @@ function Get-TargetResource
                     {
                         Write-Verbose -Message ("Site collection not found. SharePoint " + `
                                                 "Designer settings will not be applied")
-                        return $null
+                        return $nullReturn
                     }
                     else
                     {
                         return @{
                             # Set the SPD settings
-                            WebAppUrl = $params.WebAppUrl
-                            SettingsScope = $params.SettingsScope
-                            AllowSharePointDesigner = $site.AllowDesigner
-                            AllowDetachPagesFromDefinition = $site.AllowRevertFromTemplate
-                            AllowCustomiseMasterPage = $site.AllowMasterPageEditing
-                            AllowManageSiteURLStructure = $site.ShowURLStructure
-                            AllowCreateDeclarativeWorkflow = $site.AllowCreateDeclarativeWorkflow
-                            AllowSavePublishDeclarativeWorkflow = `
+                            WebAppUrl                               = $params.WebAppUrl
+                            SettingsScope                           = $params.SettingsScope
+                            AllowSharePointDesigner                 = $site.AllowDesigner
+                            AllowDetachPagesFromDefinition          = $site.AllowRevertFromTemplate
+                            AllowCustomiseMasterPage                = $site.AllowMasterPageEditing
+                            AllowManageSiteURLStructure             = $site.ShowURLStructure
+                            AllowCreateDeclarativeWorkflow          = $site.AllowCreateDeclarativeWorkflow
+                            AllowSavePublishDeclarativeWorkflow     = `
                                 $site.AllowSavePublishDeclarativeWorkflow
-                            AllowSaveDeclarativeWorkflowAsTemplate = `
+                            AllowSaveDeclarativeWorkflowAsTemplate  = `
                                 $site.AllowSaveDeclarativeWorkflowAsTemplate
                             InstallAccount = $params.InstallAccount
                         }
@@ -211,7 +236,7 @@ function Set-TargetResource
     switch ($SettingsScope)
     {
         "WebApplication" {
-            Invoke-SPDSCCommand -Credential $InstallAccount `
+            Invoke-SPDscCommand -Credential $InstallAccount `
                                 -Arguments $PSBoundParameters `
                                 -ScriptBlock {
                 $params = $args[0]
@@ -278,9 +303,9 @@ function Set-TargetResource
             }
         }
         "SiteCollection" {
-            if ((Test-SPDSCRunAsCredential -Credential $InstallAccount) -eq $true)
+            if ((Test-SPDscRunAsCredential -Credential $InstallAccount) -eq $true)
             {
-                Invoke-SPDSCCommand -Credential $InstallAccount `
+                Invoke-SPDscCommand -Credential $InstallAccount `
                                     -Arguments $PSBoundParameters `
                                     -ScriptBlock {
                     $params = $args[0]
@@ -406,10 +431,8 @@ function Test-TargetResource
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
-    if ($null -eq $CurrentValues)
-    {
-        return $false
-    }
+    Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
+    Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
 
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
                                     -DesiredValues $PSBoundParameters

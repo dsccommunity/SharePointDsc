@@ -27,12 +27,12 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                                          -ArgumentList @("DOMAIN\sp_farm", $mockPassword)
 
         # Mocks for all contexts
-        Mock -CommandName Get-SPDSCFarmAccount -MockWith {
+        Mock -CommandName Get-SPDscFarmAccount -MockWith {
             return $mockFarmCredential
         }
-        Mock -CommandName Add-SPDSCUserToLocalAdmin -MockWith { }
-        Mock -CommandName Test-SPDSCUserIsLocalAdmin -MockWith { return $false }
-        Mock -CommandName Remove-SPDSCUserToLocalAdmin -MockWith { }
+        Mock -CommandName Add-SPDscUserToLocalAdmin -MockWith { }
+        Mock -CommandName Test-SPDscUserIsLocalAdmin -MockWith { return $false }
+        Mock -CommandName Remove-SPDscUserToLocalAdmin -MockWith { }
         Mock -CommandName Restart-Service {}
 
         # Test contexts
@@ -54,7 +54,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     ID = $mockSiteId
                 }
             }
-            Mock -CommandName Get-SPDSCFarmAccount -MockWith {
+            Mock -CommandName Get-SPDscFarmAccount -MockWith {
                 return $mockCredential
             }
 

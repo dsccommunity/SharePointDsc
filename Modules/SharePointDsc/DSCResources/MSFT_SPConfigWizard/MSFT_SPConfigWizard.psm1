@@ -31,7 +31,7 @@ function Get-TargetResource
     Write-Verbose -Message "Getting status of Configuration Wizard"
 
     # Check which version of SharePoint is installed
-    if ((Get-SPDSCInstalledProductVersion).FileMajorPart -eq 15)
+    if ((Get-SPDscInstalledProductVersion).FileMajorPart -eq 15)
     {
         $wssRegKey ="hklm:SOFTWARE\Microsoft\Shared Tools\Web Server Extensions\15.0\WSS"
     }
@@ -41,8 +41,8 @@ function Get-TargetResource
     }
 
     # Read LanguagePackInstalled and SetupType registry keys
-    $languagePackInstalled = Get-SPDSCRegistryKey -Key $wssRegKey -Value "LanguagePackInstalled"
-    $setupType = Get-SPDSCRegistryKey -Key $wssRegKey -Value "SetupType"
+    $languagePackInstalled = Get-SPDscRegistryKey -Key $wssRegKey -Value "LanguagePackInstalled"
+    $setupType = Get-SPDscRegistryKey -Key $wssRegKey -Value "SetupType"
 
     # Determine if LanguagePackInstalled=1 or SetupType=B2B_Upgrade.
     # If so, the Config Wizard is required
@@ -97,10 +97,21 @@ function Set-TargetResource
 
     Write-Verbose -Message "Setting status of Configuration Wizard"
 
+    Write-Verbose -Message "Checking if all servers in the farm have the binaries installed"
+    $statusType = Get-SPDscServerPatchStatus
+
+    Write-Verbose -Message "Server status: $statusType (Has to be 'NoActionRequired' to continue)"
+    if ($statusType -ne "NoActionRequired")
+    {
+        Write-Verbose -Message "Upgrade not possible, not all servers have the same binaries installed"
+        return
+    }
+
+    # Check if DatabaseUpgradeDays parameter exists
     $now = Get-Date
     if ($DatabaseUpgradeDays)
     {
-        # DatabaseUpgradeDays parameter exists, check if current day is specified
+        Write-Verbose -Message "DatabaseUpgradeDays parameter exists, check if current day is specified"
         $currentDayOfWeek = $now.DayOfWeek.ToString().ToLower().Substring(0,3)
 
         if ($DatabaseUpgradeDays -contains $currentDayOfWeek)
@@ -124,7 +135,7 @@ function Set-TargetResource
     # Check if DatabaseUpdateTime parameter exists
     if ($DatabaseUpgradeTime)
     {
-        # Check if current time is inside of time window
+        Write-Verbose -Message "DatabaseUpgradeTime parameter exists, current time is inside of time window"
         $upgradeTimes = $DatabaseUpgradeTime.Split(" ")
         $starttime = 0
         $endtime = 0
@@ -177,7 +188,7 @@ function Set-TargetResource
     }
 
     # Check which version of SharePoint is installed
-    if ((Get-SPDSCInstalledProductVersion).FileMajorPart -eq 15)
+    if ((Get-SPDscInstalledProductVersion).FileMajorPart -eq 15)
     {
         $binaryDir = Join-Path $env:CommonProgramFiles "Microsoft Shared\Web Server Extensions\15\BIN"
     }
@@ -189,7 +200,7 @@ function Set-TargetResource
 
     # Start wizard
     Write-Verbose -Message "Starting Configuration Wizard"
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+    $result = Invoke-SPDscCommand -Credential $InstallAccount `
                                   -Arguments $psconfigExe `
                                   -ScriptBlock {
         $psconfigExe = $args[0]
@@ -269,7 +280,10 @@ function Test-TargetResource
         return $true
     }
 
-    $currentValues = Get-TargetResource @PSBoundParameters
+    $CurrentValues = Get-TargetResource @PSBoundParameters
+
+    Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
+    Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
 
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
                                     -DesiredValues $PSBoundParameters `

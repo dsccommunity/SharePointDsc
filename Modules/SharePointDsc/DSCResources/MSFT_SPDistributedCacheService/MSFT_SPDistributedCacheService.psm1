@@ -36,13 +36,13 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting the cache host information"
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+    $result = Invoke-SPDscCommand -Credential $InstallAccount `
                                   -Arguments $PSBoundParameters `
                                   -ScriptBlock {
         $params = $args[0]
         $nullReturnValue = @{
-            Name = $params.Name
-            Ensure = "Absent"
+            Name           = $params.Name
+            Ensure         = "Absent"
             InstallAccount = $params.InstallAccount
         }
 
@@ -68,13 +68,13 @@ function Get-TargetResource
                                                 -ErrorAction SilentlyContinue
 
             return @{
-                Name = $params.Name
-                CacheSizeInMB = $cacheHostConfig.Size
-                ServiceAccount = $windowsService.StartName
-                CreateFirewallRules = ($null -ne $firewallRule)
-                Ensure = "Present"
+                Name                 = $params.Name
+                CacheSizeInMB        = $cacheHostConfig.Size
+                ServiceAccount       = $windowsService.StartName
+                CreateFirewallRules  = ($null -ne $firewallRule)
+                Ensure               = "Present"
                 ServerProvisionOrder = $params.ServerProvisionOrder
-                InstallAccount = $params.InstallAccount
+                InstallAccount       = $params.InstallAccount
             }
         }
         catch
@@ -131,7 +131,7 @@ function Set-TargetResource
         if ($createFirewallRules -eq $true)
         {
             Write-Verbose -Message "Create a firewall rule for AppFabric"
-            Invoke-SPDSCCommand -Credential $InstallAccount -ScriptBlock {
+            Invoke-SPDscCommand -Credential $InstallAccount -ScriptBlock {
                 $icmpRuleName = "File and Printer Sharing (Echo Request - ICMPv4-In)"
                 $icmpFirewallRule = Get-NetFirewallRule -DisplayName $icmpRuleName `
                                                         -ErrorAction SilentlyContinue
@@ -169,7 +169,7 @@ function Set-TargetResource
         if ($CurrentState.Ensure -ne $Ensure)
         {
             Write-Verbose -Message "Enabling distributed cache service"
-            Invoke-SPDSCCommand -Credential $InstallAccount `
+            Invoke-SPDscCommand -Credential $InstallAccount `
                                 -Arguments $PSBoundParameters `
                                 -ScriptBlock {
                 $params = $args[0]
@@ -331,7 +331,7 @@ function Set-TargetResource
         elseif ($CurrentState.CacheSizeInMB -ne $CacheSizeInMB)
         {
             Write-Verbose -Message "Updating distributed cache service cache size"
-            Invoke-SPDSCCommand -Credential $InstallAccount `
+            Invoke-SPDscCommand -Credential $InstallAccount `
                                 -Arguments $PSBoundParameters `
                                 -ScriptBlock {
                 $params = $args[0]
@@ -393,7 +393,7 @@ function Set-TargetResource
     else
     {
         Write-Verbose -Message "Removing distributed cache to the server"
-        Invoke-SPDSCCommand -Credential $InstallAccount -ScriptBlock {
+        Invoke-SPDscCommand -Credential $InstallAccount -ScriptBlock {
             Remove-SPDistributedCacheServiceInstance
 
             $serviceInstance = Get-SPServiceInstance -Server $env:computername `
@@ -417,10 +417,10 @@ function Set-TargetResource
         }
         if ($CreateFirewallRules -eq $true)
         {
-            Invoke-SPDSCCommand -Credential $InstallAccount -ScriptBlock {
+            Invoke-SPDscCommand -Credential $InstallAccount -ScriptBlock {
                 $firewallRule = Get-NetFirewallRule -DisplayName "SharePoint Distribute Cache" `
                                                     -ErrorAction SilentlyContinue
-                if($null -ne $firewallRule)
+                if ($null -ne $firewallRule)
                 {
                     Write-Verbose -Message "Disabling firewall rules."
                     Disable-NetFirewallRule -DisplayName "SharePoint Distribute Cache"
@@ -472,6 +472,9 @@ function Test-TargetResource
     $PSBoundParameters.Ensure = $Ensure
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
+
+    Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
+    Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
 
     if ($Ensure -eq "Present")
     {

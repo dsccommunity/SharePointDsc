@@ -1,7 +1,7 @@
 [CmdletBinding()]
 param(
     [Parameter()]
-    [string] 
+    [string]
     $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
                                          -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
                                          -Resolve)
@@ -20,22 +20,22 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         # Initialize tests
         Add-Type -TypeDefinition @"
-    namespace Microsoft.SharePoint.Administration 
-    { 
-        public class SPQuotaTemplate 
-        { 
-            public string Name { get; set; } 
-            public long StorageMaximumLevel { get; set; } 
-            public long StorageWarningLevel { get; set; } 
-            public double UserCodeMaximumLevel { get; set; } 
+    namespace Microsoft.SharePoint.Administration
+    {
+        public class SPQuotaTemplate
+        {
+            public string Name { get; set; }
+            public long StorageMaximumLevel { get; set; }
+            public long StorageWarningLevel { get; set; }
+            public double UserCodeMaximumLevel { get; set; }
             public double UserCodeWarningLevel { get; set; }
         }
     }
 "@
 
-        # Mocks for all contexts   
-        Mock -CommandName Get-SPFarm -MockWith { 
-            return @{} 
+        # Mocks for all contexts
+        Mock -CommandName Get-SPFarm -MockWith {
+            return @{}
         }
 
         # Test contexts
@@ -49,8 +49,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Ensure = "Present"
             }
 
-            Mock -CommandName Get-SPFarm -MockWith { 
-                throw "Unable to detect local farm" 
+            Mock -CommandName Get-SPFarm -MockWith {
+                throw "Unable to detect local farm"
             }
 
             It "Should throw an exception in the get method to say MaxPoints need to be larger than WarningPoints" {
@@ -76,8 +76,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Ensure = "Present"
             }
 
-            Mock -CommandName Get-SPFarm -MockWith { 
-                throw "Unable to detect local farm" 
+            Mock -CommandName Get-SPFarm -MockWith {
+                throw "Unable to detect local farm"
             }
 
             It "Should throw an exception in the get method to say StorageMax need to be larger than StorageWarning" {
@@ -103,8 +103,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Ensure = "Absent"
             }
 
-            Mock -CommandName Get-SPFarm -MockWith { 
-                throw "Unable to detect local farm" 
+            Mock -CommandName Get-SPFarm -MockWith {
+                throw "Unable to detect local farm"
             }
 
             It "Should return Ensure=Absent" {
@@ -130,8 +130,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Ensure = "Present"
             }
 
-            Mock -CommandName Get-SPFarm -MockWith { 
-                throw "Unable to detect local farm" 
+            Mock -CommandName Get-SPFarm -MockWith {
+                throw "Unable to detect local farm"
             }
 
             It "Should return null from the get method" {
@@ -156,8 +156,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 WarningUsagePointsSolutions = 800
                 Ensure = "Present"
             }
-            
-            Mock -CommandName Get-SPDSCContentService -MockWith {
+
+            Mock -CommandName Get-SPDscContentService -MockWith {
                 $quotaTemplates = @(@{
                         Test = @{
                             StorageMaximumLevel = 512
@@ -166,16 +166,16 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                             UserCodeWarningLevel = 200
                         }
                     })
-                $quotaTemplatesCol = {$quotaTemplates}.Invoke() 
+                $quotaTemplatesCol = {$quotaTemplates}.Invoke()
 
                 $contentService = @{
                     QuotaTemplates = $quotaTemplatesCol
-                } 
+                }
 
                 $contentService = $contentService | Add-Member -MemberType ScriptMethod `
                                                                -Name Update `
-                                                               -Value { 
-                                                                   $Global:SPDscQuotaTemplatesUpdated = $true 
+                                                               -Value {
+                                                                   $Global:SPDscQuotaTemplatesUpdated = $true
                                                                 } -PassThru
                 return $contentService
             }
@@ -204,21 +204,21 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 WarningUsagePointsSolutions = 800
                 Ensure = "Present"
             }
-            
-            Mock -CommandName Get-SPDSCContentService -MockWith {
+
+            Mock -CommandName Get-SPDscContentService -MockWith {
                 $quotaTemplates = @(@{
                         Test = $null
                     })
-                $quotaTemplatesCol = {$quotaTemplates}.Invoke() 
+                $quotaTemplatesCol = {$quotaTemplates}.Invoke()
 
                 $contentService = @{
                     QuotaTemplates = $quotaTemplatesCol
-                } 
+                }
 
                 $contentService = $contentService | Add-Member -MemberType ScriptMethod `
                                                                -Name Update `
-                                                               -Value { 
-                                                                   $Global:SPDscQuotaTemplatesUpdated = $true 
+                                                               -Value {
+                                                                   $Global:SPDscQuotaTemplatesUpdated = $true
                                                                 } -PassThru
                 return $contentService
             }
@@ -247,25 +247,25 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 WarningUsagePointsSolutions = 800
                 Ensure = "Present"
             }
-            
-            Mock -CommandName Get-SPDSCContentService -MockWith { 
-                 $returnVal = @{ 
-                     QuotaTemplates = @{ 
-                         Test = @{ 
-                             StorageMaximumLevel = 1073741824 
-                             StorageWarningLevel = 536870912 
-                             UserCodeMaximumLevel = 1000 
-                             UserCodeWarningLevel = 800 
-                         } 
-                     } 
-                 }  
+
+            Mock -CommandName Get-SPDscContentService -MockWith {
+                 $returnVal = @{
+                     QuotaTemplates = @{
+                         Test = @{
+                             StorageMaximumLevel = 1073741824
+                             StorageWarningLevel = 536870912
+                             UserCodeMaximumLevel = 1000
+                             UserCodeWarningLevel = 800
+                         }
+                     }
+                 }
                  $returnVal = $returnVal | Add-Member -MemberType ScriptMethod `
                                                       -Name Update `
-                                                      -Value { 
-                                                          $Global:SPDscQuotaTemplatesUpdated = $true 
-                                                        } -PassThru 
-                 return $returnVal 
-             } 
+                                                      -Value {
+                                                          $Global:SPDscQuotaTemplatesUpdated = $true
+                                                        } -PassThru
+                 return $returnVal
+             }
 
             It "Should return values from the get method" {
                 $result = Get-TargetResource @testParams

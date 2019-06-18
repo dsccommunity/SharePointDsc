@@ -65,7 +65,7 @@ function Get-TargetResource
                                 "SPSearchServiceSettings instead.")
     }
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+    $result = Invoke-SPDscCommand -Credential $InstallAccount `
                                   -Arguments @($PSBoundParameters, $PSScriptRoot) `
                                   -ScriptBlock {
         $params = $args[0]
@@ -90,9 +90,9 @@ function Get-TargetResource
         $serviceApps = Get-SPServiceApplication -Name $params.Name -ErrorAction SilentlyContinue
 
         $nullReturn = @{
-            Name = $params.Name
+            Name            = $params.Name
             ApplicationPool = $params.ApplicationPool
-            Ensure = "Absent"
+            Ensure          = "Absent"
         }
 
         if ($null -eq $serviceApps)
@@ -120,8 +120,8 @@ function Get-TargetResource
             }
 
             $cloudIndex = $false
-            $version = Get-SPDSCInstalledProductVersion
-            if(($version.FileMajorPart -gt 15) `
+            $version = Get-SPDscInstalledProductVersion
+            if (($version.FileMajorPart -gt 15) `
                 -or ($version.FileMajorPart -eq 15 -and $version.FileBuildPart -ge 4745))
             {
                 $cloudIndex = $serviceApp.CloudIndex
@@ -230,7 +230,7 @@ function Set-TargetResource
         # Create the service app as it doesn't exist
 
         Write-Verbose -Message "Creating Search Service Application $Name"
-        Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+        Invoke-SPDscCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
             $params = $args[0]
 
             $serviceAppPool = Get-SPServiceApplicationPool $params.ApplicationPool
@@ -244,7 +244,7 @@ function Set-TargetResource
             Start-SPEnterpriseSearchServiceInstance -Identity $serviceInstance `
                                                     -ErrorAction SilentlyContinue
             $newParams = @{
-                Name = $params.Name
+                Name            = $params.Name
                 ApplicationPool = $params.ApplicationPool
             }
             if ($params.ContainsKey("DatabaseServer") -eq $true)
@@ -258,7 +258,7 @@ function Set-TargetResource
 
             if ($params.ContainsKey("CloudIndex") -eq $true -and $params.CloudIndex -eq $true)
             {
-                $version = Get-SPDSCInstalledProductVersion
+                $version = Get-SPDscInstalledProductVersion
                 if (($version.FileMajorPart -gt 15) `
                     -or ($version.FileMajorPart -eq 15 -and $version.FileBuildPart -ge 4745))
                 {
@@ -294,9 +294,9 @@ function Set-TargetResource
                     $appPool = Get-SPServiceApplicationPool -Identity $params.ApplicationPool
                     $account = $params.DefaultContentAccessAccount
                     $setParams = @{
-                        ApplicationPool = $appPool
-                        Identity = $app
-                        DefaultContentAccessAccountName = $account.UserName
+                        ApplicationPool                     = $appPool
+                        Identity                            = $app
+                        DefaultContentAccessAccountName     = $account.UserName
                         DefaultContentAccessAccountPassword = $account.Password
                     }
                     Set-SPEnterpriseSearchServiceApplication @setParams
@@ -331,7 +331,7 @@ function Set-TargetResource
     {
         # Update the service app that already exists
         Write-Verbose -Message "Updating Search Service Application $Name"
-        Invoke-SPDSCCommand -Credential $InstallAccount `
+        Invoke-SPDscCommand -Credential $InstallAccount `
                             -Arguments @($PSBoundParameters, $result) `
                             -ScriptBlock {
             $params = $args[0]
@@ -427,7 +427,7 @@ function Set-TargetResource
     {
         # The service app should not exit
         Write-Verbose -Message "Removing Search Service Application $Name"
-        Invoke-SPDSCCommand -Credential $InstallAccount `
+        Invoke-SPDscCommand -Credential $InstallAccount `
                             -Arguments $PSBoundParameters `
                             -ScriptBlock {
             $params = $args[0]
@@ -438,9 +438,9 @@ function Set-TargetResource
             }
 
             $proxies = Get-SPServiceApplicationProxy
-            foreach($proxyInstance in $proxies)
+            foreach ($proxyInstance in $proxies)
             {
-                if($serviceApp.IsConnected($proxyInstance))
+                if ($serviceApp.IsConnected($proxyInstance))
                 {
                     $proxyInstance.Delete()
                 }
@@ -518,6 +518,9 @@ function Test-TargetResource
     $PSBoundParameters.Ensure = $Ensure
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
+
+    Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
+    Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
 
     if ($PSBoundParameters.ContainsKey("DefaultContentAccessAccount") `
         -and $Ensure -eq "Present")

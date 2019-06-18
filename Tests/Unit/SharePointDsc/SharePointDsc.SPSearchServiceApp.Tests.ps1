@@ -709,7 +709,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 return $spServiceApp
             }
 
-            Mock -CommandName Get-SPDSCInstalledProductVersion -MockWith {
+            Mock -CommandName Get-SPDscInstalledProductVersion -MockWith {
                 return @{
                     FileMajorPart = 15
                     FileBuildPart = 0
@@ -720,7 +720,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 (Get-TargetResource @testParams).CloudIndex | Should Be $false
             }
 
-            Mock -CommandName Get-SPDSCInstalledProductVersion -MockWith {
+            Mock -CommandName Get-SPDscInstalledProductVersion -MockWith {
                 return @{
                     FileMajorPart = 15
                     FileBuildPart = 5000
@@ -744,7 +744,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 return $null
             }
 
-            Mock -CommandName Get-SPDSCInstalledProductVersion -MockWith {
+            Mock -CommandName Get-SPDscInstalledProductVersion -MockWith {
                 return @{
                     FileMajorPart = 15
                     FileBuildPart = 5000
@@ -755,7 +755,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Set-TargetResource @testParams
             }
 
-            Mock -CommandName Get-SPDSCInstalledProductVersion -MockWith {
+            Mock -CommandName Get-SPDscInstalledProductVersion -MockWith {
                 return @{
                     FileMajorPart = 15
                     FileBuildPart = 0

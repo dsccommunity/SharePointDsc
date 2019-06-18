@@ -26,17 +26,17 @@ function Get-TargetResource()
 
     Write-Verbose -Message "Getting remote farm trust '$Name'"
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+    $result = Invoke-SPDscCommand -Credential $InstallAccount `
                                   -Arguments $PSBoundParameters `
                                   -ScriptBlock {
         $params = $args[0]
 
         $returnValue = @{
-            Name = $params.Name
+            Name            = $params.Name
             RemoteWebAppUrl = $params.RemoteWebAppUrl
-            LocalWebAppUrl = $params.LocalWebAppUrl
-            Ensure = "Absent"
-            InstallAccount = $params.InstallAccount
+            LocalWebAppUrl  = $params.LocalWebAppUrl
+            Ensure          = "Absent"
+            InstallAccount  = $params.InstallAccount
         }
 
         $issuer = Get-SPTrustedSecurityTokenIssuer -Identity $params.Name `
@@ -97,7 +97,7 @@ function Set-TargetResource()
     {
         Write-Verbose -Message "Adding remote farm trust '$Name'"
 
-        Invoke-SPDSCCommand -Credential $InstallAccount `
+        Invoke-SPDscCommand -Credential $InstallAccount `
                             -Arguments $PSBoundParameters `
                             -ScriptBlock {
             $params = $args[0]
@@ -148,11 +148,10 @@ function Set-TargetResource()
     {
         Write-Verbose -Message "Removing remote farm trust '$Name'"
 
-        Invoke-SPDSCCommand -Credential $InstallAccount `
+        Invoke-SPDscCommand -Credential $InstallAccount `
                             -Arguments $PSBoundParameters `
                             -ScriptBlock {
             $params = $args[0]
-            $remoteWebApp = $params.RemoteWebAppUrl.TrimEnd('/')
 
             $issuer = Get-SPTrustedSecurityTokenIssuer -Identity $params.Name `
                                                        -ErrorAction SilentlyContinue
@@ -208,6 +207,9 @@ function Test-TargetResource()
     $PSBoundParameters.Ensure = $Ensure
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
+
+    Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
+    Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
 
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
                                     -DesiredValues $PSBoundParameters `

@@ -37,7 +37,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
         }
 
-        Mock -CommandName Get-SPDSCInstalledProductVersion {
+        Mock -CommandName Get-SPDscInstalledProductVersion {
             return @{
                 FileMajorPart = $Global:SPDscHelper.CurrentStubBuildNumber.Major
                 FileBuildPart = $Global:SPDscHelper.CurrentStubBuildNumber.Build
@@ -146,7 +146,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                         return @("Microsoft SharePoint Server 2013", "Language Pack for SharePoint and Project Server 2013  - Dutch/Nederlands")
                     }
                     16 {
-                        if($Global:SPDscHelper.CurrentStubBuildNumber.Minor.ToString().Length -le 4)
+                        if ($Global:SPDscHelper.CurrentStubBuildNumber.Minor.ToString().Length -le 4)
                         {
                             return @("Microsoft SharePoint Server 2016", "Language Pack for SharePoint and Project Server 2016  - Dutch/Nederlands")
                         }
@@ -194,7 +194,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                         return @("Microsoft SharePoint Server 2013", 'Language Pack for SharePoint and Project Server 2013  - Chinese (Taiwan)/中文 (繁體)')
                     }
                     16 {
-                        if($Global:SPDscHelper.CurrentStubBuildNumber.Minor.ToString().Length -le 4)
+                        if ($Global:SPDscHelper.CurrentStubBuildNumber.Minor.ToString().Length -le 4)
                         {
                             return @("Microsoft SharePoint Server 2016", 'Language Pack for SharePoint and Project Server 2016  - Chinese (Taiwan)/中文 (繁體)')
                         }
@@ -242,7 +242,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                         return @("Microsoft SharePoint Server 2013", 'Language Pack for SharePoint and Project Server 2013  - Chinese (PRC)/中文(简体)')
                     }
                     16 {
-                        if($Global:SPDscHelper.CurrentStubBuildNumber.Minor.ToString().Length -le 4)
+                        if ($Global:SPDscHelper.CurrentStubBuildNumber.Minor.ToString().Length -le 4)
                         {
                             return @("Microsoft SharePoint Server 2016", 'Language Pack for SharePoint and Project Server 2016  - Chinese (PRC)/中文(简体)')
                         }
@@ -290,7 +290,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                         return @("Microsoft SharePoint Server 2013", 'Language Pack for SharePoint and Project Server 2013  - درى Dari')
                     }
                     16 {
-                        if($Global:SPDscHelper.CurrentStubBuildNumber.Minor.ToString().Length -le 4)
+                        if ($Global:SPDscHelper.CurrentStubBuildNumber.Minor.ToString().Length -le 4)
                         {
                             return @("Microsoft SharePoint Server 2016", 'Language Pack for SharePoint and Project Server 2016  - درى Dari')
                         }
@@ -338,7 +338,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                         return @("Microsoft SharePoint Server 2013", 'Language Pack for SharePoint and Project Server 2013  - Serbian/srpski')
                     }
                     16 {
-                        if($Global:SPDscHelper.CurrentStubBuildNumber.Minor.ToString().Length -le 4)
+                        if ($Global:SPDscHelper.CurrentStubBuildNumber.Minor.ToString().Length -le 4)
                         {
                             return @("Microsoft SharePoint Server 2016", 'Language Pack for SharePoint and Project Server 2016  - Serbian/srpski')
                         }
@@ -386,7 +386,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                         return @("Microsoft SharePoint Server 2013", 'Language Pack for SharePoint and Project Server 2013  - Serbian/српски')
                     }
                     16 {
-                        if($Global:SPDscHelper.CurrentStubBuildNumber.Minor.ToString().Length -le 4)
+                        if ($Global:SPDscHelper.CurrentStubBuildNumber.Minor.ToString().Length -le 4)
                         {
                             return @("Microsoft SharePoint Server 2016", 'Language Pack for SharePoint and Project Server 2016  - Serbian/српски')
                         }
@@ -434,7 +434,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                         return @("Microsoft SharePoint Server 2013", 'Language Pack for SharePoint and Project Server 2013  - Portuguese/Português (Brasil)')
                     }
                     16 {
-                        if($Global:SPDscHelper.CurrentStubBuildNumber.Minor.ToString().Length -le 4)
+                        if ($Global:SPDscHelper.CurrentStubBuildNumber.Minor.ToString().Length -le 4)
                         {
                             return @("Microsoft SharePoint Server 2016", 'Language Pack for SharePoint and Project Server 2016  - Portuguese/Português (Brasil)')
                         }
@@ -482,7 +482,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                         return @("Microsoft SharePoint Server 2013", 'Language Pack for SharePoint and Project Server 2013  - Portuguese/Português')
                     }
                     16 {
-                        if($Global:SPDscHelper.CurrentStubBuildNumber.Minor.ToString().Length -le 4)
+                        if ($Global:SPDscHelper.CurrentStubBuildNumber.Minor.ToString().Length -le 4)
                         {
                             return @("Microsoft SharePoint Server 2016", 'Language Pack for SharePoint and Project Server 2016  - Portuguese/Português')
                         }
@@ -530,7 +530,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                         return @("Microsoft SharePoint Server 2013", 'Language Pack for SharePoint and Project Server 2013  - Arabic/LOCAL ARABIC')
                     }
                     16 {
-                        if($Global:SPDscHelper.CurrentStubBuildNumber.Minor.ToString().Length -le 4)
+                        if ($Global:SPDscHelper.CurrentStubBuildNumber.Minor.ToString().Length -le 4)
                         {
                             return @("Microsoft SharePoint Server 2016", 'Language Pack for SharePoint and Project Server 2016  - Arabic/LOCAL ARABIC')
                         }
@@ -568,7 +568,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                         return @("Microsoft SharePoint Server 2013")
                     }
                     16 {
-                        if($Global:SPDscHelper.CurrentStubBuildNumber.Minor.ToString().Length -le 4)
+                        if ($Global:SPDscHelper.CurrentStubBuildNumber.Minor.ToString().Length -le 4)
                         {
                             return @("Microsoft SharePoint Server 2016")
                         }
@@ -590,7 +590,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 }
                 else
                 {
-                    if($Global:SPDscHelper.CurrentStubBuildNumber.Minor.ToString().Length -le 4)
+                    if ($Global:SPDscHelper.CurrentStubBuildNumber.Minor.ToString().Length -le 4)
                     {
                         return @("Microsoft SharePoint Server 2016")
                     }
@@ -635,7 +635,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                         return @("Microsoft SharePoint Server 2013")
                     }
                     16 {
-                        if($Global:SPDscHelper.CurrentStubBuildNumber.Minor.ToString().Length -le 4)
+                        if ($Global:SPDscHelper.CurrentStubBuildNumber.Minor.ToString().Length -le 4)
                         {
                             return @("Microsoft SharePoint Server 2016")
                         }
@@ -657,7 +657,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 }
                 else
                 {
-                    if($Global:SPDscHelper.CurrentStubBuildNumber.Minor.ToString().Length -le 4)
+                    if ($Global:SPDscHelper.CurrentStubBuildNumber.Minor.ToString().Length -le 4)
                     {
                         return @("Microsoft SharePoint Server 2016")
                     }
@@ -697,7 +697,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                         return @("Microsoft SharePoint Server 2013")
                     }
                     16 {
-                        if($Global:SPDscHelper.CurrentStubBuildNumber.Minor.ToString().Length -le 4)
+                        if ($Global:SPDscHelper.CurrentStubBuildNumber.Minor.ToString().Length -le 4)
                         {
                             return @("Microsoft SharePoint Server 2016")
                         }
@@ -719,7 +719,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 }
                 else
                 {
-                    if($Global:SPDscHelper.CurrentStubBuildNumber.Minor.ToString().Length -le 4)
+                    if ($Global:SPDscHelper.CurrentStubBuildNumber.Minor.ToString().Length -le 4)
                     {
                         return @("Microsoft SharePoint Server 2016")
                     }
@@ -766,7 +766,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                         return @("Microsoft SharePoint Server 2013")
                     }
                     16 {
-                        if($Global:SPDscHelper.CurrentStubBuildNumber.Minor.ToString().Length -le 4)
+                        if ($Global:SPDscHelper.CurrentStubBuildNumber.Minor.ToString().Length -le 4)
                         {
                             return @("Microsoft SharePoint Server 2016")
                         }
@@ -788,7 +788,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 }
                 else
                 {
-                    if($Global:SPDscHelper.CurrentStubBuildNumber.Minor.ToString().Length -le 4)
+                    if ($Global:SPDscHelper.CurrentStubBuildNumber.Minor.ToString().Length -le 4)
                     {
                         return @("Microsoft SharePoint Server 2016")
                     }
@@ -833,7 +833,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                         return @("Microsoft SharePoint Server 2013")
                     }
                     16 {
-                        if($Global:SPDscHelper.CurrentStubBuildNumber.Minor.ToString().Length -le 4)
+                        if ($Global:SPDscHelper.CurrentStubBuildNumber.Minor.ToString().Length -le 4)
                         {
                             return @("Microsoft SharePoint Server 2016")
                         }
@@ -855,7 +855,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 }
                 else
                 {
-                    if($Global:SPDscHelper.CurrentStubBuildNumber.Minor.ToString().Length -le 4)
+                    if ($Global:SPDscHelper.CurrentStubBuildNumber.Minor.ToString().Length -le 4)
                     {
                         return @("Microsoft SharePoint Server 2016")
                     }
@@ -906,7 +906,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                         return @("Microsoft SharePoint Server 2013", "Language Pack for SharePoint and Project Server 2013  - Dutch/Nederlands")
                     }
                     16 {
-                        if($Global:SPDscHelper.CurrentStubBuildNumber.Minor.ToString().Length -le 4)
+                        if ($Global:SPDscHelper.CurrentStubBuildNumber.Minor.ToString().Length -le 4)
                         {
                             return @("Microsoft SharePoint Server 2016", "Language Pack for SharePoint and Project Server 2016  - Dutch/Nederlands")
                         }
@@ -928,7 +928,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 }
                 else
                 {
-                    if($Global:SPDscHelper.CurrentStubBuildNumber.Minor.ToString().Length -le 4)
+                    if ($Global:SPDscHelper.CurrentStubBuildNumber.Minor.ToString().Length -le 4)
                     {
                         return @("Microsoft SharePoint Server 2016", "Language Pack for SharePoint and Project Server 2016  - Dutch/Nederlands")
                     }
@@ -963,7 +963,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                         return @("Microsoft SharePoint Server 2013", "Language Pack for SharePoint and Project Server 2013  - Dutch/Nederlands")
                     }
                     16 {
-                        if($Global:SPDscHelper.CurrentStubBuildNumber.Minor.ToString().Length -le 4)
+                        if ($Global:SPDscHelper.CurrentStubBuildNumber.Minor.ToString().Length -le 4)
                         {
                             return @("Microsoft SharePoint Server 2016", "Language Pack for SharePoint and Project Server 2016  - Dutch/Nederlands")
                         }
@@ -985,7 +985,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 }
                 else
                 {
-                    if($Global:SPDscHelper.CurrentStubBuildNumber.Minor.ToString().Length -le 4)
+                    if ($Global:SPDscHelper.CurrentStubBuildNumber.Minor.ToString().Length -le 4)
                     {
                         return @("Microsoft SharePoint Server 2016", "Language Pack for SharePoint and Project Server 2016  - Dutch/Nederlands")
                     }

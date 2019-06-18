@@ -21,6 +21,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         # Mocks for all contexts
         Mock -CommandName Remove-Item -MockWith {}
         Mock -CommandName Get-Content -MockWith { return "log info" }
+        Mock -CommandName Get-SPDscServerPatchStatus -MockWith { return "NoActionRequired" }
 
         # Test contexts
         Context -Name "Upgrade required for Language Pack" -Fixture {
@@ -28,7 +29,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 IsSingleInstance = "Yes"
             }
 
-            Mock -CommandName Get-SPDSCRegistryKey -MockWith {
+            Mock -CommandName Get-SPDscRegistryKey -MockWith {
                 if ($Value -eq "LanguagePackInstalled")
                 {
                     return 1
@@ -60,7 +61,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 IsSingleInstance = "Yes"
             }
 
-            Mock -CommandName Get-SPDSCRegistryKey -MockWith {
+            Mock -CommandName Get-SPDscRegistryKey -MockWith {
                 if ($Value -eq "SetupType")
                 {
                     return "B2B_UPGRADE"
@@ -87,13 +88,35 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
         }
 
+        Context -Name "Config wizard should not be run, because not all servers have the binaries installed" -Fixture {
+            $testParams = @{
+                IsSingleInstance    = "Yes"
+            }
+
+            Mock -CommandName Get-SPDscRegistryKey -MockWith {
+                if ($Value -eq "SetupType")
+                {
+                    return "B2B_UPGRADE"
+                }
+            }
+
+            Mock -CommandName Get-SPDscServerPatchStatus -MockWith { return "UpgradeBlocked" }
+
+            Mock -CommandName Start-Process -MockWith {}
+
+            It "Should run Start-Process in the set method" {
+                Set-TargetResource @testParams
+                Assert-MockCalled Start-Process -Times 0
+            }
+        }
+
         Context -Name "Current date outside Upgrade Days" -Fixture {
             $testParams = @{
                 IsSingleInstance    = "Yes"
                 DatabaseUpgradeDays = "mon"
             }
 
-            Mock -CommandName Get-SPDSCRegistryKey -MockWith {
+            Mock -CommandName Get-SPDscRegistryKey -MockWith {
                 if ($Value -eq "SetupType")
                 {
                     return "B2B_UPGRADE"
@@ -125,7 +148,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 DatabaseUpgradeTime = "3:00am to 5:00am"
             }
 
-            Mock -CommandName Get-SPDSCRegistryKey -MockWith {
+            Mock -CommandName Get-SPDscRegistryKey -MockWith {
                 if ($Value -eq "SetupType")
                 {
                     return "B2B_UPGRADE"
@@ -149,7 +172,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 DatabaseUpgradeTime = "error 3:00am to 5:00am"
             }
 
-            Mock -CommandName Get-SPDSCRegistryKey -MockWith {
+            Mock -CommandName Get-SPDscRegistryKey -MockWith {
                 if ($Value -eq "SetupType")
                 {
                     return "B2B_UPGRADE"
@@ -173,7 +196,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 DatabaseUpgradeTime = "3:00xm to 5:00am"
             }
 
-            Mock -CommandName Get-SPDSCRegistryKey -MockWith {
+            Mock -CommandName Get-SPDscRegistryKey -MockWith {
                 if ($Value -eq "SetupType")
                 {
                     return "B2B_UPGRADE"
@@ -197,7 +220,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 DatabaseUpgradeTime = "3:00am to 5:00xm"
             }
 
-            Mock -CommandName Get-SPDSCRegistryKey -MockWith {
+            Mock -CommandName Get-SPDscRegistryKey -MockWith {
                 if ($Value -eq "SetupType")
                 {
                     return "B2B_UPGRADE"
@@ -221,7 +244,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 DatabaseUpgradeTime = "3:00pm to 5:00am"
             }
 
-            Mock -CommandName Get-SPDSCRegistryKey -MockWith {
+            Mock -CommandName Get-SPDscRegistryKey -MockWith {
                 if ($Value -eq "SetupType")
                 {
                     return "B2B_UPGRADE"
@@ -243,7 +266,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 IsSingleInstance = "Yes"
             }
 
-            Mock -CommandName Get-SPDSCRegistryKey -MockWith {
+            Mock -CommandName Get-SPDscRegistryKey -MockWith {
                 if ($Value -eq "LanguagePackInstalled")
                 {
                     return 1
@@ -275,7 +298,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Ensure           = "Absent"
             }
 
-            Mock -CommandName Get-SPDSCRegistryKey -MockWith {
+            Mock -CommandName Get-SPDscRegistryKey -MockWith {
                 return 0
             }
 

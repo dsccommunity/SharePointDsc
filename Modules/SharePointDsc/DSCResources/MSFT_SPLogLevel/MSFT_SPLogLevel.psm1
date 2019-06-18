@@ -25,7 +25,7 @@ function Get-TargetResource
         {
             Write-Verbose -Message "Exactly one log area, or the wildcard character '*' must be provided for each log item area"
             return @{
-                Name = $Name
+                Name              = $Name
                 SPLogLevelSetting = $null
             }
         }
@@ -34,7 +34,7 @@ function Get-TargetResource
         {
             Write-Verbose -Message "Exactly one log name, or the wildcard character '*' must be provided for each log item name"
             return @{
-                Name = $Name
+                Name              = $Name
                 SPLogLevelSetting = $null
             }
         }
@@ -43,7 +43,7 @@ function Get-TargetResource
         {
             Write-Verbose -Message "TraceLevel and / or EventLevel must be provided for each Area"
             return @{
-                Name = $Name
+                Name              = $Name
                 SPLogLevelSetting = $null
             }
         }
@@ -52,7 +52,7 @@ function Get-TargetResource
         {
             Write-Verbose -Message "TraceLevel $($DesiredSetting.TraceLevel) is not valid, must specify exactly one of None,Unexpected,Monitorable,High,Medium,Verbose,VerboseEx, or Default"
             return @{
-                Name = $Name
+                Name              = $Name
                 SPLogLevelSetting = $null
             }
         }
@@ -61,7 +61,7 @@ function Get-TargetResource
         {
             Write-Verbose -Message "EventLevel $($DesiredSetting.EventLevel) is not valid, must specify exactly one of None,ErrorCritical,Error,Warning,Informational,Verbose, or Default"
             return @{
-                Name = $Name
+                Name              = $Name
                 SPLogLevelSetting = $null
             }
         }
@@ -69,9 +69,9 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting SP Log Level Settings for provided Areas"
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
-                                 -Arguments $PSBoundParameters `
-                                 -ScriptBlock {
+    $result = Invoke-SPDscCommand -Credential $InstallAccount `
+                                  -Arguments $PSBoundParameters `
+                                  -ScriptBlock {
          $params = $args[0]
 
          $CurrentLogLevelSettings = @()
@@ -146,15 +146,15 @@ function Get-TargetResource
             }
 
             $CurrentLogLevelSettings += New-Object -TypeName PSObject -Property @{
-                Area = $DesiredSetting.Area
-                Name = $DesiredSetting.Name
+                Area       = $DesiredSetting.Area
+                Name       = $DesiredSetting.Name
                 TraceLevel = $TraceLevel
                 EventLevel = $EventLevel
              }
         }
 
         return @{
-            Name = $params.Name
+            Name              = $params.Name
             SPLogLevelSetting = $CurrentLogLevelSettings
         }
     }
@@ -209,7 +209,7 @@ function Set-TargetResource
 
     Write-Verbose -Message "Setting SP Log Level settings for the provided areas"
 
-    Invoke-SPDSCCommand -Credential $InstallAccount `
+    Invoke-SPDscCommand -Credential $InstallAccount `
                         -Arguments $PSBoundParameters `
                         -ScriptBlock {
         $params = $args[0]
@@ -282,7 +282,11 @@ function Test-TargetResource
     )
 
     Write-Verbose -Message "Testing SP Log Level settings for the provided areas"
+
     $CurrentValues = Get-TargetResource @PSBoundParameters
+
+    Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
+    Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
 
     if ($null -eq $CurrentValues.SPLogLevelSetting)
     {

@@ -54,7 +54,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 return $returnval
         }
 
-        Mock -CommandName Get-SPDSCAssemblyVersion -MockWith {
+        Mock -CommandName Get-SPDscAssemblyVersion -MockWith {
             return $Global:SPDscHelper.CurrentStubBuildNumber.Major
         }
 

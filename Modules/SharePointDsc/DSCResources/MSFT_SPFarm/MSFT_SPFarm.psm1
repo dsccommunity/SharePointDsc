@@ -110,7 +110,7 @@ function Get-TargetResource
                "ensure property to 'present'")
     }
 
-    $installedVersion = Get-SPDSCInstalledProductVersion
+    $installedVersion = Get-SPDscInstalledProductVersion
     switch ($installedVersion.FileMajorPart)
     {
         15 {
@@ -167,12 +167,12 @@ function Get-TargetResource
     # Determine if a connection to a farm already exists
     $majorVersion = $installedVersion.FileMajorPart
     $regPath      = "hklm:SOFTWARE\Microsoft\Shared Tools\Web Server Extensions\$majorVersion.0\Secure\ConfigDB"
-    $dsnValue     = Get-SPDSCRegistryKey -Key $regPath -Value "dsn" -ErrorAction SilentlyContinue
+    $dsnValue     = Get-SPDscRegistryKey -Key $regPath -Value "dsn" -ErrorAction SilentlyContinue
 
     if ($null -ne $dsnValue)
     {
         Write-Verbose -Message "This node has already been connected to a farm"
-        $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+        $result = Invoke-SPDscCommand -Credential $InstallAccount `
                                       -Arguments $PSBoundParameters `
                                       -ScriptBlock {
             $params = $args[0]
@@ -237,7 +237,7 @@ function Get-TargetResource
                 $centralAdminAuth = "NTLM"
             }
 
-            $admService                 = Get-SPDSCContentService
+            $admService                 = Get-SPDscContentService
             $developerDashboardSettings = $admService.DeveloperDashboardSettings
             $developerDashboardStatus   = $developerDashboardSettings.DisplayLevel
 
@@ -254,7 +254,7 @@ function Get-TargetResource
                 CentralAdministrationAuth = $centralAdminAuth
                 DeveloperDashboard        = $developerDashboardStatus
             }
-            $installedVersion = Get-SPDSCInstalledProductVersion
+            $installedVersion = Get-SPDscInstalledProductVersion
             if ($installedVersion.FileMajorPart -eq 16)
             {
                 $server = Get-SPServer -Identity $env:COMPUTERNAME -ErrorAction SilentlyContinue
@@ -414,7 +414,7 @@ function Set-TargetResource
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
-    # Set default values to ensure they are passed to Invoke-SPDSCCommand
+    # Set default values to ensure they are passed to Invoke-SPDscCommand
     if (-not $PSBoundParameters.ContainsKey("CentralAdministrationPort"))
     {
         # If CentralAdministrationUrl is specified and is SSL, let's infer the port from the Url
@@ -440,7 +440,7 @@ function Set-TargetResource
 
         if ($CurrentValues.RunCentralAdmin -ne $RunCentralAdmin)
         {
-            Invoke-SPDSCCommand -Credential $InstallAccount `
+            Invoke-SPDscCommand -Credential $InstallAccount `
                                 -Arguments $PSBoundParameters `
                                 -ScriptBlock {
                 $params = $args[0]
@@ -509,7 +509,7 @@ function Set-TargetResource
                 ([System.Uri]$CentralAdministrationUrl).Scheme -eq 'https')
             {
                 Write-Verbose -Message "Updating CentralAdmin port to HTTPS"
-                Invoke-SPDSCCommand -Credential $InstallAccount `
+                Invoke-SPDscCommand -Credential $InstallAccount `
                                     -Arguments $PSBoundParameters `
                                     -ScriptBlock {
                     $params = $args[0]
@@ -572,7 +572,7 @@ function Set-TargetResource
             elseif ($CurrentValues.CentralAdministrationPort -ne $CentralAdministrationPort)
             {
                 Write-Verbose -Message "Updating CentralAdmin port to $CentralAdministrationPort"
-                Invoke-SPDSCCommand -Credential $InstallAccount `
+                Invoke-SPDscCommand -Credential $InstallAccount `
                                     -Arguments $PSBoundParameters `
                                     -ScriptBlock {
                     $params = $args[0]
@@ -586,13 +586,13 @@ function Set-TargetResource
         if ($CurrentValues.DeveloperDashboard -ne $DeveloperDashboard)
         {
             Write-Verbose -Message "Updating DeveloperDashboard to $DeveloperDashboard"
-            Invoke-SPDSCCommand -Credential $InstallAccount `
+            Invoke-SPDscCommand -Credential $InstallAccount `
                                 -Arguments $PSBoundParameters `
                                 -ScriptBlock {
                 $params = $args[0]
 
                 Write-Verbose -Message "Updating Developer Dashboard setting"
-                $admService                 = Get-SPDSCContentService
+                $admService                 = Get-SPDscContentService
                 $developerDashboardSettings = $admService.DeveloperDashboardSettings
                 $developerDashboardSettings.DisplayLevel = [Microsoft.SharePoint.Administration.SPDeveloperDashboardLevel]::$params.DeveloperDashboard
                 $developerDashboardSettings.Update()
@@ -605,7 +605,7 @@ function Set-TargetResource
     {
         Write-Verbose -Message "Server not part of farm, creating or joining farm"
 
-        $actionResult = Invoke-SPDSCCommand -Credential $InstallAccount `
+        $actionResult = Invoke-SPDscCommand -Credential $InstallAccount `
                                             -Arguments @($PSBoundParameters, $PSScriptRoot) `
                                             -ScriptBlock {
             $params     = $args[0]
@@ -614,14 +614,14 @@ function Set-TargetResource
             $modulePath = "..\..\Modules\SharePointDsc.Farm\SPFarm.psm1"
             Import-Module -Name (Join-Path -Path $scriptRoot -ChildPath $modulePath -Resolve)
 
-            $sqlInstanceStatus = Get-SPDSCSQLInstanceStatus -SQLServer $params.DatabaseServer `
+            $sqlInstanceStatus = Get-SPDscSQLInstanceStatus -SQLServer $params.DatabaseServer `
 
             if ($sqlInstanceStatus.MaxDOPCorrect -ne $true)
             {
                 throw "The MaxDOP setting is incorrect. Please correct before continuing."
             }
 
-            $dbStatus = Get-SPDSCConfigDBStatus -SQLServer $params.DatabaseServer `
+            $dbStatus = Get-SPDscConfigDBStatus -SQLServer $params.DatabaseServer `
                                                 -Database $params.FarmConfigDatabaseName
 
             while ($dbStatus.Locked -eq $true)
@@ -630,7 +630,7 @@ function Set-TargetResource
                                         "database is currently being provisioned by a remote " + `
                                         "server, this server will wait for this to complete")
                 Start-Sleep -Seconds 30
-                $dbStatus = Get-SPDSCConfigDBStatus -SQLServer $params.DatabaseServer `
+                $dbStatus = Get-SPDscConfigDBStatus -SQLServer $params.DatabaseServer `
                                                     -Database $params.FarmConfigDatabaseName
             }
 
@@ -646,7 +646,7 @@ function Set-TargetResource
                 SkipRegisterAsDistributedCacheHost = $true
             }
 
-            $installedVersion = Get-SPDSCInstalledProductVersion
+            $installedVersion = Get-SPDscInstalledProductVersion
             switch ($installedVersion.FileMajorPart)
             {
                 15 {
@@ -720,7 +720,7 @@ function Set-TargetResource
             $farmAction = ""
             if ($createFarm -eq $false)
             {
-                $dbStatus = Get-SPDSCConfigDBStatus -SQLServer $params.DatabaseServer `
+                $dbStatus = Get-SPDscConfigDBStatus -SQLServer $params.DatabaseServer `
                                                     -Database $params.FarmConfigDatabaseName
                 $loopCount = 0
                 while ($dbStatus.DatabaseExists -eq $false -and $loopCount -lt 15)
@@ -730,7 +730,7 @@ function Set-TargetResource
                                             "15 minutes for this to complete")
                     Start-Sleep -Seconds 60
                     $loopCount++
-                    $dbStatus = Get-SPDSCConfigDBStatus -SQLServer $params.DatabaseServer `
+                    $dbStatus = Get-SPDscConfigDBStatus -SQLServer $params.DatabaseServer `
                                                         -Database $params.FarmConfigDatabaseName
                 }
 
@@ -900,7 +900,7 @@ function Set-TargetResource
             if ($params.ContainsKey("DeveloperDashboard") -and $params.DeveloperDashboard -ne "Off")
             {
                 Write-Verbose -Message "Updating Developer Dashboard setting"
-                $admService                 = Get-SPDSCContentService
+                $admService                 = Get-SPDscContentService
                 $developerDashboardSettings = $admService.DeveloperDashboardSettings
                 $developerDashboardSettings.DisplayLevel = [Microsoft.SharePoint.Administration.SPDeveloperDashboardLevel]::$params.DeveloperDashboard
                 $developerDashboardSettings.Update()
@@ -1007,6 +1007,9 @@ function Test-TargetResource
     $PSBoundParameters.Ensure = $Ensure
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
+
+    Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
+    Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
 
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
                                     -DesiredValues $PSBoundParameters `

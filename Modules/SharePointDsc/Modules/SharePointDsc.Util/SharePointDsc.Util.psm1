@@ -1,4 +1,4 @@
-function Add-SPDSCUserToLocalAdmin
+function Add-SPDscUserToLocalAdmin
 {
     [CmdletBinding()]
     param
@@ -99,23 +99,30 @@ function Convert-SPDscHashtableToString
 {
     param
     (
+        [Parameter()]
         [System.Collections.Hashtable]
         $Hashtable
     )
-    $first = $true
-    foreach($pair in $Hashtable.GetEnumerator())
+    $values = @()
+    foreach ($pair in $Hashtable.GetEnumerator())
     {
-        if ($first)
+        if ($pair.Value -is [System.Array])
         {
-            $first = $false
+            $str = "$($pair.Key)=($($pair.Value -join ","))"
+        }
+        elseif ($pair.Value -is [System.Collections.Hashtable])
+        {
+            $str = "$($pair.Key)={$(Convert-SPDscHashtableToString -Hashtable $pair.Value)}"
         }
         else
         {
-            $output += '; '
+            $str = "$($pair.Key)=$($pair.Value)"
         }
-        $output+="{0}={1}" -f $($pair.key),$($pair.Value)
+        $values += $str
     }
-    return $output
+
+    [array]::Sort($values)
+    return ($values -join "; ")
 }
 
 function Get-SPDscOSVersion
@@ -125,7 +132,7 @@ function Get-SPDscOSVersion
     return [System.Environment]::OSVersion.Version
 }
 
-function Get-SPDSCAssemblyVersion
+function Get-SPDscAssemblyVersion
 {
     [CmdletBinding()]
     param
@@ -137,7 +144,7 @@ function Get-SPDSCAssemblyVersion
     return (Get-Command $PathToAssembly).FileVersionInfo.FileMajorPart
 }
 
-function Get-SPDSCBuildVersion
+function Get-SPDscBuildVersion
 {
     [CmdletBinding()]
     param
@@ -283,7 +290,7 @@ function Get-SPDscRegProductsInfo
     return $sharePointPrograms.DisplayName
 }
 
-function Get-SPDSCRegistryKey
+function Get-SPDscRegistryKey
 {
     [CmdletBinding()]
     param
@@ -308,7 +315,29 @@ function Get-SPDSCRegistryKey
     }
 }
 
-function Get-SPDSCServiceContext
+function Get-SPDscServerPatchStatus
+{
+    $farm = Get-SPFarm
+    $productVersions = [Microsoft.SharePoint.Administration.SPProductVersions]::GetProductVersions($farm)
+    $server = Get-SPServer $env:COMPUTERNAME
+    $serverProductInfo = $productVersions.GetServerProductInfo($server.Id);
+    if ($null -ne $serverProductInfo)
+    {
+        $statusType = $serverProductInfo.InstallStatus;
+        if ($statusType -ne 0)
+        {
+            $statusType = $serverProductInfo.GetUpgradeStatus($farm, $server);
+        }
+    }
+    else
+    {
+        $statusType = [Microsoft.SharePoint.Administration.SPServerProductInfo+StatusType]::NoActionRequired;
+    }
+
+    return $statusType
+}
+
+function Get-SPDscServiceContext
 {
     [CmdletBinding()]
     param
@@ -320,13 +349,13 @@ function Get-SPDSCServiceContext
     return [Microsoft.SharePoint.SPServiceContext]::GetContext($proxyGroup,[Microsoft.SharePoint.SPSiteSubscriptionIdentifier]::Default)
 }
 
-function Get-SPDSCContentService
+function Get-SPDscContentService
 {
     [System.Reflection.Assembly]::LoadWithPartialName("Microsoft.SharePoint") | Out-Null
     return [Microsoft.SharePoint.Administration.SPWebService]::ContentService
 }
 
-function Get-SPDSCUserProfileSubTypeManager
+function Get-SPDscUserProfileSubTypeManager
 {
     [CmdletBinding()]
     param
@@ -337,7 +366,7 @@ function Get-SPDSCUserProfileSubTypeManager
     return [Microsoft.Office.Server.UserProfiles.ProfileSubtypeManager]::Get($Context)
 }
 
-function Get-SPDSCInstalledProductVersion
+function Get-SPDscInstalledProductVersion
 {
     [OutputType([System.Version])]
     param()
@@ -347,7 +376,7 @@ function Get-SPDSCInstalledProductVersion
     return (Get-Command $fullPath).FileVersionInfo
 }
 
-function Invoke-SPDSCCommand
+function Invoke-SPDscCommand
 {
     [CmdletBinding()]
     param
@@ -469,7 +498,7 @@ function Invoke-SPDSCCommand
     }
 }
 
-function Rename-SPDSCParamValue
+function Rename-SPDscParamValue
 {
     [CmdletBinding()]
     param
@@ -492,7 +521,7 @@ function Rename-SPDSCParamValue
     return $Params
 }
 
-function Remove-SPDSCUserToLocalAdmin
+function Remove-SPDscUserToLocalAdmin
 {
     [CmdletBinding()]
     param
@@ -541,6 +570,7 @@ function Remove-SPDscZoneMap
 function Resolve-SPDscSecurityIdentifier
 {
     [CmdletBinding()]
+    [OutputType([System.String])]
     param
     (
         [Parameter(Mandatory = $true)]
@@ -586,7 +616,7 @@ function Set-SPDscZoneMap
     }
 }
 
-function Test-SPDSCObjectHasProperty
+function Test-SPDscObjectHasProperty
 {
     [CmdletBinding()]
     [OutputType([System.Boolean])]
@@ -611,7 +641,7 @@ function Test-SPDSCObjectHasProperty
     return $false
 }
 
-function Test-SPDSCRunAsCredential
+function Test-SPDscRunAsCredential
 {
     [CmdletBinding()]
     [OutputType([System.Boolean])]
@@ -632,7 +662,7 @@ function Test-SPDSCRunAsCredential
     return $false
 }
 
-function Test-SPDSCRunningAsFarmAccount
+function Test-SPDscRunningAsFarmAccount
 {
     [CmdletBinding()]
     [OutputType([System.Boolean])]
@@ -656,7 +686,7 @@ function Test-SPDSCRunningAsFarmAccount
         $Username = $InstallAccount.UserName
     }
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount -ScriptBlock {
+    $result = Invoke-SPDscCommand -Credential $InstallAccount -ScriptBlock {
         try
         {
             $spFarm = Get-SPFarm
@@ -733,7 +763,7 @@ function Test-SPDscParameterState
                 }
                 else
                 {
-                    $CheckDesiredValue = Test-SPDSCObjectHasProperty -Object $DesiredValues -PropertyName $_
+                    $CheckDesiredValue = Test-SPDscObjectHasProperty -Object $DesiredValues -PropertyName $_
                 }
 
                 if ($CheckDesiredValue)
@@ -861,7 +891,7 @@ function Test-SPDscParameterState
     return $returnValue
 }
 
-function Test-SPDSCUserIsLocalAdmin
+function Test-SPDscUserIsLocalAdmin
 {
     [CmdletBinding()]
     param
@@ -887,7 +917,7 @@ function Test-SPDSCUserIsLocalAdmin
         }
 }
 
-function Test-SPDSCIsADUser
+function Test-SPDscIsADUser
 {
     [OutputType([System.Boolean])]
     [CmdletBinding()]
@@ -954,7 +984,7 @@ function Set-SPDscObjectPropertyIfValuePresent
     }
     else
     {
-        if (((Test-SPDSCObjectHasProperty $ParamsValue $ParamKey) -eq $true) `
+        if (((Test-SPDscObjectHasProperty $ParamsValue $ParamKey) -eq $true) `
           -and ($null -ne $ParamsValue.$ParamKey))
         {
             $ObjectToSet.$PropertyToSet = $ParamsValue.$ParamKey
@@ -962,7 +992,7 @@ function Set-SPDscObjectPropertyIfValuePresent
     }
 }
 
-function Remove-SPDSCGenericObject
+function Remove-SPDscGenericObject
 {
     [CmdletBinding()]
     param (
@@ -987,7 +1017,7 @@ function Format-OfficePatchGUID
     )
 
     $guidParts = $PatchGUID.Split("-")
-    if($guidParts.Count -ne 5 `
+    if ($guidParts.Count -ne 5 `
         -or $guidParts[0].Length -ne 8 `
         -or $guidParts[1].Length -ne 4 `
         -or $guidParts[2].Length -ne 4 `
@@ -1016,14 +1046,14 @@ function ConvertTo-TwoDigitFlipString
         $InputString
     )
 
-    if($InputString.Length % 2 -ne 0)
+    if ($InputString.Length % 2 -ne 0)
     {
         throw "The input string was not in the correct format. It needs to have an even length."
     }
 
     $flippedString = ""
 
-    for($i = 0; $i -lt $InputString.Length; $i++)
+    for ($i = 0; $i -lt $InputString.Length; $i++)
     {
         $flippedString += $InputString[$i+1] + $InputString[$i]
         $i++
@@ -1041,7 +1071,7 @@ function ConvertTo-ReverseString
     )
 
     $reverseString = ""
-    for($i = $InputString.Length - 1; $i -ge 0; $i--)
+    for ($i = $InputString.Length - 1; $i -ge 0; $i--)
     {
         $reverseString += $InputString[$i]
     }

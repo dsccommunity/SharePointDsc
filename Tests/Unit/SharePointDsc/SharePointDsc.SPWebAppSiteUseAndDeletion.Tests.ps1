@@ -34,8 +34,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
             Mock -CommandName Get-SPFarm -MockWith { throw "Unable to detect local farm" }
 
-            It "Should return null from the get method" {
-                Get-TargetResource @testParams | Should Be $null
+            It "Should return SendUnusedSiteCollectionNotifications=null from the get method" {
+                (Get-TargetResource @testParams).SendUnusedSiteCollectionNotifications | Should BeNullOrEmpty
             }
 
             It "Should return false from the test method" {
@@ -60,8 +60,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 return $null
             }
 
-            It "Should return null from the get method" {
-                Get-TargetResource @testParams | Should BeNullOrEmpty
+            It "Should return SendUnusedSiteCollectionNotifications=null from the get method" {
+                (Get-TargetResource @testParams).SendUnusedSiteCollectionNotifications | Should BeNullOrEmpty
             }
 
             It "Should return false from the test method" {
@@ -191,8 +191,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 }
             }
 
-            It "Should return values from the get method" {
-                Get-TargetResource @testParams | Should Not BeNullOrEmpty
+            It "Should return SendUnusedSiteCollectionNotifications=False from the get method" {
+                (Get-TargetResource @testParams).SendUnusedSiteCollectionNotifications | Should Be $false
             }
 
             It "Should return false from the test method" {
@@ -227,8 +227,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
             Mock -CommandName Get-SPFarm -MockWith { return @{} }
 
-            It "Should return values from the get method" {
-                Get-TargetResource @testParams | Should Not BeNullOrEmpty
+            It "Should return SendUnusedSiteCollectionNotifications=True from the get method" {
+                (Get-TargetResource @testParams).SendUnusedSiteCollectionNotifications | Should Be $true
             }
 
             It "Should return true from the test method" {

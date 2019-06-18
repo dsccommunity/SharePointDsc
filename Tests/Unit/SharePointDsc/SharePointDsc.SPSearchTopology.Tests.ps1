@@ -413,7 +413,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             It "Should return empty values from the get method" {
-                Get-TargetResource @testParams | Should Be $null
+                (Get-TargetResource @testParams).Admin | Should BeNullOrEmpty
             }
 
             It "Should return false from the test method" {

@@ -21,7 +21,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         # Initialize tests
 
         # Mocks for all contexts
-        Mock -CommandName Test-SPDSCIsADUser -MockWith { return $true }
+        Mock -CommandName Test-SPDscIsADUser -MockWith { return $true }
 
         Mock Grant-SPObjectSecurity -MockWith {}
         Mock Revoke-SPObjectSecurity -MockWith {}

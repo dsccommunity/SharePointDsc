@@ -19,7 +19,7 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting identity for service instance '$Name'"
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+    $result = Invoke-SPDscCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
 
         if ($params.Name -eq "SharePoint Server Search")
@@ -42,14 +42,14 @@ function Get-TargetResource
 
         switch ($processIdentity.CurrentIdentityType)
         {
-            "LocalSystem" { $ManagedAccount = "LocalSystem" }
+            "LocalSystem"    { $ManagedAccount = "LocalSystem" }
             "NetworkService" { $ManagedAccount = "NetworkService" }
-            "LocalService" { $ManagedAccount = "LocalService" }
-            Default { $ManagedAccount = $processIdentity.Username }
+            "LocalService"   { $ManagedAccount = "LocalService" }
+            Default          { $ManagedAccount = $processIdentity.Username }
         }
 
         return @{
-            Name = $params.Name
+            Name           = $params.Name
             ManagedAccount = $ManagedAccount
         }
     }
@@ -77,7 +77,7 @@ function Set-TargetResource
 
     Write-Verbose -Message "Setting service instance '$Name' to '$ManagedAccount'"
 
-    Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+    Invoke-SPDscCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
 
         if ($params.Name -eq "SharePoint Server Search")
@@ -148,6 +148,9 @@ function Test-TargetResource
     Write-Verbose -Message "Testing service instance '$Name' Process Identity"
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
+
+    Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
+    Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
 
     return ($CurrentValues.ManagedAccount -eq $ManagedAccount)
 }

@@ -240,8 +240,8 @@ function Get-TargetResource
         Write-Verbose -Message "File not blocked, continuing."
     }
 
-    $majorVersion = (Get-SPDSCAssemblyVersion -PathToAssembly $InstallerPath)
-    $buildVersion = (Get-SPDSCBuildVersion -PathToAssembly $InstallerPath)
+    $majorVersion = (Get-SPDscAssemblyVersion -PathToAssembly $InstallerPath)
+    $buildVersion = (Get-SPDscBuildVersion -PathToAssembly $InstallerPath)
     if ($majorVersion -eq 15)
     {
         Write-Verbose -Message "Version: SharePoint 2013"
@@ -394,7 +394,7 @@ function Get-TargetResource
     #SP2016/SP2019 prereqs
     if ($majorVersion -eq 16)
     {
-        if($buildVersion -lt 5000)
+        if ($buildVersion -lt 5000)
         {
             #SP2016 prereqs
             $prereqsToTest += @(
@@ -649,8 +649,8 @@ function Set-TargetResource
     }
 
     Write-Verbose -Message "Detecting SharePoint version from binaries"
-    $majorVersion = Get-SPDSCAssemblyVersion -PathToAssembly $InstallerPath
-    $buildVersion = Get-SPDSCBuildVersion -PathToAssembly $InstallerPath
+    $majorVersion = Get-SPDscAssemblyVersion -PathToAssembly $InstallerPath
+    $buildVersion = Get-SPDscBuildVersion -PathToAssembly $InstallerPath
     $osVersion = Get-SPDscOSVersion
     switch ($osVersion.Major)
     {
@@ -1040,6 +1040,9 @@ function Test-TargetResource
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
+    Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
+    Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
+
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
                                     -DesiredValues $PSBoundParameters `
                                     -ValuesToCheck @("Ensure")
@@ -1104,7 +1107,7 @@ function Test-SPDscPrereqInstallStatus
             "BundleUpgradeCode"
             {
                 $installedItem = $InstalledItems | Where-Object -FilterScript {
-                    $null -ne $_.BundleUpgradeCode -and (($_.BundleUpgradeCode.Trim() | Compare-Object $itemToCheck.SearchValue) -eq $null)
+                    $null -ne $_.BundleUpgradeCode -and ($null -eq ($_.BundleUpgradeCode.Trim() | Compare-Object $itemToCheck.SearchValue))
                 }
                 if ($null -eq $installedItem)
                 {
@@ -1116,14 +1119,11 @@ function Test-SPDscPrereqInstallStatus
                 {
                     $isRequiredVersionInstalled = $true;
 
-                    [int[]]$minimumRequiredVersion = $itemToCheck.MinimumRequiredVersion.Split('.')
-                    [int[]]$installedVersion = $installedItem.DisplayVersion.Split('.')
-                    for ([int]$index = 0; $index -lt $minimumRequiredVersion.Length -and $index -lt $installedVersion.Length; $index++)
+                    [System.Version]$minimumRequiredVersion = $itemToCheck.MinimumRequiredVersion
+                    [System.Version]$installedVersion = $installedItem.DisplayVersion
+                    if ($minimumRequiredVersion -gt $installedVersion)
                     {
-                        if ($minimumRequiredVersion[$index] -gt $installedVersion[$index])
-                        {
-                            $isRequiredVersionInstalled = $false;
-                        }
+                        $isRequiredVersionInstalled = $false;
                     }
                     if ($installedVersion.Length -eq 0 -or -not $isRequiredVersionInstalled)
                     {
