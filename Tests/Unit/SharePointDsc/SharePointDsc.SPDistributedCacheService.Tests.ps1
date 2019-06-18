@@ -61,7 +61,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                                                    -PassThru |
                                         Add-Member -MemberType ScriptMethod `
                                                    -Name Update `
-                                                   -Value {} `
+                                                   -Value { $global:SPDscUpdatedProcessID = $true } `
                                                    -PassThru |
                                         Add-Member -MemberType ScriptMethod `
                                                    -Name Deploy `
@@ -377,6 +377,49 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
             It "Should return true from the test method" {
                 Test-TargetResource @testParams | Should Be $true
+            }
+        }
+
+        Context -Name "Distributed cache is configured but with the incorrect service account" -Fixture {
+            $testParams = @{
+                Name                = "AppFabricCache"
+                Ensure              = "Present"
+                CacheSizeInMB       = 1024
+                ServiceAccount      = "DOMAIN\user"
+                CreateFirewallRules = $true
+            }
+
+            $Global:SPDscDCacheOnline = $true
+
+            Mock -CommandName Get-AFCacheHostConfiguration -MockWith {
+                return @{
+                    Size = $testParams.CacheSizeInMB
+                }
+            }
+            Mock -CommandName Get-CacheHost -MockWith {
+                return @{
+                    PortNo = 22233
+                }
+            }
+
+            Mock -CommandName Get-CimInstance -MockWith {
+                return @{
+                    StartName = "DOMAIN\wronguser"
+                }
+            }
+
+            It "Should return DOMAIN\wronguser from the get method" {
+                (Get-TargetResource @testParams).ServiceAccount | Should Be "DOMAIN\wronguser"
+            }
+
+            It "Should return false from the test method" {
+                Test-TargetResource @testParams | Should Be $false
+            }
+
+            $global:SPDscUpdatedProcessID = $false
+            It "Should correct the service account in the set method" {
+                Set-TargetResource @testParams
+                $global:SPDscUpdatedProcessID | Should Be $true
             }
         }
 
