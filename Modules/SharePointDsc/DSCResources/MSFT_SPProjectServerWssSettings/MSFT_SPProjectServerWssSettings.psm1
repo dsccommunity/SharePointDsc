@@ -4,34 +4,34 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [Parameter(Mandatory = $true)]  
-        [System.String] 
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $Url,
 
         [Parameter(Mandatory = $true)]
-        [ValidateSet("AutoCreate","UserChoice","DontCreate")]  
-        [System.String] 
+        [ValidateSet("AutoCreate","UserChoice","DontCreate")]
+        [System.String]
         $CreateProjectSiteMode,
 
-        [Parameter()] 
-        [System.Management.Automation.PSCredential] 
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 
     Write-Verbose -Message "Getting WSS settings for $Url"
 
-    if ((Get-SPDSCInstalledProductVersion).FileMajorPart -lt 16) 
+    if ((Get-SPDscInstalledProductVersion).FileMajorPart -lt 16)
     {
         throw [Exception] ("Support for Project Server in SharePointDsc is only valid for " + `
                            "SharePoint 2016 and 2019.")
     }
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+    $result = Invoke-SPDscCommand -Credential $InstallAccount `
                                   -Arguments @($PSBoundParameters, $PSScriptRoot) `
                                   -ScriptBlock {
         $params = $args[0]
         $scriptRoot = $args[1]
-        
+
         $modulePath = "..\..\Modules\SharePointDsc.ProjectServer\ProjectServerConnector.psm1"
         Import-Module -Name (Join-Path -Path $scriptRoot -ChildPath $modulePath -Resolve)
 
@@ -66,11 +66,11 @@ function Get-TargetResource
                 }
             }
         }
-        
+
         return @{
-            Url = $params.Url
+            Url                   = $params.Url
             CreateProjectSiteMode = $currentValue
-            InstallAccount = $params.InstallAccount
+            InstallAccount        = $params.InstallAccount
         }
     }
     return $result
@@ -82,28 +82,28 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [Parameter(Mandatory = $true)]  
-        [System.String] 
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $Url,
 
         [Parameter(Mandatory = $true)]
-        [ValidateSet("AutoCreate","UserChoice","DontCreate")]  
-        [System.String] 
+        [ValidateSet("AutoCreate","UserChoice","DontCreate")]
+        [System.String]
         $CreateProjectSiteMode,
 
-        [Parameter()] 
-        [System.Management.Automation.PSCredential] 
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 
     Write-Verbose -Message "Setting WSS settings for $Url"
 
-    Invoke-SPDSCCommand -Credential $InstallAccount `
+    Invoke-SPDscCommand -Credential $InstallAccount `
                         -Arguments @($PSBoundParameters, $PSScriptRoot) `
                         -ScriptBlock {
         $params = $args[0]
         $scriptRoot = $args[1]
-        
+
         $modulePath = "..\..\Modules\SharePointDsc.ProjectServer\ProjectServerConnector.psm1"
         Import-Module -Name (Join-Path -Path $scriptRoot -ChildPath $modulePath -Resolve)
 
@@ -140,26 +140,29 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [Parameter(Mandatory = $true)]  
-        [System.String] 
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $Url,
 
         [Parameter(Mandatory = $true)]
-        [ValidateSet("AutoCreate","UserChoice","DontCreate")]  
-        [System.String] 
+        [ValidateSet("AutoCreate","UserChoice","DontCreate")]
+        [System.String]
         $CreateProjectSiteMode,
 
-        [Parameter()] 
-        [System.Management.Automation.PSCredential] 
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 
     Write-Verbose -Message "Testing WSS settings for $Url"
 
-    $currentValues = Get-TargetResource @PSBoundParameters
+    $CurrentValues = Get-TargetResource @PSBoundParameters
+
+    Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
+    Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
 
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
-                                    -DesiredValues $PSBoundParameters 
+                                    -DesiredValues $PSBoundParameters
 }
 
 Export-ModuleMember -Function *-TargetResource

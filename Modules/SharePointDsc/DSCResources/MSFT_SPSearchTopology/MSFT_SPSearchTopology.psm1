@@ -43,7 +43,7 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting Search Topology for '$ServiceAppName'"
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+    $result = Invoke-SPDscCommand -Credential $InstallAccount `
                                   -Arguments $PSBoundParameters `
                                   -ScriptBlock {
         $params = $args[0]
@@ -54,8 +54,18 @@ function Get-TargetResource
 
         if ($null -eq $ssa)
         {
-            return $null
+            return @{
+                ServiceAppName          = $params.ServiceAppName
+                Admin                   = $null
+                Crawler                 = $null
+                ContentProcessing       = $null
+                AnalyticsProcessing     = $null
+                QueryProcessing         = $null
+                FirstPartitionDirectory = $null
+                IndexPartition          = $null
+            }
         }
+
         $currentTopology = $ssa.ActiveTopology
 
         $allServers = Get-SPServer | ForEach-Object -Process {
@@ -165,17 +175,18 @@ function Get-TargetResource
         }
 
         return @{
-            ServiceAppName = $params.ServiceAppName
-            Admin = $AdminComponents -replace ".$domain"
-            Crawler = $CrawlComponents -replace ".$domain"
-            ContentProcessing = $ContentProcessingComponents -replace ".$domain"
-            AnalyticsProcessing = $AnalyticsProcessingComponents -replace ".$domain"
-            QueryProcessing = $QueryProcessingComponents -replace ".$domain"
-            InstallAccount = $params.InstallAccount
+            ServiceAppName          = $params.ServiceAppName
+            Admin                   = $AdminComponents -replace ".$domain"
+            Crawler                 = $CrawlComponents -replace ".$domain"
+            ContentProcessing       = $ContentProcessingComponents -replace ".$domain"
+            AnalyticsProcessing     = $AnalyticsProcessingComponents -replace ".$domain"
+            QueryProcessing         = $QueryProcessingComponents -replace ".$domain"
             FirstPartitionDirectory = $firstPartition
-            IndexPartition = $IndexComponents -replace ".$domain"
+            IndexPartition          = $IndexComponents -replace ".$domain"
+            InstallAccount          = $params.InstallAccount
         }
     }
+
     return $result
 }
 
@@ -225,7 +236,7 @@ function Set-TargetResource
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
-    Invoke-SPDSCCommand -Credential $InstallAccount `
+    Invoke-SPDscCommand -Credential $InstallAccount `
                         -Arguments @($PSBoundParameters, $CurrentValues) `
                         -ScriptBlock {
 
@@ -254,9 +265,9 @@ function Set-TargetResource
                             })
 
         # Ensure the search service instance is running on all servers
-        foreach($searchServer in $AllSearchServers)
+        foreach ($searchServer in $AllSearchServers)
         {
-            if($searchServer -like '*.*')
+            if ($searchServer -like '*.*')
             {
                 Write-Verbose -Message "Server name specified in FQDN, extracting just server name."
                 $searchServer = $searchServer.Split('.')[0]
@@ -292,7 +303,7 @@ function Set-TargetResource
         }
 
         # Create the index partition directory on each remote server
-        foreach($IndexPartitionServer in $params.IndexPartition)
+        foreach ($IndexPartitionServer in $params.IndexPartition)
         {
             $networkPath = "\\$IndexPartitionServer\" + `
                            $params.FirstPartitionDirectory.Replace(":\", "$\")
@@ -309,7 +320,7 @@ function Set-TargetResource
         $AllSearchServiceInstances = @{}
         foreach ($server in $AllSearchServers)
         {
-            if($server -like '*.*')
+            if ($server -like '*.*')
             {
                 Write-Verbose -Message "Server name specified in FQDN, extracting just server name."
                 $server = $server.Split('.')[0]
@@ -344,12 +355,12 @@ function Set-TargetResource
                                                       -SearchTopology $currentTopology
 
         $componentTypes = @{
-            Admin = "AdminComponent"
-            Crawler = "CrawlComponent"
-            ContentProcessing = "ContentProcessingComponent"
+            Admin               = "AdminComponent"
+            Crawler             = "CrawlComponent"
+            ContentProcessing   = "ContentProcessingComponent"
             AnalyticsProcessing = "AnalyticsProcessingComponent"
-            QueryProcessing = "QueryProcessingComponent"
-            IndexPartition = "IndexComponent"
+            QueryProcessing     = "QueryProcessingComponent"
+            IndexPartition      = "IndexComponent"
         }
 
         # Build up the topology changes for each object type
@@ -377,7 +388,7 @@ function Set-TargetResource
                     $params.$CurrentSearchProperty -contains $_ -eq $false
                 }
             }
-            foreach($ComponentToAdd in $ComponentsToAdd)
+            foreach ($ComponentToAdd in $ComponentsToAdd)
             {
                 $NewComponentParams = @{
                     SearchTopology = $newTopology
@@ -414,7 +425,7 @@ function Set-TargetResource
                     }
                 }
             }
-            foreach($ComponentToRemove in $ComponentsToRemove)
+            foreach ($ComponentToRemove in $ComponentsToRemove)
             {
                 if ($componentTypes.$CurrentSearchProperty -eq "IndexComponent")
                 {
@@ -508,10 +519,8 @@ function Test-TargetResource
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
-    if ($null -eq $CurrentValues)
-    {
-        return $false
-    }
+    Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
+    Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
 
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
                                         -DesiredValues $PSBoundParameters `

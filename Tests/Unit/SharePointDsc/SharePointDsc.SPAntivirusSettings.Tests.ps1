@@ -21,13 +21,13 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         # Test contexts
         Context -Name "The server is not part of SharePoint farm" -Fixture {
             $testParams = @{
-                IsSingleInstance = "Yes"
-                ScanOnDownload = $true
-                ScanOnUpload = $true
+                IsSingleInstance      = "Yes"
+                ScanOnDownload        = $true
+                ScanOnUpload          = $true
                 AllowDownloadInfected = $true
-                AttemptToClean = $true
-                TimeoutDuration = 60
-                NumberOfThreads = 5
+                AttemptToClean        = $true
+                TimeoutDuration       = 60
+                NumberOfThreads       = 5
             }
 
             Mock -CommandName Get-SPFarm -MockWith {
@@ -55,24 +55,24 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "The server is in a farm and the incorrect settings have been applied" -Fixture {
             $testParams = @{
-                IsSingleInstance = "Yes"
-                ScanOnDownload = $true
-                ScanOnUpload = $true
+                IsSingleInstance      = "Yes"
+                ScanOnDownload        = $true
+                ScanOnUpload          = $true
                 AllowDownloadInfected = $true
-                AttemptToClean = $true
-                TimeoutDuration = 60
-                NumberOfThreads = 5
+                AttemptToClean        = $true
+                TimeoutDuration       = 60
+                NumberOfThreads       = 5
             }
 
-            Mock -CommandName Get-SPDSCContentService -MockWith {
+            Mock -CommandName Get-SPDscContentService -MockWith {
                 $returnVal = @{
                     AntivirusSettings = @{
-                        AllowDownload = $false
+                        AllowDownload       = $false
                         DownloadScanEnabled = $false
-                        UploadScanEnabled = $false
-                        CleaningEnabled = $false
-                        NumberOfThreads = 0
-                        Timeout = @{
+                        UploadScanEnabled   = $false
+                        CleaningEnabled     = $false
+                        NumberOfThreads     = 0
+                        Timeout             = @{
                             TotalSeconds = 0;
                         }
                     }
@@ -101,24 +101,24 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "The server is in a farm and the correct settings have been applied" -Fixture {
             $testParams = @{
-                IsSingleInstance = "Yes"
-                ScanOnDownload = $true
-                ScanOnUpload = $true
+                IsSingleInstance      = "Yes"
+                ScanOnDownload        = $true
+                ScanOnUpload          = $true
                 AllowDownloadInfected = $true
-                AttemptToClean = $true
-                TimeoutDuration = 60
-                NumberOfThreads = 5
+                AttemptToClean        = $true
+                TimeoutDuration       = 60
+                NumberOfThreads       = 5
             }
 
-            Mock -CommandName Get-SPDSCContentService -MockWith {
+            Mock -CommandName Get-SPDscContentService -MockWith {
                 $returnVal = @{
                     AntivirusSettings = @{
-                        AllowDownload = $true
+                        AllowDownload       = $true
                         DownloadScanEnabled = $true
-                        UploadScanEnabled = $true
-                        CleaningEnabled = $true
-                        NumberOfThreads = 5
-                        Timeout = @{
+                        UploadScanEnabled   = $true
+                        CleaningEnabled     = $true
+                        NumberOfThreads     = 5
+                        Timeout             = @{
                             TotalSeconds = 60;
                         }
                     }

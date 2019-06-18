@@ -72,7 +72,7 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting site collection $Url"
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+    $result = Invoke-SPDscCommand -Credential $InstallAccount `
                                   -Arguments $PSBoundParameters `
                                   -ScriptBlock {
         $params = $args[0]
@@ -85,27 +85,29 @@ function Get-TargetResource
 
             $site = New-Object "Microsoft.SharePoint.SPSite" -ArgumentList @($params.Url, $centralAdminSite.SystemAccount.UserToken)
         }
-        catch [System.Exception] {}
+        catch [System.Exception]
+        {
+        }
 
         if ($null -eq $site)
         {
             Write-Verbose "Site Collection not found"
 
             return @{
-                Url = $params.Url
-                OwnerAlias = $null
-                CompatibilityLevel = $null
-                ContentDatabase = $null
-                Description = $null
+                Url                      = $params.Url
+                OwnerAlias               = $null
+                CompatibilityLevel       = $null
+                ContentDatabase          = $null
+                Description              = $null
                 HostHeaderWebApplication = $null
-                Language = $null
-                Name = $null
-                OwnerEmail = $null
-                QuotaTemplate = $null
-                SecondaryEmail = $null
-                SecondaryOwnerAlias = $null
-                Template = $null
-                CreateDefaultGroups = $null
+                Language                 = $null
+                Name                     = $null
+                OwnerEmail               = $null
+                QuotaTemplate            = $null
+                SecondaryEmail           = $null
+                SecondaryOwnerAlias      = $null
+                Template                 = $null
+                CreateDefaultGroups      = $null
             }
         }
         else
@@ -149,7 +151,7 @@ function Get-TargetResource
                 }
             }
 
-            $admService = Get-SPDSCContentService
+            $admService = Get-SPDscContentService
             $quota = ($admService.QuotaTemplates | `
                       Where-Object -FilterScript {
                           $_.QuotaID -eq $site.Quota.QuotaID
@@ -164,22 +166,22 @@ function Get-TargetResource
             }
 
             return @{
-                Url = $site.Url
-                OwnerAlias = $owner
-                CompatibilityLevel = $site.CompatibilityLevel
-                ContentDatabase = $site.ContentDatabase.Name
-                Description = $site.RootWeb.Description
+                Url                      = $site.Url
+                OwnerAlias               = $owner
+                CompatibilityLevel       = $site.CompatibilityLevel
+                ContentDatabase          = $site.ContentDatabase.Name
+                Description              = $site.RootWeb.Description
                 HostHeaderWebApplication = $HostHeaderWebApplication
-                Language = $site.RootWeb.Language
-                Name = $site.RootWeb.Name
-                OwnerEmail = $site.Owner.Email
-                QuotaTemplate = $quota
-                SecondaryEmail = $site.SecondaryContact.Email
-                SecondaryOwnerAlias = $secondaryOwner
-                Template = "$($site.RootWeb.WebTemplate)#$($site.RootWeb.Configuration)"
-                CreateDefaultGroups = $CreateDefaultGroups
-                AdministrationSiteType = $site.AdministrationSiteType
-                InstallAccount = $params.InstallAccount
+                Language                 = $site.RootWeb.Language
+                Name                     = $site.RootWeb.Name
+                OwnerEmail               = $site.Owner.Email
+                QuotaTemplate            = $quota
+                SecondaryEmail           = $site.SecondaryContact.Email
+                SecondaryOwnerAlias      = $secondaryOwner
+                Template                 = "$($site.RootWeb.WebTemplate)#$($site.RootWeb.Configuration)"
+                CreateDefaultGroups      = $CreateDefaultGroups
+                AdministrationSiteType   = $site.AdministrationSiteType
+                InstallAccount           = $params.InstallAccount
             }
         }
     }
@@ -266,9 +268,9 @@ function Set-TargetResource
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
-                                  -Arguments @($PSBoundParameters,$CurrentValues) `
-                                  -ScriptBlock {
+    $null = Invoke-SPDscCommand -Credential $InstallAccount `
+                                -Arguments @($PSBoundParameters,$CurrentValues) `
+                                -ScriptBlock {
         $params = $args[0]
         $CurrentValues = $args[1]
         $doCreateDefaultGroups = $false
@@ -364,7 +366,7 @@ function Set-TargetResource
             $centralAdminSite = Get-SPSite -Identity $centralAdminWebApp.Url
             $systemAccountSite = New-Object "Microsoft.SharePoint.SPSite" -ArgumentList @($site.Id, $centralAdminSite.SystemAccount.UserToken)
 
-            if($null -eq $systemAccountSite.SecondaryContact)
+            if ($null -eq $systemAccountSite.SecondaryContact)
             {
                 $secondaryOwnerLogin = $null
             }
@@ -455,6 +457,9 @@ function Test-TargetResource
     Write-Verbose -Message "Testing site collection $Url"
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
+
+    Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
+    Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
 
     if ($CreateDefaultGroups -eq $true)
     {

@@ -69,7 +69,7 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting SPTrustedIdentityTokenIssuer ProviderRealms"
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+    $result = Invoke-SPDscCommand -Credential $InstallAccount `
                                   -Arguments $PSBoundParameters `
                                   -ScriptBlock {
         $params = $args[0]
@@ -96,13 +96,13 @@ function Get-TargetResource
     if ($null -eq $result)
     {
         return @{
-            IssuerName = $IssuerName
-            ProviderRealms = $null
+            IssuerName              = $IssuerName
+            ProviderRealms          = $null
             ProviderRealmsToInclude = $null
             ProviderRealmsToExclude = $null
-            CurrentRealms = $null
-            RealmsToAdd = $null
-            Ensure = "Absent"
+            CurrentRealms           = $null
+            RealmsToAdd             = $null
+            Ensure                  = "Absent"
         }
     }
     $currentStatus = Get-ProviderRealmsStatus -currentRealms $result `
@@ -112,13 +112,13 @@ function Get-TargetResource
                                               -Ensure $Ensure
 
     return @{
-            IssuerName = $IssuerName
-            ProviderRealms = $paramRealms
+            IssuerName              = $IssuerName
+            ProviderRealms          = $paramRealms
             ProviderRealmsToInclude = $includeRealms
             ProviderRealmsToExclude = $excludeRealms
-            CurrentRealms = $result
-            RealmsToAdd = $currentStatus.NewRealms
-            Ensure = $currentStatus.CurrentStatus
+            CurrentRealms           = $result
+            RealmsToAdd             = $currentStatus.NewRealms
+            Ensure                  = $currentStatus.CurrentStatus
         }
 }
 
@@ -156,14 +156,14 @@ function Set-TargetResource
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
-    if($CurrentValues.RealmsToAdd.Count -gt 0)
+    if ($CurrentValues.RealmsToAdd.Count -gt 0)
     {
         $PSBoundParameters.Add('RealmsToAdd', $CurrentValues.RealmsToAdd)
 
         Write-Verbose -Message "Setting SPTrustedIdentityTokenIssuer provider realms"
-        $result = Invoke-SPDSCCommand -Credential $InstallAccount `
-                                      -Arguments $PSBoundParameters `
-                                      -ScriptBlock {
+        $null = Invoke-SPDscCommand -Credential $InstallAccount `
+                                    -Arguments $PSBoundParameters `
+                                    -ScriptBlock {
             $params = $args[0]
 
             $trust = Get-SPTrustedIdentityTokenIssuer -Identity $params.IssuerName `
@@ -220,6 +220,9 @@ function Test-TargetResource
     Write-Verbose -Message "Testing SPTrustedIdentityTokenIssuer provider realms"
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
+
+    Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
+    Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
 
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
                                     -DesiredValues $PSBoundParameters `

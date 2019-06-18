@@ -38,7 +38,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             Mock -CommandName Get-SPWebApplicationAppDomain -MockWith { return $null }
 
             It "Should return null from the get method" {
-                Get-TargetResource @testParams | Should BeNullOrEmpty
+                (Get-TargetResource @testParams).AppDomain | Should BeNullOrEmpty
             }
 
             It "Should return false from the test method" {
@@ -70,7 +70,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             It "Should return null from the get method" {
-                Get-TargetResource @testParams | Should Not BeNullOrEmpty
+                (Get-TargetResource @testParams).AppDomain | Should Be "wrong.domain"
             }
 
             It "Should return false from the test method" {
@@ -103,7 +103,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             It "Should return null from the get method" {
-                Get-TargetResource @testParams | Should Not BeNullOrEmpty
+                (Get-TargetResource @testParams).AppDomain | Should Be $testParams.AppDomain
             }
 
             It "Should return false from the test method" {
@@ -128,7 +128,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             It "Should return null from the get method" {
-                Get-TargetResource @testParams | Should Not BeNullOrEmpty
+                (Get-TargetResource @testParams).AppDomain | Should Be "invalid.domain"
             }
 
             It "Should return false from the test method" {

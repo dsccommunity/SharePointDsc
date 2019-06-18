@@ -110,7 +110,7 @@ namespace Microsoft.SharePoint.Administration {
             }
             return $returnval
         }
-        Mock -CommandName Get-SPDSCContentService -MockWith {
+        Mock -CommandName Get-SPDscContentService -MockWith {
             $quotaTemplates = @(@{
                     Test = @{
                         QuotaId = 65000
@@ -205,7 +205,7 @@ namespace Microsoft.SharePoint.Administration {
                 $QuotaTemplate = "Test"
                 $AdministrationSiteType -eq "TenantAdministration"
             }
-            Mock -CommandName Get-SPDSCContentService -MockWith {
+            Mock -CommandName Get-SPDscContentService -MockWith {
                 $quotaTemplates = @(@{
                     QuotaId = 1
                     Name = "WrongTemplate"

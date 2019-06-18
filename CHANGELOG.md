@@ -2,10 +2,36 @@
 
 ## Unreleased
 
+* SharePointDsc generic
+  * Improved logging in all resource. They are now outputting
+    the current and targeted values in the Test method.
+  * Updated various resources to comply with coding style guidelines.
+  * Updated the following resources to not return Null from the Get
+    method anymore, but an hashtable which a null values:
+    SPDesignerSettings, SPDiagnosticLoggingSettings, SPFarmAdministrators,
+    SPHealthAnalyzerRuleState, SPIrmSettings, SPOutgoingEmailSettings,
+    SPPasswordChangeSettings, SPSearchTopology, SPServiceAppProxyGroup,
+    SPTimerJobState, SPUserProfileSection, SPUserProfileSyncConnection,
+    SPWebAppBlockedFileTypes, SPWebApplicationAppDomain, SPWebAppPolicy,
+    SPWebAppSiteUseAndDeletion, SPWebAppThrottlingSettings,
+    SPWordAutomationServiceApp.
+* SPConfigWizard
+  * Added check to make sure the Config Wizard is only executed when all
+    servers have the binaries installed.
 * SPDistributedCacheService
   * Added ability to check for incorrect service account.
 * SPFarm
-  * Throw error in Get method if CentralAdministrationUrl is HTTP
+  * Throw error in Get method if CentralAdministrationUrl is HTTP.
+* SPInstallPrereqs
+  * Fixed bug in version check, where lower versions would be
+    detected as higher versions.
+* SPSecureStore
+  * Fixed issue where the test issue returned false is the service
+    application didn't exist, but the database name/server parameter
+    was specified.
+* SPUserProfileSyncConnection
+  * Fixed issue where the parameter Server was checked in SP2016
+    but isn't used there and therefore always fails.
 
 ## v3.4
 

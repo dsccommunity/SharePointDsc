@@ -1,9 +1,9 @@
-# Ignoring this because we need to generate a stub credential to run the tests here 
+# Ignoring this because we need to generate a stub credential to run the tests here
 [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingConvertToSecureStringWithPlainText", "")]
 [CmdletBinding()]
 param(
     [Parameter()]
-    [string] 
+    [string]
     $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
                                          -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
                                          -Resolve)
@@ -21,90 +21,90 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
     InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
         Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
-        Context -Name "Validate Get-SPDSCAssemblyVersion" -Fixture {
+        Context -Name "Validate Get-SPDscAssemblyVersion" -Fixture {
             It "Should return the version number of a given executable" {
                 $testPath = "C:\windows\System32\WindowsPowerShell\v1.0\powershell.exe"
-                Get-SPDSCAssemblyVersion -PathToAssembly $testPath | Should Not Be 0
+                Get-SPDscAssemblyVersion -PathToAssembly $testPath | Should Not Be 0
             }
         }
 
-        Context -Name "Validate Invoke-SPDSCCommand" -Fixture {
+        Context -Name "Validate Invoke-SPDscCommand" -Fixture {
 
-            Mock -CommandName Invoke-Command -MockWith { 
-                return $null 
+            Mock -CommandName Invoke-Command -MockWith {
+                return $null
             }
-            Mock -CommandName New-PSSession -MockWith { 
-                return $null 
+            Mock -CommandName New-PSSession -MockWith {
+                return $null
             }
-            Mock -CommandName Get-PSSnapin -MockWith { 
-                return $null 
+            Mock -CommandName Get-PSSnapin -MockWith {
+                return $null
             }
-            Mock -CommandName Add-PSSnapin -MockWith { 
-                return $null 
+            Mock -CommandName Add-PSSnapin -MockWith {
+                return $null
             }
 
-            # The use of the '4>&1' operator is used to hide the verbose output from the 
-            # Invoke-SPDSCCommand command in these tests as it is not necessary to Validate
-            # the output of the tests. 
+            # The use of the '4>&1' operator is used to hide the verbose output from the
+            # Invoke-SPDscCommand command in these tests as it is not necessary to Validate
+            # the output of the tests.
 
             It "Should execute a command as the local run as user" {
-                Invoke-SPDSCCommand -ScriptBlock { return "value" } 4>&1
-            } 
+                Invoke-SPDscCommand -ScriptBlock { return "value" } 4>&1
+            }
 
             It "Should execute a command as the local run as user with additional arguments" {
-                Invoke-SPDSCCommand -ScriptBlock { return "value" } `
+                Invoke-SPDscCommand -ScriptBlock { return "value" } `
                                     -Arguments @{ Something = "42" } 4>&1
             }
 
             It "Should execute a command as the specified InstallAccount user where it is different to the current user" {
                 $mockPassword = ConvertTo-SecureString -String "password" -AsPlainText -Force
                 $mockCredential = New-Object -TypeName System.Management.Automation.PSCredential ("username", $mockPassword)
-                Invoke-SPDSCCommand -ScriptBlock { return "value" } `
+                Invoke-SPDscCommand -ScriptBlock { return "value" } `
                                     -Credential $mockCredential 4>&1
             }
 
             It "Should throw an exception when the run as user is the same as the InstallAccount user" {
                 $mockPassword = ConvertTo-SecureString -String "password" -AsPlainText -Force
                 $mockCredential = New-Object -TypeName System.Management.Automation.PSCredential ("$($Env:USERDOMAIN)\$($Env:USERNAME)", $mockPassword)
-                { Invoke-SPDSCCommand -ScriptBlock { return "value" } `
+                { Invoke-SPDscCommand -ScriptBlock { return "value" } `
                                       -Credential $mockCredential 4>&1 } | Should Throw
             }
 
             It "Should throw normal exceptions when triggered in the script block" {
-                Mock -CommandName Invoke-Command -MockWith { 
-                    throw [Exception] "A random exception" 
+                Mock -CommandName Invoke-Command -MockWith {
+                    throw [Exception] "A random exception"
                 }
 
-                { Invoke-SPDSCCommand -ScriptBlock { return "value" } 4>&1 } | Should Throw
+                { Invoke-SPDscCommand -ScriptBlock { return "value" } 4>&1 } | Should Throw
             }
 
             It "Should throw normal exceptions when triggered in the script block using InstallAccount" {
-                Mock -CommandName Invoke-Command -MockWith { 
-                    throw [Exception] "A random exception" 
+                Mock -CommandName Invoke-Command -MockWith {
+                    throw [Exception] "A random exception"
                 }
 
                 $mockPassword = ConvertTo-SecureString -String "password" -AsPlainText -Force
                 $mockCredential = New-Object -TypeName System.Management.Automation.PSCredential ("username", $mockPassword)
-                { Invoke-SPDSCCommand -ScriptBlock { return "value" } `
+                { Invoke-SPDscCommand -ScriptBlock { return "value" } `
                                       -Credential $mockCredential 4>&1 } | Should Throw
             }
 
             It "Should handle a SharePoint update conflict exception by rebooting the server to retry" {
-                Mock -CommandName Invoke-Command -MockWith { 
-                    throw [Exception] "An update conflict has occurred, and you must re-try this action." 
+                Mock -CommandName Invoke-Command -MockWith {
+                    throw [Exception] "An update conflict has occurred, and you must re-try this action."
                 }
 
-                { Invoke-SPDSCCommand -ScriptBlock { return "value" } 4>&1 } | Should Not Throw
+                { Invoke-SPDscCommand -ScriptBlock { return "value" } 4>&1 } | Should Not Throw
             }
 
             It "Should handle a SharePoint update conflict exception by rebooting the server to retry using InstallAccount" {
-                Mock -CommandName Invoke-Command -MockWith { 
-                    throw [Exception] "An update conflict has occurred, and you must re-try this action." 
+                Mock -CommandName Invoke-Command -MockWith {
+                    throw [Exception] "An update conflict has occurred, and you must re-try this action."
                 }
 
                 $mockPassword = ConvertTo-SecureString -String "password" -AsPlainText -Force
                 $mockCredential = New-Object -TypeName System.Management.Automation.PSCredential ("username", $mockPassword)
-                { Invoke-SPDSCCommand -ScriptBlock { return "value" } `
+                { Invoke-SPDscCommand -ScriptBlock { return "value" } `
                                       -Credential $mockCredential 4>&1 } | Should Not Throw
             }
         }
@@ -165,7 +165,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
             Mock -CommandName "New-Object" -ParameterFilter {
                 $TypeName -eq "System.DirectoryServices.DirectorySearcher"
-            } -MockWith { 
+            } -MockWith {
                 $searcher = @{
                     SearchRoot = $null
                     PageSize = $null
@@ -202,7 +202,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                                          } -PassThru -Force
                 return $sid
             }
-            
+
             Mock -CommandName "New-Object" -ParameterFilter {
                 $TypeName -eq "System.Security.Principal.NTAccount"
             } -MockWith {
@@ -226,7 +226,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
             Mock -CommandName "New-Object" -ParameterFilter {
                 $TypeName -eq "System.DirectoryServices.DirectorySearcher"
-            } -MockWith { 
+            } -MockWith {
                 $searcher = @{
                     SearchRoot = $null
                     PageSize = $null
@@ -261,7 +261,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
             Mock -CommandName "New-Object" -ParameterFilter {
                 $TypeName -eq "System.DirectoryServices.DirectorySearcher"
-            } -MockWith { 
+            } -MockWith {
                 $searcher = @{
                     SearchRoot = $null
                     PageSize = $null
@@ -298,7 +298,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                                          } -PassThru -Force
                 return $sid
             }
-            
+
             Mock -CommandName "New-Object" -ParameterFilter {
                 $TypeName -eq "System.Security.Principal.NTAccount"
             } -MockWith {

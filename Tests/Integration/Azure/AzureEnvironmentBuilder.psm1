@@ -41,7 +41,7 @@ The username and password to use as the local administrator on all machines. The
 on this account will also be used for all service accounts
 
 .EXAMPLE
-New-SPDscAzureLab -ResourceGroupName "SPDSCTestLab" `
+New-SPDscAzureLab -ResourceGroupName "SPDscTestLab" `
                   -Location southeastasia `
                   -StorageAccountName "spdsctestlab1" `
                   -SoftwareStorageAccountName "spdscsoftware1" `

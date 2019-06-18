@@ -370,7 +370,7 @@ function Set-TargetResource
     }
 
     Write-Verbose -Message "To prevent an endless loop: Check if an upgrade is required."
-    if ((Get-SPDSCInstalledProductVersion).FileMajorPart -eq 15)
+    if ((Get-SPDscInstalledProductVersion).FileMajorPart -eq 15)
     {
         $wssRegKey ="hklm:SOFTWARE\Microsoft\Shared Tools\Web Server Extensions\15.0\WSS"
     }
@@ -408,14 +408,14 @@ function Set-TargetResource
     <Setting Id=`"USINGUIINSTALLMODE`" Value=`"0`"/>
     <Logging Type=`"verbose`" Path=`"%temp%`" Template=`"SharePoint "
 
-    $InstalledVersion = Get-SPDSCInstalledProductVersion
+    $InstalledVersion = Get-SPDscInstalledProductVersion
     if ($InstalledVersion.FileMajorPart -eq 15)
     {
         $configData += "2013"
     }
     else
     {
-        if($InstalledVersion.ProductBuildPart.ToString().Length -eq 4)
+        if ($InstalledVersion.ProductBuildPart.ToString().Length -eq 4)
         {
             $configData += "2016"
         }
@@ -501,6 +501,9 @@ function Test-TargetResource
     }
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
+
+    Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
+    Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
 
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
                                     -DesiredValues $PSBoundParameters `

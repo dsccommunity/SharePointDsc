@@ -32,7 +32,7 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting Subscription Settings Service '$Name'"
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+    $result = Invoke-SPDscCommand -Credential $InstallAccount `
                                   -Arguments $PSBoundParameters `
                                   -ScriptBlock {
         $params = $args[0]
@@ -40,9 +40,9 @@ function Get-TargetResource
         $serviceApps = Get-SPServiceApplication -Name $params.Name `
                                                 -ErrorAction SilentlyContinue
         $nullReturn = @{
-            Name = $params.Name
+            Name            = $params.Name
             ApplicationPool = $params.ApplicationPool
-            Ensure = "Absent"
+            Ensure          = "Absent"
         }
 
         if ($null -eq $serviceApps)
@@ -71,12 +71,12 @@ function Get-TargetResource
             $db = $dbProp.GetValue($serviceApp)
 
             return  @{
-                Name = $serviceApp.DisplayName
+                Name            = $serviceApp.DisplayName
                 ApplicationPool = $serviceApp.ApplicationPool.Name
-                DatabaseName = $db.Name
-                DatabaseServer = $db.NormalizedDataSource
-                InstallAccount = $params.InstallAccount
-                Ensure = "Present"
+                DatabaseName    = $db.Name
+                DatabaseServer  = $db.NormalizedDataSource
+                InstallAccount  = $params.InstallAccount
+                Ensure          = "Present"
             }
         }
     }
@@ -121,13 +121,13 @@ function Set-TargetResource
     if ($result.Ensure -eq "Absent" -and $Ensure -eq "Present")
     {
         Write-Verbose -Message "Creating Subscription Settings Service Application $Name"
-        Invoke-SPDSCCommand -Credential $InstallAccount `
+        Invoke-SPDscCommand -Credential $InstallAccount `
                             -Arguments $PSBoundParameters `
                             -ScriptBlock {
             $params = $args[0]
 
             $newParams = @{
-                Name = $params.Name
+                Name            = $params.Name
                 ApplicationPool = $params.ApplicationPool
             }
             if ($params.ContainsKey("DatabaseName") -eq $true)
@@ -145,7 +145,7 @@ function Set-TargetResource
     if ($result.Ensure -eq "Present" -and $Ensure -eq "Present")
     {
         Write-Verbose -Message "Checking proxy for Subscription Settings Service Application $Name"
-        Invoke-SPDSCCommand -Credential $InstallAccount `
+        Invoke-SPDscCommand -Credential $InstallAccount `
                             -Arguments $PSBoundParameters `
                             -ScriptBlock {
             $params = $args[0]
@@ -177,7 +177,7 @@ function Set-TargetResource
         if ($ApplicationPool -ne $result.ApplicationPool)
         {
             Write-Verbose -Message "Updating Subscription Settings Service Application $Name"
-            Invoke-SPDSCCommand -Credential $InstallAccount `
+            Invoke-SPDscCommand -Credential $InstallAccount `
                                 -Arguments $PSBoundParameters `
                                 -ScriptBlock {
 
@@ -195,7 +195,7 @@ function Set-TargetResource
     if ($Ensure -eq "Absent")
     {
         Write-Verbose -Message "Removing Subscription Settings Service Application $Name"
-        Invoke-SPDSCCommand -Credential $InstallAccount `
+        Invoke-SPDscCommand -Credential $InstallAccount `
                             -Arguments $PSBoundParameters `
                             -ScriptBlock {
             $params = $args[0]
@@ -247,11 +247,14 @@ function Test-TargetResource
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
+    Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
+    Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
+
     if ($Ensure -eq "Present")
     {
         if ($CurrentValues.Ensure -eq "Present")
         {
-            $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+            $result = Invoke-SPDscCommand -Credential $InstallAccount `
                                           -Arguments $PSBoundParameters `
                                           -ScriptBlock {
                 $params = $args[0]

@@ -4,42 +4,42 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [Parameter(Mandatory = $true)]  
-        [System.String] 
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $Url,
-        
-        [Parameter()]  
-        [System.String[]] 
+
+        [Parameter()]
+        [System.String[]]
         $GroupNames,
 
-        [Parameter()] 
-        [ValidateSet("Present","Absent")] 
-        [System.String] 
+        [Parameter()]
+        [ValidateSet("Present","Absent")]
+        [System.String]
         $Ensure = "Present",
 
-        [Parameter()]  
-        [System.Boolean] 
+        [Parameter()]
+        [System.Boolean]
         $AutoReactivateUsers = $false,
 
-        [Parameter()] 
-        [System.Management.Automation.PSCredential] 
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 
     Write-Verbose -Message "Getting AD Resource Pool Sync settings for $Url"
 
-    if ((Get-SPDSCInstalledProductVersion).FileMajorPart -lt 16) 
+    if ((Get-SPDscInstalledProductVersion).FileMajorPart -lt 16)
     {
         throw [Exception] ("Support for Project Server in SharePointDsc is only valid for " + `
                            "SharePoint 2016 and 2019.")
     }
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+    $result = Invoke-SPDscCommand -Credential $InstallAccount `
                                   -Arguments @($PSBoundParameters, $PSScriptRoot) `
                                   -ScriptBlock {
         $params = $args[0]
         $scriptRoot = $args[1]
-        
+
         $modulePath = "..\..\Modules\SharePointDsc.ProjectServer\ProjectServerConnector.psm1"
         Import-Module -Name (Join-Path -Path $scriptRoot -ChildPath $modulePath -Resolve)
 
@@ -79,7 +79,7 @@ function Get-TargetResource
                     InstallAccount = $params.InstallAccount
                 }
             }
-            else 
+            else
             {
                 $adGroups = @()
                 $script:currentSettings.ADGroupGuids | ForEach-Object -Process {
@@ -106,31 +106,31 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [Parameter(Mandatory = $true)]  
-        [System.String] 
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $Url,
-        
-        [Parameter()]  
-        [System.String[]] 
+
+        [Parameter()]
+        [System.String[]]
         $GroupNames,
 
-        [Parameter()] 
-        [ValidateSet("Present","Absent")] 
-        [System.String] 
+        [Parameter()]
+        [ValidateSet("Present","Absent")]
+        [System.String]
         $Ensure = "Present",
 
-        [Parameter()]  
-        [System.Boolean] 
+        [Parameter()]
+        [System.Boolean]
         $AutoReactivateUsers = $false,
 
-        [Parameter()] 
-        [System.Management.Automation.PSCredential] 
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 
     Write-Verbose -Message "Setting AD Resource Pool Sync settings for $Url"
 
-    if ((Get-SPDSCInstalledProductVersion).FileMajorPart -lt 16) 
+    if ((Get-SPDscInstalledProductVersion).FileMajorPart -lt 16)
     {
         throw [Exception] ("Support for Project Server in SharePointDsc is only valid for " + `
                            "SharePoint 2016 and 2019.")
@@ -138,7 +138,7 @@ function Set-TargetResource
 
     if ($Ensure -eq "Present")
     {
-        Invoke-SPDSCCommand -Credential $InstallAccount `
+        Invoke-SPDscCommand -Credential $InstallAccount `
                             -Arguments $PSBoundParameters `
                             -ScriptBlock {
 
@@ -150,7 +150,7 @@ function Set-TargetResource
                 $groupName = Convert-SPDscADGroupNameToID -GroupName $_
                 $groupIDs.Add($groupName)
             }
-            
+
             Enable-SPProjectActiveDirectoryEnterpriseResourcePoolSync -Url $params.Url `
                                                                       -GroupUids $groupIDs.ToArray()
 
@@ -172,7 +172,7 @@ function Set-TargetResource
     }
     else
     {
-        Invoke-SPDSCCommand -Credential $InstallAccount `
+        Invoke-SPDscCommand -Credential $InstallAccount `
                             -Arguments $PSBoundParameters `
                             -ScriptBlock {
 
@@ -190,36 +190,39 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [Parameter(Mandatory = $true)]  
-        [System.String] 
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $Url,
-        
-        [Parameter()]  
-        [System.String[]] 
+
+        [Parameter()]
+        [System.String[]]
         $GroupNames,
 
-        [Parameter()] 
-        [ValidateSet("Present","Absent")] 
-        [System.String] 
+        [Parameter()]
+        [ValidateSet("Present","Absent")]
+        [System.String]
         $Ensure = "Present",
 
-        [Parameter()]  
-        [System.Boolean] 
+        [Parameter()]
+        [System.Boolean]
         $AutoReactivateUsers = $false,
 
-        [Parameter()] 
-        [System.Management.Automation.PSCredential] 
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 
     Write-Verbose -Message "Testing AD Resource Pool Sync settings for $Url"
 
-    $currentValues = Get-TargetResource @PSBoundParameters
-
     $PSBoundParameters.Ensure = $Ensure
 
+    $CurrentValues = Get-TargetResource @PSBoundParameters
+
+    Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
+    Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
+
     $paramsToCheck = @("Ensure")
-    
+
     if ($Ensure -eq "Present")
     {
         $paramsToCheck += "GroupNames"

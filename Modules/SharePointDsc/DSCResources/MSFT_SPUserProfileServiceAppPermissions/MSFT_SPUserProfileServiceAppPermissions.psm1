@@ -29,18 +29,18 @@ function Get-TargetResource
 
     Confirm-SPDscUpaPermissionsConfig -Parameters $PSBoundParameters
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+    $result = Invoke-SPDscCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
 
         $proxy = Get-SPServiceApplicationProxy | Where-Object { $_.DisplayName -eq $params.ProxyName }
         if ($null -eq $proxy)
         {
             return @{
-                ProxyName = $params.ProxyName
-                CreatePersonalSite = $null
+                ProxyName            = $params.ProxyName
+                CreatePersonalSite   = $null
                 FollowAndEditProfile = $null
-                UseTagsAndNotes = $null
-                InstallAccount = $params.InstallAccount
+                UseTagsAndNotes      = $null
+                InstallAccount       = $params.InstallAccount
             }
         }
         $security = Get-SPProfileServiceApplicationSecurity -ProfileServiceApplicationProxy $proxy
@@ -100,11 +100,11 @@ function Get-TargetResource
         }
 
         return @{
-            ProxyName = $params.ProxyName
-            CreatePersonalSite = $createPersonalSite
+            ProxyName            = $params.ProxyName
+            CreatePersonalSite   = $createPersonalSite
             FollowAndEditProfile = $followAndEditProfile
-            UseTagsAndNotes = $useTagsAndNotes
-            InstallAccount = $params.InstallAccount
+            UseTagsAndNotes      = $useTagsAndNotes
+            InstallAccount       = $params.InstallAccount
         }
     }
     return $result
@@ -150,7 +150,7 @@ function Set-TargetResource
                                 "'NT AUTHORITY\Authenticated Users'. This will be removed as " + `
                                 "identies on service app proxy permissions should be claims based.")
 
-        Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+        Invoke-SPDscCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
             $params = $args[0]
 
             $proxy = Get-SPServiceApplicationProxy | Where-Object { $_.DisplayName -eq $params.ProxyName }
@@ -166,7 +166,7 @@ function Set-TargetResource
         $CurrentValues = Get-TargetResource @PSBoundParameters
     }
 
-    Invoke-SPDSCCommand -Credential $InstallAccount -Arguments @($PSBoundParameters, $CurrentValues) -ScriptBlock {
+    Invoke-SPDscCommand -Credential $InstallAccount -Arguments @($PSBoundParameters, $CurrentValues) -ScriptBlock {
         $params = $args[0]
         $CurrentValues = $args[1]
 
@@ -179,9 +179,9 @@ function Set-TargetResource
         $security = Get-SPProfileServiceApplicationSecurity -ProfileServiceApplicationProxy $proxy
 
         $permissionsToUpdate = @{
-            "CreatePersonalSite" = "Create Personal Site"
+            "CreatePersonalSite"   = "Create Personal Site"
             "FollowAndEditProfile" = "Use Personal Features"
-            "UseTagsAndNotes" = "Use Social Features"
+            "UseTagsAndNotes"      = "Use Social Features"
         }
 
         foreach ($permission in $permissionsToUpdate.Keys)
@@ -195,11 +195,11 @@ function Set-TargetResource
             if (($null -ne $noneDiff) -and ($noneDiff.SideIndicator -eq "=>"))
             {
                 # Need to remove everyone
-                foreach($user in $CurrentValues.$permission)
+                foreach ($user in $CurrentValues.$permission)
                 {
                     if ($user -ne "Everyone" -and $user -ne "None" -and $user)
                     {
-                        $isUser = Test-SPDSCIsADUser -IdentityName $user
+                        $isUser = Test-SPDscIsADUser -IdentityName $user
                         if ($isUser -eq $true)
                         {
                             $claim = New-SPClaimsPrincipal -Identity $user `
@@ -229,11 +229,11 @@ function Set-TargetResource
             {
                 # Need to add everyone, so remove all the permissions that exist currently of this type
                 # and then add the everyone permissions
-                foreach($user in $CurrentValues.$permission)
+                foreach ($user in $CurrentValues.$permission)
                 {
                     if ($user -ne "Everyone" -and $user -ne "None" -and $user)
                     {
-                        $isUser = Test-SPDSCIsADUser -IdentityName $user
+                        $isUser = Test-SPDscIsADUser -IdentityName $user
                         if ($isUser -eq $true)
                         {
                             $claim = New-SPClaimsPrincipal -Identity $user `
@@ -264,7 +264,7 @@ function Set-TargetResource
                     if ($permissionChange.InputObject -ne "Everyone" -and `
                         $permissionChange.InputObject -ne "None")
                     {
-                        $isUser = Test-SPDSCIsADUser -IdentityName $permissionChange.InputObject
+                        $isUser = Test-SPDscIsADUser -IdentityName $permissionChange.InputObject
                         if ($isUser -eq $true)
                         {
                             $claim = New-SPClaimsPrincipal -Identity $permissionChange.InputObject `
@@ -332,6 +332,9 @@ function Test-TargetResource
     Confirm-SPDscUpaPermissionsConfig -Parameters $PSBoundParameters
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
+
+    Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
+    Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
 
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
                                         -DesiredValues $PSBoundParameters `

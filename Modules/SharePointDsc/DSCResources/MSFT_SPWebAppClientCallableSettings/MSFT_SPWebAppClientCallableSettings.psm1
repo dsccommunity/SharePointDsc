@@ -70,7 +70,7 @@ function Get-TargetResource
                "ProxyLibrariesToExclude parameters")
     }
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+    $result = Invoke-SPDscCommand -Credential $InstallAccount `
                                   -Arguments @($PSBoundParameters) `
                                   -ScriptBlock {
         $params = $args[0]
@@ -80,19 +80,19 @@ function Get-TargetResource
         {
             Write-Verbose "Web application $($params.WebAppUrl) was not found"
             return @{
-                WebAppUrl = $null
-                ProxyLibraries = $null
-                ProxyLibrariesToInclude = $null
-                ProxyLibrariesToExclude = $null
-                MaxResourcesPerRequest = $null
-                MaxObjectPaths = $null
-                ExecutionTimeout = $null
-                RequestXmlMaxDepth = $null
-                EnableXsdValidation = $null
-                EnableStackTrace = $null
+                WebAppUrl                          = $null
+                ProxyLibraries                     = $null
+                ProxyLibrariesToInclude            = $null
+                ProxyLibrariesToExclude            = $null
+                MaxResourcesPerRequest             = $null
+                MaxObjectPaths                     = $null
+                ExecutionTimeout                   = $null
+                RequestXmlMaxDepth                 = $null
+                EnableXsdValidation                = $null
+                EnableStackTrace                   = $null
                 RequestUsageExecutionTimeThreshold = $null
-                EnableRequestUsage = $null
-                LogActionsIfHasRequestException = $null
+                EnableRequestUsage                 = $null
+                LogActionsIfHasRequestException    = $null
             }
         }
 
@@ -102,38 +102,38 @@ function Get-TargetResource
             $proxyLibraries += $_
         }
 
-        if($params.ContainsKey("ProxyLibrariesToInclude"))
+        if ($params.ContainsKey("ProxyLibrariesToInclude"))
         {
             $include = $params.ProxyLibrariesToInclude
         }
         else
         {
-            $include = $null;
+            $include = $null
         }
 
-        if($params.ContainsKey("ProxyLibrariesToExclude"))
+        if ($params.ContainsKey("ProxyLibrariesToExclude"))
         {
             $exclude = $params.ProxyLibrariesToExclude
         }
         else
         {
-            $exclude = $null;
+            $exclude = $null
         }
 
         return @{
-            WebAppUrl = $params.WebAppUrl
-            ProxyLibraries = $clientCallableSettings.ProxyLibraries #$proxyLibraries
-            ProxyLibrariesToInclude = $include
-            ProxyLibrariesToExclude = $exclude
-            MaxResourcesPerRequest = $clientCallableSettings.MaxResourcesPerRequest
-            MaxObjectPaths = $clientCallableSettings.MaxObjectPaths
-            ExecutionTimeout = $clientCallableSettings.ExecutionTimeout.TotalMinutes
-            RequestXmlMaxDepth = $clientCallableSettings.RequestXmlMaxDepth
-            EnableXsdValidation = $clientCallableSettings.EnableXsdValidation
-            EnableStackTrace = $clientCallableSettings.EnableStackTrace
+            WebAppUrl                          = $params.WebAppUrl
+            ProxyLibraries                     = $clientCallableSettings.ProxyLibraries #$proxyLibraries
+            ProxyLibrariesToInclude            = $include
+            ProxyLibrariesToExclude            = $exclude
+            MaxResourcesPerRequest             = $clientCallableSettings.MaxResourcesPerRequest
+            MaxObjectPaths                     = $clientCallableSettings.MaxObjectPaths
+            ExecutionTimeout                   = $clientCallableSettings.ExecutionTimeout.TotalMinutes
+            RequestXmlMaxDepth                 = $clientCallableSettings.RequestXmlMaxDepth
+            EnableXsdValidation                = $clientCallableSettings.EnableXsdValidation
+            EnableStackTrace                   = $clientCallableSettings.EnableStackTrace
             RequestUsageExecutionTimeThreshold = $clientCallableSettings.RequestUsageExecutionTimeThreshold
-            EnableRequestUsage = $clientCallableSettings.EnableRequestUsage
-            LogActionsIfHasRequestException = $clientCallableSettings.LogActionsIfHasRequestException
+            EnableRequestUsage                 = $clientCallableSettings.EnableRequestUsage
+            LogActionsIfHasRequestException    = $clientCallableSettings.LogActionsIfHasRequestException
         }
     }
 
@@ -212,7 +212,7 @@ function Set-TargetResource
                "ProxyLibrariesToExclude parameters")
     }
 
-    Invoke-SPDSCCommand -Credential $InstallAccount `
+    Invoke-SPDscCommand -Credential $InstallAccount `
                         -Arguments @($PSBoundParameters) `
                         -ScriptBlock {
         $params = $args[0]
@@ -228,7 +228,7 @@ function Set-TargetResource
 
         if ($params.ContainsKey("ProxyLibraries") -eq $true)
         {
-            foreach($desiredProxyLibrary in $params.ProxyLibraries)
+            foreach ($desiredProxyLibrary in $params.ProxyLibraries)
             {
                 if ($clientCallableSettings.ProxyLibraries.AssemblyName -contains $desiredProxyLibrary.AssemblyName)
                 {
@@ -253,15 +253,15 @@ function Set-TargetResource
             }
 
             [System.Collections.ObjectModel.Collection[System.Object]]$proxyLibrariesToRemove = @{}
-            foreach($currentProxyLibrary in $clientCallableSettings.ProxyLibraries)
+            foreach ($currentProxyLibrary in $clientCallableSettings.ProxyLibraries)
             {
                 if ($params.ProxyLibraries.Count -eq 0 -or (-not ($params.ProxyLibraries.AssemblyName -contains $currentProxyLibrary.AssemblyName)))
                 {
-                    $proxyLibrariesToRemove.Add($currentProxyLibrary);
+                    $proxyLibrariesToRemove.Add($currentProxyLibrary)
                 }
             }
 
-            foreach($proxyLibraryToRemove in $proxyLibrariesToRemove)
+            foreach ($proxyLibraryToRemove in $proxyLibrariesToRemove)
             {
                     $clientCallableSettings.ProxyLibraries.Remove($proxyLibraryToRemove)
                     $webApplicationNeedsUpdate = $true
@@ -270,7 +270,7 @@ function Set-TargetResource
 
         if ($params.ContainsKey("ProxyLibrariesToInclude") -eq $true)
         {
-            foreach($desiredProxyLibrary in $params.ProxyLibrariesToInclude)
+            foreach ($desiredProxyLibrary in $params.ProxyLibrariesToInclude)
             {
                 if ($clientCallableSettings.ProxyLibraries.AssemblyName -contains $desiredProxyLibrary.AssemblyName)
                 {
@@ -297,12 +297,12 @@ function Set-TargetResource
 
         if ($params.ContainsKey("ProxyLibrariesToExclude") -eq $true)
         {
-            foreach($excludeProxyLibrary in $params.ProxyLibrariesToExclude)
+            foreach ($excludeProxyLibrary in $params.ProxyLibrariesToExclude)
             {
                 $existingProxyLibrary = $clientCallableSettings.ProxyLibraries | Where-Object -FilterScript {
                     $_.AssemblyName -eq $excludeProxyLibrary
                 } | Select-Object -First 1
-                if($null -ne $existingProxyLibrary)
+                if ($null -ne $existingProxyLibrary)
                 {
                     $clientCallableSettings.ProxyLibraries.Remove($existingProxyLibrary)
                     $webApplicationNeedsUpdate = $true
@@ -466,9 +466,12 @@ function Test-TargetResource
 
     Write-Verbose -Message "Testing for web application '$WebAppUrl' client callable settings"
 
-    $currentValues = Get-TargetResource @PSBoundParameters
+    $CurrentValues = Get-TargetResource @PSBoundParameters
 
-    if ($null -eq $currentValues.ProxyLibraries)
+    Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
+    Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
+
+    if ($null -eq $CurrentValues.ProxyLibraries)
     {
         Write-Verbose -Message "Proxy library list does not have a valid value"
         return $false
@@ -478,7 +481,7 @@ function Test-TargetResource
     {
         Write-Verbose -Message "Processing ProxyLibraries parameter"
 
-        if ($currentValues.ProxyLibraries.Count -eq 0)
+        if ($CurrentValues.ProxyLibraries.Count -eq 0)
         {
             if ($ProxyLibraries.Count -gt 0)
             {
@@ -494,13 +497,13 @@ function Test-TargetResource
                 return $false
             }
 
-            $differences = Compare-Object -ReferenceObject $currentValues.ProxyLibraries.AssemblyName `
+            $differences = Compare-Object -ReferenceObject $CurrentValues.ProxyLibraries.AssemblyName `
                                         -DifferenceObject $ProxyLibraries.AssemblyName
 
             if ($null -eq $differences)
             {
                 Write-Verbose -Message "Proxy library list matches - checking that SupportAppAuthentication match on each object"
-                foreach($currentProxyLibrary in $currentValues.ProxyLibraries)
+                foreach ($currentProxyLibrary in $CurrentValues.ProxyLibraries)
                 {
                     if ($currentProxyLibrary.SupportAppAuthentication -ne ($ProxyLibraries | Where-Object -FilterScript {
                             $_.AssemblyName -eq $currentProxyLibrary.AssemblyName
@@ -523,7 +526,7 @@ function Test-TargetResource
     {
         Write-Verbose -Message "Processing ProxyLibrariesToInclude parameter"
 
-        if ($currentValues.ProxyLibraries.Count -eq 0)
+        if ($CurrentValues.ProxyLibraries.Count -eq 0)
         {
             if ($ProxyLibrariesToInclude.Count -gt 0)
             {
@@ -535,7 +538,7 @@ function Test-TargetResource
         Write-Verbose -Message "Processing ProxyLibrariesToInclude parameter"
         foreach ($proxyLibrary in $ProxyLibrariesToInclude)
         {
-            if (-not($currentValues.ProxyLibraries.AssemblyName -contains $proxyLibrary.AssemblyName))
+            if (-not($CurrentValues.ProxyLibraries.AssemblyName -contains $proxyLibrary.AssemblyName))
             {
                 Write-Verbose -Message "$($proxyLibrary.AssemblyName) is not registered as a proxy library. Set result to false"
                 return $false
@@ -543,7 +546,7 @@ function Test-TargetResource
             else
             {
                 Write-Verbose -Message "$($proxyLibrary.AssemblyName) is already registered as a proxy library. Checking SupportAppAuthentication..."
-                if ($proxyLibrary.SupportAppAuthentication -ne ($currentValues.ProxyLibraries | Where-Object -FilterScript {
+                if ($proxyLibrary.SupportAppAuthentication -ne ($CurrentValues.ProxyLibraries | Where-Object -FilterScript {
                         $_.AssemblyName -eq $proxyLibrary.AssemblyName
                     } | Select-Object -First 1).SupportAppAuthentication)
                 {
@@ -558,11 +561,11 @@ function Test-TargetResource
     {
         Write-Verbose -Message "Processing ProxyLibrariesToExclude parameter"
 
-        if ($currentValues.ProxyLibraries.Count -gt 0)
+        if ($CurrentValues.ProxyLibraries.Count -gt 0)
         {
             foreach ($proxyLibrary in $ProxyLibrariesToExclude)
             {
-                if ($currentValues.ProxyLibraries.AssemblyName -contains $proxyLibrary)
+                if ($CurrentValues.ProxyLibraries.AssemblyName -contains $proxyLibrary)
                 {
                     Write-Verbose -Message "$proxyLibrary is already registered as proxy library. Set result to false"
                     return $false
@@ -575,7 +578,7 @@ function Test-TargetResource
         }
     }
 
-    return Test-SPDscParameterState -CurrentValues $currentValues `
+    return Test-SPDscParameterState -CurrentValues $CurrentValues `
                                     -DesiredValues $PSBoundParameters `
                                     -ValuesToCheck @("WebAppUrl",
                                                     "MaxResourcesPerRequest",

@@ -35,22 +35,27 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting farm wide automatic password change settings"
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+    $result = Invoke-SPDscCommand -Credential $InstallAccount `
                                   -Arguments $PSBoundParameters `
                                   -ScriptBlock {
-        $params = $args[0]
-
         $farm = Get-SPFarm
         if ($null -eq $farm )
         {
-            return $null
+            return @{
+                IsSingleInstance              = "Yes"
+                MailAddress                   = $null
+                PasswordChangeWaitTimeSeconds = $null
+                NumberOfRetries               = $null
+                DaysBeforeExpiry              = $null
+            }
         }
+
         return @{
-            IsSingleInstance = "Yes"
-            MailAddress = $farm.PasswordChangeEmailAddress
-            PasswordChangeWaitTimeSeconds= $farm.PasswordChangeGuardTime
-            NumberOfRetries= $farm.PasswordChangeMaximumTries
-            DaysBeforeExpiry = $farm.DaysBeforePasswordExpirationToSendEmail
+            IsSingleInstance              = "Yes"
+            MailAddress                   = $farm.PasswordChangeEmailAddress
+            PasswordChangeWaitTimeSeconds = $farm.PasswordChangeGuardTime
+            NumberOfRetries               = $farm.PasswordChangeMaximumTries
+            DaysBeforeExpiry              = $farm.DaysBeforePasswordExpirationToSendEmail
         }
     }
     return $result
@@ -92,7 +97,7 @@ function Set-TargetResource
 
     Write-Verbose -Message "Setting farm wide automatic password change settings"
 
-    Invoke-SPDSCCommand -Credential $InstallAccount `
+    Invoke-SPDscCommand -Credential $InstallAccount `
                         -Arguments $PSBoundParameters `
                         -ScriptBlock {
         $params = $args[0]
@@ -159,10 +164,8 @@ function Test-TargetResource
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
-    if ($null -eq $CurrentValues)
-    {
-        return $false
-    }
+    Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
+    Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
 
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
                                     -DesiredValues $PSBoundParameters `

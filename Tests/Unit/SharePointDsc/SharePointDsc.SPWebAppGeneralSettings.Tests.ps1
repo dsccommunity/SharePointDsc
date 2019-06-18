@@ -130,7 +130,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 DefaultQuotaTemplate = "Project"
             }
 
-            Mock -CommandName Get-SPDSCContentService -MockWith {
+            Mock -CommandName Get-SPDscContentService -MockWith {
                 $returnVal = @{
                     QuotaTemplates = @{
                         Project = @{
@@ -259,7 +259,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 DefaultQuotaTemplate = "NotExist"
             }
 
-            Mock -CommandName Get-SPDSCContentService -MockWith {
+            Mock -CommandName Get-SPDscContentService -MockWith {
                 $returnVal = @{
                     QuotaTemplates = @{
                         Project = @{

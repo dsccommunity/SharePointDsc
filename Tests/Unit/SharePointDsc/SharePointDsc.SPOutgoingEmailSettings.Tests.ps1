@@ -33,7 +33,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             It "Should return null from the get method" {
-                Get-TargetResource @testParams | Should BeNullOrEmpty
+                (Get-TargetResource @testParams).WebAppUrl | Should BeNullOrEmpty
             }
 
             It "Should return false from the test method" {
@@ -69,7 +69,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             It "Should return web app properties from the get method" {
-                Get-TargetResource @testParams | Should Not BeNullOrEmpty
+                (Get-TargetResource @testParams).WebAppUrl | Should Be $testParams.WebAppUrl
             }
 
             It "Should return true from the test method" {
@@ -119,7 +119,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             It "Should return false from the get method" {
-                Get-TargetResource @testParams | Should Not BeNullOrEmpty
+                (Get-TargetResource @testParams).WebAppUrl | Should Be $testParams.WebAppUrl
             }
 
             It "Should return false from the test method" {
@@ -212,7 +212,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 }
 
                 It "Should return web app properties from the get method" {
-                    Get-TargetResource @testParams | Should Not BeNullOrEmpty
+                    (Get-TargetResource @testParams).WebAppUrl | Should Be $testParams.WebAppUrl
                 }
 
                 It "Should return true from the test method" {

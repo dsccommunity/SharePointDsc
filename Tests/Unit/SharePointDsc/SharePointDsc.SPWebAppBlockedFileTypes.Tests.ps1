@@ -64,7 +64,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             It "Should return the current data from the get method" {
-                Get-TargetResource @testParams | Should Not BeNullOrEmpty
+                (Get-TargetResource @testParams).Blocked.Count | Should Be 3
             }
 
             It "Should return true from the test method" {
@@ -105,7 +105,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             It "Should return the current data from the get method" {
-                Get-TargetResource @testParams | Should Not BeNullOrEmpty
+                (Get-TargetResource @testParams).Blocked.Count | Should Be 3
             }
 
             It "Should return false from the test method" {
@@ -153,7 +153,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             It "Should return the current data from the get method" {
-                Get-TargetResource @testParams | Should Not BeNullOrEmpty
+                (Get-TargetResource @testParams).Blocked.Count | Should Be 3
             }
 
             It "Should return true from the test method" {
@@ -195,7 +195,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             It "Should return the current data from the get method" {
-                Get-TargetResource @testParams | Should Not BeNullOrEmpty
+                (Get-TargetResource @testParams).Blocked.Count | Should Be 2
             }
 
             It "Should return false from the test method" {

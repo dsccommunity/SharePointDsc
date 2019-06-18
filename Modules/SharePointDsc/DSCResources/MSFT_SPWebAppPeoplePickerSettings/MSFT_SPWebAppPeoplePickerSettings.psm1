@@ -36,7 +36,7 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting People Picker Settings for $WebAppUrl"
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+    $result = Invoke-SPDscCommand -Credential $InstallAccount `
                                   -Arguments $PSBoundParameters `
                                   -ScriptBlock {
         $params = $args[0]
@@ -117,7 +117,7 @@ function Set-TargetResource
     Write-Verbose -Message "Setting People Picker Settings for $WebAppUrl"
 
     ## Perform changes
-    Invoke-SPDSCCommand -Credential $InstallAccount `
+    Invoke-SPDscCommand -Credential $InstallAccount `
                         -Arguments $PSBoundParameters `
                         -ScriptBlock {
         $params      = $args[0]
@@ -190,7 +190,7 @@ function Set-TargetResource
                     {
                         $adsearchobj.LoginName = $searchADDomain.AccessAccount.UserName
 
-                        if([string]::IsNullOrEmpty($searchADDomain.AccessAccount.Password))
+                        if ([string]::IsNullOrEmpty($searchADDomain.AccessAccount.Password))
                         {
                             $adsearchobj.SetPassword($null)
                         }
@@ -269,6 +269,9 @@ function Test-TargetResource
     Write-Verbose -Message "Testing People Picker Settings for $WebAppUrl"
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
+
+    Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
+    Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
 
     # Testing SearchActiveDirectoryDomains against configured values
     foreach ($searchADDomain in $SearchActiveDirectoryDomains)

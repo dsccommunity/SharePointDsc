@@ -32,37 +32,46 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting web application '$WebAppUrl' site use and deletion settings"
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+    $result = Invoke-SPDscCommand -Credential $InstallAccount `
                                   -Arguments $PSBoundParameters `
                                   -ScriptBlock {
         $params = $args[0]
 
+        $nullReturn = @{
+            # Set the Site Use and Deletion settings
+            WebAppUrl                                = $params.WebAppUrl
+            SendUnusedSiteCollectionNotifications    = $null
+            UnusedSiteNotificationPeriod             = $null
+            AutomaticallyDeleteUnusedSiteCollections = $null
+            UnusedSiteNotificationsBeforeDeletion    = $null
+        }
+
         try
         {
-            $spFarm = Get-SPFarm
+            $null = Get-SPFarm
         }
         catch
         {
             Write-Verbose -Message ("No local SharePoint farm was detected. Site Use and " + `
                                     "Deletion settings will not be applied")
-            return $null
+            return $nullReturn
         }
 
         $wa = Get-SPWebApplication -Identity $params.WebAppUrl `
                                    -ErrorAction SilentlyContinue
         if ($null -eq $wa)
         {
-            return $null
+            return $nullReturn
         }
 
         return @{
             # Set the Site Use and Deletion settings
-            WebAppUrl = $params.WebAppUrl
-            SendUnusedSiteCollectionNotifications = $wa.SendUnusedSiteCollectionNotifications
-            UnusedSiteNotificationPeriod = $wa.UnusedSiteNotificationPeriod.TotalDays
+            WebAppUrl                                = $params.WebAppUrl
+            SendUnusedSiteCollectionNotifications    = $wa.SendUnusedSiteCollectionNotifications
+            UnusedSiteNotificationPeriod             = $wa.UnusedSiteNotificationPeriod.TotalDays
             AutomaticallyDeleteUnusedSiteCollections = $wa.AutomaticallyDeleteUnusedSiteCollections
-            UnusedSiteNotificationsBeforeDeletion = $wa.UnusedSiteNotificationsBeforeDeletion
-            InstallAccount = $params.InstallAccount
+            UnusedSiteNotificationsBeforeDeletion    = $wa.UnusedSiteNotificationsBeforeDeletion
+            InstallAccount                           = $params.InstallAccount
         }
     }
 
@@ -102,14 +111,14 @@ function Set-TargetResource
 
     Write-Verbose -Message "Setting web application '$WebAppUrl' Site Use and Deletion settings"
 
-    Invoke-SPDSCCommand -Credential $InstallAccount `
+    Invoke-SPDscCommand -Credential $InstallAccount `
                         -Arguments $PSBoundParameters `
                         -ScriptBlock {
         $params = $args[0]
 
         try
         {
-            $spFarm = Get-SPFarm
+            $null = Get-SPFarm
         }
         catch
         {
@@ -224,10 +233,8 @@ function Test-TargetResource
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
-    if ($null -eq $CurrentValues)
-    {
-        return $false
-    }
+    Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
+    Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
 
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
                                     -DesiredValues $PSBoundParameters

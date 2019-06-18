@@ -60,7 +60,7 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting web application '$Name' config"
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+    $result = Invoke-SPDscCommand -Credential $InstallAccount `
                                   -Arguments $PSBoundParameters `
                                   -ScriptBlock {
         $params = $args[0]
@@ -69,11 +69,11 @@ function Get-TargetResource
         if ($null -eq $wa)
         {
             return @{
-                Name = $params.Name
-                ApplicationPool = $params.ApplicationPool
+                Name                   = $params.Name
+                ApplicationPool        = $params.ApplicationPool
                 ApplicationPoolAccount = $params.ApplicationPoolAccount
-                WebAppUrl = $params.WebAppUrl
-                Ensure = "Absent"
+                WebAppUrl              = $params.WebAppUrl
+                Ensure                 = "Absent"
             }
         }
 
@@ -86,19 +86,19 @@ function Get-TargetResource
         }
 
         return @{
-            Name = $wa.DisplayName
-            ApplicationPool = $wa.ApplicationPool.Name
+            Name                   = $wa.DisplayName
+            ApplicationPool        = $wa.ApplicationPool.Name
             ApplicationPoolAccount = $wa.ApplicationPool.Username
-            WebAppUrl = $wa.Url
-            AllowAnonymous = $authProvider.AllowAnonymous
-            DatabaseName = $wa.ContentDatabases[0].Name
-            DatabaseServer = $wa.ContentDatabases[0].Server
-            HostHeader = (New-Object -TypeName System.Uri $wa.Url).Host
-            Path = $wa.IisSettings[0].Path
-            Port = (New-Object -TypeName System.Uri $wa.Url).Port
-            UseClassic = $classicAuth
-            InstallAccount = $params.InstallAccount
-            Ensure = "Present"
+            WebAppUrl              = $wa.Url
+            AllowAnonymous         = $authProvider.AllowAnonymous
+            DatabaseName           = $wa.ContentDatabases[0].Name
+            DatabaseServer         = $wa.ContentDatabases[0].Server
+            HostHeader             = (New-Object -TypeName System.Uri $wa.Url).Host
+            Path                   = $wa.IisSettings[0].Path
+            Port                   = (New-Object -TypeName System.Uri $wa.Url).Port
+            UseClassic             = $classicAuth
+            InstallAccount         = $params.InstallAccount
+            Ensure                 = "Present"
         }
     }
     return $result
@@ -170,7 +170,7 @@ function Set-TargetResource
 
     if ($Ensure -eq "Present")
     {
-        Invoke-SPDSCCommand -Credential $InstallAccount `
+        Invoke-SPDscCommand -Credential $InstallAccount `
                             -Arguments $PSBoundParameters `
                             -ScriptBlock {
             $params = $args[0]
@@ -185,7 +185,7 @@ function Set-TargetResource
                 }
 
                 # Get a reference to the Administration WebService
-                $admService = Get-SPDSCContentService
+                $admService = Get-SPDscContentService
                 $appPools = $admService.ApplicationPools | Where-Object -FilterScript {
                     $_.Name -eq $params.ApplicationPool
                 }
@@ -258,7 +258,7 @@ function Set-TargetResource
 
     if ($Ensure -eq "Absent")
     {
-        Invoke-SPDSCCommand -Credential $InstallAccount `
+        Invoke-SPDscCommand -Credential $InstallAccount `
                             -Arguments $PSBoundParameters `
                             -ScriptBlock {
             $params = $args[0]
@@ -337,6 +337,9 @@ function Test-TargetResource
     $PSBoundParameters.Ensure = $Ensure
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
+
+    Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
+    Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
 
     $testReturn = Test-SPDscParameterState -CurrentValues $CurrentValues `
                                                      -DesiredValues $PSBoundParameters `

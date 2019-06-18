@@ -100,7 +100,7 @@ function Get-TargetResource
         }
     }
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+    $result = Invoke-SPDscCommand -Credential $InstallAccount `
                                   -Arguments $PSBoundParameters `
                                   -ScriptBlock {
         $params = $args[0]
@@ -286,7 +286,7 @@ function Set-TargetResource
     }
 
     # Get current authentication method
-    $authMethod = Invoke-SPDSCCommand -Credential $InstallAccount `
+    $authMethod = Invoke-SPDscCommand -Credential $InstallAccount `
                                       -Arguments $PSBoundParameters `
                                       -ScriptBlock {
         $params = $args[0]
@@ -469,6 +469,9 @@ function Test-TargetResource
     Write-Verbose -Message "Testing web application authentication for '$WebAppUrl'"
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
+
+    Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
+    Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
 
     if ($null -eq $CurrentValues.Default -and `
         $null -eq $CurrentValues.Intranet -and `
@@ -766,7 +769,7 @@ function Set-ZoneConfiguration()
         $DesiredConfig
     )
 
-    Invoke-SPDSCCommand -Credential $InstallAccount `
+    Invoke-SPDscCommand -Credential $InstallAccount `
                         -Arguments $PSBoundParameters `
                         -ScriptBlock {
         $params = $args[0]

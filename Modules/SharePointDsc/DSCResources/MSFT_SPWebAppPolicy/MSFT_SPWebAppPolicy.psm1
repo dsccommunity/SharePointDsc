@@ -32,18 +32,26 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting web app policy for $WebAppUrl"
 
+    $nullReturn = @{
+        WebAppUrl              = $null
+        Members                = $null
+        MembersToInclude       = $null
+        MembersToExclude       = $null
+        SetCacheAccountsPolicy = $null
+    }
+
     if ($Members -and (($MembersToInclude) -or ($MembersToExclude)))
     {
         Write-Verbose -Message ("Cannot use the Members parameter together with " + `
                                "the MembersToInclude or MembersToExclude parameters")
-        return $null
+        return $nullReturn
     }
 
     if (!$Members -and !$MembersToInclude -and !$MembersToExclude)
     {
         Write-Verbose -Message ("At least one of the following parameters must be specified: " + `
                                "Members, MembersToInclude, MembersToExclude")
-        return $null
+        return $nullReturn
     }
 
     foreach ($member in $Members)
@@ -53,7 +61,7 @@ function Get-TargetResource
         {
             Write-Verbose -Message ("Members Parameter: You cannot specify ActAsSystemAccount " + `
                                    "with any other permission than Full Control")
-            return $null
+            return $nullReturn
         }
     }
 
@@ -65,21 +73,29 @@ function Get-TargetResource
             Write-Verbose -Message ("MembersToInclude Parameter: You cannot specify " + `
                                     "ActAsSystemAccount with any other permission than Full " + `
                                     "Control")
-            return $null
+            return $nullReturn
         }
     }
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+    $result = Invoke-SPDscCommand -Credential $InstallAccount `
                                   -Arguments $PSBoundParameters `
                                   -ScriptBlock {
         $params = $args[0]
+
+        $nullReturn = @{
+            WebAppUrl              = $null
+            Members                = $null
+            MembersToInclude       = $null
+            MembersToExclude       = $null
+            SetCacheAccountsPolicy = $null
+        }
 
         $wa = Get-SPWebApplication -Identity $params.WebAppUrl `
                                    -ErrorAction SilentlyContinue
 
         if ($null -eq $wa)
         {
-            return $null
+            return $nullReturn
         }
 
         $SetCacheAccountsPolicy = $false
@@ -87,8 +103,7 @@ function Get-TargetResource
         {
             if (($wa.Properties.ContainsKey("portalsuperuseraccount") -eq $true) -and `
                 ($wa.Properties.ContainsKey("portalsuperreaderaccount") -eq $true))
-                {
-
+            {
                 $correctPSU = $false
                 $correctPSR = $false
 
@@ -168,12 +183,12 @@ function Get-TargetResource
         }
 
         $returnval = @{
-                WebAppUrl = $params.WebAppUrl
-                Members = $members
-                MembersToInclude = $params.MembersToInclude
-                MembersToExclude = $params.MembersToExclude
+                WebAppUrl              = $params.WebAppUrl
+                Members                = $members
+                MembersToInclude       = $params.MembersToInclude
+                MembersToExclude       = $params.MembersToExclude
                 SetCacheAccountsPolicy = $SetCacheAccountsPolicy
-                InstallAccount = $params.InstallAccount
+                InstallAccount         = $params.InstallAccount
         }
 
         return $returnval
@@ -252,12 +267,12 @@ function Set-TargetResource
     $modulePath = "..\..\Modules\SharePointDsc.WebAppPolicy\SPWebAppPolicy.psm1"
     Import-Module -Name (Join-Path -Path $PSScriptRoot -ChildPath $modulePath -Resolve)
 
-    if ($null -eq $CurrentValues)
+    if ($null -eq $CurrentValues.WebAppUrl)
     {
         throw "Web application does not exist"
     }
 
-    $cacheAccounts = Get-SPDSCCacheAccountConfiguration -InputParameters $WebAppUrl
+    $cacheAccounts = Get-SPDscCacheAccountConfiguration -InputParameters $WebAppUrl
 
     if ($SetCacheAccountsPolicy)
     {
@@ -269,7 +284,7 @@ function Set-TargetResource
     }
 
     # Determine the default identity type to use for entries that do not have it specified
-    $defaultIdentityType = Invoke-SPDSCCommand -Credential $InstallAccount `
+    $defaultIdentityType = Invoke-SPDscCommand -Credential $InstallAccount `
                                                -Arguments $PSBoundParameters `
                                                -ScriptBlock {
         $params = $args[0]
@@ -326,7 +341,7 @@ function Set-TargetResource
         }
 
         # Get the list of differences from the current configuration
-        $differences = Compare-SPDSCWebAppPolicy -WAPolicies $CurrentValues.Members `
+        $differences = Compare-SPDscWebAppPolicy -WAPolicies $CurrentValues.Members `
                                                  -DSCSettings $allMembers `
                                                  -DefaultIdentityType $defaultIdentityType
 
@@ -398,7 +413,7 @@ function Set-TargetResource
     }
 
     ## Perform changes
-    Invoke-SPDSCCommand -Credential $InstallAccount `
+    Invoke-SPDscCommand -Credential $InstallAccount `
                         -Arguments @($PSBoundParameters,$PSScriptRoot,$changeUsers) `
                         -ScriptBlock {
         $params      = $args[0]
@@ -433,7 +448,7 @@ function Set-TargetResource
                     $userToAdd = $user.Username
                     if ($user.IdentityMode -eq "Claims")
                     {
-                        $isUser = Test-SPDSCIsADUser -IdentityName $user.Username
+                        $isUser = Test-SPDscIsADUser -IdentityName $user.Username
                         if ($isUser -eq $true)
                         {
                             $principal = New-SPClaimsPrincipal -Identity $user.Username `
@@ -476,7 +491,7 @@ function Set-TargetResource
                     $userToChange = $user.Username
                     if ($user.IdentityMode -eq "Claims")
                     {
-                        $isUser = Test-SPDSCIsADUser -IdentityName $user.Username
+                        $isUser = Test-SPDscIsADUser -IdentityName $user.Username
                         if ($isUser -eq $true)
                         {
                             $principal = New-SPClaimsPrincipal -Identity $user.Username `
@@ -551,7 +566,7 @@ function Set-TargetResource
                     $userToDrop = $user.Username
                     if ($user.IdentityMode -eq "Claims")
                     {
-                        $isUser = Test-SPDSCIsADUser -IdentityName $user.Username
+                        $isUser = Test-SPDscIsADUser -IdentityName $user.Username
                         if ($isUser -eq $true)
                         {
                             $principal = New-SPClaimsPrincipal -Identity $user.Username `
@@ -565,7 +580,7 @@ function Set-TargetResource
                             $userToDrop = $principal.ToEncodedString()
                         }
                     }
-                    Remove-SPDSCGenericObject -SourceCollection $wa.Policies `
+                    Remove-SPDscGenericObject -SourceCollection $wa.Policies `
                                               -Target $userToDrop `
                                               -ErrorAction SilentlyContinue
                 }
@@ -611,15 +626,18 @@ function Test-TargetResource
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
+    Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
+    Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
+
     $modulePath = "..\..\Modules\SharePointDsc.WebAppPolicy\SPWebAppPolicy.psm1"
     Import-Module -Name (Join-Path -Path $PSScriptRoot -ChildPath $modulePath -Resolve)
 
-    if ($null -eq $CurrentValues)
+    if ($null -eq $CurrentValues.WebAppUrl)
     {
         return $false
     }
 
-    $cacheAccounts = Get-SPDSCCacheAccountConfiguration -InputParameters $WebAppUrl
+    $cacheAccounts = Get-SPDscCacheAccountConfiguration -InputParameters $WebAppUrl
     if ($SetCacheAccountsPolicy)
     {
         if (($cacheAccounts.SuperUserAccount -eq "") -or `
@@ -631,7 +649,7 @@ function Test-TargetResource
     }
 
     # Determine the default identity type to use for entries that do not have it specified
-    $defaultIdentityType = Invoke-SPDSCCommand -Credential $InstallAccount `
+    $defaultIdentityType = Invoke-SPDscCommand -Credential $InstallAccount `
                                                -Arguments $PSBoundParameters `
                                                -ScriptBlock {
         $params = $args[0]
@@ -648,7 +666,7 @@ function Test-TargetResource
     }
 
     # If checking the full members list, or the list of members to include then build the
-    # appropriate members list and check for the output of Compare-SPDSCWebAppPolicy
+    # appropriate members list and check for the output of Compare-SPDscWebAppPolicy
     if ($Members -or $MembersToInclude)
     {
         $allMembers = @()
@@ -688,7 +706,7 @@ function Test-TargetResource
         }
 
         # Get the list of differences from the current configuration
-        $differences = Compare-SPDSCWebAppPolicy -WAPolicies $CurrentValues.Members `
+        $differences = Compare-SPDscWebAppPolicy -WAPolicies $CurrentValues.Members `
                                                  -DSCSettings $allMembers `
                                                  -DefaultIdentityType $defaultIdentityType
 
@@ -749,7 +767,7 @@ function Test-TargetResource
     }
 }
 
-function Get-SPDSCCacheAccountConfiguration()
+function Get-SPDscCacheAccountConfiguration()
 {
     [CmdletBinding()]
     [OutputType([System.Collections.Hashtable])]
@@ -759,7 +777,7 @@ function Get-SPDSCCacheAccountConfiguration()
         $InputParameters
     )
 
-    $cacheAccounts = Invoke-SPDSCCommand -Credential $InstallAccount `
+    $cacheAccounts = Invoke-SPDscCommand -Credential $InstallAccount `
                                          -Arguments $InputParameters `
                                          -ScriptBlock {
         Write-Verbose -Message "Retrieving CacheAccounts"
@@ -785,7 +803,7 @@ function Get-SPDSCCacheAccountConfiguration()
                 $convertedClaim = New-SPClaimsPrincipal -Identity $memberName `
                                                         -IdentityType EncodedClaim `
                                                         -ErrorAction SilentlyContinue
-                if($null -ne $convertedClaim)
+                if ($null -ne $convertedClaim)
                 {
                     $memberName = $convertedClaim.Value
                 }
@@ -800,7 +818,7 @@ function Get-SPDSCCacheAccountConfiguration()
                 $convertedClaim = New-SPClaimsPrincipal -Identity $memberName `
                                                         -IdentityType EncodedClaim `
                                                         -ErrorAction SilentlyContinue
-                if($null -ne $convertedClaim)
+                if ($null -ne $convertedClaim)
                 {
                     $memberName = $convertedClaim.Value
                 }

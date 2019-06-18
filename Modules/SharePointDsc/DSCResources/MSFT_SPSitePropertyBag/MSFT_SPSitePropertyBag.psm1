@@ -28,7 +28,7 @@ function Get-TargetResource()
 
     Write-Verbose -Message "Looking for SPSite property '$Key'"
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+    $result = Invoke-SPDscCommand -Credential $InstallAccount `
                                   -Arguments $PSBoundParameters `
                                   -ScriptBlock {
         $params = $args[0]
@@ -91,7 +91,7 @@ function Set-TargetResource()
 
     Write-Verbose -Message "Setting SPSite property '$Key'"
 
-    Invoke-SPDSCCommand -Credential $InstallAccount `
+    Invoke-SPDscCommand -Credential $InstallAccount `
                         -Arguments $PSBoundParameters `
                         -ScriptBlock {
         $params = $args[0]
@@ -160,7 +160,10 @@ function Test-TargetResource()
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
-    if($Ensure -eq 'Present')
+    Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
+    Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
+
+    if ($Ensure -eq 'Present')
     {
         return Test-SPDscParameterState -CurrentValues $CurrentValues `
                                         -DesiredValues $PSBoundParameters `

@@ -45,7 +45,7 @@ function Get-TargetResource
                "MembersToInclude, MembersToExclude")
     }
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+    $result = Invoke-SPDscCommand -Credential $InstallAccount `
                                   -Arguments $PSBoundParameters `
                                   -ScriptBlock {
         $params = $args[0]
@@ -55,7 +55,7 @@ function Get-TargetResource
 
         $nullReturn =  @{
             ServiceAppName = ""
-            SecurityType = $params.SecurityType
+            SecurityType   = $params.SecurityType
             InstallAccount = $params.InstallAccount
         }
 
@@ -88,7 +88,7 @@ function Get-TargetResource
         if ($params.ContainsKey("Members") -eq $true)
         {
             Write-Verbose -Message "Checking AccessLevels in Members parameter"
-            foreach($member in $params.Members)
+            foreach ($member in $params.Members)
             {
                 foreach ($accessLevel in $member.AccessLevels)
                 {
@@ -106,7 +106,7 @@ function Get-TargetResource
         if ($params.ContainsKey("MembersToInclude") -eq $true)
         {
             Write-Verbose -Message "Checking AccessLevels in MembersToInclude parameter"
-            foreach($member in $params.MembersToInclude)
+            foreach ($member in $params.MembersToInclude)
             {
                 foreach ($accessLevel in $member.AccessLevels)
                 {
@@ -124,7 +124,7 @@ function Get-TargetResource
         if ($params.ContainsKey("MembersToExclude") -eq $true)
         {
             Write-Verbose -Message "Checking AccessLevels in MembersToExclude parameter"
-            foreach($member in $params.MembersToExclude)
+            foreach ($member in $params.MembersToExclude)
             {
                 foreach ($accessLevel in $member.AccessLevels)
                 {
@@ -180,7 +180,7 @@ function Get-TargetResource
             }
 
             $members += @{
-                Username    = $user
+                Username     = $user
                 AccessLevels = $accessLevels
             }
         }
@@ -245,7 +245,7 @@ function Set-TargetResource
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
-    Invoke-SPDSCCommand -Credential $InstallAccount `
+    Invoke-SPDscCommand -Credential $InstallAccount `
                         -Arguments @($PSBoundParameters, $CurrentValues) `
                         -ScriptBlock {
         $params = $args[0]
@@ -281,7 +281,7 @@ function Set-TargetResource
         if ($params.ContainsKey("Members") -eq $true)
         {
             Write-Verbose -Message "Checking AccessLevels in Members parameter"
-            foreach($member in $params.Members)
+            foreach ($member in $params.Members)
             {
                 foreach ($accessLevel in $member.AccessLevels)
                 {
@@ -297,7 +297,7 @@ function Set-TargetResource
         if ($params.ContainsKey("MembersToInclude") -eq $true)
         {
             Write-Verbose -Message "Checking AccessLevels in MembersToInclude parameter"
-            foreach($member in $params.MembersToInclude)
+            foreach ($member in $params.MembersToInclude)
             {
                 foreach ($accessLevel in $member.AccessLevels)
                 {
@@ -324,7 +324,7 @@ function Set-TargetResource
 
         if ($params.ContainsKey("Members") -eq $true)
         {
-            foreach($desiredMember in $params.Members)
+            foreach ($desiredMember in $params.Members)
             {
                 if ($desiredMember.Username -eq "{LocalFarm}")
                 {
@@ -333,7 +333,7 @@ function Set-TargetResource
                 }
                 else
                 {
-                    $isUser = Test-SPDSCIsADUser -IdentityName $desiredMember.Username
+                    $isUser = Test-SPDscIsADUser -IdentityName $desiredMember.Username
                     if ($isUser -eq $true)
                     {
                         $claim = New-SPClaimsPrincipal -Identity $desiredMember.Username `
@@ -364,7 +364,7 @@ function Set-TargetResource
                 }
             }
 
-            foreach($currentMember in $CurrentValues.Members)
+            foreach ($currentMember in $CurrentValues.Members)
             {
                 if ($params.Members.Username -notcontains $currentMember.Username)
                 {
@@ -375,7 +375,7 @@ function Set-TargetResource
                     }
                     else
                     {
-                        $isUser = Test-SPDSCIsADUser -IdentityName $currentMember.Username
+                        $isUser = Test-SPDscIsADUser -IdentityName $currentMember.Username
                         if ($isUser -eq $true)
                         {
                             $claim = New-SPClaimsPrincipal -Identity $currentMember.Username `
@@ -403,16 +403,16 @@ function Set-TargetResource
                 }
                 else
                 {
-                    $isUser = Test-SPDSCIsADUser -IdentityName $desiredMember.Username
+                    $isUser = Test-SPDscIsADUser -IdentityName $desiredMember.Username
                     if ($isUser -eq $true)
                     {
                         $claim = New-SPClaimsPrincipal -Identity $desiredMember.Username `
-                                                    -IdentityType WindowsSamAccountName
+                                                       -IdentityType WindowsSamAccountName
                     }
                     else
                     {
                         $claim = New-SPClaimsPrincipal -Identity $desiredMember.Username `
-                                                    -IdentityType WindowsSecurityGroupName
+                                                       -IdentityType WindowsSecurityGroupName
                     }
                 }
 
@@ -450,16 +450,16 @@ function Set-TargetResource
                     }
                     else
                     {
-                        $isUser = Test-SPDSCIsADUser -IdentityName $excludeMember
+                        $isUser = Test-SPDscIsADUser -IdentityName $excludeMember
                         if ($isUser -eq $true)
                         {
                             $claim = New-SPClaimsPrincipal -Identity $excludeMember `
-                                                        -IdentityType WindowsSamAccountName
+                                                           -IdentityType WindowsSamAccountName
                         }
                         else
                         {
                             $claim = New-SPClaimsPrincipal -Identity $excludeMember `
-                                                        -IdentityType WindowsSecurityGroupName
+                                                           -IdentityType WindowsSecurityGroupName
                         }
                     }
                     Revoke-SPObjectSecurity -Identity $security -Principal $claim
@@ -517,12 +517,15 @@ function Test-TargetResource
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
+    Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
+    Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
+
     if ([System.String]::IsNullOrEmpty($CurrentValues.ServiceAppName) -eq $true)
     {
         return $false
     }
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+    $result = Invoke-SPDscCommand -Credential $InstallAccount `
                         -Arguments @($PSBoundParameters, $CurrentValues, $PSScriptRoot) `
                         -ScriptBlock {
         $params        = $args[0]
@@ -572,7 +575,7 @@ function Test-TargetResource
             if ($null -eq $differences)
             {
                 Write-Verbose -Message "Security list matches - checking that permissions match on each object"
-                foreach($currentMember in $CurrentValues.Members)
+                foreach ($currentMember in $CurrentValues.Members)
                 {
                     $expandedAccessLevels = Expand-AccessLevel -Security $security -AccessLevels ($params.Members | Where-Object -FilterScript {
                         $_.Username -eq $currentMember.Username
