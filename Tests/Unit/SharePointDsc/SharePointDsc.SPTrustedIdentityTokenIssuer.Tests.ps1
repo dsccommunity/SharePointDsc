@@ -1,204 +1,481 @@
 [CmdletBinding()]
 param(
-    [string] $SharePointCmdletModule = (Join-Path $PSScriptRoot "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" -Resolve)
+    [Parameter()]
+    [string]
+    $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
+                                         -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
+                                         -Resolve)
 )
 
-$ErrorActionPreference = 'stop'
-Set-StrictMode -Version latest
+Import-Module -Name (Join-Path -Path $PSScriptRoot `
+                                -ChildPath "..\UnitTestHelper.psm1" `
+                                -Resolve)
 
-$RepoRoot = (Resolve-Path $PSScriptRoot\..\..\..).Path
-$Global:CurrentSharePointStubModule = $SharePointCmdletModule
+$Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointCmdletModule `
+                                              -DscResource "SPTrustedIdentityTokenIssuer"
 
-$ModuleName = "MSFT_SPTrustedIdentityTokenIssuer"
-Import-Module (Join-Path $RepoRoot "Modules\SharePointDsc\DSCResources\$ModuleName\$ModuleName.psm1") -Force
+Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
+    InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
+        Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
-Describe "SPTrustedIdentityTokenIssuer - SharePoint Build $((Get-Item $SharePointCmdletModule).Directory.BaseName)" {
-    InModuleScope $ModuleName {
-        $testParams = @{
-            Name                         = "Contoso"
-            Description                  = "Contoso"
-            Realm                        = "https://sharepoint.contoso.com"
-            SignInUrl                    = "https://adfs.contoso.com/adfs/ls/"
-            IdentifierClaim              = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
-            ClaimsMappings               = @(
-                (New-CimInstance -ClassName "MSFT_KeyValuePair" -ClientOnly -Property @{
-                    Name = "Email"; 
-                    IncomingClaimType = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
-                }),
-                (New-CimInstance -ClassName "MSFT_KeyValuePair" -ClientOnly -Property @{
-                    Name = "Account name"; 
-                    IncomingClaimType = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"; 
-                    LocalClaimType = "http://schemas.xmlsoap.org/customSPGroupClaimType"
-                })
-            )
-            SigningCertificateThumbPrint = "Mock Thumbrpint"
-            ClaimProviderName            = "ldapcp"
-            ProviderSignOutUri            = "https://adfs.contoso.com/adfs/ls/"
-            Ensure                       = "Present"
-            Verbose                      = $true
-        }
-
-        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..\..).Path) "Modules\SharePointDsc")
-        
-        Mock Invoke-SPDSCCommand { 
-            return Invoke-Command -ScriptBlock $ScriptBlock -ArgumentList $Arguments -NoNewScope
-        }        
-        
-        Mock Get-ChildItem {
+        # Mocks for all contexts
+        Mock -CommandName Get-ChildItem -MockWith {
             return @(
                 @{
-                    Thumbprint = "Mock Thumbrpint"
+                    Thumbprint = "123ABCFACE123ABCFACE123ABCFACE123ABCFACE"
                 }
             )
+        } -ParameterFilter { $Path -eq 'Cert:\LocalMachine\My' }
+
+        Mock -CommandName New-SPTrustedIdentityTokenIssuer -MockWith {
+            $sptrust = [pscustomobject]@{
+                Name              = $testParams.Name
+                ClaimProviderName = ""
+                ProviderSignOutUri = ""
+            }
+            $sptrust | Add-Member -Name Update -MemberType ScriptMethod -Value { }
+            return $sptrust
         }
 
-        Remove-Module -Name "Microsoft.SharePoint.PowerShell" -Force -ErrorAction SilentlyContinue
-        Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue 
+        Mock -CommandName New-SPClaimTypeMapping -MockWith {
+            return [pscustomobject]@{
+                MappedClaimType = $testParams.IdentifierClaim
+            }
+        }
 
-        Context "The SPTrustedIdentityTokenIssuer does not exist, but it should be present" {
-            Mock New-SPTrustedIdentityTokenIssuer {
-                $sptrust = [pscustomobject]@{
-                    Name              = $testParams.Name
-                    ClaimProviderName = ""
-                    ProviderSignOutUri = ""
-                }
-                $sptrust| Add-Member -Name Update -MemberType ScriptMethod  -Value { }
-                return $sptrust
+        Mock -CommandName Get-SPClaimProvider -MockWith {
+            return [pscustomobject]@(@{
+                DisplayName = $testParams.ClaimProviderName
+            })
+        }
+
+        try
+        {
+            [Microsoft.SharePoint.Administration.SPUrlZone]
+        }
+        catch
+        {
+            Add-Type -TypeDefinition @"
+namespace Microsoft.SharePoint.Administration {
+    public enum SPUrlZone { Default, Intranet, Internet, Custom, Extranet };
+}
+"@
+        }
+
+        try
+        {
+            [Microsoft.SharePoint.Administration.SPTrustedAuthenticationProvider]
+        }
+        catch
+        {
+            Add-Type -TypeDefinition @"
+namespace Microsoft.SharePoint.Administration {
+    public class SPTrustedAuthenticationProvider {}
+}
+"@
+        }
+
+        # Test contexts
+        Context -Name "The SPTrustedLoginProvider does not exist but should, using a signing certificate in the certificate store" -Fixture {
+            $testParams = @{
+                Name                         = "Contoso"
+                Description                  = "Contoso"
+                Realm                        = "https://sharepoint.contoso.com"
+                SignInUrl                    = "https://adfs.contoso.com/adfs/ls/"
+                IdentifierClaim              = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
+                ClaimsMappings               = @(
+                    (New-CimInstance -ClassName MSFT_SPClaimTypeMapping -Property @{
+                        Name = "Email"
+                        IncomingClaimType = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
+                    } -ClientOnly)
+                    (New-CimInstance -ClassName MSFT_SPClaimTypeMapping -Property @{
+                        Name = "Role"
+                        IncomingClaimType = "http://schemas.xmlsoap.org/ExternalSTSGroupType"
+                        LocalClaimType = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
+                    } -ClientOnly)
+                )
+                SigningCertificateThumbprint = "123ABCFACE123ABCFACE123ABCFACE123ABCFACE"
+                ClaimProviderName            = "LDAPCP"
+                ProviderSignOutUri           = "https://adfs.contoso.com/adfs/ls/"
+                Ensure                       = "Present"
             }
 
-            Mock New-SPClaimTypeMapping {
-                return [pscustomobject]@{
-                    MappedClaimType = $testParams.IdentifierClaim
-                }
-            }
-
-            $getResults = Get-TargetResource @testParams
-
-            It "returns absent from the get method" {
+            It "Should return absent from the get method" {
+                $getResults = Get-TargetResource @testParams
                 $getResults.Ensure | Should Be "Absent"
             }
 
-            It "returns false from the test method" {
+            It "Should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $false
             }
 
-            It "creates the SPTrustedIdentityTokenIssuer" {
+            It "Should create the SPTrustedIdentityTokenIssuer" {
                 Set-TargetResource @testParams
                 Assert-MockCalled New-SPTrustedIdentityTokenIssuer
             }
         }
-        
-        Context "The SPTrustedIdentityTokenIssuer does not exist, but it should be present and claims provider specified exists on the farm" {
-            Mock Get-SPClaimProvider {
-                return [pscustomobject]@(@{
-                    DisplayName = $testParams.ClaimProviderName
-                })
+
+        Context -Name "The SPTrustedLoginProvider does not exist but should, using a signing certificate in the file path" -Fixture {
+            $testParams = @{
+                Name                         = "Contoso"
+                Description                  = "Contoso"
+                Realm                        = "https://sharepoint.contoso.com"
+                SignInUrl                    = "https://adfs.contoso.com/adfs/ls/"
+                IdentifierClaim              = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
+                ClaimsMappings               = @(
+                    (New-CimInstance -ClassName MSFT_SPClaimTypeMapping -Property @{
+                        Name = "Email"
+                        IncomingClaimType = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
+                    } -ClientOnly)
+                    (New-CimInstance -ClassName MSFT_SPClaimTypeMapping -Property @{
+                        Name = "Role"
+                        IncomingClaimType = "http://schemas.xmlsoap.org/ExternalSTSGroupType"
+                        LocalClaimType = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
+                    } -ClientOnly)
+                )
+                SigningCertificateFilePath   = "F:\Data\DSC\FakeSigning.cer"
+                ClaimProviderName            = "LDAPCP"
+                ProviderSignOutUri           = "https://adfs.contoso.com/adfs/ls/"
+                Ensure                       = "Present"
             }
-            
-            Mock New-SPTrustedIdentityTokenIssuer {
-                $sptrust = [pscustomobject]@{
-                    Name              = $testParams.Name
-                    ClaimProviderName = ""
-                    ProviderSignOutUri = ""
-                }
-                $sptrust| Add-Member -Name Update -MemberType ScriptMethod  -Value { }
-                return $sptrust
+
+            Mock -CommandName New-Object -MockWith {
+                return @(
+                    @{
+                        Thumbprint = "123ABCFACE123ABCFACE123ABCFACE123ABCFACE"
+                    }
+                )
+            } -ParameterFilter { $TypeName -eq 'System.Security.Cryptography.X509Certificates.X509Certificate2' }
+
+            It "Should return absent from the get method" {
+                $getResults = Get-TargetResource @testParams
+                $getResults.Ensure | Should Be "Absent"
             }
-            
-            Mock Get-SPTrustedIdentityTokenIssuer {
+
+            It "Should return false from the test method" {
+                Test-TargetResource @testParams | Should Be $false
+            }
+
+            It "Should create the SPTrustedIdentityTokenIssuer" {
+                Set-TargetResource @testParams
+                Assert-MockCalled New-SPTrustedIdentityTokenIssuer
+            }
+        }
+
+        Context -Name "The SPTrustedLoginProvider is desired, but both parameters SigningCertificateThumbprint and SigningCertificateFilePath are set while exactly 1 should" -Fixture {
+            $testParams = @{
+                Name                         = "Contoso"
+                Description                  = "Contoso"
+                Realm                        = "https://sharepoint.contoso.com"
+                SignInUrl                    = "https://adfs.contoso.com/adfs/ls/"
+                IdentifierClaim              = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
+                ClaimsMappings               = @(
+                    (New-CimInstance -ClassName MSFT_SPClaimTypeMapping -Property @{
+                        Name = "Email"
+                        IncomingClaimType = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
+                    } -ClientOnly)
+                    (New-CimInstance -ClassName MSFT_SPClaimTypeMapping -Property @{
+                        Name = "Role"
+                        IncomingClaimType = "http://schemas.xmlsoap.org/ExternalSTSGroupType"
+                        LocalClaimType = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
+                    } -ClientOnly)
+                )
+                SigningCertificateThumbprint = "123ABCFACE123ABCFACE123ABCFACE123ABCFACE"
+                SigningCertificateFilePath   = "F:\Data\DSC\FakeSigning.cer"
+                ClaimProviderName            = "LDAPCP"
+                ProviderSignOutUri           = "https://adfs.contoso.com/adfs/ls/"
+                Ensure                       = "Present"
+            }
+
+            It "should fail validation of signing certificate parameters in the set method" {
+                { Set-TargetResource @testParams } | Should Throw "Cannot use both parameters SigningCertificateThumbprint and SigningCertificateFilePath at the same time."
+            }
+        }
+
+        Context -Name "The SPTrustedLoginProvider is desired, but none of parameters SigningCertificateThumbprint and SigningCertificateFilePath is set while exactly 1 should" -Fixture {
+            $testParams = @{
+                Name                         = "Contoso"
+                Description                  = "Contoso"
+                Realm                        = "https://sharepoint.contoso.com"
+                SignInUrl                    = "https://adfs.contoso.com/adfs/ls/"
+                IdentifierClaim              = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
+                ClaimsMappings               = @(
+                    (New-CimInstance -ClassName MSFT_SPClaimTypeMapping -Property @{
+                        Name = "Email"
+                        IncomingClaimType = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
+                    } -ClientOnly)
+                    (New-CimInstance -ClassName MSFT_SPClaimTypeMapping -Property @{
+                        Name = "Role"
+                        IncomingClaimType = "http://schemas.xmlsoap.org/ExternalSTSGroupType"
+                        LocalClaimType = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
+                    } -ClientOnly)
+                )
+                ClaimProviderName            = "LDAPCP"
+                ProviderSignOutUri           = "https://adfs.contoso.com/adfs/ls/"
+                Ensure                       = "Present"
+            }
+
+            It "should fail validation of signing certificate parameters in the set method" {
+                { Set-TargetResource @testParams } | Should Throw "At least one of the following parameters must be specified: SigningCertificateThumbprint, SigningCertificateFilePath."
+            }
+        }
+
+        Context -Name "The SPTrustedLoginProvider is desired, but the thumbprint of the signing certificate in parameter SigningCertificateThumbprint is invalid" -Fixture {
+            $testParams = @{
+                Name                         = "Contoso"
+                Description                  = "Contoso"
+                Realm                        = "https://sharepoint.contoso.com"
+                SignInUrl                    = "https://adfs.contoso.com/adfs/ls/"
+                IdentifierClaim              = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
+                ClaimsMappings               = @(
+                    (New-CimInstance -ClassName MSFT_SPClaimTypeMapping -Property @{
+                        Name = "Email"
+                        IncomingClaimType = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
+                    } -ClientOnly)
+                    (New-CimInstance -ClassName MSFT_SPClaimTypeMapping -Property @{
+                        Name = "Role"
+                        IncomingClaimType = "http://schemas.xmlsoap.org/ExternalSTSGroupType"
+                        LocalClaimType = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
+                    } -ClientOnly)
+                )
+                SigningCertificateThumbprint = "XX123ABCFACEXX"
+                ClaimProviderName            = "LDAPCP"
+                ProviderSignOutUri           = "https://adfs.contoso.com/adfs/ls/"
+                Ensure                       = "Present"
+            }
+
+           It "should fail validation of parameter SigningCertificateThumbprint in the set method" {
+                { Set-TargetResource @testParams } | Should Throw "Parameter SigningCertificateThumbprint does not match valid format '^[A-Fa-f0-9]{40}$'."
+            }
+        }
+
+        Context -Name "The SPTrustedLoginProvider is desired, but the private key of the signing certificate is present in certificate store while it should not" -Fixture {
+            $testParams = @{
+                Name                         = "Contoso"
+                Description                  = "Contoso"
+                Realm                        = "https://sharepoint.contoso.com"
+                SignInUrl                    = "https://adfs.contoso.com/adfs/ls/"
+                IdentifierClaim              = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
+                ClaimsMappings               = @(
+                    (New-CimInstance -ClassName MSFT_SPClaimTypeMapping -Property @{
+                        Name = "Email"
+                        IncomingClaimType = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
+                    } -ClientOnly)
+                    (New-CimInstance -ClassName MSFT_SPClaimTypeMapping -Property @{
+                        Name = "Role"
+                        IncomingClaimType = "http://schemas.xmlsoap.org/ExternalSTSGroupType"
+                        LocalClaimType = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
+                    } -ClientOnly)
+                )
+                SigningCertificateThumbprint = "123ABCFACE123ABCFACE123ABCFACE123ABCFACE"
+                ClaimProviderName            = "LDAPCP"
+                ProviderSignOutUri           = "https://adfs.contoso.com/adfs/ls/"
+                Ensure                       = "Present"
+            }
+
+            Mock -CommandName Get-ChildItem -MockWith {
+                return @(
+                    @{
+                        Thumbprint = "123ABCFACE123ABCFACE123ABCFACE123ABCFACE"
+                        HasPrivateKey = $true
+                    }
+                )
+            } -ParameterFilter { $Path -eq 'Cert:\LocalMachine\My' }
+
+           It "should fail validation of certificate in the set method" {
+                { Set-TargetResource @testParams } | Should Throw "SharePoint requires that the private key of the signing certificate is not installed in the certificate store."
+            }
+        }
+
+        Context -Name "The SPTrustedLoginProvider does not exist but should, with a claims provider that exists on the farm" -Fixture {
+            $testParams = @{
+                Name                         = "Contoso"
+                Description                  = "Contoso"
+                Realm                        = "https://sharepoint.contoso.com"
+                SignInUrl                    = "https://adfs.contoso.com/adfs/ls/"
+                IdentifierClaim              = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
+                ClaimsMappings               = @(
+                    (New-CimInstance -ClassName MSFT_SPClaimTypeMapping -Property @{
+                        Name = "Email"
+                        IncomingClaimType = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
+                    } -ClientOnly)
+                    (New-CimInstance -ClassName MSFT_SPClaimTypeMapping -Property @{
+                        Name = "Role"
+                        IncomingClaimType = "http://schemas.xmlsoap.org/ExternalSTSGroupType"
+                        LocalClaimType = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
+                    } -ClientOnly)
+                )
+                SigningCertificateThumbprint = "123ABCFACE123ABCFACE123ABCFACE123ABCFACE"
+                ClaimProviderName            = "LDAPCP"
+                ProviderSignOutUri           = "https://adfs.contoso.com/adfs/ls/"
+                Ensure                       = "Present"
+            }
+
+            Mock -CommandName Get-SPTrustedIdentityTokenIssuer -MockWith {
                 $sptrust = [pscustomobject]@{
                     Name              = $testParams.Name
                     ClaimProviderName = $testParams.ClaimProviderName
-                    ProviderSignOutUri = ""
                 }
-                $sptrust| Add-Member -Name Update -MemberType ScriptMethod  -Value { }
+                $sptrust| Add-Member -Name Update -MemberType ScriptMethod -Value { }
                 return $sptrust
             }
-            
-            Mock New-SPClaimTypeMapping {
-                return [pscustomobject]@{
-                    MappedClaimType = $testParams.IdentifierClaim
-                }
-            }
-            
-            Set-TargetResource @testParams
-            $getResults = Get-TargetResource @testParams
-            
-            It "creates the SPTrustedIdentityTokenIssuer and sets claims provider" {
+
+            It "Should create the SPTrustedLoginProvider with claims provider set" {
+                Set-TargetResource @testParams
+                $getResults = Get-TargetResource @testParams
                 $getResults.ClaimProviderName | Should Be $testParams.ClaimProviderName
             }
         }
 
-        Context "The SPTrustedIdentityTokenIssuer already exists, and it should be present" {
-            Mock Get-SPTrustedIdentityTokenIssuer {
+        Context -Name "The SPTrustedLoginProvider already exists and should not be changed" -Fixture {
+            $testParams = @{
+                Name                         = "Contoso"
+                Description                  = "Contoso"
+                Realm                        = "https://sharepoint.contoso.com"
+                SignInUrl                    = "https://adfs.contoso.com/adfs/ls/"
+                IdentifierClaim              = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
+                ClaimsMappings               = @(
+                    (New-CimInstance -ClassName MSFT_SPClaimTypeMapping -Property @{
+                        Name = "Email"
+                        IncomingClaimType = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
+                    } -ClientOnly)
+                    (New-CimInstance -ClassName MSFT_SPClaimTypeMapping -Property @{
+                        Name = "Role"
+                        IncomingClaimType = "http://schemas.xmlsoap.org/ExternalSTSGroupType"
+                        LocalClaimType = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
+                    } -ClientOnly)
+                )
+                SigningCertificateThumbprint = "123ABCFACE123ABCFACE123ABCFACE123ABCFACE"
+                ClaimProviderName            = "LDAPCP"
+                ProviderSignOutUri           = "https://adfs.contoso.com/adfs/ls/"
+                Ensure                       = "Present"
+            }
+
+            Mock -CommandName Get-SPTrustedIdentityTokenIssuer -MockWith {
                 $sptrust = [pscustomobject]@{
                     Name              = $testParams.Name
-                    ClaimProviderName = ""
-                    ProviderSignOutUri = ""
+                    ClaimProviderName = $testParams.ClaimProviderName
                 }
                 return $sptrust
             }
 
-            $getResults = Get-TargetResource @testParams
-
-            It "returns present from the get method" {
+            It "Should return present from the get method" {
+                $getResults = Get-TargetResource @testParams
                 $getResults.Ensure | Should Be "Present"
             }
 
-            It "returns true from the test method" {
+            It "Should return true from the test method" {
                 Test-TargetResource @testParams | Should Be $true
-            }
-
-            It "doe not create the SPTrustedIdentityTokenIssuer" {
-                Set-TargetResource @testParams
             }
         }
 
-        $testParams.Ensure = "Absent"
+        Context -Name "The SPTrustedLoginProvider already exists but should be removed" -Fixture {
+            $testParams = @{
+                Name                         = "Contoso"
+                Description                  = "Contoso"
+                Realm                        = "https://sharepoint.contoso.com"
+                SignInUrl                    = "https://adfs.contoso.com/adfs/ls/"
+                IdentifierClaim              = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
+                ClaimsMappings               = @(
+                    (New-CimInstance -ClassName MSFT_SPClaimTypeMapping -Property @{
+                        Name = "Email"
+                        IncomingClaimType = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
+                    } -ClientOnly)
+                    (New-CimInstance -ClassName MSFT_SPClaimTypeMapping -Property @{
+                        Name = "Role"
+                        IncomingClaimType = "http://schemas.xmlsoap.org/ExternalSTSGroupType"
+                        LocalClaimType = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
+                    } -ClientOnly)
+                )
+                SigningCertificateThumbprint = "123ABCFACE123ABCFACE123ABCFACE123ABCFACE"
+                ClaimProviderName            = "LDAPCP"
+                ProviderSignOutUri           = "https://adfs.contoso.com/adfs/ls/"
+                Ensure                       = "Absent"
+            }
 
-        Context "The SPTrustedIdentityTokenIssuer exists, but it should be absent" {
-            Mock Get-SPTrustedIdentityTokenIssuer {
+            Mock -CommandName Get-SPTrustedIdentityTokenIssuer -MockWith {
                 $sptrust = [pscustomobject]@{
                     Name              = $testParams.Name
                 }
-                $sptrust| Add-Member -Name Update -MemberType ScriptMethod  -Value { }
+                $sptrust | Add-Member -Name Update -MemberType ScriptMethod -Value { }
                 return $sptrust
             }
 
-            Mock Remove-SPTrustedIdentityTokenIssuer { } -Verifiable
+            Mock -CommandName Get-SPWebApplication -MockWith {
+                $spWebApp = [pscustomobject]@{
+                    Url              = "http://webAppUrl"
+                }
+                $spWebApp | Add-Member -Name Update -MemberType ScriptMethod -Value { }
+                $spWebApp | Add-Member -Name GetIisSettingsWithFallback -MemberType ScriptMethod -Value { }
+                return $spWebApp
+            }
 
-            It "returns absent from the get method" {
+            Mock -CommandName Get-SPAuthenticationProvider -MockWith {
+                $spAP = [pscustomobject]@{
+                    LoginProviderName              = ""
+                }
+                $spAP | Add-Member -Name Update -MemberType ScriptMethod -Value { }
+                $spAP | Add-Member -MemberType ScriptMethod `
+                                    -Name GetType `
+                                    -Value {
+                                        return @{
+                                            FullName = "Microsoft.SharePoint.Administration.SPTrustedAuthenticationProvider"
+                                        }
+                                    } -PassThru -Force
+                return $spAP
+            }
+
+            Mock -CommandName Remove-SPTrustedIdentityTokenIssuer -MockWith { }
+
+            It "Should return absent from the get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Present"
             }
 
-            It "returns true from the test method" {
+            It "Should return true from the test method" {
                 Test-TargetResource @testParams | Should Be $false
             }
 
-            It "removes the SPTrustedIdentityTokenIssuer" {
+            It "Should remove the SPTrustedIdentityTokenIssuer" {
                 Set-TargetResource @testParams
                 Assert-MockCalled Remove-SPTrustedIdentityTokenIssuer
             }
         }
 
-        $testParams.Ensure = "Present"
-        $originalIdentifierClaim = $testParams.IdentifierClaim
-        $testParams.IdentifierClaim = "UnknownClaimType"
-
-        Context "The IdentifierClaim does not match one of the claim types in ClaimsMappings" {
-            It "validation of IdentifierClaim fails in the set method" {
-                { Set-TargetResource @testParams } | Should Throw "IdentifierClaim does not match any claim type specified in ClaimsMappings."
+        Context -Name "The SPTrustedLoginProvider is desired, but the IdentifierClaim parameter does not match a claim type in ClaimsMappings" -Fixture {
+            $testParams = @{
+                Name                         = "Contoso"
+                Description                  = "Contoso"
+                Realm                        = "https://sharepoint.contoso.com"
+                SignInUrl                    = "https://adfs.contoso.com/adfs/ls/"
+                IdentifierClaim              = "IdentityClaimTypeNotSpecifiedInClaimsMappings"
+                ClaimsMappings               = @(
+                    (New-CimInstance -ClassName MSFT_SPClaimTypeMapping -Property @{
+                        Name = "Email"
+                        IncomingClaimType = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
+                    } -ClientOnly)
+                    (New-CimInstance -ClassName MSFT_SPClaimTypeMapping -Property @{
+                        Name = "Role"
+                        IncomingClaimType = "http://schemas.xmlsoap.org/ExternalSTSGroupType"
+                        LocalClaimType = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
+                    } -ClientOnly)
+                )
+                SigningCertificateThumbprint = "123ABCFACE123ABCFACE123ABCFACE123ABCFACE"
+                ClaimProviderName            = "LDAPCP"
+                ProviderSignOutUri           = "https://adfs.contoso.com/adfs/ls/"
+                Ensure                       = "Present"
             }
-        }
 
-        $testParams.IdentifierClaim = $originalIdentifierClaim
-        $testParams.SigningCertificateThumbPrint = "UnknownSigningCertificateThumbPrint"
+            Mock -CommandName New-SPClaimTypeMapping -MockWith {
+                return [pscustomobject]@{
+                    MappedClaimType = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
+                }
+            }
 
-        Context "The certificate thumbprint does not match a certificate in certificate store LocalMachine\My" {
-            It "validation of SigningCertificateThumbPrint fails in the set method" {
-                { Set-TargetResource @testParams } | Should Throw "The certificate thumbprint does not match a certificate in certificate store LocalMachine\My."
+            It "should fail validation of IdentifierClaim in the set method" {
+                { Set-TargetResource @testParams } | Should Throw "IdentifierClaim does not match any claim type specified in ClaimsMappings."
             }
         }
     }
 }
 
+Invoke-Command -ScriptBlock $Global:SPDscHelper.CleanupScript -NoNewScope

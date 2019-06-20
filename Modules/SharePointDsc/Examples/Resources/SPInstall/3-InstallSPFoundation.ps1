@@ -3,7 +3,7 @@
     This module will install SharePoint Foundation 2013 to the local server
 #>
 
-    Configuration Example 
+    Configuration Example
     {
         param(
             [Parameter(Mandatory = $true)]

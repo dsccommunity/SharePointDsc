@@ -1,6 +1,6 @@
 [ClassVersion("1.0.0.0"), FriendlyName("SPWordAutomationServiceApp")] 
 class MSFT_SPWordAutomationServiceApp : OMI_BaseResource 
-{ 
+{
     [Key, Description("THe name of the service application")] string Name; 
     [Write, Description("Present to ensure the app exists, absent to ensure that it does not"), ValueMap{"Present","Absent"}, Values{"Present","Absent"}] string Ensure;
     [Write, Description("The name of the application pool to run the service app in")] string ApplicationPool; 

@@ -3,7 +3,7 @@
     This example shows how to add a wildcard managed path to a specific web application
 #>
 
-    Configuration Example 
+    Configuration Example
     {
         param(
             [Parameter(Mandatory = $true)]
@@ -13,13 +13,13 @@
         Import-DscResource -ModuleName SharePointDsc
 
         node localhost {
-            SPManagedPath TestManagedPath 
+            SPManagedPath TestManagedPath
             {
-                WebAppUrl      = "http://sharepoint.contoso.com"
-                InstallAccount = $SetupAccount
-                RelativeUrl    = "teams"
-                Explicit       = $false
-                HostHeader     = $true
+                WebAppUrl            = "http://sharepoint.contoso.com"
+                RelativeUrl          = "teams"
+                Explicit             = $false
+                HostHeader           = $true
+                PsDscRunAsCredential = $SetupAccount
             }
         }
     }

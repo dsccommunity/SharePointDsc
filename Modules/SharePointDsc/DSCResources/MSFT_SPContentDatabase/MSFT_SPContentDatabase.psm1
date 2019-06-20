@@ -4,25 +4,50 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [parameter(Mandatory = $true)]  [System.String] $Name,
-        [parameter(Mandatory = $false)] [System.String] $DatabaseServer,
-        [parameter(Mandatory = $true)]  [System.String] $WebAppUrl,
-        [parameter(Mandatory = $false)] [System.Boolean] $Enabled,
-        [parameter(Mandatory = $false)] [System.UInt16] $WarningSiteCount,
-        [parameter(Mandatory = $false)] [System.UInt16] $MaximumSiteCount,
-        [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] [System.String] $Ensure = "Present",
-        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
+        [Parameter(Mandatory = $true)]
+        [System.String]
+        $Name,
+
+        [Parameter()]
+        [System.String]
+        $DatabaseServer,
+
+        [Parameter(Mandatory = $true)]
+        [System.String]
+        $WebAppUrl,
+
+        [Parameter()]
+        [System.Boolean]
+        $Enabled,
+
+        [Parameter()]
+        [System.UInt16]
+        $WarningSiteCount,
+
+        [Parameter()]
+        [System.UInt16]
+        $MaximumSiteCount,
+
+        [Parameter()]
+        [ValidateSet("Present","Absent")]
+        [System.String]
+        $Ensure = "Present",
+
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
+        $InstallAccount
     )
 
     Write-Verbose -Message "Getting content database configuration settings"
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+    $result = Invoke-SPDscCommand -Credential $InstallAccount `
                                   -Arguments $PSBoundParameters `
                                   -ScriptBlock {
         $params = $args[0]
-        
+
         $cdb = Get-SPDatabase | Where-Object -FilterScript {
-            $_.Type -eq "Content Database" -and $_.Name -eq $params.Name
+            $_.GetType().FullName -eq "Microsoft.SharePoint.Administration.SPContentDatabase" -and `
+            $_.Name -eq $params.Name
         }
 
         if ($null -eq $cdb)
@@ -74,25 +99,46 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true)]  [System.String] $Name,
-        [parameter(Mandatory = $false)] [System.String] $DatabaseServer,
-        [parameter(Mandatory = $true)]  [System.String] $WebAppUrl,
-        [parameter(Mandatory = $false)] [System.Boolean] $Enabled,
-        [parameter(Mandatory = $false)] [System.UInt16] $WarningSiteCount,
-        [parameter(Mandatory = $false)] [System.UInt16] $MaximumSiteCount,
-        [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] [System.String] $Ensure = "Present",
-        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
+        [Parameter(Mandatory = $true)]
+        [System.String]
+        $Name,
+
+        [Parameter()]
+        [System.String]
+        $DatabaseServer,
+
+        [Parameter(Mandatory = $true)]
+        [System.String]
+        $WebAppUrl,
+
+        [Parameter()]
+        [System.Boolean]
+        $Enabled,
+
+        [Parameter()]
+        [System.UInt16]
+        $WarningSiteCount,
+
+        [Parameter()]
+        [System.UInt16]
+        $MaximumSiteCount,
+
+        [Parameter()]
+        [ValidateSet("Present","Absent")]
+        [System.String]
+        $Ensure = "Present",
+
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
+        $InstallAccount
     )
 
     Write-Verbose -Message "Setting content database configuration settings"
 
-    Invoke-SPDSCCommand -Credential $InstallAccount `
-                        -Arguments @($PSBoundParameters,$PSScriptRoot) `
+    Invoke-SPDscCommand -Credential $InstallAccount `
+                        -Arguments $PSBoundParameters `
                         -ScriptBlock {
         $params = $args[0]
-        $scriptRoot  = $args[1]
-
-        Import-Module (Join-Path $scriptRoot "..\..\Modules\SharePointDsc.ContentDatabase\SPContentDatabase.psm1" -Resolve)
 
         # Use Get-SPDatabase instead of Get-SPContentDatabase because the Get-SPContentDatabase
         # does not return disabled databases.
@@ -100,20 +146,24 @@ function Set-TargetResource
             $_.Type -eq "Content Database" -and $_.Name -eq $params.Name
         }
 
-        if ($params.Ensure -eq "Present") {
+        if ($params.Ensure -eq "Present")
+        {
             # Check if specified web application exists and throw exception when
             # this is not the case
             $webapp = Get-SPWebApplication | Where-Object -FilterScript {
                 $_.Url.Trim("/") -eq $params.WebAppUrl.Trim("/")
             }
 
-            if ($null -eq $webapp) {
+            if ($null -eq $webapp)
+            {
                 throw "Specified web application does not exist."
             }
 
             # Check if database exists
-            if ($null -ne $cdb) {
-                if ($cdb.Server -ne $params.DatabaseServer) {
+            if ($null -ne $cdb)
+            {
+                if ($cdb.Server -ne $params.DatabaseServer)
+                {
                     throw ("Specified database server does not match the actual database " + `
                            "server. This resource cannot move the database to a different " + `
                            "SQL instance.")
@@ -121,20 +171,65 @@ function Set-TargetResource
 
                 # Check and change attached web application.
                 # Dismount and mount to correct web application
-                if ($params.WebAppUrl.Trim("/") -ne $cdb.WebApplication.Url.Trim("/")) {
+                if ($params.WebAppUrl.Trim("/") -ne $cdb.WebApplication.Url.Trim("/"))
+                {
                     Dismount-SPContentDatabase $params.Name -Confirm:$false
 
-                    if ($params.ContainsKey("Enabled"))
+                    $newParams= @{}
+                    foreach ($param in $params.GetEnumerator())
                     {
-                        $enabled = $params.Enabled
+                        $skipParams = @("Enabled", "Ensure", "InstallAccount", "MaximumSiteCount", "WebAppUrl")
+
+                        if ($skipParams -notcontains $param.Key)
+                        {
+                            $newParams.$($param.Key) = $param.Value
+                        }
+
+                        if ($param.Key -eq "MaximumSiteCount")
+                        {
+                            $newParams.MaxSiteCount = $param.Value
+                        }
+
+                        if ($param.Key -eq "WebAppUrl")
+                        {
+                            $newParams.WebApplication = $param.Value
+                        }
+                    }
+
+                    try
+                    {
+                        $cdb = Mount-SPContentDatabase @newParams -ErrorAction Stop
+                    }
+                    catch
+                    {
+                        throw ("Error occurred while mounting content database. " + `
+                                "Content database is not mounted. " + `
+                                "Error details: $($_.Exception.Message)")
+                    }
+
+                    if ($cdb.Status -eq "Online")
+                    {
+                        $cdbenabled = $true
                     }
                     else
                     {
-                        $enabled = $true
+                        $cdbenabled = $false
                     }
-                    
-                    $parameters = @{} + $params
-                    $cdb = Mount-SPDscContentDatabase $parameters $enabled
+
+                    if ($params.Enabled -ne $cdbenabled)
+                    {
+                        switch ($params.Enabled)
+                        {
+                            $true
+                            {
+                                $cdb.Status = [Microsoft.SharePoint.Administration.SPObjectStatus]::Online
+                            }
+                            $false
+                            {
+                                $cdb.Status = [Microsoft.SharePoint.Administration.SPObjectStatus]::Disabled
+                            }
+                        }
+                    }
                 }
 
                 # Check and change database status
@@ -146,7 +241,7 @@ function Set-TargetResource
                 {
                     $cdbenabled = $false
                 }
-                
+
                 if ($params.ContainsKey("Enabled") -and $params.Enabled -ne $cdbenabled)
                 {
                     switch ($params.Enabled)
@@ -161,13 +256,13 @@ function Set-TargetResource
                         }
                     }
                  }
-                 
+
                  # Check and change site count settings
-                if ($params.WarningSiteCount -and $params.WarningSiteCount -ne $cdb.WarningSiteCount)
+                if ($null -ne $params.WarningSiteCount -and $params.WarningSiteCount -ne $cdb.WarningSiteCount)
                 {
                     $cdb.WarningSiteCount = $params.WarningSiteCount
                 }
-                
+
                 if ($params.MaximumSiteCount -and $params.MaximumSiteCount -ne $cdb.MaximumSiteCount)
                 {
                     $cdb.MaximumSiteCount = $params.MaximumSiteCount
@@ -176,17 +271,62 @@ function Set-TargetResource
             else
             {
                 # Database does not exist, but should. Create/mount database
-                if ($params.ContainsKey("Enabled"))
+                $newParams= @{}
+                foreach ($param in $params.GetEnumerator())
                 {
-                    $enabled = $params.Enabled
+                    $skipParams = @("Enabled", "Ensure", "InstallAccount", "MaximumSiteCount", "WebAppUrl")
+
+                    if ($skipParams -notcontains $param.Key)
+                    {
+                        $newParams.$($param.Key) = $param.Value
+                    }
+
+                    if ($param.Key -eq "MaximumSiteCount")
+                    {
+                        $newParams.MaxSiteCount = $param.Value
+                    }
+
+                    if ($param.Key -eq "WebAppUrl")
+                    {
+                        $newParams.WebApplication = $param.Value
+                    }
+                }
+
+                try
+                {
+                    $cdb = Mount-SPContentDatabase @newParams -ErrorAction Stop
+                }
+                catch
+                {
+                    throw ("Error occurred while mounting content database. " + `
+                            "Content database is not mounted. " + `
+                            "Error details: $($_.Exception.Message)")
+                }
+
+                if ($cdb.Status -eq "Online")
+                {
+                    $cdbenabled = $true
                 }
                 else
                 {
-                    $enabled = $true
+                    $cdbenabled = $false
                 }
-                
-                $parameters = @{} + $params
-                $cdb = Mount-SPDscContentDatabase $parameters $enabled
+
+                if ($params.ContainsKey("Enabled") -eq $true -and `
+                    $params.Enabled -ne $cdbenabled)
+                {
+                    switch ($params.Enabled)
+                    {
+                        $true
+                        {
+                            $cdb.Status = [Microsoft.SharePoint.Administration.SPObjectStatus]::Online
+                        }
+                        $false
+                        {
+                            $cdb.Status = [Microsoft.SharePoint.Administration.SPObjectStatus]::Disabled
+                        }
+                    }
+                }
             }
             $cdb.Update()
         }
@@ -208,18 +348,48 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [parameter(Mandatory = $true)]  [System.String] $Name,
-        [parameter(Mandatory = $false)] [System.String] $DatabaseServer,
-        [parameter(Mandatory = $true)]  [System.String] $WebAppUrl,
-        [parameter(Mandatory = $false)] [System.Boolean] $Enabled,
-        [parameter(Mandatory = $false)] [System.UInt16] $WarningSiteCount,
-        [parameter(Mandatory = $false)] [System.UInt16] $MaximumSiteCount,
-        [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] [System.String] $Ensure = "Present",
-        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
+        [Parameter(Mandatory = $true)]
+        [System.String]
+        $Name,
+
+        [Parameter()]
+        [System.String]
+        $DatabaseServer,
+
+        [Parameter(Mandatory = $true)]
+        [System.String]
+        $WebAppUrl,
+
+        [Parameter()]
+        [System.Boolean]
+        $Enabled,
+
+        [Parameter()]
+        [System.UInt16]
+        $WarningSiteCount,
+
+        [Parameter()]
+        [System.UInt16]
+        $MaximumSiteCount,
+
+        [Parameter()]
+        [ValidateSet("Present","Absent")]
+        [System.String]
+        $Ensure = "Present",
+
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
+        $InstallAccount
     )
 
     Write-Verbose -Message "Testing content database configuration settings"
+
+    $PSBoundParameters.Ensure = $Ensure
+
     $CurrentValues = Get-TargetResource @PSBoundParameters
+
+    Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
+    Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
 
     if ($CurrentValues.DatabaseServer -ne $DatabaseServer)
     {
@@ -229,7 +399,6 @@ function Test-TargetResource
         return $false
     }
 
-    $PSBoundParameters.Ensure = $Ensure
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
                                     -DesiredValues $PSBoundParameters
 }

@@ -15,28 +15,28 @@ function Get-TargetResource()
         [System.String]
         $LocalWebAppUrl,
 
-        [Parameter(Mandatory = $false)] 
-        [ValidateSet("Present","Absent")] 
+        [Parameter()]
+        [ValidateSet("Present","Absent")]
         [System.String] $Ensure = "Present",
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 
-    Write-Verbose -Message "Looking for remote farm trust '$Name'"
+    Write-Verbose -Message "Getting remote farm trust '$Name'"
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+    $result = Invoke-SPDscCommand -Credential $InstallAccount `
                                   -Arguments $PSBoundParameters `
                                   -ScriptBlock {
         $params = $args[0]
 
         $returnValue = @{
-            Name = $params.Name
+            Name            = $params.Name
             RemoteWebAppUrl = $params.RemoteWebAppUrl
-            LocalWebAppUrl = $params.LocalWebAppUrl
-            Ensure = "Absent"
-            InstallAccount = $params.InstallAccount
+            LocalWebAppUrl  = $params.LocalWebAppUrl
+            Ensure          = "Absent"
+            InstallAccount  = $params.InstallAccount
         }
 
         $issuer = Get-SPTrustedSecurityTokenIssuer -Identity $params.Name `
@@ -63,7 +63,7 @@ function Get-TargetResource()
         $returnValue.Ensure = "Present"
         return $returnValue
     }
-    return $result    
+    return $result
 }
 
 function Set-TargetResource()
@@ -82,20 +82,22 @@ function Set-TargetResource()
         [System.String]
         $LocalWebAppUrl,
 
-        [Parameter(Mandatory = $false)] 
-        [ValidateSet("Present","Absent")] 
+        [Parameter()]
+        [ValidateSet("Present","Absent")]
         [System.String] $Ensure = "Present",
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
+
+    Write-Verbose -Message "Setting remote farm trust '$Name'"
 
     if ($Ensure -eq "Present")
     {
         Write-Verbose -Message "Adding remote farm trust '$Name'"
 
-        Invoke-SPDSCCommand -Credential $InstallAccount `
+        Invoke-SPDscCommand -Credential $InstallAccount `
                             -Arguments $PSBoundParameters `
                             -ScriptBlock {
             $params = $args[0]
@@ -108,7 +110,8 @@ function Set-TargetResource()
                 $endpoint = "$remoteWebApp/_layouts/15/metadata/json/1"
                 $issuer = New-SPTrustedSecurityTokenIssuer -Name $params.Name `
                                                            -IsTrustBroker:$false `
-                                                           -MetadataEndpoint $endpoint
+                                                           -MetadataEndpoint $endpoint `
+                                                           -Confirm:$false
             }
 
             $rootAuthority = Get-SPTrustedRootAuthority -Identity $params.Name `
@@ -117,7 +120,8 @@ function Set-TargetResource()
             {
                 $endpoint = "$remoteWebApp/_layouts/15/metadata/json/1/rootcertificate"
                 New-SPTrustedRootAuthority -Name $params.Name `
-                                           -MetadataEndPoint $endpoint
+                                           -MetadataEndPoint $endpoint `
+                                           -Confirm:$false
             }
             $realm = $issuer.NameId.Split("@")
             $site = Get-SPSite -Identity $params.LocalWebAppUrl
@@ -127,7 +131,7 @@ function Set-TargetResource()
 
             if ($realm[1] -ne $currentRealm)
             {
-                Set-SPAuthenticationRealm -ServiceContext $serviceContext -Realm $realm[1]    
+                Set-SPAuthenticationRealm -ServiceContext $serviceContext -Realm $realm[1]
             }
 
             $appPrincipal = Get-SPAppPrincipal -Site $params.LocalWebAppUrl `
@@ -139,16 +143,15 @@ function Set-TargetResource()
                                          -Right FullControl
         }
     }
-    
+
     if ($Ensure -eq "Absent")
     {
         Write-Verbose -Message "Removing remote farm trust '$Name'"
 
-        Invoke-SPDSCCommand -Credential $InstallAccount `
+        Invoke-SPDscCommand -Credential $InstallAccount `
                             -Arguments $PSBoundParameters `
                             -ScriptBlock {
             $params = $args[0]
-            $remoteWebApp = $params.RemoteWebAppUrl.TrimEnd('/')
 
             $issuer = Get-SPTrustedSecurityTokenIssuer -Identity $params.Name `
                                                        -ErrorAction SilentlyContinue
@@ -161,7 +164,7 @@ function Set-TargetResource()
                                                 -Scope SiteCollection `
                                                 -Confirm:$false
             }
-            
+
             Get-SPTrustedRootAuthority -Identity $params.Name `
                                        -ErrorAction SilentlyContinue `
                                        | Remove-SPTrustedRootAuthority -Confirm:$false
@@ -190,16 +193,23 @@ function Test-TargetResource()
         [System.String]
         $LocalWebAppUrl,
 
-        [Parameter(Mandatory = $false)] 
-        [ValidateSet("Present","Absent")] 
+        [Parameter()]
+        [ValidateSet("Present","Absent")]
         [System.String] $Ensure = "Present",
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 
+    Write-Verbose -Message "Testing remote farm trust '$Name'"
+
+    $PSBoundParameters.Ensure = $Ensure
+
     $CurrentValues = Get-TargetResource @PSBoundParameters
+
+    Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
+    Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
 
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
                                     -DesiredValues $PSBoundParameters `

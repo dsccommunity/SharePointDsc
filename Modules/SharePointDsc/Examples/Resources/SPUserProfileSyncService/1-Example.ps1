@@ -3,7 +3,7 @@
     This example provisions the user profile sync service to the local server
 #>
 
-    Configuration Example 
+    Configuration Example
     {
         param(
             [Parameter(Mandatory = $true)]
@@ -18,12 +18,12 @@
 
         node localhost {
             SPUserProfileSyncService UserProfileSyncService
-            {  
-                UserProfileServiceAppName   = "User Profile Service Application"
-                Ensure                      = "Present"
-                FarmAccount                 = $FarmAccount
-                RunOnlyWhenWriteable        = $true
-                InstallAccount              = $SetupAccount
+            {
+                UserProfileServiceAppName = "User Profile Service Application"
+                Ensure                    = "Present"
+                FarmAccount               = $FarmAccount
+                RunOnlyWhenWriteable      = $true
+                PsDscRunAsCredential      = $SetupAccount
             }
         }
     }

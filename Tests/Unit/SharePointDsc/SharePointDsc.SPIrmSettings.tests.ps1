@@ -1,128 +1,130 @@
 [CmdletBinding()]
 param(
-    [string] $SharePointCmdletModule = (Join-Path $PSScriptRoot "..\Stubs\SharePoint\15.0.4693.1000\Microsoft.SharePoint.PowerShell.psm1" -Resolve)
+    [Parameter()]
+    [string]
+    $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
+                                         -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
+                                         -Resolve)
 )
 
-$ErrorActionPreference = 'stop'
-Set-StrictMode -Version latest
+Import-Module -Name (Join-Path -Path $PSScriptRoot `
+                                -ChildPath "..\UnitTestHelper.psm1" `
+                                -Resolve)
 
-$RepoRoot = (Resolve-Path $PSScriptRoot\..\..\..).Path
-$Global:CurrentSharePointStubModule = $SharePointCmdletModule 
+$Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointCmdletModule `
+                                              -DscResource "SPIrmSettings"
 
-$ModuleName = "MSFT_SPIrmSettings"
-Import-Module (Join-Path $RepoRoot "Modules\SharePointDsc\DSCResources\$ModuleName\$ModuleName.psm1") -Force
+Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
+    InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
+        Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
+        # Initialize tests
 
-Describe "SPIrmSettings - SharePoint Build $((Get-Item $SharePointCmdletModule).Directory.BaseName)" {
-    InModuleScope $ModuleName {
-        
-        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..\..).Path) "Modules\SharePointDsc")
-        
-        Mock Invoke-SPDSCCommand { 
-            return Invoke-Command -ScriptBlock $ScriptBlock -ArgumentList $Arguments -NoNewScope
+        # Mocks for all contexts
+        Mock -CommandName Get-SPFarm -MockWith {
+            return @{}
         }
-        
-        Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue
-               
-                
-        Context "The server is not part of SharePoint farm" {
-            Mock Get-SPFarm { throw "Unable to detect local farm" }
 
+        # Test contexts
+        Context -Name "The server is not part of SharePoint farm" -Fixture {
             $testParams = @{
-              Ensure = "Present"
-              RMSserver = "https://myRMSserver.local"
+                IsSingleInstance = "Yes"
+                Ensure = "Present"
+                RMSserver = "https://myRMSserver.local"
             }
-        
-            It "return null from the get method" {
+
+            Mock -CommandName Get-SPFarm -MockWith {
+                throw "Unable to detect local farm"
+            }
+
+            It "Should return null from the get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Absent"
             }
 
-            It "returns false from the test method" {
+            It "Should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $false
             }
 
-            It "throws an exception in the set method to say there is no local farm" {
+            It "Should throw an exception in the set method to say there is no local farm" {
                 { Set-TargetResource @testParams } | Should throw "No local SharePoint farm was detected"
             }
         }
-        
 
-        Context "IRM settings match desired settings" {
-            
-            Mock Get-SPDSCContentService {
-            $returnVal = @{
-                 IrmSettings = @{
-                    IrmRMSEnabled = $true 
-                    IrmRMSUseAD = $false
-                    IrmRMSCertServer = "https://myRMSserver.local"
+        Context -Name "IRM settings match desired settings" -Fixture {
+            $testParams = @{
+                IsSingleInstance = "Yes"
+                Ensure = "Present"
+                RMSserver = "https://myRMSserver.local"
+            }
+
+            Mock -CommandName Get-SPDscContentService -MockWith {
+                $returnVal = @{
+                    IrmSettings = @{
+                        IrmRMSEnabled = $true
+                        IrmRMSUseAD = $false
+                        IrmRMSCertServer = "https://myRMSserver.local"
+                    }
                 }
-            } 
-            $returnVal = $returnVal | Add-Member ScriptMethod Update { $Global:SPDSCIRMUpdated = $true } -PassThru
-            return $returnVal
+                $returnVal = $returnVal | Add-Member -MemberType ScriptMethod `
+                                                     -Name Update `
+                                                     -Value {
+                                                         $Global:SPDscIRMUpdated = $true
+                                                     } -PassThru
+                return $returnVal
             }
-            
-            Mock Get-SPFarm { return @{} }
-            
-            $TestParams = @{
-                    Ensure = "Present"
-                    RMSserver = "https://myRMSserver.local"
-            }
-            
-            It "Get returns current settings" {
+
+            It "Should return present in the get method" {
                  (Get-TargetResource @testParams).Ensure | Should Be "Present"
             }
-            
-            It "Test returns True" {
+
+            It "Should return true in the test method" {
                 Test-TargetResource @testParams | Should Be $true
             }
         }
-        
-        
-         Context "IRM settings do not match desired settings" {
-            
-            Mock Get-SPDSCContentService {
-            $returnVal = @{
-                 IrmSettings = @{
-                    IrmRMSEnabled = $false  
-                    IrmRMSUseAD = $false
-                    IrmRMSCertServer = $null 
-                   }
-            } 
-            $returnVal = $returnVal | Add-Member ScriptMethod Update { $Global:SPDSCIRMUpdated = $true } -PassThru
-            return $returnVal
+
+        Context -Name "IRM settings do not match desired settings" -Fixture {
+            $testParams = @{
+                IsSingleInstance = "Yes"
+                Ensure = "Present"
+                RMSserver = "https://myRMSserver.local"
             }
-            
-            Mock Get-SPFarm { return @{} }
-            
-            $TestParams = @{
-                    Ensure = "Present"
-                    RMSserver = "https://myRMSserver.local"
+
+            Mock -CommandName Get-SPDscContentService -MockWith {
+                $returnVal = @{
+                    IrmSettings = @{
+                        IrmRMSEnabled = $false
+                        IrmRMSUseAD = $false
+                        IrmRMSCertServer = $null
+                    }
+                }
+                $returnVal = $returnVal | Add-Member -MemberType ScriptMethod `
+                                                     -Name Update `
+                                                     -Value {
+                                                         $Global:SPDscIRMUpdated = $true
+                                                      } -PassThru
+                return $returnVal
             }
-            
-            It "Get returns current settings" {
+
+            It "Should return absent in the get method" {
                  (Get-TargetResource @testParams).Ensure | Should Be "Absent"
             }
-            
-            It "Test returns False" {
-                Test-TargetResource @testParams | Should Be $false 
+
+            It "Should return false in the test method" {
+                Test-TargetResource @testParams | Should Be $false
             }
-            
-            $Global:SPDSCIRMUpdated =
-            It "Set applies desired settings" {
+
+            $Global:SPDscIRMUpdated = $false
+            It "Should apply the settings in the set method" {
                 Set-TargetResource @testParams
-                $Global:SPDSCIRMUpdated | Should Be $true
+                $Global:SPDscIRMUpdated | Should Be $true
             }
-            
-            It "UseAD and RMSserver both supplied (can only use one), should throw" {
-                $TestParams.Add("UseADRMS",$true)
-                { Set-TargetResource @testParams }| Should Throw 
+
+            It "Should throw when UseAD and RMSserver are both supplied" {
+                $testParams.Add("UseADRMS",$true)
+                { Set-TargetResource @testParams } | Should Throw
             }
         }
-        
-        
-        
-        
-        
-        
     }
 }
+
+Invoke-Command -ScriptBlock $Global:SPDscHelper.CleanupScript -NoNewScope

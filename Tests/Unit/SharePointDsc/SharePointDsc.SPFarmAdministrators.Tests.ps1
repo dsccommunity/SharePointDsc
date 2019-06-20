@@ -1,320 +1,468 @@
 [CmdletBinding()]
 param(
-    [string] $SharePointCmdletModule = (Join-Path $PSScriptRoot "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" -Resolve)
+    [Parameter()]
+    [string]
+    $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
+                                         -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
+                                         -Resolve)
 )
 
-$ErrorActionPreference = 'stop'
-Set-StrictMode -Version latest
+Import-Module -Name (Join-Path -Path $PSScriptRoot `
+                                -ChildPath "..\UnitTestHelper.psm1" `
+                                -Resolve)
 
-$RepoRoot = (Resolve-Path $PSScriptRoot\..\..\..).Path
-$Global:CurrentSharePointStubModule = $SharePointCmdletModule 
+$Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointCmdletModule `
+                                              -DscResource "SPFarmAdministrators"
 
-$ModuleName = "MSFT_SPFarmAdministrators"
-Import-Module (Join-Path $RepoRoot "Modules\SharePointDsc\DSCResources\$ModuleName\$ModuleName.psm1") -Force
+Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
+    InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
+        Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
-Describe "SPFarmAdministrators - SharePoint Build $((Get-Item $SharePointCmdletModule).Directory.BaseName)" {
-    InModuleScope $ModuleName {
-        $testParams = @{
-            Name = "Farm Administrators"
-            Members = @("Demo\User1", "Demo\User2")
-        }
-        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..\..).Path) "Modules\SharePointDsc")
-
-        
-        Mock Invoke-SPDSCCommand { 
-            return Invoke-Command -ScriptBlock $ScriptBlock -ArgumentList $Arguments -NoNewScope
-        }
-        
-        Remove-Module -Name "Microsoft.SharePoint.PowerShell" -Force -ErrorAction SilentlyContinue
-        Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue
-
-
-        Context "No central admin site exists" {
-            Mock Get-SPwebapplication { return $null }
-
-            It "should return null from the get method" {
-                Get-TargetResource @testParams | Should BeNullOrEmpty
+        # Test contexts
+        Context -Name "No central admin site exists" {
+            $testParams = @{
+                IsSingleInstance = "Yes"
+                Members = @("Demo\User1", "Demo\User2")
             }
 
-            It "should return false from the test method" {
+            Mock -CommandName Get-SPwebapplication -MockWith { return $null }
+
+            It "Should return null from the get method" {
+                (Get-TargetResource @testParams).Members | Should BeNullOrEmpty
+            }
+
+            It "Should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $false
             }
 
-            It "should throw an exception in the set method" {
+            It "Should throw an exception in the set method" {
                 { Set-TargetResource @testParams } | Should throw "Unable to locate central administration website"
             }
         }
 
-        Context "Central admin exists and a fixed members list is used which matches" {
-            Mock Get-SPwebapplication { return @{
+        Context -Name "Central admin exists and a fixed members list is used which matches" -Fixture {
+            $testParams = @{
+                IsSingleInstance = "Yes"
+                Members = @("Demo\User1", "Demo\User2")
+            }
+
+            Mock -CommandName Get-SPWebApplication -MockWith {
+                return @{
                     IsAdministrationWebApplication = $true
                     Url = "http://admin.shareopoint.contoso.local"
-                }}
-            Mock Get-SPWeb {
-                $web = @{
+                }
+            }
+            Mock -CommandName Get-SPWeb -MockWith {
+                return @{
                     AssociatedOwnerGroup = "Farm Administrators"
-                    SiteGroups = New-Object Object | Add-Member ScriptMethod GetByName {
-                        return @{
-                            Users = @(
-                                @{ UserLogin = "Demo\User1" },
-                                @{ UserLogin = "Demo\User2" }
-                            )
-                        }
-                    } -PassThru
+                    SiteGroups = New-Object -TypeName "Object" |
+                                    Add-Member -MemberType ScriptMethod `
+                                               -Name GetByName `
+                                               -Value {
+                                                    return @{
+                                                        Users = @(
+                                                            @{ UserLogin = "Demo\User1" },
+                                                            @{ UserLogin = "Demo\User2" }
+                                                        )
+                                                    }
+                                                } -PassThru
+                }
+            }
+
+            It "Should return values from the get method" {
+                (Get-TargetResource @testParams).Members.Count | Should Be 2
+            }
+
+            It "Should return true from the test method" {
+                Test-TargetResource @testParams | Should Be $true
+            }
+        }
+
+        Context -Name "Central admin exists and a fixed members list is used which does not match" -Fixture {
+            $testParams = @{
+                IsSingleInstance = "Yes"
+                Members = @("Demo\User1", "Demo\User2")
+            }
+
+            Mock -CommandName Get-SPWebApplication -MockWith {
+                return @{
+                    IsAdministrationWebApplication = $true
+                    Url = "http://admin.shareopoint.contoso.local"
+                }
+            }
+
+            Mock -CommandName Get-SPWeb -MockWith {
+                $web =  @{
+                    AssociatedOwnerGroup = "Farm Administrators"
+                    SiteGroups = New-Object -TypeName "Object" |
+                                    Add-Member -MemberType ScriptMethod `
+                                               -Name GetByName `
+                                               -Value {
+                                                    return New-Object -TypeName "Object" |
+                                                        Add-Member -MemberType ScriptProperty `
+                                                                   -Name Users `
+                                                                   -Value {
+                                                                        return @(
+                                                                            @{
+                                                                                UserLogin = "Demo\User1"
+                                                                            }
+                                                                        )
+                                                                    } -PassThru |
+                                                        Add-Member -MemberType ScriptMethod `
+                                                                   -Name AddUser `
+                                                                   -Value { } `
+                                                                   -PassThru |
+                                                        Add-Member -MemberType ScriptMethod `
+                                                                   -Name RemoveUser `
+                                                                   -Value { } `
+                                                                   -PassThru
+                                                    } -PassThru
                 }
                 return $web
             }
 
-            It "should return values from the get method" {
-                Get-TargetResource @testParams | Should Not BeNullOrEmpty
+            Mock -CommandName Get-SPUser -MockWith {
+                return @{}
             }
 
-            It "should return true from the test method" {
-                Test-TargetResource @testParams | Should Be $true
-            }
-        }
-
-        Context "Central admin exists and a fixed members list is used which does not match" {
-            Mock Get-SPwebapplication { return @{
-                    IsAdministrationWebApplication = $true
-                    Url = "http://admin.shareopoint.contoso.local"
-                }}
-            Mock Get-SPWeb {
-                return @{
-                    AssociatedOwnerGroup = "Farm Administrators"
-                    SiteGroups = New-Object Object | Add-Member ScriptMethod GetByName {
-                        return New-Object  Object | Add-Member ScriptProperty Users {
-                            return @(
-                                @{ UserLogin = "Demo\User1" }
-                            )
-                        } -PassThru | Add-Member ScriptMethod AddUser { } -PassThru `
-                                    | Add-Member ScriptMethod RemoveUser { } -PassThru
-                    } -PassThru
-                }
-            }
-            Mock Get-SPUser { return @{} }
-
-            It "should return values from the get method" {
-                Get-TargetResource @testParams | Should Not BeNullOrEmpty
+            It "Should return values from the get method" {
+                (Get-TargetResource @testParams).Members.Count | Should Be 1
             }
 
-            It "should return false from the test method" {
+            It "Should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $false
             }
 
-            It "should update the members list" {
-                Set-TargetResource @testParams 
+            It "Should update the members list" {
+                Set-TargetResource @testParams
             }
         }
-        
-        Context "Central admin exists and a members to include is set where the members are in the group" {
+
+        Context -Name "Central admin exists and a members to include is set where the members are in the group" -Fixture {
             $testParams = @{
-                Name = "Farm Administrators"
+                IsSingleInstance = "Yes"
                 MembersToInclude = @("Demo\User2")
             }
-            Mock Get-SPwebapplication { return @{
+
+            Mock -CommandName Get-SPwebapplication -MockWith {
+                return @{
                     IsAdministrationWebApplication = $true
                     Url = "http://admin.shareopoint.contoso.local"
-                }}
-            Mock Get-SPWeb {
-                return @{
-                    AssociatedOwnerGroup = "Farm Administrators"
-                    SiteGroups = New-Object Object | Add-Member ScriptMethod GetByName {
-                        return New-Object  Object | Add-Member ScriptProperty Users {
-                            return @(
-                                @{ UserLogin = "Demo\User1" },
-                                @{ UserLogin = "Demo\User2" }
-                            )
-                        } -PassThru | Add-Member ScriptMethod AddUser { } -PassThru `
-                                    | Add-Member ScriptMethod RemoveUser { } -PassThru
-                    } -PassThru
                 }
             }
 
-            It "should return values from the get method" {
-                Get-TargetResource @testParams | Should Not BeNullOrEmpty
+            Mock -CommandName Get-SPWeb -MockWith {
+                return @{
+                    AssociatedOwnerGroup = "Farm Administrators"
+                    SiteGroups = New-Object -TypeName "Object" |
+                                    Add-Member -MemberType ScriptMethod `
+                                               -Name GetByName `
+                                               -Value {
+                                                    return New-Object "Object" |
+                                                        Add-Member -MemberType ScriptProperty `
+                                                                   -Name Users `
+                                                                   -Value {
+                                                                        return @(
+                                                                            @{
+                                                                                UserLogin = "Demo\User1"
+                                                                            },
+                                                                            @{
+                                                                                UserLogin = "Demo\User2"
+                                                                            }
+                                                                        )
+                                                                    } -PassThru |
+                                                        Add-Member -MemberType ScriptMethod `
+                                                                   -Name AddUser `
+                                                                   -Value { } `
+                                                                   -PassThru |
+                                                        Add-Member -MemberType ScriptMethod `
+                                                                   -Name RemoveUser `
+                                                                   -Value { } `
+                                                                   -PassThru
+                                                    } -PassThru
+                }
             }
 
-            It "should return true from the test method" {
+            It "Should return values from the get method" {
+                (Get-TargetResource @testParams).Members.Count | Should Be 2
+            }
+
+            It "Should return true from the test method" {
                 Test-TargetResource @testParams | Should Be $true
             }
         }
 
-        Context "Central admin exists and a members to include is set where the members are not in the group" {
+        Context -Name "Central admin exists and a members to include is set where the members are not in the group" -Fixture {
             $testParams = @{
-                Name = "Farm Administrators"
+                IsSingleInstance = "Yes"
                 MembersToInclude = @("Demo\User2")
             }
-            Mock Get-SPwebapplication { return @{
+
+            Mock -CommandName Get-SPwebapplication -MockWith {
+                return @{
                     IsAdministrationWebApplication = $true
                     Url = "http://admin.shareopoint.contoso.local"
-                }}
-            Mock Get-SPWeb {
-                return @{
-                    AssociatedOwnerGroup = "Farm Administrators"
-                    SiteGroups = New-Object Object | Add-Member ScriptMethod GetByName {
-                        return New-Object  Object | Add-Member ScriptProperty Users {
-                            return @(
-                                @{ UserLogin = "Demo\User1" }
-                            )
-                        } -PassThru | Add-Member ScriptMethod AddUser { } -PassThru `
-                                    | Add-Member ScriptMethod RemoveUser { } -PassThru
-                    } -PassThru
                 }
             }
 
-            It "should return values from the get method" {
-                Get-TargetResource @testParams | Should Not BeNullOrEmpty
-            }
-
-            It "should return true from the test method" {
-                Test-TargetResource @testParams | Should Be $false
-            }
-            
-            It "should update the members list" {
-                Set-TargetResource @testParams 
-            }
-        }
-
-        Context "Central admin exists and a members to exclude is set where the members are in the group" {
-            $testParams = @{
-                Name = "Farm Administrators"
-                MembersToExclude = @("Demo\User1")
-            }
-            Mock Get-SPwebapplication { return @{
-                    IsAdministrationWebApplication = $true
-                    Url = "http://admin.shareopoint.contoso.local"
-                }}
-            Mock Get-SPWeb {
+            Mock -CommandName Get-SPWeb -MockWith {
                 return @{
                     AssociatedOwnerGroup = "Farm Administrators"
-                    SiteGroups = New-Object Object | Add-Member ScriptMethod GetByName {
-                        return New-Object  Object | Add-Member ScriptProperty Users {
-                            return @(
-                                @{ UserLogin = "Demo\User1" },
-                                @{ UserLogin = "Demo\User2" }
-                            )
-                        } -PassThru | Add-Member ScriptMethod AddUser { } -PassThru `
-                                    | Add-Member ScriptMethod RemoveUser { } -PassThru
-                    } -PassThru
+                    SiteGroups = New-Object -TypeName "Object" |
+                                    Add-Member -MemberType ScriptMethod `
+                                               -Name GetByName `
+                                               -Value {
+                                                    return New-Object "Object" |
+                                                        Add-Member -MemberType ScriptProperty `
+                                                                   -Name Users `
+                                                                   -Value {
+                                                                        return @(
+                                                                            @{
+                                                                                UserLogin = "Demo\User1"
+                                                                            }
+                                                                        )
+                                                                    } -PassThru |
+                                                        Add-Member -MemberType ScriptMethod `
+                                                                   -Name AddUser `
+                                                                   -Value { } `
+                                                                   -PassThru |
+                                                        Add-Member -MemberType ScriptMethod `
+                                                                   -Name RemoveUser `
+                                                                   -Value { } `
+                                                                   -PassThru
+                                                    } -PassThru
                 }
             }
 
-            It "should return values from the get method" {
-                Get-TargetResource @testParams | Should Not BeNullOrEmpty
+            It "Should return values from the get method" {
+                (Get-TargetResource @testParams).Members.Count | Should Be 1
             }
 
-            It "should return false from the test method" {
+            It "Should return true from the test method" {
                 Test-TargetResource @testParams | Should Be $false
             }
 
-            It "should update the members list" {
-                Set-TargetResource @testParams 
+            It "Should update the members list" {
+                Set-TargetResource @testParams
             }
         }
 
-        Context "Central admin exists and a members to exclude is set where the members are not in the group" {
+        Context -Name "Central admin exists and a members to exclude is set where the members are in the group" -Fixture {
             $testParams = @{
-                Name = "Farm Administrators"
+                IsSingleInstance = "Yes"
                 MembersToExclude = @("Demo\User1")
             }
-            Mock Get-SPwebapplication { return @{
+
+            Mock -CommandName Get-SPwebapplication -MockWith {
+                return @{
                     IsAdministrationWebApplication = $true
                     Url = "http://admin.shareopoint.contoso.local"
-                }}
-            Mock Get-SPWeb {
-                return @{
-                    AssociatedOwnerGroup = "Farm Administrators"
-                    SiteGroups = New-Object Object | Add-Member ScriptMethod GetByName {
-                        return New-Object  Object | Add-Member ScriptProperty Users {
-                            return @(
-                                @{ UserLogin = "Demo\User2" }
-                            )
-                        } -PassThru | Add-Member ScriptMethod AddUser { } -PassThru `
-                                    | Add-Member ScriptMethod RemoveUser { } -PassThru
-                    } -PassThru
                 }
             }
 
-            It "should return values from the get method" {
-                Get-TargetResource @testParams | Should Not BeNullOrEmpty
+            Mock -CommandName Get-SPWeb -MockWith {
+                return @{
+                    AssociatedOwnerGroup = "Farm Administrators"
+                    SiteGroups = New-Object -TypeName "Object" |
+                                    Add-Member -MemberType ScriptMethod `
+                                               -Name GetByName `
+                                               -Value {
+                                                    return New-Object "Object" |
+                                                        Add-Member -MemberType ScriptProperty `
+                                                                   -Name Users `
+                                                                   -Value {
+                                                                        return @(
+                                                                            @{
+                                                                                UserLogin = "Demo\User1"
+                                                                            },
+                                                                            @{
+                                                                                UserLogin = "Demo\User2"
+                                                                            }
+                                                                        )
+                                                                    } -PassThru |
+                                                        Add-Member -MemberType ScriptMethod `
+                                                                   -Name AddUser `
+                                                                   -Value { } `
+                                                                   -PassThru |
+                                                        Add-Member -MemberType ScriptMethod `
+                                                                   -Name RemoveUser `
+                                                                   -Value { } `
+                                                                   -PassThru
+                                                    } -PassThru
+                }
             }
 
-            It "should return true from the test method" {
+            It "Should return values from the get method" {
+                (Get-TargetResource @testParams).Members.Count | Should Be 2
+            }
+
+            It "Should return false from the test method" {
+                Test-TargetResource @testParams | Should Be $false
+            }
+
+            It "Should update the members list" {
+                Set-TargetResource @testParams
+            }
+        }
+
+        Context -Name "Central admin exists and a members to exclude is set where the members are not in the group" -Fixture {
+            $testParams = @{
+                IsSingleInstance = "Yes"
+                MembersToExclude = @("Demo\User1")
+            }
+
+            Mock -CommandName Get-SPwebapplication -MockWith { return @{
+                    IsAdministrationWebApplication = $true
+                    Url = "http://admin.shareopoint.contoso.local"
+                }}
+            Mock -CommandName Get-SPWeb -MockWith {
+                return @{
+                    AssociatedOwnerGroup = "Farm Administrators"
+                    SiteGroups = New-Object -TypeName "Object" |
+                                    Add-Member -MemberType ScriptMethod `
+                                               -Name GetByName `
+                                               -Value {
+                                                    return New-Object "Object" |
+                                                        Add-Member -MemberType ScriptProperty `
+                                                                   -Name Users `
+                                                                   -Value {
+                                                                        return @(
+                                                                            @{
+                                                                                UserLogin = "Demo\User2"
+                                                                            }
+                                                                        )
+                                                                    } -PassThru |
+                                                        Add-Member -MemberType ScriptMethod `
+                                                                   -Name AddUser `
+                                                                   -Value { } `
+                                                                   -PassThru |
+                                                        Add-Member -MemberType ScriptMethod `
+                                                                   -Name RemoveUser `
+                                                                   -Value { } `
+                                                                   -PassThru
+                                                    } -PassThru
+                }
+            }
+
+            It "Should return values from the get method" {
+                (Get-TargetResource @testParams).Members.Count | Should Be 1
+            }
+
+            It "Should return true from the test method" {
                 Test-TargetResource @testParams | Should Be $true
             }
         }
 
-        Context "The resource is called with both an explicit members list as well as members to include/exclude" {
+        Context -Name "The resource is called with both an explicit members list as well as members to include/exclude" -Fixture {
             $testParams = @{
-                Name = "Farm Administrators"
+                IsSingleInstance = "Yes"
                 Members = @("Demo\User1")
                 MembersToExclude = @("Demo\User1")
             }
-            Mock Get-SPwebapplication { return @{
+
+            Mock -CommandName Get-SPwebapplication -MockWith {
+                return @{
                     IsAdministrationWebApplication = $true
                     Url = "http://admin.shareopoint.contoso.local"
-                }}
-            Mock Get-SPWeb {
-                return @{
-                    AssociatedOwnerGroup = "Farm Administrators"
-                    SiteGroups = New-Object Object | Add-Member ScriptMethod GetByName {
-                        return New-Object  Object | Add-Member ScriptProperty Users {
-                            return @(
-                                @{ UserLogin = "Demo\User2" }
-                            )
-                        } -PassThru | Add-Member ScriptMethod AddUser { } -PassThru `
-                                    | Add-Member ScriptMethod RemoveUser { } -PassThru
-                    } -PassThru
                 }
             }
 
-            It "should throw in the get method" {
-                { Get-TargetResource @testParams } | Should throw 
+            Mock -CommandName Get-SPWeb -MockWith {
+                return @{
+                    AssociatedOwnerGroup = "Farm Administrators"
+                    SiteGroups = New-Object -TypeName "Object" |
+                                    Add-Member -MemberType ScriptMethod `
+                                               -Name GetByName `
+                                               -Value {
+                                                    return New-Object "Object" |
+                                                        Add-Member -MemberType ScriptProperty `
+                                                                   -Name Users `
+                                                                   -Value {
+                                                                        return @(
+                                                                            @{
+                                                                                UserLogin = "Demo\User2"
+                                                                            }
+                                                                        )
+                                                                    } -PassThru |
+                                                        Add-Member -MemberType ScriptMethod `
+                                                                   -Name AddUser `
+                                                                   -Value { } `
+                                                                   -PassThru |
+                                                        Add-Member -MemberType ScriptMethod `
+                                                                   -Name RemoveUser `
+                                                                   -Value { } `
+                                                                   -PassThru
+                                                    } -PassThru
+                }
             }
 
-            It "should throw in the test method" {
+            It "Should throw in the get method" {
+                { Get-TargetResource @testParams } | Should throw
+            }
+
+            It "Should throw in the test method" {
                 { Test-TargetResource @testParams } | Should throw
             }
 
-            It "should throw in the set method" {
+            It "Should throw in the set method" {
                 { Set-TargetResource @testParams } | Should throw
             }
         }
 
-        Context "The resource is called without either the specific members list or the include/exclude lists" {
+        Context -Name "The resource is called without either the specific members list or the include/exclude lists" -Fixture {
             $testParams = @{
-                Name = "Farm Administrators"
+                IsSingleInstance = "Yes"
             }
-            Mock Get-SPwebapplication { return @{
-                    IsAdministrationWebApplication = $true
-                    Url = "http://admin.shareopoint.contoso.local"
-                }}
-            Mock Get-SPWeb {
+
+            Mock -CommandName Get-SPwebapplication -MockWith {
                 return @{
-                    AssociatedOwnerGroup = "Farm Administrators"
-                    SiteGroups = New-Object Object | Add-Member ScriptMethod GetByName {
-                        return New-Object  Object | Add-Member ScriptProperty Users {
-                            return @(
-                                @{ UserLogin = "Demo\User2" }
-                            )
-                        } -PassThru | Add-Member ScriptMethod AddUser { } -PassThru `
-                                    | Add-Member ScriptMethod RemoveUser { } -PassThru
-                    } -PassThru
+                    IsAdministrationWebApplication = $true
+                    Url = "http://admin.sharepoint.contoso.local"
                 }
             }
 
-            It "should throw in the get method" {
-                { Get-TargetResource @testParams } | Should throw 
+            Mock -CommandName Get-SPWeb -MockWith {
+                return @{
+                    AssociatedOwnerGroup = "Farm Administrators"
+                    SiteGroups = New-Object -TypeName "Object" |
+                                    Add-Member -MemberType ScriptMethod `
+                                               -Name GetByName `
+                                               -Value {
+                                                    return New-Object "Object" |
+                                                        Add-Member -MemberType ScriptProperty `
+                                                                   -Name Users `
+                                                                   -Value {
+                                                                        return @(
+                                                                            @{
+                                                                                UserLogin = "Demo\User2"
+                                                                            }
+                                                                        )
+                                                                    } -PassThru |
+                                                        Add-Member -MemberType ScriptMethod `
+                                                                   -Name AddUser `
+                                                                   -Value { } `
+                                                                   -PassThru |
+                                                        Add-Member -MemberType ScriptMethod `
+                                                                   -Name RemoveUser `
+                                                                   -Value { } `
+                                                                   -PassThru
+                                                    } -PassThru
+                }
             }
 
-            It "should throw in the test method" {
+            It "Should throw in the get method" {
+                { Get-TargetResource @testParams } | Should throw
+            }
+
+            It "Should throw in the test method" {
                 { Test-TargetResource @testParams } | Should throw
             }
 
-            It "should throw in the set method" {
+            It "Should throw in the set method" {
                 { Set-TargetResource @testParams } | Should throw
             }
         }
     }
 }
+
+Invoke-Command -ScriptBlock $Global:SPDscHelper.CleanupScript -NoNewScope

@@ -4,17 +4,17 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [parameter(Mandatory = $true)]  
-        [System.String] 
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $Name,
 
-        [parameter(Mandatory = $false)] 
-        [System.Management.Automation.PSCredential] 
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
         $InstallAccount,
-        
-        [parameter(Mandatory = $false)] 
-        [ValidateSet("Present","Absent")] 
-        [System.String] 
+
+        [Parameter()]
+        [ValidateSet("Present","Absent")]
+        [System.String]
         $Ensure = "Present"
     )
 
@@ -24,74 +24,75 @@ function Get-TargetResource
 
     $invokeArgs = @{
         Credential = $InstallAccount
-        Arguments = @($PSBoundParameters, $newName)
+        Arguments  = @($PSBoundParameters, $newName)
     }
-    $result = Invoke-SPDSCCommand @invokeArgs -ScriptBlock {
+    $result = Invoke-SPDscCommand @invokeArgs -ScriptBlock {
         $params = $args[0]
         $newName = $args[1]
-        
-        $si = Get-SPServiceInstance -Server $env:COMPUTERNAME | Where-Object -FilterScript { 
+
+        $si = Get-SPServiceInstance -Server $env:COMPUTERNAME -All | Where-Object -FilterScript {
             $_.TypeName -eq $params.Name -or `
             $_.TypeName -eq $newName -or `
             $_.GetType().Name -eq $newName
         }
-        
-        if ($null -eq $si) 
-        { 
+
+        if ($null -eq $si)
+        {
             $domain = (Get-CimInstance -ClassName Win32_ComputerSystem).Domain
             $fqdn = "$($env:COMPUTERNAME).$domain"
-            $si = Get-SPServiceInstance -Server $fqdn | Where-Object -FilterScript { 
+            $si = Get-SPServiceInstance -Server $fqdn -All | Where-Object -FilterScript {
                 $_.TypeName -eq $params.Name -or `
                 $_.TypeName -eq $newName -or `
                 $_.GetType().Name -eq $newName
             }
         }
-        
-        if ($null -eq $si) 
-        { 
+
+        if ($null -eq $si)
+        {
             return @{
                 Name = $params.Name
                 Ensure = "Absent"
                 InstallAccount = $params.InstallAccount
-            } 
+            }
         }
-        if ($si.Status -eq "Online") 
-        { 
-            $localEnsure = "Present" 
-        } 
-        else 
-        { 
-            $localEnsure = "Absent" 
+        if ($si.Status -eq "Online")
+        {
+            $localEnsure = "Present"
         }
-        
+        else
+        {
+            $localEnsure = "Absent"
+        }
+
         return @{
-            Name = $params.Name
-            Ensure = $localEnsure
+            Name           = $params.Name
+            Ensure         = $localEnsure
             InstallAccount = $params.InstallAccount
         }
     }
     return $result
 }
 
-
 function Set-TargetResource
 {
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true)]  
-        [System.String] 
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $Name,
 
-        [parameter(Mandatory = $false)] 
-        [System.Management.Automation.PSCredential] 
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
         $InstallAccount,
-        
-        [parameter(Mandatory = $false)] 
-        [ValidateSet("Present","Absent")] 
-        [System.String] 
+
+        [Parameter()]
+        [ValidateSet("Present","Absent")]
+        [System.String]
         $Ensure = "Present"
     )
+
+    Write-Verbose -Message "Setting service instance '$Name'"
 
     $newName = (Get-SPDscServiceTypeName -DisplayName $Name)
     $invokeArgs = @{
@@ -99,66 +100,69 @@ function Set-TargetResource
         Arguments = @($PSBoundParameters, $newName)
     }
 
-    if ($Ensure -eq "Present") 
+    if ($Ensure -eq "Present")
     {
         Write-Verbose -Message "Provisioning service instance '$Name'"
 
-        Invoke-SPDSCCommand @invokeArgs -ScriptBlock {
+        Invoke-SPDscCommand @invokeArgs -ScriptBlock {
             $params = $args[0]
-            
-            $si = Get-SPServiceInstance -Server $env:COMPUTERNAME | Where-Object -FilterScript { 
+            $newName = $args[1]
+
+            $si = Get-SPServiceInstance -Server $env:COMPUTERNAME -All | Where-Object -FilterScript {
                 $_.TypeName -eq $params.Name -or `
                 $_.TypeName -eq $newName -or `
                 $_.GetType().Name -eq $newName
             }
-            
-            if ($null -eq $si) 
-            { 
+
+            if ($null -eq $si)
+            {
                 $domain = (Get-CimInstance -ClassName Win32_ComputerSystem).Domain
                 $fqdn = "$($env:COMPUTERNAME).$domain"
-                $si = Get-SPServiceInstance -Server $fqdn | Where-Object -FilterScript { 
+                $si = Get-SPServiceInstance -Server $fqdn -All | Where-Object -FilterScript {
                     $_.TypeName -eq $params.Name -or `
                     $_.TypeName -eq $newName -or `
                     $_.GetType().Name -eq $newName
                 }
             }
-            if ($null -eq $si) { 
-                throw [Exception] "Unable to locate service application '$($params.Name)'"
+            if ($null -eq $si)
+            {
+                throw [Exception] "Unable to locate service instance '$($params.Name)'"
             }
-            Start-SPServiceInstance -Identity $si 
+            Start-SPServiceInstance -Identity $si
         }
-    } 
-    else 
+    }
+    else
     {
         Write-Verbose -Message "Deprovisioning service instance '$Name'"
 
-        Invoke-SPDSCCommand @invokeArgs -ScriptBlock {
+        Invoke-SPDscCommand @invokeArgs -ScriptBlock {
             $params = $args[0]
-            
-            $si = Get-SPServiceInstance -Server $env:COMPUTERNAME | Where-Object -FilterScript { 
+            $newName = $args[1]
+
+            $si = Get-SPServiceInstance -Server $env:COMPUTERNAME -All | Where-Object -FilterScript {
                 $_.TypeName -eq $params.Name -or `
                 $_.TypeName -eq $newName -or `
                 $_.GetType().Name -eq $newName
             }
-            
-            if ($null -eq $si) 
-            { 
+
+            if ($null -eq $si)
+            {
                 $domain = (Get-CimInstance -ClassName Win32_ComputerSystem).Domain
                 $fqdn = "$($env:COMPUTERNAME).$domain"
-                $si = Get-SPServiceInstance -Server $fqdn | Where-Object -FilterScript { 
+                $si = Get-SPServiceInstance -Server $fqdn -All | Where-Object -FilterScript {
                     $_.TypeName -eq $params.Name -or `
                     $_.TypeName -eq $newName -or `
                     $_.GetType().Name -eq $newName
                 }
             }
-            if ($null -eq $si) {
-                throw [Exception] "Unable to locate service application '$($params.Name)'"
+            if ($null -eq $si)
+            {
+                throw [Exception] "Unable to locate service instance '$($params.Name)'"
             }
             Stop-SPServiceInstance -Identity $si
         }
     }
 }
-
 
 function Test-TargetResource
 {
@@ -166,34 +170,38 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [parameter(Mandatory = $true)]  
-        [System.String] 
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $Name,
 
-        [parameter(Mandatory = $false)] 
-        [System.Management.Automation.PSCredential] 
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
         $InstallAccount,
-        
-        [parameter(Mandatory = $false)] 
-        [ValidateSet("Present","Absent")] 
-        [System.String] 
+
+        [Parameter()]
+        [ValidateSet("Present","Absent")]
+        [System.String]
         $Ensure = "Present"
     )
 
     Write-Verbose -Message "Testing service instance '$Name'"
+
     $PSBoundParameters.Ensure = $Ensure
 
-    $testArgs = @{
-        CurrentValues = (Get-TargetResource @PSBoundParameters)
-        DesiredValues = $PSBoundParameters
-        ValuesToCheck = @("Name", "Ensure")
-    }
-    return Test-SPDscParameterState @testArgs
+    $CurrentValues = Get-TargetResource @PSBoundParameters
+
+    Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
+    Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
+
+    return Test-SPDscParameterState -CurrentValues $CurrentValues `
+                                    -DesiredValues $PSBoundParameters `
+                                    -ValuesToCheck @("Name", "Ensure")
 }
 
 function Get-SPDscServiceTypeName
 {
     [CmdletBinding()]
+    [OutputType([System.String])]
     param(
         [Parameter(Mandatory = $true)]
         [string]

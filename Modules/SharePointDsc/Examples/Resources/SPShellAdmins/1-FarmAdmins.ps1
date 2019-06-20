@@ -4,7 +4,7 @@
     all content databases in the local farm.
 #>
 
-    Configuration Example 
+    Configuration Example
     {
         param(
             [Parameter(Mandatory = $true)]
@@ -16,9 +16,9 @@
         node localhost {
             SPShellAdmins ShellAdmins
             {
-                Name                = "Shell Admins"
-                Members             = "CONTOSO\user1", "CONTOSO\user2"
-                AllContentDatabases = $true
+                IsSingleInstance = "Yes"
+                Members          = "CONTOSO\user1", "CONTOSO\user2"
+                AllDatabases     = $true
             }
         }
     }

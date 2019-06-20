@@ -1,144 +1,361 @@
 [CmdletBinding()]
 param(
-    [string] $SharePointCmdletModule = (Join-Path $PSScriptRoot "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" -Resolve)
+    [Parameter()]
+    [string] 
+    $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
+                                         -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
+                                         -Resolve)
 )
 
-$ErrorActionPreference = 'stop'
-Set-StrictMode -Version latest
+Import-Module -Name (Join-Path -Path $PSScriptRoot `
+                                -ChildPath "..\UnitTestHelper.psm1" `
+                                -Resolve)
 
-$RepoRoot = (Resolve-Path $PSScriptRoot\..\..\..).Path
-$Global:CurrentSharePointStubModule = $SharePointCmdletModule 
+$Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointCmdletModule `
+                                              -DscResource "SPTimerJobState"
 
-$ModuleName = "MSFT_SPTimerJobState"
-Import-Module (Join-Path $RepoRoot "Modules\SharePointDsc\DSCResources\$ModuleName\$ModuleName.psm1") -Force
+Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
+    InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
+        Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
-Describe "SPTimerJobState - SharePoint Build $((Get-Item $SharePointCmdletModule).Directory.BaseName)" {
-    InModuleScope $ModuleName {
-        $testParams = @{
-            Name = "job-spapp-statequery"
-            Enabled = $true
-            Schedule = "hourly between 0 and 59"
+        # Initialize tests
+
+        # Mocks for all contexts   
+        Mock -CommandName Set-SPTimerJob -MockWith { 
+            return $null 
         }
-        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..\..).Path) "Modules\SharePointDsc")
-        
-        Mock Invoke-SPDSCCommand { 
-            return Invoke-Command -ScriptBlock $ScriptBlock -ArgumentList $Arguments -NoNewScope
+        Mock -CommandName Enable-SPTimerJob -MockWith { 
+            return $null 
         }
-        
-        Remove-Module -Name "Microsoft.SharePoint.PowerShell" -Force -ErrorAction SilentlyContinue        
-        Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue
+        Mock -CommandName Get-SPFarm -MockWith { 
+            return @{} 
+        }
+        Mock -CommandName Get-SPWebApplication -MockWith { 
+            return @{} 
+        }
 
-        Context "The server is not part of SharePoint farm" {
-            Mock Get-SPFarm { throw "Unable to detect local farm" }
-
-            It "return null from the get method" {
-                Get-TargetResource @testParams | Should Be $null
+        # Test contexts
+        Context -Name "The server is not part of SharePoint farm" -Fixture {
+            $testParams = @{
+                TypeName  = "job-spapp-statequery"
+                WebAppUrl = "N/A"
+                Enabled   = $true
+                Schedule  = "hourly between 0 and 59"
             }
 
-            It "returns false from the test method" {
-                Test-TargetResource @testParams | Should Be $false
+            Mock -CommandName Get-SPFarm -MockWith { 
+                throw "Unable to detect local farm" 
             }
 
-            It "throws an exception in the set method to say there is no local farm" {
+            It "Should return null from the get method" {
+                { Get-TargetResource @testParams } | Should throw "No local SharePoint farm was detected"
+            }
+
+            It "Should return false from the test method" {
+                { Test-TargetResource @testParams } | Should throw "No local SharePoint farm was detected"
+            }
+
+            It "Should throw an exception in the set method to say there is no local farm" {
                 { Set-TargetResource @testParams } | Should throw "No local SharePoint farm was detected"
             }
         }
 
-        Context "The server is in a farm and the incorrect enabled settings have been applied" {
-            Mock Get-SPTimerJob {
+        Context -Name "The specified web application is not found" -Fixture {
+            $testParams = @{
+                TypeName  = "job-spapp-statequery"
+                WebAppUrl = "http://sharepoint.domain.com"
+                Enabled   = $true
+                Schedule  = "hourly between 0 and 59"
+            }
+
+            Mock -CommandName Get-SPWebApplication -MockWith { 
+                return $null 
+            }
+
+            It "Should return null from the get method" {
+                { Get-TargetResource @testParams } | Should throw "Specified web application not found!"
+            }
+
+            It "Should return false from the test method" {
+                { Test-TargetResource @testParams } | Should throw "Specified web application not found!"
+            }
+
+            It "Should throw an exception in the set method to say there is no local farm" {
+                { Set-TargetResource @testParams } | Should throw "Specified web application not found!"
+            }
+        }
+
+        Context -Name "No timer jobs found for the specified web application" -Fixture {
+            $testParams = @{
+                TypeName  = "job-spapp-statequery"
+                WebAppUrl = "http://sharepoint.domain.com"
+                Enabled   = $true
+                Schedule  = "hourly between 0 and 59"
+            }
+
+            Mock -CommandName Get-SPTimerJob -MockWith {
+                return $null 
+            }
+
+            It "Should return null from the get method" {
+                { Get-TargetResource @testParams } | Should throw "No timer jobs found. Please check the input values"
+            }
+
+            It "Should return false from the test method" {
+                { Test-TargetResource @testParams } | Should throw "No timer jobs found. Please check the input values"
+            }
+
+            It "Should throw an exception in the set method to say there is no local farm" {
+                { Set-TargetResource @testParams } | Should throw "No timer jobs found. Please check the input values"
+            }
+        }
+
+        #WebApp with no timerjobs found
+
+        Context -Name "The server is in a farm and the incorrect enabled settings have been applied" -Fixture {
+            $testParams = @{
+                TypeName  = "job-spapp-statequery"
+                WebAppUrl = "N/A"
+                Enabled   = $true
+                Schedule  = "hourly between 0 and 59"
+            }
+            
+            Mock -CommandName Get-SPTimerJob -MockWith {
                 $returnVal = @{
-                    Name = "job-spapp-statequery"
+                    TypeName = "job-spapp-statequery"
                     IsDisabled = $true
                     Schedule = "hourly between 0 and 59"
                 }
-                return @($returnVal)
+                return ,@($returnVal)
             }
-            Mock Set-SPTimerJob { return $null }
-            Mock Get-SPFarm { return @{} }
 
-            It "return values from the get method" {
+            It "Should return values from the get method" {
                 Get-TargetResource @testParams | Should Not BeNullOrEmpty
             }
 
-            It "returns false from the test method" {
+            It "Should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $false
             }
 
-            It "updates the timerjob settings" {
+            It "Should update the timerjob settings" {
                 Set-TargetResource @testParams
-                Assert-MockCalled Set-SPTimerJob
+                Assert-MockCalled Enable-SPTimerJob
             }
         }
 
-        Context "The server is in a farm and the incorrect schedule settings have been applied" {
-            Mock Get-SPTimerJob {
+        Context -Name "The server is in a farm and the incorrect enabled settings have been applied - WebApp" -Fixture {
+            $testParams = @{
+                TypeName  = "job-spapp-statequery"
+                WebAppUrl = "http://sharepoint.domain.com"
+                Enabled   = $true
+                Schedule  = "hourly between 0 and 59"
+            }
+            
+            Mock -CommandName Get-SPTimerJob -MockWith {
                 $returnVal = @{
-                    Name = "job-spapp-statequery"
+                    TypeName = "job-spapp-statequery"
+                    IsDisabled = $true
+                    Schedule = "hourly between 0 and 59"
+                }
+                return ,@($returnVal)
+            }
+
+            It "Should return values from the get method" {
+                Get-TargetResource @testParams | Should Not BeNullOrEmpty
+            }
+
+            It "Should return false from the test method" {
+                Test-TargetResource @testParams | Should Be $false
+            }
+
+            It "Should update the timerjob settings" {
+                Set-TargetResource @testParams
+                Assert-MockCalled Enable-SPTimerJob
+            }
+        }
+
+        Context -Name "The server is in a farm and the incorrect schedule settings have been applied" -Fixture {
+            $testParams = @{
+                TypeName  = "job-spapp-statequery"
+                WebAppUrl = "N/A"
+                Enabled   = $true
+                Schedule  = "hourly between 0 and 59"
+            }
+            
+            Mock -CommandName Get-SPTimerJob -MockWith {
+                $returnVal = @{
+                    TypeName = "job-spapp-statequery"
                     IsDisabled = $false
                     Schedule = "weekly at sat 23:00:00"
                 }
-                return @($returnVal)
+                return ,@($returnVal)
             }
-            Mock Set-SPTimerJob { return $null }
-            Mock Get-SPFarm { return @{} }
 
-            It "return values from the get method" {
+            It "Should return values from the get method" {
                 Get-TargetResource @testParams | Should Not BeNullOrEmpty
             }
 
-            It "returns false from the test method" {
+            It "Should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $false
             }
 
-            It "updates the timer job settings" {
+            It "Should update the timer job settings" {
                 Set-TargetResource @testParams
                 Assert-MockCalled Set-SPTimerJob
             }
         }
 
-        Context "The server is in a farm and the incorrect schedule format has been used" {
-            Mock Get-SPTimerJob {
-                $returnVal = @{
-                    Name = "job-spapp-statequery"
-                    IsDisabled = $false
-                    Schedule = "incorrect format"
-                }
-                return @($returnVal)
+        Context -Name "The server is in a farm and the incorrect schedule settings have been applied - WebApp" -Fixture {
+            $testParams = @{
+                TypeName  = "job-spapp-statequery"
+                WebAppUrl = "http://sharepoint.domain.com"
+                Enabled   = $true
+                Schedule  = "hourly between 0 and 59"
             }
-            Mock Set-SPTimerJob { throw "Invalid Time: `"The time given was not given in the proper format. See: Get-Help Set-SPTimerJob -detailed`"" }
-            Mock Get-SPFarm { return @{} }
+            
+            Mock -CommandName Get-SPTimerJob -MockWith {
+                $returnVal = @{
+                    TypeName = "job-spapp-statequery"
+                    IsDisabled = $false
+                    Schedule = "weekly at sat 23:00:00"
+                }
+                return ,@($returnVal)
+            }
 
-            It "return values from the get method" {
+            It "Should return values from the get method" {
                 Get-TargetResource @testParams | Should Not BeNullOrEmpty
             }
 
-            It "returns false from the test method" {
+            It "Should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $false
             }
 
-            It "throws an exception because the incorrect schedule format is used" {
+            It "Should update the timer job settings" {
+                Set-TargetResource @testParams
+                Assert-MockCalled Set-SPTimerJob
+            }
+        }
+
+        Context -Name "The server is in a farm and the incorrect schedule format has been used" -Fixture {
+            $testParams = @{
+                TypeName  = "job-spapp-statequery"
+                WebAppUrl = "N/A"
+                Enabled   = $true
+                Schedule  = "hourly between 0 and 59"
+            }
+            
+            Mock -CommandName Get-SPTimerJob -MockWith {
+                $returnVal = @{
+                    TypeName = "job-spapp-statequery"
+                    IsDisabled = $false
+                    Schedule = "incorrect format"
+                }
+                return ,@($returnVal)
+            }
+
+            Mock -CommandName Set-SPTimerJob -MockWith { 
+                throw "Invalid Time: `"The time given was not given in the proper format. See: Get-Help Set-SPTimerJob -detailed`"" 
+            }
+
+            It "Should return values from the get method" {
+                Get-TargetResource @testParams | Should Not BeNullOrEmpty
+            }
+
+            It "Should return false from the test method" {
+                Test-TargetResource @testParams | Should Be $false
+            }
+
+            It "Should throw an exception because the incorrect schedule format is used" {
                 { Set-TargetResource @testParams } | Should throw "Incorrect schedule format used. New schedule will not be applied."
             }
         }
 
-        Context "The server is in a farm and the correct settings have been applied" {
-            Mock Get-SPTimerJob {
-                $returnVal = @{
-                    Name = "job-spapp-statequery"
-                    IsDisabled = $false
-                    Schedule = "hourly between 0 and 59"
-                }
-                return @($returnVal)
+        Context -Name "The server is in a farm and the incorrect schedule format has been used - WebApp" -Fixture {
+            $testParams = @{
+                TypeName  = "job-spapp-statequery"
+                WebAppUrl = "http://sharepoint.domain.com"
+                Enabled   = $true
+                Schedule  = "hourly between 0 and 59"
             }
-            Mock Get-SPFarm { return @{} }
+            
+            Mock -CommandName Get-SPTimerJob -MockWith {
+                $returnVal = @{
+                    TypeName = "job-spapp-statequery"
+                    IsDisabled = $false
+                    Schedule = "incorrect format"
+                }
+                return ,@($returnVal)
+            }
 
-            It "return values from the get method" {
+            Mock -CommandName Set-SPTimerJob -MockWith { 
+                throw "Invalid Time: `"The time given was not given in the proper format. See: Get-Help Set-SPTimerJob -detailed`"" 
+            }
+
+            It "Should return values from the get method" {
                 Get-TargetResource @testParams | Should Not BeNullOrEmpty
             }
 
-            It "returns true from the test method" {
+            It "Should return false from the test method" {
+                Test-TargetResource @testParams | Should Be $false
+            }
+
+            It "Should throw an exception because the incorrect schedule format is used" {
+                { Set-TargetResource @testParams } | Should throw "Incorrect schedule format used. New schedule will not be applied."
+            }
+        }
+
+        Context -Name "The server is in a farm and the correct settings have been applied" -Fixture {
+            $testParams = @{
+                TypeName  = "job-spapp-statequery"
+                WebAppUrl = "N/A"
+                Enabled   = $true
+                Schedule  = "hourly between 0 and 59"
+            }
+            
+            Mock -CommandName Get-SPTimerJob -MockWith {
+                $returnVal = @{
+                    TypeName = "job-spapp-statequery"
+                    IsDisabled = $false
+                    Schedule = "hourly between 0 and 59"
+                }
+                return ,@($returnVal)
+            }
+
+            It "Should return values from the get method" {
+                Get-TargetResource @testParams | Should Not BeNullOrEmpty
+            }
+
+            It "Should return true from the test method" {
+                Test-TargetResource @testParams | Should Be $true
+            }
+        }
+
+        Context -Name "The server is in a farm and the correct settings have been applied - WebApp" -Fixture {
+            $testParams = @{
+                TypeName  = "job-spapp-statequery"
+                WebAppUrl = "http://sharepoint.domain.com"
+                Enabled   = $true
+                Schedule  = "hourly between 0 and 59"
+            }
+            
+            Mock -CommandName Get-SPTimerJob -MockWith {
+                $returnVal = @{
+                    TypeName = "job-spapp-statequery"
+                    IsDisabled = $false
+                    Schedule = "hourly between 0 and 59"
+                }
+                return ,@($returnVal)
+            }
+
+            It "Should return values from the get method" {
+                Get-TargetResource @testParams | Should Not BeNullOrEmpty
+            }
+
+            It "Should return true from the test method" {
                 Test-TargetResource @testParams | Should Be $true
             }
         }
     }
 }
+
+Invoke-Command -ScriptBlock $Global:SPDscHelper.CleanupScript -NoNewScope

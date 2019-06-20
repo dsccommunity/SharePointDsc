@@ -4,98 +4,106 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [parameter(Mandatory = $true)]  
-        [System.String]  
-        $Url,
+        [Parameter(Mandatory = $true)]
+        [System.String]
+        $WebAppUrl,
 
-        [parameter(Mandatory = $false)] 
-        [System.Boolean] 
+        [Parameter()]
+        [System.Boolean]
         $ExternalWorkflowParticipantsEnabled,
 
-        [parameter(Mandatory = $false)] 
-        [System.Boolean] 
+        [Parameter()]
+        [System.Boolean]
         $UserDefinedWorkflowsEnabled,
 
-        [parameter(Mandatory = $false)] 
-        [System.Boolean] 
+        [Parameter()]
+        [System.Boolean]
         $EmailToNoPermissionWorkflowParticipantsEnable,
 
-        [parameter(Mandatory = $false)] 
-        [System.Management.Automation.PSCredential] 
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 
-    Write-Verbose -Message "Getting web application '$url' workflow settings"
+    Write-Verbose -Message "Getting web application '$WebAppUrl' workflow settings"
 
     $paramArgs = @($PSBoundParameters,$PSScriptRoot)
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $paramArgs -ScriptBlock {
+    $result = Invoke-SPDscCommand -Credential $InstallAccount `
+                                  -Arguments $paramArgs `
+                                  -ScriptBlock {
         $params = $args[0]
         $ScriptRoot = $args[1]
-        
-        
-        $wa = Get-SPWebApplication -Identity $params.Url -ErrorAction SilentlyContinue
-        if ($null -eq $wa) 
-        { 
-            return $null 
+
+
+        $wa = Get-SPWebApplication -Identity $params.WebAppUrl -ErrorAction SilentlyContinue
+        if ($null -eq $wa)
+        {
+            return @{
+                WebAppUrl                                     = $params.WebAppUrl
+                ExternalWorkflowParticipantsEnabled           = $null
+                UserDefinedWorkflowsEnabled                   = $null
+                EmailToNoPermissionWorkflowParticipantsEnable = $null
+            }
         }
 
         $relPath = "..\..\Modules\SharePointDsc.WebApplication\SPWebApplication.Workflow.psm1"
         Import-Module (Join-Path $ScriptRoot $relPath -Resolve)
 
-        $result = Get-SPDSCWebApplicationWorkflowConfig -WebApplication $wa
-        $result.Add("Url", $params.Url)
+        $result = Get-SPDscWebApplicationWorkflowConfig -WebApplication $wa
+        $result.Add("WebAppUrl", $params.WebAppUrl)
         $result.Add("InstallAccount", $params.InstallAccount)
         return $result
     }
     return $result
 }
 
-
 function Set-TargetResource
 {
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true)]  
-        [System.String]  
-        $Url,
+        [Parameter(Mandatory = $true)]
+        [System.String]
+        $WebAppUrl,
 
-        [parameter(Mandatory = $false)] 
-        [System.Boolean] 
+        [Parameter()]
+        [System.Boolean]
         $ExternalWorkflowParticipantsEnabled,
 
-        [parameter(Mandatory = $false)] 
-        [System.Boolean] 
+        [Parameter()]
+        [System.Boolean]
         $UserDefinedWorkflowsEnabled,
 
-        [parameter(Mandatory = $false)] 
-        [System.Boolean] 
+        [Parameter()]
+        [System.Boolean]
         $EmailToNoPermissionWorkflowParticipantsEnable,
 
-        [parameter(Mandatory = $false)] 
-        [System.Management.Automation.PSCredential] 
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 
-    Write-Verbose -Message "Setting web application '$Url' workflow settings"
+    Write-Verbose -Message "Setting web application '$WebAppUrl' workflow settings"
 
     $paramArgs = @($PSBoundParameters,$PSScriptRoot)
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $paramArgs -ScriptBlock {
+    $null = Invoke-SPDscCommand -Credential $InstallAccount `
+                                -Arguments $paramArgs `
+                                -ScriptBlock {
         $params = $args[0]
         $ScriptRoot = $args[1]
 
-        $wa = Get-SPWebApplication -Identity $params.Url -ErrorAction SilentlyContinue
-        if ($null -eq $wa) {
-            throw "Web application $($params.Url) was not found"
+        $wa = Get-SPWebApplication -Identity $params.WebAppUrl -ErrorAction SilentlyContinue
+        if ($null -eq $wa)
+        {
+            throw "Web application $($params.WebAppUrl) was not found"
             return
         }
 
         $relpath = "..\..\Modules\SharePointDsc.WebApplication\SPWebApplication.Workflow.psm1"
         Import-Module (Join-Path $ScriptRoot $relPath -Resolve)
-        Set-SPDSCWebApplicationWorkflowConfig -WebApplication $wa -Settings $params
+        Set-SPDscWebApplicationWorkflowConfig -WebApplication $wa -Settings $params
     }
 }
-
 
 function Test-TargetResource
 {
@@ -103,36 +111,38 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [parameter(Mandatory = $true)]  
-        [System.String]  
-        $Url,
+        [Parameter(Mandatory = $true)]
+        [System.String]
+        $WebAppUrl,
 
-        [parameter(Mandatory = $false)] 
-        [System.Boolean] 
+        [Parameter()]
+        [System.Boolean]
         $ExternalWorkflowParticipantsEnabled,
 
-        [parameter(Mandatory = $false)] 
-        [System.Boolean] 
+        [Parameter()]
+        [System.Boolean]
         $UserDefinedWorkflowsEnabled,
 
-        [parameter(Mandatory = $false)] 
-        [System.Boolean] 
+        [Parameter()]
+        [System.Boolean]
         $EmailToNoPermissionWorkflowParticipantsEnable,
 
-        [parameter(Mandatory = $false)] 
-        [System.Management.Automation.PSCredential] 
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 
+    Write-Verbose -Message "Testing web application '$WebAppUrl' workflow settings"
+
     $CurrentValues = Get-TargetResource @PSBoundParameters
-    Write-Verbose -Message "Testing for web application '$Url' workflow settings"
-    if ($null -eq $CurrentValues) { return $false }
+
+    Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
+    Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
 
     $relPath = "..\..\Modules\SharePointDsc.WebApplication\SPWebApplication.Workflow.psm1"
         Import-Module (Join-Path $PSScriptRoot $relPath -Resolve)
-    return Test-SPDSCWebApplicationWorkflowConfig -CurrentSettings $CurrentValues `
+    return Test-SPDscWebApplicationWorkflowConfig -CurrentSettings $CurrentValues `
                                                   -DesiredSettings $PSBoundParameters
 }
-
 
 Export-ModuleMember -Function *-TargetResource

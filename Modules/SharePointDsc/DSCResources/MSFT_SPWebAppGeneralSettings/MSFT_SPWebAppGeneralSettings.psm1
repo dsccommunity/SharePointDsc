@@ -4,222 +4,270 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [parameter(Mandatory = $true)]  
-        [System.String]  
-        $Url,
+        [Parameter(Mandatory = $true)]
+        [System.String]
+        $WebAppUrl,
 
-        [parameter(Mandatory = $false)] 
-        [System.UInt32]  
+        [Parameter()]
+        [System.UInt32]
         $TimeZone,
 
-        [parameter(Mandatory = $false)] 
-        [System.Boolean] 
+        [Parameter()]
+        [System.Boolean]
         $Alerts,
 
-        [parameter(Mandatory = $false)] 
-        [System.UInt32] 
+        [Parameter()]
+        [System.UInt32]
         $AlertsLimit,
 
-        [parameter(Mandatory = $false)] 
-        [System.Boolean] 
+        [Parameter()]
+        [System.Boolean]
         $RSS,
 
-        [parameter(Mandatory = $false)] 
-        [System.Boolean] 
+        [Parameter()]
+        [System.Boolean]
         $BlogAPI,
 
-        [parameter(Mandatory = $false)] 
-        [System.Boolean] 
+        [Parameter()]
+        [System.Boolean]
         $BlogAPIAuthenticated,
 
-        [parameter(Mandatory = $false)] 
-        [ValidateSet("Strict","Permissive")] 
-        [System.String] 
+        [Parameter()]
+        [ValidateSet("Strict","Permissive")]
+        [System.String]
         $BrowserFileHandling,
 
-        [parameter(Mandatory = $false)] 
-        [System.Boolean] 
+        [Parameter()]
+        [System.Boolean]
         $SecurityValidation,
 
-        [parameter(Mandatory = $false)] 
-        [System.Boolean] 
+        [Parameter()]
+        [System.Boolean]
         $SecurityValidationExpires,
 
-        [parameter(Mandatory = $false)] 
-        [System.Uint32]  
+        [Parameter()]
+        [System.Uint32]
         $SecurityValidationTimeoutMinutes,
 
-        [parameter(Mandatory = $false)] 
-        [System.Boolean] 
+        [Parameter()]
+        [System.Boolean]
         $RecycleBinEnabled,
 
-        [parameter(Mandatory = $false)] 
-        [System.Boolean] 
+        [Parameter()]
+        [System.Boolean]
         $RecycleBinCleanupEnabled,
 
-        [parameter(Mandatory = $false)] 
-        [System.UInt32]  
+        [Parameter()]
+        [System.UInt32]
         $RecycleBinRetentionPeriod,
 
-        [parameter(Mandatory = $false)] 
-        [System.UInt32]  
+        [Parameter()]
+        [System.UInt32]
         $SecondStageRecycleBinQuota,
 
-        [parameter(Mandatory = $false)] 
-        [System.UInt32]  
+        [Parameter()]
+        [System.UInt32]
         $MaximumUploadSize,
 
-        [parameter(Mandatory = $false)] 
-        [System.Boolean] 
+        [Parameter()]
+        [System.Boolean]
         $CustomerExperienceProgram,
 
-        [parameter(Mandatory = $false)] 
-        [System.Boolean] 
+        [Parameter()]
+        [System.Boolean]
         $PresenceEnabled,
 
-        [parameter(Mandatory = $false)] 
-        [System.Boolean] 
+        [Parameter()]
+        [System.Boolean]
         $AllowOnlineWebPartCatalog,
 
-        [parameter(Mandatory = $false)] 
-        [System.Boolean] 
+        [Parameter()]
+        [System.Boolean]
         $SelfServiceSiteCreationEnabled,
 
-        [parameter(Mandatory = $false)] 
-        [System.Management.Automation.PSCredential] 
+        [Parameter()]
+        [System.String]
+        $DefaultQuotaTemplate,
+
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 
-    Write-Verbose -Message "Getting web application '$url' general settings"
+    Write-Verbose -Message "Getting web application '$WebAppUrl' general settings"
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount -Arguments @($PSBoundParameters,$PSScriptRoot) -ScriptBlock {
+    $result = Invoke-SPDscCommand -Credential $InstallAccount `
+                                  -Arguments @($PSBoundParameters,$PSScriptRoot) `
+                                  -ScriptBlock {
         $params = $args[0]
         $ScriptRoot = $args[1]
-        
-        
-        $wa = Get-SPWebApplication -Identity $params.Url -ErrorAction SilentlyContinue
-        if ($null -eq $wa) { return $null }
 
-        Import-Module (Join-Path $ScriptRoot "..\..\Modules\SharePointDsc.WebApplication\SPWebApplication.GeneralSettings.psm1" -Resolve)
+        $wa = Get-SPWebApplication -Identity $params.WebAppUrl -ErrorAction SilentlyContinue
+        if ($null -eq $wa)
+        {
+            return @{
+                WebAppUrl                        = $params.WebAppUrl
+                TimeZone                         = $null
+                Alerts                           = $null
+                AlertsLimit                      = $null
+                RSS                              = $null
+                BlogAPI                          = $null
+                BlogAPIAuthenticated             = $null
+                BrowserFileHandling              = $null
+                SecurityValidation               = $null
+                SecurityValidationExpires        = $null
+                SecurityValidationTimeoutMinutes = $null
+                RecycleBinEnabled                = $null
+                RecycleBinCleanupEnabled         = $null
+                RecycleBinRetentionPeriod        = $null
+                SecondStageRecycleBinQuota       = $null
+                MaximumUploadSize                = $null
+                CustomerExperienceProgram        = $null
+                PresenceEnabled                  = $null
+                AllowOnlineWebPartCatalog        = $null
+                SelfServiceSiteCreationEnabled   = $null
+                DefaultQuotaTemplate             = $null
+            }
+        }
 
-        $result = Get-SPDSCWebApplicationGeneralConfig -WebApplication $wa
-        $result.Add("Url", $params.Url)
+        $modulePath = "..\..\Modules\SharePointDsc.WebApplication\SPWebApplication.GeneralSettings.psm1"
+        Import-Module -Name (Join-Path -Path $ScriptRoot -ChildPath $modulePath -Resolve)
+
+        $result = Get-SPDscWebApplicationGeneralConfig -WebApplication $wa
+        $result.Add("WebAppUrl", $params.WebAppUrl)
         $result.Add("InstallAccount", $params.InstallAccount)
         return $result
     }
     return $result
 }
 
-
 function Set-TargetResource
 {
     [CmdletBinding()]
     param
        (
-        [parameter(Mandatory = $true)]  
-        [System.String]  
-        $Url,
+        [Parameter(Mandatory = $true)]
+        [System.String]
+        $WebAppUrl,
 
-        [parameter(Mandatory = $false)] 
-        [System.UInt32]  
+        [Parameter()]
+        [System.UInt32]
         $TimeZone,
 
-        [parameter(Mandatory = $false)] 
-        [System.Boolean] 
+        [Parameter()]
+        [System.Boolean]
         $Alerts,
 
-        [parameter(Mandatory = $false)] 
-        [System.UInt32] 
+        [Parameter()]
+        [System.UInt32]
         $AlertsLimit,
 
-        [parameter(Mandatory = $false)] 
-        [System.Boolean] 
+        [Parameter()]
+        [System.Boolean]
         $RSS,
 
-        [parameter(Mandatory = $false)] 
-        [System.Boolean] 
+        [Parameter()]
+        [System.Boolean]
         $BlogAPI,
 
-        [parameter(Mandatory = $false)] 
-        [System.Boolean] 
+        [Parameter()]
+        [System.Boolean]
         $BlogAPIAuthenticated,
 
-        [parameter(Mandatory = $false)] 
-        [ValidateSet("Strict","Permissive")] 
-        [System.String] 
+        [Parameter()]
+        [ValidateSet("Strict","Permissive")]
+        [System.String]
         $BrowserFileHandling,
 
-        [parameter(Mandatory = $false)] 
-        [System.Boolean] 
+        [Parameter()]
+        [System.Boolean]
         $SecurityValidation,
 
-        [parameter(Mandatory = $false)] 
-        [System.Boolean] 
+        [Parameter()]
+        [System.Boolean]
         $SecurityValidationExpires,
 
-        [parameter(Mandatory = $false)] 
-        [System.Uint32]  
+        [Parameter()]
+        [System.Uint32]
         $SecurityValidationTimeoutMinutes,
 
-        [parameter(Mandatory = $false)] 
-        [System.Boolean] 
+        [Parameter()]
+        [System.Boolean]
         $RecycleBinEnabled,
 
-        [parameter(Mandatory = $false)] 
-        [System.Boolean] 
+        [Parameter()]
+        [System.Boolean]
         $RecycleBinCleanupEnabled,
 
-        [parameter(Mandatory = $false)] 
-        [System.UInt32]  
+        [Parameter()]
+        [System.UInt32]
         $RecycleBinRetentionPeriod,
 
-        [parameter(Mandatory = $false)] 
-        [System.UInt32]  
+        [Parameter()]
+        [System.UInt32]
         $SecondStageRecycleBinQuota,
 
-        [parameter(Mandatory = $false)] 
-        [System.UInt32]  
+        [Parameter()]
+        [System.UInt32]
         $MaximumUploadSize,
 
-        [parameter(Mandatory = $false)] 
-        [System.Boolean] 
+        [Parameter()]
+        [System.Boolean]
         $CustomerExperienceProgram,
 
-        [parameter(Mandatory = $false)] 
-        [System.Boolean] 
+        [Parameter()]
+        [System.Boolean]
         $PresenceEnabled,
 
-        [parameter(Mandatory = $false)] 
-        [System.Boolean] 
+        [Parameter()]
+        [System.Boolean]
         $AllowOnlineWebPartCatalog,
 
-        [parameter(Mandatory = $false)] 
-        [System.Boolean] 
+        [Parameter()]
+        [System.Boolean]
         $SelfServiceSiteCreationEnabled,
 
-        [parameter(Mandatory = $false)] 
-        [System.Management.Automation.PSCredential] 
+        [Parameter()]
+        [System.String]
+        $DefaultQuotaTemplate,
+
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 
-    Write-Verbose -Message "Applying general settings '$Url'"
-    
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount -Arguments @($PSBoundParameters,$PSScriptRoot) -ScriptBlock {
+    Write-Verbose -Message "Setting web application '$WebAppUrl' general settings"
+
+    Invoke-SPDscCommand -Credential $InstallAccount `
+                        -Arguments @($PSBoundParameters,$PSScriptRoot) `
+                        -ScriptBlock {
         $params = $args[0]
         $ScriptRoot = $args[1]
 
-        $wa = Get-SPWebApplication -Identity $params.Url -ErrorAction SilentlyContinue
-        if ($null -eq $wa) {
-            throw "Web application $($params.Url) was not found"
-            return
+        $wa = Get-SPWebApplication -Identity $params.WebAppUrl -ErrorAction SilentlyContinue
+        if ($null -eq $wa)
+        {
+            throw "Web application $($params.WebAppUrl) was not found"
         }
 
-        Import-Module (Join-Path $ScriptRoot "..\..\Modules\SharePointDsc.WebApplication\SPWebApplication.GeneralSettings.psm1" -Resolve)
-        Set-SPDSCWebApplicationGeneralConfig -WebApplication $wa -Settings $params
+        if ($params.ContainsKey("DefaultQuotaTemplate"))
+        {
+            $admService = Get-SPDscContentService
+
+            $quotaTemplate = $admService.QuotaTemplates[$params.DefaultQuotaTemplate]
+            if ($null -eq $quotaTemplate)
+            {
+                throw "Quota template $($params.DefaultQuotaTemplate) was not found"
+            }
+        }
+
+        $modulePath = "..\..\Modules\SharePointDsc.WebApplication\SPWebApplication.GeneralSettings.psm1"
+        Import-Module -Name (Join-Path -Path $ScriptRoot -ChildPath $modulePath -Resolve)
+
+        Set-SPDscWebApplicationGeneralConfig -WebApplication $wa -Settings $params
         $wa.Update()
     }
 }
-
 
 function Test-TargetResource
 {
@@ -227,100 +275,107 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
      (
-        [parameter(Mandatory = $true)]  
-        [System.String]  
-        $Url,
+        [Parameter(Mandatory = $true)]
+        [System.String]
+        $WebAppUrl,
 
-        [parameter(Mandatory = $false)] 
-        [System.UInt32]  
+        [Parameter()]
+        [System.UInt32]
         $TimeZone,
 
-        [parameter(Mandatory = $false)] 
-        [System.Boolean] 
+        [Parameter()]
+        [System.Boolean]
         $Alerts,
 
-        [parameter(Mandatory = $false)] 
-        [System.UInt32] 
+        [Parameter()]
+        [System.UInt32]
         $AlertsLimit,
 
-        [parameter(Mandatory = $false)] 
-        [System.Boolean] 
+        [Parameter()]
+        [System.Boolean]
         $RSS,
 
-        [parameter(Mandatory = $false)] 
-        [System.Boolean] 
+        [Parameter()]
+        [System.Boolean]
         $BlogAPI,
 
-        [parameter(Mandatory = $false)] 
-        [System.Boolean] 
+        [Parameter()]
+        [System.Boolean]
         $BlogAPIAuthenticated,
 
-        [parameter(Mandatory = $false)] 
-        [ValidateSet("Strict","Permissive")] 
-        [System.String] 
+        [Parameter()]
+        [ValidateSet("Strict","Permissive")]
+        [System.String]
         $BrowserFileHandling,
 
-        [parameter(Mandatory = $false)] 
-        [System.Boolean] 
+        [Parameter()]
+        [System.Boolean]
         $SecurityValidation,
 
-        [parameter(Mandatory = $false)] 
-        [System.Boolean] 
+        [Parameter()]
+        [System.Boolean]
         $SecurityValidationExpires,
 
-        [parameter(Mandatory = $false)] 
-        [System.Uint32]  
+        [Parameter()]
+        [System.Uint32]
         $SecurityValidationTimeoutMinutes,
 
-        [parameter(Mandatory = $false)] 
-        [System.Boolean] 
+        [Parameter()]
+        [System.Boolean]
         $RecycleBinEnabled,
 
-        [parameter(Mandatory = $false)] 
-        [System.Boolean] 
+        [Parameter()]
+        [System.Boolean]
         $RecycleBinCleanupEnabled,
 
-        [parameter(Mandatory = $false)] 
-        [System.UInt32]  
+        [Parameter()]
+        [System.UInt32]
         $RecycleBinRetentionPeriod,
 
-        [parameter(Mandatory = $false)] 
-        [System.UInt32]  
+        [Parameter()]
+        [System.UInt32]
         $SecondStageRecycleBinQuota,
 
-        [parameter(Mandatory = $false)] 
-        [System.UInt32]  
+        [Parameter()]
+        [System.UInt32]
         $MaximumUploadSize,
 
-        [parameter(Mandatory = $false)] 
-        [System.Boolean] 
+        [Parameter()]
+        [System.Boolean]
         $CustomerExperienceProgram,
 
-        [parameter(Mandatory = $false)] 
-        [System.Boolean] 
+        [Parameter()]
+        [System.Boolean]
         $PresenceEnabled,
 
-        [parameter(Mandatory = $false)] 
-        [System.Boolean] 
+        [Parameter()]
+        [System.Boolean]
         $AllowOnlineWebPartCatalog,
 
-        [parameter(Mandatory = $false)] 
-        [System.Boolean] 
+        [Parameter()]
+        [System.Boolean]
         $SelfServiceSiteCreationEnabled,
 
-        [parameter(Mandatory = $false)] 
-        [System.Management.Automation.PSCredential] 
+        [Parameter()]
+        [System.String]
+        $DefaultQuotaTemplate,
+
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 
-    $CurrentValues = Get-TargetResource @PSBoundParameters
-    Write-Verbose -Message "Testing for web application general settings '$Url'"
-    if ($null -eq $CurrentValues) { return $false }
+    Write-Verbose -Message "Testing web application '$WebAppUrl' general settings"
 
-    Import-Module (Join-Path $PSScriptRoot "..\..\Modules\SharePointDsc.WebApplication\SPWebApplication.GeneralSettings.psm1" -Resolve)
-    return Test-SPDSCWebApplicationGeneralConfig -CurrentSettings $CurrentValues -DesiredSettings $PSBoundParameters
+    $CurrentValues = Get-TargetResource @PSBoundParameters
+
+    Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
+    Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
+
+    $modulePath = "..\..\Modules\SharePointDsc.WebApplication\SPWebApplication.GeneralSettings.psm1"
+    Import-Module -Name (Join-Path -Path $PSScriptRoot -ChildPath $modulePath -Resolve)
+
+    return Test-SPDscWebApplicationGeneralConfig -CurrentSettings $CurrentValues -DesiredSettings $PSBoundParameters
 }
 
-
 Export-ModuleMember -Function *-TargetResource
-

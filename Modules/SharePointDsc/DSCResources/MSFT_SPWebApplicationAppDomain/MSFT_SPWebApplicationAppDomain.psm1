@@ -4,30 +4,59 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [parameter(Mandatory = $true)] [System.String] $AppDomain,
-        [parameter(Mandatory = $true)] [System.String] $WebApplication,
-        [parameter(Mandatory = $true)] [System.String] [ValidateSet("Default","Internet","Intranet","Extranet","Custom")] $Zone,
-        [parameter(Mandatory = $false)] [System.String] $Port,
-        [parameter(Mandatory = $false)] [System.Boolean] $SSL,
-        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
+        [Parameter(Mandatory = $true)]
+        [System.String]
+        $AppDomain,
 
+        [Parameter(Mandatory = $true)]
+        [System.String]
+        $WebAppUrl,
+
+        [Parameter(Mandatory = $true)]
+        [System.String]
+        [ValidateSet("Default","Internet","Intranet","Extranet","Custom")]
+        $Zone,
+
+        [Parameter()]
+        [System.String]
+        $Port,
+
+        [Parameter()]
+        [System.Boolean]
+        $SSL,
+
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
+        $InstallAccount
     )
 
-    Write-Verbose -Message "Checking app urls settings"
+    Write-Verbose -Message "Getting app domain settings for '$AppDomain'"
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+    $result = Invoke-SPDscCommand -Credential $InstallAccount `
+                                  -Arguments $PSBoundParameters `
+                                  -ScriptBlock {
         $params = $args[0]
-        $webAppAppDomain = Get-SPWebApplicationAppDomain -WebApplication $params.WebApplication -Zone $params.Zone
+        $webAppAppDomain = Get-SPWebApplicationAppDomain -WebApplication $params.WebAppUrl `
+                                                         -Zone $params.Zone
 
-        if ($null -eq $webAppAppDomain) {
-            return $null
-        } else {
+        if ($null -eq $webAppAppDomain)
+        {
             return @{
-                AppDomain = $webAppAppDomain.AppDomain 
-                WebApplication = $params.WebApplication
-                Zone = $webAppAppDomain.UrlZone
-                Port = $webAppAppDomain.Port
-                SSL = $webAppAppDomain.IsSchemeSSL
+                WebAppUrl = $params.WebAppUrl
+                AppDomain = $null
+                Zone      = $null
+                Port      = $null
+                SSL       = $null
+            }
+        }
+        else
+        {
+            return @{
+                WebAppUrl      = $params.WebAppUrl
+                AppDomain      = $webAppAppDomain.AppDomain
+                Zone           = $webAppAppDomain.UrlZone
+                Port           = $webAppAppDomain.Port
+                SSL            = $webAppAppDomain.IsSchemeSSL
                 InstallAccount = $params.InstallAccount
             }
         }
@@ -40,33 +69,62 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true)] [System.String] $AppDomain,
-        [parameter(Mandatory = $true)] [System.String] $WebApplication,
-        [parameter(Mandatory = $true)] [System.String] [ValidateSet("Default","Internet","Intranet","Extranet","Custom")] $Zone,
-        [parameter(Mandatory = $false)] [System.String] $Port,
-        [parameter(Mandatory = $false)] [System.Boolean] $SSL,
-        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
+        [Parameter(Mandatory = $true)]
+        [System.String]
+        $AppDomain,
+
+        [Parameter(Mandatory = $true)]
+        [System.String]
+        $WebAppUrl,
+
+        [Parameter(Mandatory = $true)]
+        [System.String]
+        [ValidateSet("Default","Internet","Intranet","Extranet","Custom")]
+        $Zone,
+
+        [Parameter()]
+        [System.String]
+        $Port,
+
+        [Parameter()]
+        [System.Boolean]
+        $SSL,
+
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
+        $InstallAccount
     )
 
-    $CurrentValues = Get-TargetResource @PSBoundParameters
-    Write-Verbose -Message "Updating app domain settings "
+    Write-Verbose -Message "Setting app domain settings for '$AppDomain'"
 
-    Invoke-SPDSCCommand -Credential $InstallAccount -Arguments @($PSBoundParameters, $CurrentValues) -ScriptBlock {
+    $CurrentValues = Get-TargetResource @PSBoundParameters
+
+    Invoke-SPDscCommand -Credential $InstallAccount `
+                        -Arguments @($PSBoundParameters, $CurrentValues) `
+                        -ScriptBlock {
         $params = $args[0]
         $CurrentValues = $args[1]
 
-        if ($null -ne $CurrentValues) {
-            Get-SPWebApplicationAppDomain -WebApplication $params.WebApplication -Zone $params.Zone | Remove-SPWebApplicationAppDomain
+        if ($null -ne $CurrentValues.AppDomain)
+        {
+            Get-SPWebApplicationAppDomain -WebApplication $params.WebAppUrl `
+                                          -Zone $params.Zone | Remove-SPWebApplicationAppDomain
             Start-Sleep -Seconds 5
         }
 
         $newParams = @{
-            AppDomain = $params.AppDomain
-            WebApplication = $params.WebApplication 
-            Zone = $params.Zone
+            AppDomain      = $params.AppDomain
+            WebApplication = $params.WebAppUrl
+            Zone           = $params.Zone
         }
-        if ($params.ContainsKey("Port") -eq $true) { $newParams.Add("Port", $params.Port) }
-        if ($params.ContainsKey("SSL") -eq $true) { $newParams.Add("SecureSocketsLayer", $params.SSL) }
+        if ($params.ContainsKey("Port") -eq $true)
+        {
+            $newParams.Add("Port", $params.Port)
+        }
+        if ($params.ContainsKey("SSL") -eq $true)
+        {
+            $newParams.Add("SecureSocketsLayer", $params.SSL)
+        }
 
         New-SPWebApplicationAppDomain @newParams
     }
@@ -78,20 +136,42 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [parameter(Mandatory = $true)] [System.String] $AppDomain,
-        [parameter(Mandatory = $true)] [System.String] $WebApplication,
-        [parameter(Mandatory = $true)] [System.String] [ValidateSet("Default","Internet","Intranet","Extranet","Custom")] $Zone,
-        [parameter(Mandatory = $false)] [System.String] $Port,
-        [parameter(Mandatory = $false)] [System.Boolean] $SSL,
-        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
+        [Parameter(Mandatory = $true)]
+        [System.String]
+        $AppDomain,
+
+        [Parameter(Mandatory = $true)]
+        [System.String]
+        $WebAppUrl,
+
+        [Parameter(Mandatory = $true)]
+        [System.String]
+        [ValidateSet("Default","Internet","Intranet","Extranet","Custom")]
+        $Zone,
+
+        [Parameter()]
+        [System.String]
+        $Port,
+
+        [Parameter()]
+        [System.Boolean]
+        $SSL,
+
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
+        $InstallAccount
     )
 
+    Write-Verbose -Message "Testing app domain settings for '$AppDomain'"
+
     $CurrentValues = Get-TargetResource @PSBoundParameters
-    Write-Verbose -Message "Testing app domain settings"
-    if ($null -eq $CurrentValues) { return $false }
-    return Test-SPDscParameterState -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("AppDomain", "Port", "SSL") 
+
+    Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
+    Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
+
+    return Test-SPDscParameterState -CurrentValues $CurrentValues `
+                                    -DesiredValues $PSBoundParameters `
+                                    -ValuesToCheck @("AppDomain", "Port", "SSL")
 }
 
-
 Export-ModuleMember -Function *-TargetResource
-

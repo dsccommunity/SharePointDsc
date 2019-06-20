@@ -1,49 +1,55 @@
 [CmdletBinding()]
 param(
-    [string] $SharePointCmdletModule = (Join-Path $PSScriptRoot "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" -Resolve)
+    [Parameter()]
+    [string]
+    $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
+                                         -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
+                                         -Resolve)
 )
 
-$ErrorActionPreference = 'stop'
-Set-StrictMode -Version latest
+Import-Module -Name (Join-Path -Path $PSScriptRoot `
+                                -ChildPath "..\UnitTestHelper.psm1" `
+                                -Resolve)
 
-$RepoRoot = (Resolve-Path $PSScriptRoot\..\..\..).Path
-$Global:CurrentSharePointStubModule = $SharePointCmdletModule
+$Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointCmdletModule `
+                                              -DscResource "SPPasswordChangeSettings"
 
-$ModuleName = "MSFT_SPPasswordChangeSettings"
-Import-Module (Join-Path $RepoRoot "Modules\SharePointDsc\DSCResources\$ModuleName\$ModuleName.psm1") -Force
+Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
+    InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
+        Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
-Describe "SPPasswordChangeSettings - SharePoint Build $((Get-Item $SharePointCmdletModule).Directory.BaseName)" {
-    InModuleScope $ModuleName {
-        $testParams = @{
-            MailAddress = "e@mail.com"
-            DaysBeforeExpiry = 7
-            PasswordChangeWaitTimeSeconds = 60
-
-        }
-        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..\..).Path) "Modules\SharePointDsc")
-        
-        Mock Invoke-SPDSCCommand { 
-            return Invoke-Command -ScriptBlock $ScriptBlock -ArgumentList $Arguments -NoNewScope
-        }
-        
-        Remove-Module -Name "Microsoft.SharePoint.PowerShell" -Force -ErrorAction SilentlyContinue
-        Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue         
-
-         Context "No local SharePoint farm is available" {
-            Mock Get-SPFarm { return $null }
-
-            It "returns null from the get method" {
-                Get-TargetResource @testParams | Should BeNullOrEmpty 
+        # Test contexts
+        Context -Name "No local SharePoint farm is available" {
+            $testParams = @{
+                IsSingleInstance = "Yes"
+                MailAddress = "e@mail.com"
+                DaysBeforeExpiry = 7
+                PasswordChangeWaitTimeSeconds = 60
             }
 
-            It "returns false from the test method" {
+            Mock -CommandName Get-SPFarm -MockWith {
+                return $null
+            }
+
+            It "Should return null from the get method" {
+                (Get-TargetResource @testParams).MailAddress | Should BeNullOrEmpty
+            }
+
+            It "Should return false from the test method" {
                 Test-TargetResource @testParams | Should be $false
             }
         }
 
 
-        Context "There is a local SharePoint farm and the properties are set correctly" {
-            Mock Get-SPFarm { 
+        Context -Name "There is a local SharePoint farm and the properties are set correctly" {
+            $testParams = @{
+                IsSingleInstance = "Yes"
+                MailAddress = "e@mail.com"
+                DaysBeforeExpiry = 7
+                PasswordChangeWaitTimeSeconds = 60
+            }
+
+            Mock -CommandName Get-SPFarm -MockWith {
                 return @{
                     PasswordChangeEmailAddress = "e@mail.com"
                     DaysBeforePasswordExpirationToSendEmail = 7
@@ -51,50 +57,55 @@ Describe "SPPasswordChangeSettings - SharePoint Build $((Get-Item $SharePointCmd
                     PasswordChangeMaximumTries = 3
                 }
             }
-            
-            It "returns farm properties from the get method" {
-                Get-TargetResource @testParams | Should Not BeNullOrEmpty 
+
+            It "Should return farm properties from the get method" {
+                (Get-TargetResource @testParams).MailAddress | Should Be "e@mail.com"
             }
 
-            It "returns true from the test method" {
+            It "Should return true from the test method" {
                 Test-TargetResource @testParams | Should Be $true
             }
         }
 
+        Context -Name "There is a local SharePoint farm and the properties are not set correctly" {
+            $testParams = @{
+                IsSingleInstance = "Yes"
+                MailAddress = "e@mail.com"
+                DaysBeforeExpiry = 7
+                PasswordChangeWaitTimeSeconds = 60
+            }
 
-        Context "There is a local SharePoint farm and the properties are not set correctly" {
-            Mock Get-SPFarm { 
+            Mock -CommandName Get-SPFarm -MockWith {
                 $result = @{
-                    PasswordChangeEmailAddress = "";
+                    PasswordChangeEmailAddress = ""
                     PasswordChangeGuardTime = 0
                     PasswordChangeMaximumTries = 0
                     DaysBeforePasswordExpirationToSendEmail = 0
                 }
-                $result = $result | Add-Member  ScriptMethod Update { 
-                    $Global:SPFarmUpdateCalled = $true;
+                $result = $result | Add-Member  ScriptMethod Update {
+                    $Global:SPDscFarmUpdateCalled = $true
                     return $true;
-                
+
                     } -PassThru
                 return $result
             }
 
-            It "returns farm properties from the get method" {
-                Get-TargetResource @testParams | Should Not BeNullOrEmpty 
+            It "Should return farm properties from the get method" {
+                (Get-TargetResource @testParams).MailAddress | Should Be ""
             }
 
-            It "returns false from the test method" {
+            It "Should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $false
             }
 
-            It "calls the new and set methods from the set function" {
-                $Global:SPFarmUpdateCalled = $false;
+            It "Should call the new and set methods from the set function" {
+                $Global:SPDscFarmUpdateCalled = $false
                 Set-TargetResource @testParams
                 Assert-MockCalled Get-SPFarm
-                $Global:SPFarmUpdateCalled  | Should Be $true
+                $Global:SPDscFarmUpdateCalled  | Should Be $true
             }
         }
-
-
-
-    }    
+    }
 }
+
+Invoke-Command -ScriptBlock $Global:SPDscHelper.CleanupScript -NoNewScope

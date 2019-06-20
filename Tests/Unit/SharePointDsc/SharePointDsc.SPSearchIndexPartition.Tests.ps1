@@ -1,56 +1,68 @@
 [CmdletBinding()]
 param(
-    [string] $SharePointCmdletModule = (Join-Path $PSScriptRoot "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" -Resolve)
+    [Parameter()]
+    [string] 
+    $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
+                                         -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
+                                         -Resolve)
 )
 
-$ErrorActionPreference = 'stop'
-Set-StrictMode -Version latest
+Import-Module -Name (Join-Path -Path $PSScriptRoot `
+                                -ChildPath "..\UnitTestHelper.psm1" `
+                                -Resolve)
 
-$RepoRoot = (Resolve-Path $PSScriptRoot\..\..\..).Path
-$Global:CurrentSharePointStubModule = $SharePointCmdletModule 
+$Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointCmdletModule `
+                                              -DscResource "SPSearchIndexPartition"
 
-$ModuleName = "MSFT_SPSearchIndexPartition"
-Import-Module (Join-Path $RepoRoot "Modules\SharePointDsc\DSCResources\$ModuleName\$ModuleName.psm1") -Force
+Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
+    InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
+        Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
-Describe "SPSearchIndexPartition - SharePoint Build $((Get-Item $SharePointCmdletModule).Directory.BaseName)" {
-    InModuleScope $ModuleName {
-        $testParams = @{
-            Index = "0"
-            Servers = @($env:COMPUTERNAME)
-            RootDirectory = "C:\SearchIndex\0"
-            ServiceAppName = "Search Service Application"
+        # Initialize tests
+        Add-Type -TypeDefinition @"
+        public class IndexComponent 
+        { 
+            public string ServerName { get; set; } 
+            public System.Guid ComponentId {get; set;} 
+            public System.Int32 IndexPartitionOrdinal {get; set;}
         }
-        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..\..).Path) "Modules\SharePointDsc")
-        Remove-Module -Name "Microsoft.SharePoint.PowerShell" -Force -ErrorAction SilentlyContinue
-        Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue 
+"@
+        $indexComponent = New-Object -TypeName IndexComponent
+        $indexComponent.ServerName = $env:COMPUTERNAME
+        $indexComponent.IndexPartitionOrdinal = 0
 
-        Mock Invoke-SPDSCCommand { 
-            return Invoke-Command -ScriptBlock $ScriptBlock -ArgumentList $Arguments -NoNewScope
-        }
-        Mock New-PSSession {
+        # Mocks for all contexts   
+        Mock -CommandName New-PSSession -MockWith {
             return $null
         }
-        Mock New-Item { return @{} }
-        Mock Start-Sleep {}
-        Mock Get-SPEnterpriseSearchServiceApplication {
+        Mock -CommandName New-Item -MockWith { 
+            return @{} 
+        }
+        Mock -CommandName Start-Sleep -MockWith {}
+        Mock -CommandName Get-SPEnterpriseSearchServiceApplication -MockWith {
             return @{
                 ActiveTopology = @{}
             }
         } 
-        Mock New-SPEnterpriseSearchTopology { return @{} }
+        Mock -CommandName New-SPEnterpriseSearchTopology -MockWith { 
+            return @{} 
+        }
 
-        $Global:SPDSCSearchRoleInstanceCallCount = 0
-        Mock Get-SPEnterpriseSearchServiceInstance  {
-            if ($Global:SPDSCSearchRoleInstanceCallCount -eq 2) {
-                $Global:SPDSCSearchRoleInstanceCallCount = 0
+        $Global:SPDscSearchRoleInstanceCallCount = 0
+        Mock -CommandName Get-SPEnterpriseSearchServiceInstance -MockWith {
+            if ($Global:SPDscSearchRoleInstanceCallCount -eq 2) 
+            {
+                $Global:SPDscSearchRoleInstanceCallCount = 0
                 return @{
                     Server = @{
                         Address = $env:COMPUTERNAME
                     }
                     Status = "Online"
                 }
-            } else {
-                $Global:SPDSCSearchRoleInstanceCallCount++
+            } 
+            else 
+            {
+                $Global:SPDscSearchRoleInstanceCallCount++
                 return @{
                     Server = @{
                         Address = $env:COMPUTERNAME
@@ -59,67 +71,93 @@ Describe "SPSearchIndexPartition - SharePoint Build $((Get-Item $SharePointCmdle
                 }
             }
         }
-        Mock Start-SPEnterpriseSearchServiceInstance { return $null }
-        Mock New-SPEnterpriseSearchIndexComponent { return $null }
-        Mock Remove-SPEnterpriseSearchComponent { return $null }
-        Mock Set-SPEnterpriseSearchTopology { return $null }
+        Mock -CommandName Start-SPEnterpriseSearchServiceInstance -MockWith { 
+            return $null 
+        }
+        Mock -CommandName New-SPEnterpriseSearchIndexComponent -MockWith { 
+            return $null 
+        }
+        Mock -CommandName Remove-SPEnterpriseSearchComponent -MockWith { 
+            return $null 
+        }
+        Mock -CommandName Set-SPEnterpriseSearchTopology -MockWith { 
+            return $null 
+        }
 
-        Add-Type -TypeDefinition "public class IndexComponent { public string ServerName { get; set; } public System.Guid ComponentId {get; set;} public System.Int32 IndexPartitionOrdinal {get; set;}}"
-        $indexComponent = New-Object IndexComponent
-        $indexComponent.ServerName = $env:COMPUTERNAME
-        $indexComponent.IndexPartitionOrdinal = 0
-        
-        Context "Search index doesn't exist and it should" {
-            Mock Get-SPEnterpriseSearchComponent { return @() }
-            $Global:SPDSCSearchRoleInstanceCallCount = 0
+        # Test contexts        
+        Context -Name "Search index doesn't exist and it should" {
+            $testParams = @{
+                Index = "0"
+                Servers = @($env:COMPUTERNAME)
+                RootDirectory = "C:\SearchIndex\0"
+                ServiceAppName = "Search Service Application"
+            }
 
-            It "returns an empty server list from the get method" {
+            Mock -CommandName Get-SPEnterpriseSearchComponent { 
+                return @() 
+            }
+            
+            $Global:SPDscSearchRoleInstanceCallCount = 0
+
+            It "Should return an empty server list from the get method" {
                 $result = Get-TargetResource @testParams
                 $result.Servers | Should BeNullOrEmpty
             }
 
-            It "returns false from the test method" {
+            It "Should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $false
             }
 
-            It "creates the search index in the set method" {
+            It "Should create the search index in the set method" {
                 Set-TargetResource @testParams
                 Assert-MockCalled New-SPEnterpriseSearchIndexComponent
             }
         }
         
-        Context "Search index does exist and it should" {
-            Mock Get-SPEnterpriseSearchComponent { return @($indexComponent) }
+        Context -Name "Search index does exist and it should" {
+            $testParams = @{
+                Index = "0"
+                Servers = @($env:COMPUTERNAME)
+                RootDirectory = "C:\SearchIndex\0"
+                ServiceAppName = "Search Service Application"
+            }
+            
+            Mock -CommandName Get-SPEnterpriseSearchComponent -MockWith { 
+                return @($indexComponent) 
+            }
 
-            It "returns present from the get method" {
+            It "Should return present from the get method" {
                 $result = Get-TargetResource @testParams
                 $result.Servers | Should Not BeNullOrEmpty
             }
 
-            It "returns true from the test method" {
+            It "Should return true from the test method" {
                 Test-TargetResource @testParams | Should Be $true
             }
         }
 
-        $testParams.Servers = @("SharePoint2")
-
-        Context "Search index exists and it shouldn't" {
-            Mock Get-SPEnterpriseSearchComponent { 
-                Add-Type -TypeDefinition "public class IndexComponent { public string ServerName { get; set; } public System.Guid ComponentId {get; set;} public System.Int32 IndexPartitionOrdinal {get; set;}}"
-                $indexComponent = New-Object IndexComponent
-                $indexComponent.ServerName = $env:COMPUTERNAME
-                $indexComponent.IndexPartitionOrdinal = 0
+        Context -Name "Search index exists and it shouldn't" {
+            $testParams = @{
+                Index = "0"
+                Servers = @("SharePoint2")
+                RootDirectory = "C:\SearchIndex\0"
+                ServiceAppName = "Search Service Application"
+            }
+            
+            Mock -CommandName Get-SPEnterpriseSearchComponent -MockWith { 
                 return @($indexComponent) 
             }
 
-            It "returns false from the test method" {
+            It "Should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $false
             }
 
-            It "removes the search index in the set method" {
+            It "Should remove the search index in the set method" {
                 Set-TargetResource @testParams
                 Assert-MockCalled Remove-SPEnterpriseSearchComponent
             }
         }
     }
 }
+
+Invoke-Command -ScriptBlock $Global:SPDscHelper.CleanupScript -NoNewScope

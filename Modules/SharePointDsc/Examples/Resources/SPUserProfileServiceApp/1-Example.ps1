@@ -3,16 +3,12 @@
     This example adds a new user profile service application to the local farm
 #>
 
-    Configuration Example 
+    Configuration Example
     {
         param(
             [Parameter(Mandatory = $true)]
             [PSCredential]
-            $SetupAccount,
-
-            [Parameter(Mandatory = $true)]
-            [PSCredential]
-            $FarmAccount
+            $SetupAccount
         )
         Import-DscResource -ModuleName SharePointDsc
 
@@ -22,6 +18,7 @@
                 Name                 = "User Profile Service Application"
                 ApplicationPool      = "SharePoint Service Applications"
                 MySiteHostLocation   = "http://my.sharepoint.contoso.local"
+                MySiteManagedPath    = "personal"
                 ProfileDBName        = "SP_UserProfiles"
                 ProfileDBServer      = "SQL.contoso.local\SQLINSTANCE"
                 SocialDBName         = "SP_Social"
@@ -29,7 +26,6 @@
                 SyncDBName           = "SP_ProfileSync"
                 SyncDBServer         = "SQL.contoso.local\SQLINSTANCE"
                 EnableNetBIOS        = $false
-                FarmAccount          = $FarmAccount
                 PsDscRunAsCredential = $SetupAccount
             }
         }

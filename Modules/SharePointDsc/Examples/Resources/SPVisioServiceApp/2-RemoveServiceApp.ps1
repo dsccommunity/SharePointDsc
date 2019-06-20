@@ -5,7 +5,7 @@
     the value used here doesn't matter.
 #>
 
-    Configuration Example 
+    Configuration Example
     {
         param(
             [Parameter(Mandatory = $true)]
@@ -17,10 +17,10 @@
         node localhost {
             SPVisioServiceApp VisioServices
             {
-                Name = "Visio Graphics Service Application"
-                ApplicationPool = "n/a"
-                Ensure = "Absent"
-                InstallAccount  = $SetupAccount
+                Name                 = "Visio Graphics Service Application"
+                ApplicationPool      = "n/a"
+                Ensure               = "Absent"
+                PsDscRunAsCredential = $SetupAccount
             }
         }
     }

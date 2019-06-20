@@ -1,57 +1,29 @@
-version: 1.2.0.{build}
-image: WMF 5
+version: 3.4.0.{build}
+
 
 install:
-    - appveyor DownloadFile https://dist.nuget.org/win-x86-commandline/latest/nuget.exe   
+    - git clone https://github.com/PowerShell/DscResource.Tests
+
+    - npm --silent install
+
     - ps: |
-        Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Force
-        Install-Module Pester -Force
-        Copy-item -Path "$env:APPVEYOR_BUILD_FOLDER\Modules\SharePointDsc" -Destination 'C:\WINDOWS\system32\WindowsPowerShell\v1.0\Modules\SharePointDsc' -Recurse
-        git clone -q https://github.com/PowerShell/DscResource.Tests "$env:APPVEYOR_BUILD_FOLDER\Modules\SharePointDsc\DscResource.Tests"
-        Import-Module "$env:APPVEYOR_BUILD_FOLDER\Modules\SharePointDsc\DscResource.Tests\TestHelper.psm1" -force
-        
+        $moduleName = 'SharePointDsc'
+        $mainModuleFolder = "Modules\$moduleName"
+        Import-Module -Name "$env:APPVEYOR_BUILD_FOLDER\DscResource.Tests\AppVeyor.psm1"
+        Invoke-AppveyorInstallTask
 
 build: off
 
 test_script:
     - ps: |
-        $testResultsFile = ".\TestsResults.xml"
-        $testCoverageFiles = @()
-        Import-Module "$env:APPVEYOR_BUILD_FOLDER\Tests\Unit\SharePointDsc.TestHarness.psm1"
-        $res = Invoke-SPDscUnitTestSuite -testResultsFile $testResultsFile -DscTestsPath "$env:APPVEYOR_BUILD_FOLDER\Modules\SharePointDsc\DscResource.Tests"
-        (New-Object 'System.Net.WebClient').UploadFile("https://ci.appveyor.com/api/testresults/nunit/$($env:APPVEYOR_JOB_ID)", (Resolve-Path $testResultsFile))
-        if ($res.FailedCount -gt 0) { 
-            throw "$($res.FailedCount) tests failed."
-        }
+        Invoke-AppveyorTestScriptTask `
+            -Type 'Harness' `
+            -MainModulePath $mainModuleFolder `
+            -CodeCovIo
 
 after_test:
     - ps: |
-        Move-Item "$env:APPVEYOR_BUILD_FOLDER\Modules\SharePointDsc\DscResource.Tests" "$env:APPVEYOR_BUILD_FOLDER\"
-        Import-Module "$env:APPVEYOR_BUILD_FOLDER\DscResource.Tests\TestHelper.psm1" -force
-        New-Item "$env:APPVEYOR_BUILD_FOLDER\modules\SharePointDsc\en-US" -ItemType Directory
-        Import-Module "$env:APPVEYOR_BUILD_FOLDER\DscResource.DocumentationHelper"
-        Write-DscResourcePowerShellHelp -OutputPath "$env:APPVEYOR_BUILD_FOLDER\modules\SharePointDsc\en-US" -ModulePath "$env:APPVEYOR_BUILD_FOLDER\modules\SharePointDsc" -Verbose
-
-        Add-Type -assemblyname System.IO.Compression.FileSystem
-
-        New-Item "$env:APPVEYOR_BUILD_FOLDER\wikicontent" -ItemType Directory
-        Write-DscResourceWikiSite -OutputPath "$env:APPVEYOR_BUILD_FOLDER\wikicontent" -ModulePath "$env:APPVEYOR_BUILD_FOLDER\modules\SharePointDsc" -Verbose
-        $zipFileName = "SharePointDsc_$($env:APPVEYOR_BUILD_VERSION)_wikicontent.zip"
-        [System.IO.Compression.ZipFile]::CreateFromDirectory("$env:APPVEYOR_BUILD_FOLDER\wikicontent", "$env:APPVEYOR_BUILD_FOLDER\$zipFileName")
-        Get-ChildItem "$env:APPVEYOR_BUILD_FOLDER\$zipFileName" | % { Push-AppveyorArtifact $_.FullName -FileName $_.Name }
-
-        Get-ChildItem "$env:APPVEYOR_BUILD_FOLDER\Modules\**\readme.md" -Recurse | Remove-Item -Confirm:$false
-
-        $manifest = Join-Path "$env:APPVEYOR_BUILD_FOLDER\modules\SharePointDsc" "SharePointDsc.psd1"
-        (Get-Content $manifest -Raw).Replace("1.2.0.0", $env:APPVEYOR_BUILD_VERSION) | Out-File $manifest
-        $zipFileName = "SharePointDsc_$($env:APPVEYOR_BUILD_VERSION).zip"
-        [System.IO.Compression.ZipFile]::CreateFromDirectory("$env:APPVEYOR_BUILD_FOLDER\modules\SharePointDsc", "$env:APPVEYOR_BUILD_FOLDER\$zipFileName")
-        New-DscChecksum -Path $env:APPVEYOR_BUILD_FOLDER -Outpath $env:APPVEYOR_BUILD_FOLDER
-        Get-ChildItem "$env:APPVEYOR_BUILD_FOLDER\$zipFileName" | % { Push-AppveyorArtifact $_.FullName -FileName $_.Name }
-        Get-ChildItem "$env:APPVEYOR_BUILD_FOLDER\$zipFileName.checksum" | % { Push-AppveyorArtifact $_.FullName -FileName $_.Name }
-        
-        cd "$env:APPVEYOR_BUILD_FOLDER\modules\SharePointDsc"
-        New-Nuspec -packageName "SharePointDsc" -version $env:APPVEYOR_BUILD_VERSION -author "Microsoft" -owners "Microsoft" -licenseUrl "https://github.com/PowerShell/DscResources/blob/master/LICENSE" -projectUrl "https://github.com/$($env:APPVEYOR_REPO_NAME)" -packageDescription "SharePointDsc" -tags "DesiredStateConfiguration DSC DSCResourceKit" -destinationPath .
-        nuget pack ".\SharePointDsc.nuspec" -outputdirectory $env:APPVEYOR_BUILD_FOLDER
-        $nuGetPackageName = "SharePointDsc." + $env:APPVEYOR_BUILD_VERSION + ".nupkg"
-        Get-ChildItem "$env:APPVEYOR_BUILD_FOLDER\$nuGetPackageName" | % { Push-AppveyorArtifact $_.FullName -FileName $_.Name }
+        Invoke-AppveyorAfterTestTask `
+            -Type 'Wiki' `
+            -MainModulePath $mainModuleFolder `
+            -ResourceModuleName $moduleName

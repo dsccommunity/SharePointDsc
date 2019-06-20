@@ -4,41 +4,67 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [parameter(Mandatory = $true)]  [System.String] $WebAppUrl,
-        [parameter(Mandatory = $true)]  [ValidateSet("Default","Intranet","Extranet","Custom","Internet")] [System.String] $Zone,
-        [parameter(Mandatory = $false)] [System.String] $Url,
-        [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] [System.String] $Ensure = "Present",
-        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
+        [Parameter(Mandatory = $true)]
+        [System.String]
+        $WebAppName,
 
+        [Parameter(Mandatory = $true)]
+        [ValidateSet("Default","Intranet","Extranet","Custom","Internet")]
+        [System.String]
+        $Zone,
+
+        [Parameter(Mandatory = $true)]
+        [System.String]
+        $Url,
+
+        [Parameter()]
+        [System.Boolean]
+        $Internal = $false,
+
+        [Parameter()]
+        [ValidateSet("Present","Absent")]
+        [System.String]
+        $Ensure = "Present",
+
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
+        $InstallAccount
     )
 
-    Write-Verbose -Message "Getting Alternate URL for $Zone in $WebAppUrl"
+    Write-Verbose -Message "Getting Alternate URL for $Zone in $WebAppName"
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+    $result = Invoke-SPDscCommand -Credential $InstallAccount `
+                                  -Arguments $PSBoundParameters `
+                                  -ScriptBlock {
         $params = $args[0]
 
-        $aam = Get-SPAlternateURL -WebApplication $params.WebAppUrl -Zone $params.Zone -ErrorAction SilentlyContinue | Select-Object -First 1
-        $url = $null
-        $Ensure = "Absent"
-        
-        if (($null -eq $aam) -and ($params.Zone -eq "Default")) {
-            # The default zone URL will change the URL of the web app, so assuming it has been applied
-            # correctly then the first call there will fail as the WebAppUrl parameter will no longer
-            # be the URL of the web app. So the assumption is that if a matching default entry with
-            # the new public URL is found then it can be returned and will pass a test.
-            $aam = Get-SPAlternateURL -Zone $params.Zone | Where-Object { $_.PublicUrl -eq $params.Url } | Select-Object -First 1
+        $aam = Get-SPAlternateURL -Identity $params.Url `
+                                  -ErrorAction SilentlyContinue
+
+        if ($null -eq $aam)
+        {
+            return @{
+                WebAppName = $params.WebAppName
+                Zone = $params.Zone
+                Url = $params.Url
+                Ensure = "Absent"
+            }
         }
-        
-        if ($null -ne $aam) {
-            $url = $aam.PublicUrl
-            $Ensure = "Present"
+
+        $internal = $false
+        if ($aam.PublicUrl -ne $aam.IncomingUrl)
+        {
+            $internal = $true
         }
-        
+
+        $wa = Get-SPWebApplication -Identity $aam.PublicUrl
+
         return @{
-            WebAppUrl = $params.WebAppUrl
-            Zone = $params.Zone
-            Url = $url
-            Ensure = $Ensure
+            WebAppName = $wa.DisplayName
+            Zone = $aam.Zone
+            Url = $aam.IncomingUrl
+            Internal = $internal
+            Ensure = "Present"
             InstallAccount = $params.InstallAccount
         }
     }
@@ -50,39 +76,160 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true)]  [System.String] $WebAppUrl,
-        [parameter(Mandatory = $true)]  [ValidateSet("Default","Intranet","Extranet","Custom","Internet")] [System.String] $Zone,
-        [parameter(Mandatory = $false)] [System.String] $Url,
-        [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] [System.String] $Ensure = "Present",
-        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
+        [Parameter(Mandatory = $true)]
+        [System.String]
+        $WebAppName,
+
+        [Parameter(Mandatory = $true)]
+        [ValidateSet("Default","Intranet","Extranet","Custom","Internet")]
+        [System.String]
+        $Zone,
+
+        [Parameter(Mandatory = $true)]
+        [System.String]
+        $Url,
+
+        [Parameter()]
+        [System.Boolean]
+        $Internal = $false,
+
+        [Parameter()]
+        [ValidateSet("Present","Absent")]
+        [System.String]
+        $Ensure = "Present",
+
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
+        $InstallAccount
 
     )
 
-    $CurrentValues = Get-TargetResource @PSBoundParameters
+    Write-Verbose -Message "Setting Alternate URL for $Zone in $WebAppName"
 
-    Write-Verbose -Message "Updating app domain settings for $SiteUrl"
-    
-    if ($Ensure -eq "Present") {
-        if ([string]::IsNullOrEmpty($Url)) {
-            throw "URL must be specified when ensure is set to present"
-        }
-
-        Invoke-SPDSCCommand -Credential $InstallAccount -Arguments ($PSBoundParameters, $CurrentValues) -ScriptBlock {
+    if ($Ensure -eq "Present")
+    {
+        Invoke-SPDscCommand -Credential $InstallAccount `
+                            -Arguments $PSBoundParameters `
+                            -ScriptBlock {
             $params = $args[0]
-            $CurrentValues = $args[1]
 
-            if ([string]::IsNullOrEmpty($CurrentValues.Url)) {
-                New-SPAlternateURL -WebApplication $params.WebAppUrl -Url $params.Url -Zone $params.Zone
-            } else {
-                Get-SPAlternateURL -WebApplication $params.WebAppUrl -Zone $params.Zone | Set-SPAlternateURL -Url $params.Url
+            $webapp = Get-SPWebApplication -IncludeCentralAdministration | Where-Object -FilterScript {
+                $_.DisplayName -eq $params.WebAppName
+            }
+
+            if ($null -eq $webapp)
+            {
+                throw "Web application was not found. Please check WebAppName parameter!"
+            }
+
+            $urlAam = Get-SPAlternateURL -Identity $params.Url `
+                                         -ErrorAction SilentlyContinue
+
+            $webAppAams = Get-SPAlternateURL -WebApplication $webapp `
+                                             -Zone $params.Zone `
+                                             -ErrorAction SilentlyContinue
+
+            if ($null -eq $webAppAams)
+            {
+                # No AAM found on specified WebApp in specified Zone
+                if ($null -eq $urlAam)
+                {
+                    # urlAAM not found, so it is safe to create AAM on specified zone
+                    $cmdParams = @{
+                        WebApplication = $webapp
+                        Url = $params.Url
+                        Zone = $params.Zone
+                    }
+                    if ($params.ContainsKey("Internal") -eq $true)
+                    {
+                        $cmdParams.Add("Internal", $params.Internal)
+                    }
+                    New-SPAlternateURL @cmdParams | Out-Null
+                }
+                else
+                {
+                    throw ("Specified URL found on different WebApp/Zone: WebApp " + `
+                           "$($urlAam.PublicUrl) in zone $($urlAam.Zone)")
+                }
+            }
+            else
+            {
+                # WebApp has one or more AAMs, check for URL
+                $aamForUrl = $webAppAams | Where-Object -FilterScript {
+                                               $_.IncomingUrl -eq $params.Url
+                                           }
+
+                if ($null -eq $aamForUrl)
+                {
+                    # URL not configured on WebApp
+                   if ($null -eq $urlAam)
+                    {
+                        # urlAAM not found, so it is safe to create AAM on specified zone (or modify existing if CA)
+                        # If this is Central Admin and Default zone, we want to update the existing AAM instead of adding a new one
+                        if ($webapp.IsAdministrationWebApplication -and $params.Zone -eq "Default")
+                        {
+                            # web app is Central Administration and Default zone
+
+                            # If CA has more than 1 AAM in Default zone, Set-SPAlternateUrl should consolidate into 1
+                            # For additional CA servers, use other zones instead of Default
+
+                            Set-SPAlternateURL -Identity $webApp.Url -Url $params.Url -Zone $params.Zone | Out-Null
+                        }
+                        else
+                        {
+                            $cmdParams = @{
+                                WebApplication = $webapp
+                                Url = $params.Url
+                                Zone = $params.Zone
+                            }
+                            if (($params.ContainsKey("Internal") -eq $true))
+                            {
+                                $cmdParams.Add("Internal", $params.Internal)
+                            }
+                            New-SPAlternateURL @cmdParams | Out-Null
+                        }
+                    }
+                    else
+                    {
+                        throw ("Specified URL ($($params.Url)) found on different WebApp/Zone: " + `
+                               "WebApp $($urlAam.PublicUrl) in zone $($urlAam.Zone)")
+                    }
+                 }
+                 else
+                 {
+                    if ($params.Internal -eq $false)
+                    {
+                        if (($urlAam.PublicUrl -eq $aamForUrl.PublicUrl) -and `
+                            ($urlAam.Zone -eq $aamForUrl.Zone))
+                        {
+                            $webAppAams | Set-SPAlternateURL -Url $params.Url | Out-Null
+                        }
+                        else
+                        {
+                            throw ("Specified URL found on different WebApp/Zone: WebApp " + `
+                                   "$($urlAam.PublicUrl) in zone $($urlAam.Zone)")
+                        }
+                    }
+                    else
+                    {
+                        Write-Verbose -Message "URL already exists!"
+                    }
+                 }
             }
         }
-    } else {
-        Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+    }
+    else
+    {
+        Invoke-SPDscCommand -Credential $InstallAccount `
+                            -Arguments $PSBoundParameters `
+                            -ScriptBlock {
             $params = $args[0]
-            Get-SPAlternateURL -WebApplication $params.WebAppUrl -Zone $params.Zone | Remove-SPAlternateURL -Confirm:$false
+            $aam = Get-SPAlternateURL -Identity $params.Url `
+                                      -ErrorAction SilentlyContinue
+
+            Remove-SPAlternateURL -Identity $aam -Confirm:$false
         }
-    }    
+    }
 }
 
 function Test-TargetResource
@@ -91,30 +238,58 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [parameter(Mandatory = $true)]  [System.String] $WebAppUrl,
-        [parameter(Mandatory = $true)]  [ValidateSet("Default","Intranet","Extranet","Custom","Internet")] [System.String] $Zone,
-        [parameter(Mandatory = $false)] [System.String] $Url,
-        [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] [System.String] $Ensure = "Present",
-        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
+        [Parameter(Mandatory = $true)]
+        [System.String]
+        $WebAppName,
+
+        [Parameter(Mandatory = $true)]
+        [ValidateSet("Default","Intranet","Extranet","Custom","Internet")]
+        [System.String]
+        $Zone,
+
+        [Parameter(Mandatory = $true)]
+        [System.String]
+        $Url,
+
+        [Parameter()]
+        [System.Boolean]
+        $Internal = $false,
+
+        [Parameter()]
+        [ValidateSet("Present","Absent")]
+        [System.String]
+        $Ensure = "Present",
+
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
+        $InstallAccount
 
     )
 
+    Write-Verbose -Message "Testing Alternate URL for $Zone in $WebAppName"
+
     $PSBoundParameters.Ensure = $Ensure
-    
-    if ([string]::IsNullOrEmpty($Url) -and $Ensure -eq "Present") {
-        throw "URL must be specified when ensure is set to present"
-    }
+    $PSBoundParameters.Internal = $Internal
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
-    Write-Verbose -Message "Testing alternate URL configuration"
+
+    Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
+    Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
+
     if ($Ensure -eq "Present")
     {
-        return Test-SPDscParameterState -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("Url", "Ensure")
+        return Test-SPDscParameterState -CurrentValues $CurrentValues `
+                                        -DesiredValues $PSBoundParameters `
+                                        -ValuesToCheck @("WebAppName", `
+                                                         "Zone", `
+                                                         "Url", `
+                                                         "Ensure", `
+                                                         "Internal")
     }
-    else 
+    else
     {
-        return Test-SPDscParameterState -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("Ensure")
+        return Test-SPDscParameterState -CurrentValues $CurrentValues `
+                                        -DesiredValues $PSBoundParameters `
+                                        -ValuesToCheck @("Ensure")
     }
-     
 }
-

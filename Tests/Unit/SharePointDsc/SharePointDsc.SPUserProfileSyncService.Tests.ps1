@@ -1,325 +1,552 @@
 [CmdletBinding()]
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingConvertToSecureStringWithPlainText", "")]
 param(
-    [string] $SharePointCmdletModule = (Join-Path $PSScriptRoot "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" -Resolve)
+    [Parameter()]
+    [string]
+    $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
+                                         -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
+                                         -Resolve)
 )
 
-$ErrorActionPreference = 'stop'
-Set-StrictMode -Version latest
+Import-Module -Name (Join-Path -Path $PSScriptRoot `
+                                -ChildPath "..\UnitTestHelper.psm1" `
+                                -Resolve)
 
-$RepoRoot = (Resolve-Path $PSScriptRoot\..\..\..).Path
-$Global:CurrentSharePointStubModule = $SharePointCmdletModule
+$Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointCmdletModule `
+                                              -DscResource "SPUserProfileSyncService"
 
-$ModuleName = "MSFT_SPUserProfileSyncService"
-Import-Module (Join-Path $RepoRoot "Modules\SharePointDsc\DSCResources\$ModuleName\$ModuleName.psm1") -Force
+Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
+    InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
+        Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
-Describe "SPUserProfileSyncService - SharePoint Build $((Get-Item $SharePointCmdletModule).Directory.BaseName)" {
-    InModuleScope $ModuleName {
-        $testParams = @{
-            UserProfileServiceAppName = "User Profile Service Service App"
-            FarmAccount = New-Object System.Management.Automation.PSCredential ("username", (ConvertTo-SecureString "password" -AsPlainText -Force))
-            Ensure = "Present"
+        # Initialize tests
+        $getTypeFullName = "Microsoft.Office.Server.Administration.UserProfileApplication"
+        $mockPassword = ConvertTo-SecureString -String "password" -AsPlainText -Force
+        $mockCredential = New-Object -TypeName System.Management.Automation.PSCredential `
+                                     -ArgumentList @("$($Env:USERDOMAIN)\$($Env:USERNAME)", $mockPassword)
+        $mockFarmCredential = New-Object -TypeName System.Management.Automation.PSCredential `
+                                         -ArgumentList @("DOMAIN\sp_farm", $mockPassword)
+
+        # Mocks for all contexts
+        Mock -CommandName Clear-SPDscKerberosToken -MockWith { }
+        Mock -CommandName Get-SPDscFarmAccount -MockWith {
+            return $mockFarmCredential
         }
-        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..\..).Path) "Modules\SharePointDsc")
-        
-        Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue 
-        $versionBeingTested = (Get-Item $Global:CurrentSharePointStubModule).Directory.BaseName
-        $majorBuildNumber = $versionBeingTested.Substring(0, $versionBeingTested.IndexOf("."))
-        Mock Get-SPDSCInstalledProductVersion { return @{ FileMajorPart = $majorBuildNumber } }
-
-        Mock Invoke-SPDSCCommand { 
-            return Invoke-Command -ScriptBlock $ScriptBlock -ArgumentList $Arguments -NoNewScope
+        Mock -CommandName Start-SPServiceInstance -MockWith { }
+        Mock -CommandName Stop-SPServiceInstance -MockWith { $Global:ServiceStatus = "Disabled" }
+        Mock -CommandName Restart-Service -MockWith { }
+        Mock -CommandName Add-SPDscUserToLocalAdmin -MockWith { }
+        Mock -CommandName Test-SPDscUserIsLocalAdmin -MockWith {
+            return $false
         }
-        
-        Remove-Module -Name "Microsoft.SharePoint.PowerShell" -Force -ErrorAction SilentlyContinue
-        Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue 
-        
-        Mock Get-SPFarm { return @{
-            DefaultServiceAccount = @{ Name = $testParams.FarmAccount.Username }
-        }}
-        Mock Start-SPServiceInstance { }
-        Mock Stop-SPServiceInstance { }
-        Mock Restart-Service { }
-        Mock Add-SPDSCUserToLocalAdmin { } 
-        Mock Test-SPDSCUserIsLocalAdmin { return $false }
-        Mock Remove-SPDSCUserToLocalAdmin { }
-        Mock New-PSSession { return $null } -ModuleName "SharePointDsc.Util"
-        Mock Start-Sleep { }
-        Mock Get-SPServiceApplication { 
+        Mock -CommandName Remove-SPDscUserToLocalAdmin -MockWith { }
+        Mock -CommandName Start-Sleep -MockWith { }
+        Mock -CommandName Get-SPServiceApplication -MockWith {
             return @(
-                New-Object Object |            
-                    Add-Member NoteProperty TypeName "User Profile Service Application" -PassThru |
-                    Add-Member NoteProperty DisplayName $testParams.Name -PassThru | 
-                    Add-Member NoteProperty ApplicationPool @{ Name = $testParams.ApplicationPool } -PassThru |             
-                    Add-Member ScriptMethod GetType {
-                        New-Object Object |
-                            Add-Member ScriptMethod GetProperties {
-                                param($x)
-                                return @(
-                                    (New-Object Object |
-                                        Add-Member NoteProperty Name "SocialDatabase" -PassThru |
-                                        Add-Member ScriptMethod GetValue {
-                                            param($x)
-                                            return @{
-                                                Name = "SP_SocialDB"
-                                                Server = @{ Name = "SQL.domain.local" }
-                                            }
-                                        } -PassThru
-                                    ),
-                                    (New-Object Object |
-                                        Add-Member NoteProperty Name "ProfileDatabase" -PassThru |
-                                        Add-Member ScriptMethod GetValue {
-                                            return @{
-                                                Name = "SP_ProfileDB"
-                                                Server = @{ Name = "SQL.domain.local" }
-                                            }
-                                        } -PassThru
-                                    ),
-                                    (New-Object Object |
-                                        Add-Member NoteProperty Name "SynchronizationDatabase" -PassThru |
-                                        Add-Member ScriptMethod GetValue {
-                                            return @{
-                                                Name = "SP_ProfileSyncDB"
-                                                Server = @{ Name = "SQL.domain.local" }
-                                            }
-                                        } -PassThru
-                                    )
-                                )
-                            } -PassThru
-                } -PassThru -Force 
+                New-Object -TypeName "Object" |
+                    Add-Member -MemberType NoteProperty `
+                               -Name TypeName `
+                               -Value "User Profile Service Application" `
+                               -PassThru |
+                    Add-Member -MemberType NoteProperty `
+                               -Name DisplayName `
+                               -Value "User Profile Service Service App" `
+                               -PassThru |
+                    Add-Member -MemberType NoteProperty `
+                               -Name ApplicationPool `
+                               -Value @{
+                                   Name = "Service Pool"
+                                } -PassThru |
+                    Add-Member -MemberType ScriptMethod `
+                               -Name GetType `
+                               -Value {
+                                   New-Object -TypeName "Object" |
+                                        Add-Member -MemberType NoteProperty `
+                                                   -Name FullName `
+                                                   -Value $getTypeFullName `
+                                                   -PassThru |
+                                        Add-Member -MemberType ScriptMethod `
+                                                   -Name GetProperties `
+                                                   -Value {
+                                                        param($x)
+                                                        return @(
+                                                            (New-Object -TypeName "Object" |
+                                                                Add-Member -MemberType NoteProperty `
+                                                                           -Name Name `
+                                                                           -Value "SocialDatabase" `
+                                                                           -PassThru |
+                                                                Add-Member -MemberType ScriptMethod `
+                                                                           -Name GetValue `
+                                                                           -Value {
+                                                                                param($x)
+                                                                                return @{
+                                                                                    Name = "SP_SocialDB"
+                                                                                    Server = @{
+                                                                                        Name = "SQL.domain.local"
+                                                                                    }
+                                                                                }
+                                                                            } -PassThru
+                                                            ),
+                                                            (New-Object -TypeName "Object" |
+                                                                Add-Member -MemberType NoteProperty `
+                                                                           -Name Name `
+                                                                           -Value "ProfileDatabase" `
+                                                                           -PassThru |
+                                                                Add-Member -MemberType ScriptMethod `
+                                                                           -Name GetValue `
+                                                                           -Value {
+                                                                                return @{
+                                                                                    Name = "SP_ProfileDB"
+                                                                                    Server = @{
+                                                                                        Name = "SQL.domain.local"
+                                                                                    }
+                                                                                }
+                                                                            } -PassThru
+                                                            ),
+                                                            (New-Object -TypeName "Object" |
+                                                                Add-Member -MemberType NoteProperty `
+                                                                           -Name Name `
+                                                                           -Value "SynchronizationDatabase" `
+                                                                           -PassThru |
+                                                                Add-Member -MemberType ScriptMethod `
+                                                                           -Name GetValue `
+                                                                           -Value {
+                                                                                return @{
+                                                                                    Name = "SP_ProfileSyncDB"
+                                                                                    Server = @{
+                                                                                        Name = "SQL.domain.local"
+                                                                                    }
+                                                                                }
+                                                                            } -PassThru
+                                                            )
+                                                        )
+                                                } -PassThru
+                                        } -PassThru -Force
             )
         }
 
-        switch ($majorBuildNumber) {
+        # Test contexts
+        switch ($Global:SPDscHelper.CurrentStubBuildNumber.Major)
+        {
             15 {
-                Context "User profile sync service is not found locally" {
-                    Mock Get-SPServiceInstance { return $null }
+                Context -Name "When PSDSCRunAsCredential is not the Farm Account" -Fixture {
+                    $testParams = @{
+                        UserProfileServiceAppName = "User Profile Sync Service App"
+                        FarmAccount = $mockCredential
+                        Ensure = "Present"
+                    }
 
-                    It "returns absent from the get method" {
-                        $Global:SPDSCUPACheck = $false
+                    Mock -CommandName Get-SPDscFarmAccount -MockWith {
+                        return $mockCredential
+                    }
+
+                    Mock -CommandName Get-SPServiceInstance -MockWith {
+                        return $null
+                    }
+
+                    It "Should throw exception in the get method" {
+                        { Get-TargetResource @testParams } | Should throw "Specified PSDSCRunAsCredential "
+                    }
+
+                    It "Should throw exception in the test method" {
+                        { Test-TargetResource @testParams } | Should throw "Specified PSDSCRunAsCredential "
+                    }
+
+                    It "Should throw exception in the set method" {
+                        { Set-TargetResource @testParams } | Should throw "Specified PSDSCRunAsCredential "
+                    }
+                }
+
+                Context -Name "When InstallAccount is the Farm Account" -Fixture {
+                    $testParams = @{
+                        UserProfileServiceAppName = "User Profile Service Service App"
+                        FarmAccount = $mockCredential
+                        Ensure = "Present"
+                        InstallAccount = $mockFarmCredential
+                    }
+
+                    Mock -CommandName Get-SPServiceInstance -MockWith {
+                        return $null
+                    }
+
+                    It "Should throw exception in the get method" {
+                        { Get-TargetResource @testParams } | Should throw "Specified InstallAccount "
+                    }
+
+                    It "Should throw exception in the test method" {
+                        { Test-TargetResource @testParams } | Should throw "Specified InstallAccount "
+                    }
+
+                    It "Should throw exception in the set method" {
+                        { Set-TargetResource @testParams } | Should throw "Specified InstallAccount "
+                    }
+                }
+
+                Context -Name "User profile sync service is not found locally" -Fixture {
+                    $testParams = @{
+                        UserProfileServiceAppName = "User Profile Service Service App"
+                        FarmAccount = $mockCredential
+                        Ensure = "Present"
+                    }
+
+                    Mock -CommandName Get-SPServiceInstance -MockWith {
+                        return $null
+                    }
+
+                    It "Should return absent from the get method" {
+                        $Global:SPDscUPACheck = $false
                         (Get-TargetResource @testParams).Ensure | Should Be "Absent"
                     }
                 }
 
-                Context "User profile sync service is not running and should be" {
-                    Mock Get-SPServiceInstance { if ($Global:SPDSCUPACheck -eq $false) {
-                            $Global:SPDSCUPACheck = $true
-                            return @( @{ 
-                                Status = "Disabled"
-                                ID = [Guid]::Parse("21946987-5163-418f-b781-2beb83aa191f")
-                                UserProfileApplicationGuid = [Guid]::Empty
-                                TypeName = "User Profile Synchronization Service" 
-                            }) 
-                        } else {
-                            return @( @{ 
-                                Status = "Online"
-                                ID = [Guid]::Parse("21946987-5163-418f-b781-2beb83aa191f")
-                                UserProfileApplicationGuid = [Guid]::NewGuid()
-                                TypeName = "User Profile Synchronization Service" 
-                            })
-                        }
+                Context -Name "User profile sync service is not running and should be" -Fixture {
+                    $testParams = @{
+                        UserProfileServiceAppName = "User Profile Service Service App"
+                        FarmAccount = $mockCredential
+                        Ensure = "Present"
                     }
-                    Mock Get-SPServiceApplication { return @(
-                        New-Object Object |            
-                            Add-Member NoteProperty ID ([Guid]::Parse("21946987-5163-418f-b781-2beb83aa191f")) -PassThru |
-                            Add-Member NoteProperty TypeName "User Profile Service Application" -PassThru |
-                            Add-Member ScriptMethod SetSynchronizationMachine {
-                                param($computerName, $syncServiceID, $FarmUserName, $FarmPassword)
-                            } -PassThru      
-                    )} 
 
-                    It "returns absent from the get method" {
-                        $Global:SPDSCUPACheck = $false
+                    Mock -CommandName Get-SPServiceInstance -MockWith {
+                        $spSvcInstance = [pscustomobject]@{
+                            ID = [Guid]::Parse("21946987-5163-418f-b781-2beb83aa191f")
+                            TypeName = "User Profile Synchronization Service"
+                        }
+                        $spSvcInstance = $spSvcInstance | Add-Member ScriptMethod GetType {
+                            return @{ Name = "ProfileSynchronizationServiceInstance" }
+                        } -PassThru -Force
+                        if ($Global:SPDscUPACheck -eq $false)
+                        {
+                            $Global:SPDscUPACheck = $true
+                            $spSvcInstance = $spSvcInstance | Add-Member NoteProperty Status "Disabled" -PassThru
+                            $spSvcInstance = $spSvcInstance | Add-Member NoteProperty UserProfileApplicationGuid [Guid]::Empty -PassThru
+                        }
+                        else
+                        {
+                            $spSvcInstance = $spSvcInstance | Add-Member NoteProperty Status "Online" -PassThru
+                            $spSvcInstance = $spSvcInstance | Add-Member NoteProperty UserProfileApplicationGuid ([Guid]::NewGuid()) -PassThru
+                        }
+                        return $spSvcInstance
+                    }
+
+                    Mock -CommandName Get-SPServiceApplication -MockWith {
+                        return @(
+                            New-Object -TypeName "Object" |
+                                Add-Member -MemberType NoteProperty `
+                                           -Name ID `
+                                           -Value ([Guid]::Parse("21946987-5163-418f-b781-2beb83aa191f")) `
+                                           -PassThru |
+                                Add-Member -MemberType ScriptMethod `
+                                           -Name GetType `
+                                           -Value {
+                                   New-Object -TypeName "Object" |
+                                        Add-Member -MemberType NoteProperty `
+                                                   -Name FullName `
+                                                   -Value $getTypeFullName `
+                                                   -PassThru
+                                           } `
+                                           -PassThru -Force |
+                                Add-Member -MemberType ScriptMethod `
+                                           -Name SetSynchronizationMachine `
+                                           -Value {
+                                                param(
+                                                    $computerName,
+                                                    $syncServiceID,
+                                                    $FarmUserName,
+                                                    $FarmPassword
+                                                )
+                                            } -PassThru
+                        )
+                    }
+
+                    It "Should return absent from the get method" {
+                        $Global:SPDscUPACheck = $false
                         (Get-TargetResource @testParams).Ensure | Should Be "Absent"
                     }
 
-                    It "returns false from the test method" {
-                        $Global:SPDSCUPACheck = $false
+                    It "Should return false from the test method" {
+                        $Global:SPDscUPACheck = $false
                         Test-TargetResource @testParams | Should Be $false
                     }
 
-                    It "calls the start service cmdlet from the set method" {
-                        $Global:SPDSCUPACheck = $false
-                        Set-TargetResource @testParams 
+                    It "Should call the start service cmdlet from the set method" {
+                        $Global:SPDscUPACheck = $false
+                        Set-TargetResource @testParams
 
                         Assert-MockCalled Start-SPServiceInstance
                     }
 
-                    Mock Get-SPFarm { return @{
-                        DefaultServiceAccount = @{ Name = "WRONG\account" }
-                    }}
-
-                    It "returns values from the get method where the farm account doesn't match" {
-                        Get-TargetResource @testParams | Should Not BeNullOrEmpty
+                    $Global:SPDscUPACheck = $false
+                    Mock -CommandName Get-SPServiceApplication -MockWith {
+                        return $null
                     }
 
-                    $Global:SPDSCUPACheck = $false
-                    Mock Get-SPServiceApplication { return $null } 
-                    It "throws in the set method if the user profile service app can't be found" {
+                    It "Should throw in the set method if the user profile service app can't be found" {
                         { Set-TargetResource @testParams } | Should Throw
                     }
                 }
 
-                Context "User profile sync service is running and should be" {
-                    Mock Get-SPServiceInstance { return @( @{ 
-                                Status = "Online"
-                                ID = [Guid]::Parse("21946987-5163-418f-b781-2beb83aa191f")
-                                UserProfileApplicationGuid = [Guid]::NewGuid()
-                                TypeName = "User Profile Synchronization Service" 
-                            })
-                    } 
-        
-                    It "returns present from the get method" {
-                        (Get-TargetResource @testParams).Ensure | Should Be "Present"
+                Context -Name "User profile sync service is running and should be" -Fixture {
+                    $testParams = @{
+                        UserProfileServiceAppName = "User Profile Service Service App"
+                        FarmAccount = $mockCredential
+                        Ensure = "Present"
                     }
 
-                    It "returns true from the test method" {
-                        Test-TargetResource @testParams | Should Be $true
-                    }
-                }
-
-                $testParams.Ensure = "Absent"
-
-                Context "User profile sync service is running and shouldn't be" {
-                    Mock Get-SPServiceInstance { if ($Global:SPDSCUPACheck -eq $false) {
-                            $Global:SPDSCUPACheck = $true
-                            return @( @{ 
-                                Status = "Online"
-                                ID = [Guid]::Parse("21946987-5163-418f-b781-2beb83aa191f")
-                                UserProfileApplicationGuid = [Guid]::NewGuid()
-                                TypeName = "User Profile Synchronization Service" 
-                            }) 
-                        } else {
-                            return @( @{ 
-                                Status = "Disabled"
-                                ID = [Guid]::Empty
-                                UserProfileApplicationGuid = [Guid]::Empty
-                                TypeName = "User Profile Synchronization Service" 
-                            })
+                    Mock -CommandName Get-SPServiceInstance -MockWith {
+                        $spSvcInstance = [pscustomobject]@{
+                            ID = [Guid]::Parse("21946987-5163-418f-b781-2beb83aa191f")
+                            TypeName = "User Profile Synchronization Service"
                         }
-                    } 
+                        $spSvcInstance = $spSvcInstance | Add-Member ScriptMethod GetType {
+                            return @{ Name = "ProfileSynchronizationServiceInstance" }
+                        } -PassThru -Force
+                        $spSvcInstance = $spSvcInstance | Add-Member NoteProperty Status "Online" -PassThru
+                        $spSvcInstance = $spSvcInstance | Add-Member NoteProperty UserProfileApplicationGuid ([Guid]::NewGuid()) -PassThru
+                        return $spSvcInstance
+                    }
 
-                    It "returns present from the get method" {
-                        $Global:SPDSCUPACheck = $false
+                    It "Should return present from the get method" {
                         (Get-TargetResource @testParams).Ensure | Should Be "Present"
                     }
 
-                    It "returns false from the test method" {
-                        $Global:SPDSCUPACheck = $false
+                    It "Should return true from the test method" {
+                        Test-TargetResource @testParams | Should Be $true
+                    }
+                }
+
+                Context -Name "User profile sync service is running and shouldn't be" -Fixture {
+                    $testParams = @{
+                        UserProfileServiceAppName = "User Profile Service Service App"
+                        FarmAccount = $mockCredential
+                        Ensure = "Absent"
+                    }
+
+                    Mock -CommandName Get-SPServiceInstance -MockWith {
+                        $spSvcInstance = [pscustomobject]@{
+                            ID = [Guid]::Parse("21946987-5163-418f-b781-2beb83aa191f")
+                            TypeName = "User Profile Synchronization Service"
+                        }
+                        $spSvcInstance = $spSvcInstance | Add-Member ScriptMethod GetType {
+                            return @{ Name = "ProfileSynchronizationServiceInstance" }
+                        } -PassThru -Force
+                        if ($Global:SPDscUPACheck -eq $false)
+                        {
+                            $Global:SPDscUPACheck = $true
+                            $spSvcInstance = $spSvcInstance | Add-Member NoteProperty Status "Online" -PassThru
+                            $spSvcInstance = $spSvcInstance | Add-Member NoteProperty UserProfileApplicationGuid ([Guid]::NewGuid()) -PassThru
+                        }
+                        else
+                        {
+                            $spSvcInstance = $spSvcInstance | Add-Member NoteProperty Status "Disabled" -PassThru
+                            $spSvcInstance = $spSvcInstance | Add-Member NoteProperty UserProfileApplicationGuid [Guid]::Empty -PassThru
+                        }
+                        return $spSvcInstance
+                    }
+
+                    It "Should return present from the get method" {
+                        $Global:SPDscUPACheck = $false
+                        (Get-TargetResource @testParams).Ensure | Should Be "Present"
+                    }
+
+                    It "Should return false from the test method" {
+                        $Global:SPDscUPACheck = $false
                         Test-TargetResource @testParams | Should Be $false
                     }
 
-                    It "calls the stop service cmdlet from the set method" {
-                        $Global:SPDSCUPACheck = $false
-                        Set-TargetResource @testParams 
+                    It "Should call the stop service cmdlet from the set method" {
+                        $Global:SPDscUPACheck = $false
+                        Set-TargetResource @testParams
 
                         Assert-MockCalled Stop-SPServiceInstance
                     }
                 }
 
-                Context "User profile sync service is not running and shouldn't be" {
-                    Mock Get-SPServiceInstance { return @( @{ 
-                            Status = "Disabled"
-                            ID = [Guid]::Parse("21946987-5163-418f-b781-2beb83aa191f")
-                            UserProfileApplicationGuid = [Guid]::Empty
-                            TypeName = "User Profile Synchronization Service" 
-                        })
-                    } 
+                Context -Name "User profile sync service is not running and shouldn't be" -Fixture {
+                    $testParams = @{
+                        UserProfileServiceAppName = "User Profile Service Service App"
+                        FarmAccount = $mockCredential
+                        Ensure = "Absent"
+                    }
 
-                    It "returns absent from the get method" {
+                    Mock -CommandName Get-SPServiceInstance -MockWith {
+                        $spSvcInstance = [pscustomobject]@{
+                            ID = [Guid]::Parse("21946987-5163-418f-b781-2beb83aa191f")
+                            TypeName = "User Profile Synchronization Service"
+                        }
+                        $spSvcInstance = $spSvcInstance | Add-Member ScriptMethod GetType {
+                            return @{ Name = "ProfileSynchronizationServiceInstance" }
+                        } -PassThru -Force
+                        $spSvcInstance = $spSvcInstance | Add-Member NoteProperty Status "Disabled" -PassThru
+                        $spSvcInstance = $spSvcInstance | Add-Member NoteProperty UserProfileApplicationGuid [Guid]::Empty -PassThru
+                        return $spSvcInstance
+                    }
+
+                    It "Should return absent from the get method" {
                         (Get-TargetResource @testParams).Ensure | Should Be "Absent"
                     }
 
-                    It "returns true from the test method" {
+                    It "Should return true from the test method" {
                         Test-TargetResource @testParams | Should Be $true
                     }
                 }
 
-
-
-                $testParams.Ensure = "Present"
-                $testParams.Add("RunOnlyWhenWriteable", $true)
-                Context "User profile sync service is not running and shouldn't be because the database is read only" {
-                    Mock Get-SPServiceInstance { return @( @{ 
-                            Status = "Disabled"
-                            ID = [Guid]::Parse("21946987-5163-418f-b781-2beb83aa191f")
-                            UserProfileApplicationGuid = [Guid]::Empty
-                            TypeName = "User Profile Synchronization Service" 
-                        })
+                Context -Name "User profile sync service is not running and shouldn't be because the database is read only" -Fixture {
+                    $testParams = @{
+                        UserProfileServiceAppName = "User Profile Service Service App"
+                        FarmAccount = $mockCredential
+                        Ensure = "Present"
+                        RunOnlyWhenWriteable = $true
                     }
 
-                    Mock Get-SPDatabase {
+                    Mock -CommandName Get-SPServiceInstance -MockWith {
+                        $spSvcInstance = [pscustomobject]@{
+                            ID = [Guid]::Parse("21946987-5163-418f-b781-2beb83aa191f")
+                            TypeName = "User Profile Synchronization Service"
+                        }
+                        $spSvcInstance = $spSvcInstance | Add-Member ScriptMethod GetType {
+                            return @{ Name = "ProfileSynchronizationServiceInstance" }
+                        } -PassThru -Force
+                        $spSvcInstance = $spSvcInstance | Add-Member NoteProperty Status "Disabled" -PassThru
+                        $spSvcInstance = $spSvcInstance | Add-Member NoteProperty UserProfileApplicationGuid ([Guid]::NewGuid()) -PassThru
+                        return $spSvcInstance
+                    }
+
+                    Mock -CommandName Get-SPDatabase -MockWith {
                         return @(
                             @{
                                 Name = "SP_ProfileDB"
                                 IsReadyOnly = $true
                             }
                         )
-                    } 
+                    }
 
-                    It "returns absent from the get method" {
+                    It "Should return absent from the get method" {
                         (Get-TargetResource @testParams).Ensure | Should Be "Absent"
                     }
 
-                    It "returns true from the test method" {
+                    It "Should return true from the test method" {
                         Test-TargetResource @testParams | Should Be $true
                     }
                 }
 
-                Context "User profile sync service is running and shouldn't be because the database is read only" {
-                    Mock Get-SPServiceInstance { return @( @{ 
-                                Status = "Online"
-                                ID = [Guid]::Parse("21946987-5163-418f-b781-2beb83aa191f")
-                                UserProfileApplicationGuid = [Guid]::NewGuid()
-                                TypeName = "User Profile Synchronization Service" 
-                            })
-                    } 
+                Context -Name "User profile sync service is running and shouldn't be because the database is read only" -Fixture {
+                    $testParams = @{
+                        UserProfileServiceAppName = "User Profile Service Service App"
+                        FarmAccount = $mockCredential
+                        Ensure = "Present"
+                        RunOnlyWhenWriteable = $true
+                    }
+                    $Global:ServiceStatus = "Online"
 
-                    Mock Get-SPDatabase {
+                    Mock -CommandName Get-SPServiceInstance -MockWith {
+                        $spSvcInstance = [pscustomobject]@{
+                            ID = [Guid]::Parse("21946987-5163-418f-b781-2beb83aa191f")
+                            TypeName = "User Profile Synchronization Service"
+                        }
+                        $spSvcInstance = $spSvcInstance | Add-Member ScriptMethod GetType {
+                            return @{ Name = "ProfileSynchronizationServiceInstance" }
+                        } -PassThru -Force
+                        $spSvcInstance | Add-Member ScriptProperty Status {
+                            return $Global:ServiceStatus
+                        }
+                        $spSvcInstance = $spSvcInstance | Add-Member NoteProperty UserProfileApplicationGuid ([Guid]::NewGuid()) -PassThru
+                        return $spSvcInstance
+                    }
+
+                    Mock -CommandName Get-SPDatabase -MockWith {
                         return @(
                             @{
                                 Name = "SP_ProfileDB"
                                 IsReadyOnly = $true
                             }
                         )
-                    } 
+                    }
 
-                    It "returns absent from the get method" {
+                    It "Should return present from the get method" {
                         (Get-TargetResource @testParams).Ensure | Should Be "Present"
                     }
 
-                    It "returns true from the test method" {
+                    It "Should return false from the test method" {
                         Test-TargetResource @testParams | Should Be $false
                     }
 
-                    It "calls the stop service cmdlet from the set method" {
-                        $Global:SPDSCUPACheck = $false
-                        Set-TargetResource @testParams 
+                    It "Should call the stop service cmdlet from the set method" {
+                        $Global:SPDscUPACheck = $false
+                        Set-TargetResource @testParams
 
                         Assert-MockCalled Stop-SPServiceInstance
+                    }
+                }
+                Context -Name "User profile sync service is not found" -Fixture {
+                    $testParams = @{
+                        UserProfileServiceAppName = "User Profile Service Service App"
+                        FarmAccount = $mockCredential
+                        Ensure = "Present"
+                        RunOnlyWhenWriteable = $true
+                    }
+
+                    Mock -CommandName Get-SPServiceInstance -MockWith {
+                        $spSvcInstance = [pscustomobject]@{
+                            ID = [Guid]::Parse("21946987-5163-418f-b781-2beb83aa191f")
+                        }
+                        $spSvcInstance = $spSvcInstance | Add-Member ScriptMethod GetType {
+                            return @{ Name = "FakeServiceInstance" }
+                        } -PassThru -Force
+                        return $spSvcInstance
+                    }
+
+                    It "Should return present from the get method" {
+                        (Get-TargetResource @testParams).Ensure | Should Be "Absent"
+                    }
+
+                    It "Should throw an error from the set method" {
+                        { Set-TargetResource @testParams } | Should throw
+                    }
+                }
+
+                Context -Name "Can't get the Farm Account" -Fixture{
+                    $testParams = @{
+                        UserProfileServiceAppName = "User Profile Service Service App"
+                        FarmAccount = $mockCredential
+                        Ensure = "Present"
+                        RunOnlyWhenWriteable = $true
+                    }
+
+                    Mock -CommandName Get-SPDscFarmAccount -MockWith{
+                        return $null
+                    }
+
+                    It "Should throw an error from the get method" {
+                        { (Get-TargetResource @testParams).Ensure } | Should throw "Unable to retrieve the Farm Account. Check if the farm exists."
+                    }
+
+                    It "Should throw an error from the set method" {
+                        { Set-TargetResource @testParams } | Should throw "Unable to retrieve the Farm Account. Check if the farm exists."
                     }
                 }
             }
             16 {
-                Context "All methods throw exceptions as user profile sync doesn't exist in 2016" {
-                    It "throws on the get method" {
+                Context -Name "All methods throw exceptions as user profile sync doesn't exist in 2016" -Fixture {
+                    $testParams = @{
+                        UserProfileServiceAppName = "User Profile Service Service App"
+                        FarmAccount = $mockCredential
+                    }
+
+                    It "Should throw on the get method" {
                         { Get-TargetResource @testParams } | Should Throw
                     }
 
-                    It "throws on the test method" {
+                    It "Should throw on the test method" {
                         { Test-TargetResource @testParams } | Should Throw
                     }
 
-                    It "throws on the set method" {
+                    It "Should throw on the set method" {
                         { Set-TargetResource @testParams } | Should Throw
                     }
                 }
             }
         }
-        
-
-
-        
-
-        
-    }    
+    }
 }
+
+Invoke-Command -ScriptBlock $Global:SPDscHelper.CleanupScript -NoNewScope

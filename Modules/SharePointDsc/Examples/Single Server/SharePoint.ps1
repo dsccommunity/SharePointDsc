@@ -12,24 +12,26 @@ Configuration Example
     Import-DscResource -ModuleName SharePointDsc
 
     node "localhost"
-    {        
+    {
         #**********************************************************
         # Install Binaries
         #
         # This section installs SharePoint and its Prerequisites
         #**********************************************************
-        
+
         SPInstallPrereqs InstallPrereqs {
+            IsSingleInstance  = "Yes"
             Ensure            = "Present"
             InstallerPath     = "C:\binaries\prerequisiteinstaller.exe"
             OnlineMode        = $true
         }
 
         SPInstall InstallSharePoint {
-            Ensure = "Present"
-            BinaryDir = "C:\binaries\"
-            ProductKey = "XXXXX-XXXXX-XXXXX-XXXXX-XXXXX"
-            DependsOn = "[SPInstallPrereqs]InstallPrereqs"
+            IsSingleInstance  = "Yes"
+            Ensure            = "Present"
+            BinaryDir         = "C:\binaries\"
+            ProductKey        = "XXXXX-XXXXX-XXXXX-XXXXX-XXXXX"
+            DependsOn         = "[SPInstallPrereqs]InstallPrereqs"
         }
 
         #**********************************************************
@@ -39,14 +41,17 @@ Configuration Example
         # provisions generic services and components used by the
         # whole farm
         #**********************************************************
-        SPCreateFarm CreateSPFarm
+        SPFarm CreateSPFarm
         {
+            IsSingleInstance         = "Yes"
+            Ensure                   = "Present"
             DatabaseServer           = "sql.contoso.com"
             FarmConfigDatabaseName   = "SP_Config"
             Passphrase               = $Passphrase
             FarmAccount              = $FarmAccount
             PsDscRunAsCredential     = $SPSetupAccount
             AdminContentDatabaseName = "SP_AdminContent"
+            RunCentralAdmin          = $true
             DependsOn                = "[SPInstall]InstallSharePoint"
         }
         SPManagedAccount ServicePoolManagedAccount
@@ -54,17 +59,18 @@ Configuration Example
             AccountName          = $ServicePoolManagedAccount.UserName
             Account              = $ServicePoolManagedAccount
             PsDscRunAsCredential = $SPSetupAccount
-            DependsOn            = "[SPCreateFarm]CreateSPFarm"
+            DependsOn            = "[SPFarm]CreateSPFarm"
         }
         SPManagedAccount WebPoolManagedAccount
         {
             AccountName          = $WebPoolManagedAccount.UserName
             Account              = $WebPoolManagedAccount
             PsDscRunAsCredential = $SPSetupAccount
-            DependsOn            = "[SPCreateFarm]CreateSPFarm"
+            DependsOn            = "[SPFarm]CreateSPFarm"
         }
         SPDiagnosticLoggingSettings ApplyDiagnosticLogSettings
         {
+            IsSingleInstance                            = "Yes"
             PsDscRunAsCredential                        = $SPSetupAccount
             LogPath                                     = "C:\ULS"
             LogSpaceInGB                                = 5
@@ -84,9 +90,9 @@ Configuration Example
             ScriptErrorReportingDelay                   = 30
             ScriptErrorReportingEnabled                 = $true
             ScriptErrorReportingRequireAuth             = $true
-            DependsOn                                   = "[SPCreateFarm]CreateSPFarm"
+            DependsOn                                   = "[SPFarm]CreateSPFarm"
         }
-        SPUsageApplication UsageApplication 
+        SPUsageApplication UsageApplication
         {
             Name                  = "Usage Service Application"
             DatabaseName          = "SP_Usage"
@@ -94,14 +100,14 @@ Configuration Example
             UsageLogLocation      = "C:\UsageLogs"
             UsageLogMaxFileSizeKB = 1024
             PsDscRunAsCredential  = $SPSetupAccount
-            DependsOn             = "[SPCreateFarm]CreateSPFarm"
+            DependsOn             = "[SPFarm]CreateSPFarm"
         }
         SPStateServiceApp StateServiceApp
         {
             Name                 = "State Service Application"
             DatabaseName         = "SP_State"
             PsDscRunAsCredential = $SPSetupAccount
-            DependsOn            = "[SPCreateFarm]CreateSPFarm"
+            DependsOn            = "[SPFarm]CreateSPFarm"
         }
         SPDistributedCacheService EnableDistributedCache
         {
@@ -111,13 +117,13 @@ Configuration Example
             ServiceAccount       = $ServicePoolManagedAccount.UserName
             PsDscRunAsCredential = $SPSetupAccount
             CreateFirewallRules  = $true
-            DependsOn            = @('[SPCreateFarm]CreateSPFarm','[SPManagedAccount]ServicePoolManagedAccount')
+            DependsOn            = @('[SPFarm]CreateSPFarm','[SPManagedAccount]ServicePoolManagedAccount')
         }
 
         #**********************************************************
         # Web applications
         #
-        # This section creates the web applications in the 
+        # This section creates the web applications in the
         # SharePoint farm, as well as managed paths and other web
         # application settings
         #**********************************************************
@@ -128,15 +134,14 @@ Configuration Example
             ApplicationPool        = "SharePoint Sites"
             ApplicationPoolAccount = $WebPoolManagedAccount.UserName
             AllowAnonymous         = $false
-            AuthenticationMethod   = "NTLM"
             DatabaseName           = "SP_Content"
-            Url                    = "http://sites.contoso.com"
+            WebAppUrl              = "http://sites.contoso.com"
             HostHeader             = "sites.contoso.com"
             Port                   = 80
             PsDscRunAsCredential   = $SPSetupAccount
             DependsOn              = "[SPManagedAccount]WebPoolManagedAccount"
         }
-        
+
         SPCacheAccounts WebAppCacheAccounts
         {
             WebAppUrl              = "http://sites.contoso.com"
@@ -165,45 +170,45 @@ Configuration Example
         #**********************************************************
 
         SPServiceInstance ClaimsToWindowsTokenServiceInstance
-        {  
+        {
             Name                 = "Claims to Windows Token Service"
             Ensure               = "Present"
             PsDscRunAsCredential = $SPSetupAccount
-            DependsOn            = "[SPCreateFarm]CreateSPFarm"
-        }   
+            DependsOn            = "[SPFarm]CreateSPFarm"
+        }
 
         SPServiceInstance SecureStoreServiceInstance
-        {  
+        {
             Name                 = "Secure Store Service"
             Ensure               = "Present"
             PsDscRunAsCredential = $SPSetupAccount
-            DependsOn            = "[SPCreateFarm]CreateSPFarm"
+            DependsOn            = "[SPFarm]CreateSPFarm"
         }
-        
+
         SPServiceInstance ManagedMetadataServiceInstance
-        {  
+        {
             Name                 = "Managed Metadata Web Service"
             Ensure               = "Present"
             PsDscRunAsCredential = $SPSetupAccount
-            DependsOn            = "[SPCreateFarm]CreateSPFarm"
+            DependsOn            = "[SPFarm]CreateSPFarm"
         }
 
         SPServiceInstance BCSServiceInstance
-        {  
+        {
             Name                 = "Business Data Connectivity Service"
             Ensure               = "Present"
             PsDscRunAsCredential = $SPSetupAccount
-            DependsOn            = "[SPCreateFarm]CreateSPFarm"
+            DependsOn            = "[SPFarm]CreateSPFarm"
         }
-        
+
         SPServiceInstance SearchServiceInstance
-        {  
+        {
             Name                 = "SharePoint Server Search"
             Ensure               = "Present"
             PsDscRunAsCredential = $SPSetupAccount
-            DependsOn            = "[SPCreateFarm]CreateSPFarm"
+            DependsOn            = "[SPFarm]CreateSPFarm"
         }
-        
+
         #**********************************************************
         # Service applications
         #
@@ -217,7 +222,7 @@ Configuration Example
             Name                 = $serviceAppPoolName
             ServiceAccount       = $ServicePoolManagedAccount.UserName
             PsDscRunAsCredential = $SPSetupAccount
-            DependsOn            = "[SPCreateFarm]CreateSPFarm"
+            DependsOn            = "[SPFarm]CreateSPFarm"
         }
 
         SPSecureStoreServiceApp SecureStoreServiceApp
@@ -230,9 +235,9 @@ Configuration Example
             PsDscRunAsCredential  = $SPSetupAccount
             DependsOn             = "[SPServiceAppPool]MainServiceAppPool"
         }
-        
+
         SPManagedMetaDataServiceApp ManagedMetadataServiceApp
-        {  
+        {
             Name                 = "Managed Metadata Service Application"
             PsDscRunAsCredential = $SPSetupAccount
             ApplicationPool      = $serviceAppPoolName
@@ -250,14 +255,14 @@ Configuration Example
         }
 
         SPSearchServiceApp SearchServiceApp
-        {  
+        {
             Name                  = "Search Service Application"
             DatabaseName          = "SP_Search"
             ApplicationPool       = $serviceAppPoolName
             PsDscRunAsCredential  = $SPSetupAccount
             DependsOn             = "[SPServiceAppPool]MainServiceAppPool"
         }
-        
+
         #**********************************************************
         # Local configuration manager settings
         #

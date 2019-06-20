@@ -1,135 +1,159 @@
 [CmdletBinding()]
 param(
-    [string] $SharePointCmdletModule = (Join-Path $PSScriptRoot "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" -Resolve)
+    [Parameter()]
+    [string] 
+    $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
+                                         -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
+                                         -Resolve)
 )
 
-$ErrorActionPreference = 'stop'
-Set-StrictMode -Version latest
+Import-Module -Name (Join-Path -Path $PSScriptRoot `
+                                -ChildPath "..\UnitTestHelper.psm1" `
+                                -Resolve)
 
-$RepoRoot = (Resolve-Path $PSScriptRoot\..\..\..).Path
-$Global:CurrentSharePointStubModule = $SharePointCmdletModule
+$Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointCmdletModule `
+                                              -DscResource "SPManagedPath"
 
-$ModuleName = "MSFT_SPManagedPath"
-Import-Module (Join-Path $RepoRoot "Modules\SharePointDsc\DSCResources\$ModuleName\$ModuleName.psm1") -Force
-
-Describe "SPManagedPath - SharePoint Build $((Get-Item $SharePointCmdletModule).Directory.BaseName)" {
-    InModuleScope $ModuleName {
-        $testParams = @{
-            WebAppUrl   = "http://sites.sharepoint.com"
-            RelativeUrl = "teams"
-            Explicit    = $false
-            HostHeader  = $false
-            Ensure      = "Present"
-        }
-        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..\..).Path) "Modules\SharePointDsc")
+Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
+    InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
+        Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
         
-        Mock Invoke-SPDSCCommand { 
-            return Invoke-Command -ScriptBlock $ScriptBlock -ArgumentList $Arguments -NoNewScope
-        }
-        
-        Remove-Module -Name "Microsoft.SharePoint.PowerShell" -Force -ErrorAction SilentlyContinue
-        Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue 
-        Mock New-SPManagedPath { }
-        Mock Remove-SPManagedPath { }
+        # Mocks for all contexts   
+        Mock -CommandName New-SPManagedPath -MockWith { }
+        Mock -CommandName Remove-SPManagedPath -MockWith { }
 
-        Context "The managed path does not exist and should" {
-            Mock Get-SPManagedPath { return $null }
+        # Test contexts
+        Context -Name "The managed path does not exist and should" -Fixture {
+            $testParams = @{
+                WebAppUrl   = "http://sites.sharepoint.com"
+                RelativeUrl = "teams"
+                Explicit    = $false
+                HostHeader  = $false
+                Ensure      = "Present"
+            }
 
-            It "returns absent from the get method" {
+            Mock -CommandName Get-SPManagedPath -MockWith { 
+                return $null 
+            }
+
+            It "Should return absent from the get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Absent"
             }
 
-            It "returns false from the test method" {
+            It "Should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $false
             }
 
-            It "creates a host header path in the set method" {
+            It "Should create a host header path in the set method" {
                 Set-TargetResource @testParams
-
                 Assert-MockCalled New-SPManagedPath
             }
 
             $testParams.HostHeader = $true
-            It "creates a host header path in the set method" {
+            It "Should create a host header path in the set method" {
                 Set-TargetResource @testParams
-
                 Assert-MockCalled New-SPManagedPath
             }
-            $testParams.HostHeader = $false
-
-            $testParams.Add("InstallAccount", (New-Object System.Management.Automation.PSCredential ("username", (ConvertTo-SecureString "password" -AsPlainText -Force))))
-            It "creates a host header path in the set method where InstallAccount is used" {
-                Set-TargetResource @testParams
-
-                Assert-MockCalled New-SPManagedPath
-            }
-            $testParams.Remove("InstallAccount")
         }
 
-        Context "The path exists but is of the wrong type" {
-            Mock Get-SPManagedPath { return @{
-                Name = $testParams.RelativeUrl
-                Type = "ExplicitInclusion"
-            } }
+        Context -Name "The path exists but is of the wrong type" -Fixture {
+            $testParams = @{
+                WebAppUrl   = "http://sites.sharepoint.com"
+                RelativeUrl = "teams"
+                Explicit    = $false
+                HostHeader  = $false
+                Ensure      = "Present"
+            }
+            
+            Mock -CommandName Get-SPManagedPath -MockWith { 
+                return @{
+                    Name = $testParams.RelativeUrl
+                    Type = "ExplicitInclusion"
+                } 
+            }
 
-            It "returns false from the test method" {
+            It "Should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $false
             }
         }
 
-        Context "The path exists and is the correct type" {
-            Mock Get-SPManagedPath { return @{
-                Name = $testParams.RelativeUrl
-                Type = "WildcardInclusion"
-            } }
+        Context -Name "The path exists and is the correct type" -Fixture {
+            $testParams = @{
+                WebAppUrl   = "http://sites.sharepoint.com"
+                RelativeUrl = "teams"
+                Explicit    = $false
+                HostHeader  = $false
+                Ensure      = "Present"
+            }
+            
+            Mock -CommandName Get-SPManagedPath -MockWith { 
+                return @{
+                    Name = $testParams.RelativeUrl
+                    Type = "WildcardInclusion"
+                } 
+            }
 
-            It "returns present from the get method" {
+            It "Should return present from the get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Present"
             }
 
-            It "returns true from the test method" {
+            It "Should return true from the test method" {
                 Test-TargetResource @testParams | Should Be $true
             }
         }
         
-        $testParams = @{
-            WebAppUrl   = "http://sites.sharepoint.com"
-            RelativeUrl = "teams"
-            Explicit    = $false
-            HostHeader  = $false
-            Ensure      = "Absent"
-        }
-        
-        Context "The managed path exists but shouldn't" {
-            Mock Get-SPManagedPath { return @{
-                Name = $testParams.RelativeUrl
-                Type = "WildcardInclusion"
-            } }
+        Context -Name "The managed path exists but shouldn't" -Fixture {
+            $testParams = @{
+                WebAppUrl   = "http://sites.sharepoint.com"
+                RelativeUrl = "teams"
+                Explicit    = $false
+                HostHeader  = $false
+                Ensure      = "Absent"
+            }
+
+            Mock -CommandName Get-SPManagedPath -MockWith { 
+                return @{
+                    Name = $testParams.RelativeUrl
+                    Type = "WildcardInclusion"
+                } 
+            }
             
-            It "should return present from the get method" {
+            It "Should return present from the get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Present"
             }
             
-            It "should return false from the test method" {
+            It "Should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $false
             }
             
-            It "should call the remove cmdlet from the set method" {
+            It "Should call the remove cmdlet from the set method" {
                 Set-TargetResource @testParams
                 Assert-MockCalled Remove-SPManagedPath
             }
         }
         
-        Context "The managed path doesn't exist and shouldn't" {
-            Mock Get-SPManagedPath { return $null }
+        Context -Name "The managed path doesn't exist and shouldn't" -Fixture {
+            $testParams = @{
+                WebAppUrl   = "http://sites.sharepoint.com"
+                RelativeUrl = "teams"
+                Explicit    = $false
+                HostHeader  = $false
+                Ensure      = "Absent"
+            }
             
-            It "should return absent from the set method" {
+            Mock -CommandName Get-SPManagedPath -MockWith { 
+                return $null 
+            }
+            
+            It "Should return absent from the set method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Absent"
             }
             
-            It "should return true from the test method" {
+            It "Should return true from the test method" {
                 Test-TargetResource @testParams | Should Be $true
             }
         }
-    }    
+    }
 }
+
+Invoke-Command -ScriptBlock $Global:SPDscHelper.CleanupScript -NoNewScope

@@ -4,39 +4,53 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [parameter(Mandatory = $true)]  [System.String] $WebAppUrl,
-        [parameter(Mandatory = $true)]  [System.String] $ServiceAppProxyGroup,
-        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
+        [Parameter(Mandatory = $true)]
+        [System.String]
+        $WebAppUrl,
+
+        [Parameter(Mandatory = $true)]
+        [System.String]
+        $ServiceAppProxyGroup,
+
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
+        $InstallAccount
     )
-    
+
     Write-Verbose -Message "Getting $WebAppUrl Service Proxy Group Association"
-    
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+
+    $result = Invoke-SPDscCommand -Credential $InstallAccount `
+                                  -Arguments $PSBoundParameters `
+                                  -ScriptBlock {
         $params = $args[0]
-            
+
         $WebApp = get-spwebapplication $params.WebAppUrl
-        if (!$WebApp) {
+        if (!$WebApp)
+        {
              return  @{
-                WebAppUrl = $null
+                WebAppUrl            = $null
                 ServiceAppProxyGroup = $null
                 InstallAccount       = $InstallAccount
-             } 
+             }
         }
-         
-         if ($WebApp.ServiceApplicationProxyGroup.friendlyname -eq "[default]") {
+
+         if ($WebApp.ServiceApplicationProxyGroup.friendlyname -eq "[default]")
+         {
              $ServiceAppProxyGroup = "Default"
-         } else {
+         }
+         else
+         {
              $ServiceAppProxyGroup = $WebApp.ServiceApplicationProxyGroup.name
          }
-         
+
          return @{
-             WebAppUrl = $params.WebAppUrl
+             WebAppUrl            = $params.WebAppUrl
              ServiceAppProxyGroup = $ServiceAppProxyGroup
              InstallAccount       = $InstallAccount
          }
     }
-    
-    return $result 
+
+    return $result
 }
 
 function Set-TargetResource
@@ -44,22 +58,33 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true)]  [System.String] $WebAppUrl,
-        [parameter(Mandatory = $true)]  [System.String] $ServiceAppProxyGroup,
-        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
+        [Parameter(Mandatory = $true)]
+        [System.String]
+        $WebAppUrl,
+
+        [Parameter(Mandatory = $true)]
+        [System.String]
+        $ServiceAppProxyGroup,
+
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
+        $InstallAccount
     )
-    
+
     Write-Verbose -Message "Setting $WebAppUrl Service Proxy Group Association"
-    
-    Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+
+    Invoke-SPDscCommand -Credential $InstallAccount `
+                        -Arguments $PSBoundParameters `
+                        -ScriptBlock {
         $params = $args[0]
-     
-        if ($params.ServiceAppProxyGroup -eq "Default") {
+
+        if ($params.ServiceAppProxyGroup -eq "Default")
+        {
                 $params.ServiceAppProxyGroup = "[default]"
         }
-        
-        Set-SPWebApplication $params.WebAppUrl -ServiceApplicationProxyGroup $params.ServiceAppProxyGroup
-        
+
+        Set-SPWebApplication -Identity $params.WebAppUrl `
+                             -ServiceApplicationProxyGroup $params.ServiceAppProxyGroup
     }
 }
 
@@ -69,20 +94,39 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [parameter(Mandatory = $true)]  [System.String] $WebAppUrl,
-        [parameter(Mandatory = $true)]  [System.String] $ServiceAppProxyGroup,
-        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
+        [Parameter(Mandatory = $true)]
+        [System.String]
+        $WebAppUrl,
+
+        [Parameter(Mandatory = $true)]
+        [System.String]
+        $ServiceAppProxyGroup,
+
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
+        $InstallAccount
     )
-    
+
     Write-Verbose -Message "Testing $WebAppUrl Service Proxy Group Association"
-    
+
     $CurrentValues = Get-TargetResource @PSBoundParameters
-    
-    if (($null -eq $CurrentValues.WebAppUrl) -or ($null -eq $CurrentValues.ServiceAppProxyGroup)) { return $false }
-    
-    if ($CurrentValues.ServiceAppProxyGroup -eq $ServiceAppProxyGroup) {
-        return $true 
-    } else {
-        return $false 
+
+    Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
+    Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
+
+    if (($null -eq $CurrentValues.WebAppUrl) -or ($null -eq $CurrentValues.ServiceAppProxyGroup))
+    {
+        return $false
+    }
+
+    if ($CurrentValues.ServiceAppProxyGroup -eq $ServiceAppProxyGroup)
+    {
+        return $true
+    }
+    else
+    {
+        return $false
     }
 }
+
+Export-ModuleMember -Function *-TargetResource

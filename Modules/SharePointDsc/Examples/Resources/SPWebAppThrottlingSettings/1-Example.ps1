@@ -3,7 +3,7 @@
     This example shows how to apply throttling settings to a specific web app
 #>
 
-    Configuration Example 
+    Configuration Example
     {
         param(
             [Parameter(Mandatory = $true)]
@@ -15,7 +15,7 @@
         node localhost {
             SPWebAppThrottlingSettings PrimaryWebAppThrottlingSettings
             {
-                Url                      = "http://exmaple.contoso.local"
+                WebAppUrl                = "http://example.contoso.local"
                 ListViewThreshold        = 5000
                 AllowObjectModelOverride = $false
                 HappyHourEnabled         = $true

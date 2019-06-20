@@ -1,84 +1,158 @@
 function Get-TargetResource
 {
     [CmdletBinding()]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSDSCUseIdenticalMandatoryParametersForDSC", "", Justification  =  "Temporary workaround for issue introduced in PSSA v1.18")]
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [parameter(Mandatory = $true)] [System.String]    $Name,
-        [parameter(Mandatory = $false)] [System.String[]] $Members,
-        [parameter(Mandatory = $false)] [System.String[]] $MembersToInclude,
-        [parameter(Mandatory = $false)] [System.String[]] $MembersToExclude,
-        [parameter(Mandatory = $false)] [Microsoft.Management.Infrastructure.CimInstance[]] $ContentDatabases,
-        [parameter(Mandatory = $false)] [System.Boolean]  $AllContentDatabases,
-        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
+        [Parameter(Mandatory = $true)]
+        [ValidateSet('Yes')]
+        [String]
+        $IsSingleInstance,
+
+        [Parameter()]
+        [System.String[]]
+        $Members,
+
+        [Parameter()]
+        [System.String[]]
+        $MembersToInclude,
+
+        [Parameter()]
+        [System.String[]]
+        $MembersToExclude,
+
+        [Parameter()]
+        [Microsoft.Management.Infrastructure.CimInstance[]]
+        $Databases,
+
+        [Parameter()]
+        [System.Boolean]
+        $AllDatabases,
+
+        [Parameter()]
+        [System.String[]]
+        $ExcludeDatabases,
+
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
+        $InstallAccount
     )
 
-    if ($Members -and (($MembersToInclude) -or ($MembersToExclude))) {
-        Write-Verbose -Verbose "Cannot use the Members parameter together with the MembersToInclude or MembersToExclude parameters"
-        return $null
+    Write-Verbose -Message "Getting Shell Admins config"
+
+    $nullreturn = @{
+        IsSingleInstance = "Yes"
+        Members          = $null
+        MembersToInclude = $null
+        MembersToExclude = $null
     }
 
-    if ($ContentDatabases) {
-        foreach ($contentDatabase in $ContentDatabases) {
-            if ($contentDatabase.Members -and (($contentDatabase.MembersToInclude) -or ($contentDatabase.MembersToExclude))) {
-                Write-Verbose -Verbose "ContentDatabases: Cannot use the Members parameter together with the MembersToInclude or MembersToExclude parameters"
-                return $null
+    if ($Members -and (($MembersToInclude) -or ($MembersToExclude)))
+    {
+        Write-Verbose -Message ("Cannot use the Members parameter together with the " + `
+                                "MembersToInclude or MembersToExclude parameters")
+        return $nullreturn
+    }
+
+    if ($Databases)
+    {
+        foreach ($database in $Databases)
+        {
+            if ($database.Members -and (($database.MembersToInclude) `
+                -or ($database.MembersToExclude)))
+            {
+                Write-Verbose -Message ("Databases: Cannot use the Members parameter " + `
+                                        "together with the MembersToInclude or " + `
+                                        "MembersToExclude parameters")
+                return $nullreturn
             }
 
-            if (!$contentDatabase.Members -and !$contentDatabase.MembersToInclude -and !$contentDatabase.MembersToExclude) {
-                Write-Verbose -Verbose "ContentDatabases: At least one of the following parameters must be specified: Members, MembersToInclude, MembersToExclude"
-                return $null
+            if (!$database.Members `
+                -and !$database.MembersToInclude `
+                -and !$database.MembersToExclude)
+            {
+                Write-Verbose -Message ("Databases: At least one of the following " + `
+                                        "parameters must be specified: Members, " + `
+                                        "MembersToInclude, MembersToExclude")
+                return $nullreturn
             }
         }
-    } else {
-        if (!$Members -and !$MembersToInclude -and !$MembersToExclude) {
-            Write-Verbose -Verbose "At least one of the following parameters must be specified: Members, MembersToInclude, MembersToExclude"
-            return $null
+    }
+    else
+    {
+        if (!$Members -and !$MembersToInclude -and !$MembersToExclude)
+        {
+            Write-Verbose -Message ("At least one of the following parameters must be " + `
+                                    "specified: Members, MembersToInclude, MembersToExclude")
+            return $nullreturn
         }
     }
 
-    if ($ContentDatabases -and $AllContentDatabases) {
-        Write-Verbose -Verbose "Cannot use the ContentDatabases parameter together with the AllContentDatabases parameter"
-        return $null
+    if ($Databases -and $AllDatabases)
+    {
+        Write-Verbose -Message ("Cannot use the Databases parameter together with the " + `
+                                "AllDatabases parameter")
+        return $nullreturn
     }
 
-    Write-Verbose -Message "Getting all Shell Admins"
+    if ($Databases -and $ExcludeDatabases)
+    {
+        Write-Verbose -Message ("Cannot use the Databases parameter together with the " + `
+                                "ExcludeDatabases parameter")
+        return $nullreturn
+    }
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount -Arguments @($PSBoundParameters, $PSScriptRoot) -ScriptBlock {
+    $result = Invoke-SPDscCommand -Credential $InstallAccount `
+                                  -Arguments @($PSBoundParameters, $PSScriptRoot) `
+                                  -ScriptBlock {
         $params = $args[0]
         $scriptRoot = $args[1]
-        
-        Import-Module -Name (Join-Path $scriptRoot "MSFT_SPShellAdmins.psm1")
-        
-        try {
-            $spFarm = Get-SPFarm
-        } catch {
-            Write-Verbose -Verbose "No local SharePoint farm was detected. Shell admin settings will not be applied"
-            return $null
+
+        Import-Module -Name (Join-Path -Path $scriptRoot -ChildPath "MSFT_SPShellAdmins.psm1")
+
+        try
+        {
+            $null = Get-SPFarm
+        }
+        catch
+        {
+            Write-Verbose -Message ("No local SharePoint farm was detected. Shell admin " + `
+                                    "settings will not be applied")
+            return $nullreturn
         }
 
         $shellAdmins = Get-SPShellAdmin
-        $allContentDatabases = $true
 
         $cdbPermissions = @()
-        foreach ($contentDatabase in (Get-SPDSCContentDatabase)) {
-            $cdbPermission = @{}
-            
-            $cdbPermission.Name = $contentDatabase.Name
-            $dbShellAdmins = Get-SPShellAdmin -Database $contentDatabase.Id
-            $cdbPermission.Members = $dbShellAdmins.UserName
-            
-            $cdbPermissions += $cdbPermission            
-        } 
+        $databases = Get-SPDatabase
+        if ($params.ContainsKey("ExcludeDatabases"))
+        {
+            $databases = $databases | Where-Object -FilterScript {
+                                        $_.Name -notin $params.ExcludeDatabases
+                                      }
+        }
+
+        foreach ($database in $databases)
+        {
+            $dbShellAdmins = Get-SPShellAdmin -Database $database.Id
+
+            $cdbPermission = @{
+                Name    = $database.Name
+                Members = $dbShellAdmins.UserName
+            }
+
+            $cdbPermissions += $cdbPermission
+        }
 
         return @{
-            Name = $params.Name
-            Members = $shellAdmins.UserName
+            IsSingleInstance = "Yes"
+            Members          = $shellAdmins.UserName
             MembersToInclude = $params.MembersToInclude
             MembersToExclude = $params.MembersToExclude
-            ContentDatabases = $cdbPermissions
-            AllContentDatabases = $params.AllContentDatabases
-            InstallAccount = $params.InstallAccount
+            Databases        = $cdbPermissions
+            AllDatabases     = $params.AllDatabases
+            InstallAccount   = $params.InstallAccount
         }
     }
     return $result
@@ -88,134 +162,245 @@ function Get-TargetResource
 function Set-TargetResource
 {
     [CmdletBinding()]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSDSCUseIdenticalMandatoryParametersForDSC", "", Justification  =  "Temporary workaround for issue introduced in PSSA v1.18")]
     param
     (
-        [parameter(Mandatory = $true)] [System.String]    $Name,
-        [parameter(Mandatory = $false)] [System.String[]] $Members,
-        [parameter(Mandatory = $false)] [System.String[]] $MembersToInclude,
-        [parameter(Mandatory = $false)] [System.String[]] $MembersToExclude,
-        [parameter(Mandatory = $false)] [Microsoft.Management.Infrastructure.CimInstance[]] $ContentDatabases,
-        [parameter(Mandatory = $false)] [System.Boolean]  $AllContentDatabases,
-        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
+        [Parameter(Mandatory = $true)]
+        [ValidateSet('Yes')]
+        [String]
+        $IsSingleInstance,
+
+        [Parameter()]
+        [System.String[]]
+        $Members,
+
+        [Parameter()]
+        [System.String[]]
+        $MembersToInclude,
+
+        [Parameter()]
+        [System.String[]]
+        $MembersToExclude,
+
+        [Parameter()]
+        [Microsoft.Management.Infrastructure.CimInstance[]]
+        $Databases,
+
+        [Parameter()]
+        [System.Boolean]
+        $AllDatabases,
+
+        [Parameter()]
+        [System.String[]]
+        $ExcludeDatabases,
+
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
+        $InstallAccount
     )
 
     Write-Verbose -Message "Setting Shell Admin config"
-    
-    if ($Members -and (($MembersToInclude) -or ($MembersToExclude))) {
-        Throw "Cannot use the Members parameter together with the MembersToInclude or MembersToExclude parameters"
+
+    if ($Members -and (($MembersToInclude) -or ($MembersToExclude)))
+    {
+        throw ("Cannot use the Members parameter together with the " + `
+               "MembersToInclude or MembersToExclude parameters")
     }
 
-    if ($ContentDatabases) {
-        foreach ($contentDatabase in $ContentDatabases) {
-            if ($contentDatabase.Members -and (($contentDatabase.MembersToInclude) -or ($contentDatabase.MembersToExclude))) {
-                throw "ContentDatabases: Cannot use the Members parameter together with the MembersToInclude or MembersToExclude parameters"
+    if ($Databases)
+    {
+        foreach ($database in $Databases)
+        {
+            if ($database.Members -and (($database.MembersToInclude) `
+                -or ($database.MembersToExclude)))
+            {
+                throw ("Databases: Cannot use the Members parameter " + `
+                       "together with the MembersToInclude or " + `
+                       "MembersToExclude parameters")
             }
 
-            if (!$contentDatabase.Members -and !$contentDatabase.MembersToInclude -and !$contentDatabase.MembersToExclude) {
-                throw "ContentDatabases: At least one of the following parameters must be specified: Members, MembersToInclude, MembersToExclude"
+            if (!$database.Members `
+                -and !$database.MembersToInclude `
+                -and !$database.MembersToExclude)
+            {
+                throw ("Databases: At least one of the following " + `
+                       "parameters must be specified: Members, " + `
+                       "MembersToInclude, MembersToExclude")
             }
         }
-    } else {
-        if (!$Members -and !$MembersToInclude -and !$MembersToExclude) {
-            throw "At least one of the following parameters must be specified: Members, MembersToInclude, MembersToExclude"
+    }
+    else
+    {
+        if (!$Members -and !$MembersToInclude -and !$MembersToExclude)
+        {
+            throw ("At least one of the following parameters must be " + `
+                   "specified: Members, MembersToInclude, MembersToExclude")
         }
     }
 
-    if ($ContentDatabases -and $AllContentDatabases) {
-        throw "Cannot use the ContentDatabases parameter together with the AllContentDatabases parameter"
+    if ($Databases -and $AllDatabases)
+    {
+        throw ("Cannot use the Databases parameter together with the " + `
+               "AllDatabases parameter")
     }
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount -Arguments @($PSBoundParameters, $PSScriptRoot) -ScriptBlock {
+    if ($Databases -and $ExcludeDatabases)
+    {
+        throw ("Cannot use the Databases parameter together with the " + `
+               "ExcludeDatabases parameter")
+    }
+
+    $null = Invoke-SPDscCommand -Credential $InstallAccount `
+                                  -Arguments @($PSBoundParameters, $PSScriptRoot) `
+                                  -ScriptBlock {
         $params = $args[0]
         $scriptRoot = $args[1]
-        
-        Import-Module -Name (Join-Path $scriptRoot "MSFT_SPShellAdmins.psm1")
-        try {
-            $spFarm = Get-SPFarm
-        } catch {
-            throw "No local SharePoint farm was detected. Shell Admin settings will not be applied"
-            return
+
+        Import-Module -Name (Join-Path -Path $scriptRoot -ChildPath "MSFT_SPShellAdmins.psm1")
+
+        try
+        {
+            $null = Get-SPFarm
+        }
+        catch
+        {
+            throw ("No local SharePoint farm was detected. Shell admin " + `
+                   "settings will not be applied")
         }
 
         $shellAdmins = Get-SPShellAdmin
 
-        if ($params.Members) {
-            Write-Verbose -Verbose "Processing Members"
-            if ($shellAdmins) {
-                $differences = Compare-Object -ReferenceObject $shellAdmins.UserName -DifferenceObject $params.Members
+        if ($params.Members)
+        {
+            Write-Verbose -Message "Processing Members"
+            if ($shellAdmins)
+            {
+                $differences = Compare-Object -ReferenceObject $shellAdmins.UserName `
+                                              -DifferenceObject $params.Members
 
-                if ($null -eq $differences) {
-                    Write-Verbose -Verbose "Shell Admins group matches. No further processing required"
-                } else {
-                    Write-Verbose -Verbose "Shell Admins group does not match. Perform corrective action"
-                    ForEach ($difference in $differences) {
-                        if ($difference.SideIndicator -eq "=>") {
-                            # Add account
+                if ($null -eq $differences)
+                {
+                    Write-Verbose -Message ("Shell Admins group matches. No further " + `
+                                            "processing required")
+                }
+                else
+                {
+                    Write-Verbose -Message ("Shell Admins group does not match. Perform " + `
+                                            "corrective action")
+
+                    foreach ($difference in $differences)
+                    {
+                        if ($difference.SideIndicator -eq "=>")
+                        {
                             $user = $difference.InputObject
-                            try {
+                            try
+                            {
                                 Add-SPShellAdmin -UserName $user
-                            } catch {
-                                throw "Error while setting the Shell Admin. The Shell Admin permissions will not be applied. Error details: $($_.Exception.Message)"
+                            }
+                            catch
+                            {
+                                throw ("Error while setting the Shell Admin. The Shell " + `
+                                       "Admin permissions will not be applied. Error " + `
+                                       "details: $($_.Exception.Message)")
                                 return
                             }
-                        } elseif ($difference.SideIndicator -eq "<=") {
-                            # Remove account
+                        }
+                        elseif ($difference.SideIndicator -eq "<=")
+                        {
                             $user = $difference.InputObject
-                            try {
+                            try
+                            {
                                 Remove-SPShellAdmin -UserName $user -Confirm:$false
-                            } catch {
-                                throw "Error while removing the Shell Admin. The Shell Admin permissions will not be revoked. Error details: $($_.Exception.Message)"
+                            }
+                            catch
+                            {
+                                throw ("Error while removing the Shell Admin. The Shell Admin " + `
+                                       "permissions will not be revoked. Error details: " + `
+                                       "$($_.Exception.Message)")
                                 return
                             }
                         }
                     }
                 }
-            } else {
-                foreach ($member in $params.Members) {
-                    try {
+            }
+            else
+            {
+                foreach ($member in $params.Members)
+                {
+                    try
+                    {
                         Add-SPShellAdmin -UserName $member
-                    } catch {
-                        throw "Error while setting the Shell Admin. The Shell Admin permissions will not be applied. Error details: $($_.Exception.Message)"
+                    }
+                    catch
+                    {
+                        throw ("Error while setting the Shell Admin. The Shell Admin " + `
+                               "permissions will not be applied. Error details: " + `
+                               "$($_.Exception.Message)")
                         return
                     }
                 }
             }
         }
 
-        if ($params.MembersToInclude) {
-            Write-Verbose -Verbose "Processing MembersToInclude"
-            if ($shellAdmins) {
-                foreach ($member in $params.MembersToInclude) {
-                    if (-not $shellAdmins.UserName.Contains($member)) {
-                        try {
+        if ($params.MembersToInclude)
+        {
+            Write-Verbose -Message "Processing MembersToInclude"
+            if ($shellAdmins)
+            {
+                foreach ($member in $params.MembersToInclude)
+                {
+                    if (-not $shellAdmins.UserName.Contains($member))
+                    {
+                        try
+                        {
                             Add-SPShellAdmin -UserName $member
-                        } catch {
-                            throw "Error while setting the Shell Admin. The Shell Admin permissions will not be applied. Error details: $($_.Exception.Message)"
+                        }
+                        catch
+                        {
+                            throw ("Error while setting the Shell Admin. The Shell Admin " + `
+                                   "permissions will not be applied. Error details: " + `
+                                   "$($_.Exception.Message)")
                             return
                         }
                     }
                 }
-            } else {
-                foreach ($member in $params.MembersToInclude) {
-                    try {
+            }
+            else
+            {
+                foreach ($member in $params.MembersToInclude)
+                {
+                    try
+                    {
                         Add-SPShellAdmin -UserName $member
-                    } catch {
-                        throw "Error while setting the Shell Admin. The Shell Admin permissions will not be applied. Error details: $($_.Exception.Message)"
+                    }
+                    catch
+                    {
+                        throw ("Error while setting the Shell Admin. The Shell Admin " + `
+                               "permissions will not be applied. Error details: $($_.Exception.Message)")
                         return
                     }
                 }
             }
         }
 
-        if ($params.MembersToExclude) {
-            Write-Verbose -Verbose "Processing MembersToExclude"
-            if ($shellAdmins) {
-                foreach ($member in $params.MembersToExclude) {
-                    if ($shellAdmins.UserName.Contains($member)) {
-                        try {
+        if ($params.MembersToExclude)
+        {
+            Write-Verbose -Message "Processing MembersToExclude"
+            if ($shellAdmins)
+            {
+                foreach ($member in $params.MembersToExclude)
+                {
+                    if ($shellAdmins.UserName.Contains($member))
+                    {
+                        try
+                        {
                             Remove-SPShellAdmin -UserName $member -Confirm:$false
-                        } catch {
-                            throw "Error while removing the Shell Admin. The Shell Admin permissions will not be revoked. Error details: $($_.Exception.Message)"
+                        }
+                        catch
+                        {
+                            throw ("Error while removing the Shell Admin. The Shell Admin " + `
+                                   "permissions will not be revoked. Error details: " + `
+                                   "$($_.Exception.Message)")
                             return
                         }
                     }
@@ -223,168 +408,285 @@ function Set-TargetResource
             }
         }
 
-        if ($params.ContentDatabases) {
-            Write-Verbose "Processing ContentDatabases parameter"
-            # The ContentDatabases parameter is set
+        if ($params.Databases)
+        {
+            Write-Verbose -Message "Processing Databases parameter"
+            # The Databases parameter is set
             # Compare the configuration against the actual set and correct any issues
 
-            foreach ($contentDatabase in $params.ContentDatabases) {
+            foreach ($database in $params.Databases)
+            {
                 # Check if configured database exists, throw error if not
-                Write-Verbose -Verbose "Processing Content Database: $($contentDatabase.Name)"
+                Write-Verbose -Message "Processing Database: $($database.Name)"
 
-                $currentCDB = Get-SPDSCContentDatabase | Where-Object { $_.Name.ToLower() -eq $contentDatabase.Name.ToLower() }
-                if ($null -ne $currentCDB) {
+                $currentCDB = Get-SPDatabase | Where-Object -FilterScript {
+                    $_.Name -eq $database.Name
+                }
+                if ($null -ne $currentCDB)
+                {
                     $dbShellAdmins = Get-SPShellAdmin -database $currentCDB.Id
 
-                    if ($contentDatabase.Members) {
-                        Write-Verbose -Verbose "Processing Members"
-                        if ($dbShellAdmins) {
-                            $differences = Compare-Object -ReferenceObject $contentDatabase.Members -DifferenceObject $dbShellAdmins.UserName
-                            ForEach ($difference in $differences) {
-                                if ($difference.SideIndicator -eq "<=") {
-                                    # Add account
+                    if ($database.Members)
+                    {
+                        Write-Verbose -Message "Processing Members"
+                        if ($dbShellAdmins)
+                        {
+                            $differences = Compare-Object -ReferenceObject $database.Members `
+                                                          -DifferenceObject $dbShellAdmins.UserName
+                            foreach ($difference in $differences)
+                            {
+                                if ($difference.SideIndicator -eq "<=")
+                                {
                                     $user = $difference.InputObject
-                                    try {
+                                    try
+                                    {
                                         Add-SPShellAdmin -database $currentCDB.Id -UserName $user
-                                    } catch {
-                                        throw "Error while setting the Shell Admin. The Shell Admin permissions will not be applied. Error details: $($_.Exception.Message)"
+                                    }
+                                    catch
+                                    {
+                                        throw ("Error while setting the Shell Admin. The " + `
+                                               "Shell Admin permissions will not be applied. " + `
+                                               "Error details: $($_.Exception.Message)")
                                         return
                                     }
-                                } elseif ($difference.SideIndicator -eq "=>") {
-                                    # Remove account
+                                }
+                                elseif ($difference.SideIndicator -eq "=>")
+                                {
                                     $user = $difference.InputObject
-                                    try {
-                                        Remove-SPShellAdmin -database $currentCDB.Id -UserName $user -Confirm:$false
-                                    } catch {
-                                        throw "Error while removing the Shell Admin. The Shell Admin permissions will not be revoked. Error details: $($_.Exception.Message)"
+                                    try
+                                    {
+                                        Remove-SPShellAdmin -Database $currentCDB.Id `
+                                                            -UserName $user `
+                                                            -Confirm:$false
+                                    }
+                                    catch
+                                    {
+                                        throw ("Error while removing the Shell Admin. The " + `
+                                               "Shell Admin permissions will not be revoked. " + `
+                                               "Error details: $($_.Exception.Message)")
                                         return
                                     }
                                 }
                             }
-                        } else {
-                            Foreach ($member in $contentDatabase.Members) {
-                                try {
+                        }
+                        else
+                        {
+                            foreach ($member in $database.Members)
+                            {
+                                try
+                                {
                                     Add-SPShellAdmin -database $currentCDB.Id -UserName $member
-                                } catch {
-                                    throw "Error while setting the Shell Admin. The Shell Admin permissions will not be applied. Error details: $($_.Exception.Message)"
+                                }
+                                catch
+                                {
+                                    throw ("Error while setting the Shell Admin. The Shell " + `
+                                           "Admin permissions will not be applied. Error " + `
+                                           "details: $($_.Exception.Message)")
                                     return
                                 }
                             }
                         }
                     }
 
-                    if ($contentDatabase.MembersToInclude) {
-                        Write-Verbose -Verbose "Processing MembersToInclude"
-                        if ($dbShellAdmins) {
-                            ForEach ($member in $contentDatabase.MembersToInclude) {
-                                if (-not $dbShellAdmins.UserName.Contains($member)) {
-                                    try {
+                    if ($database.MembersToInclude)
+                    {
+                        Write-Verbose -Message "Processing MembersToInclude"
+                        if ($dbShellAdmins)
+                        {
+                            foreach ($member in $database.MembersToInclude)
+                            {
+                                if (-not $dbShellAdmins.UserName.Contains($member))
+                                {
+                                    try
+                                    {
                                         Add-SPShellAdmin -database $currentCDB.Id -UserName $member
-                                    } catch {
-                                        throw "Error while setting the Shell Admin. The Shell Admin permissions will not be applied. Error details: $($_.Exception.Message)"
+                                    }
+                                    catch
+                                    {
+                                        throw ("Error while setting the Shell Admin. The " + `
+                                               "Shell Admin permissions will not be applied. " + `
+                                               "Error details: $($_.Exception.Message)")
                                         return
                                     }
                                 }
                             }
-                        } else {
-                            ForEach ($member in $contentDatabase.MembersToInclude) {
-                                try {
+                        }
+                        else
+                        {
+                            foreach ($member in $database.MembersToInclude)
+                            {
+                                try
+                                {
                                     Add-SPShellAdmin -database $currentCDB.Id -UserName $member
-                                } catch {
-                                    throw "Error while setting the Shell Admin. The Shell Admin permissions will not be applied. Error details: $($_.Exception.Message)"
+                                }
+                                catch
+                                {
+                                    throw ("Error while setting the Shell Admin. The Shell " + `
+                                           "Admin permissions will not be applied. Error " + `
+                                           "details: $($_.Exception.Message)")
                                     return
                                 }
                             }
                         }
                     }
 
-                    if ($contentDatabase.MembersToExclude) {
-                        Write-Verbose -Verbose "Processing MembersToExclude"
-                        if ($dbShellAdmins) {
-                            ForEach ($member in $contentDatabase.MembersToExclude) {
-                                if ($dbShellAdmins.UserName.Contains($member)) {
-                                    try {
-                                        Remove-SPShellAdmin -database $currentCDB.Id -UserName $member -Confirm:$false
-                                    } catch {
-                                        throw "Error while removing the Shell Admin. The Shell Admin permissions will not be revoked. Error details: $($_.Exception.Message)"
+                    if ($database.MembersToExclude)
+                    {
+                        Write-Verbose -Message "Processing MembersToExclude"
+                        if ($dbShellAdmins)
+                        {
+                            foreach ($member in $database.MembersToExclude)
+                            {
+                                if ($dbShellAdmins.UserName.Contains($member))
+                                {
+                                    try
+                                    {
+                                        Remove-SPShellAdmin -Database $currentCDB.Id `
+                                                            -UserName $member `
+                                                            -Confirm:$false
+                                    }
+                                    catch
+                                    {
+                                        throw ("Error while removing the Shell Admin. The " + `
+                                               "Shell Admin permissions will not be revoked. " + `
+                                               "Error details: $($_.Exception.Message)")
                                         return
                                     }
                                 }
                             }
                         }
                     }
-                } else {
-                    throw "Specified database does not exist: $($contentDatabase.Name)"
+                }
+                else
+                {
+                    throw "Specified database does not exist: $($database.Name)"
                 }
             }
         }
 
-        if ($params.AllContentDatabases) {
-            Write-Verbose "Processing AllContentDatabases parameter"
+        if ($params.AllDatabases)
+        {
+            Write-Verbose -Message "Processing AllDatabases parameter"
 
-            foreach ($contentDatabase in (Get-SPDSCContentDatabase)) {
-                $dbShellAdmins = Get-SPShellAdmin -database $contentDatabase.Id
-                if ($params.Members) {
-                    Write-Verbose -Verbose "Processing Content Database: $($contentDatabase.Name)"
-                    if ($dbShellAdmins) {
-                        $differences = Compare-Object -ReferenceObject $dbShellAdmins.UserName -DifferenceObject $params.Members
+            $databases = Get-SPDatabase
+            if ($params.ContainsKey("ExcludeDatabases"))
+            {
+                $databases = $databases | Where-Object -FilterScript {
+                                            $_.Name -notin $params.ExcludeDatabases
+                                          }
+            }
+            foreach ($database in $databases)
+            {
+                $dbShellAdmins = Get-SPShellAdmin -database $database.Id
+                if ($params.Members)
+                {
+                    Write-Verbose -Message "Processing Database: $($database.Name)"
+                    if ($dbShellAdmins)
+                    {
+                        $differences = Compare-Object -ReferenceObject $dbShellAdmins.UserName `
+                                                      -DifferenceObject $params.Members
 
-                        if ($null -eq $differences) {
-                            Write-Verbose -Verbose "Shell Admins group matches. No further processing required"
-                        } else {
-                            Write-Verbose -Verbose "Shell Admins group does not match. Perform corrective action"
-                            ForEach ($difference in $differences) {
-                                if ($difference.SideIndicator -eq "=>") {
-                                    # Add account
+                        if ($null -eq $differences)
+                        {
+                            Write-Verbose -Message ("Shell Admins group matches. No further " + `
+                                                    "processing required")
+                        }
+                        else
+                        {
+                            Write-Verbose -Message ("Shell Admins group does not match. Perform " + `
+                                                    "corrective action")
+
+                            foreach ($difference in $differences)
+                            {
+                                if ($difference.SideIndicator -eq "=>")
+                                {
                                     $user = $difference.InputObject
-                                    try {
-                                        Add-SPShellAdmin -database $contentDatabase.Id -UserName $user
-                                    } catch {
-                                        throw "Error while setting the Shell Admin. The Shell Admin permissions will not be applied. Error details: $($_.Exception.Message)"
+                                    try
+                                    {
+                                        Add-SPShellAdmin -database $database.Id -UserName $user
+                                    }
+                                    catch
+                                    {
+                                        throw ("Error while setting the Shell Admin. The " + `
+                                               "Shell Admin permissions will not be applied. " + `
+                                               "Error details: $($_.Exception.Message)")
                                         return
                                     }
-                                } elseif ($difference.SideIndicator -eq "<=") {
-                                    # Remove account
+                                }
+                                elseif ($difference.SideIndicator -eq "<=")
+                                {
                                     $user = $difference.InputObject
-                                    try {
-                                        Remove-SPShellAdmin -database $contentDatabase.Id -UserName $user -Confirm:$false
-                                    } catch {
-                                        throw "Error while removing the Shell Admin. The Shell Admin permissions will not be revoked. Error details: $($_.Exception.Message)"
+                                    try
+                                    {
+                                        Remove-SPShellAdmin -Database $database.Id `
+                                                            -UserName $user `
+                                                            -Confirm:$false
+                                    }
+                                    catch
+                                    {
+                                        throw ("Error while removing the Shell Admin. The " + `
+                                               "Shell Admin permissions will not be revoked. " + `
+                                               "Error details: $($_.Exception.Message)")
                                         return
                                     }
                                 }
                             }
                         }
-                    } else {
-                        Foreach ($member in $params.Members) {
-                            try {
-                                Add-SPShellAdmin -database $contentDatabase.Id -UserName $member
-                            } catch {
-                                throw "Error while setting the Shell Admin. The Shell Admin permissions will not be applied. Error details: $($_.Exception.Message)"
+                    }
+                    else
+                    {
+                        foreach ($member in $params.Members)
+                        {
+                            try
+                            {
+                                Add-SPShellAdmin -database $database.Id -UserName $member
+                            }
+                            catch
+                            {
+                                throw ("Error while setting the Shell Admin. The Shell Admin " + `
+                                       "permissions will not be applied. Error details: " + `
+                                       "$($_.Exception.Message)")
                                 return
                             }
                         }
                     }
                 }
 
-                if ($params.MembersToInclude) {
-                    if ($dbShellAdmins) {
-                        foreach ($member in $params.MembersToInclude) {
-                            if (-not $dbShellAdmins.UserName.Contains($member)) {
-                                try {
-                                    Add-SPShellAdmin -database $contentDatabase.Id -UserName $member
-                                } catch {
-                                    throw "Error while setting the Shell Admin. The Shell Admin permissions will not be applied. Error details: $($_.Exception.Message)"
+                if ($params.MembersToInclude)
+                {
+                    if ($dbShellAdmins)
+                    {
+                        foreach ($member in $params.MembersToInclude)
+                        {
+                            if (-not $dbShellAdmins.UserName.Contains($member))
+                            {
+                                try
+                                {
+                                    Add-SPShellAdmin -database $database.Id -UserName $member
+                                }
+                                catch
+                                {
+                                    throw ("Error while setting the Shell Admin. The Shell " + `
+                                           "Admin permissions will not be applied. Error " + `
+                                           "details: $($_.Exception.Message)")
                                     return
                                 }
                             }
                         }
-                    } else {
-                        foreach ($member in $params.MembersToInclude) {
-                            try {
-                                Add-SPShellAdmin -database $contentDatabase.Id -UserName $member
-                            } catch {
-                                throw "Error while setting the Shell Admin. The Shell Admin permissions will not be applied. Error details: $($_.Exception.Message)"
+                    }
+                    else
+                    {
+                        foreach ($member in $params.MembersToInclude)
+                        {
+                            try
+                            {
+                                Add-SPShellAdmin -database $database.Id -UserName $member
+                            }
+                            catch
+                            {
+                                throw ("Error while setting the Shell Admin. The Shell Admin " + `
+                                       "permissions will not be applied. Error details: " + `
+                                       "$($_.Exception.Message)")
                                 return
                             }
                         }
@@ -392,132 +694,222 @@ function Set-TargetResource
                     }
                 }
 
-                if ($params.MembersToExclude) {
-                    if ($dbShellAdmins) {
-                        foreach ($member in $params.MembersToExclude) {
-                            if ($dbShellAdmins.UserName.Contains($member)) {
-                                try {
-                                    Remove-SPShellAdmin -database $contentDatabase.Id -UserName $member -Confirm:$false
-                                } catch {
-                                    throw "Error while removing the Shell Admin. The Shell Admin permissions will not be revoked. Error details: $($_.Exception.Message)"
+                if ($params.MembersToExclude)
+                {
+                    if ($dbShellAdmins)
+                    {
+                        foreach ($member in $params.MembersToExclude)
+                        {
+                            if ($dbShellAdmins.UserName.Contains($member))
+                            {
+                                try
+                                {
+                                    Remove-SPShellAdmin -Database $database.Id `
+                                                        -UserName $member `
+                                                        -Confirm:$false
+                                }
+                                catch
+                                {
+                                    throw ("Error while removing the Shell Admin. The Shell " + `
+                                           "Admin permissions will not be revoked. Error " + `
+                                           "details: $($_.Exception.Message)")
                                     return
                                 }
                             }
                         }
                     }
                 }
-            } 
+            }
         }
     }
 }
 
-
 function Test-TargetResource
 {
     [CmdletBinding()]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSDSCUseIdenticalMandatoryParametersForDSC", "", Justification  =  "Temporary workaround for issue introduced in PSSA v1.18")]
     [OutputType([System.Boolean])]
     param
     (
-        [parameter(Mandatory = $true)] [System.String]    $Name,
-        [parameter(Mandatory = $false)] [System.String[]] $Members,
-        [parameter(Mandatory = $false)] [System.String[]] $MembersToInclude,
-        [parameter(Mandatory = $false)] [System.String[]] $MembersToExclude,
-        [parameter(Mandatory = $false)] [Microsoft.Management.Infrastructure.CimInstance[]] $ContentDatabases,
-        [parameter(Mandatory = $false)] [System.Boolean]  $AllContentDatabases,
-        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
+        [Parameter(Mandatory = $true)]
+        [ValidateSet('Yes')]
+        [String]
+        $IsSingleInstance,
+
+        [Parameter()]
+        [System.String[]]
+        $Members,
+
+        [Parameter()]
+        [System.String[]]
+        $MembersToInclude,
+
+        [Parameter()]
+        [System.String[]]
+        $MembersToExclude,
+
+        [Parameter()]
+        [Microsoft.Management.Infrastructure.CimInstance[]]
+        $Databases,
+
+        [Parameter()]
+        [System.Boolean]
+        $AllDatabases,
+
+        [Parameter()]
+        [System.String[]]
+        $ExcludeDatabases,
+
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
+        $InstallAccount
     )
 
     Write-Verbose -Message "Testing Shell Admin settings"
 
-    # Start checking
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
-    if ($null -eq $CurrentValues) { return $false }
+    Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
+    Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
 
-    if ($Members) {
-        Write-Verbose "Processing Members parameter"
-        if (-not $CurrentValues.Members) { return $false }
+    if ($null -eq $CurrentValues.Members -and `
+        $null -eq $CurrentValues.MembersToInclude -and `
+        $null -eq $CurrentValues.MembersToExclude)
+    {
+        return $false
+    }
 
-        $differences = Compare-Object -ReferenceObject $CurrentValues.Members -DifferenceObject $Members
+    if ($Members)
+    {
+        Write-Verbose -Message "Processing Members parameter"
+        if (-not $CurrentValues.Members)
+        {
+            return $false
+        }
 
-        if ($null -eq $differences) {
-            Write-Verbose "Shell Admins group matches"
-        } else {
-            Write-Verbose "Shell Admins group does not match"
+        $differences = Compare-Object -ReferenceObject $CurrentValues.Members `
+                                      -DifferenceObject $Members
+
+        if ($null -eq $differences)
+        {
+            Write-Verbose -Message "Shell Admins group matches"
+        }
+        else
+        {
+            Write-Verbose -Message "Shell Admins group does not match"
             return $false
         }
     }
 
-    if ($MembersToInclude) {
-        Write-Verbose "Processing MembersToInclude parameter"
-        if (-not $CurrentValues.Members) { return $false }
+    if ($MembersToInclude)
+    {
+        Write-Verbose -Message "Processing MembersToInclude parameter"
+        if (-not $CurrentValues.Members)
+        {
+            return $false
+        }
 
-        ForEach ($member in $MembersToInclude) {
-            if (-not($CurrentValues.Members.Contains($member))) {
-                Write-Verbose "$member is not a Shell Admin. Set result to false"
+        foreach ($member in $MembersToInclude)
+        {
+            if (-not($CurrentValues.Members.Contains($member)))
+            {
+                Write-Verbose -Message "$member is not a Shell Admin. Set result to false"
                 return $false
-            } else {
-                Write-Verbose "$member is already a Shell Admin. Skipping"
+            }
+            else
+            {
+                Write-Verbose -Message "$member is already a Shell Admin. Skipping"
             }
         }
     }
 
-    if ($MembersToExclude) {
-        Write-Verbose "Processing MembersToExclude parameter"
-        if ($CurrentValues.Members) {
-            ForEach ($member in $MembersToExclude) {
-                if ($CurrentValues.Members.Contains($member)) {
-                    Write-Verbose "$member is a Shell Admin. Set result to false"
+    if ($MembersToExclude)
+    {
+        Write-Verbose -Message "Processing MembersToExclude parameter"
+        if ($CurrentValues.Members)
+        {
+            foreach ($member in $MembersToExclude)
+            {
+                if ($CurrentValues.Members.Contains($member))
+                {
+                    Write-Verbose -Message "$member is a Shell Admin. Set result to false"
                     return $false
-                } else {
-                    Write-Verbose "$member is not a Shell Admin. Skipping"
+                }
+                else
+                {
+                    Write-Verbose -Message "$member is not a Shell Admin. Skipping"
                 }
             }
         }
     }
-    
-    if ($AllContentDatabases) {
-        # The AllContentDatabases parameter is set
+
+    if ($AllDatabases)
+    {
+        # The AllDatabases parameter is set
         # Check the Members group against all databases
-        Write-Verbose "Processing AllContentDatabases parameter"
+        Write-Verbose -Message "Processing AllDatabases parameter"
 
-        foreach ($contentDatabase in $CurrentValues.ContentDatabases) {
+        foreach ($database in $CurrentValues.Databases)
+        {
             # Check if configured database exists, throw error if not
-            Write-Verbose "Processing Content Database: $($contentDatabase.Name)"
+            Write-Verbose -Message "Processing Database: $($database.Name)"
 
-            if ($Members) {
-                if (-not $contentDatabase.Members) { return $false }
+            if ($Members)
+            {
+                if (-not $database.Members)
+                {
+                    return $false
+                }
 
-                $differences = Compare-Object -ReferenceObject $contentDatabase.Members -DifferenceObject $Members
-                if ($null -eq $differences) {
-                    Write-Verbose "Shell Admins group matches"
-                } else {
-                    Write-Verbose "Shell Admins group does not match"
+                $differences = Compare-Object -ReferenceObject $database.Members `
+                                              -DifferenceObject $Members
+
+                if ($null -eq $differences)
+                {
+                    Write-Verbose -Message "Shell Admins group matches"
+                }
+                else
+                {
+                    Write-Verbose -Message "Shell Admins group does not match"
                     return $false
                 }
             }
 
-            if ($MembersToInclude) {
-                if (-not $contentDatabase.Members) { return $false }
+            if ($MembersToInclude)
+            {
+                if (-not $database.Members)
+                {
+                    return $false
+                }
 
-                ForEach ($member in $MembersToInclude) {
-                    if (-not($contentDatabase.Members.Contains($member))) {
-                        Write-Verbose "$member is not a Shell Admin. Set result to false"
+                foreach ($member in $MembersToInclude)
+                {
+                    if (-not($database.Members.Contains($member)))
+                    {
+                        Write-Verbose -Message "$member is not a Shell Admin. Set result to false"
                         return $false
-                    } else {
-                        Write-Verbose "$member is already a Shell Admin. Skipping"
+                    }
+                    else
+                    {
+                        Write-Verbose -Message "$member is already a Shell Admin. Skipping"
                     }
                 }
             }
 
-            if ($MembersToExclude) {
-                if ($contentDatabase.Members) {
-                    ForEach ($member in $MembersToExclude) {
-                        if ($contentDatabase.Members.Contains($member)) {
-                            Write-Verbose "$member is a Shell Admin. Set result to false"
+            if ($MembersToExclude)
+            {
+                if ($database.Members)
+                {
+                    foreach ($member in $MembersToExclude)
+                    {
+                        if ($database.Members.Contains($member))
+                        {
+                            Write-Verbose -Message "$member is a Shell Admin. Set result to false"
                             return $false
-                        } else {
-                            Write-Verbose "$member is not a Shell Admin. Skipping"
+                        }
+                        else
+                        {
+                            Write-Verbose -Message "$member is not a Shell Admin. Skipping"
                         }
                     }
                 }
@@ -525,70 +917,95 @@ function Test-TargetResource
         }
     }
 
-    if ($ContentDatabases) {
-        # The ContentDatabases parameter is set
+    if ($Databases)
+    {
+        # The Databases parameter is set
         # Compare the configuration against the actual set
-        Write-Verbose "Processing ContentDatabases parameter"
+        Write-Verbose -Message "Processing Databases parameter"
 
-        foreach ($contentDatabase in $ContentDatabases) {
+        foreach ($database in $Databases)
+        {
             # Check if configured database exists, throw error if not
-            Write-Verbose "Processing Content Database: $($contentDatabase.Name)"
+            Write-Verbose -Message "Processing Database: $($database.Name)"
 
-            $currentCDB = $CurrentValues.ContentDatabases | Where-Object { $_.Name.ToLower() -eq $contentDatabase.Name.ToLower() }
-            if ($null -ne $currentCDB) {
-                if ($contentDatabase.Members) {
-                    Write-Verbose "Processing Members parameter"
-                    if (-not $currentCDB.Members) { return $false }
+            $currentCDB = $CurrentValues.Databases | Where-Object -FilterScript {
+                $_.Name -eq $database.Name
+            }
 
-                    $differences = Compare-Object -ReferenceObject $currentCDB.Members -DifferenceObject $contentDatabase.Members
-                    if ($null -eq $differences) {
-                        Write-Verbose "Shell Admins group matches"
-                    } else {
-                        Write-Verbose "Shell Admins group does not match"
+            if ($null -ne $currentCDB)
+            {
+                if ($database.Members)
+                {
+                    Write-Verbose -Message "Processing Members parameter"
+                    if (-not $currentCDB.Members)
+                    {
+                        return $false
+                    }
+
+                    $differences = Compare-Object -ReferenceObject $currentCDB.Members `
+                                                  -DifferenceObject $database.Members
+
+                    if ($null -eq $differences)
+                    {
+                        Write-Verbose -Message "Shell Admins group matches"
+                    }
+                    else
+                    {
+                        Write-Verbose -Message "Shell Admins group does not match"
                         return $false
                     }
                 }
 
-                if ($contentDatabase.MembersToInclude) {
-                    Write-Verbose "Processing MembersToInclude parameter"
-                    if (-not $currentCDB.Members) { return $false }
+                if ($database.MembersToInclude)
+                {
+                    Write-Verbose -Message "Processing MembersToInclude parameter"
+                    if (-not $currentCDB.Members)
+                    {
+                        return $false
+                    }
 
-                    ForEach ($member in $contentDatabase.MembersToInclude) {
-                        if (-not($currentCDB.Members.Contains($member))) {
-                            Write-Verbose "$member is not a Shell Admin. Set result to false"
+                    foreach ($member in $database.MembersToInclude)
+                    {
+                        if (-not($currentCDB.Members.Contains($member)))
+                        {
+                            Write-Verbose -Message "$member is not a Shell Admin. Set result to false"
                             return $false
-                        } else {
-                            Write-Verbose "$member is already a Shell Admin. Skipping"
+                        }
+                        else
+                        {
+                            Write-Verbose -Message "$member is already a Shell Admin. Skipping"
                         }
                     }
                 }
 
-                if ($contentDatabase.MembersToExclude) {
-                    Write-Verbose "Processing MembersToExclude parameter"
-                    if ($currentCDB.Members) {
-                        ForEach ($member in $contentDatabase.MembersToExclude) {
-                            if ($currentCDB.Members.Contains($member)) {
-                                Write-Verbose "$member is a Shell Admin. Set result to false"
+                if ($database.MembersToExclude)
+                {
+                    Write-Verbose -Message "Processing MembersToExclude parameter"
+                    if ($currentCDB.Members)
+                    {
+                        foreach ($member in $database.MembersToExclude)
+                        {
+                            if ($currentCDB.Members.Contains($member))
+                            {
+                                Write-Verbose -Message "$member is a Shell Admin. Set result to false"
                                 return $false
-                            } else {
-                                Write-Verbose "$member is not a Shell Admin. Skipping"
+                            }
+                            else
+                            {
+                                Write-Verbose -Message "$member is not a Shell Admin. Skipping"
                             }
                         }
                     }
                 }
-            } else {
-                throw "Specified database does not exist: $($contentDatabase.Name)"
+            }
+            else
+            {
+                throw "Specified database does not exist: $($database.Name)"
             }
         }
     }
 
     return $true
-}
-
-# This wrapepr exists as Pester tests seem to have an issue with this being called with no 
-# parameters. This allows us to mock the wrapper and test the logic correctly.
-function Get-SPDSCContentDatabase {
-    return Get-SPContentDatabase
 }
 
 Export-ModuleMember -Function *-TargetResource

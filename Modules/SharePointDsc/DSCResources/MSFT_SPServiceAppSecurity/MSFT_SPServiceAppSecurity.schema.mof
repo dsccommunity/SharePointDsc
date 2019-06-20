@@ -1,8 +1,8 @@
 [ClassVersion("1.0.0.0")]
 class MSFT_SPServiceAppSecurityEntry
 {
-    [Key, Description("The username for the entry")] String Username;
-    [Required, Description("The access level for the entry"), ValueMap{"Change Permissions","Full Control", "Write", "Read"}, Values{"Change Permissions","Full Control", "Write", "Read"}] String AccessLevel;
+    [Required, Description("The username for the entry")] String Username;
+    [Required, Description("The access levels for the entry")] String AccessLevels[];
 };
 [ClassVersion("1.0.0.0"), FriendlyName("SPServiceAppSecurity")]
 class MSFT_SPServiceAppSecurity : OMI_BaseResource

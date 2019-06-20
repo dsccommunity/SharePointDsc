@@ -4,59 +4,117 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [parameter(Mandatory = $true)]  
-        [System.String] 
+        [Parameter(Mandatory = $true)]
+        [ValidateSet('Yes')]
+        [String]
+        $IsSingleInstance,
+
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $BinaryDir,
 
-        [parameter(Mandatory = $true)]  
-        [System.String] 
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $ProductKey,
 
-        [parameter(Mandatory = $false)] 
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $InstallPath,
 
-        [parameter(Mandatory = $false)] 
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $DataPath,
 
-        [parameter(Mandatory = $false)] 
-        [ValidateSet("Present","Absent")] 
-        [System.String] 
+        [Parameter()]
+        [ValidateSet("Present","Absent")]
+        [System.String]
         $Ensure = "Present"
     )
 
-    Write-Verbose -Message "Getting install status of SP binaries"
+    Write-Verbose -Message "Getting install status of SharePoint"
+
+    Write-Verbose -Message "Check if Binary folder exists"
+    if (-not(Test-Path -Path $BinaryDir))
+    {
+        throw "Specified path cannot be found: {$BinaryDir}"
+    }
+
+    $InstallerPath = Join-Path -Path $BinaryDir -ChildPath "setup.exe"
+    if (-not(Test-Path -Path $InstallerPath))
+    {
+        throw "Setup.exe cannot be found in {$BinaryDir}"
+    }
+
+    Write-Verbose -Message "Checking file status of $InstallerPath"
+    $checkBlockedFile = $true
+    if (Split-Path -Path $InstallerPath -IsAbsolute)
+    {
+        $driveLetter = (Split-Path -Path $InstallerPath -Qualifier).TrimEnd(":")
+        Write-Verbose -Message "BinaryDir refers to drive $driveLetter"
+
+        $volume = Get-Volume -DriveLetter $driveLetter -ErrorAction SilentlyContinue
+        if ($null -ne $volume)
+        {
+            if ($volume.DriveType -ne "CD-ROM")
+            {
+                Write-Verbose -Message "Volume is a fixed drive: Perform Blocked File test"
+            }
+            else
+            {
+                Write-Verbose -Message "Volume is a CD-ROM drive: Skipping Blocked File test"
+                $checkBlockedFile = $false
+            }
+        }
+        else
+        {
+            Write-Verbose -Message "Volume not found. Unable to determine the type. Continuing."
+        }
+    }
+
+    if ($checkBlockedFile -eq $true)
+    {
+        Write-Verbose -Message "Checking status now"
+        $zone = Get-Item -Path $InstallerPath -Stream "Zone.Identifier" -EA SilentlyContinue
+        if ($null -ne $zone)
+        {
+            throw ("Setup file is blocked! Please use 'Unblock-File -Path $InstallerPath' " + `
+                   "to unblock the file before continuing.")
+        }
+        Write-Verbose -Message "File not blocked, continuing."
+    }
+
     $x86Path = "HKLM:\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*"
     $installedItemsX86 = Get-ItemProperty -Path $x86Path | Select-Object -Property DisplayName
-    
+
     $x64Path = "HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall\*"
     $installedItemsX64 = Get-ItemProperty -Path $x64Path | Select-Object -Property DisplayName
 
-    $installedItems = $installedItemsX86 + $installedItemsX64 
-    $installedItems = $installedItems | Select-Object -Property DisplayName -Unique    
-    $spInstall = $installedItems | Where-Object -FilterScript { 
-        $_ -match "Microsoft SharePoint Server (2013|2016)" 
+    $installedItems = $installedItemsX86 + $installedItemsX64
+    $installedItems = $installedItems | Select-Object -Property DisplayName -Unique
+    $spInstall = $installedItems | Where-Object -FilterScript {
+        $_ -match "Microsoft SharePoint Server (2013|2016|2019)"
     }
 
-    if ($spInstall) 
+    if ($spInstall)
     {
         return @{
-            BinaryDir = $BinaryDir
-            ProductKey = $ProductKey
-            InstallPath = $InstallPath
-            DataPath = $DataPath
-            Ensure = "Present"
+            IsSingleInstance = "Yes"
+            BinaryDir        = $BinaryDir
+            ProductKey       = $ProductKey
+            InstallPath      = $InstallPath
+            DataPath         = $DataPath
+            Ensure           = "Present"
         }
-    } 
-    else 
+    }
+    else
     {
         return @{
-            BinaryDir = $BinaryDir
-            ProductKey = $ProductKey
-            InstallPath = $InstallPath
-            DataPath = $DataPath
-            Ensure = "Absent"
+            IsSingleInstance = "Yes"
+            BinaryDir        = $BinaryDir
+            ProductKey       = $ProductKey
+            InstallPath      = $InstallPath
+            DataPath         = $DataPath
+            Ensure           = "Absent"
         }
     }
 }
@@ -64,59 +122,162 @@ function Get-TargetResource
 
 function Set-TargetResource
 {
+    # Supressing the global variable use to allow passing DSC the reboot message
     [CmdletBinding()]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidGlobalVars", "")]
     param
     (
-        [parameter(Mandatory = $true)]  
-        [System.String] 
+        [Parameter(Mandatory = $true)]
+        [ValidateSet('Yes')]
+        [String]
+        $IsSingleInstance,
+
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $BinaryDir,
 
-        [parameter(Mandatory = $true)]  
-        [System.String] 
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $ProductKey,
 
-        [parameter(Mandatory = $false)] 
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $InstallPath,
 
-        [parameter(Mandatory = $false)] 
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $DataPath,
 
-        [parameter(Mandatory = $false)] 
-        [ValidateSet("Present","Absent")] 
-        [System.String] 
+        [Parameter()]
+        [ValidateSet("Present","Absent")]
+        [System.String]
         $Ensure = "Present"
     )
 
-    if ($Ensure -eq "Absent") 
+    Write-Verbose -Message "Setting install status of SharePoint"
+
+    if ($Ensure -eq "Absent")
     {
         throw [Exception] ("SharePointDsc does not support uninstalling SharePoint or " + `
                            "its prerequisites. Please remove this manually.")
-        return
     }
-    
-    $InstallerPath = Join-Path $BinaryDir "setup.exe"
-    $majorVersion = (Get-SPDSCAssemblyVersion -PathToAssembly $InstallerPath)
-    if ($majorVersion -eq 15) 
+
+    Write-Verbose -Message "Check if Binary folder exists"
+    if (-not(Test-Path -Path $BinaryDir))
     {
-        $ndp = Get-ChildItem 'HKLM:\SOFTWARE\Microsoft\NET Framework Setup\NDP'
-        $dotNet46Check = $ndp | Get-ItemProperty -name Version,Release -EA 0 `
-                              | Where-Object -FilterScript { 
-                                  $_.PSChildName -match '^(?!S)\p{L}' -and $_.Version -like "4.6.*"
-                                }
-        if ($null -ne $dotNet46Check -and $dotNet46Check.Length -gt 0) 
+        throw "Specified path cannot be found: {$BinaryDir}"
+    }
+
+    $InstallerPath = Join-Path -Path $BinaryDir -ChildPath "setup.exe"
+    if (-not(Test-Path -Path $InstallerPath))
+    {
+        throw "Setup.exe cannot be found in {$BinaryDir}"
+    }
+
+    $majorVersion  = (Get-SPDscAssemblyVersion -PathToAssembly $InstallerPath)
+    if ($majorVersion -eq 15)
+    {
+        $svrsetupDll = Join-Path -Path $BinaryDir -ChildPath "updates\svrsetup.dll"
+        $checkDotNet = $true
+        if (Test-Path -Path $svrsetupDll)
         {
-            throw [Exception] ("A known issue prevents installation of SharePoint 2013 on " + `
-                               "servers that have .NET 4.6 already installed. See details " + `
-                               "at https://support.microsoft.com/en-us/kb/3087184")
-            return
-        }    
+            $svrsetupDllFileInfo = Get-ItemProperty -Path $svrsetupDll
+            $fileVersion = $svrsetupDllFileInfo.VersionInfo.FileVersion
+            if ($fileVersion -ge "15.0.4709.1000")
+            {
+                $checkDotNet = $false
+            }
+        }
+
+        if ($checkDotNet -eq $true)
+        {
+            $ndpKey = "HKLM:\SOFTWARE\Microsoft\NET Framework Setup\NDP\v4"
+            $dotNet46Installed = $false
+            if (Test-Path -Path $ndpKey)
+            {
+                $dotNetv4Keys = Get-ChildItem -Path $ndpKey
+                foreach ($dotnetInstance in $dotNetv4Keys)
+                {
+                    if ($dotnetInstance.GetValue("Release") -ge 390000)
+                    {
+                        $dotNet46Installed = $true
+                        break
+                    }
+                }
+            }
+
+            if ($dotNet46Installed -eq $true)
+            {
+                throw [Exception] ("A known issue prevents installation of SharePoint 2013 on " + `
+                                   "servers that have .NET 4.6 already installed. See details " + `
+                                   "at https://support.microsoft.com/en-us/kb/3087184")
+                return
+            }
+        }
+    }
+
+    Write-Verbose -Message "Checking file status of $InstallerPath"
+    $checkBlockedFile = $true
+    if (Split-Path -Path $InstallerPath -IsAbsolute)
+    {
+        $driveLetter = (Split-Path -Path $InstallerPath -Qualifier).TrimEnd(":")
+        Write-Verbose -Message "BinaryDir refers to drive $driveLetter"
+
+        $volume = Get-Volume -DriveLetter $driveLetter -ErrorAction SilentlyContinue
+        if ($null -ne $volume)
+        {
+            if ($volume.DriveType -ne "CD-ROM")
+            {
+                Write-Verbose -Message "Volume is a fixed drive: Perform Blocked File test"
+            }
+            else
+            {
+                Write-Verbose -Message "Volume is a CD-ROM drive: Skipping Blocked File test"
+                $checkBlockedFile = $false
+            }
+        }
+        else
+        {
+            Write-Verbose -Message "Volume not found. Unable to determine the type. Continuing."
+        }
+    }
+
+    if ($checkBlockedFile -eq $true)
+    {
+        Write-Verbose -Message "Checking status now"
+        $zone = Get-Item -Path $InstallerPath -Stream "Zone.Identifier" -EA SilentlyContinue
+        if ($null -ne $zone)
+        {
+            throw ("Setup file is blocked! Please use 'Unblock-File -Path $InstallerPath' " + `
+                   "to unblock the file before continuing.")
+        }
+        Write-Verbose -Message "File not blocked, continuing."
+    }
+
+    Write-Verbose -Message "Checking if Path is an UNC path"
+    $uncInstall = $false
+    if ($BinaryDir.StartsWith("\\"))
+    {
+        Write-Verbose -Message ("Specified BinaryDir is an UNC path. Adding servername to Local " +
+                                "Intranet Zone")
+
+        $uncInstall = $true
+
+        if ($BinaryDir -match "\\\\(.*?)\\.*")
+        {
+            $serverName = $Matches[1]
+        }
+        else
+        {
+            throw "Cannot extract servername from UNC path. Check if it is in the correct format."
+        }
+
+        Set-SPDscZoneMap -Server $serverName
     }
 
     Write-Verbose -Message "Writing install config file"
 
-    $configPath = "$env:temp\SPInstallConfig.xml" 
+    $configPath = Join-Path -Path $env:temp -ChildPath "SPInstallConfig.xml"
 
     $configData = "<Configuration>
     <Package Id=`"sts`">
@@ -132,12 +293,12 @@ function Set-TargetResource
     <Display Level=`"none`" CompletionNotice=`"no`" />
 "
 
-    if ($PSBoundParameters.ContainsKey("InstallPath") -eq $true) 
+    if ($PSBoundParameters.ContainsKey("InstallPath") -eq $true)
     {
         $configData += "    <INSTALLLOCATION Value=`"$InstallPath`" />
 "
     }
-    if ($PSBoundParameters.ContainsKey("DataPath") -eq $true) 
+    if ($PSBoundParameters.ContainsKey("DataPath") -eq $true)
     {
         $configData += "    <DATADIR Value=`"$DataPath`"/>
 "
@@ -151,17 +312,23 @@ function Set-TargetResource
     $configData | Out-File -FilePath $configPath
 
     Write-Verbose -Message "Beginning installation of SharePoint"
-    
+
     $setupExe = Join-Path -Path $BinaryDir -ChildPath "setup.exe"
-    
+
     $setup = Start-Process -FilePath $setupExe `
                            -ArgumentList "/config `"$configPath`"" `
                            -Wait `
                            -PassThru
 
-    switch ($setup.ExitCode) 
+    if ($uncInstall -eq $true)
     {
-        0 {  
+        Write-Verbose -Message "Removing added path from the Local Intranet Zone"
+        Remove-SPDscZoneMap -ServerName $serverName
+    }
+
+    switch ($setup.ExitCode)
+    {
+        0 {
             Write-Verbose -Message "SharePoint binary installation complete"
             $global:DSCMachineStatus = 1
         }
@@ -171,16 +338,19 @@ function Set-TargetResource
             $pr2 = ("HKLM:\Software\Microsoft\Windows\CurrentVersion\" + `
                     "WindowsUpdate\Auto Update\RebootRequired")
             $pr3 = "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager"
-            if (    ($null -ne (Get-Item $pr1 -ErrorAction SilentlyContinue)) `
-                -or ($null -ne (Get-Item $pr2 -ErrorAction SilentlyContinue)) `
-                -or ((Get-Item $pr3 | Get-ItemProperty).PendingFileRenameOperations.count -gt 0) `
-                ) {
-                    
-                Write-Verbose -Message ("xSPInstall has detected the server has pending " + `
+            if (    ($null -ne (Get-Item -Path $pr1 -ErrorAction SilentlyContinue)) `
+                -or ($null -ne (Get-Item -Path $pr2 -ErrorAction SilentlyContinue)) `
+                -or ((Get-Item -Path $pr3 | Get-ItemProperty).PendingFileRenameOperations.count -gt 0) `
+                )
+            {
+
+                Write-Verbose -Message ("SPInstall has detected the server has pending " + `
                                         "a reboot. Flagging to the DSC engine that the " + `
                                         "server should reboot before continuing.")
                 $global:DSCMachineStatus = 1
-            } else {
+            }
+            else
+            {
                 throw ("SharePoint installation has failed due to an issue with prerequisites " + `
                        "not being installed correctly. Please review the setup logs.")
             }
@@ -198,39 +368,47 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [parameter(Mandatory = $true)]  
-        [System.String] 
+        [Parameter(Mandatory = $true)]
+        [ValidateSet('Yes')]
+        [String]
+        $IsSingleInstance,
+
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $BinaryDir,
 
-        [parameter(Mandatory = $true)]  
-        [System.String] 
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $ProductKey,
 
-        [parameter(Mandatory = $false)] 
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $InstallPath,
 
-        [parameter(Mandatory = $false)] 
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $DataPath,
 
-        [parameter(Mandatory = $false)] 
-        [ValidateSet("Present","Absent")] 
-        [System.String] 
+        [Parameter()]
+        [ValidateSet("Present","Absent")]
+        [System.String]
         $Ensure = "Present"
     )
 
-    if ($Ensure -eq "Absent") 
+    Write-Verbose -Message "Testing install status of SharePoint"
+
+    $PSBoundParameters.Ensure = $Ensure
+
+    if ($Ensure -eq "Absent")
     {
         throw [Exception] ("SharePointDsc does not support uninstalling SharePoint or " + `
                            "its prerequisites. Please remove this manually.")
-        return
     }
 
-    $PSBoundParameters.Ensure = $Ensure
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
-    Write-Verbose -Message "Testing for installation of SharePoint"
+    Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
+    Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
 
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
                                     -DesiredValues $PSBoundParameters `

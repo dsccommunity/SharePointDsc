@@ -1,10 +1,10 @@
 <#
 .EXAMPLE
-    This example shows how to ensure that the Business Data Connectivity Service 
-    is not running on the local server. 
+    This example shows how to ensure that the Business Data Connectivity Service
+    is not running on the local server.
 #>
 
-    Configuration Example 
+    Configuration Example
     {
         param(
             [Parameter(Mandatory = $true)]
@@ -15,10 +15,10 @@
 
         node localhost {
             SPServiceInstance StopBCSServiceInstance
-            {  
-                Name           = "Business Data Connectivity Service"
-                Ensure         = "Absent"
-                InstallAccount = $SetupAccount
+            {
+                Name                 = "Business Data Connectivity Service"
+                Ensure               = "Absent"
+                PsDscRunAsCredential = $SetupAccount
             }
         }
     }

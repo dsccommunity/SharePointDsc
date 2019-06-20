@@ -5,7 +5,7 @@
     are able to be set to anything.
 #>
 
-    Configuration Example 
+    Configuration Example
     {
         param(
             [Parameter(Mandatory = $true)]
@@ -17,11 +17,11 @@
         node localhost {
             SPSecureStoreServiceApp SecureStoreServiceApp
             {
-                Name            = "Secure Store Service Application"
-                ApplicationPool = "n/a"
-                AuditingEnabled = $false
-                InstallAccount  = $SetupAccount
-                Ensure          = "Absent"
+                Name                 = "Secure Store Service Application"
+                ApplicationPool      = "n/a"
+                AuditingEnabled      = $false
+                Ensure               = "Absent"
+                PsDscRunAsCredential = $SetupAccount
             }
         }
     }

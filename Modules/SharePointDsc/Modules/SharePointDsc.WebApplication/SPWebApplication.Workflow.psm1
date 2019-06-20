@@ -1,9 +1,9 @@
-function Get-SPDSCWebApplicationWorkflowConfig 
+function Get-SPDscWebApplicationWorkflowConfig
 {
     [CmdletBinding()]
     [OutputType([System.Collections.Hashtable])]
     param(
-        [parameter(Mandatory = $true)] 
+        [Parameter(Mandatory = $true)]
         $WebApplication
     )
     return @{
@@ -16,45 +16,45 @@ function Get-SPDSCWebApplicationWorkflowConfig
     }
 }
 
-function Set-SPDSCWebApplicationWorkflowConfig 
+function Set-SPDscWebApplicationWorkflowConfig
 {
     [CmdletBinding()]
     param(
-        [parameter(Mandatory = $true)] 
+        [Parameter(Mandatory = $true)]
         $WebApplication,
 
-        [parameter(Mandatory = $true)] 
+        [Parameter(Mandatory = $true)]
         $Settings
     )
-    if ($Settings.ContainsKey("UserDefinedWorkflowsEnabled") -eq $true) 
+    if ($Settings.ContainsKey("UserDefinedWorkflowsEnabled") -eq $true)
     {
         $WebApplication.UserDefinedWorkflowsEnabled = `
             $Settings.UserDefinedWorkflowsEnabled;
     }
-    if ($Settings.ContainsKey("EmailToNoPermissionWorkflowParticipantsEnable") -eq $true) 
+    if ($Settings.ContainsKey("EmailToNoPermissionWorkflowParticipantsEnable") -eq $true)
     {
         $WebApplication.EmailToNoPermissionWorkflowParticipantsEnabled = `
             $Settings.EmailToNoPermissionWorkflowParticipantsEnable;
     }
-    if ($Settings.ContainsKey("ExternalWorkflowParticipantsEnabled") -eq $true) 
+    if ($Settings.ContainsKey("ExternalWorkflowParticipantsEnabled") -eq $true)
     {
         $WebApplication.ExternalWorkflowParticipantsEnabled = `
             $Settings.ExternalWorkflowParticipantsEnabled;
-    }                
+    }
     $WebApplication.UpdateWorkflowConfigurationSettings();
 }
 
-function Test-SPDSCWebApplicationWorkflowConfig {
+function Test-SPDscWebApplicationWorkflowConfig {
     [CmdletBinding()]
     [OutputType([System.Boolean])]
     param(
-        [parameter(Mandatory = $true)] 
+        [Parameter(Mandatory = $true)]
         $CurrentSettings,
 
-        [parameter(Mandatory = $true)] 
+        [Parameter(Mandatory = $true)]
         $DesiredSettings
     )
-    
+
     $relPath = "..\..\Modules\SharePointDsc.Util\SharePointDsc.Util.psm1"
     Import-Module (Join-Path $PSScriptRoot $relPath -Resolve)
     $valuesTocheck = @("UserDefinedWorkflowsEnabled",

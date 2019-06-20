@@ -2,22 +2,59 @@
     "version": "0.3.0",
     "configurations": [
         {
+            "type": "PowerShell",
+            "request": "launch",
+            "name": "Run current unit test (SP2013)",
+            "script": "${file}",
+            "args": [
+                "${workspaceRoot}/Tests/Unit/Stubs/SharePoint/15.0.4805.1000/Microsoft.SharePoint.PowerShell.psm1"
+            ],
+            "cwd": "${file}",
+            "createTemporaryIntegratedConsole": true
+        },
+        {
+            "type": "PowerShell",
+            "request": "launch",
+            "name": "Run current unit test (SP2016)",
+            "script": "${file}",
+            "args": [
+                "${workspaceRoot}/Tests/Unit/Stubs/SharePoint/16.0.4456.1000/Microsoft.SharePoint.PowerShell.psm1"
+            ],
+            "cwd": "${file}",
+            "createTemporaryIntegratedConsole": true
+        },
+        {
+            "type": "PowerShell",
+            "request": "launch",
+            "name": "Run current unit test (SP2019)",
+            "script": "${file}",
+            "args": [
+                "${workspaceRoot}/Tests/Unit/Stubs/SharePoint/16.0.10337.12109/Microsoft.SharePoint.PowerShell.psm1"
+            ],
+            "cwd": "${file}",
+            "createTemporaryIntegratedConsole": true
+        },
+        {
             "name": "Debug current file",
             "type": "PowerShell",
             "request": "launch",
-            "program": "${file}"
+            "script": "${file}",
+            "cwd": "${file}",
+            "createTemporaryIntegratedConsole": true
         },
         {
             "name": "Run core DSC resource tests only",
             "type": "PowerShell",
             "request": "launch",
-            "program": "${workspaceRoot}/.vscode/RunGlobalTests.ps1"
+            "script": "${workspaceRoot}/.vscode/RunGlobalTests.ps1",
+            "createTemporaryIntegratedConsole": true
         },
         {
             "name": "Run all tests",
             "type": "PowerShell",
             "request": "launch",
-            "program": "${workspaceRoot}/.vscode/RunPesterTests.ps1"
+            "script": "${workspaceRoot}/.vscode/RunPesterTests.ps1",
+            "createTemporaryIntegratedConsole": true
         }
     ]
 }

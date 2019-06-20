@@ -4,7 +4,7 @@
     specifically matches this list.
 #>
 
-    Configuration Example 
+    Configuration Example
     {
         param(
             [Parameter(Mandatory = $true)]
@@ -16,7 +16,7 @@
         node localhost {
             SPWebAppBlockedFileTypes PrimaryWebAppBlockedFileTypes
             {
-                Url                    = "http://exmaple.contoso.local"
+                WebAppUrl              = "http://example.contoso.local"
                 Blocked                = @("exe", "dll", "msi")
                 PsDscRunAsCredential   = $SetupAccount
             }

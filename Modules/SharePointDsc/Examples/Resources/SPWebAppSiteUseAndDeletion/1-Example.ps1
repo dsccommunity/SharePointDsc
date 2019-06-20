@@ -1,9 +1,9 @@
 <#
 .EXAMPLE
-    This example shows how to apply site use and deletion settings to the specified web applicaiton
+    This example shows how to apply site use and deletion settings to the specified web application
 #>
 
-    Configuration Example 
+    Configuration Example
     {
         param(
             [Parameter(Mandatory = $true)]
@@ -15,7 +15,7 @@
         node localhost {
             SPWebAppSiteUseAndDeletion ConfigureSiteUseAndDeletion
             {
-                Url                                      = "http://example.contoso.local"
+                WebAppUrl                                = "http://example.contoso.local"
                 SendUnusedSiteCollectionNotifications    = $true
                 UnusedSiteNotificationPeriod             = 90
                 AutomaticallyDeleteUnusedSiteCollections = $true

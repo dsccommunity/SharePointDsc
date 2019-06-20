@@ -3,7 +3,7 @@
     This example shows how to deploy the Managed Metadata service app to the local SharePoint farm.
 #>
 
-    Configuration Example 
+    Configuration Example
     {
         param(
             [Parameter(Mandatory = $true)]
@@ -14,12 +14,12 @@
 
         node localhost {
             SPManagedMetaDataServiceApp ManagedMetadataServiceApp
-            {  
-                Name              = "Managed Metadata Service Application"
-                InstallAccount    = $SetupAccount
-                ApplicationPool   = "SharePoint Service Applications"
-                DatabaseServer    = "SQL.contoso.local"
-                DatabaseName      = "SP_ManagedMetadata"
+            {
+                Name                 = "Managed Metadata Service Application"
+                ApplicationPool      = "SharePoint Service Applications"
+                DatabaseServer       = "SQL.contoso.local"
+                DatabaseName         = "SP_ManagedMetadata"
+                PsDscRunAsCredential = $SetupAccount
             }
         }
     }

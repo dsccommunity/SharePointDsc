@@ -11,7 +11,7 @@ $RepoRoot = (Resolve-Path $PSScriptRoot\..\..\..).Path
 Import-Module (Join-Path $RepoRoot "Modules\SharePointDsc\SharePointDsc.psd1")
 
 Describe -Tags @("PostFarm") "SPAntivirusSettings - Integration Tests" {
-    Context "Applies AV settings" {
+    Context -Name "Applies AV settings" {
         It "Apply settings to the local farm" {
             $configName = "SPAntivirusSettings_ApplySettings"
             Configuration $configName {

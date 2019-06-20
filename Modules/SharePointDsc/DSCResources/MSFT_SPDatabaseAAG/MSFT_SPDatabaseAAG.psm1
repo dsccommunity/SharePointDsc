@@ -4,38 +4,124 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [parameter(Mandatory = $true)]  [System.String] $DatabaseName,
-        [parameter(Mandatory = $true)]  [System.String] $AGName,
-        [parameter(Mandatory = $false)] [System.String] $FileShare,
-        [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] [System.String] $Ensure = "Present",
-        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
+        [Parameter(Mandatory = $true)]
+        [System.String]
+        $DatabaseName,
+
+        [Parameter(Mandatory = $true)]
+        [System.String]
+        $AGName,
+
+        [Parameter()]
+        [System.String]
+        $FileShare,
+
+        [Parameter()]
+        [ValidateSet("Present","Absent")]
+        [System.String]
+        $Ensure = "Present",
+
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
+        $InstallAccount
     )
 
-    Write-Verbose -Message "Getting current AAG config for $DatabaseName"
+    Write-Verbose -Message "Getting AAG configuration for $DatabaseName"
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
-        $params = $args[0]
-        
-        $database = Get-SPDatabase | Where-Object { $_.Name -eq $params.DatabaseName }
+    # Check if the April 2014 CU has been installed. The cmdlets have been added in this CU
+    if ((Get-SPDscInstalledProductVersion).FileMajorPart -eq 15 `
+        -and (Get-SPDscInstalledProductVersion).FileBuildPart -lt 4605)
+    {
+        throw [Exception] ("Adding databases to SQL Always-On Availability Groups " + `
+                           "require the SharePoint 2013 April 2014 CU to be installed. " + `
+                           "http://support.microsoft.com/kb/2880551")
+    }
 
-        $Ensure = "Absent"
-        $AGName = $params.AGName
-        if ($null -ne $database) {
-            $ag = $database.AvailabilityGroup
-            if ($null -ne $ag) {
-                $AGName = $ag.Name
-                if ($ag.Name -eq $params.AGName) {
-                    $Ensure = "Present"
+    if ($Ensure -eq "Present")
+    {
+        Write-Verbose -Message "Database(s) must be included in AAG $AGName"
+        $result = Invoke-SPDscCommand -Credential $InstallAccount `
+                                      -Arguments ($PSBoundParameters) `
+                                      -ScriptBlock {
+            $params = $args[0]
+
+            $Ensure = "Present"
+            $databases = Get-SPDatabase | Where-Object -FilterScript {
+                $_.Name -like $params.DatabaseName
+            }
+
+            $dbname = $params.DatabaseName
+            if ($null -ne $databases)
+            {
+                foreach ($database in $databases)
+                {
+                    $ag = $database.AvailabilityGroup
+                    if ($null -ne $ag)
+                    {
+                        if ($ag.Name -ne $params.AGName)
+                        {
+                            $Ensure = "Absent"
+                        }
+                    }
+                    else
+                    {
+                        $Ensure = "Absent"
+                    }
                 }
             }
-        }
+            else
+            {
+                Write-Verbose -Message "Specified database(s) not found."
+                $dbname = ""
+            }
 
-        return @{
-            DatabaseName = $params.DatabaseName
-            AGName = $AGName
-            FileShare = $params.FileShare
-            Ensure = $Ensure
-            InstallAccount = $params.InstallAccount
+            return @{
+                DatabaseName = $dbname
+                AGName = $params.AGName
+                FileShare = $params.FileShare
+                Ensure = $Ensure
+                InstallAccount = $params.InstallAccount
+            }
+        }
+    }
+    else
+    {
+        Write-Verbose -Message "Database(s) must not be included in an AAG $AGName"
+        $result = Invoke-SPDscCommand -Credential $InstallAccount `
+                                    -Arguments $PSBoundParameters `
+                                    -ScriptBlock {
+            $params = $args[0]
+
+            $Ensure = "Absent"
+            $databases = Get-SPDatabase | Where-Object -FilterScript {
+                $_.Name -like $params.DatabaseName
+            }
+
+            $dbname = $params.DatabaseName
+            if ($null -ne $databases)
+            {
+                foreach ($database in $databases)
+                {
+                    $ag = $database.AvailabilityGroup
+                    if ($null -ne $ag)
+                    {
+                        $Ensure = "Present"
+                    }
+                }
+            }
+            else
+            {
+                Write-Verbose -Message "Specified database(s) not found."
+                $dbname = ""
+            }
+
+            return @{
+                DatabaseName = $dbname
+                AGName = $params.AGName
+                FileShare = $params.FileShare
+                Ensure = $Ensure
+                InstallAccount = $params.InstallAccount
+            }
         }
     }
     return $result
@@ -46,59 +132,122 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true)]  [System.String] $DatabaseName,
-        [parameter(Mandatory = $true)]  [System.String] $AGName,
-        [parameter(Mandatory = $false)] [System.String] $FileShare,
-        [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] [System.String] $Ensure = "Present",
-        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
+        [Parameter(Mandatory = $true)]
+        [System.String]
+        $DatabaseName,
+
+        [Parameter(Mandatory = $true)]
+        [System.String]
+        $AGName,
+
+        [Parameter()]
+        [System.String]
+        $FileShare,
+
+        [Parameter()]
+        [ValidateSet("Present","Absent")]
+        [System.String]
+        $Ensure = "Present",
+
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
+        $InstallAccount
     )
 
-    Write-Verbose -Message "Setting AAG config for $DatabaseName"
+    Write-Verbose -Message "Setting AAG configuration for $DatabaseName"
 
-    $CurrentValues = Get-TargetResource @PSBoundParameters
+    # Check if the April 2014 CU has been installed. The cmdlets have been added in this CU
+    if ((Get-SPDscInstalledProductVersion).FileMajorPart -eq 15 `
+        -and (Get-SPDscInstalledProductVersion).FileBuildPart -lt 4605)
+    {
+        throw [Exception] ("Adding databases to SQL Always-On Availability Groups " + `
+                           "require the SharePoint 2013 April 2014 CU to be installed. " + `
+                           "http://support.microsoft.com/kb/2880551")
+    }
 
-    # Move to a new AG
-    if ($CurrentValues.AGName -ne $AGName -and $Ensure -eq "Present") {
-        Write-Verbose -Message "Moving $DatabaseName from previous AAG to $AGName"
-        Invoke-SPDSCCommand -Credential $InstallAccount -Arguments ($PSBoundParameters, $CurrentValues) -ScriptBlock {
+    if ($Ensure -eq "Present")
+    {
+        Write-Verbose -Message "Checking AAG settings for $DatabaseName"
+        Invoke-SPDscCommand -Credential $InstallAccount `
+                            -Arguments ($PSBoundParameters) `
+                            -ScriptBlock {
             $params = $args[0]
-            $CurrentValues = $args[1]
-            
-            # Remove it from the current AAG first
-            Remove-DatabaseFromAvailabilityGroup -AGName $CurrentValues.AGName -DatabaseName $params.DatabaseName -Force
 
-            # Now add it to the AAG it's meant to be in
-            $addParams = @{
-                AGName = $params.AGName
-                DatabaseName = $params.DatabaseName
+            $databases = Get-SPDatabase | Where-Object -FilterScript {
+                $_.Name -like $params.DatabaseName
             }
-            if ($params.ContainsKey("FileShare")) {
-                $addParams.Add("FileShare", $params.FileShare)
+
+            if ($null -ne $databases)
+            {
+                foreach ($database in $databases)
+                {
+                    $ag = $database.AvailabilityGroup
+                    if ($null -ne $ag)
+                    {
+                        if ($ag.Name -ne $params.AGName)
+                        {
+                            # Remove it from the current AAG first
+                            Remove-DatabaseFromAvailabilityGroup -AGName $params.AGName `
+                                                                 -DatabaseName $database.Name `
+                                                                 -Force
+
+                            # Now add it to the AAG it's meant to be in
+                            $addParams = @{
+                                AGName = $params.AGName
+                                DatabaseName = $database.Name
+                            }
+                            if ($params.ContainsKey("FileShare"))
+                            {
+                                $addParams.Add("FileShare", $params.FileShare)
+                            }
+                            Add-DatabaseToAvailabilityGroup @addParams
+                        }
+                    }
+                    else
+                    {
+                        Write-Verbose -Message "Adding $DatabaseName to $AGName"
+                        $cmdParams = @{
+                            AGName = $params.AGName
+                            DatabaseName = $database.Name
+                        }
+                        if ($params.ContainsKey("FileShare"))
+                        {
+                            $cmdParams.Add("FileShare", $params.FileShare)
+                        }
+                        Add-DatabaseToAvailabilityGroup @cmdParams
+                    }
+                }
             }
-            Add-DatabaseToAvailabilityGroup @addParams
+            else
+            {
+                throw "Specified database(s) not found."
+            }
         }
-    } else {
-        if ($Ensure -eq "Present") {
-            # Add to AG
-            Write-Verbose -Message "Adding $DatabaseName from $AGName"
-            Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
-                $params = $args[0]
+    }
+    else
+    {
+        Write-Verbose -Message "Removing $DatabaseName from $AGName"
+        Invoke-SPDscCommand -Credential $InstallAccount `
+                            -Arguments $PSBoundParameters `
+                            -ScriptBlock {
+            $params = $args[0]
 
-                $cmdParams = @{
-                    AGName = $params.AGName
-                    DatabaseName = $params.DatabaseName
-                }
-                if ($params.ContainsKey("FileShare")) {
-                    $cmdParams.Add("FileShare", $params.FileShare)
-                }
-                Add-DatabaseToAvailabilityGroup @cmdParams
+            $databases = Get-SPDatabase | Where-Object -FilterScript {
+                $_.Name -like $params.DatabaseName
             }
-        } else {
-            # Remove from the AG
-            Write-Verbose -Message "Removing $DatabaseName from $AGName"
-            Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
-                $params = $args[0]
-                Remove-DatabaseFromAvailabilityGroup -AGName $params.AGName -DatabaseName $params.DatabaseName -Force
+
+            if ($null -ne $databases)
+            {
+                foreach ($database in $databases)
+                {
+                    Remove-DatabaseFromAvailabilityGroup -AGName $params.AGName `
+                                                         -DatabaseName $database.Name `
+                                                         -Force
+                }
+            }
+            else
+            {
+                throw "Specified database(s) not found."
             }
         }
     }
@@ -110,18 +259,39 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [parameter(Mandatory = $true)]  [System.String] $DatabaseName,
-        [parameter(Mandatory = $true)]  [System.String] $AGName,
-        [parameter(Mandatory = $false)] [System.String] $FileShare,
-        [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] [System.String] $Ensure = "Present",
-        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
+        [Parameter(Mandatory = $true)]
+        [System.String]
+        $DatabaseName,
+
+        [Parameter(Mandatory = $true)]
+        [System.String]
+        $AGName,
+
+        [Parameter()]
+        [System.String]
+        $FileShare,
+
+        [Parameter()]
+        [ValidateSet("Present","Absent")]
+        [System.String]
+        $Ensure = "Present",
+
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
+        $InstallAccount
     )
 
+    Write-Verbose -Message "Testing AAG configuration for $DatabaseName"
+
     $PSBoundParameters.Ensure = $Ensure
+
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
-    Write-Verbose -Message "Checking AAG configuration for $DatabaseName"
-    
-    return Test-SPDscParameterState -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("Ensure", "AGName")
+    Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
+    Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
+
+    return Test-SPDscParameterState -CurrentValues $CurrentValues `
+                                    -DesiredValues $PSBoundParameters `
+                                    -ValuesToCheck @("Ensure", "DatabaseName")
 }
 

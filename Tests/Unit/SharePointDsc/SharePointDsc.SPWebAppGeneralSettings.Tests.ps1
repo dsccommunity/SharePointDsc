@@ -1,58 +1,63 @@
 [CmdletBinding()]
 param(
-    [string] $SharePointCmdletModule = (Join-Path $PSScriptRoot "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" -Resolve)
+    [Parameter()]
+    [string]
+    $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
+                                         -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
+                                         -Resolve)
 )
 
-$ErrorActionPreference = 'stop'
-Set-StrictMode -Version latest
+Import-Module -Name (Join-Path -Path $PSScriptRoot `
+                                -ChildPath "..\UnitTestHelper.psm1" `
+                                -Resolve)
 
-$RepoRoot = (Resolve-Path $PSScriptRoot\..\..\..).Path
-$Global:CurrentSharePointStubModule = $SharePointCmdletModule 
+$Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointCmdletModule `
+                                              -DscResource "SPWebAppGeneralSettings"
 
-$ModuleName = "MSFT_SPWebAppGeneralSettings"
-Import-Module (Join-Path $RepoRoot "Modules\SharePointDsc\DSCResources\$ModuleName\$ModuleName.psm1") -Force
+Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
+    InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
+        Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
-Describe "SPWebAppGeneralSettings - SharePoint Build $((Get-Item $SharePointCmdletModule).Directory.BaseName)" {
-    InModuleScope $ModuleName {
-        $testParams = @{
-            Url = "http://sites.sharepoint.com"
-            TimeZone = 3081
-            Alerts = $true
-            AlertsLimit = 10
-            RSS = $true
-            BlogAPI = $true
-            BlogAPIAuthenticated = $true
-            BrowserFileHandling = "Permissive"
-            SecurityValidation = $true
-            SecurityValidationExpires = $true
-            SecurityValidationTimeoutMinutes = 10
-            RecycleBinEnabled = $true
-            RecycleBinCleanupEnabled = $true
-            RecycleBinRetentionPeriod = 30
-            SecondStageRecycleBinQuota = 30
-            MaximumUploadSize = 100
-            CustomerExperienceProgram = $true
-            PresenceEnabled = $true
+        # Initialize tests
+
+        # Mocks for all contexts
+        Mock -CommandName New-SPAuthenticationProvider -MockWith { }
+        Mock -CommandName New-SPWebApplication -MockWith { }
+        Mock -CommandName Get-SPAuthenticationProvider -MockWith {
+            return @{
+                DisableKerberos = $true
+                AllowAnonymous = $false
+            }
         }
-        
-        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..\..).Path) "Modules\SharePointDsc")
-        
-        Mock Invoke-SPDSCCommand { 
-            return Invoke-Command -ScriptBlock $ScriptBlock -ArgumentList $Arguments -NoNewScope
-        }
-        
-        Remove-Module -Name "Microsoft.SharePoint.PowerShell" -Force -ErrorAction SilentlyContinue
-        Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue
-        
-        Mock New-SPAuthenticationProvider { }
-        Mock New-SPWebApplication { }
-        Mock Get-SPAuthenticationProvider { return @{ DisableKerberos = $true; AllowAnonymous = $false } }
 
-        Context "The web appliation exists and has the correct general settings" {
-            Mock Get-SPWebApplication { 
+        # Test contexts
+        Context -Name "The web application exists and has the correct general settings" -Fixture {
+            $testParams = @{
+                WebAppUrl = "http://sites.sharepoint.com"
+                TimeZone = 3081
+                Alerts = $true
+                AlertsLimit = 10
+                RSS = $true
+                BlogAPI = $true
+                BlogAPIAuthenticated = $true
+                BrowserFileHandling = "Permissive"
+                SecurityValidation = $true
+                SecurityValidationExpires = $true
+                SecurityValidationTimeoutMinutes = 10
+                RecycleBinEnabled = $true
+                RecycleBinCleanupEnabled = $true
+                RecycleBinRetentionPeriod = 30
+                SecondStageRecycleBinQuota = 30
+                MaximumUploadSize = 100
+                CustomerExperienceProgram = $true
+                PresenceEnabled = $true
+                DefaultQuotaTemplate = "Project"
+            }
+
+            Mock -CommandName Get-SPWebapplication -MockWith {
                 $webApp = @{
                     DisplayName = $testParams.Name
-                    ApplicationPool = @{ 
+                    ApplicationPool = @{
                         Name = $testParams.ApplicationPool
                         Username = $testParams.ApplicationPoolAccount
                     }
@@ -62,10 +67,10 @@ Describe "SPWebAppGeneralSettings - SharePoint Build $((Get-Item $SharePointCmdl
                             Server = "sql.domain.local"
                         }
                     )
-                    IisSettings = @( 
+                    IisSettings = @(
                         @{ Path = "C:\inetpub\wwwroot\something" }
                     )
-                    Url = $testParams.Url
+                    Url = $testParams.WebAppUrl
                     DefaultTimeZone = $testParams.TimeZone
                     AlertsEnabled = $testParams.Alerts
                     AlertsMaximum = $testParams.AlertsLimit
@@ -85,27 +90,64 @@ Describe "SPWebAppGeneralSettings - SharePoint Build $((Get-Item $SharePointCmdl
                     MaximumFileSize = $testParams.MaximumUploadSize
                     BrowserCEIPEnabled = $testParams.CustomerExperienceProgram
                     PresenceEnabled = $testParams.PresenceEnabled
+                    DefaultQuotaTemplate = $testParams.DefaultQuotaTemplate
                 }
-                $webApp = $webApp | Add-Member ScriptMethod Update {
-                    $Global:SPWebApplicationUpdateCalled = $true
+                $webApp = $webApp | Add-Member -MemberType ScriptMethod -Name Update -Value {
+                    $Global:SPDscWebApplicationUpdateCalled = $true
                 } -PassThru
                 return @($webApp)
             }
 
-            It "returns the current data from the get method" {
+            It "Should return the current data from the get method" {
                 Get-TargetResource @testParams | Should Not BeNullOrEmpty
             }
 
-            It "returns true from the test method" {
+            It "Should return true from the test method" {
                 Test-TargetResource @testParams | Should Be $true
             }
         }
 
-        Context "The web appliation exists and uses incorrect general settings" {    
-            Mock Get-SPWebApplication { 
+        Context -Name "The web application exists and uses incorrect general settings" -Fixture {
+            $testParams = @{
+                WebAppUrl = "http://sites.sharepoint.com"
+                TimeZone = 3081
+                Alerts = $true
+                AlertsLimit = 10
+                RSS = $true
+                BlogAPI = $true
+                BlogAPIAuthenticated = $true
+                BrowserFileHandling = "Permissive"
+                SecurityValidation = $true
+                SecurityValidationExpires = $true
+                SecurityValidationTimeoutMinutes = 10
+                RecycleBinEnabled = $true
+                RecycleBinCleanupEnabled = $true
+                RecycleBinRetentionPeriod = 30
+                SecondStageRecycleBinQuota = 30
+                MaximumUploadSize = 100
+                CustomerExperienceProgram = $true
+                PresenceEnabled = $true
+                DefaultQuotaTemplate = "Project"
+            }
+
+            Mock -CommandName Get-SPDscContentService -MockWith {
+                $returnVal = @{
+                    QuotaTemplates = @{
+                        Project = @{
+                            StorageMaximumLevel = 1073741824
+                            StorageWarningLevel = 536870912
+                            UserCodeMaximumLevel = 1000
+                            UserCodeWarningLevel = 800
+                        }
+                    }
+                }
+                return $returnVal
+            }
+
+            Mock -CommandName Get-SPWebapplication -MockWith {
                 $webApp = @{
                     DisplayName = $testParams.Name
-                    ApplicationPool = @{ 
+                    ApplicationPool = @{
                         Name = $testParams.ApplicationPool
                         Username = $testParams.ApplicationPoolAccount
                     }
@@ -115,10 +157,10 @@ Describe "SPWebAppGeneralSettings - SharePoint Build $((Get-Item $SharePointCmdl
                             Server = "sql.domain.local"
                         }
                     )
-                    IisSettings = @( 
+                    IisSettings = @(
                         @{ Path = "C:\inetpub\wwwroot\something" }
                     )
-                    Url = $testParams.Url
+                    Url = $testParams.WebAppUrl
                     DefaultTimeZone = 1
                     AlertsEnabled = $false
                     AlertsMaximum = 1
@@ -137,25 +179,147 @@ Describe "SPWebAppGeneralSettings - SharePoint Build $((Get-Item $SharePointCmdl
                     BrowserCEIPEnabled = $false
                     PresenceEnabled = $false
                 }
-                $webApp = $webApp | Add-Member ScriptMethod Update {
-                    $Global:SPWebApplicationUpdateCalled = $true
+                $webApp = $webApp | Add-Member -MemberType ScriptMethod -Name Update -Value {
+                    $Global:SPDscWebApplicationUpdateCalled = $true
                 } -PassThru
                 return @($webApp)
             }
 
-            It "returns the current data from the get method" {
+            It "Should return the current data from the get method" {
                 Get-TargetResource @testParams | Should Not BeNullOrEmpty
             }
 
-            It "returns false from the test method" {
+            It "Should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $false
             }
 
-            $Global:SPWebApplicationUpdateCalled = $false
-            It "updates the general settings" {
+            $Global:SPDscWebApplicationUpdateCalled = $false
+            It "Should update the general settings" {
                 Set-TargetResource @testParams
-                $Global:SPWebApplicationUpdateCalled | Should Be $true
+                $Global:SPDscWebApplicationUpdateCalled | Should Be $true
             }
         }
-    }    
+
+        Context -Name "The specified web application does not exist" -Fixture {
+            $testParams = @{
+                WebAppUrl = "http://sites.sharepoint.com"
+                TimeZone = 3081
+                Alerts = $true
+                AlertsLimit = 10
+                RSS = $true
+                BlogAPI = $true
+                BlogAPIAuthenticated = $true
+                BrowserFileHandling = "Permissive"
+                SecurityValidation = $true
+                SecurityValidationExpires = $true
+                SecurityValidationTimeoutMinutes = 10
+                RecycleBinEnabled = $true
+                RecycleBinCleanupEnabled = $true
+                RecycleBinRetentionPeriod = 30
+                SecondStageRecycleBinQuota = 30
+                MaximumUploadSize = 100
+                CustomerExperienceProgram = $true
+                PresenceEnabled = $true
+                DefaultQuotaTemplate = "NotExist"
+            }
+
+            Mock -CommandName Get-SPWebapplication -MockWith {
+                return @()
+            }
+
+            It "Should return the current data from the get method" {
+                (Get-TargetResource @testParams).TimeZone | Should BeNullOrEmpty
+            }
+
+            It "Should throw an exception" {
+                { Set-TargetResource @testParams } | Should Throw "Web application http://sites.sharepoint.com was not found"
+            }
+        }
+
+        Context -Name "The specified Quota Template does not exist" -Fixture {
+            $testParams = @{
+                WebAppUrl = "http://sites.sharepoint.com"
+                TimeZone = 3081
+                Alerts = $true
+                AlertsLimit = 10
+                RSS = $true
+                BlogAPI = $true
+                BlogAPIAuthenticated = $true
+                BrowserFileHandling = "Permissive"
+                SecurityValidation = $true
+                SecurityValidationExpires = $true
+                SecurityValidationTimeoutMinutes = 10
+                RecycleBinEnabled = $true
+                RecycleBinCleanupEnabled = $true
+                RecycleBinRetentionPeriod = 30
+                SecondStageRecycleBinQuota = 30
+                MaximumUploadSize = 100
+                CustomerExperienceProgram = $true
+                PresenceEnabled = $true
+                DefaultQuotaTemplate = "NotExist"
+            }
+
+            Mock -CommandName Get-SPDscContentService -MockWith {
+                $returnVal = @{
+                    QuotaTemplates = @{
+                        Project = @{
+                            StorageMaximumLevel = 1073741824
+                            StorageWarningLevel = 536870912
+                            UserCodeMaximumLevel = 1000
+                            UserCodeWarningLevel = 800
+                        }
+                    }
+                }
+                return $returnVal
+            }
+
+            Mock -CommandName Get-SPWebapplication -MockWith {
+                $webApp = @{
+                    DisplayName = $testParams.Name
+                    ApplicationPool = @{
+                        Name = $testParams.ApplicationPool
+                        Username = $testParams.ApplicationPoolAccount
+                    }
+                    ContentDatabases = @(
+                        @{
+                            Name = "SP_Content_01"
+                            Server = "sql.domain.local"
+                        }
+                    )
+                    IisSettings = @(
+                        @{ Path = "C:\inetpub\wwwroot\something" }
+                    )
+                    Url = $testParams.WebAppUrl
+                    DefaultTimeZone = 1
+                    AlertsEnabled = $false
+                    AlertsMaximum = 1
+                    SyndicationEnabled = $false
+                    MetaWeblogEnabled = $false
+                    MetaWeblogAuthenticationEnabled = $false
+                    BrowserFileHandling = "Strict"
+                    FormDigestSettings = @{
+                        Enabled = $false
+                    }
+                    RecycleBinEnabled = $false
+                    RecycleBinCleanupEnabled = $false
+                    RecycleBinRetentionPeriod = 1
+                    SecondStageRecycleBinQuota = 1
+                    MaximumFileSize = 1
+                    BrowserCEIPEnabled = $false
+                    PresenceEnabled = $false
+                }
+                $webApp = $webApp | Add-Member -MemberType ScriptMethod -Name Update -Value {
+                    $Global:SPDscWebApplicationUpdateCalled = $true
+                } -PassThru
+                return @($webApp)
+            }
+
+            $Global:SPDscWebApplicationUpdateCalled = $false
+            It "Should throw an exception" {
+                { Set-TargetResource @testParams } | Should Throw "Quota template NotExist was not found"
+            }
+        }
+    }
 }
+
+Invoke-Command -ScriptBlock $Global:SPDscHelper.CleanupScript -NoNewScope

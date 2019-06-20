@@ -4,19 +4,44 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [parameter(Mandatory = $true)]  [System.String] $Name,
-        [parameter(Mandatory = $true)]  [System.String] $ApplicationPool,
-        [parameter(Mandatory = $false)] [System.String] $DatabaseName,
-        [parameter(Mandatory = $false)] [System.String] $DatabaseServer,
-        [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] [System.String] $Ensure = "Present",
-        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
+        [Parameter(Mandatory = $true)]
+        [System.String]
+        $Name,
+
+        [Parameter()]
+        [System.String]
+        $ProxyName,
+
+        [Parameter(Mandatory = $true)]
+        [System.String]
+        $ApplicationPool,
+
+        [Parameter()]
+        [System.String]
+        $DatabaseName,
+
+        [Parameter()]
+        [System.String]
+        $DatabaseServer,
+
+        [Parameter()]
+        [ValidateSet("Present","Absent")]
+        [System.String]
+        $Ensure = "Present",
+
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
+        $InstallAccount
     )
+
     Write-Verbose -Message "Getting BCS service app '$Name'"
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+    $result = Invoke-SPDscCommand -Credential $InstallAccount `
+                                  -Arguments $PSBoundParameters `
+                                  -ScriptBlock {
         $params = $args[0]
-        
-        $serviceApps = Get-SPServiceApplication -Name $params.Name -ErrorAction SilentlyContinue 
+
+        $serviceApps = Get-SPServiceApplication -Name $params.Name -ErrorAction SilentlyContinue
         $nullReturn = @{
             Name = $params.Name
             ApplicationPool = $params.ApplicationPool
@@ -24,20 +49,39 @@ function Get-TargetResource
             DatabaseServer = $null
             Ensure = "Absent"
             InstallAccount = $params.InstallAccount
-        } 
-        if ($null -eq $serviceApps) { 
-            return $nullReturn 
         }
-        $serviceApp = $serviceApps | Where-Object { $_.TypeName -eq "Business Data Connectivity Service Application" }
-
-        If ($null -eq $serviceApp) { 
+        if ($null -eq $serviceApps)
+        {
             return $nullReturn
-        } else {
+        }
+        $serviceApp = $serviceApps | Where-Object -FilterScript {
+            $_.GetType().FullName -eq "Microsoft.SharePoint.BusinessData.SharedService.BdcServiceApplication"
+        }
+
+        if ($null -eq $serviceApp)
+        {
+            return $nullReturn
+        }
+        else
+        {
+            $serviceAppProxies = Get-SPServiceApplicationProxy -ErrorAction SilentlyContinue
+            if ($null -ne $serviceAppProxies)
+            {
+                $serviceAppProxy = $serviceAppProxies | Where-Object -FilterScript {
+                    $serviceApp.IsConnected($_)
+                }
+                if ($null -ne $serviceAppProxy)
+                {
+                    $proxyName = $serviceAppProxy.Name
+                }
+            }
+
             $returnVal =  @{
                 Name = $serviceApp.DisplayName
+                ProxyName = $proxyName
                 ApplicationPool = $serviceApp.ApplicationPool.Name
                 DatabaseName = $serviceApp.Database.Name
-                DatabaseServer = $serviceApp.Database.Server.Name
+                DatabaseServer = $serviceApp.Database.NormalizedDataSource
                 Ensure = "Present"
                 InstallAccount = $params.InstallAccount
             }
@@ -47,64 +91,131 @@ function Get-TargetResource
     return $result
 }
 
-
 function Set-TargetResource
 {
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true)]  [System.String] $Name,
-        [parameter(Mandatory = $true)]  [System.String] $ApplicationPool,
-        [parameter(Mandatory = $false)] [System.String] $DatabaseName,
-        [parameter(Mandatory = $false)] [System.String] $DatabaseServer,
-        [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] [System.String] $Ensure = "Present",
-        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
+        [Parameter(Mandatory = $true)]
+        [System.String]
+        $Name,
+
+        [Parameter()]
+        [System.String]
+        $ProxyName,
+
+        [Parameter(Mandatory = $true)]
+        [System.String]
+        $ApplicationPool,
+
+        [Parameter()]
+        [System.String]
+        $DatabaseName,
+
+        [Parameter()]
+        [System.String]
+        $DatabaseServer,
+
+        [Parameter()]
+        [ValidateSet("Present","Absent")]
+        [System.String]
+        $Ensure = "Present",
+
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
+        $InstallAccount
     )
+
+    Write-Verbose -Message "Setting BCS service app '$Name'"
+
+    if ($Ensure -eq "Present" -and
+        ($PSBoundParameters.ContainsKey("DatabaseName") -eq $false -or
+        $PSBoundParameters.ContainsKey("DatabaseServer") -eq $false))
+    {
+        Throw "Parameter DatabaseName and DatabaseServer are required when Ensure=Present"
+    }
 
     $result = Get-TargetResource @PSBoundParameters
 
-    if ($result.Ensure -eq "Absent" -and $Ensure -eq "Present") {
+    if ($result.Ensure -eq "Absent" -and $Ensure -eq "Present")
+    {
         # The service app doesn't exist but should
-        
         Write-Verbose -Message "Creating BCS Service Application $Name"
-        Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+        Invoke-SPDscCommand -Credential $InstallAccount `
+                            -Arguments $PSBoundParameters `
+                            -ScriptBlock {
             $params = $args[0]
-            
 
-            New-SPBusinessDataCatalogServiceApplication -Name $params.Name `
-                                                        -ApplicationPool $params.ApplicationPool `
-                                                        -DatabaseName $params.DatabaseName `
-                                                        -DatabaseServer $params.DatabaseServer
+            $bcsServiceApp = New-SPBusinessDataCatalogServiceApplication -Name $params.Name `
+                                                                         -ApplicationPool $params.ApplicationPool `
+                                                                         -DatabaseName $params.DatabaseName `
+                                                                         -DatabaseServer $params.DatabaseServer
+
+            if ($params.ContainsKey("ProxyName"))
+            {
+                # The New-SPBusinessDataCatalogServiceApplication cmdlet creates a proxy by default
+                # If a name is specified, we first need to delete the created one
+                $proxies = Get-SPServiceApplicationProxy
+                foreach ($proxyInstance in $proxies)
+                {
+                    if ($bcsServiceApp.IsConnected($proxyInstance))
+                    {
+                        $proxyInstance.Delete()
+                    }
+                }
+
+                New-SPBusinessDataCatalogServiceApplicationProxy -Name $params.ProxyName `
+                                                                 -ServiceApplication $bcsServiceApp | Out-Null
+            }
         }
     }
-    
-    if ($result.Ensure -eq "Present" -and $Ensure -eq "Present") {
+
+    if ($result.Ensure -eq "Present" -and $Ensure -eq "Present")
+    {
         # The service app exists but has the wrong application pool
-        
-        if ($ApplicationPool -ne $result.ApplicationPool) {
+        if ($ApplicationPool -ne $result.ApplicationPool)
+        {
             Write-Verbose -Message "Updating BCS Service Application $Name"
-            Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+            Invoke-SPDscCommand -Credential $InstallAccount `
+                                -Arguments $PSBoundParameters `
+                                -ScriptBlock {
                 $params = $args[0]
-                
 
                 $appPool = Get-SPServiceApplicationPool -Identity $params.ApplicationPool
 
                 Get-SPServiceApplication -Name $params.Name `
-                    | Where-Object { $_.TypeName -eq "Business Data Connectivity Service Application" } `
+                    | Where-Object -FilterScript {
+                        $_.GetType().FullName -eq "Microsoft.SharePoint.BusinessData.SharedService.BdcServiceApplication"
+                    } `
                     | Set-SPBusinessDataCatalogServiceApplication -ApplicationPool $appPool
             }
         }
     }
-    
-    if ($Ensure -eq "Absent") {
+
+    if ($Ensure -eq "Absent")
+    {
         # The service app should not exit
         Write-Verbose -Message "Removing BCS Service Application $Name"
-        Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
-                $params = $args[0]
-                
-                $appService =  Get-SPServiceApplication -Name $params.Name | Where-Object { $_.TypeName -eq "Business Data Connectivity Service Application"  }
-                Remove-SPServiceApplication $appService -Confirm:$false
+        Invoke-SPDscCommand -Credential $InstallAccount `
+                            -Arguments $PSBoundParameters `
+                            -ScriptBlock {
+            $params = $args[0]
+
+            $app = Get-SPServiceApplication -Name $params.Name | Where-Object -FilterScript {
+                $_.GetType().FullName -eq "Microsoft.SharePoint.BusinessData.SharedService.BdcServiceApplication"
             }
+
+            $proxies = Get-SPServiceApplicationProxy
+            foreach ($proxyInstance in $proxies)
+            {
+                if ($app.IsConnected($proxyInstance))
+                {
+                    $proxyInstance.Delete()
+                }
+            }
+
+            Remove-SPServiceApplication -Identity $app -Confirm:$false
+        }
     }
 }
 
@@ -114,20 +225,48 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [parameter(Mandatory = $true)]  [System.String] $Name,
-        [parameter(Mandatory = $true)]  [System.String] $ApplicationPool,
-        [parameter(Mandatory = $false)] [System.String] $DatabaseName,
-        [parameter(Mandatory = $false)] [System.String] $DatabaseServer,
-        [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] [System.String] $Ensure = "Present",
-        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
+        [Parameter(Mandatory = $true)]
+        [System.String]
+        $Name,
+
+        [Parameter()]
+        [System.String]
+        $ProxyName,
+
+        [Parameter(Mandatory = $true)]
+        [System.String]
+        $ApplicationPool,
+
+        [Parameter()]
+        [System.String]
+        $DatabaseName,
+
+        [Parameter()]
+        [System.String]
+        $DatabaseServer,
+
+        [Parameter()]
+        [ValidateSet("Present","Absent")]
+        [System.String]
+        $Ensure = "Present",
+
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
+        $InstallAccount
     )
-    
+
+    Write-Verbose -Message "Testing BCS service app '$Name'"
+
     $PSBoundParameters.Ensure = $Ensure
-    
-    Write-Verbose -Message "Testing for BCS Service Application '$Name'"
+
     $CurrentValues = Get-TargetResource @PSBoundParameters
-    
-    return Test-SPDscParameterState -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("ApplicationPool", "Ensure")
+
+    Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
+    Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
+
+    return Test-SPDscParameterState -CurrentValues $CurrentValues `
+                                    -DesiredValues $PSBoundParameters `
+                                    -ValuesToCheck @("ApplicationPool", "Ensure")
 }
 
 Export-ModuleMember -Function *-TargetResource

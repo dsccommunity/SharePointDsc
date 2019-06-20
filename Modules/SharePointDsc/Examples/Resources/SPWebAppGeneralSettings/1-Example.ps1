@@ -1,10 +1,10 @@
 <#
 .EXAMPLE
-    This example shows how to apply some of the available general settings to the 
+    This example shows how to apply some of the available general settings to the
     specified web app
 #>
 
-    Configuration Example 
+    Configuration Example
     {
         param(
             [Parameter(Mandatory = $true)]
@@ -16,7 +16,7 @@
         node localhost {
             SPWebAppGeneralSettings PrimaryWebAppGeneralSettings
             {
-                Url                    = "http://exmaple.contoso.local"
+                WebAppUrl              = "http://example.contoso.local"
                 TimeZone               = 76
                 Alerts                 = $true
                 RSS                    = $false

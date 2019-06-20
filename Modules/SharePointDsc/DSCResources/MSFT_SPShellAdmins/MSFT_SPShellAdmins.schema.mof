@@ -1,7 +1,7 @@
 [ClassVersion("1.0.0")]
-Class MSFT_SPContentDatabasePermissions
+Class MSFT_SPDatabasePermissions
 {
-    [Key, Description("Name of the Content Database")] String Name;
+    [Key, Description("Name of the Database")] String Name;
     [Write, Description("Exact list of accounts that will have to get Shell Admin permissions")] String Members[];
     [Write, Description("List of all accounts that must be in the Shell Admins group")] String MembersToInclude[];
     [Write, Description("List of all accounts that are not allowed to have Shell Admin permissions")] String MembersToExclude[];
@@ -9,12 +9,13 @@ Class MSFT_SPContentDatabasePermissions
 [ClassVersion("1.0.0.0"), FriendlyName("SPShellAdmins")]
 class MSFT_SPShellAdmins : OMI_BaseResource
 {
-    [Key, Description("Name for the config, used for administration purposes")] String Name;
+    [Key, Description("Specifies the resource is a single instance, the value must be 'Yes'"), ValueMap{"Yes"}, Values{"Yes"}] String IsSingleInstance;
     [Write, Description("Exact list of accounts that will have to get Shell Admin permissions")] String Members[];
     [Write, Description("List of all accounts that must be in the Shell Admins group")] String MembersToInclude[];
     [Write, Description("List of all accounts that are not allowed to have Shell Admin permissions")] String MembersToExclude[];
-    [Write, Description("Shell Admin configuration of Content Databases"), EmbeddedInstance("MSFT_SPContentDatabasePermissions")] String ContentDatabases[];
-    [Write, Description("Specify if all content databases must get the same config as the general config")] Boolean AllContentDatabases;
+    [Write, Description("Shell Admin configuration of Databases"), EmbeddedInstance("MSFT_SPDatabasePermissions")] String Databases[];
+    [Write, Description("Specify if all databases must get the same config as the general config")] Boolean AllDatabases;
+    [Write, Description("Specify all databases that must be excluded from AllDatabases")] String ExcludeDatabases[];
     [Write, Description("POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5"), EmbeddedInstance("MSFT_Credential")] String InstallAccount;
 };
 
