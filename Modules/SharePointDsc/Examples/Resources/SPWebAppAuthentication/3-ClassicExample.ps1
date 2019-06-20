@@ -6,23 +6,26 @@
 
     Configuration Example
     {
-        param(
+        param
+        (
             [Parameter(Mandatory = $true)]
             [PSCredential]
             $SetupAccount
         )
+
         Import-DscResource -ModuleName SharePointDsc
 
         node localhost
         {
             SPWebAppAuthentication ContosoAuthentication
             {
-                WebAppUrl   = "http://sharepoint.contoso.com"
-                Default = @(
+                WebAppUrl            = "http://sharepoint.contoso.com"
+                Default              = @(
                     MSFT_SPWebAppAuthenticationMode {
                         AuthenticationMethod = "Classic"
                     }
                 )
+                PsDscRunAsCredential = $SetupAccount
             }
         }
     }

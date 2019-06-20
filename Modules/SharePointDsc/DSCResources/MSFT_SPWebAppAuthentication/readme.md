@@ -14,7 +14,7 @@ to Claims mode. You have to run Convert-SPWebApplication manually for that.
 
 For Classic web applications, you have to use AuthenticationMethod="Classic".
 
-NOTE 3:
+NOTE 2:
 Updating the configuration can take a long time, up to five minutes.
 The Set-SPWebApplication cmdlet sometimes requires several minutes to
 complete its action. This is not a SharePointDsc issue.
