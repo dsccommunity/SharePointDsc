@@ -31,8 +31,8 @@
   * Fixed issue where the parameter Server was checked in SP2016
     but isn't used there and therefore always fails.
 * SPExcelServiceApp
-  * Throw error in Get method if parameter PrivateBytesMax and
-    UnusedObjectAgeMax are not set to System.Int32
+  * Fixes issue where Get method throws an error when the value of
+    PrivateBytesMax and UnusedObjectAgeMax are negative values.
 
 ## v3.4
 
