@@ -36,13 +36,13 @@ class MSFT_SPExcelServiceApp : OMI_BaseResource
     [Write, Description("Specifies the authentication method that Excel Services Application uses to retrieve files."), ValueMap{"UseImpersonation","UseFileAccessAccount"}, Values{"UseImpersonation","UseFileAccessAccount"}] String FileAccessMethod;
     [Write, Description("Specifies the load-balancing schema that is used by the Excel Services Application Web service application to send requests to different back-end Excel Services Application computers."), ValueMap{"RoundRobin","Local","WorkbookURL"}, Values{"RoundRobin","Local","WorkbookURL"}] String LoadBalancingScheme;
     [Write, Description("Specifies the percentage of the maximum private bytes that can be allocated to inactive objects.")] Uint32 MemoryCacheThreshold;
-    [Write, Description("Specifies the maximum private bytes, in megabytes, that are used by Excel Services Application.")] Uint32 PrivateBytesMax;
+    [Write, Description("Specifies the maximum private bytes, in megabytes, that are used by Excel Services Application.")] String PrivateBytesMax;
     [Write, Description("Specifies the maximum number of sessions allowed for a user.")] Uint32 SessionsPerUserMax;
     [Write, Description("Specifies the maximum number of anonymous sessions allowed per site collection.")] Uint32 SiteCollectionAnonymousSessionsMax;
     [Write, Description("Terminates Excel Services Application when an access violation occurs in the process.")] Boolean TerminateProcessOnAccessViolation;
     [Write, Description("Specifies that if a workbook causes an access violation error on Excel Services Application, all files originating from that workbook’s site collection are blocked from loading for the specified period (in seconds).")] Uint32 ThrottleAccessViolationsPerSiteCollection;
     [Write, Description("Specifies that the application ID that is used to look up the unattended service account credentials from the secure storage service that is specified by the UnattendedAccountSecureServiceAppName parameter.")] String UnattendedAccountApplicationId;
-    [Write, Description("Specifies the maximum amount of time, in minutes, that objects not currently used in a session are kept in the memory cache.")] Uint32 UnusedObjectAgeMax;
+    [Write, Description("Specifies the maximum amount of time, in minutes, that objects not currently used in a session are kept in the memory cache.")] String UnusedObjectAgeMax;
     [Write, Description("Specifies the local file system location of the cache that is used to store workbooks that are used by Excel Services Application.")] String WorkbookCache;
     [Write, Description("Specifies the maximum allowable size, in megabytes, of an individual session.")] Uint32 WorkbookCacheSizeMax;
     [Write, Description("Present ensures service app exists, absent ensures it is removed"), ValueMap{"Present","Absent"}, Values{"Present","Absent"}] string Ensure;

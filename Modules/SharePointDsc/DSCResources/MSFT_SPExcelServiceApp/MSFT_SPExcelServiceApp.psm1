@@ -74,7 +74,7 @@ function Get-TargetResource
         $MemoryCacheThreshold,
 
         [Parameter()]
-        [System.UInt32]
+        [System.String]
         $PrivateBytesMax,
 
         [Parameter()]
@@ -98,7 +98,7 @@ function Get-TargetResource
         $UnattendedAccountApplicationId,
 
         [Parameter()]
-        [System.UInt32]
+        [System.String]
         $UnusedObjectAgeMax,
 
         [Parameter()]
@@ -266,7 +266,7 @@ function Set-TargetResource
         $MemoryCacheThreshold,
 
         [Parameter()]
-        [System.UInt32]
+        [System.String]
         $PrivateBytesMax,
 
         [Parameter()]
@@ -290,7 +290,7 @@ function Set-TargetResource
         $UnattendedAccountApplicationId,
 
         [Parameter()]
-        [System.UInt32]
+        [System.String]
         $UnusedObjectAgeMax,
 
         [Parameter()]
@@ -523,7 +523,7 @@ function Test-TargetResource
         $MemoryCacheThreshold,
 
         [Parameter()]
-        [System.UInt32]
+        [System.String]
         $PrivateBytesMax,
 
         [Parameter()]
@@ -547,7 +547,7 @@ function Test-TargetResource
         $UnattendedAccountApplicationId,
 
         [Parameter()]
-        [System.UInt32]
+        [System.String]
         $UnusedObjectAgeMax,
 
         [Parameter()]
