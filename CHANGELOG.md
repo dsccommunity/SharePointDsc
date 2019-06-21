@@ -20,6 +20,9 @@
     servers have the binaries installed.
 * SPDistributedCacheService
   * Added ability to check for incorrect service account.
+* SPExcelServiceApp
+  * Fixes issue where Get method throws an error when the value of
+    PrivateBytesMax and UnusedObjectAgeMax are negative values.
 * SPFarm
   * Throw error in Get method if CentralAdministrationUrl is HTTP.
 * SPInstallPrereqs
