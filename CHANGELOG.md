@@ -18,11 +18,18 @@
 * SPConfigWizard
   * Added check to make sure the Config Wizard is only executed when all
     servers have the binaries installed.
+* SPDistributedCacheService
+  * Added ability to check for incorrect service account.
+* SPExcelServiceApp
+  * Fixes issue where Get method throws an error when the value of
+    PrivateBytesMax and UnusedObjectAgeMax are negative values.
 * SPFarm
   * Throw error in Get method if CentralAdministrationUrl is HTTP.
 * SPInstallPrereqs
   * Fixed bug in version check, where lower versions would be
     detected as higher versions.
+* SPProductUpdate
+  * Updated Readme to reflect the new patching possibilities added in v3.3.
 * SPSecureStore
   * Fixed issue where the test issue returned false is the service
     application didn't exist, but the database name/server parameter
@@ -30,9 +37,9 @@
 * SPUserProfileSyncConnection
   * Fixed issue where the parameter Server was checked in SP2016
     but isn't used there and therefore always fails.
-* SPExcelServiceApp
-  * Fixes issue where Get method throws an error when the value of
-    PrivateBytesMax and UnusedObjectAgeMax are negative values.
+* SPWebAppAuthentication
+  * Updated the documentation to better explain the use of this resource
+    when using Classic authentication.
 
 ## v3.4
 
