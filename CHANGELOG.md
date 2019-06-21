@@ -30,6 +30,9 @@
 * SPUserProfileSyncConnection
   * Fixed issue where the parameter Server was checked in SP2016
     but isn't used there and therefore always fails.
+* SPExcelServiceApp
+  * Fixes issue where Get method throws an error when the value of
+    PrivateBytesMax and UnusedObjectAgeMax are negative values.
 
 ## v3.4
 
