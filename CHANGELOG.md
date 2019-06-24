@@ -1,13 +1,13 @@
 # Change log for SharePointDsc
 
-## Unreleased
+## v3.5
 
 * SharePointDsc generic
   * Improved logging in all resource. They are now outputting
     the current and targeted values in the Test method.
   * Updated various resources to comply with coding style guidelines.
   * Updated the following resources to not return Null from the Get
-    method anymore, but an hashtable which a null values:
+    method anymore, but an hashtable which contains null values:
     SPDesignerSettings, SPDiagnosticLoggingSettings, SPFarmAdministrators,
     SPHealthAnalyzerRuleState, SPIrmSettings, SPOutgoingEmailSettings,
     SPPasswordChangeSettings, SPSearchTopology, SPServiceAppProxyGroup,
