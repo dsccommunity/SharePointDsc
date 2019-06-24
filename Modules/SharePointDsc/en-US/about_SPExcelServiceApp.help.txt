@@ -57,7 +57,7 @@
     Specifies the percentage of the maximum private bytes that can be allocated to inactive objects.
 
 .PARAMETER PrivateBytesMax
-    Write - Uint32
+    Write - Sint32
     Specifies the maximum private bytes, in megabytes, that are used by Excel Services Application.
 
 .PARAMETER SessionsPerUserMax
@@ -81,7 +81,7 @@
     Specifies that the application ID that is used to look up the unattended service account credentials from the secure storage service that is specified by the UnattendedAccountSecureServiceAppName parameter.
 
 .PARAMETER UnusedObjectAgeMax
-    Write - Uint32
+    Write - Sint32
     Specifies the maximum amount of time, in minutes, that objects not currently used in a session are kept in the memory cache.
 
 .PARAMETER WorkbookCache
