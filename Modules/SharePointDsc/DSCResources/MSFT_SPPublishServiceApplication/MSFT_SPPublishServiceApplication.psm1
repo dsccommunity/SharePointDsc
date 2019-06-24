@@ -13,7 +13,7 @@ function Get-TargetResource
         $InstallAccount,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present"
     )
@@ -21,8 +21,8 @@ function Get-TargetResource
     Write-Verbose -Message "Getting service application publish status '$Name'"
 
     $result = Invoke-SPDscCommand -Credential $InstallAccount `
-                                  -Arguments $PSBoundParameters `
-                                  -ScriptBlock {
+        -Arguments $PSBoundParameters `
+        -ScriptBlock {
         $params = $args[0]
 
         $serviceApp = Get-SPServiceApplication -Name $params.Name -ErrorAction SilentlyContinue
@@ -36,7 +36,7 @@ function Get-TargetResource
         if ($null -eq $serviceApp.Uri)
         {
             Write-Verbose -Message ("Only Business Data Connectivity, Machine Translation, Managed Metadata, " + `
-                                    "User Profile, Search, Secure Store are supported to be published via DSC.")
+                    "User Profile, Search, Secure Store are supported to be published via DSC.")
             $sharedEnsure = "Absent"
         }
         else
@@ -75,7 +75,7 @@ function Set-TargetResource
         $InstallAccount,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present"
     )
@@ -83,8 +83,8 @@ function Set-TargetResource
     Write-Verbose -Message "Setting service application publish status '$Name'"
 
     Invoke-SPDscCommand -Credential $InstallAccount `
-                        -Arguments $PSBoundParameters `
-                        -ScriptBlock {
+        -Arguments $PSBoundParameters `
+        -ScriptBlock {
         $params = $args[0]
 
         $serviceApp = Get-SPServiceApplication -Name $params.Name -ErrorAction SilentlyContinue
@@ -96,7 +96,7 @@ function Set-TargetResource
         if ($null -eq $serviceApp.Uri)
         {
             throw [Exception] ("Only Business Data Connectivity, Machine Translation, Managed Metadata, " + `
-                               "User Profile, Search, Secure Store are supported to be published via DSC.")
+                    "User Profile, Search, Secure Store are supported to be published via DSC.")
         }
 
         if ($Ensure -eq "Present")
@@ -129,7 +129,7 @@ function Test-TargetResource
         $InstallAccount,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present"
     )
@@ -142,8 +142,8 @@ function Test-TargetResource
     Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
 
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
-                                    -DesiredValues $PSBoundParameters `
-                                    -ValuesToCheck @("Name", "Ensure")
+        -DesiredValues $PSBoundParameters `
+        -ValuesToCheck @("Name", "Ensure")
 }
 
 Export-ModuleMember -Function *-TargetResource

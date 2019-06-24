@@ -16,7 +16,7 @@ function Get-TargetResource()
         $LocalWebAppUrl,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String] $Ensure = "Present",
 
         [Parameter()]
@@ -27,8 +27,8 @@ function Get-TargetResource()
     Write-Verbose -Message "Getting remote farm trust '$Name'"
 
     $result = Invoke-SPDscCommand -Credential $InstallAccount `
-                                  -Arguments $PSBoundParameters `
-                                  -ScriptBlock {
+        -Arguments $PSBoundParameters `
+        -ScriptBlock {
         $params = $args[0]
 
         $returnValue = @{
@@ -40,13 +40,13 @@ function Get-TargetResource()
         }
 
         $issuer = Get-SPTrustedSecurityTokenIssuer -Identity $params.Name `
-                                                   -ErrorAction SilentlyContinue
+            -ErrorAction SilentlyContinue
         if ($null -eq $issuer)
         {
             return $returnValue
         }
         $rootAuthority = Get-SPTrustedRootAuthority -Identity $params.Name `
-                                                    -ErrorAction SilentlyContinue
+            -ErrorAction SilentlyContinue
         if ($null -eq $rootAuthority)
         {
             return $returnValue
@@ -83,7 +83,7 @@ function Set-TargetResource()
         $LocalWebAppUrl,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String] $Ensure = "Present",
 
         [Parameter()]
@@ -98,36 +98,36 @@ function Set-TargetResource()
         Write-Verbose -Message "Adding remote farm trust '$Name'"
 
         Invoke-SPDscCommand -Credential $InstallAccount `
-                            -Arguments $PSBoundParameters `
-                            -ScriptBlock {
+            -Arguments $PSBoundParameters `
+            -ScriptBlock {
             $params = $args[0]
             $remoteWebApp = $params.RemoteWebAppUrl.TrimEnd('/')
 
             $issuer = Get-SPTrustedSecurityTokenIssuer -Identity $params.Name `
-                                                       -ErrorAction SilentlyContinue
+                -ErrorAction SilentlyContinue
             if ($null -eq $issuer)
             {
                 $endpoint = "$remoteWebApp/_layouts/15/metadata/json/1"
                 $issuer = New-SPTrustedSecurityTokenIssuer -Name $params.Name `
-                                                           -IsTrustBroker:$false `
-                                                           -MetadataEndpoint $endpoint `
-                                                           -Confirm:$false
+                    -IsTrustBroker:$false `
+                    -MetadataEndpoint $endpoint `
+                    -Confirm:$false
             }
 
             $rootAuthority = Get-SPTrustedRootAuthority -Identity $params.Name `
-                                                        -ErrorAction SilentlyContinue
+                -ErrorAction SilentlyContinue
             if ($null -eq $rootAuthority)
             {
                 $endpoint = "$remoteWebApp/_layouts/15/metadata/json/1/rootcertificate"
                 New-SPTrustedRootAuthority -Name $params.Name `
-                                           -MetadataEndPoint $endpoint `
-                                           -Confirm:$false
+                    -MetadataEndPoint $endpoint `
+                    -Confirm:$false
             }
             $realm = $issuer.NameId.Split("@")
             $site = Get-SPSite -Identity $params.LocalWebAppUrl
             $serviceContext = Get-SPServiceContext -Site $site
             $currentRealm = Get-SPAuthenticationRealm -ServiceContext $serviceContext `
-                                                      -ErrorAction SilentlyContinue
+                -ErrorAction SilentlyContinue
 
             if ($realm[1] -ne $currentRealm)
             {
@@ -135,12 +135,12 @@ function Set-TargetResource()
             }
 
             $appPrincipal = Get-SPAppPrincipal -Site $params.LocalWebAppUrl `
-                                               -NameIdentifier $issuer.NameId
+                -NameIdentifier $issuer.NameId
 
             Set-SPAppPrincipalPermission -Site $params.LocalWebAppUrl `
-                                         -AppPrincipal $appPrincipal `
-                                         -Scope SiteCollection `
-                                         -Right FullControl
+                -AppPrincipal $appPrincipal `
+                -Scope SiteCollection `
+                -Right FullControl
         }
     }
 
@@ -149,25 +149,25 @@ function Set-TargetResource()
         Write-Verbose -Message "Removing remote farm trust '$Name'"
 
         Invoke-SPDscCommand -Credential $InstallAccount `
-                            -Arguments $PSBoundParameters `
-                            -ScriptBlock {
+            -Arguments $PSBoundParameters `
+            -ScriptBlock {
             $params = $args[0]
 
             $issuer = Get-SPTrustedSecurityTokenIssuer -Identity $params.Name `
-                                                       -ErrorAction SilentlyContinue
+                -ErrorAction SilentlyContinue
             if ($null -ne $issuer)
             {
                 $appPrincipal = Get-SPAppPrincipal -Site $params.LocalWebAppUrl `
-                                                   -NameIdentifier $issuer.NameId
+                    -NameIdentifier $issuer.NameId
                 Remove-SPAppPrincipalPermission -Site $params.LocalWebAppUrl `
-                                                -AppPrincipal $appPrincipal `
-                                                -Scope SiteCollection `
-                                                -Confirm:$false
+                    -AppPrincipal $appPrincipal `
+                    -Scope SiteCollection `
+                    -Confirm:$false
             }
 
             Get-SPTrustedRootAuthority -Identity $params.Name `
-                                       -ErrorAction SilentlyContinue `
-                                       | Remove-SPTrustedRootAuthority -Confirm:$false
+                -ErrorAction SilentlyContinue `
+            | Remove-SPTrustedRootAuthority -Confirm:$false
             if ($null -ne $issuer)
             {
                 $issuer | Remove-SPTrustedSecurityTokenIssuer -Confirm:$false
@@ -194,7 +194,7 @@ function Test-TargetResource()
         $LocalWebAppUrl,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String] $Ensure = "Present",
 
         [Parameter()]
@@ -212,8 +212,8 @@ function Test-TargetResource()
     Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
 
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
-                                    -DesiredValues $PSBoundParameters `
-                                    -ValuesToCheck @("Ensure")
+        -DesiredValues $PSBoundParameters `
+        -ValuesToCheck @("Ensure")
 }
 
 Export-ModuleMember -Function *-TargetResource

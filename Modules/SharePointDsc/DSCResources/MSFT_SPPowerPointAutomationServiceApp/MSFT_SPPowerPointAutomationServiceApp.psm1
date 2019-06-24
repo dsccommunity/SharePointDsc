@@ -37,7 +37,7 @@ function Get-TargetResource
         $WorkerTimeoutInSeconds,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present",
 
@@ -49,12 +49,12 @@ function Get-TargetResource
     Write-Verbose -Message "Getting PowerPoint Automation service app '$Name'"
 
     if (($ApplicationPool `
-            -or $ProxyName `
-            -or $CacheExpirationPeriodInSeconds `
-            -or $MaximumConversionsPerWorker `
-            -or $WorkerKeepAliveTimeoutInSeconds `
-            -or $WorkerProcessCount `
-            -or $WorkerTimeoutInSeconds) -and ($Ensure -eq "Absent"))
+                -or $ProxyName `
+                -or $CacheExpirationPeriodInSeconds `
+                -or $MaximumConversionsPerWorker `
+                -or $WorkerKeepAliveTimeoutInSeconds `
+                -or $WorkerProcessCount `
+                -or $WorkerTimeoutInSeconds) -and ($Ensure -eq "Absent"))
     {
         throw "You cannot use any of the parameters when Ensure is specified as Absent"
     }
@@ -62,15 +62,15 @@ function Get-TargetResource
     if (($Ensure -eq "Present") -and -not $ApplicationPool)
     {
         throw ("An Application Pool is required to configure the PowerPoint " + `
-               "Automation Service Application")
+                "Automation Service Application")
     }
 
     $result = Invoke-SPDscCommand -Credential $InstallAccount `
-                                  -Arguments $PSBoundParameters `
-                                  -ScriptBlock {
+        -Arguments $PSBoundParameters `
+        -ScriptBlock {
         $params = $args[0]
         $serviceApps = Get-SPServiceApplication -Name $params.Name `
-                                                -ErrorAction SilentlyContinue
+            -ErrorAction SilentlyContinue
         $nullReturn = @{
             Name            = $params.Name
             Ensure          = "Absent"
@@ -160,7 +160,7 @@ function Set-TargetResource
         $WorkerTimeoutInSeconds,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present",
 
@@ -172,28 +172,28 @@ function Set-TargetResource
     Write-Verbose -Message "Setting PowerPoint Automation service app '$Name'"
 
     if (($ApplicationPool `
-            -or $ProxyName `
-            -or $CacheExpirationPeriodInSeconds `
-            -or $MaximumConversionsPerWorker `
-            -or $WorkerKeepAliveTimeoutInSeconds `
-            -or $WorkerProcessCount `
-            -or $WorkerTimeoutInSeconds) -and ($Ensure -eq "Absent"))
-            {
-                throw "You cannot use any of the parameters when Ensure is specified as Absent"
-            }
+                -or $ProxyName `
+                -or $CacheExpirationPeriodInSeconds `
+                -or $MaximumConversionsPerWorker `
+                -or $WorkerKeepAliveTimeoutInSeconds `
+                -or $WorkerProcessCount `
+                -or $WorkerTimeoutInSeconds) -and ($Ensure -eq "Absent"))
+    {
+        throw "You cannot use any of the parameters when Ensure is specified as Absent"
+    }
     if (($Ensure -eq "Present") -and -not $ApplicationPool)
     {
         throw ("An Application Pool is required to configure the PowerPoint " + `
-               "Automation Service Application")
+                "Automation Service Application")
     }
 
     $result = Get-TargetResource @PSBoundParameters
-     if ($result.Ensure -eq "Absent" -and $Ensure -eq "Present")
-     {
+    if ($result.Ensure -eq "Absent" -and $Ensure -eq "Present")
+    {
         Write-Verbose -Message "Creating PowerPoint Automation Service Application $Name"
         Invoke-SPDscCommand -Credential $InstallAccount `
-                            -Arguments $PSBoundParameters `
-                            -ScriptBlock {
+            -Arguments $PSBoundParameters `
+            -ScriptBlock {
             $params = $args[0]
 
             $proxyName = $params.ProxyName
@@ -235,32 +235,32 @@ function Set-TargetResource
                 throw "Specified application pool does not exist"
             }
         }
-     }
-     if ($result.Ensure -eq "Present" -and $Ensure -eq "Present")
-     {
+    }
+    if ($result.Ensure -eq "Present" -and $Ensure -eq "Present")
+    {
         Write-Verbose -Message "Updating PowerPoint Automation Service Application $Name"
         Invoke-SPDscCommand -Credential $InstallAccount `
-                            -Arguments $PSBoundParameters, $result `
-                            -ScriptBlock {
+            -Arguments $PSBoundParameters, $result `
+            -ScriptBlock {
             $params = $args[0]
             $result = $args[1]
 
             $serviceApps = Get-SPServiceApplication -Name $params.Name `
-                                                    -ErrorAction SilentlyContinue
+                -ErrorAction SilentlyContinue
             if ($null -eq $serviceApps)
             {
                 throw "No Service applications are available in the farm."
             }
             $serviceApp = $serviceApps `
-                | Where-Object -FilterScript {
-                    $_.GetType().FullName -eq "Microsoft.Office.Server.PowerPoint.Administration.PowerPointConversionServiceApplication"
+            | Where-Object -FilterScript {
+                $_.GetType().FullName -eq "Microsoft.Office.Server.PowerPoint.Administration.PowerPointConversionServiceApplication"
             }
             if ($null -eq $serviceApp)
             {
                 throw "Unable to find specified service application."
             }
             if ([string]::IsNullOrEmpty($params.ApplicationPool) -eq $false `
-                -and $params.ApplicationPool -ne $result.ApplicationPool)
+                    -and $params.ApplicationPool -ne $result.ApplicationPool)
             {
                 $appPool = Get-SPServiceApplicationPool -Identity $params.ApplicationPool
                 if ($null -eq $appPool)
@@ -270,7 +270,7 @@ function Set-TargetResource
                 $serviceApp.ApplicationPool = $appPool
             }
             if ([string]::IsNullOrEmpty($params.ProxyName) -eq $false `
-            -and $params.ProxyName -ne $result.ProxyName)
+                    -and $params.ProxyName -ne $result.ProxyName)
             {
                 $proxies = Get-SPServiceApplicationProxy
                 foreach ($proxyInstance in $proxies)
@@ -302,11 +302,11 @@ function Set-TargetResource
             {
                 $serviceApp.WorkerTimeoutInSeconds = $params.WorkerTimeoutInSeconds
             }
-                $serviceApp.Update();
+            $serviceApp.Update();
         }
-     }
-     if ($Ensure -eq "Absent")
-     {
+    }
+    if ($Ensure -eq "Absent")
+    {
         Write-Verbose -Message "Removing PowerPoint Automation Service Application $Name"
         Invoke-SPDscCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
             $params = $args[0]
@@ -332,7 +332,7 @@ function Set-TargetResource
                 Remove-SPServiceApplication -Identity $serviceApp -Confirm:$false
             }
         }
-     }
+    }
 }
 
 
@@ -375,7 +375,7 @@ function Test-TargetResource
         $WorkerTimeoutInSeconds,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure,
 
@@ -386,12 +386,12 @@ function Test-TargetResource
 
     Write-Verbose -Message "Testing PowerPoint Automation service app '$Name'"
     if (($ApplicationPool -or `
-        $ProxyName -or `
-        $CacheExpirationPeriodInSeconds -or `
-        $MaximumConversionsPerWorker -or `
-        $WorkerKeepAliveTimeoutInSeconds -or `
-        $WorkerProcessCount -or `
-        $WorkerTimeoutInSeconds) -and ($Ensure -eq "Absent"))
+                $ProxyName -or `
+                $CacheExpirationPeriodInSeconds -or `
+                $MaximumConversionsPerWorker -or `
+                $WorkerKeepAliveTimeoutInSeconds -or `
+                $WorkerProcessCount -or `
+                $WorkerTimeoutInSeconds) -and ($Ensure -eq "Absent"))
     {
         throw "You cannot use any of the parameters when Ensure is specified as Absent"
     }
@@ -399,7 +399,7 @@ function Test-TargetResource
     if (($Ensure -eq "Present") -and -not $ApplicationPool)
     {
         throw ("An Application Pool is required to configure the PowerPoint " + `
-               "Automation Service Application")
+                "Automation Service Application")
     }
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
@@ -410,13 +410,13 @@ function Test-TargetResource
     if ($Ensure -eq "Absent")
     {
         return Test-SPDscParameterState -CurrentValues $CurrentValues `
-                                        -DesiredValues $PSBoundParameters `
-                                        -ValuesToCheck @("Ensure")
+            -DesiredValues $PSBoundParameters `
+            -ValuesToCheck @("Ensure")
     }
     else
     {
         return Test-SPDscParameterState -CurrentValues $CurrentValues `
-                                        -DesiredValues $PSBoundParameters
+            -DesiredValues $PSBoundParameters
     }
 }
 

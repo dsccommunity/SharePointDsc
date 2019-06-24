@@ -3,16 +3,16 @@ param(
     [Parameter()]
     [string]
     $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
-                                         -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
-                                         -Resolve)
+            -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
+            -Resolve)
 )
 
 Import-Module -Name (Join-Path -Path $PSScriptRoot `
-                                -ChildPath "..\UnitTestHelper.psm1" `
-                                -Resolve)
+        -ChildPath "..\UnitTestHelper.psm1" `
+        -Resolve)
 
 $Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointCmdletModule `
-                                              -DscResource "SPWebAppSiteUseAndDeletion"
+    -DscResource "SPWebAppSiteUseAndDeletion"
 
 Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
     InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
@@ -56,7 +56,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 UnusedSiteNotificationsBeforeDeletion    = 30
             }
 
-            Mock -CommandName Get-SPWebApplication -MockWith  {
+            Mock -CommandName Get-SPWebApplication -MockWith {
                 return $null
             }
 
@@ -82,18 +82,18 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 UnusedSiteNotificationsBeforeDeletion    = 24
             }
 
-            Mock -CommandName Get-SPWebApplication -MockWith  {
+            Mock -CommandName Get-SPWebApplication -MockWith {
                 $returnVal = @{
-                        SendUnusedSiteCollectionNotifications    = $false
-                        UnusedSiteNotificationPeriod             = @{ TotalDays = 45; }
-                        AutomaticallyDeleteUnusedSiteCollections = $false
-                        UnusedSiteNotificationsBeforeDeletion    = 28
+                    SendUnusedSiteCollectionNotifications    = $false
+                    UnusedSiteNotificationPeriod             = @{ TotalDays = 45; }
+                    AutomaticallyDeleteUnusedSiteCollections = $false
+                    UnusedSiteNotificationsBeforeDeletion    = 28
                 }
                 $returnVal = $returnVal | Add-Member -MemberType ScriptMethod -Name Update -Value { $Global:SPDscSiteUseUpdated = $true } -PassThru
                 return $returnVal
             }
 
-            Mock -CommandName Get-SPFarm -MockWith { return @{} }
+            Mock -CommandName Get-SPFarm -MockWith { return @{ } }
 
             It "Should throw an exception - Daily schedule" {
                 Mock -CommandName Get-SPTimerJob -MockWith {
@@ -144,17 +144,17 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 UnusedSiteNotificationsBeforeDeletion    = 30
             }
 
-            Mock -CommandName Get-SPWebApplication -MockWith  {
+            Mock -CommandName Get-SPWebApplication -MockWith {
                 $returnVal = @{
-                        SendUnusedSiteCollectionNotifications    = $false
-                        UnusedSiteNotificationPeriod             = @{ TotalDays = 45; }
-                        AutomaticallyDeleteUnusedSiteCollections = $false
-                        UnusedSiteNotificationsBeforeDeletion    = 28
+                    SendUnusedSiteCollectionNotifications    = $false
+                    UnusedSiteNotificationPeriod             = @{ TotalDays = 45; }
+                    AutomaticallyDeleteUnusedSiteCollections = $false
+                    UnusedSiteNotificationsBeforeDeletion    = 28
                 }
                 return $returnVal
             }
 
-            Mock -CommandName Get-SPFarm -MockWith { return @{} }
+            Mock -CommandName Get-SPFarm -MockWith { return @{ } }
             Mock -CommandName Get-SPTimerJob -MockWith { return $null }
 
             It "Should update the Site Use and Deletion settings" {
@@ -171,18 +171,18 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 UnusedSiteNotificationsBeforeDeletion    = 30
             }
 
-            Mock -CommandName Get-SPWebApplication -MockWith  {
+            Mock -CommandName Get-SPWebApplication -MockWith {
                 $returnVal = @{
-                        SendUnusedSiteCollectionNotifications    = $false
-                        UnusedSiteNotificationPeriod             = @{ TotalDays = 45; }
-                        AutomaticallyDeleteUnusedSiteCollections = $false
-                        UnusedSiteNotificationsBeforeDeletion    = 28
+                    SendUnusedSiteCollectionNotifications    = $false
+                    UnusedSiteNotificationPeriod             = @{ TotalDays = 45; }
+                    AutomaticallyDeleteUnusedSiteCollections = $false
+                    UnusedSiteNotificationsBeforeDeletion    = 28
                 }
                 $returnVal = $returnVal | Add-Member -MemberType ScriptMethod -Name Update -Value { $Global:SPDscSiteUseUpdated = $true } -PassThru
                 return $returnVal
             }
 
-            Mock -CommandName Get-SPFarm -MockWith { return @{} }
+            Mock -CommandName Get-SPFarm -MockWith { return @{ } }
             Mock -CommandName Get-SPTimerJob -MockWith {
                 return @{
                     Schedule = @{
@@ -215,7 +215,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 UnusedSiteNotificationsBeforeDeletion    = 30
             }
 
-            Mock -CommandName Get-SPWebApplication -MockWith  {
+            Mock -CommandName Get-SPWebApplication -MockWith {
                 $returnVal = @{
                     SendUnusedSiteCollectionNotifications    = $true
                     UnusedSiteNotificationPeriod             = @{ TotalDays = 90; }
@@ -225,7 +225,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 $returnVal = $returnVal | Add-Member -MemberType ScriptMethod -Name Update -Value { $Global:SPDscSiteUseUpdated = $true } -PassThru
                 return $returnVal
             }
-            Mock -CommandName Get-SPFarm -MockWith { return @{} }
+            Mock -CommandName Get-SPFarm -MockWith { return @{ } }
 
             It "Should return SendUnusedSiteCollectionNotifications=True from the get method" {
                 (Get-TargetResource @testParams).SendUnusedSiteCollectionNotifications | Should Be $true

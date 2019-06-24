@@ -21,7 +21,7 @@ function Get-TargetResource
         $DatabaseServer,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present",
 
@@ -37,12 +37,12 @@ function Get-TargetResource
     Write-Verbose -Message "Getting state service application '$Name'"
 
     $result = Invoke-SPDscCommand -Credential $InstallAccount `
-                                  -Arguments $PSBoundParameters `
-                                  -ScriptBlock {
+        -Arguments $PSBoundParameters `
+        -ScriptBlock {
         $params = $args[0]
 
         $serviceApp = Get-SPStateServiceApplication -Identity $params.Name `
-                                                    -ErrorAction SilentlyContinue
+            -ErrorAction SilentlyContinue
 
         if ($null -eq $serviceApp)
         {
@@ -101,7 +101,7 @@ function Set-TargetResource
         $DatabaseServer,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present",
 
@@ -121,12 +121,12 @@ function Set-TargetResource
     {
         Write-Verbose -Message "Creating State Service Application $Name"
         Invoke-SPDscCommand -Credential $InstallAccount `
-                            -Arguments $PSBoundParameters `
-                            -ScriptBlock {
+            -Arguments $PSBoundParameters `
+            -ScriptBlock {
 
             $params = $args[0]
 
-            $dbParams = @{}
+            $dbParams = @{ }
 
             if ($params.ContainsKey("DatabaseName"))
             {
@@ -153,8 +153,8 @@ function Set-TargetResource
             $database = New-SPStateServiceDatabase @dbParams
             $app = New-SPStateServiceApplication -Name $params.Name -Database $database
             New-SPStateServiceApplicationProxy -Name $pName `
-                                               -ServiceApplication $app `
-                                               -DefaultProxyGroup | Out-Null
+                -ServiceApplication $app `
+                -DefaultProxyGroup | Out-Null
         }
     }
     if ($Ensure -eq "Absent")
@@ -163,7 +163,7 @@ function Set-TargetResource
         Invoke-SPDscCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
             $params = $args[0]
 
-            $serviceApp =  Get-SPStateServiceApplication -Name $params.Name
+            $serviceApp = Get-SPStateServiceApplication -Name $params.Name
 
             # Remove the connected proxy(ies)
             $proxies = Get-SPServiceApplicationProxy
@@ -204,7 +204,7 @@ function Test-TargetResource
         $DatabaseServer,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present",
 
@@ -227,8 +227,8 @@ function Test-TargetResource
     Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
 
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
-                                    -DesiredValues $PSBoundParameters `
-                                    -ValuesToCheck @("Name", "Ensure")
+        -DesiredValues $PSBoundParameters `
+        -ValuesToCheck @("Name", "Ensure")
 }
 
 Export-ModuleMember -Function *-TargetResource

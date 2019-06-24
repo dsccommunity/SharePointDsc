@@ -24,7 +24,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         Mock -CommandName 'Get-SPServiceInstance' -MockWith {
             $serviceInstance =
             @{
-                Service  = @{
+                Service = @{
                     Enabled                          = $mock.Enabled
                     DropFolder                       = $mock.DropFolder
                     UseAutomaticSettings             = $mock.UseAutomaticSettings
@@ -37,11 +37,11 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     DLsRequireAuthenticatedSenders   = $mock.DLsRequireAuthenticatedSenders
                 }
             }
-            $serviceInstance = $serviceInstance  | Add-Member -MemberType ScriptMethod -Name GetType -Value {
-                return @{ FullName = "Microsoft.SharePoint.Administration.SPIncomingEmailServiceInstance"} } -force -PassThru
+            $serviceInstance = $serviceInstance | Add-Member -MemberType ScriptMethod -Name GetType -Value {
+                return @{ FullName = "Microsoft.SharePoint.Administration.SPIncomingEmailServiceInstance" } } -force -PassThru
             $serviceInstance.Service = $serviceInstance.Service | Add-Member -MemberType ScriptMethod -Name GetType -Value {
-                return @{ FullName = "Microsoft.SharePoint.Administration.SPIncomingEmailService"} } -force -PassThru
-            $serviceInstance.Service = $serviceInstance.Service  | Add-Member -MemberType ScriptMethod -Name Update -Value {
+                return @{ FullName = "Microsoft.SharePoint.Administration.SPIncomingEmailService" } } -force -PassThru
+            $serviceInstance.Service = $serviceInstance.Service | Add-Member -MemberType ScriptMethod -Name Update -Value {
                 $Global:SPDscUpdateCalled = $true } -PassThru
             return @($serviceInstance)
         }
@@ -56,8 +56,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             Mock -CommandName 'Get-SPServiceInstance' -MockWith {
-                $serviceInstance = @{}
-                $serviceInstance = $serviceInstance  | Add-Member -MemberType ScriptMethod -Name GetType -Value {
+                $serviceInstance = @{ }
+                $serviceInstance = $serviceInstance | Add-Member -MemberType ScriptMethod -Name GetType -Value {
                     return $null } -force -PassThru
                 return @($serviceInstance)
             }
@@ -69,9 +69,9 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 $result.UseDirectoryManagementService | Should BeNullorEmpty
                 $result.RemoteDirectoryManagementURL | Should BeNullorEmpty
                 $result.ServerAddress | Should BeNullorEmpty
-                $result.DLsRequireAuthenticatedSenders| Should BeNullorEmpty
+                $result.DLsRequireAuthenticatedSenders | Should BeNullorEmpty
                 $result.DistributionGroupsEnabled | Should BeNullorEmpty
-                $result.ServerDisplayAddress| Should BeNullorEmpty
+                $result.ServerDisplayAddress | Should BeNullorEmpty
                 $result.DropFolder | Should BeNullorEmpty
             }
 
@@ -227,8 +227,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name 'When service is enabled, but should be disabled' -Fixture {
             $testParams = @{
-                IsSingleInstance               = 'Yes'
-                Ensure                         = 'Absent'
+                IsSingleInstance = 'Yes'
+                Ensure           = 'Absent'
             }
 
             $mock = @{
@@ -268,11 +268,11 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name 'When switching from manual to automatic settings' -Fixture {
             $testParams = @{
-                IsSingleInstance               = 'Yes'
-                Ensure                         = 'Present'
-                UseAutomaticSettings           = $true
-                UseDirectoryManagementService  = 'No'
-                ServerDisplayAddress           = "contoso.com"
+                IsSingleInstance              = 'Yes'
+                Ensure                        = 'Present'
+                UseAutomaticSettings          = $true
+                UseDirectoryManagementService = 'No'
+                ServerDisplayAddress          = "contoso.com"
             }
 
             $mock = @{
@@ -312,13 +312,13 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name 'When updating ServerAddress and Directory Managment Service' -Fixture {
             $testParams = @{
-                IsSingleInstance               = 'Yes'
-                Ensure                         = 'Present'
-                UseAutomaticSettings           = $false
-                UseDirectoryManagementService  = 'Yes'
-                ServerDisplayAddress           = "contoso.com"
-                ServerAddress                  = "mail.contoso.com"
-                DropFolder                     = '\\MailServer\SharedFolder'
+                IsSingleInstance              = 'Yes'
+                Ensure                        = 'Present'
+                UseAutomaticSettings          = $false
+                UseDirectoryManagementService = 'Yes'
+                ServerDisplayAddress          = "contoso.com"
+                ServerAddress                 = "mail.contoso.com"
+                DropFolder                    = '\\MailServer\SharedFolder'
             }
 
             $mock = @{

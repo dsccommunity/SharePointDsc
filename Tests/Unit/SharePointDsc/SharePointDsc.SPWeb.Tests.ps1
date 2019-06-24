@@ -1,7 +1,7 @@
 [CmdletBinding()]
 param(
     [Parameter()]
-    [string] 
+    [string]
     $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
             -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
             -Resolve)
@@ -25,16 +25,16 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             -PassThru `
             -Value { }
 
-        # Mocks for all contexts   
-        Mock -CommandName New-Object -MockWith { 
-            [PSCustomObject]@{ 
+        # Mocks for all contexts
+        Mock -CommandName New-Object -MockWith {
+            [PSCustomObject]@{
                 WebApplication = $fakeWebApp
-            } 
-        } -ParameterFilter { 
-            $TypeName -eq "Microsoft.SharePoint.SPSite" 
+            }
+        } -ParameterFilter {
+            $TypeName -eq "Microsoft.SharePoint.SPSite"
         }
         Mock -CommandName Remove-SPWeb -MockWith { }
-        
+
         # Test contexts
         Context -Name "The SPWeb doesn't exist yet and should" -Fixture {
             $testParams = @{
@@ -70,7 +70,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Description = "desc"
             }
 
-            Mock -CommandName Get-SPWeb -MockWith { 
+            Mock -CommandName Get-SPWeb -MockWith {
                 return @{
                     Url                = $testParams.Url
                     Title              = $testParams.Name
@@ -85,21 +85,21 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             It "Should return the SPWeb data from the get method" {
-                
+
                 $result = Get-TargetResource @testParams
 
-                $result.Ensure               | Should be "Present"
-                $result.Template             | Should be "STS#0"
-                $result.UniquePermissions    | Should be $false
-                $result.UseParentTopNav      | Should be $true  
-                $result.RequestAccessEmail   | Should be "valid@contoso.com"
+                $result.Ensure | Should be "Present"
+                $result.Template | Should be "STS#0"
+                $result.UniquePermissions | Should be $false
+                $result.UseParentTopNav | Should be $true
+                $result.RequestAccessEmail | Should be "valid@contoso.com"
             }
 
             It "Should return true from the test method" {
                 Test-TargetResource @testParams | Should Be $true
             }
         }
-        
+
         Context -Name "The SPWeb exists and should not" -Fixture {
             $testParams = @{
                 Url         = "http://site.sharepoint.com/sites/web"
@@ -108,14 +108,14 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Ensure      = "Absent"
             }
 
-            Mock -CommandName Get-SPWeb -MockWith { 
+            Mock -CommandName Get-SPWeb -MockWith {
                 return @{
                     Url = $testParams.Url
                 }
             }
 
             It "Should return 'Present' from the get method" {
-                (Get-TargetResource @testParams).Ensure | Should be "Present"             
+                (Get-TargetResource @testParams).Ensure | Should be "Present"
             }
 
             It "Should return false from the test method" {
@@ -146,19 +146,19 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 HasUniquePerm = $false
             }
 
-            $web |  Add-Member -Name Update `
+            $web | Add-Member -Name Update `
                 -MemberType ScriptMethod `
                 -Value { }
 
             Mock -CommandName Get-SPWeb -MockWith { $web }
 
             It "Should return the SPWeb data from the get method" {
-                
+
                 $result = Get-TargetResource @testParams
 
-                $result.Ensure            | Should be "Present"
+                $result.Ensure | Should be "Present"
                 $result.UniquePermissions | Should be $false
-                $result.UseParentTopNav   | Should be $true                
+                $result.UseParentTopNav | Should be $true
 
             }
 
@@ -167,10 +167,10 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             It "Should update the values in the set method" {
-                
+
                 Set-TargetResource @testParams
 
-                $web.Title       | Should be $testParams.Name
+                $web.Title | Should be $testParams.Name
                 $web.Description | Should be $testParams.Description
                 $web.Navigation.UseShared | Should be $false
                 $web.HasUniquePerm | Should be $true
@@ -191,7 +191,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 RequestAccessEmail = "notvalid@contoso.com"
             }
 
-            $web |  Add-Member -Name Update `
+            $web | Add-Member -Name Update `
                 -MemberType ScriptMethod `
                 -Value { }
 
@@ -202,7 +202,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             It "Should update the values in the set method" {
-                
+
                 Set-TargetResource @testParams
 
                 $web.RequestAccessEmail | Should be $testParams.RequestAccessEmail
@@ -223,7 +223,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 RequestAccessEmail = "valid@contoso.com"
             }
 
-            $web |  Add-Member -Name Update `
+            $web | Add-Member -Name Update `
                 -MemberType ScriptMethod `
                 -Value { }
 
@@ -234,7 +234,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             It "Should update the values in the set method" {
-                
+
                 Set-TargetResource @testParams
 
                 $web.RequestAccessEmail | Should be ""
@@ -256,7 +256,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 RequestAccessEmail = "valid@contoso.com"
             }
 
-            $web |  Add-Member -Name Update `
+            $web | Add-Member -Name Update `
                 -MemberType ScriptMethod `
                 -Value { }
 
@@ -267,11 +267,11 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             It "Should not update the values set method" {
-                
+
                 Set-TargetResource @testParams
 
                 $web.RequestAccessEmail | Should be "valid@contoso.com"
-                $web.HasUniquePerm      | Should be $false
+                $web.HasUniquePerm | Should be $false
 
                 Assert-MockCalled New-Object
             }
@@ -290,7 +290,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 RequestAccessEmail = "notvalid@contoso.com"
             }
 
-            $web |  Add-Member -Name Update `
+            $web | Add-Member -Name Update `
                 -MemberType ScriptMethod `
                 -Value { }
 
@@ -301,11 +301,11 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             It "Should update the value of unique permissions and not change the request access email in the set method" {
-                
+
                 Set-TargetResource @testParams
 
                 $web.RequestAccessEmail | Should be "notvalid@contoso.com"
-                $web.HasUniquePerm      | Should be $false
+                $web.HasUniquePerm | Should be $false
 
                 Assert-MockCalled New-Object
             }

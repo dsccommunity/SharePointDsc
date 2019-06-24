@@ -27,7 +27,7 @@ $Script:ServiceAppObjectType = "Microsoft.Office.Excel.Server.MossHost.ExcelServ
 function Get-TargetResource
 {
     [CmdletBinding()]
-    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSDSCUseIdenticalMandatoryParametersForDSC", "", Justification  =  "Temporary workaround for issue introduced in PSSA v1.18")]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSDSCUseIdenticalMandatoryParametersForDSC", "", Justification = "Temporary workaround for issue introduced in PSSA v1.18")]
     [OutputType([System.Collections.Hashtable])]
     param (
         [Parameter(Mandatory = $true)]
@@ -51,7 +51,7 @@ function Get-TargetResource
         $CrossDomainAccessAllowed,
 
         [Parameter()]
-        [ValidateSet("None","Connection")]
+        [ValidateSet("None", "Connection")]
         [System.String]
         $EncryptedUserConnectionRequired,
 
@@ -60,12 +60,12 @@ function Get-TargetResource
         $ExternalDataConnectionLifetime,
 
         [Parameter()]
-        [ValidateSet("UseImpersonation","UseFileAccessAccount")]
+        [ValidateSet("UseImpersonation", "UseFileAccessAccount")]
         [System.String]
         $FileAccessMethod,
 
         [Parameter()]
-        [ValidateSet("RoundRobin","Local","WorkbookURL")]
+        [ValidateSet("RoundRobin", "Local", "WorkbookURL")]
         [System.String]
         $LoadBalancingScheme,
 
@@ -110,7 +110,7 @@ function Get-TargetResource
         $WorkbookCacheSizeMax,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present",
 
@@ -124,20 +124,20 @@ function Get-TargetResource
     if ((Get-SPDscInstalledProductVersion).FileMajorPart -ne 15)
     {
         throw [Exception] ("Only SharePoint 2013 is supported to deploy Excel Services " + `
-                           "service applications via DSC, as SharePoint 2016 and SharePoint 2019 deprecated " + `
-                           "this service. See " + `
-                           "https://technet.microsoft.com/en-us/library/mt346112(v=office.16).aspx " + `
-                           "for more info.")
+                "service applications via DSC, as SharePoint 2016 and SharePoint 2019 deprecated " + `
+                "this service. See " + `
+                "https://technet.microsoft.com/en-us/library/mt346112(v=office.16).aspx " + `
+                "for more info.")
     }
 
     $result = Invoke-SPDscCommand -Credential $InstallAccount `
-                                  -Arguments @($PSBoundParameters, $Script:ServiceAppObjectType) `
-                                  -ScriptBlock {
+        -Arguments @($PSBoundParameters, $Script:ServiceAppObjectType) `
+        -ScriptBlock {
         $params = $args[0]
         $serviceAppObjectType = $args[1]
 
         $serviceApps = Get-SPServiceApplication -Name $params.Name `
-                                                -ErrorAction SilentlyContinue
+            -ErrorAction SilentlyContinue
         $nullReturn = @{
             Name            = $params.Name
             ApplicationPool = $params.ApplicationPool
@@ -187,7 +187,7 @@ function Get-TargetResource
                 }
             }
 
-            $returnVal =  @{
+            $returnVal = @{
                 Name                                      = $serviceApp.DisplayName
                 ApplicationPool                           = $serviceApp.ApplicationPool.Name
                 Ensure                                    = "Present"
@@ -219,7 +219,7 @@ function Get-TargetResource
 function Set-TargetResource
 {
     [CmdletBinding()]
-    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSDSCUseIdenticalMandatoryParametersForDSC", "", Justification  =  "Temporary workaround for issue introduced in PSSA v1.18")]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSDSCUseIdenticalMandatoryParametersForDSC", "", Justification = "Temporary workaround for issue introduced in PSSA v1.18")]
     param
     (
         [Parameter(Mandatory = $true)]
@@ -243,7 +243,7 @@ function Set-TargetResource
         $CrossDomainAccessAllowed,
 
         [Parameter()]
-        [ValidateSet("None","Connection")]
+        [ValidateSet("None", "Connection")]
         [System.String]
         $EncryptedUserConnectionRequired,
 
@@ -252,12 +252,12 @@ function Set-TargetResource
         $ExternalDataConnectionLifetime,
 
         [Parameter()]
-        [ValidateSet("UseImpersonation","UseFileAccessAccount")]
+        [ValidateSet("UseImpersonation", "UseFileAccessAccount")]
         [System.String]
         $FileAccessMethod,
 
         [Parameter()]
-        [ValidateSet("RoundRobin","Local","WorkbookURL")]
+        [ValidateSet("RoundRobin", "Local", "WorkbookURL")]
         [System.String]
         $LoadBalancingScheme,
 
@@ -302,7 +302,7 @@ function Set-TargetResource
         $WorkbookCacheSizeMax,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present",
 
@@ -316,10 +316,10 @@ function Set-TargetResource
     if ((Get-SPDscInstalledProductVersion).FileMajorPart -ne 15)
     {
         throw [Exception] ("Only SharePoint 2013 is supported to deploy Excel Services " + `
-                           "service applications via DSC, as SharePoint 2016 and SharePoint 2019 are deprecated " + `
-                           "this service. See " + `
-                           "https://technet.microsoft.com/en-us/library/mt346112(v=office.16).aspx " + `
-                           "for more info.")
+                "service applications via DSC, as SharePoint 2016 and SharePoint 2019 are deprecated " + `
+                "this service. See " + `
+                "https://technet.microsoft.com/en-us/library/mt346112(v=office.16).aspx " + `
+                "for more info.")
     }
     $result = Get-TargetResource @PSBoundParameters
 
@@ -327,13 +327,13 @@ function Set-TargetResource
     {
         Write-Verbose -Message "Creating Excel Services Application $Name"
         Invoke-SPDscCommand -Credential $InstallAccount `
-                            -Arguments $PSBoundParameters `
-                            -ScriptBlock {
+            -Arguments $PSBoundParameters `
+            -ScriptBlock {
             $params = $args[0]
 
             New-SPExcelServiceApplication -Name $params.Name `
-                                          -ApplicationPool $params.ApplicationPool `
-                                          -Default
+                -ApplicationPool $params.ApplicationPool `
+                -Default
         }
     }
 
@@ -341,20 +341,20 @@ function Set-TargetResource
     {
         Write-Verbose -Message "Updating settings for Excel Services Application $Name"
         Invoke-SPDscCommand -Credential $InstallAccount `
-                            -Arguments $PSBoundParameters `
-                            -ScriptBlock {
+            -Arguments $PSBoundParameters `
+            -ScriptBlock {
             $params = $args[0]
 
             $params.Add("Identity", $params.Name)
 
             # Remove parameters that do not belong on the set method
             @("InstallAccount", "Ensure", "TrustedFileLocations", "Name", "ApplicationPool") |
-                ForEach-Object -Process {
-                    if ($params.ContainsKey($_) -eq $true)
-                    {
-                        $params.Remove($_) | Out-Null
-                    }
+            ForEach-Object -Process {
+                if ($params.ContainsKey($_) -eq $true)
+                {
+                    $params.Remove($_) | Out-Null
                 }
+            }
 
             Set-SPExcelServiceApplication @params
         }
@@ -372,14 +372,14 @@ function Set-TargetResource
                 {
                     Write-Verbose -Message "Adding trusted location '$($desiredLocation.Address)' to service app"
                     Invoke-SPDscCommand -Credential $InstallAccount `
-                                        -Arguments @($PSBoundParameters, $desiredLocation, $Script:TrustLocationProperties, $Script:ServiceAppObjectType) `
-                                        -ScriptBlock {
+                        -Arguments @($PSBoundParameters, $desiredLocation, $Script:TrustLocationProperties, $Script:ServiceAppObjectType) `
+                        -ScriptBlock {
                         $params = $args[0]
                         $desiredLocation = $args[1]
                         $trustLocationProperties = $args[2]
-                        $serviceAppObjectType  = $args[3]
+                        $serviceAppObjectType = $args[3]
 
-                        $newArgs = @{}
+                        $newArgs = @{ }
                         $trustLocationProperties | ForEach-Object -Process {
                             if ($null -ne $desiredLocation.$_)
                             {
@@ -398,14 +398,14 @@ function Set-TargetResource
                 {
                     Write-Verbose -Message "Updating trusted location '$($desiredLocation.Address)' in service app"
                     Invoke-SPDscCommand -Credential $InstallAccount `
-                                        -Arguments @($PSBoundParameters, $desiredLocation, $Script:TrustLocationProperties, $Script:ServiceAppObjectType) `
-                                        -ScriptBlock {
+                        -Arguments @($PSBoundParameters, $desiredLocation, $Script:TrustLocationProperties, $Script:ServiceAppObjectType) `
+                        -ScriptBlock {
                         $params = $args[0]
                         $desiredLocation = $args[1]
                         $trustLocationProperties = $args[2]
-                        $serviceAppObjectType  = $args[3]
+                        $serviceAppObjectType = $args[3]
 
-                        $updateArgs = @{}
+                        $updateArgs = @{ }
                         $trustLocationProperties | ForEach-Object -Process {
                             if ($null -ne $desiredLocation.$_)
                             {
@@ -433,8 +433,8 @@ function Set-TargetResource
                 {
                     Write-Verbose -Message "Removing trusted location '$($currentLocation.Address)' from service app"
                     Invoke-SPDscCommand -Credential $InstallAccount `
-                                        -Arguments @($Name, $currentLocation) `
-                                        -ScriptBlock {
+                        -Arguments @($Name, $currentLocation) `
+                        -ScriptBlock {
                         $name = $args[0]
                         $currentLocation = $args[1]
 
@@ -449,12 +449,12 @@ function Set-TargetResource
     {
         Write-Verbose -Message "Removing Excel Service Application $Name"
         Invoke-SPDscCommand -Credential $InstallAccount `
-                            -Arguments @($PSBoundParameters, $Script:ServiceAppObjectType) `
-                            -ScriptBlock {
+            -Arguments @($PSBoundParameters, $Script:ServiceAppObjectType) `
+            -ScriptBlock {
             $params = $args[0]
             $serviceAppObjectType = $args[1]
 
-            $serviceApp =  Get-SPServiceApplication -Name $params.Name | Where-Object -FilterScript {
+            $serviceApp = Get-SPServiceApplication -Name $params.Name | Where-Object -FilterScript {
                 $_.GetType().FullName -eq $serviceAppObjectType
             }
 
@@ -475,7 +475,7 @@ function Set-TargetResource
 function Test-TargetResource
 {
     [CmdletBinding()]
-    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSDSCUseIdenticalMandatoryParametersForDSC", "", Justification  =  "Temporary workaround for issue introduced in PSSA v1.18")]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSDSCUseIdenticalMandatoryParametersForDSC", "", Justification = "Temporary workaround for issue introduced in PSSA v1.18")]
     [OutputType([System.Boolean])]
     param
     (
@@ -500,7 +500,7 @@ function Test-TargetResource
         $CrossDomainAccessAllowed,
 
         [Parameter()]
-        [ValidateSet("None","Connection")]
+        [ValidateSet("None", "Connection")]
         [System.String]
         $EncryptedUserConnectionRequired,
 
@@ -509,12 +509,12 @@ function Test-TargetResource
         $ExternalDataConnectionLifetime,
 
         [Parameter()]
-        [ValidateSet("UseImpersonation","UseFileAccessAccount")]
+        [ValidateSet("UseImpersonation", "UseFileAccessAccount")]
         [System.String]
         $FileAccessMethod,
 
         [Parameter()]
-        [ValidateSet("RoundRobin","Local","WorkbookURL")]
+        [ValidateSet("RoundRobin", "Local", "WorkbookURL")]
         [System.String]
         $LoadBalancingScheme,
 
@@ -559,7 +559,7 @@ function Test-TargetResource
         $WorkbookCacheSizeMax,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present",
 
@@ -575,10 +575,10 @@ function Test-TargetResource
     if ((Get-SPDscInstalledProductVersion).FileMajorPart -ne 15)
     {
         throw [Exception] ("Only SharePoint 2013 is supported to deploy Excel Services " + `
-                           "service applications via DSC, as SharePoint 2016 and SharePoint 2019 are deprecated " + `
-                           "this service. See " + `
-                           "https://technet.microsoft.com/en-us/library/mt346112(v=office.16).aspx " + `
-                           "for more info.")
+                "service applications via DSC, as SharePoint 2016 and SharePoint 2019 are deprecated " + `
+                "this service. See " + `
+                "https://technet.microsoft.com/en-us/library/mt346112(v=office.16).aspx " + `
+                "for more info.")
     }
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
@@ -587,26 +587,26 @@ function Test-TargetResource
     Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
 
     $mainCheck = Test-SPDscParameterState -CurrentValues $CurrentValues `
-                                          -DesiredValues $PSBoundParameters `
-                                          -ValuesToCheck @(
-                                              "Ensure",
-                                              "CachingOfUnusedFilesEnable",
-                                              "CrossDomainAccessAllowed",
-                                              "EncryptedUserConnectionRequired",
-                                              "ExternalDataConnectionLifetime",
-                                              "FileAccessMethod",
-                                              "LoadBalancingScheme",
-                                              "MemoryCacheThreshold",
-                                              "PrivateBytesMax",
-                                              "SessionsPerUserMax",
-                                              "SiteCollectionAnonymousSessionsMax",
-                                              "TerminateProcessOnAccessViolation",
-                                              "ThrottleAccessViolationsPerSiteCollection",
-                                              "UnattendedAccountApplicationId",
-                                              "UnusedObjectAgeMax",
-                                              "WorkbookCache",
-                                              "WorkbookCacheSizeMax"
-                                          )
+        -DesiredValues $PSBoundParameters `
+        -ValuesToCheck @(
+        "Ensure",
+        "CachingOfUnusedFilesEnable",
+        "CrossDomainAccessAllowed",
+        "EncryptedUserConnectionRequired",
+        "ExternalDataConnectionLifetime",
+        "FileAccessMethod",
+        "LoadBalancingScheme",
+        "MemoryCacheThreshold",
+        "PrivateBytesMax",
+        "SessionsPerUserMax",
+        "SiteCollectionAnonymousSessionsMax",
+        "TerminateProcessOnAccessViolation",
+        "ThrottleAccessViolationsPerSiteCollection",
+        "UnattendedAccountApplicationId",
+        "UnusedObjectAgeMax",
+        "WorkbookCache",
+        "WorkbookCacheSizeMax"
+    )
 
 
     if ($Ensure -eq "Present" -and $mainCheck -eq $true -and $null -ne $TrustedFileLocations)
@@ -620,7 +620,7 @@ function Test-TargetResource
             if ($null -eq $matchingCurrentValue)
             {
                 Write-Verbose -Message ("Trusted file location '$($_.Address)' was not found " + `
-                                        "in the Excel service app. Desired state is false.")
+                        "in the Excel service app. Desired state is false.")
                 return $false
             }
             else
@@ -631,9 +631,9 @@ function Test-TargetResource
                         if ($desiredLocation.$_ -ne $matchingCurrentValue.$_)
                         {
                             Write-Verbose -Message ("Trusted file location '$($desiredLocation.Address)' did not match " + `
-                                                    "desired property '$_'. Desired value is " + `
-                                                    "'$($desiredLocation.$_)' but the current value is " + `
-                                                    "'$($matchingCurrentValue.$_)'")
+                                    "desired property '$_'. Desired value is " + `
+                                    "'$($desiredLocation.$_)' but the current value is " + `
+                                    "'$($matchingCurrentValue.$_)'")
                             return $false
                         }
                     }
@@ -655,8 +655,8 @@ function Test-TargetResource
             if ($null -eq $matchingDesiredValue)
             {
                 Write-Verbose -Message ("Existing trusted file location '$($_.Address)' was not " + `
-                                        "found in the desired state for this service " + `
-                                        "application. Desired state is false.")
+                        "found in the desired state for this service " + `
+                        "application. Desired state is false.")
                 return $false
             }
             return $true

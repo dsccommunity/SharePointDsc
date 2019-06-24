@@ -1,26 +1,27 @@
 [CmdletBinding()]
 param(
     [Parameter()]
-    [string] 
+    [string]
     $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
-                                         -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
-                                         -Resolve)
+            -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
+            -Resolve)
 )
 
 Import-Module -Name (Join-Path -Path $PSScriptRoot `
-                                -ChildPath "..\UnitTestHelper.psm1" `
-                                -Resolve)
+        -ChildPath "..\UnitTestHelper.psm1" `
+        -Resolve)
 
 $Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointCmdletModule `
-                                              -DscResource "SPProjectServerAdditionalSettings"
+    -DscResource "SPProjectServerAdditionalSettings"
 
 Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
     InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
         Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
-        switch ($Global:SPDscHelper.CurrentStubBuildNumber.Major) 
+        switch ($Global:SPDscHelper.CurrentStubBuildNumber.Major)
         {
-            15 {
+            15
+            {
                 Context -Name "All methods throw exceptions as Project Server support in SharePointDsc is only for 2016" -Fixture {
                     It "Should throw on the get method" {
                         { Get-TargetResource @testParams } | Should Throw
@@ -35,7 +36,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     }
                 }
             }
-            16 {
+            16
+            {
                 $modulePath = "Modules\SharePointDsc\Modules\SharePointDsc.ProjectServer\ProjectServerConnector.psm1"
                 Import-Module -Name (Join-Path -Path $Global:SPDscHelper.RepoRoot -ChildPath $modulePath -Resolve)
 
@@ -45,13 +47,13 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 $bytes = [System.IO.File]::ReadAllBytes($fullDllPath)
                 [System.Reflection.Assembly]::Load($bytes) | Out-Null
 
-                Mock -CommandName "Import-Module" -MockWith {}
+                Mock -CommandName "Import-Module" -MockWith { }
 
-                try 
+                try
                 {
                     [SPDscTests.DummyWebService] | Out-Null
                 }
-                catch 
+                catch
                 {
                     Add-Type -TypeDefinition @"
                         namespace SPDscTests
@@ -60,9 +62,9 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                             {
                                 public void Dispose()
                                 {
-        
-                                } 
-                            } 
+
+                                }
+                            }
                         }
 "@
                 }
@@ -74,13 +76,13 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                         }
                     }
                 }
-        
+
                 Mock -CommandName Get-SPAuthenticationProvider -MockWith {
                     return @{
                         DisableKerberos = $true
                     }
                 }
-                
+
                 Mock -CommandName "Get-SPProjectPermissionMode" -MockWith {
                     return "ProjectServer"
                 }
@@ -90,59 +92,59 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 } -MockWith {
                     $service = [SPDscTests.DummyWebService]::new()
                     $service = $service | Add-Member -MemberType ScriptMethod `
-                                                     -Name GetProjectProfessionalMinimumBuildNumbers `
-                                                     -Value {
-                                                         return @{
-                                                             Versions = @{
-                                                                 Major = 2
-                                                                 Minor = 0
-                                                                 Build = 0
-                                                                 Revision = 0
-                                                                 Rows = @(
-                                                                     @{
-                                                                        Major = 2
-                                                                        Minor = 0
-                                                                        Build = 0
-                                                                        Revision = 0
-                                                                     }
-                                                                 )
-                                                             }
-                                                         }
-                                                     } -PassThru -Force `
-                                        | Add-Member -MemberType ScriptMethod `
-                                                     -Name GetServerCurrency `
-                                                     -Value {
-                                                         return "AUD"
-                                                     } -PassThru -Force `
-                                        | Add-Member -MemberType ScriptMethod `
-                                                     -Name GetSingleCurrencyEnforced `
-                                                     -Value {
-                                                         return $true
-                                                     } -PassThru -Force `
-                                        | Add-Member -MemberType ScriptMethod `
-                                                     -Name SetProjectProfessionalMinimumBuildNumbers `
-                                                     -Value {
-                                                        $global:SPDscSetProjectProfessionalMinimumBuildNumbersCalled = $true
-                                                     } -PassThru -Force `
-                                        | Add-Member -MemberType ScriptMethod `
-                                                     -Name SetServerCurrency `
-                                                     -Value {
-                                                        $global:SPDscSetServerCurrencyCalled = $true
-                                                     } -PassThru -Force `
-                                        | Add-Member -MemberType ScriptMethod `
-                                                     -Name SetSingleCurrencyEnforced `
-                                                     -Value {
-                                                        $global:SPDscSetSingleCurrencyEnforcedCalled = $true
-                                                     } -PassThru -Force 
+                        -Name GetProjectProfessionalMinimumBuildNumbers `
+                        -Value {
+                        return @{
+                            Versions = @{
+                                Major    = 2
+                                Minor    = 0
+                                Build    = 0
+                                Revision = 0
+                                Rows     = @(
+                                    @{
+                                        Major    = 2
+                                        Minor    = 0
+                                        Build    = 0
+                                        Revision = 0
+                                    }
+                                )
+                            }
+                        }
+                    } -PassThru -Force `
+                    | Add-Member -MemberType ScriptMethod `
+                        -Name GetServerCurrency `
+                        -Value {
+                        return "AUD"
+                    } -PassThru -Force `
+                    | Add-Member -MemberType ScriptMethod `
+                        -Name GetSingleCurrencyEnforced `
+                        -Value {
+                        return $true
+                    } -PassThru -Force `
+                    | Add-Member -MemberType ScriptMethod `
+                        -Name SetProjectProfessionalMinimumBuildNumbers `
+                        -Value {
+                        $global:SPDscSetProjectProfessionalMinimumBuildNumbersCalled = $true
+                    } -PassThru -Force `
+                    | Add-Member -MemberType ScriptMethod `
+                        -Name SetServerCurrency `
+                        -Value {
+                        $global:SPDscSetServerCurrencyCalled = $true
+                    } -PassThru -Force `
+                    | Add-Member -MemberType ScriptMethod `
+                        -Name SetSingleCurrencyEnforced `
+                        -Value {
+                        $global:SPDscSetSingleCurrencyEnforcedCalled = $true
+                    } -PassThru -Force
                     return $service
                 }
 
                 Context -Name "Has incorrect settings applied" -Fixture {
                     $testParams = @{
-                        Url = "http://server/pwa"
+                        Url                               = "http://server/pwa"
                         ProjectProfessionalMinBuildNumber = "1.0.0.0"
-                        ServerCurrency = "USD"
-                        EnforceServerCurrency = $false
+                        ServerCurrency                    = "USD"
+                        EnforceServerCurrency             = $false
                     }
 
                     It "Should return current settings from the get method" {
@@ -166,10 +168,10 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
                 Context -Name "Has correct settings applied" -Fixture {
                     $testParams = @{
-                        Url = "http://server/pwa"
+                        Url                               = "http://server/pwa"
                         ProjectProfessionalMinBuildNumber = "2.0.0.0"
-                        ServerCurrency = "AUD"
-                        EnforceServerCurrency = $true
+                        ServerCurrency                    = "AUD"
+                        EnforceServerCurrency             = $true
                     }
 
                     It "Should return current settings from the get method" {
@@ -180,9 +182,10 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                         Test-TargetResource @testParams | Should Be $true
                     }
                 }
-                
+
             }
-            Default {
+            Default
+            {
                 throw [Exception] "A supported version of SharePoint was not used in testing"
             }
         }

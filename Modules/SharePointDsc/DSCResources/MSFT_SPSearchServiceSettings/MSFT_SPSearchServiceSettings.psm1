@@ -13,7 +13,7 @@ function Get-TargetResource
         $IsSingleInstance,
 
         [Parameter()]
-        [ValidateSet("Reduced","PartlyReduced","Maximum")]
+        [ValidateSet("Reduced", "PartlyReduced", "Maximum")]
         [System.String]
         $PerformanceLevel,
 
@@ -33,11 +33,11 @@ function Get-TargetResource
     Write-Verbose -Message "Getting Search service settings"
 
     if ($PSBoundParameters.ContainsKey("PerformanceLevel") -eq $false -and
-        $PSBoundParameters.ContainsKey("ContactEmail") -eq $false  -and `
-        $PSBoundParameters.ContainsKey("WindowsServiceAccount") -eq $false)
+        $PSBoundParameters.ContainsKey("ContactEmail") -eq $false -and `
+            $PSBoundParameters.ContainsKey("WindowsServiceAccount") -eq $false)
     {
         Write-Verbose -Message ("You have to specify at least one of the following parameters: " + `
-                                "PerformanceLevel, ContactEmail or WindowsServiceAccount")
+                "PerformanceLevel, ContactEmail or WindowsServiceAccount")
         return @{
             IsSingleInstance      = "Yes"
             PerformanceLevel      = $null
@@ -48,8 +48,8 @@ function Get-TargetResource
     }
 
     $result = Invoke-SPDscCommand -Credential $InstallAccount `
-                                  -Arguments $PSBoundParameters `
-                                  -ScriptBlock {
+        -Arguments $PSBoundParameters `
+        -ScriptBlock {
         $params = $args[0]
 
         try
@@ -59,7 +59,7 @@ function Get-TargetResource
         catch
         {
             Write-Verbose -Message ("No local SharePoint farm was detected. Search service " + `
-                                    "settings will not be applied")
+                    "settings will not be applied")
             return @{
                 IsSingleInstance      = "Yes"
                 PerformanceLevel      = $null
@@ -73,9 +73,9 @@ function Get-TargetResource
 
         $dummyPassword = ConvertTo-SecureString -String "-" -AsPlainText -Force
         $windowsAccount = New-Object -TypeName System.Management.Automation.PSCredential `
-                                     -ArgumentList @($searchService.ProcessIdentity, $dummyPassword)
+            -ArgumentList @($searchService.ProcessIdentity, $dummyPassword)
 
-        $returnVal =  @{
+        $returnVal = @{
             IsSingleInstance      = "Yes"
             PerformanceLevel      = $searchService.PerformanceLevel
             ContactEmail          = $searchService.ContactEmail
@@ -98,7 +98,7 @@ function Set-TargetResource
         $IsSingleInstance,
 
         [Parameter()]
-        [ValidateSet("Reduced","PartlyReduced","Maximum")]
+        [ValidateSet("Reduced", "PartlyReduced", "Maximum")]
         [System.String]
         $PerformanceLevel,
 
@@ -118,19 +118,19 @@ function Set-TargetResource
     Write-Verbose -Message "Setting Search service settings"
 
     if ($PSBoundParameters.ContainsKey("PerformanceLevel") -eq $false -and
-        $PSBoundParameters.ContainsKey("ContactEmail") -eq $false  -and `
-        $PSBoundParameters.ContainsKey("WindowsServiceAccount") -eq $false)
+        $PSBoundParameters.ContainsKey("ContactEmail") -eq $false -and `
+            $PSBoundParameters.ContainsKey("WindowsServiceAccount") -eq $false)
     {
         throw ("You have to specify at least one of the following parameters: " + `
-               "PerformanceLevel, ContactEmail or WindowsServiceAccount")
+                "PerformanceLevel, ContactEmail or WindowsServiceAccount")
     }
 
     $result = Get-TargetResource @PSBoundParameters
 
     # Update the service app that already exists
     Invoke-SPDscCommand -Credential $InstallAccount `
-                        -Arguments @($PSBoundParameters, $result) `
-                        -ScriptBlock {
+        -Arguments @($PSBoundParameters, $result) `
+        -ScriptBlock {
         $params = $args[0]
         $result = $args[1]
 
@@ -141,30 +141,30 @@ function Set-TargetResource
         catch
         {
             throw ("No local SharePoint farm was detected. Search service " + `
-                   "settings will not be applied")
+                    "settings will not be applied")
         }
 
-        $setParams = @{}
+        $setParams = @{ }
 
         if ($params.ContainsKey("PerformanceLevel") -eq $true -and `
-            $result.PerformanceLevel -ne $params.PerformanceLevel)
+                $result.PerformanceLevel -ne $params.PerformanceLevel)
         {
             Write-Verbose -Message "Updating PerformanceLevel to $($params.PerformanceLevel)"
             $setParams.Add("PerformanceLevel", $params.PerformanceLevel)
         }
 
         if ($params.ContainsKey("ContactEmail") -eq $true -and `
-            $result.ContactEmail -ne $params.ContactEmail)
+                $result.ContactEmail -ne $params.ContactEmail)
         {
             Write-Verbose -Message "Updating ContactEmail to $($params.ContactEmail)"
             $setParams.Add("ContactEmail", $params.ContactEmail)
         }
 
         if ($params.ContainsKey("WindowsServiceAccount") -eq $true -and `
-            $result.WindowsServiceAccount.UserName -ne $params.WindowsServiceAccount.UserName)
+                $result.WindowsServiceAccount.UserName -ne $params.WindowsServiceAccount.UserName)
         {
             Write-Verbose -Message ("Updating WindowsServiceAccount to " + `
-                                    $params.WindowsServiceAccount.UserName)
+                    $params.WindowsServiceAccount.UserName)
             $setParams.Add("ServiceAccount", $params.WindowsServiceAccount.UserName)
             $setParams.Add("ServicePassword", $params.WindowsServiceAccount.Password)
         }
@@ -188,7 +188,7 @@ function Test-TargetResource
         $IsSingleInstance,
 
         [Parameter()]
-        [ValidateSet("Reduced","PartlyReduced","Maximum")]
+        [ValidateSet("Reduced", "PartlyReduced", "Maximum")]
         [System.String]
         $PerformanceLevel,
 
@@ -208,11 +208,11 @@ function Test-TargetResource
     Write-Verbose -Message "Testing Search service settings"
 
     if ($PSBoundParameters.ContainsKey("PerformanceLevel") -eq $false -and
-        $PSBoundParameters.ContainsKey("ContactEmail") -eq $false  -and `
-        $PSBoundParameters.ContainsKey("WindowsServiceAccount") -eq $false)
+        $PSBoundParameters.ContainsKey("ContactEmail") -eq $false -and `
+            $PSBoundParameters.ContainsKey("WindowsServiceAccount") -eq $false)
     {
         Write-Verbose -Message ("You have to specify at least one of the following parameters: " + `
-                                "PerformanceLevel, ContactEmail or WindowsServiceAccount")
+                "PerformanceLevel, ContactEmail or WindowsServiceAccount")
         return $false
     }
 
@@ -235,9 +235,9 @@ function Test-TargetResource
     }
 
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
-                                    -DesiredValues $PSBoundParameters `
-                                    -ValuesToCheck @("PerformanceLevel",
-                                                     "ContactEmail")
+        -DesiredValues $PSBoundParameters `
+        -ValuesToCheck @("PerformanceLevel",
+        "ContactEmail")
 }
 
 Export-ModuleMember -Function *-TargetResource

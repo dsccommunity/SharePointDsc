@@ -41,8 +41,8 @@ function Get-TargetResource
     Write-Verbose -Message "Getting antivirus configuration settings"
 
     $result = Invoke-SPDscCommand -Credential $InstallAccount `
-                                  -Arguments $PSBoundParameters `
-                                  -ScriptBlock {
+        -Arguments $PSBoundParameters `
+        -ScriptBlock {
         $params = $args[0]
 
         try
@@ -52,17 +52,17 @@ function Get-TargetResource
         catch
         {
             Write-Verbose -Message ("No local SharePoint farm was detected. Antivirus " + `
-                                    "settings will not be applied")
+                    "settings will not be applied")
             return @{
-                IsSingleInstance = "Yes"
+                IsSingleInstance      = "Yes"
                 # Set the antivirus settings
                 AllowDownloadInfected = $false
-                ScanOnDownload = $false
-                ScanOnUpload = $false
-                AttemptToClean = $false
-                NumberOfThreads = 0
-                TimeoutDuration = 0
-                InstallAccount = $params.InstallAccount
+                ScanOnDownload        = $false
+                ScanOnUpload          = $false
+                AttemptToClean        = $false
+                NumberOfThreads       = 0
+                TimeoutDuration       = 0
+                InstallAccount        = $params.InstallAccount
             }
         }
 
@@ -70,15 +70,15 @@ function Get-TargetResource
         $admService = Get-SPDscContentService
 
         return @{
-            IsSingleInstance = "Yes"
+            IsSingleInstance      = "Yes"
             # Set the antivirus settings
             AllowDownloadInfected = $admService.AntivirusSettings.AllowDownload
-            ScanOnDownload = $admService.AntivirusSettings.DownloadScanEnabled
-            ScanOnUpload = $admService.AntivirusSettings.UploadScanEnabled
-            AttemptToClean = $admService.AntivirusSettings.CleaningEnabled
-            NumberOfThreads = $admService.AntivirusSettings.NumberOfThreads
-            TimeoutDuration = $admService.AntivirusSettings.Timeout.TotalSeconds
-            InstallAccount = $params.InstallAccount
+            ScanOnDownload        = $admService.AntivirusSettings.DownloadScanEnabled
+            ScanOnUpload          = $admService.AntivirusSettings.UploadScanEnabled
+            AttemptToClean        = $admService.AntivirusSettings.CleaningEnabled
+            NumberOfThreads       = $admService.AntivirusSettings.NumberOfThreads
+            TimeoutDuration       = $admService.AntivirusSettings.Timeout.TotalSeconds
+            InstallAccount        = $params.InstallAccount
         }
     }
     return $result
@@ -126,8 +126,8 @@ function Set-TargetResource
     Write-Verbose -Message "Setting antivirus configuration settings"
 
     Invoke-SPDscCommand -Credential $InstallAccount `
-                        -Arguments $PSBoundParameters `
-                        -ScriptBlock {
+        -Arguments $PSBoundParameters `
+        -ScriptBlock {
         $params = $args[0]
 
         try
@@ -222,7 +222,7 @@ function Test-TargetResource
     Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
 
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
-                                    -DesiredValues $PSBoundParameters
+        -DesiredValues $PSBoundParameters
 }
 
 Export-ModuleMember -Function *-TargetResource

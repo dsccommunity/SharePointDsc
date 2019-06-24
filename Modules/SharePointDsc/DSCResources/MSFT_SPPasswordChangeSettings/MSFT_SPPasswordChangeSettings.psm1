@@ -14,17 +14,17 @@ function Get-TargetResource
         $MailAddress,
 
         [Parameter()]
-        [ValidateRange(0,356)]
+        [ValidateRange(0, 356)]
         [System.UInt32]
         $DaysBeforeExpiry,
 
         [Parameter()]
-        [ValidateRange(0,36000)]
+        [ValidateRange(0, 36000)]
         [System.UInt32]
         $PasswordChangeWaitTimeSeconds,
 
         [Parameter()]
-        [ValidateRange(0,99)]
+        [ValidateRange(0, 99)]
         [System.UInt32]
         $NumberOfRetries,
 
@@ -36,8 +36,8 @@ function Get-TargetResource
     Write-Verbose -Message "Getting farm wide automatic password change settings"
 
     $result = Invoke-SPDscCommand -Credential $InstallAccount `
-                                  -Arguments $PSBoundParameters `
-                                  -ScriptBlock {
+        -Arguments $PSBoundParameters `
+        -ScriptBlock {
         $farm = Get-SPFarm
         if ($null -eq $farm )
         {
@@ -76,17 +76,17 @@ function Set-TargetResource
         $MailAddress,
 
         [Parameter()]
-        [ValidateRange(0,356)]
+        [ValidateRange(0, 356)]
         [System.UInt32]
         $DaysBeforeExpiry,
 
         [Parameter()]
-        [ValidateRange(0,36000)]
+        [ValidateRange(0, 36000)]
         [System.UInt32]
         $PasswordChangeWaitTimeSeconds,
 
         [Parameter()]
-        [ValidateRange(0,99)]
+        [ValidateRange(0, 99)]
         [System.UInt32]
         $NumberOfRetries,
 
@@ -98,8 +98,8 @@ function Set-TargetResource
     Write-Verbose -Message "Setting farm wide automatic password change settings"
 
     Invoke-SPDscCommand -Credential $InstallAccount `
-                        -Arguments $PSBoundParameters `
-                        -ScriptBlock {
+        -Arguments $PSBoundParameters `
+        -ScriptBlock {
         $params = $args[0]
         $farm = Get-SPFarm -ErrorAction Continue
 
@@ -141,17 +141,17 @@ function Test-TargetResource
         $MailAddress,
 
         [Parameter()]
-        [ValidateRange(0,356)]
+        [ValidateRange(0, 356)]
         [System.UInt32]
         $DaysBeforeExpiry,
 
         [Parameter()]
-        [ValidateRange(0,36000)]
+        [ValidateRange(0, 36000)]
         [System.UInt32]
         $PasswordChangeWaitTimeSeconds,
 
         [Parameter()]
-        [ValidateRange(0,99)]
+        [ValidateRange(0, 99)]
         [System.UInt32]
         $NumberOfRetries,
 
@@ -168,11 +168,11 @@ function Test-TargetResource
     Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
 
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
-                                    -DesiredValues $PSBoundParameters `
-                                    -ValuesToCheck @("MailAddress",
-                                                     "DaysBeforeExpiry",
-                                                     "PasswordChangeWaitTimeSeconds",
-                                                     "NumberOfRetries")
+        -DesiredValues $PSBoundParameters `
+        -ValuesToCheck @("MailAddress",
+        "DaysBeforeExpiry",
+        "PasswordChangeWaitTimeSeconds",
+        "NumberOfRetries")
 }
 
 Export-ModuleMember -Function *-TargetResource

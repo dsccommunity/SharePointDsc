@@ -3,17 +3,17 @@ param(
     [Parameter()]
     [string]
     $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
-                                         -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
-                                         -Resolve)
+            -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
+            -Resolve)
 )
 Set-StrictMode -Version 2
 
 Import-Module -Name (Join-Path -Path $PSScriptRoot `
-                                -ChildPath "..\UnitTestHelper.psm1" `
-                                -Resolve)
+        -ChildPath "..\UnitTestHelper.psm1" `
+        -Resolve)
 
 $Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointCmdletModule `
-                                              -DscResource "SPSelfServiceSiteCreation"
+    -DscResource "SPSelfServiceSiteCreation"
 
 Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
     InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
@@ -35,17 +35,17 @@ namespace Microsoft.SharePoint.Administration {
 
         $webAppImplementation = {
             $webApp = @{
-                Url = $null
-                SelfServiceSiteCreationEnabled = $null
-                SelfServiceSiteCreationOnlineEnabled = $null
-                SelfServiceCreationQuotaTemplate = $null
-                ShowStartASiteMenuItem = $null
-                SelfServiceCreateIndividualSite = $null
-                SelfServiceCreationParentSiteUrl = $null
-                SelfServiceSiteCustomFormUrl = $null
+                Url                                      = $null
+                SelfServiceSiteCreationEnabled           = $null
+                SelfServiceSiteCreationOnlineEnabled     = $null
+                SelfServiceCreationQuotaTemplate         = $null
+                ShowStartASiteMenuItem                   = $null
+                SelfServiceCreateIndividualSite          = $null
+                SelfServiceCreationParentSiteUrl         = $null
+                SelfServiceSiteCustomFormUrl             = $null
                 RequireContactForSelfServiceSiteCreation = $null
-                Properties = @{}
-                UpdateCalled = $false
+                Properties                               = @{ }
+                UpdateCalled                             = $false
             }
 
             $webApp | Add-Member -MemberType ScriptMethod -Name Update -Value {
@@ -56,8 +56,8 @@ namespace Microsoft.SharePoint.Administration {
 
         Mock -CommandName Get-SPDscInstalledProductVersion {
             return @{
-                FileMajorPart = $Global:SPDscHelper.CurrentStubBuildNumber.Major
-                FileBuildPart = $Global:SPDscHelper.CurrentStubBuildNumber.Build
+                FileMajorPart    = $Global:SPDscHelper.CurrentStubBuildNumber.Major
+                FileBuildPart    = $Global:SPDscHelper.CurrentStubBuildNumber.Build
                 ProductBuildPart = $Global:SPDscHelper.CurrentStubBuildNumber.Build
             }
         }
@@ -66,15 +66,15 @@ namespace Microsoft.SharePoint.Administration {
 
         Context -Name "Self service site creation settings matches the current state" -Fixture {
             $testParams = @{
-                WebAppUrl = "http://sites.sharepoint.com"
-                Enabled = $true
-                OnlineEnabled = $false
-                QuotaTemplate = "SSCQoutaTemplate"
-                ShowStartASiteMenuItem = $true
-                CreateIndividualSite = $false
-                ParentSiteUrl = "/sites/SSC"
-                CustomFormUrl = ""
-                PolicyOption = "CanHavePolicy"
+                WebAppUrl               = "http://sites.sharepoint.com"
+                Enabled                 = $true
+                OnlineEnabled           = $false
+                QuotaTemplate           = "SSCQoutaTemplate"
+                ShowStartASiteMenuItem  = $true
+                CreateIndividualSite    = $false
+                ParentSiteUrl           = "/sites/SSC"
+                CustomFormUrl           = ""
+                PolicyOption            = "CanHavePolicy"
                 RequireSecondaryContact = $true
             }
 
@@ -124,15 +124,15 @@ namespace Microsoft.SharePoint.Administration {
 
         Context -Name "Self service site creation settings does not match the current state" -Fixture {
             $testParams = @{
-                WebAppUrl = "http://sites.sharepoint.com"
-                Enabled = $true
-                OnlineEnabled = $false
-                QuotaTemplate = "SSCQoutaTemplate"
-                ShowStartASiteMenuItem = $true
-                CreateIndividualSite = $false
-                ParentSiteUrl = "/sites/SSC"
-                CustomFormUrl = "http://CustomForm.SharePoint.com"
-                PolicyOption = "CanHavePolicy"
+                WebAppUrl               = "http://sites.sharepoint.com"
+                Enabled                 = $true
+                OnlineEnabled           = $false
+                QuotaTemplate           = "SSCQoutaTemplate"
+                ShowStartASiteMenuItem  = $true
+                CreateIndividualSite    = $false
+                ParentSiteUrl           = "/sites/SSC"
+                CustomFormUrl           = "http://CustomForm.SharePoint.com"
+                PolicyOption            = "CanHavePolicy"
                 RequireSecondaryContact = $true
             }
 
@@ -166,7 +166,7 @@ namespace Microsoft.SharePoint.Administration {
         Context -Name "Disabling self service site creation does not match the current state" -Fixture {
             $testParams = @{
                 WebAppUrl = "http://sites.sharepoint.com"
-                Enabled = $false
+                Enabled   = $false
             }
 
             Mock -CommandName Get-SPWebApplication -MockWith {
@@ -202,8 +202,8 @@ namespace Microsoft.SharePoint.Administration {
 
         Context -Name "Disabling self service site creation and enabling show start a site menu item" -Fixture {
             $testParams = @{
-                WebAppUrl = "http://sites.sharepoint.com"
-                Enabled = $false
+                WebAppUrl              = "http://sites.sharepoint.com"
+                Enabled                = $false
                 ShowStartASiteMenuItem = $true
             }
 
@@ -238,8 +238,8 @@ namespace Microsoft.SharePoint.Administration {
         Context -Name "Web application does not exist" -Fixture {
             $testParams = @{
                 WebAppUrl = "http://sites.sharepoint.com"
-                Enabled = $true
-                }
+                Enabled   = $true
+            }
 
             Mock -CommandName Get-SPWebApplication -MockWith {
                 return($null)
@@ -274,16 +274,16 @@ namespace Microsoft.SharePoint.Administration {
         {
             Context -Name "Using SP2019 parameters in SP2013/2016" -Fixture {
                 $testParams = @{
-                    WebAppUrl = "http://sites.sharepoint.com"
-                    Enabled = $true
-                    OnlineEnabled = $false
-                    QuotaTemplate = "SSCQoutaTemplate"
-                    ShowStartASiteMenuItem = $true
-                    CreateIndividualSite = $false
-                    ParentSiteUrl = "/sites/SSC"
-                    CustomFormUrl = ""
-                    ManagedPath = "CANNOT BE USED"
-                    PolicyOption = "CanHavePolicy"
+                    WebAppUrl               = "http://sites.sharepoint.com"
+                    Enabled                 = $true
+                    OnlineEnabled           = $false
+                    QuotaTemplate           = "SSCQoutaTemplate"
+                    ShowStartASiteMenuItem  = $true
+                    CreateIndividualSite    = $false
+                    ParentSiteUrl           = "/sites/SSC"
+                    CustomFormUrl           = ""
+                    ManagedPath             = "CANNOT BE USED"
+                    PolicyOption            = "CanHavePolicy"
                     RequireSecondaryContact = $true
                 }
 
@@ -292,16 +292,16 @@ namespace Microsoft.SharePoint.Administration {
                 }
 
                 $testParams = @{
-                    WebAppUrl = "http://sites.sharepoint.com"
-                    Enabled = $true
-                    OnlineEnabled = $false
-                    QuotaTemplate = "SSCQoutaTemplate"
-                    ShowStartASiteMenuItem = $true
-                    CreateIndividualSite = $false
-                    ParentSiteUrl = "/sites/SSC"
-                    CustomFormUrl = ""
-                    AlternateUrl = "CANNOT BE USED"
-                    PolicyOption = "CanHavePolicy"
+                    WebAppUrl               = "http://sites.sharepoint.com"
+                    Enabled                 = $true
+                    OnlineEnabled           = $false
+                    QuotaTemplate           = "SSCQoutaTemplate"
+                    ShowStartASiteMenuItem  = $true
+                    CreateIndividualSite    = $false
+                    ParentSiteUrl           = "/sites/SSC"
+                    CustomFormUrl           = ""
+                    AlternateUrl            = "CANNOT BE USED"
+                    PolicyOption            = "CanHavePolicy"
                     RequireSecondaryContact = $true
                 }
 
@@ -310,16 +310,16 @@ namespace Microsoft.SharePoint.Administration {
                 }
 
                 $testParams = @{
-                    WebAppUrl = "http://sites.sharepoint.com"
-                    Enabled = $true
-                    OnlineEnabled = $false
-                    QuotaTemplate = "SSCQoutaTemplate"
-                    ShowStartASiteMenuItem = $true
-                    CreateIndividualSite = $false
-                    ParentSiteUrl = "/sites/SSC"
-                    CustomFormUrl = ""
-                    UserExperienceVersion = "Modern" # CANNOT BE USED
-                    PolicyOption = "CanHavePolicy"
+                    WebAppUrl               = "http://sites.sharepoint.com"
+                    Enabled                 = $true
+                    OnlineEnabled           = $false
+                    QuotaTemplate           = "SSCQoutaTemplate"
+                    ShowStartASiteMenuItem  = $true
+                    CreateIndividualSite    = $false
+                    ParentSiteUrl           = "/sites/SSC"
+                    CustomFormUrl           = ""
+                    UserExperienceVersion   = "Modern" # CANNOT BE USED
+                    PolicyOption            = "CanHavePolicy"
                     RequireSecondaryContact = $true
                 }
 
@@ -334,17 +334,17 @@ namespace Microsoft.SharePoint.Administration {
         {
             Context -Name "Using both ManagedPath and AlternateUrl" -Fixture {
                 $testParams = @{
-                    WebAppUrl = "http://sites.sharepoint.com"
-                    Enabled = $true
-                    OnlineEnabled = $false
-                    QuotaTemplate = "SSCQoutaTemplate"
-                    ShowStartASiteMenuItem = $true
-                    CreateIndividualSite = $false
-                    ParentSiteUrl = "/sites/SSC"
-                    CustomFormUrl = ""
-                    ManagedPath = "sites"
-                    AlternateUrl = "sharepoint.contoso.com"
-                    PolicyOption = "CanHavePolicy"
+                    WebAppUrl               = "http://sites.sharepoint.com"
+                    Enabled                 = $true
+                    OnlineEnabled           = $false
+                    QuotaTemplate           = "SSCQoutaTemplate"
+                    ShowStartASiteMenuItem  = $true
+                    CreateIndividualSite    = $false
+                    ParentSiteUrl           = "/sites/SSC"
+                    CustomFormUrl           = ""
+                    ManagedPath             = "sites"
+                    AlternateUrl            = "sharepoint.contoso.com"
+                    PolicyOption            = "CanHavePolicy"
                     RequireSecondaryContact = $true
                 }
 

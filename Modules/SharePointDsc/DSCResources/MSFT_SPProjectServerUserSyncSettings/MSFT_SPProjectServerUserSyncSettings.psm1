@@ -30,12 +30,12 @@ function Get-TargetResource
     if ((Get-SPDscInstalledProductVersion).FileMajorPart -lt 16)
     {
         throw [Exception] ("Support for Project Server in SharePointDsc is only valid for " + `
-                           "SharePoint 2016 and 2019.")
+                "SharePoint 2016 and 2019.")
     }
 
     $result = Invoke-SPDscCommand -Credential $InstallAccount `
-                                  -Arguments @($PSBoundParameters, $PSScriptRoot) `
-                                  -ScriptBlock {
+        -Arguments @($PSBoundParameters, $PSScriptRoot) `
+        -ScriptBlock {
         $params = $args[0]
         $scriptRoot = $args[1]
 
@@ -45,8 +45,8 @@ function Get-TargetResource
         $webAppUrl = (Get-SPSite -Identity $params.Url).WebApplication.Url
         $useKerberos = -not (Get-SPAuthenticationProvider -WebApplication $webAppUrl -Zone Default).DisableKerberos
         $wssService = New-SPDscProjectServerWebService -PwaUrl $params.Url `
-                                                       -EndpointName WssInterop `
-                                                       -UseKerberos:$useKerberos
+            -EndpointName WssInterop `
+            -UseKerberos:$useKerberos
 
         $script:currentValue = $null
         Use-SPDscProjectServerWebService -Service $wssService -ScriptBlock {
@@ -69,7 +69,7 @@ function Get-TargetResource
         }
         else
         {
-            $bits = [Convert]::ToString($script:currentValue,2).PadLeft(4, '0').ToCharArray() | Select-Object -Last 4
+            $bits = [Convert]::ToString($script:currentValue, 2).PadLeft(4, '0').ToCharArray() | Select-Object -Last 4
 
             return @{
                 Url                                 = $params.Url
@@ -113,8 +113,8 @@ function Set-TargetResource
     Write-Verbose -Message "Setting User Sync settings for $Url"
 
     Invoke-SPDscCommand -Credential $InstallAccount `
-                        -Arguments $PSBoundParameters `
-                        -ScriptBlock {
+        -Arguments $PSBoundParameters `
+        -ScriptBlock {
 
         $params = $args[0]
 
@@ -181,7 +181,7 @@ function Test-TargetResource
     Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
 
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
-                                    -DesiredValues $PSBoundParameters
+        -DesiredValues $PSBoundParameters
 }
 
 Export-ModuleMember -Function *-TargetResource

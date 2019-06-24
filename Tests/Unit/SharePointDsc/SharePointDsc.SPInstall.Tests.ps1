@@ -3,16 +3,16 @@ param(
     [Parameter()]
     [string]
     $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
-                                         -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
-                                         -Resolve)
+            -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
+            -Resolve)
 )
 
 Import-Module -Name (Join-Path -Path $PSScriptRoot `
-                                -ChildPath "..\UnitTestHelper.psm1" `
-                                -Resolve)
+        -ChildPath "..\UnitTestHelper.psm1" `
+        -Resolve)
 
 $Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointCmdletModule `
-                                              -DscResource "SPInstall"
+    -DscResource "SPInstall"
 
 Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
     InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
@@ -29,29 +29,29 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             )
             $object = New-Object -TypeName System.Object
             $object = $object | Add-Member -Type NoteProperty `
-                                           -Name "DisplayName" `
-                                           -Value $Name `
-                                           -PassThru
+                -Name "DisplayName" `
+                -Value $Name `
+                -PassThru
             return $object
         }
 
         # Mocks for all contexts
         Mock -CommandName Get-ChildItem -MockWith {
             $full = @{
-                    Version = "4.5.0.0"
-                    Release = "0"
-                    PSChildName = "Full"
-                }
+                Version     = "4.5.0.0"
+                Release     = "0"
+                PSChildName = "Full"
+            }
 
-                $client = @{
-                    Version = "4.5.0.0"
-                    Release = "0"
-                    PSChildName = "Client"
-                }
+            $client = @{
+                Version     = "4.5.0.0"
+                Release     = "0"
+                PSChildName = "Client"
+            }
 
-                $returnval = @($full, $client)
-                $returnVal = $returnVal | Add-Member ScriptMethod GetValue { return 380000 } -PassThru
-                return $returnval
+            $returnval = @($full, $client)
+            $returnVal = $returnVal | Add-Member ScriptMethod GetValue { return 380000 } -PassThru
+            return $returnval
         }
 
         Mock -CommandName Get-SPDscAssemblyVersion -MockWith {
@@ -71,9 +71,9 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         Context -Name "Specified BinaryDir does not exist" -Fixture {
             $testParams = @{
                 IsSingleInstance = "Yes"
-                BinaryDir = "C:\SPInstall"
-                ProductKey = "XXXXX-XXXXX-XXXXX-XXXXX-XXXXX"
-                Ensure = "Present"
+                BinaryDir        = "C:\SPInstall"
+                ProductKey       = "XXXXX-XXXXX-XXXXX-XXXXX-XXXXX"
+                Ensure           = "Present"
             }
 
             Mock -CommandName Test-Path -MockWith {
@@ -88,7 +88,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 { Set-TargetResource @testParams } | Should Throw "Specified path cannot be found"
             }
 
-            It "Should throw exception in the test method"  {
+            It "Should throw exception in the test method" {
                 { Test-TargetResource @testParams } | Should Throw "Specified path cannot be found"
             }
         }
@@ -96,9 +96,9 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         Context -Name "Setup.exe does not exist in BinaryDir" -Fixture {
             $testParams = @{
                 IsSingleInstance = "Yes"
-                BinaryDir = "C:\SPInstall"
-                ProductKey = "XXXXX-XXXXX-XXXXX-XXXXX-XXXXX"
-                Ensure = "Present"
+                BinaryDir        = "C:\SPInstall"
+                ProductKey       = "XXXXX-XXXXX-XXXXX-XXXXX-XXXXX"
+                Ensure           = "Present"
             }
 
             Mock -CommandName Test-Path -MockWith {
@@ -113,7 +113,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 { Set-TargetResource @testParams } | Should Throw "Setup.exe cannot be found"
             }
 
-            It "Should throw exception in the test method"  {
+            It "Should throw exception in the test method" {
                 { Test-TargetResource @testParams } | Should Throw "Setup.exe cannot be found"
             }
         }
@@ -121,9 +121,9 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         Context -Name "Setup.exe file is blocked" -Fixture {
             $testParams = @{
                 IsSingleInstance = "Yes"
-                BinaryDir = "C:\SPInstall"
-                ProductKey = "XXXXX-XXXXX-XXXXX-XXXXX-XXXXX"
-                Ensure = "Present"
+                BinaryDir        = "C:\SPInstall"
+                ProductKey       = "XXXXX-XXXXX-XXXXX-XXXXX-XXXXX"
+                Ensure           = "Present"
             }
 
             Mock -CommandName Get-Item -MockWith {
@@ -138,7 +138,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 { Set-TargetResource @testParams } | Should Throw "Setup file is blocked!"
             }
 
-            It "Should throw exception in the test method"  {
+            It "Should throw exception in the test method" {
                 { Test-TargetResource @testParams } | Should Throw "Setup file is blocked!"
             }
         }
@@ -146,9 +146,9 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         Context -Name "SharePoint binaries are not installed but should be using UNC path" -Fixture {
             $testParams = @{
                 IsSingleInstance = "Yes"
-                BinaryDir = "\\server\install\SPInstall"
-                ProductKey = "XXXXX-XXXXX-XXXXX-XXXXX-XXXXX"
-                Ensure = "Present"
+                BinaryDir        = "\\server\install\SPInstall"
+                ProductKey       = "XXXXX-XXXXX-XXXXX-XXXXX-XXXXX"
+                Ensure           = "Present"
             }
 
             Mock -CommandName Test-Path -MockWith {
@@ -178,9 +178,9 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         Context -Name "SharePoint binaries are not installed but should be using CDROM drive" -Fixture {
             $testParams = @{
                 IsSingleInstance = "Yes"
-                BinaryDir = "C:\SPInstall"
-                ProductKey = "XXXXX-XXXXX-XXXXX-XXXXX-XXXXX"
-                Ensure = "Present"
+                BinaryDir        = "C:\SPInstall"
+                ProductKey       = "XXXXX-XXXXX-XXXXX-XXXXX-XXXXX"
+                Ensure           = "Present"
             }
 
             Mock -CommandName Test-Path -MockWith {
@@ -217,9 +217,9 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         Context -Name "SharePoint binaries are not installed but should be" -Fixture {
             $testParams = @{
                 IsSingleInstance = "Yes"
-                BinaryDir = "C:\SPInstall"
-                ProductKey = "XXXXX-XXXXX-XXXXX-XXXXX-XXXXX"
-                Ensure = "Present"
+                BinaryDir        = "C:\SPInstall"
+                ProductKey       = "XXXXX-XXXXX-XXXXX-XXXXX-XXXXX"
+                Ensure           = "Present"
             }
 
             Mock -CommandName Get-ItemProperty -MockWith {
@@ -230,7 +230,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 (Get-TargetResource @testParams).Ensure | Should Be "Absent"
             }
 
-            It "Should return false from the test method"  {
+            It "Should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $false
             }
         }
@@ -238,9 +238,9 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         Context -Name "SharePoint binaries are installed and should be" -Fixture {
             $testParams = @{
                 IsSingleInstance = "Yes"
-                BinaryDir = "C:\SPInstall"
-                ProductKey = "XXXXX-XXXXX-XXXXX-XXXXX-XXXXX"
-                Ensure = "Present"
+                BinaryDir        = "C:\SPInstall"
+                ProductKey       = "XXXXX-XXXXX-XXXXX-XXXXX-XXXXX"
+                Ensure           = "Present"
             }
 
             Mock -CommandName Get-ItemProperty -MockWith {
@@ -274,9 +274,9 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         Context -Name "SharePoint installation executes as expected" -Fixture {
             $testParams = @{
                 IsSingleInstance = "Yes"
-                BinaryDir = "C:\SPInstall"
-                ProductKey = "XXXXX-XXXXX-XXXXX-XXXXX-XXXXX"
-                Ensure = "Present"
+                BinaryDir        = "C:\SPInstall"
+                ProductKey       = "XXXXX-XXXXX-XXXXX-XXXXX-XXXXX"
+                Ensure           = "Present"
             }
 
             Mock -CommandName Start-Process -MockWith {
@@ -294,9 +294,9 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         Context -Name "SharePoint installation fails" -Fixture {
             $testParams = @{
                 IsSingleInstance = "Yes"
-                BinaryDir = "C:\SPInstall"
-                ProductKey = "XXXXX-XXXXX-XXXXX-XXXXX-XXXXX"
-                Ensure = "Present"
+                BinaryDir        = "C:\SPInstall"
+                ProductKey       = "XXXXX-XXXXX-XXXXX-XXXXX-XXXXX"
+                Ensure           = "Present"
             }
 
             Mock -CommandName Start-Process -MockWith {
@@ -313,12 +313,12 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         Context -Name "SharePoint binaries are installed and should not be" -Fixture {
             $testParams = @{
                 IsSingleInstance = "Yes"
-                BinaryDir = "C:\SPInstall"
-                ProductKey = "XXXXX-XXXXX-XXXXX-XXXXX-XXXXX"
-                Ensure = "Absent"
+                BinaryDir        = "C:\SPInstall"
+                ProductKey       = "XXXXX-XXXXX-XXXXX-XXXXX-XXXXX"
+                Ensure           = "Absent"
             }
 
-            Mock -CommandName Get-ItemProperty -MockWith { return @{} }  -ParameterFilter { $null -ne $Path }
+            Mock -CommandName Get-ItemProperty -MockWith { return @{ } }  -ParameterFilter { $null -ne $Path }
 
             It "Should throw in the test method because uninstall is unsupported" {
                 { Test-TargetResource @testParams } | Should Throw
@@ -332,21 +332,21 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         Context -Name "SharePoint 2013 is installing on a server with .NET 4.6" -Fixture {
             $testParams = @{
                 IsSingleInstance = "Yes"
-                BinaryDir = "C:\SPInstall"
-                ProductKey = "XXXXX-XXXXX-XXXXX-XXXXX-XXXXX"
-                Ensure = "Present"
+                BinaryDir        = "C:\SPInstall"
+                ProductKey       = "XXXXX-XXXXX-XXXXX-XXXXX-XXXXX"
+                Ensure           = "Present"
             }
 
             Mock -CommandName Get-ChildItem -MockWith {
                 $full = @{
-                    Version = "4.6.0.0"
-                    Release = "0"
+                    Version     = "4.6.0.0"
+                    Release     = "0"
                     PSChildName = "Full"
                 }
 
                 $client = @{
-                    Version = "4.6.0.0"
-                    Release = "0"
+                    Version     = "4.6.0.0"
+                    Release     = "0"
                     PSChildName = "Client"
                 }
 
@@ -363,11 +363,11 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         Context -Name "SharePoint is not installed and should be, using custom install directories" -Fixture {
             $testParams = @{
                 IsSingleInstance = "Yes"
-                BinaryDir = "C:\SPInstall"
-                ProductKey = "XXXXX-XXXXX-XXXXX-XXXXX-XXXXX"
-                Ensure = "Present"
-                InstallPath = "C:\somewhere"
-                DataPath = "C:\somewhere\else"
+                BinaryDir        = "C:\SPInstall"
+                ProductKey       = "XXXXX-XXXXX-XXXXX-XXXXX-XXXXX"
+                Ensure           = "Present"
+                InstallPath      = "C:\somewhere"
+                DataPath         = "C:\somewhere\else"
             }
 
             Mock -CommandName Get-ItemProperty -MockWith {
@@ -380,7 +380,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 (Get-TargetResource @testParams).Ensure | Should Be "Absent"
             }
 
-            It "Should return false from the test method"  {
+            It "Should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $false
             }
 

@@ -25,7 +25,7 @@ function Get-TargetResource
         $WarningUsagePointsSolutions,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present",
 
@@ -44,12 +44,12 @@ function Get-TargetResource
     if ($MaximumUsagePointsSolutions -lt $WarningUsagePointsSolutions)
     {
         throw ("MaximumUsagePointsSolutions must be equal to or larger than " + `
-               "WarningUsagePointsSolutions.")
+                "WarningUsagePointsSolutions.")
     }
 
     $result = Invoke-SPDscCommand -Credential $InstallAccount `
-                                  -Arguments $PSBoundParameters `
-                                  -ScriptBlock {
+        -Arguments $PSBoundParameters `
+        -ScriptBlock {
         $params = $args[0]
 
         try
@@ -59,7 +59,7 @@ function Get-TargetResource
         catch
         {
             Write-Verbose -Message ("No local SharePoint farm was detected. Quota " + `
-                                    "template settings will not be applied")
+                    "template settings will not be applied")
             return @{
                 Name                        = $params.Name
                 StorageMaxInMB              = 0
@@ -127,7 +127,7 @@ function Set-TargetResource
         $WarningUsagePointsSolutions,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present",
 
@@ -146,16 +146,17 @@ function Set-TargetResource
     if ($MaximumUsagePointsSolutions -lt $WarningUsagePointsSolutions)
     {
         Throw ("MaximumUsagePointsSolutions must be equal to or larger than " + `
-               "WarningUsagePointsSolutions.")
+                "WarningUsagePointsSolutions.")
     }
 
     switch ($Ensure)
     {
-        "Present" {
+        "Present"
+        {
             Write-Verbose "Ensure is set to Present - Add or update template"
             Invoke-SPDscCommand -Credential $InstallAccount `
-                                -Arguments $PSBoundParameters `
-                                -ScriptBlock {
+                -Arguments $PSBoundParameters `
+                -ScriptBlock {
                 $params = $args[0]
 
                 try
@@ -165,7 +166,7 @@ function Set-TargetResource
                 catch
                 {
                     throw ("No local SharePoint farm was detected. Quota " + `
-                           "template settings will not be applied")
+                            "template settings will not be applied")
                     return
                 }
 
@@ -222,22 +223,23 @@ function Set-TargetResource
                 }
             }
         }
-        "Absent" {
+        "Absent"
+        {
             Write-Verbose "Ensure is set to Absent - Removing template"
 
             if ($StorageMaxInMB `
-                -or $StorageWarningInMB `
-                -or $MaximumUsagePointsSolutions `
-                -or $WarningUsagePointsSolutions)
+                    -or $StorageWarningInMB `
+                    -or $MaximumUsagePointsSolutions `
+                    -or $WarningUsagePointsSolutions)
             {
                 Throw ("Do not use StorageMaxInMB, StorageWarningInMB, " + `
-                       "MaximumUsagePointsSolutions or WarningUsagePointsSolutions " + `
-                       "when Ensure is specified as Absent")
+                        "MaximumUsagePointsSolutions or WarningUsagePointsSolutions " + `
+                        "when Ensure is specified as Absent")
             }
 
             Invoke-SPDscCommand -Credential $InstallAccount `
-                                -Arguments $PSBoundParameters `
-                                -ScriptBlock {
+                -Arguments $PSBoundParameters `
+                -ScriptBlock {
                 $params = $args[0]
 
                 try
@@ -247,7 +249,7 @@ function Set-TargetResource
                 catch
                 {
                     Write-Verbose -Message ("No local SharePoint farm was detected. Quota " + `
-                                            "template settings will not be applied")
+                            "template settings will not be applied")
                     return
                 }
 
@@ -290,7 +292,7 @@ function Test-TargetResource
         $WarningUsagePointsSolutions,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present",
 
@@ -309,7 +311,7 @@ function Test-TargetResource
     if ($MaximumUsagePointsSolutions -lt $WarningUsagePointsSolutions)
     {
         Throw ("MaximumUsagePointsSolutions must be equal to or larger than " + `
-               "WarningUsagePointsSolutions.")
+                "WarningUsagePointsSolutions.")
     }
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
@@ -319,22 +321,24 @@ function Test-TargetResource
 
     switch ($Ensure)
     {
-        "Present" {
+        "Present"
+        {
             if ($CurrentValues.Ensure -eq "Absent")
             {
                 return $false
             }
             return Test-SPDscParameterState -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters
         }
-        "Absent" {
+        "Absent"
+        {
             if ($StorageMaxInMB -or `
-                $StorageWarningInMB -or `
-                $MaximumUsagePointsSolutions -or `
-                $WarningUsagePointsSolutions)
+                    $StorageWarningInMB -or `
+                    $MaximumUsagePointsSolutions -or `
+                    $WarningUsagePointsSolutions)
             {
                 throw ("Do not use StorageMaxInMB, StorageWarningInMB, " + `
-                       "MaximumUsagePointsSolutions or WarningUsagePointsSolutions " + `
-                       "when Ensure is specified as Absent")
+                        "MaximumUsagePointsSolutions or WarningUsagePointsSolutions " + `
+                        "when Ensure is specified as Absent")
             }
 
             if ($CurrentValues.Ensure -eq "Present")

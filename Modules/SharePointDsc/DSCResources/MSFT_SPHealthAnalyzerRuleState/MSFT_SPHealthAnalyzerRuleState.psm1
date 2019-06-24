@@ -13,12 +13,12 @@ function Get-TargetResource
         $Enabled,
 
         [Parameter()]
-        [ValidateSet("All Servers","Any Server")]
+        [ValidateSet("All Servers", "Any Server")]
         [System.String]
         $RuleScope,
 
         [Parameter()]
-        [ValidateSet("Hourly","Daily","Weekly","Monthly","OnDemandOnly")]
+        [ValidateSet("Hourly", "Daily", "Weekly", "Monthly", "OnDemandOnly")]
         [System.String]
         $Schedule,
 
@@ -34,8 +34,8 @@ function Get-TargetResource
     Write-Verbose -Message "Getting Health Rule configuration settings"
 
     $result = Invoke-SPDscCommand -Credential $InstallAccount `
-                                  -Arguments $PSBoundParameters `
-                                  -ScriptBlock {
+        -Arguments $PSBoundParameters `
+        -ScriptBlock {
         $params = $args[0]
 
         $nullReturn = @{
@@ -54,13 +54,13 @@ function Get-TargetResource
         catch
         {
             Write-Verbose -Message ("No local SharePoint farm was detected. Health " + `
-                                    "Analyzer Rule settings will not be applied")
+                    "Analyzer Rule settings will not be applied")
             return $nullReturn
         }
 
         $caWebapp = Get-SPwebapplication -IncludeCentralAdministration `
-            | Where-Object -FilterScript {
-                $_.IsAdministrationWebApplication
+        | Where-Object -FilterScript {
+            $_.IsAdministrationWebApplication
         }
 
         if ($null -eq $caWebapp)
@@ -79,7 +79,7 @@ function Get-TargetResource
         {
             $spQuery = New-Object Microsoft.SharePoint.SPQuery
             $querytext = "<Where><Eq><FieldRef Name='Title'/><Value Type='Text'>" + `
-                         "$($params.Name)</Value></Eq></Where>"
+                "$($params.Name)</Value></Eq></Where>"
             $spQuery.Query = $querytext
             $results = $healthRulesList.GetItems($spQuery)
             if ($results.Count -eq 1)
@@ -96,18 +96,18 @@ function Get-TargetResource
 
                 return @{
                     # Set the Health Analyzer Rule settings
-                    Name = $params.Name
-                    Enabled = $item["HealthRuleCheckEnabled"]
-                    RuleScope = $item["HealthRuleScope"]
-                    Schedule = $ruleschedule
+                    Name             = $params.Name
+                    Enabled          = $item["HealthRuleCheckEnabled"]
+                    RuleScope        = $item["HealthRuleScope"]
+                    Schedule         = $ruleschedule
                     FixAutomatically = $item["HealthRuleAutoRepairEnabled"]
-                    InstallAccount = $params.InstallAccount
+                    InstallAccount   = $params.InstallAccount
                 }
             }
             else
             {
                 Write-Verbose -Message ("Unable to find specified Health Analyzer Rule. Make " + `
-                                        "sure any related service applications exists.")
+                        "sure any related service applications exists.")
                 return $nullReturn
             }
         }
@@ -135,12 +135,12 @@ function Set-TargetResource
         $Enabled,
 
         [Parameter()]
-        [ValidateSet("All Servers","Any Server")]
+        [ValidateSet("All Servers", "Any Server")]
         [System.String]
         $RuleScope,
 
         [Parameter()]
-        [ValidateSet("Hourly","Daily","Weekly","Monthly","OnDemandOnly")]
+        [ValidateSet("Hourly", "Daily", "Weekly", "Monthly", "OnDemandOnly")]
         [System.String]
         $Schedule,
 
@@ -156,8 +156,8 @@ function Set-TargetResource
     Write-Verbose -Message "Setting Health Analyzer Rule configuration settings"
 
     Invoke-SPDscCommand -Credential $InstallAccount `
-                        -Arguments $PSBoundParameters `
-                        -ScriptBlock {
+        -Arguments $PSBoundParameters `
+        -ScriptBlock {
         $params = $args[0]
 
         try
@@ -167,18 +167,18 @@ function Set-TargetResource
         catch
         {
             throw ("No local SharePoint farm was detected. Health Analyzer Rule " + `
-                   "settings will not be applied")
+                    "settings will not be applied")
         }
 
         $caWebapp = Get-SPwebapplication -IncludeCentralAdministration `
-            | Where-Object -FilterScript {
-                $_.IsAdministrationWebApplication
+        | Where-Object -FilterScript {
+            $_.IsAdministrationWebApplication
         }
 
         if ($null -eq $caWebapp)
         {
             throw ("No Central Admin web application was found. Health Analyzer Rule " + `
-                   "settings will not be applied")
+                    "settings will not be applied")
         }
 
         # Get Central Admin SPWeb
@@ -191,7 +191,7 @@ function Set-TargetResource
         {
             $spQuery = New-Object Microsoft.SharePoint.SPQuery
             $querytext = "<Where><Eq><FieldRef Name='Title'/><Value Type='Text'>" + `
-                         "$($params.Name)</Value></Eq></Where>"
+                "$($params.Name)</Value></Eq></Where>"
             $spQuery.Query = $querytext
             $results = $healthRulesList.GetItems($spQuery)
             if ($results.Count -eq 1)
@@ -217,14 +217,14 @@ function Set-TargetResource
             else
             {
                 throw ("Could not find specified Health Analyzer Rule. Health Analyzer Rule " + `
-                       "settings will not be applied. Make sure any related service " + `
-                       "applications exists")
+                        "settings will not be applied. Make sure any related service " + `
+                        "applications exists")
             }
         }
         else
         {
             throw ("Could not find Health Analyzer Rules list. Health Analyzer Rule settings " + `
-                   "will not be applied")
+                    "will not be applied")
         }
     }
 }
@@ -245,12 +245,12 @@ function Test-TargetResource
         $Enabled,
 
         [Parameter()]
-        [ValidateSet("All Servers","Any Server")]
+        [ValidateSet("All Servers", "Any Server")]
         [System.String]
         $RuleScope,
 
         [Parameter()]
-        [ValidateSet("Hourly","Daily","Weekly","Monthly","OnDemandOnly")]
+        [ValidateSet("Hourly", "Daily", "Weekly", "Monthly", "OnDemandOnly")]
         [System.String]
         $Schedule,
 
@@ -271,7 +271,7 @@ function Test-TargetResource
     Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
 
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
-                                    -DesiredValues $PSBoundParameters
+        -DesiredValues $PSBoundParameters
 }
 
 Export-ModuleMember -Function *-TargetResource

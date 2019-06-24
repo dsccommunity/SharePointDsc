@@ -59,7 +59,7 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting web application '$WebAppUrl' throttling settings"
 
-    $paramArgs = @($PSBoundParameters,$PSScriptRoot)
+    $paramArgs = @($PSBoundParameters, $PSScriptRoot)
     $result = Invoke-SPDscCommand -Credential $InstallAccount -Arguments $paramArgs -ScriptBlock {
         $params = $args[0]
         $ScriptRoot = $args[1]
@@ -154,7 +154,7 @@ function Set-TargetResource
 
     Write-Verbose -Message "Setting web application '$WebAppUrl' throttling settings"
 
-    $paramArgs = @($PSBoundParameters,$PSScriptRoot)
+    $paramArgs = @($PSBoundParameters, $PSScriptRoot)
 
     $null = Invoke-SPDscCommand -Credential $InstallAccount -Arguments $paramArgs -ScriptBlock {
         $params = $args[0]
@@ -252,7 +252,7 @@ function Test-TargetResource
     $relPath = "..\..\Modules\SharePointDsc.WebApplication\SPWebApplication.Throttling.psm1"
     Import-Module -Name (Join-Path -Path $PSScriptRoot -ChildPath $relPath -Resolve)
     return Test-SPDscWebApplicationThrottlingConfig -CurrentSettings $CurrentValues `
-                                                    -DesiredSettings $PSBoundParameters
+        -DesiredSettings $PSBoundParameters
 }
 
 Export-ModuleMember -Function *-TargetResource

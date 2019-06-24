@@ -174,12 +174,12 @@ function Set-TargetResource
         if ($null -eq $web)
         {
             @("InstallAccount", "Ensure", "RequestAccessEmail") |
-                ForEach-Object -Process {
-                    if ($params.ContainsKey($_) -eq $true)
-                    {
-                        $params.Remove($_) | Out-Null
-                    }
+            ForEach-Object -Process {
+                if ($params.ContainsKey($_) -eq $true)
+                {
+                    $params.Remove($_) | Out-Null
                 }
+            }
 
             New-SPWeb @params | Out-Null
         }
@@ -332,8 +332,8 @@ function Test-TargetResource
     }
 
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
-                                    -DesiredValues $PSBoundParameters `
-                                    -ValuesToCheck $valuesToCheck
+        -DesiredValues $PSBoundParameters `
+        -ValuesToCheck $valuesToCheck
 }
 
 Export-ModuleMember -Function *-TargetResource
