@@ -47,22 +47,22 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting search result source '$Name'"
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+    $result = Invoke-SPDscCommand -Credential $InstallAccount `
                                   -Arguments $PSBoundParameters `
                                   -ScriptBlock {
         $params = $args[0]
         [void] [Reflection.Assembly]::LoadWithPartialName("Microsoft.Office.Server.Search")
 
         $nullReturn = @{
-            Name = $params.Name
-            ScopeName = $params.ScopeName
+            Name                 = $params.Name
+            ScopeName            = $params.ScopeName
             SearchServiceAppName = $params.SearchServiceAppName
-            Query = $null
-            ProviderType = $null
-            ConnectionUrl = $null
-            ScopeUrl = $null
-            Ensure = "Absent"
-            InstallAccount = $params.InstallAccount
+            Query                = $null
+            ProviderType         = $null
+            ConnectionUrl        = $null
+            ScopeUrl             = $null
+            Ensure               = "Absent"
+            InstallAccount       = $params.InstallAccount
         }
         $serviceApp = Get-SPEnterpriseSearchServiceApplication -Identity $params.SearchServiceAppName
         if ($null -eq $serviceApp)
@@ -104,15 +104,15 @@ function Get-TargetResource
                 $_.Id -eq $source.ProviderId
             }
             return @{
-                Name = $params.Name
-                ScopeName = $params.ScopeName
+                Name                 = $params.Name
+                ScopeName            = $params.ScopeName
                 SearchServiceAppName = $params.SearchServiceAppName
-                Query = $source.QueryTransform.QueryTemplate
-                ProviderType = $provider.DisplayName
-                ConnectionUrl = $source.ConnectionUrlTemplate
-                ScopeUrl = $params.ScopeUrl
-                Ensure = "Present"
-                InstallAccount = $params.InstallAccount
+                Query                = $source.QueryTransform.QueryTemplate
+                ProviderType         = $provider.DisplayName
+                ConnectionUrl        = $source.ConnectionUrlTemplate
+                ScopeUrl             = $params.ScopeUrl
+                Ensure               = "Present"
+                InstallAccount       = $params.InstallAccount
             }
         }
         else
@@ -176,7 +176,7 @@ function Set-TargetResource
     if ($CurrentValues.Ensure -eq "Absent" -and $Ensure -eq "Present")
     {
         Write-Verbose -Message "Creating search result source $Name"
-        Invoke-SPDSCCommand -Credential $InstallAccount `
+        Invoke-SPDscCommand -Credential $InstallAccount `
                             -Arguments $PSBoundParameters `
                             -ScriptBlock {
             $params = $args[0]
@@ -230,7 +230,7 @@ function Set-TargetResource
     if ($Ensure -eq "Absent")
     {
         Write-Verbose -Message "Removing search result source $Name"
-        Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+        Invoke-SPDscCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
             $params = $args[0]
             [void] [Reflection.Assembly]::LoadWithPartialName("Microsoft.Office.Server.Search")
 
@@ -309,6 +309,9 @@ function Test-TargetResource
     $PSBoundParameters.Ensure = $Ensure
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
+
+    Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
+    Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
 
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
                                     -DesiredValues $PSBoundParameters `

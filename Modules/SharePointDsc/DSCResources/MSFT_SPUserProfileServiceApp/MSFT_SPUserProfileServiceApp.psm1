@@ -79,7 +79,7 @@ function Get-TargetResource
                                 "This will be required as of SharePointDsc v4.0")
     }
 
-    $farmAccount = Invoke-SPDSCCommand -Credential $InstallAccount `
+    $farmAccount = Invoke-SPDscCommand -Credential $InstallAccount `
                                        -Arguments $PSBoundParameters `
                                        -ScriptBlock {
         return Get-SPDscFarmAccount
@@ -117,7 +117,7 @@ function Get-TargetResource
         throw ("Unable to retrieve the Farm Account. Check if the farm exists.")
     }
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+    $result = Invoke-SPDscCommand -Credential $InstallAccount `
                                   -Arguments $PSBoundParameters `
                                   -ScriptBlock {
         $params = $args[0]
@@ -297,7 +297,7 @@ function Set-TargetResource
 
     if ($Ensure -eq "Present")
     {
-        $farmAccount = Invoke-SPDSCCommand -Credential $InstallAccount `
+        $farmAccount = Invoke-SPDscCommand -Credential $InstallAccount `
                                            -Arguments $PSBoundParameters `
                                            -ScriptBlock {
             return Get-SPDscFarmAccount
@@ -341,12 +341,12 @@ function Set-TargetResource
         Write-Verbose -Message "Creating user profile service application $Name"
 
         # Add the FarmAccount to the local Administrators group, if it's not already there
-        $isLocalAdmin = Test-SPDSCUserIsLocalAdmin -UserName $farmAccount.UserName
+        $isLocalAdmin = Test-SPDscUserIsLocalAdmin -UserName $farmAccount.UserName
 
         if (!$isLocalAdmin)
         {
             Write-Verbose -Message "Adding farm account to Local Administrators group"
-            Add-SPDSCUserToLocalAdmin -UserName $farmAccount.UserName
+            Add-SPDscUserToLocalAdmin -UserName $farmAccount.UserName
 
             # Cycle the Timer Service and flush Kerberos tickets
             # so that it picks up the local Admin token
@@ -355,7 +355,7 @@ function Set-TargetResource
             Clear-SPDscKerberosToken -Account $farmAccount.UserName
         }
 
-        $null = Invoke-SPDSCCommand -Credential $FarmAccount `
+        $null = Invoke-SPDscCommand -Credential $FarmAccount `
                                     -Arguments @($PSBoundParameters, $setupAccount) `
                                     -ScriptBlock {
             $params = $args[0]
@@ -394,11 +394,11 @@ function Set-TargetResource
                 $params.Remove("Ensure") | Out-Null
             }
 
-            $params = Rename-SPDSCParamValue -params $params `
+            $params = Rename-SPDscParamValue -params $params `
                                              -oldName "SyncDBName" `
                                              -newName "ProfileSyncDBName"
 
-            $params = Rename-SPDSCParamValue -params $params `
+            $params = Rename-SPDscParamValue -params $params `
                                              -oldName "SyncDBServer" `
                                              -newName "ProfileSyncDBServer"
 
@@ -470,7 +470,7 @@ function Set-TargetResource
         if (!$isLocalAdmin)
         {
             Write-Verbose -Message "Removing farm account from Local Administrators group"
-            Remove-SPDSCUserToLocalAdmin -UserName $farmAccount.UserName
+            Remove-SPDscUserToLocalAdmin -UserName $farmAccount.UserName
 
             # Cycle the Timer Service and flush Kerberos tickets
             # so that it picks up the local Admin token
@@ -483,7 +483,7 @@ function Set-TargetResource
     if ($Ensure -eq "Absent")
     {
         Write-Verbose -Message "Removing user profile service application $Name"
-        Invoke-SPDSCCommand -Credential $InstallAccount `
+        Invoke-SPDscCommand -Credential $InstallAccount `
                             -Arguments $PSBoundParameters `
                             -ScriptBlock {
 
@@ -495,9 +495,9 @@ function Set-TargetResource
                     }
 
             $proxies = Get-SPServiceApplicationProxy
-            foreach($proxyInstance in $proxies)
+            foreach ($proxyInstance in $proxies)
             {
-                if($app.IsConnected($proxyInstance))
+                if ($app.IsConnected($proxyInstance))
                 {
                     $proxyInstance.Delete()
                 }
@@ -593,7 +593,10 @@ function Test-TargetResource
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
-    if($Ensure -eq "Present")
+    Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
+    Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
+
+    if ($Ensure -eq "Present")
     {
         return Test-SPDscParameterState -CurrentValues $CurrentValues `
                                             -DesiredValues $PSBoundParameters `

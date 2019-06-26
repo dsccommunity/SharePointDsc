@@ -36,7 +36,7 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting App management service app '$Name'"
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+    $result = Invoke-SPDscCommand -Credential $InstallAccount `
                                   -Arguments $PSBoundParameters `
                                   -ScriptBlock {
         $params = $args[0]
@@ -135,7 +135,7 @@ function Set-TargetResource
         # The service app doesn't exist but should
 
         Write-Verbose -Message "Creating App management Service Application $Name"
-        Invoke-SPDSCCommand -Credential $InstallAccount `
+        Invoke-SPDscCommand -Credential $InstallAccount `
                             -Arguments $PSBoundParameters `
                             -ScriptBlock {
             $params = $args[0]
@@ -177,7 +177,7 @@ function Set-TargetResource
         if ($result.ProxyName -eq "")
         {
             Write-Verbose -Message "Proxy not found, creating proxy"
-            Invoke-SPDSCCommand -Credential $InstallAccount `
+            Invoke-SPDscCommand -Credential $InstallAccount `
                                 -Arguments $PSBoundParameters `
                                 -ScriptBlock {
                 $params = $args[0]
@@ -205,7 +205,7 @@ function Set-TargetResource
         if ($ApplicationPool -ne $result.ApplicationPool)
         {
             Write-Verbose -Message "Updating Application Pool"
-            Invoke-SPDSCCommand -Credential $InstallAccount `
+            Invoke-SPDscCommand -Credential $InstallAccount `
                                 -Arguments $PSBoundParameters `
                                 -ScriptBlock {
                 $params = $args[0]
@@ -224,7 +224,7 @@ function Set-TargetResource
     {
         # The service app should not exit
         Write-Verbose -Message "Removing App management Service Application $Name"
-        Invoke-SPDSCCommand -Credential $InstallAccount `
+        Invoke-SPDscCommand -Credential $InstallAccount `
                             -Arguments $PSBoundParameters `
                             -ScriptBlock {
             $params = $args[0]
@@ -234,9 +234,9 @@ function Set-TargetResource
             }
 
             $proxies = Get-SPServiceApplicationProxy
-            foreach($proxyInstance in $proxies)
+            foreach ($proxyInstance in $proxies)
             {
-                if($app.IsConnected($proxyInstance))
+                if ($app.IsConnected($proxyInstance))
                 {
                     $proxyInstance.Delete()
                 }
@@ -288,6 +288,9 @@ function Test-TargetResource
     $PSBoundParameters.Ensure = $Ensure
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
+
+    Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
+    Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
 
     if ($CurrentValues.ProxyName -eq "")
     {

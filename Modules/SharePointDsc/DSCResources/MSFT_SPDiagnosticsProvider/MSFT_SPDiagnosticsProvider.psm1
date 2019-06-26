@@ -32,7 +32,7 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting the Diagnostics Provider"
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+    $result = Invoke-SPDscCommand -Credential $InstallAccount `
                                   -Arguments $PSBoundParameters `
                                   -ScriptBlock {
         $params = $args[0]
@@ -96,18 +96,18 @@ function Set-TargetResource
 
     Write-Verbose -Message "Setting configuration for the Diagnostics Provider"
 
-    if($Ensure -eq "Absent")
+    if ($Ensure -eq "Absent")
     {
         throw "This resource cannot remove Diagnostics Provider. Please use ensure equals Present."
     }
 
-    Invoke-SPDSCCommand -Credential $InstallAccount `
+    Invoke-SPDscCommand -Credential $InstallAccount `
                         -Arguments $PSBoundParameters `
                         -ScriptBlock {
         $params = $args[0]
         $diagnosticProvider = Get-SPDiagnosticsProvider | Where-Object {$_.Name -eq $params.Name}
 
-        if($null -eq $diagnosticProvider)
+        if ($null -eq $diagnosticProvider)
         {
             throw "The specified Diagnostic Provider {" + $params.Name + "} could not be found."
         }
@@ -116,17 +116,17 @@ function Set-TargetResource
             Identity = $params.Name
         }
 
-        if($params.ContainsKey("Retention"))
+        if ($params.ContainsKey("Retention"))
         {
             $newParams.DaysRetained = $params.Retention
         }
 
-        if($params.ContainsKey("MaxTotalSizeInBytes"))
+        if ($params.ContainsKey("MaxTotalSizeInBytes"))
         {
             $newParams.MaxTotalSizeInBytes = $params.MaxTotalSizeInBytes
         }
 
-        if($params.ContainsKey("Enabled"))
+        if ($params.ContainsKey("Enabled"))
         {
             $newParams.Enable = $params.Enabled
         }
@@ -172,6 +172,9 @@ function Test-TargetResource
     $PSBoundParameters.Ensure = $Ensure
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
+
+    Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
+    Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
 
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
                                     -DesiredValues $PSBoundParameters `

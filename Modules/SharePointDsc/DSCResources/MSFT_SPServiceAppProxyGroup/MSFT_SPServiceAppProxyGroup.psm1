@@ -32,28 +32,38 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting Service Application Proxy Group $Name"
 
-    if (($Ensure -eq "Present") `
-        -and $ServiceAppProxies `
-        -and (($ServiceAppProxiesToInclude) -or ($ServiceAppProxiesToExclude)))
+    $nullReturn = @{
+        Name                       = $Name
+        Ensure                     = $null
+        ServiceAppProxies          = $null
+        ServiceAppProxiesToInclude = $null
+        ServiceAppProxiesToExclude = $null
+    }
+
+    if (($Ensure -eq "Present") -and `
+        $ServiceAppProxies -and `
+        (($ServiceAppProxiesToInclude) -or ($ServiceAppProxiesToExclude)))
     {
         Write-Verbose -Message ("Cannot use the ServiceAppProxies parameter together " + `
                                 "with the ServiceAppProxiesToInclude or " + `
                                 "ServiceAppProxiesToExclude parameters")
-        return $null
+        return $nullReturn
     }
 
-    if (($Ensure -eq "Present") `
-        -and !$ServiceAppProxies `
-        -and !$ServiceAppProxiesToInclude `
-        -and !$ServiceAppProxiesToExclude)
+    if (($Ensure -eq "Present") -and `
+        !$ServiceAppProxies -and `
+        !$ServiceAppProxiesToInclude -and `
+        !$ServiceAppProxiesToExclude)
     {
         Write-Verbose -Message ("At least one of the following parameters must be specified: " + `
                                 "ServiceAppProxies, ServiceAppProxiesToInclude, " + `
                                 "ServiceAppProxiesToExclude")
-        return $null
+        return $nullReturn
     }
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+    $result = Invoke-SPDscCommand -Credential $InstallAccount `
+                                  -Arguments $PSBoundParameters `
+                                  -ScriptBlock {
             $params = $args[0]
 
             #Try to get the proxy group
@@ -78,15 +88,15 @@ function Get-TargetResource
             $ServiceAppProxies = $ProxyGroup.Proxies.DisplayName
 
             return @{
-                Name = $params.name
-                Ensure = $Ensure
-                ServiceAppProxies = $ServiceAppProxies
+                Name                       = $params.name
+                Ensure                     = $Ensure
+                ServiceAppProxies          = $ServiceAppProxies
                 ServiceAppProxiesToInclude = $params.ServiceAppProxiesToInclude
                 ServiceAppProxiesToExclude = $params.ServiceAppProxiesToExclude
-                InstallAccount = $params.InstallAccount
+                InstallAccount             = $params.InstallAccount
             }
-
     }
+
     return $result
 }
 
@@ -123,26 +133,26 @@ function Set-TargetResource
 
     Write-Verbose -Message "Setting Service Application Proxy Group $Name"
 
-    if (($Ensure -eq "Present") `
-        -and $ServiceAppProxies `
-        -and (($ServiceAppProxiesToInclude) -or ($ServiceAppProxiesToExclude)))
+    if (($Ensure -eq "Present") -and `
+        $ServiceAppProxies -and `
+        (($ServiceAppProxiesToInclude) -or ($ServiceAppProxiesToExclude)))
     {
         throw ("Cannot use the ServiceAppProxies parameter together " + `
                "with the ServiceAppProxiesToInclude or " + `
                "ServiceAppProxiesToExclude parameters")
     }
 
-    if (($Ensure -eq "Present") `
-        -and !$ServiceAppProxies `
-        -and !$ServiceAppProxiesToInclude `
-        -and !$ServiceAppProxiesToExclude)
+    if (($Ensure -eq "Present") -and `
+        !$ServiceAppProxies -and `
+        !$ServiceAppProxiesToInclude -and `
+        !$ServiceAppProxiesToExclude)
     {
         throw ("At least one of the following parameters must be specified: " + `
                "ServiceAppProxies, ServiceAppProxiesToInclude, " + `
                "ServiceAppProxiesToExclude")
     }
 
-    Invoke-SPDSCCommand -Credential $InstallAccount `
+    Invoke-SPDscCommand -Credential $InstallAccount `
                         -Arguments $PSBoundParameters `
                         -ScriptBlock {
         $params = $args[0]
@@ -371,10 +381,8 @@ function Test-TargetResource
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
-    if ($null -eq $CurrentValues)
-    {
-        return $false
-    }
+    Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
+    Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
 
     if ($CurrentValues.Ensure -ne $Ensure)
     {

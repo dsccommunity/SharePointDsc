@@ -21,13 +21,13 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting MinRole compliance for the current farm"
 
-    $installedVersion = Get-SPDSCInstalledProductVersion
+    $installedVersion = Get-SPDscInstalledProductVersion
     if ($installedVersion.FileMajorPart -ne 16)
     {
         throw [Exception] "MinRole is only supported in SharePoint 2016 and 2019."
     }
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+    $result = Invoke-SPDscCommand -Credential $InstallAccount `
                                   -Arguments $PSBoundParameters `
                                   -ScriptBlock {
         $nonCompliantServices = Get-SPService | Where-Object -FilterScript {
@@ -85,7 +85,7 @@ function Set-TargetResource
 
     Write-Verbose -Message "Setting MinRole compliance for the current farm"
 
-    $installedVersion = Get-SPDSCInstalledProductVersion
+    $installedVersion = Get-SPDscInstalledProductVersion
     if ($installedVersion.FileMajorPart -ne 16)
     {
         throw [Exception] "MinRole is only supported in SharePoint 2016 and 2019."
@@ -97,7 +97,7 @@ function Set-TargetResource
                "used to report when the farm is not compliant")
     }
 
-    Invoke-SPDSCCommand -Credential $InstallAccount `
+    Invoke-SPDscCommand -Credential $InstallAccount `
                         -Arguments $PSBoundParameters `
                         -ScriptBlock {
         $method = Get-SPDscRoleTestMethod
@@ -157,12 +157,12 @@ function Test-TargetResource
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
+    Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
+    Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
+
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
                                     -DesiredValues $PSBoundParameters `
                                     -ValuesToCheck @("State")
 }
 
-Export-ModuleMember -Function Get-TargetResource, `
-                              Test-TargetResource, `
-                              Set-TargetResource, `
-                              Get-SPDscRoleTestMethod
+Export-ModuleMember -Function *-TargetResource

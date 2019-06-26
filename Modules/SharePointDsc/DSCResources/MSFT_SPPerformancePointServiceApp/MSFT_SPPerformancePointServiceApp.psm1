@@ -4,63 +4,63 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [Parameter(Mandatory = $true)]  
-        [System.String] 
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $Name,
 
-        [Parameter()] 
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $ProxyName,
 
-        [Parameter(Mandatory = $true)]  
-        [System.String] 
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $ApplicationPool,
 
-        [Parameter()] 
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $DatabaseName,
 
-        [Parameter()] 
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $DatabaseServer,
 
-        [Parameter()] 
-        [ValidateSet("Present","Absent")] 
-        [System.String] 
+        [Parameter()]
+        [ValidateSet("Present","Absent")]
+        [System.String]
         $Ensure = "Present",
 
-        [Parameter()] 
-        [System.Management.Automation.PSCredential] 
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 
     Write-Verbose -Message "Getting for PerformancePoint Service Application '$Name'"
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+    $result = Invoke-SPDscCommand -Credential $InstallAccount `
                                   -Arguments $PSBoundParameters `
                                   -ScriptBlock {
         $params = $args[0]
-        
+
         $serviceApps = Get-SPServiceApplication -Name $params.Name -ErrorAction SilentlyContinue
         $nullReturn = @{
             Name = $params.Name
             ApplicationPool = $params.ApplicationPool
             Ensure = "Absent"
             InstallAccount = $params.InstallAccount
-        } 
-        if ($null -eq $serviceApps) 
+        }
+        if ($null -eq $serviceApps)
         {
-            return $nullReturn 
+            return $nullReturn
         }
         $serviceApp = $serviceApps | Where-Object -FilterScript {
             $_.GetType().FullName -eq "Microsoft.PerformancePoint.Scorecards.BIMonitoringServiceApplication"
         }
 
-        if ($null -eq $serviceApp) 
+        if ($null -eq $serviceApp)
         {
-            return $nullReturn 
-        } 
-        else 
+            return $nullReturn
+        }
+        else
         {
             $serviceAppProxies = Get-SPServiceApplicationProxy -ErrorAction SilentlyContinue
             if ($null -ne $serviceAppProxies)
@@ -91,33 +91,33 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [Parameter(Mandatory = $true)]  
-        [System.String] 
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $Name,
 
-        [Parameter()] 
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $ProxyName,
 
-        [Parameter(Mandatory = $true)]  
-        [System.String] 
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $ApplicationPool,
 
-        [Parameter()] 
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $DatabaseName,
 
-        [Parameter()] 
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $DatabaseServer,
 
-        [Parameter()] 
-        [ValidateSet("Present","Absent")] 
-        [System.String] 
+        [Parameter()]
+        [ValidateSet("Present","Absent")]
+        [System.String]
         $Ensure = "Present",
 
-        [Parameter()] 
-        [System.Management.Automation.PSCredential] 
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 
@@ -125,10 +125,10 @@ function Set-TargetResource
 
     $result = Get-TargetResource @PSBoundParameters
 
-    if ($result.Ensure -eq "Absent" -and $Ensure -eq "Present") 
+    if ($result.Ensure -eq "Absent" -and $Ensure -eq "Present")
     {
         Write-Verbose -Message "Creating PerformancePoint Service Application $Name"
-        Invoke-SPDSCCommand -Credential $InstallAccount `
+        Invoke-SPDscCommand -Credential $InstallAccount `
                             -Arguments $PSBoundParameters `
                             -ScriptBlock {
             $params = $args[0]
@@ -137,21 +137,21 @@ function Set-TargetResource
                 Name = $params.Name
                 ApplicationPool = $params.ApplicationPool
             }
-            if ($params.ContainsKey("DatabaseName") -eq $true) 
+            if ($params.ContainsKey("DatabaseName") -eq $true)
             {
                 $newParams.Add("DatabaseName", $params.DatabaseName)
             }
-            if ($params.ContainsKey("DatabaseServer") -eq $true) 
+            if ($params.ContainsKey("DatabaseServer") -eq $true)
             {
                 $newParams.Add("DatabaseServer", $params.DatabaseServer)
             }
-        
+
             New-SPPerformancePointServiceApplication @newParams
-            if ($null -eq $params.ProxyName) 
+            if ($null -eq $params.ProxyName)
             {
                 $pName = "$($params.Name) Proxy"
-            } 
-            else 
+            }
+            else
             {
                 $pName = $params.ProxyName
             }
@@ -161,15 +161,15 @@ function Set-TargetResource
         }
     }
 
-    if ($result.Ensure -eq "Present" -and $Ensure -eq "Present") 
+    if ($result.Ensure -eq "Present" -and $Ensure -eq "Present")
     {
-        if ($ApplicationPool -ne $result.ApplicationPool) 
+        if ($ApplicationPool -ne $result.ApplicationPool)
         {
             Write-Verbose -Message "Updating PerformancePoint Service Application $Name"
-            Invoke-SPDSCCommand -Credential $InstallAccount `
+            Invoke-SPDscCommand -Credential $InstallAccount `
                                 -Arguments $PSBoundParameters `
                                 -ScriptBlock {
-                $params = $args[0]               
+                $params = $args[0]
 
                 $appPool = Get-SPServiceApplicationPool -Identity $params.ApplicationPool
 
@@ -180,22 +180,22 @@ function Set-TargetResource
             }
         }
     }
-    if ($Ensure -eq "Absent") 
+    if ($Ensure -eq "Absent")
     {
         Write-Verbose -Message "Removing PerformancePoint Service Application $Name"
-        Invoke-SPDSCCommand -Credential $InstallAccount `
+        Invoke-SPDscCommand -Credential $InstallAccount `
                             -Arguments $PSBoundParameters `
                             -ScriptBlock {
             $params = $args[0]
-            
+
             $app = Get-SPServiceApplication -Name $params.Name | Where-Object -FilterScript {
                 $_.GetType().FullName -eq "Microsoft.PerformancePoint.Scorecards.BIMonitoringServiceApplication"
             }
 
             $proxies = Get-SPServiceApplicationProxy
-            foreach($proxyInstance in $proxies)
+            foreach ($proxyInstance in $proxies)
             {
-                if($app.IsConnected($proxyInstance))
+                if ($app.IsConnected($proxyInstance))
                 {
                     $proxyInstance.Delete()
                 }
@@ -212,41 +212,44 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [Parameter(Mandatory = $true)]  
-        [System.String] 
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $Name,
 
-        [Parameter()] 
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $ProxyName,
 
-        [Parameter(Mandatory = $true)]  
-        [System.String] 
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $ApplicationPool,
 
-        [Parameter()] 
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $DatabaseName,
 
-        [Parameter()] 
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $DatabaseServer,
 
-        [Parameter()] 
-        [ValidateSet("Present","Absent")] 
-        [System.String] 
+        [Parameter()]
+        [ValidateSet("Present","Absent")]
+        [System.String]
         $Ensure = "Present",
 
-        [Parameter()] 
-        [System.Management.Automation.PSCredential] 
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
         $InstallAccount
     )
-    
+
     Write-Verbose -Message "Testing PerformancePoint Service Application '$Name'"
 
     $PSBoundParameters.Ensure = $Ensure
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
+
+    Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
+    Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
 
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
                                     -DesiredValues $PSBoundParameters `

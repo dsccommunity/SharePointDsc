@@ -88,39 +88,61 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting diagnostic configuration settings"
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+    $result = Invoke-SPDscCommand -Credential $InstallAccount `
                                   -Arguments $PSBoundParameters `
                                   -ScriptBlock {
         $params = $args[0]
 
+        $nullReturn = @{
+            IsSingleInstance                            = "Yes"
+            AppAnalyticsAutomaticUploadEnabled          = $null
+            CustomerExperienceImprovementProgramEnabled = $null
+            ErrorReportingEnabled                       = $null
+            ErrorReportingAutomaticUploadEnabled        = $null
+            DownloadErrorReportingUpdatesEnabled        = $null
+            DaysToKeepLogs                              = $null
+            LogMaxDiskSpaceUsageEnabled                 = $null
+            LogSpaceInGB                                = $null
+            LogPath                                     = $null
+            LogCutInterval                              = $null
+            EventLogFloodProtectionEnabled              = $null
+            EventLogFloodProtectionThreshold            = $null
+            EventLogFloodProtectionTriggerPeriod        = $null
+            EventLogFloodProtectionQuietPeriod          = $null
+            EventLogFloodProtectionNotifyInterval       = $null
+            ScriptErrorReportingEnabled                 = $null
+            ScriptErrorReportingRequireAuth             = $null
+            ScriptErrorReportingDelay                   = $null
+        }
+
         $dc = Get-SPDiagnosticConfig -ErrorAction SilentlyContinue
         if ($null -eq $dc)
         {
-            return $null
+            return $nullReturn
         }
 
         return @{
-            IsSingleInstance = "Yes"
-            AppAnalyticsAutomaticUploadEnabled = $dc.AppAnalyticsAutomaticUploadEnabled
+            IsSingleInstance                            = "Yes"
+            AppAnalyticsAutomaticUploadEnabled          = $dc.AppAnalyticsAutomaticUploadEnabled
             CustomerExperienceImprovementProgramEnabled = `
                 $dc.CustomerExperienceImprovementProgramEnabled
-            ErrorReportingEnabled = $dc.ErrorReportingEnabled
-            ErrorReportingAutomaticUploadEnabled = $dc.ErrorReportingAutomaticUploadEnabled
-            DownloadErrorReportingUpdatesEnabled = $dc.DownloadErrorReportingUpdatesEnabled
-            DaysToKeepLogs = $dc.DaysToKeepLogs
-            LogMaxDiskSpaceUsageEnabled = $dc.LogMaxDiskSpaceUsageEnabled
-            LogSpaceInGB = $dc.LogDiskSpaceUsageGB
-            LogPath = $dc.LogLocation
-            LogCutInterval = $dc.LogCutInterval
-            EventLogFloodProtectionEnabled = $dc.EventLogFloodProtectionEnabled
-            EventLogFloodProtectionThreshold = $dc.EventLogFloodProtectionThreshold
-            EventLogFloodProtectionTriggerPeriod = $dc.EventLogFloodProtectionTriggerPeriod
-            EventLogFloodProtectionQuietPeriod = $dc.EventLogFloodProtectionQuietPeriod
-            EventLogFloodProtectionNotifyInterval = $dc.EventLogFloodProtectionNotifyInterval
-            ScriptErrorReportingEnabled = $dc.ScriptErrorReportingEnabled
-            ScriptErrorReportingRequireAuth = $dc.ScriptErrorReportingRequireAuth
-            ScriptErrorReportingDelay = $dc.ScriptErrorReportingDelay
-            InstallAccount = $params.InstallAccount
+            ErrorReportingEnabled                       = $dc.ErrorReportingEnabled
+            ErrorReportingAutomaticUploadEnabled        = $dc.ErrorReportingAutomaticUploadEnabled
+            DownloadErrorReportingUpdatesEnabled        = $dc.DownloadErrorReportingUpdatesEnabled
+            DaysToKeepLogs                              = $dc.DaysToKeepLogs
+            LogMaxDiskSpaceUsageEnabled                 = $dc.LogMaxDiskSpaceUsageEnabled
+            LogSpaceInGB                                = $dc.LogDiskSpaceUsageGB
+            LogPath                                     = $dc.LogLocation
+            LogCutInterval                              = $dc.LogCutInterval
+            EventLogFloodProtectionEnabled              = $dc.EventLogFloodProtectionEnabled
+            EventLogFloodProtectionThreshold            = $dc.EventLogFloodProtectionThreshold
+            EventLogFloodProtectionTriggerPeriod        = $dc.EventLogFloodProtectionTriggerPeriod
+            EventLogFloodProtectionQuietPeriod          = $dc.EventLogFloodProtectionQuietPeriod
+            EventLogFloodProtectionNotifyInterval       = $dc.EventLogFloodProtectionNotifyInterval
+            ScriptErrorReportingEnabled                 = $dc.ScriptErrorReportingEnabled
+            ScriptErrorReportingRequireAuth             = $dc.ScriptErrorReportingRequireAuth
+            ScriptErrorReportingDelay                   = $dc.ScriptErrorReportingDelay
+            InstallAccount                              = $params.InstallAccount
         }
     }
     return $result
@@ -216,7 +238,7 @@ function Set-TargetResource
 
     Write-Verbose -Message "Setting diagnostic configuration settings"
 
-    Invoke-SPDSCCommand -Credential $InstallAccount `
+    Invoke-SPDscCommand -Credential $InstallAccount `
                         -Arguments $PSBoundParameters `
                         -ScriptBlock {
         $params = $args[0]
@@ -230,9 +252,9 @@ function Set-TargetResource
         {
             $params.Remove("InstallAccount") | Out-Null
         }
-        $params = $params | Rename-SPDSCParamValue -oldName "LogPath" `
+        $params = $params | Rename-SPDscParamValue -oldName "LogPath" `
                                                    -newName "LogLocation" `
-                          | Rename-SPDSCParamValue -oldName "LogSpaceInGB" `
+                          | Rename-SPDscParamValue -oldName "LogSpaceInGB" `
                                                    -newName "LogDiskSpaceUsageGB"
 
         Set-SPDiagnosticConfig @params
@@ -331,10 +353,8 @@ function Test-TargetResource
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
-    if ($null -eq $CurrentValues)
-    {
-        return $false
-    }
+    Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
+    Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
 
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
                                     -DesiredValues $PSBoundParameters

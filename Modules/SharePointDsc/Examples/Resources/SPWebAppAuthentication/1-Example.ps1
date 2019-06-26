@@ -8,30 +8,33 @@
 
     Configuration Example
     {
-        param(
+        param
+        (
             [Parameter(Mandatory = $true)]
             [PSCredential]
             $SetupAccount
         )
+
         Import-DscResource -ModuleName SharePointDsc
 
         node localhost {
 
             SPWebAppAuthentication ContosoAuthentication
             {
-                WebAppUrl   = "http://sharepoint.contoso.com"
-                Default = @(
+                WebAppUrl            = "http://sharepoint.contoso.com"
+                Default              = @(
                     MSFT_SPWebAppAuthenticationMode {
                         AuthenticationMethod = "NTLM"
                     }
                 )
-                Extranet = @(
+                Extranet             = @(
                     MSFT_SPWebAppAuthenticationMode {
                         AuthenticationMethod = "FBA"
-                        MembershipProvider = "MemberPRovider"
-                        RoleProvider = "RoleProvider"
+                        MembershipProvider   = "MemberPRovider"
+                        RoleProvider         = "RoleProvider"
                     }
                 )
+                PsDscRunAsCredential = $SetupAccount
             }
         }
     }

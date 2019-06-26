@@ -54,7 +54,7 @@ namespace Microsoft.SharePoint.Administration {
             return $webApp
         }
 
-        Mock -CommandName Get-SPDSCInstalledProductVersion {
+        Mock -CommandName Get-SPDscInstalledProductVersion {
             return @{
                 FileMajorPart = $Global:SPDscHelper.CurrentStubBuildNumber.Major
                 FileBuildPart = $Global:SPDscHelper.CurrentStubBuildNumber.Build

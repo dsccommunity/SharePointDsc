@@ -77,7 +77,3 @@ some general use scenarios for all of the resources that are in the module.
 
 A full list of changes in each version can be found in the
 [change log](CHANGELOG.md)
-
-## Project Throughput
-
-[![Throughput Graph](https://graphs.waffle.io/PowerShell/SharePointDsc/throughput.svg)](https://waffle.io/PowerShell/SharePointDsc/metrics/throughput)

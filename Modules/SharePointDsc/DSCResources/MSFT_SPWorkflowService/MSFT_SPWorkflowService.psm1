@@ -27,16 +27,16 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting the current Workflow Service Configuration(s)"
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+    $result = Invoke-SPDscCommand -Credential $InstallAccount `
                                   -Arguments $PSBoundParameters `
                                   -ScriptBlock {
         $params = $args[0]
 
         $returnval = @{
             WorkflowHostUri = $null
-            SPSiteUrl = $params.SPSiteUrl
-            ScopeName = $null
-            AllowOAuthHttp = $null
+            SPSiteUrl       = $params.SPSiteUrl
+            ScopeName       = $null
+            AllowOAuthHttp  = $null
         }
 
         $site = Get-SPSite $params.SPSiteUrl
@@ -53,9 +53,9 @@ function Get-TargetResource
             {
                 $returnval = @{
                     WorkflowHostUri = $workflowProxy.GetHostname($site).TrimEnd("/")
-                    SPSiteUrl = $params.SPSiteUrl
-                    ScopeName = $workflowProxy.GetWorkflowScopeName($site)
-                    AllowOAuthHttp = $params.AllowOAuthHttp
+                    SPSiteUrl       = $params.SPSiteUrl
+                    ScopeName       = $workflowProxy.GetWorkflowScopeName($site)
+                    AllowOAuthHttp  = $params.AllowOAuthHttp
                 }
             }
         }
@@ -94,7 +94,7 @@ function Set-TargetResource
     Write-Verbose -Message "Registering the Workflow Service"
 
     ## Perform changes
-    Invoke-SPDSCCommand -Credential $InstallAccount `
+    Invoke-SPDscCommand -Credential $InstallAccount `
                         -Arguments @($PSBoundParameters) `
                         -ScriptBlock {
         $params = $args[0]
@@ -110,8 +110,8 @@ function Set-TargetResource
 
         $workflowServiceParams = @{
             WorkflowHostUri = $params.WorkflowHostUri.TrimEnd("/")
-            SPSite = $site
-            AllowOAuthHttp = $params.AllowOAuthHttp
+            SPSite          = $site
+            AllowOAuthHttp  = $params.AllowOAuthHttp
         }
 
         if ($params.ContainsKey("ScopeName"))
@@ -154,6 +154,9 @@ function Test-TargetResource
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
+    Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
+    Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
+
     if ($null -eq $CurrentValues.WorkflowHostUri)
     {
         return $false
@@ -168,8 +171,8 @@ function Test-TargetResource
     }
 
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
-    -DesiredValues $PSBoundParameters `
-    -ValuesToCheck $valuesToCheck
+                                    -DesiredValues $PSBoundParameters `
+                                    -ValuesToCheck $valuesToCheck
 }
 
 Export-ModuleMember -Function *-TargetResource

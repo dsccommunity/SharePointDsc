@@ -108,7 +108,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         # Mocks for all contexts
         Mock -CommandName Add-SPProfileSyncConnection -MockWith { $Global:SPDscUPSAddActiveDirectoryConnectionCalled = $true }
 
-        Mock -CommandName Get-SPDSCServiceContext -MockWith {
+        Mock -CommandName Get-SPDscServiceContext -MockWith {
             return @{}
         }
         Mock -CommandName Start-Sleep -MockWith { }
@@ -202,7 +202,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         }
         $userProfileServiceValidConnection.ConnectionManager.Add($connection)
 
-        Mock -CommandName Get-SPDSCADSIObject -MockWith {
+        Mock -CommandName Get-SPDscADSIObject -MockWith {
             return @{
                 distinguishedName = "DC=Contoso,DC=Com"
                 objectGUID = (New-Guid).ToString()

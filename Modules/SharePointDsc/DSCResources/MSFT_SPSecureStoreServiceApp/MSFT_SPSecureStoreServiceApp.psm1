@@ -65,16 +65,16 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting secure store service application '$Name'"
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+    $result = Invoke-SPDscCommand -Credential $InstallAccount `
                                   -Arguments $PSBoundParameters `
                                   -ScriptBlock {
         $params = $args[0]
 
         $nullReturn = @{
-            Name = $params.Name
+            Name            = $params.Name
             ApplicationPool = $params.ApplicationPool
             AuditingEnabled = $false
-            Ensure = "Absent"
+            Ensure          = "Absent"
         }
 
         $serviceApps = Get-SPServiceApplication -Name $params.Name -ErrorAction SilentlyContinue
@@ -219,7 +219,7 @@ function Set-TargetResource
     if ($result.Ensure -eq "Absent" -and $Ensure -eq "Present")
     {
         Write-Verbose -Message "Creating Secure Store Service Application $Name"
-        Invoke-SPDSCCommand -Credential $InstallAccount `
+        Invoke-SPDscCommand -Credential $InstallAccount `
                             -Arguments $params `
                             -ScriptBlock {
             $params = $args[0]
@@ -233,7 +233,7 @@ function Set-TargetResource
                 $params.Remove("InstallAccount") | Out-Null
             }
 
-            if($params.ContainsKey("DatabaseAuthenticationType"))
+            if ($params.ContainsKey("DatabaseAuthenticationType"))
             {
                 if ($params.DatabaseAuthenticationType -eq "SQL")
                 {
@@ -276,7 +276,7 @@ function Set-TargetResource
             -and $ApplicationPool -ne $result.ApplicationPool)
         {
             Write-Verbose -Message "Updating Secure Store Service Application $Name"
-            Invoke-SPDSCCommand -Credential $InstallAccount `
+            Invoke-SPDscCommand -Credential $InstallAccount `
                                 -Arguments $PSBoundParameters `
                                 -ScriptBlock {
                 $params = $args[0]
@@ -294,7 +294,7 @@ function Set-TargetResource
     {
         # The service app should not exit
         Write-Verbose -Message "Removing Secure Store Service Application $Name"
-        Invoke-SPDSCCommand -Credential $InstallAccount `
+        Invoke-SPDscCommand -Credential $InstallAccount `
                             -Arguments $PSBoundParameters `
                             -ScriptBlock {
             $params = $args[0]
@@ -305,9 +305,9 @@ function Set-TargetResource
 
             # Remove the connected proxy(ies)
             $proxies = Get-SPServiceApplicationProxy
-            foreach($proxyInstance in $proxies)
+            foreach ($proxyInstance in $proxies)
             {
-                if($serviceApp.IsConnected($proxyInstance))
+                if ($serviceApp.IsConnected($proxyInstance))
                 {
                     $proxyInstance.Delete()
                 }
@@ -389,8 +389,12 @@ function Test-TargetResource
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
+    Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
+    Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
+
     if ($PSBoundParameters.ContainsKey("DatabaseServer") -and `
-       ($CurrentValues.DatabaseServer -ne $DatabaseServer))
+        ($null -ne $CurrentValues.DatabaseServer) -and `
+        ($CurrentValues.DatabaseServer -ne $DatabaseServer))
     {
         Write-Verbose -Message ("Specified database server does not match the actual " + `
                                 "database server. This resource cannot move the database " + `
@@ -399,7 +403,8 @@ function Test-TargetResource
     }
 
     if ($PSBoundParameters.ContainsKey("DatabaseName") -and `
-       ($CurrentValues.DatabaseName -ne $DatabaseName))
+        ($null -ne $CurrentValues.DatabaseName) -and `
+        ($CurrentValues.DatabaseName -ne $DatabaseName))
     {
         Write-Verbose -Message ("Specified database name does not match the actual " + `
                                 "database name. This resource cannot rename the database.")

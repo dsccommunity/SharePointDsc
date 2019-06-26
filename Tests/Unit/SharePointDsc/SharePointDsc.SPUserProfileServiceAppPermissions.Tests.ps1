@@ -41,7 +41,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         Mock -CommandName Set-SPProfileServiceApplicationSecurity -MockWith { }
 
         Mock -CommandName Start-Sleep -MockWith { }
-        Mock -CommandName Test-SPDSCIsADUser -MockWith { return $true }
+        Mock -CommandName Test-SPDscIsADUser -MockWith { return $true }
         Mock -CommandName Write-Warning -MockWith { }
 
         Mock -CommandName Get-SPServiceApplicationProxy -MockWith {

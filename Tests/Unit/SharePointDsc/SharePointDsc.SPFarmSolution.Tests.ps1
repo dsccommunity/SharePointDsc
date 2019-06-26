@@ -95,9 +95,9 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             Mock -CommandName Get-SPSolution -MockWith {
                 $global:SPDscLoopCount = $global:SPDscLoopCount + 1
                 $index = $global:SPDscLoopCount
-              if($global:SPDscSolutionAdded)
+              if ($global:SPDscSolutionAdded)
               {
-                if($index -gt 2)
+                if ($index -gt 2)
                 {
                     return @{
                         JobExists = $false

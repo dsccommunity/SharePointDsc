@@ -44,7 +44,7 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting group settings for '$Name' at '$Url'"
 
-    if ((Get-SPDSCInstalledProductVersion).FileMajorPart -lt 16)
+    if ((Get-SPDscInstalledProductVersion).FileMajorPart -lt 16)
     {
         throw [Exception] ("Support for Project Server in SharePointDsc is only valid for " + `
                            "SharePoint 2016 and 2019.")
@@ -67,7 +67,7 @@ function Get-TargetResource
                "MembersToInclude or MembersToExclude")
     }
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+    $result = Invoke-SPDscCommand -Credential $InstallAccount `
                                   -Arguments @($PSBoundParameters, $PSScriptRoot) `
                                   -ScriptBlock {
         $params = $args[0]
@@ -103,15 +103,15 @@ function Get-TargetResource
         if ($null -eq $script:groupDataSet)
         {
             return @{
-                Url = $params.Url
-                Name = $params.Name
-                Description = ""
-                ADGroup = ""
-                Members = $null
+                Url              = $params.Url
+                Name             = $params.Name
+                Description      = ""
+                ADGroup          = ""
+                Members          = $null
                 MembersToInclude = $null
                 MembersToExclude = $null
-                Ensure = "Absent"
-                InstallAccount = $params.InstallAccount
+                Ensure           = "Absent"
+                InstallAccount   = $params.InstallAccount
             }
         }
         else
@@ -132,7 +132,7 @@ function Get-TargetResource
                 }
             }
 
-            for($i = 0; $i -lt $groupMembers.Count; $i++)
+            for ($i = 0; $i -lt $groupMembers.Count; $i++)
             {
                 if ($groupMembers[$i].Contains(":0") -eq $true)
                 {
@@ -143,15 +143,15 @@ function Get-TargetResource
             }
 
             return @{
-                Url = $params.Url
-                Name = $script:groupDataSet.SecurityGroups.WSEC_GRP_NAME
-                Description = $script:groupDataSet.SecurityGroups.WSEC_GRP_DESC
-                ADGroup = $adGroup
-                Members = $groupMembers
+                Url              = $params.Url
+                Name             = $script:groupDataSet.SecurityGroups.WSEC_GRP_NAME
+                Description      = $script:groupDataSet.SecurityGroups.WSEC_GRP_DESC
+                ADGroup          = $adGroup
+                Members          = $groupMembers
                 MembersToInclude = $null
                 MembersToExclude = $null
-                Ensure = "Present"
-                InstallAccount = $params.InstallAccount
+                Ensure           = "Present"
+                InstallAccount   = $params.InstallAccount
             }
         }
     }
@@ -208,7 +208,7 @@ function Set-TargetResource
 
     if ($Ensure -eq "Present")
     {
-        Invoke-SPDSCCommand -Credential $InstallAccount `
+        Invoke-SPDscCommand -Credential $InstallAccount `
                             -Arguments @($PSBoundParameters, $PSScriptRoot, $currentSettings) `
                             -ScriptBlock {
 
@@ -312,7 +312,7 @@ function Set-TargetResource
     }
     else
     {
-        Invoke-SPDSCCommand -Credential $InstallAccount `
+        Invoke-SPDscCommand -Credential $InstallAccount `
                             -Arguments @($PSBoundParameters, $PSScriptRoot) `
                             -ScriptBlock {
 
@@ -391,7 +391,11 @@ function Test-TargetResource
     Write-Verbose -Message "Testing group settings for '$Name' at '$Url'"
 
     $PSBoundParameters.Ensure = $Ensure
-    $currentValues = Get-TargetResource @PSBoundParameters
+
+    $CurrentValues = Get-TargetResource @PSBoundParameters
+
+    Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
+    Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
 
     if ($PSBoundParameters.ContainsKey("Members") -eq $true)
     {

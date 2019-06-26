@@ -39,7 +39,7 @@ function Get-TargetResource
         Write-Verbose -Message "No zone is specified"
     }
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+    $result = Invoke-SPDscCommand -Credential $InstallAccount `
                                   -Arguments $PSBoundParameters `
                                   -ScriptBlock {
         $params = $args[0]
@@ -152,7 +152,7 @@ function Set-TargetResource
         throw "No zone specified. Please specify a zone"
     }
 
-    Invoke-SPDSCCommand -Credential $InstallAccount `
+    Invoke-SPDscCommand -Credential $InstallAccount `
                         -Arguments $PSBoundParameters `
                         -ScriptBlock {
         $params = $args[0]
@@ -306,6 +306,9 @@ function Test-TargetResource
     Write-Verbose -Message "Testing site collection url for $Url"
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
+
+    Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
+    Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
 
     if ($null -eq $CurrentValues.Intranet -and
         $null -eq $CurrentValues.Internet -and

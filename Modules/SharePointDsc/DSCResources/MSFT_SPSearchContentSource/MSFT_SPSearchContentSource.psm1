@@ -72,7 +72,7 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting Content Source Setting for '$Name'"
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+    $result = Invoke-SPDscCommand -Credential $InstallAccount `
                                   -Arguments @($PSBoundParameters, $PSScriptRoot) `
                                   -ScriptBlock {
         $params = $args[0]
@@ -90,10 +90,10 @@ function Get-TargetResource
         if ($null -eq $source)
         {
             return @{
-                Name = $params.Name
-                ServiceAppName = $params.ServiceAppName
+                Name              = $params.Name
+                ServiceAppName    = $params.ServiceAppName
                 ContentSourceType = $params.ContentSourceType
-                Ensure = "Absent"
+                Ensure            = "Absent"
             }
         }
 
@@ -106,23 +106,23 @@ function Get-TargetResource
                     $crawlSetting = "CrawlFirstOnly"
                 }
 
-                $incrementalSchedule = Get-SPDSCSearchCrawlSchedule `
+                $incrementalSchedule = Get-SPDscSearchCrawlSchedule `
                                             -Schedule $source.IncrementalCrawlSchedule
-                $fullSchedule = Get-SPDSCSearchCrawlSchedule `
+                $fullSchedule = Get-SPDscSearchCrawlSchedule `
                                             -Schedule $source.FullCrawlSchedule
 
                 $result = @{
-                    Name = $params.Name
-                    ServiceAppName = $params.ServiceAppName
-                    Ensure = "Present"
-                    ContentSourceType = "SharePoint"
-                    Addresses = [array] $source.StartAddresses.AbsoluteUri
-                    CrawlSetting = $crawlSetting
-                    ContinuousCrawl = $source.EnableContinuousCrawls
+                    Name                = $params.Name
+                    ServiceAppName      = $params.ServiceAppName
+                    Ensure              = "Present"
+                    ContentSourceType   = "SharePoint"
+                    Addresses           = [array] $source.StartAddresses.AbsoluteUri
+                    CrawlSetting        = $crawlSetting
+                    ContinuousCrawl     = $source.EnableContinuousCrawls
                     IncrementalSchedule = $incrementalSchedule
-                    FullSchedule = $fullSchedule
-                    Priority = $source.CrawlPriority
-                    InstallAccount = $params.InstallAccount
+                    FullSchedule        = $fullSchedule
+                    Priority            = $source.CrawlPriority
+                    InstallAccount      = $params.InstallAccount
                 }
             }
             "Web" {
@@ -136,23 +136,23 @@ function Get-TargetResource
                     $crawlSetting = "CrawlFirstOnly"
                 }
 
-                $incrementalSchedule = Get-SPDSCSearchCrawlSchedule `
+                $incrementalSchedule = Get-SPDscSearchCrawlSchedule `
                                             -Schedule $source.IncrementalCrawlSchedule
-                $fullSchedule = Get-SPDSCSearchCrawlSchedule `
+                $fullSchedule = Get-SPDscSearchCrawlSchedule `
                                             -Schedule $source.FullCrawlSchedule
 
                 $result = @{
-                    Name = $params.Name
-                    ServiceAppName = $params.ServiceAppName
-                    Ensure = "Present"
-                    ContentSourceType = "Website"
-                    Addresses = [array] $source.StartAddresses.AbsoluteUri
-                    CrawlSetting = $crawlSetting
+                    Name                = $params.Name
+                    ServiceAppName      = $params.ServiceAppName
+                    Ensure              = "Present"
+                    ContentSourceType   = "Website"
+                    Addresses           = [array] $source.StartAddresses.AbsoluteUri
+                    CrawlSetting        = $crawlSetting
                     IncrementalSchedule = $incrementalSchedule
-                    FullSchedule = $fullSchedule
-                    LimitPageDepth = $source.MaxPageEnumerationDepth
-                    LimitServerHops = $source.MaxSiteEnumerationDepth
-                    Priority = $source.CrawlPriority
+                    FullSchedule        = $fullSchedule
+                    LimitPageDepth      = $source.MaxPageEnumerationDepth
+                    LimitServerHops     = $source.MaxSiteEnumerationDepth
+                    Priority            = $source.CrawlPriority
                 }
             }
             "File" {
@@ -165,39 +165,39 @@ function Get-TargetResource
                 $addresses = [array] $source.StartAddresses.AbsoluteUri
                 $addresses = $addresses.Replace("file:///","\\").Replace("/", "\")
 
-                $incrementalSchedule = Get-SPDSCSearchCrawlSchedule `
+                $incrementalSchedule = Get-SPDscSearchCrawlSchedule `
                                             -Schedule $source.IncrementalCrawlSchedule
-                $fullSchedule = Get-SPDSCSearchCrawlSchedule `
+                $fullSchedule = Get-SPDscSearchCrawlSchedule `
                                             -Schedule $source.FullCrawlSchedule
 
                 $result = @{
-                    Name = $params.Name
-                    ServiceAppName = $params.ServiceAppName
-                    Ensure = "Present"
-                    ContentSourceType = "FileShare"
-                    Addresses = $addresses
-                    CrawlSetting = $crawlSetting
+                    Name                = $params.Name
+                    ServiceAppName      = $params.ServiceAppName
+                    Ensure              = "Present"
+                    ContentSourceType   = "FileShare"
+                    Addresses           = $addresses
+                    CrawlSetting        = $crawlSetting
                     IncrementalSchedule = $incrementalSchedule
-                    FullSchedule = $fullSchedule
-                    Priority = $source.CrawlPriority
+                    FullSchedule        = $fullSchedule
+                    Priority            = $source.CrawlPriority
                 }
             }
             "Business" {
                 $result = @{
-                    Name = $params.Name
-                    ServiceAppName = $params.ServiceAppName
-                    Ensure = "Present"
-                    ContentSourceType = "Business"
-                    CrawlSetting = $crawlSetting
+                    Name                = $params.Name
+                    ServiceAppName      = $params.ServiceAppName
+                    Ensure              = "Present"
+                    ContentSourceType   = "Business"
+                    CrawlSetting        = $crawlSetting
                     IncrementalSchedule = $incrementalSchedule
-                    FullSchedule = $fullSchedule
-                    Priority = $source.CrawlPriority
+                    FullSchedule        = $fullSchedule
+                    Priority            = $source.CrawlPriority
                 }
 
-                if($null -ne $params.LOBSystemSet)
+                if ($null -ne $params.LOBSystemSet)
                 {
                     $bdcSegments = $source.StartAddresses[0].Segments
-                    if($bdcSegments.Length -ge 5)
+                    if ($bdcSegments.Length -ge 5)
                     {
                         [Reflection.Assembly]::LoadWithPartialName("System.Web") | Out-Null
                         $LOBSystemName = [System.Web.HttpUtility]::UrlDecode($bdcSegments[4].Replace("/", ""))
@@ -362,7 +362,7 @@ function Set-TargetResource
        -or ($Ensure -eq "Absent" -and $CurrentValues.Ensure -ne $Ensure))
     {
         # Remove the existing content source
-        Invoke-SPDSCCommand -Credential $InstallAccount `
+        Invoke-SPDscCommand -Credential $InstallAccount `
                             -Arguments @($PSBoundParameters) `
                             -ScriptBlock {
             $params = $args[0]
@@ -375,7 +375,7 @@ function Set-TargetResource
     if ($Ensure -eq "Present")
     {
         # Create the new content source and then apply settings to it
-        Invoke-SPDSCCommand -Credential $InstallAccount `
+        Invoke-SPDscCommand -Credential $InstallAccount `
                             -Arguments @($PSBoundParameters) `
                             -ScriptBlock {
             $params = $args[0]
@@ -404,7 +404,7 @@ function Set-TargetResource
                         $newType = "Business"
                     }
                 }
-                if($params.ContentSourceType -ne "Business")
+                if ($params.ContentSourceType -ne "Business")
                 {
                     $source = New-SPEnterpriseSearchCrawlContentSource `
                                     -SearchApplication $params.ServiceAppName `
@@ -514,7 +514,7 @@ function Set-TargetResource
                     }
                     "Weekly" {
                         $incrementalSetArgs.Add("WeeklyCrawlSchedule", $true)
-                        $propertyTest = Test-SPDSCObjectHasProperty `
+                        $propertyTest = Test-SPDscObjectHasProperty `
                                             -Object $params.IncrementalSchedule `
                                             -PropertyName "CrawlScheduleDaysOfWeek"
 
@@ -530,7 +530,7 @@ function Set-TargetResource
                     }
                     "Monthly" {
                         $incrementalSetArgs.Add("MonthlyCrawlSchedule", $true)
-                        $propertyTest = Test-SPDSCObjectHasProperty `
+                        $propertyTest = Test-SPDscObjectHasProperty `
                                             -Object $params.IncrementalSchedule `
                                             -PropertyName "CrawlScheduleDaysOfMonth"
 
@@ -540,7 +540,7 @@ function Set-TargetResource
                                 $params.IncrementalSchedule.CrawlScheduleDaysOfMonth)
                         }
 
-                        $propertyTest = Test-SPDSCObjectHasProperty `
+                        $propertyTest = Test-SPDscObjectHasProperty `
                                             -Object $params.IncrementalSchedule `
                                             -PropertyName "CrawlScheduleMonthsOfYear"
 
@@ -555,7 +555,7 @@ function Set-TargetResource
                     }
                 }
 
-                $propertyTest = Test-SPDSCObjectHasProperty -Object $params.IncrementalSchedule `
+                $propertyTest = Test-SPDscObjectHasProperty -Object $params.IncrementalSchedule `
                                                             -PropertyName "CrawlScheduleRepeatDuration"
                 if ($propertyTest -eq $true)
                 {
@@ -563,7 +563,7 @@ function Set-TargetResource
                         $params.IncrementalSchedule.CrawlScheduleRepeatDuration)
                 }
 
-                $propertyTest = Test-SPDSCObjectHasProperty -Object $params.IncrementalSchedule `
+                $propertyTest = Test-SPDscObjectHasProperty -Object $params.IncrementalSchedule `
                                                             -PropertyName "CrawlScheduleRepeatInterval"
                 if ($propertyTest -eq $true)
                 {
@@ -571,7 +571,7 @@ function Set-TargetResource
                         $params.IncrementalSchedule.CrawlScheduleRepeatInterval)
                 }
 
-                $propertyTest = Test-SPDSCObjectHasProperty -Object $params.IncrementalSchedule `
+                $propertyTest = Test-SPDscObjectHasProperty -Object $params.IncrementalSchedule `
                                                             -PropertyName "CrawlScheduleRunEveryInterval"
                 if ($propertyTest -eq $true)
                 {
@@ -579,7 +579,7 @@ function Set-TargetResource
                         $params.IncrementalSchedule.CrawlScheduleRunEveryInterval)
                 }
 
-                $propertyTest = Test-SPDSCObjectHasProperty -Object $params.IncrementalSchedule `
+                $propertyTest = Test-SPDscObjectHasProperty -Object $params.IncrementalSchedule `
                                                             -PropertyName "StartHour"
                 if ($propertyTest -eq $true)
                 {
@@ -605,7 +605,7 @@ function Set-TargetResource
                     }
                     "Weekly" {
                         $fullSetArgs.Add("WeeklyCrawlSchedule", $true)
-                        $propertyTest = Test-SPDSCObjectHasProperty -Object $params.FullSchedule `
+                        $propertyTest = Test-SPDscObjectHasProperty -Object $params.FullSchedule `
                                                                     -PropertyName "CrawlScheduleDaysOfWeek"
                         if ($propertyTest -eq $true)
                         {
@@ -618,7 +618,7 @@ function Set-TargetResource
                     }
                     "Monthly" {
                         $fullSetArgs.Add("MonthlyCrawlSchedule", $true)
-                        $propertyTest = Test-SPDSCObjectHasProperty -Object $params.FullSchedule `
+                        $propertyTest = Test-SPDscObjectHasProperty -Object $params.FullSchedule `
                                                                     -PropertyName "CrawlScheduleDaysOfMonth"
                         if ($propertyTest -eq $true)
                         {
@@ -626,7 +626,7 @@ function Set-TargetResource
                                 $params.FullSchedule.CrawlScheduleDaysOfMonth)
                         }
 
-                        $propertyTest = Test-SPDSCObjectHasProperty -Object $params.FullSchedule `
+                        $propertyTest = Test-SPDscObjectHasProperty -Object $params.FullSchedule `
                                                                     -PropertyName "CrawlScheduleMonthsOfYear"
                         if ($propertyTest -eq $true)
                         {
@@ -639,7 +639,7 @@ function Set-TargetResource
                     }
                 }
 
-                $propertyTest = Test-SPDSCObjectHasProperty -Object $params.FullSchedule `
+                $propertyTest = Test-SPDscObjectHasProperty -Object $params.FullSchedule `
                                                             -PropertyName "CrawlScheduleRepeatDuration"
                 if ($propertyTest -eq $true)
                 {
@@ -647,7 +647,7 @@ function Set-TargetResource
                         $params.FullSchedule.CrawlScheduleRepeatDuration)
                 }
 
-                $propertyTest = Test-SPDSCObjectHasProperty -Object $params.FullSchedule `
+                $propertyTest = Test-SPDscObjectHasProperty -Object $params.FullSchedule `
                                                             -PropertyName "CrawlScheduleRepeatInterval"
                 if ($propertyTest -eq $true)
                 {
@@ -655,7 +655,7 @@ function Set-TargetResource
                         $params.FullSchedule.CrawlScheduleRepeatInterval)
                 }
 
-                $propertyTest = Test-SPDSCObjectHasProperty -Object $params.FullSchedule `
+                $propertyTest = Test-SPDscObjectHasProperty -Object $params.FullSchedule `
                                                             -PropertyName "CrawlScheduleRunEveryInterval"
                 if ($propertyTest -eq $true)
                 {
@@ -663,7 +663,7 @@ function Set-TargetResource
                         $params.FullSchedule.CrawlScheduleRunEveryInterval)
                 }
 
-                $propertyTest = Test-SPDSCObjectHasProperty -Object $params.FullSchedule `
+                $propertyTest = Test-SPDscObjectHasProperty -Object $params.FullSchedule `
                                                             -PropertyName "StartHour"
                 if ($propertyTest -eq $true)
                 {
@@ -808,7 +808,11 @@ function Test-TargetResource
             }
         }
     }
+
     $CurrentValues = Get-TargetResource @PSBoundParameters
+
+    Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
+    Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
 
     if ($Ensure -eq "Absent" -or $CurrentValues.Ensure -eq "Absent")
     {
@@ -825,7 +829,7 @@ function Test-TargetResource
 
     if (($PSBoundParameters.ContainsKey("IncrementalSchedule") -eq $true) -and ($null -ne $IncrementalSchedule))
     {
-        $propertyTest = Test-SPDSCSearchCrawlSchedule -CurrentSchedule $CurrentValues.IncrementalSchedule `
+        $propertyTest = Test-SPDscSearchCrawlSchedule -CurrentSchedule $CurrentValues.IncrementalSchedule `
                                                       -DesiredSchedule $IncrementalSchedule
         if ($propertyTest -eq $false)
         {
@@ -835,7 +839,7 @@ function Test-TargetResource
 
     if (($PSBoundParameters.ContainsKey("FullSchedule") -eq $true) -and ($null -ne $FullSchedule))
     {
-        $propertyTest = Test-SPDSCSearchCrawlSchedule -CurrentSchedule $CurrentValues.FullSchedule `
+        $propertyTest = Test-SPDscSearchCrawlSchedule -CurrentSchedule $CurrentValues.FullSchedule `
                                                       -DesiredSchedule $FullSchedule
         if ($propertyTest -eq $false)
         {

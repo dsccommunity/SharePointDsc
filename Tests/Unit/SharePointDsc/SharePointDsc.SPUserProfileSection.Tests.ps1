@@ -62,7 +62,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                             $Global:SPUPSubTypeCreateCalled = $true
                         } -PassThru  | Add-Member -MemberType ScriptMethod GetSectionByName {
                             $result = $null
-                            if($Global:SPUPGetSectionByNameCalled -eq $TRUE){
+                            if ($Global:SPUPGetSectionByNameCalled -eq $TRUE){
                                 $result = $subTypeProperty
                             }
                             $Global:SPUPGetSectionByNameCalled  = $true
@@ -76,7 +76,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                         } -PassThru | Add-Member -MemberType ScriptMethod -Name Add -Value {
                             $Global:SPUPSubTypeAddCalled = $true
                         } -PassThru -Force
-        Mock -CommandName Get-SPDSCUserProfileSubTypeManager -MockWith {
+        Mock -CommandName Get-SPDscUserProfileSubTypeManager -MockWith {
         $result = @{}| Add-Member -MemberType ScriptMethod GetProfileSubtype {
                             $Global:SPUPGetProfileSubtypeCalled = $true
                             return @{
@@ -116,7 +116,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     return $result
                 } -PassThru -Force | Add-Member -MemberType ScriptMethod GetSectionByName {
                            $result = $null
-                            if($Global:UpsConfigManagerGetSectionByNameCalled -eq $TRUE){
+                            if ($Global:UpsConfigManagerGetSectionByNameCalled -eq $TRUE){
                                 $result = $subTypeProperty
                             }
                             $Global:UpsConfigManagerGetSectionByNameCalled=$true
@@ -197,7 +197,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         }
 
         Context -Name "When section exists and ensure equals Absent" {
-            Mock -CommandName Get-SPDSCUserProfileSubTypeManager -MockWith {
+            Mock -CommandName Get-SPDscUserProfileSubTypeManager -MockWith {
             $result = @{}| Add-Member -MemberType ScriptMethod GetProfileSubtype {
                                 $Global:SPUPGetProfileSubtypeCalled = $true
                                 return @{
@@ -226,7 +226,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
 
         Context -Name "When section exists and display name and display order are different" {
-            Mock -CommandName Get-SPDSCUserProfileSubTypeManager -MockWith {
+            Mock -CommandName Get-SPDscUserProfileSubTypeManager -MockWith {
             $result = @{}| Add-Member -MemberType ScriptMethod GetProfileSubtype {
                                 $Global:SPUPGetProfileSubtypeCalled = $true
                                 return @{

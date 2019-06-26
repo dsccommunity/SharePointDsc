@@ -53,7 +53,7 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting web application extension '$Name' config"
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+    $result = Invoke-SPDscCommand -Credential $InstallAccount `
                                   -Arguments $PSBoundParameters `
                                   -ScriptBlock {
         $params = $args[0]
@@ -64,12 +64,12 @@ function Get-TargetResource
         {
             Write-Verbose -Message "WebApplication $($params.WebAppUrl) does not exist"
             return @{
-                WebAppUrl = $params.WebAppUrl
-                Name = $params.Name
-                Url = $null
-                Zone = $null
+                WebAppUrl      = $params.WebAppUrl
+                Name           = $params.Name
+                Url            = $null
+                Zone           = $null
                 AllowAnonymous = $null
-                Ensure = "Absent"
+                Ensure         = "Absent"
             }
         }
 
@@ -79,12 +79,12 @@ function Get-TargetResource
         if ($null -eq $waExt)
         {
             return @{
-                WebAppUrl = $params.WebAppUrl
-                Name = $params.Name
-                Url = $params.Url
-                Zone = $params.zone
+                WebAppUrl      = $params.WebAppUrl
+                Name           = $params.Name
+                Url            = $params.Url
+                Zone           = $params.zone
                 AllowAnonymous = $params.AllowAnonymous
-                Ensure = "Absent"
+                Ensure         = "Absent"
             }
         }
 
@@ -104,17 +104,17 @@ function Get-TargetResource
         }
 
          return @{
-            WebAppUrl = $params.WebAppUrl
-            Name = $waExt.ServerComment
-            Url = $PublicURL
+            WebAppUrl      = $params.WebAppUrl
+            Name           = $waExt.ServerComment
+            Url            = $PublicURL
             AllowAnonymous = $waExt.AllowAnonymous
-            HostHeader = $HostHeader
-            Path = $waExt.Path
-            Port = $Port
-            Zone = $params.zone
-            UseSSL = $UseSSL
+            HostHeader     = $HostHeader
+            Path           = $waExt.Path
+            Port           = $Port
+            Zone           = $params.zone
+            UseSSL         = $UseSSL
             InstallAccount = $params.InstallAccount
-            Ensure = "Present"
+            Ensure         = "Present"
         }
     }
     return $result
@@ -177,7 +177,7 @@ function Set-TargetResource
 
     if ($Ensure -eq "Present")
     {
-        Invoke-SPDSCCommand -Credential $InstallAccount `
+        Invoke-SPDscCommand -Credential $InstallAccount `
                             -Arguments $PSBoundParameters `
                             -ScriptBlock {
             $params = $args[0]
@@ -236,7 +236,7 @@ function Set-TargetResource
 
     if ($Ensure -eq "Absent")
     {
-        Invoke-SPDSCCommand -Credential $InstallAccount `
+        Invoke-SPDscCommand -Credential $InstallAccount `
                             -Arguments $PSBoundParameters `
                             -ScriptBlock {
             $params = $args[0]
@@ -313,6 +313,9 @@ function Test-TargetResource
     $PSBoundParameters.Ensure = $Ensure
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
+
+    Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
+    Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
 
     $testReturn = Test-SPDscParameterState -CurrentValues $CurrentValues `
                                                      -DesiredValues $PSBoundParameters `

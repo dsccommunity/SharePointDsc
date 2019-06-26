@@ -245,7 +245,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         } -PassThru
 
 
-        Mock -CommandName Get-SPDSCUserProfileSubTypeManager -MockWith {
+        Mock -CommandName Get-SPDscUserProfileSubTypeManager -MockWith {
             $result = @{
             }| Add-Member ScriptMethod GetProfileSubtype {
                 $Global:SPUPGetProfileSubtypeCalled = $true
@@ -311,7 +311,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 })
         } -ParameterFilter {
             $TypeName -eq "Microsoft.Office.Server.UserProfiles.UserProfileManager" }
-        Mock Invoke-SPDSCCommand {
+        Mock Invoke-SPDscCommand {
             return Invoke-Command -ScriptBlock $ScriptBlock -ArgumentList $Arguments -NoNewScope
         }
 
@@ -657,7 +657,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         }
 
         Context -Name "When property exists and all properties match" {
-            Mock -CommandName Get-SPDSCUserProfileSubTypeManager -MockWith {
+            Mock -CommandName Get-SPDscUserProfileSubTypeManager -MockWith {
                 $result = @{}| Add-Member ScriptMethod GetProfileSubtype {
                     $Global:SPUPGetProfileSubtypeCalled = $true
                     return @{
@@ -707,7 +707,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         Context -Name "When property exists and type is different - throws exception" {
             $currentType = $testParamsUpdateProperty.Type
             $testParamsUpdateProperty.Type = "String (Multi Value)"
-            Mock -CommandName Get-SPDSCUserProfileSubTypeManager -MockWith {
+            Mock -CommandName Get-SPDscUserProfileSubTypeManager -MockWith {
                 $result = @{}| Add-Member ScriptMethod GetProfileSubtype {
                     $Global:SPUPGetProfileSubtypeCalled = $true
                     return @{
@@ -753,7 +753,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
             #$propertyMappingItem.DataSourcePropertyName = "property"
 
-            Mock -CommandName Get-SPDSCUserProfileSubTypeManager -MockWith {
+            Mock -CommandName Get-SPDscUserProfileSubTypeManager -MockWith {
                 $result = @{}| Add-Member ScriptMethod GetProfileSubtype {
                     $Global:SPUPGetProfileSubtypeCalled = $true
                     return @{
@@ -796,7 +796,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "When property exists and mapping does not exist" {
             $propertyMappingItem = $null
-            Mock -CommandName Get-SPDSCUserProfileSubTypeManager -MockWith {
+            Mock -CommandName Get-SPDscUserProfileSubTypeManager -MockWith {
                 $result = @{}| Add-Member ScriptMethod GetProfileSubtype {
                     $Global:SPUPGetProfileSubtypeCalled = $true
                     return @{
@@ -838,7 +838,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         }
 
         Context -Name "When property exists and ensure equals Absent" {
-            Mock -CommandName Get-SPDSCUserProfileSubTypeManager -MockWith {
+            Mock -CommandName Get-SPDscUserProfileSubTypeManager -MockWith {
                 $result = @{}| Add-Member ScriptMethod GetProfileSubtype {
                     $Global:SPUPGetProfileSubtypeCalled = $true
                     return @{
@@ -870,7 +870,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
             # Mocks for AD Import Connection
 
-            Mock -CommandName Get-SPDSCUserProfileSubTypeManager -MockWith {
+            Mock -CommandName Get-SPDscUserProfileSubTypeManager -MockWith {
                 $result = @{}| Add-Member ScriptMethod GetProfileSubtype {
                     $Global:SPUPGetProfileSubtypeCalled = $true
                     return @{

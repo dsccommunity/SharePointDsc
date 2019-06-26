@@ -28,7 +28,7 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting Visio Graphics service app '$Name'"
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+    $result = Invoke-SPDscCommand -Credential $InstallAccount `
                                   -Arguments $PSBoundParameters `
                                   -ScriptBlock {
         $params = $args[0]
@@ -36,9 +36,9 @@ function Get-TargetResource
         $serviceApps = Get-SPServiceApplication -Name $params.Name `
                                                 -ErrorAction SilentlyContinue
         $nullReturn = @{
-            Name = $params.Name
+            Name            = $params.Name
             ApplicationPool = $params.ApplicationPool
-            Ensure = "Absent"
+            Ensure          = "Absent"
         }
         if ($null -eq $serviceApps)
         {
@@ -112,7 +112,7 @@ function Set-TargetResource
     if ($result.Ensure -eq "Absent" -and $Ensure -eq "Present")
     {
         Write-Verbose -Message "Creating Visio Graphics Service Application $Name"
-        Invoke-SPDSCCommand -Credential $InstallAccount `
+        Invoke-SPDscCommand -Credential $InstallAccount `
                             -Arguments $PSBoundParameters `
                             -ScriptBlock {
             $params = $args[0]
@@ -142,7 +142,7 @@ function Set-TargetResource
         if ($ApplicationPool -ne $result.ApplicationPool)
         {
             Write-Verbose -Message "Updating Visio Graphics Service Application $Name"
-            Invoke-SPDSCCommand -Credential $InstallAccount `
+            Invoke-SPDscCommand -Credential $InstallAccount `
                                 -Arguments $PSBoundParameters `
                                 -ScriptBlock {
                 $params = $args[0]
@@ -160,7 +160,7 @@ function Set-TargetResource
     if ($Ensure -eq "Absent")
     {
         Write-Verbose -Message "Removing Visio service application $Name"
-        Invoke-SPDSCCommand -Credential $InstallAccount `
+        Invoke-SPDscCommand -Credential $InstallAccount `
                             -Arguments $PSBoundParameters `
                             -ScriptBlock {
             $params = $args[0]
@@ -171,9 +171,9 @@ function Set-TargetResource
                     }
 
             $proxies = Get-SPServiceApplicationProxy
-            foreach($proxyInstance in $proxies)
+            foreach ($proxyInstance in $proxies)
             {
-                if($app.IsConnected($proxyInstance))
+                if ($app.IsConnected($proxyInstance))
                 {
                     $proxyInstance.Delete()
                 }
@@ -217,6 +217,9 @@ function Test-TargetResource
     $PSBoundParameters.Ensure = $Ensure
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
+
+    Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
+    Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
 
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
                                     -DesiredValues $PSBoundParameters `

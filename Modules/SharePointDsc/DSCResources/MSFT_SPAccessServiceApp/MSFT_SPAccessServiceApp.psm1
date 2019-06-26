@@ -16,23 +16,23 @@ function Get-TargetResource
         [System.String]
         $DatabaseServer,
 
-        [Parameter()] 
-        [ValidateSet("Present","Absent")] 
-        [System.String] 
+        [Parameter()]
+        [ValidateSet("Present","Absent")]
+        [System.String]
         $Ensure = "Present",
 
-        [Parameter()] 
-        [System.Management.Automation.PSCredential] 
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 
     Write-Verbose -Message "Getting Access Services service app '$Name'"
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+    $result = Invoke-SPDscCommand -Credential $InstallAccount `
                                   -Arguments $PSBoundParameters `
                                   -ScriptBlock {
         $params = $args[0]
-        
+
         $serviceApps = Get-SPServiceApplication -Name $params.Name -ErrorAction SilentlyContinue
         $nullReturn = @{
             Name = $params.Name
@@ -40,20 +40,20 @@ function Get-TargetResource
             DatabaseServer = $params.DatabaseServer
             Ensure = "Absent"
             InstallAccount = $params.InstallAccount
-        } 
-        if ($null -eq $serviceApps) 
+        }
+        if ($null -eq $serviceApps)
         {
-            return $nullReturn 
+            return $nullReturn
         }
         $serviceApp = $serviceApps | Where-Object -FilterScript {
-            $_.GetType().FullName -eq "Microsoft.Office.Access.Services.MossHost.AccessServicesWebServiceApplication"            
+            $_.GetType().FullName -eq "Microsoft.Office.Access.Services.MossHost.AccessServicesWebServiceApplication"
         }
 
-        if ($null -eq $serviceApp) 
+        if ($null -eq $serviceApp)
         {
-            return $nullReturn 
-        } 
-        else 
+            return $nullReturn
+        }
+        else
         {
             ### Find database server name
             $context = [Microsoft.SharePoint.SPServiceContext]::GetContext($serviceApp.ServiceApplicationProxyGroup, [Microsoft.SharePoint.SPSiteSubscriptionIdentifier]::Default)
@@ -86,13 +86,13 @@ function Set-TargetResource
         [System.String]
         $DatabaseServer,
 
-        [Parameter()] 
-        [ValidateSet("Present","Absent")] 
-        [System.String] 
+        [Parameter()]
+        [ValidateSet("Present","Absent")]
+        [System.String]
         $Ensure = "Present",
 
-        [Parameter()] 
-        [System.Management.Automation.PSCredential] 
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 
@@ -100,10 +100,10 @@ function Set-TargetResource
 
     $result = Get-TargetResource @PSBoundParameters
 
-    if ($result.Ensure -eq "Absent" -and $Ensure -eq "Present") 
+    if ($result.Ensure -eq "Absent" -and $Ensure -eq "Present")
     {
         Write-Verbose -Message "Creating Access Services Application $Name"
-        Invoke-SPDSCCommand -Credential $InstallAccount `
+        Invoke-SPDscCommand -Credential $InstallAccount `
                             -Arguments $PSBoundParameters `
                             -ScriptBlock {
 
@@ -113,27 +113,27 @@ function Set-TargetResource
                                                    -ApplicationPool $params.ApplicationPool `
                                                    -Default `
                                                    -DatabaseServer $params.DatabaseServer
-                                                   
+
             $app | New-SPAccessServicesApplicationProxy | Out-Null
         }
     }
-    if ($Ensure -eq "Absent") 
+    if ($Ensure -eq "Absent")
     {
         Write-Verbose -Message "Removing Access Service Application $Name"
-        Invoke-SPDSCCommand -Credential $InstallAccount `
+        Invoke-SPDscCommand -Credential $InstallAccount `
                             -Arguments $PSBoundParameters `
                             -ScriptBlock {
 
             $params = $args[0]
-            
+
             $app = Get-SPServiceApplication -Name $params.Name | Where-Object -FilterScript {
                 $_.GetType().FullName -eq "Microsoft.Office.Access.Services.MossHost.AccessServicesWebServiceApplication"
             }
 
             $proxies = Get-SPServiceApplicationProxy
-            foreach($proxyInstance in $proxies)
+            foreach ($proxyInstance in $proxies)
             {
-                if($app.IsConnected($proxyInstance))
+                if ($app.IsConnected($proxyInstance))
                 {
                     $proxyInstance.Delete()
                 }
@@ -162,21 +162,24 @@ function Test-TargetResource
         [System.String]
         $DatabaseServer,
 
-        [Parameter()] 
-        [ValidateSet("Present","Absent")] 
-        [System.String] 
+        [Parameter()]
+        [ValidateSet("Present","Absent")]
+        [System.String]
         $Ensure = "Present",
 
-        [Parameter()] 
-        [System.Management.Automation.PSCredential] 
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
         $InstallAccount
     )
-    
+
     Write-Verbose -Message "Testing for Access Service Application '$Name'"
 
     $PSBoundParameters.Ensure = $Ensure
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
+
+    Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
+    Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
 
     if ($CurrentValues.DatabaseServer -ne $DatabaseServer)
     {

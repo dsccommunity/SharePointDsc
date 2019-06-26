@@ -47,14 +47,14 @@ function Get-TargetResource
         }
     }
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+    $result = Invoke-SPDscCommand -Credential $InstallAccount `
                                   -Arguments $PSBoundParameters `
                                   -ScriptBlock {
         $params = $args[0]
 
         try
         {
-            $spFarm = Get-SPFarm
+            $null = Get-SPFarm
         }
         catch
         {
@@ -128,7 +128,7 @@ function Set-TargetResource
     $result = Get-TargetResource @PSBoundParameters
 
     # Update the service app that already exists
-    Invoke-SPDSCCommand -Credential $InstallAccount `
+    Invoke-SPDscCommand -Credential $InstallAccount `
                         -Arguments @($PSBoundParameters, $result) `
                         -ScriptBlock {
         $params = $args[0]
@@ -136,7 +136,7 @@ function Set-TargetResource
 
         try
         {
-            $spFarm = Get-SPFarm
+            $null = Get-SPFarm
         }
         catch
         {
@@ -217,6 +217,9 @@ function Test-TargetResource
     }
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
+
+    Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
+    Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
 
     if ($PSBoundParameters.ContainsKey("WindowsServiceAccount"))
     {

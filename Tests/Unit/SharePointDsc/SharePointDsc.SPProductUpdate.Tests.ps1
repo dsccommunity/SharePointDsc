@@ -39,7 +39,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             )
 
             $productVersion = 2013
-            if($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 16) {
+            if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 16) {
                 if ($Global:SPDscHelper.CurrentStubBuildNumber.Build.ToString().Length -eq 4)
                 {
                     $productVersion = 2016
@@ -74,7 +74,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
             reg import $modifiedFileDestination *>&1 | Out-Null
 
-            if($PrepDataForTests)
+            if ($PrepDataForTests)
             {
                 Get-Childitem "Registry::$($testRegistryPath)\HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Installer\UserData\S-1-5-18\Products" | Where-Object -FilterScript {
                     $_.PsPath -notlike "*00000000F01FEC"
@@ -111,7 +111,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             return $service
         }
 
-        Mock -CommandName Get-SPDSCInstalledProductVersion {
+        Mock -CommandName Get-SPDscInstalledProductVersion {
             return @{
                 FileMajorPart    = $Global:SPDscHelper.CurrentStubBuildNumber.Major
                 FileBuildPart    = $Global:SPDscHelper.CurrentStubBuildNumber.Build
@@ -129,7 +129,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
         }
 
-        Mock -CommandName Get-SPDSCRegistryKey -MockWith {
+        Mock -CommandName Get-SPDscRegistryKey -MockWith {
             if ($Value -eq "SetupType")
             {
                 return "CLEAN_INSTALL"

@@ -33,7 +33,7 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting Alternate URL for $Zone in $WebAppName"
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+    $result = Invoke-SPDscCommand -Credential $InstallAccount `
                                   -Arguments $PSBoundParameters `
                                   -ScriptBlock {
         $params = $args[0]
@@ -108,7 +108,7 @@ function Set-TargetResource
 
     if ($Ensure -eq "Present")
     {
-        Invoke-SPDSCCommand -Credential $InstallAccount `
+        Invoke-SPDscCommand -Credential $InstallAccount `
                             -Arguments $PSBoundParameters `
                             -ScriptBlock {
             $params = $args[0]
@@ -220,7 +220,7 @@ function Set-TargetResource
     }
     else
     {
-        Invoke-SPDSCCommand -Credential $InstallAccount `
+        Invoke-SPDscCommand -Credential $InstallAccount `
                             -Arguments $PSBoundParameters `
                             -ScriptBlock {
             $params = $args[0]
@@ -271,9 +271,14 @@ function Test-TargetResource
     $PSBoundParameters.Ensure = $Ensure
     $PSBoundParameters.Internal = $Internal
 
+    $CurrentValues = Get-TargetResource @PSBoundParameters
+
+    Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
+    Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
+
     if ($Ensure -eq "Present")
     {
-        return Test-SPDscParameterState -CurrentValues (Get-TargetResource @PSBoundParameters) `
+        return Test-SPDscParameterState -CurrentValues $CurrentValues `
                                         -DesiredValues $PSBoundParameters `
                                         -ValuesToCheck @("WebAppName", `
                                                          "Zone", `
@@ -283,7 +288,7 @@ function Test-TargetResource
     }
     else
     {
-        return Test-SPDscParameterState -CurrentValues (Get-TargetResource @PSBoundParameters) `
+        return Test-SPDscParameterState -CurrentValues $CurrentValues `
                                         -DesiredValues $PSBoundParameters `
                                         -ValuesToCheck @("Ensure")
     }
