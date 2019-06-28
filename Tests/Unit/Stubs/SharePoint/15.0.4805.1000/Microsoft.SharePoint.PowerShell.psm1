@@ -10610,29 +10610,25 @@ param(
     [string]
     ${Description},
 
+    [Parameter(Mandatory=$true)]
     [ValidateNotNullOrEmpty()]
     [string]
     ${RegisteredIssuerName},
 
-    [ValidateNotNullOrEmpty()]
     [switch]
     ${IsTrustBroker},
 
-    [Parameter(ParameterSetName='ImportCertificateParameterSet', Mandatory=$true)]
-    [ValidateNotNull()]
-    [System.Security.Cryptography.X509Certificates.X509Certificate2]
+    [Parameter(ParameterSetName='CertificateParameterSet', Mandatory=$true)]
+    [Object]
     ${Certificate},
 
     [Parameter(ParameterSetName='MetadataEndPointParameterSet', Mandatory=$true)]
-    [ValidateNotNull()]
     [uri]
     ${MetadataEndPoint},
 
     [Parameter(ValueFromPipeline=$true)]
     [object]
-    ${AssignmentCollection})
-
- 
+    ${AssignmentCollection}) 
  } 
 
 
