@@ -60,9 +60,10 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Ensure                         = "Present"
             }
 
-            It "Should create the SPTrustedSecurityTokenIssuer" {
+            It "Should create the SPTrustedSecurityTokenIssuer using the realm of the farm" {
                 Set-TargetResource @testParams
-                Assert-MockCalled New-SPTrustedSecurityTokenIssuer
+                Assert-MockCalled -CommandName "New-SPTrustedSecurityTokenIssuer"
+                Assert-MockCalled -Times 1 -CommandName "Get-SPAuthenticationRealm"
             }
         }
 
@@ -77,9 +78,10 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Ensure                         = "Present"
             }
 
-            It "Should create the SPTrustedSecurityTokenIssuer" {
+            It "Should create the SPTrustedSecurityTokenIssuer using the realm of the farm" {
                 Set-TargetResource @testParams
-                Assert-MockCalled New-SPTrustedSecurityTokenIssuer
+                Assert-MockCalled -CommandName "New-SPTrustedSecurityTokenIssuer"
+                Assert-MockCalled -Times 1 -CommandName "Get-SPAuthenticationRealm"
             }
         }
 
@@ -94,9 +96,10 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Ensure                         = "Present"
             }
 
-            It "Should create the SPTrustedSecurityTokenIssuer" {
+            It "Should create the SPTrustedSecurityTokenIssuer using the custom realm" {
                 Set-TargetResource @testParams
-                Assert-MockCalled New-SPTrustedSecurityTokenIssuer
+                Assert-MockCalled -CommandName "New-SPTrustedSecurityTokenIssuer"
+                Assert-MockCalled -Times 0 -CommandName "Get-SPAuthenticationRealm"
             }
         }
 
@@ -111,11 +114,11 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Ensure                         = "Present"
             }
 
-            It "should fail validation of signing certificate parameters in the set method" {
+            It "should fail validation of signing certificate parameters in the Set method" {
                 { Set-TargetResource @testParams } | Should Throw "Cannot use both parameters SigningCertificateThumbprint and SigningCertificateFilePath at the same time."
             }
 
-            It "should fail validation of signing certificate parameters in the set method" {
+            It "should fail validation of signing certificate parameters in the Test method" {
                 { Test-TargetResource @testParams } | Should Throw "Cannot use both parameters SigningCertificateThumbprint and SigningCertificateFilePath at the same time."
             }
         }
@@ -131,11 +134,11 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Ensure                         = "Present"
             }
 
-            It "should fail validation of signing certificate parameters in the set method" {
+            It "should fail validation of signing certificate parameters in the Set method" {
                 { Set-TargetResource @testParams } | Should Throw "Cannot use both parameters SigningCertificateThumbprint and MetadataEndPoint at the same time."
             }
 
-            It "should fail validation of signing certificate parameters in the set method" {
+            It "should fail validation of signing certificate parameters in the Test method" {
                 { Test-TargetResource @testParams } | Should Throw "Cannot use both parameters SigningCertificateThumbprint and MetadataEndPoint at the same time."
             }
         }
@@ -151,11 +154,11 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Ensure                         = "Present"
             }
 
-            It "should fail validation of signing certificate parameters in the set method" {
+            It "should fail validation of signing certificate parameters in the Set method" {
                 { Set-TargetResource @testParams } | Should Throw "Cannot use both parameters SigningCertificateFilePath and MetadataEndPoint at the same time."
             }
 
-            It "should fail validation of signing certificate parameters in the set method" {
+            It "should fail validation of signing certificate parameters in the Test method" {
                 { Test-TargetResource @testParams } | Should Throw "Cannot use both parameters SigningCertificateFilePath and MetadataEndPoint at the same time."
             }
         }
@@ -170,7 +173,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Ensure                         = "Present"
             }
 
-            It "should fail validation of parameter SigningCertificateThumbprint in the set method" {
+            It "should fail validation of parameter SigningCertificateThumbprint in the Set method" {
                 { Set-TargetResource @testParams } | Should Throw "Parameter SigningCertificateThumbprint does not match valid format '^[A-Fa-f0-9]{40}$'."
             }
         }
@@ -200,7 +203,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 $getResults.RegisteredIssuerNameRealm | Should Be "$(Get-SPAuthenticationRealm)"
             }
 
-            It "Should return true from the test method" {
+            It "Should return true from the Test method" {
                 Test-TargetResource @testParams | Should Be $true
             }
         }
@@ -232,7 +235,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 $getResults.RegisteredIssuerNameRealm | Should Be "$(Get-SPAuthenticationRealm)"
             }
 
-            It "Should return true from the test method" {
+            It "Should return false from the Test method" {
                 Test-TargetResource @testParams | Should Be $false
             }
 

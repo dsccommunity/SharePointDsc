@@ -217,12 +217,11 @@ function Set-TargetResource
                     }
                 }
 
-                if ($null -eq $params.RegisteredIssuerNameRealm)
+                if ([string]::IsNullOrEmpty($params.RegisteredIssuerNameRealm))
                 {
                     Write-Verbose -Message "RegisteredIssuerNameRealm is not specified, use Get-SPAuthenticationRealm instead."
                     $registeredIssuerNameRealm = Get-SPAuthenticationRealm
                 }
-
                 $registeredIssuerName = "$($params.RegisteredIssuerNameIdentifier)@$registeredIssuerNameRealm"
 
                 $runParams = @{}
@@ -249,7 +248,6 @@ function Set-TargetResource
                 Identity = $params.Name
                 Confirm = $false
             }
-
             Remove-SPTrustedSecurityTokenIssuer @runParams
         }
     }
