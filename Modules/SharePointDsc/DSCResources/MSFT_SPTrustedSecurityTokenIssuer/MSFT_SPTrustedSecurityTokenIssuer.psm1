@@ -1,7 +1,7 @@
 ﻿function Get-TargetResource
 {
     [CmdletBinding()]
-    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSDSCUseIdenticalMandatoryParametersForDSC", "", Justification  =  "Temporary workaround for issue introduced in PSSA v1.18")]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSDSCUseIdenticalMandatoryParametersForDSC", "", Justification = "Temporary workaround for issue introduced in PSSA v1.18")]
     [OutputType([System.Collections.Hashtable])]
     param
     (
@@ -13,10 +13,9 @@
         [String]
         $Description,
 
-        [Parameter(Mandatory = $true)]
         [String]
         $RegisteredIssuerNameIdentifier,
-        
+
         [Parameter()]
         [String]
         $RegisteredIssuerNameRealm,
@@ -38,7 +37,7 @@
         $IsTrustBroker = $true,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [String]
         $Ensure = "Present",
 
@@ -50,31 +49,31 @@
     Write-Verbose -Message "Getting SPTrustedSecurityTokenIssuer '$Name' settings"
 
     $result = Invoke-SPDscCommand -Credential $InstallAccount `
-                                  -Arguments $PSBoundParameters `
-                                  -ScriptBlock {
+        -Arguments $PSBoundParameters `
+        -ScriptBlock {
         $params = $args[0]
 
         $spTrust = Get-SPTrustedSecurityTokenIssuer -Identity $params.Name `
-                                                    -ErrorAction SilentlyContinue
+            -ErrorAction SilentlyContinue
         if ($spTrust)
         {
-            $description                    = $spTrust.Description
+            $description = $spTrust.Description
             $registeredIssuerNameIdentifier = $spTrust.RegisteredIssuerName.Split("@")[0]
-            $registeredIssuerNameRealm      = $spTrust.RegisteredIssuerName.Split("@")[1]
-            $signingCertificateThumbprint   = $spTrust.SigningCertificate.Thumbprint
-            $metadataEndPoint               = $spTrust.MetadataEndPoint.OriginalString
-            $isTrustBroker                  = $spTrust.IsTrustBroker
-            $currentState                   = "Present"
+            $registeredIssuerNameRealm = $spTrust.RegisteredIssuerName.Split("@")[1]
+            $signingCertificateThumbprint = $spTrust.SigningCertificate.Thumbprint
+            $metadataEndPoint = $spTrust.MetadataEndPoint.OriginalString
+            $isTrustBroker = $spTrust.IsTrustBroker
+            $currentState = "Present"
         }
         else
         {
-            $description                    = ""
+            $description = ""
             $registeredIssuerNameIdentifier = ""
-            $registeredIssuerNameRealm      = ""
-            $signingCertificateThumbprint   = ""
-            $metadataEndPoint               = ""
-            $isTrustBroker                  = ""
-            $currentState                   = "Absent"
+            $registeredIssuerNameRealm = ""
+            $signingCertificateThumbprint = ""
+            $metadataEndPoint = ""
+            $isTrustBroker = ""
+            $currentState = "Absent"
         }
 
         return @{
@@ -95,7 +94,7 @@
 function Set-TargetResource
 {
     [CmdletBinding()]
-    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSDSCUseIdenticalMandatoryParametersForDSC", "", Justification  =  "Temporary workaround for issue introduced in PSSA v1.18")]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSDSCUseIdenticalMandatoryParametersForDSC", "", Justification = "Temporary workaround for issue introduced in PSSA v1.18")]
     param
     (
         [Parameter(Mandatory = $true)]
@@ -106,10 +105,9 @@ function Set-TargetResource
         [String]
         $Description,
 
-        [Parameter(Mandatory = $true)]
         [String]
         $RegisteredIssuerNameIdentifier,
-        
+
         [Parameter()]
         [String]
         $RegisteredIssuerNameRealm,
@@ -131,7 +129,7 @@ function Set-TargetResource
         $IsTrustBroker = $true,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [String]
         $Ensure = "Present",
 
@@ -149,104 +147,136 @@ function Set-TargetResource
         if ($CurrentValues.Ensure -eq "Absent")
         {
             if ($PSBoundParameters.ContainsKey("SigningCertificateThumbprint") -and `
-                $PSBoundParameters.ContainsKey("SigningCertificateFilePath"))
+                    $PSBoundParameters.ContainsKey("SigningCertificateFilePath"))
             {
                 throw ("Cannot use both parameters SigningCertificateThumbprint and SigningCertificateFilePath at the same time.")
                 return
             }
-            
+
             if ($PSBoundParameters.ContainsKey("SigningCertificateThumbprint") -and `
-                $PSBoundParameters.ContainsKey("MetadataEndPoint"))
+                    $PSBoundParameters.ContainsKey("MetadataEndPoint"))
             {
                 throw ("Cannot use both parameters SigningCertificateThumbprint and MetadataEndPoint at the same time.")
                 return
             }
 
             if ($PSBoundParameters.ContainsKey("SigningCertificateFilePath") -and `
-                $PSBoundParameters.ContainsKey("MetadataEndPoint"))
+                    $PSBoundParameters.ContainsKey("MetadataEndPoint"))
             {
                 throw ("Cannot use both parameters SigningCertificateFilePath and MetadataEndPoint at the same time.")
                 return
             }
 
             if ($PSBoundParameters.ContainsKey("SigningCertificateThumbprint") -eq $false -and `
-                $PSBoundParameters.ContainsKey("SigningCertificateFilePath") -eq $false -and `
-                $PSBoundParameters.ContainsKey("MetadataEndPoint") -eq $false)
+                    $PSBoundParameters.ContainsKey("SigningCertificateFilePath") -eq $false -and `
+                    $PSBoundParameters.ContainsKey("MetadataEndPoint") -eq $false)
             {
                 throw ("At least one of the following parameters must be specified: " + `
-                    "SigningCertificateThumbprint, SigningCertificateFilePath, MetadataEndPoint.")
+                        "SigningCertificateThumbprint, SigningCertificateFilePath, MetadataEndPoint.")
+                return
+            }
+
+            if ($PSBoundParameters.ContainsKey("MetadataEndPoint") -and `
+                    $PSBoundParameters.ContainsKey("RegisteredIssuerNameIdentifier"))
+            {
+                throw ("Cannot use both parameters MetadataEndPoint and RegisteredIssuerNameIdentifier at the same time.")
+                return
+            }
+
+            if ($PSBoundParameters.ContainsKey("MetadataEndPoint") -and `
+                    $PSBoundParameters.ContainsKey("RegisteredIssuerNameRealm"))
+            {
+                throw ("Cannot use both parameters MetadataEndPoint and RegisteredIssuerNameRealm at the same time.")
                 return
             }
 
             Write-Verbose -Message "Creating SPTrustedSecurityTokenIssuer '$Name'"
             $null = Invoke-SPDscCommand -Credential $InstallAccount `
-                                        -Arguments $PSBoundParameters `
-                                        -ScriptBlock {
+                -Arguments $PSBoundParameters `
+                -ScriptBlock {
                 $params = $args[0]
-                if ($params.SigningCertificateThumbprint)
+
+                $runParams = @{ }
+                $runParams.Add("Name", $params.Name)
+
+                if ($params.Description)
                 {
-                    Write-Verbose -Message ("Getting signing certificate with thumbprint " + `
-                        "$($params.SigningCertificateThumbprint) from the certificate store 'LocalMachine\My'")
+                    $runParams.Add("Description", $params.Description)
+                }
 
-                    if ($params.SigningCertificateThumbprint -notmatch "^[A-Fa-f0-9]{40}$")
-                    {
-                        throw ("Parameter SigningCertificateThumbprint does not match valid format '^[A-Fa-f0-9]{40}$'.")
-                    }
+                if ($params.IsTrustBroker -eq $true)
+                {
+                    $runParams.Add("IsTrustBroker", $null)
+                }
 
-                    $cert = Get-ChildItem -Path Cert:\LocalMachine\My | Where-Object -FilterScript {
-                        $_.Thumbprint -match $params.SigningCertificateThumbprint
-                    }
-
-                    if (!$cert)
-                    {
-                        throw ("Signing certificate with thumbprint $($params.SigningCertificateThumbprint) " + `
-                               "was not found in certificate store 'LocalMachine\My'.")
-                    }
+                if ($params.MetadataEndPoint)
+                {
+                    # Configure OAuth trust automatically using metadata file specified in parameter MetadataEndPoint
+                    $runParams.Add("MetadataEndPoint", $params.MetadataEndPoint)
                 }
                 else
                 {
-                    Write-Verbose -Message "Getting signing certificate from file system path '$($params.SigningCertificateFilePath)'"
-                    try
+                    # Configure OAuth trust with specified certificate and a RegisteredIssuerName
+                    if ($params.SigningCertificateThumbprint)
                     {
-                        $cert = New-Object -TypeName "System.Security.Cryptography.X509Certificates.X509Certificate2" `
-                                           -ArgumentList @($params.SigningCertificateFilePath)
+                        Write-Verbose -Message ("Getting signing certificate with thumbprint " + `
+                                "$($params.SigningCertificateThumbprint) from the certificate store 'LocalMachine\My'")
+
+                        if ($params.SigningCertificateThumbprint -notmatch "^[A-Fa-f0-9]{40}$")
+                        {
+                            throw ("Parameter SigningCertificateThumbprint does not match valid format '^[A-Fa-f0-9]{40}$'.")
+                        }
+
+                        $cert = Get-ChildItem -Path Cert:\LocalMachine\My | Where-Object -FilterScript {
+                            $_.Thumbprint -match $params.SigningCertificateThumbprint
+                        }
+
+                        if (!$cert)
+                        {
+                            throw ("Signing certificate with thumbprint $($params.SigningCertificateThumbprint) " + `
+                                    "was not found in certificate store 'LocalMachine\My'.")
+                        }
                     }
-                    catch
+                    else
                     {
-                        throw ("Signing certificate was not found in path '$($params.SigningCertificateFilePath)'.")
+                        Write-Verbose -Message "Getting signing certificate from file system path '$($params.SigningCertificateFilePath)'"
+                        try
+                        {
+                            $cert = New-Object -TypeName "System.Security.Cryptography.X509Certificates.X509Certificate2" `
+                                -ArgumentList @($params.SigningCertificateFilePath)
+                        }
+                        catch
+                        {
+                            throw ("Signing certificate was not found in path '$($params.SigningCertificateFilePath)'.")
+                        }
                     }
+
+                    if ([string]::IsNullOrEmpty($params.RegisteredIssuerNameRealm))
+                    {
+                        Write-Verbose -Message "RegisteredIssuerNameRealm is not specified, use Get-SPAuthenticationRealm instead."
+                        $registeredIssuerNameRealm = Get-SPAuthenticationRealm
+                    }
+                    $registeredIssuerName = "$($params.RegisteredIssuerNameIdentifier)@$registeredIssuerNameRealm"
+
+                    $runParams.Add("RegisteredIssuerName", $registeredIssuerName)
+                    $runParams.Add("Certificate", $cert)
                 }
 
-                if ([string]::IsNullOrEmpty($params.RegisteredIssuerNameRealm))
-                {
-                    Write-Verbose -Message "RegisteredIssuerNameRealm is not specified, use Get-SPAuthenticationRealm instead."
-                    $registeredIssuerNameRealm = Get-SPAuthenticationRealm
-                }
-                $registeredIssuerName = "$($params.RegisteredIssuerNameIdentifier)@$registeredIssuerNameRealm"
-
-                $runParams = @{}
-                $runParams.Add("Name", $params.Name)
-                $runParams.Add("Description", $params.Description)
-                $runParams.Add("RegisteredIssuerName", $registeredIssuerName)
-                $runParams.Add("Certificate", $cert)
-                if ($params.IsTrustBroker -eq $true) {
-                    $runParams.Add("IsTrustBroker", $null)
-                }
                 New-SPTrustedSecurityTokenIssuer @runParams
-             }
+            }
         }
     }
     else
     {
         Write-Verbose "Removing SPTrustedSecurityTokenIssuer '$Name'"
         $null = Invoke-SPDscCommand -Credential $InstallAccount `
-                                    -Arguments $PSBoundParameters `
-                                    -ScriptBlock {
+            -Arguments $PSBoundParameters `
+            -ScriptBlock {
             $params = $args[0]
 
             $runParams = @{
                 Identity = $params.Name
-                Confirm = $false
+                Confirm  = $false
             }
             Remove-SPTrustedSecurityTokenIssuer @runParams
         }
@@ -256,7 +286,7 @@ function Set-TargetResource
 function Test-TargetResource
 {
     [CmdletBinding()]
-    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSDSCUseIdenticalMandatoryParametersForDSC", "", Justification  =  "Temporary workaround for issue introduced in PSSA v1.18")]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSDSCUseIdenticalMandatoryParametersForDSC", "", Justification = "Temporary workaround for issue introduced in PSSA v1.18")]
     [OutputType([Boolean])]
     param
     (
@@ -268,10 +298,9 @@ function Test-TargetResource
         [String]
         $Description,
 
-        [Parameter(Mandatory = $true)]
         [String]
         $RegisteredIssuerNameIdentifier,
-        
+
         [Parameter()]
         [String]
         $RegisteredIssuerNameRealm,
@@ -293,7 +322,7 @@ function Test-TargetResource
         $IsTrustBroker = $true,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [String]
         $Ensure = "Present",
 
@@ -305,32 +334,46 @@ function Test-TargetResource
     Write-Verbose -Message "Testing SPTrustedSecurityTokenIssuer '$Name' settings"
 
     if ($PSBoundParameters.ContainsKey("SigningCertificateThumbprint") -and `
-        $PSBoundParameters.ContainsKey("SigningCertificateFilePath"))
+            $PSBoundParameters.ContainsKey("SigningCertificateFilePath"))
     {
         throw ("Cannot use both parameters SigningCertificateThumbprint and SigningCertificateFilePath at the same time.")
         return
     }
 
     if ($PSBoundParameters.ContainsKey("SigningCertificateThumbprint") -and `
-        $PSBoundParameters.ContainsKey("MetadataEndPoint"))
+            $PSBoundParameters.ContainsKey("MetadataEndPoint"))
     {
         throw ("Cannot use both parameters SigningCertificateThumbprint and MetadataEndPoint at the same time.")
         return
     }
 
     if ($PSBoundParameters.ContainsKey("SigningCertificateFilePath") -and `
-        $PSBoundParameters.ContainsKey("MetadataEndPoint"))
+            $PSBoundParameters.ContainsKey("MetadataEndPoint"))
     {
         throw ("Cannot use both parameters SigningCertificateFilePath and MetadataEndPoint at the same time.")
         return
     }
 
     if ($PSBoundParameters.ContainsKey("SigningCertificateThumbprint") -eq $false -and `
-        $PSBoundParameters.ContainsKey("SigningCertificateFilePath") -eq $false -and `
-        $PSBoundParameters.ContainsKey("MetadataEndPoint") -eq $false)
+            $PSBoundParameters.ContainsKey("SigningCertificateFilePath") -eq $false -and `
+            $PSBoundParameters.ContainsKey("MetadataEndPoint") -eq $false)
     {
         throw ("At least one of the following parameters must be specified: " + `
-            "SigningCertificateThumbprint, SigningCertificateFilePath, MetadataEndPoint.")
+                "SigningCertificateThumbprint, SigningCertificateFilePath, MetadataEndPoint.")
+        return
+    }
+
+    if ($PSBoundParameters.ContainsKey("MetadataEndPoint") -and `
+            $PSBoundParameters.ContainsKey("RegisteredIssuerNameIdentifier"))
+    {
+        throw ("Cannot use both parameters MetadataEndPoint and RegisteredIssuerNameIdentifier at the same time.")
+        return
+    }
+
+    if ($PSBoundParameters.ContainsKey("MetadataEndPoint") -and `
+            $PSBoundParameters.ContainsKey("RegisteredIssuerNameRealm"))
+    {
+        throw ("Cannot use both parameters MetadataEndPoint and RegisteredIssuerNameRealm at the same time.")
         return
     }
 
@@ -340,8 +383,8 @@ function Test-TargetResource
     Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
 
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
-                                    -DesiredValues $PSBoundParameters `
-                                    -ValuesToCheck @("Ensure")
+        -DesiredValues $PSBoundParameters `
+        -ValuesToCheck @("Ensure")
 }
 
 Export-ModuleMember -Function *-TargetResource

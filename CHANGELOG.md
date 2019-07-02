@@ -1,5 +1,10 @@
 # Change log for SharePointDsc
 
+## Unreleased
+
+* SPTrustedSecurityTokenIssuer
+  * New resource for configuring OAuth trusts
+
 ## v3.5
 
 * SharePointDsc generic

@@ -3,16 +3,16 @@ param(
     [Parameter()]
     [string]
     $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
-                                         -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
-                                         -Resolve)
+            -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
+            -Resolve)
 )
 
 Import-Module -Name (Join-Path -Path $PSScriptRoot `
-                                -ChildPath "..\UnitTestHelper.psm1" `
-                                -Resolve)
+        -ChildPath "..\UnitTestHelper.psm1" `
+        -Resolve)
 
 $Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointCmdletModule `
-                                              -DscResource "SPTrustedSecurityTokenIssuer"
+    -DscResource "SPTrustedSecurityTokenIssuer"
 
 Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
     InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
@@ -22,7 +22,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         Mock -CommandName New-SPTrustedSecurityTokenIssuer -MockWith {
             $sptrust = [pscustomobject]@{
                 NameId = "22222222-2222-2222-2222-222222222222@bc23e3e4-5899-4b5d-9cee-27344da5deb5"
-                Name = $testParams.Name
+                Name   = $testParams.Name
             }
             $sptrust | Add-Member -Name Update -MemberType ScriptMethod -Value { }
             return $sptrust
@@ -97,6 +97,22 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             It "Should create the SPTrustedSecurityTokenIssuer using the custom realm" {
+                Set-TargetResource @testParams
+                Assert-MockCalled -CommandName "New-SPTrustedSecurityTokenIssuer"
+                Assert-MockCalled -Times 0 -CommandName "Get-SPAuthenticationRealm"
+            }
+        }
+
+        Context -Name "The SPTrustedSecurityTokenIssuer does not exist and should be created, using a MetadataEndPoint" -Fixture {
+            $testParams = @{
+                Name             = "HighTrust"
+                Description      = "HighTrust fake"
+                MetadataEndPoint = "https://accounts.accesscontrol.windows.net/TENANT.onmicrosoft.com/metadata/json/1"
+                IsTrustBroker    = $true
+                Ensure           = "Present"
+            }
+
+            It "Should create the SPTrustedSecurityTokenIssuer using a MetadataEndPoint" {
                 Set-TargetResource @testParams
                 Assert-MockCalled -CommandName "New-SPTrustedSecurityTokenIssuer"
                 Assert-MockCalled -Times 0 -CommandName "Get-SPAuthenticationRealm"
