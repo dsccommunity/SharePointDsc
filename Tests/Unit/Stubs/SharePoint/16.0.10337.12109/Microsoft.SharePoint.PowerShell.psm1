@@ -11179,7 +11179,7 @@ function Add-DatabaseToAvailabilityGroup {
    }
 
 
-  function New-SPTrustedSecurityTokenIssuer {
+   function New-SPTrustedSecurityTokenIssuer {
     [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='High')]
   param(
       [Parameter(Mandatory=$true, Position=0)]
@@ -11187,34 +11187,27 @@ function Add-DatabaseToAvailabilityGroup {
       [string]
       ${Name},
 
-      [ValidateNotNullOrEmpty()]
       [string]
       ${Description},
 
-      [ValidateNotNullOrEmpty()]
+      [Parameter(ParameterSetName='ManualConfigParameterSet', Mandatory=$true)]
       [string]
       ${RegisteredIssuerName},
 
-      [ValidateNotNullOrEmpty()]
       [switch]
       ${IsTrustBroker},
 
-      [Parameter(ParameterSetName='ImportCertificateParameterSet', Mandatory=$true)]
-      [ValidateNotNull()]
-      [object]
-      #[System.Security.Cryptography.X509Certificates.X509Certificate2]
+      [Parameter(ParameterSetName='ManualConfigParameterSet', Mandatory=$true)]
+      [Object]
       ${Certificate},
 
       [Parameter(ParameterSetName='MetadataEndPointParameterSet', Mandatory=$true)]
-      [ValidateNotNull()]
       [uri]
       ${MetadataEndPoint},
 
       [Parameter(ValueFromPipeline=$true)]
       [object]
       ${AssignmentCollection})
-
-
    }
 
 
