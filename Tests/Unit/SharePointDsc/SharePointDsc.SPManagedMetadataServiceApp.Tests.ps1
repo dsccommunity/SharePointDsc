@@ -23,7 +23,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         # Mocks for all contexts
         # SPMetadataServiceApplication Mocks
-        Mock -CommandName New-SPMetadataServiceApplication -MockWith { return @{} }
+        Mock -CommandName New-SPMetadataServiceApplication -MockWith { return @{ } }
         Mock -CommandName Set-SPMetadataServiceApplication -MockWith { }
 
         # SPMetadataServiceApplicationProxy Mocks
@@ -35,23 +35,23 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     -Name Update `
                     -Value { $Global:SPDscServiceProxyUpdateCalled = $true }  `
                     -PassThru -Force `
-                    | Add-Member -MemberType ScriptMethod `
+                | Add-Member -MemberType ScriptMethod `
                     -Name Delete `
-                    -Value {$Global:SPDscServiceProxyDeleteCalled = $true } `
+                    -Value { $Global:SPDscServiceProxyDeleteCalled = $true } `
                     -PassThru -Force
             )
         }
 
         Mock -CommandName Get-SPMetadataServiceApplicationProxy -MockWith {
             return @{
-                Name = "Managed Metadata Service App Proxy"
-                Properties              = @{
+                Name       = "Managed Metadata Service App Proxy"
+                Properties = @{
                     IsNPContentTypeSyndicationEnabled = $true
-                    IsContentTypePushdownEnabled = $true
+                    IsContentTypePushdownEnabled      = $true
                 }
             } | Add-Member -MemberType ScriptMethod `
                 -Name update `
-                -Value {$Global:SPDscMetaDataServiceApplicationProxyUpdateCalled = $true} `
+                -Value { $Global:SPDscMetaDataServiceApplicationProxyUpdateCalled = $true } `
                 -PassThru -Force
         }
 
@@ -63,9 +63,9 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     -Name Update `
                     -Value { $Global:SPDscServiceProxyUpdateCalled = $true }  `
                     -PassThru -Force `
-                    | Add-Member -MemberType ScriptMethod `
+                | Add-Member -MemberType ScriptMethod `
                     -Name Delete `
-                    -Value {$Global:SPDscServiceProxyDeleteCalled = $true } `
+                    -Value { $Global:SPDscServiceProxyDeleteCalled = $true } `
                     -PassThru -Force
             )
         }
@@ -99,23 +99,23 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 -Name AddTermStoreAdministrator `
                 -Value { $Global:SPDscAddUserCalled = $true }  `
                 -PassThru -Force `
-                | Add-Member -MemberType ScriptMethod `
+            | Add-Member -MemberType ScriptMethod `
                 -Name DeleteTermStoreAdministrator `
                 -Value { $Global:SPDscDeleteUserCalled = $true }  `
                 -PassThru -Force `
-                | Add-Member -MemberType ScriptMethod `
+            | Add-Member -MemberType ScriptMethod `
                 -Name CommitAll `
                 -Value { }  `
                 -PassThru -Force `
-                | Add-Member -MemberType ScriptMethod `
+            | Add-Member -MemberType ScriptMethod `
                 -Name AddLanguage `
                 -Value { $Global:SPDscAddLanguageCalled = $true }  `
                 -PassThru -Force `
-                | Add-Member -MemberType ScriptMethod `
+            | Add-Member -MemberType ScriptMethod `
                 -Name DeleteLanguage `
                 -Value { $Global:SPDscDeleteLanguageCalled = $true }  `
                 -PassThru -Force `
-                | Add-Member -MemberType ScriptMethod `
+            | Add-Member -MemberType ScriptMethod `
                 -Name CommitAll `
                 -Value { }  `
                 -PassThru -Force
@@ -163,18 +163,18 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         # Test contexts
         Context -Name "When no service applications exist in the current farm" -Fixture {
             $testParams = @{
-                Name                    = "Managed Metadata Service App"
-                ApplicationPool         = "SharePoint Service Applications"
-                DatabaseServer          = "databaseserver\instance"
-                DatabaseName            = "SP_MMS"
-                TermStoreAdministrators = @()
-                ContentTypeHubUrl       = ""
-                ProxyName               = "Proxy Name"
-                DefaultLanguage         = 1033
-                Languages               = @()
-                ContentTypePushdownEnabled = $true
+                Name                          = "Managed Metadata Service App"
+                ApplicationPool               = "SharePoint Service Applications"
+                DatabaseServer                = "databaseserver\instance"
+                DatabaseName                  = "SP_MMS"
+                TermStoreAdministrators       = @()
+                ContentTypeHubUrl             = ""
+                ProxyName                     = "Proxy Name"
+                DefaultLanguage               = 1033
+                Languages                     = @()
+                ContentTypePushdownEnabled    = $true
                 ContentTypeSyndicationEnabled = $true
-                Ensure                  = "Present"
+                Ensure                        = "Present"
             }
 
             Mock -CommandName Get-SPServiceApplication -MockWith { return $null }
@@ -249,8 +249,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                         ApplicationPool = @{
                             Name = $testParams.ApplicationPool
                         }
-                        Database = @{
-                            Name = $testParams.DatabaseName
+                        Database        = @{
+                            Name                 = $testParams.DatabaseName
                             NormalizedDataSource = $testParams.DatabaseServer
                         }
                     }
@@ -286,28 +286,28 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                         ApplicationPool = @{
                             Name = $testParams.ApplicationPool
                         }
-                        Database = @{
-                            Name = $testParams.DatabaseName
+                        Database        = @{
+                            Name                 = $testParams.DatabaseName
                             NormalizedDataSource = $testParams.DatabaseServer
                         }
                     }
                     $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value {
                         New-Object -TypeName "Object" |
-                            Add-Member -MemberType NoteProperty `
+                        Add-Member -MemberType NoteProperty `
                             -Name FullName `
                             -Value $getTypeFullName `
                             -PassThru |
-                            Add-Member -MemberType ScriptMethod `
+                        Add-Member -MemberType ScriptMethod `
                             -Name GetProperties `
                             -Value {
                             param($x)
                             return @(
                                 (New-Object -TypeName "Object" |
-                                        Add-Member -MemberType NoteProperty `
+                                    Add-Member -MemberType NoteProperty `
                                         -Name Name `
                                         -Value "DatabaseMapper" `
                                         -PassThru |
-                                        Add-Member -MemberType ScriptMethod `
+                                    Add-Member -MemberType ScriptMethod `
                                         -Name GetValue `
                                         -Value {
                                         param($x)
@@ -371,8 +371,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                         ApplicationPool = @{
                             Name = "Wrong App Pool Name"
                         }
-                        Database = @{
-                            Name = $testParams.DatabaseName
+                        Database        = @{
+                            Name                 = $testParams.DatabaseName
                             NormalizedDataSource = $testParams.DatabaseServer
                         }
                     }
@@ -408,28 +408,28 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                         ApplicationPool = @{
                             Name = "Wrong App Pool Name"
                         }
-                        Database = @{
-                            Name = $testParams.DatabaseName
+                        Database        = @{
+                            Name                 = $testParams.DatabaseName
                             NormalizedDataSource = $testParams.DatabaseServer
                         }
                     }
                     $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value {
                         New-Object -TypeName "Object" |
-                            Add-Member -MemberType NoteProperty `
+                        Add-Member -MemberType NoteProperty `
                             -Name FullName `
                             -Value $getTypeFullName `
                             -PassThru |
-                            Add-Member -MemberType ScriptMethod `
+                        Add-Member -MemberType ScriptMethod `
                             -Name GetProperties `
                             -Value {
                             param($x)
                             return @(
                                 (New-Object -TypeName "Object" |
-                                        Add-Member -MemberType NoteProperty `
+                                    Add-Member -MemberType NoteProperty `
                                         -Name Name `
                                         -Value "DatabaseMapper" `
                                         -PassThru |
-                                        Add-Member -MemberType ScriptMethod `
+                                    Add-Member -MemberType ScriptMethod `
                                         -Name GetValue `
                                         -Value {
                                         param($x)
@@ -507,8 +507,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                         ApplicationPool = @{
                             Name = $testParams.ApplicationPool
                         }
-                        Database = @{
-                            Name = $testParams.DatabaseName
+                        Database        = @{
+                            Name                 = $testParams.DatabaseName
                             NormalizedDataSource = $testParams.DatabaseServer
                         }
                     }
@@ -544,28 +544,28 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                         ApplicationPool = @{
                             Name = "Wrong App Pool Name"
                         }
-                        Database = @{
-                            Name = $testParams.DatabaseName
+                        Database        = @{
+                            Name                 = $testParams.DatabaseName
                             NormalizedDataSource = $testParams.DatabaseServer
                         }
                     }
                     $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value {
                         New-Object -TypeName "Object" |
-                            Add-Member -MemberType NoteProperty `
+                        Add-Member -MemberType NoteProperty `
                             -Name FullName `
                             -Value $getTypeFullName `
                             -PassThru |
-                            Add-Member -MemberType ScriptMethod `
+                        Add-Member -MemberType ScriptMethod `
                             -Name GetProperties `
                             -Value {
                             param($x)
                             return @(
                                 (New-Object -TypeName "Object" |
-                                        Add-Member -MemberType NoteProperty `
+                                    Add-Member -MemberType NoteProperty `
                                         -Name Name `
                                         -Value "DatabaseMapper" `
                                         -PassThru |
-                                        Add-Member -MemberType ScriptMethod `
+                                    Add-Member -MemberType ScriptMethod `
                                         -Name GetValue `
                                         -Value {
                                         param($x)
@@ -637,8 +637,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                         ApplicationPool = @{
                             Name = "Wrong App Pool Name"
                         }
-                        Database = @{
-                            Name = $testParams.DatabaseName
+                        Database        = @{
+                            Name                 = $testParams.DatabaseName
                             NormalizedDataSource = $testParams.DatabaseServer
                         }
                     }
@@ -674,28 +674,28 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                         ApplicationPool = @{
                             Name = "Wrong App Pool Name"
                         }
-                        Database = @{
-                            Name = $testParams.DatabaseName
+                        Database        = @{
+                            Name                 = $testParams.DatabaseName
                             NormalizedDataSource = $testParams.DatabaseServer
                         }
                     }
                     $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value {
                         New-Object -TypeName "Object" |
-                            Add-Member -MemberType NoteProperty `
+                        Add-Member -MemberType NoteProperty `
                             -Name FullName `
                             -Value $getTypeFullName `
                             -PassThru |
-                            Add-Member -MemberType ScriptMethod `
+                        Add-Member -MemberType ScriptMethod `
                             -Name GetProperties `
                             -Value {
                             param($x)
                             return @(
                                 (New-Object -TypeName "Object" |
-                                        Add-Member -MemberType NoteProperty `
+                                    Add-Member -MemberType NoteProperty `
                                         -Name Name `
                                         -Value "DatabaseMapper" `
                                         -PassThru |
-                                        Add-Member -MemberType ScriptMethod `
+                                    Add-Member -MemberType ScriptMethod `
                                         -Name GetValue `
                                         -Value {
                                         param($x)
@@ -737,9 +737,9 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                         -Name Update `
                         -Value { $Global:SPDscServiceProxyUpdateCalled = $true }  `
                         -PassThru -Force `
-                        | Add-Member -MemberType ScriptMethod `
+                    | Add-Member -MemberType ScriptMethod `
                         -Name Delete `
-                        -Value {$Global:SPDscServiceProxyDeleteCalled = $true } `
+                        -Value { $Global:SPDscServiceProxyDeleteCalled = $true } `
                         -PassThru -Force
                 )
             }
@@ -800,8 +800,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     ApplicationPool = @{
                         Name = $testParams.ApplicationPool
                     }
-                    Database = @{
-                        Name = $testParams.DatabaseName
+                    Database        = @{
+                        Name                 = $testParams.DatabaseName
                         NormalizedDataSource = $testParams.DatabaseServer
                     }
                 }
@@ -856,8 +856,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     ApplicationPool = @{
                         Name = $testParams.ApplicationPool
                     }
-                    Database = @{
-                        Name = $testParams.DatabaseName
+                    Database        = @{
+                        Name                 = $testParams.DatabaseName
                         NormalizedDataSource = $testParams.DatabaseServer
                     }
                 }
@@ -919,8 +919,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     ApplicationPool = @{
                         Name = $testParams.ApplicationPool
                     }
-                    Database = @{
-                        Name = $testParams.DatabaseName
+                    Database        = @{
+                        Name                 = $testParams.DatabaseName
                         NormalizedDataSource = $testParams.DatabaseServer
                     }
                 }
@@ -966,23 +966,23 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     -Name AddTermStoreAdministrator `
                     -Value { $Global:SPDscAddUserCalled = $true }  `
                     -PassThru -Force `
-                    | Add-Member -MemberType ScriptMethod `
+                | Add-Member -MemberType ScriptMethod `
                     -Name DeleteTermStoreAdministrator `
                     -Value { $Global:SPDscDeleteUserCalled = $true }  `
                     -PassThru -Force `
-                    | Add-Member -MemberType ScriptMethod `
+                | Add-Member -MemberType ScriptMethod `
                     -Name CommitAll `
                     -Value { }  `
                     -PassThru -Force `
-                    | Add-Member -MemberType ScriptMethod `
+                | Add-Member -MemberType ScriptMethod `
                     -Name AddLanguage `
                     -Value { $Global:SPDscAddLanguageCalled = $true }  `
                     -PassThru -Force `
-                    | Add-Member -MemberType ScriptMethod `
+                | Add-Member -MemberType ScriptMethod `
                     -Name DeleteLanguage `
                     -Value { $Global:SPDscDeleteLanguageCalled = $true }  `
                     -PassThru -Force `
-                    | Add-Member -MemberType ScriptMethod `
+                | Add-Member -MemberType ScriptMethod `
                     -Name CommitAll `
                     -Value { }  `
                     -PassThru -Force
@@ -1041,7 +1041,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                             FullName = $getTypeFullName
                         })
                 } -PassThru -Force `
-                    | Add-Member -MemberType ScriptMethod `
+                | Add-Member -MemberType ScriptMethod `
                     -Name IsConnected `
                     -Value {
                     param($x)
@@ -1059,9 +1059,9 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                         -Name Update `
                         -Value { $Global:SPDscServiceProxyUpdateCalled = $true }  `
                         -PassThru -Force `
-                        | Add-Member -MemberType ScriptMethod `
+                    | Add-Member -MemberType ScriptMethod `
                         -Name Delete `
-                        -Value {$Global:SPDscServiceProxyDeleteCalled = $true } `
+                        -Value { $Global:SPDscServiceProxyDeleteCalled = $true } `
                         -PassThru -Force
                 )
             }
@@ -1138,23 +1138,23 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     -Name AddTermStoreAdministrator `
                     -Value { $Global:SPDscAddUserCalled = $true }  `
                     -PassThru -Force `
-                    | Add-Member -MemberType ScriptMethod `
+                | Add-Member -MemberType ScriptMethod `
                     -Name DeleteTermStoreAdministrator `
                     -Value { $Global:SPDscDeleteUserCalled = $true }  `
                     -PassThru -Force `
-                    | Add-Member -MemberType ScriptMethod `
+                | Add-Member -MemberType ScriptMethod `
                     -Name CommitAll `
                     -Value { }  `
                     -PassThru -Force `
-                    | Add-Member -MemberType ScriptMethod `
+                | Add-Member -MemberType ScriptMethod `
                     -Name AddLanguage `
                     -Value { $Global:SPDscAddLanguageCalled = $true }  `
                     -PassThru -Force `
-                    | Add-Member -MemberType ScriptMethod `
+                | Add-Member -MemberType ScriptMethod `
                     -Name DeleteLanguage `
                     -Value { $Global:SPDscDeleteLanguageCalled = $true }  `
                     -PassThru -Force `
-                    | Add-Member -MemberType ScriptMethod `
+                | Add-Member -MemberType ScriptMethod `
                     -Name CommitAll `
                     -Value { }  `
                     -PassThru -Force
@@ -1212,7 +1212,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                             FullName = $getTypeFullName
                         })
                 } -PassThru -Force `
-                    | Add-Member -MemberType ScriptMethod `
+                | Add-Member -MemberType ScriptMethod `
                     -Name IsConnected `
                     -Value {
                     param($x)
@@ -1301,21 +1301,21 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     }
                     $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value {
                         New-Object -TypeName "Object" |
-                            Add-Member -MemberType NoteProperty `
+                        Add-Member -MemberType NoteProperty `
                             -Name FullName `
                             -Value $getTypeFullName `
                             -PassThru |
-                            Add-Member -MemberType ScriptMethod `
+                        Add-Member -MemberType ScriptMethod `
                             -Name GetProperties `
                             -Value {
                             param($x)
                             return @(
                                 (New-Object -TypeName "Object" |
-                                        Add-Member -MemberType NoteProperty `
+                                    Add-Member -MemberType NoteProperty `
                                         -Name Name `
                                         -Value "DatabaseMapper" `
                                         -PassThru |
-                                        Add-Member -MemberType ScriptMethod `
+                                    Add-Member -MemberType ScriptMethod `
                                         -Name GetValue `
                                         -Value {
                                         param($x)
@@ -1377,23 +1377,23 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     -Name AddTermStoreAdministrator `
                     -Value { $Global:SPDscAddUserCalled = $true }  `
                     -PassThru -Force `
-                    | Add-Member -MemberType ScriptMethod `
+                | Add-Member -MemberType ScriptMethod `
                     -Name DeleteTermStoreAdministrator `
                     -Value { $Global:SPDscDeleteUserCalled = $true }  `
                     -PassThru -Force `
-                    | Add-Member -MemberType ScriptMethod `
+                | Add-Member -MemberType ScriptMethod `
                     -Name CommitAll `
                     -Value { }  `
                     -PassThru -Force `
-                    | Add-Member -MemberType ScriptMethod `
+                | Add-Member -MemberType ScriptMethod `
                     -Name AddLanguage `
                     -Value { $Global:SPDscAddLanguageCalled = $true }  `
                     -PassThru -Force `
-                    | Add-Member -MemberType ScriptMethod `
+                | Add-Member -MemberType ScriptMethod `
                     -Name DeleteLanguage `
                     -Value { $Global:SPDscDeleteLanguageCalled = $true }  `
                     -PassThru -Force `
-                    | Add-Member -MemberType ScriptMethod `
+                | Add-Member -MemberType ScriptMethod `
                     -Name CommitAll `
                     -Value { }  `
                     -PassThru -Force
@@ -1406,9 +1406,9 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             $metadataServiceApplicationProxy = @{
-                Name = "Managed Metadata Service App Proxy"
-                Properties              = @{
-                    IsContentTypePushdownEnabled = $true
+                Name       = "Managed Metadata Service App Proxy"
+                Properties = @{
+                    IsContentTypePushdownEnabled      = $true
                     IsNPContentTypeSyndicationEnabled = $true
                 }
             } | Add-Member -MemberType ScriptMethod `
@@ -1570,21 +1570,21 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     }
                     $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value {
                         New-Object -TypeName "Object" |
-                            Add-Member -MemberType NoteProperty `
+                        Add-Member -MemberType NoteProperty `
                             -Name FullName `
                             -Value $getTypeFullName `
                             -PassThru |
-                            Add-Member -MemberType ScriptMethod `
+                        Add-Member -MemberType ScriptMethod `
                             -Name GetProperties `
                             -Value {
                             param($x)
                             return @(
                                 (New-Object -TypeName "Object" |
-                                        Add-Member -MemberType NoteProperty `
+                                    Add-Member -MemberType NoteProperty `
                                         -Name Name `
                                         -Value "DatabaseMapper" `
                                         -PassThru |
-                                        Add-Member -MemberType ScriptMethod `
+                                    Add-Member -MemberType ScriptMethod `
                                         -Name GetValue `
                                         -Value {
                                         param($x)
@@ -1626,9 +1626,9 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                         -Name Update `
                         -Value { $Global:SPDscServiceProxyUpdateCalled = $true }  `
                         -PassThru -Force `
-                        | Add-Member -MemberType ScriptMethod `
+                    | Add-Member -MemberType ScriptMethod `
                         -Name Delete `
-                        -Value {$Global:SPDscServiceProxyDeleteCalled = $true } `
+                        -Value { $Global:SPDscServiceProxyDeleteCalled = $true } `
                         -PassThru -Force
                 )
             }
@@ -1657,23 +1657,23 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     -Name AddTermStoreAdministrator `
                     -Value { $Global:SPDscAddUserCalled = $true }  `
                     -PassThru -Force `
-                    | Add-Member -MemberType ScriptMethod `
+                | Add-Member -MemberType ScriptMethod `
                     -Name DeleteTermStoreAdministrator `
                     -Value { $Global:SPDscDeleteUserCalled = $true }  `
                     -PassThru -Force `
-                    | Add-Member -MemberType ScriptMethod `
+                | Add-Member -MemberType ScriptMethod `
                     -Name CommitAll `
                     -Value { }  `
                     -PassThru -Force `
-                    | Add-Member -MemberType ScriptMethod `
+                | Add-Member -MemberType ScriptMethod `
                     -Name AddLanguage `
                     -Value { $Global:SPDscAddLanguageCalled = $true }  `
                     -PassThru -Force `
-                    | Add-Member -MemberType ScriptMethod `
+                | Add-Member -MemberType ScriptMethod `
                     -Name DeleteLanguage `
                     -Value { $Global:SPDscDeleteLanguageCalled = $true }  `
                     -PassThru -Force `
-                    | Add-Member -MemberType ScriptMethod `
+                | Add-Member -MemberType ScriptMethod `
                     -Name CommitAll `
                     -Value { }  `
                     -PassThru -Force

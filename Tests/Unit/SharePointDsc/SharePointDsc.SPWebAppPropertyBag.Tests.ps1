@@ -3,16 +3,16 @@ param(
     [Parameter()]
     [string]
     $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
-                                         -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
-                                         -Resolve)
+            -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
+            -Resolve)
 )
 
 Import-Module -Name (Join-Path -Path $PSScriptRoot `
-                                -ChildPath "..\UnitTestHelper.psm1" `
-                                -Resolve)
+        -ChildPath "..\UnitTestHelper.psm1" `
+        -Resolve)
 
 $Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointCmdletModule `
-                                              -DscResource "SPWebAppPropertyBag"
+    -DscResource "SPWebAppPropertyBag"
 
 Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
     InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
@@ -35,9 +35,9 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name 'The web application does not exist' -Fixture {
             $testParams = @{
-                WebAppUrl   = "http://sharepoint.contoso.com"
-                Key = 'PropertyKey'
-                Value = 'NewPropertyValue'
+                WebAppUrl = "http://sharepoint.contoso.com"
+                Key       = 'PropertyKey'
+                Value     = 'NewPropertyValue'
             }
             Mock -CommandName Get-SPWebApplication -MockWith {
                 return $null
@@ -56,10 +56,10 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name 'The web application property value does not match' -Fixture {
             $testParams = @{
-                WebAppUrl   = "http://sharepoint.contoso.com"
-                Key = 'PropertyKey'
-                Value = 'NewPropertyValue'
-                Ensure ='Present'
+                WebAppUrl = "http://sharepoint.contoso.com"
+                Key       = 'PropertyKey'
+                Value     = 'NewPropertyValue'
+                Ensure    = 'Present'
             }
 
             $result = Get-TargetResource @testParams
@@ -90,10 +90,10 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name 'The web application property exists, and the value match' -Fixture {
             $testParams = @{
-                WebAppUrl   = "http://sharepoint.contoso.com"
-                Key = 'PropertyKey'
-                Value = 'PropertyValue'
-                Ensure = 'Present'
+                WebAppUrl = "http://sharepoint.contoso.com"
+                Key       = 'PropertyKey'
+                Value     = 'PropertyValue'
+                Ensure    = 'Present'
             }
 
             $result = Get-TargetResource @testParams
@@ -114,10 +114,10 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name 'The web application property does not exist, and should be removed' -Fixture {
             $testParams = @{
-                WebAppUrl   = "http://sharepoint.contoso.com"
-                Key = 'NonExistingPropertyKey'
-                Value = 'PropertyValue'
-                Ensure = 'Absent'
+                WebAppUrl = "http://sharepoint.contoso.com"
+                Key       = 'NonExistingPropertyKey'
+                Value     = 'PropertyValue'
+                Ensure    = 'Absent'
             }
 
             $result = Get-TargetResource @testParams
@@ -138,10 +138,10 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name 'The web application property exists, and should not be' -Fixture {
             $testParams = @{
-                WebAppUrl   = "http://sharepoint.contoso.com"
-                Key = 'PropertyKey'
-                Value = 'PropertyValue'
-                Ensure = 'Absent'
+                WebAppUrl = "http://sharepoint.contoso.com"
+                Key       = 'PropertyKey'
+                Value     = 'PropertyValue'
+                Ensure    = 'Absent'
             }
 
             $result = Get-TargetResource @testParams

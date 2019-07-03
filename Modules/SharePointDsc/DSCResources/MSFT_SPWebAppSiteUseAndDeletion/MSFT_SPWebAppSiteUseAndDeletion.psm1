@@ -21,7 +21,7 @@ function Get-TargetResource
         $AutomaticallyDeleteUnusedSiteCollections,
 
         [Parameter()]
-        [ValidateRange(2,168)]
+        [ValidateRange(2, 168)]
         [System.UInt32]
         $UnusedSiteNotificationsBeforeDeletion,
 
@@ -33,8 +33,8 @@ function Get-TargetResource
     Write-Verbose -Message "Getting web application '$WebAppUrl' site use and deletion settings"
 
     $result = Invoke-SPDscCommand -Credential $InstallAccount `
-                                  -Arguments $PSBoundParameters `
-                                  -ScriptBlock {
+        -Arguments $PSBoundParameters `
+        -ScriptBlock {
         $params = $args[0]
 
         $nullReturn = @{
@@ -53,12 +53,12 @@ function Get-TargetResource
         catch
         {
             Write-Verbose -Message ("No local SharePoint farm was detected. Site Use and " + `
-                                    "Deletion settings will not be applied")
+                    "Deletion settings will not be applied")
             return $nullReturn
         }
 
         $wa = Get-SPWebApplication -Identity $params.WebAppUrl `
-                                   -ErrorAction SilentlyContinue
+            -ErrorAction SilentlyContinue
         if ($null -eq $wa)
         {
             return $nullReturn
@@ -100,7 +100,7 @@ function Set-TargetResource
         $AutomaticallyDeleteUnusedSiteCollections,
 
         [Parameter()]
-        [ValidateRange(2,168)]
+        [ValidateRange(2, 168)]
         [System.UInt32]
         $UnusedSiteNotificationsBeforeDeletion,
 
@@ -112,8 +112,8 @@ function Set-TargetResource
     Write-Verbose -Message "Setting web application '$WebAppUrl' Site Use and Deletion settings"
 
     Invoke-SPDscCommand -Credential $InstallAccount `
-                        -Arguments $PSBoundParameters `
-                        -ScriptBlock {
+        -Arguments $PSBoundParameters `
+        -ScriptBlock {
         $params = $args[0]
 
         try
@@ -123,7 +123,7 @@ function Set-TargetResource
         catch
         {
             throw ("No local SharePoint farm was detected. Site Use and Deletion settings " + `
-                   "will not be applied")
+                    "will not be applied")
         }
 
         $wa = Get-SPWebApplication -Identity $params.WebAppUrl -ErrorAction SilentlyContinue
@@ -143,28 +143,31 @@ function Set-TargetResource
             # Check schedule value
             switch ($job.Schedule.Description)
             {
-                "Daily"   {
+                "Daily"
+                {
                     if (($params.UnusedSiteNotificationsBeforeDeletion -lt 28) -or
                         ($params.UnusedSiteNotificationsBeforeDeletion -gt 168))
                     {
                         throw ("Value of UnusedSiteNotificationsBeforeDeletion has to be >28 and " + `
-                               "<168 when the schedule is set to daily")
+                                "<168 when the schedule is set to daily")
                     }
                 }
-                "Weekly"  {
+                "Weekly"
+                {
                     if (($params.UnusedSiteNotificationsBeforeDeletion -lt 4) -or
                         ($params.UnusedSiteNotificationsBeforeDeletion -gt 24))
                     {
                         throw ("Value of UnusedSiteNotificationsBeforeDeletion has to be >4 and " + `
-                               "<24 when the schedule is set to weekly")
+                                "<24 when the schedule is set to weekly")
                     }
                 }
-                "Monthly" {
+                "Monthly"
+                {
                     if (($params.UnusedSiteNotificationsBeforeDeletion -lt 2) -or
                         ($params.UnusedSiteNotificationsBeforeDeletion -gt 6))
                     {
                         throw ("Value of UnusedSiteNotificationsBeforeDeletion has to be >2 and " + `
-                               "<6 when the schedule is set to monthly")
+                                "<6 when the schedule is set to monthly")
                     }
                 }
             }
@@ -220,7 +223,7 @@ function Test-TargetResource
         $AutomaticallyDeleteUnusedSiteCollections,
 
         [Parameter()]
-        [ValidateRange(2,168)]
+        [ValidateRange(2, 168)]
         [System.UInt32]
         $UnusedSiteNotificationsBeforeDeletion,
 
@@ -237,7 +240,7 @@ function Test-TargetResource
     Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
 
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
-                                    -DesiredValues $PSBoundParameters
+        -DesiredValues $PSBoundParameters
 }
 
 Export-ModuleMember -Function *-TargetResource

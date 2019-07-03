@@ -30,12 +30,12 @@ function Get-TargetResource
     if ((Get-SPDscInstalledProductVersion).FileMajorPart -lt 16)
     {
         throw [Exception] ("Support for Project Server in SharePointDsc is only valid for " + `
-                           "SharePoint 2016 and 2019.")
+                "SharePoint 2016 and 2019.")
     }
 
     $result = Invoke-SPDscCommand -Credential $InstallAccount `
-                                  -Arguments @($PSBoundParameters, $PSScriptRoot) `
-                                  -ScriptBlock {
+        -Arguments @($PSBoundParameters, $PSScriptRoot) `
+        -ScriptBlock {
         $params = $args[0]
         $scriptRoot = $args[1]
 
@@ -45,8 +45,8 @@ function Get-TargetResource
         $webAppUrl = (Get-SPSite -Identity $params.Url).WebApplication.Url
         $useKerberos = -not (Get-SPAuthenticationProvider -WebApplication $webAppUrl -Zone Default).DisableKerberos
         $adminService = New-SPDscProjectServerWebService -PwaUrl $params.Url `
-                                                         -EndpointName Admin `
-                                                         -UseKerberos:$useKerberos
+            -EndpointName Admin `
+            -UseKerberos:$useKerberos
 
         $script:ProjectProfessionalMinBuildNumberValue = $null
         $script:ServerCurrencyValue = $null
@@ -59,11 +59,11 @@ function Get-TargetResource
         }
 
         return @{
-            Url = $params.Url
+            Url                               = $params.Url
             ProjectProfessionalMinBuildNumber = $script:ProjectProfessionalMinBuildNumberValue
-            ServerCurrency = $script:ServerCurrencyValue
-            EnforceServerCurrency = $script:EnforceServerCurrencyValue
-            InstallAccount = $params.InstallAccount
+            ServerCurrency                    = $script:ServerCurrencyValue
+            EnforceServerCurrency             = $script:EnforceServerCurrencyValue
+            InstallAccount                    = $params.InstallAccount
         }
     }
     return $result
@@ -101,12 +101,12 @@ function Set-TargetResource
     if ((Get-SPDscInstalledProductVersion).FileMajorPart -lt 16)
     {
         throw [Exception] ("Support for Project Server in SharePointDsc is only valid for " + `
-                           "SharePoint 2016 and 2019.")
+                "SharePoint 2016 and 2019.")
     }
 
     Invoke-SPDscCommand -Credential $InstallAccount `
-                        -Arguments @($PSBoundParameters, $PSScriptRoot) `
-                        -ScriptBlock {
+        -Arguments @($PSBoundParameters, $PSScriptRoot) `
+        -ScriptBlock {
         $params = $args[0]
         $scriptRoot = $args[1]
 
@@ -116,8 +116,8 @@ function Set-TargetResource
         $webAppUrl = (Get-SPSite -Identity $params.Url).WebApplication.Url
         $useKerberos = -not (Get-SPAuthenticationProvider -WebApplication $webAppUrl -Zone Default).DisableKerberos
         $adminService = New-SPDscProjectServerWebService -PwaUrl $params.Url `
-                                                         -EndpointName Admin `
-                                                         -UseKerberos:$useKerberos
+            -EndpointName Admin `
+            -UseKerberos:$useKerberos
 
         Use-SPDscProjectServerWebService -Service $adminService -ScriptBlock {
             if ($params.ContainsKey("ProjectProfessionalMinBuildNumber") -eq $true)
@@ -180,12 +180,12 @@ function Test-TargetResource
     Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
 
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
-                                    -DesiredValues $PSBoundParameters `
-                                    -ValuesToCheck @(
-                                        "ProjectProfessionalMinBuildNumber"
-                                        "ServerCurrency",
-                                        "EnforceServerCurrency"
-                                    )
+        -DesiredValues $PSBoundParameters `
+        -ValuesToCheck @(
+        "ProjectProfessionalMinBuildNumber"
+        "ServerCurrency",
+        "EnforceServerCurrency"
+    )
 }
 
 Export-ModuleMember -Function *-TargetResource

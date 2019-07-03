@@ -18,12 +18,12 @@ function Get-TargetResource
         $Level,
 
         [Parameter()]
-        [ValidateSet("Authoratative","Demoted")]
+        [ValidateSet("Authoratative", "Demoted")]
         [System.String]
         $Action,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure,
 
@@ -35,8 +35,8 @@ function Get-TargetResource
     Write-Verbose -Message "Getting Authoratative Page Setting for '$Path'"
 
     $result = Invoke-SPDscCommand -Credential $InstallAccount `
-                                  -Arguments $PSBoundParameters `
-                                  -ScriptBlock {
+        -Arguments $PSBoundParameters `
+        -ScriptBlock {
         $params = $args[0]
 
         $nullReturn = @{
@@ -60,9 +60,9 @@ function Get-TargetResource
         if ($params.Action -eq "Authoratative")
         {
             $queryAuthority = Get-SPEnterpriseSearchQueryAuthority -Identity $params.Path `
-                                                                   -Owner $searchOwner `
-                                                                   -SearchApplication $serviceApp `
-                                                                   -ErrorAction SilentlyContinue
+                -Owner $searchOwner `
+                -SearchApplication $serviceApp `
+                -ErrorAction SilentlyContinue
             if ($null -eq $queryAuthority)
             {
                 return $nullReturn
@@ -83,9 +83,9 @@ function Get-TargetResource
         else
         {
             $queryDemoted = $serviceApp | Get-SPEnterpriseSearchQueryDemoted -Identity $params.Path `
-                                                                             -Owner $searchOwner `
-                                                                             -SearchApplication $serviceApp `
-                                                                             -ErrorAction SilentlyContinue
+                -Owner $searchOwner `
+                -SearchApplication $serviceApp `
+                -ErrorAction SilentlyContinue
             if ($null -eq $queryDemoted)
             {
                 return $nullReturn
@@ -126,12 +126,12 @@ function Set-TargetResource
         $Level,
 
         [Parameter()]
-        [ValidateSet("Authoratative","Demoted")]
+        [ValidateSet("Authoratative", "Demoted")]
         [System.String]
         $Action,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure,
 
@@ -140,15 +140,15 @@ function Set-TargetResource
         $InstallAccount
     )
 
-     Write-Verbose -Message "Setting Authoratative Page Settings for '$Path'"
+    Write-Verbose -Message "Setting Authoratative Page Settings for '$Path'"
 
     $CurrentResults = Get-TargetResource @PSBoundParameters
 
     if ($CurrentResults.Ensure -eq "Absent" -and $Ensure -eq "Present")
     {
         $null = Invoke-SPDscCommand -Credential $InstallAccount `
-                                    -Arguments $PSBoundParameters `
-                                    -ScriptBlock {
+            -Arguments $PSBoundParameters `
+            -ScriptBlock {
             $params = $args[0]
 
             $serviceApp = Get-SPEnterpriseSearchServiceApplication -Identity $params.ServiceAppName
@@ -161,10 +161,10 @@ function Set-TargetResource
             }
             if ($params.Action -eq "Authoratative")
             {
-                 New-SPEnterpriseSearchQueryAuthority -Url $params.Path `
-                                                      -SearchApplication $serviceApp `
-                                                      -Owner $searchOwner `
-                                                      -Level $params.Level
+                New-SPEnterpriseSearchQueryAuthority -Url $params.Path `
+                    -SearchApplication $serviceApp `
+                    -Owner $searchOwner `
+                    -Level $params.Level
             }
             else
             {
@@ -175,8 +175,8 @@ function Set-TargetResource
     if ($CurrentResults.Ensure -eq "Present" -and $Ensure -eq "Present")
     {
         $null = Invoke-SPDscCommand -Credential $InstallAccount `
-                                    -Arguments $PSBoundParameters `
-                                    -ScriptBlock {
+            -Arguments $PSBoundParameters `
+            -ScriptBlock {
             $params = $args[0]
 
             $serviceApp = Get-SPEnterpriseSearchServiceApplication -Identity $params.ServiceAppName
@@ -191,17 +191,17 @@ function Set-TargetResource
             if ($params.Action -eq "Authoratative")
             {
                 Set-SPEnterpriseSearchQueryAuthority -Identity $params.ServiceAppName `
-                                                     -SearchApplication $serviceApp `
-                                                     -Owner $searchOwner `
-                                                     -Level $params.Level
+                    -SearchApplication $serviceApp `
+                    -Owner $searchOwner `
+                    -Level $params.Level
             }
         }
     }
     if ($Ensure -eq "Absent")
     {
         $null = Invoke-SPDscCommand -Credential $InstallAccount `
-                                    -Arguments $PSBoundParameters `
-                                    -ScriptBlock {
+            -Arguments $PSBoundParameters `
+            -ScriptBlock {
             $params = $args[0]
 
             $serviceApp = Get-SPEnterpriseSearchServiceApplication -Identity $params.ServiceAppName
@@ -215,16 +215,16 @@ function Set-TargetResource
             if ($params.Action -eq "Authoratative")
             {
                 Remove-SPEnterpriseSearchQueryAuthority -Identity $params.ServiceAppName `
-                                                        -SearchApplication $serviceApp `
-                                                        -Owner $searchOwner `
-                                                        -ErrorAction SilentlyContinue
+                    -SearchApplication $serviceApp `
+                    -Owner $searchOwner `
+                    -ErrorAction SilentlyContinue
             }
             else
             {
                 Remove-SPEnterpriseSearchQueryDemoted -Identity $params.ServiceAppName `
-                                                      -SearchApplication $serviceApp `
-                                                      -Owner $searchOwner `
-                                                      -ErrorAction SilentlyContinue
+                    -SearchApplication $serviceApp `
+                    -Owner $searchOwner `
+                    -ErrorAction SilentlyContinue
             }
         }
     }
@@ -251,12 +251,12 @@ function Test-TargetResource
         $Level,
 
         [Parameter()]
-        [ValidateSet("Authoratative","Demoted")]
+        [ValidateSet("Authoratative", "Demoted")]
         [System.String]
         $Action,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure,
 
@@ -279,30 +279,30 @@ function Test-TargetResource
         if ($Action -eq "Authoratative")
         {
             return Test-SPDscParameterState -CurrentValues $CurrentValues `
-                                        -DesiredValues $PSBoundParameters `
-                                        -ValuesToCheck @("ServiceAppName",
-                                                         "Path",
-                                                         "Level",
-                                                         "Action",
-                                                         "Ensure")
+                -DesiredValues $PSBoundParameters `
+                -ValuesToCheck @("ServiceAppName",
+                "Path",
+                "Level",
+                "Action",
+                "Ensure")
         }
         else
         {
             return Test-SPDscParameterState -CurrentValues $CurrentValues `
-                                        -DesiredValues $PSBoundParameters `
-                                        -ValuesToCheck @("ServiceAppName",
-                                                         "Path",
-                                                         "Action",
-                                                         "Ensure")
+                -DesiredValues $PSBoundParameters `
+                -ValuesToCheck @("ServiceAppName",
+                "Path",
+                "Action",
+                "Ensure")
         }
     }
     else
     {
         return Test-SPDscParameterState -CurrentValues $CurrentValues `
-                                        -DesiredValues $PSBoundParameters `
-                                        -ValuesToCheck @("ServiceAppName",
-                                                         "Action",
-                                                         "Ensure")
+            -DesiredValues $PSBoundParameters `
+            -ValuesToCheck @("ServiceAppName",
+            "Action",
+            "Ensure")
     }
 }
 

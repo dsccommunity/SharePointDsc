@@ -49,7 +49,7 @@ function Get-TargetResource
         $UseClassic = $false,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present",
 
@@ -61,8 +61,8 @@ function Get-TargetResource
     Write-Verbose -Message "Getting web application '$Name' config"
 
     $result = Invoke-SPDscCommand -Credential $InstallAccount `
-                                  -Arguments $PSBoundParameters `
-                                  -ScriptBlock {
+        -Arguments $PSBoundParameters `
+        -ScriptBlock {
         $params = $args[0]
 
         $wa = Get-SPWebApplication -Identity $params.Name -ErrorAction SilentlyContinue
@@ -155,7 +155,7 @@ function Set-TargetResource
         $UseClassic = $false,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present",
 
@@ -171,17 +171,17 @@ function Set-TargetResource
     if ($Ensure -eq "Present")
     {
         Invoke-SPDscCommand -Credential $InstallAccount `
-                            -Arguments $PSBoundParameters `
-                            -ScriptBlock {
+            -Arguments $PSBoundParameters `
+            -ScriptBlock {
             $params = $args[0]
 
             $wa = Get-SPWebApplication -Identity $params.Name -ErrorAction SilentlyContinue
             if ($null -eq $wa)
             {
                 $newWebAppParams = @{
-                    Name = $params.Name
+                    Name            = $params.Name
                     ApplicationPool = $params.ApplicationPool
-                    Url = $params.WebAppUrl
+                    Url             = $params.WebAppUrl
                 }
 
                 # Get a reference to the Administration WebService
@@ -204,13 +204,13 @@ function Set-TargetResource
                         if ($_.Exception.Message -like "*No matching accounts were found*")
                         {
                             throw ("The specified managed account was not found. Please make " + `
-                                   "sure the managed account exists before continuing.")
+                                    "sure the managed account exists before continuing.")
                             return
                         }
                         else
                         {
                             throw ("Error occurred. Web application was not created. Error " + `
-                                   "details: $($_.Exception.Message)")
+                                    "details: $($_.Exception.Message)")
                             return
                         }
                     }
@@ -259,8 +259,8 @@ function Set-TargetResource
     if ($Ensure -eq "Absent")
     {
         Invoke-SPDscCommand -Credential $InstallAccount `
-                            -Arguments $PSBoundParameters `
-                            -ScriptBlock {
+            -Arguments $PSBoundParameters `
+            -ScriptBlock {
             $params = $args[0]
 
             $wa = Get-SPWebApplication -Identity $params.Name -ErrorAction SilentlyContinue
@@ -323,7 +323,7 @@ function Test-TargetResource
         $UseClassic = $false,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present",
 
@@ -342,8 +342,8 @@ function Test-TargetResource
     Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
 
     $testReturn = Test-SPDscParameterState -CurrentValues $CurrentValues `
-                                                     -DesiredValues $PSBoundParameters `
-                                                     -ValuesToCheck @("Ensure")
+        -DesiredValues $PSBoundParameters `
+        -ValuesToCheck @("Ensure")
     return $testReturn
 }
 

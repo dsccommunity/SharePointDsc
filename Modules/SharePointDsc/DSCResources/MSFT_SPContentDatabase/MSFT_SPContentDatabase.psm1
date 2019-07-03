@@ -29,7 +29,7 @@ function Get-TargetResource
         $MaximumSiteCount,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present",
 
@@ -41,27 +41,27 @@ function Get-TargetResource
     Write-Verbose -Message "Getting content database configuration settings"
 
     $result = Invoke-SPDscCommand -Credential $InstallAccount `
-                                  -Arguments $PSBoundParameters `
-                                  -ScriptBlock {
+        -Arguments $PSBoundParameters `
+        -ScriptBlock {
         $params = $args[0]
 
         $cdb = Get-SPDatabase | Where-Object -FilterScript {
             $_.GetType().FullName -eq "Microsoft.SharePoint.Administration.SPContentDatabase" -and `
-            $_.Name -eq $params.Name
+                $_.Name -eq $params.Name
         }
 
         if ($null -eq $cdb)
         {
             # Database does not exist
             return @{
-                Name = $params.Name
-                DatabaseServer = $params.DatabaseServer
-                WebAppUrl = $params.WebAppUrl
-                Enabled = $params.Enabled
+                Name             = $params.Name
+                DatabaseServer   = $params.DatabaseServer
+                WebAppUrl        = $params.WebAppUrl
+                Enabled          = $params.Enabled
                 WarningSiteCount = $params.WarningSiteCount
                 MaximumSiteCount = $params.MaximumSiteCount
-                Ensure = "Absent"
-                InstallAccount = $params.InstallAccount
+                Ensure           = "Absent"
+                InstallAccount   = $params.InstallAccount
             }
         }
         else
@@ -77,14 +77,14 @@ function Get-TargetResource
             }
 
             $returnVal = @{
-                Name = $params.Name
-                DatabaseServer = $cdb.Server
-                WebAppUrl = $cdb.WebApplication.Url.Trim("/")
-                Enabled = $cdbenabled
+                Name             = $params.Name
+                DatabaseServer   = $cdb.Server
+                WebAppUrl        = $cdb.WebApplication.Url.Trim("/")
+                Enabled          = $cdbenabled
                 WarningSiteCount = $cdb.WarningSiteCount
                 MaximumSiteCount = $cdb.MaximumSiteCount
-                Ensure = "Present"
-                InstallAccount = $params.InstallAccount
+                Ensure           = "Present"
+                InstallAccount   = $params.InstallAccount
             }
             return $returnVal
         }
@@ -124,7 +124,7 @@ function Set-TargetResource
         $MaximumSiteCount,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present",
 
@@ -136,8 +136,8 @@ function Set-TargetResource
     Write-Verbose -Message "Setting content database configuration settings"
 
     Invoke-SPDscCommand -Credential $InstallAccount `
-                        -Arguments $PSBoundParameters `
-                        -ScriptBlock {
+        -Arguments $PSBoundParameters `
+        -ScriptBlock {
         $params = $args[0]
 
         # Use Get-SPDatabase instead of Get-SPContentDatabase because the Get-SPContentDatabase
@@ -165,8 +165,8 @@ function Set-TargetResource
                 if ($cdb.Server -ne $params.DatabaseServer)
                 {
                     throw ("Specified database server does not match the actual database " + `
-                           "server. This resource cannot move the database to a different " + `
-                           "SQL instance.")
+                            "server. This resource cannot move the database to a different " + `
+                            "SQL instance.")
                 }
 
                 # Check and change attached web application.
@@ -175,7 +175,7 @@ function Set-TargetResource
                 {
                     Dismount-SPContentDatabase $params.Name -Confirm:$false
 
-                    $newParams= @{}
+                    $newParams = @{ }
                     foreach ($param in $params.GetEnumerator())
                     {
                         $skipParams = @("Enabled", "Ensure", "InstallAccount", "MaximumSiteCount", "WebAppUrl")
@@ -255,9 +255,9 @@ function Set-TargetResource
                             $cdb.Status = [Microsoft.SharePoint.Administration.SPObjectStatus]::Disabled
                         }
                     }
-                 }
+                }
 
-                 # Check and change site count settings
+                # Check and change site count settings
                 if ($null -ne $params.WarningSiteCount -and $params.WarningSiteCount -ne $cdb.WarningSiteCount)
                 {
                     $cdb.WarningSiteCount = $params.WarningSiteCount
@@ -271,7 +271,7 @@ function Set-TargetResource
             else
             {
                 # Database does not exist, but should. Create/mount database
-                $newParams= @{}
+                $newParams = @{ }
                 foreach ($param in $params.GetEnumerator())
                 {
                     $skipParams = @("Enabled", "Ensure", "InstallAccount", "MaximumSiteCount", "WebAppUrl")
@@ -313,7 +313,7 @@ function Set-TargetResource
                 }
 
                 if ($params.ContainsKey("Enabled") -eq $true -and `
-                    $params.Enabled -ne $cdbenabled)
+                        $params.Enabled -ne $cdbenabled)
                 {
                     switch ($params.Enabled)
                     {
@@ -373,7 +373,7 @@ function Test-TargetResource
         $MaximumSiteCount,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present",
 
@@ -394,13 +394,13 @@ function Test-TargetResource
     if ($CurrentValues.DatabaseServer -ne $DatabaseServer)
     {
         Write-Verbose -Message ("Specified database server does not match the actual " + `
-                                "database server. This resource cannot move the database " + `
-                                "to a different SQL instance.")
+                "database server. This resource cannot move the database " + `
+                "to a different SQL instance.")
         return $false
     }
 
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
-                                    -DesiredValues $PSBoundParameters
+        -DesiredValues $PSBoundParameters
 }
 
 Export-ModuleMember -Function *-TargetResource

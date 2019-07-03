@@ -1,7 +1,7 @@
 function Get-TargetResource
 {
     [CmdletBinding()]
-    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSDSCUseIdenticalMandatoryParametersForDSC", "", Justification  =  "Temporary workaround for issue introduced in PSSA v1.18")]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSDSCUseIdenticalMandatoryParametersForDSC", "", Justification = "Temporary workaround for issue introduced in PSSA v1.18")]
     [OutputType([System.Collections.Hashtable])]
     param
     (
@@ -10,7 +10,7 @@ function Get-TargetResource
         $ServiceAppName,
 
         [Parameter(Mandatory = $true)]
-        [ValidateSet("Administrators","SharingPermissions")]
+        [ValidateSet("Administrators", "SharingPermissions")]
         [System.String]
         $SecurityType,
 
@@ -36,24 +36,24 @@ function Get-TargetResource
     if ($Members -and (($MembersToInclude) -or ($MembersToExclude)))
     {
         throw ("Cannot use the Members parameter together with the MembersToInclude or " + `
-               "MembersToExclude parameters")
+                "MembersToExclude parameters")
     }
 
     if ($null -eq $Members -and $null -eq $MembersToInclude -and $null -eq $MembersToExclude)
     {
         throw ("At least one of the following parameters must be specified: Members, " + `
-               "MembersToInclude, MembersToExclude")
+                "MembersToInclude, MembersToExclude")
     }
 
     $result = Invoke-SPDscCommand -Credential $InstallAccount `
-                                  -Arguments $PSBoundParameters `
-                                  -ScriptBlock {
+        -Arguments $PSBoundParameters `
+        -ScriptBlock {
         $params = $args[0]
 
         Write-Verbose -Message "Getting Service Application $($params.ServiceAppName)"
         $serviceApp = Get-SPServiceApplication -Name $params.ServiceAppName
 
-        $nullReturn =  @{
+        $nullReturn = @{
             ServiceAppName = ""
             SecurityType   = $params.SecurityType
             InstallAccount = $params.InstallAccount
@@ -95,8 +95,8 @@ function Get-TargetResource
                     if ($availablePerms -notcontains $accessLevel)
                     {
                         Write-Verbose -Message ("Unknown AccessLevel is used ($accessLevel). " + `
-                                                "Allowed values are '" + `
-                                                ($availablePerms -join "', '") + "'")
+                                "Allowed values are '" + `
+                            ($availablePerms -join "', '") + "'")
                         return $nullReturn
                     }
                 }
@@ -113,8 +113,8 @@ function Get-TargetResource
                     if ($availablePerms -notcontains $accessLevel)
                     {
                         Write-Verbose -Message ("Unknown AccessLevel is used ($accessLevel). " + `
-                                                "Allowed values are '" + `
-                                                ($availablePerms -join "', '") + "'")
+                                "Allowed values are '" + `
+                            ($availablePerms -join "', '") + "'")
                         return $nullReturn
                     }
                 }
@@ -131,8 +131,8 @@ function Get-TargetResource
                     if ($availablePerms -notcontains $accessLevel)
                     {
                         Write-Verbose -Message ("Unknown AccessLevel is used ($accessLevel). " + `
-                                                "Allowed values are '" + `
-                                                ($availablePerms -join "', '") + "'")
+                                "Allowed values are '" + `
+                            ($availablePerms -join "', '") + "'")
                         return $nullReturn
                     }
                 }
@@ -141,10 +141,12 @@ function Get-TargetResource
 
         switch ($params.SecurityType)
         {
-            "Administrators" {
+            "Administrators"
+            {
                 $security = $serviceApp | Get-SPServiceApplicationSecurity -Admin
-             }
-            "SharingPermissions" {
+            }
+            "SharingPermissions"
+            {
                 $security = $serviceApp | Get-SPServiceApplicationSecurity
             }
         }
@@ -200,7 +202,7 @@ function Get-TargetResource
 function Set-TargetResource
 {
     [CmdletBinding()]
-    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSDSCUseIdenticalMandatoryParametersForDSC", "", Justification  =  "Temporary workaround for issue introduced in PSSA v1.18")]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSDSCUseIdenticalMandatoryParametersForDSC", "", Justification = "Temporary workaround for issue introduced in PSSA v1.18")]
     param
     (
         [Parameter(Mandatory = $true)]
@@ -208,7 +210,7 @@ function Set-TargetResource
         $ServiceAppName,
 
         [Parameter(Mandatory = $true)]
-        [ValidateSet("Administrators","SharingPermissions")]
+        [ValidateSet("Administrators", "SharingPermissions")]
         [System.String]
         $SecurityType,
 
@@ -234,20 +236,20 @@ function Set-TargetResource
     if ($Members -and (($MembersToInclude) -or ($MembersToExclude)))
     {
         throw ("Cannot use the Members parameter together with the MembersToInclude or " + `
-               "MembersToExclude parameters")
+                "MembersToExclude parameters")
     }
 
     if ($null -eq $Members -and $null -eq $MembersToInclude -and $null -eq $MembersToExclude)
     {
         throw ("At least one of the following parameters must be specified: Members, " + `
-               "MembersToInclude, MembersToExclude")
+                "MembersToInclude, MembersToExclude")
     }
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
     Invoke-SPDscCommand -Credential $InstallAccount `
-                        -Arguments @($PSBoundParameters, $CurrentValues) `
-                        -ScriptBlock {
+        -Arguments @($PSBoundParameters, $CurrentValues) `
+        -ScriptBlock {
         $params = $args[0]
         $CurrentValues = $args[1]
 
@@ -288,7 +290,7 @@ function Set-TargetResource
                     if ($availablePerms -notcontains $accessLevel)
                     {
                         throw ("Unknown AccessLevel is used ($accessLevel). Allowed values are " + `
-                               "'" + ($availablePerms -join "', '") + "'")
+                                "'" + ($availablePerms -join "', '") + "'")
                     }
                 }
             }
@@ -304,7 +306,7 @@ function Set-TargetResource
                     if ($availablePerms -notcontains $accessLevel)
                     {
                         throw ("Unknown AccessLevel is used ($accessLevel). Allowed values are " + `
-                               "'" + ($availablePerms -join "', '") + "'")
+                                "'" + ($availablePerms -join "', '") + "'")
                     }
                 }
             }
@@ -312,10 +314,12 @@ function Set-TargetResource
 
         switch ($params.SecurityType)
         {
-            "Administrators" {
+            "Administrators"
+            {
                 $security = $serviceApp | Get-SPServiceApplicationSecurity -Admin
-             }
-            "SharingPermissions" {
+            }
+            "SharingPermissions"
+            {
                 $security = $serviceApp | Get-SPServiceApplicationSecurity
             }
         }
@@ -329,7 +333,7 @@ function Set-TargetResource
                 if ($desiredMember.Username -eq "{LocalFarm}")
                 {
                     $claim = New-SPClaimsPrincipal -Identity $localFarmEncodedClaim `
-                                                   -IdentityType EncodedClaim
+                        -IdentityType EncodedClaim
                 }
                 else
                 {
@@ -337,25 +341,25 @@ function Set-TargetResource
                     if ($isUser -eq $true)
                     {
                         $claim = New-SPClaimsPrincipal -Identity $desiredMember.Username `
-                                                       -IdentityType WindowsSamAccountName
+                            -IdentityType WindowsSamAccountName
                     }
                     else
                     {
                         $claim = New-SPClaimsPrincipal -Identity $desiredMember.Username `
-                                                       -IdentityType WindowsSecurityGroupName
+                            -IdentityType WindowsSecurityGroupName
                     }
                 }
 
                 if ($CurrentValues.Members.Username -contains $desiredMember.Username)
                 {
                     if ($null -ne (Compare-Object -ReferenceObject ($CurrentValues.Members | Where-Object -FilterScript {
-                            $_.Username -eq $desiredMember.Username
-                        } | Select-Object -First 1).AccessLevels -DifferenceObject $desiredMember.AccessLevels))
+                                    $_.Username -eq $desiredMember.Username
+                                } | Select-Object -First 1).AccessLevels -DifferenceObject $desiredMember.AccessLevels))
                     {
                         Grant-SPObjectSecurity -Identity $security `
-                                               -Principal $claim `
-                                               -Rights $desiredMember.AccessLevels `
-                                               -Replace
+                            -Principal $claim `
+                            -Rights $desiredMember.AccessLevels `
+                            -Replace
                     }
                 }
                 else
@@ -371,7 +375,7 @@ function Set-TargetResource
                     if ($currentMember.UserName -eq "{LocalFarm}")
                     {
                         $claim = New-SPClaimsPrincipal -Identity $localFarmEncodedClaim `
-                                                    -IdentityType EncodedClaim
+                            -IdentityType EncodedClaim
                     }
                     else
                     {
@@ -379,12 +383,12 @@ function Set-TargetResource
                         if ($isUser -eq $true)
                         {
                             $claim = New-SPClaimsPrincipal -Identity $currentMember.Username `
-                                                        -IdentityType WindowsSamAccountName
+                                -IdentityType WindowsSamAccountName
                         }
                         else
                         {
                             $claim = New-SPClaimsPrincipal -Identity $currentMember.Username `
-                                                        -IdentityType WindowsSecurityGroupName
+                                -IdentityType WindowsSecurityGroupName
                         }
                     }
                     Revoke-SPObjectSecurity -Identity $security -Principal $claim
@@ -399,7 +403,7 @@ function Set-TargetResource
                 if ($desiredMember.Username -eq "{LocalFarm}")
                 {
                     $claim = New-SPClaimsPrincipal -Identity $localFarmEncodedClaim `
-                                                   -IdentityType EncodedClaim
+                        -IdentityType EncodedClaim
                 }
                 else
                 {
@@ -407,32 +411,32 @@ function Set-TargetResource
                     if ($isUser -eq $true)
                     {
                         $claim = New-SPClaimsPrincipal -Identity $desiredMember.Username `
-                                                       -IdentityType WindowsSamAccountName
+                            -IdentityType WindowsSamAccountName
                     }
                     else
                     {
                         $claim = New-SPClaimsPrincipal -Identity $desiredMember.Username `
-                                                       -IdentityType WindowsSecurityGroupName
+                            -IdentityType WindowsSecurityGroupName
                     }
                 }
 
                 if ($CurrentValues.Members.Username -contains $desiredMember.Username)
                 {
                     if ($null -ne (Compare-Object -ReferenceObject ($CurrentValues.Members | Where-Object -FilterScript {
-                            $_.Username -eq $desiredMember.Username
-                        } | Select-Object -First 1).AccessLevels -DifferenceObject $desiredMember.AccessLevels))
+                                    $_.Username -eq $desiredMember.Username
+                                } | Select-Object -First 1).AccessLevels -DifferenceObject $desiredMember.AccessLevels))
                     {
                         Grant-SPObjectSecurity -Identity $security `
-                                               -Principal $claim `
-                                               -Rights $desiredMember.AccessLevels `
-                                               -Replace
+                            -Principal $claim `
+                            -Rights $desiredMember.AccessLevels `
+                            -Replace
                     }
                 }
                 else
                 {
                     Grant-SPObjectSecurity -Identity $security `
-                                           -Principal $claim `
-                                           -Rights $desiredMember.AccessLevels
+                        -Principal $claim `
+                        -Rights $desiredMember.AccessLevels
                 }
             }
         }
@@ -446,7 +450,7 @@ function Set-TargetResource
                     if ($excludeMember -eq "{LocalFarm}")
                     {
                         $claim = New-SPClaimsPrincipal -Identity $localFarmEncodedClaim `
-                                                       -IdentityType EncodedClaim
+                            -IdentityType EncodedClaim
                     }
                     else
                     {
@@ -454,12 +458,12 @@ function Set-TargetResource
                         if ($isUser -eq $true)
                         {
                             $claim = New-SPClaimsPrincipal -Identity $excludeMember `
-                                                           -IdentityType WindowsSamAccountName
+                                -IdentityType WindowsSamAccountName
                         }
                         else
                         {
                             $claim = New-SPClaimsPrincipal -Identity $excludeMember `
-                                                           -IdentityType WindowsSecurityGroupName
+                                -IdentityType WindowsSecurityGroupName
                         }
                     }
                     Revoke-SPObjectSecurity -Identity $security -Principal $claim
@@ -469,11 +473,13 @@ function Set-TargetResource
 
         switch ($params.SecurityType)
         {
-            "Administrators" {
+            "Administrators"
+            {
                 $security = $serviceApp | Set-SPServiceApplicationSecurity -ObjectSecurity $security `
-                                                                           -Admin
-             }
-            "SharingPermissions" {
+                    -Admin
+            }
+            "SharingPermissions"
+            {
                 $security = $serviceApp | Set-SPServiceApplicationSecurity -ObjectSecurity $security
             }
         }
@@ -483,7 +489,7 @@ function Set-TargetResource
 function Test-TargetResource
 {
     [CmdletBinding()]
-    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSDSCUseIdenticalMandatoryParametersForDSC", "", Justification  =  "Temporary workaround for issue introduced in PSSA v1.18")]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSDSCUseIdenticalMandatoryParametersForDSC", "", Justification = "Temporary workaround for issue introduced in PSSA v1.18")]
     [OutputType([System.Boolean])]
     param
     (
@@ -492,7 +498,7 @@ function Test-TargetResource
         $ServiceAppName,
 
         [Parameter(Mandatory = $true)]
-        [ValidateSet("Administrators","SharingPermissions")]
+        [ValidateSet("Administrators", "SharingPermissions")]
         [System.String]
         $SecurityType,
 
@@ -526,11 +532,11 @@ function Test-TargetResource
     }
 
     $result = Invoke-SPDscCommand -Credential $InstallAccount `
-                        -Arguments @($PSBoundParameters, $CurrentValues, $PSScriptRoot) `
-                        -ScriptBlock {
-        $params        = $args[0]
+        -Arguments @($PSBoundParameters, $CurrentValues, $PSScriptRoot) `
+        -ScriptBlock {
+        $params = $args[0]
         $CurrentValues = $args[1]
-        $ScriptRoot    = $args[2]
+        $ScriptRoot = $args[2]
 
         $relPath = "..\..\Modules\SharePointDsc.ServiceAppSecurity\SPServiceAppSecurity.psm1"
         Import-Module (Join-Path -Path $ScriptRoot -ChildPath $relPath -Resolve)
@@ -538,10 +544,12 @@ function Test-TargetResource
         $serviceApp = Get-SPServiceApplication -Name $params.ServiceAppName
         switch ($params.SecurityType)
         {
-            "Administrators" {
+            "Administrators"
+            {
                 $security = $serviceApp | Get-SPServiceApplicationSecurity -Admin
             }
-            "SharingPermissions" {
+            "SharingPermissions"
+            {
                 $security = $serviceApp | Get-SPServiceApplicationSecurity
             }
         }
@@ -570,7 +578,7 @@ function Test-TargetResource
             }
 
             $differences = Compare-Object -ReferenceObject $CurrentValues.Members.Username `
-                                            -DifferenceObject $params.Members.Username
+                -DifferenceObject $params.Members.Username
 
             if ($null -eq $differences)
             {
@@ -578,8 +586,8 @@ function Test-TargetResource
                 foreach ($currentMember in $CurrentValues.Members)
                 {
                     $expandedAccessLevels = Expand-AccessLevel -Security $security -AccessLevels ($params.Members | Where-Object -FilterScript {
-                        $_.Username -eq $currentMember.Username
-                    } | Select-Object -First 1).AccessLevels
+                            $_.Username -eq $currentMember.Username
+                        } | Select-Object -First 1).AccessLevels
                     if ($null -ne (Compare-Object -DifferenceObject $currentMember.AccessLevels -ReferenceObject $expandedAccessLevels))
                     {
                         Write-Verbose -Message "$($currentMember.Username) has incorrect permission level. Test failed."
@@ -612,8 +620,8 @@ function Test-TargetResource
                     $expandedAccessLevels = Expand-AccessLevel -Security $security -AccessLevels $member.AccessLevels
 
                     if ($null -ne (Compare-Object -DifferenceObject $expandedAccessLevels -ReferenceObject ($CurrentValues.Members | Where-Object -FilterScript {
-                            $_.Username -eq $member.Username
-                        } | Select-Object -First 1).AccessLevels))
+                                    $_.Username -eq $member.Username
+                                } | Select-Object -First 1).AccessLevels))
                     {
                         Write-Verbose -Message "$($member.Username) has incorrect permission level. Test failed."
                         return $false

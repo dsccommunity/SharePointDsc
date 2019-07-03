@@ -2,7 +2,7 @@
 
 **Example**
 
-    SPOfficeOnlineServerBinding OosBinding 
+    SPOfficeOnlineServerBinding OosBinding
     {
         Zone                 = "internal-https"
         DnsName              = "webapps.contoso.com"

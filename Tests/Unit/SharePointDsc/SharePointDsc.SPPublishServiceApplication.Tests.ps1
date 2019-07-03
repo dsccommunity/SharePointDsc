@@ -15,7 +15,7 @@ Import-Module (Join-Path $RepoRoot "Modules\SharePointDsc\DSCResources\$ModuleNa
 Describe "SPPublishServiceApplication - SharePoint Build $((Get-Item $SharePointCmdletModule).Directory.BaseName)" {
     InModuleScope $ModuleName {
         $testParams = @{
-            Name = "Managed Metadata"
+            Name   = "Managed Metadata"
             Ensure = "Present"
         }
         Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..\..).Path) "Modules\SharePointDsc")
@@ -33,7 +33,7 @@ Describe "SPPublishServiceApplication - SharePoint Build $((Get-Item $SharePoint
             Mock -CommandName Get-SPServiceApplication {
                 $spServiceApp = [pscustomobject]@{
                     Name = $testParams.Name
-                    Uri = $null
+                    Uri  = $null
                 }
                 return $spServiceApp
             }
@@ -53,8 +53,8 @@ Describe "SPPublishServiceApplication - SharePoint Build $((Get-Item $SharePoint
         Context -Name "The service application is not published but should be" {
             Mock -CommandName Get-SPServiceApplication {
                 $spServiceApp = [pscustomobject]@{
-                    Name = $testParams.Name
-                    Uri = "urn:schemas-microsoft-com:sharepoint:service:mmsid"
+                    Name   = $testParams.Name
+                    Uri    = "urn:schemas-microsoft-com:sharepoint:service:mmsid"
                     Shared = $false
                 }
                 return $spServiceApp
@@ -78,8 +78,8 @@ Describe "SPPublishServiceApplication - SharePoint Build $((Get-Item $SharePoint
         Context -Name "The service application is published and should be" {
             Mock -CommandName Get-SPServiceApplication {
                 $spServiceApp = [pscustomobject]@{
-                    Name = $testParams.Name
-                    Uri = "urn:schemas-microsoft-com:sharepoint:service:mmsid"
+                    Name   = $testParams.Name
+                    Uri    = "urn:schemas-microsoft-com:sharepoint:service:mmsid"
                     Shared = $true
                 }
                 return $spServiceApp
@@ -95,7 +95,7 @@ Describe "SPPublishServiceApplication - SharePoint Build $((Get-Item $SharePoint
         }
 
         Context -Name "The service application specified does not exist" {
-            Mock -CommandName Get-SPServiceApplication  { return $null }
+            Mock -CommandName Get-SPServiceApplication { return $null }
 
             It "Should return absent from the get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Absent"
@@ -115,8 +115,8 @@ Describe "SPPublishServiceApplication - SharePoint Build $((Get-Item $SharePoint
         Context -Name "The service application is not published and should not be" {
             Mock -CommandName Get-SPServiceApplication {
                 $spServiceApp = [pscustomobject]@{
-                    Name = $testParams.Name
-                    Uri = "urn:schemas-microsoft-com:sharepoint:service:mmsid"
+                    Name   = $testParams.Name
+                    Uri    = "urn:schemas-microsoft-com:sharepoint:service:mmsid"
                     Shared = $false
                 }
                 return $spServiceApp
@@ -134,8 +134,8 @@ Describe "SPPublishServiceApplication - SharePoint Build $((Get-Item $SharePoint
         Context -Name "The service application is published and should not be" {
             Mock -CommandName Get-SPServiceApplication {
                 $spServiceApp = [pscustomobject]@{
-                    Name = $testParams.Name
-                    Uri = "urn:schemas-microsoft-com:sharepoint:service:mmsid"
+                    Name   = $testParams.Name
+                    Uri    = "urn:schemas-microsoft-com:sharepoint:service:mmsid"
                     Shared = $true
                 }
                 return $spServiceApp

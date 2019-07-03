@@ -80,7 +80,7 @@ function Get-TargetResource
                 $useTagsAndNotes += $user
             }
             if (($securityEntry.AllowedRights.ToString() -like "*CreatePersonalSite*") `
-                -and ($securityEntry.AllowedRights.ToString() -like "*UseMicrobloggingAndFollowing*"))
+                    -and ($securityEntry.AllowedRights.ToString() -like "*UseMicrobloggingAndFollowing*"))
             {
                 $createPersonalSite += $user
             }
@@ -143,12 +143,12 @@ function Set-TargetResource
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
     if ($CurrentValues.CreatePersonalSite -contains "NT AUTHORITY\Authenticated Users" `
-        -or $CurrentValues.FollowAndEditProfile -contains "NT AUTHORITY\Authenticated Users" `
-        -or $CurrentValues.UseTagsAndNotes -contains "NT AUTHORITY\Authenticated Users")
+            -or $CurrentValues.FollowAndEditProfile -contains "NT AUTHORITY\Authenticated Users" `
+            -or $CurrentValues.UseTagsAndNotes -contains "NT AUTHORITY\Authenticated Users")
     {
         Write-Warning -Message ("Permissions were found for the non-claims identity " + `
-                                "'NT AUTHORITY\Authenticated Users'. This will be removed as " + `
-                                "identies on service app proxy permissions should be claims based.")
+                "'NT AUTHORITY\Authenticated Users'. This will be removed as " + `
+                "identies on service app proxy permissions should be claims based.")
 
         Invoke-SPDscCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
             $params = $args[0]
@@ -187,7 +187,7 @@ function Set-TargetResource
         foreach ($permission in $permissionsToUpdate.Keys)
         {
             $permissionsDiff = Compare-Object -ReferenceObject $CurrentValues.$permission `
-                                              -DifferenceObject  $params.$permission
+                -DifferenceObject  $params.$permission
 
             $everyoneDiff = $permissionsDiff | Where-Object -FilterScript { $_.InputObject -eq "Everyone" }
             $noneDiff = $permissionsDiff | Where-Object -FilterScript { $_.InputObject -eq "None" }
@@ -203,25 +203,25 @@ function Set-TargetResource
                         if ($isUser -eq $true)
                         {
                             $claim = New-SPClaimsPrincipal -Identity $user `
-                                                           -IdentityType WindowsSamAccountName
+                                -IdentityType WindowsSamAccountName
                         }
                         else
                         {
                             $claim = New-SPClaimsPrincipal -Identity $user `
-                                                           -IdentityType WindowsSecurityGroupName
+                                -IdentityType WindowsSecurityGroupName
                         }
                         Revoke-SPObjectSecurity -Identity $security `
-                                                -Principal $claim `
-                                                -Rights $permissionsToUpdate.$permission
+                            -Principal $claim `
+                            -Rights $permissionsToUpdate.$permission
                     }
                     elseif ($user -eq "Everyone")
                     {
                         # Revoke the all user permissions
                         $allClaimsUsersClaim = New-SPClaimsPrincipal -Identity "c:0(.s|true" `
-                                                                     -IdentityType EncodedClaim
+                            -IdentityType EncodedClaim
                         Revoke-SPObjectSecurity -Identity $security `
-                                                -Principal $allClaimsUsersClaim `
-                                                -Rights $permissionsToUpdate.$permission
+                            -Principal $allClaimsUsersClaim `
+                            -Rights $permissionsToUpdate.$permission
                     }
                 }
             }
@@ -237,24 +237,24 @@ function Set-TargetResource
                         if ($isUser -eq $true)
                         {
                             $claim = New-SPClaimsPrincipal -Identity $user `
-                                                           -IdentityType WindowsSamAccountName
+                                -IdentityType WindowsSamAccountName
                         }
                         else
                         {
                             $claim = New-SPClaimsPrincipal -Identity $user `
-                                                           -IdentityType WindowsSecurityGroupName
+                                -IdentityType WindowsSecurityGroupName
                         }
                         Revoke-SPObjectSecurity -Identity $security `
-                                                -Principal $claim `
-                                                -Rights $permissionsToUpdate.$permission
+                            -Principal $claim `
+                            -Rights $permissionsToUpdate.$permission
                     }
                 }
 
                 $allClaimsUsersClaim = New-SPClaimsPrincipal -Identity "c:0(.s|true" `
-                                                             -IdentityType EncodedClaim
+                    -IdentityType EncodedClaim
                 Grant-SPObjectSecurity -Identity $security `
-                                       -Principal $allClaimsUsersClaim `
-                                       -Rights $permissionsToUpdate.$permission
+                    -Principal $allClaimsUsersClaim `
+                    -Rights $permissionsToUpdate.$permission
             }
             else
             {
@@ -262,32 +262,32 @@ function Set-TargetResource
                 foreach ($permissionChange in $permissionsDiff)
                 {
                     if ($permissionChange.InputObject -ne "Everyone" -and `
-                        $permissionChange.InputObject -ne "None")
+                            $permissionChange.InputObject -ne "None")
                     {
                         $isUser = Test-SPDscIsADUser -IdentityName $permissionChange.InputObject
                         if ($isUser -eq $true)
                         {
                             $claim = New-SPClaimsPrincipal -Identity $permissionChange.InputObject `
-                                                           -IdentityType WindowsSamAccountName
+                                -IdentityType WindowsSamAccountName
                         }
                         else
                         {
                             $claim = New-SPClaimsPrincipal -Identity $permissionChange.InputObject `
-                                                           -IdentityType WindowsSecurityGroupName
+                                -IdentityType WindowsSecurityGroupName
                         }
                         if ($permissionChange.SideIndicator -eq "=>")
                         {
                             # Grant permission to the identity
                             Grant-SPObjectSecurity -Identity $security `
-                                                   -Principal $claim `
-                                                   -Rights $permissionsToUpdate.$permission
+                                -Principal $claim `
+                                -Rights $permissionsToUpdate.$permission
                         }
                         if ($permissionChange.SideIndicator -eq "<=")
                         {
                             # Revoke permission for the identity
                             Revoke-SPObjectSecurity -Identity $security `
-                                                    -Principal $claim `
-                                                    -Rights $permissionsToUpdate.$permission
+                                -Principal $claim `
+                                -Rights $permissionsToUpdate.$permission
                         }
                     }
                 }
@@ -295,8 +295,8 @@ function Set-TargetResource
         }
 
         Set-SPProfileServiceApplicationSecurity -Identity $security `
-                                                -ProfileServiceApplicationProxy $proxy `
-                                                -Confirm:$false
+            -ProfileServiceApplicationProxy $proxy `
+            -Confirm:$false
     }
 }
 
@@ -337,10 +337,10 @@ function Test-TargetResource
     Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
 
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
-                                        -DesiredValues $PSBoundParameters `
-                                        -ValuesToCheck @("CreatePersonalSite", `
-                                                         "FollowAndEditProfile", `
-                                                         "UseTagsAndNotes")
+        -DesiredValues $PSBoundParameters `
+        -ValuesToCheck @("CreatePersonalSite", `
+            "FollowAndEditProfile", `
+            "UseTagsAndNotes")
 }
 
 function Confirm-SPDscUpaPermissionsConfig()
@@ -361,7 +361,7 @@ function Confirm-SPDscUpaPermissionsConfig()
         if (($Parameters.$_ -contains "Everyone") -and ($Parameters.$_ -contains "None"))
         {
             throw ("You can not specify 'Everyone' and 'None' in the same property. " + `
-                   "Check the value for the '$_' property on this resource.")
+                    "Check the value for the '$_' property on this resource.")
         }
     }
 }

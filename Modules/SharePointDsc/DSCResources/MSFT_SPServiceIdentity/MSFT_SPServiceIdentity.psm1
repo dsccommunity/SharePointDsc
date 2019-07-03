@@ -29,8 +29,8 @@ function Get-TargetResource
         else
         {
             $serviceInstance = Get-SPServiceInstance -Server $env:computername | Where-Object {
-                                    $_.TypeName -eq $params.Name
-                               }
+                $_.TypeName -eq $params.Name
+            }
 
             if ($null -eq $serviceInstance.service.processidentity)
             {
@@ -42,10 +42,18 @@ function Get-TargetResource
 
         switch ($processIdentity.CurrentIdentityType)
         {
-            "LocalSystem"    { $ManagedAccount = "LocalSystem" }
-            "NetworkService" { $ManagedAccount = "NetworkService" }
-            "LocalService"   { $ManagedAccount = "LocalService" }
-            Default          { $ManagedAccount = $processIdentity.Username }
+            "LocalSystem"
+            { $ManagedAccount = "LocalSystem"
+            }
+            "NetworkService"
+            { $ManagedAccount = "NetworkService"
+            }
+            "LocalService"
+            { $ManagedAccount = "LocalService"
+            }
+            Default
+            { $ManagedAccount = $processIdentity.Username
+            }
         }
 
         return @{
@@ -87,8 +95,8 @@ function Set-TargetResource
         else
         {
             $serviceInstance = Get-SPServiceInstance -Server $env:COMPUTERNAME | Where-Object {
-                                    $_.TypeName -eq $params.Name
-                               }
+                $_.TypeName -eq $params.Name
+            }
             if ($null -eq $serviceInstance)
             {
                 throw [System.Exception] "Unable to locate service $($params.Name)"
@@ -103,15 +111,15 @@ function Set-TargetResource
         }
 
         if ($params.ManagedAccount -eq "LocalSystem" -or `
-            $params.ManagedAccount -eq "LocalService" -or `
-            $params.ManagedAccount -eq "NetworkService")
+                $params.ManagedAccount -eq "LocalService" -or `
+                $params.ManagedAccount -eq "NetworkService")
         {
             $processIdentity.CurrentIdentityType = $params.ManagedAccount
         }
         else
         {
             $managedAccount = Get-SPManagedAccount -Identity $params.ManagedAccount `
-                                                   -ErrorAction SilentlyContinue
+                -ErrorAction SilentlyContinue
             if ($null -eq $managedAccount)
             {
                 throw [System.Exception] "Unable to locate Managed Account $($params.ManagedAccount)"

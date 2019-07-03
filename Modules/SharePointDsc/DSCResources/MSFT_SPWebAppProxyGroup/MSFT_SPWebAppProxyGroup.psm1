@@ -20,34 +20,34 @@ function Get-TargetResource
     Write-Verbose -Message "Getting $WebAppUrl Service Proxy Group Association"
 
     $result = Invoke-SPDscCommand -Credential $InstallAccount `
-                                  -Arguments $PSBoundParameters `
-                                  -ScriptBlock {
+        -Arguments $PSBoundParameters `
+        -ScriptBlock {
         $params = $args[0]
 
         $WebApp = get-spwebapplication $params.WebAppUrl
         if (!$WebApp)
         {
-             return  @{
+            return  @{
                 WebAppUrl            = $null
                 ServiceAppProxyGroup = $null
                 InstallAccount       = $InstallAccount
-             }
+            }
         }
 
-         if ($WebApp.ServiceApplicationProxyGroup.friendlyname -eq "[default]")
-         {
-             $ServiceAppProxyGroup = "Default"
-         }
-         else
-         {
-             $ServiceAppProxyGroup = $WebApp.ServiceApplicationProxyGroup.name
-         }
+        if ($WebApp.ServiceApplicationProxyGroup.friendlyname -eq "[default]")
+        {
+            $ServiceAppProxyGroup = "Default"
+        }
+        else
+        {
+            $ServiceAppProxyGroup = $WebApp.ServiceApplicationProxyGroup.name
+        }
 
-         return @{
-             WebAppUrl            = $params.WebAppUrl
-             ServiceAppProxyGroup = $ServiceAppProxyGroup
-             InstallAccount       = $InstallAccount
-         }
+        return @{
+            WebAppUrl            = $params.WebAppUrl
+            ServiceAppProxyGroup = $ServiceAppProxyGroup
+            InstallAccount       = $InstallAccount
+        }
     }
 
     return $result
@@ -74,17 +74,17 @@ function Set-TargetResource
     Write-Verbose -Message "Setting $WebAppUrl Service Proxy Group Association"
 
     Invoke-SPDscCommand -Credential $InstallAccount `
-                        -Arguments $PSBoundParameters `
-                        -ScriptBlock {
+        -Arguments $PSBoundParameters `
+        -ScriptBlock {
         $params = $args[0]
 
         if ($params.ServiceAppProxyGroup -eq "Default")
         {
-                $params.ServiceAppProxyGroup = "[default]"
+            $params.ServiceAppProxyGroup = "[default]"
         }
 
         Set-SPWebApplication -Identity $params.WebAppUrl `
-                             -ServiceApplicationProxyGroup $params.ServiceAppProxyGroup
+            -ServiceApplicationProxyGroup $params.ServiceAppProxyGroup
     }
 }
 

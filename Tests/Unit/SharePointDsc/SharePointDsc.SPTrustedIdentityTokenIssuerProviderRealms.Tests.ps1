@@ -2,16 +2,16 @@
 param (
     [Parameter()]
     [string]$SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
-                                                 -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
-                                                 -Resolve)
+            -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
+            -Resolve)
 )
 
 Import-Module -Name (Join-Path -Path $PSScriptRoot `
-                               -ChildPath "..\UnitTestHelper.psm1" `
-                               -Resolve)
+        -ChildPath "..\UnitTestHelper.psm1" `
+        -Resolve)
 
 $Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointCmdletModule `
-                                              -DscResource "SPTrustedIdentityTokenIssuerProviderRealms"
+    -DscResource "SPTrustedIdentityTokenIssuerProviderRealms"
 
 Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
     InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
@@ -19,16 +19,16 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "The SPTrustedLoginProvider not exists in the farm" -Fixture {
             $testParams = @{
-                IssuerName = "Contoso"
+                IssuerName     = "Contoso"
                 ProviderRealms = @((New-CimInstance -ClassName MSFT_SPProviderRealm -Property @{
-                    RealmUrl = "https://search.contoso.com"
-                    RealmUrn = "urn:sharepoint:contoso:search"
-                } -ClientOnly)
-                (New-CimInstance -ClassName MSFT_SPProviderRealm -Property @{
-                    RealmUrl = "https://intranet.contoso.com"
-                    RealmUrn = "urn:sharepoint:contoso:intranet"
-                } -ClientOnly))
-                Ensure = "Present"
+                            RealmUrl = "https://search.contoso.com"
+                            RealmUrn = "urn:sharepoint:contoso:search"
+                        } -ClientOnly)
+                    (New-CimInstance -ClassName MSFT_SPProviderRealm -Property @{
+                            RealmUrl = "https://intranet.contoso.com"
+                            RealmUrn = "urn:sharepoint:contoso:intranet"
+                        } -ClientOnly))
+                Ensure         = "Present"
             }
 
             Mock -CommandName Get-SPTrustedIdentityTokenIssuer -MockWith { return $null }
@@ -40,16 +40,16 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "The SPTrustedLoginProviderRealms already exists and should not be changed" -Fixture {
             $testParams = @{
-                IssuerName = "Contoso"
+                IssuerName     = "Contoso"
                 ProviderRealms = @((New-CimInstance -ClassName MSFT_SPProviderRealm -Property @{
-                    RealmUrl = "https://search.contoso.com"
-                    RealmUrn = "urn:sharepoint:contoso:search"
-                } -ClientOnly)
-                (New-CimInstance -ClassName MSFT_SPProviderRealm -Property @{
-                    RealmUrl = "https://intranet.contoso.com"
-                    RealmUrn = "urn:sharepoint:contoso:intranet"
-                } -ClientOnly))
-                Ensure = "Present"
+                            RealmUrl = "https://search.contoso.com"
+                            RealmUrn = "urn:sharepoint:contoso:search"
+                        } -ClientOnly)
+                    (New-CimInstance -ClassName MSFT_SPProviderRealm -Property @{
+                            RealmUrl = "https://intranet.contoso.com"
+                            RealmUrn = "urn:sharepoint:contoso:intranet"
+                        } -ClientOnly))
+                Ensure         = "Present"
             }
 
             Mock -CommandName Get-SPTrustedIdentityTokenIssuer -MockWith {
@@ -60,7 +60,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     $realmsDict[$url.ToString()] = $realm.RealmUrn
                 }
                 $realmRet = [pscustomobject]@{
-                     ProviderRealms = $realmsDict
+                    ProviderRealms = $realmsDict
                 }
                 return $realmRet
             }
@@ -77,16 +77,16 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "The SPTrustedLoginProviderRealms already exists but one realm will be added" -Fixture {
             $testParams = @{
-                IssuerName = "Contoso"
+                IssuerName     = "Contoso"
                 ProviderRealms = @((New-CimInstance -ClassName MSFT_SPProviderRealm -Property @{
-                    RealmUrl = "https://search.contoso.com"
-                    RealmUrn = "urn:sharepoint:contoso:search"
-                } -ClientOnly)
-                (New-CimInstance -ClassName MSFT_SPProviderRealm -Property @{
-                    RealmUrl = "https://intranet.contoso.com"
-                    RealmUrn = "urn:sharepoint:contoso:intranet"
-                } -ClientOnly))
-                Ensure = "Present"
+                            RealmUrl = "https://search.contoso.com"
+                            RealmUrn = "urn:sharepoint:contoso:search"
+                        } -ClientOnly)
+                    (New-CimInstance -ClassName MSFT_SPProviderRealm -Property @{
+                            RealmUrl = "https://intranet.contoso.com"
+                            RealmUrn = "urn:sharepoint:contoso:intranet"
+                        } -ClientOnly))
+                Ensure         = "Present"
             }
 
             $Global:SPTrustedIdentityTokenIssuerUpdateCalledCount = 0
@@ -128,22 +128,22 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             It "Set-TargetResource: Realm added to SPTrustedIdentityTokenIssuer.ProviderRealms" {
                 Set-TargetResource @testParams
                 $($Global:SPTrustedIdentityTokenIssuerUpdateCalledCount -eq 1 `
-                 -and $Global:SPTrustedIdentityTokenIssuerAddProviderRealmCalledCount -eq 2) | Should Be $true
+                        -and $Global:SPTrustedIdentityTokenIssuerAddProviderRealmCalledCount -eq 2) | Should Be $true
             }
         }
 
         Context -Name "The SPTrustedLoginProviderRealms empty and all will be added" -Fixture {
             $testParams = @{
-                IssuerName = "Contoso"
+                IssuerName     = "Contoso"
                 ProviderRealms = @((New-CimInstance -ClassName MSFT_SPProviderRealm -Property @{
-                    RealmUrl = "https://search.contoso.com"
-                    RealmUrn = "urn:sharepoint:contoso:search"
-                } -ClientOnly)
-                (New-CimInstance -ClassName MSFT_SPProviderRealm -Property @{
-                    RealmUrl = "https://intranet.contoso.com"
-                    RealmUrn = "urn:sharepoint:contoso:intranet"
-                } -ClientOnly))
-                Ensure = "Present"
+                            RealmUrl = "https://search.contoso.com"
+                            RealmUrn = "urn:sharepoint:contoso:search"
+                        } -ClientOnly)
+                    (New-CimInstance -ClassName MSFT_SPProviderRealm -Property @{
+                            RealmUrl = "https://intranet.contoso.com"
+                            RealmUrn = "urn:sharepoint:contoso:intranet"
+                        } -ClientOnly))
+                Ensure         = "Present"
             }
 
             $Global:SPTrustedIdentityTokenIssuerUpdateCalledCount = 0
@@ -185,22 +185,22 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             It "Set-TargetResource: Realms added to SPTrustedIdentityTokenIssuer.ProviderRealms" {
                 Set-TargetResource @testParams
                 $($Global:SPTrustedIdentityTokenIssuerAddProviderRealmCalledCount -eq 2 `
-                    -and $Global:SPTrustedIdentityTokenIssuerUpdateCalledCount -eq 1 ) | Should Be $true
+                        -and $Global:SPTrustedIdentityTokenIssuerUpdateCalledCount -eq 1 ) | Should Be $true
             }
         }
 
         Context -Name "The SPTrustedLoginProviderRealms already exists and one realm will be removed" -Fixture {
             $testParams = @{
-                IssuerName = "Contoso"
+                IssuerName     = "Contoso"
                 ProviderRealms = @((New-CimInstance -ClassName MSFT_SPProviderRealm -Property @{
-                    RealmUrl = "https://search.contoso.com"
-                    RealmUrn = "urn:sharepoint:contoso:search"
-                } -ClientOnly)
-                (New-CimInstance -ClassName MSFT_SPProviderRealm -Property @{
-                    RealmUrl = "https://intranet.contoso.com"
-                    RealmUrn = "urn:sharepoint:contoso:intranet"
-                } -ClientOnly))
-                Ensure = "Absent"
+                            RealmUrl = "https://search.contoso.com"
+                            RealmUrn = "urn:sharepoint:contoso:search"
+                        } -ClientOnly)
+                    (New-CimInstance -ClassName MSFT_SPProviderRealm -Property @{
+                            RealmUrl = "https://intranet.contoso.com"
+                            RealmUrn = "urn:sharepoint:contoso:intranet"
+                        } -ClientOnly))
+                Ensure         = "Absent"
             }
 
             $Global:SPTrustedIdentityTokenIssuerRemoveProviderRealmCalledCount = 0
@@ -244,16 +244,16 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "The SPTrustedLoginProviderRealms already exists and all will be removed" -Fixture {
             $testParams = @{
-                IssuerName = "Contoso"
+                IssuerName     = "Contoso"
                 ProviderRealms = @((New-CimInstance -ClassName MSFT_SPProviderRealm -Property @{
-                    RealmUrl = "https://search.contoso.com"
-                    RealmUrn = "urn:sharepoint:contoso:search"
-                } -ClientOnly)
-                (New-CimInstance -ClassName MSFT_SPProviderRealm -Property @{
-                    RealmUrl = "https://intranet.contoso.com"
-                    RealmUrn = "urn:sharepoint:contoso:intranet"
-                } -ClientOnly))
-                Ensure = "Absent"
+                            RealmUrl = "https://search.contoso.com"
+                            RealmUrn = "urn:sharepoint:contoso:search"
+                        } -ClientOnly)
+                    (New-CimInstance -ClassName MSFT_SPProviderRealm -Property @{
+                            RealmUrl = "https://intranet.contoso.com"
+                            RealmUrn = "urn:sharepoint:contoso:intranet"
+                        } -ClientOnly))
+                Ensure         = "Absent"
             }
 
             $Global:SPTrustedIdentityTokenIssuerUpdateCalledCount = 0
@@ -294,16 +294,16 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "The SPTrustedLoginProviderRealms already exists and one realm will be updated" -Fixture {
             $testParams = @{
-                IssuerName = "Contoso"
+                IssuerName     = "Contoso"
                 ProviderRealms = @((New-CimInstance -ClassName MSFT_SPProviderRealm -Property @{
-                    RealmUrl = "https://search.contoso.com"
-                    RealmUrn = "urn:sharepoint:contoso:search"
-                } -ClientOnly)
-                (New-CimInstance -ClassName MSFT_SPProviderRealm -Property @{
-                    RealmUrl = "https://intranet.contoso.com"
-                    RealmUrn = "urn:sharepoint:contoso:intranet"
-                } -ClientOnly))
-                Ensure = "Present"
+                            RealmUrl = "https://search.contoso.com"
+                            RealmUrn = "urn:sharepoint:contoso:search"
+                        } -ClientOnly)
+                    (New-CimInstance -ClassName MSFT_SPProviderRealm -Property @{
+                            RealmUrl = "https://intranet.contoso.com"
+                            RealmUrn = "urn:sharepoint:contoso:intranet"
+                        } -ClientOnly))
+                Ensure         = "Present"
             }
 
             $Global:SPTrustedIdentityTokenIssuerUpdateCalledCount = 0
@@ -316,7 +316,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 $realmsDict[$url.ToString()] = $realm.RealmUrn
             }
 
-            $realmsDict["https://intranet.contoso.com/"]="urn:sharepoint:contoso:intranet1"
+            $realmsDict["https://intranet.contoso.com/"] = "urn:sharepoint:contoso:intranet1"
 
             $realmRet = [pscustomobject]@{
                 ProviderRealms = $realmsDict
@@ -346,28 +346,28 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             It "Set-TargetResource: Realm updated in SPTrustedIdentityTokenIssuer.ProviderRealms" {
                 Set-TargetResource @testParams
                 $($Global:SPTrustedIdentityTokenIssuerAddProviderRealmCalledCount -eq 2 `
-                    -and $Global:SPTrustedIdentityTokenIssuerUpdateCalledCount -eq 1) | Should Be $true
+                        -and $Global:SPTrustedIdentityTokenIssuerUpdateCalledCount -eq 1) | Should Be $true
             }
         }
 
         Context -Name "The SPTrustedLoginProviderRealms already exists and one will be excluded" -Fixture {
             $testParams = @{
-                IssuerName = "Contoso"
+                IssuerName              = "Contoso"
                 ProviderRealmsToExclude = @((New-CimInstance -ClassName MSFT_SPProviderRealm -Property @{
-                    RealmUrl = "https://search.contoso.com"
-                    RealmUrn = "urn:sharepoint:contoso:search"
-                } -ClientOnly))
-                Ensure = "Present"
+                            RealmUrl = "https://search.contoso.com"
+                            RealmUrn = "urn:sharepoint:contoso:search"
+                        } -ClientOnly))
+                Ensure                  = "Present"
             }
 
             $pRealms = @((New-CimInstance -ClassName MSFT_SPProviderRealm -Property @{
-                    RealmUrl = "https://search.contoso.com"
-                    RealmUrn = "urn:sharepoint:contoso:search"
-                } -ClientOnly)
+                        RealmUrl = "https://search.contoso.com"
+                        RealmUrn = "urn:sharepoint:contoso:search"
+                    } -ClientOnly)
                 (New-CimInstance -ClassName MSFT_SPProviderRealm -Property @{
-                    RealmUrl = "https://intranet.contoso.com"
-                    RealmUrn = "urn:sharepoint:contoso:intranet"
-                } -ClientOnly))
+                        RealmUrl = "https://intranet.contoso.com"
+                        RealmUrn = "urn:sharepoint:contoso:intranet"
+                    } -ClientOnly))
 
             $Global:SPTrustedIdentityTokenIssuerUpdateCalledCount = 0
             $Global:SPTrustedIdentityTokenIssuerAddProviderRealmCalledCount = 0
@@ -407,28 +407,28 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             It "Set-TargetResource: Realm removed in SPTrustedIdentityTokenIssuer.ProviderRealms" {
                 Set-TargetResource @testParams
                 $($Global:SPTrustedIdentityTokenIssuerAddProviderRealmCalledCount -eq 1 `
-                    -and $Global:SPTrustedIdentityTokenIssuerUpdateCalledCount -eq 1) | Should Be $true
+                        -and $Global:SPTrustedIdentityTokenIssuerUpdateCalledCount -eq 1) | Should Be $true
             }
         }
 
         Context -Name "The SPTrustedLoginProviderRealms already exists and one should be excluded but not found" -Fixture {
             $testParams = @{
-                IssuerName = "Contoso"
+                IssuerName              = "Contoso"
                 ProviderRealmsToExclude = @((New-CimInstance -ClassName MSFT_SPProviderRealm -Property @{
-                    RealmUrl = "https://search.contoso.com"
-                    RealmUrn = "urn:sharepoint:contoso:search1"
-                } -ClientOnly))
-                Ensure = "Present"
+                            RealmUrl = "https://search.contoso.com"
+                            RealmUrn = "urn:sharepoint:contoso:search1"
+                        } -ClientOnly))
+                Ensure                  = "Present"
             }
 
             $pRealms = @((New-CimInstance -ClassName MSFT_SPProviderRealm -Property @{
-                    RealmUrl = "https://search.contoso.com"
-                    RealmUrn = "urn:sharepoint:contoso:search"
-                } -ClientOnly)
+                        RealmUrl = "https://search.contoso.com"
+                        RealmUrn = "urn:sharepoint:contoso:search"
+                    } -ClientOnly)
                 (New-CimInstance -ClassName MSFT_SPProviderRealm -Property @{
-                    RealmUrl = "https://intranet.contoso.com"
-                    RealmUrn = "urn:sharepoint:contoso:intranet"
-                } -ClientOnly))
+                        RealmUrl = "https://intranet.contoso.com"
+                        RealmUrn = "urn:sharepoint:contoso:intranet"
+                    } -ClientOnly))
 
             $realmsDict = New-Object 'system.collections.generic.dictionary[system.uri,string]'
             foreach ($realm in $pRealms)
@@ -457,22 +457,22 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "The SPTrustedLoginProviderRealms already exists and one should be included" -Fixture {
             $testParams = @{
-                IssuerName = "Contoso"
+                IssuerName              = "Contoso"
                 ProviderRealmsToInclude = @((New-CimInstance -ClassName MSFT_SPProviderRealm -Property @{
-                    RealmUrl = "https://searchx.contoso.com"
-                    RealmUrn = "urn:sharepoint:contoso:search"
-                } -ClientOnly))
-                Ensure = "Present"
+                            RealmUrl = "https://searchx.contoso.com"
+                            RealmUrn = "urn:sharepoint:contoso:search"
+                        } -ClientOnly))
+                Ensure                  = "Present"
             }
 
             $pRealms = @((New-CimInstance -ClassName MSFT_SPProviderRealm -Property @{
-                    RealmUrl = "https://search.contoso.com"
-                    RealmUrn = "urn:sharepoint:contoso:search"
-                } -ClientOnly)
+                        RealmUrl = "https://search.contoso.com"
+                        RealmUrn = "urn:sharepoint:contoso:search"
+                    } -ClientOnly)
                 (New-CimInstance -ClassName MSFT_SPProviderRealm -Property @{
-                    RealmUrl = "https://intranet.contoso.com"
-                    RealmUrn = "urn:sharepoint:contoso:intranet"
-                } -ClientOnly))
+                        RealmUrl = "https://intranet.contoso.com"
+                        RealmUrn = "urn:sharepoint:contoso:intranet"
+                    } -ClientOnly))
 
             $Global:SPTrustedIdentityTokenIssuerUpdateCalledCount = 0
             $Global:SPTrustedIdentityTokenIssuerAddProviderRealmCalledCount = 0
@@ -512,32 +512,32 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             It "Set-TargetResource: Realm added in SPTrustedIdentityTokenIssuer.ProviderRealms" {
                 Set-TargetResource @testParams
                 $($Global:SPTrustedIdentityTokenIssuerAddProviderRealmCalledCount -eq 3 `
-                    -and $Global:SPTrustedIdentityTokenIssuerUpdateCalledCount -eq 1) | Should Be $true
+                        -and $Global:SPTrustedIdentityTokenIssuerUpdateCalledCount -eq 1) | Should Be $true
             }
         }
 
         Context -Name "The SPTrustedLoginProviderRealms empty and two should be included" -Fixture {
             $testParams = @{
-                IssuerName = "Contoso"
+                IssuerName              = "Contoso"
                 ProviderRealmsToInclude = @((New-CimInstance -ClassName MSFT_SPProviderRealm -Property @{
-                    RealmUrl = "https://search.contoso.com"
-                    RealmUrn = "urn:sharepoint:contoso:search"
-                } -ClientOnly)
-                (New-CimInstance -ClassName MSFT_SPProviderRealm -Property @{
-                    RealmUrl = "https://intranet.contoso.com"
-                    RealmUrn = "urn:sharepoint:contoso:intranet"
-                } -ClientOnly))
-                Ensure = "Present"
+                            RealmUrl = "https://search.contoso.com"
+                            RealmUrn = "urn:sharepoint:contoso:search"
+                        } -ClientOnly)
+                    (New-CimInstance -ClassName MSFT_SPProviderRealm -Property @{
+                            RealmUrl = "https://intranet.contoso.com"
+                            RealmUrn = "urn:sharepoint:contoso:intranet"
+                        } -ClientOnly))
+                Ensure                  = "Present"
             }
 
             $pRealms = @((New-CimInstance -ClassName MSFT_SPProviderRealm -Property @{
-                    RealmUrl = "https://search.contoso.com"
-                    RealmUrn = "urn:sharepoint:contoso:search"
-                } -ClientOnly)
+                        RealmUrl = "https://search.contoso.com"
+                        RealmUrn = "urn:sharepoint:contoso:search"
+                    } -ClientOnly)
                 (New-CimInstance -ClassName MSFT_SPProviderRealm -Property @{
-                    RealmUrl = "https://intranet.contoso.com"
-                    RealmUrn = "urn:sharepoint:contoso:intranet"
-                } -ClientOnly))
+                        RealmUrl = "https://intranet.contoso.com"
+                        RealmUrn = "urn:sharepoint:contoso:intranet"
+                    } -ClientOnly))
 
             $Global:SPTrustedIdentityTokenIssuerUpdateCalledCount = 0
             $Global:SPTrustedIdentityTokenIssuerAddProviderRealmCalledCount = 0
@@ -579,28 +579,28 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             It "Set-TargetResource: Realms included in to SPTrustedIdentityTokenIssuer.ProviderRealms" {
                 Set-TargetResource @testParams
                 $($Global:SPTrustedIdentityTokenIssuerAddProviderRealmCalledCount -eq 2 `
-                    -and $Global:SPTrustedIdentityTokenIssuerUpdateCalledCount -eq 1) | Should Be $true
+                        -and $Global:SPTrustedIdentityTokenIssuerUpdateCalledCount -eq 1) | Should Be $true
             }
         }
 
         Context -Name "The SPTrustedLoginProviderRealms already exists and one should be included but found" -Fixture {
             $testParams = @{
-                IssuerName = "Contoso"
+                IssuerName              = "Contoso"
                 ProviderRealmsToInclude = @((New-CimInstance -ClassName MSFT_SPProviderRealm -Property @{
-                    RealmUrl = "https://search.contoso.com"
-                    RealmUrn = "urn:sharepoint:contoso:search"
-                } -ClientOnly))
-                Ensure = "Present"
+                            RealmUrl = "https://search.contoso.com"
+                            RealmUrn = "urn:sharepoint:contoso:search"
+                        } -ClientOnly))
+                Ensure                  = "Present"
             }
 
             $pRealms = @((New-CimInstance -ClassName MSFT_SPProviderRealm -Property @{
-                    RealmUrl = "https://search.contoso.com"
-                    RealmUrn = "urn:sharepoint:contoso:search"
-                } -ClientOnly)
+                        RealmUrl = "https://search.contoso.com"
+                        RealmUrn = "urn:sharepoint:contoso:search"
+                    } -ClientOnly)
                 (New-CimInstance -ClassName MSFT_SPProviderRealm -Property @{
-                    RealmUrl = "https://intranet.contoso.com"
-                    RealmUrn = "urn:sharepoint:contoso:intranet"
-                } -ClientOnly))
+                        RealmUrl = "https://intranet.contoso.com"
+                        RealmUrn = "urn:sharepoint:contoso:intranet"
+                    } -ClientOnly))
 
             $realmsDict = New-Object 'system.collections.generic.dictionary[system.uri,string]'
             foreach ($realm in $pRealms)
@@ -629,22 +629,22 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "The SPTrustedLoginProviderRealms already exists and one should be included and updated" -Fixture {
             $testParams = @{
-                IssuerName = "Contoso"
+                IssuerName              = "Contoso"
                 ProviderRealmsToInclude = @((New-CimInstance -ClassName MSFT_SPProviderRealm -Property @{
-                    RealmUrl = "https://search.contoso.com"
-                    RealmUrn = "urn:sharepoint:contoso:search1"
-                } -ClientOnly))
-                Ensure = "Present"
+                            RealmUrl = "https://search.contoso.com"
+                            RealmUrn = "urn:sharepoint:contoso:search1"
+                        } -ClientOnly))
+                Ensure                  = "Present"
             }
 
             $pRealms = @((New-CimInstance -ClassName MSFT_SPProviderRealm -Property @{
-                    RealmUrl = "https://search.contoso.com"
-                    RealmUrn = "urn:sharepoint:contoso:search"
-                } -ClientOnly)
+                        RealmUrl = "https://search.contoso.com"
+                        RealmUrn = "urn:sharepoint:contoso:search"
+                    } -ClientOnly)
                 (New-CimInstance -ClassName MSFT_SPProviderRealm -Property @{
-                    RealmUrl = "https://intranet.contoso.com"
-                    RealmUrn = "urn:sharepoint:contoso:intranet"
-                } -ClientOnly))
+                        RealmUrl = "https://intranet.contoso.com"
+                        RealmUrn = "urn:sharepoint:contoso:intranet"
+                    } -ClientOnly))
 
             $Global:SPTrustedIdentityTokenIssuerUpdateCalledCount = 0
             $Global:SPTrustedIdentityTokenIssuerAddProviderRealmCalledCount = 0
@@ -684,7 +684,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             It "Set-TargetResource: Realm updated in SPTrustedIdentityTokenIssuer.ProviderRealms" {
                 Set-TargetResource @testParams
                 $($Global:SPTrustedIdentityTokenIssuerAddProviderRealmCalledCount -eq 2 `
-                    -and $Global:SPTrustedIdentityTokenIssuerUpdateCalledCount -eq 1) | Should Be $true
+                        -and $Global:SPTrustedIdentityTokenIssuerUpdateCalledCount -eq 1) | Should Be $true
             }
         }
     }

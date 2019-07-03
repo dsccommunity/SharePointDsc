@@ -21,7 +21,7 @@ function Get-TargetResource
         $WaitTime = 0,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present",
 
@@ -38,8 +38,8 @@ function Get-TargetResource
     }
 
     $result = Invoke-SPDscCommand -Credential $InstallAccount `
-                                  -Arguments $PSBoundParameters `
-                                  -ScriptBlock {
+        -Arguments $PSBoundParameters `
+        -ScriptBlock {
         $params = $args[0]
 
         $nullReturn = @{
@@ -119,7 +119,7 @@ function Set-TargetResource
         $WaitTime = 0,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present",
 
@@ -142,8 +142,8 @@ function Set-TargetResource
     {
         Write-Verbose -Message "Creating Crawler Impact Rule $Name"
         Invoke-SPDscCommand -Credential $InstallAccount `
-                            -Arguments $PSBoundParameters `
-                            -ScriptBlock {
+            -Arguments $PSBoundParameters `
+            -ScriptBlock {
             $params = $args[0]
             $behavior = "0"
             $hitRate = 0
@@ -164,17 +164,17 @@ function Set-TargetResource
                 throw "The Search Service Application does not exist."
             }
             New-SPEnterpriseSearchSiteHitRule -Name $params.Name `
-                                              -Behavior $behavior `
-                                              -HitRate $hitRate `
-                                              -SearchService $serviceApp
+                -Behavior $behavior `
+                -HitRate $hitRate `
+                -SearchService $serviceApp
         }
     }
     if ($result.Ensure -eq "Present" -and $Ensure -eq "Present")
     {
         Write-Verbose -Message "Updating Crawler Impact Rule $Name"
         Invoke-SPDscCommand -Credential $InstallAccount `
-                            -Arguments $PSBoundParameters `
-                            -ScriptBlock {
+            -Arguments $PSBoundParameters `
+            -ScriptBlock {
             $params = $args[0]
             $behavior = "0"
             $hitRate = 0
@@ -195,13 +195,13 @@ function Set-TargetResource
             }
 
             Remove-SPEnterpriseSearchSiteHitRule -Identity $params.Name `
-                                                 -SearchService $serviceApp `
-                                                 -ErrorAction SilentlyContinue
+                -SearchService $serviceApp `
+                -ErrorAction SilentlyContinue
 
             New-SPEnterpriseSearchSiteHitRule -Name $params.Name `
-                                              -Behavior $behavior `
-                                              -HitRate $hitRate `
-                                              -SearchService $serviceApp
+                -Behavior $behavior `
+                -HitRate $hitRate `
+                -SearchService $serviceApp
 
         }
     }
@@ -209,8 +209,8 @@ function Set-TargetResource
     {
         Write-Verbose -Message "Removing Crawler Impact Rule $Name"
         Invoke-SPDscCommand -Credential $InstallAccount `
-                            -Arguments $PSBoundParameters `
-                            -ScriptBlock {
+            -Arguments $PSBoundParameters `
+            -ScriptBlock {
             $params = $args[0]
             $serviceApp = Get-SPEnterpriseSearchServiceApplication -Identity $params.ServiceAppName
             if ($null -eq $serviceApp)
@@ -218,8 +218,8 @@ function Set-TargetResource
                 throw "The Search Service Application does not exist."
             }
             Remove-SPEnterpriseSearchSiteHitRule -Identity $params.Name `
-                                                 -SearchService $serviceApp `
-                                                 -ErrorAction SilentlyContinue
+                -SearchService $serviceApp `
+                -ErrorAction SilentlyContinue
         }
     }
 
@@ -249,7 +249,7 @@ function Test-TargetResource
         $WaitTime = 0,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present",
 
@@ -282,18 +282,18 @@ function Test-TargetResource
     if ($Ensure -eq "Present")
     {
         return Test-SPDscParameterState -CurrentValues $CurrentValues `
-                                        -DesiredValues $PSBoundParameters `
-                                        -ValuesToCheck @("ServiceAppName",
-                                                         "Name",
-                                                         $behavior)
+            -DesiredValues $PSBoundParameters `
+            -ValuesToCheck @("ServiceAppName",
+            "Name",
+            $behavior)
     }
     else
     {
         return Test-SPDscParameterState -CurrentValues $CurrentValues `
-                                        -DesiredValues $PSBoundParameters `
-                                        -ValuesToCheck @("ServiceAppName",
-                                                         "Name",
-                                                         "Ensure")
+            -DesiredValues $PSBoundParameters `
+            -ValuesToCheck @("ServiceAppName",
+            "Name",
+            "Ensure")
     }
 }
 

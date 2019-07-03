@@ -3,16 +3,16 @@ param(
     [Parameter()]
     [string]
     $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
-                                         -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
-                                         -Resolve)
+            -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
+            -Resolve)
 )
 
 Import-Module -Name (Join-Path -Path $PSScriptRoot `
-                                -ChildPath "..\UnitTestHelper.psm1" `
-                                -Resolve)
+        -ChildPath "..\UnitTestHelper.psm1" `
+        -Resolve)
 
 $Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointCmdletModule `
-                                              -DscResource "SPMachineTranslationServiceApp"
+    -DscResource "SPMachineTranslationServiceApp"
 
 Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
     InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
@@ -22,19 +22,19 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         $getTypeFullName = "Microsoft.Office.TranslationServices.TranslationServiceApplication"
 
         # Mocks for all contexts
-        Mock -CommandName New-SPTranslationServiceApplication -MockWith { return @{} }
+        Mock -CommandName New-SPTranslationServiceApplication -MockWith { return @{ } }
         Mock -CommandName Get-SPServiceApplication -MockWith { }
         Mock -CommandName Remove-SPServiceApplication -MockWith { }
 
         # Test contexts
         Context -Name "When no service applications exist in the current farm" -Fixture {
             $testParams = @{
-                Name = "Translation Service"
-                ProxyName = "Machine Translation Service App Proxy"
+                Name            = "Translation Service"
+                ProxyName       = "Machine Translation Service App Proxy"
                 ApplicationPool = "SharePoint Service Applications"
-                DatabaseServer = "SPDB"
-                DatabaseName = "Translation"
-                Ensure = "Present"
+                DatabaseServer  = "SPDB"
+                DatabaseName    = "Translation"
+                Ensure          = "Present"
             }
 
             Mock -CommandName New-SPTranslationServiceApplication -MockWith {
@@ -42,9 +42,9 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     Name = $testParams.Name
                 }
                 $returnVal = $returnVal | Add-Member -MemberType ScriptMethod `
-                                                     -Name IsConnected -Value {
-                                                            return $true
-                                                        } -PassThru
+                    -Name IsConnected -Value {
+                    return $true
+                } -PassThru
 
                 return $returnVal
             }
@@ -52,14 +52,14 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             Mock -CommandName Get-SPServiceApplicationProxy -MockWith {
                 $proxiesToReturn = @()
                 $proxy = @{
-                    Name = $testParams.ProxyName
+                    Name        = $testParams.ProxyName
                     DisplayName = $testParams.ProxyName
                 }
                 $proxy = $proxy | Add-Member -MemberType ScriptMethod `
-                                                -Name Delete `
-                                                -Value {} `
-                                                -PassThru
-                $proxiesToReturn +=  $proxy
+                    -Name Delete `
+                    -Value { } `
+                    -PassThru
+                $proxiesToReturn += $proxy
 
                 return $proxiesToReturn
             }
@@ -80,24 +80,24 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "When service applications exist in the current farm but the specific Translation app does not" -Fixture {
             $testParams = @{
-                Name = "Translation Service"
+                Name            = "Translation Service"
                 ApplicationPool = "SharePoint Service Applications"
-                DatabaseServer = "SPDB"
-                DatabaseName = "Translation"
-                Ensure = "Present"
+                DatabaseServer  = "SPDB"
+                DatabaseName    = "Translation"
+                Ensure          = "Present"
             }
 
             Mock -CommandName Get-SPServiceApplication -MockWith {
                 $spServiceApp = [PSCustomObject]@{
-                                    DisplayName = $testParams.Name
-                                }
+                    DisplayName = $testParams.Name
+                }
                 $spServiceApp | Add-Member -MemberType ScriptMethod `
-                                           -Name GetType `
-                                           -Value {
-                                                return @{
-                                                    FullName = "Microsoft.Office.UnKnownWebServiceApplication"
-                                                }
-                                            } -PassThru -Force
+                    -Name GetType `
+                    -Value {
+                    return @{
+                        FullName = "Microsoft.Office.UnKnownWebServiceApplication"
+                    }
+                } -PassThru -Force
                 return $spServiceApp
             }
 
@@ -112,48 +112,48 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "When a service application exists and is configured correctly" -Fixture {
             $testParams = @{
-                Name = "Translation Service"
-                ProxyName = "Machine Translation Service App Proxy"
+                Name            = "Translation Service"
+                ProxyName       = "Machine Translation Service App Proxy"
                 ApplicationPool = "SharePoint Service Applications"
-                DatabaseServer = "SPDB"
-                DatabaseName = "Translation"
-                Ensure = "Present"
+                DatabaseServer  = "SPDB"
+                DatabaseName    = "Translation"
+                Ensure          = "Present"
             }
 
             Mock -CommandName Get-SPServiceApplication -MockWith {
                 $spServiceApp = [PSCustomObject]@{
-                    TypeName = "Machine Translation Service"
-                    DisplayName = $testParams.Name
+                    TypeName        = "Machine Translation Service"
+                    DisplayName     = $testParams.Name
                     ApplicationPool = @{
                         Name = $testParams.ApplicationPool
                     }
-                    Database = @{
-                        Name = $testParams.DatabaseName
+                    Database        = @{
+                        Name                 = $testParams.DatabaseName
                         NormalizedDataSource = $testParams.DatabaseServer
                     }
                 }
                 $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value {
-                        return (@{
+                    return (@{
                             FullName = $getTypeFullName
                         })
-                        } -PassThru -Force
+                } -PassThru -Force
                 $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name IsConnected -Value {
                     return $true
-                    } -PassThru -Force
+                } -PassThru -Force
                 return $spServiceApp
             }
 
             Mock -CommandName Get-SPServiceApplicationProxy -MockWith {
                 $proxiesToReturn = @()
                 $proxy = @{
-                    Name = $testParams.ProxyName
+                    Name        = $testParams.ProxyName
                     DisplayName = $testParams.ProxyName
                 }
                 $proxy = $proxy | Add-Member -MemberType ScriptMethod `
-                                                -Name Delete `
-                                                -Value {} `
-                                                -PassThru
-                $proxiesToReturn +=  $proxy
+                    -Name Delete `
+                    -Value { } `
+                    -PassThru
+                $proxiesToReturn += $proxy
 
                 return $proxiesToReturn
             }
@@ -169,30 +169,30 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "When a service application exists and the app pool is not configured correctly" -Fixture {
             $testParams = @{
-                Name = "Translation Service"
+                Name            = "Translation Service"
                 ApplicationPool = "SharePoint Service Applications"
-                DatabaseServer = "SPDB"
-                DatabaseName = "Translation"
-                Ensure = "Present"
+                DatabaseServer  = "SPDB"
+                DatabaseName    = "Translation"
+                Ensure          = "Present"
             }
 
             Mock -CommandName Get-SPServiceApplication -MockWith {
                 $spServiceApp = [PSCustomObject]@{
-                    TypeName = "Machine Translation Service"
-                    DisplayName = $testParams.Name
+                    TypeName        = "Machine Translation Service"
+                    DisplayName     = $testParams.Name
                     ApplicationPool = @{
                         Name = "Wrong App Pool Name"
                     }
-                    Database = @{
-                        Name = $testParams.DatabaseName
+                    Database        = @{
+                        Name                 = $testParams.DatabaseName
                         NormalizedDataSource = $testParams.DatabaseServer
                     }
                 }
                 $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value {
-                        return (@{
+                    return (@{
                             FullName = $getTypeFullName
                         })
-                 } -PassThru -Force
+                } -PassThru -Force
                 return $spServiceApp
             }
 
@@ -219,32 +219,32 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
                 Assert-MockCalled Get-SPServiceApplication
                 Assert-MockCalled  Set-SPTranslationServiceApplication
-           }
+            }
         }
 
         Context -Name "When the service application exists but it shouldn't" -Fixture {
             $testParams = @{
-                Name = "Translation Service"
+                Name            = "Translation Service"
                 ApplicationPool = "SharePoint Service Applications"
-                DatabaseServer = "SPDB"
-                DatabaseName = "Translation"
-                Ensure = "Absent"
+                DatabaseServer  = "SPDB"
+                DatabaseName    = "Translation"
+                Ensure          = "Absent"
             }
 
             Mock -CommandName Get-SPServiceApplication -MockWith {
                 $spServiceApp = [PSCustomObject]@{
-                    TypeName = "Machine Translation Service"
-                    DisplayName = $testParams.Name
+                    TypeName        = "Machine Translation Service"
+                    DisplayName     = $testParams.Name
                     ApplicationPool = @{
                         Name = "Wrong App Pool Name"
                     }
-                    Database = @{
-                        Name = $testParams.DatabaseName
+                    Database        = @{
+                        Name                 = $testParams.DatabaseName
                         NormalizedDataSource = $testParams.DatabaseServer
                     }
                 }
                 $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value {
-                        return (@{
+                    return (@{
                             FullName = $getTypeFullName
                         })
                 } -PassThru -Force
@@ -270,11 +270,11 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "When the service application doesn't exist and it shouldn't" -Fixture {
             $testParams = @{
-                Name = "Translation Service"
+                Name            = "Translation Service"
                 ApplicationPool = "SharePoint Service Applications"
-                DatabaseServer = "SPDB"
-                DatabaseName = "Translation"
-                Ensure = "Absent"
+                DatabaseServer  = "SPDB"
+                DatabaseName    = "Translation"
+                Ensure          = "Absent"
             }
 
             Mock -CommandName Get-SPServiceApplication -MockWith {

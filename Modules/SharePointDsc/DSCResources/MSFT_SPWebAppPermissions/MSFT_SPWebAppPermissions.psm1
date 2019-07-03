@@ -10,25 +10,25 @@ function Get-TargetResource
 
         [Parameter()]
         [ValidateSet("Manage Lists", "Override List Behaviors", "Add Items", "Edit Items",
-                     "Delete Items", "View Items", "Approve Items", "Open Items",
-                     "View Versions", "Delete Versions", "Create Alerts",
-                     "View Application Pages")]
+            "Delete Items", "View Items", "Approve Items", "Open Items",
+            "View Versions", "Delete Versions", "Create Alerts",
+            "View Application Pages")]
         [System.String[]]
         $ListPermissions,
 
         [Parameter()]
         [ValidateSet("Manage Permissions", "View Web Analytics Data", "Create Subsites",
-                     "Manage Web Site", "Add and Customize Pages", "Apply Themes and Borders",
-                     "Apply Style Sheets", "Create Groups", "Browse Directories",
-                     "Use Self-Service Site Creation", "View Pages", "Enumerate Permissions",
-                     "Browse User Information", "Manage Alerts", "Use Remote Interfaces",
-                     "Use Client Integration Features", "Open", "Edit Personal User Information")]
+            "Manage Web Site", "Add and Customize Pages", "Apply Themes and Borders",
+            "Apply Style Sheets", "Create Groups", "Browse Directories",
+            "Use Self-Service Site Creation", "View Pages", "Enumerate Permissions",
+            "Browse User Information", "Manage Alerts", "Use Remote Interfaces",
+            "Use Client Integration Features", "Open", "Edit Personal User Information")]
         [System.String[]]
         $SitePermissions,
 
         [Parameter()]
         [ValidateSet("Manage Personal Views", "Add/Remove Personal Web Parts",
-                     "Update Personal Web Parts")]
+            "Update Personal Web Parts")]
         [System.String[]]
         $PersonalPermissions,
 
@@ -46,8 +46,8 @@ function Get-TargetResource
     Test-SPDscInput @PSBoundParameters
 
     $result = Invoke-SPDscCommand -Credential $InstallAccount `
-                                  -Arguments $PSBoundParameters `
-                                  -ScriptBlock {
+        -Arguments $PSBoundParameters `
+        -ScriptBlock {
         $params = $args[0]
 
         $wa = Get-SPWebApplication -Identity $params.WebAppUrl -ErrorAction SilentlyContinue
@@ -60,14 +60,14 @@ function Get-TargetResource
         if ($wa.RightsMask -eq [Microsoft.SharePoint.SPBasePermissions]::FullMask)
         {
             $returnval = @{
-                WebAppUrl = $params.WebAppUrl
+                WebAppUrl      = $params.WebAppUrl
                 AllPermissions = $true
             }
         }
         else
         {
-            $ListPermissions     = @()
-            $SitePermissions     = @()
+            $ListPermissions = @()
+            $SitePermissions = @()
             $PersonalPermissions = @()
 
             $rightsmask = ($wa.RightsMask -split ",").trim()
@@ -75,105 +75,138 @@ function Get-TargetResource
             {
                 switch ($rightmask)
                 {
-                    "ManageLists" {
+                    "ManageLists"
+                    {
                         $ListPermissions += "Manage Lists"
                     }
-                    "CancelCheckout" {
+                    "CancelCheckout"
+                    {
                         $ListPermissions += "Override List Behaviors"
                     }
-                    "AddListItems" {
+                    "AddListItems"
+                    {
                         $ListPermissions += "Add Items"
                     }
-                    "EditListItems" {
+                    "EditListItems"
+                    {
                         $ListPermissions += "Edit Items"
                     }
-                    "DeleteListItems" {
+                    "DeleteListItems"
+                    {
                         $ListPermissions += "Delete Items"
                     }
-                    "ViewListItems" {
+                    "ViewListItems"
+                    {
                         $ListPermissions += "View Items"
                     }
-                    "ApproveItems" {
+                    "ApproveItems"
+                    {
                         $ListPermissions += "Approve Items"
                     }
-                    "OpenItems" {
+                    "OpenItems"
+                    {
                         $ListPermissions += "Open Items"
                     }
-                    "ViewVersions" {
+                    "ViewVersions"
+                    {
                         $ListPermissions += "View Versions"
                     }
-                    "DeleteVersions" {
+                    "DeleteVersions"
+                    {
                         $ListPermissions += "Delete Versions"
                     }
-                    "CreateAlerts" {
-                         $ListPermissions += "Create Alerts"
-                        }
-                    "ViewFormPages" {
+                    "CreateAlerts"
+                    {
+                        $ListPermissions += "Create Alerts"
+                    }
+                    "ViewFormPages"
+                    {
                         $ListPermissions += "View Application Pages"
                     }
 
-                    "ManagePermissions" {
+                    "ManagePermissions"
+                    {
                         $SitePermissions += "Manage Permissions"
                     }
-                    "ViewUsageData" {
+                    "ViewUsageData"
+                    {
                         $SitePermissions += "View Web Analytics Data"
                     }
-                    "ManageSubwebs" {
+                    "ManageSubwebs"
+                    {
                         $SitePermissions += "Create Subsites"
                     }
-                    "ManageWeb" {
+                    "ManageWeb"
+                    {
                         $SitePermissions += "Manage Web Site"
                     }
-                    "AddAndCustomizePages" {
+                    "AddAndCustomizePages"
+                    {
                         $SitePermissions += "Add and Customize Pages"
                     }
-                    "ApplyThemeAndBorder" {
+                    "ApplyThemeAndBorder"
+                    {
                         $SitePermissions += "Apply Themes and Borders"
                     }
-                    "ApplyStyleSheets" {
+                    "ApplyStyleSheets"
+                    {
                         $SitePermissions += "Apply Style Sheets"
                     }
-                    "CreateGroups" {
+                    "CreateGroups"
+                    {
                         $SitePermissions += "Create Groups"
                     }
-                    "BrowseDirectories" {
+                    "BrowseDirectories"
+                    {
                         $SitePermissions += "Browse Directories"
-                     }
-                    "CreateSSCSite" {
+                    }
+                    "CreateSSCSite"
+                    {
                         $SitePermissions += "Use Self-Service Site Creation"
                     }
-                    "ViewPages" {
+                    "ViewPages"
+                    {
                         $SitePermissions += "View Pages"
                     }
-                    "EnumeratePermissions" {
+                    "EnumeratePermissions"
+                    {
                         $SitePermissions += "Enumerate Permissions"
                     }
-                    "BrowseUserInfo" {
+                    "BrowseUserInfo"
+                    {
                         $SitePermissions += "Browse User Information"
                     }
-                    "ManageAlerts" {
+                    "ManageAlerts"
+                    {
                         $SitePermissions += "Manage Alerts"
                     }
-                    "UseRemoteAPIs" {
+                    "UseRemoteAPIs"
+                    {
                         $SitePermissions += "Use Remote Interfaces"
                     }
-                    "UseClientIntegration" {
+                    "UseClientIntegration"
+                    {
                         $SitePermissions += "Use Client Integration Features"
                     }
-                    "Open" {
+                    "Open"
+                    {
                         $SitePermissions += "Open"
                     }
-                    "EditMyUserInfo" {
+                    "EditMyUserInfo"
+                    {
                         $SitePermissions += "Edit Personal User Information"
                     }
 
-                    "ManagePersonalViews" {
+                    "ManagePersonalViews"
+                    {
                         $PersonalPermissions += "Manage Personal Views"
                     }
-                    "AddDelPrivateWebParts" {
+                    "AddDelPrivateWebParts"
+                    {
                         $PersonalPermissions += "Add/Remove Personal Web Parts"
                     }
-                    "UpdatePersonalWebParts" {
+                    "UpdatePersonalWebParts"
+                    {
                         $PersonalPermissions += "Update Personal Web Parts"
                     }
                 }
@@ -202,25 +235,25 @@ function Set-TargetResource
 
         [Parameter()]
         [ValidateSet("Manage Lists", "Override List Behaviors", "Add Items", "Edit Items",
-                     "Delete Items", "View Items", "Approve Items", "Open Items",
-                     "View Versions", "Delete Versions", "Create Alerts",
-                     "View Application Pages")]
+            "Delete Items", "View Items", "Approve Items", "Open Items",
+            "View Versions", "Delete Versions", "Create Alerts",
+            "View Application Pages")]
         [System.String[]]
         $ListPermissions,
 
         [Parameter()]
         [ValidateSet("Manage Permissions", "View Web Analytics Data", "Create Subsites",
-                     "Manage Web Site", "Add and Customize Pages", "Apply Themes and Borders",
-                     "Apply Style Sheets", "Create Groups", "Browse Directories",
-                     "Use Self-Service Site Creation", "View Pages", "Enumerate Permissions",
-                     "Browse User Information", "Manage Alerts", "Use Remote Interfaces",
-                     "Use Client Integration Features", "Open", "Edit Personal User Information")]
+            "Manage Web Site", "Add and Customize Pages", "Apply Themes and Borders",
+            "Apply Style Sheets", "Create Groups", "Browse Directories",
+            "Use Self-Service Site Creation", "View Pages", "Enumerate Permissions",
+            "Browse User Information", "Manage Alerts", "Use Remote Interfaces",
+            "Use Client Integration Features", "Open", "Edit Personal User Information")]
         [System.String[]]
         $SitePermissions,
 
         [Parameter()]
         [ValidateSet("Manage Personal Views", "Add/Remove Personal Web Parts",
-                     "Update Personal Web Parts")]
+            "Update Personal Web Parts")]
         [System.String[]]
         $PersonalPermissions,
 
@@ -242,12 +275,12 @@ function Set-TargetResource
     if ($AllPermissions)
     {
         $result = Invoke-SPDscCommand -Credential $InstallAccount `
-                                      -Arguments $PSBoundParameters `
-                                      -ScriptBlock {
+            -Arguments $PSBoundParameters `
+            -ScriptBlock {
             $params = $args[0]
 
             $wa = Get-SPWebApplication -Identity $params.WebAppUrl `
-                                       -ErrorAction SilentlyContinue
+                -ErrorAction SilentlyContinue
 
             if ($null -eq $wa)
             {
@@ -261,12 +294,12 @@ function Set-TargetResource
     else
     {
         $result = Invoke-SPDscCommand -Credential $InstallAccount `
-                                      -Arguments $PSBoundParameters `
-                                      -ScriptBlock {
+            -Arguments $PSBoundParameters `
+            -ScriptBlock {
             $params = $args[0]
 
             $wa = Get-SPWebApplication -Identity $params.WebAppUrl `
-                                       -ErrorAction SilentlyContinue
+                -ErrorAction SilentlyContinue
 
             if ($null -eq $wa)
             {
@@ -278,40 +311,52 @@ function Set-TargetResource
             {
                 switch ($lp)
                 {
-                    "Manage Lists" {
+                    "Manage Lists"
+                    {
                         $newMask = $newMask -bor [Microsoft.SharePoint.SPBasePermissions]::ManageLists
                     }
-                    "Override List Behaviors" {
+                    "Override List Behaviors"
+                    {
                         $newMask = $newMask -bor [Microsoft.SharePoint.SPBasePermissions]::CancelCheckout
                     }
-                    "Add Items" {
+                    "Add Items"
+                    {
                         $newMask = $newMask -bor [Microsoft.SharePoint.SPBasePermissions]::AddListItems
                     }
-                    "Edit Items" {
+                    "Edit Items"
+                    {
                         $newMask = $newMask -bor [Microsoft.SharePoint.SPBasePermissions]::EditListItems
                     }
-                    "Delete Items" {
+                    "Delete Items"
+                    {
                         $newMask = $newMask -bor [Microsoft.SharePoint.SPBasePermissions]::DeleteListItems
                     }
-                    "View Items" {
+                    "View Items"
+                    {
                         $newMask = $newMask -bor [Microsoft.SharePoint.SPBasePermissions]::ViewListItems
                     }
-                    "Approve Items" {
+                    "Approve Items"
+                    {
                         $newMask = $newMask -bor [Microsoft.SharePoint.SPBasePermissions]::ApproveItems
                     }
-                    "Open Items" {
+                    "Open Items"
+                    {
                         $newMask = $newMask -bor [Microsoft.SharePoint.SPBasePermissions]::OpenItems
                     }
-                    "View Versions" {
+                    "View Versions"
+                    {
                         $newMask = $newMask -bor [Microsoft.SharePoint.SPBasePermissions]::ViewVersions
                     }
-                    "Delete Versions" {
+                    "Delete Versions"
+                    {
                         $newMask = $newMask -bor [Microsoft.SharePoint.SPBasePermissions]::DeleteVersions
                     }
-                    "Create Alerts" {
+                    "Create Alerts"
+                    {
                         $newMask = $newMask -bor [Microsoft.SharePoint.SPBasePermissions]::CreateAlerts
                     }
-                    "View Application Pages" {
+                    "View Application Pages"
+                    {
                         $newMask = $newMask -bor [Microsoft.SharePoint.SPBasePermissions]::ViewFormPages
                     }
                 }
@@ -321,58 +366,76 @@ function Set-TargetResource
             {
                 switch ($sp)
                 {
-                    "Manage Permissions" {
+                    "Manage Permissions"
+                    {
                         $newMask = $newMask -bor [Microsoft.SharePoint.SPBasePermissions]::ManagePermissions
                     }
-                    "View Web Analytics Data" {
+                    "View Web Analytics Data"
+                    {
                         $newMask = $newMask -bor [Microsoft.SharePoint.SPBasePermissions]::ViewUsageData
                     }
-                    "Create Subsites" {
+                    "Create Subsites"
+                    {
                         $newMask = $newMask -bor [Microsoft.SharePoint.SPBasePermissions]::ManageSubwebs
                     }
-                    "Manage Web Site" {
+                    "Manage Web Site"
+                    {
                         $newMask = $newMask -bor [Microsoft.SharePoint.SPBasePermissions]::ManageWeb
                     }
-                    "Add and Customize Pages" {
+                    "Add and Customize Pages"
+                    {
                         $newMask = $newMask -bor [Microsoft.SharePoint.SPBasePermissions]::AddAndCustomizePages
                     }
-                    "Apply Themes and Borders" {
+                    "Apply Themes and Borders"
+                    {
                         $newMask = $newMask -bor [Microsoft.SharePoint.SPBasePermissions]::ApplyThemeAndBorder
                     }
-                    "Apply Style Sheets" {
+                    "Apply Style Sheets"
+                    {
                         $newMask = $newMask -bor [Microsoft.SharePoint.SPBasePermissions]::ApplyStyleSheets
                     }
-                    "Create Groups" {
+                    "Create Groups"
+                    {
                         $newMask = $newMask -bor [Microsoft.SharePoint.SPBasePermissions]::CreateGroups
                     }
-                    "Browse Directories" {
+                    "Browse Directories"
+                    {
                         $newMask = $newMask -bor [Microsoft.SharePoint.SPBasePermissions]::BrowseDirectories
                     }
-                    "Use Self-Service Site Creation" {
+                    "Use Self-Service Site Creation"
+                    {
                         $newMask = $newMask -bor [Microsoft.SharePoint.SPBasePermissions]::CreateSSCSite
                     }
-                    "View Pages" {
+                    "View Pages"
+                    {
                         $newMask = $newMask -bor [Microsoft.SharePoint.SPBasePermissions]::ViewPages
                     }
-                    "Enumerate Permissions" {
+                    "Enumerate Permissions"
+                    {
                         $newMask = $newMask -bor [Microsoft.SharePoint.SPBasePermissions]::EnumeratePermissions
                     }
-                    "Browse User Information" {
+                    "Browse User Information"
+                    {
                         $newMask = $newMask -bor [Microsoft.SharePoint.SPBasePermissions]::BrowseUserInfo
                     }
-                    "Manage Alerts" {
+                    "Manage Alerts"
+                    {
                         $newMask = $newMask -bor [Microsoft.SharePoint.SPBasePermissions]::ManageAlerts
                     }
-                    "Use Remote Interfaces" {
+                    "Use Remote Interfaces"
+                    {
                         $newMask = $newMask -bor [Microsoft.SharePoint.SPBasePermissions]::UseRemoteAPIs
                     }
-                    "Use Client Integration Features" {
+                    "Use Client Integration Features"
+                    {
                         $newMask = $newMask -bor [Microsoft.SharePoint.SPBasePermissions]::UseClientIntegration
                     }
-                    "Open" {
+                    "Open"
+                    {
                         $newMask = $newMask -bor [Microsoft.SharePoint.SPBasePermissions]::Open
                     }
-                    "Edit Personal User Information" {
+                    "Edit Personal User Information"
+                    {
                         $newMask = $newMask -bor [Microsoft.SharePoint.SPBasePermissions]::EditMyUserInfo
                     }
                 }
@@ -382,13 +445,16 @@ function Set-TargetResource
             {
                 switch ($pp)
                 {
-                    "Manage Personal Views" {
+                    "Manage Personal Views"
+                    {
                         $newMask = $newMask -bor [Microsoft.SharePoint.SPBasePermissions]::ManagePersonalViews
                     }
-                    "Add/Remove Personal Web Parts" {
+                    "Add/Remove Personal Web Parts"
+                    {
                         $newMask = $newMask -bor [Microsoft.SharePoint.SPBasePermissions]::AddDelPrivateWebParts
                     }
-                    "Update Personal Web Parts" {
+                    "Update Personal Web Parts"
+                    {
                         $newMask = $newMask -bor [Microsoft.SharePoint.SPBasePermissions]::UpdatePersonalWebParts
                     }
                 }
@@ -411,25 +477,25 @@ function Test-TargetResource
 
         [Parameter()]
         [ValidateSet("Manage Lists", "Override List Behaviors", "Add Items", "Edit Items",
-                     "Delete Items", "View Items", "Approve Items", "Open Items",
-                     "View Versions", "Delete Versions", "Create Alerts",
-                     "View Application Pages")]
+            "Delete Items", "View Items", "Approve Items", "Open Items",
+            "View Versions", "Delete Versions", "Create Alerts",
+            "View Application Pages")]
         [System.String[]]
         $ListPermissions,
 
         [Parameter()]
         [ValidateSet("Manage Permissions", "View Web Analytics Data", "Create Subsites",
-                     "Manage Web Site", "Add and Customize Pages", "Apply Themes and Borders",
-                     "Apply Style Sheets", "Create Groups", "Browse Directories",
-                     "Use Self-Service Site Creation", "View Pages", "Enumerate Permissions",
-                     "Browse User Information", "Manage Alerts", "Use Remote Interfaces",
-                     "Use Client Integration Features", "Open", "Edit Personal User Information")]
+            "Manage Web Site", "Add and Customize Pages", "Apply Themes and Borders",
+            "Apply Style Sheets", "Create Groups", "Browse Directories",
+            "Use Self-Service Site Creation", "View Pages", "Enumerate Permissions",
+            "Browse User Information", "Manage Alerts", "Use Remote Interfaces",
+            "Use Client Integration Features", "Open", "Edit Personal User Information")]
         [System.String[]]
         $SitePermissions,
 
         [Parameter()]
         [ValidateSet("Manage Personal Views", "Add/Remove Personal Web Parts",
-                     "Update Personal Web Parts")]
+            "Update Personal Web Parts")]
         [System.String[]]
         $PersonalPermissions,
 
@@ -456,8 +522,8 @@ function Test-TargetResource
         if ($CurrentValues.ContainsKey("AllPermissions"))
         {
             return Test-SPDscParameterState -CurrentValues $CurrentValues `
-                                            -DesiredValues $PSBoundParameters `
-                                            -ValuesToCheck @("AllPermissions")
+                -DesiredValues $PSBoundParameters `
+                -ValuesToCheck @("AllPermissions")
         }
         else
         {
@@ -473,17 +539,17 @@ function Test-TargetResource
         else
         {
             if ($null -ne (Compare-Object -ReferenceObject $ListPermissions `
-                                          -DifferenceObject $CurrentValues.ListPermissions))
+                        -DifferenceObject $CurrentValues.ListPermissions))
             {
                 return $false
             }
             if ($null -ne (Compare-Object -ReferenceObject $SitePermissions `
-                                          -DifferenceObject $CurrentValues.SitePermissions))
+                        -DifferenceObject $CurrentValues.SitePermissions))
             {
                 return $false
             }
             if ($null -ne (Compare-Object -ReferenceObject $PersonalPermissions `
-                                          -DifferenceObject $CurrentValues.PersonalPermissions))
+                        -DifferenceObject $CurrentValues.PersonalPermissions))
             {
                 return $false
             }
@@ -504,25 +570,25 @@ function Test-SPDscInput()
 
         [Parameter()]
         [ValidateSet("Manage Lists", "Override List Behaviors", "Add Items", "Edit Items",
-                     "Delete Items", "View Items", "Approve Items", "Open Items",
-                     "View Versions", "Delete Versions", "Create Alerts",
-                     "View Application Pages")]
+            "Delete Items", "View Items", "Approve Items", "Open Items",
+            "View Versions", "Delete Versions", "Create Alerts",
+            "View Application Pages")]
         [System.String[]]
         $ListPermissions,
 
         [Parameter()]
         [ValidateSet("Manage Permissions", "View Web Analytics Data", "Create Subsites",
-                     "Manage Web Site", "Add and Customize Pages", "Apply Themes and Borders",
-                     "Apply Style Sheets", "Create Groups", "Browse Directories",
-                     "Use Self-Service Site Creation", "View Pages", "Enumerate Permissions",
-                     "Browse User Information", "Manage Alerts", "Use Remote Interfaces",
-                     "Use Client Integration Features", "Open", "Edit Personal User Information")]
+            "Manage Web Site", "Add and Customize Pages", "Apply Themes and Borders",
+            "Apply Style Sheets", "Create Groups", "Browse Directories",
+            "Use Self-Service Site Creation", "View Pages", "Enumerate Permissions",
+            "Browse User Information", "Manage Alerts", "Use Remote Interfaces",
+            "Use Client Integration Features", "Open", "Edit Personal User Information")]
         [System.String[]]
         $SitePermissions,
 
         [Parameter()]
         [ValidateSet("Manage Personal Views", "Add/Remove Personal Web Parts",
-                     "Update Personal Web Parts")]
+            "Update Personal Web Parts")]
         [System.String[]]
         $PersonalPermissions,
 
@@ -541,7 +607,7 @@ function Test-SPDscInput()
         if ($ListPermissions -or $SitePermissions -or $PersonalPermissions)
         {
             throw ("Do not specify parameters ListPermissions, SitePermissions " + `
-                   "or PersonalPermissions when specifying parameter AllPermissions")
+                    "or PersonalPermissions when specifying parameter AllPermissions")
         }
     }
     else
@@ -550,7 +616,7 @@ function Test-SPDscInput()
         if (-not ($ListPermissions -and $SitePermissions -and $PersonalPermissions))
         {
             throw ("One of the parameters ListPermissions, SitePermissions or " + `
-                   "PersonalPermissions is missing")
+                    "PersonalPermissions is missing")
         }
     }
 
@@ -561,173 +627,173 @@ function Test-SPDscInput()
     }
 
     if (($ListPermissions -contains "Manage Lists" `
-         -or $ListPermissions -contains "Override List Behaviors" `
-         -or $ListPermissions -contains "Add Items" `
-         -or $ListPermissions -contains "Edit Items" `
-         -or $ListPermissions -contains "Delete Items" `
-         -or $ListPermissions -contains "Approve Items" `
-         -or $ListPermissions -contains "Open Items" `
-         -or $ListPermissions -contains "View Versions" `
-         -or $ListPermissions -contains "Delete Versions" `
-         -or $ListPermissions -contains "Create Alerts" `
-         -or $SitePermissions -contains "Manage Permissions" `
-         -or $SitePermissions -contains "Manage Web Site" `
-         -or $SitePermissions -contains "Add and Customize Pages" `
-         -or $SitePermissions -contains "Manage Alerts" `
-         -or $SitePermissions -contains "Use Client Integration Features" `
-         -or $PersonalPermissions -contains "Manage Personal Views" `
-         -or $PersonalPermissions -contains "Add/Remove Personal Web Parts" `
-         -or $PersonalPermissions -contains "Update Personal Web Parts") `
-       -and -not ($ListPermissions -contains "View Items"))
+                -or $ListPermissions -contains "Override List Behaviors" `
+                -or $ListPermissions -contains "Add Items" `
+                -or $ListPermissions -contains "Edit Items" `
+                -or $ListPermissions -contains "Delete Items" `
+                -or $ListPermissions -contains "Approve Items" `
+                -or $ListPermissions -contains "Open Items" `
+                -or $ListPermissions -contains "View Versions" `
+                -or $ListPermissions -contains "Delete Versions" `
+                -or $ListPermissions -contains "Create Alerts" `
+                -or $SitePermissions -contains "Manage Permissions" `
+                -or $SitePermissions -contains "Manage Web Site" `
+                -or $SitePermissions -contains "Add and Customize Pages" `
+                -or $SitePermissions -contains "Manage Alerts" `
+                -or $SitePermissions -contains "Use Client Integration Features" `
+                -or $PersonalPermissions -contains "Manage Personal Views" `
+                -or $PersonalPermissions -contains "Add/Remove Personal Web Parts" `
+                -or $PersonalPermissions -contains "Update Personal Web Parts") `
+            -and -not ($ListPermissions -contains "View Items"))
     {
         throw ("View Items is required when specifying Manage Lists, Override List Behaviors, " + `
-               "Add Items, Edit Items, Delete Items, Approve Items, Open Items, View " + `
-               "Versions, Delete Versions, Create Alerts, Manage Permissions, Manage Web Site, " + `
-               "Add and Customize Pages, Manage Alerts, Use Client Integration Features, " + `
-               "Manage Personal Views, Add/Remove Personal Web Parts or Update Personal Web Parts")
+                "Add Items, Edit Items, Delete Items, Approve Items, Open Items, View " + `
+                "Versions, Delete Versions, Create Alerts, Manage Permissions, Manage Web Site, " + `
+                "Add and Customize Pages, Manage Alerts, Use Client Integration Features, " + `
+                "Manage Personal Views, Add/Remove Personal Web Parts or Update Personal Web Parts")
     }
 
     if (($ListPermissions -contains "View Versions" `
-            -or $SitePermissions -contains "Manage Permissions") `
-        -and -not ($ListPermissions -contains "Open Items"))
+                -or $SitePermissions -contains "Manage Permissions") `
+            -and -not ($ListPermissions -contains "Open Items"))
     {
         throw "Open Items is required when specifying View Versions or Manage Permissions"
     }
 
     if (($ListPermissions -contains "Delete Versions" `
-            -or $SitePermissions -contains "Manage Permissions") `
-        -and -not ($ListPermissions -contains "View Versions"))
+                -or $SitePermissions -contains "Manage Permissions") `
+            -and -not ($ListPermissions -contains "View Versions"))
     {
         throw "View Versions is required when specifying Delete Versions or Manage Permissions"
     }
 
     if ($SitePermissions -contains "Manage Alerts" `
-        -and -not ($ListPermissions -contains "Create Alerts"))
+            -and -not ($ListPermissions -contains "Create Alerts"))
     {
         throw "Create Alerts is required when specifying Manage Alerts"
     }
 
     if ($SitePermissions -contains "Manage Web Site" `
-        -and -not ($SitePermissions -contains "Add and Customize Pages"))
+            -and -not ($SitePermissions -contains "Add and Customize Pages"))
     {
         throw "Add and Customize Pages is required when specifying Manage Web Site"
     }
 
     if (($SitePermissions -contains "Manage Permissions" `
-            -or $SitePermissions -contains "Manage Web Site" `
-            -or $SitePermissions -contains "Add and Customize Pages" `
-            -or $SitePermissions -contains "Enumerate Permissions") `
-        -and -not ($SitePermissions -contains "Browse Directories"))
+                -or $SitePermissions -contains "Manage Web Site" `
+                -or $SitePermissions -contains "Add and Customize Pages" `
+                -or $SitePermissions -contains "Enumerate Permissions") `
+            -and -not ($SitePermissions -contains "Browse Directories"))
     {
         throw ("Browse Directories is required when specifying Manage Permissions, Manage Web " + `
-               "Site, Add and Customize Pages or Enumerate Permissions")
+                "Site, Add and Customize Pages or Enumerate Permissions")
     }
 
     if (($ListPermissions -contains "Manage Lists" `
-         -or $ListPermissions -contains "Override List Behaviors" `
-         -or $ListPermissions -contains "Add Items" `
-         -or $ListPermissions -contains "Edit Items" `
-         -or $ListPermissions -contains "Delete Items" `
-         -or $ListPermissions -contains "View Items" `
-         -or $ListPermissions -contains "Approve Items" `
-         -or $ListPermissions -contains "Open Items" `
-         -or $ListPermissions -contains "View Versions" `
-         -or $ListPermissions -contains "Delete Versions" `
-         -or $ListPermissions -contains "Create Alerts" `
-         -or $SitePermissions -contains "Manage Permissions" `
-         -or $SitePermissions -contains "View Web Analytics Data" `
-         -or $SitePermissions -contains "Create Subsites" `
-         -or $SitePermissions -contains "Manage Web Site" `
-         -or $SitePermissions -contains "Add and Customize Pages" `
-         -or $SitePermissions -contains "Apply Themes and Borders" `
-         -or $SitePermissions -contains "Apply Style Sheets" `
-         -or $SitePermissions -contains "Create Groups" `
-         -or $SitePermissions -contains "Browse Directories" `
-         -or $SitePermissions -contains "Use Self-Service Site Creation" `
-         -or $SitePermissions -contains "Enumerate Permissions" `
-         -or $SitePermissions -contains "Manage Alerts" `
-         -or $PersonalPermissions -contains "Manage Personal Views" `
-         -or $PersonalPermissions -contains "Add/Remove Personal Web Parts" `
-         -or $PersonalPermissions -contains "Update Personal Web Parts") `
-       -and -not ($SitePermissions -contains "View Pages"))
+                -or $ListPermissions -contains "Override List Behaviors" `
+                -or $ListPermissions -contains "Add Items" `
+                -or $ListPermissions -contains "Edit Items" `
+                -or $ListPermissions -contains "Delete Items" `
+                -or $ListPermissions -contains "View Items" `
+                -or $ListPermissions -contains "Approve Items" `
+                -or $ListPermissions -contains "Open Items" `
+                -or $ListPermissions -contains "View Versions" `
+                -or $ListPermissions -contains "Delete Versions" `
+                -or $ListPermissions -contains "Create Alerts" `
+                -or $SitePermissions -contains "Manage Permissions" `
+                -or $SitePermissions -contains "View Web Analytics Data" `
+                -or $SitePermissions -contains "Create Subsites" `
+                -or $SitePermissions -contains "Manage Web Site" `
+                -or $SitePermissions -contains "Add and Customize Pages" `
+                -or $SitePermissions -contains "Apply Themes and Borders" `
+                -or $SitePermissions -contains "Apply Style Sheets" `
+                -or $SitePermissions -contains "Create Groups" `
+                -or $SitePermissions -contains "Browse Directories" `
+                -or $SitePermissions -contains "Use Self-Service Site Creation" `
+                -or $SitePermissions -contains "Enumerate Permissions" `
+                -or $SitePermissions -contains "Manage Alerts" `
+                -or $PersonalPermissions -contains "Manage Personal Views" `
+                -or $PersonalPermissions -contains "Add/Remove Personal Web Parts" `
+                -or $PersonalPermissions -contains "Update Personal Web Parts") `
+            -and -not ($SitePermissions -contains "View Pages"))
     {
         throw ("View Pages is required when specifying Manage Lists, Override List Behaviors, " + `
-               "Add Items, Edit Items, Delete Items, View Items, Approve Items, Open Items, " + `
-               "View Versions, Delete Versions, Create Alerts, Manage Permissions, View Web " + `
-               "Analytics Data, Create Subsites, Manage Web Site, Add and Customize Pages, " + `
-               "Apply Themes and Borders, Apply Style Sheets, Create Groups, Browse " + `
-               "Directories, Use Self-Service Site Creation, Enumerate Permissions, Manage " + `
-               "Alerts, Manage Personal Views, Add/Remove Personal Web Parts or Update " + `
-               "Personal Web Parts")
+                "Add Items, Edit Items, Delete Items, View Items, Approve Items, Open Items, " + `
+                "View Versions, Delete Versions, Create Alerts, Manage Permissions, View Web " + `
+                "Analytics Data, Create Subsites, Manage Web Site, Add and Customize Pages, " + `
+                "Apply Themes and Borders, Apply Style Sheets, Create Groups, Browse " + `
+                "Directories, Use Self-Service Site Creation, Enumerate Permissions, Manage " + `
+                "Alerts, Manage Personal Views, Add/Remove Personal Web Parts or Update " + `
+                "Personal Web Parts")
     }
 
     if (($SitePermissions -contains "Manage Permissions" `
-            -or $SitePermissions -contains "Manage Web Site") `
-        -and -not ($SitePermissions -contains "Enumerate Permissions"))
+                -or $SitePermissions -contains "Manage Web Site") `
+            -and -not ($SitePermissions -contains "Enumerate Permissions"))
     {
         throw ("Enumerate Permissions is required when specifying Manage Permissions or " + `
-               "Manage Web Site")
+                "Manage Web Site")
     }
 
     if (($SitePermissions -contains "Manage Permissions" `
-         -or $SitePermissions -contains "Create Subsites" `
-         -or $SitePermissions -contains "Manage Web Site" `
-         -or $SitePermissions -contains "Create Groups" `
-         -or $SitePermissions -contains "Use Self-Service Site Creation" `
-         -or $SitePermissions -contains "Enumerate Permissions" `
-         -or $SitePermissions -contains "Edit Personal User Information") `
-       -and -not ($SitePermissions -contains "Browse User Information"))
+                -or $SitePermissions -contains "Create Subsites" `
+                -or $SitePermissions -contains "Manage Web Site" `
+                -or $SitePermissions -contains "Create Groups" `
+                -or $SitePermissions -contains "Use Self-Service Site Creation" `
+                -or $SitePermissions -contains "Enumerate Permissions" `
+                -or $SitePermissions -contains "Edit Personal User Information") `
+            -and -not ($SitePermissions -contains "Browse User Information"))
     {
         throw ("Browse User Information is required when specifying Manage Permissions, " + `
-               "Create Subsites, Manage Web Site, Create Groups, Use Self-Service Site " + `
-               "Creation, Enumerate Permissions or Edit Personal User Information")
+                "Create Subsites, Manage Web Site, Create Groups, Use Self-Service Site " + `
+                "Creation, Enumerate Permissions or Edit Personal User Information")
     }
 
     if ($SitePermissions -contains "Use Client Integration Features" `
-        -and -not ($SitePermissions -contains "Use Remote Interfaces"))
+            -and -not ($SitePermissions -contains "Use Remote Interfaces"))
     {
         throw "Use Remote Interfaces is required when specifying Use Client Integration Features"
     }
 
     if (($ListPermissions -contains "Manage Lists" `
-         -or $ListPermissions -contains "Override List Behaviors" `
-         -or $ListPermissions -contains "Add Items" `
-         -or $ListPermissions -contains "Edit Items" `
-         -or $ListPermissions -contains "Delete Items" `
-         -or $ListPermissions -contains "View Items" `
-         -or $ListPermissions -contains "Approve Items" `
-         -or $ListPermissions -contains "Open Items" `
-         -or $ListPermissions -contains "View Versions" `
-         -or $ListPermissions -contains "Delete Versions" `
-         -or $ListPermissions -contains "Create Alerts" `
-         -or $ListPermissions -contains "View Application Pages" `
-         -or $SitePermissions -contains "Manage Permissions" `
-         -or $SitePermissions -contains "View Web Analytics Data" `
-         -or $SitePermissions -contains "Create Subsites" `
-         -or $SitePermissions -contains "Manage Web Site" `
-         -or $SitePermissions -contains "Add and Customize Pages" `
-         -or $SitePermissions -contains "Apply Themes and Borders" `
-         -or $SitePermissions -contains "Apply Style Sheets" `
-         -or $SitePermissions -contains "Create Groups" `
-         -or $SitePermissions -contains "Browse Directories" `
-         -or $SitePermissions -contains "Use Self-Service Site Creation" `
-         -or $SitePermissions -contains "View Pages" `
-         -or $SitePermissions -contains "Enumerate Permissions" `
-         -or $SitePermissions -contains "Browse User Information" `
-         -or $SitePermissions -contains "Manage Alerts" `
-         -or $SitePermissions -contains "Use Remote Interfaces" `
-         -or $SitePermissions -contains "Use Client Integration Features" `
-         -or $SitePermissions -contains "Edit Personal User Information" `
-         -or $PersonalPermissions -contains "Manage Personal Views" `
-         -or $PersonalPermissions -contains "Add/Remove Personal Web Parts" `
-         -or $PersonalPermissions -contains "Update Personal Web Parts") `
-       -and -not ($SitePermissions -contains "Open"))
+                -or $ListPermissions -contains "Override List Behaviors" `
+                -or $ListPermissions -contains "Add Items" `
+                -or $ListPermissions -contains "Edit Items" `
+                -or $ListPermissions -contains "Delete Items" `
+                -or $ListPermissions -contains "View Items" `
+                -or $ListPermissions -contains "Approve Items" `
+                -or $ListPermissions -contains "Open Items" `
+                -or $ListPermissions -contains "View Versions" `
+                -or $ListPermissions -contains "Delete Versions" `
+                -or $ListPermissions -contains "Create Alerts" `
+                -or $ListPermissions -contains "View Application Pages" `
+                -or $SitePermissions -contains "Manage Permissions" `
+                -or $SitePermissions -contains "View Web Analytics Data" `
+                -or $SitePermissions -contains "Create Subsites" `
+                -or $SitePermissions -contains "Manage Web Site" `
+                -or $SitePermissions -contains "Add and Customize Pages" `
+                -or $SitePermissions -contains "Apply Themes and Borders" `
+                -or $SitePermissions -contains "Apply Style Sheets" `
+                -or $SitePermissions -contains "Create Groups" `
+                -or $SitePermissions -contains "Browse Directories" `
+                -or $SitePermissions -contains "Use Self-Service Site Creation" `
+                -or $SitePermissions -contains "View Pages" `
+                -or $SitePermissions -contains "Enumerate Permissions" `
+                -or $SitePermissions -contains "Browse User Information" `
+                -or $SitePermissions -contains "Manage Alerts" `
+                -or $SitePermissions -contains "Use Remote Interfaces" `
+                -or $SitePermissions -contains "Use Client Integration Features" `
+                -or $SitePermissions -contains "Edit Personal User Information" `
+                -or $PersonalPermissions -contains "Manage Personal Views" `
+                -or $PersonalPermissions -contains "Add/Remove Personal Web Parts" `
+                -or $PersonalPermissions -contains "Update Personal Web Parts") `
+            -and -not ($SitePermissions -contains "Open"))
     {
         throw "Open is required when specifying any of the other permissions"
     }
 
     if ($PersonalPermissions -contains "Add/Remove Personal Web Parts" `
-        -and -not ($PersonalPermissions -contains "Update Personal Web Parts"))
+            -and -not ($PersonalPermissions -contains "Update Personal Web Parts"))
     {
         throw "Update Personal Web Parts is required when specifying Add/Remove Personal Web Parts"
     }

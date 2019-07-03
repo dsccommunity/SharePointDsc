@@ -13,17 +13,17 @@ function Get-TargetResource
         $EnableOvertimeAndNonBillableTracking,
 
         [Parameter()]
-        [ValidateSet("CurrentTaskAssignments","CurrentProjects","NoPrepopulation")]
+        [ValidateSet("CurrentTaskAssignments", "CurrentProjects", "NoPrepopulation")]
         [System.String]
         $DefaultTimesheetCreationMode,
 
         [Parameter()]
-        [ValidateSet("Days","Weeks")]
+        [ValidateSet("Days", "Weeks")]
         [System.String]
         $DefaultTrackingUnit,
 
         [Parameter()]
-        [ValidateSet("Hours","Days")]
+        [ValidateSet("Hours", "Days")]
         [System.String]
         $DefaultReportingUnit,
 
@@ -80,7 +80,7 @@ function Get-TargetResource
         $SingleEntryMode,
 
         [Parameter()]
-        [ValidateSet("PercentComplete","ActualDoneAndRemaining","HoursPerPeriod","FreeForm")]
+        [ValidateSet("PercentComplete", "ActualDoneAndRemaining", "HoursPerPeriod", "FreeForm")]
         [System.String]
         $DefaultTrackingMode,
 
@@ -98,12 +98,12 @@ function Get-TargetResource
     if ((Get-SPDscInstalledProductVersion).FileMajorPart -lt 16)
     {
         throw [Exception] ("Support for Project Server in SharePointDsc is only valid for " + `
-                           "SharePoint 2016 and 2019.")
+                "SharePoint 2016 and 2019.")
     }
 
     $result = Invoke-SPDscCommand -Credential $InstallAccount `
-                                  -Arguments @($PSBoundParameters, $PSScriptRoot) `
-                                  -ScriptBlock {
+        -Arguments @($PSBoundParameters, $PSScriptRoot) `
+        -ScriptBlock {
         $params = $args[0]
         $scriptRoot = $args[1]
 
@@ -113,8 +113,8 @@ function Get-TargetResource
         $webAppUrl = (Get-SPSite -Identity $params.Url).WebApplication.Url
         $useKerberos = -not (Get-SPAuthenticationProvider -WebApplication $webAppUrl -Zone Default).DisableKerberos
         $adminService = New-SPDscProjectServerWebService -PwaUrl $params.Url `
-                                                         -EndpointName Admin `
-                                                         -UseKerberos:$useKerberos
+            -EndpointName Admin `
+            -UseKerberos:$useKerberos
 
         $script:currentSettings = $null
         Use-SPDscProjectServerWebService -Service $adminService -ScriptBlock {
@@ -152,13 +152,16 @@ function Get-TargetResource
             $currentDefaultTimesheetCreationMode = "Unknown"
             switch ($script:currentSettings.WADMIN_TS_CREATE_MODE_ENUM)
             {
-                1 {
+                1
+                {
                     $currentDefaultTimesheetCreationMode = "CurrentTaskAssignments"
                 }
-                2 {
+                2
+                {
                     $currentDefaultTimesheetCreationMode = "CurrentProjects"
                 }
-                0 {
+                0
+                {
                     $currentDefaultTimesheetCreationMode = "NoPrepopulation"
                 }
             }
@@ -166,10 +169,12 @@ function Get-TargetResource
             $currentDefaultTrackingUnit = "Unknown"
             switch ($script:currentSettings.WADMIN_TS_DEF_ENTRY_MODE_ENUM)
             {
-                1 {
+                1
+                {
                     $currentDefaultTrackingUnit = "Weeks"
                 }
-                0 {
+                0
+                {
                     $currentDefaultTrackingUnit = "Days"
                 }
             }
@@ -177,10 +182,12 @@ function Get-TargetResource
             $currentDefaultReportingUnit = "Unknown"
             switch ($script:currentSettings.WADMIN_TS_REPORT_UNIT_ENUM)
             {
-                1 {
+                1
+                {
                     $currentDefaultReportingUnit = "Days"
                 }
-                0 {
+                0
+                {
                     $currentDefaultReportingUnit = "Hours"
                 }
             }
@@ -188,16 +195,20 @@ function Get-TargetResource
             $currentDefaultTrackingMode = "Unknown"
             switch ($script:currentSettings.WADMIN_DEFAULT_TRACKING_METHOD)
             {
-                3 {
+                3
+                {
                     $currentDefaultTrackingMode = "ActualDoneAndRemaining"
                 }
-                2 {
+                2
+                {
                     $currentDefaultTrackingMode = "PercentComplete"
                 }
-                1 {
+                1
+                {
                     $currentDefaultTrackingMode = "HoursPerPeriod"
                 }
-                0 {
+                0
+                {
                     $currentDefaultTrackingMode = "FreeForm"
                 }
             }
@@ -205,10 +216,12 @@ function Get-TargetResource
             $currentEnableOvertimeAndNonBillableTracking = $false
             switch ($script:currentSettings.WADMIN_TS_DEF_DISPLAY_ENUM)
             {
-                7 {
+                7
+                {
                     $currentEnableOvertimeAndNonBillableTracking = $true
                 }
-                0 {
+                0
+                {
                     $currentEnableOvertimeAndNonBillableTracking = $false
                 }
             }
@@ -256,17 +269,17 @@ function Set-TargetResource
         $EnableOvertimeAndNonBillableTracking,
 
         [Parameter()]
-        [ValidateSet("CurrentTaskAssignments","CurrentProjects","NoPrepopulation")]
+        [ValidateSet("CurrentTaskAssignments", "CurrentProjects", "NoPrepopulation")]
         [System.String]
         $DefaultTimesheetCreationMode,
 
         [Parameter()]
-        [ValidateSet("Days","Weeks")]
+        [ValidateSet("Days", "Weeks")]
         [System.String]
         $DefaultTrackingUnit,
 
         [Parameter()]
-        [ValidateSet("Hours","Days")]
+        [ValidateSet("Hours", "Days")]
         [System.String]
         $DefaultReportingUnit,
 
@@ -323,7 +336,7 @@ function Set-TargetResource
         $SingleEntryMode,
 
         [Parameter()]
-        [ValidateSet("PercentComplete","ActualDoneAndRemaining","HoursPerPeriod","FreeForm")]
+        [ValidateSet("PercentComplete", "ActualDoneAndRemaining", "HoursPerPeriod", "FreeForm")]
         [System.String]
         $DefaultTrackingMode,
 
@@ -341,20 +354,20 @@ function Set-TargetResource
     if ((Get-SPDscInstalledProductVersion).FileMajorPart -lt 16)
     {
         throw [Exception] ("Support for Project Server in SharePointDsc is only valid for " + `
-                           "SharePoint 2016 and 2019.")
+                "SharePoint 2016 and 2019.")
     }
 
     Invoke-SPDscCommand -Credential $InstallAccount `
-                        -Arguments $PSBoundParameters `
-                        -ScriptBlock {
+        -Arguments $PSBoundParameters `
+        -ScriptBlock {
 
         $params = $args[0]
 
         $webAppUrl = (Get-SPSite -Identity $params.Url).WebApplication.Url
         $useKerberos = -not (Get-SPAuthenticationProvider -WebApplication $webAppUrl -Zone Default).DisableKerberos
         $adminService = New-SPDscProjectServerWebService -PwaUrl $params.Url `
-                                                         -EndpointName Admin `
-                                                         -UseKerberos:$useKerberos
+            -EndpointName Admin `
+            -UseKerberos:$useKerberos
 
         Use-SPDscProjectServerWebService -Service $adminService -ScriptBlock {
             $settings = $adminService.ReadTimeSheetSettings()
@@ -363,10 +376,12 @@ function Set-TargetResource
             {
                 switch ($params.EnableOvertimeAndNonBillableTracking)
                 {
-                    $true {
+                    $true
+                    {
                         $settings.TimeSheetSettings.Rows[0]["WADMIN_TS_DEF_DISPLAY_ENUM"] = 7
                     }
-                    $false {
+                    $false
+                    {
                         $settings.TimeSheetSettings.Rows[0]["WADMIN_TS_DEF_DISPLAY_ENUM"] = 0
                     }
                 }
@@ -375,13 +390,16 @@ function Set-TargetResource
             {
                 switch ($params.DefaultTimesheetCreationMode)
                 {
-                    "CurrentTaskAssignments" {
+                    "CurrentTaskAssignments"
+                    {
                         $settings.TimeSheetSettings.Rows[0]["WADMIN_TS_CREATE_MODE_ENUM"] = 1
                     }
-                    "CurrentProjects" {
+                    "CurrentProjects"
+                    {
                         $settings.TimeSheetSettings.Rows[0]["WADMIN_TS_CREATE_MODE_ENUM"] = 2
                     }
-                    "NoPrepopulation" {
+                    "NoPrepopulation"
+                    {
                         $settings.TimeSheetSettings.Rows[0]["WADMIN_TS_CREATE_MODE_ENUM"] = 0
                     }
                 }
@@ -390,10 +408,12 @@ function Set-TargetResource
             {
                 switch ($params.DefaultTrackingUnit)
                 {
-                    "Weeks" {
+                    "Weeks"
+                    {
                         $settings.TimeSheetSettings.Rows[0]["WADMIN_TS_DEF_ENTRY_MODE_ENUM"] = 1
                     }
-                    "Days" {
+                    "Days"
+                    {
                         $settings.TimeSheetSettings.Rows[0]["WADMIN_TS_DEF_ENTRY_MODE_ENUM"] = 0
                     }
                 }
@@ -402,10 +422,12 @@ function Set-TargetResource
             {
                 switch ($params.DefaultReportingUnit)
                 {
-                    "Days" {
+                    "Days"
+                    {
                         $settings.TimeSheetSettings.Rows[0]["WADMIN_TS_REPORT_UNIT_ENUM"] = 1
                     }
-                    "Hours" {
+                    "Hours"
+                    {
                         $settings.TimeSheetSettings.Rows[0]["WADMIN_TS_REPORT_UNIT_ENUM"] = 0
                     }
                 }
@@ -466,16 +488,20 @@ function Set-TargetResource
             {
                 switch ($params.DefaultTrackingMode)
                 {
-                    "ActualDoneAndRemaining" {
+                    "ActualDoneAndRemaining"
+                    {
                         $settings.TimeSheetSettings.Rows[0]["WADMIN_DEFAULT_TRACKING_METHOD"] = 3
                     }
-                    "PercentComplete" {
+                    "PercentComplete"
+                    {
                         $settings.TimeSheetSettings.Rows[0]["WADMIN_DEFAULT_TRACKING_METHOD"] = 2
                     }
-                    "HoursPerPeriod" {
+                    "HoursPerPeriod"
+                    {
                         $settings.TimeSheetSettings.Rows[0]["WADMIN_DEFAULT_TRACKING_METHOD"] = 1
                     }
-                    "FreeForm" {
+                    "FreeForm"
+                    {
                         $settings.TimeSheetSettings.Rows[0]["WADMIN_DEFAULT_TRACKING_METHOD"] = 0
                     }
                 }
@@ -506,17 +532,17 @@ function Test-TargetResource
         $EnableOvertimeAndNonBillableTracking,
 
         [Parameter()]
-        [ValidateSet("CurrentTaskAssignments","CurrentProjects","NoPrepopulation")]
+        [ValidateSet("CurrentTaskAssignments", "CurrentProjects", "NoPrepopulation")]
         [System.String]
         $DefaultTimesheetCreationMode,
 
         [Parameter()]
-        [ValidateSet("Days","Weeks")]
+        [ValidateSet("Days", "Weeks")]
         [System.String]
         $DefaultTrackingUnit,
 
         [Parameter()]
-        [ValidateSet("Hours","Days")]
+        [ValidateSet("Hours", "Days")]
         [System.String]
         $DefaultReportingUnit,
 
@@ -573,7 +599,7 @@ function Test-TargetResource
         $SingleEntryMode,
 
         [Parameter()]
-        [ValidateSet("PercentComplete","ActualDoneAndRemaining","HoursPerPeriod","FreeForm")]
+        [ValidateSet("PercentComplete", "ActualDoneAndRemaining", "HoursPerPeriod", "FreeForm")]
         [System.String]
         $DefaultTrackingMode,
 
@@ -594,7 +620,7 @@ function Test-TargetResource
     Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
 
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
-                                    -DesiredValues $PSBoundParameters
+        -DesiredValues $PSBoundParameters
 }
 
 Export-ModuleMember -Function *-TargetResource

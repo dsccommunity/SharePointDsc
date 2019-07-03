@@ -73,8 +73,8 @@ function Get-TargetResource
     Write-Verbose -Message "Getting site collection $Url"
 
     $result = Invoke-SPDscCommand -Credential $InstallAccount `
-                                  -Arguments $PSBoundParameters `
-                                  -ScriptBlock {
+        -Arguments $PSBoundParameters `
+        -ScriptBlock {
         $params = $args[0]
         $site = $null
 
@@ -126,7 +126,7 @@ function Get-TargetResource
                 if ($site.WebApplication.UseClaimsAuthentication)
                 {
                     $owner = (New-SPClaimsPrincipal -Identity $site.Owner.UserLogin `
-                                                    -IdentityType "EncodedClaim").Value
+                            -IdentityType "EncodedClaim").Value
                 }
                 else
                 {
@@ -143,7 +143,7 @@ function Get-TargetResource
                 if ($site.WebApplication.UseClaimsAuthentication)
                 {
                     $secondaryOwner = (New-SPClaimsPrincipal -Identity $site.SecondaryContact.UserLogin `
-                                                             -IdentityType "EncodedClaim").Value
+                            -IdentityType "EncodedClaim").Value
                 }
                 else
                 {
@@ -153,9 +153,9 @@ function Get-TargetResource
 
             $admService = Get-SPDscContentService
             $quota = ($admService.QuotaTemplates | `
-                      Where-Object -FilterScript {
-                          $_.QuotaID -eq $site.Quota.QuotaID
-                      }).Name
+                    Where-Object -FilterScript {
+                    $_.QuotaID -eq $site.Quota.QuotaID
+                }).Name
 
             $CreateDefaultGroups = $true
             if ($null -eq $site.RootWeb.AssociatedVisitorGroup -and
@@ -250,7 +250,7 @@ function Set-TargetResource
         $CreateDefaultGroups = $true,
 
         [Parameter()]
-        [ValidateSet("TenantAdministration","None")]
+        [ValidateSet("TenantAdministration", "None")]
         [System.String]
         $AdministrationSiteType,
 
@@ -269,8 +269,8 @@ function Set-TargetResource
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
     $null = Invoke-SPDscCommand -Credential $InstallAccount `
-                                -Arguments @($PSBoundParameters,$CurrentValues) `
-                                -ScriptBlock {
+        -Arguments @($PSBoundParameters, $CurrentValues) `
+        -ScriptBlock {
         $params = $args[0]
         $CurrentValues = $args[1]
         $doCreateDefaultGroups = $false
@@ -285,7 +285,7 @@ function Set-TargetResource
         if ($null -eq $site)
         {
             Write-Verbose -Message ("Starting New-SPSite with the following parameters: " + `
-                                    "$(Convert-SPDscHashtableToString $params)")
+                    "$(Convert-SPDscHashtableToString $params)")
             $site = New-SPSite @params
             if ($CreateDefaultGroups -eq $true)
             {
@@ -295,7 +295,7 @@ function Set-TargetResource
             else
             {
                 Write-Verbose -Message ("CreateDefaultGroups set to false. The default " + `
-                                        "SharePoint groups will not be created")
+                        "SharePoint groups will not be created")
             }
         }
         else
@@ -340,7 +340,7 @@ function Set-TargetResource
             {
                 Write-Verbose -Message "Updating existing site collection"
                 Write-Verbose -Message ("Starting Set-SPSite with the following parameters: " + `
-                                        "$(Convert-SPDscHashtableToString $newParams)")
+                        "$(Convert-SPDscHashtableToString $newParams)")
                 Set-SPSite @newParams
             }
 
@@ -353,7 +353,7 @@ function Set-TargetResource
                 else
                 {
                     Write-Verbose -Message ("CreateDefaultGroups set to false. The default " + `
-                                            "SharePoint groups will not be created")
+                            "SharePoint groups will not be created")
                 }
             }
         }
@@ -376,8 +376,8 @@ function Set-TargetResource
             }
 
             $systemAccountSite.RootWeb.CreateDefaultAssociatedGroups($systemAccountSite.Owner.UserLogin,
-                                                                     $secondaryOwnerLogin,
-                                                                     $null)
+                $secondaryOwnerLogin,
+                $null)
         }
     }
 }
@@ -445,7 +445,7 @@ function Test-TargetResource
         $CreateDefaultGroups = $true,
 
         [Parameter()]
-        [ValidateSet("TenantAdministration","None")]
+        [ValidateSet("TenantAdministration", "None")]
         [System.String]
         $AdministrationSiteType,
 
@@ -470,12 +470,12 @@ function Test-TargetResource
     }
 
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
-                                    -DesiredValues $PSBoundParameters `
-                                    -ValuesToCheck @("Url",
-                                                     "QuotaTemplate",
-                                                     "OwnerAlias",
-                                                     "SecondaryOwnerAlias",
-                                                     "AdministrationSiteType")
+        -DesiredValues $PSBoundParameters `
+        -ValuesToCheck @("Url",
+        "QuotaTemplate",
+        "OwnerAlias",
+        "SecondaryOwnerAlias",
+        "AdministrationSiteType")
 }
 
 Export-ModuleMember -Function *-TargetResource

@@ -3,16 +3,16 @@ param(
     [Parameter()]
     [string]
     $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
-                                         -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
-                                         -Resolve)
+            -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
+            -Resolve)
 )
 
 Import-Module -Name (Join-Path -Path $PSScriptRoot `
-                                -ChildPath "..\UnitTestHelper.psm1" `
-                                -Resolve)
+        -ChildPath "..\UnitTestHelper.psm1" `
+        -Resolve)
 
 $Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointCmdletModule `
-                                              -DscResource "SPVisioServiceApp"
+    -DscResource "SPVisioServiceApp"
 
 Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
     InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
@@ -29,10 +29,10 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         # Test contexts
         Context -Name "When no service applications exist in the current farm" -Fixture {
             $testParams = @{
-                Name = "Test Visio App"
-                ProxyName = "Visio Proxy"
+                Name            = "Test Visio App"
+                ProxyName       = "Visio Proxy"
                 ApplicationPool = "Test App Pool"
-                Ensure = "Present"
+                Ensure          = "Present"
             }
 
             Mock -CommandName Get-SPServiceApplication -MockWith {
@@ -54,22 +54,22 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "When service applications exist in the current farm but the specific Visio Graphics app does not" -Fixture {
             $testParams = @{
-                Name = "Test Visio App"
+                Name            = "Test Visio App"
                 ApplicationPool = "Test App Pool"
-                Ensure = "Present"
+                Ensure          = "Present"
             }
 
             Mock -CommandName Get-SPServiceApplication -MockWith {
                 $spServiceApp = [PSCustomObject]@{
-                                    DisplayName = $testParams.Name
-                                }
+                    DisplayName = $testParams.Name
+                }
                 $spServiceApp | Add-Member -MemberType ScriptMethod `
-                                           -Name GetType `
-                                           -Value {
-                                                return @{
-                                                    FullName = "Microsoft.Office.UnKnownWebServiceApplication"
-                                                }
-                                            } -PassThru -Force
+                    -Name GetType `
+                    -Value {
+                    return @{
+                        FullName = "Microsoft.Office.UnKnownWebServiceApplication"
+                    }
+                } -PassThru -Force
 
                 return $spServiceApp
             }
@@ -81,16 +81,16 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "When a service application exists and is configured correctly" -Fixture {
             $testParams = @{
-                Name = "Test Visio App"
-                ProxyName = "Visio Proxy"
+                Name            = "Test Visio App"
+                ProxyName       = "Visio Proxy"
                 ApplicationPool = "Test App Pool"
-                Ensure = "Present"
+                Ensure          = "Present"
             }
 
             Mock -CommandName Get-SPServiceApplication -MockWith {
                 $spServiceApp = [PSCustomObject]@{
-                    TypeName = "Visio Graphics Service Application"
-                    DisplayName = $testParams.Name
+                    TypeName        = "Visio Graphics Service Application"
+                    DisplayName     = $testParams.Name
                     ApplicationPool = @{ Name = $testParams.ApplicationPool }
                 }
                 $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value {
@@ -104,14 +104,14 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             Mock -CommandName Get-SPServiceApplicationProxy -MockWith {
                 $proxiesToReturn = @()
                 $proxy = @{
-                    Name = $testParams.ProxyName
+                    Name        = $testParams.ProxyName
                     DisplayName = $testParams.ProxyName
                 }
                 $proxy = $proxy | Add-Member -MemberType ScriptMethod `
-                                                -Name Delete `
-                                                -Value {} `
-                                                -PassThru
-                $proxiesToReturn +=  $proxy
+                    -Name Delete `
+                    -Value { } `
+                    -PassThru
+                $proxiesToReturn += $proxy
 
                 return $proxiesToReturn
             }
@@ -127,15 +127,15 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "When a service application exists and is not configured correctly" -Fixture {
             $testParams = @{
-                Name = "Test Visio App"
+                Name            = "Test Visio App"
                 ApplicationPool = "Test App Pool"
-                Ensure = "Present"
+                Ensure          = "Present"
             }
 
             Mock -CommandName Get-SPServiceApplication -MockWith {
                 $spServiceApp = [PSCustomObject]@{
-                    TypeName = "Visio Graphics Service Application"
-                    DisplayName = $testParams.Name
+                    TypeName        = "Visio Graphics Service Application"
+                    DisplayName     = $testParams.Name
                     ApplicationPool = @{ Name = "Wrong App Pool Name" }
                 }
                 $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value {
@@ -162,15 +162,15 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "When the service app exists but it shouldn't" -Fixture {
             $testParams = @{
-                Name = "Test App"
+                Name            = "Test App"
                 ApplicationPool = "-"
-                Ensure = "Absent"
+                Ensure          = "Absent"
             }
 
             Mock -CommandName Get-SPServiceApplication -MockWith {
                 $spServiceApp = [PSCustomObject]@{
-                    TypeName = "Visio Graphics Service Application"
-                    DisplayName = $testParams.Name
+                    TypeName        = "Visio Graphics Service Application"
+                    DisplayName     = $testParams.Name
                     ApplicationPool = @{ Name = $testParams.ApplicationPool }
                 }
                 $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value {
@@ -195,9 +195,9 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "When the service app doesn't exist and shouldn't" -Fixture {
             $testParams = @{
-                Name = "Test App"
+                Name            = "Test App"
                 ApplicationPool = "-"
-                Ensure = "Absent"
+                Ensure          = "Absent"
             }
 
             Mock -CommandName Get-SPServiceApplication -MockWith {

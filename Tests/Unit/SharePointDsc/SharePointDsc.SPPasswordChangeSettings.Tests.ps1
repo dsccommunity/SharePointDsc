@@ -3,16 +3,16 @@ param(
     [Parameter()]
     [string]
     $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
-                                         -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
-                                         -Resolve)
+            -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
+            -Resolve)
 )
 
 Import-Module -Name (Join-Path -Path $PSScriptRoot `
-                                -ChildPath "..\UnitTestHelper.psm1" `
-                                -Resolve)
+        -ChildPath "..\UnitTestHelper.psm1" `
+        -Resolve)
 
 $Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointCmdletModule `
-                                              -DscResource "SPPasswordChangeSettings"
+    -DscResource "SPPasswordChangeSettings"
 
 Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
     InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
@@ -21,9 +21,9 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         # Test contexts
         Context -Name "No local SharePoint farm is available" {
             $testParams = @{
-                IsSingleInstance = "Yes"
-                MailAddress = "e@mail.com"
-                DaysBeforeExpiry = 7
+                IsSingleInstance              = "Yes"
+                MailAddress                   = "e@mail.com"
+                DaysBeforeExpiry              = 7
                 PasswordChangeWaitTimeSeconds = 60
             }
 
@@ -43,18 +43,18 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "There is a local SharePoint farm and the properties are set correctly" {
             $testParams = @{
-                IsSingleInstance = "Yes"
-                MailAddress = "e@mail.com"
-                DaysBeforeExpiry = 7
+                IsSingleInstance              = "Yes"
+                MailAddress                   = "e@mail.com"
+                DaysBeforeExpiry              = 7
                 PasswordChangeWaitTimeSeconds = 60
             }
 
             Mock -CommandName Get-SPFarm -MockWith {
                 return @{
-                    PasswordChangeEmailAddress = "e@mail.com"
+                    PasswordChangeEmailAddress              = "e@mail.com"
                     DaysBeforePasswordExpirationToSendEmail = 7
-                    PasswordChangeGuardTime = 60
-                    PasswordChangeMaximumTries = 3
+                    PasswordChangeGuardTime                 = 60
+                    PasswordChangeMaximumTries              = 3
                 }
             }
 
@@ -69,24 +69,24 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "There is a local SharePoint farm and the properties are not set correctly" {
             $testParams = @{
-                IsSingleInstance = "Yes"
-                MailAddress = "e@mail.com"
-                DaysBeforeExpiry = 7
+                IsSingleInstance              = "Yes"
+                MailAddress                   = "e@mail.com"
+                DaysBeforeExpiry              = 7
                 PasswordChangeWaitTimeSeconds = 60
             }
 
             Mock -CommandName Get-SPFarm -MockWith {
                 $result = @{
-                    PasswordChangeEmailAddress = ""
-                    PasswordChangeGuardTime = 0
-                    PasswordChangeMaximumTries = 0
+                    PasswordChangeEmailAddress              = ""
+                    PasswordChangeGuardTime                 = 0
+                    PasswordChangeMaximumTries              = 0
                     DaysBeforePasswordExpirationToSendEmail = 0
                 }
                 $result = $result | Add-Member  ScriptMethod Update {
                     $Global:SPDscFarmUpdateCalled = $true
                     return $true;
 
-                    } -PassThru
+                } -PassThru
                 return $result
             }
 
@@ -102,7 +102,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 $Global:SPDscFarmUpdateCalled = $false
                 Set-TargetResource @testParams
                 Assert-MockCalled Get-SPFarm
-                $Global:SPDscFarmUpdateCalled  | Should Be $true
+                $Global:SPDscFarmUpdateCalled | Should Be $true
             }
         }
     }
