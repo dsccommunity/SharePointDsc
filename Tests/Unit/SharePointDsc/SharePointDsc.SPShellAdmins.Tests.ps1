@@ -3,24 +3,24 @@ param(
     [Parameter()]
     [string]
     $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
-                                         -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
-                                         -Resolve)
+            -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
+            -Resolve)
 )
 
 Import-Module -Name (Join-Path -Path $PSScriptRoot `
-                                -ChildPath "..\UnitTestHelper.psm1" `
-                                -Resolve)
+        -ChildPath "..\UnitTestHelper.psm1" `
+        -Resolve)
 
 $Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointCmdletModule `
-                                              -DscResource "SPShellAdmins"
+    -DscResource "SPShellAdmins"
 
 Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
     InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
         Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
         # Mocks for all contexts
-        Mock -CommandName Add-SPShellAdmin -MockWith {}
-        Mock -CommandName Remove-SPShellAdmin -MockWith {}
+        Mock -CommandName Add-SPShellAdmin -MockWith { }
+        Mock -CommandName Remove-SPShellAdmin -MockWith { }
 
         # Test contexts
         Context -Name "The server is not part of SharePoint farm" -Fixture {
@@ -53,13 +53,13 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             $testParams = @{
                 IsSingleInstance = "Yes"
                 Members          = "contoso\user1", "contoso\user2"
-                Databases = @(
+                Databases        = @(
                     (New-CimInstance -ClassName MSFT_SPContentDatabasePermissions -Property @{
-                        Name = "SharePoint_Content_Contoso1"
-                        Members = "contoso\user1", "contoso\user2"
-                    } -ClientOnly)
+                            Name    = "SharePoint_Content_Contoso1"
+                            Members = "contoso\user1", "contoso\user2"
+                        } -ClientOnly)
                 )
-                AllDatabases = $true
+                AllDatabases     = $true
             }
 
             It "Should return null from the get method" {
@@ -125,12 +125,12 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         Context -Name "Members and MembersToInclude parameters used simultaneously - Database permissions" -Fixture {
             $testParams = @{
                 IsSingleInstance = "Yes"
-                Databases = @(
+                Databases        = @(
                     (New-CimInstance -ClassName MSFT_SPDatabasePermissions -Property @{
-                        Name = "SharePoint_Content_Contoso1"
-                        Members = "contoso\user1", "contoso\user2"
-                        MembersToInclude = "contoso\user1", "contoso\user2"
-                    } -ClientOnly)
+                            Name             = "SharePoint_Content_Contoso1"
+                            Members          = "contoso\user1", "contoso\user2"
+                            MembersToInclude = "contoso\user1", "contoso\user2"
+                        } -ClientOnly)
                 )
             }
 
@@ -153,11 +153,11 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         Context -Name "Databases and ExcludeDatabases parameters used simultaneously" -Fixture {
             $testParams = @{
                 IsSingleInstance = "Yes"
-                Databases = @(
+                Databases        = @(
                     (New-CimInstance -ClassName MSFT_SPDatabasePermissions -Property @{
-                        Name = "SharePoint_Content_Contoso1"
-                        Members = "contoso\user1", "contoso\user2"
-                    } -ClientOnly)
+                            Name    = "SharePoint_Content_Contoso1"
+                            Members = "contoso\user1", "contoso\user2"
+                        } -ClientOnly)
                 )
                 ExcludeDatabases = "SharePoint_Content_Contoso2"
             }
@@ -178,10 +178,10 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         Context -Name "None of the Members, MembersToInclude and MembersToExclude parameters are used - Database permissions" -Fixture {
             $testParams = @{
                 IsSingleInstance = "Yes"
-                Databases = @(
+                Databases        = @(
                     (New-CimInstance -ClassName MSFT_SPDatabasePermissions -Property @{
-                        Name = "SharePoint_Content_Contoso1"
-                    } -ClientOnly)
+                            Name = "SharePoint_Content_Contoso1"
+                        } -ClientOnly)
                 )
             }
 
@@ -204,11 +204,11 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         Context -Name "Specified content database does not exist - Database permissions" -Fixture {
             $testParams = @{
                 IsSingleInstance = "Yes"
-                Databases = @(
+                Databases        = @(
                     (New-CimInstance -ClassName MSFT_SPDatabasePermissions -Property @{
-                        Name    = "SharePoint_Content_Contoso3"
-                        Members = "contoso\user1", "contoso\user2"
-                    } -ClientOnly)
+                            Name    = "SharePoint_Content_Contoso3"
+                            Members = "contoso\user1", "contoso\user2"
+                        } -ClientOnly)
                 )
             }
 
@@ -242,7 +242,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             $testParams = @{
                 IsSingleInstance = "Yes"
                 Members          = "contoso\user1", "contoso\user2"
-                AllDatabases = $true
+                AllDatabases     = $true
             }
 
             Mock -CommandName Get-SPShellAdmin -MockWith {
@@ -250,14 +250,14 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 {
                     # Database parameter used, return database permissions
                     return @{
-                        UserName = "contoso\user3","contoso\user4"
+                        UserName = "contoso\user3", "contoso\user4"
                     }
                 }
                 else
                 {
                     # Database parameter not used, return general permissions
                     return @{
-                        UserName = "contoso\user3","contoso\user4"
+                        UserName = "contoso\user3", "contoso\user4"
                     }
                 }
             }
@@ -303,14 +303,14 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 {
                     # Database parameter used, return database permissions
                     return @{
-                        UserName = "contoso\user3","contoso\user4"
+                        UserName = "contoso\user3", "contoso\user4"
                     }
                 }
                 else
                 {
                     # Database parameter not used, return general permissions
                     return @{
-                        UserName = "contoso\user1","contoso\user2"
+                        UserName = "contoso\user1", "contoso\user2"
                     }
                 }
             }
@@ -357,12 +357,12 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 if ($database)
                 {
                     # Database parameter used, return database permissions
-                    return @{}
+                    return @{ }
                 }
                 else
                 {
                     # Database parameter not used, return general permissions
-                    return @{ UserName = "contoso\user3","contoso\user4" }
+                    return @{ UserName = "contoso\user3", "contoso\user4" }
                 }
             }
 
@@ -391,7 +391,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 if ($database)
                 {
                     # Database parameter used, return database permissions
-                    return @{}
+                    return @{ }
                 }
                 else
                 {
@@ -416,13 +416,13 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 IsSingleInstance = "Yes"
                 Databases        = @(
                     (New-CimInstance -ClassName MSFT_SPDatabasePermissions -Property @{
-                        Name = "SharePoint_Content_Contoso1"
-                        Members = "contoso\user1", "contoso\user2"
-                    } -ClientOnly)
+                            Name    = "SharePoint_Content_Contoso1"
+                            Members = "contoso\user1", "contoso\user2"
+                        } -ClientOnly)
                     (New-CimInstance -ClassName MSFT_SPDatabasePermissions -Property @{
-                        Name = "SharePoint_Content_Contoso2"
-                        Members = "contoso\user1", "contoso\user2"
-                    } -ClientOnly)
+                            Name    = "SharePoint_Content_Contoso2"
+                            Members = "contoso\user1", "contoso\user2"
+                        } -ClientOnly)
                 )
             }
 
@@ -431,14 +431,14 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 {
                     # Database parameter used, return database permissions
                     return @{
-                        UserName = "contoso\user3","contoso\user4"
+                        UserName = "contoso\user3", "contoso\user4"
                     }
                 }
                 else
                 {
                     # Database parameter not used, return general permissions
                     return @{
-                        UserName = "contoso\user1","contoso\user2"
+                        UserName = "contoso\user1", "contoso\user2"
                     }
                 }
             }
@@ -476,13 +476,13 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 IsSingleInstance = "Yes"
                 Databases        = @(
                     (New-CimInstance -ClassName MSFT_SPDatabasePermissions -Property @{
-                        Name = "SharePoint_Content_Contoso1"
-                        Members = "contoso\user1", "contoso\user2"
-                    } -ClientOnly)
+                            Name    = "SharePoint_Content_Contoso1"
+                            Members = "contoso\user1", "contoso\user2"
+                        } -ClientOnly)
                     (New-CimInstance -ClassName MSFT_SPDatabasePermissions -Property @{
-                        Name = "SharePoint_Content_Contoso2"
-                        Members = "contoso\user1", "contoso\user2"
-                    } -ClientOnly)
+                            Name    = "SharePoint_Content_Contoso2"
+                            Members = "contoso\user1", "contoso\user2"
+                        } -ClientOnly)
                 )
             }
 
@@ -491,14 +491,14 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 {
                     # Database parameter used, return database permissions
                     return @{
-                        UserName = "contoso\user1","contoso\user2"
+                        UserName = "contoso\user1", "contoso\user2"
                     }
                 }
                 else
                 {
                     # Database parameter not used, return general permissions
                     return @{
-                        UserName = "contoso\user1","contoso\user2"
+                        UserName = "contoso\user1", "contoso\user2"
                     }
                 }
             }
@@ -535,13 +535,13 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 if ($database)
                 {
                     # Database parameter used, return database permissions
-                    return @{}
+                    return @{ }
                 }
                 else
                 {
                     # Database parameter not used, return general permissions
                     return @{
-                        UserName = "contoso\user3","contoso\user4"
+                        UserName = "contoso\user3", "contoso\user4"
                     }
                 }
             }
@@ -570,7 +570,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 if ($database)
                 {
                     # Database parameter used, return database permissions
-                    return @{}
+                    return @{ }
                 }
                 else
                 {
@@ -595,13 +595,13 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 IsSingleInstance = "Yes"
                 Databases        = @(
                     (New-CimInstance -ClassName MSFT_SPDatabasePermissions -Property @{
-                        Name             = "SharePoint_Content_Contoso1"
-                        MembersToInclude = "contoso\user1", "contoso\user2"
-                    } -ClientOnly)
+                            Name             = "SharePoint_Content_Contoso1"
+                            MembersToInclude = "contoso\user1", "contoso\user2"
+                        } -ClientOnly)
                     (New-CimInstance -ClassName MSFT_SPDatabasePermissions -Property @{
-                        Name             = "SharePoint_Content_Contoso2"
-                        MembersToInclude = "contoso\user1", "contoso\user2"
-                    } -ClientOnly)
+                            Name             = "SharePoint_Content_Contoso2"
+                            MembersToInclude = "contoso\user1", "contoso\user2"
+                        } -ClientOnly)
                 )
             }
 
@@ -610,14 +610,14 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 {
                     # Database parameter used, return database permissions
                     return @{
-                        UserName = "contoso\user3","contoso\user4"
+                        UserName = "contoso\user3", "contoso\user4"
                     }
                 }
                 else
                 {
                     # Database parameter not used, return general permissions
                     return @{
-                        UserName = "contoso\user1","contoso\user2"
+                        UserName = "contoso\user1", "contoso\user2"
                     }
                 }
             }
@@ -654,13 +654,13 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 IsSingleInstance = "Yes"
                 Databases        = @(
                     (New-CimInstance -ClassName MSFT_SPDatabasePermissions -Property @{
-                        Name             = "SharePoint_Content_Contoso1"
-                        MembersToInclude = "contoso\user1", "contoso\user2"
-                    } -ClientOnly)
+                            Name             = "SharePoint_Content_Contoso1"
+                            MembersToInclude = "contoso\user1", "contoso\user2"
+                        } -ClientOnly)
                     (New-CimInstance -ClassName MSFT_SPDatabasePermissions -Property @{
-                        Name             = "SharePoint_Content_Contoso2"
-                        MembersToInclude = "contoso\user1", "contoso\user2"
-                    } -ClientOnly)
+                            Name             = "SharePoint_Content_Contoso2"
+                            MembersToInclude = "contoso\user1", "contoso\user2"
+                        } -ClientOnly)
                 )
             }
 
@@ -669,14 +669,14 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 {
                     # Database parameter used, return database permissions
                     return @{
-                        UserName = "contoso\user1","contoso\user2", "contoso\user3"
+                        UserName = "contoso\user1", "contoso\user2", "contoso\user3"
                     }
                 }
                 else
                 {
                     # Database parameter not used, return general permissions
                     return @{
-                        UserName = "contoso\user1","contoso\user2"
+                        UserName = "contoso\user1", "contoso\user2"
                     }
                 }
             }
@@ -713,13 +713,13 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 if ($database)
                 {
                     # Database parameter used, return database permissions
-                    return @{}
+                    return @{ }
                 }
                 else
                 {
                     # Database parameter not used, return general permissions
                     return @{
-                        UserName = "contoso\user1","contoso\user2"
+                        UserName = "contoso\user1", "contoso\user2"
                     }
                 }
             }
@@ -748,7 +748,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 if ($database)
                 {
                     # Database parameter used, return database permissions
-                    return @{}
+                    return @{ }
                 }
                 else
                 {
@@ -773,13 +773,13 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 IsSingleInstance = "Yes"
                 Databases        = @(
                     (New-CimInstance -ClassName MSFT_SPDatabasePermissions -Property @{
-                        Name             = "SharePoint_Content_Contoso1"
-                        MembersToExclude = "contoso\user1", "contoso\user2"
-                    } -ClientOnly)
+                            Name             = "SharePoint_Content_Contoso1"
+                            MembersToExclude = "contoso\user1", "contoso\user2"
+                        } -ClientOnly)
                     (New-CimInstance -ClassName MSFT_SPDatabasePermissions -Property @{
-                        Name             = "SharePoint_Content_Contoso2"
-                        MembersToExclude = "contoso\user1", "contoso\user2"
-                    } -ClientOnly)
+                            Name             = "SharePoint_Content_Contoso2"
+                            MembersToExclude = "contoso\user1", "contoso\user2"
+                        } -ClientOnly)
                 )
             }
 
@@ -788,14 +788,14 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 {
                     # Database parameter used, return database permissions
                     return @{
-                        UserName = "contoso\user1","contoso\user2"
+                        UserName = "contoso\user1", "contoso\user2"
                     }
                 }
                 else
                 {
                     # Database parameter not used, return general permissions
                     return @{
-                        UserName = "contoso\user1","contoso\user2"
+                        UserName = "contoso\user1", "contoso\user2"
                     }
                 }
             }
@@ -832,13 +832,13 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 IsSingleInstance = "Yes"
                 Databases        = @(
                     (New-CimInstance -ClassName MSFT_SPDatabasePermissions -Property @{
-                        Name             = "SharePoint_Content_Contoso1"
-                        MembersToExclude = "contoso\user3", "contoso\user4"
-                    } -ClientOnly)
+                            Name             = "SharePoint_Content_Contoso1"
+                            MembersToExclude = "contoso\user3", "contoso\user4"
+                        } -ClientOnly)
                     (New-CimInstance -ClassName MSFT_SPDatabasePermissions -Property @{
-                        Name             = "SharePoint_Content_Contoso2"
-                        MembersToExclude = "contoso\user5", "contoso\user6"
-                    } -ClientOnly)
+                            Name             = "SharePoint_Content_Contoso2"
+                            MembersToExclude = "contoso\user5", "contoso\user6"
+                        } -ClientOnly)
                 )
             }
 
@@ -847,14 +847,14 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 {
                     # Database parameter used, return database permissions
                     return @{
-                        UserName = "contoso\user1","contoso\user2"
+                        UserName = "contoso\user1", "contoso\user2"
                     }
                 }
                 else
                 {
                     # Database parameter not used, return general permissions
                     return @{
-                        UserName = "contoso\user1","contoso\user2"
+                        UserName = "contoso\user1", "contoso\user2"
                     }
                 }
             }

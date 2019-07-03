@@ -10,12 +10,12 @@ function Get-TargetResource
         $IsSingleInstance,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present",
 
         [Parameter()]
-        [ValidateSet("mon","tue","wed","thu","fri","sat","sun")]
+        [ValidateSet("mon", "tue", "wed", "thu", "fri", "sat", "sun")]
         [System.String[]]
         $DatabaseUpgradeDays,
 
@@ -33,11 +33,11 @@ function Get-TargetResource
     # Check which version of SharePoint is installed
     if ((Get-SPDscInstalledProductVersion).FileMajorPart -eq 15)
     {
-        $wssRegKey ="hklm:SOFTWARE\Microsoft\Shared Tools\Web Server Extensions\15.0\WSS"
+        $wssRegKey = "hklm:SOFTWARE\Microsoft\Shared Tools\Web Server Extensions\15.0\WSS"
     }
     else
     {
-        $wssRegKey ="hklm:SOFTWARE\Microsoft\Shared Tools\Web Server Extensions\16.0\WSS"
+        $wssRegKey = "hklm:SOFTWARE\Microsoft\Shared Tools\Web Server Extensions\16.0\WSS"
     }
 
     # Read LanguagePackInstalled and SetupType registry keys
@@ -77,12 +77,12 @@ function Set-TargetResource
         $IsSingleInstance,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present",
 
         [Parameter()]
-        [ValidateSet("mon","tue","wed","thu","fri","sat","sun")]
+        [ValidateSet("mon", "tue", "wed", "thu", "fri", "sat", "sun")]
         [System.String[]]
         $DatabaseUpgradeDays,
 
@@ -112,24 +112,24 @@ function Set-TargetResource
     if ($DatabaseUpgradeDays)
     {
         Write-Verbose -Message "DatabaseUpgradeDays parameter exists, check if current day is specified"
-        $currentDayOfWeek = $now.DayOfWeek.ToString().ToLower().Substring(0,3)
+        $currentDayOfWeek = $now.DayOfWeek.ToString().ToLower().Substring(0, 3)
 
         if ($DatabaseUpgradeDays -contains $currentDayOfWeek)
         {
             Write-Verbose -Message ("Current day is present in the parameter DatabaseUpgradeDays. " + `
-                                    "Configuration wizard can be run today.")
+                    "Configuration wizard can be run today.")
         }
         else
         {
             Write-Verbose -Message ("Current day is not present in the parameter DatabaseUpgradeDays, " + `
-                                    "skipping the Configuration Wizard")
+                    "skipping the Configuration Wizard")
             return
         }
     }
     else
     {
         Write-Verbose -Message ("No DatabaseUpgradeDays specified, Configuration Wizard can be " + `
-                                "ran on any day.")
+                "ran on any day.")
     }
 
     # Check if DatabaseUpdateTime parameter exists
@@ -146,12 +146,12 @@ function Set-TargetResource
         }
         else
         {
-            if ([datetime]::TryParse($upgradeTimes[0],[ref]$starttime) -ne $true)
+            if ([datetime]::TryParse($upgradeTimes[0], [ref]$starttime) -ne $true)
             {
                 throw "Error converting start time"
             }
 
-            if ([datetime]::TryParse($upgradeTimes[2],[ref]$endtime) -ne $true)
+            if ([datetime]::TryParse($upgradeTimes[2], [ref]$endtime) -ne $true)
             {
                 throw "Error converting end time"
             }
@@ -165,25 +165,25 @@ function Set-TargetResource
         if (($starttime -lt $now) -and ($endtime -gt $now))
         {
             Write-Verbose -Message ("Current time is inside of the window specified in " + `
-                                    "DatabaseUpgradeTime. Starting wizard")
+                    "DatabaseUpgradeTime. Starting wizard")
         }
         else
         {
             Write-Verbose -Message ("Current time is outside of the window specified in " + `
-                                    "DatabaseUpgradeTime, skipping the Configuration Wizard")
+                    "DatabaseUpgradeTime, skipping the Configuration Wizard")
             return
         }
     }
     else
     {
         Write-Verbose -Message ("No DatabaseUpgradeTime specified, Configuration Wizard can be " + `
-                                "ran at any time. Starting wizard.")
+                "ran at any time. Starting wizard.")
     }
 
     if ($Ensure -eq "Absent")
     {
         Write-Verbose -Message ("Ensure is set to Absent, so running the Configuration " + `
-                                "Wizard is not required")
+                "Wizard is not required")
         return
     }
 
@@ -201,16 +201,16 @@ function Set-TargetResource
     # Start wizard
     Write-Verbose -Message "Starting Configuration Wizard"
     $result = Invoke-SPDscCommand -Credential $InstallAccount `
-                                  -Arguments $psconfigExe `
-                                  -ScriptBlock {
+        -Arguments $psconfigExe `
+        -ScriptBlock {
         $psconfigExe = $args[0]
 
         $stdOutTempFile = "$env:TEMP\$((New-Guid).Guid)"
         $psconfig = Start-Process -FilePath $psconfigExe `
-                                  -ArgumentList "-cmd upgrade -inplace b2b -wait -cmd applicationcontent -install -cmd installfeatures -cmd secureresources -cmd services -install" `
-                                  -RedirectStandardOutput $stdOutTempFile `
-                                  -Wait `
-                                  -PassThru
+            -ArgumentList "-cmd upgrade -inplace b2b -wait -cmd applicationcontent -install -cmd installfeatures -cmd secureresources -cmd services -install" `
+            -RedirectStandardOutput $stdOutTempFile `
+            -Wait `
+            -PassThru
 
         $cmdOutput = Get-Content -Path $stdOutTempFile -Raw
         Remove-Item -Path $stdOutTempFile
@@ -227,13 +227,15 @@ function Set-TargetResource
     # Error codes: https://aka.ms/installerrorcodes
     switch ($result)
     {
-        0 {
+        0
+        {
             Write-Verbose -Message "SharePoint Post Setup Configuration Wizard ran successfully"
         }
-        Default {
+        Default
+        {
             throw ("SharePoint Post Setup Configuration Wizard failed, " + `
-                   "exit code was $result. Error codes can be found at " + `
-                   "https://aka.ms/installerrorcodes")
+                    "exit code was $result. Error codes can be found at " + `
+                    "https://aka.ms/installerrorcodes")
         }
     }
 }
@@ -251,12 +253,12 @@ function Test-TargetResource
         $IsSingleInstance,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present",
 
         [Parameter()]
-        [ValidateSet("mon","tue","wed","thu","fri","sat","sun")]
+        [ValidateSet("mon", "tue", "wed", "thu", "fri", "sat", "sun")]
         [System.String[]]
         $DatabaseUpgradeDays,
 
@@ -276,7 +278,7 @@ function Test-TargetResource
     if ($Ensure -eq "Absent")
     {
         Write-Verbose -Message ("Ensure is set to Absent, so running the Configuration Wizard " + `
-                                "is not required")
+                "is not required")
         return $true
     }
 
@@ -286,8 +288,8 @@ function Test-TargetResource
     Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
 
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
-                                    -DesiredValues $PSBoundParameters `
-                                    -ValuesToCheck @("Ensure")
+        -DesiredValues $PSBoundParameters `
+        -ValuesToCheck @("Ensure")
 }
 
 Export-ModuleMember -Function *-TargetResource

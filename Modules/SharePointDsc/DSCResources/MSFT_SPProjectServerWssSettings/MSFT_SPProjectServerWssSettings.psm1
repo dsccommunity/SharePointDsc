@@ -9,7 +9,7 @@ function Get-TargetResource
         $Url,
 
         [Parameter(Mandatory = $true)]
-        [ValidateSet("AutoCreate","UserChoice","DontCreate")]
+        [ValidateSet("AutoCreate", "UserChoice", "DontCreate")]
         [System.String]
         $CreateProjectSiteMode,
 
@@ -23,12 +23,12 @@ function Get-TargetResource
     if ((Get-SPDscInstalledProductVersion).FileMajorPart -lt 16)
     {
         throw [Exception] ("Support for Project Server in SharePointDsc is only valid for " + `
-                           "SharePoint 2016 and 2019.")
+                "SharePoint 2016 and 2019.")
     }
 
     $result = Invoke-SPDscCommand -Credential $InstallAccount `
-                                  -Arguments @($PSBoundParameters, $PSScriptRoot) `
-                                  -ScriptBlock {
+        -Arguments @($PSBoundParameters, $PSScriptRoot) `
+        -ScriptBlock {
         $params = $args[0]
         $scriptRoot = $args[1]
 
@@ -38,8 +38,8 @@ function Get-TargetResource
         $webAppUrl = (Get-SPSite -Identity $params.Url).WebApplication.Url
         $useKerberos = -not (Get-SPAuthenticationProvider -WebApplication $webAppUrl -Zone Default).DisableKerberos
         $wssService = New-SPDscProjectServerWebService -PwaUrl $params.Url `
-                                                       -EndpointName WssInterop `
-                                                       -UseKerberos:$useKerberos
+            -EndpointName WssInterop `
+            -UseKerberos:$useKerberos
 
         $script:currentValue = $null
         Use-SPDscProjectServerWebService -Service $wssService -ScriptBlock {
@@ -53,15 +53,18 @@ function Get-TargetResource
         $currentValue = "Unknown"
         if ($null -ne $script:currentValue)
         {
-            switch($script:currentValue)
+            switch ($script:currentValue)
             {
-                0 {
+                0
+                {
                     $currentValue = "UserChoice"
                 }
-                1 {
+                1
+                {
                     $currentValue = "AutoCreate"
                 }
-                2 {
+                2
+                {
                     $currentValue = "DontCreate"
                 }
             }
@@ -87,7 +90,7 @@ function Set-TargetResource
         $Url,
 
         [Parameter(Mandatory = $true)]
-        [ValidateSet("AutoCreate","UserChoice","DontCreate")]
+        [ValidateSet("AutoCreate", "UserChoice", "DontCreate")]
         [System.String]
         $CreateProjectSiteMode,
 
@@ -99,8 +102,8 @@ function Set-TargetResource
     Write-Verbose -Message "Setting WSS settings for $Url"
 
     Invoke-SPDscCommand -Credential $InstallAccount `
-                        -Arguments @($PSBoundParameters, $PSScriptRoot) `
-                        -ScriptBlock {
+        -Arguments @($PSBoundParameters, $PSScriptRoot) `
+        -ScriptBlock {
         $params = $args[0]
         $scriptRoot = $args[1]
 
@@ -110,21 +113,24 @@ function Set-TargetResource
         $webAppUrl = (Get-SPSite -Identity $params.Url).WebApplication.Url
         $useKerberos = -not (Get-SPAuthenticationProvider -WebApplication $webAppUrl -Zone Default).DisableKerberos
         $wssService = New-SPDscProjectServerWebService -PwaUrl $params.Url `
-                                                       -EndpointName WssInterop `
-                                                       -UseKerberos:$useKerberos
+            -EndpointName WssInterop `
+            -UseKerberos:$useKerberos
 
         Use-SPDscProjectServerWebService -Service $wssService -ScriptBlock {
             $settings = $wssService.ReadWssSettings()
 
-            switch($params.CreateProjectSiteMode)
+            switch ($params.CreateProjectSiteMode)
             {
-                "UserChoice" {
+                "UserChoice"
+                {
                     $settings.WssAdmin.Rows[0]["WADMIN_AUTO_CREATE_SUBWEBS"] = 0
                 }
-                "AutoCreate" {
+                "AutoCreate"
+                {
                     $settings.WssAdmin.Rows[0]["WADMIN_AUTO_CREATE_SUBWEBS"] = 1
                 }
-                "DontCreate" {
+                "DontCreate"
+                {
                     $settings.WssAdmin.Rows[0]["WADMIN_AUTO_CREATE_SUBWEBS"] = 2
                 }
             }
@@ -145,7 +151,7 @@ function Test-TargetResource
         $Url,
 
         [Parameter(Mandatory = $true)]
-        [ValidateSet("AutoCreate","UserChoice","DontCreate")]
+        [ValidateSet("AutoCreate", "UserChoice", "DontCreate")]
         [System.String]
         $CreateProjectSiteMode,
 
@@ -162,7 +168,7 @@ function Test-TargetResource
     Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
 
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
-                                    -DesiredValues $PSBoundParameters
+        -DesiredValues $PSBoundParameters
 }
 
 Export-ModuleMember -Function *-TargetResource

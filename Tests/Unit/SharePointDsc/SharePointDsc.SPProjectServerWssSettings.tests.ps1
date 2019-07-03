@@ -1,26 +1,27 @@
 [CmdletBinding()]
 param(
     [Parameter()]
-    [string] 
+    [string]
     $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
-                                         -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
-                                         -Resolve)
+            -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
+            -Resolve)
 )
 
 Import-Module -Name (Join-Path -Path $PSScriptRoot `
-                                -ChildPath "..\UnitTestHelper.psm1" `
-                                -Resolve)
+        -ChildPath "..\UnitTestHelper.psm1" `
+        -Resolve)
 
 $Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointCmdletModule `
-                                              -DscResource "SPProjectServerWssSettings"
+    -DscResource "SPProjectServerWssSettings"
 
 Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
     InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
         Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
-        switch ($Global:SPDscHelper.CurrentStubBuildNumber.Major) 
+        switch ($Global:SPDscHelper.CurrentStubBuildNumber.Major)
         {
-            15 {
+            15
+            {
                 Context -Name "All methods throw exceptions as Project Server support in SharePointDsc is only for 2016" -Fixture {
                     It "Should throw on the get method" {
                         { Get-TargetResource @testParams } | Should Throw
@@ -35,11 +36,12 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     }
                 }
             }
-            16 {
+            16
+            {
                 $modulePath = "Modules\SharePointDsc\Modules\SharePointDsc.ProjectServer\ProjectServerConnector.psm1"
                 Import-Module -Name (Join-Path -Path $Global:SPDscHelper.RepoRoot -ChildPath $modulePath -Resolve)
 
-                Mock -CommandName "Import-Module" -MockWith {}
+                Mock -CommandName "Import-Module" -MockWith { }
 
                 Mock -CommandName Get-SPSite -MockWith {
                     return @{
@@ -48,18 +50,18 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                         }
                     }
                 }
-        
+
                 Mock -CommandName Get-SPAuthenticationProvider -MockWith {
                     return @{
                         DisableKerberos = $true
                     }
                 }
 
-                try 
+                try
                 {
                     [SPDscTests.DummyWebService] | Out-Null
                 }
-                catch 
+                catch
                 {
                     Add-Type -TypeDefinition @"
                         namespace SPDscTests
@@ -68,13 +70,13 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                             {
                                 public void Dispose()
                                 {
-        
-                                } 
-                            } 
+
+                                }
+                            }
                         }
 "@
                 }
-                
+
                 function New-SPDscWssAdminTable
                 {
                     param(
@@ -98,15 +100,15 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Mock -CommandName "New-SPDscProjectServerWebService" -MockWith {
                     $service = [SPDscTests.DummyWebService]::new()
                     $service = $service | Add-Member -MemberType ScriptMethod `
-                                                     -Name ReadWssSettings `
-                                                     -Value {
-                                                         return $global:SPDscCurrentWssSettings
-                                                     } -PassThru -Force `
-                                        | Add-Member -MemberType ScriptMethod `
-                                                     -Name UpdateWssSettings `
-                                                     -Value {
-                                                         $global:SPDscUpdateWssSettingsCalled = $true
-                                                     } -PassThru -Force
+                        -Name ReadWssSettings `
+                        -Value {
+                        return $global:SPDscCurrentWssSettings
+                    } -PassThru -Force `
+                    | Add-Member -MemberType ScriptMethod `
+                        -Name UpdateWssSettings `
+                        -Value {
+                        $global:SPDscUpdateWssSettingsCalled = $true
+                    } -PassThru -Force
                     return $service
                 }
 
@@ -114,7 +116,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
                 Context -Name "WSS settings can not be found" -Fixture {
                     $testParams = @{
-                        Url = "http://sites.contoso.com/pwa"
+                        Url                   = "http://sites.contoso.com/pwa"
                         CreateProjectSiteMode = "AutoCreate"
                     }
 
@@ -127,14 +129,14 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
                 Context -Name "WSS settings are not applied correctly" -Fixture {
                     $testParams = @{
-                        Url = "http://sites.contoso.com/pwa"
+                        Url                   = "http://sites.contoso.com/pwa"
                         CreateProjectSiteMode = "AutoCreate"
                     }
 
                     $global:SPDscCurrentWssSettings = @{
                         WssAdmin = (New-SPDscWssAdminTable -Values @{
-                            WADMIN_AUTO_CREATE_SUBWEBS = 2
-                        }).Tables[0]
+                                WADMIN_AUTO_CREATE_SUBWEBS = 2
+                            }).Tables[0]
                     }
 
                     It "should return false on the values from the get method" {
@@ -151,17 +153,17 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                         $global:SPDscUpdateWssSettingsCalled | Should Be $true
                     }
                 }
-                
+
                 Context -Name "WSS settings are applied correctly" -Fixture {
                     $testParams = @{
-                        Url = "http://sites.contoso.com/pwa"
+                        Url                   = "http://sites.contoso.com/pwa"
                         CreateProjectSiteMode = "AutoCreate"
                     }
 
                     $global:SPDscCurrentWssSettings = @{
                         WssAdmin = (New-SPDscWssAdminTable -Values @{
-                            WADMIN_AUTO_CREATE_SUBWEBS = 1
-                        }).Tables[0]
+                                WADMIN_AUTO_CREATE_SUBWEBS = 1
+                            }).Tables[0]
                     }
 
                     It "should return true on the values from the get method" {
@@ -173,7 +175,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     }
                 }
             }
-            Default {
+            Default
+            {
                 throw [Exception] "A supported version of SharePoint was not used in testing"
             }
         }

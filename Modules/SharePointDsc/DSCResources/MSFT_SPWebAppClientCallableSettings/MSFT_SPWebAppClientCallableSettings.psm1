@@ -1,7 +1,7 @@
 function Get-TargetResource
 {
     [CmdletBinding()]
-    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSDSCUseIdenticalMandatoryParametersForDSC", "", Justification  =  "Temporary workaround for issue introduced in PSSA v1.18")]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSDSCUseIdenticalMandatoryParametersForDSC", "", Justification = "Temporary workaround for issue introduced in PSSA v1.18")]
     [OutputType([System.Collections.Hashtable])]
     param
     (
@@ -67,12 +67,12 @@ function Get-TargetResource
     if ($ProxyLibraries -and (($ProxyLibrariesToInclude) -or ($ProxyLibrariesToExclude)))
     {
         throw ("Cannot use the ProxyLibraries parameter together with the ProxyLibrariesToInclude or " + `
-               "ProxyLibrariesToExclude parameters")
+                "ProxyLibrariesToExclude parameters")
     }
 
     $result = Invoke-SPDscCommand -Credential $InstallAccount `
-                                  -Arguments @($PSBoundParameters) `
-                                  -ScriptBlock {
+        -Arguments @($PSBoundParameters) `
+        -ScriptBlock {
         $params = $args[0]
 
         $webApplication = Get-SPWebApplication -Identity $params.WebAppUrl -ErrorAction SilentlyContinue
@@ -144,7 +144,7 @@ function Get-TargetResource
 function Set-TargetResource
 {
     [CmdletBinding()]
-    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSDSCUseIdenticalMandatoryParametersForDSC", "", Justification  =  "Temporary workaround for issue introduced in PSSA v1.18")]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSDSCUseIdenticalMandatoryParametersForDSC", "", Justification = "Temporary workaround for issue introduced in PSSA v1.18")]
     param
     (
         [Parameter(Mandatory = $true)]
@@ -209,12 +209,12 @@ function Set-TargetResource
     if ($ProxyLibraries -and (($ProxyLibrariesToInclude) -or ($ProxyLibrariesToExclude)))
     {
         throw ("Cannot use the ProxyLibraries parameter together with the ProxyLibrariesToInclude or " + `
-               "ProxyLibrariesToExclude parameters")
+                "ProxyLibrariesToExclude parameters")
     }
 
     Invoke-SPDscCommand -Credential $InstallAccount `
-                        -Arguments @($PSBoundParameters) `
-                        -ScriptBlock {
+        -Arguments @($PSBoundParameters) `
+        -ScriptBlock {
         $params = $args[0]
 
         $webApplication = Get-SPWebApplication -Identity $params.WebAppUrl -ErrorAction SilentlyContinue
@@ -252,7 +252,7 @@ function Set-TargetResource
                 }
             }
 
-            [System.Collections.ObjectModel.Collection[System.Object]]$proxyLibrariesToRemove = @{}
+            [System.Collections.ObjectModel.Collection[System.Object]]$proxyLibrariesToRemove = @{ }
             foreach ($currentProxyLibrary in $clientCallableSettings.ProxyLibraries)
             {
                 if ($params.ProxyLibraries.Count -eq 0 -or (-not ($params.ProxyLibraries.AssemblyName -contains $currentProxyLibrary.AssemblyName)))
@@ -263,8 +263,8 @@ function Set-TargetResource
 
             foreach ($proxyLibraryToRemove in $proxyLibrariesToRemove)
             {
-                    $clientCallableSettings.ProxyLibraries.Remove($proxyLibraryToRemove)
-                    $webApplicationNeedsUpdate = $true
+                $clientCallableSettings.ProxyLibraries.Remove($proxyLibraryToRemove)
+                $webApplicationNeedsUpdate = $true
             }
         }
 
@@ -403,7 +403,7 @@ function Set-TargetResource
 function Test-TargetResource
 {
     [CmdletBinding()]
-    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSDSCUseIdenticalMandatoryParametersForDSC", "", Justification  =  "Temporary workaround for issue introduced in PSSA v1.18")]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSDSCUseIdenticalMandatoryParametersForDSC", "", Justification = "Temporary workaround for issue introduced in PSSA v1.18")]
     [OutputType([System.Boolean])]
     param
     (
@@ -498,7 +498,7 @@ function Test-TargetResource
             }
 
             $differences = Compare-Object -ReferenceObject $CurrentValues.ProxyLibraries.AssemblyName `
-                                        -DifferenceObject $ProxyLibraries.AssemblyName
+                -DifferenceObject $ProxyLibraries.AssemblyName
 
             if ($null -eq $differences)
             {
@@ -506,8 +506,8 @@ function Test-TargetResource
                 foreach ($currentProxyLibrary in $CurrentValues.ProxyLibraries)
                 {
                     if ($currentProxyLibrary.SupportAppAuthentication -ne ($ProxyLibraries | Where-Object -FilterScript {
-                            $_.AssemblyName -eq $currentProxyLibrary.AssemblyName
-                        } | Select-Object -First 1).SupportAppAuthentication)
+                                $_.AssemblyName -eq $currentProxyLibrary.AssemblyName
+                            } | Select-Object -First 1).SupportAppAuthentication)
                     {
                         Write-Verbose -Message "$($currentProxyLibrary.AssemblyName) has incorrect SupportAppAuthentication. Test failed."
                         return $false
@@ -547,8 +547,8 @@ function Test-TargetResource
             {
                 Write-Verbose -Message "$($proxyLibrary.AssemblyName) is already registered as a proxy library. Checking SupportAppAuthentication..."
                 if ($proxyLibrary.SupportAppAuthentication -ne ($CurrentValues.ProxyLibraries | Where-Object -FilterScript {
-                        $_.AssemblyName -eq $proxyLibrary.AssemblyName
-                    } | Select-Object -First 1).SupportAppAuthentication)
+                            $_.AssemblyName -eq $proxyLibrary.AssemblyName
+                        } | Select-Object -First 1).SupportAppAuthentication)
                 {
                     Write-Verbose -Message "$($proxyLibrary.AssemblyName) has incorrect SupportAppAuthentication. Test failed."
                     return $false
@@ -579,17 +579,17 @@ function Test-TargetResource
     }
 
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
-                                    -DesiredValues $PSBoundParameters `
-                                    -ValuesToCheck @("WebAppUrl",
-                                                    "MaxResourcesPerRequest",
-                                                    "MaxObjectPaths",
-                                                    "ExecutionTimeout",
-                                                    "RequestXmlMaxDepth",
-                                                    "EnableXsdValidation",
-                                                    "EnableStackTrace",
-                                                    "RequestUsageExecutionTimeThreshold",
-                                                    "LogActionsIfHasRequestException",
-                                                    "EnableRequestUsage")
+        -DesiredValues $PSBoundParameters `
+        -ValuesToCheck @("WebAppUrl",
+        "MaxResourcesPerRequest",
+        "MaxObjectPaths",
+        "ExecutionTimeout",
+        "RequestXmlMaxDepth",
+        "EnableXsdValidation",
+        "EnableStackTrace",
+        "RequestUsageExecutionTimeThreshold",
+        "LogActionsIfHasRequestException",
+        "EnableRequestUsage")
 }
 
 Export-ModuleMember -Function *-TargetResource

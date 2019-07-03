@@ -3,23 +3,23 @@ param(
     [Parameter()]
     [string]
     $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
-                                         -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
-                                         -Resolve)
+            -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
+            -Resolve)
 )
 
 Import-Module -Name (Join-Path -Path $PSScriptRoot `
-                                -ChildPath "..\UnitTestHelper.psm1" `
-                                -Resolve)
+        -ChildPath "..\UnitTestHelper.psm1" `
+        -Resolve)
 
 $Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointCmdletModule `
-                                              -DscResource "SPConfigWizard"
+    -DscResource "SPConfigWizard"
 
 Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
     InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
         Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
         # Mocks for all contexts
-        Mock -CommandName Remove-Item -MockWith {}
+        Mock -CommandName Remove-Item -MockWith { }
         Mock -CommandName Get-Content -MockWith { return "log info" }
         Mock -CommandName Get-SPDscServerPatchStatus -MockWith { return "NoActionRequired" }
 
@@ -90,7 +90,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "Config wizard should not be run, because not all servers have the binaries installed" -Fixture {
             $testParams = @{
-                IsSingleInstance    = "Yes"
+                IsSingleInstance = "Yes"
             }
 
             Mock -CommandName Get-SPDscRegistryKey -MockWith {
@@ -102,7 +102,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
             Mock -CommandName Get-SPDscServerPatchStatus -MockWith { return "UpgradeBlocked" }
 
-            Mock -CommandName Start-Process -MockWith {}
+            Mock -CommandName Start-Process -MockWith { }
 
             It "Should run Start-Process in the set method" {
                 Set-TargetResource @testParams
@@ -125,7 +125,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
             $testDate = Get-Date -Day 17 -Month 7 -Year 2016 -Hour 12 -Minute 00 -Second 00
             Mock -CommandName Get-Date -MockWith {
-                 return $testDate
+                return $testDate
             }
 
             It "Should return Ensure=Absent from the get method" {
@@ -157,7 +157,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
             $testDate = Get-Date -Day 17 -Month 7 -Year 2016 -Hour 12 -Minute 00 -Second 00
             Mock -CommandName Get-Date -MockWith {
-                 return $testDate
+                return $testDate
             }
 
             It "Should return null from the set method" {
@@ -181,7 +181,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
             $testDate = Get-Date -Day 17 -Month 7 -Year 2016 -Hour 12 -Minute 00 -Second 00
             Mock -CommandName Get-Date -MockWith {
-                 return $testDate
+                return $testDate
             }
 
             It "Should return exception from the set method" {
@@ -205,7 +205,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
             $testDate = Get-Date -Day 17 -Month 7 -Year 2016 -Hour 12 -Minute 00 -Second 00
             Mock -CommandName Get-Date -MockWith {
-                 return $testDate
+                return $testDate
             }
 
             It "Should return exception from the set method" {
@@ -229,7 +229,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
             $testDate = Get-Date -Day 17 -Month 7 -Year 2016 -Hour 12 -Minute 00 -Second 00
             Mock -CommandName Get-Date -MockWith {
-                 return $testDate
+                return $testDate
             }
 
             It "Should return exception from the set method" {
@@ -253,7 +253,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
             $testDate = Get-Date -Day 17 -Month 7 -Year 2016 -Hour 12 -Minute 00 -Second 00
             Mock -CommandName Get-Date -MockWith {
-                 return $testDate
+                return $testDate
             }
 
             It "Should return exception from the set method" {

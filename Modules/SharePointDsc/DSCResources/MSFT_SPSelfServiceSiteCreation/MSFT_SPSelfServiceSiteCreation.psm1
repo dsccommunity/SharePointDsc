@@ -33,7 +33,7 @@ function Get-TargetResource
         $ParentSiteUrl,
 
         [Parameter()]
-        [ValidateSet("MustHavePolicy","CanHavePolicy","NotHavePolicy")]
+        [ValidateSet("MustHavePolicy", "CanHavePolicy", "NotHavePolicy")]
         [System.String]
         $PolicyOption,
 
@@ -54,7 +54,7 @@ function Get-TargetResource
         $AlternateUrl,
 
         [Parameter()]
-        [ValidateSet("Modern","Classic","Latest")]
+        [ValidateSet("Modern", "Classic", "Latest")]
         [System.String]
         $UserExperienceVersion,
 
@@ -86,15 +86,15 @@ function Get-TargetResource
     else
     {
         if ($PSBoundParameters.ContainsKey("AlternateUrl") -eq $true -and
-           $PSBoundParameters.ContainsKey("ManagedPath") -eq $true)
+            $PSBoundParameters.ContainsKey("ManagedPath") -eq $true)
         {
             throw "You cannot specify both AlternateUrl and ManagedPath. Please use just one of these."
         }
     }
 
     $result = Invoke-SPDscCommand -Credential $InstallAccount `
-                                  -Arguments $PSBoundParameters `
-                                  -ScriptBlock {
+        -Arguments $PSBoundParameters `
+        -ScriptBlock {
         $params = $args[0]
 
         $webApplication = Get-SPWebApplication -Identity $params.WebAppUrl -ErrorAction SilentlyContinue
@@ -134,9 +134,15 @@ function Get-TargetResource
         {
             switch ($webApplication.SiteCreationUserExperienceVersion)
             {
-                "Version1" { $userExperienceVersion = "Classic" }
-                "Version2" { $userExperienceVersion = "Modern" }
-                "Latest"   { $userExperienceVersion = "Latest" }
+                "Version1"
+                { $userExperienceVersion = "Classic"
+                }
+                "Version2"
+                { $userExperienceVersion = "Modern"
+                }
+                "Latest"
+                { $userExperienceVersion = "Latest"
+                }
             }
         }
 
@@ -193,7 +199,7 @@ function Set-TargetResource
         $ParentSiteUrl,
 
         [Parameter()]
-        [ValidateSet("MustHavePolicy","CanHavePolicy","NotHavePolicy")]
+        [ValidateSet("MustHavePolicy", "CanHavePolicy", "NotHavePolicy")]
         [System.String]
         $PolicyOption,
 
@@ -214,7 +220,7 @@ function Set-TargetResource
         $AlternateUrl,
 
         [Parameter()]
-        [ValidateSet("Modern","Classic","Latest")]
+        [ValidateSet("Modern", "Classic", "Latest")]
         [System.String]
         $UserExperienceVersion,
 
@@ -246,7 +252,7 @@ function Set-TargetResource
     else
     {
         if ($PSBoundParameters.ContainsKey("AlternateUrl") -eq $true -and `
-            $PSBoundParameters.ContainsKey("ManagedPath") -eq $true)
+                $PSBoundParameters.ContainsKey("ManagedPath") -eq $true)
         {
             throw "You cannot specify both AlternateUrl and ManagedPath. Please use just one of these."
         }
@@ -258,12 +264,12 @@ function Set-TargetResource
     }
 
     Invoke-SPDscCommand -Credential $InstallAccount `
-                        -Arguments $PSBoundParameters `
-                        -ScriptBlock {
+        -Arguments $PSBoundParameters `
+        -ScriptBlock {
         $params = $args[0]
 
         if ($params.ContainsKey("AlternateUrl") -and `
-            $params.AlternateUrl.TrimEnd("/") -in (Get-SPWebApplication).Url.TrimEnd("/"))
+                $params.AlternateUrl.TrimEnd("/") -in (Get-SPWebApplication).Url.TrimEnd("/"))
         {
             throw ("Specified AlternateUrl is unknown as web application URL. " + `
                     "Please specify an existing URL")
@@ -375,9 +381,15 @@ function Set-TargetResource
         {
             switch ($params.UserExperienceVersion)
             {
-                "Modern"  { $newValue = [Microsoft.SharePoint.Administration.SiteCreationUserExperienceVersion]::Version2 }
-                "Classic" { $newValue = [Microsoft.SharePoint.Administration.SiteCreationUserExperienceVersion]::Version1 }
-                "Latest"  { $newValue = [Microsoft.SharePoint.Administration.SiteCreationUserExperienceVersion]::Latest }
+                "Modern"
+                { $newValue = [Microsoft.SharePoint.Administration.SiteCreationUserExperienceVersion]::Version2
+                }
+                "Classic"
+                { $newValue = [Microsoft.SharePoint.Administration.SiteCreationUserExperienceVersion]::Version1
+                }
+                "Latest"
+                { $newValue = [Microsoft.SharePoint.Administration.SiteCreationUserExperienceVersion]::Latest
+                }
             }
 
             if ($newValue -ne $webApplication.SiteCreationUserExperienceVersion)
@@ -448,7 +460,7 @@ function Test-TargetResource
         $ParentSiteUrl,
 
         [Parameter()]
-        [ValidateSet("MustHavePolicy","CanHavePolicy","NotHavePolicy")]
+        [ValidateSet("MustHavePolicy", "CanHavePolicy", "NotHavePolicy")]
         [System.String]
         $PolicyOption,
 
@@ -469,7 +481,7 @@ function Test-TargetResource
         $AlternateUrl,
 
         [Parameter()]
-        [ValidateSet("Modern","Classic","Latest")]
+        [ValidateSet("Modern", "Classic", "Latest")]
         [System.String]
         $UserExperienceVersion,
 
@@ -503,26 +515,26 @@ function Test-TargetResource
     if ($Enabled)
     {
         return Test-SPDscParameterState -CurrentValues $CurrentValues `
-                                        -DesiredValues $PSBoundParameters `
-                                        -ValuesToCheck @("WebAppUrl", `
-                                                         "Enabled", `
-                                                         "OnlineEnabled", `
-                                                         "ShowStartASiteMenuItem", `
-                                                         "CreateIndividualSite", `
-                                                         "ParentSiteUrl", `
-                                                         "CustomFormUrl", `
-                                                         "ManagedPath", `
-                                                         "AlternateUrl", `
-                                                         "UserExperienceVersion", `
-                                                         "PolicyOption", `
-                                                         "RequireSecondaryContact")
+            -DesiredValues $PSBoundParameters `
+            -ValuesToCheck @("WebAppUrl", `
+                "Enabled", `
+                "OnlineEnabled", `
+                "ShowStartASiteMenuItem", `
+                "CreateIndividualSite", `
+                "ParentSiteUrl", `
+                "CustomFormUrl", `
+                "ManagedPath", `
+                "AlternateUrl", `
+                "UserExperienceVersion", `
+                "PolicyOption", `
+                "RequireSecondaryContact")
     }
     else
     {
         return Test-SPDscParameterState -CurrentValues $CurrentValues `
-                                        -DesiredValues $PSBoundParameters `
-                                        -ValuesToCheck @("WebAppUrl", `
-                                                         "Enabled", `
-                                                         "ShowStartASiteMenuItem")
+            -DesiredValues $PSBoundParameters `
+            -ValuesToCheck @("WebAppUrl", `
+                "Enabled", `
+                "ShowStartASiteMenuItem")
     }
 }

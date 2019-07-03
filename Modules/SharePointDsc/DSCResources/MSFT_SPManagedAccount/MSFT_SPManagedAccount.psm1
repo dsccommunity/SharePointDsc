@@ -9,7 +9,7 @@ function Get-TargetResource
         $Account,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present",
 
@@ -37,12 +37,12 @@ function Get-TargetResource
     Write-Verbose -Message "Getting managed account $AccountName"
 
     $result = Invoke-SPDscCommand -Credential $InstallAccount `
-                                  -Arguments $PSBoundParameters `
-                                  -ScriptBlock {
+        -Arguments $PSBoundParameters `
+        -ScriptBlock {
         $params = $args[0]
 
         $ma = Get-SPManagedAccount -Identity $params.AccountName `
-                                   -ErrorAction SilentlyContinue
+            -ErrorAction SilentlyContinue
         if ($null -eq $ma)
         {
             return @{
@@ -80,7 +80,7 @@ function Set-TargetResource
         $Account,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present",
 
@@ -110,7 +110,7 @@ function Set-TargetResource
     if ($Ensure -eq "Present" -and $null -eq $Account)
     {
         throw ("You must specify the 'Account' property as a PSCredential to create a " + `
-               "managed account")
+                "managed account")
         return
     }
 
@@ -118,10 +118,10 @@ function Set-TargetResource
     if ($currentValues.Ensure -eq "Absent" -and $Ensure -eq "Present")
     {
         Write-Verbose -Message ("Managed account does not exist but should, creating " + `
-                                "the managed account")
+                "the managed account")
         Invoke-SPDscCommand -Credential $InstallAccount `
-                            -Arguments $PSBoundParameters `
-                            -ScriptBlock {
+            -Arguments $PSBoundParameters `
+            -ScriptBlock {
             $params = $args[0]
             New-SPManagedAccount -Credential $params.Account
         }
@@ -131,8 +131,8 @@ function Set-TargetResource
     {
         Write-Verbose -Message "Updating settings for managed account"
         Invoke-SPDscCommand -Credential $InstallAccount `
-                            -Arguments $PSBoundParameters `
-                            -ScriptBlock {
+            -Arguments $PSBoundParameters `
+            -ScriptBlock {
             $params = $args[0]
 
             $updateParams = @{
@@ -157,8 +157,8 @@ function Set-TargetResource
     {
         Write-Verbose -Message "Removing managed account"
         Invoke-SPDscCommand -Credential $InstallAccount `
-                            -Arguments $PSBoundParameters `
-                            -ScriptBlock {
+            -Arguments $PSBoundParameters `
+            -ScriptBlock {
             $params = $args[0]
             Remove-SPManagedAccount -Identity $params.AccountName -Confirm:$false
         }
@@ -176,7 +176,7 @@ function Test-TargetResource
         $Account,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present",
 
@@ -211,12 +211,12 @@ function Test-TargetResource
     Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
 
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
-                                    -DesiredValues $PSBoundParameters `
-                                    -ValuesToCheck @("AccountName",
-                                                     "Schedule",
-                                                     "PreExpireDays",
-                                                     "EmailNotification",
-                                                     "Ensure")
+        -DesiredValues $PSBoundParameters `
+        -ValuesToCheck @("AccountName",
+        "Schedule",
+        "PreExpireDays",
+        "EmailNotification",
+        "Ensure")
 }
 
 Export-ModuleMember -Function *-TargetResource

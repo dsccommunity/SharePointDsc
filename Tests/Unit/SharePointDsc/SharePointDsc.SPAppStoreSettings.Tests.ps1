@@ -1,28 +1,28 @@
 [CmdletBinding()]
 param(
     [Parameter()]
-    [string] 
+    [string]
     $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
-                                         -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
-                                         -Resolve)
+            -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
+            -Resolve)
 )
 
 Import-Module -Name (Join-Path -Path $PSScriptRoot `
-                                -ChildPath "..\UnitTestHelper.psm1" `
-                                -Resolve)
+        -ChildPath "..\UnitTestHelper.psm1" `
+        -Resolve)
 
 $Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointCmdletModule `
-                                              -DscResource "SPAppStoreSettings"
+    -DscResource "SPAppStoreSettings"
 
 Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
     InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
         Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
         # Initialize tests
-        
-        # Mocks for all contexts   
-        Mock -CommandName Set-SPAppAcquisitionConfiguration -MockWith {}
-        Mock -CommandName Set-SPOfficeStoreAppsDefaultActivation -MockWith {}
+
+        # Mocks for all contexts
+        Mock -CommandName Set-SPAppAcquisitionConfiguration -MockWith { }
+        Mock -CommandName Set-SPOfficeStoreAppsDefaultActivation -MockWith { }
 
         # Test contexts
         Context -Name "The specified web application does not exist" -Fixture {
@@ -74,7 +74,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             It "Should return values from the get method" {
-                $result = Get-TargetResource @testParams 
+                $result = Get-TargetResource @testParams
                 $result.AllowAppPurchases | Should Be $false
                 $result.AllowAppsForOffice | Should Be $false
             }
@@ -89,7 +89,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Assert-MockCalled Set-SPOfficeStoreAppsDefaultActivation
             }
         }
-        
+
         Context -Name "The specified settings match" -Fixture {
             $testParams = @{
                 WebAppUrl          = "https://sharepoint.contoso.com"
@@ -127,8 +127,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "The specified setting does not match" -Fixture {
             $testParams = @{
-                WebAppUrl          = "https://sharepoint.contoso.com"
-                AllowAppPurchases  = $true
+                WebAppUrl         = "https://sharepoint.contoso.com"
+                AllowAppPurchases = $true
             }
 
             Mock -CommandName Get-SPAppAcquisitionConfiguration -MockWith {

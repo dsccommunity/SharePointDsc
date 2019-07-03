@@ -3,16 +3,16 @@ param(
     [Parameter()]
     [string]
     $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
-                                         -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
-                                         -Resolve)
+            -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
+            -Resolve)
 )
 
 Import-Module -Name (Join-Path -Path $PSScriptRoot `
-                                -ChildPath "..\UnitTestHelper.psm1" `
-                                -Resolve)
+        -ChildPath "..\UnitTestHelper.psm1" `
+        -Resolve)
 
 $Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointCmdletModule `
-                                              -DscResource "SPSearchMetadataCategory"
+    -DscResource "SPSearchMetadataCategory"
 
 Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
     InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
@@ -32,11 +32,11 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         }
 
         Mock -CommandName Set-SPEnterpriseSearchMetadataCategory {
-            return @{}
+            return @{ }
         }
 
         Mock -CommandName Remove-SPEnterpriseSearchMetadataCategory {
-            return @{}
+            return @{ }
         }
 
         # Test contexts
@@ -46,12 +46,12 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             $testParams = @{
-                Name = "Test Category"
-                ServiceAppName = "Search Service Application"
+                Name                           = "Test Category"
+                ServiceAppName                 = "Search Service Application"
                 AutoCreateNewManagedProperties = $true
-                DiscoverNewProperties = $true
-                MapToContents = $true
-                Ensure = "Present"
+                DiscoverNewProperties          = $true
+                MapToContents                  = $true
+                Ensure                         = "Present"
             }
 
             It "Should return absent from the get method" {
@@ -75,9 +75,9 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             $testParams = @{
-                Name = "Test Category"
+                Name           = "Test Category"
                 ServiceAppName = "Search Service Application"
-                Ensure = "Absent"
+                Ensure         = "Absent"
             }
 
             It "Should return Present from the Get Method" {
@@ -92,15 +92,15 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         Context -Name "Trying to delete a non-empty metadata category" -Fixture {
             Mock -CommandName Get-SPEnterpriseSearchMetadataCategory {
                 return @{
-                    Name = "Test Category"
+                    Name                 = "Test Category"
                     CrawledPropertyCount = 1
                 }
             }
 
             $testParams = @{
-                Name = "Test Category"
+                Name           = "Test Category"
                 ServiceAppName = "Search Service Application"
-                Ensure = "Absent"
+                Ensure         = "Absent"
             }
 
             It "Should throw an error from the Set Method" {
@@ -110,9 +110,9 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "An invalid Search Service Aplication was specified" -Fixture {
             $testParams = @{
-                Name = "Test Category"
+                Name           = "Test Category"
                 ServiceAppName = "Search Service Application"
-                Ensure = "Absent"
+                Ensure         = "Absent"
             }
 
             Mock -CommandName Get-SPEnterpriseSearchServiceApplication {

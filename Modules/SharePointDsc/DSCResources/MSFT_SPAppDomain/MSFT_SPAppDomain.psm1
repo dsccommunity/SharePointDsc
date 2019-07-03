@@ -20,15 +20,15 @@ function Get-TargetResource
     Write-Verbose -Message "Getting app domain settings"
 
     $result = Invoke-SPDscCommand -Credential $InstallAccount `
-                                  -Arguments $PSBoundParameters `
-                                  -ScriptBlock {
+        -Arguments $PSBoundParameters `
+        -ScriptBlock {
         $params = $args[0]
-        $appDomain =  Get-SPAppDomain
+        $appDomain = Get-SPAppDomain
         $prefix = Get-SPAppSiteSubscriptionName -ErrorAction Continue
 
         return @{
-            AppDomain = $appDomain
-            Prefix= $prefix
+            AppDomain      = $appDomain
+            Prefix         = $prefix
             InstallAccount = $params.InstallAccount
         }
     }
@@ -56,8 +56,8 @@ function Set-TargetResource
     Write-Verbose -Message "Setting app domain settings"
 
     Invoke-SPDscCommand -Credential $InstallAccount `
-                        -Arguments $PSBoundParameters `
-                        -ScriptBlock {
+        -Arguments $PSBoundParameters `
+        -ScriptBlock {
         $params = $args[0]
 
         Set-SPAppDomain $params.AppDomain
@@ -92,8 +92,8 @@ function Test-TargetResource
     Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
 
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
-                                    -DesiredValues $PSBoundParameters `
-                                    -ValuesToCheck @("AppDomain", "Prefix")
+        -DesiredValues $PSBoundParameters `
+        -ValuesToCheck @("AppDomain", "Prefix")
 }
 
 Export-ModuleMember -Function *-TargetResource

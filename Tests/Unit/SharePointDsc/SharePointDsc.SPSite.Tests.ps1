@@ -3,16 +3,16 @@ param(
     [Parameter()]
     [string]
     $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
-                                         -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
-                                         -Resolve)
+            -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
+            -Resolve)
 )
 
 Import-Module -Name (Join-Path -Path $PSScriptRoot `
-                                -ChildPath "..\UnitTestHelper.psm1" `
-                                -Resolve)
+        -ChildPath "..\UnitTestHelper.psm1" `
+        -Resolve)
 
 $Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointCmdletModule `
-                                              -DscResource "SPSite"
+    -DscResource "SPSite"
 
 Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
     InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
@@ -41,27 +41,27 @@ namespace Microsoft.SharePoint.Administration {
         $siteImplementation =
         {
             $rootWeb = @{
-                AssociatedVisitorGroup = $null
-                AssociatedMemberGroup = $null
-                AssociatedOwnerGroup = $null
+                AssociatedVisitorGroup              = $null
+                AssociatedMemberGroup               = $null
+                AssociatedOwnerGroup                = $null
                 CreateDefaultAssociatedGroupsCalled = $false
             }
             $rootWeb | Add-Member -MemberType ScriptMethod `
-                                    -Name CreateDefaultAssociatedGroups `
-                                    -Value {
-                                        $this.CreateDefaultAssociatedGroupsCalled = $true
-                                    }
+                -Name CreateDefaultAssociatedGroups `
+                -Value {
+                $this.CreateDefaultAssociatedGroupsCalled = $true
+            }
 
             $site = @{
-                HostHeaderIsSiteName = $false
-                WebApplication = @{
-                    Url = "https://site.contoso.com"
+                HostHeaderIsSiteName   = $false
+                WebApplication         = @{
+                    Url                     = "https://site.contoso.com"
                     UseClaimsAuthentication = $true
                 }
-                Url = "https://site.contoso.com"
-                Owner = @{ UserLogin = "DEMO\owner" }
-                Quota = @{ QuotaId = 65000 }
-                RootWeb = $rootWeb
+                Url                    = "https://site.contoso.com"
+                Owner                  = @{ UserLogin = "DEMO\owner" }
+                Quota                  = @{ QuotaId = 65000 }
+                RootWeb                = $rootWeb
                 AdministrationSiteType = "None"
             }
             return $site
@@ -71,7 +71,7 @@ namespace Microsoft.SharePoint.Administration {
 
         Mock -CommandName Get-SPSite -MockWith {
             return @{
-                Id = 1
+                Id            = 1
                 SystemAccount = @{
                     UserToken = "CentralAdminSystemAccountUserToken"
                 }
@@ -90,23 +90,23 @@ namespace Microsoft.SharePoint.Administration {
         }
 
         Mock -CommandName New-SPSite -MockWith {
-            $rootWeb = @{}
+            $rootWeb = @{ }
             $rootWeb = $rootWeb | Add-Member -MemberType ScriptMethod `
-                                    -Name CreateDefaultAssociatedGroups `
-                                    -Value {} -PassThru
+                -Name CreateDefaultAssociatedGroups `
+                -Value { } -PassThru
             $returnval = @{
                 HostHeaderIsSiteName = $true
-                WebApplication = @{
-                    Url = $testParams.Url
+                WebApplication       = @{
+                    Url                     = $testParams.Url
                     UseClaimsAuthentication = $false
                 }
-                Url = $testParams.Url
-                Owner = @{ UserLogin = "DEMO\owner" }
-                SecondaryContact = @{ UserLogin = "DEMO\secondowner" }
-                Quota = @{
+                Url                  = $testParams.Url
+                Owner                = @{ UserLogin = "DEMO\owner" }
+                SecondaryContact     = @{ UserLogin = "DEMO\secondowner" }
+                Quota                = @{
                     QuotaId = 1
                 }
-                RootWeb = $rootWeb
+                RootWeb              = $rootWeb
             }
             return $returnval
         }
@@ -116,24 +116,24 @@ namespace Microsoft.SharePoint.Administration {
                         QuotaId = 65000
                     }
                 })
-            $quotaTemplatesCol = {$quotaTemplates}.Invoke()
+            $quotaTemplatesCol = { $quotaTemplates }.Invoke()
 
             $contentService = @{
                 QuotaTemplates = $quotaTemplatesCol
             }
 
             $contentService = $contentService | Add-Member -MemberType ScriptMethod `
-                                                            -Name Update `
-                                                            -Value {
-                                                                $Global:SPDscQuotaTemplatesUpdated = $true
-                                                            } -PassThru
+                -Name Update `
+                -Value {
+                $Global:SPDscQuotaTemplatesUpdated = $true
+            } -PassThru
             return $contentService
         }
 
         # Test contexts
         Context -Name "The site doesn't exist yet and should" -Fixture {
             $testParams = @{
-                Url = "http://site.sharepoint.com"
+                Url        = "http://site.sharepoint.com"
                 OwnerAlias = "DEMO\User"
             }
 
@@ -199,7 +199,7 @@ namespace Microsoft.SharePoint.Administration {
                 return $site
             }
 
-            Mock -CommandName Set-SPSite -MockWith {} -ParameterFilter {
+            Mock -CommandName Set-SPSite -MockWith { } -ParameterFilter {
                 $OwnerAlias = "DEMO\User"
                 $SecondaryOwnerAlias = "DEMO\SecondUser"
                 $QuotaTemplate = "Test"
@@ -207,21 +207,21 @@ namespace Microsoft.SharePoint.Administration {
             }
             Mock -CommandName Get-SPDscContentService -MockWith {
                 $quotaTemplates = @(@{
-                    QuotaId = 1
-                    Name = "WrongTemplate"
-                    WrongTemplate = @{
-                            StorageMaximumLevel = 512
-                            StorageWarningLevel = 256
+                        QuotaId       = 1
+                        Name          = "WrongTemplate"
+                        WrongTemplate = @{
+                            StorageMaximumLevel  = 512
+                            StorageWarningLevel  = 256
                             UserCodeMaximumLevel = 400
                             UserCodeWarningLevel = 200
                         }
                     })
-                $quotaTemplatesCol = {$quotaTemplates}.Invoke()
+                $quotaTemplatesCol = { $quotaTemplates }.Invoke()
 
                 $contentService = @{
                     QuotaTemplates = $quotaTemplatesCol
                 }
-               return $contentService
+                return $contentService
             }
 
             It "Should return the site data from the get method" {
@@ -244,7 +244,7 @@ namespace Microsoft.SharePoint.Administration {
 
         Context -Name "The site exists and is a host named site collection" -Fixture {
             $testParams = @{
-                Url = "http://site.sharepoint.com"
+                Url        = "http://site.sharepoint.com"
                 OwnerAlias = "DEMO\owner"
             }
 
@@ -289,7 +289,7 @@ namespace Microsoft.SharePoint.Administration {
 
         Context -Name "The site exists, but doesn't have default groups configured" -Fixture {
             $testParams = @{
-                Url = "http://site.sharepoint.com"
+                Url        = "http://site.sharepoint.com"
                 OwnerAlias = "DEMO\User"
             }
 
@@ -326,7 +326,7 @@ namespace Microsoft.SharePoint.Administration {
 
         Context -Name "The site exists and uses claims authentication" -Fixture {
             $testParams = @{
-                Url = "http://site.sharepoint.com"
+                Url        = "http://site.sharepoint.com"
                 OwnerAlias = "DEMO\User"
             }
 
@@ -409,7 +409,7 @@ namespace Microsoft.SharePoint.Administration {
 
         Context -Name "The site exists and uses classic authentication" -Fixture {
             $testParams = @{
-                Url = "http://site.sharepoint.com"
+                Url        = "http://site.sharepoint.com"
                 OwnerAlias = "DEMO\owner"
             }
 
@@ -455,14 +455,14 @@ namespace Microsoft.SharePoint.Administration {
             Mock -CommandName Get-SPSite -MockWith {
                 return @{
                     HostHeaderIsSiteName = $false
-                    WebApplication = @{
-                        Url = $testParams.Url
+                    WebApplication       = @{
+                        Url                     = $testParams.Url
                         UseClaimsAuthentication = $false
                     }
-                    Url = $testParams.Url
-                    Owner = @{ UserLogin = "DEMO\owner" }
-                    SecondaryContact = @{ UserLogin = "DEMO\secondary" }
-                    Quota = @{ QuotaId = 65000 }
+                    Url                  = $testParams.Url
+                    Owner                = @{ UserLogin = "DEMO\owner" }
+                    SecondaryContact     = @{ UserLogin = "DEMO\secondary" }
+                    Quota                = @{ QuotaId = 65000 }
                 }
             }
 
@@ -473,8 +473,8 @@ namespace Microsoft.SharePoint.Administration {
 
         Context -Name "CreateDefaultGroups is set to false, don't correct anything" -Fixture {
             $testParams = @{
-                Url = "http://site.sharepoint.com"
-                OwnerAlias = "DEMO\owner"
+                Url                 = "http://site.sharepoint.com"
+                OwnerAlias          = "DEMO\owner"
                 CreateDefaultGroups = $false
             }
 

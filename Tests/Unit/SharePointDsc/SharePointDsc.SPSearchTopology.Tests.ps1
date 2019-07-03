@@ -3,16 +3,16 @@ param(
     [Parameter()]
     [string]
     $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
-                                         -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
-                                         -Resolve)
+            -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
+            -Resolve)
 )
 
 Import-Module -Name (Join-Path -Path $PSScriptRoot `
-                                -ChildPath "..\UnitTestHelper.psm1" `
-                                -Resolve)
+        -ChildPath "..\UnitTestHelper.psm1" `
+        -Resolve)
 
 $Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointCmdletModule `
-                                              -DscResource "SPSearchTopology"
+    -DscResource "SPSearchTopology"
 
 Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
     InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
@@ -20,7 +20,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         # Initialize tests
         $mockPath = Join-Path -Path $Global:SPDscHelper.RepoRoot `
-                              -ChildPath "Tests/Unit/SharePointDsc/SharePointDsc.SPSearchTopology.Mocks.cs"
+            -ChildPath "Tests/Unit/SharePointDsc/SharePointDsc.SPSearchTopology.Mocks.cs"
         Add-Type -LiteralPath $mockPath
 
         $serverId = New-Guid
@@ -56,11 +56,11 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         $indexComponent.IndexPartitionOrdinal = 0
 
         # Mocks for all contexts
-        Mock -CommandName Start-Sleep -MockWith {}
-        Mock -CommandName New-Item -MockWith { return @{} }
-        Mock -CommandName Get-SPEnterpriseSearchServiceInstance -MockWith  {
+        Mock -CommandName Start-Sleep -MockWith { }
+        Mock -CommandName New-Item -MockWith { return @{ } }
+        Mock -CommandName Get-SPEnterpriseSearchServiceInstance -MockWith {
             return @{
-                Server = @{
+                Server     = @{
                     Address = $env:COMPUTERNAME
                 }
                 Components = @(
@@ -71,40 +71,40 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                         IndexLocation = @("C:\Program Files\Fake3")
                     }
                 )
-                Status = "Online"
+                Status     = "Online"
             }
         }
         Mock -CommandName Get-SPEnterpriseSearchServiceApplication -MockWith {
             return @{
-                ActiveTopology = @{}
+                ActiveTopology = @{ }
             }
         }
         Mock -CommandName Start-SPEnterpriseSearchServiceInstance -MockWith {
             return $null
         }
         Mock -CommandName New-SPEnterpriseSearchTopology -MockWith {
-            return @{}
+            return @{ }
         }
         Mock -CommandName New-SPEnterpriseSearchAdminComponent -MockWith {
-            return @{}
+            return @{ }
         }
         Mock -CommandName New-SPEnterpriseSearchCrawlComponent -MockWith {
-            return @{}
+            return @{ }
         }
         Mock -CommandName New-SPEnterpriseSearchContentProcessingComponent -MockWith {
-            return @{}
+            return @{ }
         }
         Mock -CommandName New-SPEnterpriseSearchAnalyticsProcessingComponent -MockWith {
-            return @{}
+            return @{ }
         }
         Mock -CommandName New-SPEnterpriseSearchQueryProcessingComponent -MockWith {
-            return @{}
+            return @{ }
         }
         Mock -CommandName New-SPEnterpriseSearchIndexComponent -MockWith {
-            return @{}
+            return @{ }
         }
         Mock -CommandName Set-SPEnterpriseSearchTopology -MockWith {
-            return @{}
+            return @{ }
         }
         Mock -CommandName Remove-SPEnterpriseSearchComponent -MockWith {
             return $null
@@ -113,7 +113,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             return @(
                 @{
                     Name = $env:COMPUTERNAME
-                    Id = $serverId
+                    Id   = $serverId
                 }
             )
         }
@@ -132,7 +132,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             Mock -CommandName Get-SPEnterpriseSearchComponent -MockWith {
-                return @{}
+                return @{ }
             }
 
             It "Should return empty values from the get method" {
@@ -166,10 +166,10 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             Mock -CommandName Get-SPEnterpriseSearchComponent -MockWith {
-                return @{}
+                return @{ }
             }
 
-            Mock -CommandName Get-SPEnterpriseSearchServiceInstance -MockWith  {
+            Mock -CommandName Get-SPEnterpriseSearchServiceInstance -MockWith {
                 return @{
                     Server = @{
                         Address = "$($env:COMPUTERNAME).domain.com"
@@ -184,7 +184,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 }
             }
 
-            Mock -CommandName Get-SPEnterpriseSearchServiceInstance -MockWith  {
+            Mock -CommandName Get-SPEnterpriseSearchServiceInstance -MockWith {
                 return $null
             } -ParameterFilter { $Identity -ne "$($env:COMPUTERNAME).domain.com" }
 
@@ -219,16 +219,19 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             Mock -CommandName Get-SPEnterpriseSearchComponent -MockWith {
-                return @{}
+                return @{ }
             }
             $Global:SPDscSearchRoleInstanceCalLCount = 0
             Mock -CommandName Get-SPEnterpriseSearchServiceInstance -MockWith {
-                if ($Global:SPDscSearchRoleInstanceCalLCount -eq 2) {
+                if ($Global:SPDscSearchRoleInstanceCalLCount -eq 2)
+                {
                     $Global:SPDscSearchRoleInstanceCalLCount = 0
                     return @{
                         Status = "Online"
                     }
-                } else {
+                }
+                else
+                {
                     $Global:SPDscSearchRoleInstanceCalLCount++
                     return @{
                         Status = "Offline"
@@ -371,15 +374,15 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     $indexComponent)
             }
 
-            Mock -CommandName Get-SPEnterpriseSearchServiceInstance  {
+            Mock -CommandName Get-SPEnterpriseSearchServiceInstance {
                 return @{
-                    Server = @{
+                    Server     = @{
                         Address = $env:COMPUTERNAME
                     }
                     Components = @{
                         IndexLocation = "D:\Index"
                     }
-                    Status = "Online"
+                    Status     = "Online"
 
                 }
             }
@@ -409,7 +412,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 return $null
             }
             Mock -CommandName Get-SPEnterpriseSearchComponent -MockWith {
-                return @{}
+                return @{ }
             }
 
             It "Should return empty values from the get method" {
@@ -457,7 +460,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             $indexComponent.ServerId = $newServerId
             $indexComponent.IndexPartitionOrdinal = 0
 
-             $testParams = @{
+            $testParams = @{
                 ServiceAppName          = "Search Service Application"
                 Admin                   = @($env:COMPUTERNAME)
                 Crawler                 = @($env:COMPUTERNAME)
@@ -478,7 +481,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     $indexComponent)
             }
 
-            Mock -CommandName Get-SPEnterpriseSearchServiceInstance  {
+            Mock -CommandName Get-SPEnterpriseSearchServiceInstance {
                 return @{
                     Server = @{
                         Address = $env:COMPUTERNAME

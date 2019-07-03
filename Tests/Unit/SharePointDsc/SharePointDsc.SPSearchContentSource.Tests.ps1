@@ -3,16 +3,16 @@ param(
     [Parameter()]
     [string]
     $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
-                                         -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
-                                         -Resolve)
+            -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
+            -Resolve)
 )
 
 Import-Module -Name (Join-Path -Path $PSScriptRoot `
-                                -ChildPath "..\UnitTestHelper.psm1" `
-                                -Resolve)
+        -ChildPath "..\UnitTestHelper.psm1" `
+        -Resolve)
 
 $Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointCmdletModule `
-                                              -DscResource "SPSearchContentSource"
+    -DscResource "SPSearchContentSource"
 
 Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
     InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
@@ -55,20 +55,20 @@ namespace Microsoft.Office.Server.Search.Administration {
 "@
 
         # Mocks for all contexts
-        Mock -CommandName Start-Sleep -MockWith {}
-        Mock -CommandName Set-SPEnterpriseSearchCrawlContentSource -MockWith {}
-        Mock -CommandName Remove-SPEnterpriseSearchCrawlContentSource -MockWith {}
+        Mock -CommandName Start-Sleep -MockWith { }
+        Mock -CommandName Set-SPEnterpriseSearchCrawlContentSource -MockWith { }
+        Mock -CommandName Remove-SPEnterpriseSearchCrawlContentSource -MockWith { }
 
         # Test contexts
         Context -Name "LimitPageDepth should not be used with Content Source Type SharePoint" {
             $testParams = @{
-                Name = "Example content source"
-                ServiceAppName = "Search Service Application"
+                Name              = "Example content source"
+                ServiceAppName    = "Search Service Application"
                 ContentSourceType = "SharePoint"
-                LimitPageDepth = 2
-                Addresses = @("http://site.contoso.com")
-                CrawlSetting = "CrawlEverything"
-                Ensure = "Present"
+                LimitPageDepth    = 2
+                Addresses         = @("http://site.contoso.com")
+                CrawlSetting      = "CrawlEverything"
+                Ensure            = "Present"
             }
 
             It "Should create the content source in the test method" {
@@ -82,13 +82,13 @@ namespace Microsoft.Office.Server.Search.Administration {
 
         Context -Name "LimitServerHops should not be used with Content Source Type SharePoint" {
             $testParams = @{
-                Name = "Example content source"
-                ServiceAppName = "Search Service Application"
+                Name              = "Example content source"
+                ServiceAppName    = "Search Service Application"
                 ContentSourceType = "SharePoint"
-                LimitServerHops = 2
-                Addresses = @("http://site.contoso.com")
-                CrawlSetting = "CrawlEverything"
-                Ensure = "Present"
+                LimitServerHops   = 2
+                Addresses         = @("http://site.contoso.com")
+                CrawlSetting      = "CrawlEverything"
+                Ensure            = "Present"
             }
 
             It "Should create the content source in the test method" {
@@ -102,12 +102,12 @@ namespace Microsoft.Office.Server.Search.Administration {
 
         Context -Name "CrawlSetting=Custom should not be used with Content Source Type SharePoint" {
             $testParams = @{
-                Name = "Example content source"
-                ServiceAppName = "Search Service Application"
+                Name              = "Example content source"
+                ServiceAppName    = "Search Service Application"
                 ContentSourceType = "SharePoint"
-                Addresses = @("http://site.contoso.com")
-                CrawlSetting = "Custom"
-                Ensure = "Present"
+                Addresses         = @("http://site.contoso.com")
+                CrawlSetting      = "Custom"
+                Ensure            = "Present"
             }
 
             It "Should create the content source in the test method" {
@@ -121,13 +121,13 @@ namespace Microsoft.Office.Server.Search.Administration {
 
         Context -Name "LimitServerHops should not be used with Content Source Type Website" {
             $testParams = @{
-                Name = "Example content source"
-                ServiceAppName = "Search Service Application"
+                Name              = "Example content source"
+                ServiceAppName    = "Search Service Application"
                 ContentSourceType = "Website"
-                LimitServerHops = 2
-                Addresses = @("http://site.contoso.com")
-                CrawlSetting = "CrawlEverything"
-                Ensure = "Present"
+                LimitServerHops   = 2
+                Addresses         = @("http://site.contoso.com")
+                CrawlSetting      = "CrawlEverything"
+                Ensure            = "Present"
             }
 
             It "Should create the content source in the test method" {
@@ -141,13 +141,13 @@ namespace Microsoft.Office.Server.Search.Administration {
 
         Context -Name "ContinuousCrawl should not be used with Content Source Type SharePoint" {
             $testParams = @{
-                Name = "Example content source"
-                ServiceAppName = "Search Service Application"
+                Name              = "Example content source"
+                ServiceAppName    = "Search Service Application"
                 ContentSourceType = "Website"
-                ContinuousCrawl = $true
-                Addresses = @("http://site.contoso.com")
-                CrawlSetting = "CrawlEverything"
-                Ensure = "Present"
+                ContinuousCrawl   = $true
+                Addresses         = @("http://site.contoso.com")
+                CrawlSetting      = "CrawlEverything"
+                Ensure            = "Present"
             }
 
             It "Should create the content source in the test method" {
@@ -161,13 +161,13 @@ namespace Microsoft.Office.Server.Search.Administration {
 
         Context -Name "LimitPageDepth should not be used with Content Source Type FileShare" {
             $testParams = @{
-                Name = "Example content source"
-                ServiceAppName = "Search Service Application"
+                Name              = "Example content source"
+                ServiceAppName    = "Search Service Application"
                 ContentSourceType = "FileShare"
-                LimitPageDepth = 2
-                Addresses = @("http://site.contoso.com")
-                CrawlSetting = "CrawlEverything"
-                Ensure = "Present"
+                LimitPageDepth    = 2
+                Addresses         = @("http://site.contoso.com")
+                CrawlSetting      = "CrawlEverything"
+                Ensure            = "Present"
             }
 
             It "Should create the content source in the test method" {
@@ -181,13 +181,13 @@ namespace Microsoft.Office.Server.Search.Administration {
 
         Context -Name "LimitServerHops should not be used with Content Source Type FileShare" {
             $testParams = @{
-                Name = "Example content source"
-                ServiceAppName = "Search Service Application"
+                Name              = "Example content source"
+                ServiceAppName    = "Search Service Application"
                 ContentSourceType = "FileShare"
-                LimitServerHops = 2
-                Addresses = @("http://site.contoso.com")
-                CrawlSetting = "CrawlEverything"
-                Ensure = "Present"
+                LimitServerHops   = 2
+                Addresses         = @("http://site.contoso.com")
+                CrawlSetting      = "CrawlEverything"
+                Ensure            = "Present"
             }
 
             It "Should create the content source in the test method" {
@@ -201,12 +201,12 @@ namespace Microsoft.Office.Server.Search.Administration {
 
         Context -Name "CrawlSetting=Custom should not be used with Content Source Type FileShare" {
             $testParams = @{
-                Name = "Example content source"
-                ServiceAppName = "Search Service Application"
+                Name              = "Example content source"
+                ServiceAppName    = "Search Service Application"
                 ContentSourceType = "FileShare"
-                Addresses = @("http://site.contoso.com")
-                CrawlSetting = "Custom"
-                Ensure = "Present"
+                Addresses         = @("http://site.contoso.com")
+                CrawlSetting      = "Custom"
+                Ensure            = "Present"
             }
 
             It "Should create the content source in the test method" {
@@ -220,12 +220,12 @@ namespace Microsoft.Office.Server.Search.Administration {
 
         Context -Name "A SharePoint content source doesn't exist but should" {
             $testParams = @{
-                Name = "Example content source"
-                ServiceAppName = "Search Service Application"
+                Name              = "Example content source"
+                ServiceAppName    = "Search Service Application"
                 ContentSourceType = "SharePoint"
-                Addresses = @("http://site.contoso.com")
-                CrawlSetting = "CrawlEverything"
-                Ensure = "Present"
+                Addresses         = @("http://site.contoso.com")
+                CrawlSetting      = "CrawlEverything"
+                Ensure            = "Present"
             }
 
             Mock -CommandName Get-SPEnterpriseSearchCrawlContentSource -MockWith {
@@ -234,18 +234,18 @@ namespace Microsoft.Office.Server.Search.Administration {
 
             Mock -CommandName New-SPEnterpriseSearchCrawlContentSource -MockWith {
                 return @{
-                    Type = "SharePoint"
-                    SharePointCrawlBehavior = "CrawlVirtualServers"
-                    StartAddresses = @(
+                    Type                     = "SharePoint"
+                    SharePointCrawlBehavior  = "CrawlVirtualServers"
+                    StartAddresses           = @(
                         @{
                             AbsoluteUri = "http://site.contoso.com"
                         }
                     )
-                    EnableContinuousCrawls = $false
+                    EnableContinuousCrawls   = $false
                     IncrementalCrawlSchedule = $null
-                    FullCrawlSchedule = $null
-                    CrawlPriority = "Normal"
-                    CrawlStatus = "Idle"
+                    FullCrawlSchedule        = $null
+                    CrawlPriority            = "Normal"
+                    CrawlStatus              = "Idle"
                 }
             }
 
@@ -268,28 +268,28 @@ namespace Microsoft.Office.Server.Search.Administration {
 
         Context -Name "A SharePoint content source does exist and should" {
             $testParams = @{
-                Name = "Example content source"
-                ServiceAppName = "Search Service Application"
+                Name              = "Example content source"
+                ServiceAppName    = "Search Service Application"
                 ContentSourceType = "SharePoint"
-                Addresses = @("http://site.contoso.com")
-                CrawlSetting = "CrawlFirstOnly"
-                Ensure = "Present"
+                Addresses         = @("http://site.contoso.com")
+                CrawlSetting      = "CrawlFirstOnly"
+                Ensure            = "Present"
             }
             Mock -CommandName Get-SPEnterpriseSearchCrawlContentSource -MockWith {
                 return @{
-                    Name = "Example content source"
-                    Type = "SharePoint"
-                    SharePointCrawlBehavior = "CrawlSites"
-                    StartAddresses = @(
+                    Name                     = "Example content source"
+                    Type                     = "SharePoint"
+                    SharePointCrawlBehavior  = "CrawlSites"
+                    StartAddresses           = @(
                         @{
                             AbsoluteUri = "http://site.contoso.com"
                         }
                     )
-                    EnableContinuousCrawls = $false
+                    EnableContinuousCrawls   = $false
                     IncrementalCrawlSchedule = $null
-                    FullCrawlSchedule = $null
-                    CrawlPriority = "Normal"
-                    CrawlStatus = "Idle"
+                    FullCrawlSchedule        = $null
+                    CrawlPriority            = "Normal"
+                    CrawlStatus              = "Idle"
                 }
             }
 
@@ -305,28 +305,28 @@ namespace Microsoft.Office.Server.Search.Administration {
 
         Context -Name "A SharePoint content source does exist and shouldn't" {
             $testParams = @{
-                Name = "Example content source"
-                ServiceAppName = "Search Service Application"
+                Name              = "Example content source"
+                ServiceAppName    = "Search Service Application"
                 ContentSourceType = "SharePoint"
-                Addresses = @("http://site.contoso.com")
-                CrawlSetting = "CrawlEverything"
-                Ensure = "Absent"
+                Addresses         = @("http://site.contoso.com")
+                CrawlSetting      = "CrawlEverything"
+                Ensure            = "Absent"
             }
             Mock -CommandName Get-SPEnterpriseSearchCrawlContentSource -MockWith {
                 return @{
-                    Name = "Example content source"
-                    Type = "SharePoint"
-                    SharePointCrawlBehavior = "CrawlVirtualServers"
-                    StartAddresses = @(
+                    Name                     = "Example content source"
+                    Type                     = "SharePoint"
+                    SharePointCrawlBehavior  = "CrawlVirtualServers"
+                    StartAddresses           = @(
                         @{
                             AbsoluteUri = "http://site.contoso.com"
                         }
                     )
-                    EnableContinuousCrawls = $false
+                    EnableContinuousCrawls   = $false
                     IncrementalCrawlSchedule = $null
-                    FullCrawlSchedule = $null
-                    CrawlPriority = "Normal"
-                    CrawlStatus = "Idle"
+                    FullCrawlSchedule        = $null
+                    CrawlPriority            = "Normal"
+                    CrawlStatus              = "Idle"
                 }
             }
 
@@ -348,12 +348,12 @@ namespace Microsoft.Office.Server.Search.Administration {
 
         Context -Name "A SharePoint content source doesn't exist and shouldn't" {
             $testParams = @{
-                Name = "Example content source"
-                ServiceAppName = "Search Service Application"
+                Name              = "Example content source"
+                ServiceAppName    = "Search Service Application"
                 ContentSourceType = "SharePoint"
-                Addresses = @("http://site.contoso.com")
-                CrawlSetting = "CrawlEverything"
-                Ensure = "Absent"
+                Addresses         = @("http://site.contoso.com")
+                CrawlSetting      = "CrawlEverything"
+                Ensure            = "Absent"
             }
             Mock -CommandName Get-SPEnterpriseSearchCrawlContentSource -MockWith {
                 return $null
@@ -371,29 +371,29 @@ namespace Microsoft.Office.Server.Search.Administration {
 
         Context -Name "A SharePoint source that uses continuous crawl has incorrect settings applied" -Fixture {
             $testParams = @{
-                Name = "Example content source"
-                ServiceAppName = "Search Service Application"
+                Name              = "Example content source"
+                ServiceAppName    = "Search Service Application"
                 ContentSourceType = "SharePoint"
-                Addresses = @("http://site.contoso.com")
-                CrawlSetting = "CrawlEverything"
-                ContinuousCrawl = $true
-                Ensure = "Present"
+                Addresses         = @("http://site.contoso.com")
+                CrawlSetting      = "CrawlEverything"
+                ContinuousCrawl   = $true
+                Ensure            = "Present"
             }
             Mock -CommandName Get-SPEnterpriseSearchCrawlContentSource -MockWith {
                 return @{
-                    Name = "Example content source"
-                    Type = "SharePoint"
-                    SharePointCrawlBehavior = "CrawlVirtualServers"
-                    StartAddresses = @(
+                    Name                     = "Example content source"
+                    Type                     = "SharePoint"
+                    SharePointCrawlBehavior  = "CrawlVirtualServers"
+                    StartAddresses           = @(
                         @{
                             AbsoluteUri = "http://wrong.site"
                         }
                     )
-                    EnableContinuousCrawls = $true
+                    EnableContinuousCrawls   = $true
                     IncrementalCrawlSchedule = $null
-                    FullCrawlSchedule = $null
-                    CrawlPriority = "Normal"
-                    CrawlStatus = "Idle"
+                    FullCrawlSchedule        = $null
+                    CrawlPriority            = "Normal"
+                    CrawlStatus              = "Idle"
                 }
             }
 
@@ -415,30 +415,30 @@ namespace Microsoft.Office.Server.Search.Administration {
 
         Context -Name "A website content source doesn't exist but should" -Fixture {
             $testParams = @{
-                Name = "Example content source"
-                ServiceAppName = "Search Service Application"
+                Name              = "Example content source"
+                ServiceAppName    = "Search Service Application"
                 ContentSourceType = "Website"
-                Addresses = @("http://site.contoso.com")
-                CrawlSetting = "CrawlEverything"
-                Ensure = "Present"
+                Addresses         = @("http://site.contoso.com")
+                CrawlSetting      = "CrawlEverything"
+                Ensure            = "Present"
             }
             Mock -CommandName Get-SPEnterpriseSearchCrawlContentSource -MockWith {
                 return $null
             }
             Mock -CommandName New-SPEnterpriseSearchCrawlContentSource -MockWith {
                 return @{
-                    Type = "Web"
-                    MaxPageEnumerationDepth = [System.Int32]::MaxValue
-                    MaxSiteEnumerationDepth = 0
-                    StartAddresses = @(
+                    Type                     = "Web"
+                    MaxPageEnumerationDepth  = [System.Int32]::MaxValue
+                    MaxSiteEnumerationDepth  = 0
+                    StartAddresses           = @(
                         @{
                             AbsoluteUri = "http://site.contoso.com"
                         }
                     )
                     IncrementalCrawlSchedule = $null
-                    FullCrawlSchedule = $null
-                    CrawlPriority = "Normal"
-                    CrawlStatus = "Idle"
+                    FullCrawlSchedule        = $null
+                    CrawlPriority            = "Normal"
+                    CrawlStatus              = "Idle"
                 }
             }
 
@@ -461,28 +461,28 @@ namespace Microsoft.Office.Server.Search.Administration {
 
         Context -Name "A website content source does exist and should" -Fixture {
             $testParams = @{
-                Name = "Example content source"
-                ServiceAppName = "Search Service Application"
+                Name              = "Example content source"
+                ServiceAppName    = "Search Service Application"
                 ContentSourceType = "Website"
-                Addresses = @("http://site.contoso.com")
-                CrawlSetting = "CrawlEverything"
-                Ensure = "Present"
+                Addresses         = @("http://site.contoso.com")
+                CrawlSetting      = "CrawlEverything"
+                Ensure            = "Present"
             }
             Mock -CommandName Get-SPEnterpriseSearchCrawlContentSource -MockWith {
                 return @{
-                    Name = "Example content source"
-                    Type = "Web"
-                    MaxPageEnumerationDepth = [System.Int32]::MaxValue
-                    MaxSiteEnumerationDepth = 0
-                    StartAddresses = @(
+                    Name                     = "Example content source"
+                    Type                     = "Web"
+                    MaxPageEnumerationDepth  = [System.Int32]::MaxValue
+                    MaxSiteEnumerationDepth  = 0
+                    StartAddresses           = @(
                         @{
                             AbsoluteUri = "http://site.contoso.com"
                         }
                     )
                     IncrementalCrawlSchedule = $null
-                    FullCrawlSchedule = $null
-                    CrawlPriority = "Normal"
-                    CrawlStatus = "Idle"
+                    FullCrawlSchedule        = $null
+                    CrawlPriority            = "Normal"
+                    CrawlStatus              = "Idle"
                 }
             }
 
@@ -498,29 +498,29 @@ namespace Microsoft.Office.Server.Search.Administration {
 
         Context -Name "A website content source does exist and shouldn't" -Fixture {
             $testParams = @{
-                Name = "Example content source"
-                ServiceAppName = "Search Service Application"
+                Name              = "Example content source"
+                ServiceAppName    = "Search Service Application"
                 ContentSourceType = "Website"
-                Addresses = @("http://site.contoso.com")
-                CrawlSetting = "CrawlEverything"
-                Ensure = "Absent"
+                Addresses         = @("http://site.contoso.com")
+                CrawlSetting      = "CrawlEverything"
+                Ensure            = "Absent"
             }
 
             Mock -CommandName Get-SPEnterpriseSearchCrawlContentSource -MockWith {
                 return @{
-                    Name = "Example content source"
-                    Type = "Web"
-                    MaxPageEnumerationDepth = [System.Int32]::MaxValue
-                    MaxSiteEnumerationDepth = 0
-                    StartAddresses = @(
+                    Name                     = "Example content source"
+                    Type                     = "Web"
+                    MaxPageEnumerationDepth  = [System.Int32]::MaxValue
+                    MaxSiteEnumerationDepth  = 0
+                    StartAddresses           = @(
                         @{
                             AbsoluteUri = "http://site.contoso.com"
                         }
                     )
                     IncrementalCrawlSchedule = $null
-                    FullCrawlSchedule = $null
-                    CrawlPriority = "Normal"
-                    CrawlStatus = "Idle"
+                    FullCrawlSchedule        = $null
+                    CrawlPriority            = "Normal"
+                    CrawlStatus              = "Idle"
                 }
             }
 
@@ -542,12 +542,12 @@ namespace Microsoft.Office.Server.Search.Administration {
 
         Context -Name "A website content source doesn't exist and shouldn't" -Fixture {
             $testParams = @{
-                Name = "Example content source"
-                ServiceAppName = "Search Service Application"
+                Name              = "Example content source"
+                ServiceAppName    = "Search Service Application"
                 ContentSourceType = "Website"
-                Addresses = @("http://site.contoso.com")
-                CrawlSetting = "CrawlEverything"
-                Ensure = "Absent"
+                Addresses         = @("http://site.contoso.com")
+                CrawlSetting      = "CrawlEverything"
+                Ensure            = "Absent"
             }
 
             Mock -CommandName Get-SPEnterpriseSearchCrawlContentSource -MockWith {
@@ -566,29 +566,29 @@ namespace Microsoft.Office.Server.Search.Administration {
 
         Context -Name "A website content source has incorrect crawl depth settings applied" -Fixture {
             $testParams = @{
-                Name = "Example content source"
-                ServiceAppName = "Search Service Application"
+                Name              = "Example content source"
+                ServiceAppName    = "Search Service Application"
                 ContentSourceType = "Website"
-                Addresses = @("http://site.contoso.com")
-                CrawlSetting = "CrawlEverything"
-                Ensure = "Present"
+                Addresses         = @("http://site.contoso.com")
+                CrawlSetting      = "CrawlEverything"
+                Ensure            = "Present"
             }
 
             Mock -CommandName Get-SPEnterpriseSearchCrawlContentSource -MockWith {
                 return @{
-                    Name = "Example content source"
-                    Type = "Web"
-                    MaxPageEnumerationDepth = 0
-                    MaxSiteEnumerationDepth = 0
-                    StartAddresses = @(
+                    Name                     = "Example content source"
+                    Type                     = "Web"
+                    MaxPageEnumerationDepth  = 0
+                    MaxSiteEnumerationDepth  = 0
+                    StartAddresses           = @(
                         @{
                             AbsoluteUri = "http://site.contoso.com"
                         }
                     )
                     IncrementalCrawlSchedule = $null
-                    FullCrawlSchedule = $null
-                    CrawlPriority = "Normal"
-                    CrawlStatus = "Idle"
+                    FullCrawlSchedule        = $null
+                    CrawlPriority            = "Normal"
+                    CrawlStatus              = "Idle"
                 }
             }
 
@@ -605,29 +605,29 @@ namespace Microsoft.Office.Server.Search.Administration {
 
         Context -Name "A file share content source doesn't exist but should" -Fixture {
             $testParams = @{
-                Name = "Example content source"
-                ServiceAppName = "Search Service Application"
+                Name              = "Example content source"
+                ServiceAppName    = "Search Service Application"
                 ContentSourceType = "Fileshare"
-                Addresses = @("\\server\share")
-                CrawlSetting = "CrawlEverything"
-                Ensure = "Present"
+                Addresses         = @("\\server\share")
+                CrawlSetting      = "CrawlEverything"
+                Ensure            = "Present"
             }
             Mock -CommandName Get-SPEnterpriseSearchCrawlContentSource -MockWith {
                 return $null
             }
             Mock -CommandName New-SPEnterpriseSearchCrawlContentSource -MockWith {
                 return @{
-                    Type = "File"
-                    FollowDirectories = $true
-                    StartAddresses = @(
+                    Type                     = "File"
+                    FollowDirectories        = $true
+                    StartAddresses           = @(
                         @{
                             AbsoluteUri = "file:///server/share"
                         }
                     )
                     IncrementalCrawlSchedule = $null
-                    FullCrawlSchedule = $null
-                    CrawlPriority = "Normal"
-                    CrawlStatus = "Idle"
+                    FullCrawlSchedule        = $null
+                    CrawlPriority            = "Normal"
+                    CrawlStatus              = "Idle"
                 }
             }
 
@@ -650,28 +650,28 @@ namespace Microsoft.Office.Server.Search.Administration {
 
         Context -Name "A file share content source does exist and should" -Fixture {
             $testParams = @{
-                Name = "Example content source"
-                ServiceAppName = "Search Service Application"
+                Name              = "Example content source"
+                ServiceAppName    = "Search Service Application"
                 ContentSourceType = "Fileshare"
-                Addresses = @("\\server\share")
-                CrawlSetting = "CrawlEverything"
-                Ensure = "Present"
+                Addresses         = @("\\server\share")
+                CrawlSetting      = "CrawlEverything"
+                Ensure            = "Present"
             }
 
             Mock -CommandName Get-SPEnterpriseSearchCrawlContentSource -MockWith {
                 return @{
-                    Name = "Example content source"
-                    Type = "File"
-                    FollowDirectories = $true
-                    StartAddresses = @(
+                    Name                     = "Example content source"
+                    Type                     = "File"
+                    FollowDirectories        = $true
+                    StartAddresses           = @(
                         @{
                             AbsoluteUri = "file:///server/share"
                         }
                     )
                     IncrementalCrawlSchedule = $null
-                    FullCrawlSchedule = $null
-                    CrawlPriority = "Normal"
-                    CrawlStatus = "Idle"
+                    FullCrawlSchedule        = $null
+                    CrawlPriority            = "Normal"
+                    CrawlStatus              = "Idle"
                 }
             }
 
@@ -687,28 +687,28 @@ namespace Microsoft.Office.Server.Search.Administration {
 
         Context -Name "A file share content source does exist and shouldn't" -Fixture {
             $testParams = @{
-                Name = "Example content source"
-                ServiceAppName = "Search Service Application"
+                Name              = "Example content source"
+                ServiceAppName    = "Search Service Application"
                 ContentSourceType = "Fileshare"
-                Addresses = @("\\server\share")
-                CrawlSetting = "CrawlEverything"
-                Ensure = "Absent"
+                Addresses         = @("\\server\share")
+                CrawlSetting      = "CrawlEverything"
+                Ensure            = "Absent"
             }
 
             Mock -CommandName Get-SPEnterpriseSearchCrawlContentSource -MockWith {
                 return @{
-                    Name = "Example content source"
-                    Type = "File"
-                    FollowDirectories = $true
-                    StartAddresses = @(
+                    Name                     = "Example content source"
+                    Type                     = "File"
+                    FollowDirectories        = $true
+                    StartAddresses           = @(
                         @{
                             AbsoluteUri = "file:///server/share"
                         }
                     )
                     IncrementalCrawlSchedule = $null
-                    FullCrawlSchedule = $null
-                    CrawlPriority = "Normal"
-                    CrawlStatus = "Idle"
+                    FullCrawlSchedule        = $null
+                    CrawlPriority            = "Normal"
+                    CrawlStatus              = "Idle"
                 }
             }
 
@@ -730,12 +730,12 @@ namespace Microsoft.Office.Server.Search.Administration {
 
         Context -Name "A file share content source doesn't exist and shouldn't" -Fixture {
             $testParams = @{
-                Name = "Example content source"
-                ServiceAppName = "Search Service Application"
+                Name              = "Example content source"
+                ServiceAppName    = "Search Service Application"
                 ContentSourceType = "Fileshare"
-                Addresses = @("\\server\share")
-                CrawlSetting = "CrawlEverything"
-                Ensure = "Absent"
+                Addresses         = @("\\server\share")
+                CrawlSetting      = "CrawlEverything"
+                Ensure            = "Absent"
             }
             Mock -CommandName Get-SPEnterpriseSearchCrawlContentSource -MockWith {
                 return $null
@@ -753,27 +753,27 @@ namespace Microsoft.Office.Server.Search.Administration {
 
         Context -Name "A file share content source has incorrect crawl depth settings applied" -Fixture {
             $testParams = @{
-                Name = "Example content source"
-                ServiceAppName = "Search Service Application"
+                Name              = "Example content source"
+                ServiceAppName    = "Search Service Application"
                 ContentSourceType = "Fileshare"
-                Addresses = @("\\server\share")
-                CrawlSetting = "CrawlEverything"
-                Ensure = "Present"
+                Addresses         = @("\\server\share")
+                CrawlSetting      = "CrawlEverything"
+                Ensure            = "Present"
             }
             Mock -CommandName Get-SPEnterpriseSearchCrawlContentSource -MockWith {
                 return @{
-                    Name = "Example content source"
-                    Type = "File"
-                    FollowDirectories = $false
-                    StartAddresses = @(
+                    Name                     = "Example content source"
+                    Type                     = "File"
+                    FollowDirectories        = $false
+                    StartAddresses           = @(
                         @{
                             AbsoluteUri = "file:///server/share"
                         }
                     )
                     IncrementalCrawlSchedule = $null
-                    FullCrawlSchedule = $null
-                    CrawlPriority = "Normal"
-                    CrawlStatus = "Idle"
+                    FullCrawlSchedule        = $null
+                    CrawlPriority            = "Normal"
+                    CrawlStatus              = "Idle"
                 }
             }
 
@@ -790,19 +790,19 @@ namespace Microsoft.Office.Server.Search.Administration {
 
         Context -Name "A content source has a full schedule that does not match the desired schedule" -Fixture {
             $testParams = @{
-                Name = "Example content source"
-                ServiceAppName = "Search Service Application"
+                Name              = "Example content source"
+                ServiceAppName    = "Search Service Application"
                 ContentSourceType = "SharePoint"
-                Addresses = @("http://site.contoso.com")
-                CrawlSetting = "CrawlEverything"
-                Ensure = "Present"
-                FullSchedule = (New-CimInstance -ClassName MSFT_SPSearchCrawlSchedule -Property @{
-                    ScheduleType = "Daily"
-                    StartHour = "0"
-                    StartMinute = "0"
-                    CrawlScheduleRepeatDuration = "1440"
-                    CrawlScheduleRepeatInterval = "5"
-                } -ClientOnly)
+                Addresses         = @("http://site.contoso.com")
+                CrawlSetting      = "CrawlEverything"
+                Ensure            = "Present"
+                FullSchedule      = (New-CimInstance -ClassName MSFT_SPSearchCrawlSchedule -Property @{
+                        ScheduleType                = "Daily"
+                        StartHour                   = "0"
+                        StartMinute                 = "0"
+                        CrawlScheduleRepeatDuration = "1440"
+                        CrawlScheduleRepeatInterval = "5"
+                    } -ClientOnly)
             }
 
             $Global:SPDscContentSourceLoopCount = 0
@@ -824,24 +824,24 @@ namespace Microsoft.Office.Server.Search.Administration {
                     $crawlStatus = "Idle"
                 }
                 $returnval = @{
-                    Name = "Example content source"
-                    Type = "SharePoint"
-                    SharePointCrawlBehavior = "CrawlVirtualServers"
-                    StartAddresses = @(
+                    Name                     = "Example content source"
+                    Type                     = "SharePoint"
+                    SharePointCrawlBehavior  = "CrawlVirtualServers"
+                    StartAddresses           = @(
                         @{
                             AbsoluteUri = "http://site.contoso.com"
                         }
                     )
-                    EnableContinuousCrawls = $false
+                    EnableContinuousCrawls   = $false
                     IncrementalCrawlSchedule = $null
-                    FullCrawlSchedule = $schedule
-                    CrawlPriority = "Normal"
-                    CrawlStatus = $crawlStatus
+                    FullCrawlSchedule        = $schedule
+                    CrawlPriority            = "Normal"
+                    CrawlStatus              = $crawlStatus
                 }
                 $returnval = $returnval | Add-Member -MemberType ScriptMethod `
-                                                     -Name StopCrawl `
-                                                     -Value {
-                                                     } -PassThru -Force
+                    -Name StopCrawl `
+                    -Value {
+                } -PassThru -Force
 
                 $Global:SPDscContentSourceLoopCount++
                 return $returnval
@@ -860,19 +860,19 @@ namespace Microsoft.Office.Server.Search.Administration {
 
         Context -Name "A content source has a full schedule that does match the desired schedule" -Fixture {
             $testParams = @{
-                Name = "Example content source"
-                ServiceAppName = "Search Service Application"
+                Name              = "Example content source"
+                ServiceAppName    = "Search Service Application"
                 ContentSourceType = "SharePoint"
-                Addresses = @("http://site.contoso.com")
-                CrawlSetting = "CrawlEverything"
-                Ensure = "Present"
-                FullSchedule = (New-CimInstance -ClassName MSFT_SPSearchCrawlSchedule -Property @{
-                    ScheduleType = "Daily"
-                    StartHour = "0"
-                    StartMinute = "0"
-                    CrawlScheduleRepeatDuration = "1440"
-                    CrawlScheduleRepeatInterval = "5"
-                } -ClientOnly)
+                Addresses         = @("http://site.contoso.com")
+                CrawlSetting      = "CrawlEverything"
+                Ensure            = "Present"
+                FullSchedule      = (New-CimInstance -ClassName MSFT_SPSearchCrawlSchedule -Property @{
+                        ScheduleType                = "Daily"
+                        StartHour                   = "0"
+                        StartMinute                 = "0"
+                        CrawlScheduleRepeatDuration = "1440"
+                        CrawlScheduleRepeatInterval = "5"
+                    } -ClientOnly)
             }
 
             Mock -CommandName Get-SPEnterpriseSearchCrawlContentSource -MockWith {
@@ -883,19 +883,19 @@ namespace Microsoft.Office.Server.Search.Administration {
                 $schedule.StartMinute = 0
                 $schedule.DaysInterval = 1
                 return @{
-                    Name = "Example content source"
-                    Type = "SharePoint"
-                    SharePointCrawlBehavior = "CrawlVirtualServers"
-                    StartAddresses = @(
+                    Name                     = "Example content source"
+                    Type                     = "SharePoint"
+                    SharePointCrawlBehavior  = "CrawlVirtualServers"
+                    StartAddresses           = @(
                         @{
                             AbsoluteUri = "http://site.contoso.com"
                         }
                     )
-                    EnableContinuousCrawls = $false
+                    EnableContinuousCrawls   = $false
                     IncrementalCrawlSchedule = $null
-                    FullCrawlSchedule = $schedule
-                    CrawlPriority = "Normal"
-                    CrawlStatus = "Idle"
+                    FullCrawlSchedule        = $schedule
+                    CrawlPriority            = "Normal"
+                    CrawlStatus              = "Idle"
                 }
             }
 
@@ -906,18 +906,18 @@ namespace Microsoft.Office.Server.Search.Administration {
 
         Context -Name "A content source has a incremental schedule that does not match the desired schedule" -Fixture {
             $testParams = @{
-                Name = "Example content source"
-                ServiceAppName = "Search Service Application"
-                ContentSourceType = "SharePoint"
-                Addresses = @("http://site.contoso.com")
-                CrawlSetting = "CrawlEverything"
-                Ensure = "Present"
+                Name                = "Example content source"
+                ServiceAppName      = "Search Service Application"
+                ContentSourceType   = "SharePoint"
+                Addresses           = @("http://site.contoso.com")
+                CrawlSetting        = "CrawlEverything"
+                Ensure              = "Present"
                 IncrementalSchedule = (New-CimInstance -ClassName MSFT_SPSearchCrawlSchedule -Property @{
-                    ScheduleType = "Weekly"
-                    StartHour = "0"
-                    StartMinute = "0"
-                    CrawlScheduleDaysOfWeek = @("Monday", "Wednesday")
-                } -ClientOnly)
+                        ScheduleType            = "Weekly"
+                        StartHour               = "0"
+                        StartMinute             = "0"
+                        CrawlScheduleDaysOfWeek = @("Monday", "Wednesday")
+                    } -ClientOnly)
             }
 
             Mock -CommandName Get-SPEnterpriseSearchCrawlContentSource -MockWith {
@@ -926,19 +926,19 @@ namespace Microsoft.Office.Server.Search.Administration {
                 $schedule.StartMinute = 0
                 $schedule.DaysOfWeek = [enum]::Parse([Microsoft.Office.Server.Search.Administration.DaysOfWeek], "Monday, Wednesday, Friday")
                 return @{
-                    Name = "Example content source"
-                    Type = "SharePoint"
-                    SharePointCrawlBehavior = "CrawlVirtualServers"
-                    StartAddresses = @(
+                    Name                     = "Example content source"
+                    Type                     = "SharePoint"
+                    SharePointCrawlBehavior  = "CrawlVirtualServers"
+                    StartAddresses           = @(
                         @{
                             AbsoluteUri = "http://site.contoso.com"
                         }
                     )
-                    EnableContinuousCrawls = $false
+                    EnableContinuousCrawls   = $false
                     IncrementalCrawlSchedule = $schedule
-                    FullCrawlSchedule = $null
-                    CrawlPriority = "Normal"
-                    CrawlStatus = "Idle"
+                    FullCrawlSchedule        = $null
+                    CrawlPriority            = "Normal"
+                    CrawlStatus              = "Idle"
                 }
             }
 
@@ -954,18 +954,18 @@ namespace Microsoft.Office.Server.Search.Administration {
 
         Context -Name "A content source has a incremental schedule that does match the desired schedule" -Fixture {
             $testParams = @{
-                Name = "Example content source"
-                ServiceAppName = "Search Service Application"
-                ContentSourceType = "SharePoint"
-                Addresses = @("http://site.contoso.com")
-                CrawlSetting = "CrawlEverything"
-                Ensure = "Present"
+                Name                = "Example content source"
+                ServiceAppName      = "Search Service Application"
+                ContentSourceType   = "SharePoint"
+                Addresses           = @("http://site.contoso.com")
+                CrawlSetting        = "CrawlEverything"
+                Ensure              = "Present"
                 IncrementalSchedule = (New-CimInstance -ClassName MSFT_SPSearchCrawlSchedule -Property @{
-                    ScheduleType = "Weekly"
-                    StartHour = "0"
-                    StartMinute = "0"
-                    CrawlScheduleDaysOfWeek = @("Monday", "Wednesday", "Friday")
-                } -ClientOnly)
+                        ScheduleType            = "Weekly"
+                        StartHour               = "0"
+                        StartMinute             = "0"
+                        CrawlScheduleDaysOfWeek = @("Monday", "Wednesday", "Friday")
+                    } -ClientOnly)
             }
 
             Mock -CommandName Get-SPEnterpriseSearchCrawlContentSource -MockWith {
@@ -974,19 +974,19 @@ namespace Microsoft.Office.Server.Search.Administration {
                 $schedule.StartMinute = 0
                 $schedule.DaysOfWeek = [enum]::Parse([Microsoft.Office.Server.Search.Administration.DaysOfWeek], "Monday, Wednesday, Friday")
                 return @{
-                    Name = "Example content source"
-                    Type = "SharePoint"
-                    SharePointCrawlBehavior = "CrawlVirtualServers"
-                    StartAddresses = @(
+                    Name                     = "Example content source"
+                    Type                     = "SharePoint"
+                    SharePointCrawlBehavior  = "CrawlVirtualServers"
+                    StartAddresses           = @(
                         @{
                             AbsoluteUri = "http://site.contoso.com"
                         }
                     )
-                    EnableContinuousCrawls = $false
+                    EnableContinuousCrawls   = $false
                     IncrementalCrawlSchedule = $schedule
-                    FullCrawlSchedule = $null
-                    CrawlPriority = "Normal"
-                    CrawlStatus = "Idle"
+                    FullCrawlSchedule        = $null
+                    CrawlPriority            = "Normal"
+                    CrawlStatus              = "Idle"
                 }
             }
 
@@ -997,22 +997,22 @@ namespace Microsoft.Office.Server.Search.Administration {
 
         Context -Name "A business content source does exist and should" -Fixture {
             $testParams = @{
-                Name = "Example content source"
-                ServiceAppName = "Search Service Application"
+                Name              = "Example content source"
+                ServiceAppName    = "Search Service Application"
                 ContentSourceType = "Business"
-                LOBSystemSet = @("MyDataSource", "MyDataSourceInstance")
-                Ensure = "Present"
+                LOBSystemSet      = @("MyDataSource", "MyDataSourceInstance")
+                Ensure            = "Present"
             }
             Mock -CommandName Get-SPEnterpriseSearchCrawlContentSource -MockWith {
                 return @{
-                    Name = "Example content source"
-                    Type = "Business"
+                    Name                     = "Example content source"
+                    Type                     = "Business"
                     IncrementalCrawlSchedule = $null
-                    FullCrawlSchedule = $null
-                    StartAddresses = @(
+                    FullCrawlSchedule        = $null
+                    StartAddresses           = @(
                         @{
                             AbsoluteUri = "bdc3://segment1/segment2/segment3/MyDataSource/MyDataSourceInstance&fakevalue=1"
-                            Segments = @("bdc3", "segment1", "segment2", "segment3", "MyDataSource", "MyDataSourceInstance&fakevalue=1")
+                            Segments    = @("bdc3", "segment1", "segment2", "segment3", "MyDataSource", "MyDataSourceInstance&fakevalue=1")
                         }
                     )
                 }
@@ -1035,11 +1035,11 @@ namespace Microsoft.Office.Server.Search.Administration {
 
         Context -Name "A business content source does not exist and should" -Fixture {
             $testParams = @{
-                Name = "Example content source"
-                ServiceAppName = "Search Service Application"
+                Name              = "Example content source"
+                ServiceAppName    = "Search Service Application"
                 ContentSourceType = "Business"
-                LOBSystemSet = @("MyDataSource", "MyDataSourceInstance")
-                Ensure = "Present"
+                LOBSystemSet      = @("MyDataSource", "MyDataSourceInstance")
+                Ensure            = "Present"
             }
             Mock -CommandName Get-SPEnterpriseSearchCrawlContentSource -MockWith {
                 return $null
@@ -1047,12 +1047,12 @@ namespace Microsoft.Office.Server.Search.Administration {
 
             Mock -CommandName New-SPEnterpriseSearchCrawlContentSource -MockWith {
                 return @{
-                    Type = "Business"
-                    SearchApplication = $testParams.ServiceAppName
+                    Type                     = "Business"
+                    SearchApplication        = $testParams.ServiceAppName
                     IncrementalCrawlSchedule = $null
-                    FullCrawlSchedule = $null
-                    LOBSystemSet = $testParams.LOBSystemSet
-                    CrawlStatus = "Idle"
+                    FullCrawlSchedule        = $null
+                    LOBSystemSet             = $testParams.LOBSystemSet
+                    CrawlStatus              = "Idle"
                 }
             }
 
@@ -1080,23 +1080,23 @@ namespace Microsoft.Office.Server.Search.Administration {
 
         Context -Name "A business content source does exist and shouldn't" -Fixture {
             $testParams = @{
-                Name = "Example content source"
-                ServiceAppName = "Search Service Application"
+                Name              = "Example content source"
+                ServiceAppName    = "Search Service Application"
                 ContentSourceType = "Business"
-                LOBSystemSet = @("MyDataSource", "MyDataSourceInstance")
-                Ensure = "Absent"
+                LOBSystemSet      = @("MyDataSource", "MyDataSourceInstance")
+                Ensure            = "Absent"
             }
 
             Mock -CommandName Get-SPEnterpriseSearchCrawlContentSource -MockWith {
                 return @{
-                    Name = "Example content source"
-                    Type = "Business"
+                    Name                     = "Example content source"
+                    Type                     = "Business"
                     IncrementalCrawlSchedule = $null
-                    FullCrawlSchedule = $null
-                    StartAddresses = @(
+                    FullCrawlSchedule        = $null
+                    StartAddresses           = @(
                         @{
                             AbsoluteUri = "bdc3://segment1/segment2/segment3/MyDataSource/MyDataSourceInstance&fakevalue=1"
-                            Segments = @("bdc3", "segment1", "segment2", "segment3", "MyDataSource", "MyDataSourceInstance&fakevalue=1")
+                            Segments    = @("bdc3", "segment1", "segment2", "segment3", "MyDataSource", "MyDataSourceInstance&fakevalue=1")
                         }
                     )
                 }
@@ -1120,11 +1120,11 @@ namespace Microsoft.Office.Server.Search.Administration {
 
         Context -Name "A business content source doesn't exist and shouldn't" -Fixture {
             $testParams = @{
-                Name = "Example content source"
-                ServiceAppName = "Search Service Application"
+                Name              = "Example content source"
+                ServiceAppName    = "Search Service Application"
                 ContentSourceType = "Business"
-                LOBSystemSet = @("MyDataSource", "MyDataSourceInstance")
-                Ensure = "Absent"
+                LOBSystemSet      = @("MyDataSource", "MyDataSourceInstance")
+                Ensure            = "Absent"
             }
 
             Mock -CommandName Get-SPEnterpriseSearchCrawlContentSource -MockWith {
@@ -1143,10 +1143,10 @@ namespace Microsoft.Office.Server.Search.Administration {
 
         Context -Name "Invalid Content Source Type" {
             $testParams = @{
-                Name = "Example content source"
-                ServiceAppName = "Search Service Application"
+                Name              = "Example content source"
+                ServiceAppName    = "Search Service Application"
                 ContentSourceType = "Business"
-                Ensure = "Present"
+                Ensure            = "Present"
             }
             Mock -CommandName Get-SPEnterpriseSearchCrawlContentSource -MockWith {
                 return @{
@@ -1167,11 +1167,11 @@ namespace Microsoft.Office.Server.Search.Administration {
             }
 
             $testParams = @{
-                Name = "Example content source"
-                ServiceAppName = "Search Service Application"
+                Name              = "Example content source"
+                ServiceAppName    = "Search Service Application"
                 ContentSourceType = "SharePoint"
-                LimitPageDepth = 1
-                Ensure = "Present"
+                LimitPageDepth    = 1
+                Ensure            = "Present"
             }
 
             It "Should throw Invalid parameter error" {
@@ -1180,11 +1180,11 @@ namespace Microsoft.Office.Server.Search.Administration {
             }
 
             $testParams = @{
-                Name = "Example content source"
-                ServiceAppName = "Search Service Application"
+                Name              = "Example content source"
+                ServiceAppName    = "Search Service Application"
                 ContentSourceType = "SharePoint"
-                LimitServerHops = 1
-                Ensure = "Present"
+                LimitServerHops   = 1
+                Ensure            = "Present"
             }
 
             It "Should throw Invalid parameter error" {
@@ -1193,11 +1193,11 @@ namespace Microsoft.Office.Server.Search.Administration {
             }
 
             $testParams = @{
-                Name = "Example content source"
-                ServiceAppName = "Search Service Application"
+                Name              = "Example content source"
+                ServiceAppName    = "Search Service Application"
                 ContentSourceType = "SharePoint"
-                CrawlSetting = "Custom"
-                Ensure = "Present"
+                CrawlSetting      = "Custom"
+                Ensure            = "Present"
             }
 
             It "Should throw Invalid parameter error" {
@@ -1213,11 +1213,11 @@ namespace Microsoft.Office.Server.Search.Administration {
             }
 
             $testParams = @{
-                Name = "Example content source"
-                ServiceAppName = "Search Service Application"
+                Name              = "Example content source"
+                ServiceAppName    = "Search Service Application"
                 ContentSourceType = "Website"
-                ContinuousCrawl = $true
-                Ensure = "Present"
+                ContinuousCrawl   = $true
+                Ensure            = "Present"
             }
 
             It "Should throw Invalid parameter error" {
@@ -1226,11 +1226,11 @@ namespace Microsoft.Office.Server.Search.Administration {
             }
 
             $testParams = @{
-                Name = "Example content source"
-                ServiceAppName = "Search Service Application"
+                Name              = "Example content source"
+                ServiceAppName    = "Search Service Application"
                 ContentSourceType = "Website"
-                LimitServerHops = 1
-                Ensure = "Present"
+                LimitServerHops   = 1
+                Ensure            = "Present"
             }
 
             It "Should throw Invalid parameter error" {
@@ -1246,11 +1246,11 @@ namespace Microsoft.Office.Server.Search.Administration {
             }
 
             $testParams = @{
-                Name = "Example content source"
-                ServiceAppName = "Search Service Application"
+                Name              = "Example content source"
+                ServiceAppName    = "Search Service Application"
                 ContentSourceType = "FileShare"
-                LimitPageDepth = 1
-                Ensure = "Present"
+                LimitPageDepth    = 1
+                Ensure            = "Present"
             }
 
             It "Should throw Invalid parameter error" {
@@ -1259,11 +1259,11 @@ namespace Microsoft.Office.Server.Search.Administration {
             }
 
             $testParams = @{
-                Name = "Example content source"
-                ServiceAppName = "Search Service Application"
+                Name              = "Example content source"
+                ServiceAppName    = "Search Service Application"
                 ContentSourceType = "FileShare"
-                LimitServerHops = 1
-                Ensure = "Present"
+                LimitServerHops   = 1
+                Ensure            = "Present"
             }
 
             It "Should throw Invalid parameter error" {
@@ -1272,11 +1272,11 @@ namespace Microsoft.Office.Server.Search.Administration {
             }
 
             $testParams = @{
-                Name = "Example content source"
-                ServiceAppName = "Search Service Application"
+                Name              = "Example content source"
+                ServiceAppName    = "Search Service Application"
                 ContentSourceType = "FileShare"
-                CrawlSetting = "Custom"
-                Ensure = "Present"
+                CrawlSetting      = "Custom"
+                Ensure            = "Present"
             }
 
             It "Should throw Invalid parameter error" {
@@ -1292,11 +1292,11 @@ namespace Microsoft.Office.Server.Search.Administration {
             }
 
             $testParams = @{
-                Name = "Example content source"
-                ServiceAppName = "Search Service Application"
+                Name              = "Example content source"
+                ServiceAppName    = "Search Service Application"
                 ContentSourceType = "Business"
-                LimitPageDepth = 1
-                Ensure = "Present"
+                LimitPageDepth    = 1
+                Ensure            = "Present"
             }
 
             It "Should throw Invalid parameter error" {
@@ -1305,11 +1305,11 @@ namespace Microsoft.Office.Server.Search.Administration {
             }
 
             $testParams = @{
-                Name = "Example content source"
-                ServiceAppName = "Search Service Application"
+                Name              = "Example content source"
+                ServiceAppName    = "Search Service Application"
                 ContentSourceType = "Business"
-                LimitServerHops = 1
-                Ensure = "Present"
+                LimitServerHops   = 1
+                Ensure            = "Present"
             }
 
             It "Should throw Invalid parameter error" {
@@ -1318,11 +1318,11 @@ namespace Microsoft.Office.Server.Search.Administration {
             }
 
             $testParams = @{
-                Name = "Example content source"
-                ServiceAppName = "Search Service Application"
+                Name              = "Example content source"
+                ServiceAppName    = "Search Service Application"
                 ContentSourceType = "Business"
-                ContinuousCrawl = $true
-                Ensure = "Present"
+                ContinuousCrawl   = $true
+                Ensure            = "Present"
             }
 
             It "Should throw Invalid parameter error" {
@@ -1337,22 +1337,22 @@ namespace Microsoft.Office.Server.Search.Administration {
                     Name = "Example content source"
                 }
                 $returnval = $returnval | Add-Member -MemberType NoteProperty `
-                                                     -Name Type `
-                                                     -Value "Business" `
-                                                     -PassThru |
-                                          Add-Member -MemberType ScriptMethod `
-                                                     -Name StopCrawl `
-                                                     -Value {
-                                                         $null
-                                                     }  -PassThru -Force
+                    -Name Type `
+                    -Value "Business" `
+                    -PassThru |
+                Add-Member -MemberType ScriptMethod `
+                    -Name StopCrawl `
+                    -Value {
+                    $null
+                }  -PassThru -Force
                 return $returnval
             }
 
             $testParams = @{
-                Name = "Example content source"
-                ServiceAppName = "Search Service Application"
+                Name              = "Example content source"
+                ServiceAppName    = "Search Service Application"
                 ContentSourceType = "FileShare"
-                Ensure = "Present"
+                Ensure            = "Present"
             }
 
             It "Should throw error complaining cannot change type without the force parameter" {
@@ -1360,11 +1360,11 @@ namespace Microsoft.Office.Server.Search.Administration {
             }
 
             $testParams = @{
-                Name = "Example content source"
-                ServiceAppName = "Search Service Application"
+                Name              = "Example content source"
+                ServiceAppName    = "Search Service Application"
                 ContentSourceType = "FileShare"
-                Force = $true
-                Ensure = "Present"
+                Force             = $true
+                Ensure            = "Present"
             }
 
             It "Should change the Content Source Type" {

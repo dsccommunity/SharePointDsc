@@ -9,7 +9,7 @@ function Get-TargetResource
         $Url,
 
         [Parameter(Mandatory = $true)]
-        [ValidateSet("SharePoint","ProjectServer")]
+        [ValidateSet("SharePoint", "ProjectServer")]
         [System.String]
         $PermissionMode,
 
@@ -23,12 +23,12 @@ function Get-TargetResource
     if ((Get-SPDscInstalledProductVersion).FileMajorPart -lt 16)
     {
         throw [Exception] ("Support for Project Server in SharePointDsc is only valid for " + `
-                           "SharePoint 2016 and 2019.")
+                "SharePoint 2016 and 2019.")
     }
 
     $result = Invoke-SPDscCommand -Credential $InstallAccount `
-                                  -Arguments $PSBoundParameters `
-                                  -ScriptBlock {
+        -Arguments $PSBoundParameters `
+        -ScriptBlock {
         $params = $args[0]
 
         try
@@ -59,7 +59,7 @@ function Set-TargetResource
         $Url,
 
         [Parameter(Mandatory = $true)]
-        [ValidateSet("SharePoint","ProjectServer")]
+        [ValidateSet("SharePoint", "ProjectServer")]
         [System.String]
         $PermissionMode,
 
@@ -73,12 +73,12 @@ function Set-TargetResource
     if ((Get-SPDscInstalledProductVersion).FileMajorPart -lt 16)
     {
         throw [Exception] ("Support for Project Server in SharePointDsc is only valid for " + `
-                           "SharePoint 2016 and 2019.")
+                "SharePoint 2016 and 2019.")
     }
 
     Invoke-SPDscCommand -Credential $InstallAccount `
-                        -Arguments $PSBoundParameters `
-                        -ScriptBlock {
+        -Arguments $PSBoundParameters `
+        -ScriptBlock {
         $params = $args[0]
 
         Set-SPProjectPermissionMode -Url $params.Url -Mode $params.PermissionMode
@@ -96,7 +96,7 @@ function Test-TargetResource
         $Url,
 
         [Parameter(Mandatory = $true)]
-        [ValidateSet("SharePoint","ProjectServer")]
+        [ValidateSet("SharePoint", "ProjectServer")]
         [System.String]
         $PermissionMode,
 
@@ -113,8 +113,8 @@ function Test-TargetResource
     Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
 
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
-                                    -DesiredValues $PSBoundParameters `
-                                    -ValuesToCheck @("PermissionMode")
+        -DesiredValues $PSBoundParameters `
+        -ValuesToCheck @("PermissionMode")
 
 }
 

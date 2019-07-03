@@ -28,13 +28,13 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 IsDefaultKeywordTaxonomy        = $false
             }
         } `
-            | Add-Member -MemberType ScriptMethod `
+        | Add-Member -MemberType ScriptMethod `
             -Name Update `
             -Value { `
                 $Global:SPDscServiceProxyUpdateCalled = $true
         } `
             -PassThru -Force `
-            | Add-Member -MemberType ScriptMethod `
+        | Add-Member -MemberType ScriptMethod `
             -Name GetType `
             -Value { `
                 return (@{
@@ -51,13 +51,13 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 IsDefaultKeywordTaxonomy        = $true
             }
         } `
-            | Add-Member -MemberType ScriptMethod `
+        | Add-Member -MemberType ScriptMethod `
             -Name Update `
             -Value { `
                 $Global:SPDscServiceProxyUpdateCalledDefault = $true `
         } `
             -PassThru -Force `
-            | Add-Member -MemberType ScriptMethod `
+        | Add-Member -MemberType ScriptMethod `
             -Name GetType `
             -Value { `
                 return (@{
@@ -93,7 +93,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Name     = "Mock Proxy"
 
             } `
-                | Add-Member -MemberType ScriptMethod `
+            | Add-Member -MemberType ScriptMethod `
                 -Name GetType `
                 -Value { `
                     return (@{
@@ -128,13 +128,13 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     IsDefaultKeywordTaxonomy        = $false
                 }
             } `
-                | Add-Member -MemberType ScriptMethod `
+            | Add-Member -MemberType ScriptMethod `
                 -Name Update `
                 -Value { `
                     $Global:SPDscServiceProxyUpdateCalled = $true
             } `
                 -PassThru -Force `
-                | Add-Member -MemberType ScriptMethod `
+            | Add-Member -MemberType ScriptMethod `
                 -Name GetType `
                 -Value { `
                     return (@{
@@ -219,13 +219,13 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     IsDefaultKeywordTaxonomy        = $true
                 }
             } `
-                | Add-Member -MemberType ScriptMethod `
+            | Add-Member -MemberType ScriptMethod `
                 -Name Update `
                 -Value { `
                     $Global:SPDscServiceProxyUpdateCalledDefault = $true `
             } `
                 -PassThru -Force `
-                | Add-Member -MemberType ScriptMethod `
+            | Add-Member -MemberType ScriptMethod `
                 -Name GetType `
                 -Value { `
                     return (@{

@@ -60,7 +60,7 @@
 
     $result = Invoke-SPDscCommand -Credential $InstallAccount `
         -ScriptBlock {
-        $spEmailServiceInstance = (Get-SPServiceInstance | Where-Object {$_.GetType().FullName -eq "Microsoft.SharePoint.Administration.SPIncomingEmailServiceInstance" }) | Select-Object -First 1
+        $spEmailServiceInstance = (Get-SPServiceInstance | Where-Object { $_.GetType().FullName -eq "Microsoft.SharePoint.Administration.SPIncomingEmailServiceInstance" }) | Select-Object -First 1
         $spEmailService = $spEmailServiceInstance.service
 
         # some simple error checking, just incase we didn't capture the service for some reason
@@ -199,30 +199,30 @@ function Set-TargetResource
     if ($Ensure -eq 'Present')
     {
         if (-not $PSBoundParameters.containskey("UseAutomaticSettings"))
-            {
-                throw "UseAutomaticSettings parameter must be specified when enabling incoming email."
-            }
+        {
+            throw "UseAutomaticSettings parameter must be specified when enabling incoming email."
+        }
 
-            if (-not $PSBoundParameters.containskey("ServerDisplayAddress"))
-            {
-                throw "ServerDisplayAddress parameter must be specified when enabling incoming email"
-            }
+        if (-not $PSBoundParameters.containskey("ServerDisplayAddress"))
+        {
+            throw "ServerDisplayAddress parameter must be specified when enabling incoming email"
+        }
 
-            if (($PSBoundParameters.UseDirectoryManagementService -eq 'Remote' -and $null -eq $PSBoundParameters.RemoteDirectoryManagementURL) `
-                    -or ($PSBoundParameters.containskey('RemoteDirectoryManagementURL') -and $PSBoundParameters.UseDirectoryManagementService -ne 'Remote'))
-            {
-                throw "RemoteDirectoryManagementURL must be specified only when UseDirectoryManagementService is set to 'Remote'"
-            }
+        if (($PSBoundParameters.UseDirectoryManagementService -eq 'Remote' -and $null -eq $PSBoundParameters.RemoteDirectoryManagementURL) `
+                -or ($PSBoundParameters.containskey('RemoteDirectoryManagementURL') -and $PSBoundParameters.UseDirectoryManagementService -ne 'Remote'))
+        {
+            throw "RemoteDirectoryManagementURL must be specified only when UseDirectoryManagementService is set to 'Remote'"
+        }
 
-            if ($PSBoundParameters.UseAutomaticSettings -eq $true -and $PSBoundParameters.containskey("DropFolder"))
-            {
-                throw "DropFolder parameter is not valid when using Automatic Mode"
-            }
+        if ($PSBoundParameters.UseAutomaticSettings -eq $true -and $PSBoundParameters.containskey("DropFolder"))
+        {
+            throw "DropFolder parameter is not valid when using Automatic Mode"
+        }
 
-            if ($PSBoundParameters.UseAutomaticSettings -eq $false -and  (-not $PSBoundParameters.containskey("DropFolder")))
-            {
-                throw "DropFolder parameter must be specified when not using Automatic Mode"
-            }
+        if ($PSBoundParameters.UseAutomaticSettings -eq $false -and (-not $PSBoundParameters.containskey("DropFolder")))
+        {
+            throw "DropFolder parameter must be specified when not using Automatic Mode"
+        }
     }
 
     Invoke-SPDscCommand -Credential $InstallAccount `
@@ -230,7 +230,7 @@ function Set-TargetResource
         -ScriptBlock {
         $params = $args[0]
 
-        $spEmailServiceInstance = (Get-SPServiceInstance | Where-Object {$_.GetType().FullName -eq "Microsoft.SharePoint.Administration.SPIncomingEmailServiceInstance" }) | Select-Object -First 1
+        $spEmailServiceInstance = (Get-SPServiceInstance | Where-Object { $_.GetType().FullName -eq "Microsoft.SharePoint.Administration.SPIncomingEmailServiceInstance" }) | Select-Object -First 1
         $spEmailService = $spEmailServiceInstance.service
 
         #some simple error checking, just incase we didn't capture the service for some reason
@@ -377,7 +377,7 @@ function Test-TargetResource
     Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
 
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
-                                    -DesiredValues $PSBoundParameters
+        -DesiredValues $PSBoundParameters
 }
 
 Export-ModuleMember -Function *-TargetResource

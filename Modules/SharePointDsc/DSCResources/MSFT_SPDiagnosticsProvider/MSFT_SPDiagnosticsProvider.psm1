@@ -25,7 +25,7 @@ function Get-TargetResource
         $InstallAccount,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present"
     )
@@ -33,18 +33,18 @@ function Get-TargetResource
     Write-Verbose -Message "Getting the Diagnostics Provider"
 
     $result = Invoke-SPDscCommand -Credential $InstallAccount `
-                                  -Arguments $PSBoundParameters `
-                                  -ScriptBlock {
+        -Arguments $PSBoundParameters `
+        -ScriptBlock {
         $params = $args[0]
 
-        $diagnosticProvider = Get-SPDiagnosticsProvider | Where-Object {$_.Name -eq $params.Name}
+        $diagnosticProvider = Get-SPDiagnosticsProvider | Where-Object { $_.Name -eq $params.Name }
         $nullReturn = @{
-            Name = $params.Name
-            Retention = $params.Retention
+            Name                = $params.Name
+            Retention           = $params.Retention
             MaxTotalSizeInBytes = $params.MaxTotalSizeInBytes
-            Enabled = $params.Enabled
-            Ensure = "Absent"
-            InstallAccount = $params.InstallAccount
+            Enabled             = $params.Enabled
+            Ensure              = "Absent"
+            InstallAccount      = $params.InstallAccount
         }
         if ($null -eq $diagnosticProvider)
         {
@@ -52,12 +52,12 @@ function Get-TargetResource
         }
 
         return @{
-            Name = $diagnosticProvider.Name
-            Retention = $diagnosticProvider.Retention
+            Name                = $diagnosticProvider.Name
+            Retention           = $diagnosticProvider.Retention
             MaxTotalSizeInBytes = $diagnosticProvider.MaxTotalSizeInBytes
-            Enabled = $diagnosticProvider.Enabled
-            Ensure = "Present"
-            InstallAccount = $params.InstallAccount
+            Enabled             = $diagnosticProvider.Enabled
+            Ensure              = "Present"
+            InstallAccount      = $params.InstallAccount
         }
     }
     return $result
@@ -89,7 +89,7 @@ function Set-TargetResource
         $InstallAccount,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present"
     )
@@ -102,10 +102,10 @@ function Set-TargetResource
     }
 
     Invoke-SPDscCommand -Credential $InstallAccount `
-                        -Arguments $PSBoundParameters `
-                        -ScriptBlock {
+        -Arguments $PSBoundParameters `
+        -ScriptBlock {
         $params = $args[0]
-        $diagnosticProvider = Get-SPDiagnosticsProvider | Where-Object {$_.Name -eq $params.Name}
+        $diagnosticProvider = Get-SPDiagnosticsProvider | Where-Object { $_.Name -eq $params.Name }
 
         if ($null -eq $diagnosticProvider)
         {
@@ -162,7 +162,7 @@ function Test-TargetResource
         $InstallAccount,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present"
     )
@@ -177,12 +177,12 @@ function Test-TargetResource
     Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
 
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
-                                    -DesiredValues $PSBoundParameters `
-                                    -ValuesToCheck @("Ensure",
-                                                     "Name",
-                                                     "Retention",
-                                                     "MaxTotalSizeInBytes",
-                                                     "Enabled")
+        -DesiredValues $PSBoundParameters `
+        -ValuesToCheck @("Ensure",
+        "Name",
+        "Retention",
+        "MaxTotalSizeInBytes",
+        "Enabled")
 }
 
 Export-ModuleMember -Function *-TargetResource

@@ -3,16 +3,16 @@ param(
     [Parameter()]
     [string]
     $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
-                                         -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
-                                         -Resolve)
+            -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
+            -Resolve)
 )
 
 Import-Module -Name (Join-Path -Path $PSScriptRoot `
-                                -ChildPath "..\UnitTestHelper.psm1" `
-                                -Resolve)
+        -ChildPath "..\UnitTestHelper.psm1" `
+        -Resolve)
 
 $Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointCmdletModule `
-                                              -DscResource "SPAppCatalog"
+    -DscResource "SPAppCatalog"
 
 Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
     InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
@@ -22,9 +22,9 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         $mockPassword = ConvertTo-SecureString -String "password" -AsPlainText -Force
         $mockCredential = New-Object -TypeName System.Management.Automation.PSCredential `
-                                     -ArgumentList @("$($Env:USERDOMAIN)\$($Env:USERNAME)", $mockPassword)
+            -ArgumentList @("$($Env:USERDOMAIN)\$($Env:USERNAME)", $mockPassword)
         $mockFarmCredential = New-Object -TypeName System.Management.Automation.PSCredential `
-                                         -ArgumentList @("DOMAIN\sp_farm", $mockPassword)
+            -ArgumentList @("DOMAIN\sp_farm", $mockPassword)
 
         # Mocks for all contexts
         Mock -CommandName Get-SPDscFarmAccount -MockWith {
@@ -33,7 +33,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         Mock -CommandName Add-SPDscUserToLocalAdmin -MockWith { }
         Mock -CommandName Test-SPDscUserIsLocalAdmin -MockWith { return $false }
         Mock -CommandName Remove-SPDscUserToLocalAdmin -MockWith { }
-        Mock -CommandName Restart-Service {}
+        Mock -CommandName Restart-Service { }
 
         # Test contexts
         Context -Name "The PsDscRunAsCredential is the Farm account" -Fixture {
@@ -41,17 +41,17 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 SiteUrl = "https://content.sharepoint.contoso.com/sites/AppCatalog"
             }
 
-            Mock -CommandName Update-SPAppCatalogConfiguration -MockWith {}
+            Mock -CommandName Update-SPAppCatalogConfiguration -MockWith { }
             Mock -CommandName Get-SPSite -MockWith {
                 return @{
                     WebApplication = @{
-                        Features = @( @{} ) | Add-Member -MemberType ScriptMethod `
-                                                         -Name "Item" `
-                                                         -Value { return $null } `
-                                                         -PassThru `
-                                                         -Force
+                        Features = @( @{ } ) | Add-Member -MemberType ScriptMethod `
+                            -Name "Item" `
+                            -Value { return $null } `
+                            -PassThru `
+                            -Force
                     }
-                    ID = $mockSiteId
+                    ID             = $mockSiteId
                 }
             }
             Mock -CommandName Get-SPDscFarmAccount -MockWith {
@@ -72,13 +72,13 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             Mock -CommandName Get-SPSite -MockWith {
                 return @{
                     WebApplication = @{
-                        Features = @( @{} ) | Add-Member -MemberType ScriptMethod `
-                                                         -Name "Item" `
-                                                         -Value { return $null } `
-                                                         -PassThru `
-                                                         -Force
+                        Features = @( @{ } ) | Add-Member -MemberType ScriptMethod `
+                            -Name "Item" `
+                            -Value { return $null } `
+                            -PassThru `
+                            -Force
                     }
-                    ID = $mockSiteId
+                    ID             = $mockSiteId
                 }
             }
 
@@ -104,13 +104,13 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             Mock -CommandName Get-SPSite -MockWith {
                 return @{
                     WebApplication = @{
-                        Features = @( @{} ) | Add-Member -MemberType ScriptMethod `
-                                                         -Name "Item" `
-                                                         -Value { return $null } `
-                                                         -PassThru `
-                                                         -Force
+                        Features = @( @{ } ) | Add-Member -MemberType ScriptMethod `
+                            -Name "Item" `
+                            -Value { return $null } `
+                            -PassThru `
+                            -Force
                     }
-                    ID = $mockSiteId
+                    ID             = $mockSiteId
                 }
             }
 
@@ -137,21 +137,21 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             Mock -CommandName Get-SPSite -MockWith {
                 return @{
                     WebApplication = @{
-                        Features = @( @{} ) | Add-Member -MemberType ScriptMethod `
-                                                         -Name "Item" `
-                                                         -Value {
-                                                             return @{
-                                                                ID = [guid]::NewGuid()
-                                                                Properties = @{
-                                                                    "__AppCatSiteId" = @{Value = $mockSiteId}
-                                                                }
-                                                            }
-                                                         } `
-                                                         -PassThru `
-                                                         -Force
+                        Features = @( @{ } ) | Add-Member -MemberType ScriptMethod `
+                            -Name "Item" `
+                            -Value {
+                            return @{
+                                ID         = [guid]::NewGuid()
+                                Properties = @{
+                                    "__AppCatSiteId" = @{Value = $mockSiteId }
+                                }
+                            }
+                        } `
+                            -PassThru `
+                            -Force
                     }
-                    ID = $mockSiteId
-                    Url = $testParams.SiteUrl
+                    ID             = $mockSiteId
+                    Url            = $testParams.SiteUrl
                 }
             }
 
@@ -176,13 +176,13 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             Mock -CommandName Get-SPSite -MockWith {
                 return @{
                     WebApplication = @{
-                        Features = @( @{} ) | Add-Member -MemberType ScriptMethod `
-                                                         -Name "Item" `
-                                                         -Value { return $null } `
-                                                         -PassThru `
-                                                         -Force
+                        Features = @( @{ } ) | Add-Member -MemberType ScriptMethod `
+                            -Name "Item" `
+                            -Value { return $null } `
+                            -PassThru `
+                            -Force
                     }
-                    ID = $mockSiteId
+                    ID             = $mockSiteId
                 }
             }
 
@@ -196,9 +196,9 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
             It "Should throw an exception in the set method" {
                 { Set-TargetResource @testParams } | Should throw `
-                    ("This resource must be run as the farm account (not a setup account). " + `
-                    "Please ensure either the PsDscRunAsCredential or InstallAccount " + `
-                    "credentials are set to the farm account and run this resource again")
+                ("This resource must be run as the farm account (not a setup account). " + `
+                        "Please ensure either the PsDscRunAsCredential or InstallAccount " + `
+                        "credentials are set to the farm account and run this resource again")
             }
         }
     }

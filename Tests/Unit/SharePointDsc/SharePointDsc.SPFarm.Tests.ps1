@@ -3,27 +3,27 @@ param(
     [Parameter()]
     [string]
     $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
-                                         -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
-                                         -Resolve)
+            -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
+            -Resolve)
 )
 
 Import-Module -Name (Join-Path -Path $PSScriptRoot `
-                                -ChildPath "..\UnitTestHelper.psm1" `
-                                -Resolve)
+        -ChildPath "..\UnitTestHelper.psm1" `
+        -Resolve)
 
 $Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointCmdletModule `
-                                              -DscResource "SPFarm"
+    -DscResource "SPFarm"
 
 Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
     InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
         Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
-# Initialize tests
+        # Initialize tests
         $mockPassword = ConvertTo-SecureString -String "password" -AsPlainText -Force
         $mockFarmAccount = New-Object -TypeName "System.Management.Automation.PSCredential" `
-                                      -ArgumentList @("username", $mockPassword)
+            -ArgumentList @("username", $mockPassword)
         $mockPassphrase = New-Object -TypeName "System.Management.Automation.PSCredential" `
-                                     -ArgumentList @("PASSPHRASEUSER", $mockPassword)
+            -ArgumentList @("PASSPHRASEUSER", $mockPassword)
 
         $modulePath = "Modules\SharePointDsc\Modules\SharePointDsc.Farm\SPFarm.psm1"
         Import-Module -Name (Join-Path -Path $Global:SPDscHelper.RepoRoot -ChildPath $modulePath -Resolve)
@@ -153,7 +153,7 @@ namespace Microsoft.SharePoint.Administration {
         }
 
         Context -Name "Invalid CA URL has been passed in (HTTP currently not supported)" -Fixture {
-            $testParams  = @{
+            $testParams = @{
                 IsSingleInstance          = "Yes"
                 Ensure                    = "Present"
                 FarmConfigDatabaseName    = "SP_Config"
@@ -290,9 +290,9 @@ namespace Microsoft.SharePoint.Administration {
             Mock -CommandName "Get-SPFarm" -MockWith { return $null }
             Mock -CommandName "Get-SPDscConfigDBStatus" -MockWith {
                 return @{
-                    Locked = $false
+                    Locked           = $false
                     ValidPermissions = $true
-                    DatabaseExists = $true
+                    DatabaseExists   = $true
                 }
             }
             Mock -CommandName "Get-SPDscSQLInstanceStatus" -MockWith {
@@ -318,20 +318,20 @@ namespace Microsoft.SharePoint.Administration {
                         $null | Add-Member -MemberType ScriptMethod `
                             -Name GetType `
                             -Value {
-                                return @{
-                                    Name = "SPWebServiceInstance"
-                                }
-                    } -PassThru -Force | Add-Member -Name Name `
-                    -MemberType ScriptProperty `
-                    -PassThru `
-                    {
-                        # get
-                        ""
-                    }`
-                    {
-                        # set
-                        param ( $arg )
-                    }
+                            return @{
+                                Name = "SPWebServiceInstance"
+                            }
+                        } -PassThru -Force | Add-Member -Name Name `
+                            -MemberType ScriptProperty `
+                            -PassThru `
+                        {
+                            # get
+                            ""
+                        }`
+                        {
+                            # set
+                            param ( $arg )
+                        }
                     )
                 }
                 else
@@ -345,8 +345,8 @@ namespace Microsoft.SharePoint.Administration {
                 return @{
                     IsAdministrationWebApplication = $true
                     ContentDatabases               = @(@{
-                        Name = $testParams.AdminContentDatabaseName
-                    })
+                            Name = $testParams.AdminContentDatabaseName
+                        })
                     Url                            = "http://localhost:9999"
                 }
             }
@@ -402,10 +402,10 @@ namespace Microsoft.SharePoint.Administration {
             Mock -CommandName "Get-SPWebApplication" -MockWith {
                 return @{
                     IsAdministrationWebApplication = $true
-                    ContentDatabases = @(@{
-                        Name = $testParams.AdminContentDatabaseName
-                    })
-                    Url = "http://localhost:9999"
+                    ContentDatabases               = @(@{
+                            Name = $testParams.AdminContentDatabaseName
+                        })
+                    Url                            = "http://localhost:9999"
                 }
             }
             Mock -CommandName "Get-SPServiceInstance" -MockWith {
@@ -415,12 +415,12 @@ namespace Microsoft.SharePoint.Administration {
                         @{
                             Name = "WSS_Administration"
                         } | Add-Member -MemberType ScriptMethod `
-                                       -Name GetType `
-                                       -Value {
-                                           return @{
-                                               Name = "SPWebServiceInstance"
-                                           }
-                                       } -PassThru -Force
+                            -Name GetType `
+                            -Value {
+                            return @{
+                                Name = "SPWebServiceInstance"
+                            }
+                        } -PassThru -Force
                     )
                 }
                 else
@@ -548,20 +548,20 @@ namespace Microsoft.SharePoint.Administration {
             }
             Mock -CommandName Get-SPDatabase -MockWith {
                 return @(@{
-                    Name                 = $testParams.FarmConfigDatabaseName
-                    Type                 = "Configuration Database"
-                    NormalizedDataSource = $testParams.DatabaseServer
-                })
+                        Name                 = $testParams.FarmConfigDatabaseName
+                        Type                 = "Configuration Database"
+                        NormalizedDataSource = $testParams.DatabaseServer
+                    })
             }
             Mock -CommandName Get-SPWebApplication -MockWith {
                 return @{
                     IsAdministrationWebApplication = $true
                     ContentDatabases               = @(@{
-                        Name = $testParams.AdminContentDatabaseName
-                    })
+                            Name = $testParams.AdminContentDatabaseName
+                        })
                     IISSettings                    = @(@{
-                        DisableKerberos = $true
-                    })
+                            DisableKerberos = $true
+                        })
                     Url                            = "http://localhost:9999"
                 }
             }
@@ -575,26 +575,26 @@ namespace Microsoft.SharePoint.Administration {
                 switch ($global:SPDscSIRunCount)
                 {
                     { 2 -contains $_ }
-                        {
-                            $global:SPDscSIRunCount++
-                            return @(
-                                @{
-                                    Name   = "WSS_Administration"
-                                    Status = "Online"
-                                } | Add-Member -MemberType ScriptMethod `
-                                               -Name GetType `
-                                               -Value {
-                                                   return @{
-                                                       Name = "SPWebServiceInstance"
-                                                   }
-                                               } -PassThru -Force
-                            )
-                        }
-                    { 0,1 -contains $_ }
-                        {
-                            $global:SPDscSIRunCount++
-                            return $null
-                        }
+                    {
+                        $global:SPDscSIRunCount++
+                        return @(
+                            @{
+                                Name   = "WSS_Administration"
+                                Status = "Online"
+                            } | Add-Member -MemberType ScriptMethod `
+                                -Name GetType `
+                                -Value {
+                                return @{
+                                    Name = "SPWebServiceInstance"
+                                }
+                            } -PassThru -Force
+                        )
+                    }
+                    { 0, 1 -contains $_ }
+                    {
+                        $global:SPDscSIRunCount++
+                        return $null
+                    }
                 }
             }
 
@@ -650,20 +650,20 @@ namespace Microsoft.SharePoint.Administration {
             }
             Mock -CommandName Get-SPDatabase -MockWith {
                 return @(@{
-                    Name                 = $testParams.FarmConfigDatabaseName
-                    Type                 = "Configuration Database"
-                    NormalizedDataSource = $testParams.DatabaseServer
-                })
+                        Name                 = $testParams.FarmConfigDatabaseName
+                        Type                 = "Configuration Database"
+                        NormalizedDataSource = $testParams.DatabaseServer
+                    })
             }
             Mock -CommandName Get-SPWebApplication -MockWith {
                 return @{
                     IsAdministrationWebApplication = $true
                     ContentDatabases               = @(@{
-                        Name = $testParams.AdminContentDatabaseName
-                    })
+                            Name = $testParams.AdminContentDatabaseName
+                        })
                     IISSettings                    = @(@{
-                        DisableKerberos = $true
-                    })
+                            DisableKerberos = $true
+                        })
                     Url                            = "http://localhost:9999"
                 }
             }
@@ -679,16 +679,16 @@ namespace Microsoft.SharePoint.Administration {
                         Name   = "WSS_Administration"
                         Status = "Online"
                     } | Add-Member -MemberType ScriptMethod `
-                                   -Name GetType `
-                                   -Value {
-                                       return @{
-                                           Name = "SPWebServiceInstance"
-                                       }
-                                   } -PassThru -Force
+                        -Name GetType `
+                        -Value {
+                        return @{
+                            Name = "SPWebServiceInstance"
+                        }
+                    } -PassThru -Force
                 )
             }
 
-            Mock -CommandName Set-SPCentralAdministration -MockWith {}
+            Mock -CommandName Set-SPCentralAdministration -MockWith { }
 
             It "Should return 9999 as CA Port from the get method" {
                 (Get-TargetResource @testParams).CentralAdministrationPort | Should Be 9999
@@ -745,10 +745,10 @@ namespace Microsoft.SharePoint.Administration {
             }
             Mock -CommandName Get-SPDatabase -MockWith {
                 return @(@{
-                    Name                 = $testParams.FarmConfigDatabaseName
-                    Type                 = "Configuration Database"
-                    NormalizedDataSource = $testParams.DatabaseServer
-                })
+                        Name                 = $testParams.FarmConfigDatabaseName
+                        Type                 = "Configuration Database"
+                        NormalizedDataSource = $testParams.DatabaseServer
+                    })
             }
             Mock -CommandName Get-SPWebApplication -MockWith {
                 $webapp = @{
@@ -765,7 +765,7 @@ namespace Microsoft.SharePoint.Administration {
                             SecureBindings  = @(
                                 @{
                                     HostHeader = "different.contoso.com"
-                                    Port = "443"
+                                    Port       = "443"
                                 }
                             )
                         }
@@ -796,26 +796,26 @@ namespace Microsoft.SharePoint.Administration {
                 switch ($global:SPDscSIRunCount)
                 {
                     { 2 -contains $_ }
-                        {
-                            $global:SPDscSIRunCount++
-                            return @(
-                                @{
-                                    Name   = "WSS_Administration"
-                                    Status = "Online"
-                                } | Add-Member -MemberType ScriptMethod `
-                                               -Name GetType `
-                                               -Value {
-                                                   return @{
-                                                       Name = "SPWebServiceInstance"
-                                                   }
-                                               } -PassThru -Force
-                            )
-                        }
-                    { 0,1 -contains $_ }
-                        {
-                            $global:SPDscSIRunCount++
-                            return $null
-                        }
+                    {
+                        $global:SPDscSIRunCount++
+                        return @(
+                            @{
+                                Name   = "WSS_Administration"
+                                Status = "Online"
+                            } | Add-Member -MemberType ScriptMethod `
+                                -Name GetType `
+                                -Value {
+                                return @{
+                                    Name = "SPWebServiceInstance"
+                                }
+                            } -PassThru -Force
+                        )
+                    }
+                    { 0, 1 -contains $_ }
+                    {
+                        $global:SPDscSIRunCount++
+                        return $null
+                    }
                 }
             }
 
@@ -871,8 +871,8 @@ namespace Microsoft.SharePoint.Administration {
                 return @{
                     IsAdministrationWebApplication = $true
                     ContentDatabases               = @(@{
-                        Name = $testParams.AdminContentDatabaseName
-                    })
+                            Name = $testParams.AdminContentDatabaseName
+                        })
                     Url                            = "http://localhost:9999"
                 }
             }
@@ -883,12 +883,12 @@ namespace Microsoft.SharePoint.Administration {
                         @{
                             Name = "WSS_Administration"
                         } | Add-Member -MemberType ScriptMethod `
-                                       -Name GetType `
-                                       -Value {
-                                           return @{
-                                               Name = "SPWebServiceInstance"
-                                           }
-                                       } -PassThru -Force
+                            -Name GetType `
+                            -Value {
+                            return @{
+                                Name = "SPWebServiceInstance"
+                            }
+                        } -PassThru -Force
                     )
                 }
                 else
@@ -956,10 +956,10 @@ namespace Microsoft.SharePoint.Administration {
             }
             Mock -CommandName Get-SPDatabase -MockWith {
                 return @(@{
-                    Name                 = $testParams.FarmConfigDatabaseName
-                    Type                 = "Configuration Database"
-                    NormalizedDataSource = $testParams.DatabaseServer
-                })
+                        Name                 = $testParams.FarmConfigDatabaseName
+                        Type                 = "Configuration Database"
+                        NormalizedDataSource = $testParams.DatabaseServer
+                    })
             }
             Mock -CommandName Get-SPWebApplication -MockWith {
                 $webapp = @{
@@ -1006,26 +1006,26 @@ namespace Microsoft.SharePoint.Administration {
                 switch ($global:SPDscSIRunCount)
                 {
                     { 2 -contains $_ }
-                        {
-                            $global:SPDscSIRunCount++
-                            return @(
-                                @{
-                                    Name   = "WSS_Administration"
-                                    Status = "Online"
-                                } | Add-Member -MemberType ScriptMethod `
-                                               -Name GetType `
-                                               -Value {
-                                                   return @{
-                                                       Name = "SPWebServiceInstance"
-                                                   }
-                                               } -PassThru -Force
-                            )
-                        }
-                    { 0,1 -contains $_ }
-                        {
-                            $global:SPDscSIRunCount++
-                            return $null
-                        }
+                    {
+                        $global:SPDscSIRunCount++
+                        return @(
+                            @{
+                                Name   = "WSS_Administration"
+                                Status = "Online"
+                            } | Add-Member -MemberType ScriptMethod `
+                                -Name GetType `
+                                -Value {
+                                return @{
+                                    Name = "SPWebServiceInstance"
+                                }
+                            } -PassThru -Force
+                        )
+                    }
+                    { 0, 1 -contains $_ }
+                    {
+                        $global:SPDscSIRunCount++
+                        return $null
+                    }
                 }
             }
 
@@ -1088,51 +1088,51 @@ namespace Microsoft.SharePoint.Administration {
             }
             Mock -CommandName "Get-SPDatabase" -MockWith {
                 return @(@{
-                    Name                 = $testParams.FarmConfigDatabaseName
-                    Type                 = "Configuration Database"
-                    NormalizedDataSource = $testParams.DatabaseServer
-                })
+                        Name                 = $testParams.FarmConfigDatabaseName
+                        Type                 = "Configuration Database"
+                        NormalizedDataSource = $testParams.DatabaseServer
+                    })
             }
             Mock -CommandName "Get-SPWebApplication" -MockWith {
                 return @{
                     IsAdministrationWebApplication = $true
                     ContentDatabases               = @(@{
-                        Name = $testParams.AdminContentDatabaseName
-                    })
+                            Name = $testParams.AdminContentDatabaseName
+                        })
                     IISSettings                    = @(@{
-                        DisableKerberos = $true
-                    })
+                            DisableKerberos = $true
+                        })
                     Url                            = "http://localhost:9999"
                 }
             }
-            Mock -CommandName Start-Sleep -MockWith {}
+            Mock -CommandName Start-Sleep -MockWith { }
             Mock -CommandName Get-SPServiceInstance -MockWith {
                 switch ($global:SPDscSIRunCount)
                 {
-                    { 0,2 -contains $_ }
-                        {
-                            $global:SPDscSIRunCount++
-                            return @(
-                                @{
-                                    Name   = "WSS_Administration"
-                                    Status = "Online"
-                                } | Add-Member -MemberType ScriptMethod `
-                                               -Name GetType `
-                                               -Value {
-                                                   return @{
-                                                       Name = "SPWebServiceInstance"
-                                                   }
-                                               } -PassThru -Force
-                            )
-                        }
+                    { 0, 2 -contains $_ }
+                    {
+                        $global:SPDscSIRunCount++
+                        return @(
+                            @{
+                                Name   = "WSS_Administration"
+                                Status = "Online"
+                            } | Add-Member -MemberType ScriptMethod `
+                                -Name GetType `
+                                -Value {
+                                return @{
+                                    Name = "SPWebServiceInstance"
+                                }
+                            } -PassThru -Force
+                        )
+                    }
                     { 1 -contains $_ }
-                        {
-                            $global:SPDscSIRunCount++
-                            return $null
-                        }
+                    {
+                        $global:SPDscSIRunCount++
+                        return $null
+                    }
                 }
             }
-            Mock -CommandName "Stop-SPServiceInstance" -MockWith {}
+            Mock -CommandName "Stop-SPServiceInstance" -MockWith { }
 
             $global:SPDscSIRunCount = 0
             It "Should return present from the get method" {
@@ -1193,20 +1193,20 @@ namespace Microsoft.SharePoint.Administration {
             }
             Mock -CommandName "Get-SPDatabase" -MockWith {
                 return @(@{
-                    Name                 = $testParams.FarmConfigDatabaseName
-                    Type                 = "Configuration Database"
-                    NormalizedDataSource = $testParams.DatabaseServer
-                })
+                        Name                 = $testParams.FarmConfigDatabaseName
+                        Type                 = "Configuration Database"
+                        NormalizedDataSource = $testParams.DatabaseServer
+                    })
             }
             Mock -CommandName "Get-SPWebApplication" -MockWith {
                 return @{
                     IsAdministrationWebApplication = $true
                     ContentDatabases               = @(@{
-                        Name = $testParams.AdminContentDatabaseName
-                    })
+                            Name = $testParams.AdminContentDatabaseName
+                        })
                     IISSettings                    = @(@{
-                        DisableKerberos = $true
-                    })
+                            DisableKerberos = $true
+                        })
                     Url                            = "http://localhost:9999"
                 }
             }
@@ -1218,12 +1218,12 @@ namespace Microsoft.SharePoint.Administration {
                             Name   = "WSS_Administration"
                             Status = "Online"
                         } | Add-Member -MemberType ScriptMethod `
-                                       -Name GetType `
-                                       -Value {
-                                           return @{
-                                               Name = "SPWebServiceInstance"
-                                           }
-                                       } -PassThru -Force
+                            -Name GetType `
+                            -Value {
+                            return @{
+                                Name = "SPWebServiceInstance"
+                            }
+                        } -PassThru -Force
                     )
                 }
                 else
@@ -1287,20 +1287,20 @@ namespace Microsoft.SharePoint.Administration {
             }
             Mock -CommandName "Get-SPDatabase" -MockWith {
                 return @(@{
-                    Name                 = $testParams.FarmConfigDatabaseName
-                    Type                 = "Configuration Database"
-                    NormalizedDataSource = $testParams.DatabaseServer
-                })
+                        Name                 = $testParams.FarmConfigDatabaseName
+                        Type                 = "Configuration Database"
+                        NormalizedDataSource = $testParams.DatabaseServer
+                    })
             }
             Mock -CommandName "Get-SPWebApplication" -MockWith {
                 return @{
                     IsAdministrationWebApplication = $true
                     ContentDatabases               = @(@{
-                        Name = $testParams.AdminContentDatabaseName
-                    })
+                            Name = $testParams.AdminContentDatabaseName
+                        })
                     IISSettings                    = @(@{
-                        DisableKerberos = $true
-                    })
+                            DisableKerberos = $true
+                        })
                     Url                            = "http://localhost:9999"
                 }
             }
@@ -1312,12 +1312,12 @@ namespace Microsoft.SharePoint.Administration {
                             Name   = "WSS_Administration"
                             Status = "Online"
                         } | Add-Member -MemberType ScriptMethod `
-                                       -Name GetType `
-                                       -Value {
-                                           return @{
-                                               Name = "SPWebServiceInstance"
-                                           }
-                                       } -PassThru -Force
+                            -Name GetType `
+                            -Value {
+                            return @{
+                                Name = "SPWebServiceInstance"
+                            }
+                        } -PassThru -Force
                     )
                 }
                 else
@@ -1370,7 +1370,7 @@ namespace Microsoft.SharePoint.Administration {
                     FarmConfigDatabaseName    = "SP_Config"
                     DatabaseServer            = "DatabaseServer\Instance"
                     FarmAccount               = $mockFarmAccount
-                    Passphrase                =  $mockPassphrase
+                    Passphrase                = $mockPassphrase
                     AdminContentDatabaseName  = "Admin_Content"
                     CentralAdministrationAuth = "Kerberos"
                     CentralAdministrationPort = 1234
@@ -1430,27 +1430,27 @@ namespace Microsoft.SharePoint.Administration {
                 }
                 Mock -CommandName "Get-SPDatabase" -MockWith {
                     return @(@{
-                        Name   = $testParams.FarmConfigDatabaseName
-                        Type   = "Configuration Database"
-                        Server = @{
-                            Name = $testParams.DatabaseServer
-                        }
-                    })
+                            Name   = $testParams.FarmConfigDatabaseName
+                            Type   = "Configuration Database"
+                            Server = @{
+                                Name = $testParams.DatabaseServer
+                            }
+                        })
                 }
                 Mock -CommandName "Get-SPWebApplication" -MockWith {
                     return @{
                         IsAdministrationWebApplication = $true
                         ContentDatabases               = @(@{
-                            Name = $testParams.AdminContentDatabaseName
-                        })
+                                Name = $testParams.AdminContentDatabaseName
+                            })
                         IISSettings                    = @(@{
-                            DisableKerberos = $true
-                        })
+                                DisableKerberos = $true
+                            })
                         Url                            = "http://localhost:9999"
                     }
                 }
 
-                Mock -CommandName Get-SPServer -MockWith{
+                Mock -CommandName Get-SPServer -MockWith {
                     return @{
                         Name = "spwfe"
                         Role = "WebFrontEnd"
@@ -1459,7 +1459,7 @@ namespace Microsoft.SharePoint.Administration {
 
                 Mock -CommandName Get-SPDscInstalledProductVersion -MockWith { return @{ FileMajorPart = 15 } }
 
-                It "Should return WebFrontEnd from the get method"{
+                It "Should return WebFrontEnd from the get method" {
                     (Get-TargetResource @testParams).ServerRole | Should Be $null
                 }
             }
@@ -1474,7 +1474,7 @@ namespace Microsoft.SharePoint.Administration {
                     FarmConfigDatabaseName    = "SP_Config"
                     DatabaseServer            = "DatabaseServer\Instance"
                     FarmAccount               = $mockFarmAccount
-                    Passphrase                =  $mockPassphrase
+                    Passphrase                = $mockPassphrase
                     AdminContentDatabaseName  = "Admin_Content"
                     CentralAdministrationAuth = "Kerberos"
                     CentralAdministrationPort = 1234
@@ -1589,20 +1589,20 @@ namespace Microsoft.SharePoint.Administration {
                 }
                 Mock -CommandName "Get-SPDatabase" -MockWith {
                     return @(@{
-                        Name                 = $testParams.FarmConfigDatabaseName
-                        Type                 = "Configuration Database"
-                        NormalizedDataSource = $testParams.DatabaseServer
-                    })
+                            Name                 = $testParams.FarmConfigDatabaseName
+                            Type                 = "Configuration Database"
+                            NormalizedDataSource = $testParams.DatabaseServer
+                        })
                 }
                 Mock -CommandName "Get-SPWebApplication" -MockWith {
                     return @{
                         IsAdministrationWebApplication = $true
                         ContentDatabases               = @(@{
-                            Name = $testParams.AdminContentDatabaseName
-                        })
+                                Name = $testParams.AdminContentDatabaseName
+                            })
                         IISSettings                    = @(@{
-                            DisableKerberos = $true
-                        })
+                                DisableKerberos = $true
+                            })
                         Url                            = "http://localhost:9999"
                     }
                 }
@@ -1614,12 +1614,12 @@ namespace Microsoft.SharePoint.Administration {
                                 Name   = "WSS_Administration"
                                 Status = "Online"
                             } | Add-Member -MemberType ScriptMethod `
-                                           -Name GetType `
-                                           -Value {
-                                               return @{
-                                                   Name = "SPWebServiceInstance"
-                                               }
-                                           } -PassThru -Force
+                                -Name GetType `
+                                -Value {
+                                return @{
+                                    Name = "SPWebServiceInstance"
+                                }
+                            } -PassThru -Force
                         )
                     }
                     else
@@ -1681,26 +1681,26 @@ namespace Microsoft.SharePoint.Administration {
             }
             Mock -CommandName "Get-SPDatabase" -MockWith {
                 return @(@{
-                    Name   = $testParams.FarmConfigDatabaseName
-                    Type   = "Configuration Database"
-                    Server = @{
-                        Name = $testParams.DatabaseServer
-                    }
-                })
+                        Name   = $testParams.FarmConfigDatabaseName
+                        Type   = "Configuration Database"
+                        Server = @{
+                            Name = $testParams.DatabaseServer
+                        }
+                    })
             }
             Mock -CommandName "Get-SPWebApplication" -MockWith {
                 return @{
                     IsAdministrationWebApplication = $true
                     ContentDatabases               = @(@{
-                        Name = $testParams.AdminContentDatabaseName
-                    })
+                            Name = $testParams.AdminContentDatabaseName
+                        })
                     IISSettings                    = @(@{
-                        DisableKerberos = $true
-                    })
+                            DisableKerberos = $true
+                        })
                     Url                            = "http://localhost:9999"
                 }
             }
-            Mock -CommandName Get-SPServer -MockWith{
+            Mock -CommandName Get-SPServer -MockWith {
                 return @{
                     Name = "spwfe"
                     Role = "WebFrontEnd"
@@ -1709,7 +1709,7 @@ namespace Microsoft.SharePoint.Administration {
 
             Mock -CommandName Get-SPDscInstalledProductVersion -MockWith { return @{ FileMajorPart = 16; ProductBuildPart = 4700 } }
 
-            It "Should return WebFrontEnd from the get method"{
+            It "Should return WebFrontEnd from the get method" {
                 (Get-TargetResource @testParams).ServerRole | Should Be "WebFrontEnd"
             }
         }
@@ -1778,12 +1778,12 @@ namespace Microsoft.SharePoint.Administration {
                             Name   = "WSS_Administration"
                             Status = "Online"
                         } | Add-Member -MemberType ScriptMethod `
-                                       -Name GetType `
-                                       -Value {
-                                           return @{
-                                               Name = "SPWebServiceInstance"
-                                           }
-                                       } -PassThru -Force
+                            -Name GetType `
+                            -Value {
+                            return @{
+                                Name = "SPWebServiceInstance"
+                            }
+                        } -PassThru -Force
                     )
                 }
                 else
@@ -1854,20 +1854,20 @@ namespace Microsoft.SharePoint.Administration {
             }
             Mock -CommandName "Get-SPDatabase" -MockWith {
                 return @(@{
-                    Name                 = $testParams.FarmConfigDatabaseName
-                    Type                 = "Configuration Database"
-                    NormalizedDataSource = $testParams.DatabaseServer
-                })
+                        Name                 = $testParams.FarmConfigDatabaseName
+                        Type                 = "Configuration Database"
+                        NormalizedDataSource = $testParams.DatabaseServer
+                    })
             }
             Mock -CommandName "Get-SPWebApplication" -MockWith {
                 return @{
                     IsAdministrationWebApplication = $true
                     ContentDatabases               = @(@{
-                        Name = $testParams.AdminContentDatabaseName
-                    })
+                            Name = $testParams.AdminContentDatabaseName
+                        })
                     IISSettings                    = @(@{
-                        DisableKerberos = $true
-                    })
+                            DisableKerberos = $true
+                        })
                     Url                            = "http://localhost:9999"
                 }
             }
@@ -1879,12 +1879,12 @@ namespace Microsoft.SharePoint.Administration {
                             Name   = "WSS_Administration"
                             Status = "Online"
                         } | Add-Member -MemberType ScriptMethod `
-                                       -Name GetType `
-                                       -Value {
-                                           return @{
-                                               Name = "SPWebServiceInstance"
-                                           }
-                                       } -PassThru -Force
+                            -Name GetType `
+                            -Value {
+                            return @{
+                                Name = "SPWebServiceInstance"
+                            }
+                        } -PassThru -Force
                     )
                 }
                 else

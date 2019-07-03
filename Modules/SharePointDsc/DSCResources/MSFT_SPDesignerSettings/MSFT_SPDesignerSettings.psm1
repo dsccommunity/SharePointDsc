@@ -9,7 +9,7 @@ function Get-TargetResource
         $WebAppUrl,
 
         [Parameter(Mandatory = $true)]
-        [ValidateSet("WebApplication","SiteCollection")]
+        [ValidateSet("WebApplication", "SiteCollection")]
         [System.String]
         $SettingsScope,
 
@@ -50,22 +50,23 @@ function Get-TargetResource
 
     switch ($SettingsScope)
     {
-        "WebApplication" {
+        "WebApplication"
+        {
             $result = Invoke-SPDscCommand -Credential $InstallAccount `
-                                          -Arguments $PSBoundParameters `
-                                          -ScriptBlock {
+                -Arguments $PSBoundParameters `
+                -ScriptBlock {
                 $params = $args[0]
 
                 $nullReturn = @{
-                    WebAppUrl                               = $params.WebAppUrl
-                    SettingsScope                           = $params.SettingsScope
-                    AllowSharePointDesigner                 = $null
-                    AllowDetachPagesFromDefinition          = $null
-                    AllowCustomiseMasterPage                = $null
-                    AllowManageSiteURLStructure             = $null
-                    AllowCreateDeclarativeWorkflow          = $null
-                    AllowSavePublishDeclarativeWorkflow     = $null
-                    AllowSaveDeclarativeWorkflowAsTemplate  = $null
+                    WebAppUrl                              = $params.WebAppUrl
+                    SettingsScope                          = $params.SettingsScope
+                    AllowSharePointDesigner                = $null
+                    AllowDetachPagesFromDefinition         = $null
+                    AllowCustomiseMasterPage               = $null
+                    AllowManageSiteURLStructure            = $null
+                    AllowCreateDeclarativeWorkflow         = $null
+                    AllowSavePublishDeclarativeWorkflow    = $null
+                    AllowSaveDeclarativeWorkflowAsTemplate = $null
                 }
 
                 try
@@ -75,7 +76,7 @@ function Get-TargetResource
                 catch
                 {
                     Write-Verbose -Message ("No local SharePoint farm was detected. " + `
-                                            "SharePoint Designer settings will not be applied")
+                            "SharePoint Designer settings will not be applied")
                     return $nullReturn
                 }
 
@@ -86,7 +87,7 @@ function Get-TargetResource
                 if ($null -eq $webapp)
                 {
                     Write-Verbose -Message ("Web application not found. SharePoint Designer " + `
-                                            "settings will not be applied")
+                            "settings will not be applied")
                     return $nullReturn
                 }
                 else
@@ -96,41 +97,42 @@ function Get-TargetResource
 
                     return @{
                         # Set the SPD settings
-                        WebAppUrl                               = $params.WebAppUrl
-                        SettingsScope                           = $params.SettingsScope
-                        AllowSharePointDesigner                 = $spdSettings.AllowDesigner
-                        AllowDetachPagesFromDefinition          = $spdSettings.AllowRevertFromTemplate
-                        AllowCustomiseMasterPage                = $spdSettings.AllowMasterPageEditing
-                        AllowManageSiteURLStructure             = $spdSettings.ShowURLStructure
-                        AllowCreateDeclarativeWorkflow          = `
+                        WebAppUrl                              = $params.WebAppUrl
+                        SettingsScope                          = $params.SettingsScope
+                        AllowSharePointDesigner                = $spdSettings.AllowDesigner
+                        AllowDetachPagesFromDefinition         = $spdSettings.AllowRevertFromTemplate
+                        AllowCustomiseMasterPage               = $spdSettings.AllowMasterPageEditing
+                        AllowManageSiteURLStructure            = $spdSettings.ShowURLStructure
+                        AllowCreateDeclarativeWorkflow         = `
                             $spdSettings.AllowCreateDeclarativeWorkflow
-                        AllowSavePublishDeclarativeWorkflow     = `
+                        AllowSavePublishDeclarativeWorkflow    = `
                             $spdSettings.AllowSavePublishDeclarativeWorkflow
-                        AllowSaveDeclarativeWorkflowAsTemplate  = `
+                        AllowSaveDeclarativeWorkflowAsTemplate = `
                             $spdSettings.AllowSaveDeclarativeWorkflowAsTemplate
-                        InstallAccount = $params.InstallAccount
+                        InstallAccount                         = $params.InstallAccount
                     }
                 }
             }
         }
-        "SiteCollection" {
+        "SiteCollection"
+        {
             if ((Test-SPDscRunAsCredential -Credential $InstallAccount) -eq $true)
             {
                 $result = Invoke-SPDscCommand -Credential $InstallAccount `
-                                              -Arguments $PSBoundParameters `
-                                              -ScriptBlock {
+                    -Arguments $PSBoundParameters `
+                    -ScriptBlock {
                     $params = $args[0]
 
                     $nullReturn = @{
-                        WebAppUrl                               = $params.WebAppUrl
-                        SettingsScope                           = $params.SettingsScope
-                        AllowSharePointDesigner                 = $null
-                        AllowDetachPagesFromDefinition          = $null
-                        AllowCustomiseMasterPage                = $null
-                        AllowManageSiteURLStructure             = $null
-                        AllowCreateDeclarativeWorkflow          = $null
-                        AllowSavePublishDeclarativeWorkflow     = $null
-                        AllowSaveDeclarativeWorkflowAsTemplate  = $null
+                        WebAppUrl                              = $params.WebAppUrl
+                        SettingsScope                          = $params.SettingsScope
+                        AllowSharePointDesigner                = $null
+                        AllowDetachPagesFromDefinition         = $null
+                        AllowCustomiseMasterPage               = $null
+                        AllowManageSiteURLStructure            = $null
+                        AllowCreateDeclarativeWorkflow         = $null
+                        AllowSavePublishDeclarativeWorkflow    = $null
+                        AllowSaveDeclarativeWorkflowAsTemplate = $null
                     }
 
                     try
@@ -140,7 +142,7 @@ function Get-TargetResource
                     catch
                     {
                         Write-Verbose -Message ("No local SharePoint farm was detected. " + `
-                                                "SharePoint Designer settings will not be applied")
+                                "SharePoint Designer settings will not be applied")
                         return $nullReturn
                     }
 
@@ -149,25 +151,25 @@ function Get-TargetResource
                     if ($null -eq $site)
                     {
                         Write-Verbose -Message ("Site collection not found. SharePoint " + `
-                                                "Designer settings will not be applied")
+                                "Designer settings will not be applied")
                         return $nullReturn
                     }
                     else
                     {
                         return @{
                             # Set the SPD settings
-                            WebAppUrl                               = $params.WebAppUrl
-                            SettingsScope                           = $params.SettingsScope
-                            AllowSharePointDesigner                 = $site.AllowDesigner
-                            AllowDetachPagesFromDefinition          = $site.AllowRevertFromTemplate
-                            AllowCustomiseMasterPage                = $site.AllowMasterPageEditing
-                            AllowManageSiteURLStructure             = $site.ShowURLStructure
-                            AllowCreateDeclarativeWorkflow          = $site.AllowCreateDeclarativeWorkflow
-                            AllowSavePublishDeclarativeWorkflow     = `
+                            WebAppUrl                              = $params.WebAppUrl
+                            SettingsScope                          = $params.SettingsScope
+                            AllowSharePointDesigner                = $site.AllowDesigner
+                            AllowDetachPagesFromDefinition         = $site.AllowRevertFromTemplate
+                            AllowCustomiseMasterPage               = $site.AllowMasterPageEditing
+                            AllowManageSiteURLStructure            = $site.ShowURLStructure
+                            AllowCreateDeclarativeWorkflow         = $site.AllowCreateDeclarativeWorkflow
+                            AllowSavePublishDeclarativeWorkflow    = `
                                 $site.AllowSavePublishDeclarativeWorkflow
-                            AllowSaveDeclarativeWorkflowAsTemplate  = `
+                            AllowSaveDeclarativeWorkflowAsTemplate = `
                                 $site.AllowSaveDeclarativeWorkflowAsTemplate
-                            InstallAccount = $params.InstallAccount
+                            InstallAccount                         = $params.InstallAccount
                         }
                     }
                 }
@@ -175,8 +177,8 @@ function Get-TargetResource
             else
             {
                 throw ("A known issue exists that prevents these settings from being managed " + `
-                       "when InstallAccount is used instead of PsDscRunAsAccount. See " + `
-                       "http://aka.ms/xSharePointRemoteIssues for details.")
+                        "when InstallAccount is used instead of PsDscRunAsAccount. See " + `
+                        "http://aka.ms/xSharePointRemoteIssues for details.")
             }
         }
     }
@@ -194,7 +196,7 @@ function Set-TargetResource
         $WebAppUrl,
 
         [Parameter(Mandatory = $true)]
-        [ValidateSet("WebApplication","SiteCollection")]
+        [ValidateSet("WebApplication", "SiteCollection")]
         [System.String]
         $SettingsScope,
 
@@ -235,10 +237,11 @@ function Set-TargetResource
 
     switch ($SettingsScope)
     {
-        "WebApplication" {
+        "WebApplication"
+        {
             Invoke-SPDscCommand -Credential $InstallAccount `
-                                -Arguments $PSBoundParameters `
-                                -ScriptBlock {
+                -Arguments $PSBoundParameters `
+                -ScriptBlock {
                 $params = $args[0]
 
                 try
@@ -248,7 +251,7 @@ function Set-TargetResource
                 catch
                 {
                     throw ("No local SharePoint farm was detected. SharePoint " + `
-                           "Designer settings will not be applied")
+                            "Designer settings will not be applied")
                     return
                 }
 
@@ -261,7 +264,7 @@ function Set-TargetResource
                 if ($null -eq $webapp)
                 {
                     throw ("Web application not found. SharePoint Designer settings " + `
-                           "will not be applied")
+                            "will not be applied")
                     return
                 }
                 else
@@ -302,12 +305,13 @@ function Set-TargetResource
                 }
             }
         }
-        "SiteCollection" {
+        "SiteCollection"
+        {
             if ((Test-SPDscRunAsCredential -Credential $InstallAccount) -eq $true)
             {
                 Invoke-SPDscCommand -Credential $InstallAccount `
-                                    -Arguments $PSBoundParameters `
-                                    -ScriptBlock {
+                    -Arguments $PSBoundParameters `
+                    -ScriptBlock {
                     $params = $args[0]
 
                     try
@@ -317,7 +321,7 @@ function Set-TargetResource
                     catch
                     {
                         throw ("No local SharePoint farm was detected. SharePoint Designer " + `
-                               "settings will not be applied")
+                                "settings will not be applied")
                         return
                     }
 
@@ -328,7 +332,7 @@ function Set-TargetResource
                     if ($null -eq $site)
                     {
                         throw ("Site collection not found. SharePoint Designer settings " + `
-                               "will not be applied")
+                                "will not be applied")
                         return $null
                     }
                     else
@@ -363,7 +367,7 @@ function Set-TargetResource
                         if ($params.ContainsKey("AllowSaveDeclarativeWorkflowAsTemplate"))
                         {
                             $site.AllowSaveDeclarativeWorkflowAsTemplate = `
-                            $params.AllowSaveDeclarativeWorkflowAsTemplate
+                                $params.AllowSaveDeclarativeWorkflowAsTemplate
                         }
                     }
                 }
@@ -371,8 +375,8 @@ function Set-TargetResource
             else
             {
                 throw ("A known issue exists that prevents these settings from being " + `
-                       "managed when InstallAccount is used instead of PsDscRunAsAccount. " + `
-                       "See http://aka.ms/xSharePointRemoteIssues for details.")
+                        "managed when InstallAccount is used instead of PsDscRunAsAccount. " + `
+                        "See http://aka.ms/xSharePointRemoteIssues for details.")
             }
         }
     }
@@ -390,7 +394,7 @@ function Test-TargetResource
         $WebAppUrl,
 
         [Parameter(Mandatory = $true)]
-        [ValidateSet("WebApplication","SiteCollection")]
+        [ValidateSet("WebApplication", "SiteCollection")]
         [System.String]
         $SettingsScope,
 
@@ -435,7 +439,7 @@ function Test-TargetResource
     Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
 
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
-                                    -DesiredValues $PSBoundParameters
+        -DesiredValues $PSBoundParameters
 }
 
 Export-ModuleMember -Function *-TargetResource

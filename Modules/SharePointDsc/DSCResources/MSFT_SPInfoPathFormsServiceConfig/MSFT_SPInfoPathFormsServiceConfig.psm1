@@ -10,7 +10,7 @@ function Get-TargetResource
         $IsSingleInstance,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure,
 
@@ -78,8 +78,8 @@ function Get-TargetResource
     Write-Verbose -Message "Getting InfoPath Forms Service Configuration"
 
     $result = Invoke-SPDscCommand -Credential $InstallAccount `
-                                  -Arguments $PSBoundParameters `
-                                  -ScriptBlock {
+        -Arguments $PSBoundParameters `
+        -ScriptBlock {
         $params = $args[0]
 
         $config = Get-SPInfoPathFormsService
@@ -141,7 +141,7 @@ function Set-TargetResource
         $IsSingleInstance,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure,
 
@@ -215,8 +215,8 @@ function Set-TargetResource
     }
 
     Invoke-SPDscCommand -Credential $InstallAccount `
-                        -Arguments $PSBoundParameters `
-                        -ScriptBlock {
+        -Arguments $PSBoundParameters `
+        -ScriptBlock {
         $params = $args[0]
         $config = Get-SPInfoPathFormsService
 
@@ -306,7 +306,7 @@ function Test-TargetResource
         $IsSingleInstance,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure,
 
@@ -381,22 +381,22 @@ function Test-TargetResource
     Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
 
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
-                                    -DesiredValues $PSBoundParameters `
-                                    -ValuesToCheck @("Ensure",
-                                                     "AllowUserFormBrowserEnabling",
-                                                     "AllowUserFormBrowserRendering",
-                                                     "MaxDataConnectionTimeout",
-                                                     "DefaultDataConnectionTimeout",
-                                                     "MaxDataConnectionResponseSize",
-                                                     "RequireSslForDataConnections",
-                                                     "AllowEmbeddedSqlForDataConnections",
-                                                     "AllowUdcAuthenticationForDataConnections",
-                                                     "AllowUserFormCrossDomainDataConnections",
-                                                     "AllowEventPropagation",
-                                                     "MaxPostbacksPerSession",
-                                                     "MaxUserActionsPerPostback",
-                                                     "ActiveSessionsTimeout",
-                                                     "MaxSizeOfUserFormState")
+        -DesiredValues $PSBoundParameters `
+        -ValuesToCheck @("Ensure",
+        "AllowUserFormBrowserEnabling",
+        "AllowUserFormBrowserRendering",
+        "MaxDataConnectionTimeout",
+        "DefaultDataConnectionTimeout",
+        "MaxDataConnectionResponseSize",
+        "RequireSslForDataConnections",
+        "AllowEmbeddedSqlForDataConnections",
+        "AllowUdcAuthenticationForDataConnections",
+        "AllowUserFormCrossDomainDataConnections",
+        "AllowEventPropagation",
+        "MaxPostbacksPerSession",
+        "MaxUserActionsPerPostback",
+        "ActiveSessionsTimeout",
+        "MaxSizeOfUserFormState")
 }
 
 Export-ModuleMember -Function *-TargetResource

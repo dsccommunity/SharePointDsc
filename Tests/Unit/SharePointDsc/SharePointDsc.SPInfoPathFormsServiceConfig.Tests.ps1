@@ -3,16 +3,16 @@ param(
     [Parameter()]
     [string]
     $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
-                                         -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
-                                         -Resolve)
+            -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
+            -Resolve)
 )
 
 Import-Module -Name (Join-Path -Path $PSScriptRoot `
-                                -ChildPath "..\UnitTestHelper.psm1" `
-                                -Resolve)
+        -ChildPath "..\UnitTestHelper.psm1" `
+        -Resolve)
 
 $Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointCmdletModule `
-                                              -DscResource "SPInfoPathFormsServiceConfig"
+    -DscResource "SPInfoPathFormsServiceConfig"
 
 Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
     InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
@@ -20,7 +20,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Mock -CommandName Get-SPInfoPathFormsService -MockWith {
             return @{
-                Ensure = "Present"
+                Ensure                                   = "Present"
                 AllowUserFormBrowserEnabling             = $true
                 AllowUserFormBrowserRendering            = $true
                 MaxDataConnectionTimeout                 = 20000
@@ -35,7 +35,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 MaxUserActionsPerPostback                = 200
                 ActiveSessionsTimeout                    = 1440
                 MaxSizeOfUserFormState                   = 4194304
-            }| Add-Member ScriptMethod Update {
+            } | Add-Member ScriptMethod Update {
                 $global:InfoPathSettingsUpdated = $true
             } -PassThru
         }
@@ -91,7 +91,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
             It "Should return false when the Test method is called" {
                 { Set-TargetResource @testParams } | Should throw "This resource cannot undo InfoPath Forms Service Configuration changes. " `
-                "Please set Ensure to Present or omit the resource"
+                    "Please set Ensure to Present or omit the resource"
             }
         }
 

@@ -28,8 +28,8 @@ function Get-TargetResource
     Write-Verbose -Message "Getting web application '$WebAppUrl' blocked file types"
 
     $result = Invoke-SPDscCommand -Credential $InstallAccount `
-                                  -Arguments @($PSBoundParameters,$PSScriptRoot) `
-                                  -ScriptBlock {
+        -Arguments @($PSBoundParameters, $PSScriptRoot) `
+        -ScriptBlock {
         $params = $args[0]
         $ScriptRoot = $args[1]
 
@@ -85,8 +85,8 @@ function Set-TargetResource
     Write-Verbose -Message "Setting web application '$WebAppUrl' blocked file types"
 
     $null = Invoke-SPDscCommand -Credential $InstallAccount `
-                                -Arguments @($PSBoundParameters,$PSScriptRoot) `
-                                -ScriptBlock {
+        -Arguments @($PSBoundParameters, $PSScriptRoot) `
+        -ScriptBlock {
         $params = $args[0]
         $ScriptRoot = $args[1]
 
@@ -143,7 +143,7 @@ function Test-TargetResource
     Import-Module -Name (Join-Path -Path $PSScriptRoot -ChildPath $modulePath -Resolve)
 
     return Test-SPDscWebApplicationBlockedFileTypeConfig -CurrentSettings $CurrentValues `
-                                                         -DesiredSettings $PSBoundParameters
+        -DesiredSettings $PSBoundParameters
 }
 
 Export-ModuleMember -Function *-TargetResource

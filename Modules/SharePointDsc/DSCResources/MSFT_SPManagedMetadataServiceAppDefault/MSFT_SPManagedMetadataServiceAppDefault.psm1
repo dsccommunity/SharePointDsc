@@ -188,8 +188,8 @@ function Test-TargetResource
     Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
 
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
-                                    -DesiredValues $PSBoundParameters `
-                                    -ValuesToCheck $valuesToCheck
+        -DesiredValues $PSBoundParameters `
+        -ValuesToCheck $valuesToCheck
 }
 
 Export-ModuleMember -Function *-TargetResource

@@ -16,13 +16,13 @@ function Get-TargetResource
     Write-Verbose -Message "Getting app catalog status of $SiteUrl"
 
     $result = Invoke-SPDscCommand -Credential $InstallAccount `
-                                  -Arguments $PSBoundParameters `
-                                  -ScriptBlock {
+        -Arguments $PSBoundParameters `
+        -ScriptBlock {
         $params = $args[0]
 
         $site = Get-SPSite $params.SiteUrl -ErrorAction SilentlyContinue
         $nullreturn = @{
-            SiteUrl = $null
+            SiteUrl        = $null
             InstallAccount = $params.InstallAccount
         }
         if ($null -eq $site)
@@ -40,7 +40,7 @@ function Get-TargetResource
             return $nullreturn
         }
         return @{
-            SiteUrl = $site.Url
+            SiteUrl        = $site.Url
             InstallAccount = $params.InstallAccount
         }
     }
@@ -65,8 +65,8 @@ function Set-TargetResource
 
     Write-Verbose -Message "Retrieving farm account"
     $farmAccount = Invoke-SPDscCommand -Credential $InstallAccount `
-                                       -Arguments $PSBoundParameters `
-                                       -ScriptBlock {
+        -Arguments $PSBoundParameters `
+        -ScriptBlock {
         return Get-SPDscFarmAccount
     }
 
@@ -120,8 +120,8 @@ function Set-TargetResource
     }
 
     Invoke-SPDscCommand -Credential $farmAccount `
-                        -Arguments $PSBoundParameters `
-                        -ScriptBlock {
+        -Arguments $PSBoundParameters `
+        -ScriptBlock {
         $params = $args[0]
         try
         {
@@ -130,8 +130,8 @@ function Set-TargetResource
         catch [System.UnauthorizedAccessException]
         {
             throw ("This resource must be run as the farm account (not a setup account). " + `
-                   "Please ensure either the PsDscRunAsCredential or InstallAccount " + `
-                   "credentials are set to the farm account and run this resource again")
+                    "Please ensure either the PsDscRunAsCredential or InstallAccount " + `
+                    "credentials are set to the farm account and run this resource again")
         }
     } | Out-Null
 
@@ -172,8 +172,8 @@ function Test-TargetResource
     Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
 
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
-                                    -DesiredValues $PSBoundParameters `
-                                    -ValuesToCheck @("SiteUrl")
+        -DesiredValues $PSBoundParameters `
+        -ValuesToCheck @("SiteUrl")
 }
 
 Export-ModuleMember -Function *-TargetResource
