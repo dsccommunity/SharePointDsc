@@ -1,5 +1,13 @@
 # Change log for SharePointDsc
 
+## Unreleased
+
+* SPInstall
+  * Updated error code checks to force reboot.
+* SPFarm
+  * Moved check for CentralAdministrationUrl is HTTP to Set method,
+    to prevent issues with ReverseDsc.
+
 ## v3.5
 
 * SharePointDsc generic
