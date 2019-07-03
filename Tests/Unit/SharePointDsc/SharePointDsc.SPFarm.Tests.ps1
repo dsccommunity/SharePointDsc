@@ -139,14 +139,6 @@ namespace Microsoft.SharePoint.Administration {
                 RunCentralAdmin           = $true
             }
 
-            It "Should throw exception in the get method" {
-                { Get-TargetResource @testParams } | Should Throw "CentralAdministrationUrl should not specify port. Use CentralAdministrationPort instead."
-            }
-
-            It "Should throw exception in the test method" {
-                { Test-TargetResource @testParams } | Should Throw "CentralAdministrationUrl should not specify port. Use CentralAdministrationPort instead."
-            }
-
             It "Should throw exception in the set method" {
                 { Set-TargetResource @testParams } | Should Throw "CentralAdministrationUrl should not specify port. Use CentralAdministrationPort instead."
             }
@@ -164,14 +156,6 @@ namespace Microsoft.SharePoint.Administration {
                 Passphrase                = $mockPassphrase
                 AdminContentDatabaseName  = "SP_AdminContent"
                 RunCentralAdmin           = $true
-            }
-
-            It "Should throw exception in the get method" {
-                { Get-TargetResource @testParams } | Should Throw "CentralAdministrationUrl parameter can only be used with HTTPS"
-            }
-
-            It "Should throw exception in the test method" {
-                { Test-TargetResource @testParams } | Should Throw "CentralAdministrationUrl parameter can only be used with HTTPS"
             }
 
             It "Should throw exception in the set method" {
