@@ -17,7 +17,7 @@ function Get-TargetResource
         $ProxyName,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present",
 
@@ -29,12 +29,12 @@ function Get-TargetResource
     Write-Verbose -Message "Getting Visio Graphics service app '$Name'"
 
     $result = Invoke-SPDscCommand -Credential $InstallAccount `
-                                  -Arguments $PSBoundParameters `
-                                  -ScriptBlock {
+        -Arguments $PSBoundParameters `
+        -ScriptBlock {
         $params = $args[0]
 
         $serviceApps = Get-SPServiceApplication -Name $params.Name `
-                                                -ErrorAction SilentlyContinue
+            -ErrorAction SilentlyContinue
         $nullReturn = @{
             Name            = $params.Name
             ApplicationPool = $params.ApplicationPool
@@ -96,7 +96,7 @@ function Set-TargetResource
         $ProxyName,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present",
 
@@ -113,12 +113,12 @@ function Set-TargetResource
     {
         Write-Verbose -Message "Creating Visio Graphics Service Application $Name"
         Invoke-SPDscCommand -Credential $InstallAccount `
-                            -Arguments $PSBoundParameters `
-                            -ScriptBlock {
+            -Arguments $PSBoundParameters `
+            -ScriptBlock {
             $params = $args[0]
 
             $visioApp = New-SPVisioServiceApplication -Name $params.Name `
-                                                      -ApplicationPool $params.ApplicationPool
+                -ApplicationPool $params.ApplicationPool
 
             if ($params.ContainsKey("ProxyName"))
             {
@@ -133,7 +133,7 @@ function Set-TargetResource
             if ($null -ne $visioApp)
             {
                 New-SPVisioServiceApplicationProxy -Name $pName `
-                                                   -ServiceApplication $visioApp.Name | Out-Null
+                    -ServiceApplication $visioApp.Name | Out-Null
             }
         }
     }
@@ -143,16 +143,16 @@ function Set-TargetResource
         {
             Write-Verbose -Message "Updating Visio Graphics Service Application $Name"
             Invoke-SPDscCommand -Credential $InstallAccount `
-                                -Arguments $PSBoundParameters `
-                                -ScriptBlock {
+                -Arguments $PSBoundParameters `
+                -ScriptBlock {
                 $params = $args[0]
 
                 $appPool = Get-SPServiceApplicationPool -Identity $params.ApplicationPool
 
                 Get-SPServiceApplication -Name $params.Name `
-                    | Where-Object -FilterScript {
-                        $_.GetType().FullName -eq "Microsoft.Office.Visio.Server.Administration.VisioGraphicsServiceApplication"
-                    } | Set-SPVisioServiceApplication -ServiceApplicationPool $appPool
+                | Where-Object -FilterScript {
+                    $_.GetType().FullName -eq "Microsoft.Office.Visio.Server.Administration.VisioGraphicsServiceApplication"
+                } | Set-SPVisioServiceApplication -ServiceApplicationPool $appPool
             }
         }
     }
@@ -161,14 +161,14 @@ function Set-TargetResource
     {
         Write-Verbose -Message "Removing Visio service application $Name"
         Invoke-SPDscCommand -Credential $InstallAccount `
-                            -Arguments $PSBoundParameters `
-                            -ScriptBlock {
+            -Arguments $PSBoundParameters `
+            -ScriptBlock {
             $params = $args[0]
 
             $app = Get-SPServiceApplication -Name $params.Name `
-                    | Where-Object -FilterScript {
-                        $_.GetType().FullName -eq "Microsoft.Office.Visio.Server.Administration.VisioGraphicsServiceApplication"
-                    }
+            | Where-Object -FilterScript {
+                $_.GetType().FullName -eq "Microsoft.Office.Visio.Server.Administration.VisioGraphicsServiceApplication"
+            }
 
             $proxies = Get-SPServiceApplicationProxy
             foreach ($proxyInstance in $proxies)
@@ -203,7 +203,7 @@ function Test-TargetResource
         $ProxyName,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present",
 
@@ -222,8 +222,8 @@ function Test-TargetResource
     Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
 
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
-                                    -DesiredValues $PSBoundParameters `
-                                    -ValuesToCheck @("ApplicationPool", "Ensure")
+        -DesiredValues $PSBoundParameters `
+        -ValuesToCheck @("ApplicationPool", "Ensure")
 }
 
 Export-ModuleMember -Function *-TargetResource

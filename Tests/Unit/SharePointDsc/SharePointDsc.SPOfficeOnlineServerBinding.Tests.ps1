@@ -1,29 +1,29 @@
 [CmdletBinding()]
 param(
     [Parameter()]
-    [string] 
+    [string]
     $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
-                                         -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
-                                         -Resolve)
+            -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
+            -Resolve)
 )
 
 Import-Module -Name (Join-Path -Path $PSScriptRoot `
-                                -ChildPath "..\UnitTestHelper.psm1" `
-                                -Resolve)
+        -ChildPath "..\UnitTestHelper.psm1" `
+        -Resolve)
 
 $Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointCmdletModule `
-                                              -DscResource "SPOfficeOnlineServerBinding"
+    -DscResource "SPOfficeOnlineServerBinding"
 
 Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
     InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
         Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
-        # Mocks for all contexts   
-        Mock -CommandName Remove-SPWOPIBinding -MockWith {}
-        Mock -CommandName New-SPWOPIBinding -MockWith {}
-        Mock -CommandName Set-SPWOPIZone -MockWith {}
+        # Mocks for all contexts
+        Mock -CommandName Remove-SPWOPIBinding -MockWith { }
+        Mock -CommandName New-SPWOPIBinding -MockWith { }
+        Mock -CommandName Set-SPWOPIZone -MockWith { }
         Mock -CommandName Get-SPWOPIZone -MockWith { return "internal-https" }
-        
+
         # Test contexts
         Context -Name "No bindings are set for the specified zone, but they should be" -Fixture {
             $testParams = @{
@@ -37,7 +37,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             It "Should return absent from the get method" {
-                (Get-TargetResource @testParams).Ensure | Should Be "Absent" 
+                (Get-TargetResource @testParams).Ensure | Should Be "Absent"
             }
 
             It "Should return false from the test method" {
@@ -46,7 +46,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
             It "Should create the bindings in the set method" {
                 Set-TargetResource @testParams
-                Assert-MockCalled New-SPWOPIBinding 
+                Assert-MockCalled New-SPWOPIBinding
                 Assert-MockCalled Set-SPWOPIZone
             }
         }
@@ -77,7 +77,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             It "Should remove the old bindings and create the new bindings in the set method" {
                 Set-TargetResource @testParams
                 Assert-MockCalled Remove-SPWOPIBinding
-                Assert-MockCalled New-SPWOPIBinding 
+                Assert-MockCalled New-SPWOPIBinding
                 Assert-MockCalled Set-SPWOPIZone
             }
         }
@@ -133,7 +133,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Set-TargetResource @testParams
                 Assert-MockCalled Remove-SPWOPIBinding
             }
-        } 
+        }
 
         Context -Name "Bindings are not set for the specified zone, and they should not be" -Fixture {
             $testParams = @{

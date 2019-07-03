@@ -3,16 +3,16 @@ param(
     [Parameter()]
     [string]
     $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
-                                         -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
-                                         -Resolve)
+            -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
+            -Resolve)
 )
 
 Import-Module -Name (Join-Path -Path $PSScriptRoot `
-                                -ChildPath "..\UnitTestHelper.psm1" `
-                                -Resolve)
+        -ChildPath "..\UnitTestHelper.psm1" `
+        -Resolve)
 
 $Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointCmdletModule `
-                                              -DscResource "SPTrustedIdentityTokenIssuer"
+    -DscResource "SPTrustedIdentityTokenIssuer"
 
 Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
     InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
@@ -29,8 +29,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Mock -CommandName New-SPTrustedIdentityTokenIssuer -MockWith {
             $sptrust = [pscustomobject]@{
-                Name              = $testParams.Name
-                ClaimProviderName = ""
+                Name               = $testParams.Name
+                ClaimProviderName  = ""
                 ProviderSignOutUri = ""
             }
             $sptrust | Add-Member -Name Update -MemberType ScriptMethod -Value { }
@@ -45,8 +45,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Mock -CommandName Get-SPClaimProvider -MockWith {
             return [pscustomobject]@(@{
-                DisplayName = $testParams.ClaimProviderName
-            })
+                    DisplayName = $testParams.ClaimProviderName
+                })
         }
 
         try
@@ -85,14 +85,14 @@ namespace Microsoft.SharePoint.Administration {
                 IdentifierClaim              = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
                 ClaimsMappings               = @(
                     (New-CimInstance -ClassName MSFT_SPClaimTypeMapping -Property @{
-                        Name = "Email"
-                        IncomingClaimType = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
-                    } -ClientOnly)
+                            Name              = "Email"
+                            IncomingClaimType = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
+                        } -ClientOnly)
                     (New-CimInstance -ClassName MSFT_SPClaimTypeMapping -Property @{
-                        Name = "Role"
-                        IncomingClaimType = "http://schemas.xmlsoap.org/ExternalSTSGroupType"
-                        LocalClaimType = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
-                    } -ClientOnly)
+                            Name              = "Role"
+                            IncomingClaimType = "http://schemas.xmlsoap.org/ExternalSTSGroupType"
+                            LocalClaimType    = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
+                        } -ClientOnly)
                 )
                 SigningCertificateThumbprint = "123ABCFACE123ABCFACE123ABCFACE123ABCFACE"
                 ClaimProviderName            = "LDAPCP"
@@ -117,26 +117,26 @@ namespace Microsoft.SharePoint.Administration {
 
         Context -Name "The SPTrustedLoginProvider does not exist but should, using a signing certificate in the file path" -Fixture {
             $testParams = @{
-                Name                         = "Contoso"
-                Description                  = "Contoso"
-                Realm                        = "https://sharepoint.contoso.com"
-                SignInUrl                    = "https://adfs.contoso.com/adfs/ls/"
-                IdentifierClaim              = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
-                ClaimsMappings               = @(
+                Name                       = "Contoso"
+                Description                = "Contoso"
+                Realm                      = "https://sharepoint.contoso.com"
+                SignInUrl                  = "https://adfs.contoso.com/adfs/ls/"
+                IdentifierClaim            = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
+                ClaimsMappings             = @(
                     (New-CimInstance -ClassName MSFT_SPClaimTypeMapping -Property @{
-                        Name = "Email"
-                        IncomingClaimType = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
-                    } -ClientOnly)
+                            Name              = "Email"
+                            IncomingClaimType = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
+                        } -ClientOnly)
                     (New-CimInstance -ClassName MSFT_SPClaimTypeMapping -Property @{
-                        Name = "Role"
-                        IncomingClaimType = "http://schemas.xmlsoap.org/ExternalSTSGroupType"
-                        LocalClaimType = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
-                    } -ClientOnly)
+                            Name              = "Role"
+                            IncomingClaimType = "http://schemas.xmlsoap.org/ExternalSTSGroupType"
+                            LocalClaimType    = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
+                        } -ClientOnly)
                 )
-                SigningCertificateFilePath   = "F:\Data\DSC\FakeSigning.cer"
-                ClaimProviderName            = "LDAPCP"
-                ProviderSignOutUri           = "https://adfs.contoso.com/adfs/ls/"
-                Ensure                       = "Present"
+                SigningCertificateFilePath = "F:\Data\DSC\FakeSigning.cer"
+                ClaimProviderName          = "LDAPCP"
+                ProviderSignOutUri         = "https://adfs.contoso.com/adfs/ls/"
+                Ensure                     = "Present"
             }
 
             Mock -CommandName New-Object -MockWith {
@@ -171,14 +171,14 @@ namespace Microsoft.SharePoint.Administration {
                 IdentifierClaim              = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
                 ClaimsMappings               = @(
                     (New-CimInstance -ClassName MSFT_SPClaimTypeMapping -Property @{
-                        Name = "Email"
-                        IncomingClaimType = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
-                    } -ClientOnly)
+                            Name              = "Email"
+                            IncomingClaimType = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
+                        } -ClientOnly)
                     (New-CimInstance -ClassName MSFT_SPClaimTypeMapping -Property @{
-                        Name = "Role"
-                        IncomingClaimType = "http://schemas.xmlsoap.org/ExternalSTSGroupType"
-                        LocalClaimType = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
-                    } -ClientOnly)
+                            Name              = "Role"
+                            IncomingClaimType = "http://schemas.xmlsoap.org/ExternalSTSGroupType"
+                            LocalClaimType    = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
+                        } -ClientOnly)
                 )
                 SigningCertificateThumbprint = "123ABCFACE123ABCFACE123ABCFACE123ABCFACE"
                 SigningCertificateFilePath   = "F:\Data\DSC\FakeSigning.cer"
@@ -194,25 +194,25 @@ namespace Microsoft.SharePoint.Administration {
 
         Context -Name "The SPTrustedLoginProvider is desired, but none of parameters SigningCertificateThumbprint and SigningCertificateFilePath is set while exactly 1 should" -Fixture {
             $testParams = @{
-                Name                         = "Contoso"
-                Description                  = "Contoso"
-                Realm                        = "https://sharepoint.contoso.com"
-                SignInUrl                    = "https://adfs.contoso.com/adfs/ls/"
-                IdentifierClaim              = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
-                ClaimsMappings               = @(
+                Name               = "Contoso"
+                Description        = "Contoso"
+                Realm              = "https://sharepoint.contoso.com"
+                SignInUrl          = "https://adfs.contoso.com/adfs/ls/"
+                IdentifierClaim    = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
+                ClaimsMappings     = @(
                     (New-CimInstance -ClassName MSFT_SPClaimTypeMapping -Property @{
-                        Name = "Email"
-                        IncomingClaimType = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
-                    } -ClientOnly)
+                            Name              = "Email"
+                            IncomingClaimType = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
+                        } -ClientOnly)
                     (New-CimInstance -ClassName MSFT_SPClaimTypeMapping -Property @{
-                        Name = "Role"
-                        IncomingClaimType = "http://schemas.xmlsoap.org/ExternalSTSGroupType"
-                        LocalClaimType = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
-                    } -ClientOnly)
+                            Name              = "Role"
+                            IncomingClaimType = "http://schemas.xmlsoap.org/ExternalSTSGroupType"
+                            LocalClaimType    = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
+                        } -ClientOnly)
                 )
-                ClaimProviderName            = "LDAPCP"
-                ProviderSignOutUri           = "https://adfs.contoso.com/adfs/ls/"
-                Ensure                       = "Present"
+                ClaimProviderName  = "LDAPCP"
+                ProviderSignOutUri = "https://adfs.contoso.com/adfs/ls/"
+                Ensure             = "Present"
             }
 
             It "should fail validation of signing certificate parameters in the set method" {
@@ -229,14 +229,14 @@ namespace Microsoft.SharePoint.Administration {
                 IdentifierClaim              = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
                 ClaimsMappings               = @(
                     (New-CimInstance -ClassName MSFT_SPClaimTypeMapping -Property @{
-                        Name = "Email"
-                        IncomingClaimType = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
-                    } -ClientOnly)
+                            Name              = "Email"
+                            IncomingClaimType = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
+                        } -ClientOnly)
                     (New-CimInstance -ClassName MSFT_SPClaimTypeMapping -Property @{
-                        Name = "Role"
-                        IncomingClaimType = "http://schemas.xmlsoap.org/ExternalSTSGroupType"
-                        LocalClaimType = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
-                    } -ClientOnly)
+                            Name              = "Role"
+                            IncomingClaimType = "http://schemas.xmlsoap.org/ExternalSTSGroupType"
+                            LocalClaimType    = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
+                        } -ClientOnly)
                 )
                 SigningCertificateThumbprint = "XX123ABCFACEXX"
                 ClaimProviderName            = "LDAPCP"
@@ -244,7 +244,7 @@ namespace Microsoft.SharePoint.Administration {
                 Ensure                       = "Present"
             }
 
-           It "should fail validation of parameter SigningCertificateThumbprint in the set method" {
+            It "should fail validation of parameter SigningCertificateThumbprint in the set method" {
                 { Set-TargetResource @testParams } | Should Throw "Parameter SigningCertificateThumbprint does not match valid format '^[A-Fa-f0-9]{40}$'."
             }
         }
@@ -258,14 +258,14 @@ namespace Microsoft.SharePoint.Administration {
                 IdentifierClaim              = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
                 ClaimsMappings               = @(
                     (New-CimInstance -ClassName MSFT_SPClaimTypeMapping -Property @{
-                        Name = "Email"
-                        IncomingClaimType = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
-                    } -ClientOnly)
+                            Name              = "Email"
+                            IncomingClaimType = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
+                        } -ClientOnly)
                     (New-CimInstance -ClassName MSFT_SPClaimTypeMapping -Property @{
-                        Name = "Role"
-                        IncomingClaimType = "http://schemas.xmlsoap.org/ExternalSTSGroupType"
-                        LocalClaimType = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
-                    } -ClientOnly)
+                            Name              = "Role"
+                            IncomingClaimType = "http://schemas.xmlsoap.org/ExternalSTSGroupType"
+                            LocalClaimType    = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
+                        } -ClientOnly)
                 )
                 SigningCertificateThumbprint = "123ABCFACE123ABCFACE123ABCFACE123ABCFACE"
                 ClaimProviderName            = "LDAPCP"
@@ -276,13 +276,13 @@ namespace Microsoft.SharePoint.Administration {
             Mock -CommandName Get-ChildItem -MockWith {
                 return @(
                     @{
-                        Thumbprint = "123ABCFACE123ABCFACE123ABCFACE123ABCFACE"
+                        Thumbprint    = "123ABCFACE123ABCFACE123ABCFACE123ABCFACE"
                         HasPrivateKey = $true
                     }
                 )
             } -ParameterFilter { $Path -eq 'Cert:\LocalMachine\My' }
 
-           It "should fail validation of certificate in the set method" {
+            It "should fail validation of certificate in the set method" {
                 { Set-TargetResource @testParams } | Should Throw "SharePoint requires that the private key of the signing certificate is not installed in the certificate store."
             }
         }
@@ -296,14 +296,14 @@ namespace Microsoft.SharePoint.Administration {
                 IdentifierClaim              = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
                 ClaimsMappings               = @(
                     (New-CimInstance -ClassName MSFT_SPClaimTypeMapping -Property @{
-                        Name = "Email"
-                        IncomingClaimType = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
-                    } -ClientOnly)
+                            Name              = "Email"
+                            IncomingClaimType = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
+                        } -ClientOnly)
                     (New-CimInstance -ClassName MSFT_SPClaimTypeMapping -Property @{
-                        Name = "Role"
-                        IncomingClaimType = "http://schemas.xmlsoap.org/ExternalSTSGroupType"
-                        LocalClaimType = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
-                    } -ClientOnly)
+                            Name              = "Role"
+                            IncomingClaimType = "http://schemas.xmlsoap.org/ExternalSTSGroupType"
+                            LocalClaimType    = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
+                        } -ClientOnly)
                 )
                 SigningCertificateThumbprint = "123ABCFACE123ABCFACE123ABCFACE123ABCFACE"
                 ClaimProviderName            = "LDAPCP"
@@ -316,7 +316,7 @@ namespace Microsoft.SharePoint.Administration {
                     Name              = $testParams.Name
                     ClaimProviderName = $testParams.ClaimProviderName
                 }
-                $sptrust| Add-Member -Name Update -MemberType ScriptMethod -Value { }
+                $sptrust | Add-Member -Name Update -MemberType ScriptMethod -Value { }
                 return $sptrust
             }
 
@@ -336,14 +336,14 @@ namespace Microsoft.SharePoint.Administration {
                 IdentifierClaim              = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
                 ClaimsMappings               = @(
                     (New-CimInstance -ClassName MSFT_SPClaimTypeMapping -Property @{
-                        Name = "Email"
-                        IncomingClaimType = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
-                    } -ClientOnly)
+                            Name              = "Email"
+                            IncomingClaimType = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
+                        } -ClientOnly)
                     (New-CimInstance -ClassName MSFT_SPClaimTypeMapping -Property @{
-                        Name = "Role"
-                        IncomingClaimType = "http://schemas.xmlsoap.org/ExternalSTSGroupType"
-                        LocalClaimType = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
-                    } -ClientOnly)
+                            Name              = "Role"
+                            IncomingClaimType = "http://schemas.xmlsoap.org/ExternalSTSGroupType"
+                            LocalClaimType    = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
+                        } -ClientOnly)
                 )
                 SigningCertificateThumbprint = "123ABCFACE123ABCFACE123ABCFACE123ABCFACE"
                 ClaimProviderName            = "LDAPCP"
@@ -378,14 +378,14 @@ namespace Microsoft.SharePoint.Administration {
                 IdentifierClaim              = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
                 ClaimsMappings               = @(
                     (New-CimInstance -ClassName MSFT_SPClaimTypeMapping -Property @{
-                        Name = "Email"
-                        IncomingClaimType = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
-                    } -ClientOnly)
+                            Name              = "Email"
+                            IncomingClaimType = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
+                        } -ClientOnly)
                     (New-CimInstance -ClassName MSFT_SPClaimTypeMapping -Property @{
-                        Name = "Role"
-                        IncomingClaimType = "http://schemas.xmlsoap.org/ExternalSTSGroupType"
-                        LocalClaimType = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
-                    } -ClientOnly)
+                            Name              = "Role"
+                            IncomingClaimType = "http://schemas.xmlsoap.org/ExternalSTSGroupType"
+                            LocalClaimType    = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
+                        } -ClientOnly)
                 )
                 SigningCertificateThumbprint = "123ABCFACE123ABCFACE123ABCFACE123ABCFACE"
                 ClaimProviderName            = "LDAPCP"
@@ -395,7 +395,7 @@ namespace Microsoft.SharePoint.Administration {
 
             Mock -CommandName Get-SPTrustedIdentityTokenIssuer -MockWith {
                 $sptrust = [pscustomobject]@{
-                    Name              = $testParams.Name
+                    Name = $testParams.Name
                 }
                 $sptrust | Add-Member -Name Update -MemberType ScriptMethod -Value { }
                 return $sptrust
@@ -403,7 +403,7 @@ namespace Microsoft.SharePoint.Administration {
 
             Mock -CommandName Get-SPWebApplication -MockWith {
                 $spWebApp = [pscustomobject]@{
-                    Url              = "http://webAppUrl"
+                    Url = "http://webAppUrl"
                 }
                 $spWebApp | Add-Member -Name Update -MemberType ScriptMethod -Value { }
                 $spWebApp | Add-Member -Name GetIisSettingsWithFallback -MemberType ScriptMethod -Value { }
@@ -412,16 +412,16 @@ namespace Microsoft.SharePoint.Administration {
 
             Mock -CommandName Get-SPAuthenticationProvider -MockWith {
                 $spAP = [pscustomobject]@{
-                    LoginProviderName              = ""
+                    LoginProviderName = ""
                 }
                 $spAP | Add-Member -Name Update -MemberType ScriptMethod -Value { }
                 $spAP | Add-Member -MemberType ScriptMethod `
-                                    -Name GetType `
-                                    -Value {
-                                        return @{
-                                            FullName = "Microsoft.SharePoint.Administration.SPTrustedAuthenticationProvider"
-                                        }
-                                    } -PassThru -Force
+                    -Name GetType `
+                    -Value {
+                    return @{
+                        FullName = "Microsoft.SharePoint.Administration.SPTrustedAuthenticationProvider"
+                    }
+                } -PassThru -Force
                 return $spAP
             }
 
@@ -450,14 +450,14 @@ namespace Microsoft.SharePoint.Administration {
                 IdentifierClaim              = "IdentityClaimTypeNotSpecifiedInClaimsMappings"
                 ClaimsMappings               = @(
                     (New-CimInstance -ClassName MSFT_SPClaimTypeMapping -Property @{
-                        Name = "Email"
-                        IncomingClaimType = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
-                    } -ClientOnly)
+                            Name              = "Email"
+                            IncomingClaimType = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
+                        } -ClientOnly)
                     (New-CimInstance -ClassName MSFT_SPClaimTypeMapping -Property @{
-                        Name = "Role"
-                        IncomingClaimType = "http://schemas.xmlsoap.org/ExternalSTSGroupType"
-                        LocalClaimType = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
-                    } -ClientOnly)
+                            Name              = "Role"
+                            IncomingClaimType = "http://schemas.xmlsoap.org/ExternalSTSGroupType"
+                            LocalClaimType    = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
+                        } -ClientOnly)
                 )
                 SigningCertificateThumbprint = "123ABCFACE123ABCFACE123ABCFACE123ABCFACE"
                 ClaimProviderName            = "LDAPCP"

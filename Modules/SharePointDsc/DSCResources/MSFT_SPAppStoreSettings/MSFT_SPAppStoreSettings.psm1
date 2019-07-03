@@ -24,12 +24,12 @@ function Get-TargetResource
     Write-Verbose -Message "Getting app store settings of $WebAppUrl"
 
     $result = Invoke-SPDscCommand -Credential $InstallAccount `
-                                  -Arguments $PSBoundParameters `
-                                  -ScriptBlock {
+        -Arguments $PSBoundParameters `
+        -ScriptBlock {
         $params = $args[0]
 
         $nullreturn = @{
-            WebAppUrl = $null
+            WebAppUrl      = $null
             InstallAccount = $params.InstallAccount
         }
 
@@ -45,10 +45,10 @@ function Get-TargetResource
         $AllowAppsForOffice = [System.Convert]::ToBoolean($currentAAFO)
 
         return @{
-            WebAppUrl = $params.WebAppUrl
-            AllowAppPurchases = $AllowAppPurchases
+            WebAppUrl          = $params.WebAppUrl
+            AllowAppPurchases  = $AllowAppPurchases
             AllowAppsForOffice = $AllowAppsForOffice
-            InstallAccount = $params.InstallAccount
+            InstallAccount     = $params.InstallAccount
         }
     }
     return $result
@@ -79,8 +79,8 @@ function Set-TargetResource
     Write-Verbose -Message "Setting app store settings of $WebAppUrl"
 
     Invoke-SPDscCommand -Credential $InstallAccount `
-                        -Arguments $PSBoundParameters `
-                        -ScriptBlock {
+        -Arguments $PSBoundParameters `
+        -ScriptBlock {
         $params = $args[0]
 
         $wa = Get-SPWebApplication -Identity $params.WebAppUrl -ErrorAction SilentlyContinue
@@ -96,7 +96,7 @@ function Set-TargetResource
             if ($AllowAppPurchases -ne $params.AllowAppPurchases)
             {
                 Set-SPAppAcquisitionConfiguration -WebApplication $params.WebAppUrl `
-                                                  -Enable $params.AllowAppPurchases
+                    -Enable $params.AllowAppPurchases
             }
         }
 
@@ -107,7 +107,7 @@ function Set-TargetResource
             if ($AllowAppsForOffice -ne $params.AllowAppsForOffice)
             {
                 Set-SPOfficeStoreAppsDefaultActivation -WebApplication $params.WebAppUrl `
-                                                       -Enable $params.AllowAppsForOffice
+                    -Enable $params.AllowAppsForOffice
             }
         }
     }

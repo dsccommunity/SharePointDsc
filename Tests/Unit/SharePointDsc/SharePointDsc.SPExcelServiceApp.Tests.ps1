@@ -1,31 +1,32 @@
 [CmdletBinding()]
 param(
     [Parameter()]
-    [string] 
+    [string]
     $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
-                                         -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
-                                         -Resolve)
+            -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
+            -Resolve)
 )
 
 Import-Module -Name (Join-Path -Path $PSScriptRoot `
-                                -ChildPath "..\UnitTestHelper.psm1" `
-                                -Resolve)
+        -ChildPath "..\UnitTestHelper.psm1" `
+        -Resolve)
 
 $Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointCmdletModule `
-                                              -DscResource "SPExcelServiceApp"
+    -DscResource "SPExcelServiceApp"
 
 Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
     InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
         Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
         # Initialize tests
-        $getTypeFullName = "Microsoft.Office.Excel.Server.MossHost.ExcelServerWebServiceApplication" 
+        $getTypeFullName = "Microsoft.Office.Excel.Server.MossHost.ExcelServerWebServiceApplication"
 
         # Test contexts
-        switch ($Global:SPDscHelper.CurrentStubBuildNumber.Major) 
+        switch ($Global:SPDscHelper.CurrentStubBuildNumber.Major)
         {
-            15 {
-                # Mocks for all contexts   
+            15
+            {
+                # Mocks for all contexts
                 Mock -CommandName Remove-SPServiceApplication -MockWith { }
                 Mock -CommandName New-SPExcelServiceApplication -MockWith { }
                 Mock -CommandName Get-SPExcelFileLocation -MockWith { }
@@ -36,12 +37,12 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
                 Context -Name "When no service applications exist in the current farm" -Fixture {
                     $testParams = @{
-                        Name = "Test Excel Services App"
+                        Name            = "Test Excel Services App"
                         ApplicationPool = "Test App Pool"
                     }
 
-                    Mock -CommandName Get-SPServiceApplication -MockWith { 
-                        return $null 
+                    Mock -CommandName Get-SPServiceApplication -MockWith {
+                        return $null
                     }
 
                     It "Should return absent from the Get method" {
@@ -54,113 +55,113 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
                     It "Should create a new service application in the set method" {
                         Set-TargetResource @testParams
-                        Assert-MockCalled New-SPExcelServiceApplication 
+                        Assert-MockCalled New-SPExcelServiceApplication
                     }
                 }
 
                 Context -Name "When service applications exist in the current farm but the specific Excel Services app does not" -Fixture {
                     $testParams = @{
-                        Name = "Test Excel Services App"
+                        Name            = "Test Excel Services App"
                         ApplicationPool = "Test App Pool"
                     }
 
-                    Mock -CommandName Get-SPServiceApplication -MockWith { 
-                        $spServiceApp = [PSCustomObject]@{ 
-                                            DisplayName = $testParams.Name 
-                                        } 
+                    Mock -CommandName Get-SPServiceApplication -MockWith {
+                        $spServiceApp = [PSCustomObject]@{
+                            DisplayName = $testParams.Name
+                        }
                         $spServiceApp | Add-Member -MemberType ScriptMethod `
-                                                -Name GetType `
-                                                -Value {  
-                                                        return @{ 
-                                                            FullName = "Microsoft.Office.UnKnownWebServiceApplication" 
-                                                        }  
-                                                    } -PassThru -Force 
-                        return $spServiceApp 
+                            -Name GetType `
+                            -Value {
+                            return @{
+                                FullName = "Microsoft.Office.UnKnownWebServiceApplication"
+                            }
+                        } -PassThru -Force
+                        return $spServiceApp
                     }
 
                     Mock -CommandName Get-SPServiceApplication -MockWith { return @(@{
-                        TypeName = "Some other service app type"
-                    }) }
+                                TypeName = "Some other service app type"
+                            }) }
 
                     It "Should return absent from the Get method" {
-                        (Get-TargetResource @testParams).Ensure | Should Be "Absent" 
+                        (Get-TargetResource @testParams).Ensure | Should Be "Absent"
                     }
 
                 }
 
                 Context -Name "When a service application exists and is configured correctly" -Fixture {
                     $testParams = @{
-                        Name = "Test Excel Services App"
+                        Name            = "Test Excel Services App"
                         ApplicationPool = "Test App Pool"
                     }
 
-                    Mock -CommandName Get-SPServiceApplication -MockWith { 
-                        $spServiceApp = [PSCustomObject]@{ 
-                            TypeName = "Excel Services Application Web Service Application"
-                            DisplayName = $testParams.Name
+                    Mock -CommandName Get-SPServiceApplication -MockWith {
+                        $spServiceApp = [PSCustomObject]@{
+                            TypeName        = "Excel Services Application Web Service Application"
+                            DisplayName     = $testParams.Name
                             ApplicationPool = @{ Name = $testParams.ApplicationPool }
                         }
-                        $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value { 
-                            return @{ FullName = $getTypeFullName } 
+                        $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value {
+                            return @{ FullName = $getTypeFullName }
                         } -PassThru -Force
                         return $spServiceApp
                     }
 
                     It "Should return values from the get method" {
-                        (Get-TargetResource @testParams).Ensure | Should Be "Present" 
+                        (Get-TargetResource @testParams).Ensure | Should Be "Present"
                     }
 
                     It "Should return true when the Test method is called" {
                         Test-TargetResource @testParams | Should Be $true
                     }
                 }
-                
+
                 Context -Name "When the service application exists but it shouldn't" -Fixture {
                     $testParams = @{
-                        Name = "Test App"
+                        Name            = "Test App"
                         ApplicationPool = "-"
-                        Ensure = "Absent"
+                        Ensure          = "Absent"
                     }
 
-                    Mock -CommandName Get-SPServiceApplication -MockWith { 
-                        $spServiceApp = [PSCustomObject]@{ 
-                            TypeName = "Excel Services Application Web Service Application"
-                            DisplayName = $testParams.Name
+                    Mock -CommandName Get-SPServiceApplication -MockWith {
+                        $spServiceApp = [PSCustomObject]@{
+                            TypeName        = "Excel Services Application Web Service Application"
+                            DisplayName     = $testParams.Name
                             ApplicationPool = @{ Name = $testParams.ApplicationPool }
                         }
-                        $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value { 
-                            return @{ FullName = $getTypeFullName } 
+                        $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value {
+                            return @{ FullName = $getTypeFullName }
                         } -PassThru -Force
                         return $spServiceApp
                     }
-                    
+
                     It "Should return present from the Get method" {
-                        (Get-TargetResource @testParams).Ensure | Should Be "Present" 
+                        (Get-TargetResource @testParams).Ensure | Should Be "Present"
                     }
-                    
+
                     It "Should return false when the Test method is called" {
                         Test-TargetResource @testParams | Should Be $false
                     }
-                    
+
                     It "Should call the remove service application cmdlet in the set method" {
                         Set-TargetResource @testParams
                         Assert-MockCalled Remove-SPServiceApplication
                     }
                 }
-                
+
                 Context -Name "When the service application doesn't exist and it shouldn't" -Fixture {
                     $testParams = @{
-                        Name = "Test App"
+                        Name            = "Test App"
                         ApplicationPool = "-"
-                        Ensure = "Absent"
+                        Ensure          = "Absent"
                     }
 
                     Mock -CommandName Get-SPServiceApplication -MockWith { return $null }
-                    
+
                     It "Should return absent from the Get method" {
-                        (Get-TargetResource @testParams).Ensure | Should Be "Absent" 
+                        (Get-TargetResource @testParams).Ensure | Should Be "Absent"
                     }
-                    
+
                     It "Should return true when the Test method is called" {
                         Test-TargetResource @testParams | Should Be $true
                     }
@@ -168,30 +169,30 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
                 Context -Name "When the service app should have trusted locations, but doesn't" -Fixture {
                     $testParams = @{
-                        Name = "Test Excel Services App"
-                        ApplicationPool = "Test App Pool"
+                        Name                 = "Test Excel Services App"
+                        ApplicationPool      = "Test App Pool"
                         TrustedFileLocations = @(
                             (New-CimInstance -ClassName MSFT_SPExcelFileLocation -ClientOnly -Property @{
-                                Address = "http://"
-                                LocationType = "SharePoint"
-                                WorkbookSizeMax = 10
-                            })
+                                    Address         = "http://"
+                                    LocationType    = "SharePoint"
+                                    WorkbookSizeMax = 10
+                                })
                         )
                     }
 
-                    Mock -CommandName Get-SPServiceApplication -MockWith { 
-                        $spServiceApp = [PSCustomObject]@{ 
-                            TypeName = "Excel Services Application Web Service Application"
-                            DisplayName = $testParams.Name
+                    Mock -CommandName Get-SPServiceApplication -MockWith {
+                        $spServiceApp = [PSCustomObject]@{
+                            TypeName        = "Excel Services Application Web Service Application"
+                            DisplayName     = $testParams.Name
                             ApplicationPool = @{ Name = $testParams.ApplicationPool }
                         }
-                        $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value { 
-                            return @{ FullName = $getTypeFullName } 
+                        $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value {
+                            return @{ FullName = $getTypeFullName }
                         } -PassThru -Force
                         return $spServiceApp
                     }
 
-                    Mock -CommandName Get-SPExcelFileLocation -MockWith { 
+                    Mock -CommandName Get-SPExcelFileLocation -MockWith {
                         return @()
                     }
 
@@ -211,35 +212,35 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
                 Context -Name "When the service app should have trusted locations, but the settings don't match" -Fixture {
                     $testParams = @{
-                        Name = "Test Excel Services App"
-                        ApplicationPool = "Test App Pool"
+                        Name                 = "Test Excel Services App"
+                        ApplicationPool      = "Test App Pool"
                         TrustedFileLocations = @(
                             (New-CimInstance -ClassName MSFT_SPExcelFileLocation -ClientOnly -Property @{
-                                Address = "http://"
-                                LocationType = "SharePoint"
-                                WorkbookSizeMax = 10
-                            })
+                                    Address         = "http://"
+                                    LocationType    = "SharePoint"
+                                    WorkbookSizeMax = 10
+                                })
                         )
                     }
 
-                    Mock -CommandName Get-SPServiceApplication -MockWith { 
-                        $spServiceApp = [PSCustomObject]@{ 
-                            TypeName = "Excel Services Application Web Service Application"
-                            DisplayName = $testParams.Name
+                    Mock -CommandName Get-SPServiceApplication -MockWith {
+                        $spServiceApp = [PSCustomObject]@{
+                            TypeName        = "Excel Services Application Web Service Application"
+                            DisplayName     = $testParams.Name
                             ApplicationPool = @{ Name = $testParams.ApplicationPool }
                         }
-                        $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value { 
-                            return @{ FullName = $getTypeFullName } 
+                        $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value {
+                            return @{ FullName = $getTypeFullName }
                         } -PassThru -Force
                         return $spServiceApp
                     }
 
-                    Mock -CommandName Get-SPExcelFileLocation -MockWith { 
+                    Mock -CommandName Get-SPExcelFileLocation -MockWith {
                         return @(@{
-                            Address = "http://"
-                            LocationType = "SharePoint"
-                            WorkbookSizeMax = 2
-                        })
+                                Address         = "http://"
+                                LocationType    = "SharePoint"
+                                WorkbookSizeMax = 2
+                            })
                     }
 
                     It "Should return trusted location results from the get method" {
@@ -258,35 +259,35 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
                 Context -Name "When the service app should have trusted locations, and does" -Fixture {
                     $testParams = @{
-                        Name = "Test Excel Services App"
-                        ApplicationPool = "Test App Pool"
+                        Name                 = "Test Excel Services App"
+                        ApplicationPool      = "Test App Pool"
                         TrustedFileLocations = @(
                             (New-CimInstance -ClassName MSFT_SPExcelFileLocation -ClientOnly -Property @{
-                                Address = "http://"
-                                LocationType = "SharePoint"
-                                WorkbookSizeMax = 10
-                            })
+                                    Address         = "http://"
+                                    LocationType    = "SharePoint"
+                                    WorkbookSizeMax = 10
+                                })
                         )
                     }
 
-                    Mock -CommandName Get-SPServiceApplication -MockWith { 
-                        $spServiceApp = [PSCustomObject]@{ 
-                            TypeName = "Excel Services Application Web Service Application"
-                            DisplayName = $testParams.Name
+                    Mock -CommandName Get-SPServiceApplication -MockWith {
+                        $spServiceApp = [PSCustomObject]@{
+                            TypeName        = "Excel Services Application Web Service Application"
+                            DisplayName     = $testParams.Name
                             ApplicationPool = @{ Name = $testParams.ApplicationPool }
                         }
-                        $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value { 
-                            return @{ FullName = $getTypeFullName } 
+                        $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value {
+                            return @{ FullName = $getTypeFullName }
                         } -PassThru -Force
                         return $spServiceApp
                     }
 
-                    Mock -CommandName Get-SPExcelFileLocation -MockWith { 
+                    Mock -CommandName Get-SPExcelFileLocation -MockWith {
                         return @(@{
-                            Address = "http://"
-                            LocationType = "SharePoint"
-                            WorkbookSizeMax = 10
-                        })
+                                Address         = "http://"
+                                LocationType    = "SharePoint"
+                                WorkbookSizeMax = 10
+                            })
                     }
 
                     It "Should return trusted location results from the get method" {
@@ -300,40 +301,40 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
                 Context -Name "When the service app should have trusted locations, and does but also has an extra one that should be removed" -Fixture {
                     $testParams = @{
-                        Name = "Test Excel Services App"
-                        ApplicationPool = "Test App Pool"
+                        Name                 = "Test Excel Services App"
+                        ApplicationPool      = "Test App Pool"
                         TrustedFileLocations = @(
                             (New-CimInstance -ClassName MSFT_SPExcelFileLocation -ClientOnly -Property @{
-                                Address = "http://"
-                                LocationType = "SharePoint"
-                                WorkbookSizeMax = 10
-                            })
+                                    Address         = "http://"
+                                    LocationType    = "SharePoint"
+                                    WorkbookSizeMax = 10
+                                })
                         )
                     }
 
-                    Mock -CommandName Get-SPServiceApplication -MockWith { 
-                        $spServiceApp = [PSCustomObject]@{ 
-                            TypeName = "Excel Services Application Web Service Application"
-                            DisplayName = $testParams.Name
+                    Mock -CommandName Get-SPServiceApplication -MockWith {
+                        $spServiceApp = [PSCustomObject]@{
+                            TypeName        = "Excel Services Application Web Service Application"
+                            DisplayName     = $testParams.Name
                             ApplicationPool = @{ Name = $testParams.ApplicationPool }
                         }
-                        $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value { 
-                            return @{ FullName = $getTypeFullName } 
+                        $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value {
+                            return @{ FullName = $getTypeFullName }
                         } -PassThru -Force
                         return $spServiceApp
                     }
 
-                    Mock -CommandName Get-SPExcelFileLocation -MockWith { 
+                    Mock -CommandName Get-SPExcelFileLocation -MockWith {
                         return @(@{
-                            Address = "http://"
-                            LocationType = "SharePoint"
-                            WorkbookSizeMax = 10
-                        },
-                        @{
-                            Address = "https://"
-                            LocationType = "SharePoint"
-                            WorkbookSizeMax = 10
-                        })
+                                Address         = "http://"
+                                LocationType    = "SharePoint"
+                                WorkbookSizeMax = 10
+                            },
+                            @{
+                                Address         = "https://"
+                                LocationType    = "SharePoint"
+                                WorkbookSizeMax = 10
+                            })
                     }
 
                     It "Should return trusted location results from the get method" {
@@ -350,7 +351,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     }
                 }
             }
-            16 {
+            16
+            {
                 Context -Name "All methods throw exceptions as Excel Services doesn't exist in 2016/2019" -Fixture {
                     It "Should throw on the get method" {
                         { Get-TargetResource @testParams } | Should Throw
@@ -365,7 +367,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     }
                 }
             }
-            Default {
+            Default
+            {
                 throw [Exception] "A supported version of SharePoint was not used in testing"
             }
         }

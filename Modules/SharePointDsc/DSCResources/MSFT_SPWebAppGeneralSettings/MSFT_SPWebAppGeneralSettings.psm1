@@ -33,7 +33,7 @@ function Get-TargetResource
         $BlogAPIAuthenticated,
 
         [Parameter()]
-        [ValidateSet("Strict","Permissive")]
+        [ValidateSet("Strict", "Permissive")]
         [System.String]
         $BrowserFileHandling,
 
@@ -97,8 +97,8 @@ function Get-TargetResource
     Write-Verbose -Message "Getting web application '$WebAppUrl' general settings"
 
     $result = Invoke-SPDscCommand -Credential $InstallAccount `
-                                  -Arguments @($PSBoundParameters,$PSScriptRoot) `
-                                  -ScriptBlock {
+        -Arguments @($PSBoundParameters, $PSScriptRoot) `
+        -ScriptBlock {
         $params = $args[0]
         $ScriptRoot = $args[1]
 
@@ -145,7 +145,7 @@ function Set-TargetResource
 {
     [CmdletBinding()]
     param
-       (
+    (
         [Parameter(Mandatory = $true)]
         [System.String]
         $WebAppUrl,
@@ -175,7 +175,7 @@ function Set-TargetResource
         $BlogAPIAuthenticated,
 
         [Parameter()]
-        [ValidateSet("Strict","Permissive")]
+        [ValidateSet("Strict", "Permissive")]
         [System.String]
         $BrowserFileHandling,
 
@@ -239,8 +239,8 @@ function Set-TargetResource
     Write-Verbose -Message "Setting web application '$WebAppUrl' general settings"
 
     Invoke-SPDscCommand -Credential $InstallAccount `
-                        -Arguments @($PSBoundParameters,$PSScriptRoot) `
-                        -ScriptBlock {
+        -Arguments @($PSBoundParameters, $PSScriptRoot) `
+        -ScriptBlock {
         $params = $args[0]
         $ScriptRoot = $args[1]
 
@@ -274,7 +274,7 @@ function Test-TargetResource
     [CmdletBinding()]
     [OutputType([System.Boolean])]
     param
-     (
+    (
         [Parameter(Mandatory = $true)]
         [System.String]
         $WebAppUrl,
@@ -304,7 +304,7 @@ function Test-TargetResource
         $BlogAPIAuthenticated,
 
         [Parameter()]
-        [ValidateSet("Strict","Permissive")]
+        [ValidateSet("Strict", "Permissive")]
         [System.String]
         $BrowserFileHandling,
 

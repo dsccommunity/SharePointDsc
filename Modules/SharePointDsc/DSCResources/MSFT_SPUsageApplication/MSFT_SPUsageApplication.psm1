@@ -9,7 +9,7 @@ function Get-TargetResource
         $Name,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present",
 
@@ -53,12 +53,12 @@ function Get-TargetResource
     Write-Verbose -Message "Getting usage application '$Name'"
 
     $result = Invoke-SPDscCommand -Credential $InstallAccount `
-                                  -Arguments $PSBoundParameters `
-                                  -ScriptBlock {
+        -Arguments $PSBoundParameters `
+        -ScriptBlock {
         $params = $args[0]
 
         $serviceApps = Get-SPServiceApplication -Name $params.Name `
-                                                -ErrorAction SilentlyContinue
+            -ErrorAction SilentlyContinue
         $nullReturn = @{
             Name   = $params.Name
             Ensure = "Absent"
@@ -117,7 +117,7 @@ function Set-TargetResource
         $Name,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present",
 
@@ -165,11 +165,11 @@ function Set-TargetResource
     if ($CurrentState.Ensure -eq "Absent" -and $Ensure -eq "Present")
     {
         Invoke-SPDscCommand -Credential $InstallAccount `
-                            -Arguments $PSBoundParameters `
-                            -ScriptBlock {
+            -Arguments $PSBoundParameters `
+            -ScriptBlock {
             $params = $args[0]
 
-            $newParams = @{}
+            $newParams = @{ }
             $newParams.Add("Name", $params.Name)
             if ($params.ContainsKey("DatabaseName"))
             {
@@ -197,8 +197,8 @@ function Set-TargetResource
     {
         Write-Verbose -Message "Configuring usage application $Name"
         Invoke-SPDscCommand -Credential $InstallAccount `
-                            -Arguments $PSBoundParameters `
-                            -ScriptBlock {
+            -Arguments $PSBoundParameters `
+            -ScriptBlock {
             $params = $args[0]
 
             $spUsageApplicationProxy = Get-SPServiceApplicationProxy | Where-Object -FilterScript {
@@ -210,7 +210,7 @@ function Set-TargetResource
                 $spUsageApplicationProxy.Provision()
             }
 
-            $setParams = @{}
+            $setParams = @{ }
             $setParams.Add("LoggingEnabled", $true)
             if ($params.ContainsKey("UsageLogCutTime"))
             {
@@ -236,14 +236,14 @@ function Set-TargetResource
     {
         Write-Verbose -Message "Removing usage application $Name"
         Invoke-SPDscCommand -Credential $InstallAccount `
-                            -Arguments $PSBoundParameters `
-                            -ScriptBlock {
+            -Arguments $PSBoundParameters `
+            -ScriptBlock {
             $params = $args[0]
 
             $service = Get-SPServiceApplication -Name $params.Name `
-                    | Where-Object -FilterScript {
-                        $_.GetType().FullName -eq "Microsoft.SharePoint.Administration.SPUsageApplication"
-                    }
+            | Where-Object -FilterScript {
+                $_.GetType().FullName -eq "Microsoft.SharePoint.Administration.SPUsageApplication"
+            }
             Remove-SPServiceApplication $service -Confirm:$false
         }
     }
@@ -260,7 +260,7 @@ function Test-TargetResource
         $Name,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present",
 
@@ -313,18 +313,18 @@ function Test-TargetResource
     if ($Ensure -eq "Present")
     {
         return Test-SPDscParameterState -CurrentValues $CurrentValues `
-                                        -DesiredValues $PSBoundParameters `
-                                        -ValuesToCheck @("UsageLogCutTime",
-                                                         "UsageLogLocation",
-                                                         "UsageLogMaxFileSizeKB",
-                                                         "UsageLogMaxSpaceGB",
-                                                         "Ensure")
+            -DesiredValues $PSBoundParameters `
+            -ValuesToCheck @("UsageLogCutTime",
+            "UsageLogLocation",
+            "UsageLogMaxFileSizeKB",
+            "UsageLogMaxSpaceGB",
+            "Ensure")
     }
     else
     {
         return Test-SPDscParameterState -CurrentValues $CurrentValues `
-                                        -DesiredValues $PSBoundParameters `
-                                        -ValuesToCheck @("Ensure")
+            -DesiredValues $PSBoundParameters `
+            -ValuesToCheck @("Ensure")
     }
 }
 

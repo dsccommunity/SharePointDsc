@@ -3,16 +3,16 @@ param(
     [Parameter()]
     [string]
     $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
-                                         -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
-                                         -Resolve)
+            -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
+            -Resolve)
 )
 
 Import-Module -Name (Join-Path -Path $PSScriptRoot `
-                                -ChildPath "..\UnitTestHelper.psm1" `
-                                -Resolve)
+        -ChildPath "..\UnitTestHelper.psm1" `
+        -Resolve)
 
 $Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointCmdletModule `
-                                              -DscResource "SPProjectServerLicense"
+    -DscResource "SPProjectServerLicense"
 
 Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
     InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
@@ -20,7 +20,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         switch ($Global:SPDscHelper.CurrentStubBuildNumber.Major)
         {
-            15 {
+            15
+            {
                 Context -Name "All methods throw exceptions as Project Server support in SharePointDsc is only for 2016" -Fixture {
                     It "Should throw on the get method" {
                         { Get-TargetResource @testParams } | Should Throw
@@ -35,7 +36,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     }
                 }
             }
-            16 {
+            16
+            {
                 Mock -CommandName Enable-ProjectServerLicense -MockWith { }
                 Mock -CommandName Disable-ProjectServerLicense -MockWith { }
 
@@ -158,7 +160,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     }
                 }
             }
-            Default {
+            Default
+            {
                 throw [Exception] "A supported version of SharePoint was not used in testing"
             }
         }

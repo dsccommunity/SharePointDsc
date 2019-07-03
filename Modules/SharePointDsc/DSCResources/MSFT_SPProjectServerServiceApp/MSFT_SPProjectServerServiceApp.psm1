@@ -17,7 +17,7 @@ function Get-TargetResource
         $ProxyName,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present",
 
@@ -31,16 +31,16 @@ function Get-TargetResource
     if ((Get-SPDscInstalledProductVersion).FileMajorPart -lt 16)
     {
         throw [Exception] ("Support for Project Server in SharePointDsc is only valid for " + `
-                           "SharePoint 2016 and 2019.")
+                "SharePoint 2016 and 2019.")
     }
 
     $result = Invoke-SPDscCommand -Credential $InstallAccount `
-                                  -Arguments $PSBoundParameters `
-                                  -ScriptBlock {
+        -Arguments $PSBoundParameters `
+        -ScriptBlock {
         $params = $args[0]
 
         $serviceApps = Get-SPServiceApplication -Name $params.Name `
-                                                -ErrorAction SilentlyContinue
+            -ErrorAction SilentlyContinue
         $nullReturn = @{
             Name            = $params.Name
             ApplicationPool = ""
@@ -104,7 +104,7 @@ function Set-TargetResource
         $ProxyName,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present",
 
@@ -118,7 +118,7 @@ function Set-TargetResource
     if ((Get-SPDscInstalledProductVersion).FileMajorPart -lt 16)
     {
         throw [Exception] ("Support for Project Server in SharePointDsc is only valid for " + `
-                           "SharePoint 2016 and 2019.")
+                "SharePoint 2016 and 2019.")
     }
 
     $result = Get-TargetResource @PSBoundParameters
@@ -127,12 +127,12 @@ function Set-TargetResource
     {
         Write-Verbose -Message "Creating Project Server Service Application $Name"
         Invoke-SPDscCommand -Credential $InstallAccount `
-                            -Arguments $PSBoundParameters `
-                            -ScriptBlock {
+            -Arguments $PSBoundParameters `
+            -ScriptBlock {
             $params = $args[0]
 
             $pwaApp = New-SPProjectServiceApplication -Name $params.Name `
-                                                      -ApplicationPool $params.ApplicationPool
+                -ApplicationPool $params.ApplicationPool
             if ($params.ContainsKey("ProxyName") -eq $true)
             {
                 $pName = $params.ProxyName
@@ -154,16 +154,16 @@ function Set-TargetResource
         {
             Write-Verbose -Message "Updating Project Server Service Application $Name"
             Invoke-SPDscCommand -Credential $InstallAccount `
-                                -Arguments $PSBoundParameters `
-                                -ScriptBlock {
+                -Arguments $PSBoundParameters `
+                -ScriptBlock {
                 $params = $args[0]
 
                 $appPool = Get-SPServiceApplicationPool -Identity $params.ApplicationPool
 
                 Get-SPServiceApplication -Name $params.Name `
-                    | Where-Object -FilterScript {
-                        $_.GetType().FullName -eq "Microsoft.Office.Project.Server.Administration.PsiServiceApplication"
-                    } | Set-SPProjectServiceApplication -ApplicationPool $appPool
+                | Where-Object -FilterScript {
+                    $_.GetType().FullName -eq "Microsoft.Office.Project.Server.Administration.PsiServiceApplication"
+                } | Set-SPProjectServiceApplication -ApplicationPool $appPool
             }
         }
     }
@@ -172,14 +172,14 @@ function Set-TargetResource
     {
         Write-Verbose -Message "Removing Project Server service application $Name"
         Invoke-SPDscCommand -Credential $InstallAccount `
-                            -Arguments $PSBoundParameters `
-                            -ScriptBlock {
+            -Arguments $PSBoundParameters `
+            -ScriptBlock {
             $params = $args[0]
 
             $app = Get-SPServiceApplication -Name $params.Name `
-                    | Where-Object -FilterScript {
-                        $_.GetType().FullName -eq "Microsoft.Office.Project.Server.Administration.PsiServiceApplication"
-                    }
+            | Where-Object -FilterScript {
+                $_.GetType().FullName -eq "Microsoft.Office.Project.Server.Administration.PsiServiceApplication"
+            }
 
             $proxies = Get-SPServiceApplicationProxy
             foreach ($proxyInstance in $proxies)
@@ -214,7 +214,7 @@ function Test-TargetResource
         $ProxyName,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present",
 
@@ -235,14 +235,14 @@ function Test-TargetResource
     if ($Ensure -eq "Present")
     {
         return Test-SPDscParameterState -CurrentValues $CurrentValues `
-                                        -DesiredValues $PSBoundParameters `
-                                        -ValuesToCheck @("ApplicationPool", "Ensure")
+            -DesiredValues $PSBoundParameters `
+            -ValuesToCheck @("ApplicationPool", "Ensure")
     }
     else
     {
         return Test-SPDscParameterState -CurrentValues $CurrentValues `
-                                        -DesiredValues $PSBoundParameters `
-                                        -ValuesToCheck @("Ensure")
+            -DesiredValues $PSBoundParameters `
+            -ValuesToCheck @("Ensure")
     }
 
 }

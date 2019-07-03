@@ -13,7 +13,7 @@ function Get-TargetResource
         $GroupNames,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present",
 
@@ -31,12 +31,12 @@ function Get-TargetResource
     if ((Get-SPDscInstalledProductVersion).FileMajorPart -lt 16)
     {
         throw [Exception] ("Support for Project Server in SharePointDsc is only valid for " + `
-                           "SharePoint 2016 and 2019.")
+                "SharePoint 2016 and 2019.")
     }
 
     $result = Invoke-SPDscCommand -Credential $InstallAccount `
-                                  -Arguments @($PSBoundParameters, $PSScriptRoot) `
-                                  -ScriptBlock {
+        -Arguments @($PSBoundParameters, $PSScriptRoot) `
+        -ScriptBlock {
         $params = $args[0]
         $scriptRoot = $args[1]
 
@@ -46,8 +46,8 @@ function Get-TargetResource
         $webAppUrl = (Get-SPSite -Identity $params.Url).WebApplication.Url
         $useKerberos = -not (Get-SPAuthenticationProvider -WebApplication $webAppUrl -Zone Default).DisableKerberos
         $adminService = New-SPDscProjectServerWebService -PwaUrl $params.Url `
-                                                         -EndpointName Admin `
-                                                         -UseKerberos:$useKerberos
+            -EndpointName Admin `
+            -UseKerberos:$useKerberos
 
         $script:currentSettings = $null
         $script:reactivateUsers = $false
@@ -60,11 +60,11 @@ function Get-TargetResource
         if ($null -eq $script:currentSettings)
         {
             return @{
-                Url = $params.Url
-                GroupNames = @()
-                Ensure = "Absent"
+                Url                 = $params.Url
+                GroupNames          = @()
+                Ensure              = "Absent"
                 AutoReactivateUsers = $false
-                InstallAccount = $params.InstallAccount
+                InstallAccount      = $params.InstallAccount
             }
         }
         else
@@ -72,11 +72,11 @@ function Get-TargetResource
             if ($null -eq $script:currentSettings.ADGroupGuids -or $script:currentSettings.ADGroupGuids.Length -lt 1)
             {
                 return @{
-                    Url = $params.Url
-                    GroupNames = @()
-                    Ensure = "Absent"
+                    Url                 = $params.Url
+                    GroupNames          = @()
+                    Ensure              = "Absent"
                     AutoReactivateUsers = $script:reactivateUsers
-                    InstallAccount = $params.InstallAccount
+                    InstallAccount      = $params.InstallAccount
                 }
             }
             else
@@ -88,11 +88,11 @@ function Get-TargetResource
                 }
 
                 return @{
-                    Url = $params.Url
-                    GroupNames = $adGroups
-                    Ensure = "Present"
+                    Url                 = $params.Url
+                    GroupNames          = $adGroups
+                    Ensure              = "Present"
                     AutoReactivateUsers = $script:reactivateUsers
-                    InstallAccount = $params.InstallAccount
+                    InstallAccount      = $params.InstallAccount
                 }
             }
         }
@@ -115,7 +115,7 @@ function Set-TargetResource
         $GroupNames,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present",
 
@@ -133,14 +133,14 @@ function Set-TargetResource
     if ((Get-SPDscInstalledProductVersion).FileMajorPart -lt 16)
     {
         throw [Exception] ("Support for Project Server in SharePointDsc is only valid for " + `
-                           "SharePoint 2016 and 2019.")
+                "SharePoint 2016 and 2019.")
     }
 
     if ($Ensure -eq "Present")
     {
         Invoke-SPDscCommand -Credential $InstallAccount `
-                            -Arguments $PSBoundParameters `
-                            -ScriptBlock {
+            -Arguments $PSBoundParameters `
+            -ScriptBlock {
 
             $params = $args[0]
 
@@ -152,19 +152,19 @@ function Set-TargetResource
             }
 
             Enable-SPProjectActiveDirectoryEnterpriseResourcePoolSync -Url $params.Url `
-                                                                      -GroupUids $groupIDs.ToArray()
+                -GroupUids $groupIDs.ToArray()
 
             if ($params.ContainsKey("AutoReactivateUsers") -eq $true)
             {
                 $webAppUrl = (Get-SPSite -Identity $params.Url).WebApplication.Url
                 $useKerberos = -not (Get-SPAuthenticationProvider -WebApplication $webAppUrl -Zone Default).DisableKerberos
                 $adminService = New-SPDscProjectServerWebService -PwaUrl $params.Url `
-                                                                 -EndpointName Admin `
-                                                                 -UseKerberos:$useKerberos
+                    -EndpointName Admin `
+                    -UseKerberos:$useKerberos
 
                 Use-SPDscProjectServerWebService -Service $adminService -ScriptBlock {
                     $settings = $adminService.GetActiveDirectorySyncEnterpriseResourcePoolSettings()
-                    $settings.AutoReactivateInactiveUsers  = $params.AutoReactivateUsers
+                    $settings.AutoReactivateInactiveUsers = $params.AutoReactivateUsers
                     $adminService.SetActiveDirectorySyncEnterpriseResourcePoolSettings($settings)
                 }
             }
@@ -173,8 +173,8 @@ function Set-TargetResource
     else
     {
         Invoke-SPDscCommand -Credential $InstallAccount `
-                            -Arguments $PSBoundParameters `
-                            -ScriptBlock {
+            -Arguments $PSBoundParameters `
+            -ScriptBlock {
 
             $params = $args[0]
 
@@ -199,7 +199,7 @@ function Test-TargetResource
         $GroupNames,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present",
 
@@ -233,8 +233,8 @@ function Test-TargetResource
     }
 
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
-                                    -DesiredValues $PSBoundParameters `
-                                    -ValuesToCheck $paramsToCheck
+        -DesiredValues $PSBoundParameters `
+        -ValuesToCheck $paramsToCheck
 }
 
 Export-ModuleMember -Function *-TargetResource

@@ -21,7 +21,7 @@ function Get-TargetResource
         $HostHeader,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present",
 
@@ -33,8 +33,8 @@ function Get-TargetResource
     Write-Verbose -Message "Getting managed path $RelativeUrl in $WebAppUrl"
 
     $result = Invoke-SPDscCommand -Credential $InstallAccount `
-                                  -Arguments $PSBoundParameters `
-                                  -ScriptBlock {
+        -Arguments $PSBoundParameters `
+        -ScriptBlock {
         $params = $args[0]
 
         $getParams = @{
@@ -95,7 +95,7 @@ function Set-TargetResource
         $HostHeader,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present",
 
@@ -112,13 +112,13 @@ function Set-TargetResource
     {
         Write-Verbose -Message "Creating the managed path $RelativeUrl in $WebAppUrl"
         Invoke-SPDscCommand -Credential $InstallAccount `
-                            -Arguments $PSBoundParameters `
-                            -ScriptBlock {
+            -Arguments $PSBoundParameters `
+            -ScriptBlock {
             $params = $args[0]
 
             $newParams = @{
                 RelativeURL = $params.RelativeUrl
-                Explicit = $params.Explicit
+                Explicit    = $params.Explicit
             }
             if ($params.HostHeader)
             {
@@ -136,8 +136,8 @@ function Set-TargetResource
     {
         Write-Verbose -Message "Removing the managed path $RelativeUrl from $WebAppUrl"
         Invoke-SPDscCommand -Credential $InstallAccount `
-                            -Arguments $PSBoundParameters `
-                            -ScriptBlock {
+            -Arguments $PSBoundParameters `
+            -ScriptBlock {
             $params = $args[0]
 
             $removeParams = @{
@@ -180,7 +180,7 @@ function Test-TargetResource
         $HostHeader,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present",
 
@@ -199,12 +199,12 @@ function Test-TargetResource
     Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
 
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
-                                    -DesiredValues $PSBoundParameters `
-                                    -ValuesToCheck @("WebAppUrl",
-                                                     "RelativeUrl",
-                                                     "Explicit",
-                                                     "HostHeader",
-                                                     "Ensure")
+        -DesiredValues $PSBoundParameters `
+        -ValuesToCheck @("WebAppUrl",
+        "RelativeUrl",
+        "Explicit",
+        "HostHeader",
+        "Ensure")
 }
 
 Export-ModuleMember -Function *-TargetResource

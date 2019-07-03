@@ -3,16 +3,16 @@ param(
     [Parameter()]
     [string]
     $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
-                                         -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
-                                         -Resolve)
+            -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
+            -Resolve)
 )
 
 Import-Module -Name (Join-Path -Path $PSScriptRoot `
-                                -ChildPath "..\UnitTestHelper.psm1" `
-                                -Resolve)
+        -ChildPath "..\UnitTestHelper.psm1" `
+        -Resolve)
 
 $Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointCmdletModule `
-                                              -DscResource "SPHealthAnalyzerRuleState"
+    -DscResource "SPHealthAnalyzerRuleState"
 
 Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
     InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
@@ -23,23 +23,23 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         # Mocks for all contexts
         Mock -CommandName Get-SPFarm -MockWith {
-            return @{}
+            return @{ }
         }
 
         Mock -CommandName Get-SPWebapplication -MockWith {
             return @{
-                Url = ""
-                IsAdministrationWebApplication=$true
+                Url                            = ""
+                IsAdministrationWebApplication = $true
             }
         }
 
         # Test contexts
         Context -Name "The server is not part of SharePoint farm" -Fixture {
             $testParams = @{
-                Name = "Drives are at risk of running out of free space."
-                Enabled = $true
-                RuleScope   = "All Servers"
-                Schedule = "Daily"
+                Name             = "Drives are at risk of running out of free space."
+                Enabled          = $true
+                RuleScope        = "All Servers"
+                Schedule         = "Daily"
                 FixAutomatically = $false
             }
 
@@ -60,10 +60,10 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "The server is in a farm, but no central admin site is found" -Fixture {
             $testParams = @{
-                Name = "Drives are at risk of running out of free space."
-                Enabled = $true
-                RuleScope   = "All Servers"
-                Schedule = "Daily"
+                Name             = "Drives are at risk of running out of free space."
+                Enabled          = $true
+                RuleScope        = "All Servers"
+                Schedule         = "Daily"
                 FixAutomatically = $false
             }
 
@@ -86,10 +86,10 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "The server is in a farm, CA found, but no health analyzer rules list is found" -Fixture {
             $testParams = @{
-                Name = "Drives are at risk of running out of free space."
-                Enabled = $true
-                RuleScope   = "All Servers"
-                Schedule = "Daily"
+                Name             = "Drives are at risk of running out of free space."
+                Enabled          = $true
+                RuleScope        = "All Servers"
+                Schedule         = "Daily"
                 FixAutomatically = $false
             }
 
@@ -114,10 +114,10 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "The server is in a farm, CA found, Health Rules list found, but no rules match the specified rule name" -Fixture {
             $testParams = @{
-                Name = "Drives are at risk of running out of free space."
-                Enabled = $true
-                RuleScope   = "All Servers"
-                Schedule = "Daily"
+                Name             = "Drives are at risk of running out of free space."
+                Enabled          = $true
+                RuleScope        = "All Servers"
+                Schedule         = "Daily"
                 FixAutomatically = $false
             }
 
@@ -126,13 +126,13 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     Lists = @{
                         BaseTemplate = "HealthRules"
                     } | Add-Member -MemberType ScriptMethod -Name GetItems -Value {
-                            return ,@()
-                        } -PassThru
+                        return , @()
+                    } -PassThru
                 }
                 return $web
             }
 
-            Mock -CommandName Get-SPFarm -MockWith { return @{} }
+            Mock -CommandName Get-SPFarm -MockWith { return @{ } }
 
             It "Should return null from the get method" {
                 (Get-TargetResource @testParams).Name | Should BeNullOrEmpty
@@ -149,10 +149,10 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "The server is in a farm, CA/Health Rules list/Health Rule found, but the incorrect settings have been applied" -Fixture {
             $testParams = @{
-                Name = "Drives are at risk of running out of free space."
-                Enabled = $true
-                RuleScope   = "All Servers"
-                Schedule = "Daily"
+                Name             = "Drives are at risk of running out of free space."
+                Enabled          = $true
+                RuleScope        = "All Servers"
+                Schedule         = "Daily"
                 FixAutomatically = $false
             }
 
@@ -161,16 +161,16 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     Lists = @{
                         BaseTemplate = "HealthRules"
                     } | Add-Member -MemberType ScriptMethod -Name GetItems -Value {
-                            $itemcol = @(@{
-                                HealthRuleCheckEnabled = $false;
-                                HealthRuleScope = "Any Server";
-                                HealthRuleSchedule = "Weekly";
+                        $itemcol = @(@{
+                                HealthRuleCheckEnabled      = $false;
+                                HealthRuleScope             = "Any Server";
+                                HealthRuleSchedule          = "Weekly";
                                 HealthRuleAutoRepairEnabled = $true
                             } | Add-Member -MemberType ScriptMethod -Name Update -Value {
                                 $Global:SPDscHealthRulesUpdated = $true
                             } -PassThru )
-                            return ,$itemcol
-                        } -PassThru
+                        return , $itemcol
+                    } -PassThru
                 }
                 return $web
             }
@@ -179,7 +179,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 $result = Get-TargetResource @testParams
                 $result.Enabled | Should Be $false
                 $result.RuleScope | Should Be 'Any Server'
-                $result.Schedule| Should Be 'Weekly'
+                $result.Schedule | Should Be 'Weekly'
                 $result.FixAutomatically | Should Be $true
             }
 
@@ -196,10 +196,10 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "The server is in a farm and the correct settings have been applied" -Fixture {
             $testParams = @{
-                Name = "Drives are at risk of running out of free space."
-                Enabled = $true
-                RuleScope   = "All Servers"
-                Schedule = "Daily"
+                Name             = "Drives are at risk of running out of free space."
+                Enabled          = $true
+                RuleScope        = "All Servers"
+                Schedule         = "Daily"
                 FixAutomatically = $false
             }
 
@@ -208,16 +208,16 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     Lists = @{
                         BaseTemplate = "HealthRules"
                     } | Add-Member -MemberType ScriptMethod -Name GetItems -Value {
-                            $itemcol = @(@{
-                                HealthRuleCheckEnabled = $true;
-                                HealthRuleScope = "All Servers";
-                                HealthRuleSchedule = "Daily";
+                        $itemcol = @(@{
+                                HealthRuleCheckEnabled      = $true;
+                                HealthRuleScope             = "All Servers";
+                                HealthRuleSchedule          = "Daily";
                                 HealthRuleAutoRepairEnabled = $false
                             } | Add-Member -MemberType ScriptMethod -Name Update -Value {
                                 $Global:SPDscHealthRulesUpdated = $true
                             } -PassThru )
-                            return ,$itemcol
-                        } -PassThru
+                        return , $itemcol
+                    } -PassThru
                 }
                 return $web
             }
@@ -226,7 +226,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 $result = Get-TargetResource @testParams
                 $result.Enabled | Should Be $true
                 $result.RuleScope | Should Be 'All Servers'
-                $result.Schedule| Should Be 'Daily'
+                $result.Schedule | Should Be 'Daily'
                 $result.FixAutomatically | Should Be $false
             }
 

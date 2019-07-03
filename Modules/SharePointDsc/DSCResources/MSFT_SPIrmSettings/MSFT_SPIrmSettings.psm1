@@ -11,7 +11,7 @@ function Get-TargetResource
 
         [Parameter()]
         [System.String]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         $Ensure,
 
         [Parameter()]
@@ -30,8 +30,8 @@ function Get-TargetResource
     Write-Verbose "Getting SharePoint IRM Settings"
 
     $result = Invoke-SPDscCommand -Credential $InstallAccount `
-                                  -Arguments $PSBoundParameters `
-                                  -ScriptBlock {
+        -Arguments $PSBoundParameters `
+        -ScriptBlock {
         $params = $args[0]
 
         try
@@ -41,7 +41,7 @@ function Get-TargetResource
         catch
         {
             Write-Verbose -Message ("No local SharePoint farm was detected. IRM settings " + `
-                                    "will not be applied")
+                    "will not be applied")
             return @{
                 IsSingleInstance = "Yes"
                 Ensure           = "Absent"
@@ -68,9 +68,9 @@ function Get-TargetResource
             UseADRMS         = $admService.IrmSettings.IrmRMSUseAD
             RMSserver        = $admService.IrmSettings.IrmRMSCertServer
         }
-   }
+    }
 
-   return $result
+    return $result
 }
 
 function Set-TargetResource
@@ -85,7 +85,7 @@ function Set-TargetResource
 
         [Parameter()]
         [System.String]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         $Ensure,
 
         [Parameter()]
@@ -104,8 +104,8 @@ function Set-TargetResource
     Write-Verbose "Setting SharePoint IRM Settings"
 
     Invoke-SPDscCommand -Credential $InstallAccount `
-                        -Arguments $PSBoundParameters `
-                        -ScriptBlock {
+        -Arguments $PSBoundParameters `
+        -ScriptBlock {
         $params = $args[0]
 
         try
@@ -159,7 +159,7 @@ function Test-TargetResource
 
         [Parameter()]
         [System.String]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         $Ensure,
 
         [Parameter()]
@@ -188,7 +188,7 @@ function Test-TargetResource
     }
 
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
-                                    -DesiredValues $PSBoundParameters
+        -DesiredValues $PSBoundParameters
 }
 
 Export-ModuleMember -Function *-TargetResource

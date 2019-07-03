@@ -28,8 +28,8 @@ function Get-TargetResource
     Write-Verbose -Message "Getting the current Workflow Service Configuration(s)"
 
     $result = Invoke-SPDscCommand -Credential $InstallAccount `
-                                  -Arguments $PSBoundParameters `
-                                  -ScriptBlock {
+        -Arguments $PSBoundParameters `
+        -ScriptBlock {
         $params = $args[0]
 
         $returnval = @{
@@ -95,8 +95,8 @@ function Set-TargetResource
 
     ## Perform changes
     Invoke-SPDscCommand -Credential $InstallAccount `
-                        -Arguments @($PSBoundParameters) `
-                        -ScriptBlock {
+        -Arguments @($PSBoundParameters) `
+        -ScriptBlock {
         $params = $args[0]
 
         $site = Get-SPSite $params.SPSiteUrl
@@ -171,8 +171,8 @@ function Test-TargetResource
     }
 
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
-                                    -DesiredValues $PSBoundParameters `
-                                    -ValuesToCheck $valuesToCheck
+        -DesiredValues $PSBoundParameters `
+        -ValuesToCheck $valuesToCheck
 }
 
 Export-ModuleMember -Function *-TargetResource

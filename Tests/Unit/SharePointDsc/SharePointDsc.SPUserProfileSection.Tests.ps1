@@ -3,31 +3,35 @@ param(
     [Parameter()]
     [string]
     $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
-                                         -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
-                                         -Resolve)
+            -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
+            -Resolve)
 )
 
 Import-Module -Name (Join-Path -Path $PSScriptRoot `
-                                -ChildPath "..\UnitTestHelper.psm1" `
-                                -Resolve)
+        -ChildPath "..\UnitTestHelper.psm1" `
+        -Resolve)
 
 $Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointCmdletModule `
-                                              -DscResource "SPUserProfileSection"
+    -DscResource "SPUserProfileSection"
 
 Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
     InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
         Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
-        $testParams= @{
-           Name = "PersonalInformation"
-           UserProfileService = "User Profile Service Application"
-           DisplayName = "Personal Information"
-           DisplayOrder = 5000
+        $testParams = @{
+            Name               = "PersonalInformation"
+            UserProfileService = "User Profile Service Application"
+            DisplayName        = "Personal Information"
+            DisplayOrder       = 5000
         }
 
-        try { [Microsoft.Office.Server.UserProfiles] }
-        catch {
-            try {
+        try
+        { [Microsoft.Office.Server.UserProfiles]
+        }
+        catch
+        {
+            try
+            {
                 Add-Type -TypeDefinition @"
                 namespace Microsoft.Office.Server.UserProfiles {
                 public enum ConnectionType { ActiveDirectory, BusinessDataCatalog };
@@ -35,114 +39,118 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 }
 "@ -ErrorAction SilentlyContinue
             }
-            catch {
+            catch
+            {
                 Write-Verbose -Message "The Type was already added."
             }
         }
 
 
         $coreProperty = @{
-                            DisplayName = $testParams.DisplayName
-                            Name = $testParams.Name
-                        } | Add-Member -MemberType ScriptMethod Commit {
-                            $Global:SPUPSPropertyCommitCalled = $true
-                        } -PassThru | Add-Member -MemberType ScriptMethod Delete {
-                            $Global:SPUPSPropertyDeleteCalled = $true
-                        } -PassThru
+            DisplayName = $testParams.DisplayName
+            Name        = $testParams.Name
+        } | Add-Member -MemberType ScriptMethod Commit {
+            $Global:SPUPSPropertyCommitCalled = $true
+        } -PassThru | Add-Member -MemberType ScriptMethod Delete {
+            $Global:SPUPSPropertyDeleteCalled = $true
+        } -PassThru
         $subTypeProperty = @{
-                            Name= $testParams.Name
-                            DisplayName= $testParams.DisplayName
-                            DisplayOrder =$testParams.DisplayOrder
-                            CoreProperty = $coreProperty
-                        }| Add-Member -MemberType ScriptMethod Commit {
-                            $Global:SPUPSPropertyCommitCalled = $true
-                        } -PassThru
-        $userProfileSubTypePropertiesNoProperty = @{} | Add-Member -MemberType ScriptMethod Create {
-        param($section)
-                            $Global:SPUPSubTypeCreateCalled = $true
-                        } -PassThru  | Add-Member -MemberType ScriptMethod GetSectionByName {
-                            $result = $null
-                            if ($Global:SPUPGetSectionByNameCalled -eq $TRUE){
-                                $result = $subTypeProperty
-                            }
-                            $Global:SPUPGetSectionByNameCalled  = $true
-                            return $result
-                        } -PassThru| Add-Member -MemberType ScriptMethod -Name Add -Value {
-                            $Global:SPUPSubTypeAddCalled = $true
-                        } -PassThru -Force
-        $coreProperties = @{ProfileInformation = $coreProperty}
+            Name         = $testParams.Name
+            DisplayName  = $testParams.DisplayName
+            DisplayOrder = $testParams.DisplayOrder
+            CoreProperty = $coreProperty
+        } | Add-Member -MemberType ScriptMethod Commit {
+            $Global:SPUPSPropertyCommitCalled = $true
+        } -PassThru
+        $userProfileSubTypePropertiesNoProperty = @{ } | Add-Member -MemberType ScriptMethod Create {
+            param($section)
+            $Global:SPUPSubTypeCreateCalled = $true
+        } -PassThru | Add-Member -MemberType ScriptMethod GetSectionByName {
+            $result = $null
+            if ($Global:SPUPGetSectionByNameCalled -eq $TRUE)
+            {
+                $result = $subTypeProperty
+            }
+            $Global:SPUPGetSectionByNameCalled = $true
+            return $result
+        } -PassThru | Add-Member -MemberType ScriptMethod -Name Add -Value {
+            $Global:SPUPSubTypeAddCalled = $true
+        } -PassThru -Force
+        $coreProperties = @{ProfileInformation = $coreProperty }
         $userProfileSubTypePropertiesProperty = @{"ProfileInformation" = $subTypeProperty } | Add-Member -MemberType ScriptMethod Create {
-                            $Global:SPUPSubTypeCreateCalled = $true
-                        } -PassThru | Add-Member -MemberType ScriptMethod -Name Add -Value {
-                            $Global:SPUPSubTypeAddCalled = $true
-                        } -PassThru -Force
+            $Global:SPUPSubTypeCreateCalled = $true
+        } -PassThru | Add-Member -MemberType ScriptMethod -Name Add -Value {
+            $Global:SPUPSubTypeAddCalled = $true
+        } -PassThru -Force
         Mock -CommandName Get-SPDscUserProfileSubTypeManager -MockWith {
-        $result = @{}| Add-Member -MemberType ScriptMethod GetProfileSubtype {
-                            $Global:SPUPGetProfileSubtypeCalled = $true
-                            return @{
-                            Properties = $userProfileSubTypePropertiesNoProperty
-                            }
-                        } -PassThru
+            $result = @{ } | Add-Member -MemberType ScriptMethod GetProfileSubtype {
+                $Global:SPUPGetProfileSubtypeCalled = $true
+                return @{
+                    Properties = $userProfileSubTypePropertiesNoProperty
+                }
+            } -PassThru
 
-        return $result
+            return $result
         }
 
-        Mock -CommandName Set-SPDscObjectPropertyIfValuePresent -MockWith {return ;}
+        Mock -CommandName Set-SPDscObjectPropertyIfValuePresent -MockWith { return ; }
         Mock -CommandName Get-SPWebApplication -MockWith {
             return @(
-                    @{
-                        IsAdministrationWebApplication=$true
-                        Url ="caURL"
-                     })
+                @{
+                    IsAdministrationWebApplication = $true
+                    Url                            = "caURL"
+                })
         }
 
         Mock -CommandName New-Object -MockWith {
-            $ProfilePropertyManager = @{"Contoso"  = $null} # $connection is never set, so it will always be $null
+            $ProfilePropertyManager = @{"Contoso" = $null } # $connection is never set, so it will always be $null
             return (@{
-            ProfilePropertyManager = $ProfilePropertyManager
-            ConnectionManager = $null # $ConnnectionManager is never set, so it will always be $null
-            } | Add-Member -MemberType ScriptMethod GetPropertiesWithSection {
-                $Global:UpsConfigManagerGetPropertiesWithSectionCalled=$true;
+                    ProfilePropertyManager = $ProfilePropertyManager
+                    ConnectionManager      = $null # $ConnnectionManager is never set, so it will always be $null
+                } | Add-Member -MemberType ScriptMethod GetPropertiesWithSection {
+                    $Global:UpsConfigManagerGetPropertiesWithSectionCalled = $true;
 
-                $result = (@{}|Add-Member -MemberType ScriptMethod Create {
-                param ($section)
+                    $result = (@{ } | Add-Member -MemberType ScriptMethod Create {
+                            param ($section)
 
 
-                    $result = @{Name = ""
-                            DisplayName=""
-                            DisplayOrder=0}|Add-Member -MemberType ScriptMethod Commit {
-                                $Global:UpsConfigManagerCommitCalled=$true;
+                            $result = @{Name = ""
+                                DisplayName  = ""
+                                DisplayOrder = 0
+                            } | Add-Member -MemberType ScriptMethod Commit {
+                                $Global:UpsConfigManagerCommitCalled = $true;
                             } -PassThru
-                    return $result
-                } -PassThru -Force | Add-Member -MemberType ScriptMethod GetSectionByName {
-                           $result = $null
-                            if ($Global:UpsConfigManagerGetSectionByNameCalled -eq $TRUE){
+                            return $result
+                        } -PassThru -Force | Add-Member -MemberType ScriptMethod GetSectionByName {
+                            $result = $null
+                            if ($Global:UpsConfigManagerGetSectionByNameCalled -eq $TRUE)
+                            {
                                 $result = $subTypeProperty
                             }
-                            $Global:UpsConfigManagerGetSectionByNameCalled=$true
+                            $Global:UpsConfigManagerGetSectionByNameCalled = $true
                             return $result
-                return $null # $userProfileSubTypePropertiesUpdateProperty is never set, so it will always be $null;
-            } -PassThru | Add-Member -MemberType ScriptMethod SetDisplayOrderBySectionName {
-                $Global:UpsConfigManagerSetDisplayOrderBySectionNameCalled=$true;
-                return $null # $userProfileSubTypePropertiesUpdateProperty is never set, so it will always be $null;
-            } -PassThru | Add-Member -MemberType ScriptMethod CommitDisplayOrder {
-                $Global:UpsConfigManagerCommitDisplayOrderCalled=$true;
-                return $null # $userProfileSubTypePropertiesUpdateProperty is never set, so it will always be $null;
-            } -PassThru| Add-Member -MemberType ScriptMethod RemoveSectionByName {
-                $Global:UpsConfigManagerRemoveSectionByNameCalled=$true;
-                return ($coreProperties);
-            } -PassThru
+                            return $null # $userProfileSubTypePropertiesUpdateProperty is never set, so it will always be $null;
+                        } -PassThru | Add-Member -MemberType ScriptMethod SetDisplayOrderBySectionName {
+                            $Global:UpsConfigManagerSetDisplayOrderBySectionNameCalled = $true;
+                            return $null # $userProfileSubTypePropertiesUpdateProperty is never set, so it will always be $null;
+                        } -PassThru | Add-Member -MemberType ScriptMethod CommitDisplayOrder {
+                            $Global:UpsConfigManagerCommitDisplayOrderCalled = $true;
+                            return $null # $userProfileSubTypePropertiesUpdateProperty is never set, so it will always be $null;
+                        } -PassThru | Add-Member -MemberType ScriptMethod RemoveSectionByName {
+                            $Global:UpsConfigManagerRemoveSectionByNameCalled = $true;
+                            return ($coreProperties);
+                        } -PassThru
 
-)
-           return $result
+                    )
+                    return $result
 
-             } -PassThru )
+                } -PassThru )
         } -ParameterFilter { $TypeName -eq "Microsoft.Office.Server.UserProfiles.UserProfileConfigManager" }
 
-        $userProfileService =  @{
-            Name = "User Profile Service Application"
-            TypeName = "User Profile Service Application"
-            ApplicationPool = "SharePoint Service Applications"
+        $userProfileService = @{
+            Name                         = "User Profile Service Application"
+            TypeName                     = "User Profile Service Application"
+            ApplicationPool              = "SharePoint Service Applications"
             ServiceApplicationProxyGroup = "Proxy Group"
         }
 
@@ -167,11 +175,11 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             It "Should create a new user profile section in the set method" {
                 $Global:SPUPSubTypeCreateCalled = $false
                 $Global:UpsConfigManagerSetDisplayOrderBySectionNameCalled = $false
-                $Global:SPUPSPropertyCommitCalled=$false;
+                $Global:SPUPSPropertyCommitCalled = $false;
 
                 Set-TargetResource @testParams
                 $Global:SPUPSubTypeCreateCalled | should be $false
-                $Global:SPUPSPropertyCommitCalled|should be $true
+                $Global:SPUPSPropertyCommitCalled | should be $true
                 $Global:UpsConfigManagerSetDisplayOrderBySectionNameCalled | Should be $true
             }
 
@@ -198,16 +206,16 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "When section exists and ensure equals Absent" {
             Mock -CommandName Get-SPDscUserProfileSubTypeManager -MockWith {
-            $result = @{}| Add-Member -MemberType ScriptMethod GetProfileSubtype {
-                                $Global:SPUPGetProfileSubtypeCalled = $true
-                                return @{
-                                Properties = $userProfileSubTypePropertiesProperty
-                                }
-                            } -PassThru
+                $result = @{ } | Add-Member -MemberType ScriptMethod GetProfileSubtype {
+                    $Global:SPUPGetProfileSubtypeCalled = $true
+                    return @{
+                        Properties = $userProfileSubTypePropertiesProperty
+                    }
+                } -PassThru
 
-            return $result
+                return $result
             }
-                    $testParams.Ensure = "Absent"
+            $testParams.Ensure = "Absent"
 
             It "Should return true when the Test method is called" {
                 $Global:SPUPGetSectionByNameCalled = $true
@@ -218,7 +226,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
             It "deletes an user profile property in the set method" {
                 $Global:UpsConfigManagerGetSectionByNameCalled = $true
-                $Global:UpsConfigManagerRemoveSectionByNameCalled=$false
+                $Global:UpsConfigManagerRemoveSectionByNameCalled = $false
                 Set-TargetResource @testParams
                 $Global:UpsConfigManagerRemoveSectionByNameCalled | Should be $true
             }
@@ -227,12 +235,12 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "When section exists and display name and display order are different" {
             Mock -CommandName Get-SPDscUserProfileSubTypeManager -MockWith {
-            $result = @{}| Add-Member -MemberType ScriptMethod GetProfileSubtype {
-                                $Global:SPUPGetProfileSubtypeCalled = $true
-                                return @{
-                                Properties = $userProfileSubTypePropertiesProperty
-                                }
-                            } -PassThru
+                $result = @{ } | Add-Member -MemberType ScriptMethod GetProfileSubtype {
+                    $Global:SPUPGetProfileSubtypeCalled = $true
+                    return @{
+                        Properties = $userProfileSubTypePropertiesProperty
+                    }
+                } -PassThru
                 return $result
             }
             $testParams.Ensure = "Present"
@@ -253,7 +261,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             It "Should update an user profile property in the set method" {
                 $Global:SPUPSubTypeCreateCalled = $false
                 $Global:UpsConfigManagerSetDisplayOrderBySectionNameCalled = $false
-                $Global:SPUPGetSectionByNameCalled=$true
+                $Global:SPUPGetSectionByNameCalled = $true
                 Set-TargetResource @testParams
                 Assert-MockCalled Set-SPDscObjectPropertyIfValuePresent
                 $Global:SPUPSubTypeCreateCalled | should be $false

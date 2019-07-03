@@ -31,18 +31,18 @@ function Get-TargetResource
     if ($Members -and (($MembersToInclude) -or ($MembersToExclude)))
     {
         throw ("Cannot use the Members parameter together with the " + `
-               "MembersToInclude or MembersToExclude parameters")
+                "MembersToInclude or MembersToExclude parameters")
     }
 
     if (!$Members -and !$MembersToInclude -and !$MembersToExclude)
     {
         throw ("At least one of the following parameters must be specified: " + `
-               "Members, MembersToInclude, MembersToExclude")
+                "Members, MembersToInclude, MembersToExclude")
     }
 
     $result = Invoke-SPDscCommand -Credential $InstallAccount `
-                                  -Arguments $PSBoundParameters `
-                                  -ScriptBlock {
+        -Arguments $PSBoundParameters `
+        -ScriptBlock {
         $params = $args[0]
 
         $nullReturn = @{
@@ -110,13 +110,13 @@ function Set-TargetResource
     if ($Members -and (($MembersToInclude) -or ($MembersToExclude)))
     {
         throw ("Cannot use the Members parameter together with the " + `
-               "MembersToInclude or MembersToExclude parameters")
+                "MembersToInclude or MembersToExclude parameters")
     }
 
     if (!$Members -and !$MembersToInclude -and !$MembersToExclude)
     {
         throw ("At least one of the following parameters must be specified: " + `
-               "Members, MembersToInclude, MembersToExclude")
+                "Members, MembersToInclude, MembersToExclude")
     }
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
@@ -125,7 +125,7 @@ function Set-TargetResource
         throw "Unable to locate central administration website"
     }
 
-    $changeUsers = @{}
+    $changeUsers = @{ }
     $runChange = $false
 
     if ($Members)
@@ -133,7 +133,7 @@ function Set-TargetResource
         Write-Verbose "Processing Members parameter"
 
         $differences = Compare-Object -ReferenceObject $CurrentValues.Members `
-                                      -DifferenceObject $Members
+            -DifferenceObject $Members
 
         if ($null -eq $differences)
         {
@@ -142,7 +142,7 @@ function Set-TargetResource
         else
         {
             Write-Verbose "Farm Administrators group does not match. Perform corrective action"
-            $addUsers    = @()
+            $addUsers = @()
             $removeUsers = @()
             foreach ($difference in $differences)
             {
@@ -271,13 +271,13 @@ function Test-TargetResource
     if ($Members -and (($MembersToInclude) -or ($MembersToExclude)))
     {
         throw ("Cannot use the Members parameter together with the " + `
-               "MembersToInclude or MembersToExclude parameters")
+                "MembersToInclude or MembersToExclude parameters")
     }
 
     if (!$Members -and !$MembersToInclude -and !$MembersToExclude)
     {
         throw ("At least one of the following parameters must be specified: " + `
-               "Members, MembersToInclude, MembersToExclude")
+                "Members, MembersToInclude, MembersToExclude")
     }
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
@@ -294,7 +294,7 @@ function Test-TargetResource
     {
         Write-Verbose "Processing Members parameter"
         $differences = Compare-Object -ReferenceObject $CurrentValues.Members `
-                                      -DifferenceObject $Members
+            -DifferenceObject $Members
 
         if ($null -eq $differences)
         {
@@ -355,8 +355,8 @@ function Merge-SPDscFarmAdminList
     )
 
     $null = Invoke-SPDscCommand -Credential $InstallAccount `
-                                -Arguments $changeUsers `
-                                -ScriptBlock {
+        -Arguments $changeUsers `
+        -ScriptBlock {
         $changeUsers = $args[0]
 
         $webApps = Get-SPWebApplication -IncludeCentralAdministration
@@ -374,7 +374,7 @@ function Merge-SPDscFarmAdminList
         {
             foreach ($loginName in $changeUsers.Add)
             {
-                $caWeb.SiteGroups.GetByName($farmAdminGroup).AddUser($loginName,"","","")
+                $caWeb.SiteGroups.GetByName($farmAdminGroup).AddUser($loginName, "", "", "")
             }
         }
 

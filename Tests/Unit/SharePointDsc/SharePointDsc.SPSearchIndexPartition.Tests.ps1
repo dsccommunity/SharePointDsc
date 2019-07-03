@@ -1,18 +1,18 @@
 [CmdletBinding()]
 param(
     [Parameter()]
-    [string] 
+    [string]
     $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
-                                         -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
-                                         -Resolve)
+            -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
+            -Resolve)
 )
 
 Import-Module -Name (Join-Path -Path $PSScriptRoot `
-                                -ChildPath "..\UnitTestHelper.psm1" `
-                                -Resolve)
+        -ChildPath "..\UnitTestHelper.psm1" `
+        -Resolve)
 
 $Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointCmdletModule `
-                                              -DscResource "SPSearchIndexPartition"
+    -DscResource "SPSearchIndexPartition"
 
 Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
     InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
@@ -20,10 +20,10 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         # Initialize tests
         Add-Type -TypeDefinition @"
-        public class IndexComponent 
-        { 
-            public string ServerName { get; set; } 
-            public System.Guid ComponentId {get; set;} 
+        public class IndexComponent
+        {
+            public string ServerName { get; set; }
+            public System.Guid ComponentId {get; set;}
             public System.Int32 IndexPartitionOrdinal {get; set;}
         }
 "@
@@ -31,26 +31,26 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         $indexComponent.ServerName = $env:COMPUTERNAME
         $indexComponent.IndexPartitionOrdinal = 0
 
-        # Mocks for all contexts   
+        # Mocks for all contexts
         Mock -CommandName New-PSSession -MockWith {
             return $null
         }
-        Mock -CommandName New-Item -MockWith { 
-            return @{} 
+        Mock -CommandName New-Item -MockWith {
+            return @{ }
         }
-        Mock -CommandName Start-Sleep -MockWith {}
+        Mock -CommandName Start-Sleep -MockWith { }
         Mock -CommandName Get-SPEnterpriseSearchServiceApplication -MockWith {
             return @{
-                ActiveTopology = @{}
+                ActiveTopology = @{ }
             }
-        } 
-        Mock -CommandName New-SPEnterpriseSearchTopology -MockWith { 
-            return @{} 
+        }
+        Mock -CommandName New-SPEnterpriseSearchTopology -MockWith {
+            return @{ }
         }
 
         $Global:SPDscSearchRoleInstanceCallCount = 0
         Mock -CommandName Get-SPEnterpriseSearchServiceInstance -MockWith {
-            if ($Global:SPDscSearchRoleInstanceCallCount -eq 2) 
+            if ($Global:SPDscSearchRoleInstanceCallCount -eq 2)
             {
                 $Global:SPDscSearchRoleInstanceCallCount = 0
                 return @{
@@ -59,8 +59,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     }
                     Status = "Online"
                 }
-            } 
-            else 
+            }
+            else
             {
                 $Global:SPDscSearchRoleInstanceCallCount++
                 return @{
@@ -71,32 +71,32 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 }
             }
         }
-        Mock -CommandName Start-SPEnterpriseSearchServiceInstance -MockWith { 
-            return $null 
+        Mock -CommandName Start-SPEnterpriseSearchServiceInstance -MockWith {
+            return $null
         }
-        Mock -CommandName New-SPEnterpriseSearchIndexComponent -MockWith { 
-            return $null 
+        Mock -CommandName New-SPEnterpriseSearchIndexComponent -MockWith {
+            return $null
         }
-        Mock -CommandName Remove-SPEnterpriseSearchComponent -MockWith { 
-            return $null 
+        Mock -CommandName Remove-SPEnterpriseSearchComponent -MockWith {
+            return $null
         }
-        Mock -CommandName Set-SPEnterpriseSearchTopology -MockWith { 
-            return $null 
+        Mock -CommandName Set-SPEnterpriseSearchTopology -MockWith {
+            return $null
         }
 
-        # Test contexts        
+        # Test contexts
         Context -Name "Search index doesn't exist and it should" {
             $testParams = @{
-                Index = "0"
-                Servers = @($env:COMPUTERNAME)
-                RootDirectory = "C:\SearchIndex\0"
+                Index          = "0"
+                Servers        = @($env:COMPUTERNAME)
+                RootDirectory  = "C:\SearchIndex\0"
                 ServiceAppName = "Search Service Application"
             }
 
-            Mock -CommandName Get-SPEnterpriseSearchComponent { 
-                return @() 
+            Mock -CommandName Get-SPEnterpriseSearchComponent {
+                return @()
             }
-            
+
             $Global:SPDscSearchRoleInstanceCallCount = 0
 
             It "Should return an empty server list from the get method" {
@@ -113,17 +113,17 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Assert-MockCalled New-SPEnterpriseSearchIndexComponent
             }
         }
-        
+
         Context -Name "Search index does exist and it should" {
             $testParams = @{
-                Index = "0"
-                Servers = @($env:COMPUTERNAME)
-                RootDirectory = "C:\SearchIndex\0"
+                Index          = "0"
+                Servers        = @($env:COMPUTERNAME)
+                RootDirectory  = "C:\SearchIndex\0"
                 ServiceAppName = "Search Service Application"
             }
-            
-            Mock -CommandName Get-SPEnterpriseSearchComponent -MockWith { 
-                return @($indexComponent) 
+
+            Mock -CommandName Get-SPEnterpriseSearchComponent -MockWith {
+                return @($indexComponent)
             }
 
             It "Should return present from the get method" {
@@ -138,14 +138,14 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "Search index exists and it shouldn't" {
             $testParams = @{
-                Index = "0"
-                Servers = @("SharePoint2")
-                RootDirectory = "C:\SearchIndex\0"
+                Index          = "0"
+                Servers        = @("SharePoint2")
+                RootDirectory  = "C:\SearchIndex\0"
                 ServiceAppName = "Search Service Application"
             }
-            
-            Mock -CommandName Get-SPEnterpriseSearchComponent -MockWith { 
-                return @($indexComponent) 
+
+            Mock -CommandName Get-SPEnterpriseSearchComponent -MockWith {
+                return @($indexComponent)
             }
 
             It "Should return false from the test method" {
