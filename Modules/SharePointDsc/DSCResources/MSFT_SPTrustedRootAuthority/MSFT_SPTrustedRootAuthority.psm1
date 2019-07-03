@@ -162,7 +162,7 @@ function Set-TargetResource
                 try
                 {
                     $cert = New-Object System.Security.Cryptography.X509Certificates.X509Certificate2
-                    $cert.Import($CertificateFilePath)
+                    $cert.Import($params.CertificateFilePath)
                 }
                 catch
                 {
@@ -215,7 +215,7 @@ function Set-TargetResource
                 try
                 {
                     $cert = New-Object System.Security.Cryptography.X509Certificates.X509Certificate2
-                    $cert.Import($CertificateFilePath)
+                    $cert.Import($params.CertificateFilePath)
                 }
                 catch
                 {
