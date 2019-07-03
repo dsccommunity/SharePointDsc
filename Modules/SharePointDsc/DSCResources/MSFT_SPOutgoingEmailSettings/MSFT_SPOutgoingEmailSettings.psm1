@@ -41,24 +41,24 @@ function Get-TargetResource
 
     $installedVersion = Get-SPDscInstalledProductVersion
     if (($PSBoundParameters.ContainsKey("UseTLS") -eq $true) -and `
-        $installedVersion.FileMajorPart -ne 16)
+            $installedVersion.FileMajorPart -ne 16)
     {
         throw [Exception] "UseTLS is only supported in SharePoint 2016 and SharePoint 2019."
     }
 
     if (($PSBoundParameters.ContainsKey("SMTPPort") -eq $true) -and `
-        $installedVersion.FileMajorPart -ne 16)
+            $installedVersion.FileMajorPart -ne 16)
     {
         throw [Exception] "SMTPPort is only supported in SharePoint 2016 and SharePoint 2019."
     }
 
     $result = Invoke-SPDscCommand -Credential $InstallAccount `
-                                  -Arguments $PSBoundParameters `
-                                  -ScriptBlock {
+        -Arguments $PSBoundParameters `
+        -ScriptBlock {
         $params = $args[0]
         $webApp = Get-SPWebApplication -Identity $params.WebAppUrl `
-                                       -IncludeCentralAdministration `
-                                       -ErrorAction SilentlyContinue
+            -IncludeCentralAdministration `
+            -ErrorAction SilentlyContinue
 
         if ($null -eq $webApp)
         {
@@ -135,20 +135,20 @@ function Set-TargetResource
 
     $installedVersion = Get-SPDscInstalledProductVersion
     if (($PSBoundParameters.ContainsKey("UseTLS") -eq $true) -and `
-        $installedVersion.FileMajorPart -lt 16)
+            $installedVersion.FileMajorPart -lt 16)
     {
         throw [Exception] "UseTLS is only supported in SharePoint 2016 and SharePoint 2019."
     }
 
     if (($PSBoundParameters.ContainsKey("SMTPPort") -eq $true) -and `
-        $installedVersion.FileMajorPart -lt 16)
+            $installedVersion.FileMajorPart -lt 16)
     {
         throw [Exception] "SMTPPort is only supported in SharePoint 2016 and SharePoint 2019."
     }
 
     $null = Invoke-SPDscCommand -Credential $InstallAccount `
-                                -Arguments $PSBoundParameters `
-                                -ScriptBlock {
+        -Arguments $PSBoundParameters `
+        -ScriptBlock {
         $params = $args[0]
         $webApp = $null
 
@@ -163,13 +163,15 @@ function Set-TargetResource
         $installedVersion = Get-SPDscInstalledProductVersion
         switch ($installedVersion.FileMajorPart)
         {
-            15 {
+            15
+            {
                 $webApp.UpdateMailSettings($params.SMTPServer, `
-                                           $params.FromAddress, `
-                                           $params.ReplyToAddress, `
-                                           $params.CharacterSet)
+                        $params.FromAddress, `
+                        $params.ReplyToAddress, `
+                        $params.CharacterSet)
             }
-            16 {
+            16
+            {
                 if ($params.ContainsKey("UseTLS") -eq $false)
                 {
                     $UseTLS = $false
@@ -189,15 +191,16 @@ function Set-TargetResource
                 }
 
                 $webApp.UpdateMailSettings($params.SMTPServer, `
-                                           $params.FromAddress, `
-                                           $params.ReplyToAddress, `
-                                           $params.CharacterSet, `
-                                           $UseTLS, `
-                                           $SMTPPort)
+                        $params.FromAddress, `
+                        $params.ReplyToAddress, `
+                        $params.CharacterSet, `
+                        $UseTLS, `
+                        $SMTPPort)
             }
-            default {
+            default
+            {
                 throw ("Detected an unsupported major version of SharePoint. SharePointDsc only " + `
-                       "supports SharePoint 2013, 2016 or 2019.")
+                        "supports SharePoint 2013, 2016 or 2019.")
             }
         }
     }
@@ -250,13 +253,13 @@ function Test-TargetResource
     Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
 
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
-                                    -DesiredValues $PSBoundParameters `
-                                    -ValuesToCheck @("SMTPServer",
-                                                     "FromAddress",
-                                                     "ReplyToAddress",
-                                                     "CharacterSet",
-                                                     "UseTLS",
-                                                     "SMTPPort")
+        -DesiredValues $PSBoundParameters `
+        -ValuesToCheck @("SMTPServer",
+        "FromAddress",
+        "ReplyToAddress",
+        "CharacterSet",
+        "UseTLS",
+        "SMTPPort")
 }
 
 Export-ModuleMember -Function *-TargetResource

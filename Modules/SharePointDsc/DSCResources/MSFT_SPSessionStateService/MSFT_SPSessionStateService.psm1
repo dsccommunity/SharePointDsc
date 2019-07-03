@@ -13,7 +13,7 @@ function Get-TargetResource
         $DatabaseServer,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present",
 
@@ -29,8 +29,8 @@ function Get-TargetResource
     Write-Verbose -Message "Getting SPSessionStateService info"
 
     $result = Invoke-SPDscCommand -Credential $InstallAccount `
-                                  -Arguments $PSBoundParameters `
-                                  -ScriptBlock {
+        -Arguments $PSBoundParameters `
+        -ScriptBlock {
         $svc = Get-SPSessionStateService
         $Ensure = "Absent"
         if ($svc.SessionStateEnabled -eq $true)
@@ -61,7 +61,7 @@ function Set-TargetResource
         $DatabaseServer,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present",
 
@@ -84,8 +84,8 @@ function Set-TargetResource
     if ($Ensure -eq "Present")
     {
         Invoke-SPDscCommand -Credential $InstallAccount `
-                            -Arguments $PSBoundParameters `
-                            -ScriptBlock {
+            -Arguments $PSBoundParameters `
+            -ScriptBlock {
             $params = $args[0]
 
             $svc = Get-SPSessionStateService
@@ -109,8 +109,8 @@ function Set-TargetResource
     if ($Ensure -eq "Absent")
     {
         Invoke-SPDscCommand -Credential $InstallAccount `
-                            -Arguments $PSBoundParameters `
-                            -ScriptBlock {
+            -Arguments $PSBoundParameters `
+            -ScriptBlock {
             $svc = Get-SPSessionStateService
             if ($svc.SessionStateEnabled)
             {
@@ -140,7 +140,7 @@ function Test-TargetResource
         $DatabaseServer,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present",
 
@@ -165,14 +165,14 @@ function Test-TargetResource
     if ($Ensure -eq "Present")
     {
         return Test-SPDscParameterState -CurrentValues $CurrentValues `
-                                        -DesiredValues $PSBoundParameters `
-                                        -ValuesToCheck @("Ensure","SessionTimeout")
+            -DesiredValues $PSBoundParameters `
+            -ValuesToCheck @("Ensure", "SessionTimeout")
     }
     else
     {
         return Test-SPDscParameterState -CurrentValues $CurrentValues `
-                                        -DesiredValues $PSBoundParameters `
-                                        -ValuesToCheck @("Ensure")
+            -DesiredValues $PSBoundParameters `
+            -ValuesToCheck @("Ensure")
     }
 }
 

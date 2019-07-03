@@ -4,23 +4,23 @@ param(
     [Parameter()]
     [string]
     $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
-                                         -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
-                                         -Resolve)
+            -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
+            -Resolve)
 )
 
 Import-Module -Name (Join-Path -Path $PSScriptRoot `
-                                -ChildPath "..\UnitTestHelper.psm1" `
-                                -Resolve)
+        -ChildPath "..\UnitTestHelper.psm1" `
+        -Resolve)
 
 $Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointCmdletModule `
-                                              -DscResource "SPDiagnosticLoggingSettings"
+    -DscResource "SPDiagnosticLoggingSettings"
 
 Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
     InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
         Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
         # Mocks for all contexts
-        Mock -CommandName Set-SPDiagnosticConfig -MockWith {}
+        Mock -CommandName Set-SPDiagnosticConfig -MockWith { }
 
         # Test contexts
         Context -Name "Diagnostic configuration can not be loaded" {
@@ -224,7 +224,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         Context -Name "Diagnostic configuration needs updating and the InstallAccount option is used" {
             $mockPassword = ConvertTo-SecureString -String "password" -AsPlainText -Force
             $mockAccount = New-Object -TypeName "System.Management.Automation.PSCredential" `
-                                      -ArgumentList @("username", $mockPassword)
+                -ArgumentList @("username", $mockPassword)
             $testParams = @{
                 IsSingleInstance                            = "Yes"
                 LogPath                                     = "L:\ULSLogs"

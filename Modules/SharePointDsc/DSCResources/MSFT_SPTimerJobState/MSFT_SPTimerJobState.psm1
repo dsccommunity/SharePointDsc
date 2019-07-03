@@ -30,12 +30,12 @@ function Get-TargetResource
     if ($TypeName -eq "Microsoft.SharePoint.Administration.Health.SPHealthAnalyzerJobDefinition")
     {
         throw ("You cannot use SPTimerJobState to change the schedule of " + `
-               "health analyzer timer jobs.")
+                "health analyzer timer jobs.")
     }
 
     $result = Invoke-SPDscCommand -Credential $InstallAccount `
-                                  -Arguments $PSBoundParameters `
-                                  -ScriptBlock {
+        -Arguments $PSBoundParameters `
+        -ScriptBlock {
         $params = $args[0]
 
         try
@@ -45,7 +45,7 @@ function Get-TargetResource
         catch
         {
             throw ("No local SharePoint farm was detected. Timer job " + `
-                   "settings will not be applied")
+                    "settings will not be applied")
         }
 
         $returnval = @{
@@ -61,7 +61,7 @@ function Get-TargetResource
             }
 
             $timerjob = Get-SPTimerJob -Type $params.TypeName `
-                                        -WebApplication $wa
+                -WebApplication $wa
 
             if ($timerjob.Count -eq 0)
             {
@@ -69,8 +69,8 @@ function Get-TargetResource
             }
 
             $returnval.WebAppUrl = $params.WebAppUrl
-            $returnval.Enabled   = -not $timerjob.IsDisabled
-            $returnval.Schedule  = $null
+            $returnval.Enabled = -not $timerjob.IsDisabled
+            $returnval.Schedule = $null
             if ($null -ne $timerjob.Schedule)
             {
                 $returnval.Schedule = $timerjob.Schedule.ToString()
@@ -82,8 +82,8 @@ function Get-TargetResource
             if ($timerjob.Count -eq 1)
             {
                 $returnval.WebAppUrl = "N/A"
-                $returnval.Enabled   = -not $timerjob.IsDisabled
-                $returnval.Schedule  = $null
+                $returnval.Enabled = -not $timerjob.IsDisabled
+                $returnval.Schedule = $null
                 if ($null -ne $timerjob.Schedule)
                 {
                     $returnval.Schedule = $timerjob.Schedule.ToString()
@@ -92,7 +92,7 @@ function Get-TargetResource
             else
             {
                 throw ("$($timerjob.Count) timer jobs found. Check input " + `
-                       "values or use the WebAppUrl parameter.")
+                        "values or use the WebAppUrl parameter.")
             }
         }
         return $returnval
@@ -132,12 +132,12 @@ function Set-TargetResource
     if ($TypeName -eq "Microsoft.SharePoint.Administration.Health.SPHealthAnalyzerJobDefinition")
     {
         throw ("You cannot use SPTimerJobState to change the schedule of " + `
-               "health analyzer timer jobs.")
+                "health analyzer timer jobs.")
     }
 
     Invoke-SPDscCommand -Credential $InstallAccount `
-                        -Arguments $PSBoundParameters `
-                        -ScriptBlock {
+        -Arguments $PSBoundParameters `
+        -ScriptBlock {
         $params = $args[0]
 
         try
@@ -160,7 +160,7 @@ function Set-TargetResource
             }
 
             $timerjob = Get-SPTimerJob -Type $params.TypeName `
-                                        -WebApplication $wa
+                -WebApplication $wa
 
             if ($timerjob.Count -eq 0)
             {
@@ -174,13 +174,13 @@ function Set-TargetResource
                     try
                     {
                         Set-SPTimerJob -Identity $timerjob `
-                                       -Schedule $params.Schedule `
-                                       -ErrorAction Stop
+                            -Schedule $params.Schedule `
+                            -ErrorAction Stop
                     }
                     catch
                     {
                         if ($_.Exception.Message -like `
-                            "*The time given was not given in the proper format*")
+                                "*The time given was not given in the proper format*")
                         {
                             throw ("Incorrect schedule format used. New schedule will " + `
                                     "not be applied.")
@@ -241,13 +241,13 @@ function Set-TargetResource
                         try
                         {
                             Set-SPTimerJob -Identity $timerjob `
-                                           -Schedule $params.Schedule `
-                                           -ErrorAction Stop
+                                -Schedule $params.Schedule `
+                                -ErrorAction Stop
                         }
                         catch
                         {
                             if ($_.Exception.Message -like `
-                                "*The time given was not given in the proper format*")
+                                    "*The time given was not given in the proper format*")
                             {
                                 throw ("Incorrect schedule format used. New schedule will " + `
                                         "not be applied.")
@@ -335,7 +335,7 @@ function Test-TargetResource
     if ($TypeName -eq "Microsoft.SharePoint.Administration.Health.SPHealthAnalyzerJobDefinition")
     {
         throw ("You cannot use SPTimerJobState to change the schedule of " + `
-               "health analyzer timer jobs.")
+                "health analyzer timer jobs.")
     }
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
@@ -344,7 +344,7 @@ function Test-TargetResource
     Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
 
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
-                                    -DesiredValues $PSBoundParameters
+        -DesiredValues $PSBoundParameters
 }
 
 Export-ModuleMember -Function *-TargetResource

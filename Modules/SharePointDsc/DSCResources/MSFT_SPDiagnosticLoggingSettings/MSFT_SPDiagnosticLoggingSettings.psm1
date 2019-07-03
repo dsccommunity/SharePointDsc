@@ -89,8 +89,8 @@ function Get-TargetResource
     Write-Verbose -Message "Getting diagnostic configuration settings"
 
     $result = Invoke-SPDscCommand -Credential $InstallAccount `
-                                  -Arguments $PSBoundParameters `
-                                  -ScriptBlock {
+        -Arguments $PSBoundParameters `
+        -ScriptBlock {
         $params = $args[0]
 
         $nullReturn = @{
@@ -239,8 +239,8 @@ function Set-TargetResource
     Write-Verbose -Message "Setting diagnostic configuration settings"
 
     Invoke-SPDscCommand -Credential $InstallAccount `
-                        -Arguments $PSBoundParameters `
-                        -ScriptBlock {
+        -Arguments $PSBoundParameters `
+        -ScriptBlock {
         $params = $args[0]
 
         if ($params.ContainsKey("IsSingleInstance"))
@@ -253,9 +253,9 @@ function Set-TargetResource
             $params.Remove("InstallAccount") | Out-Null
         }
         $params = $params | Rename-SPDscParamValue -oldName "LogPath" `
-                                                   -newName "LogLocation" `
-                          | Rename-SPDscParamValue -oldName "LogSpaceInGB" `
-                                                   -newName "LogDiskSpaceUsageGB"
+            -newName "LogLocation" `
+        | Rename-SPDscParamValue -oldName "LogSpaceInGB" `
+            -newName "LogDiskSpaceUsageGB"
 
         Set-SPDiagnosticConfig @params
     }
@@ -357,7 +357,7 @@ function Test-TargetResource
     Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
 
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
-                                    -DesiredValues $PSBoundParameters
+        -DesiredValues $PSBoundParameters
 }
 
 Export-ModuleMember -Function *-TargetResource

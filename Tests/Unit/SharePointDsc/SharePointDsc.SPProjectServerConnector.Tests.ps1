@@ -3,17 +3,17 @@ param(
     [Parameter()]
     [string]
     $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
-                                         -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
-                                         -Resolve)
+            -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
+            -Resolve)
 )
 
 Import-Module -Name (Join-Path -Path $PSScriptRoot `
-                                -ChildPath "..\UnitTestHelper.psm1" `
-                                -Resolve)
+        -ChildPath "..\UnitTestHelper.psm1" `
+        -Resolve)
 
 $Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointCmdletModule `
-                                              -SubModulePath "Modules\SharePointDsc.ProjectServer\ProjectServerConnector.psm1" `
-                                              -ExcludeInvokeHelper
+    -SubModulePath "Modules\SharePointDsc.ProjectServer\ProjectServerConnector.psm1" `
+    -ExcludeInvokeHelper
 
 Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
     InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
@@ -32,26 +32,26 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 DisableKerberos = $true
             }
         }
-        
+
         Context -Name "New-SPDscProjectServerWebService" -Fixture {
 
             $serviceNames = @("Admin", "Archive", "Calendar", "CubeAdmin", "CustomFields",
-            "Driver", "Events", "LookupTable", "Notifications", "ObjectLinkProvider",
-            "PortfolioAnalyses", "Project", "QueueSystem", "ResourcePlan", "Resource",
-            "Security", "Statusing", "TimeSheet", "Workflow", "WssInterop")
+                "Driver", "Events", "LookupTable", "Notifications", "ObjectLinkProvider",
+                "PortfolioAnalyses", "Project", "QueueSystem", "ResourcePlan", "Resource",
+                "Security", "Statusing", "TimeSheet", "Workflow", "WssInterop")
 
             $serviceNames | ForEach-Object -Process {
                 $service = $_
 
                 It "Should create a new HTTP $service web service" {
                     $serviceObject = New-SPDscProjectServerWebService -PwaUrl "http://server/pwa" `
-                                                                      -EndpointName $service
+                        -EndpointName $service
                     $serviceObject.Dispose()
                 }
 
                 It "Should create a new HTTPS $service web service" {
                     $serviceObject = New-SPDscProjectServerWebService -PwaUrl "https://server/pwa" `
-                                                                      -EndpointName $service
+                        -EndpointName $service
                     $serviceObject.Dispose()
                 }
             }
@@ -87,7 +87,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
         }
 
-        Mock -CommandName "Import-Module" -MockWith {}
+        Mock -CommandName "Import-Module" -MockWith { }
 
         try
         {
@@ -115,14 +115,14 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             Mock -CommandName "New-SPDscProjectServerWebService" -MockWith {
                 $service = [SPDscTests.DummyWebService]::new()
                 $service = $service | Add-Member -MemberType ScriptMethod `
-                                                 -Name ReadResource `
-                                                 -Value {
-                                                     return @{
-                                                        Resources = @{
-                                                            WRES_ACCOUNT = "DEMO\user"
-                                                        }
-                                                     }
-                                                 } -PassThru -Force
+                    -Name ReadResource `
+                    -Value {
+                    return @{
+                        Resources = @{
+                            WRES_ACCOUNT = "DEMO\user"
+                        }
+                    }
+                } -PassThru -Force
                 return $service
             }
 
@@ -182,24 +182,24 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             Mock -CommandName "New-SPDscProjectServerWebService" -MockWith {
                 $service = [SPDscTests.DummyWebService]::new()
                 $service = $service | Add-Member -MemberType ScriptMethod `
-                                                 -Name ReadResources `
-                                                 -Value {
-                                                     return @{
-                                                        Resources = @{
-                                                            Count = 2
-                                                            Rows = @(
-                                                                @{
-                                                                    WRES_Account = "DEMO\user1"
-                                                                    RES_UID = (New-Guid)
-                                                                }
-                                                                @{
-                                                                    WRES_Account = "DEMO\user2"
-                                                                    RES_UID = (New-Guid)
-                                                                }
-                                                            )
-                                                        }
-                                                     }
-                                                 } -PassThru -Force
+                    -Name ReadResources `
+                    -Value {
+                    return @{
+                        Resources = @{
+                            Count = 2
+                            Rows  = @(
+                                @{
+                                    WRES_Account = "DEMO\user1"
+                                    RES_UID      = (New-Guid)
+                                }
+                                @{
+                                    WRES_Account = "DEMO\user2"
+                                    RES_UID      = (New-Guid)
+                                }
+                            )
+                        }
+                    }
+                } -PassThru -Force
                 return $service
             }
 
@@ -210,24 +210,24 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             Mock -CommandName "New-SPDscProjectServerWebService" -MockWith {
                 $service = [SPDscTests.DummyWebService]::new()
                 $service = $service | Add-Member -MemberType ScriptMethod `
-                                                 -Name ReadResources `
-                                                 -Value {
-                                                     return @{
-                                                        Resources = @{
-                                                            Count = 2
-                                                            Rows = @(
-                                                                @{
-                                                                    WRES_Account = "DEMO\user1"
-                                                                    RES_UID = (New-Guid)
-                                                                }
-                                                                @{
-                                                                    WRES_Account = "DEMO\user2"
-                                                                    RES_UID = (New-Guid)
-                                                                }
-                                                            )
-                                                        }
-                                                     }
-                                                 } -PassThru -Force
+                    -Name ReadResources `
+                    -Value {
+                    return @{
+                        Resources = @{
+                            Count = 2
+                            Rows  = @(
+                                @{
+                                    WRES_Account = "DEMO\user1"
+                                    RES_UID      = (New-Guid)
+                                }
+                                @{
+                                    WRES_Account = "DEMO\user2"
+                                    RES_UID      = (New-Guid)
+                                }
+                            )
+                        }
+                    }
+                } -PassThru -Force
                 return $service
             }
 
@@ -238,15 +238,15 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             Mock -CommandName "New-SPDscProjectServerWebService" -MockWith {
                 $service = [SPDscTests.DummyWebService]::new()
                 $service = $service | Add-Member -MemberType ScriptMethod `
-                                                 -Name ReadResources `
-                                                 -Value {
-                                                     return @{
-                                                        Resources = @{
-                                                            Count = 0
-                                                            Rows = @()
-                                                        }
-                                                     }
-                                                 } -PassThru -Force
+                    -Name ReadResources `
+                    -Value {
+                    return @{
+                        Resources = @{
+                            Count = 0
+                            Rows  = @()
+                        }
+                    }
+                } -PassThru -Force
                 return $service
             }
 

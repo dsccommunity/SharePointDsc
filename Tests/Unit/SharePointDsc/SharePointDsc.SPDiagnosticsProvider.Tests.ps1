@@ -3,16 +3,16 @@ param(
     [Parameter()]
     [string]
     $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
-                                         -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
-                                         -Resolve)
+            -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
+            -Resolve)
 )
 
 Import-Module -Name (Join-Path -Path $PSScriptRoot `
-                                -ChildPath "..\UnitTestHelper.psm1" `
-                                -Resolve)
+        -ChildPath "..\UnitTestHelper.psm1" `
+        -Resolve)
 
 $Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointCmdletModule `
-                                              -DscResource "SPDiagnosticsProvider"
+    -DscResource "SPDiagnosticsProvider"
 
 Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
     InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
@@ -20,24 +20,24 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Mock -CommandName Get-SPDiagnosticsProvider -MockWith {
             return @{
-                Name = "job-diagnostics-blocking-query-provider"
+                Name                = "job-diagnostics-blocking-query-provider"
                 MaxTotalSizeInBytes = 100000
-                Retention = 14
-                Enabled = $true
-            }| Add-Member ScriptMethod Update {
+                Retention           = 14
+                Enabled             = $true
+            } | Add-Member ScriptMethod Update {
             } -PassThru
         }
 
-        Mock -CommandName Set-SPDiagnosticsProvider -MockWith {}
+        Mock -CommandName Set-SPDiagnosticsProvider -MockWith { }
 
         Context -Name "When the Diagnostics Provider passed doesn't exist" -Fixture {
 
             $testParams = @{
-                Name = "MyFakeProvider"
-                Retention = 13
+                Name                = "MyFakeProvider"
+                Retention           = 13
                 MaxTotalSizeInBytes = 10000
-                Enabled = $true
-                Ensure = "Present"
+                Enabled             = $true
+                Ensure              = "Present"
             }
 
             It "Should return false when the Test method is called" {
@@ -56,11 +56,11 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         Context -Name "When the Diagnostics Provider exists" -Fixture {
 
             $testParams = @{
-                Name = "job-diagnostics-blocking-query-provider"
-                Retention = 13
+                Name                = "job-diagnostics-blocking-query-provider"
+                Retention           = 13
                 MaxTotalSizeInBytes = 10000
-                Enabled = $true
-                Ensure = "Present"
+                Enabled             = $true
+                Ensure              = "Present"
             }
 
             It "Should return false when the Test method is called" {
@@ -80,11 +80,11 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         Context -Name "When using Ensure is Absent" -Fixture {
 
             $testParams = @{
-                Name = "job-diagnostics-blocking-query-provider"
-                Retention = 13
+                Name                = "job-diagnostics-blocking-query-provider"
+                Retention           = 13
                 MaxTotalSizeInBytes = 10000
-                Enabled = $true
-                Ensure = "Absent"
+                Enabled             = $true
+                Ensure              = "Absent"
             }
 
             It "Should properly configure the provider" {

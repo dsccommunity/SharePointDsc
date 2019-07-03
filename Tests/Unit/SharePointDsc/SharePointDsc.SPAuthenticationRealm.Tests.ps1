@@ -3,16 +3,16 @@ param(
     [Parameter()]
     [string]
     $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
-                                         -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
-                                         -Resolve)
+            -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
+            -Resolve)
 )
 
 Import-Module -Name (Join-Path -Path $PSScriptRoot `
-                                -ChildPath "..\UnitTestHelper.psm1" `
-                                -Resolve)
+        -ChildPath "..\UnitTestHelper.psm1" `
+        -Resolve)
 
 $Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointCmdletModule `
-                                              -DscResource "SPAuthenticationRealm"
+    -DscResource "SPAuthenticationRealm"
 
 Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
     InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
@@ -29,7 +29,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         Context -Name "Authentication realm matches the farm's current atuhentication realm" -Fixture {
             $Global:SPAuthenticationRealm = "14757a87-4d74-4323-83b9-fb1e77e8f22f"
             $testParams = @{
-                IsSingleInstance = "Yes"
+                IsSingleInstance    = "Yes"
                 AuthenticationRealm = $Global:SPAuthenticationRealm
             }
 
@@ -42,7 +42,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             $Global:SPAuthenticationRealm = "11111111-1111-1111-1111-111111111111"
 
             $testParams = @{
-                IsSingleInstance = "Yes"
+                IsSingleInstance    = "Yes"
                 AuthenticationRealm = "14757a87-4d74-4323-83b9-fb1e77e8f22f"
             }
 

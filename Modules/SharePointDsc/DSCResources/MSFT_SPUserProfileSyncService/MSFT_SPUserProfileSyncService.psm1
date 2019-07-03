@@ -9,7 +9,7 @@ function Get-TargetResource
         $UserProfileServiceAppName,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String] $Ensure = "Present",
 
         [Parameter()]
@@ -30,12 +30,12 @@ function Get-TargetResource
     if ((Get-SPDscInstalledProductVersion).FileMajorPart -ne 15)
     {
         throw [Exception] ("Only SharePoint 2013 is supported to deploy the user profile sync " + `
-                           "service via DSC, as 2016/2019 do not use the FIM based sync service.")
+                "service via DSC, as 2016/2019 do not use the FIM based sync service.")
     }
 
     $farmAccount = Invoke-SPDscCommand -Credential $InstallAccount `
-                                       -Arguments $PSBoundParameters `
-                                       -ScriptBlock {
+        -Arguments $PSBoundParameters `
+        -ScriptBlock {
         return Get-SPDscFarmAccount
     }
 
@@ -47,11 +47,12 @@ function Get-TargetResource
             if ($InstallAccount.UserName -eq $farmAccount.UserName)
             {
                 throw ("Specified InstallAccount ($($InstallAccount.UserName)) is the Farm " + `
-                       "Account. Make sure the specified InstallAccount isn't the Farm Account " + `
-                       "and try again")
+                        "Account. Make sure the specified InstallAccount isn't the Farm Account " + `
+                        "and try again")
             }
         }
-        else {
+        else
+        {
             # PSDSCRunAsCredential or System
             if (-not $Env:USERNAME.Contains("$"))
             {
@@ -60,8 +61,8 @@ function Get-TargetResource
                 if ($localaccount -eq $farmAccount.UserName)
                 {
                     throw ("Specified PSDSCRunAsCredential ($localaccount) is the Farm " + `
-                           "Account. Make sure the specified PSDSCRunAsCredential isn't the " + `
-                           "Farm Account and try again")
+                            "Account. Make sure the specified PSDSCRunAsCredential isn't the " + `
+                            "Farm Account and try again")
                 }
             }
         }
@@ -72,12 +73,12 @@ function Get-TargetResource
     }
 
     $result = Invoke-SPDscCommand -Credential $InstallAccount `
-                                  -Arguments $PSBoundParameters `
-                                  -ScriptBlock {
+        -Arguments $PSBoundParameters `
+        -ScriptBlock {
         $params = $args[0]
 
         $services = Get-SPServiceInstance -Server $env:COMPUTERNAME `
-                        -ErrorAction SilentlyContinue
+            -ErrorAction SilentlyContinue
 
         if ($null -eq $services)
         {
@@ -98,7 +99,7 @@ function Get-TargetResource
             $domain = (Get-CimInstance -ClassName Win32_ComputerSystem).Domain
             $currentServer = "$($env:COMPUTERNAME).$domain"
             $services = Get-SPServiceInstance -Server $currentServer `
-                                                  -ErrorAction SilentlyContinue
+                -ErrorAction SilentlyContinue
             $syncService = $services | Where-Object -FilterScript {
                 $_.GetType().Name -eq "ProfileSynchronizationServiceInstance"
             }
@@ -114,10 +115,10 @@ function Get-TargetResource
             }
         }
         if ($null -ne $syncService.UserProfileApplicationGuid -and `
-            $syncService.UserProfileApplicationGuid -ne [Guid]::Empty)
+                $syncService.UserProfileApplicationGuid -ne [Guid]::Empty)
         {
             $upa = Get-SPServiceApplication -Identity $syncService.UserProfileApplicationGuid `
-                                         -ErrorAction SilentlyContinue
+                -ErrorAction SilentlyContinue
         }
         if ($syncService.Status -eq "Online")
         {
@@ -150,7 +151,7 @@ function Set-TargetResource
         $UserProfileServiceAppName,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String] $Ensure = "Present",
 
         [Parameter()]
@@ -173,12 +174,12 @@ function Set-TargetResource
     if ((Get-SPDscInstalledProductVersion).FileMajorPart -ne 15)
     {
         throw [Exception] ("Only SharePoint 2013 is supported to deploy the user profile sync " + `
-                           "service via DSC, as 2016/2019 do not use the FIM based sync service.")
+                "service via DSC, as 2016/2019 do not use the FIM based sync service.")
     }
 
     $farmAccount = Invoke-SPDscCommand -Credential $InstallAccount `
-                                           -Arguments $PSBoundParameters `
-                                           -ScriptBlock {
+        -Arguments $PSBoundParameters `
+        -ScriptBlock {
         return Get-SPDscFarmAccount
     }
 
@@ -190,11 +191,12 @@ function Set-TargetResource
             if ($InstallAccount.UserName -eq $farmAccount.UserName)
             {
                 throw ("Specified InstallAccount ($($InstallAccount.UserName)) is the Farm " + `
-                       "Account. Make sure the specified InstallAccount isn't the Farm Account " + `
-                       "and try again")
+                        "Account. Make sure the specified InstallAccount isn't the Farm Account " + `
+                        "and try again")
             }
         }
-        else {
+        else
+        {
             # PSDSCRunAsCredential or System
             if (-not $Env:USERNAME.Contains("$"))
             {
@@ -203,8 +205,8 @@ function Set-TargetResource
                 if ($localaccount -eq $farmAccount.UserName)
                 {
                     throw ("Specified PSDSCRunAsCredential ($localaccount) is the Farm " + `
-                           "Account. Make sure the specified PSDSCRunAsCredential isn't the " + `
-                           "Farm Account and try again")
+                            "Account. Make sure the specified PSDSCRunAsCredential isn't the " + `
+                            "Farm Account and try again")
                 }
             }
         }
@@ -217,13 +219,13 @@ function Set-TargetResource
     if ($PSBoundParameters.ContainsKey("RunOnlyWhenWriteable") -eq $true)
     {
         $databaseReadOnly = Test-SPDscUserProfileDBReadOnly `
-                                -UserProfileServiceAppName $UserProfileServiceAppName `
-                                -InstallAccount $InstallAccount
+            -UserProfileServiceAppName $UserProfileServiceAppName `
+            -InstallAccount $InstallAccount
 
         if ($databaseReadOnly)
         {
             Write-Verbose -Message ("User profile database is read only, setting user profile " + `
-                                   "sync service to not run on the local server")
+                    "sync service to not run on the local server")
             $PSBoundParameters.Ensure = "Absent"
         }
         else
@@ -251,15 +253,15 @@ function Set-TargetResource
     try
     {
         Invoke-SPDscCommand -Credential $FarmAccount `
-                            -Arguments ($PSBoundParameters,$farmAccount) `
-                            -ScriptBlock {
+            -Arguments ($PSBoundParameters, $farmAccount) `
+            -ScriptBlock {
             $params = $args[0]
             $farmAccount = $args[1]
 
             $currentServer = $env:COMPUTERNAME
 
             $services = Get-SPServiceInstance -Server $currentServer `
-                                              -ErrorAction SilentlyContinue
+                -ErrorAction SilentlyContinue
             $syncService = $services | Where-Object -FilterScript {
                 $_.GetType().Name -eq "ProfileSynchronizationServiceInstance"
             }
@@ -280,11 +282,11 @@ function Set-TargetResource
             if (($params.Ensure -eq "Present") -and ($syncService.Status -ne "Online"))
             {
                 $ups = Get-SPServiceApplication -Name $params.UserProfileServiceAppName `
-                                                        -ErrorAction SilentlyContinue
+                    -ErrorAction SilentlyContinue
                 if ($null -eq $ups)
                 {
                     throw [Exception] ("No User Profile Service Application was found " + `
-                                       "named $($params.UserProfileServiceAppName)")
+                            "named $($params.UserProfileServiceAppName)")
                 }
 
                 $userName = $farmAccount.UserName
@@ -314,11 +316,11 @@ function Set-TargetResource
 
                 # Get the current status of the Sync service
                 Write-Verbose -Message ("$([DateTime]::Now.ToShortTimeString()) - Waiting for user " + `
-                                        "profile sync service to become '$desiredState' (waited " + `
-                                        "$count of $maxCount minutes)")
+                        "profile sync service to become '$desiredState' (waited " + `
+                        "$count of $maxCount minutes)")
 
                 $services = Get-SPServiceInstance -Server $currentServer `
-                                                  -ErrorAction SilentlyContinue
+                    -ErrorAction SilentlyContinue
                 $syncService = $services | Where-Object -FilterScript {
                     $_.GetType().Name -eq "ProfileSynchronizationServiceInstance"
                 }
@@ -359,7 +361,7 @@ function Test-TargetResource
         $UserProfileServiceAppName,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String] $Ensure = "Present",
 
         [Parameter()]
@@ -382,7 +384,7 @@ function Test-TargetResource
     if ((Get-SPDscInstalledProductVersion).FileMajorPart -ne 15)
     {
         throw [Exception] ("Only SharePoint 2013 is supported to deploy the user profile sync " + `
-                           "service via DSC, as 2016/2019 do not use the FIM based sync service.")
+                "service via DSC, as 2016/2019 do not use the FIM based sync service.")
     }
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
@@ -393,13 +395,13 @@ function Test-TargetResource
     if ($PSBoundParameters.ContainsKey("RunOnlyWhenWriteable") -eq $true)
     {
         $databaseReadOnly = Test-SPDscUserProfileDBReadOnly `
-                                -UserProfileServiceAppName $UserProfileServiceAppName `
-                                -InstallAccount $InstallAccount
+            -UserProfileServiceAppName $UserProfileServiceAppName `
+            -InstallAccount $InstallAccount
 
         if ($databaseReadOnly)
         {
             Write-Verbose -Message ("User profile database is read only, setting user profile " + `
-                                   "sync service to not run on the local server")
+                    "sync service to not run on the local server")
             $PSBoundParameters.Ensure = "Absent"
         }
         else
@@ -409,8 +411,8 @@ function Test-TargetResource
     }
 
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
-                                    -DesiredValues $PSBoundParameters `
-                                    -ValuesToCheck @("Ensure")
+        -DesiredValues $PSBoundParameters `
+        -ValuesToCheck @("Ensure")
 }
 
 function Test-SPDscUserProfileDBReadOnly()
@@ -426,16 +428,16 @@ function Test-SPDscUserProfileDBReadOnly()
     )
 
     $databaseReadOnly = Invoke-SPDscCommand -Credential $InstallAccount `
-                                            -Arguments $UserProfileServiceAppName `
-                                            -ScriptBlock {
+        -Arguments $UserProfileServiceAppName `
+        -ScriptBlock {
         $UserProfileServiceAppName = $args[0]
 
         $serviceApps = Get-SPServiceApplication -Name $UserProfileServiceAppName `
-                                                -ErrorAction SilentlyContinue
+            -ErrorAction SilentlyContinue
         if ($null -eq $serviceApps)
         {
             throw [Exception] ("No user profile service was found " + `
-                               "named $UserProfileServiceAppName")
+                    "named $UserProfileServiceAppName")
         }
         $ups = $serviceApps | Where-Object -FilterScript {
             $_.GetType().FullName -eq "Microsoft.Office.Server.Administration.UserProfileApplication"
@@ -443,7 +445,7 @@ function Test-SPDscUserProfileDBReadOnly()
 
         $propType = $ups.GetType()
         $propData = $propType.GetProperties([System.Reflection.BindingFlags]::Instance -bor `
-                                            [System.Reflection.BindingFlags]::NonPublic)
+                [System.Reflection.BindingFlags]::NonPublic)
         $profileProp = $propData | Where-Object -FilterScript {
             $_.Name -eq "ProfileDatabase"
         }

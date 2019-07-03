@@ -34,7 +34,7 @@ function Get-TargetResource
         $InstallAccount,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present"
     )
@@ -42,8 +42,8 @@ function Get-TargetResource
     Write-Verbose -Message "Getting Security Token Service Configuration"
 
     $result = Invoke-SPDscCommand -Credential $InstallAccount `
-                                  -Arguments $PSBoundParameters `
-                                  -ScriptBlock {
+        -Arguments $PSBoundParameters `
+        -ScriptBlock {
         $params = $args[0]
 
         $config = Get-SPSecurityTokenServiceConfig
@@ -111,7 +111,7 @@ function Set-TargetResource
         $InstallAccount,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present"
     )
@@ -125,8 +125,8 @@ function Set-TargetResource
     }
 
     Invoke-SPDscCommand -Credential $InstallAccount `
-                        -Arguments $PSBoundParameters `
-                        -ScriptBlock {
+        -Arguments $PSBoundParameters `
+        -ScriptBlock {
         $params = $args[0]
         $config = Get-SPSecurityTokenServiceConfig
         $config.Name = $params.Name
@@ -191,7 +191,7 @@ function Test-TargetResource
         $InstallAccount,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present"
     )
@@ -206,12 +206,12 @@ function Test-TargetResource
     Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
 
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
-                                    -DesiredValues $PSBoundParameters `
-                                    -ValuesToCheck @("Ensure",
-                                                     "NameIdentifier",
-                                                     "UseSessionCookies",
-                                                     "AllowOAuthOverHttp",
-                                                     "AllowMetadataOverHttp")
+        -DesiredValues $PSBoundParameters `
+        -ValuesToCheck @("Ensure",
+        "NameIdentifier",
+        "UseSessionCookies",
+        "AllowOAuthOverHttp",
+        "AllowMetadataOverHttp")
 }
 
 Export-ModuleMember -Function *-TargetResource

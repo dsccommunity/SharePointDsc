@@ -3,16 +3,16 @@ param(
     [Parameter()]
     [string]
     $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
-                                         -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
-                                         -Resolve)
+            -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
+            -Resolve)
 )
 
 Import-Module -Name (Join-Path -Path $PSScriptRoot `
-                                -ChildPath "..\UnitTestHelper.psm1" `
-                                -Resolve)
+        -ChildPath "..\UnitTestHelper.psm1" `
+        -Resolve)
 
 $Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointCmdletModule `
-                                              -DscResource "SPServiceAppProxyGroup"
+    -DscResource "SPServiceAppProxyGroup"
 
 Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
     InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
@@ -27,13 +27,13 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         )
 
         # Mocks for all contexts
-        Mock -CommandName Add-SPServiceApplicationProxyGroupMember -MockWith {}
-        Mock -CommandName Remove-SPServiceApplicationProxyGroupMember -MockWith {}
+        Mock -CommandName Add-SPServiceApplicationProxyGroupMember -MockWith { }
+        Mock -CommandName Remove-SPServiceApplicationProxyGroupMember -MockWith { }
         Mock -CommandName Get-SPServiceApplicationProxy -MockWith {
             $proxiesToReturn = @()
             foreach ($ServiceAppProxy in $listofAllServiceAppProxies)
             {
-                $proxiesToReturn +=  @{
+                $proxiesToReturn += @{
                     DisplayName = $ServiceAppProxy
                 }
             }
@@ -48,9 +48,9 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         # Test contexts
         Context -Name "ServiceAppProxies and ServiceAppProxiesToInclude parameters used simultaniously" -Fixture {
             $testParams = @{
-                Name              = "Shared Services"
-                Ensure            = "Present"
-                ServiceAppProxies = "Web 1 User Profile Service Application","Web 1 MMS Service Application","State Service Application"
+                Name                       = "Shared Services"
+                Ensure                     = "Present"
+                ServiceAppProxies          = "Web 1 User Profile Service Application", "Web 1 MMS Service Application", "State Service Application"
                 ServiceAppProxiesToInclude = "Web 2 User Profile Service Application"
             }
 
@@ -69,8 +69,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "None of the ServiceAppProxies, ServiceAppProxiesToInclude and ServiceAppProxiesToExclude parameters are used" -Fixture {
             $testParams = @{
-                Name              = "My Proxy Group"
-                Ensure            = "Present"
+                Name   = "My Proxy Group"
+                Ensure = "Present"
             }
 
             It "Should return Ensure=null from the get method" {
@@ -90,7 +90,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             $testParams = @{
                 Name              = "Shared Services"
                 Ensure            = "Present"
-                ServiceAppProxies = @("State Service Application","Web 1 User Profile Service Application")
+                ServiceAppProxies = @("State Service Application", "Web 1 User Profile Service Application")
             }
 
             Mock -CommandName Get-SPServiceApplicationProxyGroup -MockWith {
@@ -113,8 +113,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "The ServiceApplication Proxy Group does not exist, and should not" -Fixture {
             $testParams = @{
-                Name              = "Shared Services"
-                Ensure            = "Absent"
+                Name   = "Shared Services"
+                Ensure = "Absent"
             }
 
             Mock -CommandName Get-SPServiceApplicationProxyGroup -MockWith {
@@ -134,7 +134,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             $testParams = @{
                 Name              = "Shared Services"
                 Ensure            = "Present"
-                ServiceAppProxies = @("State Service Application","Web 1 User Profile Service Application")
+                ServiceAppProxies = @("State Service Application", "Web 1 User Profile Service Application")
             }
 
             Mock -CommandName Get-SPServiceApplicationProxyGroup -MockWith {
@@ -146,7 +146,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     }
                 }
                 return @{
-                    Name = $testParams.Name
+                    Name    = $testParams.Name
                     Proxies = $proxiesToReturn
                 }
             }
@@ -182,7 +182,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     }
                 }
                 return @{
-                    Name = $testParams.Name
+                    Name    = $testParams.Name
                     Proxies = $proxiesToReturn
                 }
             }
@@ -204,8 +204,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "The Service Application Proxy Group exists and should, ServiceAppProxiesToInclude matches" -Fixture {
             $testParams = @{
-                Name              = "Shared Services"
-                Ensure            = "Present"
+                Name                       = "Shared Services"
+                Ensure                     = "Present"
                 ServiceAppProxiesToInclude = @(
                     "State Service Application",
                     "Web 1 User Profile Service Application")
@@ -225,7 +225,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     }
                 }
                 return @{
-                    Name = $testParams.Name
+                    Name    = $testParams.Name
                     Proxies = $proxiesToReturn
                 }
             }
@@ -241,8 +241,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "The Service Application Proxy Group exists and should, ServiceAppProxiesToInclude does not match" -Fixture {
             $testParams = @{
-                Name              = "Shared Services"
-                Ensure            = "Present"
+                Name                       = "Shared Services"
+                Ensure                     = "Present"
                 ServiceAppProxiesToInclude = @(
                     "State Service Application",
                     "Web 1 User Profile Service Application")
@@ -256,12 +256,12 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 $proxiesToReturn = @()
                 foreach ($ServiceAppProxy in $serviceAppProxiesConfigured)
                 {
-                    $proxiesToReturn +=  @{
+                    $proxiesToReturn += @{
                         DisplayName = $ServiceAppProxy
                     }
                 }
                 return @{
-                    Name = $testParams.Name
+                    Name    = $testParams.Name
                     Proxies = $proxiesToReturn
                 }
             }
@@ -283,8 +283,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "The Service Application Proxy Group exists and should, ServiceAppProxiesToExclude matches" -Fixture {
             $testParams = @{
-                Name              = "Shared Services"
-                Ensure            = "Present"
+                Name                       = "Shared Services"
+                Ensure                     = "Present"
                 ServiceAppProxiesToExclude = @("Web 1 User Profile Service Application")
             }
 
@@ -301,7 +301,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     }
                 }
                 return @{
-                    Name = $testParams.Name
+                    Name    = $testParams.Name
                     Proxies = $proxiesToReturn
                 }
             }
@@ -317,9 +317,9 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "The Service Application Proxy Group exists and should, ServiceAppProxiesToExclude does not match" -Fixture {
             $testParams = @{
-                Name              = "Shared Services"
-                Ensure            = "Present"
-                ServiceAppProxiesToExclude = @("Web 1 User Profile Service Application","Web 2 User Profile Service Application")
+                Name                       = "Shared Services"
+                Ensure                     = "Present"
+                ServiceAppProxiesToExclude = @("Web 1 User Profile Service Application", "Web 2 User Profile Service Application")
             }
 
             $serviceAppProxiesConfigured = @(
@@ -331,12 +331,12 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 $proxiesToReturn = @()
                 foreach ($ServiceAppProxy in $serviceAppProxiesConfigured)
                 {
-                    $proxiesToReturn +=  @{
+                    $proxiesToReturn += @{
                         DisplayName = $ServiceAppProxy
                     }
                 }
                 return @{
-                    Name = $testParams.Name
+                    Name    = $testParams.Name
                     Proxies = $proxiesToReturn
                 }
             }
@@ -369,12 +369,12 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 $proxiesToReturn = @()
                 foreach ($ServiceAppProxy in "Web 1 User Profile Service Application")
                 {
-                    $proxiesToReturn +=  @{
+                    $proxiesToReturn += @{
                         DisplayName = $ServiceAppProxy
                     }
                 }
                 return @{
-                    Name = $testParams.Name
+                    Name    = $testParams.Name
                     Proxies = $proxiesToReturn
                 }
             }
@@ -388,14 +388,14 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             It "Should throw an error from the set method" {
-               { Set-TargetResource @testParams } | Should throw "Invalid Service Application Proxy No Such Service Application"
+                { Set-TargetResource @testParams } | Should throw "Invalid Service Application Proxy No Such Service Application"
             }
         }
 
         Context -Name "Specified service application does not exist, ServiceAppProxiesToInclude specified" -Fixture {
             $testParams = @{
-                Name              = "Shared Services"
-                Ensure            = "Present"
+                Name                       = "Shared Services"
+                Ensure                     = "Present"
                 ServiceAppProxiesToInclude = @(
                     "No Such Service Application",
                     "Web 1 User Profile Service Application")
@@ -410,7 +410,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     }
                 }
                 return @{
-                    Name = $testParams.Name
+                    Name    = $testParams.Name
                     Proxies = $proxiesToReturn
                 }
             }
@@ -424,7 +424,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             It "Should throw an error from the set method" {
-               { Set-TargetResource @testParams }| Should throw "Invalid Service Application Proxy No Such Service Application"
+                { Set-TargetResource @testParams } | Should throw "Invalid Service Application Proxy No Such Service Application"
             }
         }
     }

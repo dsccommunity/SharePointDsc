@@ -17,7 +17,7 @@ function Get-TargetResource
         $Target,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present",
 
@@ -29,8 +29,8 @@ function Get-TargetResource
     Write-Verbose -Message "Getting Search Crawl Mapping for '$Url'"
 
     $result = Invoke-SPDscCommand -Credential $InstallAccount `
-                                  -Arguments $PSBoundParameters `
-                                  -ScriptBlock {
+        -Arguments $PSBoundParameters `
+        -ScriptBlock {
 
         $params = $args[0]
         $searchApp = Get-SPEnterpriseSearchServiceApplication -Identity $params.ServiceAppName
@@ -112,7 +112,7 @@ function Set-TargetResource
         $Target,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present",
 
@@ -120,7 +120,7 @@ function Set-TargetResource
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
-     Write-Verbose -Message "Setting Search Crawl Mapping Rule '$Url'"
+    Write-Verbose -Message "Setting Search Crawl Mapping Rule '$Url'"
     $result = Get-TargetResource @PSBoundParameters
 
     if ($result.Ensure -eq "Absent" -and $Ensure -eq "Present")
@@ -128,8 +128,8 @@ function Set-TargetResource
         Write-Verbose "Adding the Crawl Mapping '$Url'"
 
         Invoke-SPDscCommand -Credential $InstallAccount `
-                            -Arguments $PSBoundParameters `
-                            -ScriptBlock {
+            -Arguments $PSBoundParameters `
+            -ScriptBlock {
             $params = $args[0]
 
             $searchApp = Get-SPEnterpriseSearchServiceApplication -Identity $params.ServiceAppName
@@ -147,8 +147,8 @@ function Set-TargetResource
     {
         Write-Verbose "Updating the Crawl Mapping '$Url'"
         Invoke-SPDscCommand -Credential $InstallAccount `
-                            -Arguments $PSBoundParameters `
-                            -ScriptBlock {
+            -Arguments $PSBoundParameters `
+            -ScriptBlock {
             $params = $args[0]
 
             $searchApp = Get-SPEnterpriseSearchServiceApplication -Identity $params.ServiceAppName
@@ -163,8 +163,8 @@ function Set-TargetResource
     {
         Write-Verbose "Removing the Crawl Mapping '$Url'"
         Invoke-SPDscCommand -Credential $InstallAccount `
-                            -Arguments $PSBoundParameters `
-                            -ScriptBlock {
+            -Arguments $PSBoundParameters `
+            -ScriptBlock {
             $params = $args[0]
 
             $searchapp = Get-SPEnterpriseSearchServiceApplication -Identity $params.ServiceAppName
@@ -195,7 +195,7 @@ function Test-TargetResource
         $Target,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present",
 
@@ -215,14 +215,14 @@ function Test-TargetResource
     if ($Ensure -eq "Present")
     {
         return Test-SPDscParameterState -CurrentValues $CurrentValues `
-                                        -DesiredValues $PSBoundParameters `
-                                        -ValuesToCheck @("ServiceAppName","Url","Target","Ensure")
+            -DesiredValues $PSBoundParameters `
+            -ValuesToCheck @("ServiceAppName", "Url", "Target", "Ensure")
     }
     else
     {
         return Test-SPDscParameterState -CurrentValues $CurrentValues `
-                                        -DesiredValues $PSBoundParameters `
-                                        -ValuesToCheck @("Ensure")
+            -DesiredValues $PSBoundParameters `
+            -ValuesToCheck @("Ensure")
     }
 }
 

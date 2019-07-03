@@ -17,7 +17,7 @@ function Get-TargetResource()
         $Value,
 
         [Parameter()]
-        [ValidateSet('Present','Absent')]
+        [ValidateSet('Present', 'Absent')]
         [System.String]
         $Ensure = 'Present',
 
@@ -29,8 +29,8 @@ function Get-TargetResource()
     Write-Verbose -Message "Looking for SPSite property '$Key'"
 
     $result = Invoke-SPDscCommand -Credential $InstallAccount `
-                                  -Arguments $PSBoundParameters `
-                                  -ScriptBlock {
+        -Arguments $PSBoundParameters `
+        -ScriptBlock {
         $params = $args[0]
 
         $spSite = Get-SPSite -Identity $params.Url -ErrorAction SilentlyContinue
@@ -41,7 +41,7 @@ function Get-TargetResource()
         }
 
         if ($null -ne $spSite.RootWeb.Properties -and `
-            $spSite.RootWeb.Properties.ContainsKey($params.Key) -eq $true)
+                $spSite.RootWeb.Properties.ContainsKey($params.Key) -eq $true)
         {
             $localEnsure = 'Present'
             $currentValue = $spSite.RootWeb.Properties[$params.Key]
@@ -80,7 +80,7 @@ function Set-TargetResource()
         $Value,
 
         [Parameter()]
-        [ValidateSet('Present','Absent')]
+        [ValidateSet('Present', 'Absent')]
         [System.String]
         $Ensure = 'Present',
 
@@ -92,8 +92,8 @@ function Set-TargetResource()
     Write-Verbose -Message "Setting SPSite property '$Key'"
 
     Invoke-SPDscCommand -Credential $InstallAccount `
-                        -Arguments $PSBoundParameters `
-                        -ScriptBlock {
+        -Arguments $PSBoundParameters `
+        -ScriptBlock {
         $params = $args[0]
 
         $spSite = Get-SPSite -Identity $params.Url -ErrorAction SilentlyContinue
@@ -147,7 +147,7 @@ function Test-TargetResource()
         $Value,
 
         [Parameter()]
-        [ValidateSet('Present','Absent')]
+        [ValidateSet('Present', 'Absent')]
         [System.String]
         $Ensure = 'Present',
 
@@ -166,14 +166,14 @@ function Test-TargetResource()
     if ($Ensure -eq 'Present')
     {
         return Test-SPDscParameterState -CurrentValues $CurrentValues `
-                                        -DesiredValues $PSBoundParameters `
-                                        -ValuesToCheck @('Ensure','Key', 'Value')
+            -DesiredValues $PSBoundParameters `
+            -ValuesToCheck @('Ensure', 'Key', 'Value')
     }
     else
     {
         return Test-SPDscParameterState -CurrentValues $CurrentValues `
-                                        -DesiredValues $PSBoundParameters `
-                                        -ValuesToCheck @('Ensure','Key')
+            -DesiredValues $PSBoundParameters `
+            -ValuesToCheck @('Ensure', 'Key')
 
     }
 

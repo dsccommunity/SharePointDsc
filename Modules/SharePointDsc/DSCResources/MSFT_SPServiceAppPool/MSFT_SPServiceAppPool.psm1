@@ -13,7 +13,7 @@ function Get-TargetResource
         $ServiceAccount,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present",
 
@@ -25,12 +25,12 @@ function Get-TargetResource
     Write-Verbose -Message "Getting service application pool '$Name'"
 
     $result = Invoke-SPDscCommand -Credential $InstallAccount `
-                                  -Arguments $PSBoundParameters `
-                                  -ScriptBlock {
+        -Arguments $PSBoundParameters `
+        -ScriptBlock {
         $params = $args[0]
 
         $sap = Get-SPServiceApplicationPool -Identity $params.Name `
-                                            -ErrorAction SilentlyContinue
+            -ErrorAction SilentlyContinue
         if ($null -eq $sap)
         {
             return @{
@@ -64,7 +64,7 @@ function Set-TargetResource
         $ServiceAccount,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present",
 
@@ -81,21 +81,21 @@ function Set-TargetResource
     {
         Write-Verbose -Message "Creating Service Application Pool $Name"
         Invoke-SPDscCommand -Credential $InstallAccount `
-                            -Arguments $PSBoundParameters `
-                            -ScriptBlock {
+            -Arguments $PSBoundParameters `
+            -ScriptBlock {
             $params = $args[0]
 
             New-SPServiceApplicationPool -Name $params.Name `
-                                         -Account $params.ServiceAccount
+                -Account $params.ServiceAccount
 
             $sap = Get-SPServiceApplicationPool -Identity $params.Name `
-                                                -ErrorAction SilentlyContinue
+                -ErrorAction SilentlyContinue
             if ($null -ne $sap)
             {
                 if ($sap.ProcessAccountName -ne $params.ServiceAccount)
                 {
                     Set-SPServiceApplicationPool -Identity $params.Name `
-                                                 -Account $params.ServiceAccount
+                        -Account $params.ServiceAccount
                 }
             }
         }
@@ -104,16 +104,16 @@ function Set-TargetResource
     {
         Write-Verbose -Message "Updating Service Application Pool $Name"
         Invoke-SPDscCommand -Credential $InstallAccount `
-                            -Arguments $PSBoundParameters `
-                            -ScriptBlock {
+            -Arguments $PSBoundParameters `
+            -ScriptBlock {
             $params = $args[0]
 
             $sap = Get-SPServiceApplicationPool -Identity $params.Name `
-                                                -ErrorAction SilentlyContinue
+                -ErrorAction SilentlyContinue
             if ($sap.ProcessAccountName -ne $params.ServiceAccount)
             {
                 Set-SPServiceApplicationPool -Identity $params.Name `
-                                             -Account $params.ServiceAccount
+                    -Account $params.ServiceAccount
             }
         }
     }
@@ -121,8 +121,8 @@ function Set-TargetResource
     {
         Write-Verbose -Message "Removing Service Application Pool $Name"
         Invoke-SPDscCommand -Credential $InstallAccount `
-                            -Arguments $PSBoundParameters `
-                            -ScriptBlock {
+            -Arguments $PSBoundParameters `
+            -ScriptBlock {
             $params = $args[0]
             Remove-SPServiceApplicationPool -Identity $params.Name -Confirm:$false
         }
@@ -144,7 +144,7 @@ function Test-TargetResource
         $ServiceAccount,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present",
 
@@ -165,14 +165,14 @@ function Test-TargetResource
     if ($Ensure -eq "Present")
     {
         return Test-SPDscParameterState -CurrentValues $CurrentValues `
-                                        -DesiredValues $PSBoundParameters `
-                                        -ValuesToCheck @("ServiceAccount", "Ensure")
+            -DesiredValues $PSBoundParameters `
+            -ValuesToCheck @("ServiceAccount", "Ensure")
     }
     else
     {
         return Test-SPDscParameterState -CurrentValues $CurrentValues `
-                                        -DesiredValues $PSBoundParameters `
-                                        -ValuesToCheck @("Ensure")
+            -DesiredValues $PSBoundParameters `
+            -ValuesToCheck @("Ensure")
     }
 }
 

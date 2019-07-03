@@ -1,7 +1,7 @@
 function Get-TargetResource
 {
     [CmdletBinding()]
-    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSDSCUseIdenticalMandatoryParametersForDSC", "", Justification  =  "Temporary workaround for issue introduced in PSSA v1.18")]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSDSCUseIdenticalMandatoryParametersForDSC", "", Justification = "Temporary workaround for issue introduced in PSSA v1.18")]
     [OutputType([System.Collections.Hashtable])]
     param
     (
@@ -51,7 +51,7 @@ function Get-TargetResource
     if ($Members -and (($MembersToInclude) -or ($MembersToExclude)))
     {
         Write-Verbose -Message ("Cannot use the Members parameter together with the " + `
-                                "MembersToInclude or MembersToExclude parameters")
+                "MembersToInclude or MembersToExclude parameters")
         return $nullreturn
     }
 
@@ -60,21 +60,21 @@ function Get-TargetResource
         foreach ($database in $Databases)
         {
             if ($database.Members -and (($database.MembersToInclude) `
-                -or ($database.MembersToExclude)))
+                        -or ($database.MembersToExclude)))
             {
                 Write-Verbose -Message ("Databases: Cannot use the Members parameter " + `
-                                        "together with the MembersToInclude or " + `
-                                        "MembersToExclude parameters")
+                        "together with the MembersToInclude or " + `
+                        "MembersToExclude parameters")
                 return $nullreturn
             }
 
             if (!$database.Members `
-                -and !$database.MembersToInclude `
-                -and !$database.MembersToExclude)
+                    -and !$database.MembersToInclude `
+                    -and !$database.MembersToExclude)
             {
                 Write-Verbose -Message ("Databases: At least one of the following " + `
-                                        "parameters must be specified: Members, " + `
-                                        "MembersToInclude, MembersToExclude")
+                        "parameters must be specified: Members, " + `
+                        "MembersToInclude, MembersToExclude")
                 return $nullreturn
             }
         }
@@ -84,7 +84,7 @@ function Get-TargetResource
         if (!$Members -and !$MembersToInclude -and !$MembersToExclude)
         {
             Write-Verbose -Message ("At least one of the following parameters must be " + `
-                                    "specified: Members, MembersToInclude, MembersToExclude")
+                    "specified: Members, MembersToInclude, MembersToExclude")
             return $nullreturn
         }
     }
@@ -92,20 +92,20 @@ function Get-TargetResource
     if ($Databases -and $AllDatabases)
     {
         Write-Verbose -Message ("Cannot use the Databases parameter together with the " + `
-                                "AllDatabases parameter")
+                "AllDatabases parameter")
         return $nullreturn
     }
 
     if ($Databases -and $ExcludeDatabases)
     {
         Write-Verbose -Message ("Cannot use the Databases parameter together with the " + `
-                                "ExcludeDatabases parameter")
+                "ExcludeDatabases parameter")
         return $nullreturn
     }
 
     $result = Invoke-SPDscCommand -Credential $InstallAccount `
-                                  -Arguments @($PSBoundParameters, $PSScriptRoot) `
-                                  -ScriptBlock {
+        -Arguments @($PSBoundParameters, $PSScriptRoot) `
+        -ScriptBlock {
         $params = $args[0]
         $scriptRoot = $args[1]
 
@@ -118,7 +118,7 @@ function Get-TargetResource
         catch
         {
             Write-Verbose -Message ("No local SharePoint farm was detected. Shell admin " + `
-                                    "settings will not be applied")
+                    "settings will not be applied")
             return $nullreturn
         }
 
@@ -129,8 +129,8 @@ function Get-TargetResource
         if ($params.ContainsKey("ExcludeDatabases"))
         {
             $databases = $databases | Where-Object -FilterScript {
-                                        $_.Name -notin $params.ExcludeDatabases
-                                      }
+                $_.Name -notin $params.ExcludeDatabases
+            }
         }
 
         foreach ($database in $databases)
@@ -162,7 +162,7 @@ function Get-TargetResource
 function Set-TargetResource
 {
     [CmdletBinding()]
-    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSDSCUseIdenticalMandatoryParametersForDSC", "", Justification  =  "Temporary workaround for issue introduced in PSSA v1.18")]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSDSCUseIdenticalMandatoryParametersForDSC", "", Justification = "Temporary workaround for issue introduced in PSSA v1.18")]
     param
     (
         [Parameter(Mandatory = $true)]
@@ -204,7 +204,7 @@ function Set-TargetResource
     if ($Members -and (($MembersToInclude) -or ($MembersToExclude)))
     {
         throw ("Cannot use the Members parameter together with the " + `
-               "MembersToInclude or MembersToExclude parameters")
+                "MembersToInclude or MembersToExclude parameters")
     }
 
     if ($Databases)
@@ -212,20 +212,20 @@ function Set-TargetResource
         foreach ($database in $Databases)
         {
             if ($database.Members -and (($database.MembersToInclude) `
-                -or ($database.MembersToExclude)))
+                        -or ($database.MembersToExclude)))
             {
                 throw ("Databases: Cannot use the Members parameter " + `
-                       "together with the MembersToInclude or " + `
-                       "MembersToExclude parameters")
+                        "together with the MembersToInclude or " + `
+                        "MembersToExclude parameters")
             }
 
             if (!$database.Members `
-                -and !$database.MembersToInclude `
-                -and !$database.MembersToExclude)
+                    -and !$database.MembersToInclude `
+                    -and !$database.MembersToExclude)
             {
                 throw ("Databases: At least one of the following " + `
-                       "parameters must be specified: Members, " + `
-                       "MembersToInclude, MembersToExclude")
+                        "parameters must be specified: Members, " + `
+                        "MembersToInclude, MembersToExclude")
             }
         }
     }
@@ -234,25 +234,25 @@ function Set-TargetResource
         if (!$Members -and !$MembersToInclude -and !$MembersToExclude)
         {
             throw ("At least one of the following parameters must be " + `
-                   "specified: Members, MembersToInclude, MembersToExclude")
+                    "specified: Members, MembersToInclude, MembersToExclude")
         }
     }
 
     if ($Databases -and $AllDatabases)
     {
         throw ("Cannot use the Databases parameter together with the " + `
-               "AllDatabases parameter")
+                "AllDatabases parameter")
     }
 
     if ($Databases -and $ExcludeDatabases)
     {
         throw ("Cannot use the Databases parameter together with the " + `
-               "ExcludeDatabases parameter")
+                "ExcludeDatabases parameter")
     }
 
     $null = Invoke-SPDscCommand -Credential $InstallAccount `
-                                  -Arguments @($PSBoundParameters, $PSScriptRoot) `
-                                  -ScriptBlock {
+        -Arguments @($PSBoundParameters, $PSScriptRoot) `
+        -ScriptBlock {
         $params = $args[0]
         $scriptRoot = $args[1]
 
@@ -265,7 +265,7 @@ function Set-TargetResource
         catch
         {
             throw ("No local SharePoint farm was detected. Shell admin " + `
-                   "settings will not be applied")
+                    "settings will not be applied")
         }
 
         $shellAdmins = Get-SPShellAdmin
@@ -276,17 +276,17 @@ function Set-TargetResource
             if ($shellAdmins)
             {
                 $differences = Compare-Object -ReferenceObject $shellAdmins.UserName `
-                                              -DifferenceObject $params.Members
+                    -DifferenceObject $params.Members
 
                 if ($null -eq $differences)
                 {
                     Write-Verbose -Message ("Shell Admins group matches. No further " + `
-                                            "processing required")
+                            "processing required")
                 }
                 else
                 {
                     Write-Verbose -Message ("Shell Admins group does not match. Perform " + `
-                                            "corrective action")
+                            "corrective action")
 
                     foreach ($difference in $differences)
                     {
@@ -300,8 +300,8 @@ function Set-TargetResource
                             catch
                             {
                                 throw ("Error while setting the Shell Admin. The Shell " + `
-                                       "Admin permissions will not be applied. Error " + `
-                                       "details: $($_.Exception.Message)")
+                                        "Admin permissions will not be applied. Error " + `
+                                        "details: $($_.Exception.Message)")
                                 return
                             }
                         }
@@ -315,8 +315,8 @@ function Set-TargetResource
                             catch
                             {
                                 throw ("Error while removing the Shell Admin. The Shell Admin " + `
-                                       "permissions will not be revoked. Error details: " + `
-                                       "$($_.Exception.Message)")
+                                        "permissions will not be revoked. Error details: " + `
+                                        "$($_.Exception.Message)")
                                 return
                             }
                         }
@@ -334,8 +334,8 @@ function Set-TargetResource
                     catch
                     {
                         throw ("Error while setting the Shell Admin. The Shell Admin " + `
-                               "permissions will not be applied. Error details: " + `
-                               "$($_.Exception.Message)")
+                                "permissions will not be applied. Error details: " + `
+                                "$($_.Exception.Message)")
                         return
                     }
                 }
@@ -358,8 +358,8 @@ function Set-TargetResource
                         catch
                         {
                             throw ("Error while setting the Shell Admin. The Shell Admin " + `
-                                   "permissions will not be applied. Error details: " + `
-                                   "$($_.Exception.Message)")
+                                    "permissions will not be applied. Error details: " + `
+                                    "$($_.Exception.Message)")
                             return
                         }
                     }
@@ -376,7 +376,7 @@ function Set-TargetResource
                     catch
                     {
                         throw ("Error while setting the Shell Admin. The Shell Admin " + `
-                               "permissions will not be applied. Error details: $($_.Exception.Message)")
+                                "permissions will not be applied. Error details: $($_.Exception.Message)")
                         return
                     }
                 }
@@ -399,8 +399,8 @@ function Set-TargetResource
                         catch
                         {
                             throw ("Error while removing the Shell Admin. The Shell Admin " + `
-                                   "permissions will not be revoked. Error details: " + `
-                                   "$($_.Exception.Message)")
+                                    "permissions will not be revoked. Error details: " + `
+                                    "$($_.Exception.Message)")
                             return
                         }
                     }
@@ -432,7 +432,7 @@ function Set-TargetResource
                         if ($dbShellAdmins)
                         {
                             $differences = Compare-Object -ReferenceObject $database.Members `
-                                                          -DifferenceObject $dbShellAdmins.UserName
+                                -DifferenceObject $dbShellAdmins.UserName
                             foreach ($difference in $differences)
                             {
                                 if ($difference.SideIndicator -eq "<=")
@@ -445,8 +445,8 @@ function Set-TargetResource
                                     catch
                                     {
                                         throw ("Error while setting the Shell Admin. The " + `
-                                               "Shell Admin permissions will not be applied. " + `
-                                               "Error details: $($_.Exception.Message)")
+                                                "Shell Admin permissions will not be applied. " + `
+                                                "Error details: $($_.Exception.Message)")
                                         return
                                     }
                                 }
@@ -456,14 +456,14 @@ function Set-TargetResource
                                     try
                                     {
                                         Remove-SPShellAdmin -Database $currentCDB.Id `
-                                                            -UserName $user `
-                                                            -Confirm:$false
+                                            -UserName $user `
+                                            -Confirm:$false
                                     }
                                     catch
                                     {
                                         throw ("Error while removing the Shell Admin. The " + `
-                                               "Shell Admin permissions will not be revoked. " + `
-                                               "Error details: $($_.Exception.Message)")
+                                                "Shell Admin permissions will not be revoked. " + `
+                                                "Error details: $($_.Exception.Message)")
                                         return
                                     }
                                 }
@@ -480,8 +480,8 @@ function Set-TargetResource
                                 catch
                                 {
                                     throw ("Error while setting the Shell Admin. The Shell " + `
-                                           "Admin permissions will not be applied. Error " + `
-                                           "details: $($_.Exception.Message)")
+                                            "Admin permissions will not be applied. Error " + `
+                                            "details: $($_.Exception.Message)")
                                     return
                                 }
                             }
@@ -504,8 +504,8 @@ function Set-TargetResource
                                     catch
                                     {
                                         throw ("Error while setting the Shell Admin. The " + `
-                                               "Shell Admin permissions will not be applied. " + `
-                                               "Error details: $($_.Exception.Message)")
+                                                "Shell Admin permissions will not be applied. " + `
+                                                "Error details: $($_.Exception.Message)")
                                         return
                                     }
                                 }
@@ -522,8 +522,8 @@ function Set-TargetResource
                                 catch
                                 {
                                     throw ("Error while setting the Shell Admin. The Shell " + `
-                                           "Admin permissions will not be applied. Error " + `
-                                           "details: $($_.Exception.Message)")
+                                            "Admin permissions will not be applied. Error " + `
+                                            "details: $($_.Exception.Message)")
                                     return
                                 }
                             }
@@ -542,14 +542,14 @@ function Set-TargetResource
                                     try
                                     {
                                         Remove-SPShellAdmin -Database $currentCDB.Id `
-                                                            -UserName $member `
-                                                            -Confirm:$false
+                                            -UserName $member `
+                                            -Confirm:$false
                                     }
                                     catch
                                     {
                                         throw ("Error while removing the Shell Admin. The " + `
-                                               "Shell Admin permissions will not be revoked. " + `
-                                               "Error details: $($_.Exception.Message)")
+                                                "Shell Admin permissions will not be revoked. " + `
+                                                "Error details: $($_.Exception.Message)")
                                         return
                                     }
                                 }
@@ -572,8 +572,8 @@ function Set-TargetResource
             if ($params.ContainsKey("ExcludeDatabases"))
             {
                 $databases = $databases | Where-Object -FilterScript {
-                                            $_.Name -notin $params.ExcludeDatabases
-                                          }
+                    $_.Name -notin $params.ExcludeDatabases
+                }
             }
             foreach ($database in $databases)
             {
@@ -584,17 +584,17 @@ function Set-TargetResource
                     if ($dbShellAdmins)
                     {
                         $differences = Compare-Object -ReferenceObject $dbShellAdmins.UserName `
-                                                      -DifferenceObject $params.Members
+                            -DifferenceObject $params.Members
 
                         if ($null -eq $differences)
                         {
                             Write-Verbose -Message ("Shell Admins group matches. No further " + `
-                                                    "processing required")
+                                    "processing required")
                         }
                         else
                         {
                             Write-Verbose -Message ("Shell Admins group does not match. Perform " + `
-                                                    "corrective action")
+                                    "corrective action")
 
                             foreach ($difference in $differences)
                             {
@@ -608,8 +608,8 @@ function Set-TargetResource
                                     catch
                                     {
                                         throw ("Error while setting the Shell Admin. The " + `
-                                               "Shell Admin permissions will not be applied. " + `
-                                               "Error details: $($_.Exception.Message)")
+                                                "Shell Admin permissions will not be applied. " + `
+                                                "Error details: $($_.Exception.Message)")
                                         return
                                     }
                                 }
@@ -619,14 +619,14 @@ function Set-TargetResource
                                     try
                                     {
                                         Remove-SPShellAdmin -Database $database.Id `
-                                                            -UserName $user `
-                                                            -Confirm:$false
+                                            -UserName $user `
+                                            -Confirm:$false
                                     }
                                     catch
                                     {
                                         throw ("Error while removing the Shell Admin. The " + `
-                                               "Shell Admin permissions will not be revoked. " + `
-                                               "Error details: $($_.Exception.Message)")
+                                                "Shell Admin permissions will not be revoked. " + `
+                                                "Error details: $($_.Exception.Message)")
                                         return
                                     }
                                 }
@@ -644,8 +644,8 @@ function Set-TargetResource
                             catch
                             {
                                 throw ("Error while setting the Shell Admin. The Shell Admin " + `
-                                       "permissions will not be applied. Error details: " + `
-                                       "$($_.Exception.Message)")
+                                        "permissions will not be applied. Error details: " + `
+                                        "$($_.Exception.Message)")
                                 return
                             }
                         }
@@ -667,8 +667,8 @@ function Set-TargetResource
                                 catch
                                 {
                                     throw ("Error while setting the Shell Admin. The Shell " + `
-                                           "Admin permissions will not be applied. Error " + `
-                                           "details: $($_.Exception.Message)")
+                                            "Admin permissions will not be applied. Error " + `
+                                            "details: $($_.Exception.Message)")
                                     return
                                 }
                             }
@@ -685,8 +685,8 @@ function Set-TargetResource
                             catch
                             {
                                 throw ("Error while setting the Shell Admin. The Shell Admin " + `
-                                       "permissions will not be applied. Error details: " + `
-                                       "$($_.Exception.Message)")
+                                        "permissions will not be applied. Error details: " + `
+                                        "$($_.Exception.Message)")
                                 return
                             }
                         }
@@ -705,14 +705,14 @@ function Set-TargetResource
                                 try
                                 {
                                     Remove-SPShellAdmin -Database $database.Id `
-                                                        -UserName $member `
-                                                        -Confirm:$false
+                                        -UserName $member `
+                                        -Confirm:$false
                                 }
                                 catch
                                 {
                                     throw ("Error while removing the Shell Admin. The Shell " + `
-                                           "Admin permissions will not be revoked. Error " + `
-                                           "details: $($_.Exception.Message)")
+                                            "Admin permissions will not be revoked. Error " + `
+                                            "details: $($_.Exception.Message)")
                                     return
                                 }
                             }
@@ -727,7 +727,7 @@ function Set-TargetResource
 function Test-TargetResource
 {
     [CmdletBinding()]
-    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSDSCUseIdenticalMandatoryParametersForDSC", "", Justification  =  "Temporary workaround for issue introduced in PSSA v1.18")]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSDSCUseIdenticalMandatoryParametersForDSC", "", Justification = "Temporary workaround for issue introduced in PSSA v1.18")]
     [OutputType([System.Boolean])]
     param
     (
@@ -773,8 +773,8 @@ function Test-TargetResource
     Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
 
     if ($null -eq $CurrentValues.Members -and `
-        $null -eq $CurrentValues.MembersToInclude -and `
-        $null -eq $CurrentValues.MembersToExclude)
+            $null -eq $CurrentValues.MembersToInclude -and `
+            $null -eq $CurrentValues.MembersToExclude)
     {
         return $false
     }
@@ -788,7 +788,7 @@ function Test-TargetResource
         }
 
         $differences = Compare-Object -ReferenceObject $CurrentValues.Members `
-                                      -DifferenceObject $Members
+            -DifferenceObject $Members
 
         if ($null -eq $differences)
         {
@@ -862,7 +862,7 @@ function Test-TargetResource
                 }
 
                 $differences = Compare-Object -ReferenceObject $database.Members `
-                                              -DifferenceObject $Members
+                    -DifferenceObject $Members
 
                 if ($null -eq $differences)
                 {
@@ -943,7 +943,7 @@ function Test-TargetResource
                     }
 
                     $differences = Compare-Object -ReferenceObject $currentCDB.Members `
-                                                  -DifferenceObject $database.Members
+                        -DifferenceObject $database.Members
 
                     if ($null -eq $differences)
                     {

@@ -1,18 +1,18 @@
 [CmdletBinding()]
 param(
     [Parameter()]
-    [string] 
+    [string]
     $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
-                                         -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
-                                         -Resolve)
+            -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
+            -Resolve)
 )
 
 Import-Module -Name (Join-Path -Path $PSScriptRoot `
-                                -ChildPath "..\UnitTestHelper.psm1" `
-                                -Resolve)
+        -ChildPath "..\UnitTestHelper.psm1" `
+        -Resolve)
 
 $Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointCmdletModule `
-                                              -DscResource "SPTimerJobState"
+    -DscResource "SPTimerJobState"
 
 Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
     InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
@@ -20,18 +20,18 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         # Initialize tests
 
-        # Mocks for all contexts   
-        Mock -CommandName Set-SPTimerJob -MockWith { 
-            return $null 
+        # Mocks for all contexts
+        Mock -CommandName Set-SPTimerJob -MockWith {
+            return $null
         }
-        Mock -CommandName Enable-SPTimerJob -MockWith { 
-            return $null 
+        Mock -CommandName Enable-SPTimerJob -MockWith {
+            return $null
         }
-        Mock -CommandName Get-SPFarm -MockWith { 
-            return @{} 
+        Mock -CommandName Get-SPFarm -MockWith {
+            return @{ }
         }
-        Mock -CommandName Get-SPWebApplication -MockWith { 
-            return @{} 
+        Mock -CommandName Get-SPWebApplication -MockWith {
+            return @{ }
         }
 
         # Test contexts
@@ -43,8 +43,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Schedule  = "hourly between 0 and 59"
             }
 
-            Mock -CommandName Get-SPFarm -MockWith { 
-                throw "Unable to detect local farm" 
+            Mock -CommandName Get-SPFarm -MockWith {
+                throw "Unable to detect local farm"
             }
 
             It "Should return null from the get method" {
@@ -68,8 +68,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Schedule  = "hourly between 0 and 59"
             }
 
-            Mock -CommandName Get-SPWebApplication -MockWith { 
-                return $null 
+            Mock -CommandName Get-SPWebApplication -MockWith {
+                return $null
             }
 
             It "Should return null from the get method" {
@@ -94,7 +94,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             Mock -CommandName Get-SPTimerJob -MockWith {
-                return $null 
+                return $null
             }
 
             It "Should return null from the get method" {
@@ -119,14 +119,14 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Enabled   = $true
                 Schedule  = "hourly between 0 and 59"
             }
-            
+
             Mock -CommandName Get-SPTimerJob -MockWith {
                 $returnVal = @{
-                    TypeName = "job-spapp-statequery"
+                    TypeName   = "job-spapp-statequery"
                     IsDisabled = $true
-                    Schedule = "hourly between 0 and 59"
+                    Schedule   = "hourly between 0 and 59"
                 }
-                return ,@($returnVal)
+                return , @($returnVal)
             }
 
             It "Should return values from the get method" {
@@ -150,14 +150,14 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Enabled   = $true
                 Schedule  = "hourly between 0 and 59"
             }
-            
+
             Mock -CommandName Get-SPTimerJob -MockWith {
                 $returnVal = @{
-                    TypeName = "job-spapp-statequery"
+                    TypeName   = "job-spapp-statequery"
                     IsDisabled = $true
-                    Schedule = "hourly between 0 and 59"
+                    Schedule   = "hourly between 0 and 59"
                 }
-                return ,@($returnVal)
+                return , @($returnVal)
             }
 
             It "Should return values from the get method" {
@@ -181,14 +181,14 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Enabled   = $true
                 Schedule  = "hourly between 0 and 59"
             }
-            
+
             Mock -CommandName Get-SPTimerJob -MockWith {
                 $returnVal = @{
-                    TypeName = "job-spapp-statequery"
+                    TypeName   = "job-spapp-statequery"
                     IsDisabled = $false
-                    Schedule = "weekly at sat 23:00:00"
+                    Schedule   = "weekly at sat 23:00:00"
                 }
-                return ,@($returnVal)
+                return , @($returnVal)
             }
 
             It "Should return values from the get method" {
@@ -212,14 +212,14 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Enabled   = $true
                 Schedule  = "hourly between 0 and 59"
             }
-            
+
             Mock -CommandName Get-SPTimerJob -MockWith {
                 $returnVal = @{
-                    TypeName = "job-spapp-statequery"
+                    TypeName   = "job-spapp-statequery"
                     IsDisabled = $false
-                    Schedule = "weekly at sat 23:00:00"
+                    Schedule   = "weekly at sat 23:00:00"
                 }
-                return ,@($returnVal)
+                return , @($returnVal)
             }
 
             It "Should return values from the get method" {
@@ -243,18 +243,18 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Enabled   = $true
                 Schedule  = "hourly between 0 and 59"
             }
-            
+
             Mock -CommandName Get-SPTimerJob -MockWith {
                 $returnVal = @{
-                    TypeName = "job-spapp-statequery"
+                    TypeName   = "job-spapp-statequery"
                     IsDisabled = $false
-                    Schedule = "incorrect format"
+                    Schedule   = "incorrect format"
                 }
-                return ,@($returnVal)
+                return , @($returnVal)
             }
 
-            Mock -CommandName Set-SPTimerJob -MockWith { 
-                throw "Invalid Time: `"The time given was not given in the proper format. See: Get-Help Set-SPTimerJob -detailed`"" 
+            Mock -CommandName Set-SPTimerJob -MockWith {
+                throw "Invalid Time: `"The time given was not given in the proper format. See: Get-Help Set-SPTimerJob -detailed`""
             }
 
             It "Should return values from the get method" {
@@ -277,18 +277,18 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Enabled   = $true
                 Schedule  = "hourly between 0 and 59"
             }
-            
+
             Mock -CommandName Get-SPTimerJob -MockWith {
                 $returnVal = @{
-                    TypeName = "job-spapp-statequery"
+                    TypeName   = "job-spapp-statequery"
                     IsDisabled = $false
-                    Schedule = "incorrect format"
+                    Schedule   = "incorrect format"
                 }
-                return ,@($returnVal)
+                return , @($returnVal)
             }
 
-            Mock -CommandName Set-SPTimerJob -MockWith { 
-                throw "Invalid Time: `"The time given was not given in the proper format. See: Get-Help Set-SPTimerJob -detailed`"" 
+            Mock -CommandName Set-SPTimerJob -MockWith {
+                throw "Invalid Time: `"The time given was not given in the proper format. See: Get-Help Set-SPTimerJob -detailed`""
             }
 
             It "Should return values from the get method" {
@@ -311,14 +311,14 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Enabled   = $true
                 Schedule  = "hourly between 0 and 59"
             }
-            
+
             Mock -CommandName Get-SPTimerJob -MockWith {
                 $returnVal = @{
-                    TypeName = "job-spapp-statequery"
+                    TypeName   = "job-spapp-statequery"
                     IsDisabled = $false
-                    Schedule = "hourly between 0 and 59"
+                    Schedule   = "hourly between 0 and 59"
                 }
-                return ,@($returnVal)
+                return , @($returnVal)
             }
 
             It "Should return values from the get method" {
@@ -337,14 +337,14 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Enabled   = $true
                 Schedule  = "hourly between 0 and 59"
             }
-            
+
             Mock -CommandName Get-SPTimerJob -MockWith {
                 $returnVal = @{
-                    TypeName = "job-spapp-statequery"
+                    TypeName   = "job-spapp-statequery"
                     IsDisabled = $false
-                    Schedule = "hourly between 0 and 59"
+                    Schedule   = "hourly between 0 and 59"
                 }
-                return ,@($returnVal)
+                return , @($returnVal)
             }
 
             It "Should return values from the get method" {

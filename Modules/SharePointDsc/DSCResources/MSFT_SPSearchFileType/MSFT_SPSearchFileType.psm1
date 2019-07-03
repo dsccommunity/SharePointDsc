@@ -25,7 +25,7 @@ function Get-TargetResource
         $Enabled,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present",
 
@@ -38,24 +38,24 @@ function Get-TargetResource
 
     if ($Ensure -eq "Present" -and `
         (-not($PSBoundParameters.ContainsKey("MimeType")) -or `
-         -not($PSBoundParameters.ContainsKey("Description"))))
+                -not($PSBoundParameters.ContainsKey("Description"))))
     {
         Write-Verbose -Message "Ensure is configured as Present, but MimeType and/or Description is missing"
         $nullReturn = @{
-            FileType = $FileType
+            FileType       = $FileType
             ServiceAppName = $ServiceAppName
-            Ensure = "Absent"
+            Ensure         = "Absent"
         }
         return $nullReturn
     }
 
     $result = Invoke-SPDscCommand -Credential $InstallAccount `
-                                  -Arguments $PSBoundParameters `
-                                  -ScriptBlock {
+        -Arguments $PSBoundParameters `
+        -ScriptBlock {
         $params = $args[0]
 
         $serviceApps = Get-SPServiceApplication -Name $params.ServiceAppName `
-                                                -ErrorAction SilentlyContinue
+            -ErrorAction SilentlyContinue
 
         $nullReturn = @{
             FileType       = $params.FileType
@@ -82,9 +82,9 @@ function Get-TargetResource
         else
         {
             $fileType = Get-SPEnterpriseSearchFileFormat `
-                          -SearchApplication $params.ServiceAppName | Where-Object -FilterScript {
-                              $_.Identity -eq $params.FileType
-                          }
+                -SearchApplication $params.ServiceAppName | Where-Object -FilterScript {
+                $_.Identity -eq $params.FileType
+            }
 
             if ($null -eq $fileType)
             {
@@ -136,7 +136,7 @@ function Set-TargetResource
         $Enabled,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present",
 
@@ -149,7 +149,7 @@ function Set-TargetResource
 
     if ($Ensure -eq "Present" -and `
         (-not($PSBoundParameters.ContainsKey("MimeType")) -or `
-         -not($PSBoundParameters.ContainsKey("Description"))))
+                -not($PSBoundParameters.ContainsKey("Description"))))
     {
         throw "Ensure is configured as Present, but MimeType and/or Description is missing"
     }
@@ -160,12 +160,12 @@ function Set-TargetResource
 
     Write-Verbose -Message "Checking if Service Application '$ServiceAppName' exists"
     Invoke-SPDscCommand -Credential $InstallAccount `
-                        -Arguments $PSBoundParameters `
-                        -ScriptBlock {
+        -Arguments $PSBoundParameters `
+        -ScriptBlock {
         $params = $args[0]
 
         $serviceApps = Get-SPServiceApplication -Name $params.ServiceAppName `
-                                                -ErrorAction SilentlyContinue
+            -ErrorAction SilentlyContinue
 
         if ($null -eq $serviceApps)
         {
@@ -186,8 +186,8 @@ function Set-TargetResource
     {
         Write-Verbose -Message "Creating File Type $FileType"
         Invoke-SPDscCommand -Credential $InstallAccount `
-                            -Arguments $PSBoundParameters `
-                            -ScriptBlock {
+            -Arguments $PSBoundParameters `
+            -ScriptBlock {
             $params = $args[0]
 
             $newParams = @{
@@ -218,9 +218,9 @@ function Set-TargetResource
             $params = $args[0]
 
             $fileType = Get-SPEnterpriseSearchFileFormat `
-                          -SearchApplication $params.ServiceAppName | Where-Object -FilterScript {
-                              $_.Identity -eq $params.FileType
-                          }
+                -SearchApplication $params.ServiceAppName | Where-Object -FilterScript {
+                $_.Identity -eq $params.FileType
+            }
 
             if ($null -ne $fileType)
             {
@@ -228,8 +228,8 @@ function Set-TargetResource
                     ($fileType.Name -ne $params.Description))
                 {
                     Remove-SPEnterpriseSearchFileFormat -Identity $params.FileType `
-                                                        -SearchApplication $params.ServiceAppName `
-                                                        -Confirm:$false
+                        -SearchApplication $params.ServiceAppName `
+                        -Confirm:$false
 
                     $newParams = @{
                         FormatId          = $params.FileType
@@ -262,13 +262,13 @@ function Set-TargetResource
     {
         Write-Verbose -Message "Removing Crawl Rule $Path"
         Invoke-SPDscCommand -Credential $InstallAccount `
-                            -Arguments $PSBoundParameters `
-                            -ScriptBlock {
+            -Arguments $PSBoundParameters `
+            -ScriptBlock {
             $params = $args[0]
 
             Remove-SPEnterpriseSearchFileFormat -Identity $params.FileType `
-                                                -SearchApplication $params.ServiceAppName `
-                                                -Confirm:$false
+                -SearchApplication $params.ServiceAppName `
+                -Confirm:$false
         }
     }
 }
@@ -300,7 +300,7 @@ function Test-TargetResource
         $Enabled,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present",
 
@@ -329,16 +329,16 @@ function Test-TargetResource
         }
 
         return Test-SPDscParameterState -CurrentValues $CurrentValues `
-                                        -DesiredValues $PSBoundParameters `
-                                        -ValuesToCheck @("Ensure",
-                                                         "Description",
-                                                         "MimeType")
+            -DesiredValues $PSBoundParameters `
+            -ValuesToCheck @("Ensure",
+            "Description",
+            "MimeType")
     }
     else
     {
         return Test-SPDscParameterState -CurrentValues $CurrentValues `
-                                        -DesiredValues $PSBoundParameters `
-                                        -ValuesToCheck @("Ensure")
+            -DesiredValues $PSBoundParameters `
+            -ValuesToCheck @("Ensure")
     }
 }
 

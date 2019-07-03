@@ -1,7 +1,7 @@
 function Get-TargetResource
 {
     [CmdletBinding()]
-    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSDSCUseIdenticalMandatoryParametersForDSC", "", Justification  =  "Temporary workaround for issue introduced in PSSA v1.18")]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSDSCUseIdenticalMandatoryParametersForDSC", "", Justification = "Temporary workaround for issue introduced in PSSA v1.18")]
     [OutputType([System.Collections.Hashtable])]
     param
     (
@@ -48,7 +48,7 @@ function Get-TargetResource
             }
         }
 
-        if ($null -ne $DesiredSetting.TraceLevel -and @("None","Unexpected","Monitorable","High","Medium","Verbose","VerboseEx","Default") -notcontains $DesiredSetting.TraceLevel)
+        if ($null -ne $DesiredSetting.TraceLevel -and @("None", "Unexpected", "Monitorable", "High", "Medium", "Verbose", "VerboseEx", "Default") -notcontains $DesiredSetting.TraceLevel)
         {
             Write-Verbose -Message "TraceLevel $($DesiredSetting.TraceLevel) is not valid, must specify exactly one of None,Unexpected,Monitorable,High,Medium,Verbose,VerboseEx, or Default"
             return @{
@@ -57,7 +57,7 @@ function Get-TargetResource
             }
         }
 
-        if ($null -ne $DesiredSetting.EventLevel -and @("None","ErrorCritical","Error","Warning","Information","Verbose","Default") -notcontains $DesiredSetting.EventLevel)
+        if ($null -ne $DesiredSetting.EventLevel -and @("None", "ErrorCritical", "Error", "Warning", "Information", "Verbose", "Default") -notcontains $DesiredSetting.EventLevel)
         {
             Write-Verbose -Message "EventLevel $($DesiredSetting.EventLevel) is not valid, must specify exactly one of None,ErrorCritical,Error,Warning,Informational,Verbose, or Default"
             return @{
@@ -70,13 +70,13 @@ function Get-TargetResource
     Write-Verbose -Message "Getting SP Log Level Settings for provided Areas"
 
     $result = Invoke-SPDscCommand -Credential $InstallAccount `
-                                  -Arguments $PSBoundParameters `
-                                  -ScriptBlock {
-         $params = $args[0]
+        -Arguments $PSBoundParameters `
+        -ScriptBlock {
+        $params = $args[0]
 
-         $CurrentLogLevelSettings = @()
-         foreach ($DesiredSetting in $params.SPLogLevelSetting)
-         {
+        $CurrentLogLevelSettings = @()
+        foreach ($DesiredSetting in $params.SPLogLevelSetting)
+        {
             Write-Verbose -Message "Getting SP Log Level Settings for $($DesiredSetting.Area):$($DesiredSetting.Name)"
             $CurrentLogItemSettings = Get-SPLogLevel -Identity "$($DesiredSetting.Area):$($DesiredSetting.Name)"
 
@@ -107,13 +107,13 @@ function Get-TargetResource
                 else
                 {
                     #return a csv list of current unique trace level settings for the provided Area/Name
-                    $Tracelevel = [System.String]::Join(",",(($CurrentLogItemSettings.traceseverity) | Select-Object -Unique))
+                    $Tracelevel = [System.String]::Join(",", (($CurrentLogItemSettings.traceseverity) | Select-Object -Unique))
                 }
             }
             #default was not specified, so we return the unique current trace severity across all provided settings.
             else
             {
-               $Tracelevel = [System.String]::Join(",",(($CurrentLogItemSettings.traceseverity) | Select-Object -Unique))
+                $Tracelevel = [System.String]::Join(",", (($CurrentLogItemSettings.traceseverity) | Select-Object -Unique))
             }
 
             #EventLevels
@@ -136,13 +136,13 @@ function Get-TargetResource
                 else
                 {
                     #return a csv list of current unique Event level settings for the provided Area/Name
-                    $Eventlevel = [System.String]::Join(",",(($CurrentLogItemSettings.Eventseverity) | Select-Object -Unique))
+                    $Eventlevel = [System.String]::Join(",", (($CurrentLogItemSettings.Eventseverity) | Select-Object -Unique))
                 }
             }
             #default was not specified, so we return the unique current Event severity across all provided settings.
             else
             {
-               $Eventlevel = [System.String]::Join(",",(($CurrentLogItemSettings.Eventseverity) | Select-Object -Unique))
+                $Eventlevel = [System.String]::Join(",", (($CurrentLogItemSettings.Eventseverity) | Select-Object -Unique))
             }
 
             $CurrentLogLevelSettings += New-Object -TypeName PSObject -Property @{
@@ -150,7 +150,7 @@ function Get-TargetResource
                 Name       = $DesiredSetting.Name
                 TraceLevel = $TraceLevel
                 EventLevel = $EventLevel
-             }
+            }
         }
 
         return @{
@@ -163,7 +163,7 @@ function Get-TargetResource
 function Set-TargetResource
 {
     [CmdletBinding()]
-    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSDSCUseIdenticalMandatoryParametersForDSC", "", Justification  =  "Temporary workaround for issue introduced in PSSA v1.18")]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSDSCUseIdenticalMandatoryParametersForDSC", "", Justification = "Temporary workaround for issue introduced in PSSA v1.18")]
     param
     (
         [Parameter(Mandatory = $true)]
@@ -196,12 +196,12 @@ function Set-TargetResource
             throw "TraceLevel and / or EventLevel must be provided for each Area"
         }
 
-        if ($null -ne $DesiredSetting.TraceLevel -and @("None","Unexpected","Monitorable","High","Medium","Verbose","VerboseEx","Default") -notcontains $DesiredSetting.TraceLevel)
+        if ($null -ne $DesiredSetting.TraceLevel -and @("None", "Unexpected", "Monitorable", "High", "Medium", "Verbose", "VerboseEx", "Default") -notcontains $DesiredSetting.TraceLevel)
         {
             throw "TraceLevel $($DesiredSetting.TraceLevel) is not valid, must specify exactly one of None,Unexpected,Monitorable,High,Medium,Verbose,VerboseEx, or Default"
         }
 
-        if ($null -ne $DesiredSetting.EventLevel -and @("None","ErrorCritical","Error","Warning","Information","Verbose","Default") -notcontains $DesiredSetting.EventLevel)
+        if ($null -ne $DesiredSetting.EventLevel -and @("None", "ErrorCritical", "Error", "Warning", "Information", "Verbose", "Default") -notcontains $DesiredSetting.EventLevel)
         {
             throw "EventLevel $($DesiredSetting.EventLevel) is not valid, must specify exactly one of None,ErrorCritical,Error,Warning,Information,Verbose, or Default"
         }
@@ -210,8 +210,8 @@ function Set-TargetResource
     Write-Verbose -Message "Setting SP Log Level settings for the provided areas"
 
     Invoke-SPDscCommand -Credential $InstallAccount `
-                        -Arguments $PSBoundParameters `
-                        -ScriptBlock {
+        -Arguments $PSBoundParameters `
+        -ScriptBlock {
         $params = $args[0]
 
         foreach ($DesiredSetting in $params.SPLogLevelSetting)
@@ -264,7 +264,7 @@ function Set-TargetResource
 function Test-TargetResource
 {
     [CmdletBinding()]
-    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSDSCUseIdenticalMandatoryParametersForDSC", "", Justification  =  "Temporary workaround for issue introduced in PSSA v1.18")]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSDSCUseIdenticalMandatoryParametersForDSC", "", Justification = "Temporary workaround for issue introduced in PSSA v1.18")]
     [OutputType([System.Boolean])]
     param
     (
@@ -299,7 +299,7 @@ function Test-TargetResource
     {
         Write-Verbose -Message "Testing SP Log Level setting for $($DesiredSetting.Area):$($DesiredSetting.Name)"
 
-        $CurrentSetting = $CurrentValues.SPLogLevelSetting | Where-Object -FilterScript {$_.Area -eq $DesiredSetting.Area -and $_.Name -eq $DesiredSetting.Name}
+        $CurrentSetting = $CurrentValues.SPLogLevelSetting | Where-Object -FilterScript { $_.Area -eq $DesiredSetting.Area -and $_.Name -eq $DesiredSetting.Name }
 
         if (($null -ne $DesiredSetting.TraceLevel -and $CurrentSetting.TraceLevel -ne $DesiredSetting.TraceLevel) -or ($null -ne $DesiredSetting.EventLevel -and $CurrentSetting.EventLevel -ne $DesiredSetting.EventLevel))
         {

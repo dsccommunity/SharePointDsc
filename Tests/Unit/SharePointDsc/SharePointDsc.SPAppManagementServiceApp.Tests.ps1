@@ -3,16 +3,16 @@ param(
     [Parameter()]
     [string]
     $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
-                                         -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
-                                         -Resolve)
+            -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
+            -Resolve)
 )
 
 Import-Module -Name (Join-Path -Path $PSScriptRoot `
-                                -ChildPath "..\UnitTestHelper.psm1" `
-                                -Resolve)
+        -ChildPath "..\UnitTestHelper.psm1" `
+        -Resolve)
 
 $Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointCmdletModule `
-                                              -DscResource "SPAppManagementServiceApp"
+    -DscResource "SPAppManagementServiceApp"
 
 Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
     InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
@@ -22,20 +22,20 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         $getTypeFullName = "Microsoft.SharePoint.AppManagement.AppManagementServiceApplication"
 
         # Mocks for all contexts
-        Mock -CommandName Remove-SPServiceApplication -MockWith {}
+        Mock -CommandName Remove-SPServiceApplication -MockWith { }
 
         # Test contexts
         Context -Name "When no service applications exist in the current farm but it should" -Fixture {
             $testParams = @{
-                Name = "Test App"
+                Name            = "Test App"
                 ApplicationPool = "Test App Pool"
-                DatabaseName = "Test_DB"
-                Ensure = "Present"
-                DatabaseServer = "TestServer\Instance"
+                DatabaseName    = "Test_DB"
+                Ensure          = "Present"
+                DatabaseServer  = "TestServer\Instance"
             }
 
             Mock -CommandName Get-SPServiceApplication -MockWith { return $null }
-            Mock -CommandName New-SPAppManagementServiceApplication -MockWith {  return  @(@{})}
+            Mock -CommandName New-SPAppManagementServiceApplication -MockWith { return  @(@{ }) }
             Mock -CommandName New-SPAppManagementServiceApplicationProxy -MockWith { return $null }
 
             It "Should return absent from the get method" {
@@ -55,24 +55,24 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "When service applications exist in the current farm with the same name but is the wrong type" -Fixture {
             $testParams = @{
-                Name = "Test App"
+                Name            = "Test App"
                 ApplicationPool = "Test App Pool"
-                DatabaseName = "Test_DB"
-                Ensure = "Present"
-                DatabaseServer = "TestServer\Instance"
+                DatabaseName    = "Test_DB"
+                Ensure          = "Present"
+                DatabaseServer  = "TestServer\Instance"
             }
 
             Mock -CommandName Get-SPServiceApplication -MockWith {
                 $spServiceApp = [PSCustomObject]@{
-                                    DisplayName = $testParams.Name
-                                }
+                    DisplayName = $testParams.Name
+                }
                 $spServiceApp | Add-Member -MemberType ScriptMethod `
-                                           -Name GetType `
-                                           -Value {
-                                                return @{
-                                                    FullName = "Microsoft.Office.UnKnownWebServiceApplication"
-                                                }
-                                            } -PassThru -Force
+                    -Name GetType `
+                    -Value {
+                    return @{
+                        FullName = "Microsoft.Office.UnKnownWebServiceApplication"
+                    }
+                } -PassThru -Force
                 return $spServiceApp
             }
 
@@ -85,20 +85,20 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "When a service application exists and it should, and is also configured correctly" -Fixture {
             $testParams = @{
-                Name = "Test App"
+                Name            = "Test App"
                 ApplicationPool = "Test App Pool"
-                DatabaseName = "Test_DB"
-                Ensure = "Present"
-                DatabaseServer = "TestServer\Instance"
+                DatabaseName    = "Test_DB"
+                Ensure          = "Present"
+                DatabaseServer  = "TestServer\Instance"
             }
 
             Mock -CommandName Get-SPServiceApplication -MockWith {
-                 $spServiceApp = [PSCustomObject]@{
-                    TypeName = "App Management Service Application"
-                    DisplayName = $testParams.Name
+                $spServiceApp = [PSCustomObject]@{
+                    TypeName        = "App Management Service Application"
+                    DisplayName     = $testParams.Name
                     ApplicationPool = @{ Name = $testParams.ApplicationPool }
-                    Database = @{
-                        Name = $testParams.DatabaseName
+                    Database        = @{
+                        Name                 = $testParams.DatabaseName
                         NormalizedDataSource = $testParams.DatabaseServer
                     }
                 }
@@ -114,13 +114,13 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             Mock -CommandName Get-SPServiceApplicationProxy -MockWith {
                 $proxiesToReturn = @()
                 $proxy = @{
-                    Name = "AppManagement Proxy"
+                    Name        = "AppManagement Proxy"
                     DisplayName = "AppManagement Proxy"
                 }
                 $proxy = $proxy | Add-Member -MemberType ScriptMethod `
-                                                -Name Delete `
-                                                -Value {} `
-                                                -PassThru
+                    -Name Delete `
+                    -Value { } `
+                    -PassThru
                 $proxiesToReturn += $proxy
 
                 return $proxiesToReturn
@@ -138,20 +138,20 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "When a service application exists and it should, but the app pool is not configured correctly" -Fixture {
             $testParams = @{
-                Name = "Test App"
+                Name            = "Test App"
                 ApplicationPool = "Test App Pool"
-                DatabaseName = "Test_DB"
-                Ensure = "Present"
-                DatabaseServer = "TestServer\Instance"
+                DatabaseName    = "Test_DB"
+                Ensure          = "Present"
+                DatabaseServer  = "TestServer\Instance"
             }
 
             Mock -CommandName Get-SPServiceApplication -MockWith {
                 $spServiceApp = [PSCustomObject]@{
-                    TypeName = "App Management Service Application"
-                    DisplayName = $testParams.Name
+                    TypeName        = "App Management Service Application"
+                    DisplayName     = $testParams.Name
                     ApplicationPool = @{ Name = "Wrong app pool" }
-                    Database = @{
-                        Name = $testParams.DatabaseName
+                    Database        = @{
+                        Name                 = $testParams.DatabaseName
                         NormalizedDataSource = $testParams.DatabaseServer
                     }
                 }
@@ -181,20 +181,20 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "When a service application exists and it should, but no proxy exists" -Fixture {
             $testParams = @{
-                Name = "Test App"
+                Name            = "Test App"
                 ApplicationPool = "Test App Pool"
-                DatabaseName = "Test_DB"
-                Ensure = "Present"
-                DatabaseServer = "TestServer\Instance"
+                DatabaseName    = "Test_DB"
+                Ensure          = "Present"
+                DatabaseServer  = "TestServer\Instance"
             }
 
             Mock -CommandName Get-SPServiceApplication -MockWith {
                 $spServiceApp = [PSCustomObject]@{
-                    TypeName = "App Management Service Application"
-                    DisplayName = $testParams.Name
+                    TypeName        = "App Management Service Application"
+                    DisplayName     = $testParams.Name
                     ApplicationPool = @{ Name = $testParams.ApplicationPool }
-                    Database = @{
-                        Name = $testParams.DatabaseName
+                    Database        = @{
+                        Name                 = $testParams.DatabaseName
                         NormalizedDataSource = $testParams.DatabaseServer
                     }
                 }
@@ -230,13 +230,13 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "When a service app needs to be created and no database paramsters are provided" -Fixture {
             $testParams = @{
-                Name = "Test App"
+                Name            = "Test App"
                 ApplicationPool = "Test App Pool"
-                Ensure = "Present"
+                Ensure          = "Present"
             }
 
             Mock -CommandName Get-SPServiceApplication -MockWith { return $null }
-            Mock -CommandName New-SPAppManagementServiceApplication -MockWith {  return  @(@{})}
+            Mock -CommandName New-SPAppManagementServiceApplication -MockWith { return  @(@{ }) }
             Mock -CommandName New-SPAppManagementServiceApplicationProxy -MockWith { return $null }
 
             It "Should not throw an exception in the set method" {
@@ -247,18 +247,18 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "When the service application exists but it shouldn't" -Fixture {
             $testParams = @{
-                Name = "Test App"
+                Name            = "Test App"
                 ApplicationPool = "-"
-                Ensure = "Absent"
+                Ensure          = "Absent"
             }
 
             Mock -CommandName Get-SPServiceApplication -MockWith {
                 $spServiceApp = [PSCustomObject]@{
-                    TypeName = "App Management Service Application"
-                    DisplayName = $testParams.Name
+                    TypeName        = "App Management Service Application"
+                    DisplayName     = $testParams.Name
                     ApplicationPool = @{ Name = $testParams.ApplicationPool }
-                    Database = @{
-                        Name = $testParams.DatabaseName
+                    Database        = @{
+                        Name                 = $testParams.DatabaseName
                         NormalizedDataSource = $testParams.DatabaseServer
                     }
                 }
@@ -284,9 +284,9 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "When the serivce application doesn't exist and it shouldn't" -Fixture {
             $testParams = @{
-                Name = "Test App"
+                Name            = "Test App"
                 ApplicationPool = "-"
-                Ensure = "Absent"
+                Ensure          = "Absent"
             }
 
             Mock -CommandName Get-SPServiceApplication -MockWith { return $null }

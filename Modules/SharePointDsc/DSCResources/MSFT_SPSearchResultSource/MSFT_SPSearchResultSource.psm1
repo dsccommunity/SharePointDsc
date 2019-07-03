@@ -10,8 +10,8 @@ function Get-TargetResource
 
         [Parameter(Mandatory = $true)]
         [ValidateSet("SSA",
-                     "SPSite",
-                     "SPWeb")]
+            "SPSite",
+            "SPWeb")]
         [System.String]
         $ScopeName,
 
@@ -36,7 +36,7 @@ function Get-TargetResource
         $ConnectionUrl,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present",
 
@@ -48,8 +48,8 @@ function Get-TargetResource
     Write-Verbose -Message "Getting search result source '$Name'"
 
     $result = Invoke-SPDscCommand -Credential $InstallAccount `
-                                  -Arguments $PSBoundParameters `
-                                  -ScriptBlock {
+        -Arguments $PSBoundParameters `
+        -ScriptBlock {
         $params = $args[0]
         [void] [Reflection.Assembly]::LoadWithPartialName("Microsoft.Office.Server.Search")
 
@@ -68,7 +68,7 @@ function Get-TargetResource
         if ($null -eq $serviceApp)
         {
             Write-Verbose -Message ("Specified Search service application $($params.SearchServiceAppName)" + `
-                                    "does not exist.")
+                    "does not exist.")
             return $nullReturn
         }
 
@@ -77,7 +77,7 @@ function Get-TargetResource
         if ($providers.Keys -notcontains $params.ProviderType)
         {
             Write-Verbose -Message ("Unknown ProviderType ($($params.ProviderType)) is used. Allowed " + `
-                                    "values are: '" + ($providers.Keys -join "', '") + "'")
+                    "values are: '" + ($providers.Keys -join "', '") + "'")
             return $nullReturn
         }
 
@@ -93,7 +93,7 @@ function Get-TargetResource
         $filter = New-Object Microsoft.Office.Server.Search.Administration.SearchObjectFilter($searchOwner)
         $filter.IncludeHigherLevel = $true
 
-        $source = $fedManager.ListSources($filter,$true) | Where-Object -FilterScript {
+        $source = $fedManager.ListSources($filter, $true) | Where-Object -FilterScript {
             $_.Name -eq $params.Name
         }
 
@@ -134,8 +134,8 @@ function Set-TargetResource
 
         [Parameter(Mandatory = $true)]
         [ValidateSet("SSA",
-                     "SPSite",
-                     "SPWeb")]
+            "SPSite",
+            "SPWeb")]
         [System.String]
         $ScopeName,
 
@@ -160,7 +160,7 @@ function Set-TargetResource
         $ConnectionUrl,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present",
 
@@ -177,25 +177,25 @@ function Set-TargetResource
     {
         Write-Verbose -Message "Creating search result source $Name"
         Invoke-SPDscCommand -Credential $InstallAccount `
-                            -Arguments $PSBoundParameters `
-                            -ScriptBlock {
+            -Arguments $PSBoundParameters `
+            -ScriptBlock {
             $params = $args[0]
             [void] [Reflection.Assembly]::LoadWithPartialName("Microsoft.Office.Server.Search")
 
             $serviceApp = Get-SPEnterpriseSearchServiceApplication `
-                            -Identity $params.SearchServiceAppName
+                -Identity $params.SearchServiceAppName
             if ($null -eq $serviceApp)
             {
                 throw ("Specified Search service application $($params.SearchServiceAppName)" + `
-                       "does not exist.")
+                        "does not exist.")
             }
 
-            $fedManager =  New-Object Microsoft.Office.Server.Search.Administration.Query.FederationManager($serviceApp)
+            $fedManager = New-Object Microsoft.Office.Server.Search.Administration.Query.FederationManager($serviceApp)
             $providers = $fedManager.ListProviders()
             if ($providers.Keys -notcontains $params.ProviderType)
             {
                 throw ("Unknown ProviderType ($($params.ProviderType)) is used. Allowed " + `
-                       "values are: '" + ($providers.Keys -join "', '") + "'")
+                        "values are: '" + ($providers.Keys -join "', '") + "'")
             }
 
             $searchOwner = $null
@@ -235,7 +235,7 @@ function Set-TargetResource
             [void] [Reflection.Assembly]::LoadWithPartialName("Microsoft.Office.Server.Search")
 
             $serviceApp = Get-SPEnterpriseSearchServiceApplication `
-                            -Identity $params.SearchServiceAppName
+                -Identity $params.SearchServiceAppName
 
             $fedManager = New-Object Microsoft.Office.Server.Search.Administration.Query.FederationManager($serviceApp)
             $searchOwner = $null
@@ -269,8 +269,8 @@ function Test-TargetResource
 
         [Parameter(Mandatory = $true)]
         [ValidateSet("SSA",
-                     "SPSite",
-                     "SPWeb")]
+            "SPSite",
+            "SPWeb")]
         [System.String]
         $ScopeName,
 
@@ -295,7 +295,7 @@ function Test-TargetResource
         $ConnectionUrl,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present",
 
@@ -314,8 +314,8 @@ function Test-TargetResource
     Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
 
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
-                                    -DesiredValues $PSBoundParameters `
-                                    -ValuesToCheck @("Ensure")
+        -DesiredValues $PSBoundParameters `
+        -ValuesToCheck @("Ensure")
 }
 
 Export-ModuleMember -Function *-TargetResource
