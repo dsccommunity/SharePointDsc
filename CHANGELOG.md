@@ -1,5 +1,11 @@
 # Change log for SharePointDsc
 
+## Unreleased
+
+* SPTrustedRootAuthority
+  * Fixes issue where Set method throws an error because the
+    parameter CertificateFilePath is not read correctly.
+
 ## v3.5
 
 * SharePointDsc generic
