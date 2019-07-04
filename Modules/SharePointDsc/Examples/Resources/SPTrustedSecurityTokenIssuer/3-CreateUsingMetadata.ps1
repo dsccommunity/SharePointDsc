@@ -1,6 +1,6 @@
 <#
 .EXAMPLE
-    This example deploys a trusted token issuer to the local farm.
+    This example creates a trusted security token issuer that will be configured using the metadata file of the ACS tenant.
 #>
 
 Configuration Example

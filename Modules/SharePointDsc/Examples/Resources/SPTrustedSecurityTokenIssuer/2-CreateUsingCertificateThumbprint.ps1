@@ -1,6 +1,6 @@
 <#
 .EXAMPLE
-    This example deploys a trusted token issuer to the local farm.
+    This example creates a trusted security token issuer using a signing certificate retrieved from its thumbprint, and the SPAuthenticationRealm of the SharePoint farm.
 #>
 
 Configuration Example
