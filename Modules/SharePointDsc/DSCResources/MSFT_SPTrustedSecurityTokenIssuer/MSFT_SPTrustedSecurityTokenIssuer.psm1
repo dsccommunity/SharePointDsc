@@ -260,17 +260,20 @@ function Set-TargetResource
     }
     else
     {
-        Write-Verbose "Removing SPTrustedSecurityTokenIssuer '$Name'"
-        $null = Invoke-SPDscCommand -Credential $InstallAccount `
-            -Arguments $PSBoundParameters `
-            -ScriptBlock {
-            $params = $args[0]
+        if ($CurrentValues.Ensure -eq "Present")
+        {
+            Write-Verbose "Removing SPTrustedSecurityTokenIssuer '$Name'"
+            $null = Invoke-SPDscCommand -Credential $InstallAccount `
+                -Arguments $PSBoundParameters `
+                -ScriptBlock {
+                $params = $args[0]
 
-            $runParams = @{
-                Identity = $params.Name
-                Confirm  = $false
+                $runParams = @{
+                    Identity = $params.Name
+                    Confirm  = $false
+                }
+                Remove-SPTrustedSecurityTokenIssuer @runParams
             }
-            Remove-SPTrustedSecurityTokenIssuer @runParams
         }
     }
 }
