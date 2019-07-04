@@ -1,7 +1,6 @@
 ﻿function Get-TargetResource
 {
     [CmdletBinding()]
-    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSDSCUseIdenticalMandatoryParametersForDSC", "", Justification = "Temporary workaround for issue introduced in PSSA v1.18")]
     [OutputType([System.Collections.Hashtable])]
     param
     (
@@ -94,7 +93,6 @@
 function Set-TargetResource
 {
     [CmdletBinding()]
-    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSDSCUseIdenticalMandatoryParametersForDSC", "", Justification = "Temporary workaround for issue introduced in PSSA v1.18")]
     param
     (
         [Parameter(Mandatory = $true)]
@@ -150,21 +148,18 @@ function Set-TargetResource
                     $PSBoundParameters.ContainsKey("SigningCertificateFilePath"))
             {
                 throw ("Cannot use both parameters SigningCertificateThumbprint and SigningCertificateFilePath at the same time.")
-                return
             }
 
             if ($PSBoundParameters.ContainsKey("SigningCertificateThumbprint") -and `
                     $PSBoundParameters.ContainsKey("MetadataEndPoint"))
             {
                 throw ("Cannot use both parameters SigningCertificateThumbprint and MetadataEndPoint at the same time.")
-                return
             }
 
             if ($PSBoundParameters.ContainsKey("SigningCertificateFilePath") -and `
                     $PSBoundParameters.ContainsKey("MetadataEndPoint"))
             {
                 throw ("Cannot use both parameters SigningCertificateFilePath and MetadataEndPoint at the same time.")
-                return
             }
 
             if ($PSBoundParameters.ContainsKey("SigningCertificateThumbprint") -eq $false -and `
@@ -173,21 +168,18 @@ function Set-TargetResource
             {
                 throw ("At least one of the following parameters must be specified: " + `
                         "SigningCertificateThumbprint, SigningCertificateFilePath, MetadataEndPoint.")
-                return
             }
 
             if ($PSBoundParameters.ContainsKey("MetadataEndPoint") -and `
                     $PSBoundParameters.ContainsKey("RegisteredIssuerNameIdentifier"))
             {
                 throw ("Cannot use both parameters MetadataEndPoint and RegisteredIssuerNameIdentifier at the same time.")
-                return
             }
 
             if ($PSBoundParameters.ContainsKey("MetadataEndPoint") -and `
                     $PSBoundParameters.ContainsKey("RegisteredIssuerNameRealm"))
             {
                 throw ("Cannot use both parameters MetadataEndPoint and RegisteredIssuerNameRealm at the same time.")
-                return
             }
 
             Write-Verbose -Message "Creating SPTrustedSecurityTokenIssuer '$Name'"
@@ -286,7 +278,6 @@ function Set-TargetResource
 function Test-TargetResource
 {
     [CmdletBinding()]
-    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSDSCUseIdenticalMandatoryParametersForDSC", "", Justification = "Temporary workaround for issue introduced in PSSA v1.18")]
     [OutputType([Boolean])]
     param
     (
@@ -337,21 +328,18 @@ function Test-TargetResource
             $PSBoundParameters.ContainsKey("SigningCertificateFilePath"))
     {
         throw ("Cannot use both parameters SigningCertificateThumbprint and SigningCertificateFilePath at the same time.")
-        return
     }
 
     if ($PSBoundParameters.ContainsKey("SigningCertificateThumbprint") -and `
             $PSBoundParameters.ContainsKey("MetadataEndPoint"))
     {
         throw ("Cannot use both parameters SigningCertificateThumbprint and MetadataEndPoint at the same time.")
-        return
     }
 
     if ($PSBoundParameters.ContainsKey("SigningCertificateFilePath") -and `
             $PSBoundParameters.ContainsKey("MetadataEndPoint"))
     {
         throw ("Cannot use both parameters SigningCertificateFilePath and MetadataEndPoint at the same time.")
-        return
     }
 
     if ($PSBoundParameters.ContainsKey("SigningCertificateThumbprint") -eq $false -and `
@@ -360,21 +348,18 @@ function Test-TargetResource
     {
         throw ("At least one of the following parameters must be specified: " + `
                 "SigningCertificateThumbprint, SigningCertificateFilePath, MetadataEndPoint.")
-        return
     }
 
     if ($PSBoundParameters.ContainsKey("MetadataEndPoint") -and `
             $PSBoundParameters.ContainsKey("RegisteredIssuerNameIdentifier"))
     {
         throw ("Cannot use both parameters MetadataEndPoint and RegisteredIssuerNameIdentifier at the same time.")
-        return
     }
 
     if ($PSBoundParameters.ContainsKey("MetadataEndPoint") -and `
             $PSBoundParameters.ContainsKey("RegisteredIssuerNameRealm"))
     {
         throw ("Cannot use both parameters MetadataEndPoint and RegisteredIssuerNameRealm at the same time.")
-        return
     }
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
