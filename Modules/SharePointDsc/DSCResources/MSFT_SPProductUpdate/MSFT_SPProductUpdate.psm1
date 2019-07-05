@@ -391,7 +391,19 @@ function Set-TargetResource
 
     $installedVersion = Get-SPDscInstalledProductVersion
 
-    if ($ShutdownServices)
+    Write-Verbose -Message "Try to load local Farm"
+
+    $farmIsAvailable = Invoke-SPDscCommand -Credential $InstallAccount `
+        -ScriptBlock {
+        $farm = Get-SPFarm -ErrorAction SilentlyContinue
+        if ($null -eq $farm)
+        {
+            return $false
+        }
+        return $true
+    }
+
+    if ($ShutdownServices -and $farmIsAvailable)
     {
         Write-Verbose -Message "Stopping services to speed up installation process"
 
@@ -527,7 +539,7 @@ function Set-TargetResource
         }
     }
 
-    if ($ShutdownServices)
+    if ($ShutdownServices -and $farmIsAvailable)
     {
         Write-Verbose -Message "Restart stopped services"
         Set-Service -Name "SPTimerV4" -StartupType Automatic

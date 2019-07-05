@@ -90,6 +90,11 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             return $true
         }
 
+        # Additional mock needed for fixing #1087
+        Mock -CommandName Get-SPFarm {
+            return $true
+        }
+
         Mock -CommandName Get-Service -MockWith {
             $service = @{
                 Status = "Running"
@@ -247,6 +252,10 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
             Add-TestRegistryData -PatchLevel "RTM"
 
+            Mock -CommandName Get-SPFarm {
+                return $null
+            }
+
             Mock -CommandName Get-ItemProperty -MockWith {
                 if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 15)
                 {
@@ -295,6 +304,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
             It "Should run the Start-Process function in the set method" {
                 Set-TargetResource @testParams
+                # MockCalled set to 0, as there is no farm available.
+                Assert-MockCalled Get-Service -Exactly 0
                 Assert-MockCalled Start-Process
             }
 
@@ -677,6 +688,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
             It "Should run the Start-Process function in the set method" {
                 Set-TargetResource @testParams
+                Assert-MockCalled Get-Service -Exactly 6
                 Assert-MockCalled Start-Process
             }
 
