@@ -19447,7 +19447,7 @@ param(
  }
 
 
-function Set-SPTrustedSecurityTokenIssuer {
+ function Set-SPTrustedSecurityTokenIssuer {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='High')]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -19455,32 +19455,29 @@ param(
     [object]
     ${Identity},
 
-    [ValidateNotNullOrEmpty()]
     [string]
     ${Description},
 
+    [Parameter(ParameterSetName='ManualConfigParameterSet', Mandatory=$true)]
     [string]
     ${RegisteredIssuerName},
 
-    [Parameter(ParameterSetName='MetadataEndPointParameterSet')]
+    [switch]
+    ${IsTrustBroker},
+
+    [Parameter(ParameterSetName='ManualConfigParameterSet', Mandatory=$true)]
+    [ValidateNotNull()]
+    [Object]
+    ${Certificate},
+
+    [Parameter(ParameterSetName='MetadataEndPointParameterSet', Mandatory=$true)]
     [ValidateNotNull()]
     [uri]
     ${MetadataEndPoint},
 
-    [Parameter(ParameterSetName='ImportCertificateParameterSet')]
-    [ValidateNotNull()]
-    [System.Security.Cryptography.X509Certificates.X509Certificate2]
-    ${Certificate},
-
-    [ValidateNotNullOrEmpty()]
-    [switch]
-    ${IsTrustBroker},
-
     [Parameter(ValueFromPipeline=$true)]
     [object]
     ${AssignmentCollection})
-
-
  }
 
 
