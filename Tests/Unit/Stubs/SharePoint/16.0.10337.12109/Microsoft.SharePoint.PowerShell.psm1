@@ -11179,7 +11179,7 @@ function Add-DatabaseToAvailabilityGroup {
    }
 
 
-  function New-SPTrustedSecurityTokenIssuer {
+   function New-SPTrustedSecurityTokenIssuer {
     [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='High')]
   param(
       [Parameter(Mandatory=$true, Position=0)]
@@ -11187,34 +11187,27 @@ function Add-DatabaseToAvailabilityGroup {
       [string]
       ${Name},
 
-      [ValidateNotNullOrEmpty()]
       [string]
       ${Description},
 
-      [ValidateNotNullOrEmpty()]
+      [Parameter(ParameterSetName='ManualConfigParameterSet', Mandatory=$true)]
       [string]
       ${RegisteredIssuerName},
 
-      [ValidateNotNullOrEmpty()]
       [switch]
       ${IsTrustBroker},
 
-      [Parameter(ParameterSetName='ImportCertificateParameterSet', Mandatory=$true)]
-      [ValidateNotNull()]
-      [object]
-      #[System.Security.Cryptography.X509Certificates.X509Certificate2]
+      [Parameter(ParameterSetName='ManualConfigParameterSet', Mandatory=$true)]
+      [Object]
       ${Certificate},
 
       [Parameter(ParameterSetName='MetadataEndPointParameterSet', Mandatory=$true)]
-      [ValidateNotNull()]
       [uri]
       ${MetadataEndPoint},
 
       [Parameter(ValueFromPipeline=$true)]
       [object]
       ${AssignmentCollection})
-
-
    }
 
 
@@ -19582,7 +19575,7 @@ function Add-DatabaseToAvailabilityGroup {
    }
 
 
-  function Set-SPTrustedSecurityTokenIssuer {
+   function Set-SPTrustedSecurityTokenIssuer {
     [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='High')]
   param(
       [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
@@ -19590,33 +19583,29 @@ function Add-DatabaseToAvailabilityGroup {
       [object]
       ${Identity},
 
-      [ValidateNotNullOrEmpty()]
       [string]
       ${Description},
 
+      [Parameter(ParameterSetName='ManualConfigParameterSet', Mandatory=$true)]
       [string]
       ${RegisteredIssuerName},
 
-      [Parameter(ParameterSetName='MetadataEndPointParameterSet')]
+      [switch]
+      ${IsTrustBroker},
+
+      [Parameter(ParameterSetName='ManualConfigParameterSet', Mandatory=$true)]
+      [ValidateNotNull()]
+      [Object]
+      ${Certificate},
+
+      [Parameter(ParameterSetName='MetadataEndPointParameterSet', Mandatory=$true)]
       [ValidateNotNull()]
       [uri]
       ${MetadataEndPoint},
 
-      [Parameter(ParameterSetName='ImportCertificateParameterSet')]
-      [ValidateNotNull()]
-      [object]
-      #[System.Security.Cryptography.X509Certificates.X509Certificate2]
-      ${Certificate},
-
-      [ValidateNotNullOrEmpty()]
-      [switch]
-      ${IsTrustBroker},
-
       [Parameter(ValueFromPipeline=$true)]
       [object]
       ${AssignmentCollection})
-
-
    }
 
 
