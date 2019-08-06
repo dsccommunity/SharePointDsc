@@ -35,6 +35,39 @@
             "createTemporaryIntegratedConsole": true
         },
         {
+            "type": "PowerShell",
+            "request": "launch",
+            "name": "Get current unit test code overage (SP2013)",
+            "script": "${workspaceRoot}/.vscode/GetTestCoverage.ps1",
+            "args": [
+                "${file}",
+                "${workspaceRoot}/Tests/Unit/Stubs/SharePoint/15.0.4805.1000/Microsoft.SharePoint.PowerShell.psm1"
+            ],
+            "createTemporaryIntegratedConsole": true
+        },
+        {
+            "type": "PowerShell",
+            "request": "launch",
+            "name": "Get current unit test code overage (SP2016)",
+            "script": "${workspaceRoot}/.vscode/GetTestCoverage.ps1",
+            "args": [
+                "${file}",
+                "${workspaceRoot}/Tests/Unit/Stubs/SharePoint/16.0.4456.1000/Microsoft.SharePoint.PowerShell.psm1"
+            ],
+            "createTemporaryIntegratedConsole": true
+        },
+        {
+            "type": "PowerShell",
+            "request": "launch",
+            "name": "Get current unit test code overage (SP2019)",
+            "script": "${workspaceRoot}/.vscode/GetTestCoverage.ps1",
+            "args": [
+                "${file}",
+                "${workspaceRoot}/Tests/Unit/Stubs/SharePoint/16.0.10337.12109/Microsoft.SharePoint.PowerShell.psm1"
+            ],
+            "createTemporaryIntegratedConsole": true
+        },
+        {
             "name": "Debug current file",
             "type": "PowerShell",
             "request": "launch",
