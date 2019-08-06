@@ -91,16 +91,19 @@ function Get-TargetResource
         $uri = $CentralAdministrationUrl -as [System.Uri]
         if ($null -eq $uri.AbsoluteUri)
         {
-            throw "CentralAdministrationUrl is not a valid URI. It should include the scheme (http/https) and address."
+            Write-Verbose -Message ("CentralAdministrationUrl is not a valid URI. It should " + `
+                    "include the scheme (http/https) and address.")
         }
         if ($uri.scheme -ne 'https')
         {
-            throw "Currently, the CentralAdministrationUrl parameter can only be used with HTTPS. To provision CA on " + `
-                "HTTP, omit the CentralAdministrationUrl parameter to provision CA on http://servername:port."
+            Write-Verbose -Message ("Currently, the CentralAdministrationUrl parameter can only " + `
+                    "be used with HTTPS. To provision CA on HTTP, omit the CentralAdministrationUrl " + `
+                    "parameter to provision CA on http://servername:port.")
         }
         if ($CentralAdministrationUrl -match ':\d+')
         {
-            throw "CentralAdministrationUrl should not specify port. Use CentralAdministrationPort instead."
+            Write-Verbose -Message ("CentralAdministrationUrl should not specify port. Use " + `
+                    "CentralAdministrationPort instead.")
         }
     }
 
@@ -413,6 +416,24 @@ function Set-TargetResource
     {
         throw ("SharePointDsc does not support removing a server from a farm, please set the " + `
                 "ensure property to 'present'")
+    }
+
+    if ($PSBoundParameters.ContainsKey("CentralAdministrationUrl"))
+    {
+        $uri = $CentralAdministrationUrl -as [System.Uri]
+        if ($null -eq $uri.AbsoluteUri)
+        {
+            throw "CentralAdministrationUrl is not a valid URI. It should include the scheme (http/https) and address."
+        }
+        if ($uri.scheme -ne 'https')
+        {
+            throw "Currently, the CentralAdministrationUrl parameter can only be used with HTTPS. To provision CA on " + `
+                "HTTP, omit the CentralAdministrationUrl parameter to provision CA on http://servername:port."
+        }
+        if ($CentralAdministrationUrl -match ':\d+')
+        {
+            throw "CentralAdministrationUrl should not specify port. Use CentralAdministrationPort instead."
+        }
     }
 
     $CurrentValues = Get-TargetResource @PSBoundParameters

@@ -165,4 +165,7 @@ function Test-TargetResource
         -ValuesToCheck @("State")
 }
 
-Export-ModuleMember -Function *-TargetResource
+Export-ModuleMember -Function Get-TargetResource, `
+    Test-TargetResource, `
+    Set-TargetResource, `
+    Get-SPDscRoleTestMethod

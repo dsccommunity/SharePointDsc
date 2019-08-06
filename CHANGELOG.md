@@ -5,6 +5,11 @@
 * SharePointDsc generic
   * Added new launch actions to vscode to allow code coverage reports for
     the current unit test file.
+* SPFarm
+  * Moved check for CentralAdministrationUrl is HTTP to Set method,
+    to prevent issues with ReverseDsc.
+* SPInstall
+  * Updated error code checks to force reboot.
 * SPProductUpdate
   * Fixes an issue using ShutdownServices when no Farm is available.
 * SPTrustedRootAuthority

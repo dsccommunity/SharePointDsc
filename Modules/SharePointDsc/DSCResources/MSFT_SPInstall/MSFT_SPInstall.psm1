@@ -326,11 +326,17 @@ function Set-TargetResource
         Remove-SPDscZoneMap -ServerName $serverName
     }
 
+    # Exit codes: https://docs.microsoft.com/en-us/windows/desktop/msi/error-codes
     switch ($setup.ExitCode)
     {
         0
         {
             Write-Verbose -Message "SharePoint binary installation complete"
+            $global:DSCMachineStatus = 1
+        }
+        3010
+        {
+            Write-Verbose -Message "SharePoint binary installation complete, but reboot is required"
             $global:DSCMachineStatus = 1
         }
         30066
