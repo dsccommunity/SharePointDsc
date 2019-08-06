@@ -1,6 +1,6 @@
 # Change log for SharePointDsc
 
-## Unreleased
+## v3.6
 
 * SharePointDsc generic
   * Added new launch actions to vscode to allow code coverage reports for
