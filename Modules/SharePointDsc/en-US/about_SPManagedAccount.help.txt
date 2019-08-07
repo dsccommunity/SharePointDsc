@@ -1,4 +1,4 @@
-﻿.NAME
+.NAME
     SPManagedAccount
 
 # Description
@@ -15,7 +15,7 @@
     
     The default value for the Ensure parameter is Present. When not specifying this
     parameter, the managed account is created.
-    
+
 .PARAMETER AccountName
     Key - string
     The username of the account
@@ -45,10 +45,9 @@
     Write - String
     POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5
 
+.EXAMPLE 1
 
-.EXAMPLE
-    This example shows how to create a new managed account in a local farm.
-
+This example shows how to create a new managed account in a local farm.
 
     Configuration Example 
     {
@@ -74,11 +73,10 @@
         }
     }
 
+.EXAMPLE 2
 
-.EXAMPLE
-    This example shows how to create a new managed account in a local farm, using
-    the automatic password change schedule
-
+This example shows how to create a new managed account in a local farm, using
+the automatic password change schedule
 
     Configuration Example 
     {

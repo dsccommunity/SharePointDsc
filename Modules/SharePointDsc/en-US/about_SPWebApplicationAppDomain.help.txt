@@ -1,4 +1,4 @@
-﻿.NAME
+.NAME
     SPWebApplicationAppDomain
 
 # Description
@@ -11,7 +11,7 @@
     application, allowing for the setting of unique app domains for each extension
     of a web application. The app prefix should still be set using the SPAppDomain
     resource before this is applied to customise a specific zone.
-    
+
 .PARAMETER WebAppUrl
     Key - string
     The URL of the web application to set the app domain for
@@ -37,10 +37,9 @@
     Write - String
     POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5
 
+.EXAMPLE 1
 
-.EXAMPLE
-    This example shows how to set the app domain for a specified web application
-
+This example shows how to set the app domain for a specified web application
 
     Configuration Example
     {

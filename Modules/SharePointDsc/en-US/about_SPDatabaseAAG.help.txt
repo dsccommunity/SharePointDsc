@@ -1,4 +1,4 @@
-﻿.NAME
+.NAME
     SPDatabaseAAG
 
 # Description
@@ -27,7 +27,7 @@
     connection string to the specified availability group. If this is NOT what
     you want (for example: You are using SQL aliasses which point to the AG
     listener), you should NOT use this resource.
-    
+
 .PARAMETER DatabaseName
     Key - string
     The name of the database to put in the AlwaysOn group
@@ -49,11 +49,10 @@
     Write - String
     POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5
 
+.EXAMPLE 1
 
-.EXAMPLE
-    This example takes an existing SharePoint database and puts it in to the specified
-    AlwaysOn Availability Group (AAG).
-
+This example takes an existing SharePoint database and puts it in to the specified
+AlwaysOn Availability Group (AAG).
 
     Configuration Example 
     {
@@ -75,11 +74,10 @@
         }
     }
 
+.EXAMPLE 2
 
-.EXAMPLE
-    This example takes existing SharePoint databases, based on the database name pattern, and puts
-    them in to the specified AlwaysOn Availability Group (AAG).
-
+This example takes existing SharePoint databases, based on the database name pattern, and puts
+them in to the specified AlwaysOn Availability Group (AAG).
 
     Configuration Example 
     {
@@ -101,10 +99,9 @@
         }
     }
 
+.EXAMPLE 3
 
-.EXAMPLE
-    This example removes a database from the specified AlwaysOn Availability Group (AAG)
-
+This example removes a database from the specified AlwaysOn Availability Group (AAG)
 
     Configuration Example 
     {

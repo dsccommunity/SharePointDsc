@@ -1,4 +1,4 @@
-﻿.NAME
+.NAME
     SPDistributedCacheClientSettings
 
 # Description
@@ -13,7 +13,7 @@
     DistributedActivityFeedCache, DistributedActivityFeedLMTCache,
     DistributedBouncerCache, DistributedDefaultCache, DistributedSearchCache,
     DistributedSecurityTrimmingCache, and DistributedServerToAppServerAccessTokenCache.
-    
+
 .PARAMETER IsSingleInstance
     Key - String
     Allowed values: Yes
@@ -203,10 +203,9 @@
     Write - String
     POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5
 
+.EXAMPLE 1
 
-.EXAMPLE
-    This example configures the distributed cache client settings.
-
+This example configures the distributed cache client settings.
 
     Configuration Example
     {
@@ -256,11 +255,10 @@
         }
     }
 
+.EXAMPLE 2
 
-.EXAMPLE
-    This example configures the distributed cache client settings
-    in SharePoint 2016.
-
+This example configures the distributed cache client settings
+in SharePoint 2016.
 
     Configuration Example
     {

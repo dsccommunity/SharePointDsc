@@ -1,4 +1,4 @@
-﻿.NAME
+.NAME
     SPSearchContentSource
 
 # Description
@@ -11,7 +11,7 @@
     
     The default value for the Ensure parameter is Present. When not specifying this
     parameter, the content source is created.
-    
+
 .PARAMETER Name
     Key - String
     The name of the content source
@@ -76,10 +76,9 @@
     Write - String
     POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5
 
+.EXAMPLE 1
 
-.EXAMPLE
-    This example shows how to create a SharePoint sites content source
-
+This example shows how to create a SharePoint sites content source
 
     Configuration Example 
     {
@@ -107,10 +106,9 @@
         }
     }
 
+.EXAMPLE 2
 
-.EXAMPLE
-    This example shows how to create a website content source
-
+This example shows how to create a website content source
 
     Configuration Example 
     {

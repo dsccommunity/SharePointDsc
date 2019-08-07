@@ -1,4 +1,4 @@
-﻿.NAME
+.NAME
     SPWebAppPeoplePickerSettings
 
 # Description
@@ -18,7 +18,7 @@
     The encryption key must be set on every front-end web server in the farm
     on which SharePoint is installed:
     https://technet.microsoft.com/en-us/library/gg602075(v=office.15).aspx#section3
-    
+
 .PARAMETER WebAppUrl
     Key - string
     The URL of the web application
@@ -47,10 +47,9 @@
     Write - String
     POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5
 
+.EXAMPLE 1
 
-.EXAMPLE
-    This example shows how to configure the people picker settings on the specified web application
-
+This example shows how to configure the people picker settings on the specified web application
 
     Configuration Example
     {

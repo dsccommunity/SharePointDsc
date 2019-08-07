@@ -1,4 +1,4 @@
-﻿.NAME
+.NAME
     SPMachineTranslationServiceApp
 
 # Description
@@ -14,7 +14,7 @@
     
     The default value for the Ensure parameter is Present. When not specifying this
     parameter, the service application is provisioned.
-    
+
 .PARAMETER Name
     Key - String
     Specifies the name of the service application.
@@ -44,10 +44,9 @@
     Write - String
     POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5
 
+.EXAMPLE 1
 
-.EXAMPLE
-    This example shows how to deploy the SP Machine Translation Service App to the local SharePoint farm.
-
+This example shows how to deploy the SP Machine Translation Service App to the local SharePoint farm.
 
 Configuration Example 
 {
@@ -71,10 +70,9 @@ Configuration Example
     }
 }
 
+.EXAMPLE 2
 
-.EXAMPLE
-    This example shows how to remove the SP Machine Translation Service App to the local SharePoint farm.
-
+This example shows how to remove the SP Machine Translation Service App to the local SharePoint farm.
 
 Configuration Example 
 {

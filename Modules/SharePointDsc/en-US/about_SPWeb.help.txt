@@ -1,4 +1,4 @@
-﻿.NAME
+.NAME
     SPWeb
 
 # Description
@@ -11,7 +11,7 @@
     
     The default value for the Ensure parameter is Present. When not specifying this
     parameter, the web is created.
-    
+
 .PARAMETER Url
     Key - string
     The URL of the web
@@ -61,10 +61,9 @@
     Write - String
     POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5
 
+.EXAMPLE 1
 
-.EXAMPLE
-    This example deploys a subsite in a specific location
-
+This example deploys a subsite in a specific location
 
     Configuration Example 
     {
@@ -90,11 +89,10 @@
         }
     }
 
+.EXAMPLE 2
 
-.EXAMPLE
-    This example deploys a subsite in a specific location and enables
-    access requests for this web
-
+This example deploys a subsite in a specific location and enables
+access requests for this web
 
     Configuration Example 
     {
@@ -122,11 +120,10 @@
         }
     }
 
+.EXAMPLE 3
 
-.EXAMPLE
-    This example deploys a subsite in a specific location and disables
-    access requests for this web
-
+This example deploys a subsite in a specific location and disables
+access requests for this web
 
     Configuration Example 
     {

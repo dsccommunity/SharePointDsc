@@ -1,4 +1,4 @@
-﻿.NAME
+.NAME
     SPWebAppProxyGroup
 
 # Description
@@ -15,7 +15,7 @@
     This resource is used in conjunction with the SPServiceAppProxyGroup resource,
     which creates the proxy groups and associates the desired service application
     proxies with it. Within your configuration, that resource should be a
-    
+
 .PARAMETER WebAppUrl
     Key - String
     URL of the web application
@@ -28,10 +28,9 @@
     Write - String
     POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5
 
+.EXAMPLE 1
 
-.EXAMPLE
-    This example shows how to assign a specific proxy group to the specified web app 
-
+This example shows how to assign a specific proxy group to the specified web app 
 
     Configuration Example 
     {

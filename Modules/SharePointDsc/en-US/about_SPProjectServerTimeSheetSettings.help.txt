@@ -1,4 +1,4 @@
-﻿.NAME
+.NAME
     SPProjectServerTimeSheetSettings
 
 # Description
@@ -8,7 +8,7 @@
     
     Allows you to configure the default timesheet settings for a specific PWA
     instance.
-    
+
 .PARAMETER Url
     Key - string
     The default zone URL of the Project site to set timesheet settings for
@@ -97,11 +97,10 @@
     Write - String
     POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5
 
+.EXAMPLE 1
 
-.EXAMPLE
-    This example demonstrates how to apply timesheet settings to a specific
-    PWA instance
-
+This example demonstrates how to apply timesheet settings to a specific
+PWA instance
 
 Configuration Example 
 {

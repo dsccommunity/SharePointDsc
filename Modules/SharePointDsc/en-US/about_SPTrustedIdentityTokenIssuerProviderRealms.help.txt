@@ -1,4 +1,4 @@
-﻿.NAME
+.NAME
     SPTrustedIdentityTokenIssuerProviderRealms
 
 # Description
@@ -16,7 +16,7 @@
     without changing any other realms that are set already. Include and
     Exclude can be combined together. RealmUrl is the key and should be
     unique, otherwise existing RealmUrn value will be updated/replaced.
-    
+
 .PARAMETER IssuerName
     Key - String
     Name of the SPTrustedIdentityTokenIssuer
@@ -42,11 +42,10 @@
     Write - String
     POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5
 
+.EXAMPLE 1
 
-.EXAMPLE
-    This example adds provider realms to existing trusted token issuer.
-    Existing will be removed.
-
+This example adds provider realms to existing trusted token issuer.
+Existing will be removed.
 
 Configuration Example 
 {
@@ -79,11 +78,10 @@ Configuration Example
     }
 }
 
+.EXAMPLE 2
 
-.EXAMPLE
-    This example adds provider realms to existing trusted token issuer.
-    Existing are left and not removed.
-
+This example adds provider realms to existing trusted token issuer.
+Existing are left and not removed.
 
 Configuration Example 
 {
@@ -117,12 +115,11 @@ Configuration Example
     }
 }
 
+.EXAMPLE 3
 
-.EXAMPLE
-    This example excludes provider realms from 
-    existing trusted token issuer.
-    Existing and not excluded are left and not removed.
-
+This example excludes provider realms from 
+existing trusted token issuer.
+Existing and not excluded are left and not removed.
 
 Configuration Example 
 {
@@ -155,12 +152,11 @@ Configuration Example
     }
 }
 
+.EXAMPLE 4
 
-.EXAMPLE
-    This example includes and excludes provider realms 
-    from existing trusted token issuer.
-    Existing and not excluded are left and not removed.
-
+This example includes and excludes provider realms 
+from existing trusted token issuer.
+Existing and not excluded are left and not removed.
 
 Configuration Example 
 {

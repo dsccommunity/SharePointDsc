@@ -1,4 +1,4 @@
-﻿.NAME
+.NAME
     SPUserProfileSyncService
 
 # Description
@@ -29,7 +29,7 @@
     This does however mean that CredSSP is required, which has some security
     implications. More information about these risks can be found at:
     http://www.powershellmagazine.com/2014/03/06/accidental-sabotage-beware-of-credssp/
-    
+
 .PARAMETER UserProfileServiceAppName
     Key - string
     The name of the user profile service for this sync instance
@@ -51,10 +51,9 @@
     Write - String
     POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5
 
+.EXAMPLE 1
 
-.EXAMPLE
-    This example provisions the user profile sync service to the local server
-
+This example provisions the user profile sync service to the local server
 
     Configuration Example
     {

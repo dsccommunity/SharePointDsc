@@ -1,4 +1,4 @@
-﻿.NAME
+.NAME
     SPSearchMetadataCategory
 
 # Description
@@ -11,7 +11,7 @@
     
     The default value for the Ensure parameter is Present. When not specifying this
     parameter, the Metadata Category is created.
-    
+
 .PARAMETER Name
     Key - String
     The name of the Metadata Category
@@ -41,10 +41,9 @@
     Write - String
     POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5
 
+.EXAMPLE 1
 
-.EXAMPLE
-    This example shows how to create a new Search Metadata Category, using the required parameters
-
+This example shows how to create a new Search Metadata Category, using the required parameters
 
     Configuration Example
     {

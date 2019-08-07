@@ -1,4 +1,4 @@
-﻿.NAME
+.NAME
     SPServiceAppSecurity
 
 # Description
@@ -82,7 +82,7 @@
     $perms = Get-SPServiceApplicationSecurity  -Identity $serviceApp -Admin
     $perms.NamedAccessRights.Name
     ```
-    
+
 .PARAMETER ServiceAppName
     Key - String
     The name of the service application you wish to apply security settings to
@@ -108,13 +108,12 @@
     Write - String
     POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5
 
+.EXAMPLE 1
 
-.EXAMPLE
-    This example shows how full control permission can be given to the farm
-    account and service app pool account to the user profile service app's
-    sharing permission.
-    It also shows granting access to specific areas to a user.
-
+This example shows how full control permission can be given to the farm
+account and service app pool account to the user profile service app's
+sharing permission.
+It also shows granting access to specific areas to a user.
 
     Configuration Example
     {
@@ -150,12 +149,11 @@
         }
     }
 
+.EXAMPLE 2
 
-.EXAMPLE
-    This example shows how to use the local farm token to grant
-    full control permission to the local farm to the
-    user profile service app's sharing permission.
-
+This example shows how to use the local farm token to grant
+full control permission to the local farm to the
+user profile service app's sharing permission.
 
     Configuration Example
     {

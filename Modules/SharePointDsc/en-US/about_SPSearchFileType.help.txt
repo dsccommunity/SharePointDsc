@@ -1,4 +1,4 @@
-﻿.NAME
+.NAME
     SPSearchFileType
 
 # Description
@@ -12,7 +12,7 @@
     
     The default value for the Ensure parameter is Present. When not specifying this
     parameter, the file type is added.
-    
+
 .PARAMETER FileType
     Key - string
     The name of the file type
@@ -42,10 +42,9 @@
     Write - String
     POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5
 
+.EXAMPLE 1
 
-.EXAMPLE
-    This example shows how to apply settings to a specific file type in search, using the required parameters
-
+This example shows how to apply settings to a specific file type in search, using the required parameters
 
     Configuration Example 
     {
@@ -69,10 +68,9 @@
         }
     }
 
+.EXAMPLE 2
 
-.EXAMPLE
-    This example shows how to disable a specific file type in search
-
+This example shows how to disable a specific file type in search
 
     Configuration Example 
     {

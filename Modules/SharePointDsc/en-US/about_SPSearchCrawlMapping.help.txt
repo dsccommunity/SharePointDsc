@@ -1,4 +1,4 @@
-﻿.NAME
+.NAME
     SPSearchCrawlMapping
 
 # Description
@@ -12,7 +12,7 @@
     
     The default value for the Ensure parameter is Present. When you omit this
     parameter the crawl rule is created.
-    
+
 .PARAMETER ServiceAppName
     Key - String
     Search Service Application Name
@@ -34,10 +34,9 @@
     Write - String
     POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5
 
+.EXAMPLE 1
 
-.EXAMPLE
-    This example shows how to apply a Search Crawl Mapping rule to a search application.
-
+This example shows how to apply a Search Crawl Mapping rule to a search application.
 
     Configuration Example 
     {

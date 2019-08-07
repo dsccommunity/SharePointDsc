@@ -1,4 +1,4 @@
-﻿.NAME
+.NAME
     SPProductUpdate
 
 # Description
@@ -32,7 +32,7 @@
        (SPInstallLanguagePack)
     3. Install Cumulative Updates (SPProductUpdate)
     4. Create SPFarm (SPFarm)
-    
+
 .PARAMETER SetupFile
     Key - String
     The name of the update setup file
@@ -59,11 +59,10 @@
     Write - String
     POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5
 
+.EXAMPLE 1
 
-.EXAMPLE
-    This example installs the Cumulative Update only in the specified window.
-    It also shuts down services to speed up the installation process.
-
+This example installs the Cumulative Update only in the specified window.
+It also shuts down services to speed up the installation process.
 
     Configuration Example 
     {
@@ -87,11 +86,10 @@
         }
     }
 
+.EXAMPLE 2
 
-.EXAMPLE
-    This example installs the SharePoint 2013 Service Pack only in the specified window.
-    It also shuts down services to speed up the installation process.
-
+This example installs the SharePoint 2013 Service Pack only in the specified window.
+It also shuts down services to speed up the installation process.
 
     Configuration Example 
     {
@@ -115,11 +113,10 @@
         }
     }
 
+.EXAMPLE 3
 
-.EXAMPLE
-    This example installs the SharePoint 2013 Dutch Language Pack Service Pack only in the specified window.
-    It also shuts down services to speed up the installation process.
-
+This example installs the SharePoint 2013 Dutch Language Pack Service Pack only in the specified window.
+It also shuts down services to speed up the installation process.
 
     Configuration Example 
     {

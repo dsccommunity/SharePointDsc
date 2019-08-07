@@ -1,4 +1,4 @@
-﻿.NAME
+.NAME
     SPProjectServerWssSettings
 
 # Description
@@ -14,7 +14,7 @@
     or PsDscRunAsCredential properties) needs to have elevated rights to execute
     this resource. It is recommended to use the SharePoint Farm Account for this
     purpose to avoid receiving a "GeneralSecurityAccessDenied" error.
-    
+
 .PARAMETER Url
     Key - string
     The default zone URL of the Project site to set WSS settings for
@@ -28,10 +28,9 @@
     Write - String
     POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5
 
+.EXAMPLE 1
 
-.EXAMPLE
-    This example demonstrates how to set WSS settings for a PWA site
-
+This example demonstrates how to set WSS settings for a PWA site
 
 Configuration Example 
 {

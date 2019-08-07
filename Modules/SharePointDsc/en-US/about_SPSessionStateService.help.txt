@@ -1,4 +1,4 @@
-﻿.NAME
+.NAME
     SPSessionStateService
 
 # Description
@@ -12,7 +12,7 @@
     
     The default value for the Ensure parameter is Present. When not specifying this
     parameter, the service application is provisioned.
-    
+
 .PARAMETER DatabaseName
     Key - string
     The name of the database for the service
@@ -34,10 +34,9 @@
     Write - String
     POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5
 
+.EXAMPLE 1
 
-.EXAMPLE
-    This example creates a new session state service on the local farm.
-
+This example creates a new session state service on the local farm.
 
     Configuration Example 
     {

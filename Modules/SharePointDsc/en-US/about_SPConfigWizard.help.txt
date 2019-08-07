@@ -1,4 +1,4 @@
-﻿.NAME
+.NAME
     SPConfigWizard
 
 # Description
@@ -11,7 +11,7 @@
     DatabaseUpgradeDays and DatabaseUpgradeTime parameters specify a window in
     which the update can be installed. This module has to be used to complete the
     update installation step, performed by SPProductUpdate.
-    
+
 .PARAMETER IsSingleInstance
     Key - String
     Allowed values: Yes
@@ -35,10 +35,9 @@
     Write - String
     POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5
 
+.EXAMPLE 1
 
-.EXAMPLE
-    This example runs the Configuration Wizard as soon as it is applied.
-
+This example runs the Configuration Wizard as soon as it is applied.
 
     Configuration Example
     {
@@ -58,11 +57,10 @@
         }
     }
 
+.EXAMPLE 2
 
-.EXAMPLE
-    This example only runs the Configuration Wizard in the specified window:
-    - Saturday and Sunday night between 3am and 5am.
-
+This example only runs the Configuration Wizard in the specified window:
+- Saturday and Sunday night between 3am and 5am.
 
     Configuration Example
     {

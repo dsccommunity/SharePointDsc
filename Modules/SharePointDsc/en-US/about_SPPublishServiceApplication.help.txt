@@ -1,4 +1,4 @@
-﻿.NAME
+.NAME
     SPPublishServiceApplication
 
 # Description
@@ -23,7 +23,7 @@
     
     The default value for the Ensure parameter is Present. When not specifying this
     parameter, the service application is provisioned.
-    
+
 .PARAMETER Name
     Key - string
     The name of the service application to publish
@@ -37,11 +37,10 @@
     Write - String
     POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5
 
+.EXAMPLE 1
 
-.EXAMPLE
-    This example shows how to ensure that the managed metadata service is published
-    within the farm.
-
+This example shows how to ensure that the managed metadata service is published
+within the farm.
 
     Configuration Example
     {
@@ -62,11 +61,10 @@
         }
     }
 
+.EXAMPLE 2
 
-.EXAMPLE
-    This example shows how to ensure that the Secure Store Service is not
-    published within the farm.
-
+This example shows how to ensure that the Secure Store Service is not
+published within the farm.
 
     Configuration Example
     {

@@ -1,4 +1,4 @@
-﻿.NAME
+.NAME
     SPDiagnosticLoggingSettings
 
 # Description
@@ -10,7 +10,7 @@
     (ULS) logging on servers in the farm. These settings are applied to the
     diagnostic logging service for the farm and do not need to be applied to each
     server individually, the settings will be propagated throughout the farm when
-    
+
 .PARAMETER IsSingleInstance
     Key - String
     Allowed values: Yes
@@ -92,12 +92,11 @@
     Write - String
     POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5
 
+.EXAMPLE 1
 
-.EXAMPLE
-    This example applies the specified diagnostic logging settings to the local
-    SharPoint farm. Any setting not defined will be left as it default, or to
-    whatever value has been manually configured outside of DSC.
-
+This example applies the specified diagnostic logging settings to the local
+SharPoint farm. Any setting not defined will be left as it default, or to
+whatever value has been manually configured outside of DSC.
 
     Configuration Example
     {

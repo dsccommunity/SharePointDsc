@@ -1,4 +1,4 @@
-﻿.NAME
+.NAME
     SPVisioServiceApp
 
 # Description
@@ -12,7 +12,7 @@
     
     The default value for the Ensure parameter is Present. When not specifying this
     parameter, the service application is provisioned.
-    
+
 .PARAMETER Name
     Key - string
     The name of the service application
@@ -34,10 +34,9 @@
     Write - String
     POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5
 
+.EXAMPLE 1
 
-.EXAMPLE
-    This example shows how to create a new visio services service app in the local farm
-
+This example shows how to create a new visio services service app in the local farm
 
     Configuration Example
     {
@@ -58,12 +57,11 @@
         }
     }
 
+.EXAMPLE 2
 
-.EXAMPLE
-    This example shows how to remove a visio services service app in the local farm.
-    The ApplicationPool property is still requried but is not used when removing, so
-    the value used here doesn't matter.
-
+This example shows how to remove a visio services service app in the local farm.
+The ApplicationPool property is still requried but is not used when removing, so
+the value used here doesn't matter.
 
     Configuration Example
     {

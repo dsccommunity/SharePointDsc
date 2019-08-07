@@ -1,4 +1,4 @@
-﻿.NAME
+.NAME
     SPWebAppThrottlingSettings
 
 # Description
@@ -13,7 +13,7 @@
     (or whatever they have been manually changed to within SharePoint). Happy hour
     is the setting used to control the window where threshold do not apply
     throughout the day. You can specify the start time of this window as well as
-    
+
 .PARAMETER WebAppUrl
     Key - string
     The URL of the web application
@@ -66,10 +66,9 @@
     Write - string
     POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5
 
+.EXAMPLE 1
 
-.EXAMPLE
-    This example shows how to apply throttling settings to a specific web app
-
+This example shows how to apply throttling settings to a specific web app
 
     Configuration Example
     {

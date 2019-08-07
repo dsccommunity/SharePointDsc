@@ -1,4 +1,4 @@
-﻿.NAME
+.NAME
     SPUserProfileServiceAppPermissions
 
 # Description
@@ -11,7 +11,7 @@
     tagging. If you want to allow all users the ability to use a specific
     permisisons include "Everyone" as a user in the corresponding property. To
     specify that there should be no permissions on a type, use "none"
-    
+
 .PARAMETER ProxyName
     Key - string
     The name of the proxy that is attached to the user profile service you wish to set permissions for
@@ -32,11 +32,10 @@
     Write - String
     POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5
 
+.EXAMPLE 1
 
-.EXAMPLE
-    This example applies permissions for the user profile service application to limit
-    access to specific features.
-
+This example applies permissions for the user profile service application to limit
+access to specific features.
 
     Configuration Example 
     {

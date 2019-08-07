@@ -1,4 +1,4 @@
-﻿.NAME
+.NAME
     SPUserProfileProperty
 
 # Description
@@ -19,7 +19,7 @@
     
     The default value for the Ensure parameter is Present. When not specifying this
     parameter, the user profile property is created.
-    
+
 .PARAMETER Name
     Key - string
     The internal name of the user profile property
@@ -112,11 +112,10 @@
     Write - string
     POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5
 
+.EXAMPLE 1
 
-.EXAMPLE
-    This example deploys/updates the WorkEmail2 property in the user profile service
-    app
-
+This example deploys/updates the WorkEmail2 property in the user profile service
+app
 
 Configuration Example
 {

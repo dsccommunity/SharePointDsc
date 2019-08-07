@@ -1,4 +1,4 @@
-﻿.NAME
+.NAME
     SPManagedMetaDataServiceApp
 
 # Description
@@ -23,7 +23,7 @@
     
     ContentTypePushdownEnabled and ContentTypeSyndicationEnabled will only be altered
     if they are part of the bound parameters.
-    
+
 .PARAMETER Name
     Key - string
     The name of the managed metadata service application
@@ -77,10 +77,9 @@
     Write - String
     POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5
 
+.EXAMPLE 1
 
-.EXAMPLE
-    This example shows how to deploy the Managed Metadata service app to the local SharePoint farm.
-
+This example shows how to deploy the Managed Metadata service app to the local SharePoint farm.
 
     Configuration Example
     {
@@ -103,14 +102,13 @@
         }
     }
 
+.EXAMPLE 2
 
-.EXAMPLE
 
-    This example shows how to remove a specific managed metadata service app from the
-    local SharePoint farm. Because Application pool parameter is required
-    but is not acutally needed to remove the app, any text value can
-    be supplied for these as it will be ignored.
-
+This example shows how to remove a specific managed metadata service app from the
+local SharePoint farm. Because Application pool parameter is required
+but is not acutally needed to remove the app, any text value can
+be supplied for these as it will be ignored.
 
     Configuration Example
     {
@@ -132,11 +130,10 @@
         }
     }
 
+.EXAMPLE 3
 
-.EXAMPLE
-    This example shows how to deploy the Managed Metadata service app to the local SharePoint farm
-    and also include a specific list of users to be the term store administrators.
-
+This example shows how to deploy the Managed Metadata service app to the local SharePoint farm
+and also include a specific list of users to be the term store administrators.
 
     Configuration Example
     {
@@ -163,11 +160,10 @@
         }
     }
 
+.EXAMPLE 4
 
-.EXAMPLE
-    This example shows how to deploy the Managed Metadata service app to the local SharePoint farm
-    and also include a specific list of users to be the term store administrators.
-
+This example shows how to deploy the Managed Metadata service app to the local SharePoint farm
+and also include a specific list of users to be the term store administrators.
 
     Configuration Example
     {
@@ -196,11 +192,10 @@
         }
     }
 
+.EXAMPLE 5
 
-.EXAMPLE
-    This example shows how to deploy the Managed Metadata service app to the local SharePoint farm
-    and also include a specific list of users to be the term store administrators.
-
+This example shows how to deploy the Managed Metadata service app to the local SharePoint farm
+and also include a specific list of users to be the term store administrators.
 
 Configuration Example
 {
@@ -224,11 +219,10 @@ Configuration Example
     }
 }
 
+.EXAMPLE 6
 
-.EXAMPLE
-    This example shows how to deploy the Managed Metadata service app to the local SharePoint farm
-    and also include a specific list of users to be the term store administrators.
-
+This example shows how to deploy the Managed Metadata service app to the local SharePoint farm
+and also include a specific list of users to be the term store administrators.
 
 Configuration Example
 {

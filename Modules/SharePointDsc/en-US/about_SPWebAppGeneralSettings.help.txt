@@ -1,4 +1,4 @@
-﻿.NAME
+.NAME
     SPWebAppGeneralSettings
 
 # Description
@@ -11,7 +11,7 @@
     application is specified through the URL property, and then any combination of
     settings can be applied. Any settings not included will be left as the default
     (or whatever they have been manually changed to within SharePoint).
-    
+
 .PARAMETER WebAppUrl
     Key - string
     The URL of the web app to set the general settings for
@@ -101,11 +101,10 @@
     Write - string
     POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5
 
+.EXAMPLE 1
 
-.EXAMPLE
-    This example shows how to apply some of the available general settings to the
-    specified web app
-
+This example shows how to apply some of the available general settings to the
+specified web app
 
     Configuration Example
     {

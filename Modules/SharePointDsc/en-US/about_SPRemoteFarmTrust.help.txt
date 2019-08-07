@@ -1,4 +1,4 @@
-﻿.NAME
+.NAME
     SPRemoteFarmTrust
 
 # Description
@@ -13,7 +13,7 @@
     
     The default value for the Ensure parameter is Present. When not specifying this
     parameter, the remote farm trust is created.
-    
+
 .PARAMETER Name
     Key - string
     A name of the remote farm, used to create token issuer and root authority
@@ -35,11 +35,10 @@
     Write - String
     POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5
 
+.EXAMPLE 1
 
-.EXAMPLE
-    This example creates a remote farm trust so that the local web app trusts calls 
-    that will come from the remote web app. 
-
+This example creates a remote farm trust so that the local web app trusts calls 
+that will come from the remote web app. 
 
     Configuration Example 
     {

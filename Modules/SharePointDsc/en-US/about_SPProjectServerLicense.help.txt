@@ -1,4 +1,4 @@
-﻿.NAME
+.NAME
     SPProjectServerLicense
 
 # Description
@@ -8,7 +8,7 @@
     
     This resource is used to enable a Project Server license in to a SharePoint
     2016 or 2019 farm.
-    
+
 .PARAMETER IsSingleInstance
     Key - String
     Allowed values: Yes
@@ -27,10 +27,9 @@
     Write - String
     POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5
 
+.EXAMPLE 1
 
-.EXAMPLE
-    This example enables Project Server in the current environment
-
+This example enables Project Server in the current environment
 
 Configuration Example
 {
@@ -51,10 +50,9 @@ Configuration Example
     }
 }
 
+.EXAMPLE 2
 
-.EXAMPLE
-    This example disables Project Server in the current environment
-
+This example disables Project Server in the current environment
 
 Configuration Example
 {

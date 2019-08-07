@@ -1,4 +1,4 @@
-﻿.NAME
+.NAME
     SPIrmSettings
 
 # Description
@@ -11,7 +11,7 @@
     
     The default value for the Ensure parameter is Present. When not specifying this
     parameter, IRM is configured.
-    
+
 .PARAMETER IsSingleInstance
     Key - String
     Allowed values: Yes
@@ -34,11 +34,10 @@
     Write - String
     POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5
 
+.EXAMPLE 1
 
-.EXAMPLE
-    This example shows how to apply the RMS settings to a local farm, pointing to
-    a specific RMS server
-
+This example shows how to apply the RMS settings to a local farm, pointing to
+a specific RMS server
 
     Configuration Example
     {

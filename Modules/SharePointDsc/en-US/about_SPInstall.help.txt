@@ -1,4 +1,4 @@
-﻿.NAME
+.NAME
     SPInstall
 
 # Description
@@ -29,7 +29,7 @@
     they should support working with multiple language packs for multilingual
     deployments. However due to constraints in how we set up and install the
     product, only English ISOs are supported for installing SharePoint.
-    
+
 .PARAMETER IsSingleInstance
     Key - String
     Allowed values: Yes
@@ -56,12 +56,11 @@
     Allowed values: Present, Absent
     Present to install SharePoint. Absent is currently not supported
 
+.EXAMPLE 1
 
-.EXAMPLE
-    This module will install SharePoint to the default locations. The binaries for
-    SharePoint in this scenario are stored at C:\SPInstall (so it will look to run
-    C:\SPInstall\Setup.exe)
-
+This module will install SharePoint to the default locations. The binaries for
+SharePoint in this scenario are stored at C:\SPInstall (so it will look to run
+C:\SPInstall\Setup.exe)
 
     Configuration Example
     {
@@ -82,11 +81,10 @@
         }
     }
 
+.EXAMPLE 2
 
-.EXAMPLE
-    This module will install SharePoint to the specific locations set for the
-    InstallPath and DataPath directories.
-
+This module will install SharePoint to the specific locations set for the
+InstallPath and DataPath directories.
 
     Configuration Example
     {
@@ -109,10 +107,9 @@
         }
     }
 
+.EXAMPLE 3
 
-.EXAMPLE
-    This module will install SharePoint Foundation 2013 to the local server
-
+This module will install SharePoint Foundation 2013 to the local server
 
     Configuration Example
     {

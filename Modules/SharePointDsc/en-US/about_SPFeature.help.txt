@@ -1,4 +1,4 @@
-﻿.NAME
+.NAME
     SPFeature
 
 # Description
@@ -13,7 +13,7 @@
     
     The default value for the Ensure parameter is Present. When not specifying this
     parameter, the feature is enabled.
-    
+
 .PARAMETER Name
     Key - string
     The name of the feature
@@ -40,10 +40,9 @@
     Write - String
     POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5
 
+.EXAMPLE 1
 
-.EXAMPLE
-    This example shows how to enable a site collection scoped feature 
-
+This example shows how to enable a site collection scoped feature 
 
     Configuration Example 
     {
@@ -66,10 +65,9 @@
         }
     }
 
+.EXAMPLE 2
 
-.EXAMPLE
-    This example shows how to disable a site collection scoped feature 
-
+This example shows how to disable a site collection scoped feature 
 
     Configuration Example 
     {
