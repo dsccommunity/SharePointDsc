@@ -1,4 +1,4 @@
-﻿.NAME
+.NAME
     SPWebAppPropertyBag
 
 # Description
@@ -12,7 +12,7 @@
     
     The default value for the Ensure parameter is Present. When not specifying
     this parameter, the property bag is configured.
-    
+
 .PARAMETER WebAppUrl
     Key - string
     The URL of the web application
@@ -34,10 +34,9 @@
     Write - String
     POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5
 
+.EXAMPLE 1
 
-.EXAMPLE
-    This example shows how add property bag value in a web application.
-
+This example shows how add property bag value in a web application.
 
 Configuration Example
 {
@@ -63,10 +62,9 @@ Configuration Example
     }
 }
 
+.EXAMPLE 2
 
-.EXAMPLE
-    This example shows how remove a property bag value in a web application.
-
+This example shows how remove a property bag value in a web application.
 
 Configuration Example
 {

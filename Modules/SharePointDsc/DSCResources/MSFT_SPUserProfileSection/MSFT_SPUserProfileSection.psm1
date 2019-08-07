@@ -9,7 +9,7 @@ function Get-TargetResource
         $Name,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present",
 
@@ -33,12 +33,12 @@ function Get-TargetResource
     Write-Verbose -Message "Getting user profile section $Name"
 
     $result = Invoke-SPDscCommand -Credential $InstallAccount `
-                                  -Arguments $PSBoundParameters `
-                                  -ScriptBlock {
+        -Arguments $PSBoundParameters `
+        -ScriptBlock {
         $params = $args[0]
 
         $upsa = Get-SPServiceApplication -Name $params.UserProfileService `
-                                         -ErrorAction SilentlyContinue
+            -ErrorAction SilentlyContinue
         $nullReturn = @{
             Name               = $params.Name
             Ensure             = "Absent"
@@ -51,11 +51,11 @@ function Get-TargetResource
         }
 
         $caURL = (Get-SpWebApplication -IncludeCentralAdministration | Where-Object -FilterScript {
-            $_.IsAdministrationWebApplication -eq $true
-        }).Url
+                $_.IsAdministrationWebApplication -eq $true
+            }).Url
         $context = Get-SPServiceContext -Site $caURL
-        $userProfileConfigManager  = New-Object -TypeName "Microsoft.Office.Server.UserProfiles.UserProfileConfigManager" `
-                                                -ArgumentList $context
+        $userProfileConfigManager = New-Object -TypeName "Microsoft.Office.Server.UserProfiles.UserProfileConfigManager" `
+            -ArgumentList $context
         $properties = $userProfileConfigManager.GetPropertiesWithSection()
 
         $userProfileProperty = $properties.GetSectionByName($params.Name)
@@ -86,7 +86,7 @@ function Set-TargetResource
         $Name,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present",
 
@@ -114,12 +114,12 @@ function Set-TargetResource
     $PSBoundParameters.Ensure = $Ensure
 
     Invoke-SPDscCommand -Credential $InstallAccount `
-                        -Arguments $PSBoundParameters `
-                        -ScriptBlock {
+        -Arguments $PSBoundParameters `
+        -ScriptBlock {
         $params = $args[0]
 
         $ups = Get-SPServiceApplication -Name $params.UserProfileService `
-                                        -ErrorAction SilentlyContinue
+            -ErrorAction SilentlyContinue
 
         if ($null -eq $ups)
         {
@@ -127,12 +127,12 @@ function Set-TargetResource
         }
 
         $caURL = (Get-SpWebApplication  -IncludeCentralAdministration | Where-Object -FilterScript {
-            $_.IsAdministrationWebApplication -eq $true
-        }).Url
+                $_.IsAdministrationWebApplication -eq $true
+            }).Url
         $context = Get-SPServiceContext  $caURL
 
-        $userProfileConfigManager  = New-Object -TypeName "Microsoft.Office.Server.UserProfiles.UserProfileConfigManager" `
-                                                -ArgumentList $context
+        $userProfileConfigManager = New-Object -TypeName "Microsoft.Office.Server.UserProfiles.UserProfileConfigManager" `
+            -ArgumentList $context
 
         if ($null -eq $userProfileConfigManager)
         {
@@ -160,9 +160,9 @@ function Set-TargetResource
         else
         {
             Set-SPDscObjectPropertyIfValuePresent -ObjectToSet $userProfileProperty `
-                                                  -PropertyToSet "DisplayName" `
-                                                  -ParamsValue $params `
-                                                  -ParamKey "DisplayName"
+                -PropertyToSet "DisplayName" `
+                -ParamsValue $params `
+                -ParamKey "DisplayName"
             $userProfileProperty.Commit()
         }
 
@@ -170,7 +170,7 @@ function Set-TargetResource
         if ($params.ContainsKey("DisplayOrder"))
         {
             $properties = $userProfileConfigManager.GetPropertiesWithSection()
-            $properties.SetDisplayOrderBySectionName($params.Name,$params.DisplayOrder)
+            $properties.SetDisplayOrderBySectionName($params.Name, $params.DisplayOrder)
             $properties.CommitDisplayOrder()
         }
 
@@ -188,7 +188,7 @@ function Test-TargetResource
         $Name,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present",
 
@@ -222,17 +222,17 @@ function Test-TargetResource
     if ($Ensure -eq "Present")
     {
         return Test-SPDscParameterState -CurrentValues $CurrentValues `
-                                        -DesiredValues $PSBoundParameters `
-                                        -ValuesToCheck @("Name",
-                                                         "DisplayName",
-                                                         "DisplayOrder",
-                                                         "Ensure")
+            -DesiredValues $PSBoundParameters `
+            -ValuesToCheck @("Name",
+            "DisplayName",
+            "DisplayOrder",
+            "Ensure")
     }
     else
     {
         return Test-SPDscParameterState -CurrentValues $CurrentValues `
-                                        -DesiredValues $PSBoundParameters `
-                                        -ValuesToCheck @("Ensure")
+            -DesiredValues $PSBoundParameters `
+            -ValuesToCheck @("Ensure")
     }
 }
 

@@ -1,4 +1,4 @@
-﻿.NAME
+.NAME
     SPContentDatabase
 
 # Description
@@ -16,7 +16,7 @@
     
     The default value for the Ensure parameter is Present. When not specifying this
     parameter, the content database is provisioned.
-    
+
 .PARAMETER Name
     Key - String
     Specifies the name of the content database
@@ -50,10 +50,9 @@
     Write - String
     POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5
 
+.EXAMPLE 1
 
-.EXAMPLE
-    This example creates a new content database for the specified web application.
-
+This example creates a new content database for the specified web application.
 
     Configuration Example 
     {
@@ -78,12 +77,11 @@
         }
     }
 
+.EXAMPLE 2
 
-.EXAMPLE
-    This example dismounts a content database from the specified web application. This 
-    will not remove the database from SQL server however, only taking it out of the 
-    web applications configuration.
-
+This example dismounts a content database from the specified web application. This 
+will not remove the database from SQL server however, only taking it out of the 
+web applications configuration.
 
     Configuration Example 
     {

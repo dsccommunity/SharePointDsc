@@ -1,4 +1,4 @@
-﻿.NAME
+.NAME
     SPWordAutomationServiceApp
 
 # Description
@@ -18,7 +18,7 @@
     
     The default value for the Ensure parameter is Present. When not specifying this
     parameter, the service application is provisioned.
-    
+
 .PARAMETER Name
     Key - string
     THe name of the service application
@@ -97,10 +97,9 @@
     Write - string
     POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5
 
+.EXAMPLE 1
 
-.EXAMPLE
-    This example makes sure the service application exists and has a specific configuration
-
+This example makes sure the service application exists and has a specific configuration
 
     Configuration Example 
     {
@@ -137,10 +136,9 @@
         }
     }
 
+.EXAMPLE 2
 
-.EXAMPLE
-    This example removes a word automation service app
-
+This example removes a word automation service app
 
     Configuration Example 
     {

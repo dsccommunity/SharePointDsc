@@ -3,16 +3,16 @@ param(
     [Parameter()]
     [string]
     $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
-                                         -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
-                                         -Resolve)
+            -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
+            -Resolve)
 )
 
 Import-Module -Name (Join-Path -Path $PSScriptRoot `
-                                -ChildPath "..\UnitTestHelper.psm1" `
-                                -Resolve)
+        -ChildPath "..\UnitTestHelper.psm1" `
+        -Resolve)
 
 $Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointCmdletModule `
-                                              -DscResource "SPQuotaTemplate"
+    -DscResource "SPQuotaTemplate"
 
 Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
     InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
@@ -35,18 +35,18 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         # Mocks for all contexts
         Mock -CommandName Get-SPFarm -MockWith {
-            return @{}
+            return @{ }
         }
 
         # Test contexts
         Context -Name "WarningUsagePointsSolutions is lower than MaximumUsagePointsSolutions" -Fixture {
             $testParams = @{
-                Name = "Test"
-                StorageMaxInMB = 1024
-                StorageWarningInMB = 512
+                Name                        = "Test"
+                StorageMaxInMB              = 1024
+                StorageWarningInMB          = 512
                 MaximumUsagePointsSolutions = 1000
                 WarningUsagePointsSolutions = 1800
-                Ensure = "Present"
+                Ensure                      = "Present"
             }
 
             Mock -CommandName Get-SPFarm -MockWith {
@@ -68,12 +68,12 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "StorageWarningInMB is lower than StorageMaxInMB" -Fixture {
             $testParams = @{
-                Name = "Test"
-                StorageMaxInMB = 1024
-                StorageWarningInMB = 1512
+                Name                        = "Test"
+                StorageMaxInMB              = 1024
+                StorageWarningInMB          = 1512
                 MaximumUsagePointsSolutions = 1000
                 WarningUsagePointsSolutions = 800
-                Ensure = "Present"
+                Ensure                      = "Present"
             }
 
             Mock -CommandName Get-SPFarm -MockWith {
@@ -95,12 +95,12 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "Using Max or Warning parameters with Ensure=Absent" -Fixture {
             $testParams = @{
-                Name = "Test"
-                StorageMaxInMB = 1024
-                StorageWarningInMB = 512
+                Name                        = "Test"
+                StorageMaxInMB              = 1024
+                StorageWarningInMB          = 512
                 MaximumUsagePointsSolutions = 1000
                 WarningUsagePointsSolutions = 800
-                Ensure = "Absent"
+                Ensure                      = "Absent"
             }
 
             Mock -CommandName Get-SPFarm -MockWith {
@@ -122,12 +122,12 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "The server is not part of SharePoint farm" -Fixture {
             $testParams = @{
-                Name = "Test"
-                StorageMaxInMB = 1024
-                StorageWarningInMB = 512
+                Name                        = "Test"
+                StorageMaxInMB              = 1024
+                StorageWarningInMB          = 512
                 MaximumUsagePointsSolutions = 1000
                 WarningUsagePointsSolutions = 800
-                Ensure = "Present"
+                Ensure                      = "Present"
             }
 
             Mock -CommandName Get-SPFarm -MockWith {
@@ -149,34 +149,34 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "The server is in a farm and the incorrect settings have been applied to the template" -Fixture {
             $testParams = @{
-                Name = "Test"
-                StorageMaxInMB = 1024
-                StorageWarningInMB = 512
+                Name                        = "Test"
+                StorageMaxInMB              = 1024
+                StorageWarningInMB          = 512
                 MaximumUsagePointsSolutions = 1000
                 WarningUsagePointsSolutions = 800
-                Ensure = "Present"
+                Ensure                      = "Present"
             }
 
             Mock -CommandName Get-SPDscContentService -MockWith {
                 $quotaTemplates = @(@{
                         Test = @{
-                            StorageMaximumLevel = 512
-                            StorageWarningLevel = 256
+                            StorageMaximumLevel  = 512
+                            StorageWarningLevel  = 256
                             UserCodeMaximumLevel = 400
                             UserCodeWarningLevel = 200
                         }
                     })
-                $quotaTemplatesCol = {$quotaTemplates}.Invoke()
+                $quotaTemplatesCol = { $quotaTemplates }.Invoke()
 
                 $contentService = @{
                     QuotaTemplates = $quotaTemplatesCol
                 }
 
                 $contentService = $contentService | Add-Member -MemberType ScriptMethod `
-                                                               -Name Update `
-                                                               -Value {
-                                                                   $Global:SPDscQuotaTemplatesUpdated = $true
-                                                                } -PassThru
+                    -Name Update `
+                    -Value {
+                    $Global:SPDscQuotaTemplatesUpdated = $true
+                } -PassThru
                 return $contentService
             }
 
@@ -197,29 +197,29 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "The server is in a farm and the template doesn't exist" -Fixture {
             $testParams = @{
-                Name = "Test"
-                StorageMaxInMB = 1024
-                StorageWarningInMB = 512
+                Name                        = "Test"
+                StorageMaxInMB              = 1024
+                StorageWarningInMB          = 512
                 MaximumUsagePointsSolutions = 1000
                 WarningUsagePointsSolutions = 800
-                Ensure = "Present"
+                Ensure                      = "Present"
             }
 
             Mock -CommandName Get-SPDscContentService -MockWith {
                 $quotaTemplates = @(@{
                         Test = $null
                     })
-                $quotaTemplatesCol = {$quotaTemplates}.Invoke()
+                $quotaTemplatesCol = { $quotaTemplates }.Invoke()
 
                 $contentService = @{
                     QuotaTemplates = $quotaTemplatesCol
                 }
 
                 $contentService = $contentService | Add-Member -MemberType ScriptMethod `
-                                                               -Name Update `
-                                                               -Value {
-                                                                   $Global:SPDscQuotaTemplatesUpdated = $true
-                                                                } -PassThru
+                    -Name Update `
+                    -Value {
+                    $Global:SPDscQuotaTemplatesUpdated = $true
+                } -PassThru
                 return $contentService
             }
 
@@ -240,32 +240,32 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "The server is in a farm and the correct settings have been applied" -Fixture {
             $testParams = @{
-                Name = "Test"
-                StorageMaxInMB = 1024
-                StorageWarningInMB = 512
+                Name                        = "Test"
+                StorageMaxInMB              = 1024
+                StorageWarningInMB          = 512
                 MaximumUsagePointsSolutions = 1000
                 WarningUsagePointsSolutions = 800
-                Ensure = "Present"
+                Ensure                      = "Present"
             }
 
             Mock -CommandName Get-SPDscContentService -MockWith {
-                 $returnVal = @{
-                     QuotaTemplates = @{
-                         Test = @{
-                             StorageMaximumLevel = 1073741824
-                             StorageWarningLevel = 536870912
-                             UserCodeMaximumLevel = 1000
-                             UserCodeWarningLevel = 800
-                         }
-                     }
-                 }
-                 $returnVal = $returnVal | Add-Member -MemberType ScriptMethod `
-                                                      -Name Update `
-                                                      -Value {
-                                                          $Global:SPDscQuotaTemplatesUpdated = $true
-                                                        } -PassThru
-                 return $returnVal
-             }
+                $returnVal = @{
+                    QuotaTemplates = @{
+                        Test = @{
+                            StorageMaximumLevel  = 1073741824
+                            StorageWarningLevel  = 536870912
+                            UserCodeMaximumLevel = 1000
+                            UserCodeWarningLevel = 800
+                        }
+                    }
+                }
+                $returnVal = $returnVal | Add-Member -MemberType ScriptMethod `
+                    -Name Update `
+                    -Value {
+                    $Global:SPDscQuotaTemplatesUpdated = $true
+                } -PassThru
+                return $returnVal
+            }
 
             It "Should return values from the get method" {
                 $result = Get-TargetResource @testParams

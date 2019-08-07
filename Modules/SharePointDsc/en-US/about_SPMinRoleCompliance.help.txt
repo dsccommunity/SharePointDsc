@@ -1,4 +1,4 @@
-﻿.NAME
+.NAME
     SPMinRoleCompliance
 
 # Description
@@ -11,7 +11,7 @@
     based on the role of servers anywhere in the farm, and if they are not in a
     compliant state it will tell SharePoint to create timer jobs to make the
     necesssary modifications to make the farm compliant again.
-    
+
 .PARAMETER IsSingleInstance
     Key - String
     Allowed values: Yes
@@ -26,10 +26,9 @@
     Write - String
     POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5
 
+.EXAMPLE 1
 
-.EXAMPLE
-    This example shows how to ensure the farm is always compliant with MinRole settings
-
+This example shows how to ensure the farm is always compliant with MinRole settings
 
     Configuration Example
     {

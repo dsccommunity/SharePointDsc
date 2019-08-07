@@ -1,4 +1,4 @@
-﻿.NAME
+.NAME
     SPSiteUrl
 
 # Description
@@ -17,7 +17,7 @@
     $new = "http://new.contoso.com"
     $site.Rename($new)
     ((Get-SPSite $new).contentdatabase).RefreshSitesInConfigurationDatabase
-    
+
 .PARAMETER Url
     Key - string
     The URL of the site collection
@@ -42,11 +42,10 @@
     Write - String
     POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5
 
+.EXAMPLE 1
 
-.EXAMPLE
-    This example configures the site collection urls for the specified
-    Host Named Site Collection
-
+This example configures the site collection urls for the specified
+Host Named Site Collection
 
     Configuration Example
     {

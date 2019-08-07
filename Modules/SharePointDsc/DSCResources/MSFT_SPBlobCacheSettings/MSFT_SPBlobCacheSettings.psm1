@@ -41,16 +41,16 @@ function Get-TargetResource
     Write-Verbose -Message "Getting blob cache settings for $WebAppUrl"
 
     $result = Invoke-SPDscCommand -Credential $InstallAccount `
-                                  -Arguments $PSBoundParameters `
-                                  -ScriptBlock {
+        -Arguments $PSBoundParameters `
+        -ScriptBlock {
         $params = $args[0]
 
         $webappsi = Get-SPServiceInstance -Server $env:COMPUTERNAME `
-                                          -ErrorAction SilentlyContinue `
-                        | Where-Object -FilterScript {
-                            $_.GetType().Name -eq "SPWebServiceInstance" -and `
-                            $_.Name -eq ""
-                          }
+            -ErrorAction SilentlyContinue `
+        | Where-Object -FilterScript {
+            $_.GetType().Name -eq "SPWebServiceInstance" -and `
+                $_.Name -eq ""
+        }
 
         if ($null -eq $webappsi)
         {
@@ -68,7 +68,7 @@ function Get-TargetResource
         }
 
         $wa = Get-SPWebApplication -Identity $params.WebAppUrl `
-                                   -ErrorAction SilentlyContinue
+            -ErrorAction SilentlyContinue
 
         if ($null -eq $wa)
         {
@@ -186,7 +186,7 @@ function Set-TargetResource
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
-    $changes = @{}
+    $changes = @{ }
 
     if ($PSBoundParameters.ContainsKey("EnableCache"))
     {
@@ -232,17 +232,17 @@ function Set-TargetResource
     {
         ## Perform changes
         Invoke-SPDscCommand -Credential $InstallAccount `
-                            -Arguments @($PSBoundParameters, $changes) `
-                            -ScriptBlock {
-            $params  = $args[0]
+            -Arguments @($PSBoundParameters, $changes) `
+            -ScriptBlock {
+            $params = $args[0]
             $changes = $args[1]
 
             $webappsi = Get-SPServiceInstance -Server $env:COMPUTERNAME `
-                                                    -ErrorAction SilentlyContinue `
-                            | Where-Object -FilterScript {
-                                $_.GetType().Name -eq "SPWebServiceInstance" -and `
-                                $_.Name -eq ""
-                            }
+                -ErrorAction SilentlyContinue `
+            | Where-Object -FilterScript {
+                $_.GetType().Name -eq "SPWebServiceInstance" -and `
+                    $_.Name -eq ""
+            }
 
             if ($null -eq $webappsi)
             {
@@ -260,7 +260,7 @@ function Set-TargetResource
 
             $zone = [Microsoft.SharePoint.Administration.SPUrlZone]::$($params.Zone)
 
-            $sitePath  = $wa.IisSettings[$zone].Path
+            $sitePath = $wa.IisSettings[$zone].Path
             $timestamp = Get-Date -Format "yyyyMMdd_HHmmss"
             $webconfiglocation = Join-Path -Path $sitePath -ChildPath "web.config"
             $webconfigbackuplocation = Join-Path -Path $sitePath -ChildPath "web_config-$timestamp.backup"
@@ -270,27 +270,27 @@ function Set-TargetResource
 
             if ($changes.ContainsKey("EnableCache"))
             {
-                $webconfig.configuration.SharePoint.BlobCache.SetAttribute("enabled",$changes.EnableCache.ToString())
+                $webconfig.configuration.SharePoint.BlobCache.SetAttribute("enabled", $changes.EnableCache.ToString())
             }
 
             if ($changes.ContainsKey("Location"))
             {
-                $webconfig.configuration.SharePoint.BlobCache.SetAttribute("location",$changes.Location)
+                $webconfig.configuration.SharePoint.BlobCache.SetAttribute("location", $changes.Location)
             }
 
             if ($changes.ContainsKey("MaxSizeInGB"))
             {
-                $webconfig.configuration.SharePoint.BlobCache.SetAttribute("maxSize",$changes.MaxSizeInGB.ToString())
+                $webconfig.configuration.SharePoint.BlobCache.SetAttribute("maxSize", $changes.MaxSizeInGB.ToString())
             }
 
             if ($changes.ContainsKey("MaxAgeInSeconds"))
             {
-                $webconfig.configuration.SharePoint.BlobCache.SetAttribute("max-age",$($changes.MaxAgeInSeconds.ToString()))
+                $webconfig.configuration.SharePoint.BlobCache.SetAttribute("max-age", $($changes.MaxAgeInSeconds.ToString()))
             }
 
             if ($changes.ContainsKey("FileTypes"))
             {
-                $webconfig.configuration.SharePoint.BlobCache.SetAttribute("path",$changes.FileTypes)
+                $webconfig.configuration.SharePoint.BlobCache.SetAttribute("path", $changes.FileTypes)
             }
             $webconfig.Save($webconfiglocation)
         }
@@ -375,12 +375,12 @@ function Test-TargetResource
     }
 
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
-                                    -DesiredValues $PSBoundParameters `
-                                    -ValuesToCheck @("EnableCache",
-                                                     "Location",
-                                                     "MaxSizeInGB",
-                                                     "FileType",
-                                                     "MaxAgeInSeconds")
+        -DesiredValues $PSBoundParameters `
+        -ValuesToCheck @("EnableCache",
+        "Location",
+        "MaxSizeInGB",
+        "FileType",
+        "MaxAgeInSeconds")
 }
 
 Export-ModuleMember -Function *-TargetResource

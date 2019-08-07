@@ -17,7 +17,7 @@ function Get-TargetResource
         $Url,
 
         [Parameter(Mandatory = $true)]
-        [ValidateSet("Default","Intranet","Internet","Extranet","Custom")]
+        [ValidateSet("Default", "Intranet", "Internet", "Extranet", "Custom")]
         [System.String]
         $Zone,
 
@@ -42,7 +42,7 @@ function Get-TargetResource
         $UseSSL,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present",
 
@@ -54,8 +54,8 @@ function Get-TargetResource
     Write-Verbose -Message "Getting web application extension '$Name' config"
 
     $result = Invoke-SPDscCommand -Credential $InstallAccount `
-                                  -Arguments $PSBoundParameters `
-                                  -ScriptBlock {
+        -Arguments $PSBoundParameters `
+        -ScriptBlock {
         $params = $args[0]
 
         $wa = Get-SPWebApplication -Identity $params.WebAppUrl -ErrorAction SilentlyContinue
@@ -103,7 +103,7 @@ function Get-TargetResource
             $UseSSL = $false
         }
 
-         return @{
+        return @{
             WebAppUrl      = $params.WebAppUrl
             Name           = $waExt.ServerComment
             Url            = $PublicURL
@@ -125,7 +125,7 @@ function Set-TargetResource
 {
     [CmdletBinding()]
     param
-        (
+    (
         [Parameter(Mandatory = $true)]
         [System.String]
         $WebAppUrl,
@@ -139,7 +139,7 @@ function Set-TargetResource
         $Url,
 
         [Parameter(Mandatory = $true)]
-        [ValidateSet("Default","Intranet","Internet","Extranet","Custom")]
+        [ValidateSet("Default", "Intranet", "Internet", "Extranet", "Custom")]
         [System.String]
         $Zone,
 
@@ -164,7 +164,7 @@ function Set-TargetResource
         $UseSSL,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present",
 
@@ -178,8 +178,8 @@ function Set-TargetResource
     if ($Ensure -eq "Present")
     {
         Invoke-SPDscCommand -Credential $InstallAccount `
-                            -Arguments $PSBoundParameters `
-                            -ScriptBlock {
+            -Arguments $PSBoundParameters `
+            -ScriptBlock {
             $params = $args[0]
 
             $wa = Get-SPWebApplication -Identity $params.WebAppUrl -ErrorAction SilentlyContinue
@@ -196,7 +196,7 @@ function Set-TargetResource
             {
                 $newWebAppExtParams = @{
                     Name = $params.Name
-                    Url = $params.Url
+                    Url  = $params.Url
                     Zone = $params.zone
                 }
 
@@ -237,8 +237,8 @@ function Set-TargetResource
     if ($Ensure -eq "Absent")
     {
         Invoke-SPDscCommand -Credential $InstallAccount `
-                            -Arguments $PSBoundParameters `
-                            -ScriptBlock {
+            -Arguments $PSBoundParameters `
+            -ScriptBlock {
             $params = $args[0]
 
             $wa = Get-SPWebApplication -Identity $params.WebAppUrl -ErrorAction SilentlyContinue
@@ -260,7 +260,7 @@ function Test-TargetResource
     [CmdletBinding()]
     [OutputType([System.Boolean])]
     param
-        (
+    (
         [Parameter(Mandatory = $true)]
         [System.String]
         $WebAppUrl,
@@ -274,7 +274,7 @@ function Test-TargetResource
         $Url,
 
         [Parameter(Mandatory = $true)]
-        [ValidateSet("Default","Intranet","Internet","Extranet","Custom")]
+        [ValidateSet("Default", "Intranet", "Internet", "Extranet", "Custom")]
         [System.String]
         $Zone,
 
@@ -299,7 +299,7 @@ function Test-TargetResource
         $UseSSL,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present",
 
@@ -318,8 +318,8 @@ function Test-TargetResource
     Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
 
     $testReturn = Test-SPDscParameterState -CurrentValues $CurrentValues `
-                                                     -DesiredValues $PSBoundParameters `
-                                                     -ValuesToCheck @("Ensure","AllowAnonymous")
+        -DesiredValues $PSBoundParameters `
+        -ValuesToCheck @("Ensure", "AllowAnonymous")
     return $testReturn
 }
 

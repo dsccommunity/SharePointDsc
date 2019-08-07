@@ -14,7 +14,7 @@ function Get-TargetResource
 
         [Parameter(Mandatory = $true)]
         [System.String]
-        [ValidateSet("Default","Internet","Intranet","Extranet","Custom")]
+        [ValidateSet("Default", "Internet", "Intranet", "Extranet", "Custom")]
         $Zone,
 
         [Parameter()]
@@ -33,11 +33,11 @@ function Get-TargetResource
     Write-Verbose -Message "Getting app domain settings for '$AppDomain'"
 
     $result = Invoke-SPDscCommand -Credential $InstallAccount `
-                                  -Arguments $PSBoundParameters `
-                                  -ScriptBlock {
+        -Arguments $PSBoundParameters `
+        -ScriptBlock {
         $params = $args[0]
         $webAppAppDomain = Get-SPWebApplicationAppDomain -WebApplication $params.WebAppUrl `
-                                                         -Zone $params.Zone
+            -Zone $params.Zone
 
         if ($null -eq $webAppAppDomain)
         {
@@ -79,7 +79,7 @@ function Set-TargetResource
 
         [Parameter(Mandatory = $true)]
         [System.String]
-        [ValidateSet("Default","Internet","Intranet","Extranet","Custom")]
+        [ValidateSet("Default", "Internet", "Intranet", "Extranet", "Custom")]
         $Zone,
 
         [Parameter()]
@@ -100,15 +100,15 @@ function Set-TargetResource
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
     Invoke-SPDscCommand -Credential $InstallAccount `
-                        -Arguments @($PSBoundParameters, $CurrentValues) `
-                        -ScriptBlock {
+        -Arguments @($PSBoundParameters, $CurrentValues) `
+        -ScriptBlock {
         $params = $args[0]
         $CurrentValues = $args[1]
 
         if ($null -ne $CurrentValues.AppDomain)
         {
             Get-SPWebApplicationAppDomain -WebApplication $params.WebAppUrl `
-                                          -Zone $params.Zone | Remove-SPWebApplicationAppDomain
+                -Zone $params.Zone | Remove-SPWebApplicationAppDomain
             Start-Sleep -Seconds 5
         }
 
@@ -146,7 +146,7 @@ function Test-TargetResource
 
         [Parameter(Mandatory = $true)]
         [System.String]
-        [ValidateSet("Default","Internet","Intranet","Extranet","Custom")]
+        [ValidateSet("Default", "Internet", "Intranet", "Extranet", "Custom")]
         $Zone,
 
         [Parameter()]
@@ -170,8 +170,8 @@ function Test-TargetResource
     Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
 
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
-                                    -DesiredValues $PSBoundParameters `
-                                    -ValuesToCheck @("AppDomain", "Port", "SSL")
+        -DesiredValues $PSBoundParameters `
+        -ValuesToCheck @("AppDomain", "Port", "SSL")
 }
 
 Export-ModuleMember -Function *-TargetResource

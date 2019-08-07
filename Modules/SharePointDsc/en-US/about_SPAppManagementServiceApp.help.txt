@@ -1,4 +1,4 @@
-﻿.NAME
+.NAME
     SPAppManagementServiceApp
 
 # Description
@@ -17,7 +17,7 @@
     
     The default value for the Ensure parameter is Present. When not specifying this
     parameter, the service application is provisioned.
-    
+
 .PARAMETER Name
     Key - string
     The name of the app management service application
@@ -47,11 +47,10 @@
     Write - String
     POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5
 
+.EXAMPLE 1
 
-.EXAMPLE
-    This example shows how to create a new app management service application in the 
-    local SharePoint farm.
-
+This example shows how to create a new app management service application in the 
+local SharePoint farm.
 
     Configuration Example 
     {
@@ -74,12 +73,11 @@
         }
     }
 
+.EXAMPLE 2
 
-.EXAMPLE
-    This example shows how to remove a specific app management service application in the 
-    local SharePoint farm. The application pool property is still mandatory but it is not
-    used so therefore the value is not important. 
-
+This example shows how to remove a specific app management service application in the 
+local SharePoint farm. The application pool property is still mandatory but it is not
+used so therefore the value is not important. 
 
     Configuration Example 
     {

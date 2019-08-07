@@ -1,4 +1,4 @@
-﻿.NAME
+.NAME
     SPFarmSolution
 
 # Description
@@ -15,7 +15,7 @@
     
     The default value for the Ensure parameter is Present. When not specifying this
     parameter, the solution is deployed.
-    
+
 .PARAMETER Name
     Key - string
     The filename of the WSP package
@@ -50,10 +50,9 @@
     Write - String
     POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5
 
+.EXAMPLE 1
 
-.EXAMPLE
-    This example shows how to deploy a WSP to specific web applications.
-
+This example shows how to deploy a WSP to specific web applications.
 
     Configuration Example
     {

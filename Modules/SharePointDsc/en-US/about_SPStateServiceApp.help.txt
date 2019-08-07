@@ -1,4 +1,4 @@
-﻿.NAME
+.NAME
     SPStateServiceApp
 
 # Description
@@ -12,7 +12,7 @@
     
     The default value for the Ensure parameter is Present. When not specifying this
     parameter, the service application is provisioned.
-    
+
 .PARAMETER Name
     Key - string
     The name of the state service app
@@ -42,10 +42,9 @@
     Write - String
     POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5
 
+.EXAMPLE 1
 
-.EXAMPLE
-    This example creates a state service application in the local farm
-
+This example creates a state service application in the local farm
 
     Configuration Example 
     {

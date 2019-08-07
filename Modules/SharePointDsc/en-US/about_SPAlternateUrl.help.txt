@@ -1,4 +1,4 @@
-﻿.NAME
+.NAME
     SPAlternateUrl
 
 # Description
@@ -33,7 +33,7 @@
     in the registry. It will not, however, update bindings in IIS. It is recommended
     to use the xWebsite resource from the xWebAdministration module to configure the
     appropriate bindings in IIS.
-    
+
 .PARAMETER WebAppName
     Key - String
     The name of the web application to apply the alternate URL to
@@ -60,10 +60,9 @@
     Write - String
     POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5
 
+.EXAMPLE 1
 
-.EXAMPLE
-    This example shows how to add a new alternate URL to a specific web application
-
+This example shows how to add a new alternate URL to a specific web application
 
     Configuration Example 
     {
@@ -87,11 +86,10 @@
         }
     }
 
+.EXAMPLE 2
 
-.EXAMPLE
-    This example shows how to remove an alternate URL from a specified zone for a specific
-    web application.
-
+This example shows how to remove an alternate URL from a specified zone for a specific
+web application.
 
     Configuration Example 
     {

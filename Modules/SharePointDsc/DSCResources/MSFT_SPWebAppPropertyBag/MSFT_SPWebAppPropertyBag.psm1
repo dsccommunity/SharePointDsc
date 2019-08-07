@@ -17,7 +17,7 @@ function Get-TargetResource()
         $Value,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = 'Present',
 
@@ -29,8 +29,8 @@ function Get-TargetResource()
     Write-Verbose -Message "Looking for SPWebApplication property '$Key'"
 
     $result = Invoke-SPDscCommand -Credential $InstallAccount `
-                                  -Arguments $PSBoundParameters `
-                                  -ScriptBlock {
+        -Arguments $PSBoundParameters `
+        -ScriptBlock {
         $params = $args[0]
 
         $spWebApp = Get-SPWebApplication -Identity $params.WebAppUrl -ErrorAction SilentlyContinue
@@ -85,7 +85,7 @@ function Set-TargetResource()
         $Value,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = 'Present',
 
@@ -97,8 +97,8 @@ function Set-TargetResource()
     Write-Verbose -Message "Setting SPWebApplication property '$Key'"
 
     Invoke-SPDscCommand -Credential $InstallAccount `
-                        -Arguments $PSBoundParameters `
-                        -ScriptBlock {
+        -Arguments $PSBoundParameters `
+        -ScriptBlock {
         $params = $args[0]
 
         $spWebApp = Get-SPWebApplication -Identity $params.WebAppUrl -ErrorAction SilentlyContinue
@@ -137,7 +137,7 @@ function Test-TargetResource()
         $Value,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = 'Present',
 
@@ -156,14 +156,14 @@ function Test-TargetResource()
     if ($Ensure -eq 'Present')
     {
         return Test-SPDscParameterState -CurrentValues $CurrentValues `
-                                        -DesiredValues $PSBoundParameters `
-                                        -ValuesToCheck @('Ensure','Key', 'Value')
+            -DesiredValues $PSBoundParameters `
+            -ValuesToCheck @('Ensure', 'Key', 'Value')
     }
     else
     {
         return Test-SPDscParameterState -CurrentValues $CurrentValues `
-                                        -DesiredValues $PSBoundParameters `
-                                        -ValuesToCheck @('Ensure','Key')
+            -DesiredValues $PSBoundParameters `
+            -ValuesToCheck @('Ensure', 'Key')
 
     }
 

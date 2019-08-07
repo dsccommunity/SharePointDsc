@@ -3,16 +3,16 @@ param(
     [Parameter()]
     [string]
     $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
-                                         -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
-                                         -Resolve)
+            -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
+            -Resolve)
 )
 
 Import-Module -Name (Join-Path -Path $PSScriptRoot `
-                                -ChildPath "..\UnitTestHelper.psm1" `
-                                -Resolve)
+        -ChildPath "..\UnitTestHelper.psm1" `
+        -Resolve)
 
 $Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointCmdletModule `
-                                              -DscResource "SPSearchManagedProperty"
+    -DscResource "SPSearchManagedProperty"
 
 Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
     InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
@@ -22,8 +22,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         # Mocks for all contexts
         Mock -CommandName New-SPEnterpriseSearchMetadataManagedProperty -MockWith { $Script:PropertyCreated = $true }
-        Mock -CommandName Set-SPEnterpriseSearchMetadataManagedProperty -MockWith {}
-        Mock -CommandName Remove-SPEnterpriseSearchMetadataManagedProperty -MockWith {}
+        Mock -CommandName Set-SPEnterpriseSearchMetadataManagedProperty -MockWith { }
+        Mock -CommandName Remove-SPEnterpriseSearchMetadataManagedProperty -MockWith { }
         Mock -CommandName Get-SPEnterpriseSearchServiceApplication -MockWith {
             return @(
                 @{
@@ -32,23 +32,32 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             )
         }
 
-        try { [Microsoft.Office.Server.Search.Administration] }
-        catch {
-            try {
+        try
+        { [Microsoft.Office.Server.Search.Administration]
+        }
+        catch
+        {
+            try
+            {
                 Add-Type -TypeDefinition @"
                 namespace Microsoft.Office.Server.Search.Administration {
                 public enum ManagedDataType { Text, YesNo, Integer, DateTime, Double };
                 }
 "@ -ErrorAction SilentlyContinue
             }
-            catch {
+            catch
+            {
                 Write-Verbose "The Type Microsoft.Office.Server.Search.Administration.ManagedDataType was already added."
             }
         }
 
-        try { [Microsoft.Office.Server.Search.Administration.MappingCollection] }
-        catch {
-            try {
+        try
+        { [Microsoft.Office.Server.Search.Administration.MappingCollection]
+        }
+        catch
+        {
+            try
+            {
                 Add-Type -TypeDefinition @"
                 namespace Microsoft.Office.Server.Search.Administration {
                     public class MappingCollection
@@ -58,14 +67,19 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 }
 "@ -ErrorAction SilentlyContinue
             }
-            catch {
+            catch
+            {
                 Write-Verbose "The Type Microsoft.Office.Server.Search.Administration.MappingCollection was already added."
             }
         }
 
-        try { [Microsoft.Office.Server.Search.Administration.Mapping] }
-        catch {
-            try {
+        try
+        { [Microsoft.Office.Server.Search.Administration.Mapping]
+        }
+        catch
+        {
+            try
+            {
                 Add-Type -TypeDefinition @"
                 namespace Microsoft.Office.Server.Search.Administration {
                     public class Mapping
@@ -77,20 +91,21 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 }
 "@ -ErrorAction SilentlyContinue
             }
-            catch {
+            catch
+            {
                 Write-Verbose "The Type Microsoft.Office.Server.Search.Administration.Mapping was already added."
             }
         }
 
         Context -Name "When the property doesn't exist and should" -Fixture {
             $testParams = @{
-                Name = "TestParam"
-                PropertyType = "Text"
-                ServiceAppName = "Search Service Application"
+                Name              = "TestParam"
+                PropertyType      = "Text"
+                ServiceAppName    = "Search Service Application"
                 HasMultipleValues = $false
-                Aliases = @("TestAlias")
+                Aliases           = @("TestAlias")
                 CrawledProperties = @("CP1", "CP2")
-                Ensure = "Present"
+                Ensure            = "Present"
             }
 
             $Script:PropertyCreated = $false
@@ -100,51 +115,51 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
             Mock -CommandName Get-SPEnterpriseSearchMetadataManagedProperty -MockWith {
                 $results = @{
-                    Name = "TestParam"
-                    PID = 1
-                    ManagedType = "Text"
-                    Searchable = $true
-                    Refinable = $true
-                    Queryable = $true
-                    Sortable = $true
-                    NoWordBreaker = $true
+                    Name              = "TestParam"
+                    PID               = 1
+                    ManagedType       = "Text"
+                    Searchable        = $true
+                    Refinable         = $true
+                    Queryable         = $true
+                    Sortable          = $true
+                    NoWordBreaker     = $true
                     HasMultipleValues = $false
                 } | Add-Member -MemberType ScriptMethod `
                     -Name GetAliases `
                     -Value {
-                        @("Alias1", "Alias2")
-                    } -PassThru -Force |
-                    Add-Member -MemberType ScriptMethod `
+                    @("Alias1", "Alias2")
+                } -PassThru -Force |
+                Add-Member -MemberType ScriptMethod `
                     -Name GetMappedCrawledProperties `
                     -Value {
-                        return @("Map1")
-                    } -PassThru -Force |
-                    Add-Member -MemberType ScriptMethod `
+                    return @("Map1")
+                } -PassThru -Force |
+                Add-Member -MemberType ScriptMethod `
                     -Name Update `
                     -Value {
-                        $null
-                    } -PassThru -Force |
-                    Add-Member -MemberType ScriptMethod `
+                    $null
+                } -PassThru -Force |
+                Add-Member -MemberType ScriptMethod `
                     -Name AddAlias `
                     -Value {
-                        $null
-                    } -PassThru -Force |
-                    Add-Member -MemberType ScriptMethod `
+                    $null
+                } -PassThru -Force |
+                Add-Member -MemberType ScriptMethod `
                     -Name SetMappings `
                     -Value {
-                        $null
-                    } -PassThru -Force |
-                    Add-Member -MemberType ScriptMethod `
+                    $null
+                } -PassThru -Force |
+                Add-Member -MemberType ScriptMethod `
                     -Name DeleteAlias `
                     -Value {
-                        $null
-                    } -PassThru -Force
+                    $null
+                } -PassThru -Force
                 return $results
 
             } -ParameterFilter { $Script:PropertyCreated -eq $true }
 
             Mock -CommandName Get-SPEnterpriseSearchMetadataCrawledProperty -MockWith {
-                return @{CrawledPropertyName = 'FakeValue';}
+                return @{CrawledPropertyName = 'FakeValue'; }
             }
 
             It "Should return absent from the Get method" {
@@ -163,54 +178,54 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "When the property already exists with the proper type and should" -Fixture {
             $testParams = @{
-                Name = "TestParam"
-                PropertyType = "Text"
+                Name           = "TestParam"
+                PropertyType   = "Text"
                 ServiceAppName = "Search Service Application"
-                Ensure = "Present"
+                Ensure         = "Present"
             }
 
             Mock -CommandName Get-SPEnterpriseSearchMetadataManagedProperty -MockWith {
                 $results = @{
-                    Name = "TestParam"
-                    PID = 1
-                    ManagedType = "Text"
-                    Searchable = $true
-                    Refinable = $true
-                    Queryable = $true
-                    Sortable = $true
-                    NoWordBreaker = $true
+                    Name              = "TestParam"
+                    PID               = 1
+                    ManagedType       = "Text"
+                    Searchable        = $true
+                    Refinable         = $true
+                    Queryable         = $true
+                    Sortable          = $true
+                    NoWordBreaker     = $true
                     HasMultipleValues = $false
-                    Ensure = "Present"
+                    Ensure            = "Present"
                 } | Add-Member -MemberType ScriptMethod `
                     -Name GetAliases `
                     -Value {
-                        $null
-                    } -PassThru -Force |
-                    Add-Member -MemberType ScriptMethod `
+                    $null
+                } -PassThru -Force |
+                Add-Member -MemberType ScriptMethod `
                     -Name GetMappedCrawledProperties `
                     -Value {
-                        $null
-                    } -PassThru -Force |
-                    Add-Member -MemberType ScriptMethod `
+                    $null
+                } -PassThru -Force |
+                Add-Member -MemberType ScriptMethod `
                     -Name Update `
                     -Value {
-                        $null
-                    } -PassThru -Force |
-                    Add-Member -MemberType ScriptMethod `
+                    $null
+                } -PassThru -Force |
+                Add-Member -MemberType ScriptMethod `
                     -Name AddAlias `
                     -Value {
-                        $null
-                    } -PassThru -Force |
-                    Add-Member -MemberType ScriptMethod `
+                    $null
+                } -PassThru -Force |
+                Add-Member -MemberType ScriptMethod `
                     -Name SetMappings `
                     -Value {
-                        $null
-                    } -PassThru -Force |
-                    Add-Member -MemberType ScriptMethod `
+                    $null
+                } -PassThru -Force |
+                Add-Member -MemberType ScriptMethod `
                     -Name DeleteAllMappings `
                     -Value {
-                        $null
-                    } -PassThru -Force
+                    $null
+                } -PassThru -Force
                 return $results
             }
 
@@ -227,54 +242,54 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "When the property already exists, but with the invalid property type" -Fixture {
             $testParams = @{
-                Name = "TestParam"
-                PropertyType = "Text"
+                Name           = "TestParam"
+                PropertyType   = "Text"
                 ServiceAppName = "Search Service Application"
-                Ensure = "Present"
+                Ensure         = "Present"
             }
 
             Mock -CommandName Get-SPEnterpriseSearchMetadataManagedProperty -MockWith {
                 $results = @{
-                    Name = "TestParam"
-                    PID = 1
-                    ManagedType = "Number"
-                    Searchable = $true
-                    Refinable = $true
-                    Queryable = $true
-                    Sortable = $true
-                    NoWordBreaker = $true
+                    Name              = "TestParam"
+                    PID               = 1
+                    ManagedType       = "Number"
+                    Searchable        = $true
+                    Refinable         = $true
+                    Queryable         = $true
+                    Sortable          = $true
+                    NoWordBreaker     = $true
                     HasMultipleValues = $false
-                    Ensure = "Present"
+                    Ensure            = "Present"
                 } | Add-Member -MemberType ScriptMethod `
                     -Name GetAliases `
                     -Value {
-                        $null
-                    } -PassThru -Force |
-                    Add-Member -MemberType ScriptMethod `
+                    $null
+                } -PassThru -Force |
+                Add-Member -MemberType ScriptMethod `
                     -Name GetMappedCrawledProperties `
                     -Value {
-                        $null
-                    } -PassThru -Force |
-                    Add-Member -MemberType ScriptMethod `
+                    $null
+                } -PassThru -Force |
+                Add-Member -MemberType ScriptMethod `
                     -Name Update `
                     -Value {
-                        $null
-                    } -PassThru -Force |
-                    Add-Member -MemberType ScriptMethod `
+                    $null
+                } -PassThru -Force |
+                Add-Member -MemberType ScriptMethod `
                     -Name AddAlias `
                     -Value {
-                        $null
-                    } -PassThru -Force |
-                    Add-Member -MemberType ScriptMethod `
+                    $null
+                } -PassThru -Force |
+                Add-Member -MemberType ScriptMethod `
                     -Name SetMappings `
                     -Value {
-                        $null
-                    } -PassThru -Force |
-                    Add-Member -MemberType ScriptMethod `
+                    $null
+                } -PassThru -Force |
+                Add-Member -MemberType ScriptMethod `
                     -Name DeleteAllMappings `
                     -Value {
-                        $null
-                    } -PassThru -Force
+                    $null
+                } -PassThru -Force
                 return $results
             }
 
@@ -291,54 +306,54 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "When the property should not exist" -Fixture {
             $testParams = @{
-                Name = "TestParam"
-                PropertyType = "Text"
+                Name           = "TestParam"
+                PropertyType   = "Text"
                 ServiceAppName = "Search Service Application"
-                Ensure = "Absent"
+                Ensure         = "Absent"
             }
 
             Mock -CommandName Get-SPEnterpriseSearchMetadataManagedProperty -MockWith {
                 $results = @{
-                    Name = "TestParam"
-                    PID = 1
-                    ManagedType = "Text"
-                    Searchable = $true
-                    Refinable = $true
-                    Queryable = $true
-                    Sortable = $true
-                    NoWordBreaker = $true
+                    Name              = "TestParam"
+                    PID               = 1
+                    ManagedType       = "Text"
+                    Searchable        = $true
+                    Refinable         = $true
+                    Queryable         = $true
+                    Sortable          = $true
+                    NoWordBreaker     = $true
                     HasMultipleValues = $false
-                    Ensure = "Present"
+                    Ensure            = "Present"
                 } | Add-Member -MemberType ScriptMethod `
                     -Name GetAliases `
                     -Value {
-                        $null
-                    } -PassThru -Force |
-                    Add-Member -MemberType ScriptMethod `
+                    $null
+                } -PassThru -Force |
+                Add-Member -MemberType ScriptMethod `
                     -Name GetMappedCrawledProperties `
                     -Value {
-                        $null
-                    } -PassThru -Force |
-                    Add-Member -MemberType ScriptMethod `
+                    $null
+                } -PassThru -Force |
+                Add-Member -MemberType ScriptMethod `
                     -Name Update `
                     -Value {
-                        $null
-                    } -PassThru -Force |
-                    Add-Member -MemberType ScriptMethod `
+                    $null
+                } -PassThru -Force |
+                Add-Member -MemberType ScriptMethod `
                     -Name AddAlias `
                     -Value {
-                        $null
-                    } -PassThru -Force |
-                    Add-Member -MemberType ScriptMethod `
+                    $null
+                } -PassThru -Force |
+                Add-Member -MemberType ScriptMethod `
                     -Name SetMappings `
                     -Value {
-                        $null
-                    } -PassThru -Force |
-                    Add-Member -MemberType ScriptMethod `
+                    $null
+                } -PassThru -Force |
+                Add-Member -MemberType ScriptMethod `
                     -Name DeleteAllMappings `
                     -Value {
-                        $null
-                    } -PassThru -Force
+                    $null
+                } -PassThru -Force
                 return $results
             }
 
@@ -355,36 +370,36 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "When specified Service Application does not exist" -Fixture {
             $testParams = @{
-                Name = "TestParam"
-                PropertyType = "Text"
+                Name           = "TestParam"
+                PropertyType   = "Text"
                 ServiceAppName = "InvalidSSA"
-                Ensure = "Absent"
+                Ensure         = "Absent"
             }
 
-            Mock -CommandName Get-SPEnterpriseSearchServiceApplication -MockWith{
+            Mock -CommandName Get-SPEnterpriseSearchServiceApplication -MockWith {
                 return $null
             }
 
             It "Should throw an error" {
-                { Get-TargetResource @testParams }| Should Throw "The specified Search Service Application InvalidSSA is  `
+                { Get-TargetResource @testParams } | Should Throw "The specified Search Service Application InvalidSSA is  `
                    invalid. Please make sure you specify the name of an existing service application."
             }
         }
 
         Context -Name "When specified Service Application does not exist" -Fixture {
             $testParams = @{
-                Name = "TestParam"
-                PropertyType = "Text"
+                Name           = "TestParam"
+                PropertyType   = "Text"
                 ServiceAppName = "InvalidSSA"
-                Ensure = "Absent"
+                Ensure         = "Absent"
             }
 
-            Mock -CommandName Get-SPEnterpriseSearchServiceApplication -MockWith{
+            Mock -CommandName Get-SPEnterpriseSearchServiceApplication -MockWith {
                 return $null
             }
 
             It "Should throw an error" {
-                { Get-TargetResource @testParams }| Should Throw "The specified Search Service Application InvalidSSA is  `
+                { Get-TargetResource @testParams } | Should Throw "The specified Search Service Application InvalidSSA is  `
                    invalid. Please make sure you specify the name of an existing service application."
             }
         }

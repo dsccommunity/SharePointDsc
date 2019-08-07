@@ -3,16 +3,16 @@ param(
     [Parameter()]
     [string]
     $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
-                                         -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
-                                         -Resolve)
+            -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
+            -Resolve)
 )
 
 Import-Module -Name (Join-Path -Path $PSScriptRoot `
-                                -ChildPath "..\UnitTestHelper.psm1" `
-                                -Resolve)
+        -ChildPath "..\UnitTestHelper.psm1" `
+        -Resolve)
 
 $Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointCmdletModule `
-                                              -DscResource "SPDesignerSettings"
+    -DscResource "SPDesignerSettings"
 
 Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
     InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
@@ -20,7 +20,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         # Mocks for all contexts
         Mock -CommandName Get-SPFarm -MockWith {
-            return @{}
+            return @{ }
         }
 
         # Test contexts
@@ -79,9 +79,9 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             Mock -CommandName Get-SPWebapplication -MockWith {
-                $result = @{}
+                $result = @{ }
                 $result.DisplayName = "Test"
-                $result.Url         = "https://intranet.sharepoint.contoso.com"
+                $result.Url = "https://intranet.sharepoint.contoso.com"
 
                 $result = $result | Add-Member -MemberType ScriptMethod -Name Update -Value {
                     $Global:SPDscDesignerUpdated = $true
@@ -120,14 +120,14 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
             Mock -CommandName Get-SPSite -MockWith {
                 return @{
-                        Url                                    = "https://intranet.sharepoint.contoso.com"
-                        AllowDesigner                          = $true
-                        AllowRevertFromTemplate                = $true
-                        AllowMasterPageEditing                 = $true
-                        ShowURLStructure                       = $true
-                        AllowCreateDeclarativeWorkflow         = $true
-                        AllowSavePublishDeclarativeWorkflow    = $true
-                        AllowSaveDeclarativeWorkflowAsTemplate = $true
+                    Url                                    = "https://intranet.sharepoint.contoso.com"
+                    AllowDesigner                          = $true
+                    AllowRevertFromTemplate                = $true
+                    AllowMasterPageEditing                 = $true
+                    ShowURLStructure                       = $true
+                    AllowCreateDeclarativeWorkflow         = $true
+                    AllowSavePublishDeclarativeWorkflow    = $true
+                    AllowSaveDeclarativeWorkflowAsTemplate = $true
                 }
             }
 
@@ -160,14 +160,14 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
             Mock -CommandName Get-SPSite -MockWith {
                 return @{
-                        Url                                    = "https://intranet.sharepoint.contoso.com"
-                        AllowDesigner                          = $true
-                        AllowRevertFromTemplate                = $true
-                        AllowMasterPageEditing                 = $true
-                        ShowURLStructure                       = $true
-                        AllowCreateDeclarativeWorkflow         = $true
-                        AllowSavePublishDeclarativeWorkflow    = $true
-                        AllowSaveDeclarativeWorkflowAsTemplate = $true
+                    Url                                    = "https://intranet.sharepoint.contoso.com"
+                    AllowDesigner                          = $true
+                    AllowRevertFromTemplate                = $true
+                    AllowMasterPageEditing                 = $true
+                    ShowURLStructure                       = $true
+                    AllowCreateDeclarativeWorkflow         = $true
+                    AllowSavePublishDeclarativeWorkflow    = $true
+                    AllowSaveDeclarativeWorkflowAsTemplate = $true
                 }
             }
             Mock -CommandName Test-SPDscRunAsCredential { return $false }
@@ -218,7 +218,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             Mock -CommandName Test-SPDscRunAsCredential { return $true }
 
             Mock -CommandName Get-SPWebApplication -MockWith {
-                $result = @{}
+                $result = @{ }
                 $result.DisplayName = "Test"
                 $result.Url = "https://intranet.sharepoint.contoso.com"
 
@@ -249,14 +249,14 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
             Mock -CommandName Get-SPSite -MockWith {
                 $returnVal = @{
-                        Url                                    = "https://intranet.sharepoint.contoso.com"
-                        AllowDesigner                          = $false
-                        AllowRevertFromTemplate                = $false
-                        AllowMasterPageEditing                 = $false
-                        ShowURLStructure                       = $false
-                        AllowCreateDeclarativeWorkflow         = $false
-                        AllowSavePublishDeclarativeWorkflow    = $false
-                        AllowSaveDeclarativeWorkflowAsTemplate = $false
+                    Url                                    = "https://intranet.sharepoint.contoso.com"
+                    AllowDesigner                          = $false
+                    AllowRevertFromTemplate                = $false
+                    AllowMasterPageEditing                 = $false
+                    ShowURLStructure                       = $false
+                    AllowCreateDeclarativeWorkflow         = $false
+                    AllowSavePublishDeclarativeWorkflow    = $false
+                    AllowSaveDeclarativeWorkflowAsTemplate = $false
                 }
                 $returnVal = $returnVal | Add-Member -MemberType ScriptMethod -Name Update -Value {
                     $Global:SPDscDesignerUpdated = $true

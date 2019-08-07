@@ -1,4 +1,4 @@
-﻿.NAME
+.NAME
     SPSecureStoreServiceApp
 
 # Description
@@ -13,7 +13,7 @@
     
     The default value for the Ensure parameter is Present. When not specifying this
     parameter, the service application is provisioned.
-    
+
 .PARAMETER Name
     Key - string
     The name of the secure store service app
@@ -72,10 +72,9 @@
     Write - String
     POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5
 
+.EXAMPLE 1
 
-.EXAMPLE
-    This example creates a new secure store service app.
-
+This example creates a new secure store service app.
 
     Configuration Example
     {
@@ -99,12 +98,11 @@
         }
     }
 
+.EXAMPLE 2
 
-.EXAMPLE
-    This example removes a secure store service app. The ApplicationPool and
-    AuditingEnabled parameters are required, but are not used so their values
-    are able to be set to anything.
-
+This example removes a secure store service app. The ApplicationPool and
+AuditingEnabled parameters are required, but are not used so their values
+are able to be set to anything.
 
     Configuration Example
     {

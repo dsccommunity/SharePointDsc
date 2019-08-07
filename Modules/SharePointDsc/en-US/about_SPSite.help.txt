@@ -1,4 +1,4 @@
-﻿.NAME
+.NAME
     SPSite
 
 # Description
@@ -30,7 +30,7 @@
     AdministrationSiteType is used in combination with the resource
     SPWebAppClientCallableSettings. The required proxy library must be configured
     before the administration site type has any effect.
-    
+
 .PARAMETER Url
     Key - string
     The URL of the site collection
@@ -96,10 +96,9 @@
     Write - String
     POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5
 
+.EXAMPLE 1
 
-.EXAMPLE
-    This example creates a site collection with the provided details
-
+This example creates a site collection with the provided details
 
     Configuration Example 
     {
@@ -123,10 +122,9 @@
         }
     }
 
+.EXAMPLE 2
 
-.EXAMPLE
-    This example creates a site collection with the provided details
-
+This example creates a site collection with the provided details
 
     Configuration Example
     {
@@ -151,10 +149,9 @@
         }
     }
 
+.EXAMPLE 3
 
-.EXAMPLE
-    This example creates a site collection with the provided details
-
+This example creates a site collection with the provided details
 
     Configuration Example
     {

@@ -1,4 +1,4 @@
-﻿.NAME
+.NAME
     SPDiagnosticsProvider
 
 # Description
@@ -9,7 +9,7 @@
     This resource is responsible for configuring the Diagnostics Provider within
     the local SharePoint farm. Using Ensure equals to Absent is not supported.
     This resource can only apply configuration, not ensure they don't exist.
-    
+
 .PARAMETER Name
     Key - string
     Name of the Diagnostics Provider to configure
@@ -35,10 +35,9 @@
     Write - String
     POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5
 
+.EXAMPLE 1
 
-.EXAMPLE
-    This example shows how to configure the retention period for a Diagnostics Provider.
-
+This example shows how to configure the retention period for a Diagnostics Provider.
 
     Configuration Example
     {

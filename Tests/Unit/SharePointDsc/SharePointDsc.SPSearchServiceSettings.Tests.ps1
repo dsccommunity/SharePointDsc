@@ -4,16 +4,16 @@ param(
     [Parameter()]
     [string]
     $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
-                                         -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
-                                         -Resolve)
+            -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
+            -Resolve)
 )
 
 Import-Module -Name (Join-Path -Path $PSScriptRoot `
-                                -ChildPath "..\UnitTestHelper.psm1" `
-                                -Resolve)
+        -ChildPath "..\UnitTestHelper.psm1" `
+        -Resolve)
 
 $Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointCmdletModule `
-                                              -DscResource "SPSearchServiceSettings"
+    -DscResource "SPSearchServiceSettings"
 
 Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
     InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
@@ -22,7 +22,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         # Initialize tests
         $mockPassword = ConvertTo-SecureString -String "password" -AsPlainText -Force
         $mockCredential = New-Object -TypeName System.Management.Automation.PSCredential `
-                                     -ArgumentList @("DOMAIN\username", $mockPassword)
+            -ArgumentList @("DOMAIN\username", $mockPassword)
 
         # Mocks for all contexts
 
@@ -57,7 +57,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "No optional parameters are specified" -Fixture {
             $testParams = @{
-                IsSingleInstance      = "Yes"
+                IsSingleInstance = "Yes"
             }
 
             It "Should return null from the get method" {
@@ -120,7 +120,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 }
             }
 
-            Mock -CommandName Set-SPEnterpriseSearchService -MockWith {}
+            Mock -CommandName Set-SPEnterpriseSearchService -MockWith { }
 
             It "Should return the configured values from the Get method" {
                 $result = Get-TargetResource @testParams
@@ -153,7 +153,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 }
             }
 
-            Mock -CommandName Set-SPEnterpriseSearchService -MockWith {}
+            Mock -CommandName Set-SPEnterpriseSearchService -MockWith { }
 
             It "Should return the configured values from the Get method" {
                 $result = Get-TargetResource @testParams
@@ -186,7 +186,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 }
             }
 
-            Mock -CommandName Set-SPEnterpriseSearchService -MockWith {}
+            Mock -CommandName Set-SPEnterpriseSearchService -MockWith { }
 
             It "Should return the configured values from the Get method" {
                 $result = Get-TargetResource @testParams

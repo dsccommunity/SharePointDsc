@@ -1,4 +1,4 @@
-﻿.NAME
+.NAME
     SPBlobCacheSettings
 
 # Description
@@ -23,7 +23,7 @@
     Best practice:
     Specify a directory that is not on the same drive as where either the server
     operating system swap files or server log files are stored.
-    
+
 .PARAMETER WebAppUrl
     Key - string
     The URL of the web application
@@ -57,11 +57,10 @@
     Write - String
     POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5
 
+.EXAMPLE 1
 
-.EXAMPLE
-    This example shows how to configure the blob cache settings on the local server for the
-    specified web application and zone 
-
+This example shows how to configure the blob cache settings on the local server for the
+specified web application and zone 
 
     Configuration Example 
     {

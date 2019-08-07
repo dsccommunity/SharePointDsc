@@ -1,4 +1,4 @@
-﻿.NAME
+.NAME
     SPTrustedRootAuthority
 
 # Description
@@ -10,7 +10,7 @@
     SharePoint farm. It imports the certificate into SharePoint in order for
     high trust apps or consuming service applications from other farms will
     work.
-    
+
 .PARAMETER Name
     Key - String
     Specifies the name of the trusted root authority to create.
@@ -32,10 +32,9 @@
     Write - String
     POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5
 
+.EXAMPLE 1
 
-.EXAMPLE
-    This example deploys a SP Trusted Root Authority to the local farm.
-
+This example deploys a SP Trusted Root Authority to the local farm.
 
     Configuration Example
     {
@@ -57,10 +56,9 @@
         }
     }
 
+.EXAMPLE 2
 
-.EXAMPLE
-    This example deploys a SP Trusted Root Authority to the local farm.
-
+This example deploys a SP Trusted Root Authority to the local farm.
 
     Configuration Example
     {
@@ -82,10 +80,9 @@
         }
     }
 
+.EXAMPLE 3
 
-.EXAMPLE
-    This example removes a SP Trusted Root Authority from the local farm.
-
+This example removes a SP Trusted Root Authority from the local farm.
 
     Configuration Example
     {

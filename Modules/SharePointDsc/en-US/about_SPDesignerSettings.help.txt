@@ -1,4 +1,4 @@
-﻿.NAME
+.NAME
     SPDesignerSettings
 
 # Description
@@ -22,7 +22,7 @@
     "SiteCollection". Due to an issue with Remote PowerShell and SharePoint,
     changing the Site Collection settings results in an Access Denied error.
     Consider implementing PowerShell v5 and switching to the PsDscRunAsCredential
-    
+
 .PARAMETER WebAppUrl
     Key - string
     The URL of the web application or site collection to configure
@@ -64,11 +64,10 @@
     Write - String
     POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5
 
+.EXAMPLE 1
 
-.EXAMPLE
-    This example applies settings to disable SharePoint Designer access to the
-    specified web application.
-
+This example applies settings to disable SharePoint Designer access to the
+specified web application.
 
     Configuration Example
     {

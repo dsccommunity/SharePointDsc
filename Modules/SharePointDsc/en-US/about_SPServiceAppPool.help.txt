@@ -1,4 +1,4 @@
-﻿.NAME
+.NAME
     SPServiceAppPool
 
 # Description
@@ -12,7 +12,7 @@
     
     The default value for the Ensure parameter is Present. When not specifying this
     parameter, the service application pool is provisioned.
-    
+
 .PARAMETER Name
     Key - string
     The name of application pool
@@ -30,10 +30,9 @@
     Write - String
     POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5
 
+.EXAMPLE 1
 
-.EXAMPLE
-    This example creates a service application pool for service apps to run in.
-
+This example creates a service application pool for service apps to run in.
 
     Configuration Example 
     {

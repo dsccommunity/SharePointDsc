@@ -1,4 +1,4 @@
-﻿.NAME
+.NAME
     SPUserProfileSyncConnection
 
 # Description
@@ -17,7 +17,7 @@
     to know which OUs to remove. If any extra OUs exists after the
     configuration has run the test method will report the resource not
     in desired state.
-    
+
 .PARAMETER Name
     Key - string
     The name of the connection
@@ -76,11 +76,10 @@
     Write - string
     POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5
 
+.EXAMPLE 1
 
-.EXAMPLE
-    This example adds a new user profile sync connection to the specified user 
-    profile service app
-
+This example adds a new user profile sync connection to the specified user 
+profile service app
 
     Configuration Example 
     {

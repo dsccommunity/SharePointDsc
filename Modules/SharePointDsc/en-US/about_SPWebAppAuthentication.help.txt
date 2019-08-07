@@ -1,4 +1,4 @@
-﻿.NAME
+.NAME
     SPWebAppAuthentication
 
 # Description
@@ -21,7 +21,7 @@
     Updating the configuration can take a long time, up to five minutes.
     The Set-SPWebApplication cmdlet sometimes requires several minutes to
     complete its action. This is not a SharePointDsc issue.
-    
+
 .PARAMETER WebAppUrl
     Key - string
     The URL of the web application
@@ -50,13 +50,12 @@
     Write - string
     POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5
 
+.EXAMPLE 1
 
-.EXAMPLE
-    This example shows how to configure the authentication of a web application in the local farm using a custom
-    claim provider. A SPTrustedIdentityTokenIssuer is created named Contoso, then this SPTrustedIdentityTokenIssuer
-    is referenced by the SPWebAppAuthentication as the AuthenticationProvider and the AuthenticationMethod is set
-    to "Federated" value.
-
+This example shows how to configure the authentication of a web application in the local farm using a custom
+claim provider. A SPTrustedIdentityTokenIssuer is created named Contoso, then this SPTrustedIdentityTokenIssuer
+is referenced by the SPWebAppAuthentication as the AuthenticationProvider and the AuthenticationMethod is set
+to "Federated" value.
 
     Configuration Example
     {
@@ -91,13 +90,12 @@
         }
     }
 
+.EXAMPLE 2
 
-.EXAMPLE
-    This example shows how to configure the authentication of a web application in the local farm using a custom
-    claim provider. A SPTrustedIdentityTokenIssuer is created named Contoso, then this SPTrustedIdentityTokenIssuer
-    is referenced by the SPWebAppAuthentication as the AuthenticationProvider and the AuthenticationMethod is set
-    to "Federated" value.
-
+This example shows how to configure the authentication of a web application in the local farm using a custom
+claim provider. A SPTrustedIdentityTokenIssuer is created named Contoso, then this SPTrustedIdentityTokenIssuer
+is referenced by the SPWebAppAuthentication as the AuthenticationProvider and the AuthenticationMethod is set
+to "Federated" value.
 
     Configuration Example
     {
@@ -156,11 +154,10 @@
         }
     }
 
+.EXAMPLE 3
 
-.EXAMPLE
-    This example shows how to configure the authentication of a web application in the
-    local farm using Classic authentication.
-
+This example shows how to configure the authentication of a web application in the
+local farm using Classic authentication.
 
     Configuration Example
     {

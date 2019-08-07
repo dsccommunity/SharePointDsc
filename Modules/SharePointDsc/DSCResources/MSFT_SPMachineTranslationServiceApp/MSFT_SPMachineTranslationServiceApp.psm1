@@ -25,7 +25,7 @@ function Get-TargetResource
         $ApplicationPool,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present",
 
@@ -36,8 +36,8 @@ function Get-TargetResource
     Write-Verbose -Message "Getting Machine Translation Service Application '$Name'"
 
     $result = Invoke-SPDscCommand -Credential $InstallAccount `
-                                  -Arguments $PSBoundParameters `
-                                  -ScriptBlock {
+        -Arguments $PSBoundParameters `
+        -ScriptBlock {
         $params = $args[0]
 
         $serviceApps = Get-SPServiceApplication -Name $params.Name -ErrorAction SilentlyContinue
@@ -63,7 +63,8 @@ function Get-TargetResource
         {
             return $nullReturn
         }
-        else {
+        else
+        {
             $serviceAppProxies = Get-SPServiceApplicationProxy -ErrorAction SilentlyContinue
             if ($null -ne $serviceAppProxies)
             {
@@ -117,7 +118,7 @@ function Set-TargetResource
         $ApplicationPool,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present",
 
@@ -134,8 +135,8 @@ function Set-TargetResource
         Write-Verbose "Resetting Machine Translation Service Application."
 
         Invoke-SPDscCommand -Credential $InstallAccount `
-                            -Arguments $PSBoundParameters `
-                            -ScriptBlock {
+            -Arguments $PSBoundParameters `
+            -ScriptBlock {
             $params = $args[0]
             $serviceApps = Get-SPServiceApplication -Identity $params.Name
 
@@ -144,8 +145,8 @@ function Set-TargetResource
             }
 
             $serviceApp | Set-SPTranslationServiceApplication -ApplicationPool $params.ApplicationPool `
-                                                              -DatabaseName $params.DatabaseName `
-                                                              -DatabaseServer $params.DatabaseServer
+                -DatabaseName $params.DatabaseName `
+                -DatabaseServer $params.DatabaseServer
         }
     }
     if ($CurrentValues.Ensure -eq "Absent" -and $Ensure -eq "Present")
@@ -153,14 +154,14 @@ function Set-TargetResource
         Write-Verbose "Creating Machine Translation Service Application."
 
         $result = Invoke-SPDscCommand -Credential $InstallAccount `
-                                  -Arguments $PSBoundParameters `
-                                  -ScriptBlock {
+            -Arguments $PSBoundParameters `
+            -ScriptBlock {
             $params = $args[0]
 
             $tsServiceApp = New-SPTranslationServiceApplication -Name $params.Name `
-                                                                -DatabaseName $params.DatabaseName `
-                                                                -DatabaseServer $params.DatabaseServer `
-                                                                -ApplicationPool $params.ApplicationPool
+                -DatabaseName $params.DatabaseName `
+                -DatabaseServer $params.DatabaseServer `
+                -ApplicationPool $params.ApplicationPool
 
             if ($params.ContainsKey("ProxyName"))
             {
@@ -176,7 +177,7 @@ function Set-TargetResource
                 }
 
                 New-SPTranslationServiceApplicationProxy -Name $params.ProxyName `
-                                                         -ServiceApplication $tsServiceApp | Out-Null
+                    -ServiceApplication $tsServiceApp | Out-Null
             }
 
         }
@@ -186,8 +187,8 @@ function Set-TargetResource
         Write-Verbose "Removing Machine Translation Service Application."
 
         $result = Invoke-SPDscCommand -Credential $InstallAccount `
-                                      -Arguments $PSBoundParameters `
-                                      -ScriptBlock {
+            -Arguments $PSBoundParameters `
+            -ScriptBlock {
             $params = $args[0]
 
             $serviceApps = Get-SPServiceApplication -Identity $params.Name
@@ -228,7 +229,7 @@ function Test-TargetResource
         $ApplicationPool,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present",
 
@@ -247,12 +248,12 @@ function Test-TargetResource
     Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
 
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
-                                    -DesiredValues $PSBoundParameters `
-                                    -ValuesToCheck @("Name",
-                                                     "ApplicationPool",
-                                                     "DatabaseName",
-                                                     "DatabaseServer",
-                                                     "Ensure")
+        -DesiredValues $PSBoundParameters `
+        -ValuesToCheck @("Name",
+        "ApplicationPool",
+        "DatabaseName",
+        "DatabaseServer",
+        "Ensure")
 
 }
 

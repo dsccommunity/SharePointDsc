@@ -3,16 +3,16 @@ param(
     [Parameter()]
     [string]
     $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
-                                         -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
-                                         -Resolve)
+            -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
+            -Resolve)
 )
 
 Import-Module -Name (Join-Path -Path $PSScriptRoot `
-                                -ChildPath "..\UnitTestHelper.psm1" `
-                                -Resolve)
+        -ChildPath "..\UnitTestHelper.psm1" `
+        -Resolve)
 
 $Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointCmdletModule `
-                                              -DscResource "SPMinRoleCompliance"
+    -DscResource "SPMinRoleCompliance"
 
 Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
     InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
@@ -24,17 +24,18 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         Mock -CommandName Get-SPDscRoleTestMethod -MockWith {
             $obj = New-Object -TypeName System.Object
             $obj = $obj | Add-Member -MemberType ScriptMethod `
-                                     -Name Invoke `
-                                     -Value {
-                                         return $global:SPDscIsRoleCompliant
-                                     } -PassThru -Force
+                -Name Invoke `
+                -Value {
+                return $global:SPDscIsRoleCompliant
+            } -PassThru -Force
             return $obj
         }
 
         # Test contexts
         switch ($Global:SPDscHelper.CurrentStubBuildNumber.Major)
         {
-            15 {
+            15
+            {
                 Context -Name "All methods throw exceptions as MinRole doesn't exist in 2013" -Fixture {
                     It "Should throw on the get method" {
                         { Get-TargetResource @testParams } | Should Throw
@@ -49,23 +50,24 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     }
                 }
             }
-            16 {
+            16
+            {
                 Context -Name "The farm is not compliant as services aren't running but should be" -Fixture {
                     $testParams = @{
                         IsSingleInstance = "Yes"
-                        State = "Compliant"
+                        State            = "Compliant"
                     }
 
                     Mock -CommandName Get-SPService -MockWith {
                         return @(
                             @{
                                 CompliantWithMinRole = $true
-                                Instances = @(
+                                Instances            = @(
                                     @{
-                                        Id = (New-Guid)
-                                        Status = "Disabled"
+                                        Id       = (New-Guid)
+                                        Status   = "Disabled"
                                         TypeName = "Dummy service 1"
-                                        Server = @{
+                                        Server   = @{
                                             Name = "ServerName"
                                         }
                                     }
@@ -73,12 +75,12 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                             }
                             @{
                                 CompliantWithMinRole = $false
-                                Instances = @(
+                                Instances            = @(
                                     @{
-                                        Id = (New-Guid)
-                                        Status = "Disabled"
+                                        Id       = (New-Guid)
+                                        Status   = "Disabled"
                                         TypeName = "Dummy service 2"
-                                        Server = @{
+                                        Server   = @{
                                             Name = "ServerName"
                                         }
                                     }
@@ -107,19 +109,19 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Context -Name "The farm is not compliant as services are running that shouldn't be" -Fixture {
                     $testParams = @{
                         IsSingleInstance = "Yes"
-                        State = "Compliant"
+                        State            = "Compliant"
                     }
 
                     Mock -CommandName Get-SPService -MockWith {
                         return @(
                             @{
                                 CompliantWithMinRole = $false
-                                Instances = @(
+                                Instances            = @(
                                     @{
-                                        Id = (New-Guid)
-                                        Status = "Online"
+                                        Id       = (New-Guid)
+                                        Status   = "Online"
                                         TypeName = "Dummy service 1"
-                                        Server = @{
+                                        Server   = @{
                                             Name = "ServerName"
                                         }
                                     }
@@ -127,12 +129,12 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                             }
                             @{
                                 CompliantWithMinRole = $true
-                                Instances = @(
+                                Instances            = @(
                                     @{
-                                        Id = (New-Guid)
-                                        Status = "Online"
+                                        Id       = (New-Guid)
+                                        Status   = "Online"
                                         TypeName = "Dummy service 2"
-                                        Server = @{
+                                        Server   = @{
                                             Name = "ServerName"
                                         }
                                     }
@@ -161,24 +163,24 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Context -Name "The farm is compliant and should be" -Fixture {
                     $testParams = @{
                         IsSingleInstance = "Yes"
-                        State = "Compliant"
+                        State            = "Compliant"
                     }
 
                     $testParams = @{
                         IsSingleInstance = "Yes"
-                        State = "Compliant"
+                        State            = "Compliant"
                     }
 
                     Mock -CommandName Get-SPService -MockWith {
                         return @(
                             @{
                                 CompliantWithMinRole = $true
-                                Instances = @(
+                                Instances            = @(
                                     @{
-                                        Id = (New-Guid)
-                                        Status = "Disabled"
+                                        Id       = (New-Guid)
+                                        Status   = "Disabled"
                                         TypeName = "Dummy service 1"
-                                        Server = @{
+                                        Server   = @{
                                             Name = "ServerName"
                                         }
                                     }
@@ -186,12 +188,12 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                             }
                             @{
                                 CompliantWithMinRole = $true
-                                Instances = @(
+                                Instances            = @(
                                     @{
-                                        Id = (New-Guid)
-                                        Status = "Disabled"
+                                        Id       = (New-Guid)
+                                        Status   = "Disabled"
                                         TypeName = "Dummy service 2"
-                                        Server = @{
+                                        Server   = @{
                                             Name = "ServerName"
                                         }
                                     }
@@ -214,7 +216,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Context -Name "NonCompliant is requested in any function" -Fixture {
                     $testParams = @{
                         IsSingleInstance = "Yes"
-                        State = "NonCompliant"
+                        State            = "NonCompliant"
                     }
 
                     It "Should throw on the test method" {
@@ -226,7 +228,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     }
                 }
             }
-            Default {
+            Default
+            {
                 throw [Exception] "A supported version of SharePoint was not used in testing"
             }
         }

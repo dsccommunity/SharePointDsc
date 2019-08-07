@@ -1,4 +1,4 @@
-﻿.NAME
+.NAME
     SPShellAdmins
 
 # Description
@@ -42,7 +42,7 @@
     is the owner of that content database in SQL Server. When this is true, you
     cannot add it to the Shell Admins (common for AllContentDatabases parameter)
     and the resource will throw an error. Workaround: Change database owner in SQL
-    
+
 .PARAMETER IsSingleInstance
     Key - String
     Allowed values: Yes
@@ -76,11 +76,10 @@
     Write - String
     POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5
 
+.EXAMPLE 1
 
-.EXAMPLE
-    This example gives admin access to the specified users for the local farm as well as
-    all content databases in the local farm.
-
+This example gives admin access to the specified users for the local farm as well as
+all content databases in the local farm.
 
     Configuration Example
     {
@@ -101,11 +100,10 @@
         }
     }
 
+.EXAMPLE 2
 
-.EXAMPLE
-    This example gives admin access to the specified users for the local farm as well as
-    all content databases in the local farm.
-
+This example gives admin access to the specified users for the local farm as well as
+all content databases in the local farm.
 
     Configuration Example
     {
@@ -135,12 +133,11 @@
         }
     }
 
+.EXAMPLE 3
 
-.EXAMPLE
-    This example gives admin access to the specified users for the local farm as
-    well as all content databases in the local farm, with the exception of database
-    WSS_Content_Portal.
-
+This example gives admin access to the specified users for the local farm as
+well as all content databases in the local farm, with the exception of database
+WSS_Content_Portal.
 
     Configuration Example
     {

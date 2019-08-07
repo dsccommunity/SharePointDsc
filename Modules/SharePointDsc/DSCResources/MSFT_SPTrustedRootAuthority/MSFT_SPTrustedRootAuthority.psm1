@@ -17,7 +17,7 @@ function Get-TargetResource
         $CertificateFilePath,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present",
 
@@ -29,17 +29,17 @@ function Get-TargetResource
     Write-Verbose "Getting Trusted Root Authority with name '$Name'"
 
     if ($PSBoundParameters.ContainsKey("CertificateThumbprint") -and `
-        $PSBoundParameters.ContainsKey("CertificateFilePath"))
+            $PSBoundParameters.ContainsKey("CertificateFilePath"))
     {
         Write-Verbose -Message ("Cannot use both parameters CertificateThumbprint and " + `
-                                "CertificateFilePath at the same time.")
+                "CertificateFilePath at the same time.")
     }
 
     if (-not ($PSBoundParameters.ContainsKey("CertificateThumbprint")) -and `
-        -not($PSBoundParameters.ContainsKey("CertificateFilePath")))
+            -not($PSBoundParameters.ContainsKey("CertificateFilePath")))
     {
         Write-Verbose -Message ("At least one of the following parameters must be specified: " + `
-                                "CertificateThumbprint, CertificateFilePath.")
+                "CertificateThumbprint, CertificateFilePath.")
     }
 
     if ($PSBoundParameters.ContainsKey("CertificateFilePath"))
@@ -51,8 +51,8 @@ function Get-TargetResource
     }
 
     $result = Invoke-SPDscCommand -Credential $InstallAccount `
-                                  -Arguments $PSBoundParameters `
-                                  -ScriptBlock {
+        -Arguments $PSBoundParameters `
+        -ScriptBlock {
         $params = $args[0]
 
         $rootCert = Get-SPTrustedRootAuthority -Identity $params.Name -ErrorAction SilentlyContinue
@@ -89,7 +89,7 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-       [Parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String]
         $Name,
 
@@ -102,7 +102,7 @@ function Set-TargetResource
         $CertificateFilePath,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present",
 
@@ -114,17 +114,17 @@ function Set-TargetResource
     Write-Verbose -Message "Setting SPTrustedRootAuthority '$Name'"
 
     if ($PSBoundParameters.ContainsKey("CertificateThumbprint") -and `
-        $PSBoundParameters.ContainsKey("CertificateFilePath"))
+            $PSBoundParameters.ContainsKey("CertificateFilePath"))
     {
         throw ("Cannot use both parameters CertificateThumbprint and CertificateFilePath " + `
-               "at the same time.")
+                "at the same time.")
     }
 
     if (-not ($PSBoundParameters.ContainsKey("CertificateThumbprint")) -and `
-        -not($PSBoundParameters.ContainsKey("CertificateFilePath")))
+            -not($PSBoundParameters.ContainsKey("CertificateFilePath")))
     {
         throw ("At least one of the following parameters must be specified: " + `
-               "CertificateThumbprint, CertificateFilePath.")
+                "CertificateThumbprint, CertificateFilePath.")
     }
 
     if ($PSBoundParameters.ContainsKey("CertificateFilePath"))
@@ -140,15 +140,15 @@ function Set-TargetResource
     {
         Write-Verbose -Message "Updating SPTrustedRootAuthority '$Name'"
         $null = Invoke-SPDscCommand -Credential $InstallAccount `
-                                    -Arguments $PSBoundParameters `
-                                    -ScriptBlock {
+            -Arguments $PSBoundParameters `
+            -ScriptBlock {
             $params = $args[0]
 
             if ($params.ContainsKey("CertificateThumbprint"))
             {
                 Write-Verbose -Message "Importing certificate from CertificateThumbprint"
                 $cert = Get-Item -Path "CERT:\LocalMachine\My\$($params.CertificateThumbprint)" `
-                                 -ErrorAction SilentlyContinue
+                    -ErrorAction SilentlyContinue
 
                 if ($null -eq $cert)
                 {
@@ -162,7 +162,7 @@ function Set-TargetResource
                 try
                 {
                     $cert = New-Object System.Security.Cryptography.X509Certificates.X509Certificate2
-                    $cert.Import($CertificateFilePath)
+                    $cert.Import($params.CertificateFilePath)
                 }
                 catch
                 {
@@ -193,15 +193,15 @@ function Set-TargetResource
     {
         Write-Verbose -Message "Adding SPTrustedRootAuthority '$Name'"
         $null = Invoke-SPDscCommand -Credential $InstallAccount `
-                                      -Arguments $PSBoundParameters `
-                                      -ScriptBlock {
+            -Arguments $PSBoundParameters `
+            -ScriptBlock {
             $params = $args[0]
 
             if ($params.ContainsKey("CertificateThumbprint"))
             {
                 Write-Verbose -Message "Importing certificate from CertificateThumbprint"
                 $cert = Get-Item -Path "CERT:\LocalMachine\My\$($params.CertificateThumbprint)" `
-                                 -ErrorAction SilentlyContinue
+                    -ErrorAction SilentlyContinue
 
                 if ($null -eq $cert)
                 {
@@ -215,7 +215,7 @@ function Set-TargetResource
                 try
                 {
                     $cert = New-Object System.Security.Cryptography.X509Certificates.X509Certificate2
-                    $cert.Import($CertificateFilePath)
+                    $cert.Import($params.CertificateFilePath)
                 }
                 catch
                 {
@@ -245,11 +245,11 @@ function Set-TargetResource
     {
         Write-Verbose -Message "Removing SPTrustedRootAuthority '$Name'"
         $null = Invoke-SPDscCommand -Credential $InstallAccount `
-                                      -Arguments $PSBoundParameters `
-                                      -ScriptBlock {
+            -Arguments $PSBoundParameters `
+            -ScriptBlock {
             $params = $args[0]
             Remove-SPTrustedRootAuthority -Identity $params.Name `
-                                          -ErrorAction SilentlyContinue
+                -ErrorAction SilentlyContinue
         }
     }
 }
@@ -273,7 +273,7 @@ function Test-TargetResource
         $CertificateFilePath,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present",
 
@@ -285,17 +285,17 @@ function Test-TargetResource
     Write-Verbose -Message "Testing SPTrustedRootAuthority '$Name'"
 
     if ($PSBoundParameters.ContainsKey("CertificateThumbprint") -and `
-        $PSBoundParameters.ContainsKey("CertificateFilePath"))
+            $PSBoundParameters.ContainsKey("CertificateFilePath"))
     {
         throw ("Cannot use both parameters CertificateThumbprint and CertificateFilePath " + `
-            "at the same time.")
+                "at the same time.")
     }
 
     if (-not ($PSBoundParameters.ContainsKey("CertificateThumbprint")) -and `
-        -not($PSBoundParameters.ContainsKey("CertificateFilePath")))
+            -not($PSBoundParameters.ContainsKey("CertificateFilePath")))
     {
         throw ("At least one of the following parameters must be specified: " + `
-            "CertificateThumbprint, CertificateFilePath.")
+                "CertificateThumbprint, CertificateFilePath.")
     }
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
@@ -316,14 +316,14 @@ function Test-TargetResource
     if ($Ensure -eq "Present")
     {
         return Test-SPDscParameterState -CurrentValues $CurrentValues `
-                                        -DesiredValues $PSBoundParameters `
-                                        -ValuesToCheck @("Name","CertificateThumbprint","Ensure")
+            -DesiredValues $PSBoundParameters `
+            -ValuesToCheck @("Name", "CertificateThumbprint", "Ensure")
     }
     else
     {
-         return Test-SPDscParameterState -CurrentValues $CurrentValues `
-                                         -DesiredValues $PSBoundParameters `
-                                         -ValuesToCheck @("Name","Ensure")
+        return Test-SPDscParameterState -CurrentValues $CurrentValues `
+            -DesiredValues $PSBoundParameters `
+            -ValuesToCheck @("Name", "Ensure")
     }
 }
 

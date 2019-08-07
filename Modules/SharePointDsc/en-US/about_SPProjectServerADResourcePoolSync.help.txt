@@ -1,4 +1,4 @@
-﻿.NAME
+.NAME
     SPProjectServerADResourcePoolSync
 
 # Description
@@ -26,7 +26,7 @@
             Schedule                = "daily between 03:00:00 and 03:00:00"
             PsDscRunAsCredential    = $SetupAccount
         }
-    
+
 .PARAMETER Url
     Key - string
     The default zone URL of the Project site to set permissions for
@@ -48,10 +48,9 @@
     Write - String
     POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5
 
+.EXAMPLE 1
 
-.EXAMPLE
-    This example enables Project Server AD resource pool sync
-
+This example enables Project Server AD resource pool sync
 
 Configuration Example 
 {
@@ -73,10 +72,9 @@ Configuration Example
     }
 }
 
+.EXAMPLE 2
 
-.EXAMPLE
-    This example disables Project Server AD resource pool sync
-
+This example disables Project Server AD resource pool sync
 
 Configuration Example 
 {

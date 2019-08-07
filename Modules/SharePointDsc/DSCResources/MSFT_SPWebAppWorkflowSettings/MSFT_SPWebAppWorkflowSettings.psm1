@@ -27,10 +27,10 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting web application '$WebAppUrl' workflow settings"
 
-    $paramArgs = @($PSBoundParameters,$PSScriptRoot)
+    $paramArgs = @($PSBoundParameters, $PSScriptRoot)
     $result = Invoke-SPDscCommand -Credential $InstallAccount `
-                                  -Arguments $paramArgs `
-                                  -ScriptBlock {
+        -Arguments $paramArgs `
+        -ScriptBlock {
         $params = $args[0]
         $ScriptRoot = $args[1]
 
@@ -85,10 +85,10 @@ function Set-TargetResource
 
     Write-Verbose -Message "Setting web application '$WebAppUrl' workflow settings"
 
-    $paramArgs = @($PSBoundParameters,$PSScriptRoot)
+    $paramArgs = @($PSBoundParameters, $PSScriptRoot)
     $null = Invoke-SPDscCommand -Credential $InstallAccount `
-                                -Arguments $paramArgs `
-                                -ScriptBlock {
+        -Arguments $paramArgs `
+        -ScriptBlock {
         $params = $args[0]
         $ScriptRoot = $args[1]
 
@@ -140,9 +140,9 @@ function Test-TargetResource
     Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
 
     $relPath = "..\..\Modules\SharePointDsc.WebApplication\SPWebApplication.Workflow.psm1"
-        Import-Module (Join-Path $PSScriptRoot $relPath -Resolve)
+    Import-Module (Join-Path $PSScriptRoot $relPath -Resolve)
     return Test-SPDscWebApplicationWorkflowConfig -CurrentSettings $CurrentValues `
-                                                  -DesiredSettings $PSBoundParameters
+        -DesiredSettings $PSBoundParameters
 }
 
 Export-ModuleMember -Function *-TargetResource

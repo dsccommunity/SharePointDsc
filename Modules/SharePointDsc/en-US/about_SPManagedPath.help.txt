@@ -1,4 +1,4 @@
-﻿.NAME
+.NAME
     SPManagedPath
 
 # Description
@@ -16,7 +16,7 @@
     
     The default value for the Ensure parameter is Present. When not specifying this
     parameter, the managed path is created.
-    
+
 .PARAMETER WebAppUrl
     Key - string
     The URL of the web application to apply the managed path to - this is ignored for host header web applications
@@ -42,10 +42,9 @@
     Write - String
     POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5
 
+.EXAMPLE 1
 
-.EXAMPLE
-    This example shows how to deploy an explicit managed path to a specifici web application
-
+This example shows how to deploy an explicit managed path to a specifici web application
 
     Configuration Example
     {
@@ -68,10 +67,9 @@
         }
     }
 
+.EXAMPLE 2
 
-.EXAMPLE
-    This example shows how to add a wildcard managed path to a specific web application
-
+This example shows how to add a wildcard managed path to a specific web application
 
     Configuration Example
     {
@@ -94,10 +92,9 @@
         }
     }
 
+.EXAMPLE 3
 
-.EXAMPLE
-    This example shows how to remove a wildcard managed path from a specific web application
-
+This example shows how to remove a wildcard managed path from a specific web application
 
     Configuration Example
     {

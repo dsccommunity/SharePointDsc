@@ -1,4 +1,4 @@
-﻿.NAME
+.NAME
     SPSearchCrawlerImpactRule
 
 # Description
@@ -12,7 +12,7 @@
     
     The default value for the Ensure parameter is Present. When you omit this
     parameter the crawl rule is created.
-    
+
 .PARAMETER ServiceAppName
     Key - String
     Search Service Application Name

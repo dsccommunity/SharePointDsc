@@ -1,4 +1,4 @@
-﻿.NAME
+.NAME
     SPSearchTopology
 
 # Description
@@ -26,7 +26,7 @@
     also need to ensure that it was able to create the index path at I:\. If no
     disk labeled I: was available on server1, this would fail, even though it will
     not hold an actual index component.
-    
+
 .PARAMETER ServiceAppName
     Key - String
     The name of the search service application for this topology
@@ -63,10 +63,9 @@
     Write - String
     POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5
 
+.EXAMPLE 1
 
-.EXAMPLE
-    This example shows how to apply a specific topology to the search service app
-
+This example shows how to apply a specific topology to the search service app
 
     Configuration Example 
     {

@@ -1,4 +1,4 @@
-﻿.NAME
+.NAME
     SPFarmAdministrators
 
 # Description
@@ -15,7 +15,7 @@
     users to add or remove, without changing any other members that are in the
     group already that may not be specified here, allowing for some manual
     management outside of this configuration resource.
-    
+
 .PARAMETER IsSingleInstance
     Key - String
     Allowed values: Yes
@@ -37,11 +37,10 @@
     Write - String
     POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5
 
+.EXAMPLE 1
 
-.EXAMPLE
-    This example shows how to set a specific list of members for the farm admins group.
-    Any members not in this list will be removed.
-
+This example shows how to set a specific list of members for the farm admins group.
+Any members not in this list will be removed.
 
     Configuration Example
     {
@@ -62,13 +61,12 @@
         }
     }
 
+.EXAMPLE 2
 
-.EXAMPLE
-    This example shows how certain changes are made to the farm admins groups. Here any
-    members in the MembersToInclude property are added, and members in the MembersToExclude
-    property are removed. Any members that exist in the farm admins group that aren't listed
-    in either of these properties are left alone.
-
+This example shows how certain changes are made to the farm admins groups. Here any
+members in the MembersToInclude property are added, and members in the MembersToExclude
+property are removed. Any members that exist in the farm admins group that aren't listed
+in either of these properties are left alone.
 
     Configuration Example
     {

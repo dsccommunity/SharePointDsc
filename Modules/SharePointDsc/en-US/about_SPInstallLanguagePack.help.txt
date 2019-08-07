@@ -1,4 +1,4 @@
-﻿.NAME
+.NAME
     SPInstallLanguagePack
 
 # Description
@@ -22,7 +22,7 @@
     stream is added to indicate that the file is potentially from an unsafe source.
     To use these files, make sure you first unblock them using Unblock-File.
     SPInstallLanguagePack will throw an error when it detects the file is blocked.
-    
+
 .PARAMETER BinaryDir
     Key - String
     The directory that contains all of the SharePoint binaries
@@ -45,12 +45,11 @@
     Write - String
     POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5
 
+.EXAMPLE 1
 
-.EXAMPLE
-    This module will install the SharePoint Language Pack. The binaries for
-    SharePoint in this scenario are stored at C:\SPInstall (so it will look to run
-    C:\SPInstall\Setup.exe)
-
+This module will install the SharePoint Language Pack. The binaries for
+SharePoint in this scenario are stored at C:\SPInstall (so it will look to run
+C:\SPInstall\Setup.exe)
 
     Configuration Example 
     {
@@ -70,12 +69,11 @@
         }
     }
 
+.EXAMPLE 2
 
-.EXAMPLE
-    This module will install the SharePoint Language Pack in the specified timeframe.
-    The binaries for SharePoint in this scenario are stored at C:\SPInstall (so it
-    will look to run C:\SPInstall\Setup.exe)
-
+This module will install the SharePoint Language Pack in the specified timeframe.
+The binaries for SharePoint in this scenario are stored at C:\SPInstall (so it
+will look to run C:\SPInstall\Setup.exe)
 
     Configuration Example 
     {

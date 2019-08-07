@@ -1,4 +1,4 @@
-﻿.NAME
+.NAME
     SPWebAppPolicy
 
 # Description
@@ -22,7 +22,7 @@
     needs to be specified. Do not combine the Members property with the
     MemberToInclude and MembersToExclude properties. Do not set the
     ActAsSystemAccount property to $true without setting the permission level to
-    
+
 .PARAMETER WebAppUrl
     Key - string
     The URL of the web application
@@ -47,11 +47,10 @@
     Write - String
     POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5
 
+.EXAMPLE 1
 
-.EXAMPLE
-    This example sets the specific web app policy for the specified web app to
-    match the provided list below.
-
+This example sets the specific web app policy for the specified web app to
+match the provided list below.
 
     Configuration Example 
     {
@@ -83,11 +82,10 @@
         }
     }
 
+.EXAMPLE 2
 
-.EXAMPLE
-    This example shows how to include specific members while excluding other members
-    from the policy of the web app. 
-
+This example shows how to include specific members while excluding other members
+from the policy of the web app. 
 
     Configuration Example 
     {

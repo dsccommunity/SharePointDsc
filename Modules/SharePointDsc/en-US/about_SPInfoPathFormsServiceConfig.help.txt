@@ -1,4 +1,4 @@
-﻿.NAME
+.NAME
     SPInfoPathFormsServiceConfig
 
 # Description
@@ -9,7 +9,7 @@
     This resource is responsible for configuring the InfoPath Forms service within
     the local SharePoint farm. Using Ensure equals to Absent is not supported.
     This resource can only apply configuration, not ensure they don't exist.
-    
+
 .PARAMETER IsSingleInstance
     Key - String
     Allowed values: Yes
@@ -80,11 +80,10 @@
     Write - String
     POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5
 
+.EXAMPLE 1
 
-.EXAMPLE
-    This example shows how to configure the InfoPath Forms Service
-    in the local SharePoint farm.
-
+This example shows how to configure the InfoPath Forms Service
+in the local SharePoint farm.
 
     Configuration Example
     {

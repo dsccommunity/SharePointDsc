@@ -1,4 +1,4 @@
-﻿.NAME
+.NAME
     SPTimerJobState
 
 # Description
@@ -29,7 +29,7 @@
     
     NOTE2: You cannot use SPTimerJobState to change the Health Analyzer jobs, because
     these are configured to specific times by default.
-    
+
 .PARAMETER TypeName
     Key - String
     The type name of the timer job (not the display name)
@@ -50,10 +50,9 @@
     Write - String
     POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5
 
+.EXAMPLE 1
 
-.EXAMPLE
-    This example show how to disable the dead site delete job in the local farm.
-
+This example show how to disable the dead site delete job in the local farm.
 
     Configuration Example 
     {

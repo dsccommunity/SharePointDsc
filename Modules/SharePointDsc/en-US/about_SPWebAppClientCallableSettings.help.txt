@@ -1,4 +1,4 @@
-﻿.NAME
+.NAME
     SPWebAppClientCallableSettings
 
 # Description
@@ -47,7 +47,7 @@
     NOTE2:
     An IIS reset needs to be performed on all servers in the farm after
     modifying the registered proxy libraries.
-    
+
 .PARAMETER WebAppUrl
     Key - string
     The URL of the web application to set blocked file types for
@@ -104,10 +104,9 @@
     Write - string
     POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5
 
+.EXAMPLE 1
 
-.EXAMPLE
-    This example shows how to set the client callable settings for a web application
-
+This example shows how to set the client callable settings for a web application
 
     Configuration Example
     {
@@ -136,10 +135,9 @@
         }
     }
 
+.EXAMPLE 2
 
-.EXAMPLE
-    This example shows how to enable tenant administration for a web application in a SharePoint 2013 farm
-
+This example shows how to enable tenant administration for a web application in a SharePoint 2013 farm
 
     Configuration Example
     {

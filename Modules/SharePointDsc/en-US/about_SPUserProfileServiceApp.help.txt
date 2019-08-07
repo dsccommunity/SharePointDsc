@@ -1,4 +1,4 @@
-﻿.NAME
+.NAME
     SPUserProfileServiceApp
 
 # Description
@@ -38,7 +38,7 @@
     NOTE2:
     You should always specify the MySiteHostLocation parameter. Currently this is not
     a required parameter, but will be as of SharePointDsc v4.0.
-    
+
 .PARAMETER Name
     Key - string
     The name of the user profile service
@@ -105,10 +105,9 @@
     Write - String
     POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5
 
+.EXAMPLE 1
 
-.EXAMPLE
-    This example adds a new user profile service application to the local farm
-
+This example adds a new user profile service application to the local farm
 
     Configuration Example
     {
@@ -138,10 +137,9 @@
         }
     }
 
+.EXAMPLE 2
 
-.EXAMPLE
-    This example adds a new user profile service application to the local farm
-
+This example adds a new user profile service application to the local farm
 
     Configuration Example
     {
@@ -176,10 +174,9 @@
         }
     }
 
+.EXAMPLE 3
 
-.EXAMPLE
-    This example adds a new user profile service application to the local farm
-
+This example adds a new user profile service application to the local farm
 
     Configuration Example
     {

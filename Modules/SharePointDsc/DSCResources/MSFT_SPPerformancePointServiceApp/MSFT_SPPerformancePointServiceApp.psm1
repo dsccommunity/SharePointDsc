@@ -25,7 +25,7 @@ function Get-TargetResource
         $DatabaseServer,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present",
 
@@ -37,16 +37,16 @@ function Get-TargetResource
     Write-Verbose -Message "Getting for PerformancePoint Service Application '$Name'"
 
     $result = Invoke-SPDscCommand -Credential $InstallAccount `
-                                  -Arguments $PSBoundParameters `
-                                  -ScriptBlock {
+        -Arguments $PSBoundParameters `
+        -ScriptBlock {
         $params = $args[0]
 
         $serviceApps = Get-SPServiceApplication -Name $params.Name -ErrorAction SilentlyContinue
         $nullReturn = @{
-            Name = $params.Name
+            Name            = $params.Name
             ApplicationPool = $params.ApplicationPool
-            Ensure = "Absent"
-            InstallAccount = $params.InstallAccount
+            Ensure          = "Absent"
+            InstallAccount  = $params.InstallAccount
         }
         if ($null -eq $serviceApps)
         {
@@ -112,7 +112,7 @@ function Set-TargetResource
         $DatabaseServer,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present",
 
@@ -129,12 +129,12 @@ function Set-TargetResource
     {
         Write-Verbose -Message "Creating PerformancePoint Service Application $Name"
         Invoke-SPDscCommand -Credential $InstallAccount `
-                            -Arguments $PSBoundParameters `
-                            -ScriptBlock {
+            -Arguments $PSBoundParameters `
+            -ScriptBlock {
             $params = $args[0]
 
             $newParams = @{
-                Name = $params.Name
+                Name            = $params.Name
                 ApplicationPool = $params.ApplicationPool
             }
             if ($params.ContainsKey("DatabaseName") -eq $true)
@@ -156,8 +156,8 @@ function Set-TargetResource
                 $pName = $params.ProxyName
             }
             New-SPPerformancePointServiceApplicationProxy -Name $pName `
-                                                          -ServiceApplication $params.Name `
-                                                          -Default
+                -ServiceApplication $params.Name `
+                -Default
         }
     }
 
@@ -167,16 +167,16 @@ function Set-TargetResource
         {
             Write-Verbose -Message "Updating PerformancePoint Service Application $Name"
             Invoke-SPDscCommand -Credential $InstallAccount `
-                                -Arguments $PSBoundParameters `
-                                -ScriptBlock {
+                -Arguments $PSBoundParameters `
+                -ScriptBlock {
                 $params = $args[0]
 
                 $appPool = Get-SPServiceApplicationPool -Identity $params.ApplicationPool
 
                 Get-SPServiceApplication -Name $params.Name `
-                    | Where-Object -FilterScript {
-                        $_.GetType().FullName -eq "Microsoft.PerformancePoint.Scorecards.BIMonitoringServiceApplication"
-                    } | Set-SPPerformancePointServiceApplication -ApplicationPool $appPool
+                | Where-Object -FilterScript {
+                    $_.GetType().FullName -eq "Microsoft.PerformancePoint.Scorecards.BIMonitoringServiceApplication"
+                } | Set-SPPerformancePointServiceApplication -ApplicationPool $appPool
             }
         }
     }
@@ -184,8 +184,8 @@ function Set-TargetResource
     {
         Write-Verbose -Message "Removing PerformancePoint Service Application $Name"
         Invoke-SPDscCommand -Credential $InstallAccount `
-                            -Arguments $PSBoundParameters `
-                            -ScriptBlock {
+            -Arguments $PSBoundParameters `
+            -ScriptBlock {
             $params = $args[0]
 
             $app = Get-SPServiceApplication -Name $params.Name | Where-Object -FilterScript {
@@ -233,7 +233,7 @@ function Test-TargetResource
         $DatabaseServer,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present",
 
@@ -252,8 +252,8 @@ function Test-TargetResource
     Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
 
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
-                                    -DesiredValues $PSBoundParameters `
-                                    -ValuesToCheck @("ApplicationPool", "Ensure")
+        -DesiredValues $PSBoundParameters `
+        -ValuesToCheck @("ApplicationPool", "Ensure")
 }
 
 Export-ModuleMember -Function *-TargetResource

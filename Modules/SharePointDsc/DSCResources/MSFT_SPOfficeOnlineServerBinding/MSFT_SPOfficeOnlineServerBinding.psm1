@@ -5,7 +5,7 @@ function Get-TargetResource
     param
     (
         [Parameter(Mandatory = $true)]
-        [ValidateSet("Internal-HTTP","Internal-HTTPS","External-HTTP","External-HTTPS")]
+        [ValidateSet("Internal-HTTP", "Internal-HTTPS", "External-HTTP", "External-HTTPS")]
         [System.String]
         $Zone,
 
@@ -14,7 +14,7 @@ function Get-TargetResource
         $DnsName,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present",
 
@@ -26,8 +26,8 @@ function Get-TargetResource
     Write-Verbose -Message "Getting Office Online Server details for '$Zone' zone"
 
     $result = Invoke-SPDscCommand -Credential $InstallAccount `
-                                  -Arguments $PSBoundParameters `
-                                  -ScriptBlock {
+        -Arguments $PSBoundParameters `
+        -ScriptBlock {
         $params = $args[0]
 
         $currentZone = Get-SPWOPIZone
@@ -61,7 +61,7 @@ function Set-TargetResource
     param
     (
         [Parameter(Mandatory = $true)]
-        [ValidateSet("Internal-HTTP","Internal-HTTPS","External-HTTP","External-HTTPS")]
+        [ValidateSet("Internal-HTTP", "Internal-HTTPS", "External-HTTP", "External-HTTPS")]
         [System.String]
         $Zone,
 
@@ -70,7 +70,7 @@ function Set-TargetResource
         $DnsName,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present",
 
@@ -88,21 +88,21 @@ function Set-TargetResource
         if ($DnsName -ne $CurrentResults.DnsName -or $Zone -ne $CurrentResults.Zone)
         {
             if ([String]::IsNullOrEmpty($CurrentResults.DnsName) -eq $false `
-                -or $Zone -ne $CurrentResults.Zone)
+                    -or $Zone -ne $CurrentResults.Zone)
             {
                 Write-Verbose -Message ("Removing bindings for zone '$Zone' so new bindings " + `
-                                        "can be added")
+                        "can be added")
                 Invoke-SPDscCommand -Credential $InstallAccount `
-                                    -Arguments $PSBoundParameters `
-                                    -ScriptBlock {
+                    -Arguments $PSBoundParameters `
+                    -ScriptBlock {
                     $params = $args[0]
                     Get-SPWOPIBinding -WOPIZone $params.Zone | Remove-SPWOPIBinding -Confirm:$false
                 }
             }
             Write-Verbose -Message "Creating new bindings for '$DnsName' and setting zone to '$Zone'"
             Invoke-SPDscCommand -Credential $InstallAccount `
-                                -Arguments $PSBoundParameters `
-                                -ScriptBlock {
+                -Arguments $PSBoundParameters `
+                -ScriptBlock {
                 $params = $args[0]
 
                 $newParams = @{
@@ -122,8 +122,8 @@ function Set-TargetResource
     {
         Write-Verbose -Message "Removing bindings for zone '$Zone'"
         Invoke-SPDscCommand -Credential $InstallAccount `
-                            -Arguments $PSBoundParameters `
-                            -ScriptBlock {
+            -Arguments $PSBoundParameters `
+            -ScriptBlock {
             $params = $args[0]
             Get-SPWOPIBinding -WOPIZone $params.Zone | Remove-SPWOPIBinding -Confirm:$false
         }
@@ -137,7 +137,7 @@ function Test-TargetResource
     param
     (
         [Parameter(Mandatory = $true)]
-        [ValidateSet("Internal-HTTP","Internal-HTTPS","External-HTTP","External-HTTPS")]
+        [ValidateSet("Internal-HTTP", "Internal-HTTPS", "External-HTTP", "External-HTTPS")]
         [System.String]
         $Zone,
 
@@ -146,7 +146,7 @@ function Test-TargetResource
         $DnsName,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present",
 
@@ -167,11 +167,11 @@ function Test-TargetResource
     $paramsToCheck = @("Ensure")
     if ($Ensure -eq "Present")
     {
-        $paramsToCheck += @("Zone","DnsName")
+        $paramsToCheck += @("Zone", "DnsName")
     }
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
-                                    -DesiredValues $PSBoundParameters `
-                                    -ValuesToCheck $paramsToCheck
+        -DesiredValues $PSBoundParameters `
+        -ValuesToCheck $paramsToCheck
 }
 
 Export-ModuleMember -Function *-TargetResource

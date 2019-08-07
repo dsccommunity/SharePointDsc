@@ -1,4 +1,4 @@
-﻿.NAME
+.NAME
     SPTrustedIdentityTokenIssuer
 
 # Description
@@ -34,7 +34,7 @@
     
     The default value for the Ensure parameter is Present. When not specifying this
     parameter, the token issuer is created.
-    
+
 .PARAMETER Name
     Key - String
     Name of the SPTrustedIdentityTokenIssuer
@@ -88,10 +88,9 @@
     Write - String
     POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5
 
+.EXAMPLE 1
 
-.EXAMPLE
-    This example deploys a trusted token issuer to the local farm.
-
+This example deploys a trusted token issuer to the local farm.
 
     Configuration Example 
     {
@@ -130,10 +129,9 @@
         }
     }
 
+.EXAMPLE 2
 
-.EXAMPLE
-    This example deploys a trusted token issuer to the local farm.
-
+This example deploys a trusted token issuer to the local farm.
 
     Configuration Example 
     {

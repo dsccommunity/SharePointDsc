@@ -17,7 +17,7 @@ function Get-TargetResource
         $DatabaseServer,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present",
 
@@ -29,17 +29,17 @@ function Get-TargetResource
     Write-Verbose -Message "Getting Access Services service app '$Name'"
 
     $result = Invoke-SPDscCommand -Credential $InstallAccount `
-                                  -Arguments $PSBoundParameters `
-                                  -ScriptBlock {
+        -Arguments $PSBoundParameters `
+        -ScriptBlock {
         $params = $args[0]
 
         $serviceApps = Get-SPServiceApplication -Name $params.Name -ErrorAction SilentlyContinue
         $nullReturn = @{
-            Name = $params.Name
+            Name            = $params.Name
             ApplicationPool = $params.ApplicationPool
-            DatabaseServer = $params.DatabaseServer
-            Ensure = "Absent"
-            InstallAccount = $params.InstallAccount
+            DatabaseServer  = $params.DatabaseServer
+            Ensure          = "Absent"
+            InstallAccount  = $params.InstallAccount
         }
         if ($null -eq $serviceApps)
         {
@@ -59,10 +59,10 @@ function Get-TargetResource
             $context = [Microsoft.SharePoint.SPServiceContext]::GetContext($serviceApp.ServiceApplicationProxyGroup, [Microsoft.SharePoint.SPSiteSubscriptionIdentifier]::Default)
             $dbserver = (Get-SPAccessServicesDatabaseServer $context).ServerName
             return @{
-                Name = $serviceApp.DisplayName
-                DatabaseServer = $dbserver
+                Name            = $serviceApp.DisplayName
+                DatabaseServer  = $dbserver
                 ApplicationPool = $serviceApp.ApplicationPool.Name
-                Ensure = "Present"
+                Ensure          = "Present"
             }
         }
     }
@@ -87,7 +87,7 @@ function Set-TargetResource
         $DatabaseServer,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present",
 
@@ -104,15 +104,15 @@ function Set-TargetResource
     {
         Write-Verbose -Message "Creating Access Services Application $Name"
         Invoke-SPDscCommand -Credential $InstallAccount `
-                            -Arguments $PSBoundParameters `
-                            -ScriptBlock {
+            -Arguments $PSBoundParameters `
+            -ScriptBlock {
 
             $params = $args[0]
 
             $app = New-SPAccessServicesApplication -Name $params.Name `
-                                                   -ApplicationPool $params.ApplicationPool `
-                                                   -Default `
-                                                   -DatabaseServer $params.DatabaseServer
+                -ApplicationPool $params.ApplicationPool `
+                -Default `
+                -DatabaseServer $params.DatabaseServer
 
             $app | New-SPAccessServicesApplicationProxy | Out-Null
         }
@@ -121,8 +121,8 @@ function Set-TargetResource
     {
         Write-Verbose -Message "Removing Access Service Application $Name"
         Invoke-SPDscCommand -Credential $InstallAccount `
-                            -Arguments $PSBoundParameters `
-                            -ScriptBlock {
+            -Arguments $PSBoundParameters `
+            -ScriptBlock {
 
             $params = $args[0]
 
@@ -163,7 +163,7 @@ function Test-TargetResource
         $DatabaseServer,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present",
 
@@ -184,14 +184,14 @@ function Test-TargetResource
     if ($CurrentValues.DatabaseServer -ne $DatabaseServer)
     {
         Write-Verbose -Message ("Specified database server does not match the actual " + `
-                                "database server. This resource cannot move the database " + `
-                                "to a different SQL instance.")
+                "database server. This resource cannot move the database " + `
+                "to a different SQL instance.")
         return $false
     }
 
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
-                                    -DesiredValues $PSBoundParameters `
-                                    -ValuesToCheck @("Ensure")
+        -DesiredValues $PSBoundParameters `
+        -ValuesToCheck @("Ensure")
 }
 
 Export-ModuleMember -Function *-TargetResource

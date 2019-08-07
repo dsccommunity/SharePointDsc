@@ -1,4 +1,4 @@
-﻿.NAME
+.NAME
     SPDistributedCacheService
 
 # Description
@@ -28,7 +28,7 @@
     
     The default value for the Ensure parameter is Present. When not specifying this
     parameter, the distributed cache is provisioned.
-    
+
 .PARAMETER Name
     Key - String
     A name to assign to this resource - not really used. For example - AppFabricCachingService
@@ -58,12 +58,11 @@
     Write - String
     POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5
 
+.EXAMPLE 1
 
-.EXAMPLE
-    This example applies the distributed cache service to the current server,
-    also setting the rules in Windows firewall to allow communication with
-    other cache hosts.
-
+This example applies the distributed cache service to the current server,
+also setting the rules in Windows firewall to allow communication with
+other cache hosts.
 
     Configuration Example
     {
@@ -86,13 +85,12 @@
         }
     }
 
+.EXAMPLE 2
 
-.EXAMPLE
-    This example applies the distributed cache service to the current server,
-    but will not apply the rules to allow it to communicate with other cache
-    hosts to the Windows Firewall. Use this approach if you have an alternate
-    firewall solution.
-
+This example applies the distributed cache service to the current server,
+but will not apply the rules to allow it to communicate with other cache
+hosts to the Windows Firewall. Use this approach if you have an alternate
+firewall solution.
 
     Configuration Example
     {
@@ -115,15 +113,14 @@
         }
     }
 
+.EXAMPLE 3
 
-.EXAMPLE
-    This example applies the distributed cache service to both "server1" and
-    "server2". The ServerProvisionOrder will ensure that it applies it to
-    server1 first and then server2, making sure they don't both attempt to
-    create the cache at the same time, resuling in errors.
+This example applies the distributed cache service to both "server1" and
+"server2". The ServerProvisionOrder will ensure that it applies it to
+server1 first and then server2, making sure they don't both attempt to
+create the cache at the same time, resuling in errors.
 
-    Note: Do not allow plain text passwords in production environments.
-
+Note: Do not allow plain text passwords in production environments.
 
     $ConfigurationData = @{
         AllNodes = @(

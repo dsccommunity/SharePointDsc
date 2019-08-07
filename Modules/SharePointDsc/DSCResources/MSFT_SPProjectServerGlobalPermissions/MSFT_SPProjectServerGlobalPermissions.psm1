@@ -35,19 +35,19 @@ function Get-TargetResource
     if ((Get-SPDscInstalledProductVersion).FileMajorPart -lt 16)
     {
         throw [Exception] ("Support for Project Server in SharePointDsc is only valid for " + `
-                           "SharePoint 2016 and 2019.")
+                "SharePoint 2016 and 2019.")
     }
 
     $result = Invoke-SPDscCommand -Credential $InstallAccount `
-                                  -Arguments @($PSBoundParameters, $PSScriptRoot) `
-                                  -ScriptBlock {
+        -Arguments @($PSBoundParameters, $PSScriptRoot) `
+        -ScriptBlock {
         $params = $args[0]
         $scriptRoot = $args[1]
 
         if ((Get-SPProjectPermissionMode -Url $params.Url) -ne "ProjectServer")
         {
             throw [Exception] ("SPProjectServerGlobalPermissions is designed for Project Server " + `
-                               "permissions mode only, and this site is set to SharePoint mode")
+                    "permissions mode only, and this site is set to SharePoint mode")
         }
 
         $modulePath = "..\..\Modules\SharePointDsc.ProjectServer\ProjectServerConnector.psm1"
@@ -57,29 +57,31 @@ function Get-TargetResource
         $denyPermissions = @()
         $script:resultDataSet = $null
 
-        switch($params.EntityType)
+        switch ($params.EntityType)
         {
-            "User" {
+            "User"
+            {
                 $webAppUrl = (Get-SPSite -Identity $params.Url).WebApplication.Url
                 $useKerberos = -not (Get-SPAuthenticationProvider -WebApplication $webAppUrl -Zone Default).DisableKerberos
                 $resourceService = New-SPDscProjectServerWebService -PwaUrl $params.Url `
-                                                                    -EndpointName Resource `
-                                                                    -UseKerberos:$useKerberos
+                    -EndpointName Resource `
+                    -UseKerberos:$useKerberos
 
                 $userId = Get-SPDscProjectServerResourceId -PwaUrl $params.Url -ResourceName $params.EntityName
                 Use-SPDscProjectServerWebService -Service $resourceService -ScriptBlock {
                     $script:resultDataSet = $resourceService.ReadResourceAuthorization($userId)
                 }
             }
-            "Group" {
+            "Group"
+            {
                 $webAppUrl = (Get-SPSite -Identity $params.Url).WebApplication.Url
                 $useKerberos = -not (Get-SPAuthenticationProvider -WebApplication $webAppUrl -Zone Default).DisableKerberos
                 $securityService = New-SPDscProjectServerWebService -PwaUrl $params.Url `
-                                                                    -EndpointName Security `
-                                                                    -UseKerberos:$useKerberos
+                    -EndpointName Security `
+                    -UseKerberos:$useKerberos
 
                 Use-SPDscProjectServerWebService -Service $securityService -ScriptBlock {
-                    $groupInfo  = $securityService.ReadGroupList().SecurityGroups | Where-Object -FilterScript {
+                    $groupInfo = $securityService.ReadGroupList().SecurityGroups | Where-Object -FilterScript {
                         $_.WSEC_GRP_NAME -eq $params.EntityName
                     }
                     $script:resultDataSet = $securityService.ReadGroup($groupInfo.WSEC_GRP_UID)
@@ -100,11 +102,11 @@ function Get-TargetResource
         }
 
         return @{
-            Url = $params.Url
-            EntityName = $params.EntityName
-            EntityType = $params.EntityType
+            Url              = $params.Url
+            EntityName       = $params.EntityName
+            EntityType       = $params.EntityType
             AllowPermissions = $allowPermissions
-            DenyPermissions = $denyPermissions
+            DenyPermissions  = $denyPermissions
         }
     }
     return $result
@@ -147,8 +149,8 @@ function Set-TargetResource
     $currentValues = Get-TargetResource @PSBoundParameters
 
     $result = Invoke-SPDscCommand -Credential $InstallAccount `
-                                  -Arguments @($PSBoundParameters, $PSScriptRoot, $currentValues) `
-                                  -ScriptBlock {
+        -Arguments @($PSBoundParameters, $PSScriptRoot, $currentValues) `
+        -ScriptBlock {
         $params = $args[0]
         $scriptRoot = $args[1]
         $currentValues = $args[2]
@@ -165,16 +167,18 @@ function Set-TargetResource
         if ($params.ContainsKey("AllowPermissions") -eq $true)
         {
             $allowPermsDifference = Compare-Object -ReferenceObject $currentValues.AllowPermissions `
-                                                   -DifferenceObject $params.AllowPermissions
+                -DifferenceObject $params.AllowPermissions
 
             $allowPermsDifference | ForEach-Object -Process {
                 $diff = $_
                 switch ($diff.SideIndicator)
                 {
-                    "<=" {
+                    "<="
+                    {
                         $allowPermsToRemove += $diff.InputObject
                     }
-                    "=>" {
+                    "=>"
+                    {
                         $allowPermsToAdd += $diff.InputObject
                     }
                 }
@@ -183,30 +187,33 @@ function Set-TargetResource
         if ($params.ContainsKey("DenyPermissions") -eq $true)
         {
             $denyPermsDifference = Compare-Object -ReferenceObject $currentValues.DenyPermissions `
-                                                   -DifferenceObject $params.DenyPermissions
+                -DifferenceObject $params.DenyPermissions
 
             $denyPermsDifference | ForEach-Object -Process {
                 $diff = $_
                 switch ($diff.SideIndicator)
                 {
-                    "<=" {
+                    "<="
+                    {
                         $denyPermsToRemove += $diff.InputObject
                     }
-                    "=>" {
+                    "=>"
+                    {
                         $denyPermsToAdd += $diff.InputObject
                     }
                 }
             }
         }
 
-        switch($params.EntityType)
+        switch ($params.EntityType)
         {
-            "User" {
+            "User"
+            {
                 $webAppUrl = (Get-SPSite -Identity $params.Url).WebApplication.Url
                 $useKerberos = -not (Get-SPAuthenticationProvider -WebApplication $webAppUrl -Zone Default).DisableKerberos
                 $resourceService = New-SPDscProjectServerWebService -PwaUrl $params.Url `
-                                                                    -EndpointName Resource `
-                                                                    -UseKerberos:$useKerberos
+                    -EndpointName Resource `
+                    -UseKerberos:$useKerberos
 
                 $userId = Get-SPDscProjectServerResourceId -PwaUrl $params.Url -ResourceName $params.EntityName
                 Use-SPDscProjectServerWebService -Service $resourceService -ScriptBlock {
@@ -247,15 +254,16 @@ function Set-TargetResource
                     $resourceService.UpdateResources($dataSet, $false, $true)
                 }
             }
-            "Group" {
+            "Group"
+            {
                 $webAppUrl = (Get-SPSite -Identity $params.Url).WebApplication.Url
                 $useKerberos = -not (Get-SPAuthenticationProvider -WebApplication $webAppUrl -Zone Default).DisableKerberos
                 $securityService = New-SPDscProjectServerWebService -PwaUrl $params.Url `
-                                                                    -EndpointName Security `
-                                                                    -UseKerberos:$useKerberos
+                    -EndpointName Security `
+                    -UseKerberos:$useKerberos
 
                 Use-SPDscProjectServerWebService -Service $securityService -ScriptBlock {
-                    $groupInfo  = $securityService.ReadGroupList().SecurityGroups | Where-Object -FilterScript {
+                    $groupInfo = $securityService.ReadGroupList().SecurityGroups | Where-Object -FilterScript {
                         $_.WSEC_GRP_NAME -eq $params.EntityName
                     }
                     $dataSet = $securityService.ReadGroup($groupInfo.WSEC_GRP_UID)
@@ -341,11 +349,11 @@ function Test-TargetResource
     Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
 
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
-                                    -DesiredValues $PSBoundParameters `
-                                    -ValuesToCheck @(
-                                        "AllowPermissions",
-                                        "DenyPermissions"
-                                    )
+        -DesiredValues $PSBoundParameters `
+        -ValuesToCheck @(
+        "AllowPermissions",
+        "DenyPermissions"
+    )
 }
 
 Export-ModuleMember -Function *-TargetResource

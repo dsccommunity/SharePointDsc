@@ -1,4 +1,4 @@
-﻿.NAME
+.NAME
     SPLogLevel
 
 # Description
@@ -13,7 +13,7 @@
     within an area. Settings can be changed to desired valid values, or set to the
     default by using the keyword 'Default' as the trace level and event level.
     You must specify a unique name for each instance of this resource in a configuration.
-    
+
 .PARAMETER Name
     Key - String
     Friendly Name used to reference this collection of log level settings
@@ -26,9 +26,9 @@
     Write - String
     POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5
 
+.EXAMPLE 1
 
-.EXAMPLE
-    This example sets an Area / Category item to a custom value.
+This example sets an Area / Category item to a custom value.
 
 Configuration Example
 {
@@ -56,9 +56,9 @@ Configuration Example
     }
 }
 
+.EXAMPLE 2
 
-.EXAMPLE
-    This example sets an entire Area to the default values
+This example sets an entire Area to the default values
 
 Configuration Example
 {
@@ -86,9 +86,9 @@ Configuration Example
     }
 }
 
+.EXAMPLE 3
 
-.EXAMPLE
-    This example sets multiple items to custom values
+This example sets multiple items to custom values
 
 Configuration Example
 {

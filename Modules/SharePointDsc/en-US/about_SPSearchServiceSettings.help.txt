@@ -1,4 +1,4 @@
-﻿.NAME
+.NAME
     SPSearchServiceSettings
 
 # Description
@@ -10,7 +10,7 @@
     service, like the crawler performance level. All settings are farm
     wide settings, which is why this resource should only be used once
     in each configuration.
-    
+
 .PARAMETER IsSingleInstance
     Key - String
     Allowed values: Yes
@@ -33,10 +33,9 @@
     Write - String
     POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5
 
+.EXAMPLE 1
 
-.EXAMPLE
-    This example creates a new search service app in the local farm
-
+This example creates a new search service app in the local farm
 
     Configuration Example
     {

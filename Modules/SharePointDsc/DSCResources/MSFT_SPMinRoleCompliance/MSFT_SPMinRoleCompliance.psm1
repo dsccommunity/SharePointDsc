@@ -10,7 +10,7 @@ function Get-TargetResource
         $IsSingleInstance,
 
         [Parameter(Mandatory = $true)]
-        [ValidateSet("Compliant","NonCompliant")]
+        [ValidateSet("Compliant", "NonCompliant")]
         [System.String]
         $State,
 
@@ -28,8 +28,8 @@ function Get-TargetResource
     }
 
     $result = Invoke-SPDscCommand -Credential $InstallAccount `
-                                  -Arguments $PSBoundParameters `
-                                  -ScriptBlock {
+        -Arguments $PSBoundParameters `
+        -ScriptBlock {
         $nonCompliantServices = Get-SPService | Where-Object -FilterScript {
             $_.CompliantWithMinRole -eq $false
         }
@@ -60,7 +60,7 @@ function Get-SPDscRoleTestMethod
     $assembly = [System.Reflection.Assembly]::LoadWithPartialName("Microsoft.SharePoint")
     $type = $assembly.GetType("Microsoft.SharePoint.Administration.SPServerRoleManager")
     $flags = [Reflection.BindingFlags] "NonPublic,Static"
-    return $type.GetMethod("IsCompliantWithMinRole",$flags)
+    return $type.GetMethod("IsCompliantWithMinRole", $flags)
 }
 
 function Set-TargetResource
@@ -74,7 +74,7 @@ function Set-TargetResource
         $IsSingleInstance,
 
         [Parameter(Mandatory = $true)]
-        [ValidateSet("Compliant","NonCompliant")]
+        [ValidateSet("Compliant", "NonCompliant")]
         [System.String]
         $State,
 
@@ -94,12 +94,12 @@ function Set-TargetResource
     if ($State -eq "NonCompliant")
     {
         throw ("State can only be configured to 'Compliant'. The 'NonCompliant' value is only " + `
-               "used to report when the farm is not compliant")
+                "used to report when the farm is not compliant")
     }
 
     Invoke-SPDscCommand -Credential $InstallAccount `
-                        -Arguments $PSBoundParameters `
-                        -ScriptBlock {
+        -Arguments $PSBoundParameters `
+        -ScriptBlock {
         $method = Get-SPDscRoleTestMethod
 
         Get-SPService | Where-Object -FilterScript {
@@ -138,7 +138,7 @@ function Test-TargetResource
         $IsSingleInstance,
 
         [Parameter(Mandatory = $true)]
-        [ValidateSet("Compliant","NonCompliant")]
+        [ValidateSet("Compliant", "NonCompliant")]
         [System.String]
         $State,
 
@@ -152,7 +152,7 @@ function Test-TargetResource
     if ($State -eq "NonCompliant")
     {
         throw ("State can only be configured to 'Compliant'. The 'NonCompliant' value is only " + `
-               "used to report when the farm is not compliant")
+                "used to report when the farm is not compliant")
     }
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
@@ -161,8 +161,11 @@ function Test-TargetResource
     Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
 
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
-                                    -DesiredValues $PSBoundParameters `
-                                    -ValuesToCheck @("State")
+        -DesiredValues $PSBoundParameters `
+        -ValuesToCheck @("State")
 }
 
-Export-ModuleMember -Function *-TargetResource
+Export-ModuleMember -Function Get-TargetResource, `
+    Test-TargetResource, `
+    Set-TargetResource, `
+    Get-SPDscRoleTestMethod

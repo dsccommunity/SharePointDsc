@@ -1,4 +1,4 @@
-﻿.NAME
+.NAME
     SPIncomingEmailSettings
 
 # Description
@@ -14,7 +14,7 @@
     
     This resource does not currently support setting the Active Directory OU
     where SharePoint can create mail contacts and distribution groups.
-    
+
 .PARAMETER IsSingleInstance
     Key - String
     Allowed values: Yes
@@ -62,10 +62,9 @@
     Write - String
     POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5
 
+.EXAMPLE 1
 
-.EXAMPLE
-    This example shows how to configure SharePoint Incoming Email in Automatic Mode
-
+This example shows how to configure SharePoint Incoming Email in Automatic Mode
 
 Configuration Example
 {
@@ -89,10 +88,9 @@ Configuration Example
     }
 }
 
+.EXAMPLE 2
 
-.EXAMPLE
-    This example shows how to configure SharePoint Incoming Email in Advanced Mode
-
+This example shows how to configure SharePoint Incoming Email in Advanced Mode
 
 Configuration Example
 {

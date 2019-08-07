@@ -1,4 +1,4 @@
-﻿.NAME
+.NAME
     SPOfficeOnlineServerBinding
 
 # Description
@@ -18,7 +18,7 @@
     
     The default value for the Ensure parameter is Present. When not specifying this
     parameter, the zone is configured.
-    
+
 .PARAMETER Zone
     Key - string
     Allowed values: Internal-HTTP, Internal-HTTPS, External-HTTP, External-HTTPS
@@ -37,11 +37,10 @@
     Write - String
     POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5
 
+.EXAMPLE 1
 
-.EXAMPLE
-    This example shows how to create bindings to the internal-https zone for the 
-    local SharePoint farm.
-
+This example shows how to create bindings to the internal-https zone for the 
+local SharePoint farm.
 
     Configuration Example 
     {
@@ -62,11 +61,10 @@
         }
     }
 
+.EXAMPLE 2
 
-.EXAMPLE
-    This example shows how to remove bindings from the internal-http zone for the 
-    local SharePoint farm.
-
+This example shows how to remove bindings from the internal-http zone for the 
+local SharePoint farm.
 
     Configuration Example 
     {

@@ -1,4 +1,4 @@
-﻿.NAME
+.NAME
     SPAccessServices2010
 
 # Description
@@ -12,7 +12,7 @@
     
     The default value for the Ensure parameter is Present. When not specifying this
     parameter, the service application is provisioned.
-    
+
 .PARAMETER Name
     Key - String
     The name of the service application

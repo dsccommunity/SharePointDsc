@@ -1,4 +1,4 @@
-﻿.NAME
+.NAME
     SPWebApplicationExtension
 
 # Description
@@ -12,7 +12,7 @@
     AllowAnonymous and Authentication methods remain consistent. Please note that this
     currently does not support changing the claims provider on an existing claims
     enabled web application externsion.
-    
+
 .PARAMETER WebAppUrl
     Key - string
     The URL of the parent web application
@@ -59,10 +59,9 @@
     Write - string
     POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5
 
+.EXAMPLE 1
 
-.EXAMPLE
-    This example shows how to create a new web application extension in the local farm
-
+This example shows how to create a new web application extension in the local farm
 
     Configuration Example
     {

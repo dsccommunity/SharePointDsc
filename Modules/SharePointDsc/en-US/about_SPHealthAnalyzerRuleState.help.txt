@@ -1,4 +1,4 @@
-﻿.NAME
+.NAME
     SPHealthAnalyzerRuleState
 
 # Description
@@ -8,7 +8,7 @@
     
     This resource is used to configure Health Analyzer rules for the local farm.
     The resource is able to enable/disable and configure the specified rule.
-    
+
 .PARAMETER Name
     Key - String
     The name of the rule exactly as it appears in central admin
@@ -35,10 +35,9 @@
     Write - String
     POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5
 
+.EXAMPLE 1
 
-.EXAMPLE
-    This example shows how to disable a health analyzer rule 
-
+This example shows how to disable a health analyzer rule 
 
     Configuration Example 
     {

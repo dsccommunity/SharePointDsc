@@ -1,4 +1,4 @@
-﻿.NAME
+.NAME
     SPBCSServiceApp
 
 # Description
@@ -17,7 +17,7 @@
     
     The default value for the Ensure parameter is Present. When not specifying this
     parameter, the service application is provisioned.
-    
+
 .PARAMETER Name
     Key - string
     The name of the BCS service app
@@ -47,11 +47,10 @@
     Write - String
     POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5
 
+.EXAMPLE 1
 
-.EXAMPLE
-    This example shows how to deploy a Business Connectivity Services application to the
-    local SharePoint farm.
-
+This example shows how to deploy a Business Connectivity Services application to the
+local SharePoint farm.
 
     Configuration Example
     {
@@ -74,12 +73,11 @@
         }
     }
 
+.EXAMPLE 2
 
-.EXAMPLE
-    This example shows how to deploy a Business Connectivity Services application to the
-    local SharePoint farm. The application pool account is mandatory but the value is 
-    ignored when removing a service app, so the value entered here does not matter. 
-
+This example shows how to deploy a Business Connectivity Services application to the
+local SharePoint farm. The application pool account is mandatory but the value is 
+ignored when removing a service app, so the value entered here does not matter. 
 
     Configuration Example 
     {

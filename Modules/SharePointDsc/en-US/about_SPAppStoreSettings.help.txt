@@ -1,4 +1,4 @@
-﻿.NAME
+.NAME
     SPAppStoreSettings
 
 # Description
@@ -8,7 +8,7 @@
     
     This resource will configure the ability to purchase apps for both SharePoint
     and Office apps.
-    
+
 .PARAMETER WebAppUrl
     Key - string
     The URL of the web application
@@ -25,10 +25,9 @@
     Write - String
     POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5
 
+.EXAMPLE 1
 
-.EXAMPLE
-    This example shows how to configure the AppCatalog in the farm
-
+This example shows how to configure the AppCatalog in the farm
 
     Configuration Example 
     {
@@ -49,10 +48,9 @@
         }
     }
 
+.EXAMPLE 2
 
-.EXAMPLE
-    This example shows how to configure the AppCatalog in the farm
-
+This example shows how to configure the AppCatalog in the farm
 
     Configuration Example 
     {
@@ -74,10 +72,9 @@
         }
     }
 
+.EXAMPLE 3
 
-.EXAMPLE
-    This example shows how to configure the AppCatalog in the farm
-
+This example shows how to configure the AppCatalog in the farm
 
     Configuration Example 
     {

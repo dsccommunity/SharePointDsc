@@ -1,4 +1,4 @@
-﻿.NAME
+.NAME
     SPExcelServiceApp
 
 # Description
@@ -12,7 +12,7 @@
     
     The default value for the Ensure parameter is Present. When not specifying this
     parameter, the service application is provisioned.
-    
+
 .PARAMETER Name
     Key - string
     The name of the service application
@@ -74,7 +74,7 @@
 
 .PARAMETER ThrottleAccessViolationsPerSiteCollection
     Write - Uint32
-    Specifies that if a workbook causes an access violation error on Excel Services Application, all files originating from that workbookâ€™s site collection are blocked from loading for the specified period (in seconds).
+    Specifies that if a workbook causes an access violation error on Excel Services Application, all files originating from that workbook???s site collection are blocked from loading for the specified period (in seconds).
 
 .PARAMETER UnattendedAccountApplicationId
     Write - String
@@ -101,10 +101,9 @@
     Write - String
     POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5
 
+.EXAMPLE 1
 
-.EXAMPLE
-    This example shows how to deploy Excel Services to the local SharePoint farm.
-
+This example shows how to deploy Excel Services to the local SharePoint farm.
 
     Configuration Example
     {
@@ -125,12 +124,11 @@
         }
     }
 
+.EXAMPLE 2
 
-.EXAMPLE
-    This example shows how to remove Excel Services from the local SharePoint farm.
-    Here application pool is a required parameter, but it is not actually used when
-    removing a service app and as such can be ignored and set to any value.
-
+This example shows how to remove Excel Services from the local SharePoint farm.
+Here application pool is a required parameter, but it is not actually used when
+removing a service app and as such can be ignored and set to any value.
 
     Configuration Example
     {

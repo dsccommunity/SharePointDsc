@@ -1,4 +1,4 @@
-﻿.NAME
+.NAME
     SPWebAppBlockedFileTypes
 
 # Description
@@ -17,7 +17,7 @@
     file type is not on the list, and if it is it will be removed. Both of these
     properties will only make changes to the file types in their list and will
     leave the full list as it is otherwise, whereas the blocked property resets
-    
+
 .PARAMETER WebAppUrl
     Key - string
     The URL of the web application to set blocked file types for
@@ -38,12 +38,11 @@
     Write - string
     POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5
 
+.EXAMPLE 1
 
-.EXAMPLE
-    This example shows how to ensure that specific file types are always blocked while
-    others will always be allowed. Any file types not mentioned in this config will be
-    able to be managed manually.
-
+This example shows how to ensure that specific file types are always blocked while
+others will always be allowed. Any file types not mentioned in this config will be
+able to be managed manually.
 
     Configuration Example
     {
@@ -65,11 +64,10 @@
         }
     }
 
+.EXAMPLE 2
 
-.EXAMPLE
-    This example shows how to ensure that the blocked file type list always
-    specifically matches this list.
-
+This example shows how to ensure that the blocked file type list always
+specifically matches this list.
 
     Configuration Example
     {

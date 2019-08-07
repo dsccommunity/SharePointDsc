@@ -1,4 +1,4 @@
-﻿.NAME
+.NAME
     SPServiceAppProxyGroup
 
 # Description
@@ -25,7 +25,7 @@
     
     The default value for the Ensure parameter is Present. When not specifying this
     parameter, the proxy group is created.
-    
+
 .PARAMETER Name
     Key - String
     Name of the Proxy Group to create
@@ -51,11 +51,10 @@
     Write - String
     POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5
 
+.EXAMPLE 1
 
-.EXAMPLE
-    This example creates two seperate proxy groups of service apps that can be 
-    assigned to web apps in the farm
-
+This example creates two seperate proxy groups of service apps that can be 
+assigned to web apps in the farm
 
     Configuration Example 
     {
