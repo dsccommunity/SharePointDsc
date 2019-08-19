@@ -4,17 +4,17 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [Parameter(Mandatory = $true)]  
-        [System.String] 
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $Name,
 
         [Parameter()]
-        [System.Management.Automation.PSCredential] 
+        [System.Management.Automation.PSCredential]
         $InstallAccount,
-        
+
         [Parameter()]
-        [ValidateSet("Present","Absent")] 
-        [System.String] 
+        [ValidateSet("Present", "Absent")]
+        [System.String]
         $Ensure = "Present"
     )
 
@@ -24,49 +24,49 @@ function Get-TargetResource
 
     $invokeArgs = @{
         Credential = $InstallAccount
-        Arguments = @($PSBoundParameters, $newName)
+        Arguments  = @($PSBoundParameters, $newName)
     }
-    $result = Invoke-SPDSCCommand @invokeArgs -ScriptBlock {
+    $result = Invoke-SPDscCommand @invokeArgs -ScriptBlock {
         $params = $args[0]
         $newName = $args[1]
-        
+
         $si = Get-SPServiceInstance -Server $env:COMPUTERNAME -All | Where-Object -FilterScript {
             $_.TypeName -eq $params.Name -or `
-            $_.TypeName -eq $newName -or `
-            $_.GetType().Name -eq $newName
+                $_.TypeName -eq $newName -or `
+                $_.GetType().Name -eq $newName
         }
-        
-        if ($null -eq $si) 
+
+        if ($null -eq $si)
         {
             $domain = (Get-CimInstance -ClassName Win32_ComputerSystem).Domain
             $fqdn = "$($env:COMPUTERNAME).$domain"
             $si = Get-SPServiceInstance -Server $fqdn -All | Where-Object -FilterScript {
                 $_.TypeName -eq $params.Name -or `
-                $_.TypeName -eq $newName -or `
-                $_.GetType().Name -eq $newName
+                    $_.TypeName -eq $newName -or `
+                    $_.GetType().Name -eq $newName
             }
         }
-        
-        if ($null -eq $si) 
+
+        if ($null -eq $si)
         {
             return @{
-                Name = $params.Name
-                Ensure = "Absent"
+                Name           = $params.Name
+                Ensure         = "Absent"
                 InstallAccount = $params.InstallAccount
-            } 
+            }
         }
-        if ($si.Status -eq "Online") 
+        if ($si.Status -eq "Online")
         {
-            $localEnsure = "Present" 
-        } 
-        else 
-        {
-            $localEnsure = "Absent" 
+            $localEnsure = "Present"
         }
-        
+        else
+        {
+            $localEnsure = "Absent"
+        }
+
         return @{
-            Name = $params.Name
-            Ensure = $localEnsure
+            Name           = $params.Name
+            Ensure         = $localEnsure
             InstallAccount = $params.InstallAccount
         }
     }
@@ -78,17 +78,17 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [Parameter(Mandatory = $true)]  
-        [System.String] 
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $Name,
 
         [Parameter()]
-        [System.Management.Automation.PSCredential] 
+        [System.Management.Automation.PSCredential]
         $InstallAccount,
-        
+
         [Parameter()]
-        [ValidateSet("Present","Absent")] 
-        [System.String] 
+        [ValidateSet("Present", "Absent")]
+        [System.String]
         $Ensure = "Present"
     )
 
@@ -97,62 +97,62 @@ function Set-TargetResource
     $newName = (Get-SPDscServiceTypeName -DisplayName $Name)
     $invokeArgs = @{
         Credential = $InstallAccount
-        Arguments = @($PSBoundParameters, $newName)
+        Arguments  = @($PSBoundParameters, $newName)
     }
 
-    if ($Ensure -eq "Present") 
+    if ($Ensure -eq "Present")
     {
         Write-Verbose -Message "Provisioning service instance '$Name'"
 
-        Invoke-SPDSCCommand @invokeArgs -ScriptBlock {
+        Invoke-SPDscCommand @invokeArgs -ScriptBlock {
             $params = $args[0]
             $newName = $args[1]
-            
+
             $si = Get-SPServiceInstance -Server $env:COMPUTERNAME -All | Where-Object -FilterScript {
                 $_.TypeName -eq $params.Name -or `
-                $_.TypeName -eq $newName -or `
-                $_.GetType().Name -eq $newName
+                    $_.TypeName -eq $newName -or `
+                    $_.GetType().Name -eq $newName
             }
-            
-            if ($null -eq $si) 
+
+            if ($null -eq $si)
             {
                 $domain = (Get-CimInstance -ClassName Win32_ComputerSystem).Domain
                 $fqdn = "$($env:COMPUTERNAME).$domain"
                 $si = Get-SPServiceInstance -Server $fqdn -All | Where-Object -FilterScript {
                     $_.TypeName -eq $params.Name -or `
-                    $_.TypeName -eq $newName -or `
-                    $_.GetType().Name -eq $newName
+                        $_.TypeName -eq $newName -or `
+                        $_.GetType().Name -eq $newName
                 }
             }
             if ($null -eq $si)
             {
                 throw [Exception] "Unable to locate service instance '$($params.Name)'"
             }
-            Start-SPServiceInstance -Identity $si 
+            Start-SPServiceInstance -Identity $si
         }
-    } 
-    else 
+    }
+    else
     {
         Write-Verbose -Message "Deprovisioning service instance '$Name'"
 
-        Invoke-SPDSCCommand @invokeArgs -ScriptBlock {
+        Invoke-SPDscCommand @invokeArgs -ScriptBlock {
             $params = $args[0]
             $newName = $args[1]
-            
+
             $si = Get-SPServiceInstance -Server $env:COMPUTERNAME -All | Where-Object -FilterScript {
                 $_.TypeName -eq $params.Name -or `
-                $_.TypeName -eq $newName -or `
-                $_.GetType().Name -eq $newName
+                    $_.TypeName -eq $newName -or `
+                    $_.GetType().Name -eq $newName
             }
-            
-            if ($null -eq $si) 
+
+            if ($null -eq $si)
             {
                 $domain = (Get-CimInstance -ClassName Win32_ComputerSystem).Domain
                 $fqdn = "$($env:COMPUTERNAME).$domain"
                 $si = Get-SPServiceInstance -Server $fqdn -All | Where-Object -FilterScript {
                     $_.TypeName -eq $params.Name -or `
-                    $_.TypeName -eq $newName -or `
-                    $_.GetType().Name -eq $newName
+                        $_.TypeName -eq $newName -or `
+                        $_.GetType().Name -eq $newName
                 }
             }
             if ($null -eq $si)
@@ -170,17 +170,17 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [Parameter(Mandatory = $true)]  
-        [System.String] 
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $Name,
 
         [Parameter()]
-        [System.Management.Automation.PSCredential] 
+        [System.Management.Automation.PSCredential]
         $InstallAccount,
-        
+
         [Parameter()]
-        [ValidateSet("Present","Absent")] 
-        [System.String] 
+        [ValidateSet("Present", "Absent")]
+        [System.String]
         $Ensure = "Present"
     )
 
@@ -188,12 +188,14 @@ function Test-TargetResource
 
     $PSBoundParameters.Ensure = $Ensure
 
-    $testArgs = @{
-        CurrentValues = (Get-TargetResource @PSBoundParameters)
-        DesiredValues = $PSBoundParameters
-        ValuesToCheck = @("Name", "Ensure")
-    }
-    return Test-SPDscParameterState @testArgs
+    $CurrentValues = Get-TargetResource @PSBoundParameters
+
+    Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
+    Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
+
+    return Test-SPDscParameterState -CurrentValues $CurrentValues `
+        -DesiredValues $PSBoundParameters `
+        -ValuesToCheck @("Name", "Ensure")
 }
 
 function Get-SPDscServiceTypeName
@@ -207,88 +209,116 @@ function Get-SPDscServiceTypeName
     )
     switch ($DisplayName)
     {
-        "Access Database Service 2010" {
+        "Access Database Service 2010"
+        {
             return "AccessServerWebServiceInstance"
         }
-        "Access Services" {
+        "Access Services"
+        {
             return "AccessServicesWebServiceInstance"
         }
-        "App Management Service" {
+        "App Management Service"
+        {
             return "AppManagementServiceInstance"
         }
-        "Business Data Connectivity Service" {
+        "Business Data Connectivity Service"
+        {
             return "BdcServiceInstance"
         }
-        "PerformancePoint Service" {
+        "PerformancePoint Service"
+        {
             return "BIMonitoringServiceInstance"
         }
-        "Excel Calculation Services" {
+        "Excel Calculation Services"
+        {
             return "ExcelServerWebServiceInstance"
         }
-        "Document Conversions Launcher Service" {
+        "Document Conversions Launcher Service"
+        {
             return "LauncherServiceInstance"
         }
-        "Document Conversions Load Balancer Service" {
+        "Document Conversions Load Balancer Service"
+        {
             return "LoadBalancerServiceInstance"
         }
-        "Managed Metadata Web Service" {
+        "Managed Metadata Web Service"
+        {
             return "MetadataWebServiceInstance"
         }
-        "Lotus Notes Connector" {
+        "Lotus Notes Connector"
+        {
             return "NotesWebServiceInstance"
         }
-        "PowerPoint Conversion Service" {
+        "PowerPoint Conversion Service"
+        {
             return "PowerPointConversionServiceInstance"
         }
-        "User Profile Synchronization Service" {
+        "User Profile Synchronization Service"
+        {
             return "ProfileSynchronizationServiceInstance"
         }
-        "Search Query and Site Settings Service" {
+        "Search Query and Site Settings Service"
+        {
             return "SearchQueryAndSiteSettingsServiceInstance"
         }
-        "Search Host Controller Service" {
+        "Search Host Controller Service"
+        {
             return "SearchRuntimeServiceInstance"
         }
-        "SharePoint Server Search" {
+        "SharePoint Server Search"
+        {
             return "SearchServiceInstance"
         }
-        "Secure Store Service" {
+        "Secure Store Service"
+        {
             return "SecureStoreServiceInstance"
         }
-        "Microsoft SharePoint Foundation Incoming E-Mail" {
+        "Microsoft SharePoint Foundation Incoming E-Mail"
+        {
             return "SPIncomingEmailServiceInstance"
         }
-        "Request Management" {
+        "Request Management"
+        {
             return "SPRequestManagementServiceInstance"
         }
-        "Microsoft SharePoint Foundation Subscription Settings Service" {
+        "Microsoft SharePoint Foundation Subscription Settings Service"
+        {
             return "SPSubscriptionSettingsServiceInstance"
         }
-        "Microsoft SharePoint Foundation Sandboxed Code Service" {
+        "Microsoft SharePoint Foundation Sandboxed Code Service"
+        {
             return "SPUserCodeServiceInstance"
         }
-        "Claims to Windows Token Service" {
+        "Claims to Windows Token Service"
+        {
             return "SPWindowsTokenServiceInstance"
         }
-        "Microsoft SharePoint Foundation Workflow Timer Service" {
+        "Microsoft SharePoint Foundation Workflow Timer Service"
+        {
             return "SPWorkflowTimerServiceInstance"
         }
-        "Machine Translation Service" {
+        "Machine Translation Service"
+        {
             return "TranslationServiceInstance"
         }
-        "User Profile Service" {
+        "User Profile Service"
+        {
             return "UserProfileServiceInstance"
         }
-        "Visio Graphics Service" {
+        "Visio Graphics Service"
+        {
             return "VisioGraphicsServiceInstance"
         }
-        "Word Automation Services" {
+        "Word Automation Services"
+        {
             return "WordServiceInstance"
         }
-        "Work Management Service" {
+        "Work Management Service"
+        {
             return "WorkManagementServiceInstance"
         }
-        Default {
+        Default
+        {
             return $DisplayName
         }
     }

@@ -28,7 +28,7 @@ function Get-TargetResource
         $DatabaseName,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present",
 
@@ -39,6 +39,10 @@ function Get-TargetResource
         [Parameter()]
         [System.Boolean]
         $CloudIndex,
+
+        [Parameter()]
+        [System.Boolean]
+        $AlertsEnabled,
 
         [Parameter()]
         [System.Management.Automation.PSCredential]
@@ -58,12 +62,12 @@ function Get-TargetResource
     if ($PSBoundParameters.ContainsKey("WindowsServiceAccount"))
     {
         Write-Verbose -Message ("This parameter is deprecated in this resource. Please use " + `
-                                "SPSearchServiceSettings instead.")
+                "SPSearchServiceSettings instead.")
     }
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
-                                  -Arguments @($PSBoundParameters, $PSScriptRoot) `
-                                  -ScriptBlock {
+    $result = Invoke-SPDscCommand -Credential $InstallAccount `
+        -Arguments @($PSBoundParameters, $PSScriptRoot) `
+        -ScriptBlock {
         $params = $args[0]
         $scriptRoot = $args[1]
 
@@ -76,19 +80,19 @@ function Get-TargetResource
         [void][System.Reflection.Assembly]::LoadWithPartialName("Microsoft.Office.Server")
 
         $serviceAppPool = Get-SPServiceApplicationPool -Identity $params.ApplicationPool `
-                                                       -ErrorAction SilentlyContinue
+            -ErrorAction SilentlyContinue
         if ($null -eq $serviceAppPool)
         {
             Write-Verbose -Message ("Specified service application pool $($params.ApplicationPool) " + `
-                                    "does not exist.")
+                    "does not exist.")
         }
 
         $serviceApps = Get-SPServiceApplication -Name $params.Name -ErrorAction SilentlyContinue
 
         $nullReturn = @{
-            Name = $params.Name
+            Name            = $params.Name
             ApplicationPool = $params.ApplicationPool
-            Ensure = "Absent"
+            Ensure          = "Absent"
         }
 
         if ($null -eq $serviceApps)
@@ -107,18 +111,18 @@ function Get-TargetResource
         {
             $c = [Microsoft.Office.Server.Search.Administration.SearchContext]::GetContext($serviceApp.Name)
             $sc = New-Object -TypeName Microsoft.Office.Server.Search.Administration.Content `
-                             -ArgumentList $c;
+                -ArgumentList $c;
             $dummyPassword = ConvertTo-SecureString -String "-" -AsPlainText -Force
             if ($null -ne $sc.DefaultGatheringAccount)
             {
                 $defaultAccount = New-Object -TypeName System.Management.Automation.PSCredential `
-                                             -ArgumentList @($sc.DefaultGatheringAccount, $dummyPassword)
+                    -ArgumentList @($sc.DefaultGatheringAccount, $dummyPassword)
             }
 
             $cloudIndex = $false
-            $version = Get-SPDSCInstalledProductVersion
-            if(($version.FileMajorPart -gt 15) `
-                -or ($version.FileMajorPart -eq 15 -and $version.FileBuildPart -ge 4745))
+            $version = Get-SPDscInstalledProductVersion
+            if (($version.FileMajorPart -gt 15) `
+                    -or ($version.FileMajorPart -eq 15 -and $version.FileBuildPart -ge 4745))
             {
                 $cloudIndex = $serviceApp.CloudIndex
             }
@@ -136,7 +140,7 @@ function Get-TargetResource
                 }
             }
 
-            $returnVal =  @{
+            $returnVal = @{
                 Name                        = $serviceApp.DisplayName
                 ProxyName                   = $pName
                 ApplicationPool             = $serviceApp.ApplicationPool.Name
@@ -146,6 +150,7 @@ function Get-TargetResource
                 SearchCenterUrl             = $serviceApp.SearchCenterUrl
                 DefaultContentAccessAccount = $defaultAccount
                 CloudIndex                  = $cloudIndex
+                AlertsEnabled               = $serviceApp.AlertsEnabled
                 WindowsServiceAccount       = $params.WindowsServiceAccount
                 InstallAccount              = $params.InstallAccount
             }
@@ -181,7 +186,7 @@ function Set-TargetResource
         $DatabaseName,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present",
 
@@ -192,6 +197,10 @@ function Set-TargetResource
         [Parameter()]
         [System.Boolean]
         $CloudIndex,
+
+        [Parameter()]
+        [System.Boolean]
+        $AlertsEnabled,
 
         [Parameter()]
         [System.Management.Automation.PSCredential]
@@ -211,7 +220,7 @@ function Set-TargetResource
     if ($PSBoundParameters.ContainsKey("WindowsServiceAccount"))
     {
         Write-Verbose -Message ("This parameter is deprecated in this resource. Please use " + `
-                                "SPSearchServiceSettings instead.")
+                "SPSearchServiceSettings instead.")
     }
 
     $result = Get-TargetResource @PSBoundParameters
@@ -221,21 +230,21 @@ function Set-TargetResource
         # Create the service app as it doesn't exist
 
         Write-Verbose -Message "Creating Search Service Application $Name"
-        Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+        Invoke-SPDscCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
             $params = $args[0]
 
             $serviceAppPool = Get-SPServiceApplicationPool $params.ApplicationPool
             if ($null -eq $serviceAppPool)
             {
                 throw ("Specified service application pool $($params.ApplicationPool) does not " + `
-                       "exist. Please make sure it exists before continuing.")
+                        "exist. Please make sure it exists before continuing.")
             }
 
             $serviceInstance = Get-SPEnterpriseSearchServiceInstance -Local
             Start-SPEnterpriseSearchServiceInstance -Identity $serviceInstance `
-                                                    -ErrorAction SilentlyContinue
+                -ErrorAction SilentlyContinue
             $newParams = @{
-                Name = $params.Name
+                Name            = $params.Name
                 ApplicationPool = $params.ApplicationPool
             }
             if ($params.ContainsKey("DatabaseServer") -eq $true)
@@ -249,17 +258,17 @@ function Set-TargetResource
 
             if ($params.ContainsKey("CloudIndex") -eq $true -and $params.CloudIndex -eq $true)
             {
-                $version = Get-SPDSCInstalledProductVersion
+                $version = Get-SPDscInstalledProductVersion
                 if (($version.FileMajorPart -gt 15) `
-                    -or ($version.FileMajorPart -eq 15 -and $version.FileBuildPart -ge 4745))
+                        -or ($version.FileMajorPart -eq 15 -and $version.FileBuildPart -ge 4745))
                 {
                     $newParams.Add("CloudIndex", $params.CloudIndex)
                 }
                 else
                 {
                     throw ("Please install SharePoint 2019, 2016 or SharePoint 2013 with August " + `
-                           "2015 CU or higher before attempting to create a cloud enabled " + `
-                           "search service application")
+                            "2015 CU or higher before attempting to create a cloud enabled " + `
+                            "search service application")
                 }
             }
 
@@ -281,13 +290,13 @@ function Set-TargetResource
                 if ($params.ContainsKey("DefaultContentAccessAccount") -eq $true)
                 {
                     Write-Verbose -Message ("Setting DefaultContentAccessAccount to " + `
-                                            $params.DefaultContentAccessAccount.UserName)
+                            $params.DefaultContentAccessAccount.UserName)
                     $appPool = Get-SPServiceApplicationPool -Identity $params.ApplicationPool
                     $account = $params.DefaultContentAccessAccount
                     $setParams = @{
-                        ApplicationPool = $appPool
-                        Identity = $app
-                        DefaultContentAccessAccountName = $account.UserName
+                        ApplicationPool                     = $appPool
+                        Identity                            = $app
+                        DefaultContentAccessAccountName     = $account.UserName
                         DefaultContentAccessAccountPassword = $account.Password
                     }
                     Set-SPEnterpriseSearchServiceApplication @setParams
@@ -298,9 +307,20 @@ function Set-TargetResource
                     Write-Verbose -Message "Setting SearchCenterUrl to $($params.SearchCenterUrl)"
                     $serviceApp = Get-SPServiceApplication -Name $params.Name | `
                         Where-Object -FilterScript {
-                            $_.GetType().FullName -eq "Microsoft.Office.Server.Search.Administration.SearchServiceApplication"
-                        }
+                        $_.GetType().FullName -eq "Microsoft.Office.Server.Search.Administration.SearchServiceApplication"
+                    }
                     $serviceApp.SearchCenterUrl = $params.SearchCenterUrl
+                    $serviceApp.Update()
+                }
+
+                if ($params.ContainsKey("AlertsEnabled") -eq $true)
+                {
+                    Write-Verbose -Message "Setting AlertsEnabled to $($params.AlertsEnabled)"
+                    $serviceApp = Get-SPServiceApplication -Name $params.Name | `
+                        Where-Object -FilterScript {
+                        $_.GetType().FullName -eq "Microsoft.Office.Server.Search.Administration.SearchServiceApplication"
+                    }
+                    $serviceApp.AlertsEnabled = $params.AlertsEnabled
                     $serviceApp.Update()
                 }
             }
@@ -311,16 +331,16 @@ function Set-TargetResource
     {
         # Update the service app that already exists
         Write-Verbose -Message "Updating Search Service Application $Name"
-        Invoke-SPDSCCommand -Credential $InstallAccount `
-                            -Arguments @($PSBoundParameters, $result) `
-                            -ScriptBlock {
+        Invoke-SPDscCommand -Credential $InstallAccount `
+            -Arguments @($PSBoundParameters, $result) `
+            -ScriptBlock {
             $params = $args[0]
             $result = $args[1]
 
             $serviceApp = Get-SPServiceApplication -Name $params.Name | `
                 Where-Object -FilterScript {
-                    $_.GetType().FullName -eq "Microsoft.Office.Server.Search.Administration.SearchServiceApplication"
-                }
+                $_.GetType().FullName -eq "Microsoft.Office.Server.Search.Administration.SearchServiceApplication"
+            }
 
             if ($null -eq $params.ProxyName)
             {
@@ -342,8 +362,8 @@ function Set-TargetResource
                 {
                     Write-Verbose -Message "Updating proxy name to $pName"
                     $serviceAppProxy = Get-SPServiceApplicationProxy | Where-Object -FilterScript {
-                                           $_.Name -eq $result.ProxyName
-                                       }
+                        $_.Name -eq $result.ProxyName
+                    }
                     $serviceAppProxy.Name = $pName
                     $serviceAppProxy.Update()
                 }
@@ -362,10 +382,10 @@ function Set-TargetResource
             }
 
             if ($params.ContainsKey("DefaultContentAccessAccount") -eq $true -and `
-                $result.DefaultContentAccessAccount.UserName -ne $params.DefaultContentAccessAccount.UserName)
+                    $result.DefaultContentAccessAccount.UserName -ne $params.DefaultContentAccessAccount.UserName)
             {
                 Write-Verbose -Message ("Updating DefaultContentAccessAccount to " + `
-                                        $params.DefaultContentAccessAccount.UserName)
+                        $params.DefaultContentAccessAccount.UserName)
 
                 $account = $params.DefaultContentAccessAccount
                 $setParams.Add("DefaultContentAccessAccountName", $account.UserName)
@@ -378,14 +398,26 @@ function Set-TargetResource
             }
 
             if ($params.ContainsKey("SearchCenterUrl") -eq $true -and `
-                $result.SearchCenterUrl -ne $params.SearchCenterUrl)
+                    $result.SearchCenterUrl -ne $params.SearchCenterUrl)
             {
                 Write-Verbose -Message "Updating SearchCenterUrl to $($params.SearchCenterUrl)"
                 $serviceApp = Get-SPServiceApplication -Name $params.Name | `
                     Where-Object -FilterScript {
-                        $_.GetType().FullName -eq "Microsoft.Office.Server.Search.Administration.SearchServiceApplication"
-                    }
+                    $_.GetType().FullName -eq "Microsoft.Office.Server.Search.Administration.SearchServiceApplication"
+                }
                 $serviceApp.SearchCenterUrl = $params.SearchCenterUrl
+                $serviceApp.Update()
+            }
+
+            if ($params.ContainsKey("AlertsEnabled") -eq $true -and `
+                    $result.AlertsEnabled -ne $params.AlertsEnabled)
+            {
+                Write-Verbose -Message "Updating AlertsEnabled to $($params.AlertsEnabled)"
+                $serviceApp = Get-SPServiceApplication -Name $params.Name | `
+                    Where-Object -FilterScript {
+                    $_.GetType().FullName -eq "Microsoft.Office.Server.Search.Administration.SearchServiceApplication"
+                }
+                $serviceApp.AlertsEnabled = $params.AlertsEnabled
                 $serviceApp.Update()
             }
         }
@@ -395,20 +427,20 @@ function Set-TargetResource
     {
         # The service app should not exit
         Write-Verbose -Message "Removing Search Service Application $Name"
-        Invoke-SPDSCCommand -Credential $InstallAccount `
-                            -Arguments $PSBoundParameters `
-                            -ScriptBlock {
+        Invoke-SPDscCommand -Credential $InstallAccount `
+            -Arguments $PSBoundParameters `
+            -ScriptBlock {
             $params = $args[0]
 
-            $serviceApp =  Get-SPServiceApplication -Name $params.Name | Where-Object -FilterScript {
+            $serviceApp = Get-SPServiceApplication -Name $params.Name | Where-Object -FilterScript {
                 $_.GetType().FullName -eq "Microsoft.Office.Server.Search.Administration.SearchServiceApplication"
 
             }
 
             $proxies = Get-SPServiceApplicationProxy
-            foreach($proxyInstance in $proxies)
+            foreach ($proxyInstance in $proxies)
             {
-                if($serviceApp.IsConnected($proxyInstance))
+                if ($serviceApp.IsConnected($proxyInstance))
                 {
                     $proxyInstance.Delete()
                 }
@@ -446,7 +478,7 @@ function Test-TargetResource
         $DatabaseName,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present",
 
@@ -457,6 +489,10 @@ function Test-TargetResource
         [Parameter()]
         [System.Boolean]
         $CloudIndex,
+
+        [Parameter()]
+        [System.Boolean]
+        $AlertsEnabled,
 
         [Parameter()]
         [System.Management.Automation.PSCredential]
@@ -476,15 +512,18 @@ function Test-TargetResource
     if ($PSBoundParameters.ContainsKey("WindowsServiceAccount"))
     {
         Write-Verbose -Message ("This parameter is deprecated in this resource. Please use " + `
-                                "SPSearchServiceSettings instead.")
+                "SPSearchServiceSettings instead.")
     }
 
     $PSBoundParameters.Ensure = $Ensure
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
+    Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
+    Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
+
     if ($PSBoundParameters.ContainsKey("DefaultContentAccessAccount") `
-        -and $Ensure -eq "Present")
+            -and $Ensure -eq "Present")
     {
         $desired = $DefaultContentAccessAccount.UserName
         $current = $CurrentValues.DefaultContentAccessAccount.UserName
@@ -500,17 +539,18 @@ function Test-TargetResource
     if ($Ensure -eq "Present")
     {
         return Test-SPDscParameterState -CurrentValues $CurrentValues `
-                                        -DesiredValues $PSBoundParameters `
-                                        -ValuesToCheck @("Ensure",
-                                                         "ApplicationPool",
-                                                         "SearchCenterUrl",
-                                                         "ProxyName")
+            -DesiredValues $PSBoundParameters `
+            -ValuesToCheck @("Ensure",
+            "ApplicationPool",
+            "SearchCenterUrl",
+            "ProxyName",
+            "AlertsEnabled")
     }
     else
     {
         return Test-SPDscParameterState -CurrentValues $CurrentValues `
-                                        -DesiredValues $PSBoundParameters `
-                                        -ValuesToCheck @("Ensure")
+            -DesiredValues $PSBoundParameters `
+            -ValuesToCheck @("Ensure")
     }
 }
 

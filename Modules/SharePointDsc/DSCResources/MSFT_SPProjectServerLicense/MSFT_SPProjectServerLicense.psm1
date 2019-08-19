@@ -10,7 +10,7 @@ function Get-TargetResource
         $IsSingleInstance,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present",
 
@@ -25,15 +25,15 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting license status for Project Server"
 
-    if ((Get-SPDSCInstalledProductVersion).FileMajorPart -lt 16)
+    if ((Get-SPDscInstalledProductVersion).FileMajorPart -lt 16)
     {
         throw [Exception] ("Support for Project Server in SharePointDsc is only valid for " + `
-                           "SharePoint 2016 and 2019.")
+                "SharePoint 2016 and 2019.")
     }
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
-                                  -Arguments $PSBoundParameters `
-                                  -ScriptBlock {
+    $result = Invoke-SPDscCommand -Credential $InstallAccount `
+        -Arguments $PSBoundParameters `
+        -ScriptBlock {
         $params = $args[0]
 
         try
@@ -65,9 +65,9 @@ function Get-TargetResource
 
                 return @{
                     IsSingleInstance = "Yes"
-                    Ensure = $status
-                    ProductKey = $params.ProductKey
-                    InstallAccount = $params.InstallAccount
+                    Ensure           = $status
+                    ProductKey       = $params.ProductKey
+                    InstallAccount   = $params.InstallAccount
                 }
             }
             else
@@ -75,9 +75,9 @@ function Get-TargetResource
                 Write-Verbose -Message "Unable to determine the license status for Project Server"
                 return @{
                     IsSingleInstance = "Yes"
-                    Ensure = "Absent"
-                    ProductKey = $params.ProductKey
-                    InstallAccount = $params.InstallAccount
+                    Ensure           = "Absent"
+                    ProductKey       = $params.ProductKey
+                    InstallAccount   = $params.InstallAccount
                 }
             }
         }
@@ -86,9 +86,9 @@ function Get-TargetResource
             Write-Verbose -Message "Unable to determine the license status for Project Server"
             return @{
                 IsSingleInstance = "Yes"
-                Ensure = "Absent"
-                ProductKey = $params.ProductKey
-                InstallAccount = $params.InstallAccount
+                Ensure           = "Absent"
+                ProductKey       = $params.ProductKey
+                InstallAccount   = $params.InstallAccount
             }
         }
     }
@@ -107,7 +107,7 @@ function Set-TargetResource
         $IsSingleInstance,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present",
 
@@ -122,10 +122,10 @@ function Set-TargetResource
 
     Write-Verbose -Message "Setting Project Server License status"
 
-    if ((Get-SPDSCInstalledProductVersion).FileMajorPart -lt 16)
+    if ((Get-SPDscInstalledProductVersion).FileMajorPart -lt 16)
     {
         throw [Exception] ("Support for Project Server in SharePointDsc is only valid for " + `
-                           "SharePoint 2016 and 2019.")
+                "SharePoint 2016 and 2019.")
     }
 
     if ($Ensure -eq "Present" -and $PSBoundParameters.ContainsKey("ProductKey") -eq $false)
@@ -140,9 +140,9 @@ function Set-TargetResource
         # License status does not match
         if ($Ensure -eq "Present")
         {
-            Invoke-SPDSCCommand -Credential $InstallAccount `
-                                -Arguments $PSBoundParameters `
-                                -ScriptBlock {
+            Invoke-SPDscCommand -Credential $InstallAccount `
+                -Arguments $PSBoundParameters `
+                -ScriptBlock {
 
                 $params = $args[0]
                 Enable-ProjectServerLicense -key $params.ProductKey
@@ -150,9 +150,9 @@ function Set-TargetResource
         }
         if ($Ensure -eq "Absent")
         {
-            Invoke-SPDSCCommand -Credential $InstallAccount `
-                                -Arguments $PSBoundParameters `
-                                -ScriptBlock {
+            Invoke-SPDscCommand -Credential $InstallAccount `
+                -Arguments $PSBoundParameters `
+                -ScriptBlock {
 
                 Disable-ProjectServerLicense
             }
@@ -173,7 +173,7 @@ function Test-TargetResource
         $IsSingleInstance,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present",
 
@@ -190,11 +190,14 @@ function Test-TargetResource
 
     $PSBoundParameters.Ensure = $Ensure
 
-    $currentValues = Get-TargetResource @PSBoundParameters
+    $CurrentValues = Get-TargetResource @PSBoundParameters
+
+    Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
+    Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
 
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
-                                    -DesiredValues $PSBoundParameters `
-                                    -ValuesToCheck @("Ensure")
+        -DesiredValues $PSBoundParameters `
+        -ValuesToCheck @("Ensure")
 }
 
 Export-ModuleMember -Function *-TargetResource

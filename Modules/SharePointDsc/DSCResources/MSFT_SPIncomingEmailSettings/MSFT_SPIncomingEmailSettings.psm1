@@ -58,9 +58,9 @@
 
     Write-Verbose -Message "Getting SharePoint Incoming Email Settings"
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+    $result = Invoke-SPDscCommand -Credential $InstallAccount `
         -ScriptBlock {
-        $spEmailServiceInstance = (Get-SPServiceInstance | Where-Object {$_.GetType().FullName -eq "Microsoft.SharePoint.Administration.SPIncomingEmailServiceInstance" }) | Select-Object -First 1
+        $spEmailServiceInstance = (Get-SPServiceInstance | Where-Object { $_.GetType().FullName -eq "Microsoft.SharePoint.Administration.SPIncomingEmailServiceInstance" }) | Select-Object -First 1
         $spEmailService = $spEmailServiceInstance.service
 
         # some simple error checking, just incase we didn't capture the service for some reason
@@ -199,38 +199,38 @@ function Set-TargetResource
     if ($Ensure -eq 'Present')
     {
         if (-not $PSBoundParameters.containskey("UseAutomaticSettings"))
-            {
-                throw "UseAutomaticSettings parameter must be specified when enabling incoming email."
-            }
+        {
+            throw "UseAutomaticSettings parameter must be specified when enabling incoming email."
+        }
 
-            if (-not $PSBoundParameters.containskey("ServerDisplayAddress"))
-            {
-                throw "ServerDisplayAddress parameter must be specified when enabling incoming email"
-            }
+        if (-not $PSBoundParameters.containskey("ServerDisplayAddress"))
+        {
+            throw "ServerDisplayAddress parameter must be specified when enabling incoming email"
+        }
 
-            if (($PSBoundParameters.UseDirectoryManagementService -eq 'Remote' -and $null -eq $PSBoundParameters.RemoteDirectoryManagementURL) `
-                    -or ($PSBoundParameters.containskey('RemoteDirectoryManagementURL') -and $PSBoundParameters.UseDirectoryManagementService -ne 'Remote'))
-            {
-                throw "RemoteDirectoryManagementURL must be specified only when UseDirectoryManagementService is set to 'Remote'"
-            }
+        if (($PSBoundParameters.UseDirectoryManagementService -eq 'Remote' -and $null -eq $PSBoundParameters.RemoteDirectoryManagementURL) `
+                -or ($PSBoundParameters.containskey('RemoteDirectoryManagementURL') -and $PSBoundParameters.UseDirectoryManagementService -ne 'Remote'))
+        {
+            throw "RemoteDirectoryManagementURL must be specified only when UseDirectoryManagementService is set to 'Remote'"
+        }
 
-            if ($PSBoundParameters.UseAutomaticSettings -eq $true -and $PSBoundParameters.containskey("DropFolder"))
-            {
-                throw "DropFolder parameter is not valid when using Automatic Mode"
-            }
+        if ($PSBoundParameters.UseAutomaticSettings -eq $true -and $PSBoundParameters.containskey("DropFolder"))
+        {
+            throw "DropFolder parameter is not valid when using Automatic Mode"
+        }
 
-            if ($PSBoundParameters.UseAutomaticSettings -eq $false -and  (-not $PSBoundParameters.containskey("DropFolder")))
-            {
-                throw "DropFolder parameter must be specified when not using Automatic Mode"
-            }
+        if ($PSBoundParameters.UseAutomaticSettings -eq $false -and (-not $PSBoundParameters.containskey("DropFolder")))
+        {
+            throw "DropFolder parameter must be specified when not using Automatic Mode"
+        }
     }
 
-    Invoke-SPDSCCommand -Credential $InstallAccount `
+    Invoke-SPDscCommand -Credential $InstallAccount `
         -Arguments $PSBoundParameters `
         -ScriptBlock {
         $params = $args[0]
 
-        $spEmailServiceInstance = (Get-SPServiceInstance | Where-Object {$_.GetType().FullName -eq "Microsoft.SharePoint.Administration.SPIncomingEmailServiceInstance" }) | Select-Object -First 1
+        $spEmailServiceInstance = (Get-SPServiceInstance | Where-Object { $_.GetType().FullName -eq "Microsoft.SharePoint.Administration.SPIncomingEmailServiceInstance" }) | Select-Object -First 1
         $spEmailService = $spEmailServiceInstance.service
 
         #some simple error checking, just incase we didn't capture the service for some reason
@@ -371,9 +371,13 @@ function Test-TargetResource
 
     Write-Verbose -Message "Testing SharePoint Incoming Email Settings"
 
-    return Test-SPDscParameterState -CurrentValues (Get-TargetResource @PSBoundParameters) `
+    $CurrentValues = Get-TargetResource @PSBoundParameters
+
+    Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
+    Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
+
+    return Test-SPDscParameterState -CurrentValues $CurrentValues `
         -DesiredValues $PSBoundParameters
 }
-
 
 Export-ModuleMember -Function *-TargetResource

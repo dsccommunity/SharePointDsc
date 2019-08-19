@@ -59,17 +59,17 @@ function New-SPDscUnitTestHelper
             Import-Module -Name "$SharePointStubModule" -WarningAction SilentlyContinue
             Import-Module -Name "$moduleToLoad"
 
-            Mock -CommandName Get-SPDSCInstalledProductVersion -MockWith {
+            Mock -CommandName Get-SPDscInstalledProductVersion -MockWith {
                 return @{
                     FileMajorPart = $majorBuildNumber
                 }
             }
 
-            Mock -CommandName Get-SPDSCAssemblyVersion -MockWith {
+            Mock -CommandName Get-SPDscAssemblyVersion -MockWith {
                 return $majorBuildNumber
             }
 
-            Mock -CommandName Get-SPDSCBuildVersion -MockWith {
+            Mock -CommandName Get-SPDscBuildVersion -MockWith {
                 return $minorBuildNumber
             }
 
@@ -78,7 +78,7 @@ function New-SPDscUnitTestHelper
     if ($ExcludeInvokeHelper -eq $false)
     {
         $initScript += @"
-            Mock Invoke-SPDSCCommand {
+            Mock Invoke-SPDscCommand {
                 return Invoke-Command -ScriptBlock `$ScriptBlock -ArgumentList `$Arguments -NoNewScope
             }
 "@
@@ -87,7 +87,7 @@ function New-SPDscUnitTestHelper
     if ($IncludeDistributedCacheStubs -eq $true)
     {
         $dcachePath = Join-Path -Path $repoRoot `
-                                -ChildPath "Tests\Unit\Stubs\DistributedCache\DistributedCache.psm1"
+            -ChildPath "Tests\Unit\Stubs\DistributedCache\DistributedCache.psm1"
         $initScript += @"
 
             Import-Module -Name "$dcachePath" -WarningAction SilentlyContinue
@@ -96,13 +96,13 @@ function New-SPDscUnitTestHelper
     }
 
     return @{
-        DescribeHeader = $describeHeader
-        ModuleName = $moduleName
-        CurrentStubModulePath = $SharePointStubModule
+        DescribeHeader         = $describeHeader
+        ModuleName             = $moduleName
+        CurrentStubModulePath  = $SharePointStubModule
         CurrentStubBuildNumber = [Version]::Parse($spBuild)
-        InitializeScript = [ScriptBlock]::Create($initScript)
-        RepoRoot = $repoRoot
-        CleanupScript = [ScriptBlock]::Create(@"
+        InitializeScript       = [ScriptBlock]::Create($initScript)
+        RepoRoot               = $repoRoot
+        CleanupScript          = [ScriptBlock]::Create(@"
 
             Get-Variable -Scope Global -Name "SPDsc*" | Remove-Variable -Force -Scope "Global"
             `$global:DSCMachineStatus = 0
@@ -111,7 +111,8 @@ function New-SPDscUnitTestHelper
     }
 }
 
-function Write-SPDSCStubFile() {
+function Write-SPDscStubFile
+{
     param
     (
         [Parameter(Mandatory = $true)]
@@ -122,23 +123,23 @@ function Write-SPDSCStubFile() {
     Add-PSSnapin Microsoft.SharePoint.PowerShell
 
     $SPStubContent = ((Get-Command | Where-Object -FilterScript {
-        $_.Source -eq "Microsoft.SharePoint.PowerShell"
-    } )  |  ForEach-Object -Process {
-       $signature = $null
-       $command = $_
-       $metadata = New-Object -TypeName System.Management.Automation.CommandMetaData `
-                              -ArgumentList $command
-       $definition = [System.Management.Automation.ProxyCommand]::Create($metadata)
-       foreach ($line in $definition -split "`n")
-       {
-           if ($line.Trim() -eq 'begin')
-           {
-               break
-           }
-           $signature += $line
-       }
-       "function $($command.Name) { `n  $signature `n } `n"
-    }) | Out-String
+                $_.Source -eq "Microsoft.SharePoint.PowerShell"
+            } )  |  ForEach-Object -Process {
+            $signature = $null
+            $command = $_
+            $metadata = New-Object -TypeName System.Management.Automation.CommandMetaData `
+                -ArgumentList $command
+            $definition = [System.Management.Automation.ProxyCommand]::Create($metadata)
+            foreach ($line in $definition -split "`n")
+            {
+                if ($line.Trim() -eq 'begin')
+                {
+                    break
+                }
+                $signature += $line
+            }
+            "function $($command.Name) { `n  $signature `n } `n"
+        }) | Out-String
 
     foreach ($line in $SPStubContent.Split([Environment]::NewLine))
     {
@@ -149,4 +150,56 @@ function Write-SPDSCStubFile() {
 
         $line | Out-File -FilePath $SharePointStubPath -Encoding utf8 -Append
     }
+}
+
+function Get-SPDscRegistryValue
+{
+    param(
+        [Parameter(Mandatory = $true)]
+        [System.String]
+        $OutPath
+    )
+
+    $patchRegistryPath = "Registry::HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Installer\UserData\S-1-5-18\Patches"
+
+    $installerRegistryPath = "Registry::HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Installer\UserData\S-1-5-18\Products"
+    $installerEntries = Get-ChildItem $installerRegistryPath -ErrorAction SilentlyContinue
+    $officeProductKeys = $installerEntries | Where-Object -FilterScript {$_.PsPath -like "*00000000F01FEC"}
+
+    $productInfo = @()
+    $productPatches = @()
+    $detailedPatchInformation = @()
+    $null = $officeProductKeys | ForEach-Object -Process {
+
+        $officeProductKey = $_
+
+        $productInfo += Get-ItemProperty "Registry::$($officeProductKey)\InstallProperties" -ErrorAction SilentlyContinue
+
+        $patchInformationFolder = Get-ItemProperty "Registry::$($officeProductKey)\Patches" -ErrorAction SilentlyContinue
+        $productPatches += $patchInformationFolder
+
+        if ($patchInformationFolder.AllPatches.GetType().Name -eq "String[]" -and $patchInformationFolder.AllPatches.Length -gt 0)
+        {
+            $patchGuid = $patchInformationFolder.AllPatches[$patchInformationFolder.AllPatches.Length - 1]
+        }
+        else
+        {
+            $patchGuid = $patchInformationFolder.AllPatches
+        }
+
+        if ($null -ne $patchGuid)
+        {
+            $detailedPatchInformation += Get-ItemProperty "$($patchRegistryPath)\$($patchGuid)"
+        }
+
+    }
+
+    $registryHash = @{
+        Products                  = $officeProductKeys
+        ProductsInstallProperties = $productInfo
+        ProductsPatches           = $productPatches
+        Patches                   = $detailedPatchInformation
+    }
+
+    ConvertTo-Json $registryHash -Compress > $OutPath
 }

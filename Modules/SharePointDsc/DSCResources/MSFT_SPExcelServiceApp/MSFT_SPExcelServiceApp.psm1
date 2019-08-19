@@ -22,192 +22,193 @@ $Script:TrustLocationProperties = @(
     "Description",
     "RESTExternalDataAllowed"
 )
-$Script:ServiceAppObjectType = "Microsoft.Office.Excel.Server.MossHost.ExcelServerWebServiceApplication"  
+$Script:ServiceAppObjectType = "Microsoft.Office.Excel.Server.MossHost.ExcelServerWebServiceApplication"
 
 function Get-TargetResource
 {
     [CmdletBinding()]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSDSCUseIdenticalMandatoryParametersForDSC", "", Justification = "Temporary workaround for issue introduced in PSSA v1.18")]
     [OutputType([System.Collections.Hashtable])]
     param (
-        [Parameter(Mandatory = $true)]  
-        [System.String] 
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $Name,
 
-        [Parameter(Mandatory = $true)]  
-        [System.String] 
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $ApplicationPool,
 
-        [Parameter()] 
-        [Microsoft.Management.Infrastructure.CimInstance[]] 
+        [Parameter()]
+        [Microsoft.Management.Infrastructure.CimInstance[]]
         $TrustedFileLocations,
 
-        [Parameter()]  
-        [System.Boolean] 
+        [Parameter()]
+        [System.Boolean]
         $CachingOfUnusedFilesEnable,
 
-        [Parameter()]  
-        [System.Boolean] 
+        [Parameter()]
+        [System.Boolean]
         $CrossDomainAccessAllowed,
 
-        [Parameter()]  
-        [ValidateSet("None","Connection")] 
-        [System.String] 
+        [Parameter()]
+        [ValidateSet("None", "Connection")]
+        [System.String]
         $EncryptedUserConnectionRequired,
 
-        [Parameter()]  
-        [System.UInt32] 
+        [Parameter()]
+        [System.UInt32]
         $ExternalDataConnectionLifetime,
 
-        [Parameter()]  
-        [ValidateSet("UseImpersonation","UseFileAccessAccount")] 
-        [System.String] 
+        [Parameter()]
+        [ValidateSet("UseImpersonation", "UseFileAccessAccount")]
+        [System.String]
         $FileAccessMethod,
 
-        [Parameter()]  
-        [ValidateSet("RoundRobin","Local","WorkbookURL")] 
-        [System.String] 
+        [Parameter()]
+        [ValidateSet("RoundRobin", "Local", "WorkbookURL")]
+        [System.String]
         $LoadBalancingScheme,
 
-        [Parameter()]  
-        [System.UInt32] 
+        [Parameter()]
+        [System.UInt32]
         $MemoryCacheThreshold,
 
-        [Parameter()]  
-        [System.UInt32] 
+        [Parameter()]
+        [System.Int32]
         $PrivateBytesMax,
 
-        [Parameter()]  
-        [System.UInt32] 
+        [Parameter()]
+        [System.UInt32]
         $SessionsPerUserMax,
 
-        [Parameter()]  
-        [System.UInt32] 
+        [Parameter()]
+        [System.UInt32]
         $SiteCollectionAnonymousSessionsMax,
 
-        [Parameter()]  
-        [System.Boolean] 
+        [Parameter()]
+        [System.Boolean]
         $TerminateProcessOnAccessViolation,
 
-        [Parameter()]  
-        [System.UInt32] 
+        [Parameter()]
+        [System.UInt32]
         $ThrottleAccessViolationsPerSiteCollection,
 
-        [Parameter()]  
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $UnattendedAccountApplicationId,
 
-        [Parameter()]  
-        [System.UInt32] 
+        [Parameter()]
+        [System.Int32]
         $UnusedObjectAgeMax,
 
-        [Parameter()]   
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $WorkbookCache,
 
-        [Parameter()]  
-        [System.UInt32] 
+        [Parameter()]
+        [System.UInt32]
         $WorkbookCacheSizeMax,
 
-        [Parameter()] 
-        [ValidateSet("Present","Absent")] 
-        [System.String] 
+        [Parameter()]
+        [ValidateSet("Present", "Absent")]
+        [System.String]
         $Ensure = "Present",
 
-        [Parameter()] 
-        [System.Management.Automation.PSCredential] 
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
         $InstallAccount
     )
-    
+
     Write-Verbose -Message "Getting Excel Services Application '$Name'"
 
-    if ((Get-SPDSCInstalledProductVersion).FileMajorPart -ne 15) 
+    if ((Get-SPDscInstalledProductVersion).FileMajorPart -ne 15)
     {
         throw [Exception] ("Only SharePoint 2013 is supported to deploy Excel Services " + `
-                           "service applications via DSC, as SharePoint 2016 and SharePoint 2019 deprecated " + `
-                           "this service. See " + `
-                           "https://technet.microsoft.com/en-us/library/mt346112(v=office.16).aspx " + `
-                           "for more info.")
+                "service applications via DSC, as SharePoint 2016 and SharePoint 2019 deprecated " + `
+                "this service. See " + `
+                "https://technet.microsoft.com/en-us/library/mt346112(v=office.16).aspx " + `
+                "for more info.")
     }
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
-                                  -Arguments @($PSBoundParameters, $Script:ServiceAppObjectType) `
-                                  -ScriptBlock {
+    $result = Invoke-SPDscCommand -Credential $InstallAccount `
+        -Arguments @($PSBoundParameters, $Script:ServiceAppObjectType) `
+        -ScriptBlock {
         $params = $args[0]
         $serviceAppObjectType = $args[1]
-        
+
         $serviceApps = Get-SPServiceApplication -Name $params.Name `
-                                                -ErrorAction SilentlyContinue
+            -ErrorAction SilentlyContinue
         $nullReturn = @{
-            Name = $params.Name
+            Name            = $params.Name
             ApplicationPool = $params.ApplicationPool
-            Ensure = "Absent"
-            InstallAccount = $params.InstallAccount
-        }  
+            Ensure          = "Absent"
+            InstallAccount  = $params.InstallAccount
+        }
         if ($null -eq $serviceApps)
         {
-            return $nullReturn 
+            return $nullReturn
         }
         $serviceApp = $serviceApps | Where-Object -FilterScript {
-            $_.GetType().FullName -eq $serviceAppObjectType    
+            $_.GetType().FullName -eq $serviceAppObjectType
         }
 
         if ($null -eq $serviceApp)
         {
             return $nullReturn
-        } 
-        else 
+        }
+        else
         {
             $fileLocations = Get-SPExcelFileLocation -ExcelServiceApplication $serviceApp
             $fileLocationsToReturn = @()
             $fileLocations | ForEach-Object -Process {
                 $fileLocationsToReturn += @{
-                    Address = $_.Address
-                    LocationType = $_.LocationType
-                    IncludeChildren = [Convert]::ToBoolean($_.IncludeChildren)
-                    SessionTimeout = $_.SessionTimeout
-                    ShortSessionTimeout = $_.ShortSessionTimeout
-                    NewWorkbookSessionTimeout = $_.NewWorkbookSessionTimeout
-                    RequestDurationMax = $_.RequestDurationMax
-                    ChartRenderDurationMax = $_.ChartRenderDurationMax
-                    WorkbookSizeMax = $_.WorkbookSizeMax
-                    ChartAndImageSizeMax = $_.ChartAndImageSizeMax
+                    Address                                = $_.Address
+                    LocationType                           = $_.LocationType
+                    IncludeChildren                        = [Convert]::ToBoolean($_.IncludeChildren)
+                    SessionTimeout                         = $_.SessionTimeout
+                    ShortSessionTimeout                    = $_.ShortSessionTimeout
+                    NewWorkbookSessionTimeout              = $_.NewWorkbookSessionTimeout
+                    RequestDurationMax                     = $_.RequestDurationMax
+                    ChartRenderDurationMax                 = $_.ChartRenderDurationMax
+                    WorkbookSizeMax                        = $_.WorkbookSizeMax
+                    ChartAndImageSizeMax                   = $_.ChartAndImageSizeMax
                     AutomaticVolatileFunctionCacheLifetime = $_.AutomaticVolatileFunctionCacheLifetime
-                    DefaultWorkbookCalcMode = $_.DefaultWorkbookCalcMode
-                    ExternalDataAllowed = $_.ExternalDataAllowed
-                    WarnOnDataRefresh = [Convert]::ToBoolean($_.WarnOnDataRefresh)
-                    DisplayGranularExtDataErrors = [Convert]::ToBoolean($_.DisplayGranularExtDataErrors)
-                    AbortOnRefreshOnOpenFail = [Convert]::ToBoolean($_.AbortOnRefreshOnOpenFail)
-                    PeriodicExtDataCacheLifetime = $_.PeriodicExtDataCacheLifetime
-                    ManualExtDataCacheLifetime = $_.ManualExtDataCacheLifetime
-                    ConcurrentDataRequestsPerSessionMax = $_.ConcurrentDataRequestsPerSessionMax
-                    UdfsAllowed = [Convert]::ToBoolean($_.UdfsAllowed)
-                    Description = $_.Description
-                    RESTExternalDataAllowed = [Convert]::ToBoolean($_.RESTExternalDataAllowed)
+                    DefaultWorkbookCalcMode                = $_.DefaultWorkbookCalcMode
+                    ExternalDataAllowed                    = $_.ExternalDataAllowed
+                    WarnOnDataRefresh                      = [Convert]::ToBoolean($_.WarnOnDataRefresh)
+                    DisplayGranularExtDataErrors           = [Convert]::ToBoolean($_.DisplayGranularExtDataErrors)
+                    AbortOnRefreshOnOpenFail               = [Convert]::ToBoolean($_.AbortOnRefreshOnOpenFail)
+                    PeriodicExtDataCacheLifetime           = $_.PeriodicExtDataCacheLifetime
+                    ManualExtDataCacheLifetime             = $_.ManualExtDataCacheLifetime
+                    ConcurrentDataRequestsPerSessionMax    = $_.ConcurrentDataRequestsPerSessionMax
+                    UdfsAllowed                            = [Convert]::ToBoolean($_.UdfsAllowed)
+                    Description                            = $_.Description
+                    RESTExternalDataAllowed                = [Convert]::ToBoolean($_.RESTExternalDataAllowed)
                 }
             }
 
-            $returnVal =  @{
-                Name = $serviceApp.DisplayName
-                ApplicationPool = $serviceApp.ApplicationPool.Name
-                Ensure = "Present"
-                TrustedFileLocations = $fileLocationsToReturn
-                CachingOfUnusedFilesEnable = $serviceApp.CachingOfUnusedFilesEnable 
-                CrossDomainAccessAllowed = $serviceApp.CrossDomainAccessAllowed
-                EncryptedUserConnectionRequired = $serviceApp.EncryptedUserConnectionRequired
-                ExternalDataConnectionLifetime = $serviceApp.ExternalDataConnectionLifetime
-                FileAccessMethod = $serviceApp.FileAccessMethod
-                LoadBalancingScheme = $serviceApp.LoadBalancingScheme
-                MemoryCacheThreshold = $serviceApp.MemoryCacheThreshold
-                PrivateBytesMax = $serviceApp.PrivateBytesMax
-                SessionsPerUserMax = $serviceApp.SessionsPerUserMax
-                SiteCollectionAnonymousSessionsMax = $serviceApp.SiteCollectionAnonymousSessionsMax
-                TerminateProcessOnAccessViolation = $serviceApp.TerminateProcessOnAccessViolation
+            $returnVal = @{
+                Name                                      = $serviceApp.DisplayName
+                ApplicationPool                           = $serviceApp.ApplicationPool.Name
+                Ensure                                    = "Present"
+                TrustedFileLocations                      = $fileLocationsToReturn
+                CachingOfUnusedFilesEnable                = $serviceApp.CachingOfUnusedFilesEnable
+                CrossDomainAccessAllowed                  = $serviceApp.CrossDomainAccessAllowed
+                EncryptedUserConnectionRequired           = $serviceApp.EncryptedUserConnectionRequired
+                ExternalDataConnectionLifetime            = $serviceApp.ExternalDataConnectionLifetime
+                FileAccessMethod                          = $serviceApp.FileAccessMethod
+                LoadBalancingScheme                       = $serviceApp.LoadBalancingScheme
+                MemoryCacheThreshold                      = $serviceApp.MemoryCacheThreshold
+                PrivateBytesMax                           = $serviceApp.PrivateBytesMax
+                SessionsPerUserMax                        = $serviceApp.SessionsPerUserMax
+                SiteCollectionAnonymousSessionsMax        = $serviceApp.SiteCollectionAnonymousSessionsMax
+                TerminateProcessOnAccessViolation         = $serviceApp.TerminateProcessOnAccessViolation
                 ThrottleAccessViolationsPerSiteCollection = $serviceApp.ThrottleAccessViolationsPerSiteCollection
-                UnattendedAccountApplicationId = $serviceApp.UnattendedAccountApplicationId
-                UnusedObjectAgeMax = $serviceApp.UnusedObjectAgeMax
-                WorkbookCache = $serviceApp.WorkbookCache
-                WorkbookCacheSizeMax = $serviceApp.WorkbookCacheSizeMax
-                InstallAccount = $params.InstallAccount
+                UnattendedAccountApplicationId            = $serviceApp.UnattendedAccountApplicationId
+                UnusedObjectAgeMax                        = $serviceApp.UnusedObjectAgeMax
+                WorkbookCache                             = $serviceApp.WorkbookCache
+                WorkbookCacheSizeMax                      = $serviceApp.WorkbookCacheSizeMax
+                InstallAccount                            = $params.InstallAccount
             }
             return $returnVal
         }
@@ -218,141 +219,142 @@ function Get-TargetResource
 function Set-TargetResource
 {
     [CmdletBinding()]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSDSCUseIdenticalMandatoryParametersForDSC", "", Justification = "Temporary workaround for issue introduced in PSSA v1.18")]
     param
     (
-        [Parameter(Mandatory = $true)]  
-        [System.String] 
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $Name,
 
-        [Parameter(Mandatory = $true)]  
-        [System.String] 
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $ApplicationPool,
 
-        [Parameter()] 
-        [Microsoft.Management.Infrastructure.CimInstance[]] 
+        [Parameter()]
+        [Microsoft.Management.Infrastructure.CimInstance[]]
         $TrustedFileLocations,
 
-        [Parameter()]  
-        [System.Boolean] 
+        [Parameter()]
+        [System.Boolean]
         $CachingOfUnusedFilesEnable,
 
-        [Parameter()]  
-        [System.Boolean] 
+        [Parameter()]
+        [System.Boolean]
         $CrossDomainAccessAllowed,
 
-        [Parameter()]  
-        [ValidateSet("None","Connection")] 
-        [System.String] 
+        [Parameter()]
+        [ValidateSet("None", "Connection")]
+        [System.String]
         $EncryptedUserConnectionRequired,
 
-        [Parameter()]  
-        [System.UInt32] 
+        [Parameter()]
+        [System.UInt32]
         $ExternalDataConnectionLifetime,
 
-        [Parameter()]  
-        [ValidateSet("UseImpersonation","UseFileAccessAccount")] 
-        [System.String] 
+        [Parameter()]
+        [ValidateSet("UseImpersonation", "UseFileAccessAccount")]
+        [System.String]
         $FileAccessMethod,
 
-        [Parameter()]  
-        [ValidateSet("RoundRobin","Local","WorkbookURL")] 
-        [System.String] 
+        [Parameter()]
+        [ValidateSet("RoundRobin", "Local", "WorkbookURL")]
+        [System.String]
         $LoadBalancingScheme,
 
-        [Parameter()]  
-        [System.UInt32] 
+        [Parameter()]
+        [System.UInt32]
         $MemoryCacheThreshold,
 
-        [Parameter()]  
-        [System.UInt32] 
+        [Parameter()]
+        [System.Int32]
         $PrivateBytesMax,
 
-        [Parameter()]  
-        [System.UInt32] 
+        [Parameter()]
+        [System.UInt32]
         $SessionsPerUserMax,
 
-        [Parameter()]  
-        [System.UInt32] 
+        [Parameter()]
+        [System.UInt32]
         $SiteCollectionAnonymousSessionsMax,
 
-        [Parameter()]  
-        [System.Boolean] 
+        [Parameter()]
+        [System.Boolean]
         $TerminateProcessOnAccessViolation,
 
-        [Parameter()]  
-        [System.UInt32] 
+        [Parameter()]
+        [System.UInt32]
         $ThrottleAccessViolationsPerSiteCollection,
 
-        [Parameter()]  
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $UnattendedAccountApplicationId,
 
-        [Parameter()]  
-        [System.UInt32] 
+        [Parameter()]
+        [System.Int32]
         $UnusedObjectAgeMax,
 
-        [Parameter()]   
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $WorkbookCache,
 
-        [Parameter()]  
-        [System.UInt32] 
+        [Parameter()]
+        [System.UInt32]
         $WorkbookCacheSizeMax,
 
-        [Parameter()] 
-        [ValidateSet("Present","Absent")] 
-        [System.String] 
+        [Parameter()]
+        [ValidateSet("Present", "Absent")]
+        [System.String]
         $Ensure = "Present",
 
-        [Parameter()] 
-        [System.Management.Automation.PSCredential] 
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 
     Write-Verbose -Message "Setting Excel Services Application '$Name'"
 
-    if ((Get-SPDSCInstalledProductVersion).FileMajorPart -ne 15) 
+    if ((Get-SPDscInstalledProductVersion).FileMajorPart -ne 15)
     {
         throw [Exception] ("Only SharePoint 2013 is supported to deploy Excel Services " + `
-                           "service applications via DSC, as SharePoint 2016 and SharePoint 2019 are deprecated " + `
-                           "this service. See " + `
-                           "https://technet.microsoft.com/en-us/library/mt346112(v=office.16).aspx " + `
-                           "for more info.")
+                "service applications via DSC, as SharePoint 2016 and SharePoint 2019 are deprecated " + `
+                "this service. See " + `
+                "https://technet.microsoft.com/en-us/library/mt346112(v=office.16).aspx " + `
+                "for more info.")
     }
     $result = Get-TargetResource @PSBoundParameters
 
     if ($result.Ensure -eq "Absent" -and $Ensure -eq "Present")
     {
         Write-Verbose -Message "Creating Excel Services Application $Name"
-        Invoke-SPDSCCommand -Credential $InstallAccount `
-                            -Arguments $PSBoundParameters `
-                            -ScriptBlock {
+        Invoke-SPDscCommand -Credential $InstallAccount `
+            -Arguments $PSBoundParameters `
+            -ScriptBlock {
             $params = $args[0]
 
             New-SPExcelServiceApplication -Name $params.Name `
-                                          -ApplicationPool $params.ApplicationPool `
-                                          -Default
+                -ApplicationPool $params.ApplicationPool `
+                -Default
         }
     }
 
     if ($Ensure -eq "Present")
     {
         Write-Verbose -Message "Updating settings for Excel Services Application $Name"
-        Invoke-SPDSCCommand -Credential $InstallAccount `
-                            -Arguments $PSBoundParameters `
-                            -ScriptBlock {
+        Invoke-SPDscCommand -Credential $InstallAccount `
+            -Arguments $PSBoundParameters `
+            -ScriptBlock {
             $params = $args[0]
 
             $params.Add("Identity", $params.Name)
 
             # Remove parameters that do not belong on the set method
-            @("InstallAccount", "Ensure", "TrustedFileLocations", "Name", "ApplicationPool") | 
-                ForEach-Object -Process {
-                    if ($params.ContainsKey($_) -eq $true) 
-                    {
-                        $params.Remove($_) | Out-Null
-                    }
+            @("InstallAccount", "Ensure", "TrustedFileLocations", "Name", "ApplicationPool") |
+            ForEach-Object -Process {
+                if ($params.ContainsKey($_) -eq $true)
+                {
+                    $params.Remove($_) | Out-Null
                 }
+            }
 
             Set-SPExcelServiceApplication @params
         }
@@ -364,20 +366,20 @@ function Set-TargetResource
             $TrustedFileLocations | ForEach-Object -Process {
                 $desiredLocation = $_
                 $matchingCurrentValue = $result.TrustedFileLocations | Where-Object -FilterScript {
-                    $_.Address -eq $desiredLocation.Address 
+                    $_.Address -eq $desiredLocation.Address
                 }
                 if ($null -eq $matchingCurrentValue)
                 {
                     Write-Verbose -Message "Adding trusted location '$($desiredLocation.Address)' to service app"
-                    Invoke-SPDSCCommand -Credential $InstallAccount `
-                                        -Arguments @($PSBoundParameters, $desiredLocation, $Script:TrustLocationProperties, $Script:ServiceAppObjectType) `
-                                        -ScriptBlock {
+                    Invoke-SPDscCommand -Credential $InstallAccount `
+                        -Arguments @($PSBoundParameters, $desiredLocation, $Script:TrustLocationProperties, $Script:ServiceAppObjectType) `
+                        -ScriptBlock {
                         $params = $args[0]
                         $desiredLocation = $args[1]
                         $trustLocationProperties = $args[2]
-                        $serviceAppObjectType  = $args[3]
+                        $serviceAppObjectType = $args[3]
 
-                        $newArgs = @{}
+                        $newArgs = @{ }
                         $trustLocationProperties | ForEach-Object -Process {
                             if ($null -ne $desiredLocation.$_)
                             {
@@ -395,15 +397,15 @@ function Set-TargetResource
                 else
                 {
                     Write-Verbose -Message "Updating trusted location '$($desiredLocation.Address)' in service app"
-                    Invoke-SPDSCCommand -Credential $InstallAccount `
-                                        -Arguments @($PSBoundParameters, $desiredLocation, $Script:TrustLocationProperties, $Script:ServiceAppObjectType) `
-                                        -ScriptBlock {
+                    Invoke-SPDscCommand -Credential $InstallAccount `
+                        -Arguments @($PSBoundParameters, $desiredLocation, $Script:TrustLocationProperties, $Script:ServiceAppObjectType) `
+                        -ScriptBlock {
                         $params = $args[0]
                         $desiredLocation = $args[1]
                         $trustLocationProperties = $args[2]
-                        $serviceAppObjectType  = $args[3]
+                        $serviceAppObjectType = $args[3]
 
-                        $updateArgs = @{}
+                        $updateArgs = @{ }
                         $trustLocationProperties | ForEach-Object -Process {
                             if ($null -ne $desiredLocation.$_)
                             {
@@ -425,14 +427,14 @@ function Set-TargetResource
             $result.TrustedFileLocations | ForEach-Object -Process {
                 $currentLocation = $_
                 $matchingDesiredValue = $TrustedFileLocations | Where-Object -FilterScript {
-                    $_.Address -eq $currentLocation.Address 
+                    $_.Address -eq $currentLocation.Address
                 }
                 if ($null -eq $matchingDesiredValue)
                 {
                     Write-Verbose -Message "Removing trusted location '$($currentLocation.Address)' from service app"
-                    Invoke-SPDSCCommand -Credential $InstallAccount `
-                                        -Arguments @($Name, $currentLocation) `
-                                        -ScriptBlock {
+                    Invoke-SPDscCommand -Credential $InstallAccount `
+                        -Arguments @($Name, $currentLocation) `
+                        -ScriptBlock {
                         $name = $args[0]
                         $currentLocation = $args[1]
 
@@ -443,23 +445,23 @@ function Set-TargetResource
         }
     }
 
-    if ($Ensure -eq "Absent") 
+    if ($Ensure -eq "Absent")
     {
         Write-Verbose -Message "Removing Excel Service Application $Name"
-        Invoke-SPDSCCommand -Credential $InstallAccount `
-                            -Arguments @($PSBoundParameters, $Script:ServiceAppObjectType) `
-                            -ScriptBlock {
+        Invoke-SPDscCommand -Credential $InstallAccount `
+            -Arguments @($PSBoundParameters, $Script:ServiceAppObjectType) `
+            -ScriptBlock {
             $params = $args[0]
             $serviceAppObjectType = $args[1]
 
-            $serviceApp =  Get-SPServiceApplication -Name $params.Name | Where-Object -FilterScript {
-                $_.GetType().FullName -eq $serviceAppObjectType  
+            $serviceApp = Get-SPServiceApplication -Name $params.Name | Where-Object -FilterScript {
+                $_.GetType().FullName -eq $serviceAppObjectType
             }
 
             $proxies = Get-SPServiceApplicationProxy
-            foreach($proxyInstance in $proxies)
+            foreach ($proxyInstance in $proxies)
             {
-                if($serviceApp.IsConnected($proxyInstance))
+                if ($serviceApp.IsConnected($proxyInstance))
                 {
                     $proxyInstance.Delete()
                 }
@@ -473,148 +475,152 @@ function Set-TargetResource
 function Test-TargetResource
 {
     [CmdletBinding()]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSDSCUseIdenticalMandatoryParametersForDSC", "", Justification = "Temporary workaround for issue introduced in PSSA v1.18")]
     [OutputType([System.Boolean])]
     param
     (
-        [Parameter(Mandatory = $true)]  
-        [System.String] 
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $Name,
 
-        [Parameter(Mandatory = $true)]  
-        [System.String] 
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $ApplicationPool,
 
-        [Parameter()] 
-        [Microsoft.Management.Infrastructure.CimInstance[]] 
+        [Parameter()]
+        [Microsoft.Management.Infrastructure.CimInstance[]]
         $TrustedFileLocations,
 
-        [Parameter()]  
-        [System.Boolean] 
+        [Parameter()]
+        [System.Boolean]
         $CachingOfUnusedFilesEnable,
 
-        [Parameter()]  
-        [System.Boolean] 
+        [Parameter()]
+        [System.Boolean]
         $CrossDomainAccessAllowed,
 
-        [Parameter()]  
-        [ValidateSet("None","Connection")] 
-        [System.String] 
+        [Parameter()]
+        [ValidateSet("None", "Connection")]
+        [System.String]
         $EncryptedUserConnectionRequired,
 
-        [Parameter()]  
-        [System.UInt32] 
+        [Parameter()]
+        [System.UInt32]
         $ExternalDataConnectionLifetime,
 
-        [Parameter()]  
-        [ValidateSet("UseImpersonation","UseFileAccessAccount")] 
-        [System.String] 
+        [Parameter()]
+        [ValidateSet("UseImpersonation", "UseFileAccessAccount")]
+        [System.String]
         $FileAccessMethod,
 
-        [Parameter()]  
-        [ValidateSet("RoundRobin","Local","WorkbookURL")] 
-        [System.String] 
+        [Parameter()]
+        [ValidateSet("RoundRobin", "Local", "WorkbookURL")]
+        [System.String]
         $LoadBalancingScheme,
 
-        [Parameter()]  
-        [System.UInt32] 
+        [Parameter()]
+        [System.UInt32]
         $MemoryCacheThreshold,
 
-        [Parameter()]  
-        [System.UInt32] 
+        [Parameter()]
+        [System.Int32]
         $PrivateBytesMax,
 
-        [Parameter()]  
-        [System.UInt32] 
+        [Parameter()]
+        [System.UInt32]
         $SessionsPerUserMax,
 
-        [Parameter()]  
-        [System.UInt32] 
+        [Parameter()]
+        [System.UInt32]
         $SiteCollectionAnonymousSessionsMax,
 
-        [Parameter()]  
-        [System.Boolean] 
+        [Parameter()]
+        [System.Boolean]
         $TerminateProcessOnAccessViolation,
 
-        [Parameter()]  
-        [System.UInt32] 
+        [Parameter()]
+        [System.UInt32]
         $ThrottleAccessViolationsPerSiteCollection,
 
-        [Parameter()]  
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $UnattendedAccountApplicationId,
 
-        [Parameter()]  
-        [System.UInt32] 
+        [Parameter()]
+        [System.Int32]
         $UnusedObjectAgeMax,
 
-        [Parameter()]   
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $WorkbookCache,
 
-        [Parameter()]  
-        [System.UInt32] 
+        [Parameter()]
+        [System.UInt32]
         $WorkbookCacheSizeMax,
 
-        [Parameter()] 
-        [ValidateSet("Present","Absent")] 
-        [System.String] 
+        [Parameter()]
+        [ValidateSet("Present", "Absent")]
+        [System.String]
         $Ensure = "Present",
 
-        [Parameter()] 
-        [System.Management.Automation.PSCredential] 
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
         $InstallAccount
     )
-    
+
     Write-Verbose -Message "Testing Excel Services Application '$Name'"
 
     $PSBoundParameters.Ensure = $Ensure
 
-    if ((Get-SPDSCInstalledProductVersion).FileMajorPart -ne 15) 
+    if ((Get-SPDscInstalledProductVersion).FileMajorPart -ne 15)
     {
         throw [Exception] ("Only SharePoint 2013 is supported to deploy Excel Services " + `
-                           "service applications via DSC, as SharePoint 2016 and SharePoint 2019 are deprecated " + `
-                           "this service. See " + `
-                           "https://technet.microsoft.com/en-us/library/mt346112(v=office.16).aspx " + `
-                           "for more info.")
+                "service applications via DSC, as SharePoint 2016 and SharePoint 2019 are deprecated " + `
+                "this service. See " + `
+                "https://technet.microsoft.com/en-us/library/mt346112(v=office.16).aspx " + `
+                "for more info.")
     }
-    
+
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
-    $mainCheck = Test-SPDscParameterState -CurrentValues $CurrentValues `
-                                            -DesiredValues $PSBoundParameters `
-                                            -ValuesToCheck @(
-                                                "Ensure",
-                                                "CachingOfUnusedFilesEnable",
-                                                "CrossDomainAccessAllowed",
-                                                "EncryptedUserConnectionRequired",
-                                                "ExternalDataConnectionLifetime",
-                                                "FileAccessMethod",
-                                                "LoadBalancingScheme",
-                                                "MemoryCacheThreshold",
-                                                "PrivateBytesMax",
-                                                "SessionsPerUserMax",
-                                                "SiteCollectionAnonymousSessionsMax",
-                                                "TerminateProcessOnAccessViolation",
-                                                "ThrottleAccessViolationsPerSiteCollection",
-                                                "UnattendedAccountApplicationId",
-                                                "UnusedObjectAgeMax",
-                                                "WorkbookCache",
-                                                "WorkbookCacheSizeMax"
-                                                )
+    Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
+    Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
 
-    
-    if ($Ensure -eq "Present" -and $mainCheck -eq $true -and $null -ne $TrustedFileLocations) 
+    $mainCheck = Test-SPDscParameterState -CurrentValues $CurrentValues `
+        -DesiredValues $PSBoundParameters `
+        -ValuesToCheck @(
+        "Ensure",
+        "CachingOfUnusedFilesEnable",
+        "CrossDomainAccessAllowed",
+        "EncryptedUserConnectionRequired",
+        "ExternalDataConnectionLifetime",
+        "FileAccessMethod",
+        "LoadBalancingScheme",
+        "MemoryCacheThreshold",
+        "PrivateBytesMax",
+        "SessionsPerUserMax",
+        "SiteCollectionAnonymousSessionsMax",
+        "TerminateProcessOnAccessViolation",
+        "ThrottleAccessViolationsPerSiteCollection",
+        "UnattendedAccountApplicationId",
+        "UnusedObjectAgeMax",
+        "WorkbookCache",
+        "WorkbookCacheSizeMax"
+    )
+
+
+    if ($Ensure -eq "Present" -and $mainCheck -eq $true -and $null -ne $TrustedFileLocations)
     {
         # Check that all the desired types are in the current values and match
         $locationCheck = $TrustedFileLocations | ForEach-Object -Process {
             $desiredLocation = $_
             $matchingCurrentValue = $CurrentValues.TrustedFileLocations | Where-Object -FilterScript {
-                $_.Address -eq $desiredLocation.Address 
+                $_.Address -eq $desiredLocation.Address
             }
             if ($null -eq $matchingCurrentValue)
             {
                 Write-Verbose -Message ("Trusted file location '$($_.Address)' was not found " + `
-                                        "in the Excel service app. Desired state is false.")
+                        "in the Excel service app. Desired state is false.")
                 return $false
             }
             else
@@ -625,9 +631,9 @@ function Test-TargetResource
                         if ($desiredLocation.$_ -ne $matchingCurrentValue.$_)
                         {
                             Write-Verbose -Message ("Trusted file location '$($desiredLocation.Address)' did not match " + `
-                                                    "desired property '$_'. Desired value is " + `
-                                                    "'$($desiredLocation.$_)' but the current value is " + `
-                                                    "'$($matchingCurrentValue.$_)'")
+                                    "desired property '$_'. Desired value is " + `
+                                    "'$($desiredLocation.$_)' but the current value is " + `
+                                    "'$($matchingCurrentValue.$_)'")
                             return $false
                         }
                     }
@@ -644,13 +650,13 @@ function Test-TargetResource
         $locationCheck = $CurrentValues.TrustedFileLocations | ForEach-Object -Process {
             $currentLocation = $_
             $matchingDesiredValue = $TrustedFileLocations | Where-Object -FilterScript {
-                $_.Address -eq $currentLocation.Address 
+                $_.Address -eq $currentLocation.Address
             }
             if ($null -eq $matchingDesiredValue)
             {
                 Write-Verbose -Message ("Existing trusted file location '$($_.Address)' was not " + `
-                                        "found in the desired state for this service " + `
-                                        "application. Desired state is false.")
+                        "found in the desired state for this service " + `
+                        "application. Desired state is false.")
                 return $false
             }
             return $true
@@ -659,8 +665,8 @@ function Test-TargetResource
         {
             return $false
         }
-        
-        # at this point if no other value has been returned, all desired entires exist and are 
+
+        # at this point if no other value has been returned, all desired entires exist and are
         # correct, and no existing entries exist that are not in desired state, so return true
         return $true
     }

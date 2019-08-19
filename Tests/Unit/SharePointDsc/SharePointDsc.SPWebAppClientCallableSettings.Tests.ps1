@@ -3,16 +3,16 @@ param(
     [Parameter()]
     [string]
     $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
-                                         -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
-                                         -Resolve)
+            -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
+            -Resolve)
 )
 
 Import-Module -Name (Join-Path -Path $PSScriptRoot `
-                                -ChildPath "..\UnitTestHelper.psm1" `
-                                -Resolve)
+        -ChildPath "..\UnitTestHelper.psm1" `
+        -Resolve)
 
 $Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointCmdletModule `
-                                              -DscResource "SPWebAppClientCallableSettings"
+    -DscResource "SPWebAppClientCallableSettings"
 
 Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
     InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
@@ -42,21 +42,21 @@ namespace Microsoft.SharePoint.Administration {
 
         $webAppImplementation = {
             $clientCallableSettings = [PSCustomObject] @{
-                ProxyLibraries = [System.Collections.ObjectModel.Collection[Microsoft.SharePoint.Administration.SPClientCallableProxyLibrary]]@()
-                MaxResourcesPerRequest = 16
-                MaxObjectPaths = 256
-                ExecutionTimeout = [System.TimeSpan]::FromMinutes(90);
-                RequestXmlMaxDepth = 32
-                EnableXsdValidation = $true
-                EnableStackTrace = $false
+                ProxyLibraries                     = [System.Collections.ObjectModel.Collection[Microsoft.SharePoint.Administration.SPClientCallableProxyLibrary]]@()
+                MaxResourcesPerRequest             = 16
+                MaxObjectPaths                     = 256
+                ExecutionTimeout                   = [System.TimeSpan]::FromMinutes(90);
+                RequestXmlMaxDepth                 = 32
+                EnableXsdValidation                = $true
+                EnableStackTrace                   = $false
                 RequestUsageExecutionTimeThreshold = 800
-                EnableRequestUsage = $true
-                LogActionsIfHasRequestException = $true
+                EnableRequestUsage                 = $true
+                LogActionsIfHasRequestException    = $true
             }
 
             $webApp = @{
                 ClientCallableSettings = $clientCallableSettings
-                UpdateCalled = $false
+                UpdateCalled           = $false
             }
 
             $webApp | Add-Member -MemberType ScriptMethod -Name Update -Value {
@@ -68,24 +68,24 @@ namespace Microsoft.SharePoint.Administration {
         # Test contexts
         Context -Name "Client callable settings and a specific proxy library list matches current state" -Fixture {
             $testParams = @{
-                WebAppUrl = "http://sites.sharepoint.com"
-                ProxyLibraries = @(
+                WebAppUrl                          = "http://sites.sharepoint.com"
+                ProxyLibraries                     = @(
                     (New-CimInstance -ClassName "MSFT_SPProxyLibraryEntry" `
-                    -ClientOnly `
-                    -Property @{
-                        AssemblyName = "Assembly"
-                        SupportAppAuthentication = $true
-                               })
+                            -ClientOnly `
+                            -Property @{
+                            AssemblyName             = "Assembly"
+                            SupportAppAuthentication = $true
+                        })
                 )
-                MaxResourcesPerRequest = 16
-                MaxObjectPaths = 256
-                ExecutionTimeout = 90
-                RequestXmlMaxDepth = 32
-                EnableXsdValidation = $true
-                EnableStackTrace = $false
+                MaxResourcesPerRequest             = 16
+                MaxObjectPaths                     = 256
+                ExecutionTimeout                   = 90
+                RequestXmlMaxDepth                 = 32
+                EnableXsdValidation                = $true
+                EnableStackTrace                   = $false
                 RequestUsageExecutionTimeThreshold = 800
-                EnableRequestUsage = $true
-                LogActionsIfHasRequestException = $true
+                EnableRequestUsage                 = $true
+                LogActionsIfHasRequestException    = $true
             }
 
             Mock -CommandName Get-SPWebapplication -MockWith {
@@ -136,16 +136,16 @@ namespace Microsoft.SharePoint.Administration {
 
         Context -Name "Client callable settings does not match the current state" -Fixture {
             $testParams = @{
-                WebAppUrl = "http://sites.sharepoint.com"
-                MaxResourcesPerRequest = 8
-                MaxObjectPaths = 128
-                ExecutionTimeout = 45
-                RequestXmlMaxDepth = 16
-                EnableXsdValidation = $false
-                EnableStackTrace = $true
+                WebAppUrl                          = "http://sites.sharepoint.com"
+                MaxResourcesPerRequest             = 8
+                MaxObjectPaths                     = 128
+                ExecutionTimeout                   = 45
+                RequestXmlMaxDepth                 = 16
+                EnableXsdValidation                = $false
+                EnableStackTrace                   = $true
                 RequestUsageExecutionTimeThreshold = 400
-                EnableRequestUsage = $false
-                LogActionsIfHasRequestException = $false
+                EnableRequestUsage                 = $false
+                LogActionsIfHasRequestException    = $false
             }
 
             Mock -CommandName Get-SPWebapplication -MockWith {
@@ -200,14 +200,14 @@ namespace Microsoft.SharePoint.Administration {
 
         Context -Name "A proxy library does not match the current state" -Fixture {
             $testParams = @{
-                WebAppUrl = "http://sites.sharepoint.com"
+                WebAppUrl      = "http://sites.sharepoint.com"
                 ProxyLibraries = @(
                     (New-CimInstance -ClassName "MSFT_SPProxyLibraryEntry" `
-                    -ClientOnly `
-                    -Property @{
-                        AssemblyName = "Assembly"
-                        SupportAppAuthentication = $true
-                               })
+                            -ClientOnly `
+                            -Property @{
+                            AssemblyName             = "Assembly"
+                            SupportAppAuthentication = $true
+                        })
                 )
             }
 
@@ -239,14 +239,14 @@ namespace Microsoft.SharePoint.Administration {
 
         Context -Name "A proxy library to include does not match the current state" -Fixture {
             $testParams = @{
-                WebAppUrl = "http://sites.sharepoint.com"
+                WebAppUrl               = "http://sites.sharepoint.com"
                 ProxyLibrariesToInclude = @(
                     (New-CimInstance -ClassName "MSFT_SPProxyLibraryEntry" `
-                    -ClientOnly `
-                    -Property @{
-                        AssemblyName = "Assembly"
-                        SupportAppAuthentication = $true
-                               })
+                            -ClientOnly `
+                            -Property @{
+                            AssemblyName             = "Assembly"
+                            SupportAppAuthentication = $true
+                        })
                 )
             }
 
@@ -278,14 +278,14 @@ namespace Microsoft.SharePoint.Administration {
 
         Context -Name "Proxy libraries does not match the current state" -Fixture {
             $testParams = @{
-                WebAppUrl = "http://sites.sharepoint.com"
+                WebAppUrl      = "http://sites.sharepoint.com"
                 ProxyLibraries = @(
                     (New-CimInstance -ClassName "MSFT_SPProxyLibraryEntry" `
-                    -ClientOnly `
-                    -Property @{
-                        AssemblyName = "NewAssembly"
-                        SupportAppAuthentication = $true
-                               })
+                            -ClientOnly `
+                            -Property @{
+                            AssemblyName             = "NewAssembly"
+                            SupportAppAuthentication = $true
+                        })
                 )
             }
 
@@ -317,20 +317,20 @@ namespace Microsoft.SharePoint.Administration {
 
         Context -Name "Multiple proxy libraries matches the current state" -Fixture {
             $testParams = @{
-                WebAppUrl = "http://sites.sharepoint.com"
+                WebAppUrl      = "http://sites.sharepoint.com"
                 ProxyLibraries = @(
                     (New-CimInstance -ClassName "MSFT_SPProxyLibraryEntry" `
-                    -ClientOnly `
-                    -Property @{
-                        AssemblyName = "Assembly1"
-                        SupportAppAuthentication = $true
-                               }),
+                            -ClientOnly `
+                            -Property @{
+                            AssemblyName             = "Assembly1"
+                            SupportAppAuthentication = $true
+                        }),
                     (New-CimInstance -ClassName "MSFT_SPProxyLibraryEntry" `
-                    -ClientOnly `
-                    -Property @{
-                        AssemblyName = "Assembly2"
-                        SupportAppAuthentication = $true
-                               })
+                            -ClientOnly `
+                            -Property @{
+                            AssemblyName             = "Assembly2"
+                            SupportAppAuthentication = $true
+                        })
                 )
             }
 
@@ -368,14 +368,14 @@ namespace Microsoft.SharePoint.Administration {
 
         Context -Name "Proxy libraries to include does not match the current state" -Fixture {
             $testParams = @{
-                WebAppUrl = "http://sites.sharepoint.com"
+                WebAppUrl               = "http://sites.sharepoint.com"
                 ProxyLibrariesToInclude = @(
                     (New-CimInstance -ClassName "MSFT_SPProxyLibraryEntry" `
-                    -ClientOnly `
-                    -Property @{
-                        AssemblyName = "NewAssembly"
-                        SupportAppAuthentication = $true
-                               })
+                            -ClientOnly `
+                            -Property @{
+                            AssemblyName             = "NewAssembly"
+                            SupportAppAuthentication = $true
+                        })
                 )
             }
 
@@ -409,14 +409,14 @@ namespace Microsoft.SharePoint.Administration {
 
         Context -Name "Proxy library to include matches the current state" -Fixture {
             $testParams = @{
-                WebAppUrl = "http://sites.sharepoint.com"
+                WebAppUrl               = "http://sites.sharepoint.com"
                 ProxyLibrariesToInclude = @(
                     (New-CimInstance -ClassName "MSFT_SPProxyLibraryEntry" `
-                    -ClientOnly `
-                    -Property @{
-                        AssemblyName = "Assembly"
-                        SupportAppAuthentication = $true
-                               })
+                            -ClientOnly `
+                            -Property @{
+                            AssemblyName             = "Assembly"
+                            SupportAppAuthentication = $true
+                        })
                 )
             }
 
@@ -448,7 +448,7 @@ namespace Microsoft.SharePoint.Administration {
 
         Context -Name "A proxy library to exclude does not match the current state" -Fixture {
             $testParams = @{
-                WebAppUrl = "http://sites.sharepoint.com"
+                WebAppUrl               = "http://sites.sharepoint.com"
                 ProxyLibrariesToExclude = @("Assembly")
             }
 
@@ -485,7 +485,7 @@ namespace Microsoft.SharePoint.Administration {
 
         Context -Name "Proxy library to exclude matches the current state" -Fixture {
             $testParams = @{
-                WebAppUrl = "http://sites.sharepoint.com"
+                WebAppUrl               = "http://sites.sharepoint.com"
                 ProxyLibrariesToExclude = @("Assembly")
             }
 
@@ -517,14 +517,14 @@ namespace Microsoft.SharePoint.Administration {
 
         Context -Name "Proxy libraries does not match the current state of empty proxy libraries" -Fixture {
             $testParams = @{
-                WebAppUrl = "http://sites.sharepoint.com"
+                WebAppUrl      = "http://sites.sharepoint.com"
                 ProxyLibraries = @(
                     (New-CimInstance -ClassName "MSFT_SPProxyLibraryEntry" `
-                    -ClientOnly `
-                    -Property @{
-                        AssemblyName = "Assembly"
-                        SupportAppAuthentication = $true
-                               })
+                            -ClientOnly `
+                            -Property @{
+                            AssemblyName             = "Assembly"
+                            SupportAppAuthentication = $true
+                        })
                 )
             }
 
@@ -541,7 +541,7 @@ namespace Microsoft.SharePoint.Administration {
 
         Context -Name "Empty proxy libraries matches the current state of empty proxy libraries" -Fixture {
             $testParams = @{
-                WebAppUrl = "http://sites.sharepoint.com"
+                WebAppUrl      = "http://sites.sharepoint.com"
                 ProxyLibraries = @()
             }
 
@@ -558,7 +558,7 @@ namespace Microsoft.SharePoint.Administration {
 
         Context -Name "Empty proxy libraries does not match the current state" -Fixture {
             $testParams = @{
-                WebAppUrl = "http://sites.sharepoint.com"
+                WebAppUrl      = "http://sites.sharepoint.com"
                 ProxyLibraries = @()
             }
 
@@ -588,14 +588,14 @@ namespace Microsoft.SharePoint.Administration {
 
         Context -Name "Proxy libraries to include does not match the current state of empty proxy libraries" -Fixture {
             $testParams = @{
-                WebAppUrl = "http://sites.sharepoint.com"
+                WebAppUrl               = "http://sites.sharepoint.com"
                 ProxyLibrariesToInclude = @(
                     (New-CimInstance -ClassName "MSFT_SPProxyLibraryEntry" `
-                    -ClientOnly `
-                    -Property @{
-                        AssemblyName = "Assembly"
-                        SupportAppAuthentication = $true
-                               })
+                            -ClientOnly `
+                            -Property @{
+                            AssemblyName             = "Assembly"
+                            SupportAppAuthentication = $true
+                        })
                 )
             }
 
@@ -612,7 +612,7 @@ namespace Microsoft.SharePoint.Administration {
 
         Context -Name "Proxy libraries to exclude matches the current state of empty proxy libraries" -Fixture {
             $testParams = @{
-                WebAppUrl = "http://sites.sharepoint.com"
+                WebAppUrl               = "http://sites.sharepoint.com"
                 ProxyLibrariesToExclude = @("Assembly")
             }
 
@@ -629,22 +629,22 @@ namespace Microsoft.SharePoint.Administration {
 
         Context -Name "ProxyLibraries and ProxyLibrariesToInclude properties are provided" -Fixture {
             $testParams = @{
-                WebAppUrl = "http://sites.sharepoint.com"
-                ProxyLibraries = @(
+                WebAppUrl               = "http://sites.sharepoint.com"
+                ProxyLibraries          = @(
                     (New-CimInstance -ClassName "MSFT_SPProxyLibraryEntry" `
-                    -ClientOnly `
-                    -Property @{
-                        AssemblyName = "Assembly"
-                        SupportAppAuthentication = $true
-                               })
+                            -ClientOnly `
+                            -Property @{
+                            AssemblyName             = "Assembly"
+                            SupportAppAuthentication = $true
+                        })
                 )
                 ProxyLibrariesToInclude = @(
                     (New-CimInstance -ClassName "MSFT_SPProxyLibraryEntry" `
-                    -ClientOnly `
-                    -Property @{
-                        AssemblyName = "Assembly"
-                        SupportAppAuthentication = $true
-                               })
+                            -ClientOnly `
+                            -Property @{
+                            AssemblyName             = "Assembly"
+                            SupportAppAuthentication = $true
+                        })
                 )
             }
 
@@ -667,14 +667,14 @@ namespace Microsoft.SharePoint.Administration {
 
         Context -Name "ProxyLibraries and ProxyLibrariesToExclude properties are provided" -Fixture {
             $testParams = @{
-                WebAppUrl = "http://sites.sharepoint.com"
-                ProxyLibraries = @(
+                WebAppUrl               = "http://sites.sharepoint.com"
+                ProxyLibraries          = @(
                     (New-CimInstance -ClassName "MSFT_SPProxyLibraryEntry" `
-                    -ClientOnly `
-                    -Property @{
-                        AssemblyName = "Assembly"
-                        SupportAppAuthentication = $true
-                               })
+                            -ClientOnly `
+                            -Property @{
+                            AssemblyName             = "Assembly"
+                            SupportAppAuthentication = $true
+                        })
                 )
                 ProxyLibrariesToExclude = @("Assembly")
             }
@@ -698,22 +698,22 @@ namespace Microsoft.SharePoint.Administration {
 
         Context -Name "All of the proxy libraries properties are provided" -Fixture {
             $testParams = @{
-                WebAppUrl = "http://sites.sharepoint.com"
-                ProxyLibraries = @(
+                WebAppUrl               = "http://sites.sharepoint.com"
+                ProxyLibraries          = @(
                     (New-CimInstance -ClassName "MSFT_SPProxyLibraryEntry" `
-                    -ClientOnly `
-                    -Property @{
-                        AssemblyName = "Assembly"
-                        SupportAppAuthentication = $true
-                               })
+                            -ClientOnly `
+                            -Property @{
+                            AssemblyName             = "Assembly"
+                            SupportAppAuthentication = $true
+                        })
                 )
                 ProxyLibrariesToInclude = @(
                     (New-CimInstance -ClassName "MSFT_SPProxyLibraryEntry" `
-                    -ClientOnly `
-                    -Property @{
-                        AssemblyName = "Assembly"
-                        SupportAppAuthentication = $true
-                               })
+                            -ClientOnly `
+                            -Property @{
+                            AssemblyName             = "Assembly"
+                            SupportAppAuthentication = $true
+                        })
                 )
                 ProxyLibrariesToExclude = @("Assembly")
             }

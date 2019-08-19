@@ -1,6 +1,7 @@
 function Get-TargetResource
 {
     [CmdletBinding()]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSDSCUseIdenticalMandatoryParametersForDSC", "", Justification = "Temporary workaround for issue introduced in PSSA v1.18")]
     [OutputType([System.Collections.Hashtable])]
     param
     (
@@ -45,10 +46,10 @@ function Get-TargetResource
     }
 
     if ($PSBoundParameters.ContainsKey("Default") -eq $false -and `
-        $PSBoundParameters.ContainsKey("Intranet") -eq $false -and `
-        $PSBoundParameters.ContainsKey("Internet") -eq $false -and `
-        $PSBoundParameters.ContainsKey("Extranet") -eq $false -and `
-        $PSBoundParameters.ContainsKey("Custom") -eq $false)
+            $PSBoundParameters.ContainsKey("Intranet") -eq $false -and `
+            $PSBoundParameters.ContainsKey("Internet") -eq $false -and `
+            $PSBoundParameters.ContainsKey("Extranet") -eq $false -and `
+            $PSBoundParameters.ContainsKey("Custom") -eq $false)
     {
         Write-Verbose -Message "You have to specify at least one zone."
         return $nullreturn
@@ -99,9 +100,9 @@ function Get-TargetResource
         }
     }
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
-                                  -Arguments $PSBoundParameters `
-                                  -ScriptBlock {
+    $result = Invoke-SPDscCommand -Credential $InstallAccount `
+        -Arguments $PSBoundParameters `
+        -ScriptBlock {
         $params = $args[0]
 
         $wa = Get-SPWebApplication -Identity $params.WebAppUrl -ErrorAction SilentlyContinue
@@ -129,10 +130,10 @@ function Get-TargetResource
             $authProviders = Get-SPAuthenticationProvider -WebApplication $params.WebAppUrl -Zone $zone
             if ($null -eq $authProviders)
             {
-                $localAuthMode          = "Classic"
+                $localAuthMode = "Classic"
                 $authenticationProvider = $null
-                $roleProvider           = $null
-                $membershipProvider     = $null
+                $roleProvider = $null
+                $membershipProvider = $null
 
                 $provider = @{
                     AuthenticationMethod   = $localAuthMode
@@ -142,21 +143,31 @@ function Get-TargetResource
                 }
                 switch ($zone)
                 {
-                    "Default"  { $default += $provider }
-                    "Intranet" { $intranet += $provider }
-                    "Internet" { $internet += $provider }
-                    "Extranet" { $extranet += $provider }
-                    "Custom"   { $custom += $provider }
+                    "Default"
+                    { $default += $provider
+                    }
+                    "Intranet"
+                    { $intranet += $provider
+                    }
+                    "Internet"
+                    { $internet += $provider
+                    }
+                    "Extranet"
+                    { $extranet += $provider
+                    }
+                    "Custom"
+                    { $custom += $provider
+                    }
                 }
             }
             else
             {
                 foreach ($authProvider in $authProviders)
                 {
-                    $localAuthMode          = $null
+                    $localAuthMode = $null
                     $authenticationProvider = $null
-                    $roleProvider           = $null
-                    $membershipProvider     = $null
+                    $roleProvider = $null
+                    $membershipProvider = $null
 
                     if ($authProvider.DisplayName -eq "Windows Authentication")
                     {
@@ -171,9 +182,9 @@ function Get-TargetResource
                     }
                     elseif ($authProvider.DisplayName -eq "Forms Authentication")
                     {
-                        $localAuthMode          = "FBA"
-                        $roleProvider           = $authProvider.RoleProvider
-                        $membershipProvider     = $authProvider.MembershipProvider
+                        $localAuthMode = "FBA"
+                        $roleProvider = $authProvider.RoleProvider
+                        $membershipProvider = $authProvider.MembershipProvider
                     }
                     else
                     {
@@ -189,11 +200,21 @@ function Get-TargetResource
                     }
                     switch ($zone)
                     {
-                        "Default"  { $default += $provider }
-                        "Intranet" { $intranet += $provider }
-                        "Internet" { $internet += $provider }
-                        "Extranet" { $extranet += $provider }
-                        "Custom"   { $custom += $provider }
+                        "Default"
+                        { $default += $provider
+                        }
+                        "Intranet"
+                        { $intranet += $provider
+                        }
+                        "Internet"
+                        { $internet += $provider
+                        }
+                        "Extranet"
+                        { $extranet += $provider
+                        }
+                        "Custom"
+                        { $custom += $provider
+                        }
                     }
                 }
             }
@@ -214,6 +235,7 @@ function Get-TargetResource
 function Set-TargetResource
 {
     [CmdletBinding()]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSDSCUseIdenticalMandatoryParametersForDSC", "", Justification = "Temporary workaround for issue introduced in PSSA v1.18")]
     param
     (
         [Parameter(Mandatory = $true)]
@@ -249,10 +271,10 @@ function Set-TargetResource
 
     # Test is at least one zone is specified
     if ($PSBoundParameters.ContainsKey("Default") -eq $false -and `
-        $PSBoundParameters.ContainsKey("Intranet") -eq $false -and `
-        $PSBoundParameters.ContainsKey("Internet") -eq $false -and `
-        $PSBoundParameters.ContainsKey("Extranet") -eq $false -and `
-        $PSBoundParameters.ContainsKey("Custom") -eq $false)
+            $PSBoundParameters.ContainsKey("Intranet") -eq $false -and `
+            $PSBoundParameters.ContainsKey("Internet") -eq $false -and `
+            $PSBoundParameters.ContainsKey("Extranet") -eq $false -and `
+            $PSBoundParameters.ContainsKey("Custom") -eq $false)
     {
         throw "You have to specify at least one zone."
     }
@@ -284,9 +306,9 @@ function Set-TargetResource
     }
 
     # Get current authentication method
-    $authMethod = Invoke-SPDSCCommand -Credential $InstallAccount `
-                                      -Arguments $PSBoundParameters `
-                                      -ScriptBlock {
+    $authMethod = Invoke-SPDscCommand -Credential $InstallAccount `
+        -Arguments $PSBoundParameters `
+        -ScriptBlock {
         $params = $args[0]
 
         $wa = Get-SPWebApplication -Identity $params.WebAppUrl -ErrorAction SilentlyContinue
@@ -342,7 +364,7 @@ function Set-TargetResource
     {
         # Test is current config matches desired config
         $result = Test-ZoneConfiguration -DesiredConfig $Default `
-                                         -CurrentConfig $CurrentValues.Default
+            -CurrentConfig $CurrentValues.Default
 
         # If that is the case, set desired config.
         if ($result -eq $false)
@@ -361,7 +383,7 @@ function Set-TargetResource
 
         # Test is current config matches desired config
         $result = Test-ZoneConfiguration -DesiredConfig $Intranet `
-                                         -CurrentConfig $CurrentValues.Intranet
+            -CurrentConfig $CurrentValues.Intranet
 
         # If that is the case, set desired config.
         if ($result -eq $false)
@@ -380,7 +402,7 @@ function Set-TargetResource
 
         # Test is current config matches desired config
         $result = Test-ZoneConfiguration -DesiredConfig $Internet `
-                                         -CurrentConfig $CurrentValues.Internet
+            -CurrentConfig $CurrentValues.Internet
 
         # If that is the case, set desired config.
         if ($result -eq $false)
@@ -399,7 +421,7 @@ function Set-TargetResource
 
         # Test is current config matches desired config
         $result = Test-ZoneConfiguration -DesiredConfig $Extranet `
-                                         -CurrentConfig $CurrentValues.Extranet
+            -CurrentConfig $CurrentValues.Extranet
 
         # If that is the case, set desired config.
         if ($result -eq $false)
@@ -418,7 +440,7 @@ function Set-TargetResource
 
         # Test is current config matches desired config
         $result = Test-ZoneConfiguration -DesiredConfig $Custom `
-                                         -CurrentConfig $CurrentValues.Custom
+            -CurrentConfig $CurrentValues.Custom
 
         # If that is the case, set desired config.
         if ($result -eq $false)
@@ -431,6 +453,7 @@ function Set-TargetResource
 function Test-TargetResource
 {
     [CmdletBinding()]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSDSCUseIdenticalMandatoryParametersForDSC", "", Justification = "Temporary workaround for issue introduced in PSSA v1.18")]
     [OutputType([System.Boolean])]
     param
     (
@@ -467,11 +490,14 @@ function Test-TargetResource
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
+    Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
+    Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
+
     if ($null -eq $CurrentValues.Default -and `
-        $null -eq $CurrentValues.Intranet -and `
-        $null -eq $CurrentValues.Internet -and `
-        $null -eq $CurrentValues.Extranet -and `
-        $null -eq $CurrentValues.Custom)
+            $null -eq $CurrentValues.Intranet -and `
+            $null -eq $CurrentValues.Internet -and `
+            $null -eq $CurrentValues.Extranet -and `
+            $null -eq $CurrentValues.Custom)
     {
         return $false
     }
@@ -479,7 +505,7 @@ function Test-TargetResource
     if ($PSBoundParameters.ContainsKey("Default"))
     {
         $result = Test-ZoneConfiguration -DesiredConfig $Default `
-                                         -CurrentConfig $CurrentValues.Default
+            -CurrentConfig $CurrentValues.Default
 
         if ($result -eq $false)
         {
@@ -495,7 +521,7 @@ function Test-TargetResource
         }
 
         $result = Test-ZoneConfiguration -DesiredConfig $Intranet `
-                                         -CurrentConfig $CurrentValues.Intranet
+            -CurrentConfig $CurrentValues.Intranet
 
         if ($result -eq $false)
         {
@@ -511,7 +537,7 @@ function Test-TargetResource
         }
 
         $result = Test-ZoneConfiguration -DesiredConfig $Internet `
-                                         -CurrentConfig $CurrentValues.Internet
+            -CurrentConfig $CurrentValues.Internet
 
         if ($result -eq $false)
         {
@@ -527,7 +553,7 @@ function Test-TargetResource
         }
 
         $result = Test-ZoneConfiguration -DesiredConfig $Extranet `
-                                         -CurrentConfig $CurrentValues.Extranet
+            -CurrentConfig $CurrentValues.Extranet
 
         if ($result -eq $false)
         {
@@ -543,7 +569,7 @@ function Test-TargetResource
         }
 
         $result = Test-ZoneConfiguration -DesiredConfig $Custom `
-                                         -CurrentConfig $CurrentValues.Custom
+            -CurrentConfig $CurrentValues.Custom
 
         if ($result -eq $false)
         {
@@ -567,7 +593,7 @@ function Test-Parameter()
         $Exception
     )
 
-    $ntlmUsed     = $false
+    $ntlmUsed = $false
     $kerberosUsed = $false
     foreach ($zoneConfig in $Zone)
     {
@@ -603,14 +629,15 @@ function Test-Parameter()
 
         switch ($zoneConfig.AuthenticationMethod)
         {
-            "NTLM" {
+            "NTLM"
+            {
                 $ntlmUsed = $true
                 if ($authProviderUsed -eq $true -or `
-                    $membProviderUsed -eq $true -or `
-                    $roleProviderUsed -eq $true)
+                        $membProviderUsed -eq $true -or `
+                        $roleProviderUsed -eq $true)
                 {
                     $message = "You cannot use AuthenticationProvider, MembershipProvider " + `
-                               "or RoleProvider when using NTLM"
+                        "or RoleProvider when using NTLM"
                     if ($Exception)
                     {
                         throw $message
@@ -622,14 +649,15 @@ function Test-Parameter()
                     }
                 }
             }
-            "Kerberos" {
+            "Kerberos"
+            {
                 $kerberosUsed = $true
                 if ($authProviderUsed -eq $true -or `
-                    $membProviderUsed -eq $true -or `
-                    $roleProviderUsed -eq $true)
+                        $membProviderUsed -eq $true -or `
+                        $roleProviderUsed -eq $true)
                 {
                     $message = "You cannot use AuthenticationProvider, MembershipProvider " + `
-                               "or RoleProvider when using Kerberos"
+                        "or RoleProvider when using Kerberos"
                     if ($Exception)
                     {
                         throw $message
@@ -641,12 +669,13 @@ function Test-Parameter()
                     }
                 }
             }
-            "FBA" {
+            "FBA"
+            {
                 if ($membProviderUsed -eq $false -or `
-                    $roleProviderUsed -eq $false)
+                        $roleProviderUsed -eq $false)
                 {
                     $message = "You have to specify MembershipProvider and " + `
-                               "RoleProvider when using FBA"
+                        "RoleProvider when using FBA"
                     if ($Exception)
                     {
                         throw $message
@@ -661,7 +690,7 @@ function Test-Parameter()
                 if ($authProviderUsed -eq $true)
                 {
                     $message = "You cannot use AuthenticationProvider when " + `
-                               "using FBA"
+                        "using FBA"
                     if ($Exception)
                     {
                         throw $message
@@ -673,12 +702,13 @@ function Test-Parameter()
                     }
                 }
             }
-            "Federated" {
+            "Federated"
+            {
                 if ($membProviderUsed -eq $true -or `
-                    $roleProviderUsed -eq $true)
+                        $roleProviderUsed -eq $true)
                 {
                     $message = "You cannot use MembershipProvider or " + `
-                               "RoleProvider when using Federated"
+                        "RoleProvider when using Federated"
                     if ($Exception)
                     {
                         throw $message
@@ -693,7 +723,7 @@ function Test-Parameter()
                 if ($authProviderUsed -eq $false)
                 {
                     $message = "You have to specify AuthenticationProvider when " + `
-                               "using Federated"
+                        "using Federated"
                     if ($Exception)
                     {
                         throw $message
@@ -740,8 +770,8 @@ function Test-ZoneIsNotClassic()
         if ($desiredAuth.AuthenticationMethod -ne "Classic")
         {
             throw ("Specified Web Application is using Classic Authentication and " + `
-                   "Claims Authentication is specified. Please use " + `
-                   "Convert-SPWebApplication first!")
+                    "Claims Authentication is specified. Please use " + `
+                    "Convert-SPWebApplication first!")
         }
     }
 }
@@ -754,7 +784,7 @@ function Set-ZoneConfiguration()
         $WebAppUrl,
 
         [Parameter(Mandatory = $true)]
-        [ValidateSet("Default","Intranet","Internet","Extranet","Custom")]
+        [ValidateSet("Default", "Intranet", "Internet", "Extranet", "Custom")]
         [System.String]
         $Zone,
 
@@ -763,9 +793,9 @@ function Set-ZoneConfiguration()
         $DesiredConfig
     )
 
-    Invoke-SPDSCCommand -Credential $InstallAccount `
-                        -Arguments $PSBoundParameters `
-                        -ScriptBlock {
+    Invoke-SPDscCommand -Credential $InstallAccount `
+        -Arguments $PSBoundParameters `
+        -ScriptBlock {
         $params = $args[0]
 
         $ap = @()
@@ -774,24 +804,28 @@ function Set-ZoneConfiguration()
         {
             switch ($zoneConfig.AuthenticationMethod)
             {
-                "NTLM" {
+                "NTLM"
+                {
                     $newap = New-SPAuthenticationProvider -UseWindowsIntegratedAuthentication
                 }
-                "Kerberos" {
+                "Kerberos"
+                {
                     $newap = New-SPAuthenticationProvider -UseWindowsIntegratedAuthentication `
-                                                          -DisableKerberos:$false
+                        -DisableKerberos:$false
                 }
-                "FBA" {
+                "FBA"
+                {
                     $newap = New-SPAuthenticationProvider -ASPNETMembershipProvider $zoneConfig.MembershipProvider `
-                                                          -ASPNETRoleProviderName $zoneConfig.RoleProvider
+                        -ASPNETRoleProviderName $zoneConfig.RoleProvider
                 }
-                "Federated" {
+                "Federated"
+                {
                     $tokenIssuer = Get-SPTrustedIdentityTokenIssuer -Identity $zoneConfig.AuthenticationProvider `
-                                                                    -ErrorAction SilentlyContinue
+                        -ErrorAction SilentlyContinue
                     if ($null -eq $tokenIssuer)
                     {
                         throw ("Specified AuthenticationProvider $($zoneConfig.AuthenticationProvider) " + `
-                               "does not exist")
+                                "does not exist")
                     }
                     $newap = New-SPAuthenticationProvider -TrustedIdentityTokenIssuer $tokenIssuer
                 }
@@ -820,26 +854,29 @@ function Test-ZoneConfiguration()
     {
         switch ($zoneConfig.AuthenticationMethod)
         {
-            { $_ -in @("NTLM","Kerberos","Classic") } {
+            { $_ -in @("NTLM", "Kerberos", "Classic") }
+            {
                 $configuredMethod = $CurrentConfig | `
-                                    Where-Object -FilterScript {
-                                        $_.AuthenticationMethod -eq $zoneConfig.AuthenticationMethod
-                                    }
+                    Where-Object -FilterScript {
+                    $_.AuthenticationMethod -eq $zoneConfig.AuthenticationMethod
+                }
             }
-            "FBA" {
+            "FBA"
+            {
                 $configuredMethod = $CurrentConfig | `
-                                    Where-Object -FilterScript {
-                                        $_.AuthenticationMethod -eq $zoneConfig.AuthenticationMethod -and `
-                                        $_.MembershipProvider -eq $zoneConfig.MembershipProvider -and `
-                                        $_.RoleProvider -eq $zoneConfig.RoleProvider
-                                    }
+                    Where-Object -FilterScript {
+                    $_.AuthenticationMethod -eq $zoneConfig.AuthenticationMethod -and `
+                        $_.MembershipProvider -eq $zoneConfig.MembershipProvider -and `
+                        $_.RoleProvider -eq $zoneConfig.RoleProvider
+                }
             }
-            "Federated" {
+            "Federated"
+            {
                 $configuredMethod = $CurrentConfig | `
-                                    Where-Object -FilterScript {
-                                        $_.AuthenticationMethod -eq $zoneConfig.AuthenticationMethod -and `
-                                        $_.AuthenticationProvider -eq $zoneConfig.AuthenticationProvider
-                                    }
+                    Where-Object -FilterScript {
+                    $_.AuthenticationMethod -eq $zoneConfig.AuthenticationMethod -and `
+                        $_.AuthenticationProvider -eq $zoneConfig.AuthenticationProvider
+                }
             }
         }
 
@@ -854,26 +891,29 @@ function Test-ZoneConfiguration()
     {
         switch ($zoneConfig.AuthenticationMethod)
         {
-            { $_ -in @("NTLM","Kerberos","Classic") } {
+            { $_ -in @("NTLM", "Kerberos", "Classic") }
+            {
                 $specifiedMethod = $DesiredConfig | `
-                                   Where-Object -FilterScript {
-                                       $_.AuthenticationMethod -eq $zoneConfig.AuthenticationMethod
-                                   }
+                    Where-Object -FilterScript {
+                    $_.AuthenticationMethod -eq $zoneConfig.AuthenticationMethod
+                }
             }
-            "FBA" {
+            "FBA"
+            {
                 $specifiedMethod = $DesiredConfig | `
-                                   Where-Object -FilterScript {
-                                       $_.AuthenticationMethod -eq $zoneConfig.AuthenticationMethod -and `
-                                       $_.MembershipProvider -eq $zoneConfig.MembershipProvider -and `
-                                       $_.RoleProvider -eq $zoneConfig.RoleProvider
-                                   }
+                    Where-Object -FilterScript {
+                    $_.AuthenticationMethod -eq $zoneConfig.AuthenticationMethod -and `
+                        $_.MembershipProvider -eq $zoneConfig.MembershipProvider -and `
+                        $_.RoleProvider -eq $zoneConfig.RoleProvider
+                }
             }
-            "Federated" {
+            "Federated"
+            {
                 $specifiedMethod = $DesiredConfig | `
-                                   Where-Object -FilterScript {
-                                       $_.AuthenticationMethod -eq $zoneConfig.AuthenticationMethod -and `
-                                       $_.AuthenticationProvider -eq $zoneConfig.AuthenticationProvider
-                                   }
+                    Where-Object -FilterScript {
+                    $_.AuthenticationMethod -eq $zoneConfig.AuthenticationMethod -and `
+                        $_.AuthenticationProvider -eq $zoneConfig.AuthenticationProvider
+                }
             }
         }
 

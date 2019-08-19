@@ -13,7 +13,7 @@ function Get-TargetResource
         $Url,
 
         [Parameter(Mandatory = $true)]
-        [ValidateSet("Farm","WebApplication","Site","Web")]
+        [ValidateSet("Farm", "WebApplication", "Site", "Web")]
         [System.String]
         $FeatureScope,
 
@@ -22,7 +22,7 @@ function Get-TargetResource
         $InstallAccount,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present",
 
@@ -33,9 +33,9 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting feature $Name at $FeatureScope scope"
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
-                                  -Arguments $PSBoundParameters `
-                                  -ScriptBlock {
+    $result = Invoke-SPDscCommand -Credential $InstallAccount `
+        -Arguments $PSBoundParameters `
+        -ScriptBlock {
         $params = $args[0]
 
         $checkParams = @{
@@ -87,7 +87,7 @@ function Set-TargetResource
         $Url,
 
         [Parameter(Mandatory = $true)]
-        [ValidateSet("Farm","WebApplication","Site","Web")]
+        [ValidateSet("Farm", "WebApplication", "Site", "Web")]
         [System.String]
         $FeatureScope,
 
@@ -96,7 +96,7 @@ function Set-TargetResource
         $InstallAccount,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present",
 
@@ -114,9 +114,9 @@ function Set-TargetResource
 
     if ($Ensure -eq "Present")
     {
-        Invoke-SPDSCCommand -Credential $InstallAccount `
-                            -Arguments $PSBoundParameters `
-                            -ScriptBlock {
+        Invoke-SPDscCommand -Credential $InstallAccount `
+            -Arguments $PSBoundParameters `
+            -ScriptBlock {
             $params = $args[0]
             $currentValues = $params["CurrentValues"]
 
@@ -134,20 +134,20 @@ function Set-TargetResource
                 # Disable the feature first if it already exists.
                 $runParams.Add("Confirm", $false)
                 Write-Verbose -Message ("Disable Feature '$($params.Name)' because it is " + `
-                                        "already active at scope '$($params.FeatureScope)'...")
+                        "already active at scope '$($params.FeatureScope)'...")
                 Disable-SPFeature @runParams
             }
 
             Write-Verbose -Message ("Enable Feature '$($params.Name)' at scope " + `
-                                    "'$($params.FeatureScope)'...")
+                    "'$($params.FeatureScope)'...")
             Enable-SPFeature @runParams
         }
     }
     if ($Ensure -eq "Absent")
     {
-        Invoke-SPDSCCommand -Credential $InstallAccount `
-                            -Arguments $PSBoundParameters `
-                            -ScriptBlock {
+        Invoke-SPDscCommand -Credential $InstallAccount `
+            -Arguments $PSBoundParameters `
+            -ScriptBlock {
 
             $params = $args[0]
             $currentValues = $params["CurrentValues"]
@@ -163,7 +163,7 @@ function Set-TargetResource
 
             $runParams.Add("Confirm", $false)
             Write-Verbose -Message ("Disable Feature '$($params.Name)' because 'Ensure' is " + `
-                                    "'$($params.Ensure)'...")
+                    "'$($params.Ensure)'...")
             Disable-SPFeature @runParams
         }
     }
@@ -185,7 +185,7 @@ function Test-TargetResource
         $Url,
 
         [Parameter(Mandatory = $true)]
-        [ValidateSet("Farm","WebApplication","Site","Web")]
+        [ValidateSet("Farm", "WebApplication", "Site", "Web")]
         [System.String]
         $FeatureScope,
 
@@ -194,7 +194,7 @@ function Test-TargetResource
         $InstallAccount,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present",
 
@@ -209,9 +209,12 @@ function Test-TargetResource
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
+    Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
+    Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
+
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
-                                    -DesiredValues $PSBoundParameters `
-                                    -ValuesToCheck @("Ensure", "Version")
+        -DesiredValues $PSBoundParameters `
+        -ValuesToCheck @("Ensure", "Version")
 }
 
 Export-ModuleMember -Function *-TargetResource

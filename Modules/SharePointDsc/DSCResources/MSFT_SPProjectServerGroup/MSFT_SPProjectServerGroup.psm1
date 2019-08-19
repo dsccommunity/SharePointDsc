@@ -33,7 +33,7 @@ function Get-TargetResource
         $MembersToExclude,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present",
 
@@ -44,39 +44,39 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting group settings for '$Name' at '$Url'"
 
-    if ((Get-SPDSCInstalledProductVersion).FileMajorPart -lt 16)
+    if ((Get-SPDscInstalledProductVersion).FileMajorPart -lt 16)
     {
         throw [Exception] ("Support for Project Server in SharePointDsc is only valid for " + `
-                           "SharePoint 2016 and 2019.")
+                "SharePoint 2016 and 2019.")
     }
 
     if ($PSBoundParameters.ContainsKey("ADGroup") -eq $true -and `
         ($PSBoundParameters.ContainsKey("Members") -eq $true -or `
-         $PSBoundParameters.ContainsKey("MembersToInclude") -eq $true -or `
-         $PSBoundParameters.ContainsKey("MembersToExclude") -eq $true))
+                $PSBoundParameters.ContainsKey("MembersToInclude") -eq $true -or `
+                $PSBoundParameters.ContainsKey("MembersToExclude") -eq $true))
     {
         throw ("Property ADGroup can not be used at the same time as Members, " + `
-               "MembersToInclude or MembersToExclude")
+                "MembersToInclude or MembersToExclude")
     }
 
     if ($PSBoundParameters.ContainsKey("Members") -eq $true -and `
         ($PSBoundParameters.ContainsKey("MembersToInclude") -eq $true -or `
-         $PSBoundParameters.ContainsKey("MembersToExclude") -eq $true))
+                $PSBoundParameters.ContainsKey("MembersToExclude") -eq $true))
     {
         throw ("Property Members can not be used at the same time as " + `
-               "MembersToInclude or MembersToExclude")
+                "MembersToInclude or MembersToExclude")
     }
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
-                                  -Arguments @($PSBoundParameters, $PSScriptRoot) `
-                                  -ScriptBlock {
+    $result = Invoke-SPDscCommand -Credential $InstallAccount `
+        -Arguments @($PSBoundParameters, $PSScriptRoot) `
+        -ScriptBlock {
         $params = $args[0]
         $scriptRoot = $args[1]
 
         if ((Get-SPProjectPermissionMode -Url $params.Url) -ne "ProjectServer")
         {
             throw [Exception] ("SPProjectServerGroup is design for Project Server permissions " + `
-                               "mode only, and this site is set to SharePoint mode")
+                    "mode only, and this site is set to SharePoint mode")
         }
 
         $modulePath = "..\..\Modules\SharePointDsc.ProjectServer\ProjectServerConnector.psm1"
@@ -85,12 +85,12 @@ function Get-TargetResource
         $webAppUrl = (Get-SPSite -Identity $params.Url).WebApplication.Url
         $useKerberos = -not (Get-SPAuthenticationProvider -WebApplication $webAppUrl -Zone Default).DisableKerberos
         $securityService = New-SPDscProjectServerWebService -PwaUrl $params.Url `
-                                                            -EndpointName Security `
-                                                            -UseKerberos:$useKerberos
+            -EndpointName Security `
+            -UseKerberos:$useKerberos
 
         $script:groupDataSet = $null
         Use-SPDscProjectServerWebService -Service $securityService -ScriptBlock {
-            $groupInfo  = $securityService.ReadGroupList().SecurityGroups | Where-Object -FilterScript {
+            $groupInfo = $securityService.ReadGroupList().SecurityGroups | Where-Object -FilterScript {
                 $_.WSEC_GRP_NAME -eq $params.Name
             }
 
@@ -103,15 +103,15 @@ function Get-TargetResource
         if ($null -eq $script:groupDataSet)
         {
             return @{
-                Url = $params.Url
-                Name = $params.Name
-                Description = ""
-                ADGroup = ""
-                Members = $null
+                Url              = $params.Url
+                Name             = $params.Name
+                Description      = ""
+                ADGroup          = ""
+                Members          = $null
                 MembersToInclude = $null
                 MembersToExclude = $null
-                Ensure = "Absent"
-                InstallAccount = $params.InstallAccount
+                Ensure           = "Absent"
+                InstallAccount   = $params.InstallAccount
             }
         }
         else
@@ -132,26 +132,26 @@ function Get-TargetResource
                 }
             }
 
-            for($i = 0; $i -lt $groupMembers.Count; $i++)
+            for ($i = 0; $i -lt $groupMembers.Count; $i++)
             {
                 if ($groupMembers[$i].Contains(":0") -eq $true)
                 {
                     $realUserName = New-SPClaimsPrincipal -Identity $groupMembers[$i] `
-                                                          -IdentityType EncodedClaim
+                        -IdentityType EncodedClaim
                     $groupMembers[$i] = $realUserName.Value
                 }
             }
 
             return @{
-                Url = $params.Url
-                Name = $script:groupDataSet.SecurityGroups.WSEC_GRP_NAME
-                Description = $script:groupDataSet.SecurityGroups.WSEC_GRP_DESC
-                ADGroup = $adGroup
-                Members = $groupMembers
+                Url              = $params.Url
+                Name             = $script:groupDataSet.SecurityGroups.WSEC_GRP_NAME
+                Description      = $script:groupDataSet.SecurityGroups.WSEC_GRP_DESC
+                ADGroup          = $adGroup
+                Members          = $groupMembers
                 MembersToInclude = $null
                 MembersToExclude = $null
-                Ensure = "Present"
-                InstallAccount = $params.InstallAccount
+                Ensure           = "Present"
+                InstallAccount   = $params.InstallAccount
             }
         }
     }
@@ -193,7 +193,7 @@ function Set-TargetResource
         $MembersToExclude,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present",
 
@@ -208,9 +208,9 @@ function Set-TargetResource
 
     if ($Ensure -eq "Present")
     {
-        Invoke-SPDSCCommand -Credential $InstallAccount `
-                            -Arguments @($PSBoundParameters, $PSScriptRoot, $currentSettings) `
-                            -ScriptBlock {
+        Invoke-SPDscCommand -Credential $InstallAccount `
+            -Arguments @($PSBoundParameters, $PSScriptRoot, $currentSettings) `
+            -ScriptBlock {
 
             $params = $args[0]
             $scriptRoot = $args[1]
@@ -222,11 +222,11 @@ function Set-TargetResource
             $webAppUrl = (Get-SPSite -Identity $params.Url).WebApplication.Url
             $useKerberos = -not (Get-SPAuthenticationProvider -WebApplication $webAppUrl -Zone Default).DisableKerberos
             $securityService = New-SPDscProjectServerWebService -PwaUrl $params.Url `
-                                                                -EndpointName Security `
-                                                                -UseKerberos:$useKerberos
+                -EndpointName Security `
+                -UseKerberos:$useKerberos
 
             Use-SPDscProjectServerWebService -Service $securityService -ScriptBlock {
-                $groupInfo  = $securityService.ReadGroupList().SecurityGroups | Where-Object -FilterScript {
+                $groupInfo = $securityService.ReadGroupList().SecurityGroups | Where-Object -FilterScript {
                     $_.WSEC_GRP_NAME -eq $params.Name
                 }
 
@@ -240,7 +240,7 @@ function Set-TargetResource
                     $newGroupDS.SecurityGroups.AddSecurityGroupsRow($newGroup)
                     $securityService.CreateGroups($newGroupDS)
 
-                    $groupInfo  = $securityService.ReadGroupList().SecurityGroups | Where-Object -FilterScript {
+                    $groupInfo = $securityService.ReadGroupList().SecurityGroups | Where-Object -FilterScript {
                         $_.WSEC_GRP_NAME -eq $params.Name
                     }
                 }
@@ -312,9 +312,9 @@ function Set-TargetResource
     }
     else
     {
-        Invoke-SPDSCCommand -Credential $InstallAccount `
-                            -Arguments @($PSBoundParameters, $PSScriptRoot) `
-                            -ScriptBlock {
+        Invoke-SPDscCommand -Credential $InstallAccount `
+            -Arguments @($PSBoundParameters, $PSScriptRoot) `
+            -ScriptBlock {
 
             $params = $args[0]
             $scriptRoot = $args[1]
@@ -325,11 +325,11 @@ function Set-TargetResource
             $webAppUrl = (Get-SPSite -Identity $params.Url).WebApplication.Url
             $useKerberos = -not (Get-SPAuthenticationProvider -WebApplication $webAppUrl -Zone Default).DisableKerberos
             $securityService = New-SPDscProjectServerWebService -PwaUrl $params.Url `
-                                                                -EndpointName Security `
-                                                                -UseKerberos:$useKerberos
+                -EndpointName Security `
+                -UseKerberos:$useKerberos
 
             Use-SPDscProjectServerWebService -Service $securityService -ScriptBlock {
-                $groupInfo  = $securityService.ReadGroupList().SecurityGroups | Where-Object -FilterScript {
+                $groupInfo = $securityService.ReadGroupList().SecurityGroups | Where-Object -FilterScript {
                     $_.WSEC_GRP_NAME -eq $params.Name
                 }
 
@@ -379,7 +379,7 @@ function Test-TargetResource
         $MembersToExclude,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present",
 
@@ -391,13 +391,17 @@ function Test-TargetResource
     Write-Verbose -Message "Testing group settings for '$Name' at '$Url'"
 
     $PSBoundParameters.Ensure = $Ensure
-    $currentValues = Get-TargetResource @PSBoundParameters
+
+    $CurrentValues = Get-TargetResource @PSBoundParameters
+
+    Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
+    Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
 
     if ($PSBoundParameters.ContainsKey("Members") -eq $true)
     {
         $membersMatch = Test-SPDscParameterState -CurrentValues $CurrentValues `
-                                                 -DesiredValues $PSBoundParameters `
-                                                 -ValuesToCheck @("Members")
+            -DesiredValues $PSBoundParameters `
+            -ValuesToCheck @("Members")
         if ($membersMatch -eq $false)
         {
             return $false
@@ -439,13 +443,13 @@ function Test-TargetResource
     }
 
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
-                                    -DesiredValues $PSBoundParameters `
-                                    -ValuesToCheck @(
-                                        "Name",
-                                        "Description",
-                                        "ADGroup",
-                                        "Ensure"
-                                    )
+        -DesiredValues $PSBoundParameters `
+        -ValuesToCheck @(
+        "Name",
+        "Description",
+        "ADGroup",
+        "Ensure"
+    )
 }
 
 Export-ModuleMember -Function *-TargetResource

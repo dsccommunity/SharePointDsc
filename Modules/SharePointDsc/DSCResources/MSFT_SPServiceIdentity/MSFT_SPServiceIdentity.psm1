@@ -19,7 +19,7 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting identity for service instance '$Name'"
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+    $result = Invoke-SPDscCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
 
         if ($params.Name -eq "SharePoint Server Search")
@@ -29,8 +29,8 @@ function Get-TargetResource
         else
         {
             $serviceInstance = Get-SPServiceInstance -Server $env:computername | Where-Object {
-                                    $_.TypeName -eq $params.Name
-                               }
+                $_.TypeName -eq $params.Name
+            }
 
             if ($null -eq $serviceInstance.service.processidentity)
             {
@@ -42,14 +42,22 @@ function Get-TargetResource
 
         switch ($processIdentity.CurrentIdentityType)
         {
-            "LocalSystem" { $ManagedAccount = "LocalSystem" }
-            "NetworkService" { $ManagedAccount = "NetworkService" }
-            "LocalService" { $ManagedAccount = "LocalService" }
-            Default { $ManagedAccount = $processIdentity.Username }
+            "LocalSystem"
+            { $ManagedAccount = "LocalSystem"
+            }
+            "NetworkService"
+            { $ManagedAccount = "NetworkService"
+            }
+            "LocalService"
+            { $ManagedAccount = "LocalService"
+            }
+            Default
+            { $ManagedAccount = $processIdentity.Username
+            }
         }
 
         return @{
-            Name = $params.Name
+            Name           = $params.Name
             ManagedAccount = $ManagedAccount
         }
     }
@@ -77,7 +85,7 @@ function Set-TargetResource
 
     Write-Verbose -Message "Setting service instance '$Name' to '$ManagedAccount'"
 
-    Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+    Invoke-SPDscCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
 
         if ($params.Name -eq "SharePoint Server Search")
@@ -87,8 +95,8 @@ function Set-TargetResource
         else
         {
             $serviceInstance = Get-SPServiceInstance -Server $env:COMPUTERNAME | Where-Object {
-                                    $_.TypeName -eq $params.Name
-                               }
+                $_.TypeName -eq $params.Name
+            }
             if ($null -eq $serviceInstance)
             {
                 throw [System.Exception] "Unable to locate service $($params.Name)"
@@ -103,15 +111,15 @@ function Set-TargetResource
         }
 
         if ($params.ManagedAccount -eq "LocalSystem" -or `
-            $params.ManagedAccount -eq "LocalService" -or `
-            $params.ManagedAccount -eq "NetworkService")
+                $params.ManagedAccount -eq "LocalService" -or `
+                $params.ManagedAccount -eq "NetworkService")
         {
             $processIdentity.CurrentIdentityType = $params.ManagedAccount
         }
         else
         {
             $managedAccount = Get-SPManagedAccount -Identity $params.ManagedAccount `
-                                                   -ErrorAction SilentlyContinue
+                -ErrorAction SilentlyContinue
             if ($null -eq $managedAccount)
             {
                 throw [System.Exception] "Unable to locate Managed Account $($params.ManagedAccount)"
@@ -148,6 +156,9 @@ function Test-TargetResource
     Write-Verbose -Message "Testing service instance '$Name' Process Identity"
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
+
+    Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
+    Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
 
     return ($CurrentValues.ManagedAccount -eq $ManagedAccount)
 }

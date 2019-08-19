@@ -60,13 +60,13 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting managed metadata service application $Name"
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
-                                  -Arguments $PSBoundParameters `
-                                  -ScriptBlock {
+    $result = Invoke-SPDscCommand -Credential $InstallAccount `
+        -Arguments $PSBoundParameters `
+        -ScriptBlock {
         $params = $args[0]
 
         $serviceApps = Get-SPServiceApplication -Name $params.Name `
-                                                -ErrorAction SilentlyContinue
+            -ErrorAction SilentlyContinue
         $nullReturn = @{
             Name                    = $params.Name
             Ensure                  = "Absent"
@@ -91,7 +91,14 @@ function Get-TargetResource
         {
             $serviceAppProxies = Get-SPServiceApplicationProxy -ErrorAction SilentlyContinue
 
-            $proxyName = $params.ProxyName
+            if ($params.ContainsKey("ProxyName") -eq $true)
+            {
+                $proxyName = $params.ProxyName
+            }
+            else
+            {
+                $proxyName = ""
+            }
 
             if ($null -ne $serviceAppProxies)
             {
@@ -105,7 +112,7 @@ function Get-TargetResource
             }
 
             $proxy = Get-SPMetadataServiceApplicationProxy -Identity $proxyName `
-                                                           -ErrorAction SilentlyContinue
+                -ErrorAction SilentlyContinue
             if ($null -ne $proxy)
             {
                 $contentTypePushDownEnabled = $proxy.Properties["IsContentTypePushdownEnabled"]
@@ -124,7 +131,7 @@ function Get-TargetResource
                     -bor [System.Reflection.BindingFlags]::NonPublic
                 $defaultPartitionId = [Guid]::Parse("0C37852B-34D0-418e-91C6-2AC25AF4BE5B")
 
-                $installedVersion = Get-SPDSCInstalledProductVersion
+                $installedVersion = Get-SPDscInstalledProductVersion
                 switch ($installedVersion.FileMajorPart)
                 {
                     15
@@ -173,7 +180,7 @@ function Get-TargetResource
             }
 
             $centralAdminSite = Get-SPWebApplication -IncludeCentralAdministration `
-                | Where-Object -FilterScript {
+            | Where-Object -FilterScript {
                 $_.IsAdministrationWebApplication -eq $true
             }
             $session = Get-SPTaxonomySession -Site $centralAdminSite.Url
@@ -321,9 +328,9 @@ function Set-TargetResource
     if ($result.Ensure -eq "Absent" -and $Ensure -eq "Present")
     {
         Write-Verbose -Message "Creating Managed Metadata Service Application $Name"
-        Invoke-SPDSCCommand -Credential $InstallAccount `
-                            -Arguments ($PSBoundParameters, $pName) `
-                            -ScriptBlock {
+        Invoke-SPDscCommand -Credential $InstallAccount `
+            -Arguments ($PSBoundParameters, $pName) `
+            -ScriptBlock {
             $params = $args[0]
             $pName = $args[1]
 
@@ -343,9 +350,9 @@ function Set-TargetResource
             if ($null -ne $app)
             {
                 New-SPMetadataServiceApplicationProxy -Name $pName `
-                                                      -ServiceApplication $app `
-                                                      -DefaultProxyGroup `
-                                                      -ContentTypePushdownEnabled
+                    -ServiceApplication $app `
+                    -DefaultProxyGroup `
+                    -ContentTypePushdownEnabled
             }
         }
         $result = Get-TargetResource @PSBoundParameters
@@ -354,16 +361,16 @@ function Set-TargetResource
     if ($result.Ensure -eq "Present" -and $Ensure -eq "Present")
     {
         if ([string]::IsNullOrEmpty($ApplicationPool) -eq $false -and `
-            $ApplicationPool -ne $result.ApplicationPool)
+                $ApplicationPool -ne $result.ApplicationPool)
         {
             Write-Verbose -Message "Updating application pool of Managed Metadata Service Application $Name"
-            Invoke-SPDSCCommand -Credential $InstallAccount `
-                                -Arguments $PSBoundParameters `
-                                -ScriptBlock {
+            Invoke-SPDscCommand -Credential $InstallAccount `
+                -Arguments $PSBoundParameters `
+                -ScriptBlock {
                 $params = $args[0]
 
                 $serviceApp = Get-SPServiceApplication -Name $params.Name `
-                    | Where-Object -FilterScript {
+                | Where-Object -FilterScript {
                     $_.GetType().FullName -eq "Microsoft.SharePoint.Taxonomy.MetadataWebServiceApplication"
                 }
                 $appPool = Get-SPServiceApplicationPool -Identity $params.ApplicationPool
@@ -374,14 +381,14 @@ function Set-TargetResource
         if ($pName -ne $result.ProxyName)
         {
             Write-Verbose -Message "Updating Managed Metadata Service Application Proxy"
-            Invoke-SPDSCCommand -Credential $InstallAccount `
-                                -Arguments @($PSBoundParameters, $pName) `
-                                -ScriptBlock {
+            Invoke-SPDscCommand -Credential $InstallAccount `
+                -Arguments @($PSBoundParameters, $pName) `
+                -ScriptBlock {
                 $params = $args[0]
                 $pName = $args[1]
 
                 $serviceApps = Get-SPServiceApplication -Name $params.Name `
-                                                        -ErrorAction SilentlyContinue
+                    -ErrorAction SilentlyContinue
                 $serviceApp = $serviceApps | Where-Object -FilterScript {
                     $_.GetType().FullName -eq "Microsoft.SharePoint.Taxonomy.MetadataWebServiceApplication"
                 }
@@ -403,9 +410,9 @@ function Set-TargetResource
                     {
                         Write-Verbose -Message "Creating Service Application Proxy '$pName'"
                         New-SPMetadataServiceApplicationProxy -Name $pName `
-                                                              -ServiceApplication $serviceApp `
-                                                              -DefaultProxyGroup `
-                                                              -ContentTypePushdownEnabled
+                            -ServiceApplication $serviceApp `
+                            -DefaultProxyGroup `
+                            -ContentTypePushdownEnabled
                     }
                 }
             }
@@ -415,13 +422,13 @@ function Set-TargetResource
                 -and ($ContentTypeHubUrl.TrimEnd('/') -ne $result.ContentTypeHubUrl.TrimEnd('/')))
         {
             Write-Verbose -Message "Updating Content type hub for Managed Metadata Service Application $Name"
-            Invoke-SPDSCCommand -Credential $InstallAccount `
+            Invoke-SPDscCommand -Credential $InstallAccount `
                 -Arguments $PSBoundParameters `
                 -ScriptBlock {
                 $params = $args[0]
 
                 $serviceApp = Get-SPServiceApplication -Name $params.Name `
-                    | Where-Object -FilterScript {
+                | Where-Object -FilterScript {
                     $_.GetType().FullName -eq "Microsoft.SharePoint.Taxonomy.MetadataWebServiceApplication"
                 }
                 Set-SPMetadataServiceApplication -Identity $serviceApp -HubUri $params.ContentTypeHubUrl
@@ -434,7 +441,7 @@ function Set-TargetResource
         {
             Write-Verbose -Message "Updating the term store administrators"
             # Update the term store administrators
-            Invoke-SPDSCCommand -Credential $InstallAccount `
+            Invoke-SPDscCommand -Credential $InstallAccount `
                 -Arguments @($PSBoundParameters, $result, $pName) `
                 -ScriptBlock {
 
@@ -443,7 +450,7 @@ function Set-TargetResource
                 $pName = $args[2]
 
                 $centralAdminSite = Get-SPWebApplication -IncludeCentralAdministration `
-                    | Where-Object -FilterScript {
+                | Where-Object -FilterScript {
                     $_.IsAdministrationWebApplication -eq $true
                 }
                 $session = Get-SPTaxonomySession -Site $centralAdminSite.Url
@@ -496,7 +503,7 @@ function Set-TargetResource
         {
             # The lanauge settings should be set to default
             Write-Verbose -Message "Updating the default language for Managed Metadata Service Application Proxy '$pName'"
-            Invoke-SPDSCCommand -Credential $InstallAccount `
+            Invoke-SPDscCommand -Credential $InstallAccount `
                 -Arguments @($PSBoundParameters, $pName) `
                 -ScriptBlock {
 
@@ -504,7 +511,7 @@ function Set-TargetResource
                 $pName = $args[1]
 
                 $centralAdminSite = Get-SPWebApplication -IncludeCentralAdministration `
-                    | Where-Object -FilterScript {
+                | Where-Object -FilterScript {
                     $_.IsAdministrationWebApplication -eq $true
                 }
                 $session = Get-SPTaxonomySession -Site $centralAdminSite.Url
@@ -540,7 +547,7 @@ function Set-TargetResource
         {
             Write-Verbose -Message "Updating working languages for Managed Metadata Service Application Proxy '$pName'"
             # Update the term store working languages
-            Invoke-SPDSCCommand -Credential $InstallAccount `
+            Invoke-SPDscCommand -Credential $InstallAccount `
                 -Arguments @($PSBoundParameters, $result, $pName) `
                 -ScriptBlock {
 
@@ -549,7 +556,7 @@ function Set-TargetResource
                 $pName = $args[2]
 
                 $centralAdminSite = Get-SPWebApplication -IncludeCentralAdministration `
-                    | Where-Object -FilterScript {
+                | Where-Object -FilterScript {
                     $_.IsAdministrationWebApplication -eq $true
                 }
                 $session = Get-SPTaxonomySession -Site $centralAdminSite.Url
@@ -606,7 +613,7 @@ function Set-TargetResource
                 -and ($ContentTypePushdownEnabled -ne $result.ContentTypePushdownEnabled)
         )
         {
-            Invoke-SPDSCCommand -Credential $InstallAccount `
+            Invoke-SPDscCommand -Credential $InstallAccount `
                 -Arguments @($PSBoundParameters, $pName) `
                 -ScriptBlock {
                 $params = $args[0]
@@ -629,7 +636,7 @@ function Set-TargetResource
                 -and ($ContentTypeSyndicationEnabled -ne $result.ContentTypeSyndicationEnabled)
         )
         {
-            Invoke-SPDSCCommand -Credential $InstallAccount `
+            Invoke-SPDscCommand -Credential $InstallAccount `
                 -Arguments @($PSBoundParameters, $pName) `
                 -ScriptBlock {
                 $params = $args[0]
@@ -653,7 +660,7 @@ function Set-TargetResource
     {
         # The service app should not exit
         Write-Verbose -Message "Removing Managed Metadata Service Application $Name"
-        Invoke-SPDSCCommand -Credential $InstallAccount `
+        Invoke-SPDscCommand -Credential $InstallAccount `
             -Arguments $PSBoundParameters `
             -ScriptBlock {
             $params = $args[0]
@@ -746,19 +753,22 @@ function Test-TargetResource
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
+    Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
+    Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
+
     $valuesToCheck = @("ApplicationPool",
-                       "ContentTypeHubUrl"
-                       "ContentTypePushdownEnabled"
-                       "ContentTypeSyndicationEnabled"
-                       "DefaultLanguage"
-                       "Ensure",
-                       "Languages"
-                       "TermStoreAdministrators"
-                       "ProxyName")
+        "ContentTypeHubUrl"
+        "ContentTypePushdownEnabled"
+        "ContentTypeSyndicationEnabled"
+        "DefaultLanguage"
+        "Ensure",
+        "Languages"
+        "TermStoreAdministrators"
+        "ProxyName")
 
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
-                                    -DesiredValues $PSBoundParameters `
-                                    -ValuesToCheck $valuesToCheck
+        -DesiredValues $PSBoundParameters `
+        -ValuesToCheck $valuesToCheck
 }
 
 Export-ModuleMember -Function *-TargetResource

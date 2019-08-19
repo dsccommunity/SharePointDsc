@@ -12,6 +12,8 @@ NOTE:
 This resource cannot be used to convert a Classic web application
 to Claims mode. You have to run Convert-SPWebApplication manually for that.
 
+For Classic web applications, you have to use AuthenticationMethod="Classic".
+
 NOTE 2:
 Updating the configuration can take a long time, up to five minutes.
 The Set-SPWebApplication cmdlet sometimes requires several minutes to

@@ -21,7 +21,7 @@ function Get-TargetResource
         $DatabaseServer,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present",
 
@@ -36,20 +36,20 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting state service application '$Name'"
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
-                                  -Arguments $PSBoundParameters `
-                                  -ScriptBlock {
+    $result = Invoke-SPDscCommand -Credential $InstallAccount `
+        -Arguments $PSBoundParameters `
+        -ScriptBlock {
         $params = $args[0]
 
         $serviceApp = Get-SPStateServiceApplication -Identity $params.Name `
-                                                    -ErrorAction SilentlyContinue
+            -ErrorAction SilentlyContinue
 
         if ($null -eq $serviceApp)
         {
             return @{
-                Name = $params.Name
-                DatabaseName = $params.DatabaseName
-                Ensure = "Absent"
+                Name           = $params.Name
+                DatabaseName   = $params.DatabaseName
+                Ensure         = "Absent"
                 InstallAccount = $params.InstallAccount
             }
         }
@@ -67,12 +67,12 @@ function Get-TargetResource
         }
 
         return @{
-            Name = $serviceApp.DisplayName
-            ProxyName = $proxyName
-            DatabaseName = $serviceApp.Databases.Name
+            Name           = $serviceApp.DisplayName
+            ProxyName      = $proxyName
+            DatabaseName   = $serviceApp.Databases.Name
             DatabaseServer = $serviceApp.Databases.NormalizedDataSource
             InstallAccount = $params.InstallAccount
-            Ensure = "Present"
+            Ensure         = "Present"
         }
     }
     return $result
@@ -101,7 +101,7 @@ function Set-TargetResource
         $DatabaseServer,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present",
 
@@ -120,13 +120,13 @@ function Set-TargetResource
     if ($Ensure -eq "Present")
     {
         Write-Verbose -Message "Creating State Service Application $Name"
-        Invoke-SPDSCCommand -Credential $InstallAccount `
-                            -Arguments $PSBoundParameters `
-                            -ScriptBlock {
+        Invoke-SPDscCommand -Credential $InstallAccount `
+            -Arguments $PSBoundParameters `
+            -ScriptBlock {
 
             $params = $args[0]
 
-            $dbParams = @{}
+            $dbParams = @{ }
 
             if ($params.ContainsKey("DatabaseName"))
             {
@@ -153,23 +153,23 @@ function Set-TargetResource
             $database = New-SPStateServiceDatabase @dbParams
             $app = New-SPStateServiceApplication -Name $params.Name -Database $database
             New-SPStateServiceApplicationProxy -Name $pName `
-                                               -ServiceApplication $app `
-                                               -DefaultProxyGroup | Out-Null
+                -ServiceApplication $app `
+                -DefaultProxyGroup | Out-Null
         }
     }
     if ($Ensure -eq "Absent")
     {
         Write-Verbose -Message "Removing State Service Application $Name"
-        Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+        Invoke-SPDscCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
             $params = $args[0]
 
-            $serviceApp =  Get-SPStateServiceApplication -Name $params.Name
+            $serviceApp = Get-SPStateServiceApplication -Name $params.Name
 
             # Remove the connected proxy(ies)
             $proxies = Get-SPServiceApplicationProxy
-            foreach($proxyInstance in $proxies)
+            foreach ($proxyInstance in $proxies)
             {
-                if($serviceApp.IsConnected($proxyInstance))
+                if ($serviceApp.IsConnected($proxyInstance))
                 {
                     $proxyInstance.Delete()
                 }
@@ -204,7 +204,7 @@ function Test-TargetResource
         $DatabaseServer,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present",
 
@@ -223,9 +223,12 @@ function Test-TargetResource
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
+    Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
+    Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
+
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
-                                    -DesiredValues $PSBoundParameters `
-                                    -ValuesToCheck @("Name", "Ensure")
+        -DesiredValues $PSBoundParameters `
+        -ValuesToCheck @("Name", "Ensure")
 }
 
 Export-ModuleMember -Function *-TargetResource

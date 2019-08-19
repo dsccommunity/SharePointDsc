@@ -3,16 +3,16 @@ param(
     [Parameter()]
     [string]
     $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
-                                         -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
-                                         -Resolve)
+            -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
+            -Resolve)
 )
 
 Import-Module -Name (Join-Path -Path $PSScriptRoot `
-                                -ChildPath "..\UnitTestHelper.psm1" `
-                                -Resolve)
+        -ChildPath "..\UnitTestHelper.psm1" `
+        -Resolve)
 
 $Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointCmdletModule `
-                                              -DscResource "SPSiteUrl"
+    -DscResource "SPSiteUrl"
 
 Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
     InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
@@ -27,15 +27,15 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 $global:SpDscSPSiteUrlRanOnce = $true
                 return @(
                     @{
-                        Url = "http://sharepoint.contoso.intra"
+                        Url  = "http://sharepoint.contoso.intra"
                         Zone = "Default"
                     },
                     @{
-                        Url = "http://sharepoint.contoso.com"
+                        Url  = "http://sharepoint.contoso.com"
                         Zone = "Intranet"
                     },
                     @{
-                        Url = "https://sharepoint.contoso.com"
+                        Url  = "https://sharepoint.contoso.com"
                         Zone = "Internet"
                     }
                 )
@@ -50,7 +50,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         # Test contexts
         Context -Name "No zones specified" -Fixture {
             $testParams = @{
-                Url      = "http://sharepoint.contoso.intra"
+                Url = "http://sharepoint.contoso.intra"
             }
 
             Mock -CommandName Get-SPSite -MockWith { return $null }
@@ -128,7 +128,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             Mock -CommandName Get-SPSiteUrl -MockWith {
                 return @(
                     @{
-                        Url = "http://sharepoint.contoso.intra"
+                        Url  = "http://sharepoint.contoso.intra"
                         Zone = "Default"
                     }
                 )
@@ -154,7 +154,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             Mock -CommandName Get-SPSiteUrl -MockWith {
                 return @(
                     @{
-                        Url = "http://sharepoint.contoso.intra"
+                        Url  = "http://sharepoint.contoso.intra"
                         Zone = "Default"
                     }
                 )
@@ -180,7 +180,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             Mock -CommandName Get-SPSiteUrl -MockWith {
                 return @(
                     @{
-                        Url = "http://sharepoint.contoso.intra"
+                        Url  = "http://sharepoint.contoso.intra"
                         Zone = "Default"
                     }
                 )
@@ -193,7 +193,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "The site exists, but the specified Custom is already in use" -Fixture {
             $testParams = @{
-                Url      = "http://sharepoint.contoso.intra"
+                Url    = "http://sharepoint.contoso.intra"
                 Custom = "http://sharepoint.contoso.com"
             }
 
@@ -206,7 +206,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             Mock -CommandName Get-SPSiteUrl -MockWith {
                 return @(
                     @{
-                        Url = "http://sharepoint.contoso.intra"
+                        Url  = "http://sharepoint.contoso.intra"
                         Zone = "Default"
                     }
                 )
@@ -265,23 +265,23 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     $global:SpDscSPSiteUrlRanOnce = $true
                     return @(
                         @{
-                            Url = "http://sharepoint.contoso.intra"
+                            Url  = "http://sharepoint.contoso.intra"
                             Zone = "Default"
                         },
                         @{
-                            Url = "http://sharepoint.contoso.com"
+                            Url  = "http://sharepoint.contoso.com"
                             Zone = "Extranet"
                         },
                         @{
-                            Url = "https://sharepoint.contoso.com"
+                            Url  = "https://sharepoint.contoso.com"
                             Zone = "Custom"
                         }
                     )
-                    }
-                    else
-                    {
-                        return $null
-                    }
+                }
+                else
+                {
+                    return $null
+                }
             }
 
             $global:SpDscSPSiteUrlRanOnce = $false
@@ -322,15 +322,15 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     $global:SpDscSPSiteUrlRanOnce = $true
                     return @(
                         @{
-                            Url = "http://sharepoint.contoso.intra"
+                            Url  = "http://sharepoint.contoso.intra"
                             Zone = "Default"
                         },
                         @{
-                            Url = "http://sharepoint.contoso.com"
+                            Url  = "http://sharepoint.contoso.com"
                             Zone = "Intranet"
                         },
                         @{
-                            Url = "https://sharepoint.contoso.com"
+                            Url  = "https://sharepoint.contoso.com"
                             Zone = "Internet"
                         }
                     )

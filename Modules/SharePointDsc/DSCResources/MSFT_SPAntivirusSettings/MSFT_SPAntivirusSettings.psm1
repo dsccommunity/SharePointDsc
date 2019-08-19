@@ -40,9 +40,9 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting antivirus configuration settings"
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
-                                  -Arguments $PSBoundParameters `
-                                  -ScriptBlock {
+    $result = Invoke-SPDscCommand -Credential $InstallAccount `
+        -Arguments $PSBoundParameters `
+        -ScriptBlock {
         $params = $args[0]
 
         try
@@ -52,33 +52,33 @@ function Get-TargetResource
         catch
         {
             Write-Verbose -Message ("No local SharePoint farm was detected. Antivirus " + `
-                                    "settings will not be applied")
+                    "settings will not be applied")
             return @{
-                IsSingleInstance = "Yes"
+                IsSingleInstance      = "Yes"
                 # Set the antivirus settings
                 AllowDownloadInfected = $false
-                ScanOnDownload = $false
-                ScanOnUpload = $false
-                AttemptToClean = $false
-                NumberOfThreads = 0
-                TimeoutDuration = 0
-                InstallAccount = $params.InstallAccount
+                ScanOnDownload        = $false
+                ScanOnUpload          = $false
+                AttemptToClean        = $false
+                NumberOfThreads       = 0
+                TimeoutDuration       = 0
+                InstallAccount        = $params.InstallAccount
             }
         }
 
         # Get a reference to the Administration WebService
-        $admService = Get-SPDSCContentService
+        $admService = Get-SPDscContentService
 
         return @{
-            IsSingleInstance = "Yes"
+            IsSingleInstance      = "Yes"
             # Set the antivirus settings
             AllowDownloadInfected = $admService.AntivirusSettings.AllowDownload
-            ScanOnDownload = $admService.AntivirusSettings.DownloadScanEnabled
-            ScanOnUpload = $admService.AntivirusSettings.UploadScanEnabled
-            AttemptToClean = $admService.AntivirusSettings.CleaningEnabled
-            NumberOfThreads = $admService.AntivirusSettings.NumberOfThreads
-            TimeoutDuration = $admService.AntivirusSettings.Timeout.TotalSeconds
-            InstallAccount = $params.InstallAccount
+            ScanOnDownload        = $admService.AntivirusSettings.DownloadScanEnabled
+            ScanOnUpload          = $admService.AntivirusSettings.UploadScanEnabled
+            AttemptToClean        = $admService.AntivirusSettings.CleaningEnabled
+            NumberOfThreads       = $admService.AntivirusSettings.NumberOfThreads
+            TimeoutDuration       = $admService.AntivirusSettings.Timeout.TotalSeconds
+            InstallAccount        = $params.InstallAccount
         }
     }
     return $result
@@ -125,9 +125,9 @@ function Set-TargetResource
 
     Write-Verbose -Message "Setting antivirus configuration settings"
 
-    Invoke-SPDSCCommand -Credential $InstallAccount `
-                        -Arguments $PSBoundParameters `
-                        -ScriptBlock {
+    Invoke-SPDscCommand -Credential $InstallAccount `
+        -Arguments $PSBoundParameters `
+        -ScriptBlock {
         $params = $args[0]
 
         try
@@ -141,7 +141,7 @@ function Set-TargetResource
         }
 
         Write-Verbose -Message "Start update"
-        $admService = Get-SPDSCContentService
+        $admService = Get-SPDscContentService
 
         # Set the antivirus settings
         if ($params.ContainsKey("AllowDownloadInfected"))
@@ -216,8 +216,13 @@ function Test-TargetResource
 
     Write-Verbose -Message "Testing antivirus configuration settings"
 
-    return Test-SPDscParameterState -CurrentValues (Get-TargetResource @PSBoundParameters) `
-                                    -DesiredValues $PSBoundParameters
+    $CurrentValues = Get-TargetResource @PSBoundParameters
+
+    Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
+    Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
+
+    return Test-SPDscParameterState -CurrentValues $CurrentValues `
+        -DesiredValues $PSBoundParameters
 }
 
 Export-ModuleMember -Function *-TargetResource

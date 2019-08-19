@@ -1,80 +1,80 @@
 [CmdletBinding()]
 param(
     [Parameter()]
-    [string] 
+    [string]
     $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
-                                         -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
-                                         -Resolve)
+            -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
+            -Resolve)
 )
 
 Import-Module -Name (Join-Path -Path $PSScriptRoot `
-                                -ChildPath "..\UnitTestHelper.psm1" `
-                                -Resolve)
+        -ChildPath "..\UnitTestHelper.psm1" `
+        -Resolve)
 
 $Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointCmdletModule `
-                                              -DscResource "SPContentDatabase"
+    -DscResource "SPContentDatabase"
 
 Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
     InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
         Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
         # Initialize tests
-        try 
-        { 
-            [Microsoft.SharePoint.Administration.SPObjectStatus] 
+        try
+        {
+            [Microsoft.SharePoint.Administration.SPObjectStatus]
         }
-        catch 
+        catch
         {
             Add-Type -TypeDefinition @"
 namespace Microsoft.SharePoint.Administration {
     public enum SPObjectStatus { Online, Disabled };
-}        
+}
 "@
         }
 
         # Mocks for all contexts
         Mock -CommandName Dismount-SPContentDatabase -MockWith { }
-        Mock -CommandName Get-SPWebApplication -MockWith { 
-            return @{ 
-                Url="http://sharepoint.contoso.com/" 
-            } 
+        Mock -CommandName Get-SPWebApplication -MockWith {
+            return @{
+                Url = "http://sharepoint.contoso.com/"
+            }
         }
 
         # Test contexts
         Context -Name "DatabaseServer parameter does not match actual setting" -Fixture {
             $testParams = @{
-                Name = "SharePoint_Content_01"
-                DatabaseServer = "SQLSrv"
-                WebAppUrl = "http://sharepoint.contoso.com"
-                Enabled = $true
+                Name             = "SharePoint_Content_01"
+                DatabaseServer   = "SQLSrv"
+                WebAppUrl        = "http://sharepoint.contoso.com"
+                Enabled          = $true
                 WarningSiteCount = 2000
                 MaximumSiteCount = 5000
-                Ensure = "Present"
+                Ensure           = "Present"
             }
-            
-            Mock -CommandName Get-SPDatabase -MockWith { 
+
+            Mock -CommandName Get-SPDatabase -MockWith {
                 $returnval = @{
-                    Name = "SharePoint_Content_01"
-                    Type = "Content Database"
-                    Server = "WrongSQLSrv"
-                    WebApplication = @{ 
-                        Url = "http://sharepoint.contoso.com/" 
+                    Name             = "SharePoint_Content_01"
+                    Type             = "Content Database"
+                    Server           = "WrongSQLSrv"
+                    WebApplication   = @{
+                        Url = "http://sharepoint.contoso.com/"
                     }
-                    Status = "Online"
+                    Status           = "Online"
                     WarningSiteCount = 2000
                     MaximumSiteCount = 5000
                 }
-                $returnVal = $returnVal | Add-Member -MemberType ScriptMethod -Name GetType -Value { 
+                $returnVal = $returnVal | Add-Member -MemberType ScriptMethod -Name GetType -Value {
                     return @{
                         FullName = "Microsoft.SharePoint.Administration.SPContentDatabase"
                     }
                 } -PassThru -Force
                 return $returnval
             }
-            Mock -CommandName Get-SPWebApplication -MockWith { 
-                return @{ 
-                    Url="http://sharepoint.contoso.com/" 
-                } 
+            Mock -CommandName Get-SPWebApplication -MockWith {
+                return @{
+                    Url = "http://sharepoint.contoso.com/"
+                }
             }
 
             It "Should return Ensure=Present from the get method" {
@@ -89,39 +89,39 @@ namespace Microsoft.SharePoint.Administration {
                 { Set-TargetResource @testParams } | Should throw "Specified database server does not match the actual database server. This resource cannot move the database to a different SQL instance."
             }
         }
-        
+
         Context -Name "Specified Web application does not exist" -Fixture {
             $testParams = @{
-                Name = "SharePoint_Content_01"
-                DatabaseServer = "SQLSrv"
-                WebAppUrl = "http://sharepoint.contoso.com"
-                Enabled = $true
+                Name             = "SharePoint_Content_01"
+                DatabaseServer   = "SQLSrv"
+                WebAppUrl        = "http://sharepoint.contoso.com"
+                Enabled          = $true
                 WarningSiteCount = 2000
                 MaximumSiteCount = 5000
-                Ensure = "Present"
+                Ensure           = "Present"
             }
 
-            Mock -CommandName Get-SPDatabase -MockWith { 
+            Mock -CommandName Get-SPDatabase -MockWith {
                 $returnval = @{
-                    Name = "SharePoint_Content_01"
-                    Type = "Content Database"
-                    Server = "SQLSrv"
-                    WebApplication = @{ 
-                        Url = "http://sharepoint2.contoso.com/" 
+                    Name             = "SharePoint_Content_01"
+                    Type             = "Content Database"
+                    Server           = "SQLSrv"
+                    WebApplication   = @{
+                        Url = "http://sharepoint2.contoso.com/"
                     }
-                    Status = "Online"
+                    Status           = "Online"
                     WarningSiteCount = 2000
                     MaximumSiteCount = 5000
                 }
-                $returnVal = $returnVal | Add-Member -MemberType ScriptMethod -Name GetType -Value { 
+                $returnVal = $returnVal | Add-Member -MemberType ScriptMethod -Name GetType -Value {
                     return @{
                         FullName = "Microsoft.SharePoint.Administration.SPContentDatabase"
                     }
                 } -PassThru -Force
                 return $returnval
             }
-            Mock -CommandName Get-SPWebApplication -MockWith { 
-                return @() 
+            Mock -CommandName Get-SPWebApplication -MockWith {
+                return @()
             }
 
             It "Should return Ensure=Present from the get method" {
@@ -139,24 +139,24 @@ namespace Microsoft.SharePoint.Administration {
 
         Context -Name "Mount database throws an error" -Fixture {
             $testParams = @{
-                Name = "SharePoint_Content_01"
-                DatabaseServer = "SQLSrv"
-                WebAppUrl = "http://sharepoint.contoso.com"
-                Enabled = $true
+                Name             = "SharePoint_Content_01"
+                DatabaseServer   = "SQLSrv"
+                WebAppUrl        = "http://sharepoint.contoso.com"
+                Enabled          = $true
                 WarningSiteCount = 2000
                 MaximumSiteCount = 5000
-                Ensure = "Present"
+                Ensure           = "Present"
             }
-            
-            Mock -CommandName Get-SPDatabase -MockWith { 
-                $returnVal = @{}
-                $returnVal = $returnVal | Add-Member -MemberType ScriptMethod -Name Update -Value { 
-                    $Global:SPDscContentDatabaseUpdated = $true 
+
+            Mock -CommandName Get-SPDatabase -MockWith {
+                $returnVal = @{ }
+                $returnVal = $returnVal | Add-Member -MemberType ScriptMethod -Name Update -Value {
+                    $Global:SPDscContentDatabaseUpdated = $true
                 } -PassThru
                 return $returnVal
             }
-            
-            Mock -CommandName Mount-SPContentDatabase -MockWith { 
+
+            Mock -CommandName Mount-SPContentDatabase -MockWith {
                 throw "MOUNT ERROR"
             }
 
@@ -167,35 +167,35 @@ namespace Microsoft.SharePoint.Administration {
 
         Context -Name "Content database does not exist, but has to be" -Fixture {
             $testParams = @{
-                Name = "SharePoint_Content_01"
-                DatabaseServer = "SQLSrv"
-                WebAppUrl = "http://sharepoint.contoso.com"
-                Enabled = $true
+                Name             = "SharePoint_Content_01"
+                DatabaseServer   = "SQLSrv"
+                WebAppUrl        = "http://sharepoint.contoso.com"
+                Enabled          = $true
                 WarningSiteCount = 2000
                 MaximumSiteCount = 5000
-                Ensure = "Present"
+                Ensure           = "Present"
             }
-            
-            Mock -CommandName Get-SPDatabase -MockWith { 
-                $returnVal = @{}
-                $returnVal = $returnVal | Add-Member -MemberType ScriptMethod -Name Update -Value { 
-                    $Global:SPDscContentDatabaseUpdated = $true 
+
+            Mock -CommandName Get-SPDatabase -MockWith {
+                $returnVal = @{ }
+                $returnVal = $returnVal | Add-Member -MemberType ScriptMethod -Name Update -Value {
+                    $Global:SPDscContentDatabaseUpdated = $true
                 } -PassThru
                 return $returnVal
             }
 
-            Mock -CommandName Get-SPWebApplication { return @{ Url="http://sharepoint.contoso.com/" } }
-            Mock Mount-SPContentDatabase { 
+            Mock -CommandName Get-SPWebApplication { return @{ Url = "http://sharepoint.contoso.com/" } }
+            Mock Mount-SPContentDatabase {
                 $returnval = @{
-                    Name = "SharePoint_Content_01"
-                    Server = "SQLSrv"
-                    WebApplication = @{ Url = "http://sharepoint.contoso.com/" }
-                    Status = "Online"
+                    Name             = "SharePoint_Content_01"
+                    Server           = "SQLSrv"
+                    WebApplication   = @{ Url = "http://sharepoint.contoso.com/" }
+                    Status           = "Online"
                     WarningSiteCount = 2000
                     MaximumSiteCount = 5000
                 }
-                $returnVal = $returnVal | Add-Member -MemberType ScriptMethod -Name Update -Value { 
-                    $Global:SPDscContentDatabaseUpdated = $true 
+                $returnVal = $returnVal | Add-Member -MemberType ScriptMethod -Name Update -Value {
+                    $Global:SPDscContentDatabaseUpdated = $true
                 } -PassThru
                 return $returnVal
             }
@@ -217,34 +217,34 @@ namespace Microsoft.SharePoint.Administration {
 
         Context -Name "Content database exists, but has incorrect settings" -Fixture {
             $testParams = @{
-                Name = "SharePoint_Content_01"
-                DatabaseServer = "SQLSrv"
-                WebAppUrl = "http://sharepoint.contoso.com"
-                Enabled = $true
+                Name             = "SharePoint_Content_01"
+                DatabaseServer   = "SQLSrv"
+                WebAppUrl        = "http://sharepoint.contoso.com"
+                Enabled          = $true
                 WarningSiteCount = 2000
                 MaximumSiteCount = 5000
-                Ensure = "Present"
+                Ensure           = "Present"
             }
-            
-            Mock -CommandName Get-SPDatabase -MockWith { 
+
+            Mock -CommandName Get-SPDatabase -MockWith {
                 $returnVal = @{
-                    Name = "SharePoint_Content_01"
-                    Type = "Content Database"
-                    Server = "SQLSrv"
-                    WebApplication = @{ Url = "http://sharepoint.contoso.com/" }
-                    Status = "Disabled"
+                    Name             = "SharePoint_Content_01"
+                    Type             = "Content Database"
+                    Server           = "SQLSrv"
+                    WebApplication   = @{ Url = "http://sharepoint.contoso.com/" }
+                    Status           = "Disabled"
                     WarningSiteCount = 1000
                     MaximumSiteCount = 2000
                 }
-                $returnVal = $returnVal | Add-Member -MemberType ScriptMethod -Name Update -Value { 
-                    $Global:SPDscContentDatabaseUpdated = $true 
+                $returnVal = $returnVal | Add-Member -MemberType ScriptMethod -Name Update -Value {
+                    $Global:SPDscContentDatabaseUpdated = $true
                 } -PassThru
-                $returnVal = $returnVal | Add-Member -MemberType ScriptMethod -Name GetType -Value { 
+                $returnVal = $returnVal | Add-Member -MemberType ScriptMethod -Name GetType -Value {
                     return @{
                         FullName = "Microsoft.SharePoint.Administration.SPContentDatabase"
                     }
                 } -PassThru -Force
-                
+
                 return $returnVal
             }
 
@@ -262,39 +262,39 @@ namespace Microsoft.SharePoint.Administration {
                 $Global:SPDscContentDatabaseUpdated | Should Be $true
             }
         }
-        
+
         Context -Name "Content database exists, but Ensure is set to Absent" -Fixture {
             $testParams = @{
-                Name = "SharePoint_Content_01"
-                DatabaseServer = "SQLSrv"
-                WebAppUrl = "http://sharepoint.contoso.com"
-                Enabled = $true
+                Name             = "SharePoint_Content_01"
+                DatabaseServer   = "SQLSrv"
+                WebAppUrl        = "http://sharepoint.contoso.com"
+                Enabled          = $true
                 WarningSiteCount = 2000
                 MaximumSiteCount = 5000
-                Ensure = "Absent"
+                Ensure           = "Absent"
             }
-            
-            Mock -CommandName Get-SPDatabase -MockWith { 
+
+            Mock -CommandName Get-SPDatabase -MockWith {
                 $returnVal = @{
-                    Name = "SharePoint_Content_01"
-                    Type = "Content Database"
-                    Server = "SQLSrv"
-                    WebApplication = @{ Url = "http://sharepoint.contoso.com/" }
-                    Status = "Disabled"
+                    Name             = "SharePoint_Content_01"
+                    Type             = "Content Database"
+                    Server           = "SQLSrv"
+                    WebApplication   = @{ Url = "http://sharepoint.contoso.com/" }
+                    Status           = "Disabled"
                     WarningSiteCount = 1000
                     MaximumSiteCount = 2000
                 }
-                $returnVal = $returnVal | Add-Member -MemberType ScriptMethod -Name Update -Value { 
-                    $Global:SPDscContentDatabaseUpdated = $true 
+                $returnVal = $returnVal | Add-Member -MemberType ScriptMethod -Name Update -Value {
+                    $Global:SPDscContentDatabaseUpdated = $true
                 } -PassThru
-                $returnVal = $returnVal | Add-Member -MemberType ScriptMethod -Name GetType -Value { 
+                $returnVal = $returnVal | Add-Member -MemberType ScriptMethod -Name GetType -Value {
                     return @{
                         FullName = "Microsoft.SharePoint.Administration.SPContentDatabase"
                     }
                 } -PassThru -Force
                 return $returnVal
             }
-            
+
             It "Should return Ensure=Present from the get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Present"
             }
@@ -311,26 +311,26 @@ namespace Microsoft.SharePoint.Administration {
 
         Context -Name "Content database is mounted to the incorrect web application" -Fixture {
             $testParams = @{
-                Name = "SharePoint_Content_01"
-                DatabaseServer = "SQLSrv"
-                WebAppUrl = "http://sharepoint.contoso.com"
-                Enabled = $true
+                Name             = "SharePoint_Content_01"
+                DatabaseServer   = "SQLSrv"
+                WebAppUrl        = "http://sharepoint.contoso.com"
+                Enabled          = $true
                 WarningSiteCount = 2000
                 MaximumSiteCount = 5000
-                Ensure = "Present"
+                Ensure           = "Present"
             }
-            
-            Mock -CommandName Get-SPDatabase -MockWith { 
+
+            Mock -CommandName Get-SPDatabase -MockWith {
                 $returnVal = @{
-                    Name = "SharePoint_Content_01"
-                    Type = "Content Database"
-                    Server = "SQLSrv"
-                    WebApplication = @{ Url = "http://sharepoint2.contoso.com/" }
-                    Status = "Online"
+                    Name             = "SharePoint_Content_01"
+                    Type             = "Content Database"
+                    Server           = "SQLSrv"
+                    WebApplication   = @{ Url = "http://sharepoint2.contoso.com/" }
+                    Status           = "Online"
                     WarningSiteCount = 2000
                     MaximumSiteCount = 5000
                 }
-                $returnVal = $returnVal | Add-Member -MemberType ScriptMethod -Name GetType -Value { 
+                $returnVal = $returnVal | Add-Member -MemberType ScriptMethod -Name GetType -Value {
                     return @{
                         FullName = "Microsoft.SharePoint.Administration.SPContentDatabase"
                     }
@@ -338,23 +338,23 @@ namespace Microsoft.SharePoint.Administration {
                 return $returnVal
             }
 
-            Mock -CommandName Get-SPWebApplication { return @{ Url="http://sharepoint.contoso.com/" } }
+            Mock -CommandName Get-SPWebApplication { return @{ Url = "http://sharepoint.contoso.com/" } }
             Mock Dismount-SPContentDatabase { }
-            Mock Mount-SPContentDatabase { 
+            Mock Mount-SPContentDatabase {
                 $returnVal = @{
-                    Name = "SharePoint_Content_01"
-                    Server = "SQLSrv"
-                    WebApplication = @{ Url = "http://sharepoint.contoso.com/" }
-                    Status = "Online"
+                    Name             = "SharePoint_Content_01"
+                    Server           = "SQLSrv"
+                    WebApplication   = @{ Url = "http://sharepoint.contoso.com/" }
+                    Status           = "Online"
                     WarningSiteCount = 2000
                     MaximumSiteCount = 5000
                 }
-                $returnVal = $returnVal | Add-Member -MemberType ScriptMethod -Name Update -Value { 
-                    $Global:SPDscContentDatabaseUpdated = $true 
+                $returnVal = $returnVal | Add-Member -MemberType ScriptMethod -Name Update -Value {
+                    $Global:SPDscContentDatabaseUpdated = $true
                 } -PassThru
                 return $returnVal
             }
-                        
+
             It "Should return Ensure=Present from the get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Present"
             }
@@ -372,33 +372,33 @@ namespace Microsoft.SharePoint.Administration {
 
         Context -Name "Content database is present with correct settings and Ensure is Present" -Fixture {
             $testParams = @{
-                Name = "SharePoint_Content_01"
-                DatabaseServer = "SQLSrv"
-                WebAppUrl = "http://sharepoint.contoso.com"
-                Enabled = $true
+                Name             = "SharePoint_Content_01"
+                DatabaseServer   = "SQLSrv"
+                WebAppUrl        = "http://sharepoint.contoso.com"
+                Enabled          = $true
                 WarningSiteCount = 2000
                 MaximumSiteCount = 5000
-                Ensure = "Present"
+                Ensure           = "Present"
             }
-            
-            Mock -CommandName Get-SPDatabase -MockWith { 
+
+            Mock -CommandName Get-SPDatabase -MockWith {
                 $returnVal = @{
-                    Name = "SharePoint_Content_01"
-                    Type = "Content Database"
-                    Server = "SQLSrv"
-                    WebApplication = @{ Url = "http://sharepoint.contoso.com/" }
-                    Status = "Online"
+                    Name             = "SharePoint_Content_01"
+                    Type             = "Content Database"
+                    Server           = "SQLSrv"
+                    WebApplication   = @{ Url = "http://sharepoint.contoso.com/" }
+                    Status           = "Online"
                     WarningSiteCount = 2000
                     MaximumSiteCount = 5000
                 }
-                $returnVal = $returnVal | Add-Member -MemberType ScriptMethod -Name GetType -Value { 
+                $returnVal = $returnVal | Add-Member -MemberType ScriptMethod -Name GetType -Value {
                     return @{
                         FullName = "Microsoft.SharePoint.Administration.SPContentDatabase"
                     }
                 } -PassThru -Force
                 return $returnVal
             }
-                        
+
             It "Should return Ensure=Present from the get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Present"
             }
@@ -410,20 +410,20 @@ namespace Microsoft.SharePoint.Administration {
 
         Context -Name "Content database is absent and Ensure is Absent" -Fixture {
             $testParams = @{
-                Name = "SharePoint_Content_01"
-                DatabaseServer = "SQLSrv"
-                WebAppUrl = "http://sharepoint.contoso.com"
-                Enabled = $true
+                Name             = "SharePoint_Content_01"
+                DatabaseServer   = "SQLSrv"
+                WebAppUrl        = "http://sharepoint.contoso.com"
+                Enabled          = $true
                 WarningSiteCount = 2000
                 MaximumSiteCount = 5000
-                Ensure = "Absent"
+                Ensure           = "Absent"
             }
-            
-            Mock -CommandName Get-SPDatabase -MockWith { 
+
+            Mock -CommandName Get-SPDatabase -MockWith {
                 $returnVal = @{ }
                 return $returnVal
             }
-                        
+
             It "Should return Ensure=Absent from the get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Absent"
             }

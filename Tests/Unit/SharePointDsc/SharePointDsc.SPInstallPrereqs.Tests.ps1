@@ -122,11 +122,11 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             })
         }
 
-        Mock -CommandName Get-SPDSCAssemblyVersion {
+        Mock -CommandName Get-SPDscAssemblyVersion {
             return $Global:SPDscHelper.CurrentStubBuildNumber.Major
         }
 
-        Mock -CommandName Get-SPDSCBuildVersion {
+        Mock -CommandName Get-SPDscBuildVersion {
             return $Global:SPDscHelper.CurrentStubBuildNumber.Build
         }
 
@@ -477,6 +477,130 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
         }
 
+        Context -Name "Prerequisites are not installed but should be and are to be installed in offline mode with UNC path specified" -Fixture {
+            $testParams = @{
+                IsSingleInstance = "Yes"
+                InstallerPath = "\\server\SPInstall\Prerequisiteinstaller.exe"
+                OnlineMode = $false
+                Ensure = "Present"
+            }
+
+            Mock -CommandName Get-ItemProperty -MockWith {
+                return @()
+            } -ParameterFilter { $null -ne $Path }
+
+            Mock -CommandName Get-Item -MockWith {
+                return $null
+            } -ParameterFilter { $Path.StartsWith("\\") }
+
+            Mock -CommandName Start-Process -MockWith {
+                return @{
+                    ExitCode = 0
+                }
+            }
+            Mock -CommandName Test-Path -MockWith {
+                return $true
+            }
+
+            It "Should throw an exception in the set method if required parameters are not set" {
+                {Set-TargetResource @testParams} | Should Throw
+            }
+
+            switch ($Global:SPDscHelper.CurrentStubBuildNumber.Major)
+            {
+                15 {
+                    $requiredParams = @("SQLNCli","PowerShell","NETFX","IDFX","Sync","AppFabric","IDFX11","MSIPCClient","WCFDataServices","KB2671763","WCFDataServices56")
+                }
+                16 {
+                    if ($Global:SPDscHelper.CurrentStubBuildNumber.Build -lt 10000)
+                    {
+                        # SharePoint 2016
+                        $requiredParams = @("SQLNCli","Sync","AppFabric","IDFX11","MSIPCClient","KB3092423","WCFDataServices56","DotNetFx","MSVCRT11","MSVCRT14","ODBC")
+                    }
+                    else
+                    {
+                        # SharePoint 2019
+                        $requiredParams = @("SQLNCli","Sync","AppFabric","IDFX11","MSIPCClient","KB3092423","WCFDataServices56","DotNet472","MSVCRT11","MSVCRT141")
+                    }
+                }
+                Default {
+                    throw [Exception] "A supported version of SharePoint was not used in testing"
+                }
+            }
+
+            $requiredParams | ForEach-Object -Process {
+                $testParams.Add($_, "C:\fake\value.exe")
+            }
+
+            It "does not throw an exception where the required parameters are included" {
+                {Set-TargetResource @testParams} | Should Not Throw
+            }
+        }
+
+        Context -Name "Prerequisites are not installed but should be and are to be installed in offline mode from CDROM" -Fixture {
+            $testParams = @{
+                IsSingleInstance = "Yes"
+                InstallerPath = "C:\SPInstall\Prerequisiteinstaller.exe"
+                OnlineMode = $false
+                Ensure = "Present"
+            }
+
+            Mock -CommandName Get-ItemProperty -MockWith {
+                return @()
+            } -ParameterFilter { $null -ne $Path }
+
+            Mock -CommandName Get-Item -MockWith {
+                return $null
+            } -ParameterFilter { $Path.StartsWith("C:\") }
+
+            Mock -CommandName Get-Volume -MockWith {
+                return @{
+                    DriveType = "CD-ROM"
+                }
+            }
+
+            Mock -CommandName Start-Process -MockWith {
+                return @{
+                    ExitCode = 0
+                }
+            }
+            Mock -CommandName Test-Path -MockWith {
+                return $true
+            }
+
+            switch ($Global:SPDscHelper.CurrentStubBuildNumber.Major)
+            {
+                15 {
+                    $requiredParams = @("SQLNCli","PowerShell","NETFX","IDFX","Sync","AppFabric","IDFX11","MSIPCClient","WCFDataServices","KB2671763","WCFDataServices56")
+                }
+                16 {
+                    if ($Global:SPDscHelper.CurrentStubBuildNumber.Build -lt 10000)
+                    {
+                        # SharePoint 2016
+                        $requiredParams = @("SQLNCli","Sync","AppFabric","IDFX11","MSIPCClient","KB3092423","WCFDataServices56","DotNetFx","MSVCRT11","MSVCRT14","ODBC")
+                    }
+                    else
+                    {
+                        # SharePoint 2019
+                        $requiredParams = @("SQLNCli","Sync","AppFabric","IDFX11","MSIPCClient","KB3092423","WCFDataServices56","DotNet472","MSVCRT11","MSVCRT141")
+                    }
+                }
+                Default {
+                    throw [Exception] "A supported version of SharePoint was not used in testing"
+                }
+            }
+
+            $requiredParams | ForEach-Object -Process {
+                $testParams.Add($_, "C:\fake\value.exe")
+            }
+
+            It "does not throw an exception where the required parameters are included" {
+                Set-TargetResource @testParams
+                Assert-MockCalled Get-Item -Times 0
+                Assert-MockCalled Start-Process
+            }
+        }
+
         Context -Name "Prerequisites are not installed but should be and are to be installed in offline mode, but invalid paths have been passed" -Fixture {
             $testParams = @{
                 IsSingleInstance = "Yes"
@@ -738,6 +862,56 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 It "Should throw an exception from the set method" {
                     {Set-TargetResource @testParams} | Should Throw
                 }
+            }
+        }
+
+        Context -Name "InstallerPath does not exist" -Fixture {
+            $testParams = @{
+                IsSingleInstance = "Yes"
+                InstallerPath = "C:\SPInstall\Prerequisiteinstaller.exe"
+                OnlineMode = $true
+                Ensure = "Present"
+            }
+
+            Mock -CommandName Test-Path {
+                return $false
+            }
+
+            It "throws an error in the get method" {
+                { Get-TargetResource @testParams } | Should Throw ("PrerequisitesInstaller cannot be found")
+            }
+
+            It "throws an error in the set method" {
+                { Set-TargetResource @testParams } | Should Throw ("PrerequisitesInstaller cannot be found")
+            }
+
+            It "throws an error in the test method" {
+                { Test-TargetResource @testParams } | Should Throw ("PrerequisitesInstaller cannot be found")
+            }
+        }
+
+        Context -Name "InstallerPath is blocked" -Fixture {
+            $testParams = @{
+                IsSingleInstance = "Yes"
+                InstallerPath = "C:\SPInstall\Prerequisiteinstaller.exe"
+                OnlineMode = $true
+                Ensure = "Present"
+            }
+
+            Mock -CommandName Get-Item {
+                return "data"
+            }
+
+            It "throws an error in the get method" {
+                { Get-TargetResource @testParams } | Should Throw ("PrerequisitesInstaller is blocked!")
+            }
+
+            It "throws an error in the set method" {
+                { Set-TargetResource @testParams } | Should Throw ("PrerequisitesInstaller is blocked!")
+            }
+
+            It "throws an error in the test method" {
+                { Test-TargetResource @testParams } | Should Throw ("PrerequisitesInstaller is blocked!")
             }
         }
     }

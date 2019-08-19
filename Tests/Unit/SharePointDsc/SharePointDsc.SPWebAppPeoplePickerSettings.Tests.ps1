@@ -3,16 +3,16 @@ param(
     [Parameter()]
     [string]
     $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
-                                         -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
-                                         -Resolve)
+            -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
+            -Resolve)
 )
 
 Import-Module -Name (Join-Path -Path $PSScriptRoot `
-                                -ChildPath "..\UnitTestHelper.psm1" `
-                                -Resolve)
+        -ChildPath "..\UnitTestHelper.psm1" `
+        -Resolve)
 
 $Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointCmdletModule `
-                                              -DscResource "SPWebAppPeoplePickerSettings"
+    -DscResource "SPWebAppPeoplePickerSettings"
 
 Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
     InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
@@ -21,10 +21,13 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         # Initialize tests
         $mockPassword = ConvertTo-SecureString -String "password" -AsPlainText -Force
         $mockAccount = New-Object -TypeName "System.Management.Automation.PSCredential" `
-                                  -ArgumentList @("username", $mockPassword)
+            -ArgumentList @("username", $mockPassword)
 
-        try { [Microsoft.SharePoint.Administration.SPPeoplePickerSearchActiveDirectoryDomain] }
-        catch {
+        try
+        { [Microsoft.SharePoint.Administration.SPPeoplePickerSearchActiveDirectoryDomain]
+        }
+        catch
+        {
             Add-Type -TypeDefinition @"
 namespace Microsoft.SharePoint.Administration {
     public class SPPeoplePickerSearchActiveDirectoryDomain {
@@ -45,7 +48,7 @@ namespace Microsoft.SharePoint.Administration {
         # Test contexts
         Context -Name "The web application doesn't exist" -Fixture {
             $testParams = @{
-                WebAppUrl   = "http://sharepoint.contoso.com"
+                WebAppUrl                      = "http://sharepoint.contoso.com"
                 ActiveDirectoryCustomFilter    = $null
                 ActiveDirectoryCustomQuery     = $null
                 ActiveDirectorySearchTimeout   = 30
@@ -56,7 +59,7 @@ namespace Microsoft.SharePoint.Administration {
             Mock -CommandName Get-SPWebApplication -MockWith { return $null }
 
             It "Should return null for all properties from the get method" {
-                (Get-TargetResource @testParams).OnlySearchWithinSiteCollection  | Should BeNullOrEmpty
+                (Get-TargetResource @testParams).OnlySearchWithinSiteCollection | Should BeNullOrEmpty
             }
 
             It "Should return false from the test method" {
@@ -70,34 +73,34 @@ namespace Microsoft.SharePoint.Administration {
 
         Context -Name "Search domain settings do not match actual values" -Fixture {
             $testParams = @{
-                WebAppUrl   = "http://sharepoint.contoso.com"
-                SearchActiveDirectoryDomains   = @(
+                WebAppUrl                    = "http://sharepoint.contoso.com"
+                SearchActiveDirectoryDomains = @(
                     (New-CimInstance -ClassName MSFT_SPWebAppPPSearchDomain -Property @{
-                        FQDN     = "contoso.intra"
-                        IsForest = $false
-                        AccessAccount  = (New-CimInstance -ClassName MSFT_Credential `
-                                                    -Property @{
-                                                        Username=[string]$mockAccount.UserName;
-                                                        Password=[string]$mockAccount.Password;
-                                                    } `
-                                                    -Namespace root/microsoft/windows/desiredstateconfiguration `
-                                                    -ClientOnly)
-                    } -ClientOnly)
+                            FQDN          = "contoso.intra"
+                            IsForest      = $false
+                            AccessAccount = (New-CimInstance -ClassName MSFT_Credential `
+                                    -Property @{
+                                    Username = [string]$mockAccount.UserName;
+                                    Password = [string]$mockAccount.Password;
+                                } `
+                                    -Namespace root/microsoft/windows/desiredstateconfiguration `
+                                    -ClientOnly)
+                        } -ClientOnly)
                 )
             }
 
             Mock -CommandName Get-SPWebApplication -MockWith {
-                $searchADdom =  New-Object -TypeName "System.Collections.Generic.List[System.Object]"
+                $searchADdom = New-Object -TypeName "System.Collections.Generic.List[System.Object]"
                 $searchDom1 = New-Object -TypeName "Object" | `
-                                Add-Member -MemberType NoteProperty `
-                                           -Name DomainName `
-                                           -Value ( "contosonew.intra" ) -PassThru | `
-                                Add-Member -MemberType NoteProperty `
-                                           -Name IsForest `
-                                           -Value ( $false ) -PassThru | `
-                                Add-Member -MemberType NoteProperty `
-                                           -Name LoginName `
-                                           -Value ( $mockAccount.UserName ) -PassThru
+                    Add-Member -MemberType NoteProperty `
+                    -Name DomainName `
+                    -Value ( "contosonew.intra" ) -PassThru | `
+                    Add-Member -MemberType NoteProperty `
+                    -Name IsForest `
+                    -Value ( $false ) -PassThru | `
+                    Add-Member -MemberType NoteProperty `
+                    -Name LoginName `
+                    -Value ( $mockAccount.UserName ) -PassThru
                 $searchADdom.Add($searchDom1)
 
                 $returnval = @{
@@ -135,7 +138,7 @@ namespace Microsoft.SharePoint.Administration {
 
         Context -Name "Settings do not match actual values" -Fixture {
             $testParams = @{
-                WebAppUrl   = "http://sharepoint.contoso.com"
+                WebAppUrl                      = "http://sharepoint.contoso.com"
                 ActiveDirectoryCustomFilter    = $null
                 ActiveDirectoryCustomQuery     = $null
                 ActiveDirectorySearchTimeout   = 30
@@ -143,17 +146,17 @@ namespace Microsoft.SharePoint.Administration {
             }
 
             Mock -CommandName Get-SPWebApplication -MockWith {
-                $searchADdom =  New-Object -TypeName "System.Collections.Generic.List[System.Object]"
+                $searchADdom = New-Object -TypeName "System.Collections.Generic.List[System.Object]"
                 $searchDom1 = New-Object -TypeName "Object" | `
-                                Add-Member -MemberType NoteProperty `
-                                           -Name DomainName `
-                                           -Value ( "contoso.intra" ) -PassThru | `
-                                           Add-Member -MemberType NoteProperty `
-                                           -Name IsForest `
-                                           -Value ( $false ) -PassThru | `
-                                           Add-Member -MemberType NoteProperty `
-                                           -Name LoginName `
-                                           -Value ( $mockAccount.UserName ) -PassThru
+                    Add-Member -MemberType NoteProperty `
+                    -Name DomainName `
+                    -Value ( "contoso.intra" ) -PassThru | `
+                    Add-Member -MemberType NoteProperty `
+                    -Name IsForest `
+                    -Value ( $false ) -PassThru | `
+                    Add-Member -MemberType NoteProperty `
+                    -Name LoginName `
+                    -Value ( $mockAccount.UserName ) -PassThru
                 $searchADdom.Add($searchDom1)
 
                 $returnval = @{
@@ -191,34 +194,34 @@ namespace Microsoft.SharePoint.Administration {
 
         Context -Name "Search domain settings match actual values" -Fixture {
             $testParams = @{
-                WebAppUrl   = "http://sharepoint.contoso.com"
-                SearchActiveDirectoryDomains   = @(
+                WebAppUrl                    = "http://sharepoint.contoso.com"
+                SearchActiveDirectoryDomains = @(
                     (New-CimInstance -ClassName MSFT_SPWebAppPPSearchDomain -Property @{
-                        FQDN     = "contoso.intra"
-                        IsForest = $false
-                        AccessAccount  = (New-CimInstance -ClassName MSFT_Credential `
-                                                    -Property @{
-                                                        Username=[string]$mockAccount.UserName;
-                                                        Password=[string]$mockAccount.Password;
-                                                    } `
-                                                    -Namespace root/microsoft/windows/desiredstateconfiguration `
-                                                    -ClientOnly)
-                    } -ClientOnly)
+                            FQDN          = "contoso.intra"
+                            IsForest      = $false
+                            AccessAccount = (New-CimInstance -ClassName MSFT_Credential `
+                                    -Property @{
+                                    Username = [string]$mockAccount.UserName;
+                                    Password = [string]$mockAccount.Password;
+                                } `
+                                    -Namespace root/microsoft/windows/desiredstateconfiguration `
+                                    -ClientOnly)
+                        } -ClientOnly)
                 )
             }
 
             Mock -CommandName Get-SPWebApplication -MockWith {
-                $searchADdom =  New-Object -TypeName "System.Collections.Generic.List[System.Object]"
+                $searchADdom = New-Object -TypeName "System.Collections.Generic.List[System.Object]"
                 $searchDom1 = New-Object -TypeName "Object" | `
-                                Add-Member -MemberType NoteProperty `
-                                           -Name DomainName `
-                                           -Value ( "contoso.intra" ) -PassThru | `
-                                Add-Member -MemberType NoteProperty `
-                                           -Name IsForest `
-                                           -Value ( $false ) -PassThru | `
-                                Add-Member -MemberType NoteProperty `
-                                           -Name LoginName `
-                                           -Value ( $mockAccount.UserName ) -PassThru
+                    Add-Member -MemberType NoteProperty `
+                    -Name DomainName `
+                    -Value ( "contoso.intra" ) -PassThru | `
+                    Add-Member -MemberType NoteProperty `
+                    -Name IsForest `
+                    -Value ( $false ) -PassThru | `
+                    Add-Member -MemberType NoteProperty `
+                    -Name LoginName `
+                    -Value ( $mockAccount.UserName ) -PassThru
                 $searchADdom.Add($searchDom1)
 
                 $returnval = @{
@@ -251,7 +254,7 @@ namespace Microsoft.SharePoint.Administration {
 
         Context -Name "Settings match actual values" -Fixture {
             $testParams = @{
-                WebAppUrl   = "http://sharepoint.contoso.com"
+                WebAppUrl                      = "http://sharepoint.contoso.com"
                 ActiveDirectoryCustomFilter    = $null
                 ActiveDirectoryCustomQuery     = $null
                 ActiveDirectorySearchTimeout   = 30

@@ -49,12 +49,12 @@ function Get-TargetResource
         $UseDisabledFilter,
 
         [Parameter()]
-        [ValidateSet("ActiveDirectory","BusinessDataCatalog")]
+        [ValidateSet("ActiveDirectory", "BusinessDataCatalog")]
         [System.String]
         $ConnectionType,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present",
 
@@ -65,39 +65,39 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting user profile service sync connection $Name"
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
-                                  -Arguments $PSBoundParameters `
-                                  -ScriptBlock {
+    $result = Invoke-SPDscCommand -Credential $InstallAccount `
+        -Arguments $PSBoundParameters `
+        -ScriptBlock {
         $params = $args[0]
 
         $ups = Get-SPServiceApplication -Name $params.UserProfileService `
-                                        -ErrorAction SilentlyContinue
+            -ErrorAction SilentlyContinue
 
-        $nullreturn = @{
-            Name = $params.Name
-            UserProfileService = $null
-            Forest = $null
+        $nullReturn = @{
+            Name                  = $params.Name
+            UserProfileService    = $null
+            Forest                = $null
             ConnectionCredentials = $null
-            IncludedOUs = $null
-            ExcludedOUs = $null
-            Server = $null
-            Port = $null
-            UseSSL = $null
-            UseDisabledFilter = $null
-            ConnectionType = $null
-            Force = $null
-            Ensure = "Absent"
+            IncludedOUs           = $null
+            ExcludedOUs           = $null
+            Server                = $null
+            Port                  = $null
+            UseSSL                = $null
+            UseDisabledFilter     = $null
+            ConnectionType        = $null
+            Force                 = $null
+            Ensure                = "Absent"
         }
 
         if ($null -eq $ups)
         {
-            return $nullreturn
+            return $nullReturn
         }
         else
         {
-            $context = Get-SPDSCServiceContext -ProxyGroup $ups.ServiceApplicationProxyGroup
+            $context = Get-SPDscServiceContext -ProxyGroup $ups.ServiceApplicationProxyGroup
             $upcm = New-Object -TypeName "Microsoft.Office.Server.UserProfiles.UserProfileConfigManager" `
-                               -ArgumentList $context
+                -ArgumentList $context
 
             $Name = $params.Name
             $connection = $upcm.ConnectionManager | Where-Object -FilterScript {
@@ -105,7 +105,7 @@ function Get-TargetResource
             }
 
             # In SP2016, the forest name is used as name but the dot is replaced by a dash
-            $installedVersion = Get-SPDSCInstalledProductVersion
+            $installedVersion = Get-SPDscInstalledProductVersion
             if ($installedVersion.FileMajorPart -eq 16 -and $null -eq $connection)
             {
                 $Name = $params.Forest -replace "\.", "-"
@@ -116,7 +116,7 @@ function Get-TargetResource
 
             if ($null -eq $connection)
             {
-                return $nullreturn
+                return $nullReturn
             }
             $namingContext = $connection.NamingContexts | Select-Object -First 1
             if ($null -eq $namingContext)
@@ -135,9 +135,9 @@ function Get-TargetResource
                 $useDisabledFilter = $METHOD_GET_USEDISABLEDFILTER.Invoke($connection, $null)
                 $useSSL = $METHOD_GET_USESSL.Invoke($connection, $null)
 
-                if($null -eq $namingContexts)
+                if ($null -eq $namingContexts)
                 {
-                    return $nullreturn
+                    return $nullReturn
                 }
 
                 if ($null -eq $namingContexts.ContainersIncluded)
@@ -159,19 +159,19 @@ function Get-TargetResource
                 }
 
                 return @{
-                    Name = $params.Name
-                    UserProfileService = $params.UserProfileService
-                    Forest = $namingContexts.DistinguishedName.Replace(",DC=", ".").Replace("DC=", "");
+                    Name                  = $params.Name
+                    UserProfileService    = $params.UserProfileService
+                    Forest                = $namingContexts.DistinguishedName.Replace(",DC=", ".").Replace("DC=", "");
                     ConnectionCredentials = $accountCredentials
-                    IncludedOUs = $inclOUs
-                    ExcludedOUs = $exclOUs
-                    Server = $null
-                    Port = $params.Port
-                    UseSSL = $useSSL
-                    UseDisabledFilter = $useDisabledFilter
-                    ConnectionType = $connection.Type -replace "Import",""
-                    Force = $params.Force
-                    Ensure = "Present"
+                    IncludedOUs           = $inclOUs
+                    ExcludedOUs           = $exclOUs
+                    Server                = $null
+                    Port                  = $params.Port
+                    UseSSL                = $useSSL
+                    UseDisabledFilter     = $useDisabledFilter
+                    ConnectionType        = $connection.Type -replace "Import", ""
+                    Force                 = $params.Force
+                    Ensure                = "Present"
                 }
             }
 
@@ -197,19 +197,19 @@ function Get-TargetResource
             }
 
             return @{
-                UserProfileService = $params.UserProfileService
-                Forest = $connection.Server
-                Name = $params.Name
+                Name                  = $params.Name
+                UserProfileService    = $params.UserProfileService
+                Forest                = $connection.Server
                 ConnectionCredentials = $accountCredentials
-                IncludedOUs = $inclOUs
-                ExcludedOUs = $exclOUs
-                Server = $domainController
-                UseSSL = $connection.UseSSL
-                UseDisabledFilter = $connection.UseDisabledFilter
-                Port = $params.Port
-                ConnectionType = $connection.Type.ToString()
-                Force = $params.Force
-                Ensure = "Present"
+                IncludedOUs           = $inclOUs
+                ExcludedOUs           = $exclOUs
+                Server                = $domainController
+                UseSSL                = $connection.UseSSL
+                UseDisabledFilter     = $connection.UseDisabledFilter
+                Port                  = $params.Port
+                ConnectionType        = $connection.Type.ToString()
+                Force                 = $params.Force
+                Ensure                = "Present"
             }
         }
     }
@@ -266,19 +266,19 @@ function Set-TargetResource
         $UseDisabledFilter,
 
         [Parameter()]
-        [ValidateSet("ActiveDirectory","BusinessDataCatalog")]
+        [ValidateSet("ActiveDirectory", "BusinessDataCatalog")]
         [System.String]
         $ConnectionType,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present",
 
         [Parameter()]
         [System.Management.Automation.PSCredential]
         $InstallAccount
-   )
+    )
 
     Write-Verbose -Message "Setting user profile service sync connection $Name"
 
@@ -294,12 +294,12 @@ function Set-TargetResource
         if ($UseSSL -eq $true -and $PSBoundParameters.ContainsKey("Port") -eq $false)
         {
             Write-Verbose -Message ("UseSSL is set to True, but no port is specified. Assuming " + `
-                                    "that port 636 (default LDAPS port) is to be used.")
+                    "that port 636 (default LDAPS port) is to be used.")
             $PSBoundParameters.Port = 636
         }
     }
 
-    $installedVersion = Get-SPDSCInstalledProductVersion
+    $installedVersion = Get-SPDscInstalledProductVersion
 
     if ($PSBoundParameters.ContainsKey("Port") -eq $false)
     {
@@ -316,7 +316,7 @@ function Set-TargetResource
     if ($PSBoundParameters.ContainsKey("UseDisabledFilter") -eq $false)
     {
         Write-Verbose -Message ("UseDisabledFilter is not specified. Assuming that disabled " + `
-                                "accounts should not be filtered.")
+                "accounts should not be filtered.")
         $PSBoundParameters.UseDisabledFilter = $false
     }
     else
@@ -327,9 +327,9 @@ function Set-TargetResource
         }
     }
 
-    Invoke-SPDSCCommand -Credential $InstallAccount `
-                        -Arguments @($PSBoundParameters, $PSScriptRoot) `
-                        -ScriptBlock {
+    Invoke-SPDscCommand -Credential $InstallAccount `
+        -Arguments @($PSBoundParameters, $PSScriptRoot) `
+        -ScriptBlock {
 
         $params = $args[0]
         $scriptRoot = $args[1]
@@ -346,11 +346,11 @@ function Set-TargetResource
         {
             throw "User Profile Service Application $($params.UserProfileService) not found"
         }
-        $context = Get-SPDSCServiceContext -ProxyGroup $ups.ServiceApplicationProxyGroup
+        $context = Get-SPDscServiceContext -ProxyGroup $ups.ServiceApplicationProxyGroup
 
         Write-Verbose -Message "retrieving UserProfileConfigManager "
         $upcm = New-Object -TypeName "Microsoft.Office.Server.UserProfiles.UserProfileConfigManager" `
-                           -ArgumentList @($context)
+            -ArgumentList @($context)
 
         if ($upcm.IsSynchronizationRunning())
         {
@@ -358,7 +358,7 @@ function Set-TargetResource
         }
 
         # In SP2016, the forest name is used as name but the dot is replaced by a dash
-        $installedVersion = Get-SPDSCInstalledProductVersion
+        $installedVersion = Get-SPDscInstalledProductVersion
         if ($installedVersion.FileMajorPart -eq 16)
         {
             $Name = $params.Forest -replace "\.", "-"
@@ -374,10 +374,10 @@ function Set-TargetResource
 
         if ($params.Ensure -eq "Present")
         {
-            if ($null -ne $connection -and $params.Forest -ieq  $connection.Server)
+            if ($null -ne $connection -and $params.Forest -ieq $connection.Server)
             {
                 $domain = $params.ConnectionCredentials.UserName.Split("\")[0]
-                $userName= $params.ConnectionCredentials.UserName.Split("\")[1]
+                $userName = $params.ConnectionCredentials.UserName.Split("\")[1]
                 $connection.SetCredentials($domain, $userName, $params.ConnectionCredentials.Password)
 
                 $connection.NamingContexts | ForEach-Object -Process {
@@ -385,14 +385,14 @@ function Set-TargetResource
                     if ($params.ContainsKey("IncludedOUs"))
                     {
                         $namingContext.ContainersIncluded.Clear()
-                        $params.IncludedOUs| ForEach-Object -Process {
+                        $params.IncludedOUs | ForEach-Object -Process {
                             $namingContext.ContainersIncluded.Add($_)
                         }
                     }
                     $namingContext.ContainersExcluded.Clear()
                     if ($params.ContainsKey("ExcludedOUs"))
                     {
-                        $params.IncludedOUs| ForEach-Object -Process {
+                        $params.IncludedOUs | ForEach-Object -Process {
                             $namingContext.ContainersExcluded.Add($_)
                         }
                     }
@@ -407,15 +407,15 @@ function Set-TargetResource
                 Write-Verbose -Message "Creating a new connection "
 
                 $userDomain = $params.ConnectionCredentials.UserName.Split("\")[0]
-                $userName= $params.ConnectionCredentials.UserName.Split("\")[1]
+                $userName = $params.ConnectionCredentials.UserName.Split("\")[1]
 
-                $installedVersion = Get-SPDSCInstalledProductVersion
+                $installedVersion = Get-SPDscInstalledProductVersion
 
-                switch($installedVersion.FileMajorPart)
+                switch ($installedVersion.FileMajorPart)
                 {
                     15
                     {
-                        if ($null -ne $connection -and $params.Forest -ine  $connection.Server)
+                        if ($null -ne $connection -and $params.Forest -ine $connection.Server)
                         {
                             if ($params.ContainsKey("Force") -and $params.Force -eq $true)
                             {
@@ -448,69 +448,69 @@ function Set-TargetResource
 
                         $list = New-Object -TypeName System.Collections.Generic.List[[Microsoft.Office.Server.UserProfiles.DirectoryServiceNamingContext]]
 
-                        $partition = Get-SPDSCADSIObject -LdapPath ("LDAP://" +("DC=" + $params.Forest.Replace(".", ",DC=")))
+                        $partition = Get-SPDscADSIObject -LdapPath ("LDAP://" + ("DC=" + $params.Forest.Replace(".", ",DC=")))
                         $list.Add((New-Object -TypeName "Microsoft.Office.Server.UserProfiles.DirectoryServiceNamingContext" `
-                                            -ArgumentList @(
-                                                        $partition.distinguishedName,
-                                                        $params.Forest,
-                                                        $false,
-                                                        (New-Object -TypeName "System.Guid" `
-                                                                    -ArgumentList $partition.objectGUID),
-                                                        $listIncludedOUs,
-                                                        $listExcludedOUs,
-                                                        $null ,
-                                                        $false)))
-                        $partition = Get-SPDSCADSIObject -LdapPath ("LDAP://CN=Configuration," + ("DC=" + $params.Forest.Replace(".", ",DC=")))
+                                    -ArgumentList @(
+                                    $partition.distinguishedName,
+                                    $params.Forest,
+                                    $false,
+                                    (New-Object -TypeName "System.Guid" `
+                                            -ArgumentList $partition.objectGUID),
+                                    $listIncludedOUs,
+                                    $listExcludedOUs,
+                                    $null ,
+                                    $false)))
+                        $partition = Get-SPDscADSIObject -LdapPath ("LDAP://CN=Configuration," + ("DC=" + $params.Forest.Replace(".", ",DC=")))
                         $list.Add((New-Object -TypeName "Microsoft.Office.Server.UserProfiles.DirectoryServiceNamingContext" `
-                                            -ArgumentList @(
-                                                        $partition.distinguishedName,
-                                                        $params.Forest,
-                                                        $true,
-                                                        (New-Object -TypeName "System.Guid" `
-                                                                    -ArgumentList $partition.objectGUID),
-                                                        $listIncludedOUs ,
-                                                        $listExcludedOUs ,
-                                                        $null ,
-                                                        $false)))
+                                    -ArgumentList @(
+                                    $partition.distinguishedName,
+                                    $params.Forest,
+                                    $true,
+                                    (New-Object -TypeName "System.Guid" `
+                                            -ArgumentList $partition.objectGUID),
+                                    $listIncludedOUs ,
+                                    $listExcludedOUs ,
+                                    $null ,
+                                    $false)))
 
                         Write-Verbose -Message "Creating the new connection via object model (SP2013)"
-                        $upcm.ConnectionManager.AddActiveDirectoryConnection( [Microsoft.Office.Server.UserProfiles.ConnectionType]::ActiveDirectory,  `
-                                                $params.Name, `
-                                                $params.Forest, `
-                                                $params.UseSSL, `
-                                                $userDomain, `
-                                                $userName, `
-                                                $params.ConnectionCredentials.Password, `
-                                                $list, `
-                                                $null,`
-                                                $null) | Out-Null
+                        $upcm.ConnectionManager.AddActiveDirectoryConnection( [Microsoft.Office.Server.UserProfiles.ConnectionType]::ActiveDirectory, `
+                                $params.Name, `
+                                $params.Forest, `
+                                $params.UseSSL, `
+                                $userDomain, `
+                                $userName, `
+                                $params.ConnectionCredentials.Password, `
+                                $list, `
+                                $null, `
+                                $null) | Out-Null
                     }
                     16
                     {
                         Write-Verbose -Message "Creating the new connection via cmdlet (SP2016)"
                         Write-Verbose -Message "Adding IncludedOUs to the connection"
-                        foreach($ou in $params.IncludedOUs)
+                        foreach ($ou in $params.IncludedOUs)
                         {
                             Add-SPProfileSyncConnection -ProfileServiceApplication $ups `
-                                                        -ConnectionForestName $params.Forest `
-                                                        -ConnectionDomain $userDomain `
-                                                        -ConnectionUserName $userName `
-                                                        -ConnectionPassword $params.ConnectionCredentials.Password `
-                                                        -ConnectionUseSSL $params.UseSSL `
-                                                        -ConnectionSynchronizationOU $ou `
-                                                        -ConnectionPort $params.Port `
-                                                        -ConnectionUseDisabledFilter $params.UseDisabledFilter
+                                -ConnectionForestName $params.Forest `
+                                -ConnectionDomain $userDomain `
+                                -ConnectionUserName $userName `
+                                -ConnectionPassword $params.ConnectionCredentials.Password `
+                                -ConnectionUseSSL $params.UseSSL `
+                                -ConnectionSynchronizationOU $ou `
+                                -ConnectionPort $params.Port `
+                                -ConnectionUseDisabledFilter $params.UseDisabledFilter
                         }
 
                         Write-Verbose -Message "Removing ExcludedOUs from the connection"
-                        foreach($ou in $params.ExcludedOUs)
+                        foreach ($ou in $params.ExcludedOUs)
                         {
                             Remove-SPProfilesyncConnection -ProfileServiceApplication $ups `
-                                                           -ConnectionForestName $params.Forest `
-                                                           -ConnectionDomain $userDomain `
-                                                           -ConnectionUserName $userName `
-                                                           -ConnectionPassword $params.ConnectionCredentials.Password `
-                                                           -ConnectionSynchronizationOU $ou
+                                -ConnectionForestName $params.Forest `
+                                -ConnectionDomain $userDomain `
+                                -ConnectionUserName $userName `
+                                -ConnectionPassword $params.ConnectionCredentials.Password `
+                                -ConnectionSynchronizationOU $ou
                         }
                     }
                 }
@@ -578,12 +578,12 @@ function Test-TargetResource
         $UseDisabledFilter,
 
         [Parameter()]
-        [ValidateSet("ActiveDirectory","BusinessDataCatalog")]
+        [ValidateSet("ActiveDirectory", "BusinessDataCatalog")]
         [System.String]
         $ConnectionType,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present",
 
@@ -598,20 +598,17 @@ function Test-TargetResource
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
-    if ($null -eq $CurrentValues.UserProfileService)
-    {
-        return $false
-    }
+    Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
+    Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
 
-    $installedVersion = Get-SPDSCInstalledProductVersion
+    $installedVersion = Get-SPDscInstalledProductVersion
     $valuesToCheck = @("Forest",
-    "UserProfileService",
-    "Server",
-    "UseSSL",
-    "IncludedOUs",
-    "Ensure")
+        "UserProfileService",
+        "UseSSL",
+        "IncludedOUs",
+        "Ensure")
 
-    if($installedVersion.FileMajorPart -eq 15)
+    if ($installedVersion.FileMajorPart -eq 15)
     {
         if ($Force -eq $true)
         {
@@ -619,11 +616,12 @@ function Test-TargetResource
         }
 
         $valuesToCheck += "ExcludedOUs"
+        $valuesToCheck += "Server"
     }
 
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
-                                    -DesiredValues $PSBoundParameters `
-                                    -ValuesToCheck $valuesToCheck
+        -DesiredValues $PSBoundParameters `
+        -ValuesToCheck $valuesToCheck
 }
 
 <#
@@ -631,7 +629,7 @@ function Test-TargetResource
 
 This method is not intensed for public use, and was created to facilitate unit testing
 #>
-function Get-SPDSCADSIObject
+function Get-SPDscADSIObject
 {
     param(
         [Parameter()]
@@ -640,4 +638,4 @@ function Get-SPDSCADSIObject
     return [ADSI]($LdapPath)
 }
 
-Export-ModuleMember -Function *-TargetResource, Get-SPDSCADSIObject
+Export-ModuleMember -Function *-TargetResource, Get-SPDscADSIObject

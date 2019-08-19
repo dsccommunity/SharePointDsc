@@ -10,7 +10,7 @@ function Get-TargetResource
         $IsSingleInstance,
 
         [Parameter(Mandatory = $true)]
-        [ValidateSet("Compliant","NonCompliant")]
+        [ValidateSet("Compliant", "NonCompliant")]
         [System.String]
         $State,
 
@@ -21,15 +21,15 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting MinRole compliance for the current farm"
 
-    $installedVersion = Get-SPDSCInstalledProductVersion
+    $installedVersion = Get-SPDscInstalledProductVersion
     if ($installedVersion.FileMajorPart -ne 16)
     {
         throw [Exception] "MinRole is only supported in SharePoint 2016 and 2019."
     }
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
-                                  -Arguments $PSBoundParameters `
-                                  -ScriptBlock {
+    $result = Invoke-SPDscCommand -Credential $InstallAccount `
+        -Arguments $PSBoundParameters `
+        -ScriptBlock {
         $nonCompliantServices = Get-SPService | Where-Object -FilterScript {
             $_.CompliantWithMinRole -eq $false
         }
@@ -60,7 +60,7 @@ function Get-SPDscRoleTestMethod
     $assembly = [System.Reflection.Assembly]::LoadWithPartialName("Microsoft.SharePoint")
     $type = $assembly.GetType("Microsoft.SharePoint.Administration.SPServerRoleManager")
     $flags = [Reflection.BindingFlags] "NonPublic,Static"
-    return $type.GetMethod("IsCompliantWithMinRole",$flags)
+    return $type.GetMethod("IsCompliantWithMinRole", $flags)
 }
 
 function Set-TargetResource
@@ -74,7 +74,7 @@ function Set-TargetResource
         $IsSingleInstance,
 
         [Parameter(Mandatory = $true)]
-        [ValidateSet("Compliant","NonCompliant")]
+        [ValidateSet("Compliant", "NonCompliant")]
         [System.String]
         $State,
 
@@ -85,7 +85,7 @@ function Set-TargetResource
 
     Write-Verbose -Message "Setting MinRole compliance for the current farm"
 
-    $installedVersion = Get-SPDSCInstalledProductVersion
+    $installedVersion = Get-SPDscInstalledProductVersion
     if ($installedVersion.FileMajorPart -ne 16)
     {
         throw [Exception] "MinRole is only supported in SharePoint 2016 and 2019."
@@ -94,12 +94,12 @@ function Set-TargetResource
     if ($State -eq "NonCompliant")
     {
         throw ("State can only be configured to 'Compliant'. The 'NonCompliant' value is only " + `
-               "used to report when the farm is not compliant")
+                "used to report when the farm is not compliant")
     }
 
-    Invoke-SPDSCCommand -Credential $InstallAccount `
-                        -Arguments $PSBoundParameters `
-                        -ScriptBlock {
+    Invoke-SPDscCommand -Credential $InstallAccount `
+        -Arguments $PSBoundParameters `
+        -ScriptBlock {
         $method = Get-SPDscRoleTestMethod
 
         Get-SPService | Where-Object -FilterScript {
@@ -138,7 +138,7 @@ function Test-TargetResource
         $IsSingleInstance,
 
         [Parameter(Mandatory = $true)]
-        [ValidateSet("Compliant","NonCompliant")]
+        [ValidateSet("Compliant", "NonCompliant")]
         [System.String]
         $State,
 
@@ -152,17 +152,20 @@ function Test-TargetResource
     if ($State -eq "NonCompliant")
     {
         throw ("State can only be configured to 'Compliant'. The 'NonCompliant' value is only " + `
-               "used to report when the farm is not compliant")
+                "used to report when the farm is not compliant")
     }
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
+    Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
+    Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
+
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
-                                    -DesiredValues $PSBoundParameters `
-                                    -ValuesToCheck @("State")
+        -DesiredValues $PSBoundParameters `
+        -ValuesToCheck @("State")
 }
 
 Export-ModuleMember -Function Get-TargetResource, `
-                              Test-TargetResource, `
-                              Set-TargetResource, `
-                              Get-SPDscRoleTestMethod
+    Test-TargetResource, `
+    Set-TargetResource, `
+    Get-SPDscRoleTestMethod

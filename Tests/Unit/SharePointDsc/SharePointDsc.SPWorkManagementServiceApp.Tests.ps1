@@ -3,16 +3,16 @@ param(
     [Parameter()]
     [string]
     $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
-                                         -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
-                                         -Resolve)
+            -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
+            -Resolve)
 )
 
 Import-Module -Name (Join-Path -Path $PSScriptRoot `
-                                -ChildPath "..\UnitTestHelper.psm1" `
-                                -Resolve)
+        -ChildPath "..\UnitTestHelper.psm1" `
+        -Resolve)
 
 $Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointCmdletModule `
-                                              -DscResource "SPWorkManagementServiceApp"
+    -DscResource "SPWorkManagementServiceApp"
 
 Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
     InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
@@ -31,13 +31,13 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         {
             Context -Name "When a service application exists and Ensure equals 'Absent'" -Fixture {
                 $testParams = @{
-                    Name = "Test Work Management App"
+                    Name   = "Test Work Management App"
                     Ensure = "Absent"
                 }
 
                 Mock -CommandName Get-SPServiceApplication {
                     $spServiceApp = [pscustomobject]@{
-                        DisplayName = $testParams.Name
+                        DisplayName     = $testParams.Name
                         ApplicationPool = @{ Name = "Wrong App Pool Name" }
                     }
                     $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value {
@@ -58,7 +58,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
             Context -Name "When Ensure=Present and ApplicationPool parameter is missing" -Fixture {
                 $testParams = @{
-                    Name = "Test Work Management App"
+                    Name   = "Test Work Management App"
                     Ensure = "Present"
                 }
 
@@ -71,9 +71,9 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
             Context -Name "When no service applications exist in the current farm" -Fixture {
                 $testParams = @{
-                    Name = "Test Work Management App"
+                    Name            = "Test Work Management App"
                     ApplicationPool = "Test App Pool"
-                    ProxyName = "Test Work Management App Proxy"
+                    ProxyName       = "Test Work Management App Proxy"
                 }
 
                 Mock -CommandName Get-SPServiceApplication { return $null }
@@ -94,7 +94,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
             Context -Name "When service applications exist in the current farm but the specific Work Management app does not" -Fixture {
                 $testParams = @{
-                    Name = "Test Work Management App"
+                    Name            = "Test Work Management App"
                     ApplicationPool = "Test App Pool"
                 }
 
@@ -124,27 +124,27 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
             Context -Name "When a service application exists and is configured correctly" -Fixture {
                 $testParams = @{
-                    Name = "Test Work Management App"
-                    ApplicationPool = "Test App Pool"
-                    MinimumTimeBetweenEwsSyncSubscriptionSearches =10
-                    MinimumTimeBetweenProviderRefreshes=10
-                    MinimumTimeBetweenSearchQueries=10
-                    NumberOfSubscriptionSyncsPerEwsSyncRun=10
-                    NumberOfUsersEwsSyncWillProcessAtOnce=10
-                    NumberOfUsersPerEwsSyncBatch=10
+                    Name                                          = "Test Work Management App"
+                    ApplicationPool                               = "Test App Pool"
+                    MinimumTimeBetweenEwsSyncSubscriptionSearches = 10
+                    MinimumTimeBetweenProviderRefreshes           = 10
+                    MinimumTimeBetweenSearchQueries               = 10
+                    NumberOfSubscriptionSyncsPerEwsSyncRun        = 10
+                    NumberOfUsersEwsSyncWillProcessAtOnce         = 10
+                    NumberOfUsersPerEwsSyncBatch                  = 10
                 }
 
                 Mock -CommandName Get-SPServiceApplication {
                     $spServiceApp = [pscustomobject]@{
-                        DisplayName = $testParams.Name
+                        DisplayName     = $testParams.Name
                         ApplicationPool = @{ Name = $testParams.ApplicationPool }
-                        AdminSettings = @{
-                                MinimumTimeBetweenEwsSyncSubscriptionSearches =  (new-timespan -minutes 10)
-                                MinimumTimeBetweenProviderRefreshes= (new-timespan -minutes 10)
-                                MinimumTimeBetweenSearchQueries= (new-timespan -minutes 10)
-                                NumberOfSubscriptionSyncsPerEwsSyncRun=10
-                                NumberOfUsersEwsSyncWillProcessAtOnce=  10
-                                NumberOfUsersPerEwsSyncBatch=  10
+                        AdminSettings   = @{
+                            MinimumTimeBetweenEwsSyncSubscriptionSearches = (new-timespan -minutes 10)
+                            MinimumTimeBetweenProviderRefreshes           = (new-timespan -minutes 10)
+                            MinimumTimeBetweenSearchQueries               = (new-timespan -minutes 10)
+                            NumberOfSubscriptionSyncsPerEwsSyncRun        = 10
+                            NumberOfUsersEwsSyncWillProcessAtOnce         = 10
+                            NumberOfUsersPerEwsSyncBatch                  = 10
                         }
                     }
                     $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value {
@@ -164,27 +164,27 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
             Context -Name "When a service application exists and is not configured correctly" -Fixture {
                 $testParams = @{
-                    Name = "Test Work Management App"
-                    ApplicationPool = "Test App Pool"
-                    MinimumTimeBetweenEwsSyncSubscriptionSearches =20
-                    MinimumTimeBetweenProviderRefreshes=20
-                    MinimumTimeBetweenSearchQueries=20
-                    NumberOfSubscriptionSyncsPerEwsSyncRun=20
-                    NumberOfUsersEwsSyncWillProcessAtOnce=20
-                    NumberOfUsersPerEwsSyncBatch=20
+                    Name                                          = "Test Work Management App"
+                    ApplicationPool                               = "Test App Pool"
+                    MinimumTimeBetweenEwsSyncSubscriptionSearches = 20
+                    MinimumTimeBetweenProviderRefreshes           = 20
+                    MinimumTimeBetweenSearchQueries               = 20
+                    NumberOfSubscriptionSyncsPerEwsSyncRun        = 20
+                    NumberOfUsersEwsSyncWillProcessAtOnce         = 20
+                    NumberOfUsersPerEwsSyncBatch                  = 20
                 }
 
                 Mock -CommandName Get-SPServiceApplication {
                     $spServiceApp = [pscustomobject]@{
-                        DisplayName = $testParams.Name
+                        DisplayName     = $testParams.Name
                         ApplicationPool = @{ Name = "Wrong App Pool Name" }
-                        AdminSettings = @{
-                                MinimumTimeBetweenEwsSyncSubscriptionSearches =  (new-timespan -minutes 10)
-                                MinimumTimeBetweenProviderRefreshes= (new-timespan -minutes 10)
-                                MinimumTimeBetweenSearchQueries= (new-timespan -minutes 10)
-                                NumberOfSubscriptionSyncsPerEwsSyncRun=10
-                                NumberOfUsersEwsSyncWillProcessAtOnce=  10
-                                NumberOfUsersPerEwsSyncBatch=  10
+                        AdminSettings   = @{
+                            MinimumTimeBetweenEwsSyncSubscriptionSearches = (new-timespan -minutes 10)
+                            MinimumTimeBetweenProviderRefreshes           = (new-timespan -minutes 10)
+                            MinimumTimeBetweenSearchQueries               = (new-timespan -minutes 10)
+                            NumberOfSubscriptionSyncsPerEwsSyncRun        = 10
+                            NumberOfUsersEwsSyncWillProcessAtOnce         = 10
+                            NumberOfUsersPerEwsSyncBatch                  = 10
                         }
                     }
                     $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value {
@@ -214,14 +214,14 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         {
             Context -Name "Trying to use SPWorkManagementServiceApp in SP2016/SP2019, not available" -Fixture {
                 $testParams = @{
-                    Name = "Test Work Management App"
-                    ApplicationPool = "Test App Pool"
-                    MinimumTimeBetweenEwsSyncSubscriptionSearches =20
-                    MinimumTimeBetweenProviderRefreshes=20
-                    MinimumTimeBetweenSearchQueries=20
-                    NumberOfSubscriptionSyncsPerEwsSyncRun=20
-                    NumberOfUsersEwsSyncWillProcessAtOnce=20
-                    NumberOfUsersPerEwsSyncBatch=20
+                    Name                                          = "Test Work Management App"
+                    ApplicationPool                               = "Test App Pool"
+                    MinimumTimeBetweenEwsSyncSubscriptionSearches = 20
+                    MinimumTimeBetweenProviderRefreshes           = 20
+                    MinimumTimeBetweenSearchQueries               = 20
+                    NumberOfSubscriptionSyncsPerEwsSyncRun        = 20
+                    NumberOfUsersEwsSyncWillProcessAtOnce         = 20
+                    NumberOfUsersPerEwsSyncBatch                  = 20
                 }
 
                 It "Should throw an exception in the Get method" {

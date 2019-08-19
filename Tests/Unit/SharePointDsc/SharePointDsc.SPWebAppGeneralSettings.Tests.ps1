@@ -3,16 +3,16 @@ param(
     [Parameter()]
     [string]
     $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
-                                         -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
-                                         -Resolve)
+            -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
+            -Resolve)
 )
 
 Import-Module -Name (Join-Path -Path $PSScriptRoot `
-                                -ChildPath "..\UnitTestHelper.psm1" `
-                                -Resolve)
+        -ChildPath "..\UnitTestHelper.psm1" `
+        -Resolve)
 
 $Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointCmdletModule `
-                                              -DscResource "SPWebAppGeneralSettings"
+    -DscResource "SPWebAppGeneralSettings"
 
 Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
     InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
@@ -26,71 +26,71 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         Mock -CommandName Get-SPAuthenticationProvider -MockWith {
             return @{
                 DisableKerberos = $true
-                AllowAnonymous = $false
+                AllowAnonymous  = $false
             }
         }
 
         # Test contexts
         Context -Name "The web application exists and has the correct general settings" -Fixture {
             $testParams = @{
-                WebAppUrl = "http://sites.sharepoint.com"
-                TimeZone = 3081
-                Alerts = $true
-                AlertsLimit = 10
-                RSS = $true
-                BlogAPI = $true
-                BlogAPIAuthenticated = $true
-                BrowserFileHandling = "Permissive"
-                SecurityValidation = $true
-                SecurityValidationExpires = $true
+                WebAppUrl                        = "http://sites.sharepoint.com"
+                TimeZone                         = 3081
+                Alerts                           = $true
+                AlertsLimit                      = 10
+                RSS                              = $true
+                BlogAPI                          = $true
+                BlogAPIAuthenticated             = $true
+                BrowserFileHandling              = "Permissive"
+                SecurityValidation               = $true
+                SecurityValidationExpires        = $true
                 SecurityValidationTimeoutMinutes = 10
-                RecycleBinEnabled = $true
-                RecycleBinCleanupEnabled = $true
-                RecycleBinRetentionPeriod = 30
-                SecondStageRecycleBinQuota = 30
-                MaximumUploadSize = 100
-                CustomerExperienceProgram = $true
-                PresenceEnabled = $true
-                DefaultQuotaTemplate = "Project"
+                RecycleBinEnabled                = $true
+                RecycleBinCleanupEnabled         = $true
+                RecycleBinRetentionPeriod        = 30
+                SecondStageRecycleBinQuota       = 30
+                MaximumUploadSize                = 100
+                CustomerExperienceProgram        = $true
+                PresenceEnabled                  = $true
+                DefaultQuotaTemplate             = "Project"
             }
 
             Mock -CommandName Get-SPWebapplication -MockWith {
                 $webApp = @{
-                    DisplayName = $testParams.Name
-                    ApplicationPool = @{
-                        Name = $testParams.ApplicationPool
+                    DisplayName                     = $testParams.Name
+                    ApplicationPool                 = @{
+                        Name     = $testParams.ApplicationPool
                         Username = $testParams.ApplicationPoolAccount
                     }
-                    ContentDatabases = @(
+                    ContentDatabases                = @(
                         @{
-                            Name = "SP_Content_01"
+                            Name   = "SP_Content_01"
                             Server = "sql.domain.local"
                         }
                     )
-                    IisSettings = @(
+                    IisSettings                     = @(
                         @{ Path = "C:\inetpub\wwwroot\something" }
                     )
-                    Url = $testParams.WebAppUrl
-                    DefaultTimeZone = $testParams.TimeZone
-                    AlertsEnabled = $testParams.Alerts
-                    AlertsMaximum = $testParams.AlertsLimit
-                    SyndicationEnabled = $testParams.RSS
-                    MetaWeblogEnabled = $testParams.BlogAPI
+                    Url                             = $testParams.WebAppUrl
+                    DefaultTimeZone                 = $testParams.TimeZone
+                    AlertsEnabled                   = $testParams.Alerts
+                    AlertsMaximum                   = $testParams.AlertsLimit
+                    SyndicationEnabled              = $testParams.RSS
+                    MetaWeblogEnabled               = $testParams.BlogAPI
                     MetaWeblogAuthenticationEnabled = $testParams.BlogAPIAuthenticated
-                    BrowserFileHandling = $testParams.BrowserFileHandling
-                    FormDigestSettings = @{
+                    BrowserFileHandling             = $testParams.BrowserFileHandling
+                    FormDigestSettings              = @{
                         Enabled = $testParams.SecurityValidation
                         Expires = $testParams.SecurityValidationExpires
                         Timeout = (new-timespan -minutes $testParams.SecurityValidationTimeoutMinutes)
                     }
-                    RecycleBinEnabled = $testParams.RecycleBinEnabled
-                    RecycleBinCleanupEnabled = $testParams.RecycleBinCleanupEnabled
-                    RecycleBinRetentionPeriod = $testParams.RecycleBinRetentionPeriod
-                    SecondStageRecycleBinQuota = $testParams.SecondStageRecycleBinQuota
-                    MaximumFileSize = $testParams.MaximumUploadSize
-                    BrowserCEIPEnabled = $testParams.CustomerExperienceProgram
-                    PresenceEnabled = $testParams.PresenceEnabled
-                    DefaultQuotaTemplate = $testParams.DefaultQuotaTemplate
+                    RecycleBinEnabled               = $testParams.RecycleBinEnabled
+                    RecycleBinCleanupEnabled        = $testParams.RecycleBinCleanupEnabled
+                    RecycleBinRetentionPeriod       = $testParams.RecycleBinRetentionPeriod
+                    SecondStageRecycleBinQuota      = $testParams.SecondStageRecycleBinQuota
+                    MaximumFileSize                 = $testParams.MaximumUploadSize
+                    BrowserCEIPEnabled              = $testParams.CustomerExperienceProgram
+                    PresenceEnabled                 = $testParams.PresenceEnabled
+                    DefaultQuotaTemplate            = $testParams.DefaultQuotaTemplate
                 }
                 $webApp = $webApp | Add-Member -MemberType ScriptMethod -Name Update -Value {
                     $Global:SPDscWebApplicationUpdateCalled = $true
@@ -109,33 +109,33 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "The web application exists and uses incorrect general settings" -Fixture {
             $testParams = @{
-                WebAppUrl = "http://sites.sharepoint.com"
-                TimeZone = 3081
-                Alerts = $true
-                AlertsLimit = 10
-                RSS = $true
-                BlogAPI = $true
-                BlogAPIAuthenticated = $true
-                BrowserFileHandling = "Permissive"
-                SecurityValidation = $true
-                SecurityValidationExpires = $true
+                WebAppUrl                        = "http://sites.sharepoint.com"
+                TimeZone                         = 3081
+                Alerts                           = $true
+                AlertsLimit                      = 10
+                RSS                              = $true
+                BlogAPI                          = $true
+                BlogAPIAuthenticated             = $true
+                BrowserFileHandling              = "Permissive"
+                SecurityValidation               = $true
+                SecurityValidationExpires        = $true
                 SecurityValidationTimeoutMinutes = 10
-                RecycleBinEnabled = $true
-                RecycleBinCleanupEnabled = $true
-                RecycleBinRetentionPeriod = 30
-                SecondStageRecycleBinQuota = 30
-                MaximumUploadSize = 100
-                CustomerExperienceProgram = $true
-                PresenceEnabled = $true
-                DefaultQuotaTemplate = "Project"
+                RecycleBinEnabled                = $true
+                RecycleBinCleanupEnabled         = $true
+                RecycleBinRetentionPeriod        = 30
+                SecondStageRecycleBinQuota       = 30
+                MaximumUploadSize                = 100
+                CustomerExperienceProgram        = $true
+                PresenceEnabled                  = $true
+                DefaultQuotaTemplate             = "Project"
             }
 
-            Mock -CommandName Get-SPDSCContentService -MockWith {
+            Mock -CommandName Get-SPDscContentService -MockWith {
                 $returnVal = @{
                     QuotaTemplates = @{
                         Project = @{
-                            StorageMaximumLevel = 1073741824
-                            StorageWarningLevel = 536870912
+                            StorageMaximumLevel  = 1073741824
+                            StorageWarningLevel  = 536870912
                             UserCodeMaximumLevel = 1000
                             UserCodeWarningLevel = 800
                         }
@@ -146,38 +146,38 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
             Mock -CommandName Get-SPWebapplication -MockWith {
                 $webApp = @{
-                    DisplayName = $testParams.Name
-                    ApplicationPool = @{
-                        Name = $testParams.ApplicationPool
+                    DisplayName                     = $testParams.Name
+                    ApplicationPool                 = @{
+                        Name     = $testParams.ApplicationPool
                         Username = $testParams.ApplicationPoolAccount
                     }
-                    ContentDatabases = @(
+                    ContentDatabases                = @(
                         @{
-                            Name = "SP_Content_01"
+                            Name   = "SP_Content_01"
                             Server = "sql.domain.local"
                         }
                     )
-                    IisSettings = @(
+                    IisSettings                     = @(
                         @{ Path = "C:\inetpub\wwwroot\something" }
                     )
-                    Url = $testParams.WebAppUrl
-                    DefaultTimeZone = 1
-                    AlertsEnabled = $false
-                    AlertsMaximum = 1
-                    SyndicationEnabled = $false
-                    MetaWeblogEnabled = $false
+                    Url                             = $testParams.WebAppUrl
+                    DefaultTimeZone                 = 1
+                    AlertsEnabled                   = $false
+                    AlertsMaximum                   = 1
+                    SyndicationEnabled              = $false
+                    MetaWeblogEnabled               = $false
                     MetaWeblogAuthenticationEnabled = $false
-                    BrowserFileHandling = "Strict"
-                    FormDigestSettings = @{
+                    BrowserFileHandling             = "Strict"
+                    FormDigestSettings              = @{
                         Enabled = $false
                     }
-                    RecycleBinEnabled = $false
-                    RecycleBinCleanupEnabled = $false
-                    RecycleBinRetentionPeriod = 1
-                    SecondStageRecycleBinQuota = 1
-                    MaximumFileSize = 1
-                    BrowserCEIPEnabled = $false
-                    PresenceEnabled = $false
+                    RecycleBinEnabled               = $false
+                    RecycleBinCleanupEnabled        = $false
+                    RecycleBinRetentionPeriod       = 1
+                    SecondStageRecycleBinQuota      = 1
+                    MaximumFileSize                 = 1
+                    BrowserCEIPEnabled              = $false
+                    PresenceEnabled                 = $false
                 }
                 $webApp = $webApp | Add-Member -MemberType ScriptMethod -Name Update -Value {
                     $Global:SPDscWebApplicationUpdateCalled = $true
@@ -202,25 +202,25 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "The specified web application does not exist" -Fixture {
             $testParams = @{
-                WebAppUrl = "http://sites.sharepoint.com"
-                TimeZone = 3081
-                Alerts = $true
-                AlertsLimit = 10
-                RSS = $true
-                BlogAPI = $true
-                BlogAPIAuthenticated = $true
-                BrowserFileHandling = "Permissive"
-                SecurityValidation = $true
-                SecurityValidationExpires = $true
+                WebAppUrl                        = "http://sites.sharepoint.com"
+                TimeZone                         = 3081
+                Alerts                           = $true
+                AlertsLimit                      = 10
+                RSS                              = $true
+                BlogAPI                          = $true
+                BlogAPIAuthenticated             = $true
+                BrowserFileHandling              = "Permissive"
+                SecurityValidation               = $true
+                SecurityValidationExpires        = $true
                 SecurityValidationTimeoutMinutes = 10
-                RecycleBinEnabled = $true
-                RecycleBinCleanupEnabled = $true
-                RecycleBinRetentionPeriod = 30
-                SecondStageRecycleBinQuota = 30
-                MaximumUploadSize = 100
-                CustomerExperienceProgram = $true
-                PresenceEnabled = $true
-                DefaultQuotaTemplate = "NotExist"
+                RecycleBinEnabled                = $true
+                RecycleBinCleanupEnabled         = $true
+                RecycleBinRetentionPeriod        = 30
+                SecondStageRecycleBinQuota       = 30
+                MaximumUploadSize                = 100
+                CustomerExperienceProgram        = $true
+                PresenceEnabled                  = $true
+                DefaultQuotaTemplate             = "NotExist"
             }
 
             Mock -CommandName Get-SPWebapplication -MockWith {
@@ -238,33 +238,33 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "The specified Quota Template does not exist" -Fixture {
             $testParams = @{
-                WebAppUrl = "http://sites.sharepoint.com"
-                TimeZone = 3081
-                Alerts = $true
-                AlertsLimit = 10
-                RSS = $true
-                BlogAPI = $true
-                BlogAPIAuthenticated = $true
-                BrowserFileHandling = "Permissive"
-                SecurityValidation = $true
-                SecurityValidationExpires = $true
+                WebAppUrl                        = "http://sites.sharepoint.com"
+                TimeZone                         = 3081
+                Alerts                           = $true
+                AlertsLimit                      = 10
+                RSS                              = $true
+                BlogAPI                          = $true
+                BlogAPIAuthenticated             = $true
+                BrowserFileHandling              = "Permissive"
+                SecurityValidation               = $true
+                SecurityValidationExpires        = $true
                 SecurityValidationTimeoutMinutes = 10
-                RecycleBinEnabled = $true
-                RecycleBinCleanupEnabled = $true
-                RecycleBinRetentionPeriod = 30
-                SecondStageRecycleBinQuota = 30
-                MaximumUploadSize = 100
-                CustomerExperienceProgram = $true
-                PresenceEnabled = $true
-                DefaultQuotaTemplate = "NotExist"
+                RecycleBinEnabled                = $true
+                RecycleBinCleanupEnabled         = $true
+                RecycleBinRetentionPeriod        = 30
+                SecondStageRecycleBinQuota       = 30
+                MaximumUploadSize                = 100
+                CustomerExperienceProgram        = $true
+                PresenceEnabled                  = $true
+                DefaultQuotaTemplate             = "NotExist"
             }
 
-            Mock -CommandName Get-SPDSCContentService -MockWith {
+            Mock -CommandName Get-SPDscContentService -MockWith {
                 $returnVal = @{
                     QuotaTemplates = @{
                         Project = @{
-                            StorageMaximumLevel = 1073741824
-                            StorageWarningLevel = 536870912
+                            StorageMaximumLevel  = 1073741824
+                            StorageWarningLevel  = 536870912
                             UserCodeMaximumLevel = 1000
                             UserCodeWarningLevel = 800
                         }
@@ -275,38 +275,38 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
             Mock -CommandName Get-SPWebapplication -MockWith {
                 $webApp = @{
-                    DisplayName = $testParams.Name
-                    ApplicationPool = @{
-                        Name = $testParams.ApplicationPool
+                    DisplayName                     = $testParams.Name
+                    ApplicationPool                 = @{
+                        Name     = $testParams.ApplicationPool
                         Username = $testParams.ApplicationPoolAccount
                     }
-                    ContentDatabases = @(
+                    ContentDatabases                = @(
                         @{
-                            Name = "SP_Content_01"
+                            Name   = "SP_Content_01"
                             Server = "sql.domain.local"
                         }
                     )
-                    IisSettings = @(
+                    IisSettings                     = @(
                         @{ Path = "C:\inetpub\wwwroot\something" }
                     )
-                    Url = $testParams.WebAppUrl
-                    DefaultTimeZone = 1
-                    AlertsEnabled = $false
-                    AlertsMaximum = 1
-                    SyndicationEnabled = $false
-                    MetaWeblogEnabled = $false
+                    Url                             = $testParams.WebAppUrl
+                    DefaultTimeZone                 = 1
+                    AlertsEnabled                   = $false
+                    AlertsMaximum                   = 1
+                    SyndicationEnabled              = $false
+                    MetaWeblogEnabled               = $false
                     MetaWeblogAuthenticationEnabled = $false
-                    BrowserFileHandling = "Strict"
-                    FormDigestSettings = @{
+                    BrowserFileHandling             = "Strict"
+                    FormDigestSettings              = @{
                         Enabled = $false
                     }
-                    RecycleBinEnabled = $false
-                    RecycleBinCleanupEnabled = $false
-                    RecycleBinRetentionPeriod = 1
-                    SecondStageRecycleBinQuota = 1
-                    MaximumFileSize = 1
-                    BrowserCEIPEnabled = $false
-                    PresenceEnabled = $false
+                    RecycleBinEnabled               = $false
+                    RecycleBinCleanupEnabled        = $false
+                    RecycleBinRetentionPeriod       = 1
+                    SecondStageRecycleBinQuota      = 1
+                    MaximumFileSize                 = 1
+                    BrowserCEIPEnabled              = $false
+                    PresenceEnabled                 = $false
                 }
                 $webApp = $webApp | Add-Member -MemberType ScriptMethod -Name Update -Value {
                     $Global:SPDscWebApplicationUpdateCalled = $true

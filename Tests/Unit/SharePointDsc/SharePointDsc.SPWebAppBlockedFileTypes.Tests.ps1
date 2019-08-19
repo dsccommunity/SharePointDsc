@@ -3,16 +3,16 @@ param(
     [Parameter()]
     [string]
     $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
-                                         -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
-                                         -Resolve)
+            -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
+            -Resolve)
 )
 
 Import-Module -Name (Join-Path -Path $PSScriptRoot `
-                                -ChildPath "..\UnitTestHelper.psm1" `
-                                -Resolve)
+        -ChildPath "..\UnitTestHelper.psm1" `
+        -Resolve)
 
 $Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointCmdletModule `
-                                              -DscResource "SPWebAppBlockedFileTypes"
+    -DscResource "SPWebAppBlockedFileTypes"
 
 Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
     InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
@@ -26,7 +26,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         Mock -CommandName Get-SPAuthenticationProvider -MockWith {
             return @{
                 DisableKerberos = $true
-                AllowAnonymous = $false
+                AllowAnonymous  = $false
             }
         }
 
@@ -34,27 +34,27 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         Context -Name "The web appliation exists and a specific blocked file type list matches" -Fixture {
             $testParams = @{
                 WebAppUrl = "http://sites.sharepoint.com"
-                Blocked = @("exe", "dll", "ps1")
+                Blocked   = @("exe", "dll", "ps1")
             }
 
             Mock -CommandName Get-SPWebapplication -MockWith {
                 [Collections.Generic.List[String]]$CurrentBlockedFiles = @("exe", "ps1", "dll")
                 $webApp = @{
-                    DisplayName = $testParams.Name
-                    ApplicationPool = @{
-                        Name = $testParams.ApplicationPool
+                    DisplayName           = $testParams.Name
+                    ApplicationPool       = @{
+                        Name     = $testParams.ApplicationPool
                         Username = $testParams.ApplicationPoolAccount
                     }
-                    ContentDatabases = @(
+                    ContentDatabases      = @(
                         @{
-                            Name = "SP_Content_01"
+                            Name   = "SP_Content_01"
                             Server = "sql.domain.local"
                         }
                     )
-                    IisSettings = @(
+                    IisSettings           = @(
                         @{ Path = "C:\inetpub\wwwroot\something" }
                     )
-                    Url = $testParams.WebAppUrl
+                    Url                   = $testParams.WebAppUrl
                     BlockedFileExtensions = $CurrentBlockedFiles
                 }
                 $webApp = $webApp | Add-Member -MemberType ScriptMethod -Name Update -Value {
@@ -64,7 +64,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             It "Should return the current data from the get method" {
-                Get-TargetResource @testParams | Should Not BeNullOrEmpty
+                (Get-TargetResource @testParams).Blocked.Count | Should Be 3
             }
 
             It "Should return true from the test method" {
@@ -75,27 +75,27 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         Context -Name "The web appliation exists and a specific blocked file type list does not match" -Fixture {
             $testParams = @{
                 WebAppUrl = "http://sites.sharepoint.com"
-                Blocked = @("exe", "dll", "ps1")
+                Blocked   = @("exe", "dll", "ps1")
             }
 
             Mock -CommandName Get-SPWebapplication -MockWith {
                 [Collections.Generic.List[String]]$CurrentBlockedFiles = @("exe", "pdf", "dll")
                 $webApp = @{
-                    DisplayName = $testParams.Name
-                    ApplicationPool = @{
-                        Name = $testParams.ApplicationPool
+                    DisplayName           = $testParams.Name
+                    ApplicationPool       = @{
+                        Name     = $testParams.ApplicationPool
                         Username = $testParams.ApplicationPoolAccount
                     }
-                    ContentDatabases = @(
+                    ContentDatabases      = @(
                         @{
-                            Name = "SP_Content_01"
+                            Name   = "SP_Content_01"
                             Server = "sql.domain.local"
                         }
                     )
-                    IisSettings = @(
+                    IisSettings           = @(
                         @{ Path = "C:\inetpub\wwwroot\something" }
                     )
-                    Url = $testParams.WebAppUrl
+                    Url                   = $testParams.WebAppUrl
                     BlockedFileExtensions = $CurrentBlockedFiles
                 }
                 $webApp = $webApp | Add-Member -MemberType ScriptMethod -Name Update -Value {
@@ -105,7 +105,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             It "Should return the current data from the get method" {
-                Get-TargetResource @testParams | Should Not BeNullOrEmpty
+                (Get-TargetResource @testParams).Blocked.Count | Should Be 3
             }
 
             It "Should return false from the test method" {
@@ -121,7 +121,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "The web appliation exists and a list of types to include and exclude both match" -Fixture {
             $testParams = @{
-                WebAppUrl = "http://sites.sharepoint.com"
+                WebAppUrl     = "http://sites.sharepoint.com"
                 EnsureBlocked = @("exe")
                 EnsureAllowed = @("pdf")
             }
@@ -129,21 +129,21 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             Mock -CommandName Get-SPWebapplication -MockWith {
                 [Collections.Generic.List[String]]$CurrentBlockedFiles = @("exe", "ps1", "dll")
                 $webApp = @{
-                    DisplayName = $testParams.Name
-                    ApplicationPool = @{
-                        Name = $testParams.ApplicationPool
+                    DisplayName           = $testParams.Name
+                    ApplicationPool       = @{
+                        Name     = $testParams.ApplicationPool
                         Username = $testParams.ApplicationPoolAccount
                     }
-                    ContentDatabases = @(
+                    ContentDatabases      = @(
                         @{
-                            Name = "SP_Content_01"
+                            Name   = "SP_Content_01"
                             Server = "sql.domain.local"
                         }
                     )
-                    IisSettings = @(
+                    IisSettings           = @(
                         @{ Path = "C:\inetpub\wwwroot\something" }
                     )
-                    Url = $testParams.WebAppUrl
+                    Url                   = $testParams.WebAppUrl
                     BlockedFileExtensions = $CurrentBlockedFiles
                 }
                 $webApp = $webApp | Add-Member -MemberType ScriptMethod -Name Update -Value {
@@ -153,7 +153,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             It "Should return the current data from the get method" {
-                Get-TargetResource @testParams | Should Not BeNullOrEmpty
+                (Get-TargetResource @testParams).Blocked.Count | Should Be 3
             }
 
             It "Should return true from the test method" {
@@ -163,7 +163,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "The web appliation exists and a list of types to include and exclude both failed" -Fixture {
             $testParams = @{
-                WebAppUrl = "http://sites.sharepoint.com"
+                WebAppUrl     = "http://sites.sharepoint.com"
                 EnsureBlocked = @("exe")
                 EnsureAllowed = @("pdf")
             }
@@ -171,21 +171,21 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             Mock -CommandName Get-SPWebapplication -MockWith {
                 [Collections.Generic.List[String]]$CurrentBlockedFiles = @("pdf", "dll")
                 $webApp = @{
-                    DisplayName = $testParams.Name
-                    ApplicationPool = @{
-                        Name = $testParams.ApplicationPool
+                    DisplayName           = $testParams.Name
+                    ApplicationPool       = @{
+                        Name     = $testParams.ApplicationPool
                         Username = $testParams.ApplicationPoolAccount
                     }
-                    ContentDatabases = @(
+                    ContentDatabases      = @(
                         @{
-                            Name = "SP_Content_01"
+                            Name   = "SP_Content_01"
                             Server = "sql.domain.local"
                         }
                     )
-                    IisSettings = @(
+                    IisSettings           = @(
                         @{ Path = "C:\inetpub\wwwroot\something" }
                     )
-                    Url = $testParams.WebAppUrl
+                    Url                   = $testParams.WebAppUrl
                     BlockedFileExtensions = $CurrentBlockedFiles
                 }
                 $webApp = $webApp | Add-Member -MemberType ScriptMethod -Name Update -Value {
@@ -195,7 +195,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             It "Should return the current data from the get method" {
-                Get-TargetResource @testParams | Should Not BeNullOrEmpty
+                (Get-TargetResource @testParams).Blocked.Count | Should Be 2
             }
 
             It "Should return false from the test method" {
@@ -211,8 +211,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "All blocked file type parameters are passed to the methods" -Fixture {
             $testParams = @{
-                WebAppUrl = "http://sites.sharepoint.com"
-                Blocked = @("exe", "dll", "ps1")
+                WebAppUrl     = "http://sites.sharepoint.com"
+                Blocked       = @("exe", "dll", "ps1")
                 EnsureBlocked = @("exe", "dll")
                 EnsureAllowed = @("ps1")
             }
@@ -220,21 +220,21 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             Mock -CommandName Get-SPWebapplication -MockWith {
                 [Collections.Generic.List[String]]$CurrentBlockedFiles = @("pdf", "dll")
                 $webApp = @{
-                    DisplayName = $testParams.Name
-                    ApplicationPool = @{
-                        Name = $testParams.ApplicationPool
+                    DisplayName           = $testParams.Name
+                    ApplicationPool       = @{
+                        Name     = $testParams.ApplicationPool
                         Username = $testParams.ApplicationPoolAccount
                     }
-                    ContentDatabases = @(
+                    ContentDatabases      = @(
                         @{
-                            Name = "SP_Content_01"
+                            Name   = "SP_Content_01"
                             Server = "sql.domain.local"
                         }
                     )
-                    IisSettings = @(
+                    IisSettings           = @(
                         @{ Path = "C:\inetpub\wwwroot\something" }
                     )
-                    Url = $testParams.WebAppUrl
+                    Url                   = $testParams.WebAppUrl
                     BlockedFileExtensions = $CurrentBlockedFiles
                 }
                 $webApp = $webApp | Add-Member -MemberType ScriptMethod -Name Update -Value {
@@ -260,21 +260,21 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             Mock -CommandName Get-SPWebapplication -MockWith {
                 [Collections.Generic.List[String]]$CurrentBlockedFiles = @("pdf", "dll")
                 $webApp = @{
-                    DisplayName = $testParams.Name
-                    ApplicationPool = @{
-                        Name = $testParams.ApplicationPool
+                    DisplayName           = $testParams.Name
+                    ApplicationPool       = @{
+                        Name     = $testParams.ApplicationPool
                         Username = $testParams.ApplicationPoolAccount
                     }
-                    ContentDatabases = @(
+                    ContentDatabases      = @(
                         @{
-                            Name = "SP_Content_01"
+                            Name   = "SP_Content_01"
                             Server = "sql.domain.local"
                         }
                     )
-                    IisSettings = @(
+                    IisSettings           = @(
                         @{ Path = "C:\inetpub\wwwroot\something" }
                     )
-                    Url = $testParams.WebAppUrl
+                    Url                   = $testParams.WebAppUrl
                     BlockedFileExtensions = $CurrentBlockedFiles
                 }
                 $webApp = $webApp | Add-Member -MemberType ScriptMethod -Name Update -Value {

@@ -27,22 +27,27 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting web application '$WebAppUrl' blocked file types"
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
-                                  -Arguments @($PSBoundParameters,$PSScriptRoot) `
-                                  -ScriptBlock {
+    $result = Invoke-SPDscCommand -Credential $InstallAccount `
+        -Arguments @($PSBoundParameters, $PSScriptRoot) `
+        -ScriptBlock {
         $params = $args[0]
         $ScriptRoot = $args[1]
 
         $wa = Get-SPWebApplication -Identity $params.WebAppUrl -ErrorAction SilentlyContinue
         if ($null -eq $wa)
         {
-            return $null
+            return @{
+                WebAppUrl     = $null
+                Blocked       = $null
+                EnsureBlocked = $null
+                EnsureAllowed = $null
+            }
         }
 
         $modulePath = "..\..\Modules\SharePointDsc.WebApplication\SPWebApplication.BlockedFileTypes.psm1"
         Import-Module -Name (Join-Path -Path $ScriptRoot -ChildPath $modulePath -Resolve)
 
-        $result = Get-SPDSCWebApplicationBlockedFileTypeConfig -WebApplication $wa
+        $result = Get-SPDscWebApplicationBlockedFileTypeConfig -WebApplication $wa
         $result.Add("WebAppUrl", $params.WebAppUrl)
         $result.Add("InstallAccount", $params.InstallAccount)
         return $result
@@ -79,9 +84,9 @@ function Set-TargetResource
 
     Write-Verbose -Message "Setting web application '$WebAppUrl' blocked file types"
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
-                                  -Arguments @($PSBoundParameters,$PSScriptRoot) `
-                                  -ScriptBlock {
+    $null = Invoke-SPDscCommand -Credential $InstallAccount `
+        -Arguments @($PSBoundParameters, $PSScriptRoot) `
+        -ScriptBlock {
         $params = $args[0]
         $ScriptRoot = $args[1]
 
@@ -95,7 +100,7 @@ function Set-TargetResource
         $modulePath = "..\..\Modules\SharePointDsc.WebApplication\SPWebApplication.BlockedFileTypes.psm1"
         Import-Module -Name (Join-Path -Path $ScriptRoot -ChildPath $modulePath -Resolve)
 
-        Set-SPDSCWebApplicationBlockedFileTypeConfig -WebApplication $wa -Settings $params
+        Set-SPDscWebApplicationBlockedFileTypeConfig -WebApplication $wa -Settings $params
         $wa.Update()
     }
 }
@@ -131,16 +136,14 @@ function Test-TargetResource
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
-    if ($null -eq $CurrentValues)
-    {
-        return $false
-    }
+    Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
+    Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
 
     $modulePath = "..\..\Modules\SharePointDsc.WebApplication\SPWebApplication.BlockedFileTypes.psm1"
     Import-Module -Name (Join-Path -Path $PSScriptRoot -ChildPath $modulePath -Resolve)
 
-    return Test-SPDSCWebApplicationBlockedFileTypeConfig -CurrentSettings $CurrentValues `
-                                                         -DesiredSettings $PSBoundParameters
+    return Test-SPDscWebApplicationBlockedFileTypeConfig -CurrentSettings $CurrentValues `
+        -DesiredSettings $PSBoundParameters
 }
 
 Export-ModuleMember -Function *-TargetResource

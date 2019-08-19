@@ -13,7 +13,7 @@ function Get-TargetResource
         $ServiceAppName,
 
         [Parameter(Mandatory = $true)]
-        [ValidateSet("Binary","DateTime","Decimal","Double","Integer","Text","YesNo")]
+        [ValidateSet("Binary", "DateTime", "Decimal", "Double", "Integer", "Text", "YesNo")]
         [System.String]
         $PropertyType,
 
@@ -66,7 +66,7 @@ function Get-TargetResource
         $CrawledProperties,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present",
 
@@ -77,9 +77,9 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting Managed Property Setting for '$Name'"
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
-                                  -Arguments @($PSBoundParameters) `
-                                  -ScriptBlock {
+    $result = Invoke-SPDscCommand -Credential $InstallAccount `
+        -Arguments @($PSBoundParameters) `
+        -ScriptBlock {
         $params = $args[0]
 
         $ssa = Get-SPEnterpriseSearchServiceApplication -Identity $params.ServiceAppName
@@ -89,14 +89,14 @@ function Get-TargetResource
                    invalid. Please make sure you specify the name of an existing service application.")
         }
         $managedProperty = Get-SPEnterpriseSearchMetadataManagedProperty -SearchApplication $ssa | `
-                                    Where-Object{$_.Name -eq $params.Name}
+            Where-Object { $_.Name -eq $params.Name }
         if ($null -eq $managedProperty)
         {
             return @{
-                Name = $params.Name
+                Name           = $params.Name
                 ServiceAppName = $params.ServiceAppName
-                PropertyType = $params.PropertyType
-                Ensure = "Absent"
+                PropertyType   = $params.PropertyType
+                Ensure         = "Absent"
             }
         }
         else
@@ -110,21 +110,21 @@ function Get-TargetResource
                 $includeAllCrawlProperties = $false
             }
             $results = @{
-                Name = $params.Name
-                ServiceAppName = $params.ServiceAppName
-                PropertyType = $managedProperty.ManagedType
-                Searchable = $managedProperty.Searchable
-                Queryable = $managedPRoperty.Queryable
-                Retrievable = $managedProperty.Retrievable
-                HasMultipleValues = $managedProperty.HasMultipleValues
-                Refinable = $managedProperty.Refinable
-                Sortable = $managedProperty.Sortable
-                SafeForAnonymous = $managedProperty.SafeForAnonymous
-                Aliases = $aliases
-                TokenNormalization = $managedProperty.TokenNormalization
-                NoWordBreaker = $managedProperty.NoWordBreaker
+                Name                        = $params.Name
+                ServiceAppName              = $params.ServiceAppName
+                PropertyType                = $managedProperty.ManagedType
+                Searchable                  = $managedProperty.Searchable
+                Queryable                   = $managedPRoperty.Queryable
+                Retrievable                 = $managedProperty.Retrievable
+                HasMultipleValues           = $managedProperty.HasMultipleValues
+                Refinable                   = $managedProperty.Refinable
+                Sortable                    = $managedProperty.Sortable
+                SafeForAnonymous            = $managedProperty.SafeForAnonymous
+                Aliases                     = $aliases
+                TokenNormalization          = $managedProperty.TokenNormalization
+                NoWordBreaker               = $managedProperty.NoWordBreaker
                 IncludeAllCrawledProperties = $includeAllCrawlProperties
-                Ensure = "Present"
+                Ensure                      = "Present"
             }
 
             if (!$includeAllCrawlProperties)
@@ -156,7 +156,7 @@ function Set-TargetResource
         $ServiceAppName,
 
         [Parameter(Mandatory = $true)]
-        [ValidateSet("Binary","DateTime","Decimal","Double","Integer","Text","YesNo")]
+        [ValidateSet("Binary", "DateTime", "Decimal", "Double", "Integer", "Text", "YesNo")]
         [System.String]
         $PropertyType,
 
@@ -209,7 +209,7 @@ function Set-TargetResource
         $CrawledProperties,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present",
 
@@ -224,10 +224,10 @@ function Set-TargetResource
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
     # Validate that the specified crawled properties are all valid and existing
-    Invoke-SPDSCCommand -Credential $InstallAccount `
-                        -Arguments @($PSBoundParameters, `
-                                     $CurrentValues) `
-                        -ScriptBlock {
+    Invoke-SPDscCommand -Credential $InstallAccount `
+        -Arguments @($PSBoundParameters, `
+            $CurrentValues) `
+        -ScriptBlock {
         $params = $args[0]
         $CurrentValues = $args[1]
 
@@ -244,7 +244,7 @@ function Set-TargetResource
         foreach ($mappedCrawlProperty in $params.CrawledProperties)
         {
             $currentCrawlProperty = Get-SPEnterpriseSearchMetadataCrawledProperty -Name $mappedCrawlProperty `
-                                                                                  -SearchApplication $params.ServiceAppName
+                -SearchApplication $params.ServiceAppName
             if (!$currentCrawlProperty)
             {
                 throw("The specified crawled property $($mappedCrawlProperty) does not exist. `
@@ -257,11 +257,11 @@ function Set-TargetResource
         # If the property should not be present and is, or if it should be present bu the current property type
         # differs from the desired one.
         if ($params.Ensure -eq "Absent" -and $CurrentValues.Ensure -eq "Present" -or `
-        ($params.PropertyType -ne $CurrentValues.PropertyType -and `
-        $CurrentValues.Ensure -eq "Present"))
+            ($params.PropertyType -ne $CurrentValues.PropertyType -and `
+                    $CurrentValues.Ensure -eq "Present"))
         {
             $managedProperty = Get-SPEnterpriseSearchMetadataManagedProperty -Identity $params.Name `
-                                                                         -SearchApplication $params.ServiceAppName
+                -SearchApplication $params.ServiceAppName
 
             # In order to delete a Managed PRoperty we need to make sure it doesn't have any crawled properties
             # mapped to it first.
@@ -270,8 +270,8 @@ function Set-TargetResource
             # Remove the existing managed property
             Write-Verbose  "Removing Managed Property $($params.Name)"
             Remove-SPEnterpriseSearchMetadataManagedProperty -Identity $params.Name `
-                                                             -SearchApplication $params.ServiceAppName `
-                                                             -Confirm:$false
+                -SearchApplication $params.ServiceAppName `
+                -Confirm:$false
 
             if ($params.PropertyType -ne $CurrentValues.PropertyType)
             {
@@ -289,19 +289,19 @@ function Set-TargetResource
 
             Write-Verbose "Creating a new Managed Property $($params.Name)"
             New-SPEnterpriseSearchMetadataManagedProperty -Name $params.Name `
-                                                          -SearchApplication $params.ServiceAppName `
-                                                          -Type $managedTypeID
+                -SearchApplication $params.ServiceAppName `
+                -Type $managedTypeID
         }
 
         # Set the specified properties on the Managed Property
         $managedProperty = Get-SPEnterpriseSearchMetadataManagedProperty -Identity $params.Name `
-                                                                         -SearchApplication $params.ServiceAppName
+            -SearchApplication $params.ServiceAppName
 
         Set-SPEnterpriseSearchMetadataManagedProperty -Identity $managedProperty.Name `
-                                                      -SearchApplication $params.ServiceAppName `
-                                                      -Retrievable $params.Retrievable `
-                                                      -SafeForAnonymous $params.SafeForAnonymous `
-                                                      -NoWordBreaker $params.NoWordBreaker
+            -SearchApplication $params.ServiceAppName `
+            -Retrievable $params.Retrievable `
+            -SafeForAnonymous $params.SafeForAnonymous `
+            -NoWordBreaker $params.NoWordBreaker
 
         $managedProperty.HasMultipleValues = $params.HasMultipleValues
         $managedProperty.Searchable = $params.Searchable
@@ -316,10 +316,10 @@ function Set-TargetResource
         # If alias doesn't already exist, add it
         $currentAliases = $managedProperty.GetAliases()
 
-        foreach($alias in $params.Aliases)
+        foreach ($alias in $params.Aliases)
         {
-            $currentAlias = $managedProperty.GetAliases() | Where-Object {$_ -eq $alias}
-            if(!$currentAlias)
+            $currentAlias = $managedProperty.GetAliases() | Where-Object { $_ -eq $alias }
+            if (!$currentAlias)
             {
                 $managedProperty.AddAlias($alias)
             }
@@ -330,9 +330,9 @@ function Set-TargetResource
         # which means we need to remove them.
         $currentAliases = $managedProperty.GetAliases()
 
-        foreach($alias in $currentAliases)
+        foreach ($alias in $currentAliases)
         {
-            if(!$params.Aliases.Contains($alias))
+            if (!$params.Aliases.Contains($alias))
             {
                 $managedProperty.DeleteAlias($alias)
             }
@@ -344,7 +344,7 @@ function Set-TargetResource
         foreach ($mappedCrawlProperty in $params.CrawledProperties)
         {
             $currentCrawlProperty = Get-SPEnterpriseSearchMetadataCrawledProperty -Name $mappedCrawlProperty `
-                                                                                  -SearchApplication $params.ServiceAppName
+                -SearchApplication $params.ServiceAppName
 
             $mapping = [Microsoft.Office.Server.Search.Administration.Mapping]::new()
             $mapping.CrawledPropertyName = $mappedCrawlProperty
@@ -371,7 +371,7 @@ function Test-TargetResource
         $ServiceAppName,
 
         [Parameter(Mandatory = $true)]
-        [ValidateSet("Binary","DateTime","Decimal","Double","Integer","Text","YesNo")]
+        [ValidateSet("Binary", "DateTime", "Decimal", "Double", "Integer", "Text", "YesNo")]
         [System.String]
         $PropertyType,
 
@@ -424,7 +424,7 @@ function Test-TargetResource
         $CrawledProperties,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present",
 
@@ -436,23 +436,27 @@ function Test-TargetResource
     Write-Verbose -Message "Testing Managed Property Setting for '$Name'"
 
     $PSBoundParameters.Ensure = $Ensure
+
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
+    Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
+    Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
+
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
-                                    -DesiredValues $PSBoundParameters `
-                                    -ValuesToCheck @("Name",
-                                                     "PropertyType",
-                                                     "Ensure",
-                                                     "HasMultipleValues",
-                                                     "Retrievable",
-                                                     "Searchable",
-                                                     "Refinable",
-                                                     "Searchable",
-                                                     "NoWordBreaker",
-                                                     "IncludeAllCrawledProperties",
-                                                     "Aliases",
-                                                     "Sortable",
-                                                     "SafeForAnonymous")
+        -DesiredValues $PSBoundParameters `
+        -ValuesToCheck @("Name",
+        "PropertyType",
+        "Ensure",
+        "HasMultipleValues",
+        "Retrievable",
+        "Searchable",
+        "Refinable",
+        "Searchable",
+        "NoWordBreaker",
+        "IncludeAllCrawledProperties",
+        "Aliases",
+        "Sortable",
+        "SafeForAnonymous")
 }
 
 Export-ModuleMember -Function *-TargetResource

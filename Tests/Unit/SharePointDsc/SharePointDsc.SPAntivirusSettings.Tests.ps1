@@ -3,16 +3,16 @@ param(
     [Parameter()]
     [string]
     $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
-                                         -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
-                                         -Resolve)
+            -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
+            -Resolve)
 )
 
 Import-Module -Name (Join-Path -Path $PSScriptRoot `
-                                -ChildPath "..\UnitTestHelper.psm1" `
-                                -Resolve)
+        -ChildPath "..\UnitTestHelper.psm1" `
+        -Resolve)
 
 $Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointCmdletModule `
-                                              -DscResource "SPAntivirusSettings"
+    -DscResource "SPAntivirusSettings"
 
 Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
     InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
@@ -21,13 +21,13 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         # Test contexts
         Context -Name "The server is not part of SharePoint farm" -Fixture {
             $testParams = @{
-                IsSingleInstance = "Yes"
-                ScanOnDownload = $true
-                ScanOnUpload = $true
+                IsSingleInstance      = "Yes"
+                ScanOnDownload        = $true
+                ScanOnUpload          = $true
                 AllowDownloadInfected = $true
-                AttemptToClean = $true
-                TimeoutDuration = 60
-                NumberOfThreads = 5
+                AttemptToClean        = $true
+                TimeoutDuration       = 60
+                NumberOfThreads       = 5
             }
 
             Mock -CommandName Get-SPFarm -MockWith {
@@ -55,24 +55,24 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "The server is in a farm and the incorrect settings have been applied" -Fixture {
             $testParams = @{
-                IsSingleInstance = "Yes"
-                ScanOnDownload = $true
-                ScanOnUpload = $true
+                IsSingleInstance      = "Yes"
+                ScanOnDownload        = $true
+                ScanOnUpload          = $true
                 AllowDownloadInfected = $true
-                AttemptToClean = $true
-                TimeoutDuration = 60
-                NumberOfThreads = 5
+                AttemptToClean        = $true
+                TimeoutDuration       = 60
+                NumberOfThreads       = 5
             }
 
-            Mock -CommandName Get-SPDSCContentService -MockWith {
+            Mock -CommandName Get-SPDscContentService -MockWith {
                 $returnVal = @{
                     AntivirusSettings = @{
-                        AllowDownload = $false
+                        AllowDownload       = $false
                         DownloadScanEnabled = $false
-                        UploadScanEnabled = $false
-                        CleaningEnabled = $false
-                        NumberOfThreads = 0
-                        Timeout = @{
+                        UploadScanEnabled   = $false
+                        CleaningEnabled     = $false
+                        NumberOfThreads     = 0
+                        Timeout             = @{
                             TotalSeconds = 0;
                         }
                     }
@@ -82,7 +82,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 } -PassThru
                 return $returnVal
             }
-            Mock -CommandName Get-SPFarm -MockWith { return @{} }
+            Mock -CommandName Get-SPFarm -MockWith { return @{ } }
 
             It "Should return values from the get method" {
                 Get-TargetResource @testParams | Should Not BeNullOrEmpty
@@ -101,31 +101,31 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "The server is in a farm and the correct settings have been applied" -Fixture {
             $testParams = @{
-                IsSingleInstance = "Yes"
-                ScanOnDownload = $true
-                ScanOnUpload = $true
+                IsSingleInstance      = "Yes"
+                ScanOnDownload        = $true
+                ScanOnUpload          = $true
                 AllowDownloadInfected = $true
-                AttemptToClean = $true
-                TimeoutDuration = 60
-                NumberOfThreads = 5
+                AttemptToClean        = $true
+                TimeoutDuration       = 60
+                NumberOfThreads       = 5
             }
 
-            Mock -CommandName Get-SPDSCContentService -MockWith {
+            Mock -CommandName Get-SPDscContentService -MockWith {
                 $returnVal = @{
                     AntivirusSettings = @{
-                        AllowDownload = $true
+                        AllowDownload       = $true
                         DownloadScanEnabled = $true
-                        UploadScanEnabled = $true
-                        CleaningEnabled = $true
-                        NumberOfThreads = 5
-                        Timeout = @{
+                        UploadScanEnabled   = $true
+                        CleaningEnabled     = $true
+                        NumberOfThreads     = 5
+                        Timeout             = @{
                             TotalSeconds = 60;
                         }
                     }
                 }
                 return $returnVal
             }
-            Mock -CommandName Get-SPFarm -MockWith { return @{} }
+            Mock -CommandName Get-SPFarm -MockWith { return @{ } }
 
             It "Should return values from the get method" {
                 Get-TargetResource @testParams | Should Not BeNullOrEmpty

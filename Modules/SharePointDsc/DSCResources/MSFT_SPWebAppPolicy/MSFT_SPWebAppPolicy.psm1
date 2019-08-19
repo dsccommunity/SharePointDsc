@@ -1,6 +1,7 @@
 function Get-TargetResource
 {
     [CmdletBinding()]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSDSCUseIdenticalMandatoryParametersForDSC", "", Justification = "Temporary workaround for issue introduced in PSSA v1.18")]
     [OutputType([System.Collections.Hashtable])]
     param
     (
@@ -31,54 +32,70 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting web app policy for $WebAppUrl"
 
+    $nullReturn = @{
+        WebAppUrl              = $null
+        Members                = $null
+        MembersToInclude       = $null
+        MembersToExclude       = $null
+        SetCacheAccountsPolicy = $null
+    }
+
     if ($Members -and (($MembersToInclude) -or ($MembersToExclude)))
     {
         Write-Verbose -Message ("Cannot use the Members parameter together with " + `
-                               "the MembersToInclude or MembersToExclude parameters")
-        return $null
+                "the MembersToInclude or MembersToExclude parameters")
+        return $nullReturn
     }
 
     if (!$Members -and !$MembersToInclude -and !$MembersToExclude)
     {
         Write-Verbose -Message ("At least one of the following parameters must be specified: " + `
-                               "Members, MembersToInclude, MembersToExclude")
-        return $null
+                "Members, MembersToInclude, MembersToExclude")
+        return $nullReturn
     }
 
     foreach ($member in $Members)
     {
         if (($member.ActAsSystemAccount -eq $true) `
-            -and ($member.PermissionLevel -ne "Full Control"))
+                -and ($member.PermissionLevel -ne "Full Control"))
         {
             Write-Verbose -Message ("Members Parameter: You cannot specify ActAsSystemAccount " + `
-                                   "with any other permission than Full Control")
-            return $null
+                    "with any other permission than Full Control")
+            return $nullReturn
         }
     }
 
     foreach ($member in $MembersToInclude)
     {
         if (($member.ActAsSystemAccount -eq $true) `
-            -and ($member.PermissionLevel -ne "Full Control"))
+                -and ($member.PermissionLevel -ne "Full Control"))
         {
             Write-Verbose -Message ("MembersToInclude Parameter: You cannot specify " + `
-                                    "ActAsSystemAccount with any other permission than Full " + `
-                                    "Control")
-            return $null
+                    "ActAsSystemAccount with any other permission than Full " + `
+                    "Control")
+            return $nullReturn
         }
     }
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
-                                  -Arguments $PSBoundParameters `
-                                  -ScriptBlock {
+    $result = Invoke-SPDscCommand -Credential $InstallAccount `
+        -Arguments $PSBoundParameters `
+        -ScriptBlock {
         $params = $args[0]
 
+        $nullReturn = @{
+            WebAppUrl              = $null
+            Members                = $null
+            MembersToInclude       = $null
+            MembersToExclude       = $null
+            SetCacheAccountsPolicy = $null
+        }
+
         $wa = Get-SPWebApplication -Identity $params.WebAppUrl `
-                                   -ErrorAction SilentlyContinue
+            -ErrorAction SilentlyContinue
 
         if ($null -eq $wa)
         {
-            return $null
+            return $nullReturn
         }
 
         $SetCacheAccountsPolicy = $false
@@ -86,8 +103,7 @@ function Get-TargetResource
         {
             if (($wa.Properties.ContainsKey("portalsuperuseraccount") -eq $true) -and `
                 ($wa.Properties.ContainsKey("portalsuperreaderaccount") -eq $true))
-                {
-
+            {
                 $correctPSU = $false
                 $correctPSR = $false
 
@@ -119,15 +135,15 @@ function Get-TargetResource
         $members = @()
         foreach ($policy in $wa.Policies)
         {
-            $member = @{}
+            $member = @{ }
             $memberName = $policy.UserName
             $identityType = "Native"
             if ($memberName -like "i:*|*" -or $memberName -like "c:*|*")
             {
                 $identityType = "Claims"
                 $convertedClaim = New-SPClaimsPrincipal -Identity $memberName `
-                                                        -IdentityType EncodedClaim `
-                                                        -ErrorAction SilentlyContinue
+                    -IdentityType EncodedClaim `
+                    -ErrorAction SilentlyContinue
                 if ($null -ne $convertedClaim)
                 {
                     $memberName = $convertedClaim.Value
@@ -167,12 +183,12 @@ function Get-TargetResource
         }
 
         $returnval = @{
-                WebAppUrl = $params.WebAppUrl
-                Members = $members
-                MembersToInclude = $params.MembersToInclude
-                MembersToExclude = $params.MembersToExclude
-                SetCacheAccountsPolicy = $SetCacheAccountsPolicy
-                InstallAccount = $params.InstallAccount
+            WebAppUrl              = $params.WebAppUrl
+            Members                = $members
+            MembersToInclude       = $params.MembersToInclude
+            MembersToExclude       = $params.MembersToExclude
+            SetCacheAccountsPolicy = $SetCacheAccountsPolicy
+            InstallAccount         = $params.InstallAccount
         }
 
         return $returnval
@@ -183,6 +199,7 @@ function Get-TargetResource
 function Set-TargetResource
 {
     [CmdletBinding()]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSDSCUseIdenticalMandatoryParametersForDSC", "", Justification = "Temporary workaround for issue introduced in PSSA v1.18")]
     param
     (
         [Parameter(Mandatory = $true)]
@@ -215,13 +232,13 @@ function Set-TargetResource
     if ($Members -and (($MembersToInclude) -or ($MembersToExclude)))
     {
         throw ("Cannot use the Members parameter together with the " + `
-              "MembersToInclude or MembersToExclude parameters")
+                "MembersToInclude or MembersToExclude parameters")
     }
 
     if (!$Members -and !$MembersToInclude -and !$MembersToExclude)
     {
         throw ("At least one of the following parameters must be specified: " + `
-              "Members, MembersToInclude, MembersToExclude")
+                "Members, MembersToInclude, MembersToExclude")
     }
 
     foreach ($member in $Members)
@@ -230,7 +247,7 @@ function Set-TargetResource
             ($member.PermissionLevel -ne "Full Control"))
         {
             throw ("Members Parameter: You cannot specify ActAsSystemAccount " + `
-                  "with any other permission than Full Control")
+                    "with any other permission than Full Control")
         }
     }
 
@@ -240,7 +257,7 @@ function Set-TargetResource
             ($member.PermissionLevel -ne "Full Control"))
         {
             throw ("MembersToInclude Parameter: You cannot specify ActAsSystemAccount " + `
-                  "with any other permission than Full Control")
+                    "with any other permission than Full Control")
         }
     }
 
@@ -250,26 +267,26 @@ function Set-TargetResource
     $modulePath = "..\..\Modules\SharePointDsc.WebAppPolicy\SPWebAppPolicy.psm1"
     Import-Module -Name (Join-Path -Path $PSScriptRoot -ChildPath $modulePath -Resolve)
 
-    if ($null -eq $CurrentValues)
+    if ($null -eq $CurrentValues.WebAppUrl)
     {
         throw "Web application does not exist"
     }
 
-    $cacheAccounts = Get-SPDSCCacheAccountConfiguration -InputParameters $WebAppUrl
+    $cacheAccounts = Get-SPDscCacheAccountConfiguration -InputParameters $WebAppUrl
 
     if ($SetCacheAccountsPolicy)
     {
         if ($cacheAccounts.SuperUserAccount -eq "" -or $cacheAccounts.SuperReaderAccount -eq "")
         {
             throw ("Cache accounts not configured properly. PortalSuperUserAccount or " + `
-                  "PortalSuperReaderAccount property is not configured.")
+                    "PortalSuperReaderAccount property is not configured.")
         }
     }
 
     # Determine the default identity type to use for entries that do not have it specified
-    $defaultIdentityType = Invoke-SPDSCCommand -Credential $InstallAccount `
-                                               -Arguments $PSBoundParameters `
-                                               -ScriptBlock {
+    $defaultIdentityType = Invoke-SPDscCommand -Credential $InstallAccount `
+        -Arguments $PSBoundParameters `
+        -ScriptBlock {
         $params = $args[0]
 
         $wa = Get-SPWebApplication -Identity $params.WebAppUrl
@@ -296,7 +313,7 @@ function Set-TargetResource
         if ($MembersToInclude)
         {
             Write-Verbose -Message ("MembersToInclude property is set - setting membership " + `
-                                    "list to ensure specified members are included")
+                    "list to ensure specified members are included")
             $membersToCheck = $MembersToInclude
         }
         foreach ($member in $membersToCheck)
@@ -309,57 +326,60 @@ function Set-TargetResource
         {
             Write-Verbose -Message "SetCacheAccountsPolicy is True - Adding Cache Accounts to list"
             $psuAccount = @{
-                UserName = $cacheAccounts.SuperUserAccount
+                UserName        = $cacheAccounts.SuperUserAccount
                 PermissionLevel = "Full Control"
-                IdentityMode = $cacheAccounts.IdentityMode
+                IdentityMode    = $cacheAccounts.IdentityMode
             }
             $allMembers += $psuAccount
 
             $psrAccount = @{
-                UserName = $cacheAccounts.SuperReaderAccount
+                UserName        = $cacheAccounts.SuperReaderAccount
                 PermissionLevel = "Full Read"
-                IdentityMode = $cacheAccounts.IdentityMode
+                IdentityMode    = $cacheAccounts.IdentityMode
             }
             $allMembers += $psrAccount
         }
 
         # Get the list of differences from the current configuration
-        $differences = Compare-SPDSCWebAppPolicy -WAPolicies $CurrentValues.Members `
-                                                 -DSCSettings $allMembers `
-                                                 -DefaultIdentityType $defaultIdentityType
+        $differences = Compare-SPDscWebAppPolicy -WAPolicies $CurrentValues.Members `
+            -DSCSettings $allMembers `
+            -DefaultIdentityType $defaultIdentityType
 
         foreach ($difference in $differences)
         {
             switch ($difference.Status)
             {
-                Additional {
+                Additional
+                {
                     # Only remove users if the "Members" property was set
                     # instead of "MembersToInclude"
                     if ($Members)
                     {
                         $user = @{
-                            Type     = "Delete"
-                            Username = $difference.Username
+                            Type         = "Delete"
+                            Username     = $difference.Username
                             IdentityMode = $difference.IdentityType
                         }
                     }
                 }
-                Different {
+                Different
+                {
                     $user = @{
-                        Type     = "Change"
-                        Username = $difference.Username
+                        Type               = "Change"
+                        Username           = $difference.Username
                         PermissionLevel    = $difference.DesiredPermissionLevel
                         ActAsSystemAccount = $difference.DesiredActAsSystemSetting
-                        IdentityMode = $difference.IdentityType
+                        IdentityMode       = $difference.IdentityType
                     }
                 }
-                Missing  {
+                Missing
+                {
                     $user = @{
-                        Type     = "Add"
-                        Username = $difference.Username
+                        Type               = "Add"
+                        Username           = $difference.Username
                         PermissionLevel    = $difference.DesiredPermissionLevel
                         ActAsSystemAccount = $difference.DesiredActAsSystemSetting
-                        IdentityMode = $difference.IdentityType
+                        IdentityMode       = $difference.IdentityType
                     }
                 }
             }
@@ -370,7 +390,7 @@ function Set-TargetResource
     if ($MembersToExclude)
     {
         Write-Verbose -Message ("MembersToExclude property is set - setting membership list " + `
-                                "to ensure specified members are not included")
+                "to ensure specified members are not included")
 
         foreach ($member in $MembersToExclude)
         {
@@ -396,11 +416,11 @@ function Set-TargetResource
     }
 
     ## Perform changes
-    Invoke-SPDSCCommand -Credential $InstallAccount `
-                        -Arguments @($PSBoundParameters,$PSScriptRoot,$changeUsers) `
-                        -ScriptBlock {
-        $params      = $args[0]
-        $scriptRoot  = $args[1]
+    Invoke-SPDscCommand -Credential $InstallAccount `
+        -Arguments @($PSBoundParameters, $PSScriptRoot, $changeUsers) `
+        -ScriptBlock {
+        $params = $args[0]
+        $scriptRoot = $args[1]
         $changeUsers = $args[2]
 
         $modulePath = "..\..\Modules\SharePointDsc.WebAppPolicy\SPWebAppPolicy.psm1"
@@ -413,10 +433,10 @@ function Set-TargetResource
             throw "Specified web application could not be found."
         }
 
-        $denyAll     = $wa.PolicyRoles.GetSpecialRole([Microsoft.SharePoint.Administration.SPPolicyRoleType]::DenyAll)
-        $denyWrite   = $wa.PolicyRoles.GetSpecialRole([Microsoft.SharePoint.Administration.SPPolicyRoleType]::DenyWrite)
+        $denyAll = $wa.PolicyRoles.GetSpecialRole([Microsoft.SharePoint.Administration.SPPolicyRoleType]::DenyAll)
+        $denyWrite = $wa.PolicyRoles.GetSpecialRole([Microsoft.SharePoint.Administration.SPPolicyRoleType]::DenyWrite)
         $fullControl = $wa.PolicyRoles.GetSpecialRole([Microsoft.SharePoint.Administration.SPPolicyRoleType]::FullControl)
-        $fullRead    = $wa.PolicyRoles.GetSpecialRole([Microsoft.SharePoint.Administration.SPPolicyRoleType]::FullRead)
+        $fullRead = $wa.PolicyRoles.GetSpecialRole([Microsoft.SharePoint.Administration.SPPolicyRoleType]::FullRead)
 
         Write-Verbose -Message "Processing changes"
 
@@ -424,24 +444,25 @@ function Set-TargetResource
         {
             switch ($user.Type)
             {
-                "Add" {
+                "Add"
+                {
                     # User does not exist. Add user
                     Write-Verbose -Message "Adding $($user.Username)"
 
                     $userToAdd = $user.Username
                     if ($user.IdentityMode -eq "Claims")
                     {
-                        $isUser = Test-SPDSCIsADUser -IdentityName $user.Username
+                        $isUser = Test-SPDscIsADUser -IdentityName $user.Username
                         if ($isUser -eq $true)
                         {
                             $principal = New-SPClaimsPrincipal -Identity $user.Username `
-                                                               -IdentityType WindowsSamAccountName
+                                -IdentityType WindowsSamAccountName
                             $userToAdd = $principal.ToEncodedString()
                         }
                         else
                         {
                             $principal = New-SPClaimsPrincipal -Identity $user.Username `
-                                                               -IdentityType WindowsSecurityGroupName
+                                -IdentityType WindowsSecurityGroupName
                             $userToAdd = $principal.ToEncodedString()
                         }
                     }
@@ -450,16 +471,20 @@ function Set-TargetResource
                     {
                         switch ($permissionLevel)
                         {
-                            "Deny All" {
+                            "Deny All"
+                            {
                                 $newPolicy.PolicyRoleBindings.Add($denyAll)
                             }
-                            "Deny Write" {
+                            "Deny Write"
+                            {
                                 $newPolicy.PolicyRoleBindings.Add($denyWrite)
                             }
-                            "Full Control" {
+                            "Full Control"
+                            {
                                 $newPolicy.PolicyRoleBindings.Add($fullControl)
                             }
-                            "Full Read" {
+                            "Full Read"
+                            {
                                 $newPolicy.PolicyRoleBindings.Add($fullRead)
                             }
                         }
@@ -469,22 +494,23 @@ function Set-TargetResource
                         $newPolicy.IsSystemUser = $user.ActAsSystemAccount
                     }
                 }
-                "Change" {
+                "Change"
+                {
                     # User exists. Check permissions
                     $userToChange = $user.Username
                     if ($user.IdentityMode -eq "Claims")
                     {
-                        $isUser = Test-SPDSCIsADUser -IdentityName $user.Username
+                        $isUser = Test-SPDscIsADUser -IdentityName $user.Username
                         if ($isUser -eq $true)
                         {
                             $principal = New-SPClaimsPrincipal -Identity $user.Username `
-                                                               -IdentityType WindowsSamAccountName
+                                -IdentityType WindowsSamAccountName
                             $userToChange = $principal.ToEncodedString()
                         }
                         else
                         {
                             $principal = New-SPClaimsPrincipal -Identity $user.Username `
-                                                               -IdentityType WindowsSecurityGroupName
+                                -IdentityType WindowsSecurityGroupName
                             $userToChange = $principal.ToEncodedString()
                         }
                     }
@@ -519,7 +545,7 @@ function Set-TargetResource
                     }
 
                     $polbinddiff = Compare-Object -ReferenceObject $userPermissionlevel `
-                                                  -DifferenceObject $user.PermissionLevel
+                        -DifferenceObject $user.PermissionLevel
                     if ($null -ne $polbinddiff)
                     {
                         $policy.PolicyRoleBindings.RemoveAll()
@@ -527,16 +553,20 @@ function Set-TargetResource
                         {
                             switch ($permissionLevel)
                             {
-                                "Deny All" {
+                                "Deny All"
+                                {
                                     $policy.PolicyRoleBindings.Add($denyAll)
                                 }
-                                "Deny Write" {
+                                "Deny Write"
+                                {
                                     $policy.PolicyRoleBindings.Add($denyWrite)
                                 }
-                                "Full Control" {
+                                "Full Control"
+                                {
                                     $policy.PolicyRoleBindings.Add($fullControl)
                                 }
-                                "Full Read" {
+                                "Full Read"
+                                {
                                     $policy.PolicyRoleBindings.Add($fullRead)
                                 }
                             }
@@ -549,23 +579,23 @@ function Set-TargetResource
                     $userToDrop = $user.Username
                     if ($user.IdentityMode -eq "Claims")
                     {
-                        $isUser = Test-SPDSCIsADUser -IdentityName $user.Username
+                        $isUser = Test-SPDscIsADUser -IdentityName $user.Username
                         if ($isUser -eq $true)
                         {
                             $principal = New-SPClaimsPrincipal -Identity $user.Username `
-                                                               -IdentityType WindowsSamAccountName
+                                -IdentityType WindowsSamAccountName
                             $userToDrop = $principal.ToEncodedString()
                         }
                         else
                         {
                             $principal = New-SPClaimsPrincipal -Identity $user.Username `
-                                                               -IdentityType WindowsSecurityGroupName
+                                -IdentityType WindowsSecurityGroupName
                             $userToDrop = $principal.ToEncodedString()
                         }
                     }
-                    Remove-SPDSCGenericObject -SourceCollection $wa.Policies `
-                                              -Target $userToDrop `
-                                              -ErrorAction SilentlyContinue
+                    Remove-SPDscGenericObject -SourceCollection $wa.Policies `
+                        -Target $userToDrop `
+                        -ErrorAction SilentlyContinue
                 }
             }
         }
@@ -576,6 +606,7 @@ function Set-TargetResource
 function Test-TargetResource
 {
     [CmdletBinding()]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSDSCUseIdenticalMandatoryParametersForDSC", "", Justification = "Temporary workaround for issue introduced in PSSA v1.18")]
     [OutputType([System.Boolean])]
     param
     (
@@ -608,29 +639,32 @@ function Test-TargetResource
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
+    Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
+    Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
+
     $modulePath = "..\..\Modules\SharePointDsc.WebAppPolicy\SPWebAppPolicy.psm1"
     Import-Module -Name (Join-Path -Path $PSScriptRoot -ChildPath $modulePath -Resolve)
 
-    if ($null -eq $CurrentValues)
+    if ($null -eq $CurrentValues.WebAppUrl)
     {
         return $false
     }
 
-    $cacheAccounts = Get-SPDSCCacheAccountConfiguration -InputParameters $WebAppUrl
+    $cacheAccounts = Get-SPDscCacheAccountConfiguration -InputParameters $WebAppUrl
     if ($SetCacheAccountsPolicy)
     {
         if (($cacheAccounts.SuperUserAccount -eq "") -or `
             ($cacheAccounts.SuperReaderAccount -eq ""))
         {
             throw "Cache accounts not configured properly. PortalSuperUserAccount or " + `
-                  "PortalSuperReaderAccount property is not configured."
+                "PortalSuperReaderAccount property is not configured."
         }
     }
 
     # Determine the default identity type to use for entries that do not have it specified
-    $defaultIdentityType = Invoke-SPDSCCommand -Credential $InstallAccount `
-                                               -Arguments $PSBoundParameters `
-                                               -ScriptBlock {
+    $defaultIdentityType = Invoke-SPDscCommand -Credential $InstallAccount `
+        -Arguments $PSBoundParameters `
+        -ScriptBlock {
         $params = $args[0]
 
         $wa = Get-SPWebApplication -Identity $params.WebAppUrl
@@ -645,7 +679,7 @@ function Test-TargetResource
     }
 
     # If checking the full members list, or the list of members to include then build the
-    # appropriate members list and check for the output of Compare-SPDSCWebAppPolicy
+    # appropriate members list and check for the output of Compare-SPDscWebAppPolicy
     if ($Members -or $MembersToInclude)
     {
         $allMembers = @()
@@ -657,7 +691,7 @@ function Test-TargetResource
         if ($MembersToInclude)
         {
             Write-Verbose -Message ("MembersToInclude property is set - testing membership " + `
-                                    "list to ensure specified members are included")
+                    "list to ensure specified members are included")
             $membersToCheck = $MembersToInclude
         }
         foreach ($member in $membersToCheck)
@@ -670,24 +704,24 @@ function Test-TargetResource
         {
             Write-Verbose -Message "SetCacheAccountsPolicy is True - Adding Cache Accounts to list"
             $psuAccount = @{
-                UserName = $cacheAccounts.SuperUserAccount
+                UserName        = $cacheAccounts.SuperUserAccount
                 PermissionLevel = "Full Control"
-                IdentityMode = $cacheAccounts.IdentityMode
+                IdentityMode    = $cacheAccounts.IdentityMode
             }
             $allMembers += $psuAccount
 
             $psrAccount = @{
-                UserName = $cacheAccounts.SuperReaderAccount
+                UserName        = $cacheAccounts.SuperReaderAccount
                 PermissionLevel = "Full Read"
-                IdentityMode = $cacheAccounts.IdentityMode
+                IdentityMode    = $cacheAccounts.IdentityMode
             }
             $allMembers += $psrAccount
         }
 
         # Get the list of differences from the current configuration
-        $differences = Compare-SPDSCWebAppPolicy -WAPolicies $CurrentValues.Members `
-                                                 -DSCSettings $allMembers `
-                                                 -DefaultIdentityType $defaultIdentityType
+        $differences = Compare-SPDscWebAppPolicy -WAPolicies $CurrentValues.Members `
+            -DSCSettings $allMembers `
+            -DefaultIdentityType $defaultIdentityType
 
         # If checking members, any difference counts as a fail
         if ($Members)
@@ -707,8 +741,8 @@ function Test-TargetResource
         if ($MembersToInclude)
         {
             if (($differences | Where-Object -FilterScript {
-                    $_.Status -eq "Different" -or $_.Status -eq "Missing"
-                }).Count -eq 0)
+                        $_.Status -eq "Different" -or $_.Status -eq "Missing"
+                    }).Count -eq 0)
             {
                 return $true
             }
@@ -725,7 +759,7 @@ function Test-TargetResource
     if ($MembersToExclude)
     {
         Write-Verbose -Message ("MembersToExclude property is set - checking for permissions " + `
-                                "that need to be removed")
+                "that need to be removed")
         foreach ($member in $MembersToExclude)
         {
             if (($cacheAccounts.SuperUserAccount -eq $member.Username) -or `
@@ -746,7 +780,7 @@ function Test-TargetResource
     }
 }
 
-function Get-SPDSCCacheAccountConfiguration()
+function Get-SPDscCacheAccountConfiguration()
 {
     [CmdletBinding()]
     [OutputType([System.Collections.Hashtable])]
@@ -756,9 +790,9 @@ function Get-SPDSCCacheAccountConfiguration()
         $InputParameters
     )
 
-    $cacheAccounts = Invoke-SPDSCCommand -Credential $InstallAccount `
-                                         -Arguments $InputParameters `
-                                         -ScriptBlock {
+    $cacheAccounts = Invoke-SPDscCommand -Credential $InstallAccount `
+        -Arguments $InputParameters `
+        -ScriptBlock {
         Write-Verbose -Message "Retrieving CacheAccounts"
         $params = $args[0]
 
@@ -770,7 +804,7 @@ function Get-SPDSCCacheAccountConfiguration()
         }
 
         $returnval = @{
-            SuperUserAccount = ""
+            SuperUserAccount   = ""
             SuperReaderAccount = ""
         }
 
@@ -780,9 +814,9 @@ function Get-SPDSCCacheAccountConfiguration()
             if ($wa.UseClaimsAuthentication -eq $true)
             {
                 $convertedClaim = New-SPClaimsPrincipal -Identity $memberName `
-                                                        -IdentityType EncodedClaim `
-                                                        -ErrorAction SilentlyContinue
-                if($null -ne $convertedClaim)
+                    -IdentityType EncodedClaim `
+                    -ErrorAction SilentlyContinue
+                if ($null -ne $convertedClaim)
                 {
                     $memberName = $convertedClaim.Value
                 }
@@ -795,9 +829,9 @@ function Get-SPDSCCacheAccountConfiguration()
             if ($wa.UseClaimsAuthentication -eq $true)
             {
                 $convertedClaim = New-SPClaimsPrincipal -Identity $memberName `
-                                                        -IdentityType EncodedClaim `
-                                                        -ErrorAction SilentlyContinue
-                if($null -ne $convertedClaim)
+                    -IdentityType EncodedClaim `
+                    -ErrorAction SilentlyContinue
+                if ($null -ne $convertedClaim)
                 {
                     $memberName = $convertedClaim.Value
                 }

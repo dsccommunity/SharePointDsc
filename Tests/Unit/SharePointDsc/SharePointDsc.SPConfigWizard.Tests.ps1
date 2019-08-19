@@ -3,20 +3,25 @@ param(
     [Parameter()]
     [string]
     $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
-                                         -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
-                                         -Resolve)
+            -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
+            -Resolve)
 )
 
 Import-Module -Name (Join-Path -Path $PSScriptRoot `
-                                -ChildPath "..\UnitTestHelper.psm1" `
-                                -Resolve)
+        -ChildPath "..\UnitTestHelper.psm1" `
+        -Resolve)
 
 $Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointCmdletModule `
-                                              -DscResource "SPConfigWizard"
+    -DscResource "SPConfigWizard"
 
 Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
     InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
         Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
+
+        # Mocks for all contexts
+        Mock -CommandName Remove-Item -MockWith { }
+        Mock -CommandName Get-Content -MockWith { return "log info" }
+        Mock -CommandName Get-SPDscServerPatchStatus -MockWith { return "NoActionRequired" }
 
         # Test contexts
         Context -Name "Upgrade required for Language Pack" -Fixture {
@@ -24,7 +29,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 IsSingleInstance = "Yes"
             }
 
-            Mock -CommandName Get-SPDSCRegistryKey -MockWith {
+            Mock -CommandName Get-SPDscRegistryKey -MockWith {
                 if ($Value -eq "LanguagePackInstalled")
                 {
                     return 1
@@ -56,7 +61,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 IsSingleInstance = "Yes"
             }
 
-            Mock -CommandName Get-SPDSCRegistryKey -MockWith {
+            Mock -CommandName Get-SPDscRegistryKey -MockWith {
                 if ($Value -eq "SetupType")
                 {
                     return "B2B_UPGRADE"
@@ -83,13 +88,35 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
         }
 
+        Context -Name "Config wizard should not be run, because not all servers have the binaries installed" -Fixture {
+            $testParams = @{
+                IsSingleInstance = "Yes"
+            }
+
+            Mock -CommandName Get-SPDscRegistryKey -MockWith {
+                if ($Value -eq "SetupType")
+                {
+                    return "B2B_UPGRADE"
+                }
+            }
+
+            Mock -CommandName Get-SPDscServerPatchStatus -MockWith { return "UpgradeBlocked" }
+
+            Mock -CommandName Start-Process -MockWith { }
+
+            It "Should run Start-Process in the set method" {
+                Set-TargetResource @testParams
+                Assert-MockCalled Start-Process -Times 0
+            }
+        }
+
         Context -Name "Current date outside Upgrade Days" -Fixture {
             $testParams = @{
                 IsSingleInstance    = "Yes"
                 DatabaseUpgradeDays = "mon"
             }
 
-            Mock -CommandName Get-SPDSCRegistryKey -MockWith {
+            Mock -CommandName Get-SPDscRegistryKey -MockWith {
                 if ($Value -eq "SetupType")
                 {
                     return "B2B_UPGRADE"
@@ -98,7 +125,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
             $testDate = Get-Date -Day 17 -Month 7 -Year 2016 -Hour 12 -Minute 00 -Second 00
             Mock -CommandName Get-Date -MockWith {
-                 return $testDate
+                return $testDate
             }
 
             It "Should return Ensure=Absent from the get method" {
@@ -121,7 +148,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 DatabaseUpgradeTime = "3:00am to 5:00am"
             }
 
-            Mock -CommandName Get-SPDSCRegistryKey -MockWith {
+            Mock -CommandName Get-SPDscRegistryKey -MockWith {
                 if ($Value -eq "SetupType")
                 {
                     return "B2B_UPGRADE"
@@ -130,7 +157,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
             $testDate = Get-Date -Day 17 -Month 7 -Year 2016 -Hour 12 -Minute 00 -Second 00
             Mock -CommandName Get-Date -MockWith {
-                 return $testDate
+                return $testDate
             }
 
             It "Should return null from the set method" {
@@ -145,7 +172,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 DatabaseUpgradeTime = "error 3:00am to 5:00am"
             }
 
-            Mock -CommandName Get-SPDSCRegistryKey -MockWith {
+            Mock -CommandName Get-SPDscRegistryKey -MockWith {
                 if ($Value -eq "SetupType")
                 {
                     return "B2B_UPGRADE"
@@ -154,7 +181,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
             $testDate = Get-Date -Day 17 -Month 7 -Year 2016 -Hour 12 -Minute 00 -Second 00
             Mock -CommandName Get-Date -MockWith {
-                 return $testDate
+                return $testDate
             }
 
             It "Should return exception from the set method" {
@@ -169,7 +196,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 DatabaseUpgradeTime = "3:00xm to 5:00am"
             }
 
-            Mock -CommandName Get-SPDSCRegistryKey -MockWith {
+            Mock -CommandName Get-SPDscRegistryKey -MockWith {
                 if ($Value -eq "SetupType")
                 {
                     return "B2B_UPGRADE"
@@ -178,7 +205,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
             $testDate = Get-Date -Day 17 -Month 7 -Year 2016 -Hour 12 -Minute 00 -Second 00
             Mock -CommandName Get-Date -MockWith {
-                 return $testDate
+                return $testDate
             }
 
             It "Should return exception from the set method" {
@@ -193,7 +220,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 DatabaseUpgradeTime = "3:00am to 5:00xm"
             }
 
-            Mock -CommandName Get-SPDSCRegistryKey -MockWith {
+            Mock -CommandName Get-SPDscRegistryKey -MockWith {
                 if ($Value -eq "SetupType")
                 {
                     return "B2B_UPGRADE"
@@ -202,7 +229,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
             $testDate = Get-Date -Day 17 -Month 7 -Year 2016 -Hour 12 -Minute 00 -Second 00
             Mock -CommandName Get-Date -MockWith {
-                 return $testDate
+                return $testDate
             }
 
             It "Should return exception from the set method" {
@@ -217,7 +244,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 DatabaseUpgradeTime = "3:00pm to 5:00am"
             }
 
-            Mock -CommandName Get-SPDSCRegistryKey -MockWith {
+            Mock -CommandName Get-SPDscRegistryKey -MockWith {
                 if ($Value -eq "SetupType")
                 {
                     return "B2B_UPGRADE"
@@ -226,7 +253,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
             $testDate = Get-Date -Day 17 -Month 7 -Year 2016 -Hour 12 -Minute 00 -Second 00
             Mock -CommandName Get-Date -MockWith {
-                 return $testDate
+                return $testDate
             }
 
             It "Should return exception from the set method" {
@@ -239,7 +266,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 IsSingleInstance = "Yes"
             }
 
-            Mock -CommandName Get-SPDSCRegistryKey -MockWith {
+            Mock -CommandName Get-SPDscRegistryKey -MockWith {
                 if ($Value -eq "LanguagePackInstalled")
                 {
                     return 1
@@ -271,7 +298,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Ensure           = "Absent"
             }
 
-            Mock -CommandName Get-SPDSCRegistryKey -MockWith {
+            Mock -CommandName Get-SPDscRegistryKey -MockWith {
                 return 0
             }
 
