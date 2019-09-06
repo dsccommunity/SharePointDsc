@@ -247,7 +247,7 @@ function Set-TargetResource
 
                 if ($solution.ContainsWebApplicationResource)
                 {
-                    if ($null -eq $webApps -or $webApps.Length -eq 0)
+                    if ($null -eq $params.WebAppUrls -or $params.WebAppUrls.Length -eq 0)
                     {
                         $runParams.Add("AllWebApplications", $true)
 
@@ -255,7 +255,7 @@ function Set-TargetResource
                     }
                     else
                     {
-                        foreach ($webApp in $webApps)
+                        foreach ($webApp in $params.WebAppUrls)
                         {
                             $runParams["WebApplication"] = $webApp
 
@@ -296,7 +296,7 @@ function Set-TargetResource
                 }
                 else
                 {
-                    if ($null -eq $webApps -or $webApps.Length -eq 0)
+                    if ($null -eq $params.WebAppUrls -or $params.WebAppUrls.Length -eq 0)
                     {
                         $runParams.Add("AllWebApplications", $true)
 
@@ -304,7 +304,7 @@ function Set-TargetResource
                     }
                     else
                     {
-                        foreach ($webApp in $webApps)
+                        foreach ($webApp in $params.WebAppUrls)
                         {
                             $runParams["WebApplication"] = $webApp
 
