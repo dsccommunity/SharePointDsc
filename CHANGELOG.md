@@ -1,5 +1,10 @@
 # Change log for SharePointDsc
 
+## UNRELEASED
+
+* SPFarmSolution
+  * Fix for Web Application scoped solutions.
+
 ## v3.6
 
 * SharePointDsc generic
