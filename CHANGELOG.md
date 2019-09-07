@@ -5,6 +5,9 @@
 * SPFarmSolution
   * Fix for Web Application scoped solutions.
 
+* SPWebAppAuthentication
+  * Fixes issue where Test method return false on NON-US OS.
+
 ## v3.6
 
 * SharePointDsc generic
