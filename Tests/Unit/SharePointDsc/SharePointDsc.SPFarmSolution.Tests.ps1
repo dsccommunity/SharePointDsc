@@ -351,6 +351,34 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Assert-MockCalled Install-SPSolution -ParameterFilter { $CompatibilityLevel -eq $testParams.SolutionLevel }
             }
         }
+
+        Context -Name "Solution is scoped at the Web Application Level" -Fixture {
+            $testParams = @{
+                Name          = "SomeSolution"
+                LiteralPath   = "\\server\share\file.wsp"
+                Deployed      = $true
+                Ensure        = "Present"
+                Version       = "1.1.0.0"
+                WebAppUrls    = @("https://contoso.com")
+                SolutionLevel = "All"
+            }
+
+            $solution = [pscustomobject]@{
+                Deployed                       = $false
+                Properties                     = @{ Version = "1.0.0.0" }
+                ContainsWebApplicationResource = $true
+                DeployedWebApplications        = @()
+                ContainsGlobalAssembly         = $true
+            }
+            $solution | Add-Member -Name Update -MemberType ScriptMethod  -Value { }
+
+            Mock -CommandName Get-SPSolution -MockWith { $solution }
+            Mock -CommandName Add-SPSolution -MockWith { $solution }
+
+            It "Deploys the solution to the specified Web Application" {
+                Set-TargetResource @testParams
+            }
+        }
     }
 }
 
