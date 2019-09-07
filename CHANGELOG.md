@@ -1,5 +1,10 @@
 # Change log for SharePointDsc
 
+## Unreleased
+
+* SPWebAppAuthentication
+  * Fixes issue where Test method return false on NON-US OS.
+
 ## v3.6
 
 * SharePointDsc generic
