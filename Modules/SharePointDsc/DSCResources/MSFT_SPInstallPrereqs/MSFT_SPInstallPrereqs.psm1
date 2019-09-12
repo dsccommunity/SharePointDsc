@@ -231,7 +231,14 @@ function Get-TargetResource
     if ($checkBlockedFile -eq $true)
     {
         Write-Verbose -Message "Checking status now"
-        $zone = Get-Item -Path $InstallerPath -Stream "Zone.Identifier" -EA SilentlyContinue
+        try
+        {
+            $zone = Get-Item -Path $InstallerPath -Stream "Zone.Identifier" -EA SilentlyContinue
+        }
+        catch
+        {
+            #empty catch-block since we only care about the non-fail case
+        }
         if ($null -ne $zone)
         {
             throw ("PrerequisitesInstaller is blocked! Please use 'Unblock-File -Path " + `
@@ -639,7 +646,14 @@ function Set-TargetResource
     if ($checkBlockedFile -eq $true)
     {
         Write-Verbose -Message "Checking status now"
-        $zone = Get-Item -Path $InstallerPath -Stream "Zone.Identifier" -EA SilentlyContinue
+        try 
+        {
+            $zone = Get-Item -Path $InstallerPath -Stream "Zone.Identifier" -EA SilentlyContinue
+        }
+        catch
+        {
+            #empty catch-block since we only care about the non-fail case
+        }
         if ($null -ne $zone)
         {
             throw ("PrerequisitesInstaller is blocked! Please use 'Unblock-File -Path " + `
