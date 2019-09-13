@@ -237,7 +237,7 @@ function Get-TargetResource
         }
         catch
         {
-            #empty catch-block since we only care about the non-fail case
+            Write-Verbose -Message 'Encountered error while reading file stream. Ignoring file stream.'
         }
         if ($null -ne $zone)
         {
@@ -652,7 +652,7 @@ function Set-TargetResource
         }
         catch
         {
-            #empty catch-block since we only care about the non-fail case
+            Write-Verbose -Message 'Encountered error while reading file stream. Ignoring file stream.'
         }
         if ($null -ne $zone)
         {
