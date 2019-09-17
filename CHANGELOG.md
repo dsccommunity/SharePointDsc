@@ -7,7 +7,8 @@
     the current unit test file.
 * SPFarm
   * Moved check for CentralAdministrationUrl is HTTP to Set method,
-    to prevent issues with ReverseDsc.
+    to prevent issues with ReverseDsc
+  * Handle case where null or empty CentralAdministrationUrl is passed in
 * SPInstall
   * Updated error code checks to force reboot.
 * SPProductUpdate

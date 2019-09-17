@@ -88,22 +88,29 @@ function Get-TargetResource
 
     if ($PSBoundParameters.ContainsKey("CentralAdministrationUrl"))
     {
-        $uri = $CentralAdministrationUrl -as [System.Uri]
-        if ($null -eq $uri.AbsoluteUri)
+        if ([string]::IsNullOrEmpty($CentralAdministrationUrl))
         {
-            Write-Verbose -Message ("CentralAdministrationUrl is not a valid URI. It should " + `
-                    "include the scheme (http/https) and address.")
+            $PSBoundParameters.Remove('CentralAdministrationUrl') | Out-Null
         }
-        if ($uri.scheme -ne 'https')
+        else
         {
-            Write-Verbose -Message ("Currently, the CentralAdministrationUrl parameter can only " + `
-                    "be used with HTTPS. To provision CA on HTTP, omit the CentralAdministrationUrl " + `
-                    "parameter to provision CA on http://servername:port.")
-        }
-        if ($CentralAdministrationUrl -match ':\d+')
-        {
-            Write-Verbose -Message ("CentralAdministrationUrl should not specify port. Use " + `
-                    "CentralAdministrationPort instead.")
+            $uri = $CentralAdministrationUrl -as [System.Uri]
+            if ($null -eq $uri.AbsoluteUri)
+            {
+                Write-Verbose -Message ("CentralAdministrationUrl is not a valid URI. It should " + `
+                        "include the scheme (http/https) and address.")
+            }
+            # if ($uri.scheme -ne 'https')
+            # {
+            #     Write-Verbose -Message ("Currently, the CentralAdministrationUrl parameter can only " + `
+            #             "be used with HTTPS. To provision CA on HTTP, omit the CentralAdministrationUrl " + `
+            #             "parameter to provision CA on http://servername:port.")
+            # }
+            if ($CentralAdministrationUrl -match ':\d+')
+            {
+                Write-Verbose -Message ("CentralAdministrationUrl should not specify port. Use " + `
+                        "CentralAdministrationPort instead.")
+            }
         }
     }
 
@@ -420,19 +427,26 @@ function Set-TargetResource
 
     if ($PSBoundParameters.ContainsKey("CentralAdministrationUrl"))
     {
-        $uri = $CentralAdministrationUrl -as [System.Uri]
-        if ($null -eq $uri.AbsoluteUri)
+        if ([string]::IsNullOrEmpty($CentralAdministrationUrl))
         {
-            throw "CentralAdministrationUrl is not a valid URI. It should include the scheme (http/https) and address."
+            $PSBoundParameters.Remove('CentralAdministrationUrl') | Out-Null
         }
-        if ($uri.scheme -ne 'https')
+        else
         {
-            throw "Currently, the CentralAdministrationUrl parameter can only be used with HTTPS. To provision CA on " + `
-                "HTTP, omit the CentralAdministrationUrl parameter to provision CA on http://servername:port."
-        }
-        if ($CentralAdministrationUrl -match ':\d+')
-        {
-            throw "CentralAdministrationUrl should not specify port. Use CentralAdministrationPort instead."
+            $uri = $CentralAdministrationUrl -as [System.Uri]
+            if ($null -eq $uri.AbsoluteUri -or $uri.scheme -notin ('http', 'https'))
+            {
+                throw "CentralAdministrationUrl is not a valid URI. It should include the scheme (http/https) and address."
+            }
+            # if ($uri.scheme -ne 'https')
+            # {
+            #     throw "Currently, the CentralAdministrationUrl parameter can only be used with HTTPS. To provision CA on " + `
+            #         "HTTP, omit the CentralAdministrationUrl parameter to provision CA on http://servername:port."
+            # }
+            if ($CentralAdministrationUrl -match ':\d+')
+            {
+                throw "CentralAdministrationUrl should not specify port. Use CentralAdministrationPort instead."
+            }
         }
     }
 
@@ -441,9 +455,8 @@ function Set-TargetResource
     # Set default values to ensure they are passed to Invoke-SPDscCommand
     if (-not $PSBoundParameters.ContainsKey("CentralAdministrationPort"))
     {
-        # If CentralAdministrationUrl is specified and is SSL, let's infer the port from the Url
-        if ($PSBoundParameters.ContainsKey("CentralAdministrationUrl") -and `
-            (New-Object -TypeName System.Uri $CentralAdministrationUrl).Scheme -eq 'https')
+        # If CentralAdministrationUrl is specified, let's infer the port from the Url
+        if ($PSBoundParameters.ContainsKey("CentralAdministrationUrl"))
         {
             $PSBoundParameters.Add("CentralAdministrationPort", (New-Object -TypeName System.Uri $CentralAdministrationUrl).Port)
         }
@@ -525,72 +538,83 @@ function Set-TargetResource
 
         if ($RunCentralAdmin)
         {
-            # For the following SSL scenarios, we should remove the CA web application and recreate it
-            #   CentralAdministrationUrl is HTTPS
-            #   AND     Current CentralAdministrationUrl is not equal to new CentralAdministrationUrl
-            #       OR  Current SecureBindings does not exist or doesn't match desired url and port
-            if ($PSBoundParameters.ContainsKey("CentralAdministrationUrl") -and `
-                ([System.Uri]$CentralAdministrationUrl).Scheme -eq 'https')
+
+            if ($PSBoundParameters.ContainsKey("CentralAdministrationUrl"))
             {
-                Write-Verbose -Message "Updating CentralAdmin port to HTTPS"
-                Invoke-SPDscCommand -Credential $InstallAccount `
-                    -Arguments $PSBoundParameters `
-                    -ScriptBlock {
-                    $params = $args[0]
+                if (([System.Uri]$CentralAdministrationUrl).Scheme -eq 'https')
+                {
+                    # For the following SSL scenarios, we should remove the CA web application and recreate it
+                    #   CentralAdministrationUrl is HTTPS
+                    #   AND     Current CentralAdministrationUrl is not equal to new CentralAdministrationUrl
+                    #       OR  Current SecureBindings does not exist or doesn't match desired url and port
 
-                    $reprovisionCentralAdmin = $false
-                    $centralAdminSite = Get-SPWebApplication -IncludeCentralAdministration | Where-Object -FilterScript {
-                        $_.IsAdministrationWebApplication
-                    }
+                    Write-Verbose -Message "Updating CentralAdmin port to HTTPS"
+                    Invoke-SPDscCommand -Credential $InstallAccount `
+                        -Arguments $PSBoundParameters `
+                        -ScriptBlock {
+                        $params = $args[0]
 
-                    $desiredUri = [System.Uri]("{0}:{1}" -f $params.CentralAdministrationUrl.TrimEnd('/'), $params.CentralAdministrationPort)
-                    $currentUri = [System.Uri]$centralAdminSite.Url
-                    if ($desiredUri.AbsoluteUri -ne $currentUri.AbsoluteUri)
-                    {
-                        Write-Verbose -Message "Re-provisioning CA because $($currentUri.AbsoluteUri) does not equal $($desiredUri.AbsoluteUri)"
-                        $reprovisionCentralAdmin = $true
-                    }
-                    else
-                    {
-                        # check securebindings
-                        # there should be an entry in the SecureBindings object of the
-                        # SPWebApplication's IisSettings for the default zone
-                        $secureBindings = $centralAdminSite.GetIisSettingsWithFallback("Default").SecureBindings
-                        if ($null -ne $secureBindings[0] -and (-not [string]::IsNullOrEmpty($secureBindings[0].HostHeader)))
+                        $reprovisionCentralAdmin = $false
+                        $centralAdminSite = Get-SPWebApplication -IncludeCentralAdministration | Where-Object -FilterScript {
+                            $_.IsAdministrationWebApplication
+                        }
+
+                        $desiredUri = [System.Uri]("{0}:{1}" -f $params.CentralAdministrationUrl.TrimEnd('/'), $params.CentralAdministrationPort)
+                        $currentUri = [System.Uri]$centralAdminSite.Url
+                        if ($desiredUri.AbsoluteUri -ne $currentUri.AbsoluteUri)
                         {
-                            # check to see if secureBindings host header and port match what we want them to be
-                            if ($desiredUri.Host -ne $secureBindings[0].HostHeader -or `
-                                    $desiredUri.Port -ne $secureBindings[0].Port)
-                            {
-                                Write-Verbose -Message "Re-provisioning CA because $($desiredUri.Host) does not equal $($secureBindings[0].HostHeader) or $($desiredUri.Port) does not equal $($secureBindings[0].Port)"
-                                $reprovisionCentralAdmin = $true
-                            }
+                            Write-Verbose -Message "Re-provisioning CA because $($currentUri.AbsoluteUri) does not equal $($desiredUri.AbsoluteUri)"
+                            $reprovisionCentralAdmin = $true
                         }
                         else
                         {
-                            # secureBindings did not exist or did not contain a valid hostheader
-                            Write-Verbose -Message "Re-provisioning CA because secureBindings does not exist or does not contain a valid host header"
-                            $reprovisionCentralAdmin = $true
+                            # check securebindings
+                            # there should be an entry in the SecureBindings object of the
+                            # SPWebApplication's IisSettings for the default zone
+                            $secureBindings = $centralAdminSite.GetIisSettingsWithFallback("Default").SecureBindings
+                            if ($null -ne $secureBindings[0] -and (-not [string]::IsNullOrEmpty($secureBindings[0].HostHeader)))
+                            {
+                                # check to see if secureBindings host header and port match what we want them to be
+                                if ($desiredUri.Host -ne $secureBindings[0].HostHeader -or `
+                                        $desiredUri.Port -ne $secureBindings[0].Port)
+                                {
+                                    Write-Verbose -Message "Re-provisioning CA because $($desiredUri.Host) does not equal $($secureBindings[0].HostHeader) or $($desiredUri.Port) does not equal $($secureBindings[0].Port)"
+                                    $reprovisionCentralAdmin = $true
+                                }
+                            }
+                            else
+                            {
+                                # secureBindings did not exist or did not contain a valid hostheader
+                                Write-Verbose -Message "Re-provisioning CA because secureBindings does not exist or does not contain a valid host header"
+                                $reprovisionCentralAdmin = $true
+                            }
+                        }
+
+                        if ($reprovisionCentralAdmin)
+                        {
+                            # Write-Verbose -Message "Removing Central Admin web application in order to reprovision it"
+                            Remove-SPWebApplication -Identity $centralAdminSite.Url -Zone Default -DeleteIisSite
+
+                            Write-Verbose -Message "Re-provisioning Central Admin web application with SSL"
+                            $webAppParams = @{
+                                Identity             = $centralAdminSite.Url
+                                Name                 = "SharePoint Central Administration v4"
+                                Zone                 = "Default"
+                                HostHeader           = $desiredUri.Host
+                                Port                 = $desiredUri.Port
+                                AuthenticationMethod = $params.CentralAdministrationAuth
+                                SecureSocketsLayer   = $true
+                            }
+                            New-SPWebApplicationExtension @webAppParams
                         }
                     }
+                }
+                else
+                {
+                    # CentralAdministrationUrl was specified as HTTP.
+                    # If hostname = server name, ignore as this is default behavior
+                    # Otherwise, update binding/AAM
 
-                    if ($reprovisionCentralAdmin)
-                    {
-                        # Write-Verbose -Message "Removing Central Admin web application in order to reprovision it"
-                        Remove-SPWebApplication -Identity $centralAdminSite.Url -Zone Default -DeleteIisSite
-
-                        Write-Verbose -Message "Re-provisioning Central Admin web application with SSL"
-                        $webAppParams = @{
-                            Identity             = $centralAdminSite.Url
-                            Name                 = "SharePoint Central Administration v4"
-                            Zone                 = "Default"
-                            HostHeader           = $desiredUri.Host
-                            Port                 = $desiredUri.Port
-                            AuthenticationMethod = $params.CentralAdministrationAuth
-                            SecureSocketsLayer   = $true
-                        }
-                        New-SPWebApplicationExtension @webAppParams
-                    }
                 }
             }
             elseif ($CurrentValues.CentralAdministrationPort -ne $CentralAdministrationPort)
