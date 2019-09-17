@@ -1,6 +1,14 @@
 # Change log for SharePointDsc
 
-## Unreleased
+## UNRELEASED
+
+* SPFarmSolution
+  * Fix for Web Application scoped solutions.
+
+* SPWebAppAuthentication
+  * Fixes issue where Test method return false on NON-US OS.
+
+## v3.6
 
 * SharePointDsc generic
   * Added new launch actions to vscode to allow code coverage reports for
