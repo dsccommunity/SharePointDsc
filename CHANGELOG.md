@@ -4,6 +4,8 @@
 
 * SPConfigWizard
   * Fixed issue with incorrect check for upgrade status of server
+* SPFarm
+  * Removed SingleServer as ServerRole, since this is an invalid role.
 * SPFarmSolution
   * Fix for Web Application scoped solutions.
 * SPInstall
