@@ -10,6 +10,8 @@
   * Fix for Web Application scoped solutions.
 * SPInstall
   * Fixes a terminating error for sources in weird file shares
+  * Corrected issue with incorrectly detecting SharePoint after it
+    has been uninstalled
 * SPInstallLanguagePack
   * Fixes a terminating error for sources in weird file shares
 * SPInstallPrereqs
