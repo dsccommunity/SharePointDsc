@@ -12,6 +12,7 @@
   * Fixes a terminating error for sources in weird file shares
   * Corrected issue with incorrectly detecting SharePoint after it
     has been uninstalled
+  * Corrected issue with detecting a paused installation
 * SPInstallLanguagePack
   * Fixes a terminating error for sources in weird file shares
 * SPInstallPrereqs
