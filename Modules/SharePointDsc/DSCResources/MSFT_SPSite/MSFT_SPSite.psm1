@@ -312,20 +312,38 @@ function Set-TargetResource
                 }
             }
 
-            if ($params.ContainsKey("OwnerAlias") -eq $true)
+            $centralAdminWebApp = [Microsoft.SharePoint.Administration.SPAdministrationWebApplication]::Local
+            $centralAdminSite = Get-SPSite -Identity $centralAdminWebApp.Url
+            $systemAccountSite = New-Object "Microsoft.SharePoint.SPSite" -ArgumentList @($site.Id, $centralAdminSite.SystemAccount.UserToken)
+
+            if ($params.OwnerAlias -ne $CurrentValues.OwnerAlias)
             {
-                if ($params.OwnerAlias -ne $CurrentValues.OwnerAlias)
+                Write-Verbose -Message "Updating owner to $($params.OwnerAlias)"
+                try
                 {
-                    $newParams.OwnerAlias = $params.OwnerAlias
+                    $confirmedUsername = $systemAccountSite.RootWeb.EnsureUser($params.OwnerAlias)
                 }
+                catch
+                {
+                    Write-Output "Cannot resolve user $($params.OwnerAlias) as OwnerAlias"
+                }
+                $systemAccountSite.Owner = $confirmedUsername
             }
 
-            if ($params.ContainsKey("SecondaryOwnerAlias") -eq $true)
+            if ($params.ContainsKey("SecondaryOwnerAlias") -eq $true -and `
+                    $params.SecondaryOwnerAlias -ne $CurrentValues.SecondaryOwnerAlias)
             {
-                if ($params.SecondaryOwnerAlias -ne $CurrentValues.SecondaryOwnerAlias)
+                Write-Verbose -Message "Updating secondary owner to $($params.SecondaryOwnerAlias)"
+                try
                 {
-                    $newParams.SecondaryOwnerAlias = $params.SecondaryOwnerAlias
+                    $confirmedUsername = $systemAccountSite.RootWeb.EnsureUser($params.SecondaryOwnerAlias)
                 }
+                catch
+                {
+                    Write-Verbose -Message ("Cannot resolve user $($params.SecondaryOwnerAlias) " + `
+                            "as SecondaryOwnerAlias")
+                }
+                $systemAccountSite.SecondaryContact = $confirmedUsername
             }
 
             if ($params.ContainsKey("AdministrationSiteType") -eq $true)

@@ -20,6 +20,9 @@
 * SPProductUpdate
   * Fixes a terminating error for sources in weird file shares
   * Corrected incorrect farm detection, added in earlier bugfix
+* SPSite
+  * Fixed issue with incorrectly updating site OwnerAlias and
+    SecondaryOwnerAlias
 * SPWebAppAuthentication
   * Fixes issue where Test method return false on NON-US OS.
 
