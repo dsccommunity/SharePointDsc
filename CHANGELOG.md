@@ -2,21 +2,18 @@
 
 ## UNRELEASED
 
+* SPConfigWizard
+  * Fixed issue with incorrect check for upgrade status of server
 * SPFarmSolution
   * Fix for Web Application scoped solutions.
-
 * SPInstall
-  * Fixes a terminating error for sources in weird file shares (#1109)
-  
+  * Fixes a terminating error for sources in weird file shares
 * SPInstallLanguagePack
-  * Fixes a terminating error for sources in weird file shares (#1109)
-
+  * Fixes a terminating error for sources in weird file shares
 * SPInstallPrereqs
-  * Fixes a terminating error for sources in weird file shares (#1109)
-
+  * Fixes a terminating error for sources in weird file shares
 * SPProductUpdate
-  * Fixes a terminating error for sources in weird file shares (#1109)
-
+  * Fixes a terminating error for sources in weird file shares
 * SPWebAppAuthentication
   * Fixes issue where Test method return false on NON-US OS.
 

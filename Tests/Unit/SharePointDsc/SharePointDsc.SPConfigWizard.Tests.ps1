@@ -21,7 +21,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         # Mocks for all contexts
         Mock -CommandName Remove-Item -MockWith { }
         Mock -CommandName Get-Content -MockWith { return "log info" }
-        Mock -CommandName Get-SPDscServerPatchStatus -MockWith { return "NoActionRequired" }
+        Mock -CommandName Get-SPDscServerPatchStatus -MockWith { return "UpgradeRequired" }
 
         # Test contexts
         Context -Name "Upgrade required for Language Pack" -Fixture {
