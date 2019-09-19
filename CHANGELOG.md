@@ -19,6 +19,7 @@
   * Fixes a terminating error for sources in weird file shares
 * SPProductUpdate
   * Fixes a terminating error for sources in weird file shares
+  * Corrected incorrect farm detection, added in earlier bugfix
 * SPWebAppAuthentication
   * Fixes issue where Test method return false on NON-US OS.
 

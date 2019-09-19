@@ -253,7 +253,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             Add-TestRegistryData -PatchLevel "RTM"
 
             Mock -CommandName Get-SPFarm {
-                return $null
+                throw
             }
 
             Mock -CommandName Get-ItemProperty -MockWith {
