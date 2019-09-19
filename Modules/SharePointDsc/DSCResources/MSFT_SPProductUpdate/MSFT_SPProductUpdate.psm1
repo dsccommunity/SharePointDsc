@@ -78,7 +78,14 @@ function Get-TargetResource
     if ($checkBlockedFile -eq $true)
     {
         Write-Verbose -Message "Checking status now"
-        $zone = Get-Item -Path $SetupFile -Stream "Zone.Identifier" -EA SilentlyContinue
+        try
+        {
+            $zone = Get-Item -Path $SetupFile -Stream "Zone.Identifier" -EA SilentlyContinue
+        }
+        catch
+        {
+            Write-Verbose -Message 'Encountered error while reading file stream. Ignoring file stream.'
+        }
 
         if ($null -ne $zone)
         {
@@ -306,7 +313,14 @@ function Set-TargetResource
     if ($checkBlockedFile -eq $true)
     {
         Write-Verbose -Message "Checking status now"
-        $zone = Get-Item -Path $SetupFile -Stream "Zone.Identifier" -EA SilentlyContinue
+        try
+        {
+            $zone = Get-Item -Path $SetupFile -Stream "Zone.Identifier" -EA SilentlyContinue
+        }
+        catch
+        {
+            Write-Verbose -Message 'Encountered error while reading file stream. Ignoring file stream.'
+        }
 
         if ($null -ne $zone)
         {
