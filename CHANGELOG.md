@@ -1,5 +1,25 @@
 # Change log for SharePointDsc
 
+## UNRELEASED
+
+* SPFarmSolution
+  * Fix for Web Application scoped solutions.
+
+* SPInstall
+  * Fixes a terminating error for sources in weird file shares (#1109)
+  
+* SPInstallLanguagePack
+  * Fixes a terminating error for sources in weird file shares (#1109)
+
+* SPInstallPrereqs
+  * Fixes a terminating error for sources in weird file shares (#1109)
+
+* SPProductUpdate
+  * Fixes a terminating error for sources in weird file shares (#1109)
+
+* SPWebAppAuthentication
+  * Fixes issue where Test method return false on NON-US OS.
+
 ## v3.6
 
 * SharePointDsc generic

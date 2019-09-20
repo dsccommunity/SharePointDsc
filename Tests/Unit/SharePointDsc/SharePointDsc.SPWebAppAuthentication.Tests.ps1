@@ -375,11 +375,13 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             Mock -CommandName Get-SPAuthenticationProvider -MockWith {
                 return @(
                     @{
-                        DisplayName     = "Windows Authentication"
-                        DisableKerberos = $true
+                        DisplayName       = "Windows Authentication"
+                        ClaimProviderName = 'AD'
+                        DisableKerberos   = $true
                     },
                     @{
                         DisplayName        = "Forms Authentication"
+                        ClaimProviderName  = 'Forms'
                         RoleProvider       = "RoleProvider"
                         MembershipProvider = "MemberProvider"
                     },
@@ -425,8 +427,9 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             Mock -CommandName Get-SPAuthenticationProvider -MockWith {
                 return @(
                     @{
-                        DisplayName     = "Windows Authentication"
-                        DisableKerberos = $true
+                        DisplayName       = "Windows Authentication"
+                        ClaimProviderName = 'AD'
+                        DisableKerberos   = $true
                     }
                 )
             }
@@ -468,11 +471,13 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             Mock -CommandName Get-SPAuthenticationProvider -MockWith {
                 return @(
                     @{
-                        DisplayName     = "Windows Authentication"
-                        DisableKerberos = $true
+                        DisplayName       = "Windows Authentication"
+                        ClaimProviderName = 'AD'
+                        DisableKerberos   = $true
                     },
                     @{
                         DisplayName        = "Forms Authentication"
+                        ClaimProviderName  = 'Forms'
                         RoleProvider       = "RoleProvider"
                         MembershipProvider = "MemberProvider"
                     }
@@ -528,11 +533,13 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             Mock -CommandName Get-SPAuthenticationProvider -MockWith {
                 return @(
                     @{
-                        DisplayName     = "Windows Authentication"
-                        DisableKerberos = $true
+                        DisplayName       = "Windows Authentication"
+                        ClaimProviderName = 'AD'
+                        DisableKerberos   = $true
                     },
                     @{
                         DisplayName        = "Forms Authentication"
+                        ClaimProviderName  = 'Forms'
                         RoleProvider       = "RoleProvider"
                         MembershipProvider = "MemberProvider"
                     },
@@ -583,11 +590,13 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             Mock -CommandName Get-SPAuthenticationProvider -MockWith {
                 return @(
                     @{
-                        DisplayName     = "Windows Authentication"
-                        DisableKerberos = $true
+                        DisplayName       = "Windows Authentication"
+                        ClaimProviderName = 'AD'
+                        DisableKerberos   = $true
                     },
                     @{
                         DisplayName        = "Forms Authentication"
+                        ClaimProviderName  = 'Forms'
                         RoleProvider       = "RoleProvider"
                         MembershipProvider = "MemberProvider"
                     }
@@ -643,11 +652,13 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             Mock -CommandName Get-SPAuthenticationProvider -MockWith {
                 return @(
                     @{
-                        DisplayName     = "Windows Authentication"
-                        DisableKerberos = $true
+                        DisplayName       = "Windows Authentication"
+                        ClaimProviderName = 'AD'
+                        DisableKerberos   = $true
                     },
                     @{
                         DisplayName        = "Forms Authentication"
+                        ClaimProviderName  = 'Forms'
                         RoleProvider       = "RoleProvider"
                         MembershipProvider = "MemberProvider"
                     },
@@ -698,11 +709,13 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             Mock -CommandName Get-SPAuthenticationProvider -MockWith {
                 return @(
                     @{
-                        DisplayName     = "Windows Authentication"
-                        DisableKerberos = $true
+                        DisplayName       = "Windows Authentication"
+                        ClaimProviderName = 'AD'
+                        DisableKerberos   = $true
                     },
                     @{
                         DisplayName        = "Forms Authentication"
+                        ClaimProviderName  = 'Forms'
                         RoleProvider       = "RoleProvider"
                         MembershipProvider = "MemberProvider"
                     }
@@ -758,11 +771,13 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             Mock -CommandName Get-SPAuthenticationProvider -MockWith {
                 return @(
                     @{
-                        DisplayName     = "Windows Authentication"
-                        DisableKerberos = $true
+                        DisplayName       = "Windows Authentication"
+                        ClaimProviderName = 'AD'
+                        DisableKerberos   = $true
                     },
                     @{
                         DisplayName        = "Forms Authentication"
+                        ClaimProviderName  = 'Forms'
                         RoleProvider       = "RoleProvider"
                         MembershipProvider = "MemberProvider"
                     },
@@ -808,11 +823,13 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             Mock -CommandName Get-SPAuthenticationProvider -MockWith {
                 return @(
                     @{
-                        DisplayName     = "Windows Authentication"
-                        DisableKerberos = $true
+                        DisplayName       = "Windows Authentication"
+                        ClaimProviderName = 'AD'
+                        DisableKerberos   = $true
                     },
                     @{
                         DisplayName        = "Forms Authentication"
+                        ClaimProviderName  = 'Forms'
                         RoleProvider       = "RoleProvider"
                         MembershipProvider = "MemberProvider"
                     },
@@ -871,11 +888,13 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             Mock -CommandName Get-SPAuthenticationProvider -MockWith {
                 return @(
                     @{
-                        DisplayName     = "Windows Authentication"
-                        DisableKerberos = $true
+                        DisplayName       = "Windows Authentication"
+                        ClaimProviderName = 'AD'
+                        DisableKerberos   = $true
                     },
                     @{
                         DisplayName        = "Forms Authentication"
+                        ClaimProviderName  = 'Forms'
                         RoleProvider       = "RoleProvider"
                         MembershipProvider = "MemberProvider"
                     },
@@ -926,11 +945,13 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             Mock -CommandName Get-SPAuthenticationProvider -MockWith {
                 return @(
                     @{
-                        DisplayName     = "Windows Authentication"
+                        DisplayName       = "Windows Authentication"
+                        ClaimProviderName = 'AD'
                         DisableKerberos = $false
                     },
                     @{
                         DisplayName        = "Forms Authentication"
+                        ClaimProviderName  = 'Forms'
                         RoleProvider       = "RoleProvider"
                         MembershipProvider = "MemberProvider"
                     }
