@@ -6,8 +6,6 @@
   * Fixed issue with incorrect check for upgrade status of server
 * SPFarm
   * Removed SingleServer as ServerRole, since this is an invalid role.
-  * Moved check for CentralAdministrationUrl is HTTP to Set method,
-    to prevent issues with ReverseDsc
   * Handle case where null or empty CentralAdministrationUrl is passed in
 * SPFarmSolution
   * Fix for Web Application scoped solutions.
@@ -34,6 +32,9 @@
 * SharePointDsc generic
   * Added new launch actions to vscode to allow code coverage reports for
     the current unit test file.
+* SPFarm
+  * Moved check for CentralAdministrationUrl is HTTP to Set method,
+    to prevent issues with ReverseDsc
 * SPInstall
   * Updated error code checks to force reboot.
 * SPProductUpdate
