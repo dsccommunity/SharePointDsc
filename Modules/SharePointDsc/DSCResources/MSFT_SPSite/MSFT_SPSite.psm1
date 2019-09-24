@@ -322,12 +322,12 @@ function Set-TargetResource
                 try
                 {
                     $confirmedUsername = $systemAccountSite.RootWeb.EnsureUser($params.OwnerAlias)
+                    $systemAccountSite.Owner = $confirmedUsername
                 }
                 catch
                 {
                     Write-Output "Cannot resolve user $($params.OwnerAlias) as OwnerAlias"
                 }
-                $systemAccountSite.Owner = $confirmedUsername
             }
 
             if ($params.ContainsKey("SecondaryOwnerAlias") -eq $true -and `
@@ -337,13 +337,13 @@ function Set-TargetResource
                 try
                 {
                     $confirmedUsername = $systemAccountSite.RootWeb.EnsureUser($params.SecondaryOwnerAlias)
+                    $systemAccountSite.SecondaryContact = $confirmedUsername
                 }
                 catch
                 {
                     Write-Verbose -Message ("Cannot resolve user $($params.SecondaryOwnerAlias) " + `
                             "as SecondaryOwnerAlias")
                 }
-                $systemAccountSite.SecondaryContact = $confirmedUsername
             }
 
             if ($params.ContainsKey("AdministrationSiteType") -eq $true)
