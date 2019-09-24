@@ -100,8 +100,9 @@ function Set-TargetResource
     Write-Verbose -Message "Checking if all servers in the farm have the binaries installed"
     $statusType = Get-SPDscServerPatchStatus
 
-    Write-Verbose -Message "Server status: $statusType (Has to be 'NoActionRequired' to continue)"
-    if ($statusType -ne "NoActionRequired")
+    Write-Verbose -Message ("Server status: $statusType (Has to be 'UpgradeAvailable' or " + `
+            "'UpgradeRequired' to continue)")
+    if ($statusType -ne "UpgradeRequired" -and $statusType -ne "UpgradeAvailable")
     {
         Write-Verbose -Message "Upgrade not possible, not all servers have the same binaries installed"
         return

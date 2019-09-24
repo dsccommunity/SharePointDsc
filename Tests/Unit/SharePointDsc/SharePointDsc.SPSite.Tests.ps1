@@ -51,6 +51,9 @@ namespace Microsoft.SharePoint.Administration {
                 -Value {
                 $this.CreateDefaultAssociatedGroupsCalled = $true
             }
+            $rootWeb = $rootWeb | Add-Member -MemberType ScriptMethod `
+                -Name EnsureUser `
+                -Value { return "user" } -PassThru
 
             $site = @{
                 HostHeaderIsSiteName   = $false
@@ -200,8 +203,6 @@ namespace Microsoft.SharePoint.Administration {
             }
 
             Mock -CommandName Set-SPSite -MockWith { } -ParameterFilter {
-                $OwnerAlias = "DEMO\User"
-                $SecondaryOwnerAlias = "DEMO\SecondUser"
                 $QuotaTemplate = "Test"
                 $AdministrationSiteType -eq "TenantAdministration"
             }

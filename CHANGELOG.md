@@ -2,21 +2,27 @@
 
 ## UNRELEASED
 
+* SPConfigWizard
+  * Fixed issue with incorrect check for upgrade status of server
+* SPFarm
+  * Removed SingleServer as ServerRole, since this is an invalid role.
 * SPFarmSolution
   * Fix for Web Application scoped solutions.
-
 * SPInstall
-  * Fixes a terminating error for sources in weird file shares (#1109)
-  
+  * Fixes a terminating error for sources in weird file shares
+  * Corrected issue with incorrectly detecting SharePoint after it
+    has been uninstalled
+  * Corrected issue with detecting a paused installation
 * SPInstallLanguagePack
-  * Fixes a terminating error for sources in weird file shares (#1109)
-
+  * Fixes a terminating error for sources in weird file shares
 * SPInstallPrereqs
-  * Fixes a terminating error for sources in weird file shares (#1109)
-
+  * Fixes a terminating error for sources in weird file shares
 * SPProductUpdate
-  * Fixes a terminating error for sources in weird file shares (#1109)
-
+  * Fixes a terminating error for sources in weird file shares
+  * Corrected incorrect farm detection, added in earlier bugfix
+* SPSite
+  * Fixed issue with incorrectly updating site OwnerAlias and
+    SecondaryOwnerAlias
 * SPWebAppAuthentication
   * Fixes issue where Test method return false on NON-US OS.
 

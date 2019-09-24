@@ -58,7 +58,6 @@ function Get-TargetResource
             "Custom",
             "DistributedCache",
             "Search",
-            "SingleServer",
             "SingleServerFarm",
             "WebFrontEnd",
             "WebFrontEndWithDistributedCache")]
@@ -393,7 +392,6 @@ function Set-TargetResource
             "Custom",
             "DistributedCache",
             "Search",
-            "SingleServer",
             "SingleServerFarm",
             "WebFrontEnd",
             "WebFrontEndWithDistributedCache")]
@@ -1012,7 +1010,6 @@ function Test-TargetResource
             "Custom",
             "DistributedCache",
             "Search",
-            "SingleServer",
             "SingleServerFarm",
             "WebFrontEnd",
             "WebFrontEndWithDistributedCache")]

@@ -409,12 +409,15 @@ function Set-TargetResource
 
     $farmIsAvailable = Invoke-SPDscCommand -Credential $InstallAccount `
         -ScriptBlock {
-        $farm = Get-SPFarm -ErrorAction SilentlyContinue
-        if ($null -eq $farm)
+        try
+        {
+            $null = Get-SPFarm
+            return $true
+        }
+        catch
         {
             return $false
         }
-        return $true
     }
 
     if ($ShutdownServices -and $farmIsAvailable)
