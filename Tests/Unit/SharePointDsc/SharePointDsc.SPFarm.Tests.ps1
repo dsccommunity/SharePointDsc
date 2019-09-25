@@ -144,25 +144,6 @@ namespace Microsoft.SharePoint.Administration {
             }
         }
 
-        Context -Name "Invalid CA URL has been passed in (HTTP currently not supported)" -Fixture {
-            $testParams = @{
-                IsSingleInstance          = "Yes"
-                Ensure                    = "Present"
-                FarmConfigDatabaseName    = "SP_Config"
-                CentralAdministrationPort = 443
-                CentralAdministrationUrl  = "http://admin.contoso.com"
-                DatabaseServer            = "sql.contoso.com"
-                FarmAccount               = $mockFarmAccount
-                Passphrase                = $mockPassphrase
-                AdminContentDatabaseName  = "SP_AdminContent"
-                RunCentralAdmin           = $true
-            }
-
-            It "Should throw exception in the set method" {
-                { Set-TargetResource @testParams } | Should Throw "CentralAdministrationUrl parameter can only be used with HTTPS"
-            }
-        }
-
         Context -Name "No config databaes exists, and this server should be connected to one" -Fixture {
             $testParams = @{
                 IsSingleInstance         = "Yes"
