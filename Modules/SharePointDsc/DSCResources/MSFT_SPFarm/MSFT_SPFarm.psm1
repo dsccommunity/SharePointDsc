@@ -96,18 +96,12 @@ function Get-TargetResource
             $uri = $CentralAdministrationUrl -as [System.Uri]
             if ($null -eq $uri.AbsoluteUri)
             {
-                Write-Verbose -Message ("CentralAdministrationUrl is not a valid URI. It should " + `
+                throw ("CentralAdministrationUrl is not a valid URI. It should " + `
                         "include the scheme (http/https) and address.")
             }
-            # if ($uri.scheme -ne 'https')
-            # {
-            #     Write-Verbose -Message ("Currently, the CentralAdministrationUrl parameter can only " + `
-            #             "be used with HTTPS. To provision CA on HTTP, omit the CentralAdministrationUrl " + `
-            #             "parameter to provision CA on http://servername:port.")
-            # }
             if ($CentralAdministrationUrl -match ':\d+')
             {
-                Write-Verbose -Message ("CentralAdministrationUrl should not specify port. Use " + `
+                throw ("CentralAdministrationUrl should not specify port. Use " + `
                         "CentralAdministrationPort instead.")
             }
         }
@@ -423,30 +417,29 @@ function Set-TargetResource
                 "ensure property to 'present'")
     }
 
-    if ($PSBoundParameters.ContainsKey("CentralAdministrationUrl"))
-    {
-        if ([string]::IsNullOrEmpty($CentralAdministrationUrl))
-        {
-            $PSBoundParameters.Remove('CentralAdministrationUrl') | Out-Null
-        }
-        else
-        {
-            $uri = $CentralAdministrationUrl -as [System.Uri]
-            if ($null -eq $uri.AbsoluteUri -or $uri.scheme -notin ('http', 'https'))
-            {
-                throw "CentralAdministrationUrl is not a valid URI. It should include the scheme (http/https) and address."
-            }
-            # if ($uri.scheme -ne 'https')
-            # {
-            #     throw "Currently, the CentralAdministrationUrl parameter can only be used with HTTPS. To provision CA on " + `
-            #         "HTTP, omit the CentralAdministrationUrl parameter to provision CA on http://servername:port."
-            # }
-            if ($CentralAdministrationUrl -match ':\d+')
-            {
-                throw "CentralAdministrationUrl should not specify port. Use CentralAdministrationPort instead."
-            }
-        }
-    }
+    #########
+    # Testing adding exception throwing back to Get method now that HTTP is supported
+    # and we're checking for null/empty CentralAdministrationUrl
+    #########
+    # if ($PSBoundParameters.ContainsKey("CentralAdministrationUrl"))
+    # {
+    #     if ([string]::IsNullOrEmpty($CentralAdministrationUrl))
+    #     {
+    #         $PSBoundParameters.Remove('CentralAdministrationUrl') | Out-Null
+    #     }
+    #     else
+    #     {
+    #         $uri = $CentralAdministrationUrl -as [System.Uri]
+    #         if ($null -eq $uri.AbsoluteUri -or $uri.scheme -notin ('http', 'https'))
+    #         {
+    #             throw "CentralAdministrationUrl is not a valid URI. It should include the scheme (http/https) and address."
+    #         }
+    #         if ($CentralAdministrationUrl -match ':\d+')
+    #         {
+    #             throw "CentralAdministrationUrl should not specify port. Use CentralAdministrationPort instead."
+    #         }
+    #     }
+    # }
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
