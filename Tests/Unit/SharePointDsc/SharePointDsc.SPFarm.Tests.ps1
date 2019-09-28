@@ -93,17 +93,31 @@ namespace Microsoft.SharePoint.Administration {
                 RunCentralAdmin           = $true
             }
 
-            It "Should throw exception in the get method" {
-                { Get-TargetResource @testParams } | Should Throw "An invalid value for CentralAdministrationPort is specified:"
+            $expectedException = "Cannot validate argument on parameter 'CentralAdministrationPort'. The 80000 argument is greater than the maximum allowed range of 65535. Supply an argument that is less than or equal to 65535 and then try the command again."
+
+            It "Should throw parameter validation exception in the get method" {
+                { Get-TargetResource @testParams } | Should Throw $expectedException
             }
 
-            It "Should throw exception in the test method" {
-                { Test-TargetResource @testParams } | Should Throw "An invalid value for CentralAdministrationPort is specified:"
+            It "Should throw parameter validation exception in the test method" {
+                { Test-TargetResource @testParams } | Should Throw $expectedException
             }
 
-            It "Should throw exception in the set method" {
-                { Set-TargetResource @testParams } | Should Throw "An invalid value for CentralAdministrationPort is specified:"
+            It "Should throw parameter validation exception in the Set method" {
+                { Set-TargetResource @testParams } | Should Throw $expectedException
             }
+
+            # It "Should throw exception in the get method" {
+            #     { Get-TargetResource @testParams } | Should Throw "An invalid value for CentralAdministrationPort is specified:"
+            # }
+
+            # It "Should throw exception in the test method" {
+            #     { Test-TargetResource @testParams } | Should Throw "An invalid value for CentralAdministrationPort is specified:"
+            # }
+
+            # It "Should throw exception in the set method" {
+            #     { Set-TargetResource @testParams } | Should Throw "An invalid value for CentralAdministrationPort is specified:"
+            # }
         }
 
         Context -Name "CA URL passed in cannot be parsed as System.Uri" -Fixture {
@@ -118,14 +132,6 @@ namespace Microsoft.SharePoint.Administration {
                 Passphrase                = $mockPassphrase
                 AdminContentDatabaseName  = "SP_AdminContent"
                 RunCentralAdmin           = $true
-            }
-
-            It "Should throw exception in the get method" {
-                { Get-TargetResource @testParams } | Should Throw "CentralAdministrationUrl is not a valid URI. It should include the scheme (http/https) and address."
-            }
-
-            It "Should throw exception in the test method" {
-                { Test-TargetResource @testParams } | Should Throw "CentralAdministrationUrl is not a valid URI. It should include the scheme (http/https) and address."
             }
 
             It "Should throw exception in the set method" {
@@ -147,24 +153,15 @@ namespace Microsoft.SharePoint.Administration {
                 RunCentralAdmin           = $true
             }
 
-            It "Should throw exception in the get method" {
-                { Get-TargetResource @testParams } | Should Throw "CentralAdministrationUrl should not specify port. Use CentralAdministrationPort instead."
-            }
-
-            It "Should throw exception in the test method" {
-                { Test-TargetResource @testParams } | Should Throw "CentralAdministrationUrl should not specify port. Use CentralAdministrationPort instead."
-            }
-
             It "Should throw exception in the set method" {
                 { Set-TargetResource @testParams } | Should Throw "CentralAdministrationUrl should not specify port. Use CentralAdministrationPort instead."
             }
         }
 
-        Context -Name "No config databaes exists, and this server should be connected to one" -Fixture {
+        Context -Name "No config databases exists, and this server should be connected to one" -Fixture {
             $testParams = @{
                 IsSingleInstance         = "Yes"
                 Ensure                   = "Present"
-                CentralAdministrationUrl = ""
                 FarmConfigDatabaseName   = "SP_Config"
                 DatabaseServer           = "sql.contoso.com"
                 FarmAccount              = $mockFarmAccount
@@ -821,6 +818,82 @@ namespace Microsoft.SharePoint.Administration {
             }
         }
 
+        Context -Name "Server not yet part of the farm, and will run Central Admin on HTTP with vanity host name" -Fixture {
+            $testParams = @{
+                IsSingleInstance         = "Yes"
+                Ensure                   = "Present"
+                FarmConfigDatabaseName   = "SP_Config"
+                DatabaseServer           = "sql.contoso.com"
+                FarmAccount              = $mockFarmAccount
+                Passphrase               = $mockPassphrase
+                AdminContentDatabaseName = "SP_AdminContent"
+                CentralAdministrationUrl = "http://admin.contoso.com"
+                RunCentralAdmin          = $true
+            }
+
+            Mock -CommandName "Get-SPDscRegistryKey" -MockWith { return $null }
+            Mock -CommandName "Get-SPFarm" -MockWith { return $null }
+            Mock -CommandName "Get-SPDscConfigDBStatus" -MockWith {
+                return @{
+                    Locked           = $false
+                    ValidPermissions = $true
+                    DatabaseExists   = $true
+                }
+            }
+            Mock -CommandName "Get-SPDscSQLInstanceStatus" -MockWith {
+                return @{
+                    MaxDOPCorrect = $true
+                }
+            }
+
+            Mock -CommandName "Get-SPWebApplication" -MockWith {
+                return @{
+                    IsAdministrationWebApplication = $true
+                    ContentDatabases               = @(@{
+                            Name = $testParams.AdminContentDatabaseName
+                        })
+                    Url                            = "http://localhost:9999"
+                }
+            }
+            Mock -CommandName "Get-SPServiceInstance" -MockWith {
+                if ($global:SPDscCentralAdminCheckDone -eq $true)
+                {
+                    return @(
+                        @{
+                            Name = "WSS_Administration"
+                        } | Add-Member -MemberType ScriptMethod `
+                            -Name GetType `
+                            -Value {
+                            return @{
+                                Name = "SPWebServiceInstance"
+                            }
+                        } -PassThru -Force
+                    )
+                }
+                else
+                {
+                    $global:SPDscCentralAdminCheckDone = $true
+                    return $null
+                }
+            }
+
+            It "Should return absent from the get method" {
+                (Get-TargetResource @testParams).Ensure | Should Be "Absent"
+            }
+
+            It "Should return false from the test method" {
+                Test-TargetResource @testParams | Should be $false
+            }
+
+            $global:SPDscCentralAdminCheckDone = $false
+            It "Should provision, remove, and re-extend CA web application in the set method" {
+                Set-TargetResource @testParams -Verbose
+                Assert-MockCalled -CommandName "New-SPCentralAdministration"
+                Assert-MockCalled -CommandName "Remove-SPWebApplication"
+                Assert-MockCalled -CommandName "New-SPWebApplicationExtension"
+            }
+        }
+
         Context -Name "Server not yet part of the farm, and will run Central Admin on HTTPS" -Fixture {
             $testParams = @{
                 IsSingleInstance         = "Yes"
@@ -890,7 +963,7 @@ namespace Microsoft.SharePoint.Administration {
 
             $global:SPDscCentralAdminCheckDone = $false
             It "Should provision, remove, and re-extend CA web application in the set method" {
-                Set-TargetResource @testParams
+                Set-TargetResource @testParams -Verbose
                 Assert-MockCalled -CommandName "New-SPCentralAdministration"
                 Assert-MockCalled -CommandName "Remove-SPWebApplication"
                 Assert-MockCalled -CommandName "New-SPWebApplicationExtension"

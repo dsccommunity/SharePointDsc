@@ -7,6 +7,9 @@
 * SPFarm
   * Removed SingleServer as ServerRole, since this is an invalid role.
   * Handle case where null or empty CentralAdministrationUrl is passed in
+  * Move CentralAdministrationPort validation into parameter definition
+    to work with ReverseDsc
+  * Add NotNullOrEmpty parameter validation to CentralAdministrationUrl
 * SPFarmSolution
   * Fix for Web Application scoped solutions.
 * SPInstall

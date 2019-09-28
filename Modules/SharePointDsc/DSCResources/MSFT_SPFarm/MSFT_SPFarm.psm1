@@ -43,6 +43,7 @@ function Get-TargetResource
         $CentralAdministrationUrl,
 
         [Parameter()]
+        [ValidateRange(1, 65535)]
         [System.UInt32]
         $CentralAdministrationPort,
 
@@ -68,7 +69,6 @@ function Get-TargetResource
         [System.String]
         $DeveloperDashboard,
 
-
         [Parameter()]
         [System.Management.Automation.PSCredential]
         $InstallAccount
@@ -76,41 +76,9 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting the settings of the current local SharePoint Farm (if any)"
 
-    if ($PSBoundParameters.ContainsKey("CentralAdministrationPort"))
-    {
-        if ($CentralAdministrationPort -notin 1..65535)
-        {
-            throw ("An invalid value for CentralAdministrationPort is specified: " + `
-                    "$CentralAdministrationPort")
-        }
-    }
-
-    if ($PSBoundParameters.ContainsKey("CentralAdministrationUrl"))
-    {
-        if ([string]::IsNullOrEmpty($CentralAdministrationUrl))
-        {
-            $PSBoundParameters.Remove('CentralAdministrationUrl') | Out-Null
-        }
-        else
-        {
-            $uri = $CentralAdministrationUrl -as [System.Uri]
-            if ($null -eq $uri.AbsoluteUri)
-            {
-                throw ("CentralAdministrationUrl is not a valid URI. It should " + `
-                        "include the scheme (http/https) and address.")
-            }
-            if ($CentralAdministrationUrl -match ':\d+')
-            {
-                throw ("CentralAdministrationUrl should not specify port. Use " + `
-                        "CentralAdministrationPort instead.")
-            }
-        }
-    }
-
     if ($Ensure -eq "Absent")
     {
-        throw ("SharePointDsc does not support removing a server from a farm, please set the " + `
-                "ensure property to 'present'")
+        throw "SharePointDsc does not support removing a server from a farm, please set the ensure property to 'present'"
     }
 
     $installedVersion = Get-SPDscInstalledProductVersion
@@ -124,15 +92,15 @@ function Get-TargetResource
         {
             if ($DeveloperDashboard -eq "OnDemand")
             {
-                throw ("The DeveloperDashboard value 'OnDemand' is not allowed in SharePoint " + `
-                        "2016 and 2019")
+                throw "The DeveloperDashboard value 'OnDemand' is not allowed in SharePoint 2016 and 2019"
             }
 
             if ($DeveloperDashboard -eq "On")
             {
-                Write-Verbose -Message ("Please make sure you also provision the Usage and Health " + `
-                        "service application to make sure the Developer Dashboard " + `
-                        "works properly")
+                $message = "Please make sure you also provision the Usage and Health " +
+                "service application to make sure the Developer Dashboard " +
+                "works properly"
+                Write-Verbose -Message $message
             }
 
             if ($installedVersion.ProductBuildPart.ToString().Length -eq 4)
@@ -146,27 +114,27 @@ function Get-TargetResource
         }
         default
         {
-            throw ("Detected an unsupported major version of SharePoint. SharePointDsc only " + `
-                    "supports SharePoint 2013, 2016 or 2019.")
+            throw ("Detected an unsupported major version of SharePoint. SharePointDsc only " +
+                "supports SharePoint 2013, 2016 or 2019.")
         }
     }
 
-    if (($PSBoundParameters.ContainsKey("ServerRole") -eq $true) `
-            -and $installedVersion.FileMajorPart -ne 16)
+    if (($PSBoundParameters.ContainsKey("ServerRole") -eq $true) -and
+        $installedVersion.FileMajorPart -ne 16)
     {
         throw [Exception] "Server role is only supported in SharePoint 2016 and 2019."
     }
 
-    if (($PSBoundParameters.ContainsKey("ServerRole") -eq $true) `
-            -and $installedVersion.FileMajorPart -eq 16 `
-            -and $installedVersion.FileBuildPart -lt 4456 `
-            -and ($ServerRole -eq "ApplicationWithSearch" `
-                -or $ServerRole -eq "WebFrontEndWithDistributedCache"))
+    if (($PSBoundParameters.ContainsKey("ServerRole") -eq $true) -and
+        $installedVersion.FileMajorPart -eq 16 -and
+        $installedVersion.FileBuildPart -lt 4456 -and
+        ($ServerRole -eq "ApplicationWithSearch" -or
+            $ServerRole -eq "WebFrontEndWithDistributedCache"))
     {
-        throw [Exception] ("ServerRole values of 'ApplicationWithSearch' or " + `
-                "'WebFrontEndWithDistributedCache' require the SharePoint 2016 " + `
-                "Feature Pack 1 to be installed. See " + `
-                "https://support.microsoft.com/en-us/kb/3127940")
+        throw [Exception] ("ServerRole values of 'ApplicationWithSearch' or " +
+            "'WebFrontEndWithDistributedCache' require the SharePoint 2016 " +
+            "Feature Pack 1 to be installed. See " +
+            "https://support.microsoft.com/en-us/kb/3127940")
     }
 
 
@@ -211,8 +179,8 @@ function Get-TargetResource
                 $farmAccount = $spFarm.DefaultServiceAccount.Name
             }
 
-            $centralAdminSite = Get-SPWebApplication -IncludeCentralAdministration `
-            | Where-Object -FilterScript {
+            $centralAdminSite = Get-SPWebApplication -IncludeCentralAdministration |
+            Where-Object -FilterScript {
                 $_.IsAdministrationWebApplication -eq $true
             }
 
@@ -221,9 +189,9 @@ function Get-TargetResource
             if ($null -ne $ca)
             {
                 $ca = $ca | Where-Object -Filterscript {
-                    $_.GetType().Name -eq "SPWebServiceInstance" -and `
-                        $_.Name -eq "WSS_Administration" -and `
-                        $_.Status -eq "Online"
+                    $_.GetType().Name -eq "SPWebServiceInstance" -and
+                    $_.Name -eq "WSS_Administration" -and
+                    $_.Status -eq "Online"
                 }
             }
 
@@ -233,8 +201,8 @@ function Get-TargetResource
             }
 
             $centralAdminAuth = $null
-            if ($null -ne $centralAdminSite -and `
-                    $centralAdminSite.IisSettings[0].DisableKerberos -eq $false)
+            if ($null -ne $centralAdminSite -and
+                $centralAdminSite.IisSettings[0].DisableKerberos -eq $false)
             {
                 $centralAdminAuth = "Kerberos"
             }
@@ -287,11 +255,11 @@ function Get-TargetResource
         {
             # The node is currently connected to a farm but was unable to retrieve the values
             # of current farm settings, most likely due to connectivity issues with the SQL box
-            Write-Verbose -Message ("This server appears to be connected to a farm already, " + `
-                    "but the configuration database is currently unable to be " + `
-                    "accessed. Values returned from the get method will be " + `
-                    "incomplete, however the 'Ensure' property should be " + `
-                    "considered correct")
+            Write-Verbose -Message ("This server appears to be connected to a farm already, " +
+                "but the configuration database is currently unable to be " +
+                "accessed. Values returned from the get method will be " +
+                "incomplete, however the 'Ensure' property should be " +
+                "considered correct")
             return @{
                 IsSingleInstance          = "Yes"
                 FarmConfigDatabaseName    = $null
@@ -378,6 +346,7 @@ function Set-TargetResource
         $CentralAdministrationUrl,
 
         [Parameter()]
+        [ValidateRange(1, 65535)]
         [System.UInt32]
         $CentralAdministrationPort,
 
@@ -413,33 +382,29 @@ function Set-TargetResource
 
     if ($Ensure -eq "Absent")
     {
-        throw ("SharePointDsc does not support removing a server from a farm, please set the " + `
-                "ensure property to 'present'")
+        throw ("SharePointDsc does not support removing a server from a farm, please set the " +
+            "ensure property to 'present'")
     }
 
-    #########
-    # Testing adding exception throwing back to Get method now that HTTP is supported
-    # and we're checking for null/empty CentralAdministrationUrl
-    #########
-    # if ($PSBoundParameters.ContainsKey("CentralAdministrationUrl"))
-    # {
-    #     if ([string]::IsNullOrEmpty($CentralAdministrationUrl))
-    #     {
-    #         $PSBoundParameters.Remove('CentralAdministrationUrl') | Out-Null
-    #     }
-    #     else
-    #     {
-    #         $uri = $CentralAdministrationUrl -as [System.Uri]
-    #         if ($null -eq $uri.AbsoluteUri -or $uri.scheme -notin ('http', 'https'))
-    #         {
-    #             throw "CentralAdministrationUrl is not a valid URI. It should include the scheme (http/https) and address."
-    #         }
-    #         if ($CentralAdministrationUrl -match ':\d+')
-    #         {
-    #             throw "CentralAdministrationUrl should not specify port. Use CentralAdministrationPort instead."
-    #         }
-    #     }
-    # }
+    if ($PSBoundParameters.ContainsKey("CentralAdministrationUrl"))
+    {
+        if ([string]::IsNullOrEmpty($CentralAdministrationUrl))
+        {
+            $PSBoundParameters.Remove('CentralAdministrationUrl') | Out-Null
+        }
+        else
+        {
+            $uri = $CentralAdministrationUrl -as [System.Uri]
+            if ($null -eq $uri.AbsoluteUri -or $uri.scheme -notin ('http', 'https'))
+            {
+                throw "CentralAdministrationUrl is not a valid URI. It should include the scheme (http/https) and address."
+            }
+            if ($CentralAdministrationUrl -match ':\d+')
+            {
+                throw "CentralAdministrationUrl should not specify port. Use CentralAdministrationPort instead."
+            }
+        }
+    }
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
@@ -488,8 +453,8 @@ function Set-TargetResource
                     if ($null -ne $serviceInstance)
                     {
                         $serviceInstance = $serviceInstance | Where-Object -FilterScript {
-                            $_.GetType().Name -eq "SPWebServiceInstance" -and `
-                                $_.Name -eq "WSS_Administration"
+                            $_.GetType().Name -eq "SPWebServiceInstance" -and
+                            $_.Name -eq "WSS_Administration"
                         }
                     }
 
@@ -513,8 +478,8 @@ function Set-TargetResource
                     if ($null -ne $serviceInstance)
                     {
                         $serviceInstance = $serviceInstance | Where-Object -FilterScript {
-                            $_.GetType().Name -eq "SPWebServiceInstance" -and `
-                                $_.Name -eq "WSS_Administration"
+                            $_.GetType().Name -eq "SPWebServiceInstance" -and
+                            $_.Name -eq "WSS_Administration"
                         }
                     }
 
@@ -529,83 +494,84 @@ function Set-TargetResource
 
         if ($RunCentralAdmin)
         {
-
             if ($PSBoundParameters.ContainsKey("CentralAdministrationUrl"))
             {
-                if (([System.Uri]$CentralAdministrationUrl).Scheme -eq 'https')
-                {
-                    # For the following SSL scenarios, we should remove the CA web application and recreate it
-                    #   CentralAdministrationUrl is HTTPS
-                    #   AND     Current CentralAdministrationUrl is not equal to new CentralAdministrationUrl
-                    #       OR  Current SecureBindings does not exist or doesn't match desired url and port
+                # For the following scenarios, we should remove the CA web application and recreate it
+                #   CentralAdministrationUrl is passed in
+                #   AND     Current CentralAdministrationUrl is not equal to new CentralAdministrationUrl
+                #       OR  Current SecureBindings (HTTPS) or ServerBindings (HTTP) does not exist or doesn't
+                #           match desired url and port
 
-                    Write-Verbose -Message "Updating CentralAdmin port to HTTPS"
-                    Invoke-SPDscCommand -Credential $InstallAccount `
-                        -Arguments $PSBoundParameters `
-                        -ScriptBlock {
-                        $params = $args[0]
+                Write-Verbose -Message "Updating Central Admin URL configuration"
+                Invoke-SPDscCommand -Credential $InstallAccount `
+                    -Arguments $PSBoundParameters `
+                    -ScriptBlock {
+                    $params = $args[0]
 
-                        $reprovisionCentralAdmin = $false
-                        $centralAdminSite = Get-SPWebApplication -IncludeCentralAdministration | Where-Object -FilterScript {
-                            $_.IsAdministrationWebApplication
-                        }
+                    $reprovisionCentralAdmin = $false
+                    $centralAdminSite = Get-SPWebApplication -IncludeCentralAdministration | Where-Object -FilterScript {
+                        $_.IsAdministrationWebApplication
+                    }
 
-                        $desiredUri = [System.Uri]("{0}:{1}" -f $params.CentralAdministrationUrl.TrimEnd('/'), $params.CentralAdministrationPort)
-                        $currentUri = [System.Uri]$centralAdminSite.Url
-                        if ($desiredUri.AbsoluteUri -ne $currentUri.AbsoluteUri)
+                    $isCentralAdminUrlHttps = (([System.Uri]$params.CentralAdministrationUrl).Scheme -eq 'https')
+
+                    $desiredUri = [System.Uri]("{0}:{1}" -f $params.CentralAdministrationUrl.TrimEnd('/'), $params.CentralAdministrationPort)
+                    $currentUri = [System.Uri]$centralAdminSite.Url
+                    if ($desiredUri.AbsoluteUri -ne $currentUri.AbsoluteUri)
+                    {
+                        Write-Verbose -Message "Re-provisioning CA because $($currentUri.AbsoluteUri) does not equal $($desiredUri.AbsoluteUri)"
+                        $reprovisionCentralAdmin = $true
+                    }
+                    else
+                    {
+                        # check securebindings (https) or serverbindings (http)
+                        # there should be an entry in the SecureBindings object of the
+                        # SPWebApplication's IisSettings for the default zone
+                        $iisBindings = $null
+                        if ($isCentralAdminUrlHttps)
                         {
-                            Write-Verbose -Message "Re-provisioning CA because $($currentUri.AbsoluteUri) does not equal $($desiredUri.AbsoluteUri)"
-                            $reprovisionCentralAdmin = $true
+                            $iisBindings = $centralAdminSite.GetIisSettingsWithFallback("Default").SecureBindings
                         }
                         else
                         {
-                            # check securebindings
-                            # there should be an entry in the SecureBindings object of the
-                            # SPWebApplication's IisSettings for the default zone
-                            $secureBindings = $centralAdminSite.GetIisSettingsWithFallback("Default").SecureBindings
-                            if ($null -ne $secureBindings[0] -and (-not [string]::IsNullOrEmpty($secureBindings[0].HostHeader)))
+                            $iisBindings = $centralAdminSite.GetIisSettingsWithFallback("Default").ServerBindings
+                        }
+
+                        if ($null -ne $iisBindings[0] -and (-not [string]::IsNullOrEmpty($iisBindings[0].HostHeader)))
+                        {
+                            # check to see if iisBindings host header and port match what we want them to be
+                            if ($desiredUri.Host -ne $iisBindings[0].HostHeader -or
+                                $desiredUri.Port -ne $iisBindings[0].Port)
                             {
-                                # check to see if secureBindings host header and port match what we want them to be
-                                if ($desiredUri.Host -ne $secureBindings[0].HostHeader -or `
-                                        $desiredUri.Port -ne $secureBindings[0].Port)
-                                {
-                                    Write-Verbose -Message "Re-provisioning CA because $($desiredUri.Host) does not equal $($secureBindings[0].HostHeader) or $($desiredUri.Port) does not equal $($secureBindings[0].Port)"
-                                    $reprovisionCentralAdmin = $true
-                                }
-                            }
-                            else
-                            {
-                                # secureBindings did not exist or did not contain a valid hostheader
-                                Write-Verbose -Message "Re-provisioning CA because secureBindings does not exist or does not contain a valid host header"
+                                Write-Verbose -Message "Re-provisioning CA because $($desiredUri.Host) does not equal $($secureBindings[0].HostHeader) or $($desiredUri.Port) does not equal $($secureBindings[0].Port)"
                                 $reprovisionCentralAdmin = $true
                             }
                         }
-
-                        if ($reprovisionCentralAdmin)
+                        else
                         {
-                            # Write-Verbose -Message "Removing Central Admin web application in order to reprovision it"
-                            Remove-SPWebApplication -Identity $centralAdminSite.Url -Zone Default -DeleteIisSite
-
-                            Write-Verbose -Message "Re-provisioning Central Admin web application with SSL"
-                            $webAppParams = @{
-                                Identity             = $centralAdminSite.Url
-                                Name                 = "SharePoint Central Administration v4"
-                                Zone                 = "Default"
-                                HostHeader           = $desiredUri.Host
-                                Port                 = $desiredUri.Port
-                                AuthenticationMethod = $params.CentralAdministrationAuth
-                                SecureSocketsLayer   = $true
-                            }
-                            New-SPWebApplicationExtension @webAppParams
+                            # iisBindings did not exist or did not contain a valid hostheader
+                            Write-Verbose -Message "Re-provisioning CA because IIS Bindings does not exist or does not contain a valid host header"
+                            $reprovisionCentralAdmin = $true
                         }
                     }
-                }
-                else
-                {
-                    # CentralAdministrationUrl was specified as HTTP.
-                    # If hostname = server name, ignore as this is default behavior
-                    # Otherwise, update binding/AAM
 
+                    if ($reprovisionCentralAdmin)
+                    {
+                        # Write-Verbose -Message "Removing Central Admin web application in order to reprovision it"
+                        Remove-SPWebApplication -Identity $centralAdminSite.Url -Zone Default -DeleteIisSite
+
+                        Write-Verbose -Message "Re-provisioning Central Admin web application"
+                        $webAppParams = @{
+                            Identity             = $centralAdminSite.Url
+                            Name                 = "SharePoint Central Administration v4"
+                            Zone                 = "Default"
+                            HostHeader           = $desiredUri.Host
+                            Port                 = $desiredUri.Port
+                            AuthenticationMethod = $params.CentralAdministrationAuth
+                            SecureSocketsLayer   = $isCentralAdminUrlHttps
+                        }
+                        New-SPWebApplicationExtension @webAppParams
+                    }
                 }
             }
             elseif ($CurrentValues.CentralAdministrationPort -ne $CentralAdministrationPort)
@@ -653,7 +619,7 @@ function Set-TargetResource
             $modulePath = "..\..\Modules\SharePointDsc.Farm\SPFarm.psm1"
             Import-Module -Name (Join-Path -Path $scriptRoot -ChildPath $modulePath -Resolve)
 
-            $sqlInstanceStatus = Get-SPDscSQLInstanceStatus -SQLServer $params.DatabaseServer `
+            $sqlInstanceStatus = Get-SPDscSQLInstanceStatus -SQLServer $params.DatabaseServer
 
             if ($sqlInstanceStatus.MaxDOPCorrect -ne $true)
             {
@@ -665,9 +631,9 @@ function Set-TargetResource
 
             while ($dbStatus.Locked -eq $true)
             {
-                Write-Verbose -Message ("[$([DateTime]::Now.ToShortTimeString())] The configuration " + `
-                        "database is currently being provisioned by a remote " + `
-                        "server, this server will wait for this to complete")
+                Write-Verbose -Message ("[$([DateTime]::Now.ToShortTimeString())] The configuration " +
+                    "database is currently being provisioned by a remote " +
+                    "server, this server will wait for this to complete")
                 Start-Sleep -Seconds 30
                 $dbStatus = Get-SPDscConfigDBStatus -SQLServer $params.DatabaseServer `
                     -Database $params.FarmConfigDatabaseName
@@ -698,13 +664,13 @@ function Set-TargetResource
                     {
                         if ($installedVersion.ProductBuildPart.ToString().Length -eq 4)
                         {
-                            Write-Verbose -Message ("Detected Version: SharePoint 2016 - " + `
-                                    "configuring server as $($params.ServerRole)")
+                            Write-Verbose -Message ("Detected Version: SharePoint 2016 - " +
+                                "configuring server as $($params.ServerRole)")
                         }
                         else
                         {
-                            Write-Verbose -Message ("Detected Version: SharePoint 2019 - " + `
-                                    "configuring server as $($params.ServerRole)")
+                            Write-Verbose -Message ("Detected Version: SharePoint 2019 - " +
+                                "configuring server as $($params.ServerRole)")
                         }
                         $executeArgs.Add("LocalServerRole", $params.ServerRole)
                     }
@@ -712,50 +678,50 @@ function Set-TargetResource
                     {
                         if ($installedVersion.ProductBuildPart.ToString().Length -eq 4)
                         {
-                            Write-Verbose -Message ("Detected Version: SharePoint 2016 - no server " + `
-                                    "role provided, configuring server without a " + `
-                                    "specific role")
+                            Write-Verbose -Message ("Detected Version: SharePoint 2016 - no server " +
+                                "role provided, configuring server without a " +
+                                "specific role")
                         }
                         else
                         {
-                            Write-Verbose -Message ("Detected Version: SharePoint 2019 - no server " + `
-                                    "role provided, configuring server without a " + `
-                                    "specific role")
+                            Write-Verbose -Message ("Detected Version: SharePoint 2019 - no server " +
+                                "role provided, configuring server without a " +
+                                "specific role")
                         }
                         $executeArgs.Add("ServerRoleOptional", $true)
                     }
                 }
                 Default
                 {
-                    throw [Exception] ("An unknown version of SharePoint (Major version $_) " + `
-                            "was detected. Only versions 15 (SharePoint 2013) and" + `
-                            "16 (SharePoint 2016 or SharePoint 2019) are supported.")
+                    throw [Exception] ("An unknown version of SharePoint (Major version $_) " +
+                        "was detected. Only versions 15 (SharePoint 2013) and" +
+                        "16 (SharePoint 2016 or SharePoint 2019) are supported.")
                 }
             }
 
             if ($dbStatus.DatabaseExists -eq $true)
             {
-                Write-Verbose -Message ("The SharePoint config database " + `
-                        "'$($params.FarmConfigDatabaseName)' already exists, so " + `
-                        "this server will join the farm.")
+                Write-Verbose -Message ("The SharePoint config database " +
+                    "'$($params.FarmConfigDatabaseName)' already exists, so " +
+                    "this server will join the farm.")
                 $createFarm = $false
             }
             elseif ($dbStatus.DatabaseExists -eq $false -and $params.RunCentralAdmin -eq $false)
             {
                 # Only allow the farm to be created by a server that will run central admin
                 # to avoid a ghost CA site appearing on this server and causing issues
-                Write-Verbose -Message ("The SharePoint config database " + `
-                        "'$($params.FarmConfigDatabaseName)' does not exist, but " + `
-                        "this server will not be running the central admin " + `
-                        "website, so it will wait to join the farm rather than " + `
-                        "create one.")
+                Write-Verbose -Message ("The SharePoint config database " +
+                    "'$($params.FarmConfigDatabaseName)' does not exist, but " +
+                    "this server will not be running the central admin " +
+                    "website, so it will wait to join the farm rather than " +
+                    "create one.")
                 $createFarm = $false
             }
             else
             {
-                Write-Verbose -Message ("The SharePoint config database " + `
-                        "'$($params.FarmConfigDatabaseName)' does not exist, so " + `
-                        "this server will create the farm.")
+                Write-Verbose -Message ("The SharePoint config database " +
+                    "'$($params.FarmConfigDatabaseName)' does not exist, so " +
+                    "this server will create the farm.")
                 $createFarm = $true
             }
 
@@ -767,9 +733,9 @@ function Set-TargetResource
                 $loopCount = 0
                 while ($dbStatus.DatabaseExists -eq $false -and $loopCount -lt 15)
                 {
-                    Write-Verbose -Message ("The configuration database is not yet provisioned " + `
-                            "by a remote server, this server will wait for up to " + `
-                            "15 minutes for this to complete")
+                    Write-Verbose -Message ("The configuration database is not yet provisioned " +
+                        "by a remote server, this server will wait for up to " +
+                        "15 minutes for this to complete")
                     Start-Sleep -Seconds 60
                     $loopCount++
                     $dbStatus = Get-SPDscConfigDBStatus -SQLServer $params.DatabaseServer `
@@ -785,8 +751,8 @@ function Set-TargetResource
                     $executeArgs.Remove("ServerRoleOptional")
                 }
 
-                Write-Verbose -Message ("The server will attempt to join the farm now once every " + `
-                        "60 seconds for the next 15 minutes.")
+                Write-Verbose -Message ("The server will attempt to join the farm now once every " +
+                    "60 seconds for the next 15 minutes.")
                 $loopCount = 0
                 $connectedToFarm = $false
                 $lastException = $null
@@ -800,12 +766,12 @@ function Set-TargetResource
                     catch
                     {
                         $lastException = $_.Exception
-                        Write-Verbose -Message ("$([DateTime]::Now.ToShortTimeString()) - An error " + `
-                                "occured joining config database " + `
-                                "'$($params.FarmConfigDatabaseName)' on " + `
-                                "'$($params.DatabaseServer)'. This resource will " + `
-                                "wait and retry automatically for up to 15 minutes. " + `
-                                "(waited $loopCount of 15 minutes)")
+                        Write-Verbose -Message ("$([DateTime]::Now.ToShortTimeString()) - An error " +
+                            "occured joining config database " +
+                            "'$($params.FarmConfigDatabaseName)' on " +
+                            "'$($params.DatabaseServer)'. This resource will " +
+                            "wait and retry automatically for up to 15 minutes. " +
+                            "(waited $loopCount of 15 minutes)")
                         $loopCount++
                         Start-Sleep -Seconds 60
                     }
@@ -822,8 +788,7 @@ function Set-TargetResource
             {
                 Write-Verbose -Message "The database does not exist, so create a new farm"
 
-                Write-Verbose -Message ("Creating Lock database to prevent two servers creating " + `
-                        "the same farm")
+                Write-Verbose -Message "Creating Lock database to prevent two servers creating the same farm"
                 Add-SPDscConfigDBLock -SQLServer $params.DatabaseServer `
                     -Database $params.FarmConfigDatabaseName
 
@@ -864,8 +829,7 @@ function Set-TargetResource
             if ($params.RunCentralAdmin -eq $true)
             {
                 Write-Verbose -Message "RunCentralAdmin is True, provisioning Central Admin"
-                $centralAdminSite = Get-SPWebApplication -IncludeCentralAdministration `
-                | Where-Object -FilterScript {
+                $centralAdminSite = Get-SPWebApplication -IncludeCentralAdministration | Where-Object -FilterScript {
                     $_.IsAdministrationWebApplication -eq $true
                 }
 
@@ -880,34 +844,55 @@ function Set-TargetResource
                     New-SPCentralAdministration -Port $params.CentralAdministrationPort `
                         -WindowsAuthProvider $params.CentralAdministrationAuth
 
-                    # if central admin is to be SSL, let's remove and re-provision
-                    if (-not [string]::IsNullOrEmpty($params.CentralAdministrationUrl) -and `
-                        ([System.Uri]$params.CentralAdministrationUrl).Scheme -eq 'https')
+                    if (-not [string]::IsNullOrEmpty($params.CentralAdministrationUrl))
                     {
-                        Write-Verbose -Message "Removing Central Admin to properly provision as SSL"
-
-                        $centralAdminSite = Get-SPWebApplication -IncludeCentralAdministration `
-                        | Where-Object -FilterScript {
+                        $centralAdminSite = Get-SPWebApplication -IncludeCentralAdministration | Where-Object -FilterScript {
                             $_.IsAdministrationWebApplication -eq $true
                         }
 
-                        # Wondering if -DeleteIisSite is necessary. Does this add more risk of ending up in
-                        # a state without CA or a way to recover it?
-                        Remove-SPWebApplication -Identity $centralAdminSite.Url -Zone Default -DeleteIisSite
+                        # cases where we need to reprovision CA:
+                        # 1. desired Url is https
+                        # 2. desired Url/port does not match current Url/port
+                        # 3. IIS bindings don't match (shouldn't need this because case #2 should catch it in this case)
+                        $reprovisionCentralAdmin = $false
+                        $isCentralAdminUrlHttps = (([System.Uri]$params.CentralAdministrationUrl).Scheme -eq 'https')
 
-                        Write-Verbose -Message "Reprovisioning Central Admin with SSL"
+                        $desiredUri = [System.Uri]("{0}:{1}" -f $params.CentralAdministrationUrl.TrimEnd('/'), $params.CentralAdministrationPort)
+                        $currentUri = [System.Uri]$centralAdminSite.Url
 
-                        $webAppParams = @{
-                            Identity             = $centralAdminSite.Url
-                            Name                 = "SharePoint Central Administration v4"
-                            Zone                 = "Default"
-                            HostHeader           = ([System.Uri]$params.CentralAdministrationUrl).Host
-                            Port                 = $params.CentralAdministrationPort
-                            AuthenticationMethod = $params.CentralAdministrationAuth
-                            SecureSocketsLayer   = $true
+                        if ($isCentralAdminUrlHttps)
+                        {
+                            Write-Verbose -Message "Re-provisioning newly created CA because we want it to be HTTPS"
+                            $reprovisionCentralAdmin = $true
+                        }
+                        elseif ($desiredUri.AbsoluteUri -ne $currentUri.AbsoluteUri)
+                        {
+                            Write-Verbose -Message "Re-provisioning CA because $($currentUri.AbsoluteUri) does not equal $($desiredUri.AbsoluteUri)"
+                            $reprovisionCentralAdmin = $true
                         }
 
-                        New-SPWebApplicationExtension @webAppParams
+                        if ($reprovisionCentralAdmin)
+                        {
+                            Write-Verbose -Message "Removing Central Admin web application"
+
+                            # Wondering if -DeleteIisSite is necessary. Does this add more risk of ending up in
+                            # a state without CA or a way to recover it?
+                            Remove-SPWebApplication -Identity $centralAdminSite.Url -Zone Default -DeleteIisSite
+
+                            Write-Verbose -Message "Reprovisioning Central Admin with SSL"
+
+                            $webAppParams = @{
+                                Identity             = $centralAdminSite.Url
+                                Name                 = "SharePoint Central Administration v4"
+                                Zone                 = "Default"
+                                HostHeader           = $desiredUri.Host
+                                Port                 = $desiredUri.Port
+                                AuthenticationMethod = $params.CentralAdministrationAuth
+                                SecureSocketsLayer   = $isCentralAdminUrlHttps
+                            }
+
+                            New-SPWebApplicationExtension @webAppParams
+                        }
                     }
                 }
                 else
@@ -923,8 +908,8 @@ function Set-TargetResource
                     if ($null -ne $serviceInstance)
                     {
                         $serviceInstance = $serviceInstance | Where-Object -FilterScript {
-                            $_.GetType().Name -eq "SPWebServiceInstance" -and `
-                                $_.Name -eq "WSS_Administration"
+                            $_.GetType().Name -eq "SPWebServiceInstance" -and
+                            $_.Name -eq "WSS_Administration"
                         }
                     }
 
@@ -956,11 +941,11 @@ function Set-TargetResource
             Write-Verbose -Message "Starting timer service"
             Start-Service -Name sptimerv4
 
-            Write-Verbose -Message ("Pausing for 5 minutes to allow the timer service to " + `
-                    "fully provision the server")
+            Write-Verbose -Message ("Pausing for 5 minutes to allow the timer service to " +
+                "fully provision the server")
             Start-Sleep -Seconds 300
-            Write-Verbose -Message ("Join farm complete. Restarting computer to allow " + `
-                    "configuration to continue")
+            Write-Verbose -Message ("Join farm complete. Restarting computer to allow " +
+                "configuration to continue")
 
             $global:DSCMachineStatus = 1
         }
@@ -1012,6 +997,7 @@ function Test-TargetResource
         $CentralAdministrationUrl,
 
         [Parameter()]
+        [ValidateRange(1, 65535)]
         [System.UInt32]
         $CentralAdministrationPort,
 
@@ -1037,7 +1023,6 @@ function Test-TargetResource
         [System.String]
         $DeveloperDashboard,
 
-
         [Parameter()]
         [System.Management.Automation.PSCredential]
         $InstallAccount
@@ -1046,6 +1031,32 @@ function Test-TargetResource
     Write-Verbose -Message "Testing local SP Farm settings"
 
     $PSBoundParameters.Ensure = $Ensure
+
+    if ($PSBoundParameters.ContainsKey("CentralAdministrationUrl"))
+    {
+        if ([string]::IsNullOrEmpty($CentralAdministrationUrl))
+        {
+            $PSBoundParameters.Remove('CentralAdministrationUrl') | Out-Null
+        }
+        else
+        {
+            $uri = $CentralAdministrationUrl -as [System.Uri]
+            if ($null -eq $uri.AbsoluteUri)
+            {
+                Write-Warning -Message ("CentralAdministrationUrl is not a valid URI. It should " +
+                    "include the scheme (http/https) and address.")
+                $PSBoundParameters.Remove('CentralAdministrationUrl') | Out-Null
+            }
+            # TODO: should we allow port here as long as either the port matches CentralAdministrationPort
+            #       or CentralAdministrationPort is not specified?
+            if ($CentralAdministrationUrl -match ':\d+')
+            {
+                Write-Warning -Message ("CentralAdministrationUrl should not specify port. Use " +
+                    "CentralAdministrationPort instead.")
+                $PSBoundParameters.Remove('CentralAdministrationUrl') | Out-Null
+            }
+        }
+    }
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
