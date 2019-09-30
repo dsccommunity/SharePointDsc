@@ -509,6 +509,7 @@ function Set-TargetResource
                     $params = $args[0]
 
                     $reprovisionCentralAdmin = $false
+
                     $centralAdminSite = Get-SPWebApplication -IncludeCentralAdministration | Where-Object -FilterScript {
                         $_.IsAdministrationWebApplication
                     }
@@ -530,10 +531,12 @@ function Set-TargetResource
                         $iisBindings = $null
                         if ($isCentralAdminUrlHttps)
                         {
+                            Write-Verbose -Message "Getting current secure bindings..."
                             $iisBindings = $centralAdminSite.GetIisSettingsWithFallback("Default").SecureBindings
                         }
                         else
                         {
+                            Write-Verbose -Message "Getting current server bindings..."
                             $iisBindings = $centralAdminSite.GetIisSettingsWithFallback("Default").ServerBindings
                         }
 
@@ -543,7 +546,7 @@ function Set-TargetResource
                             if ($desiredUri.Host -ne $iisBindings[0].HostHeader -or
                                 $desiredUri.Port -ne $iisBindings[0].Port)
                             {
-                                Write-Verbose -Message "Re-provisioning CA because $($desiredUri.Host) does not equal $($secureBindings[0].HostHeader) or $($desiredUri.Port) does not equal $($secureBindings[0].Port)"
+                                Write-Verbose -Message "Re-provisioning CA because $($desiredUri.Host) does not equal $($iisBindings[0].HostHeader) or $($desiredUri.Port) does not equal $($iisBindings[0].Port)"
                                 $reprovisionCentralAdmin = $true
                             }
                         }
@@ -1043,17 +1046,17 @@ function Test-TargetResource
             $uri = $CentralAdministrationUrl -as [System.Uri]
             if ($null -eq $uri.AbsoluteUri)
             {
-                Write-Warning -Message ("CentralAdministrationUrl is not a valid URI. It should " +
+                throw ("CentralAdministrationUrl is not a valid URI. It should " +
                     "include the scheme (http/https) and address.")
-                $PSBoundParameters.Remove('CentralAdministrationUrl') | Out-Null
+                # $PSBoundParameters.Remove('CentralAdministrationUrl') | Out-Null
             }
             # TODO: should we allow port here as long as either the port matches CentralAdministrationPort
             #       or CentralAdministrationPort is not specified?
             if ($CentralAdministrationUrl -match ':\d+')
             {
-                Write-Warning -Message ("CentralAdministrationUrl should not specify port. Use " +
+                throw ("CentralAdministrationUrl should not specify port. Use " +
                     "CentralAdministrationPort instead.")
-                $PSBoundParameters.Remove('CentralAdministrationUrl') | Out-Null
+                # $PSBoundParameters.Remove('CentralAdministrationUrl') | Out-Null
             }
         }
     }
