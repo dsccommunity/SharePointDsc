@@ -36,11 +36,10 @@ CentralAdministrationAuth can be specified as "NTLM" or "KERBEROS". If not
 specified, it defaults to NTLM. If using Kerberos, make sure to have
 appropriate SPNs setup for Farm account and Central Administration URI.
 
-To provision Central Admin as an SSL web application, specify a value for
-the CentralAdministrationUrl property that begins with https:// followed
-by the vanity host name or server name you wish to use to access CA.
-(e.g. https://admin.sharepoint.contoso.com). This parameter does not
-currently support HTTP.
+To provision Central Admin on a vanity URL instead of the default
+http(s)://servername:port, use the CentralAdministrationUrl parameter.
+Central Admin will be provisioned as an SSL web application if this URL
+begins with HTTPS, and will default to port 443.
 
 DeveloperDashboard can be specified as "On", "Off" and (only when using
 SharePoint 2013) to "OnDemand".
