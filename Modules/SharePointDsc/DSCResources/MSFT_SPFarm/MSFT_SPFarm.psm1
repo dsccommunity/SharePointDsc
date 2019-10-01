@@ -1048,7 +1048,6 @@ function Test-TargetResource
             {
                 throw ("CentralAdministrationUrl is not a valid URI. It should " +
                     "include the scheme (http/https) and address.")
-                # $PSBoundParameters.Remove('CentralAdministrationUrl') | Out-Null
             }
             # TODO: should we allow port here as long as either the port matches CentralAdministrationPort
             #       or CentralAdministrationPort is not specified?
@@ -1056,7 +1055,6 @@ function Test-TargetResource
             {
                 throw ("CentralAdministrationUrl should not specify port. Use " +
                     "CentralAdministrationPort instead.")
-                # $PSBoundParameters.Remove('CentralAdministrationUrl') | Out-Null
             }
         }
     }
