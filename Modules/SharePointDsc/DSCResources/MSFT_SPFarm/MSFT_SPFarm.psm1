@@ -414,17 +414,21 @@ function Set-TargetResource
         # If CentralAdministrationUrl is specified, let's infer the port from the Url
         if ($PSBoundParameters.ContainsKey("CentralAdministrationUrl"))
         {
-            $PSBoundParameters.Add("CentralAdministrationPort", (New-Object -TypeName System.Uri $CentralAdministrationUrl).Port)
+            $CentralAdministrationPort =
+            $PSBoundParameters.CentralAdministrationPort =
+            (New-Object -TypeName System.Uri $CentralAdministrationUrl).Port
         }
         else
         {
-            $PSBoundParameters.Add("CentralAdministrationPort", 9999)
+            $CentralAdministrationPort =
+            $PSBoundParameters.CentralAdministrationPort = 9999
         }
     }
 
     if (-not $PSBoundParameters.ContainsKey("CentralAdministrationAuth"))
     {
-        $PSBoundParameters.Add("CentralAdministrationAuth", "NTLM")
+        $CentralAdministrationAuth =
+        $PSBoundParameters.CentralAdministrationAuth = "NTLM"
     }
 
     if ($CurrentValues.Ensure -eq "Present")
@@ -494,6 +498,9 @@ function Set-TargetResource
 
         if ($RunCentralAdmin)
         {
+            # track whether or not we end up reprovisioning CA
+            $reprovisionCentralAdmin = $false
+
             if ($PSBoundParameters.ContainsKey("CentralAdministrationUrl"))
             {
                 # For the following scenarios, we should remove the CA web application and recreate it
@@ -507,8 +514,6 @@ function Set-TargetResource
                     -Arguments $PSBoundParameters `
                     -ScriptBlock {
                     $params = $args[0]
-
-                    $reprovisionCentralAdmin = $false
 
                     $centralAdminSite = Get-SPWebApplication -IncludeCentralAdministration | Where-Object -FilterScript {
                         $_.IsAdministrationWebApplication
@@ -585,8 +590,25 @@ function Set-TargetResource
                     -ScriptBlock {
                     $params = $args[0]
 
-                    Write-Verbose -Message "Updating Central Admin port"
                     Set-SPCentralAdministration -Port $params.CentralAdministrationPort
+                }
+            }
+
+            # if Authentication Method doesn't match and we haven't reprovisioned CA above, update auth method
+            if ($CurrentValues.CentralAdministrationAuth -ne $CentralAdministrationAuth -and
+                (-not $reprovisionCentralAdmin))
+            {
+                Write-Verbose -Message "Updating CentralAdmin authentication method from $($CurrentValues.CentralAdministrationAuth) to $CentralAdministrationAuth"
+                Invoke-SPDscCommand -Credential $InstallAccount `
+                    -Arguments $PSBoundParameters `
+                    -ScriptBlock {
+                    $params = $args[0]
+
+                    $centralAdminSite = Get-SPWebApplication -IncludeCentralAdministration | Where-Object -FilterScript {
+                        $_.IsAdministrationWebApplication
+                    }
+
+                    $centralAdminSite | Set-SPWebApplication -Zone "Default" -AuthenticationMethod $params.CentralAdministrationAuth
                 }
             }
         }
@@ -1070,6 +1092,7 @@ function Test-TargetResource
         "RunCentralAdmin",
         "CentralAdministrationUrl",
         "CentralAdministrationPort",
+        "CentralAdministrationAuth",
         "DeveloperDashboard")
 }
 

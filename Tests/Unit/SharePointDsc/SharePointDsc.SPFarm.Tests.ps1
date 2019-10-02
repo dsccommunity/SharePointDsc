@@ -682,6 +682,284 @@ namespace Microsoft.SharePoint.Administration {
             }
         }
 
+        Context -Name "This server is running CA as NTLM, but authentication method should be Kerberos" -Fixture {
+            $testParams = @{
+                IsSingleInstance          = "Yes"
+                Ensure                    = "Present"
+                FarmConfigDatabaseName    = "SP_Config"
+                DatabaseServer            = "sql.contoso.com"
+                FarmAccount               = $mockFarmAccount
+                Passphrase                = $mockPassphrase
+                AdminContentDatabaseName  = "SP_AdminContent"
+                RunCentralAdmin           = $true
+                CentralAdministrationUrl  = "http://admin.contoso.com"
+                CentralAdministrationPort = 80
+                CentralAdministrationAuth = "Kerberos"
+            }
+
+            Mock -CommandName Get-SPDscRegistryKey -MockWith {
+                return "Connection string example"
+            }
+
+            Mock -CommandName Get-SPFarm -MockWith {
+                return @{
+                    Name                     = $testParams.FarmConfigDatabaseName
+                    DatabaseServer           = @{
+                        Name = $testParams.DatabaseServer
+                    }
+                    AdminContentDatabaseName = $testParams.AdminContentDatabaseName
+                }
+            }
+            Mock -CommandName Get-SPDscConfigDBStatus -MockWith {
+                return @{
+                    Locked           = $false
+                    ValidPermissions = $true
+                    DatabaseExists   = $true
+                }
+            }
+            Mock -CommandName "Get-SPDscSQLInstanceStatus" -MockWith {
+                return @{
+                    MaxDOPCorrect = $true
+                }
+            }
+            Mock -CommandName Get-SPDatabase -MockWith {
+                return @(@{
+                        Name                 = $testParams.FarmConfigDatabaseName
+                        Type                 = "Configuration Database"
+                        NormalizedDataSource = $testParams.DatabaseServer
+                    })
+            }
+            Mock -CommandName Get-SPWebApplication -MockWith {
+                $webapp = @{
+                    ContentDatabases               = @(
+                        @{
+                            Name = $testParams.AdminContentDatabaseName
+                        }
+                    )
+                    Url                            = $testParams.CentralAdministrationUrl
+                    IsAdministrationWebApplication = $true
+                    IisSettings                    = [ordered]@{
+                        Default = @{
+                            DisableKerberos = $true
+                            ServerBindings  = @(
+                                @{
+                                    HostHeader = "admin.contoso.com"
+                                    Port       = "80"
+                                }
+                            )
+                        }
+                    }
+                }
+
+                $webapp | Add-Member -MemberType ScriptMethod -Name GetIisSettingsWithFallback -Value {
+                    [CmdletBinding()]
+                    param(
+                        [Parameter(Mandatory = $true)]
+                        [string]
+                        $Zone
+                    )
+
+                    return $this.IisSettings[$Zone]
+                }
+
+                return $webapp
+            }
+
+            Mock -CommandName Get-CimInstance -MockWith {
+                return @{
+                    Domain = "domain.com"
+                }
+            }
+
+            Mock -CommandName Get-SPServiceInstance -MockWith {
+                switch ($global:SPDscSIRunCount)
+                {
+                    { 2 -contains $_ }
+                    {
+                        $global:SPDscSIRunCount++
+                        return @(
+                            @{
+                                Name   = "WSS_Administration"
+                                Status = "Online"
+                            } | Add-Member -MemberType ScriptMethod `
+                                -Name GetType `
+                                -Value {
+                                return @{
+                                    Name = "SPWebServiceInstance"
+                                }
+                            } -PassThru -Force
+                        )
+                    }
+                    { 0, 1 -contains $_ }
+                    {
+                        $global:SPDscSIRunCount++
+                        return $null
+                    }
+                }
+            }
+
+            Mock -CommandName Set-SPWebApplication -MockWith { }
+
+            $global:SPDscSIRunCount = 2
+            It "Should return current values for the Get method" {
+                $result = Get-TargetResource @testParams
+                $result.RunCentralAdmin | Should Be $true
+                $result.CentralAdministrationUrl | Should Be $testParams.CentralAdministrationUrl
+                $result.CentralAdministrationPort | Should Be $testParams.CentralAdministrationPort
+                $result.CentralAdministrationAuth | Should Be "NTLM"
+            }
+
+            $global:SPDscSIRunCount = 2
+            It "Should change Authentication Mode of CA from NTLM to Kerberos" {
+                Set-TargetResource @testParams
+                Assert-MockCalled -CommandName "Set-SPWebApplication"
+            }
+
+            $global:SPDscSIRunCount = 2
+            It "Should return false from the test method" {
+                Test-TargetResource @testParams | Should be $false
+            }
+        }
+
+        Context -Name "This server is running CA as Kerberos, but authentication method should be NTLM" -Fixture {
+            $testParams = @{
+                IsSingleInstance          = "Yes"
+                Ensure                    = "Present"
+                FarmConfigDatabaseName    = "SP_Config"
+                DatabaseServer            = "sql.contoso.com"
+                FarmAccount               = $mockFarmAccount
+                Passphrase                = $mockPassphrase
+                AdminContentDatabaseName  = "SP_AdminContent"
+                RunCentralAdmin           = $true
+                CentralAdministrationUrl  = "http://admin.contoso.com"
+                CentralAdministrationPort = 80
+                CentralAdministrationAuth = "NTLM"
+            }
+
+            Mock -CommandName Get-SPDscRegistryKey -MockWith {
+                return "Connection string example"
+            }
+
+            Mock -CommandName Get-SPFarm -MockWith {
+                return @{
+                    Name                     = $testParams.FarmConfigDatabaseName
+                    DatabaseServer           = @{
+                        Name = $testParams.DatabaseServer
+                    }
+                    AdminContentDatabaseName = $testParams.AdminContentDatabaseName
+                }
+            }
+            Mock -CommandName Get-SPDscConfigDBStatus -MockWith {
+                return @{
+                    Locked           = $false
+                    ValidPermissions = $true
+                    DatabaseExists   = $true
+                }
+            }
+            Mock -CommandName "Get-SPDscSQLInstanceStatus" -MockWith {
+                return @{
+                    MaxDOPCorrect = $true
+                }
+            }
+            Mock -CommandName Get-SPDatabase -MockWith {
+                return @(@{
+                        Name                 = $testParams.FarmConfigDatabaseName
+                        Type                 = "Configuration Database"
+                        NormalizedDataSource = $testParams.DatabaseServer
+                    })
+            }
+            Mock -CommandName Get-SPWebApplication -MockWith {
+                $webapp = @{
+                    ContentDatabases               = @(
+                        @{
+                            Name = $testParams.AdminContentDatabaseName
+                        }
+                    )
+                    Url                            = $testParams.CentralAdministrationUrl
+                    IsAdministrationWebApplication = $true
+                    IisSettings                    = [ordered]@{
+                        Default = @{
+                            DisableKerberos = $false
+                            ServerBindings  = @(
+                                @{
+                                    HostHeader = "admin.contoso.com"
+                                    Port       = "80"
+                                }
+                            )
+                        }
+                    }
+                }
+
+                $webapp | Add-Member -MemberType ScriptMethod -Name GetIisSettingsWithFallback -Value {
+                    [CmdletBinding()]
+                    param(
+                        [Parameter(Mandatory = $true)]
+                        [string]
+                        $Zone
+                    )
+
+                    return $this.IisSettings[$Zone]
+                }
+
+                return $webapp
+            }
+
+            Mock -CommandName Get-CimInstance -MockWith {
+                return @{
+                    Domain = "domain.com"
+                }
+            }
+
+            Mock -CommandName Get-SPServiceInstance -MockWith {
+                switch ($global:SPDscSIRunCount)
+                {
+                    { 2 -contains $_ }
+                    {
+                        $global:SPDscSIRunCount++
+                        return @(
+                            @{
+                                Name   = "WSS_Administration"
+                                Status = "Online"
+                            } | Add-Member -MemberType ScriptMethod `
+                                -Name GetType `
+                                -Value {
+                                return @{
+                                    Name = "SPWebServiceInstance"
+                                }
+                            } -PassThru -Force
+                        )
+                    }
+                    { 0, 1 -contains $_ }
+                    {
+                        $global:SPDscSIRunCount++
+                        return $null
+                    }
+                }
+            }
+
+            Mock -CommandName Set-SPWebApplication -MockWith { }
+
+            $global:SPDscSIRunCount = 2
+            It "Should return current values for the Get method" {
+                $result = Get-TargetResource @testParams
+                $result.RunCentralAdmin | Should Be $true
+                $result.CentralAdministrationUrl | Should Be $testParams.CentralAdministrationUrl
+                $result.CentralAdministrationPort | Should Be $testParams.CentralAdministrationPort
+                $result.CentralAdministrationAuth | Should Be "Kerberos"
+            }
+
+            $global:SPDscSIRunCount = 2
+            It "Should change Authentication Mode of CA from Kerberos to NTLM" {
+                Set-TargetResource @testParams
+                Assert-MockCalled -CommandName "Set-SPWebApplication"
+            }
+
+            $global:SPDscSIRunCount = 2
+            It "Should return false from the test method" {
+                Test-TargetResource @testParams | Should be $false
+            }
+        }
+
         Context -Name "This server is running CA on HTTP, but secure bindings do not match CA URL" -Fixture {
             $testParams = @{
                 IsSingleInstance          = "Yes"
