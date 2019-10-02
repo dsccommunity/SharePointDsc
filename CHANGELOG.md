@@ -10,6 +10,7 @@
   * Move CentralAdministrationPort validation into parameter definition
     to work with ReverseDsc
   * Add NotNullOrEmpty parameter validation to CentralAdministrationUrl
+  * Fixed error when changing developer dashboard display level.
 * SPFarmSolution
   * Fix for Web Application scoped solutions.
 * SPInstall
