@@ -11,6 +11,7 @@
     to work with ReverseDsc
   * Add NotNullOrEmpty parameter validation to CentralAdministrationUrl
   * Fixed error when changing developer dashboard display level.
+  * Add support for updating Central Admin Authentication Method
 * SPFarmSolution
   * Fix for Web Application scoped solutions.
 * SPInstall
