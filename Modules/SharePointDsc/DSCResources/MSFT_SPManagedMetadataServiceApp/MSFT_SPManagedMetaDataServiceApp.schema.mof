@@ -14,4 +14,6 @@ class MSFT_SPManagedMetaDataServiceApp : OMI_BaseResource
     [Write, Description("Specifies that existing instances of changed content types in subsites and libraries will be updated.")] boolean ContentTypePushdownEnabled;
     [Write, Description("Specifies that this connection will provide access to the content types that are associated with the managed metadata service application.")] boolean ContentTypeSyndicationEnabled;
     [Write, Description("POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5"), EmbeddedInstance("MSFT_Credential")] String InstallAccount;
+    [Write, Description("Should SQL Server authentication be used to connect to the database (unlikely, unless using an Azure SQL Managed Instance)?")] Boolean UseSQLAuthentication;
+    [Write, Description("The credentials to use to access the database"), EmbeddedInstance("MSFT_Credential")] String DatabaseCredentials;
 };

@@ -12,6 +12,14 @@ function Get-TargetResource
         [System.String]
         $DatabaseServer,
 
+        [Parameter()]
+        [System.Boolean]
+        $UseSQLAuthentication,
+
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
+        $DatabaseCredentials,
+
         [Parameter(Mandatory = $true)]
         [System.String]
         $WebAppUrl,
@@ -106,6 +114,14 @@ function Set-TargetResource
         [Parameter()]
         [System.String]
         $DatabaseServer,
+
+        [Parameter()]
+        [System.Boolean]
+        $UseSQLAuthentication,
+
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
+        $DatabaseCredentials,
 
         [Parameter(Mandatory = $true)]
         [System.String]
@@ -355,6 +371,14 @@ function Test-TargetResource
         [Parameter()]
         [System.String]
         $DatabaseServer,
+
+        [Parameter()]
+        [System.Boolean]
+        $UseSQLAuthentication,
+
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
+        $DatabaseCredentials,
 
         [Parameter(Mandatory = $true)]
         [System.String]

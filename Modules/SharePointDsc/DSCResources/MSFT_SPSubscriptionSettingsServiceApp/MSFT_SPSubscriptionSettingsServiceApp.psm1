@@ -21,6 +21,14 @@ function Get-TargetResource
         $DatabaseServer,
 
         [Parameter()]
+        [System.Boolean]
+        $UseSQLAuthentication,
+
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
+        $DatabaseCredentials,
+
+        [Parameter()]
         [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present",
@@ -105,6 +113,14 @@ function Set-TargetResource
         $DatabaseServer,
 
         [Parameter()]
+        [System.Boolean]
+        $UseSQLAuthentication,
+
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
+        $DatabaseCredentials,
+
+        [Parameter()]
         [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present",
@@ -137,6 +153,15 @@ function Set-TargetResource
             if ($params.ContainsKey("DatabaseServer") -eq $true)
             {
                 $newParams.Add("DatabaseServer", $params.DatabaseServer)
+            }
+            if ($params.useSQLAuthentication -eq $true)
+            {
+                Write-Verbose -Message "Using SQL authentication to create service application as `$useSQLAuthentication is set to $($params.useSQLAuthentication))."
+                $newParams.Add("DatabaseCredentials", $params.DatabaseCredentials)
+            }
+            else
+            {
+                Write-Verbose -Message "`$useSQLAuthentication is false or not specified; using default Windows authentication."
             }
             $serviceApp = New-SPSubscriptionSettingsServiceApplication @newParams
             New-SPSubscriptionSettingsServiceApplicationProxy -ServiceApplication $serviceApp | Out-Null
@@ -230,6 +255,14 @@ function Test-TargetResource
         [Parameter()]
         [System.String]
         $DatabaseServer,
+
+        [Parameter()]
+        [System.Boolean]
+        $UseSQLAuthentication,
+
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
+        $DatabaseCredentials,
 
         [Parameter()]
         [ValidateSet("Present", "Absent")]

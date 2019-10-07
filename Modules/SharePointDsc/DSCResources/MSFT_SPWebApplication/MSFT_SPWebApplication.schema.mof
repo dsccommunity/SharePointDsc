@@ -14,5 +14,7 @@ class MSFT_SPWebApplication : OMI_BaseResource
     [Write, Description("The port to run the site on")] string Port;
     [Write, Description("Present if the web app should exist, absent if it should not"), ValueMap{"Present","Absent"}, Values{"Present","Absent"}] string Ensure;
     [Write, Description("POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5"), EmbeddedInstance("MSFT_Credential")] string InstallAccount;
+    [Write, Description("Should SQL Server authentication be used to connect to the database (unlikely, unless using an Azure SQL Managed Instance)?")] Boolean UseSQLAuthentication;
+    [Write, Description("The credentials to use to access the database"), EmbeddedInstance("MSFT_Credential")] String DatabaseCredentials;
 };
 
