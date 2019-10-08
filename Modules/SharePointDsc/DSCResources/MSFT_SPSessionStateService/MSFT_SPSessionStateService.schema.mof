@@ -6,5 +6,7 @@ class MSFT_SPSessionStateService : OMI_BaseResource
     [Write, Description("Present is the state service should be enabled, absent if it should be disabled"), ValueMap{"Present","Absent"}, Values{"Present","Absent"}] string Ensure;
     [Write, Description("What is the timeout on sessions")] uint32 SessionTimeout;
     [Write, Description("POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5"), EmbeddedInstance("MSFT_Credential")] String InstallAccount;
+    [Write, Description("Should SQL Server authentication be used to connect to the database (unlikely, unless using an Azure SQL Managed Instance)?")] Boolean UseSQLAuthentication;
+    [Write, Description("The credentials to use to access the database"), EmbeddedInstance("MSFT_Credential")] String DatabaseCredentials;
 };
 

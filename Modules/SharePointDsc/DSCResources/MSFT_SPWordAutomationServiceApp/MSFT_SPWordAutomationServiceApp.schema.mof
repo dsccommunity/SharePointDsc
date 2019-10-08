@@ -20,4 +20,6 @@ class MSFT_SPWordAutomationServiceApp : OMI_BaseResource
     [Write, Description("How long is the keep alive timeout set to for the service app")] uint32 KeepAliveTimeout;
     [Write, Description("What is the maximum time in seconds for a document conversion to be allowed to run")] uint32 MaximumConversionTime;
     [Write, Description("POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5"), EmbeddedInstance("MSFT_Credential")] string InstallAccount;
+    [Write, Description("Should SQL Server authentication be used to connect to the database (unlikely, unless using an Azure SQL Managed Instance)?")] Boolean UseSQLAuthentication;
+    [Write, Description("The credentials to use to access the database"), EmbeddedInstance("MSFT_Credential")] String DatabaseCredentials;
 };

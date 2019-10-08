@@ -13,6 +13,14 @@ function Get-TargetResource
         $DatabaseServer,
 
         [Parameter()]
+        [System.Boolean]
+        $UseSQLAuthentication,
+
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
+        $DatabaseCredentials,
+
+        [Parameter()]
         [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present",
@@ -61,6 +69,14 @@ function Set-TargetResource
         $DatabaseServer,
 
         [Parameter()]
+        [System.Boolean]
+        $UseSQLAuthentication,
+
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
+        $DatabaseCredentials,
+
+        [Parameter()]
         [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present",
@@ -100,9 +116,18 @@ function Set-TargetResource
             else
             {
                 Write-Verbose -Message "Enabling SPSessionState"
+                if ($params.UseSQLAuthentication -eq $true)
+                {
+                    $databaseCredentialsParam = @{DatabaseCredentials = $params.DatabaseCredentials }
+                }
+                else
+                {
+                    $databaseCredentialsParam = ""
+                }
                 Enable-SPSessionStateService -DatabaseName $params.DatabaseName `
                     -DatabaseServer $params.DatabaseServer `
-                    -SessionTimeout $params.SessionTimeout
+                    -SessionTimeout $params.SessionTimeout `
+                    @databaseCredentialsParam
             }
         }
     }
@@ -138,6 +163,14 @@ function Test-TargetResource
         [Parameter(Mandatory = $true)]
         [System.String]
         $DatabaseServer,
+
+        [Parameter()]
+        [System.Boolean]
+        $UseSQLAuthentication,
+
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
+        $DatabaseCredentials,
 
         [Parameter()]
         [ValidateSet("Present", "Absent")]

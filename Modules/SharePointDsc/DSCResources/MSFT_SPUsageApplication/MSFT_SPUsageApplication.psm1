@@ -177,8 +177,13 @@ function Set-TargetResource
             }
             if ($params.ContainsKey("DatabaseCredentials"))
             {
-                $params.Add("DatabaseUsername", $params.DatabaseCredentials.Username)
-                $params.Add("DatabasePassword", $params.DatabaseCredentials.Password)
+                Write-Verbose -Message "Using DatabaseUsername and DatabasePassword parameters since we specified DatabaseCredentials."
+                $newparams.Add("DatabaseUsername", $params.DatabaseCredentials.Username)
+                $newparams.Add("DatabasePassword", $params.DatabaseCredentials.Password)
+            }
+            else
+            {
+                Write-Verbose -Message "Using default Windows auth as no DatabaseCredentials were provided."
             }
             if ($params.ContainsKey("DatabaseServer"))
             {
