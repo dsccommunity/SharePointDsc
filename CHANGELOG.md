@@ -31,6 +31,11 @@
     SecondaryOwnerAlias
 * SPWebAppAuthentication
   * Fixes issue where Test method return false on NON-US OS.
+* SharePointDSC generic
+  * Added support in several resources for creating/connecting to farm
+    and service applications using a (single) SQL-based credential
+    instead of the default Windows credentials. Needed when e.g. using
+    Azure SQL Managed Instance as SharePoint's database server.
 
 ## v3.6
 
