@@ -432,13 +432,13 @@ function Set-TargetResource
                 $params.Add("ProfileDBCredentials", $params.DatabaseCredentials)
                 $params.Add("ProfileSyncDBCredentials", $params.DatabaseCredentials)
                 $params.Add("SocialDBCredentials", $params.DatabaseCredentials)
-                $params.Remove("UseSQLAuthentication") | Out-Null
-                $params.Remove("DatabaseCredentials") | Out-Null
             }
             else
             {
                 Write-Verbose -Message "`$UseSQLAuthentication is false or not specified; using default Windows authentication."
             }
+            $params.Remove("UseSQLAuthentication") | Out-Null
+            $params.Remove("DatabaseCredentials") | Out-Null
 
             $serviceApps = Get-SPServiceApplication -Name $params.Name `
                 -ErrorAction SilentlyContinue

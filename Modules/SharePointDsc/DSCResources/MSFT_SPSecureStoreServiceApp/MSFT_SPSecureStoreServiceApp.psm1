@@ -235,10 +235,9 @@ function Set-TargetResource
             {
                 $params.Add("DatabaseUsername", $params.DatabaseCredentials.Username)
                 $params.Add("DatabasePassword", $params.DatabaseCredentials.Password)
-                $params.Remove("UseSQLAuthentication") | Out-Null
-                $params.Remove("DatabaseCredentials") | Out-Null
-
             }
+            $params.Remove("UseSQLAuthentication") | Out-Null
+            $params.Remove("DatabaseCredentials") | Out-Null
 
             $pName = "$($params.Name) Proxy"
 
