@@ -239,7 +239,7 @@ function Set-TargetResource
                         {
                             throw ("The server $($env:COMPUTERNAME) was not found in the " + `
                                    "ServerProvisionOrder array of Distributed Cache server(s).  " + `
-								                   "The server must be included in ServerProvisionOrder or Ensure equal to Absent.")                               
+                                   "The server must be included in ServerProvisionOrder or Ensure equal to Absent.")
                         }
                         $currentServer = $params.ServerProvisionOrder[$serverCount]
                     }
