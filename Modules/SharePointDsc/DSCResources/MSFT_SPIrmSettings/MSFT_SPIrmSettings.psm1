@@ -11,7 +11,7 @@ function Get-TargetResource
 
         [Parameter()]
         [System.String]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         $Ensure,
 
         [Parameter()]
@@ -29,29 +29,29 @@ function Get-TargetResource
 
     Write-Verbose "Getting SharePoint IRM Settings"
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
-                                  -Arguments $PSBoundParameters `
-                                  -ScriptBlock {
+    $result = Invoke-SPDscCommand -Credential $InstallAccount `
+        -Arguments $PSBoundParameters `
+        -ScriptBlock {
         $params = $args[0]
 
         try
         {
-            $spFarm = Get-SPFarm
+            $null = Get-SPFarm
         }
         catch
         {
             Write-Verbose -Message ("No local SharePoint farm was detected. IRM settings " + `
-                                    "will not be applied")
+                    "will not be applied")
             return @{
-                    IsSingleInstance = "Yes"
-                    Ensure = "Absent"
-                    UseADRMS =  $UseADRMS
-                    RMSserver = $RMSserver
-                   }
+                IsSingleInstance = "Yes"
+                Ensure           = "Absent"
+                UseADRMS         = $UseADRMS
+                RMSserver        = $RMSserver
+            }
         }
 
         # Get a reference to the Administration WebService
-        $admService = Get-SPDSCContentService
+        $admService = Get-SPDscContentService
 
         if ($admService.IrmSettings.IrmRMSEnabled)
         {
@@ -64,12 +64,13 @@ function Get-TargetResource
 
         return @{
             IsSingleInstance = "Yes"
-            Ensure = $Ensure
-            UseADRMS =  $admService.IrmSettings.IrmRMSUseAD
-            RMSserver = $admService.IrmSettings.IrmRMSCertServer
+            Ensure           = $Ensure
+            UseADRMS         = $admService.IrmSettings.IrmRMSUseAD
+            RMSserver        = $admService.IrmSettings.IrmRMSCertServer
         }
-   }
-   return $Result
+    }
+
+    return $result
 }
 
 function Set-TargetResource
@@ -84,7 +85,7 @@ function Set-TargetResource
 
         [Parameter()]
         [System.String]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         $Ensure,
 
         [Parameter()]
@@ -102,14 +103,14 @@ function Set-TargetResource
 
     Write-Verbose "Setting SharePoint IRM Settings"
 
-    Invoke-SPDSCCommand -Credential $InstallAccount `
-                        -Arguments $PSBoundParameters `
-                        -ScriptBlock {
+    Invoke-SPDscCommand -Credential $InstallAccount `
+        -Arguments $PSBoundParameters `
+        -ScriptBlock {
         $params = $args[0]
 
         try
         {
-            $spFarm = Get-SPFarm
+            $null = Get-SPFarm
         }
         catch
         {
@@ -117,7 +118,7 @@ function Set-TargetResource
             return
         }
 
-        $admService = Get-SPDSCContentService
+        $admService = Get-SPDscContentService
 
         if ($params.UseADRMS -and ($null -ne $params.RMSserver))
         {
@@ -158,7 +159,7 @@ function Test-TargetResource
 
         [Parameter()]
         [System.String]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         $Ensure,
 
         [Parameter()]
@@ -178,10 +179,8 @@ function Test-TargetResource
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
-    if ($null -eq $CurrentValues)
-    {
-        return $false
-    }
+    Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
+    Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
 
     if ($UseADRMS -ne $true)
     {
@@ -189,7 +188,7 @@ function Test-TargetResource
     }
 
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
-                                    -DesiredValues $PSBoundParameters
+        -DesiredValues $PSBoundParameters
 }
 
 Export-ModuleMember -Function *-TargetResource

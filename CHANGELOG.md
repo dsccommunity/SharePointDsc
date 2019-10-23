@@ -1,9 +1,95 @@
 # Change log for SharePointDsc
 
-## Unreleased
+## UNRELEASED
 
+* SPConfigWizard
+  * Fixed issue with incorrect check for upgrade status of server
 * SPFarm
-  * Throw error in Get method if CentralAdministrationUrl is HTTP
+  * Removed SingleServer as ServerRole, since this is an invalid role.
+  * Handle case where null or empty CentralAdministrationUrl is passed in
+  * Move CentralAdministrationPort validation into parameter definition
+    to work with ReverseDsc
+  * Add NotNullOrEmpty parameter validation to CentralAdministrationUrl
+  * Fixed error when changing developer dashboard display level.
+  * Add support for updating Central Admin Authentication Method
+* SPFarmSolution
+  * Fix for Web Application scoped solutions.
+* SPInstall
+  * Fixes a terminating error for sources in weird file shares
+  * Corrected issue with incorrectly detecting SharePoint after it
+    has been uninstalled
+  * Corrected issue with detecting a paused installation
+* SPInstallLanguagePack
+  * Fixes a terminating error for sources in weird file shares
+* SPInstallPrereqs
+  * Fixes a terminating error for sources in weird file shares
+* SPProductUpdate
+  * Fixes a terminating error for sources in weird file shares
+  * Corrected incorrect farm detection, added in earlier bugfix
+* SPSite
+  * Fixed issue with incorrectly updating site OwnerAlias and
+    SecondaryOwnerAlias
+* SPWebAppAuthentication
+  * Fixes issue where Test method return false on NON-US OS.
+
+## v3.6
+
+* SharePointDsc generic
+  * Added new launch actions to vscode to allow code coverage reports for
+    the current unit test file.
+* SPFarm
+  * Moved check for CentralAdministrationUrl is HTTP to Set method,
+    to prevent issues with ReverseDsc
+* SPInstall
+  * Updated error code checks to force reboot.
+* SPProductUpdate
+  * Fixes an issue using ShutdownServices when no Farm is available.
+* SPTrustedRootAuthority
+  * Fixes issue where Set method throws an error because the
+    parameter CertificateFilePath is not read correctly.
+* SPTrustedSecurityTokenIssuer
+  * New resource for configuring OAuth trusts
+
+## v3.5
+
+* SharePointDsc generic
+  * Improved logging in all resource. They are now outputting
+    the current and targeted values in the Test method.
+  * Updated various resources to comply with coding style guidelines.
+  * Updated the following resources to not return Null from the Get
+    method anymore, but an hashtable which contains null values:
+    SPDesignerSettings, SPDiagnosticLoggingSettings, SPFarmAdministrators,
+    SPHealthAnalyzerRuleState, SPIrmSettings, SPOutgoingEmailSettings,
+    SPPasswordChangeSettings, SPSearchTopology, SPServiceAppProxyGroup,
+    SPTimerJobState, SPUserProfileSection, SPUserProfileSyncConnection,
+    SPWebAppBlockedFileTypes, SPWebApplicationAppDomain, SPWebAppPolicy,
+    SPWebAppSiteUseAndDeletion, SPWebAppThrottlingSettings,
+    SPWordAutomationServiceApp.
+* SPConfigWizard
+  * Added check to make sure the Config Wizard is only executed when all
+    servers have the binaries installed.
+* SPDistributedCacheService
+  * Added ability to check for incorrect service account.
+* SPExcelServiceApp
+  * Fixes issue where Get method throws an error when the value of
+    PrivateBytesMax and UnusedObjectAgeMax are negative values.
+* SPFarm
+  * Throw error in Get method if CentralAdministrationUrl is HTTP.
+* SPInstallPrereqs
+  * Fixed bug in version check, where lower versions would be
+    detected as higher versions.
+* SPProductUpdate
+  * Updated Readme to reflect the new patching possibilities added in v3.3.
+* SPSecureStore
+  * Fixed issue where the test issue returned false is the service
+    application didn't exist, but the database name/server parameter
+    was specified.
+* SPUserProfileSyncConnection
+  * Fixed issue where the parameter Server was checked in SP2016
+    but isn't used there and therefore always fails.
+* SPWebAppAuthentication
+  * Updated the documentation to better explain the use of this resource
+    when using Classic authentication.
 
 ## v3.4
 

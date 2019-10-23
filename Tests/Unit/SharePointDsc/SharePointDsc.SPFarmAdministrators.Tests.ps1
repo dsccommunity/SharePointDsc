@@ -3,16 +3,16 @@ param(
     [Parameter()]
     [string]
     $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
-                                         -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
-                                         -Resolve)
+            -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
+            -Resolve)
 )
 
 Import-Module -Name (Join-Path -Path $PSScriptRoot `
-                                -ChildPath "..\UnitTestHelper.psm1" `
-                                -Resolve)
+        -ChildPath "..\UnitTestHelper.psm1" `
+        -Resolve)
 
 $Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointCmdletModule `
-                                              -DscResource "SPFarmAdministrators"
+    -DscResource "SPFarmAdministrators"
 
 Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
     InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
@@ -22,13 +22,13 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         Context -Name "No central admin site exists" {
             $testParams = @{
                 IsSingleInstance = "Yes"
-                Members = @("Demo\User1", "Demo\User2")
+                Members          = @("Demo\User1", "Demo\User2")
             }
 
             Mock -CommandName Get-SPwebapplication -MockWith { return $null }
 
             It "Should return null from the get method" {
-                Get-TargetResource @testParams | Should BeNullOrEmpty
+                (Get-TargetResource @testParams).Members | Should BeNullOrEmpty
             }
 
             It "Should return false from the test method" {
@@ -43,34 +43,34 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         Context -Name "Central admin exists and a fixed members list is used which matches" -Fixture {
             $testParams = @{
                 IsSingleInstance = "Yes"
-                Members = @("Demo\User1", "Demo\User2")
+                Members          = @("Demo\User1", "Demo\User2")
             }
 
-            Mock -CommandName Get-SPwebapplication -MockWith {
+            Mock -CommandName Get-SPWebApplication -MockWith {
                 return @{
                     IsAdministrationWebApplication = $true
-                    Url = "http://admin.shareopoint.contoso.local"
+                    Url                            = "http://admin.shareopoint.contoso.local"
                 }
             }
             Mock -CommandName Get-SPWeb -MockWith {
                 return @{
                     AssociatedOwnerGroup = "Farm Administrators"
-                    SiteGroups = New-Object -TypeName "Object" |
-                                    Add-Member -MemberType ScriptMethod `
-                                               -Name GetByName `
-                                               -Value {
-                                                    return @{
-                                                        Users = @(
-                                                            @{ UserLogin = "Demo\User1" },
-                                                            @{ UserLogin = "Demo\User2" }
-                                                        )
-                                                    }
-                                                } -PassThru
+                    SiteGroups           = New-Object -TypeName "Object" |
+                    Add-Member -MemberType ScriptMethod `
+                        -Name GetByName `
+                        -Value {
+                        return @{
+                            Users = @(
+                                @{ UserLogin = "Demo\User1" },
+                                @{ UserLogin = "Demo\User2" }
+                            )
+                        }
+                    } -PassThru
                 }
             }
 
             It "Should return values from the get method" {
-                Get-TargetResource @testParams | Should Not BeNullOrEmpty
+                (Get-TargetResource @testParams).Members.Count | Should Be 2
             }
 
             It "Should return true from the test method" {
@@ -81,52 +81,52 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         Context -Name "Central admin exists and a fixed members list is used which does not match" -Fixture {
             $testParams = @{
                 IsSingleInstance = "Yes"
-                Members = @("Demo\User1", "Demo\User2")
+                Members          = @("Demo\User1", "Demo\User2")
             }
 
-            Mock -CommandName Get-SPwebapplication -MockWith {
+            Mock -CommandName Get-SPWebApplication -MockWith {
                 return @{
                     IsAdministrationWebApplication = $true
-                    Url = "http://admin.shareopoint.contoso.local"
+                    Url                            = "http://admin.shareopoint.contoso.local"
                 }
             }
 
             Mock -CommandName Get-SPWeb -MockWith {
-                $web =  @{
+                $web = @{
                     AssociatedOwnerGroup = "Farm Administrators"
-                    SiteGroups = New-Object -TypeName "Object" |
-                                    Add-Member -MemberType ScriptMethod `
-                                               -Name GetByName `
-                                               -Value {
-                                                    return New-Object -TypeName "Object" |
-                                                        Add-Member -MemberType ScriptProperty `
-                                                                   -Name Users `
-                                                                   -Value {
-                                                                        return @(
-                                                                            @{
-                                                                                UserLogin = "Demo\User1"
-                                                                            }
-                                                                        )
-                                                                    } -PassThru |
-                                                        Add-Member -MemberType ScriptMethod `
-                                                                   -Name AddUser `
-                                                                   -Value { } `
-                                                                   -PassThru |
-                                                        Add-Member -MemberType ScriptMethod `
-                                                                   -Name RemoveUser `
-                                                                   -Value { } `
-                                                                   -PassThru
-                                                    } -PassThru
+                    SiteGroups           = New-Object -TypeName "Object" |
+                    Add-Member -MemberType ScriptMethod `
+                        -Name GetByName `
+                        -Value {
+                        return New-Object -TypeName "Object" |
+                        Add-Member -MemberType ScriptProperty `
+                            -Name Users `
+                            -Value {
+                            return @(
+                                @{
+                                    UserLogin = "Demo\User1"
+                                }
+                            )
+                        } -PassThru |
+                        Add-Member -MemberType ScriptMethod `
+                            -Name AddUser `
+                            -Value { } `
+                            -PassThru |
+                        Add-Member -MemberType ScriptMethod `
+                            -Name RemoveUser `
+                            -Value { } `
+                            -PassThru
+                    } -PassThru
                 }
                 return $web
             }
 
             Mock -CommandName Get-SPUser -MockWith {
-                return @{}
+                return @{ }
             }
 
             It "Should return values from the get method" {
-                Get-TargetResource @testParams | Should Not BeNullOrEmpty
+                (Get-TargetResource @testParams).Members.Count | Should Be 1
             }
 
             It "Should return false from the test method" {
@@ -147,44 +147,44 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             Mock -CommandName Get-SPwebapplication -MockWith {
                 return @{
                     IsAdministrationWebApplication = $true
-                    Url = "http://admin.shareopoint.contoso.local"
+                    Url                            = "http://admin.shareopoint.contoso.local"
                 }
             }
 
             Mock -CommandName Get-SPWeb -MockWith {
                 return @{
                     AssociatedOwnerGroup = "Farm Administrators"
-                    SiteGroups = New-Object -TypeName "Object" |
-                                    Add-Member -MemberType ScriptMethod `
-                                               -Name GetByName `
-                                               -Value {
-                                                    return New-Object "Object" |
-                                                        Add-Member -MemberType ScriptProperty `
-                                                                   -Name Users `
-                                                                   -Value {
-                                                                        return @(
-                                                                            @{
-                                                                                UserLogin = "Demo\User1"
-                                                                            },
-                                                                            @{
-                                                                                UserLogin = "Demo\User2"
-                                                                            }
-                                                                        )
-                                                                    } -PassThru |
-                                                        Add-Member -MemberType ScriptMethod `
-                                                                   -Name AddUser `
-                                                                   -Value { } `
-                                                                   -PassThru |
-                                                        Add-Member -MemberType ScriptMethod `
-                                                                   -Name RemoveUser `
-                                                                   -Value { } `
-                                                                   -PassThru
-                                                    } -PassThru
+                    SiteGroups           = New-Object -TypeName "Object" |
+                    Add-Member -MemberType ScriptMethod `
+                        -Name GetByName `
+                        -Value {
+                        return New-Object "Object" |
+                        Add-Member -MemberType ScriptProperty `
+                            -Name Users `
+                            -Value {
+                            return @(
+                                @{
+                                    UserLogin = "Demo\User1"
+                                },
+                                @{
+                                    UserLogin = "Demo\User2"
+                                }
+                            )
+                        } -PassThru |
+                        Add-Member -MemberType ScriptMethod `
+                            -Name AddUser `
+                            -Value { } `
+                            -PassThru |
+                        Add-Member -MemberType ScriptMethod `
+                            -Name RemoveUser `
+                            -Value { } `
+                            -PassThru
+                    } -PassThru
                 }
             }
 
             It "Should return values from the get method" {
-                Get-TargetResource @testParams | Should Not BeNullOrEmpty
+                (Get-TargetResource @testParams).Members.Count | Should Be 2
             }
 
             It "Should return true from the test method" {
@@ -201,41 +201,41 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             Mock -CommandName Get-SPwebapplication -MockWith {
                 return @{
                     IsAdministrationWebApplication = $true
-                    Url = "http://admin.shareopoint.contoso.local"
+                    Url                            = "http://admin.shareopoint.contoso.local"
                 }
             }
 
             Mock -CommandName Get-SPWeb -MockWith {
                 return @{
                     AssociatedOwnerGroup = "Farm Administrators"
-                    SiteGroups = New-Object -TypeName "Object" |
-                                    Add-Member -MemberType ScriptMethod `
-                                               -Name GetByName `
-                                               -Value {
-                                                    return New-Object "Object" |
-                                                        Add-Member -MemberType ScriptProperty `
-                                                                   -Name Users `
-                                                                   -Value {
-                                                                        return @(
-                                                                            @{
-                                                                                UserLogin = "Demo\User1"
-                                                                            }
-                                                                        )
-                                                                    } -PassThru |
-                                                        Add-Member -MemberType ScriptMethod `
-                                                                   -Name AddUser `
-                                                                   -Value { } `
-                                                                   -PassThru |
-                                                        Add-Member -MemberType ScriptMethod `
-                                                                   -Name RemoveUser `
-                                                                   -Value { } `
-                                                                   -PassThru
-                                                    } -PassThru
+                    SiteGroups           = New-Object -TypeName "Object" |
+                    Add-Member -MemberType ScriptMethod `
+                        -Name GetByName `
+                        -Value {
+                        return New-Object "Object" |
+                        Add-Member -MemberType ScriptProperty `
+                            -Name Users `
+                            -Value {
+                            return @(
+                                @{
+                                    UserLogin = "Demo\User1"
+                                }
+                            )
+                        } -PassThru |
+                        Add-Member -MemberType ScriptMethod `
+                            -Name AddUser `
+                            -Value { } `
+                            -PassThru |
+                        Add-Member -MemberType ScriptMethod `
+                            -Name RemoveUser `
+                            -Value { } `
+                            -PassThru
+                    } -PassThru
                 }
             }
 
             It "Should return values from the get method" {
-                Get-TargetResource @testParams | Should Not BeNullOrEmpty
+                (Get-TargetResource @testParams).Members.Count | Should Be 1
             }
 
             It "Should return true from the test method" {
@@ -256,44 +256,44 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             Mock -CommandName Get-SPwebapplication -MockWith {
                 return @{
                     IsAdministrationWebApplication = $true
-                    Url = "http://admin.shareopoint.contoso.local"
+                    Url                            = "http://admin.shareopoint.contoso.local"
                 }
             }
 
             Mock -CommandName Get-SPWeb -MockWith {
                 return @{
                     AssociatedOwnerGroup = "Farm Administrators"
-                    SiteGroups = New-Object -TypeName "Object" |
-                                    Add-Member -MemberType ScriptMethod `
-                                               -Name GetByName `
-                                               -Value {
-                                                    return New-Object "Object" |
-                                                        Add-Member -MemberType ScriptProperty `
-                                                                   -Name Users `
-                                                                   -Value {
-                                                                        return @(
-                                                                            @{
-                                                                                UserLogin = "Demo\User1"
-                                                                            },
-                                                                            @{
-                                                                                UserLogin = "Demo\User2"
-                                                                            }
-                                                                        )
-                                                                    } -PassThru |
-                                                        Add-Member -MemberType ScriptMethod `
-                                                                   -Name AddUser `
-                                                                   -Value { } `
-                                                                   -PassThru |
-                                                        Add-Member -MemberType ScriptMethod `
-                                                                   -Name RemoveUser `
-                                                                   -Value { } `
-                                                                   -PassThru
-                                                    } -PassThru
+                    SiteGroups           = New-Object -TypeName "Object" |
+                    Add-Member -MemberType ScriptMethod `
+                        -Name GetByName `
+                        -Value {
+                        return New-Object "Object" |
+                        Add-Member -MemberType ScriptProperty `
+                            -Name Users `
+                            -Value {
+                            return @(
+                                @{
+                                    UserLogin = "Demo\User1"
+                                },
+                                @{
+                                    UserLogin = "Demo\User2"
+                                }
+                            )
+                        } -PassThru |
+                        Add-Member -MemberType ScriptMethod `
+                            -Name AddUser `
+                            -Value { } `
+                            -PassThru |
+                        Add-Member -MemberType ScriptMethod `
+                            -Name RemoveUser `
+                            -Value { } `
+                            -PassThru
+                    } -PassThru
                 }
             }
 
             It "Should return values from the get method" {
-                Get-TargetResource @testParams | Should Not BeNullOrEmpty
+                (Get-TargetResource @testParams).Members.Count | Should Be 2
             }
 
             It "Should return false from the test method" {
@@ -313,39 +313,39 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
             Mock -CommandName Get-SPwebapplication -MockWith { return @{
                     IsAdministrationWebApplication = $true
-                    Url = "http://admin.shareopoint.contoso.local"
-                }}
+                    Url                            = "http://admin.shareopoint.contoso.local"
+                } }
             Mock -CommandName Get-SPWeb -MockWith {
                 return @{
                     AssociatedOwnerGroup = "Farm Administrators"
-                    SiteGroups = New-Object -TypeName "Object" |
-                                    Add-Member -MemberType ScriptMethod `
-                                               -Name GetByName `
-                                               -Value {
-                                                    return New-Object "Object" |
-                                                        Add-Member -MemberType ScriptProperty `
-                                                                   -Name Users `
-                                                                   -Value {
-                                                                        return @(
-                                                                            @{
-                                                                                UserLogin = "Demo\User2"
-                                                                            }
-                                                                        )
-                                                                    } -PassThru |
-                                                        Add-Member -MemberType ScriptMethod `
-                                                                   -Name AddUser `
-                                                                   -Value { } `
-                                                                   -PassThru |
-                                                        Add-Member -MemberType ScriptMethod `
-                                                                   -Name RemoveUser `
-                                                                   -Value { } `
-                                                                   -PassThru
-                                                    } -PassThru
+                    SiteGroups           = New-Object -TypeName "Object" |
+                    Add-Member -MemberType ScriptMethod `
+                        -Name GetByName `
+                        -Value {
+                        return New-Object "Object" |
+                        Add-Member -MemberType ScriptProperty `
+                            -Name Users `
+                            -Value {
+                            return @(
+                                @{
+                                    UserLogin = "Demo\User2"
+                                }
+                            )
+                        } -PassThru |
+                        Add-Member -MemberType ScriptMethod `
+                            -Name AddUser `
+                            -Value { } `
+                            -PassThru |
+                        Add-Member -MemberType ScriptMethod `
+                            -Name RemoveUser `
+                            -Value { } `
+                            -PassThru
+                    } -PassThru
                 }
             }
 
             It "Should return values from the get method" {
-                Get-TargetResource @testParams | Should Not BeNullOrEmpty
+                (Get-TargetResource @testParams).Members.Count | Should Be 1
             }
 
             It "Should return true from the test method" {
@@ -356,43 +356,43 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         Context -Name "The resource is called with both an explicit members list as well as members to include/exclude" -Fixture {
             $testParams = @{
                 IsSingleInstance = "Yes"
-                Members = @("Demo\User1")
+                Members          = @("Demo\User1")
                 MembersToExclude = @("Demo\User1")
             }
 
             Mock -CommandName Get-SPwebapplication -MockWith {
                 return @{
                     IsAdministrationWebApplication = $true
-                    Url = "http://admin.shareopoint.contoso.local"
+                    Url                            = "http://admin.shareopoint.contoso.local"
                 }
             }
 
             Mock -CommandName Get-SPWeb -MockWith {
                 return @{
                     AssociatedOwnerGroup = "Farm Administrators"
-                    SiteGroups = New-Object -TypeName "Object" |
-                                    Add-Member -MemberType ScriptMethod `
-                                               -Name GetByName `
-                                               -Value {
-                                                    return New-Object "Object" |
-                                                        Add-Member -MemberType ScriptProperty `
-                                                                   -Name Users `
-                                                                   -Value {
-                                                                        return @(
-                                                                            @{
-                                                                                UserLogin = "Demo\User2"
-                                                                            }
-                                                                        )
-                                                                    } -PassThru |
-                                                        Add-Member -MemberType ScriptMethod `
-                                                                   -Name AddUser `
-                                                                   -Value { } `
-                                                                   -PassThru |
-                                                        Add-Member -MemberType ScriptMethod `
-                                                                   -Name RemoveUser `
-                                                                   -Value { } `
-                                                                   -PassThru
-                                                    } -PassThru
+                    SiteGroups           = New-Object -TypeName "Object" |
+                    Add-Member -MemberType ScriptMethod `
+                        -Name GetByName `
+                        -Value {
+                        return New-Object "Object" |
+                        Add-Member -MemberType ScriptProperty `
+                            -Name Users `
+                            -Value {
+                            return @(
+                                @{
+                                    UserLogin = "Demo\User2"
+                                }
+                            )
+                        } -PassThru |
+                        Add-Member -MemberType ScriptMethod `
+                            -Name AddUser `
+                            -Value { } `
+                            -PassThru |
+                        Add-Member -MemberType ScriptMethod `
+                            -Name RemoveUser `
+                            -Value { } `
+                            -PassThru
+                    } -PassThru
                 }
             }
 
@@ -417,36 +417,36 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             Mock -CommandName Get-SPwebapplication -MockWith {
                 return @{
                     IsAdministrationWebApplication = $true
-                    Url = "http://admin.sharepoint.contoso.local"
+                    Url                            = "http://admin.sharepoint.contoso.local"
                 }
             }
 
             Mock -CommandName Get-SPWeb -MockWith {
                 return @{
                     AssociatedOwnerGroup = "Farm Administrators"
-                    SiteGroups = New-Object -TypeName "Object" |
-                                    Add-Member -MemberType ScriptMethod `
-                                               -Name GetByName `
-                                               -Value {
-                                                    return New-Object "Object" |
-                                                        Add-Member -MemberType ScriptProperty `
-                                                                   -Name Users `
-                                                                   -Value {
-                                                                        return @(
-                                                                            @{
-                                                                                UserLogin = "Demo\User2"
-                                                                            }
-                                                                        )
-                                                                    } -PassThru |
-                                                        Add-Member -MemberType ScriptMethod `
-                                                                   -Name AddUser `
-                                                                   -Value { } `
-                                                                   -PassThru |
-                                                        Add-Member -MemberType ScriptMethod `
-                                                                   -Name RemoveUser `
-                                                                   -Value { } `
-                                                                   -PassThru
-                                                    } -PassThru
+                    SiteGroups           = New-Object -TypeName "Object" |
+                    Add-Member -MemberType ScriptMethod `
+                        -Name GetByName `
+                        -Value {
+                        return New-Object "Object" |
+                        Add-Member -MemberType ScriptProperty `
+                            -Name Users `
+                            -Value {
+                            return @(
+                                @{
+                                    UserLogin = "Demo\User2"
+                                }
+                            )
+                        } -PassThru |
+                        Add-Member -MemberType ScriptMethod `
+                            -Name AddUser `
+                            -Value { } `
+                            -PassThru |
+                        Add-Member -MemberType ScriptMethod `
+                            -Name RemoveUser `
+                            -Value { } `
+                            -PassThru
+                    } -PassThru
                 }
             }
 

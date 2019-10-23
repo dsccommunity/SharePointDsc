@@ -3,16 +3,16 @@ param(
     [Parameter()]
     [string]
     $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
-                                         -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
-                                         -Resolve)
+            -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
+            -Resolve)
 )
 
 Import-Module -Name (Join-Path -Path $PSScriptRoot `
-                                -ChildPath "..\UnitTestHelper.psm1" `
-                                -Resolve)
+        -ChildPath "..\UnitTestHelper.psm1" `
+        -Resolve)
 
 $Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointCmdletModule `
-                                              -DscResource "SPFarmSolution"
+    -DscResource "SPFarmSolution"
 
 Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
     InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
@@ -31,12 +31,12 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         # Test contexts
         Context -Name "The solution isn't installed, but should be" -Fixture {
             $testParams = @{
-                Name            = "SomeSolution"
-                LiteralPath     = "\\server\share\file.wsp"
-                Deployed        = $true
-                Ensure          = "Present"
-                Version         = "1.0.0.0"
-                WebAppUrls      = @("http://app1", "http://app2")
+                Name        = "SomeSolution"
+                LiteralPath = "\\server\share\file.wsp"
+                Deployed    = $true
+                Ensure      = "Present"
+                Version     = "1.0.0.0"
+                WebAppUrls  = @("http://app1", "http://app2")
             }
 
             $global:SPDscSolutionAdded = $false
@@ -53,7 +53,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             Mock -CommandName Add-SPSolution -MockWith {
-                $solution = [pscustomobject] @{ Properties = @{ Version = "" }}
+                $solution = [pscustomobject] @{ Properties = @{ Version = "" } }
                 $solution | Add-Member -Name Update -MemberType ScriptMethod -Value { }
                 $global:SPDscSolutionAdded = $true
                 return $solution
@@ -81,12 +81,12 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "The solution isn't installed, but should be with loop testing" -Fixture {
             $testParams = @{
-                Name            = "SomeSolution"
-                LiteralPath     = "\\server\share\file.wsp"
-                Deployed        = $true
-                Ensure          = "Present"
-                Version         = "1.0.0.0"
-                WebAppUrls      = @("http://app1", "http://app2")
+                Name        = "SomeSolution"
+                LiteralPath = "\\server\share\file.wsp"
+                Deployed    = $true
+                Ensure      = "Present"
+                Version     = "1.0.0.0"
+                WebAppUrls  = @("http://app1", "http://app2")
             }
 
             $global:SPDscSolutionAdded = $false
@@ -95,21 +95,21 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             Mock -CommandName Get-SPSolution -MockWith {
                 $global:SPDscLoopCount = $global:SPDscLoopCount + 1
                 $index = $global:SPDscLoopCount
-              if($global:SPDscSolutionAdded)
-              {
-                if($index -gt 2)
+                if ($global:SPDscSolutionAdded)
                 {
-                    return @{
-                        JobExists = $false
+                    if ($index -gt 2)
+                    {
+                        return @{
+                            JobExists = $false
+                        }
+                    }
+                    else
+                    {
+                        return @{
+                            JobExists = $true
+                        }
                     }
                 }
-                else
-                {
-                    return @{
-                        JobExists = $true
-                    }
-                }
-              }
                 else
                 {
                     return $null
@@ -117,7 +117,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             Mock -CommandName Add-SPSolution -MockWith {
-                $solution = [pscustomobject] @{ Properties = @{ Version = "" }}
+                $solution = [pscustomobject] @{ Properties = @{ Version = "" } }
                 $solution | Add-Member -Name Update -MemberType ScriptMethod -Value { }
                 $global:SPDscSolutionAdded = $true
                 return $solution
@@ -148,19 +148,19 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "The solution is installed, but should not be" -Fixture {
             $testParams = @{
-                Name            = "SomeSolution"
-                LiteralPath     = "\\server\share\file.wsp"
-                Deployed        = $true
-                Ensure          = "Absent"
-                Version         = "1.0.0.0"
-                WebAppUrls      = @("http://app1", "http://app2")
+                Name        = "SomeSolution"
+                LiteralPath = "\\server\share\file.wsp"
+                Deployed    = $true
+                Ensure      = "Absent"
+                Version     = "1.0.0.0"
+                WebAppUrls  = @("http://app1", "http://app2")
             }
 
             Mock -CommandName Get-SPSolution -MockWith {
                 return [pscustomobject]@{
                     Deployed                = $true
                     Properties              = @{ Version = "1.0.0.0" }
-                    DeployedWebApplications = @( [pscustomobject]@{Url="http://app1"}, [pscustomobject]@{Url="http://app2"})
+                    DeployedWebApplications = @( [pscustomobject]@{Url = "http://app1" }, [pscustomobject]@{Url = "http://app2" })
                     ContainsGlobalAssembly  = $true
                 }
             }
@@ -186,12 +186,12 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "The solution isn't installed, and should not be" -Fixture {
             $testParams = @{
-                Name            = "SomeSolution"
-                LiteralPath     = "\\server\share\file.wsp"
-                Deployed        = $false
-                Ensure          = "Absent"
-                Version         = "0.0.0.0"
-                WebAppUrls      = @()
+                Name        = "SomeSolution"
+                LiteralPath = "\\server\share\file.wsp"
+                Deployed    = $false
+                Ensure      = "Absent"
+                Version     = "0.0.0.0"
+                WebAppUrls  = @()
             }
 
             Mock -CommandName Get-SPSolution -MockWith { $null }
@@ -211,19 +211,19 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "The solution is installed, but needs update" -Fixture {
             $testParams = @{
-                Name            = "SomeSolution"
-                LiteralPath     = "\\server\share\file.wsp"
-                Deployed        = $true
-                Ensure          = "Present"
-                Version         = "1.1.0.0"
-                WebAppUrls      = @("http://app1", "http://app2")
+                Name        = "SomeSolution"
+                LiteralPath = "\\server\share\file.wsp"
+                Deployed    = $true
+                Ensure      = "Present"
+                Version     = "1.1.0.0"
+                WebAppUrls  = @("http://app1", "http://app2")
             }
 
             Mock -CommandName Get-SPSolution -MockWith {
                 $s = [pscustomobject]@{
                     Deployed                = $true
                     Properties              = @{ Version = "1.0.0.0" }
-                    DeployedWebApplications = @( [pscustomobject]@{Url="http://app1"}, [pscustomobject]@{Url="http://app2"})
+                    DeployedWebApplications = @( [pscustomobject]@{Url = "http://app1" }, [pscustomobject]@{Url = "http://app2" })
                     ContainsGlobalAssembly  = $true
                 }
                 $s | Add-Member -Name Update -MemberType ScriptMethod -Value { }
@@ -251,19 +251,19 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "The solution is installed, and should be" -Fixture {
             $testParams = @{
-                Name            = "SomeSolution"
-                LiteralPath     = "\\server\share\file.wsp"
-                Deployed        = $true
-                Ensure          = "Present"
-                Version         = "1.0.0.0"
-                WebAppUrls      = @("http://app1", "http://app2")
+                Name        = "SomeSolution"
+                LiteralPath = "\\server\share\file.wsp"
+                Deployed    = $true
+                Ensure      = "Present"
+                Version     = "1.0.0.0"
+                WebAppUrls  = @("http://app1", "http://app2")
             }
 
             Mock -CommandName Get-SPSolution -MockWith {
                 return [pscustomobject]@{
                     Deployed                = $true
                     Properties              = @{ Version = "1.0.0.0" }
-                    DeployedWebApplications = @( [pscustomobject]@{Url="http://app1"}, [pscustomobject]@{Url="http://app2"})
+                    DeployedWebApplications = @( [pscustomobject]@{Url = "http://app1" }, [pscustomobject]@{Url = "http://app2" })
                     ContainsGlobalAssembly  = $true
                 }
             }
@@ -283,20 +283,20 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "The solution exists but is not deloyed, and needs update" -Fixture {
             $testParams = @{
-                Name            = "SomeSolution"
-                LiteralPath     = "\\server\share\file.wsp"
-                Deployed        = $true
-                Ensure          = "Present"
-                Version         = "1.1.0.0"
-                WebAppUrls      = @()
+                Name        = "SomeSolution"
+                LiteralPath = "\\server\share\file.wsp"
+                Deployed    = $true
+                Ensure      = "Present"
+                Version     = "1.1.0.0"
+                WebAppUrls  = @()
             }
 
             $solution = [pscustomobject]@{
-                    Deployed                = $false
-                    Properties              = @{ Version = "1.0.0.0" }
-                    DeployedWebApplications = @( [pscustomobject]@{Url="http://app1"}, [pscustomobject]@{Url="http://app2"})
-                    ContainsGlobalAssembly  = $true
-                }
+                Deployed                = $false
+                Properties              = @{ Version = "1.0.0.0" }
+                DeployedWebApplications = @( [pscustomobject]@{Url = "http://app1" }, [pscustomobject]@{Url = "http://app2" })
+                ContainsGlobalAssembly  = $true
+            }
             $solution | Add-Member -Name Update -MemberType ScriptMethod  -Value { }
 
             Mock -CommandName Get-SPSolution -MockWith { $solution }
@@ -325,21 +325,21 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "A solution deployment can target a specific compatability level" -Fixture {
             $testParams = @{
-                Name            = "SomeSolution"
-                LiteralPath     = "\\server\share\file.wsp"
-                Deployed        = $true
-                Ensure          = "Present"
-                Version         = "1.1.0.0"
-                WebAppUrls      = @()
-                SolutionLevel   = "All"
+                Name          = "SomeSolution"
+                LiteralPath   = "\\server\share\file.wsp"
+                Deployed      = $true
+                Ensure        = "Present"
+                Version       = "1.1.0.0"
+                WebAppUrls    = @()
+                SolutionLevel = "All"
             }
 
             $solution = [pscustomobject]@{
-                    Deployed                = $false
-                    Properties              = @{ Version = "1.0.0.0" }
-                    DeployedWebApplications = @( [pscustomobject]@{Url="http://app1"}, [pscustomobject]@{Url="http://app2"})
-                    ContainsGlobalAssembly  = $true
-                }
+                Deployed                = $false
+                Properties              = @{ Version = "1.0.0.0" }
+                DeployedWebApplications = @( [pscustomobject]@{Url = "http://app1" }, [pscustomobject]@{Url = "http://app2" })
+                ContainsGlobalAssembly  = $true
+            }
             $solution | Add-Member -Name Update -MemberType ScriptMethod  -Value { }
 
             Mock -CommandName Get-SPSolution -MockWith { $solution }
@@ -349,6 +349,71 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Set-TargetResource @testParams
 
                 Assert-MockCalled Install-SPSolution -ParameterFilter { $CompatibilityLevel -eq $testParams.SolutionLevel }
+            }
+        }
+
+        Context -Name "Solution is scoped at the Web Application Level" -Fixture {
+            $testParams = @{
+                Name          = "SomeSolution"
+                LiteralPath   = "\\server\share\file.wsp"
+                Deployed      = $true
+                Ensure        = "Present"
+                Version       = "1.1.0.0"
+                WebAppUrls    = @("https://contoso.com")
+                SolutionLevel = "All"
+            }
+
+            $solution = [pscustomobject]@{
+                Deployed                       = $false
+                Properties                     = @{ Version = "1.0.0.0" }
+                ContainsWebApplicationResource = $true
+                DeployedWebApplications        = @()
+                ContainsGlobalAssembly         = $true
+            }
+            $solution | Add-Member -Name Update -MemberType ScriptMethod  -Value { }
+
+            Mock -CommandName Get-SPSolution -MockWith { $solution }
+            Mock -CommandName Add-SPSolution -MockWith { $solution }
+
+            It "Deploys the solution to the specified Web Application" {
+                Set-TargetResource @testParams
+            }
+        }
+
+        Context -Name "Solution is scoped at multiple Web Application Levels" -Fixture {
+            $testParams = @{
+                Name          = "SomeSolution"
+                LiteralPath   = "\\server\share\file.wsp"
+                Deployed      = $true
+                Ensure        = "Present"
+                Version       = "1.1.0.0"
+                WebAppUrls    = @("https://contoso.com", "https://tailspintoys.com")
+                SolutionLevel = "All"
+            }
+
+            $numberOfCalls = 1
+            Mock -CommandName Install-SPSolution -MockWith {
+                if ($numberOfCalls -le 1)
+                {
+                    $numberOfCalls++
+                    throw "A deployment is already underway"
+                }
+            }
+
+            $solution = [pscustomobject]@{
+                Deployed                       = $false
+                Properties                     = @{ Version = "1.0.0.0" }
+                ContainsWebApplicationResource = $true
+                DeployedWebApplications        = @()
+                ContainsGlobalAssembly         = $true
+            }
+            $solution | Add-Member -Name Update -MemberType ScriptMethod  -Value { }
+
+            Mock -CommandName Get-SPSolution -MockWith { $solution }
+            Mock -CommandName Add-SPSolution -MockWith { $solution }
+
+            It "Deploys the solution to the specified Web Application" {
+                Set-TargetResource @testParams
             }
         }
     }

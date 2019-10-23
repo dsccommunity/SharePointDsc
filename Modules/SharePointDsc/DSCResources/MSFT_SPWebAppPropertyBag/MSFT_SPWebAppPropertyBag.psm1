@@ -17,7 +17,7 @@ function Get-TargetResource()
         $Value,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = 'Present',
 
@@ -28,9 +28,9 @@ function Get-TargetResource()
 
     Write-Verbose -Message "Looking for SPWebApplication property '$Key'"
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
-                                  -Arguments $PSBoundParameters `
-                                  -ScriptBlock {
+    $result = Invoke-SPDscCommand -Credential $InstallAccount `
+        -Arguments $PSBoundParameters `
+        -ScriptBlock {
         $params = $args[0]
 
         $spWebApp = Get-SPWebApplication -Identity $params.WebAppUrl -ErrorAction SilentlyContinue
@@ -59,9 +59,9 @@ function Get-TargetResource()
 
         return @{
             WebAppUrl = $params.WebAppUrl
-            Key = $params.Key
-            Value = $currentValue
-            Ensure = $localEnsure
+            Key       = $params.Key
+            Value     = $currentValue
+            Ensure    = $localEnsure
         }
     }
     return $result
@@ -85,7 +85,7 @@ function Set-TargetResource()
         $Value,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = 'Present',
 
@@ -96,9 +96,9 @@ function Set-TargetResource()
 
     Write-Verbose -Message "Setting SPWebApplication property '$Key'"
 
-    Invoke-SPDSCCommand -Credential $InstallAccount `
-                        -Arguments $PSBoundParameters `
-                        -ScriptBlock {
+    Invoke-SPDscCommand -Credential $InstallAccount `
+        -Arguments $PSBoundParameters `
+        -ScriptBlock {
         $params = $args[0]
 
         $spWebApp = Get-SPWebApplication -Identity $params.WebAppUrl -ErrorAction SilentlyContinue
@@ -137,7 +137,7 @@ function Test-TargetResource()
         $Value,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = 'Present',
 
@@ -150,17 +150,20 @@ function Test-TargetResource()
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
-    if($Ensure -eq 'Present')
+    Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
+    Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
+
+    if ($Ensure -eq 'Present')
     {
         return Test-SPDscParameterState -CurrentValues $CurrentValues `
-                                        -DesiredValues $PSBoundParameters `
-                                        -ValuesToCheck @('Ensure','Key', 'Value')
+            -DesiredValues $PSBoundParameters `
+            -ValuesToCheck @('Ensure', 'Key', 'Value')
     }
     else
     {
         return Test-SPDscParameterState -CurrentValues $CurrentValues `
-                                        -DesiredValues $PSBoundParameters `
-                                        -ValuesToCheck @('Ensure','Key')
+            -DesiredValues $PSBoundParameters `
+            -ValuesToCheck @('Ensure', 'Key')
 
     }
 

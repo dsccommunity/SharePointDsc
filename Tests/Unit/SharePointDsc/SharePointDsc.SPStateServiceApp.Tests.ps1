@@ -4,16 +4,16 @@ param(
     [Parameter()]
     [string]
     $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
-                                         -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
-                                         -Resolve)
+            -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
+            -Resolve)
 )
 
 Import-Module -Name (Join-Path -Path $PSScriptRoot `
-                                -ChildPath "..\UnitTestHelper.psm1" `
-                                -Resolve)
+        -ChildPath "..\UnitTestHelper.psm1" `
+        -Resolve)
 
 $Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointCmdletModule `
-                                              -DscResource "SPStateServiceApp"
+    -DscResource "SPStateServiceApp"
 
 Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
     InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
@@ -22,23 +22,23 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         # Initialize tests
         $mockPassword = ConvertTo-SecureString -String "password" -AsPlainText -Force
         $mockCredential = New-Object -TypeName System.Management.Automation.PSCredential `
-                                     -ArgumentList @("username", $mockPassword)
+            -ArgumentList @("username", $mockPassword)
 
         # Mocks for all contexts
-        Mock -CommandName New-SPStateServiceDatabase -MockWith { return @{} }
-        Mock -CommandName New-SPStateServiceApplication -MockWith { return @{} }
-        Mock -CommandName New-SPStateServiceApplicationProxy -MockWith { return @{} }
+        Mock -CommandName New-SPStateServiceDatabase -MockWith { return @{ } }
+        Mock -CommandName New-SPStateServiceApplication -MockWith { return @{ } }
+        Mock -CommandName New-SPStateServiceApplicationProxy -MockWith { return @{ } }
         Mock -CommandName Remove-SPServiceApplication -MockWith { }
 
         # Test contexts
         Context -Name "the service app doesn't exist and should" -Fixture {
             $testParams = @{
-                Name = "State Service App"
-                ProxyName = "State Service Proxy"
-                DatabaseName = "SP_StateService"
-                DatabaseServer = "SQL.test.domain"
+                Name                = "State Service App"
+                ProxyName           = "State Service Proxy"
+                DatabaseName        = "SP_StateService"
+                DatabaseServer      = "SQL.test.domain"
                 DatabaseCredentials = $mockCredential
-                Ensure = "Present"
+                Ensure              = "Present"
             }
 
             Mock -CommandName New-SPStateServiceApplication -MockWith {
@@ -46,9 +46,9 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     Name = $testParams.Name
                 }
                 $returnVal = $returnVal | Add-Member -MemberType ScriptMethod `
-                                                     -Name IsConnected -Value {
-                                                            return $true
-                                                        } -PassThru
+                    -Name IsConnected -Value {
+                    return $true
+                } -PassThru
 
                 return $returnVal
             }
@@ -56,14 +56,14 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             Mock -CommandName Get-SPServiceApplicationProxy -MockWith {
                 $proxiesToReturn = @()
                 $proxy = @{
-                    Name = $testParams.ProxyName
+                    Name        = $testParams.ProxyName
                     DisplayName = $testParams.ProxyName
                 }
                 $proxy = $proxy | Add-Member -MemberType ScriptMethod `
-                                                -Name Delete `
-                                                -Value {} `
-                                                -PassThru
-                $proxiesToReturn +=  $proxy
+                    -Name Delete `
+                    -Value { } `
+                    -PassThru
+                $proxiesToReturn += $proxy
 
                 return $proxiesToReturn
             }
@@ -85,36 +85,36 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "the service app exists and should" -Fixture {
             $testParams = @{
-                Name = "State Service App"
-                DatabaseName = "SP_StateService"
-                DatabaseServer = "SQL.test.domain"
+                Name                = "State Service App"
+                DatabaseName        = "SP_StateService"
+                DatabaseServer      = "SQL.test.domain"
                 DatabaseCredentials = $mockCredential
-                Ensure = "Present"
+                Ensure              = "Present"
             }
 
             Mock -CommandName Get-SPStateServiceApplication -MockWith {
                 $returnVal = @{
                     DisplayName = $testParams.Name
-                    Name = $testParams.Name
+                    Name        = $testParams.Name
                 }
                 $returnVal = $returnVal | Add-Member -MemberType ScriptMethod `
-                                                     -Name IsConnected -Value {
-                                                            return $true
-                                                        } -PassThru
+                    -Name IsConnected -Value {
+                    return $true
+                } -PassThru
 
                 return $returnVal
             }
             Mock -CommandName Get-SPServiceApplicationProxy -MockWith {
                 $proxiesToReturn = @()
                 $proxy = @{
-                    Name = $testParams.ProxyName
+                    Name        = $testParams.ProxyName
                     DisplayName = $testParams.ProxyName
                 }
                 $proxy = $proxy | Add-Member -MemberType ScriptMethod `
-                                                -Name Delete `
-                                                -Value {} `
-                                                -PassThru
-                $proxiesToReturn +=  $proxy
+                    -Name Delete `
+                    -Value { } `
+                    -PassThru
+                $proxiesToReturn += $proxy
 
                 return $proxiesToReturn
             }
@@ -130,9 +130,9 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "When the service app exists but it shouldn't" -Fixture {
             $testParams = @{
-                Name = "State Service App"
+                Name         = "State Service App"
                 DatabaseName = "-"
-                Ensure = "Absent"
+                Ensure       = "Absent"
             }
 
             Mock -CommandName Get-SPStateServiceApplication -MockWith {
@@ -157,9 +157,9 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "When the service app doesn't exist and shouldn't" -Fixture {
             $testParams = @{
-                Name = "State Service App"
+                Name         = "State Service App"
                 DatabaseName = "-"
-                Ensure = "Absent"
+                Ensure       = "Absent"
             }
 
             Mock -CommandName Get-SPServiceApplication -MockWith {

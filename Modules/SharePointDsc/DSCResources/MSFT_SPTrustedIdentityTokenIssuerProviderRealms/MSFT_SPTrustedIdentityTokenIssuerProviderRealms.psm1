@@ -1,7 +1,7 @@
 function Get-TargetResource
 {
     [CmdletBinding()]
-    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSDSCUseIdenticalMandatoryParametersForDSC", "", Justification  =  "Temporary workaround for issue introduced in PSSA v1.18")]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSDSCUseIdenticalMandatoryParametersForDSC", "", Justification = "Temporary workaround for issue introduced in PSSA v1.18")]
     [OutputType([System.Collections.Hashtable])]
     param
     (
@@ -33,13 +33,13 @@ function Get-TargetResource
     if ($ProviderRealms.Count -gt 0 -and ($ProviderRealmsToInclude.Count -gt 0 -or $ProviderRealmsToExclude.Count -gt 0))
     {
         throw ("Cannot use the ProviderRealms parameter together with the " + `
-               "ProviderRealmsToInclude or ProviderRealmsToExclude parameters")
+                "ProviderRealmsToInclude or ProviderRealmsToExclude parameters")
     }
 
     if ($ProviderRealms.Count -eq 0 -and $ProviderRealmsToInclude.Count -eq 0 -and $ProviderRealmsToExclude.Count -eq 0)
     {
         throw ("At least one of the following parameters must be specified: " + `
-               "ProviderRealms, ProviderRealmsToInclude, ProviderRealmsToExclude")
+                "ProviderRealms, ProviderRealmsToInclude, ProviderRealmsToExclude")
     }
 
     $paramRealms = @{ }
@@ -69,14 +69,14 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting SPTrustedIdentityTokenIssuer ProviderRealms"
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
-                                  -Arguments $PSBoundParameters `
-                                  -ScriptBlock {
+    $result = Invoke-SPDscCommand -Credential $InstallAccount `
+        -Arguments $PSBoundParameters `
+        -ScriptBlock {
         $params = $args[0]
         $currentRealms = @{ }
 
         $spTrust = Get-SPTrustedIdentityTokenIssuer -Identity $params.IssuerName `
-                                                    -ErrorAction SilentlyContinue
+            -ErrorAction SilentlyContinue
 
         if ($null -eq $spTrust)
         {
@@ -96,36 +96,36 @@ function Get-TargetResource
     if ($null -eq $result)
     {
         return @{
-            IssuerName = $IssuerName
-            ProviderRealms = $null
+            IssuerName              = $IssuerName
+            ProviderRealms          = $null
             ProviderRealmsToInclude = $null
             ProviderRealmsToExclude = $null
-            CurrentRealms = $null
-            RealmsToAdd = $null
-            Ensure = "Absent"
+            CurrentRealms           = $null
+            RealmsToAdd             = $null
+            Ensure                  = "Absent"
         }
     }
     $currentStatus = Get-ProviderRealmsStatus -currentRealms $result `
-                                              -desiredRealms $paramRealms `
-                                              -includeRealms $includeRealms `
-                                              -excludeRealms $excludeRealms `
-                                              -Ensure $Ensure
+        -desiredRealms $paramRealms `
+        -includeRealms $includeRealms `
+        -excludeRealms $excludeRealms `
+        -Ensure $Ensure
 
     return @{
-            IssuerName = $IssuerName
-            ProviderRealms = $paramRealms
-            ProviderRealmsToInclude = $includeRealms
-            ProviderRealmsToExclude = $excludeRealms
-            CurrentRealms = $result
-            RealmsToAdd = $currentStatus.NewRealms
-            Ensure = $currentStatus.CurrentStatus
-        }
+        IssuerName              = $IssuerName
+        ProviderRealms          = $paramRealms
+        ProviderRealmsToInclude = $includeRealms
+        ProviderRealmsToExclude = $excludeRealms
+        CurrentRealms           = $result
+        RealmsToAdd             = $currentStatus.NewRealms
+        Ensure                  = $currentStatus.CurrentStatus
+    }
 }
 
 function Set-TargetResource
 {
     [CmdletBinding()]
-    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSDSCUseIdenticalMandatoryParametersForDSC", "", Justification  =  "Temporary workaround for issue introduced in PSSA v1.18")]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSDSCUseIdenticalMandatoryParametersForDSC", "", Justification = "Temporary workaround for issue introduced in PSSA v1.18")]
     param
     (
         [Parameter(Mandatory = $true)]
@@ -156,18 +156,18 @@ function Set-TargetResource
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
-    if($CurrentValues.RealmsToAdd.Count -gt 0)
+    if ($CurrentValues.RealmsToAdd.Count -gt 0)
     {
         $PSBoundParameters.Add('RealmsToAdd', $CurrentValues.RealmsToAdd)
 
         Write-Verbose -Message "Setting SPTrustedIdentityTokenIssuer provider realms"
-        $result = Invoke-SPDSCCommand -Credential $InstallAccount `
-                                      -Arguments $PSBoundParameters `
-                                      -ScriptBlock {
+        $null = Invoke-SPDscCommand -Credential $InstallAccount `
+            -Arguments $PSBoundParameters `
+            -ScriptBlock {
             $params = $args[0]
 
             $trust = Get-SPTrustedIdentityTokenIssuer -Identity $params.IssuerName `
-                                    -ErrorAction SilentlyContinue
+                -ErrorAction SilentlyContinue
 
             if ($null -eq $trust)
             {
@@ -187,7 +187,7 @@ function Set-TargetResource
 function Test-TargetResource
 {
     [CmdletBinding()]
-    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSDSCUseIdenticalMandatoryParametersForDSC", "", Justification  =  "Temporary workaround for issue introduced in PSSA v1.18")]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSDSCUseIdenticalMandatoryParametersForDSC", "", Justification = "Temporary workaround for issue introduced in PSSA v1.18")]
     [OutputType([Boolean])]
     param
     (
@@ -221,9 +221,12 @@ function Test-TargetResource
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
+    Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
+    Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
+
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
-                                    -DesiredValues $PSBoundParameters `
-                                    -ValuesToCheck @("Ensure")
+        -DesiredValues $PSBoundParameters `
+        -ValuesToCheck @("Ensure")
 }
 
 Export-ModuleMember -Function *-TargetResource
@@ -323,7 +326,7 @@ function Get-ProviderRealmsStatus()
 
             if ($update.Count -gt 0)
             {
-                $update.Keys | ForEach-Object{ $currentRealms[$_] = $update[$_] }
+                $update.Keys | ForEach-Object { $currentRealms[$_] = $update[$_] }
             }
 
             if ($inclusion.Count -gt 0)
@@ -342,7 +345,7 @@ function Get-ProviderRealmsStatus()
 
                 if ($exclusion.Count -gt 0)
                 {
-                    $exclusion.Keys | ForEach-Object{ $currentRealms.Remove($_) }
+                    $exclusion.Keys | ForEach-Object { $currentRealms.Remove($_) }
                 }
             }
 

@@ -4,16 +4,16 @@ param(
     [Parameter()]
     [string]
     $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
-                                         -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
-                                         -Resolve)
+            -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
+            -Resolve)
 )
 
 Import-Module -Name (Join-Path -Path $PSScriptRoot `
-                                -ChildPath "..\UnitTestHelper.psm1" `
-                                -Resolve)
+        -ChildPath "..\UnitTestHelper.psm1" `
+        -Resolve)
 
 $Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointCmdletModule `
-                                              -DscResource "SPSearchServiceApp"
+    -DscResource "SPSearchServiceApp"
 
 Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
     InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
@@ -34,22 +34,22 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         $mockPassword = ConvertTo-SecureString -String "password" -AsPlainText -Force
         $mockCredential = New-Object -TypeName System.Management.Automation.PSCredential `
-                                     -ArgumentList @("DOMAIN\username", $mockPassword)
+            -ArgumentList @("DOMAIN\username", $mockPassword)
 
         # Mocks for all contexts
-        Mock -CommandName Start-SPEnterpriseSearchServiceInstance -MockWith {}
-        Mock -CommandName Remove-SPServiceApplication -MockWith {}
-        Mock -CommandName New-SPEnterpriseSearchServiceApplicationProxy -MockWith {}
-        Mock -CommandName Set-SPEnterpriseSearchServiceApplication -MockWith {}
+        Mock -CommandName Start-SPEnterpriseSearchServiceInstance -MockWith { }
+        Mock -CommandName Remove-SPServiceApplication -MockWith { }
+        Mock -CommandName New-SPEnterpriseSearchServiceApplicationProxy -MockWith { }
+        Mock -CommandName Set-SPEnterpriseSearchServiceApplication -MockWith { }
         Mock -CommandName New-SPBusinessDataCatalogServiceApplication -MockWith { }
         Mock -CommandName Set-SPEnterpriseSearchServiceApplication -MockWith { }
-        Mock -CommandName Set-SPEnterpriseSearchService -MockWith {}
+        Mock -CommandName Set-SPEnterpriseSearchService -MockWith { }
 
         Mock -CommandName Get-SPEnterpriseSearchServiceInstance -MockWith {
-            return @{}
+            return @{ }
         }
         Mock -CommandName New-SPEnterpriseSearchServiceApplication -MockWith {
-            return @{}
+            return @{ }
         }
         Mock -CommandName Get-SPServiceApplicationPool -MockWith {
             return @{
@@ -69,14 +69,14 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
         }
 
-        Mock Import-Module -MockWith {} -ParameterFilter { $_.Name -eq $ModuleName }
+        Mock Import-Module -MockWith { } -ParameterFilter { $_.Name -eq $ModuleName }
 
         # Test contexts
         Context -Name "When no service applications exist in the current farm" -Fixture {
             $testParams = @{
-                Name = "Search Service Application"
-                ApplicationPool = "SharePoint Search Services"
-                Ensure = "Present"
+                Name                  = "Search Service Application"
+                ApplicationPool       = "SharePoint Search Services"
+                Ensure                = "Present"
                 WindowsServiceAccount = $mockCredential
             }
 
@@ -91,10 +91,10 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "When no service applications exist in the current farm" -Fixture {
             $testParams = @{
-                Name = "Search Service Application"
-                ApplicationPool = "SharePoint Search Services"
-                AlertsEnabled = $true
-                Ensure = "Present"
+                Name                  = "Search Service Application"
+                ApplicationPool       = "SharePoint Search Services"
+                AlertsEnabled         = $true
+                Ensure                = "Present"
                 WindowsServiceAccount = $mockCredential
             }
 
@@ -108,12 +108,12 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 else
                 {
                     $spServiceApp = [PSCustomObject]@{
-                        TypeName = "Search Service Application"
-                        DisplayName = $testParams.Name
+                        TypeName        = "Search Service Application"
+                        DisplayName     = $testParams.Name
                         ApplicationPool = @{ Name = $testParams.ApplicationPool }
-                        AlertsEnabled = $false
-                        Database = @{
-                            Name = $testParams.DatabaseName
+                        AlertsEnabled   = $false
+                        Database        = @{
+                            Name                 = $testParams.DatabaseName
                             NormalizedDataSource = $testParams.DatabaseServer
                         }
                     }
@@ -147,22 +147,22 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "When service applications exist in the current farm but the specific search app does not" -Fixture {
             $testParams = @{
-                Name = "Search Service Application"
+                Name            = "Search Service Application"
                 ApplicationPool = "SharePoint Search Services"
-                Ensure = "Present"
+                Ensure          = "Present"
             }
 
             Mock -CommandName Get-SPServiceApplication -MockWith {
                 $spServiceApp = [PSCustomObject]@{
-                                    DisplayName = $testParams.Name
-                                }
+                    DisplayName = $testParams.Name
+                }
                 $spServiceApp | Add-Member -MemberType ScriptMethod `
-                                           -Name GetType `
-                                           -Value {
-                                                return @{
-                                                    FullName = "Microsoft.Office.UnKnownWebServiceApplication"
-                                                }
-                                            } -PassThru -Force
+                    -Name GetType `
+                    -Value {
+                    return @{
+                        FullName = "Microsoft.Office.UnKnownWebServiceApplication"
+                    }
+                } -PassThru -Force
                 return $spServiceApp
             }
 
@@ -182,18 +182,18 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "When a service application exists and is configured correctly" -Fixture {
             $testParams = @{
-                Name = "Search Service Application"
+                Name            = "Search Service Application"
                 ApplicationPool = "SharePoint Search Services"
-                Ensure = "Present"
+                Ensure          = "Present"
             }
 
             Mock -CommandName Get-SPServiceApplication -MockWith {
                 $spServiceApp = [PSCustomObject]@{
-                    TypeName = "Search Service Application"
-                    DisplayName = $testParams.Name
+                    TypeName        = "Search Service Application"
+                    DisplayName     = $testParams.Name
                     ApplicationPool = @{ Name = $testParams.ApplicationPool }
-                    Database = @{
-                        Name = $testParams.DatabaseName
+                    Database        = @{
+                        Name                 = $testParams.DatabaseName
                         NormalizedDataSource = $testParams.DatabaseServer
                     }
                 }
@@ -215,18 +215,18 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "When a service application exists and the app pool is not configured correctly" -Fixture {
             $testParams = @{
-                Name = "Search Service Application"
+                Name            = "Search Service Application"
                 ApplicationPool = "SharePoint Search Services"
-                Ensure = "Present"
+                Ensure          = "Present"
             }
 
             Mock -CommandName Get-SPServiceApplication -MockWith {
                 $spServiceApp = [PSCustomObject]@{
-                    TypeName = "Search Service Application"
-                    DisplayName = $testParams.Name
+                    TypeName        = "Search Service Application"
+                    DisplayName     = $testParams.Name
                     ApplicationPool = @{ Name = "Wrong App Pool Name" }
-                    Database = @{
-                        Name = $testParams.DatabaseName
+                    Database        = @{
+                        Name                 = $testParams.DatabaseName
                         NormalizedDataSource = $testParams.DatabaseServer
                     }
                 }
@@ -265,19 +265,19 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "When a service application exists and the Proxy Name is not configured correctly" -Fixture {
             $testParams = @{
-                Name = "Search Service Application"
-                ProxyName = "Search SA Proxy"
+                Name            = "Search Service Application"
+                ProxyName       = "Search SA Proxy"
                 ApplicationPool = "SharePoint Search Services"
-                Ensure = "Present"
+                Ensure          = "Present"
             }
 
             Mock -CommandName Get-SPServiceApplication -MockWith {
                 $spServiceApp = [PSCustomObject]@{
-                    TypeName = "Search Service Application"
-                    DisplayName = $testParams.Name
+                    TypeName        = "Search Service Application"
+                    DisplayName     = $testParams.Name
                     ApplicationPool = @{ Name = $testParams.ApplicationPool }
-                    Database = @{
-                        Name = $testParams.DatabaseName
+                    Database        = @{
+                        Name                 = $testParams.DatabaseName
                         NormalizedDataSource = $testParams.DatabaseServer
                     }
                 }
@@ -297,7 +297,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             Mock -CommandName Get-SPServiceApplicationProxy -MockWith {
-                $returnval =  @{
+                $returnval = @{
                     Name = "$($testParams.Name) Proxy"
                 }
                 $returnval = $returnval | Add-Member -MemberType ScriptMethod -Name Update -Value {
@@ -319,19 +319,19 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "When a service application exists, but the Proxy doesn't" -Fixture {
             $testParams = @{
-                Name = "Search Service Application"
-                ProxyName = "Search SA Proxy"
+                Name            = "Search Service Application"
+                ProxyName       = "Search SA Proxy"
                 ApplicationPool = "SharePoint Search Services"
-                Ensure = "Present"
+                Ensure          = "Present"
             }
 
             Mock -CommandName Get-SPServiceApplication -MockWith {
                 $spServiceApp = [PSCustomObject]@{
-                    TypeName = "Search Service Application"
-                    DisplayName = $testParams.Name
+                    TypeName        = "Search Service Application"
+                    DisplayName     = $testParams.Name
                     ApplicationPool = @{ Name = $testParams.ApplicationPool }
-                    Database = @{
-                        Name = $testParams.DatabaseName
+                    Database        = @{
+                        Name                 = $testParams.DatabaseName
                         NormalizedDataSource = $testParams.DatabaseServer
                     }
                 }
@@ -366,19 +366,19 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "When the default content access account does not match" -Fixture {
             $testParams = @{
-                Name = "Search Service Application"
-                ApplicationPool = "SharePoint Search Services"
-                Ensure = "Present"
+                Name                        = "Search Service Application"
+                ApplicationPool             = "SharePoint Search Services"
+                Ensure                      = "Present"
                 DefaultContentAccessAccount = $mockCredential
             }
 
             Mock -CommandName Get-SPServiceApplication -MockWith {
                 $spServiceApp = [PSCustomObject]@{
-                    TypeName = "Search Service Application"
-                    DisplayName = $testParams.Name
+                    TypeName        = "Search Service Application"
+                    DisplayName     = $testParams.Name
                     ApplicationPool = @{ Name = $testParams.ApplicationPool }
-                    Database = @{
-                        Name = $testParams.DatabaseName
+                    Database        = @{
+                        Name                 = $testParams.DatabaseName
                         NormalizedDataSource = $testParams.DatabaseServer
                     }
                 }
@@ -419,21 +419,21 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "When the default content access account does match" -Fixture {
             $testParams = @{
-                Name = "Search Service Application"
-                ApplicationPool = "SharePoint Search Services"
-                Ensure = "Present"
+                Name                        = "Search Service Application"
+                ApplicationPool             = "SharePoint Search Services"
+                Ensure                      = "Present"
                 DefaultContentAccessAccount = $mockCredential
             }
 
             Mock -CommandName Get-SPServiceApplication -MockWith {
                 $spServiceApp = [PSCustomObject]@{
-                    TypeName = "Search Service Application"
-                    DisplayName = $testParams.Name
+                    TypeName        = "Search Service Application"
+                    DisplayName     = $testParams.Name
                     ApplicationPool = @{
                         Name = $testParams.ApplicationPool
                     }
-                    Database = @{
-                        Name = $testParams.DatabaseName
+                    Database        = @{
+                        Name                 = $testParams.DatabaseName
                         NormalizedDataSource = $testParams.DatabaseServer
                     }
                 }
@@ -458,9 +458,9 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "When the search center URL does not match" -Fixture {
             $testParams = @{
-                Name = "Search Service Application"
+                Name            = "Search Service Application"
                 ApplicationPool = "SharePoint Search Services"
-                Ensure = "Present"
+                Ensure          = "Present"
                 SearchCenterUrl = "http://search.sp.contoso.com"
             }
 
@@ -468,12 +468,12 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
             Mock -CommandName Get-SPServiceApplication -MockWith {
                 $spServiceApp = [PSCustomObject]@{
-                    TypeName = "Search Service Application"
-                    DisplayName = $testParams.Name
+                    TypeName        = "Search Service Application"
+                    DisplayName     = $testParams.Name
                     ApplicationPool = @{ Name = $testParams.ApplicationPool }
                     SearchCenterUrl = "http://wrong.url.here"
-                    Database = @{
-                        Name = $testParams.DatabaseName
+                    Database        = @{
+                        Name                 = $testParams.DatabaseName
                         NormalizedDataSource = $testParams.DatabaseServer
                     }
                 }
@@ -521,22 +521,22 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "When AlertsEnabled does not match" -Fixture {
             $testParams = @{
-                Name = "Search Service Application"
+                Name            = "Search Service Application"
                 ApplicationPool = "SharePoint Search Services"
-                Ensure = "Present"
-                AlertsEnabled = $true
+                Ensure          = "Present"
+                AlertsEnabled   = $true
             }
 
             $Global:SPDscAlertsEnabledUpdated = $false
 
             Mock -CommandName Get-SPServiceApplication -MockWith {
                 $spServiceApp = [PSCustomObject]@{
-                    TypeName = "Search Service Application"
-                    DisplayName = $testParams.Name
+                    TypeName        = "Search Service Application"
+                    DisplayName     = $testParams.Name
                     ApplicationPool = @{ Name = $testParams.ApplicationPool }
-                    AlertsEnabled = $false
-                    Database = @{
-                        Name = $testParams.DatabaseName
+                    AlertsEnabled   = $false
+                    Database        = @{
+                        Name                 = $testParams.DatabaseName
                         NormalizedDataSource = $testParams.DatabaseServer
                     }
                 }
@@ -584,9 +584,9 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "When the search center URL does match" -Fixture {
             $testParams = @{
-                Name = "Search Service Application"
+                Name            = "Search Service Application"
                 ApplicationPool = "SharePoint Search Services"
-                Ensure = "Present"
+                Ensure          = "Present"
             }
 
             Mock -CommandName Get-SPServiceApplicationPool -MockWith {
@@ -597,12 +597,12 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
             Mock -CommandName Get-SPServiceApplication -MockWith {
                 $spServiceApp = [PSCustomObject]@{
-                    TypeName = "Search Service Application"
-                    DisplayName = $testParams.Name
+                    TypeName        = "Search Service Application"
+                    DisplayName     = $testParams.Name
                     ApplicationPool = @{ Name = $testParams.ApplicationPool }
                     SearchCenterUrl = "http://search.sp.contoso.com"
-                    Database = @{
-                        Name = $testParams.DatabaseName
+                    Database        = @{
+                        Name                 = $testParams.DatabaseName
                         NormalizedDataSource = $testParams.DatabaseServer
                     }
                 }
@@ -627,20 +627,20 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "When the service app exists but it shouldn't" -Fixture {
             $testParams = @{
-                Name = "Search Service Application"
+                Name            = "Search Service Application"
                 ApplicationPool = "SharePoint Search Services"
-                Ensure = "Absent"
+                Ensure          = "Absent"
             }
 
             Mock -CommandName Get-SPServiceApplication -MockWith {
                 $spServiceApp = [PSCustomObject]@{
-                    TypeName = "Search Service Application"
-                    DisplayName = $testParams.Name
+                    TypeName        = "Search Service Application"
+                    DisplayName     = $testParams.Name
                     ApplicationPool = @{
                         Name = $testParams.ApplicationPool
                     }
-                    Database = @{
-                        Name = $testParams.DatabaseName
+                    Database        = @{
+                        Name                 = $testParams.DatabaseName
                         NormalizedDataSource = $testParams.DatabaseServer
                     }
                 }
@@ -666,9 +666,9 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "When the service app doesn't exist and shouldn't" -Fixture {
             $testParams = @{
-                Name = "Search Service Application"
+                Name            = "Search Service Application"
                 ApplicationPool = "SharePoint Search Services"
-                Ensure = "Absent"
+                Ensure          = "Absent"
             }
 
             Mock -CommandName Get-SPServiceApplication -MockWith {
@@ -686,20 +686,20 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "When the service app exists and is cloud enabled" -Fixture {
             $testParams = @{
-                Name = "Search Service Application"
+                Name            = "Search Service Application"
                 ApplicationPool = "SharePoint Search Services"
-                Ensure = "Present"
-                CloudIndex = $true
+                Ensure          = "Present"
+                CloudIndex      = $true
             }
 
             Mock -CommandName Get-SPServiceApplication -MockWith {
                 $spServiceApp = [PSCustomObject]@{
-                    TypeName = "Search Service Application"
-                    DisplayName = $testParams.Name
+                    TypeName        = "Search Service Application"
+                    DisplayName     = $testParams.Name
                     ApplicationPool = @{ Name = $testParams.ApplicationPool }
-                    CloudIndex = $true
-                    Database = @{
-                        Name = $testParams.DatabaseName
+                    CloudIndex      = $true
+                    Database        = @{
+                        Name                 = $testParams.DatabaseName
                         NormalizedDataSource = $testParams.DatabaseServer
                     }
                 }
@@ -709,7 +709,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 return $spServiceApp
             }
 
-            Mock -CommandName Get-SPDSCInstalledProductVersion -MockWith {
+            Mock -CommandName Get-SPDscInstalledProductVersion -MockWith {
                 return @{
                     FileMajorPart = 15
                     FileBuildPart = 0
@@ -720,7 +720,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 (Get-TargetResource @testParams).CloudIndex | Should Be $false
             }
 
-            Mock -CommandName Get-SPDSCInstalledProductVersion -MockWith {
+            Mock -CommandName Get-SPDscInstalledProductVersion -MockWith {
                 return @{
                     FileMajorPart = 15
                     FileBuildPart = 5000
@@ -734,17 +734,17 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "When the service doesn't exist and it should be cloud enabled" -Fixture {
             $testParams = @{
-                Name = "Search Service Application"
+                Name            = "Search Service Application"
                 ApplicationPool = "SharePoint Search Services"
-                Ensure = "Present"
-                CloudIndex = $true
+                Ensure          = "Present"
+                CloudIndex      = $true
             }
 
             Mock -CommandName Get-SPServiceApplication -MockWith {
                 return $null
             }
 
-            Mock -CommandName Get-SPDSCInstalledProductVersion -MockWith {
+            Mock -CommandName Get-SPDscInstalledProductVersion -MockWith {
                 return @{
                     FileMajorPart = 15
                     FileBuildPart = 5000
@@ -755,7 +755,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Set-TargetResource @testParams
             }
 
-            Mock -CommandName Get-SPDSCInstalledProductVersion -MockWith {
+            Mock -CommandName Get-SPDscInstalledProductVersion -MockWith {
                 return @{
                     FileMajorPart = 15
                     FileBuildPart = 0
@@ -769,19 +769,19 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context "A service app exists that has a correct windows service account in use" -Fixture {
             $testParams = @{
-                Name = "Search Service Application"
-                ApplicationPool = "SharePoint Search Services"
-                Ensure = "Present"
+                Name                  = "Search Service Application"
+                ApplicationPool       = "SharePoint Search Services"
+                Ensure                = "Present"
                 WindowsServiceAccount = $mockCredential
             }
 
             Mock -CommandName Get-SPServiceApplication -MockWith {
                 $spServiceApp = [PSCustomObject]@{
-                    TypeName = "Search Service Application"
-                    DisplayName = $testParams.Name
+                    TypeName        = "Search Service Application"
+                    DisplayName     = $testParams.Name
                     ApplicationPool = @{ Name = $testParams.ApplicationPool }
-                    Database = @{
-                        Name = $testParams.DatabaseName
+                    Database        = @{
+                        Name                 = $testParams.DatabaseName
                         NormalizedDataSource = $testParams.DatabaseServer
                     }
                 }

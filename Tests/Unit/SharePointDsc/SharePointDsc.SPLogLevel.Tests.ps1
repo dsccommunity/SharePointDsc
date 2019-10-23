@@ -3,16 +3,16 @@ param(
     [Parameter()]
     [string]
     $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
-                                         -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
-                                         -Resolve)
+            -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
+            -Resolve)
 )
 
 Import-Module -Name (Join-Path -Path $PSScriptRoot `
-                                -ChildPath "..\UnitTestHelper.psm1" `
-                                -Resolve)
+        -ChildPath "..\UnitTestHelper.psm1" `
+        -Resolve)
 
 $Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointCmdletModule `
-                                              -DscResource "SPLogLevel"
+    -DscResource "SPLogLevel"
 
 Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
     InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
@@ -24,14 +24,14 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         # Test contexts
         Context -Name "Multiple Log Category Areas were specified for one item" -Fixture {
             $testParams = @{
-                Name = "My LogLevel Settings"
+                Name              = "My LogLevel Settings"
                 SPLogLevelSetting = @(
                     (New-CimInstance -ClassName MSFT_SPLogLevelItem -Property @{
-                        Area           = "SharePoint Server","Excel Services Application"
-                        Name    = "*"
-                        TraceLevel = "Medium"
-                        EventLevel = "Information"
-                    } -ClientOnly)
+                            Area       = "SharePoint Server", "Excel Services Application"
+                            Name       = "*"
+                            TraceLevel = "Medium"
+                            EventLevel = "Information"
+                        } -ClientOnly)
                 )
             }
 
@@ -51,14 +51,14 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "Multiple Log Category Names were specified for one item" -Fixture {
             $testParams = @{
-                Name = "My LogLevel Settings"
+                Name              = "My LogLevel Settings"
                 SPLogLevelSetting = @(
                     (New-CimInstance -ClassName MSFT_SPLogLevelItem -Property @{
-                        Area           = "SharePointServer"
-                        Name    = "Database","UserProfile"
-                        TraceLevel = "Medium"
-                        EventLevel = "Information"
-                    } -ClientOnly)
+                            Area       = "SharePointServer"
+                            Name       = "Database", "UserProfile"
+                            TraceLevel = "Medium"
+                            EventLevel = "Information"
+                        } -ClientOnly)
                 )
             }
 
@@ -77,12 +77,12 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "No desired Trace and Event levels were specified" -Fixture {
             $testParams = @{
-                Name = "My LogLevel Settings"
+                Name              = "My LogLevel Settings"
                 SPLogLevelSetting = @(
                     (New-CimInstance -ClassName MSFT_SPLogLevelItem -Property @{
-                        Area           = "SharePointServer"
-                        Name    = "Database"
-                    } -ClientOnly)
+                            Area = "SharePointServer"
+                            Name = "Database"
+                        } -ClientOnly)
                 )
             }
 
@@ -101,14 +101,14 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "An invalid Trace level was specified" -Fixture {
             $testParams = @{
-                Name = "My LogLevel Settings"
+                Name              = "My LogLevel Settings"
                 SPLogLevelSetting = @(
                     (New-CimInstance -ClassName MSFT_SPLogLevelItem -Property @{
-                        Area           = "SharePointServer"
-                        Name    = "Database"
-                        TraceLevel = "detailed"
-                        EventLevel = "Information"
-                    } -ClientOnly)
+                            Area       = "SharePointServer"
+                            Name       = "Database"
+                            TraceLevel = "detailed"
+                            EventLevel = "Information"
+                        } -ClientOnly)
                 )
             }
 
@@ -127,14 +127,14 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "An invalid Event level was specified" -Fixture {
             $testParams = @{
-                Name = "My LogLevel Settings"
+                Name              = "My LogLevel Settings"
                 SPLogLevelSetting = @(
                     (New-CimInstance -ClassName MSFT_SPLogLevelItem -Property @{
-                        Area           = "SharePoint Server"
-                        Name    = "Database"
-                        TraceLevel = "Medium"
-                        EventLevel = "detailed"
-                    } -ClientOnly)
+                            Area       = "SharePoint Server"
+                            Name       = "Database"
+                            TraceLevel = "Medium"
+                            EventLevel = "detailed"
+                        } -ClientOnly)
                 )
             }
 
@@ -153,26 +153,26 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "Desired setting for log level items is the Default, and the current setting is the Default" -Fixture {
             $testParams = @{
-                Name = "My LogLevel Settings"
+                Name              = "My LogLevel Settings"
                 SPLogLevelSetting = @(
                     (New-CimInstance -ClassName MSFT_SPLogLevelItem -Property @{
-                        Area           = "SharePoint Server"
-                        Name    = "Database"
-                        TraceLevel = "Default"
-                        EventLevel = "Default"
-                    } -ClientOnly)
+                            Area       = "SharePoint Server"
+                            Name       = "Database"
+                            TraceLevel = "Default"
+                            EventLevel = "Default"
+                        } -ClientOnly)
                 )
             }
 
             Mock -CommandName Get-SPLogLevel -MockWith {
                 return @{
-                        Area = "SharePoint Server"
-                        Name = "Database"
-                        TraceSeverity = "Medium"
-                        EventSeverity = "Information"
-                        DefaultTraceSeverity = "Medium"
-                        DefaultEventSeverity = "Information"
-                    }
+                    Area                 = "SharePoint Server"
+                    Name                 = "Database"
+                    TraceSeverity        = "Medium"
+                    EventSeverity        = "Information"
+                    DefaultTraceSeverity = "Medium"
+                    DefaultEventSeverity = "Information"
+                }
             }
 
             It "Should return 'Default' from the get method [TraceLevel]" {
@@ -191,26 +191,26 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "Desired setting for a log level item is the Default, and the current setting is not the Default" -Fixture {
             $testParams = @{
-                Name = "My LogLevel Settings"
+                Name              = "My LogLevel Settings"
                 SPLogLevelSetting = @(
                     (New-CimInstance -ClassName MSFT_SPLogLevelItem -Property @{
-                        Area           = "SharePoint Server"
-                        Name    = "Database"
-                        TraceLevel = "Default"
-                        EventLevel = "Default"
-                    } -ClientOnly)
+                            Area       = "SharePoint Server"
+                            Name       = "Database"
+                            TraceLevel = "Default"
+                            EventLevel = "Default"
+                        } -ClientOnly)
                 )
             }
 
             Mock -CommandName Get-SPLogLevel -MockWith {
                 return @{
-                        Area = "SharePoint Server"
-                        Name = "Database"
-                        TraceSeverity = "Unexpected"
-                        EventSeverity = "Error"
-                        DefaultTraceSeverity = "Medium"
-                        DefaultEventSeverity = "Information"
-                    }
+                    Area                 = "SharePoint Server"
+                    Name                 = "Database"
+                    TraceSeverity        = "Unexpected"
+                    EventSeverity        = "Error"
+                    DefaultTraceSeverity = "Medium"
+                    DefaultEventSeverity = "Information"
+                }
             }
 
             It "Should return values from the get method [TraceLevel]" {
@@ -233,26 +233,26 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "Desired setting for a log level item is a custom value, and the current setting matches" -Fixture {
             $testParams = @{
-                Name = "My LogLevel Settings"
+                Name              = "My LogLevel Settings"
                 SPLogLevelSetting = @(
                     (New-CimInstance -ClassName MSFT_SPLogLevelItem -Property @{
-                        Area           = "SharePoint Server"
-                        Name    = "Database"
-                        TraceLevel = "Unexpected"
-                        EventLevel = "Error"
-                    } -ClientOnly)
+                            Area       = "SharePoint Server"
+                            Name       = "Database"
+                            TraceLevel = "Unexpected"
+                            EventLevel = "Error"
+                        } -ClientOnly)
                 )
             }
 
             Mock -CommandName Get-SPLogLevel -MockWith {
                 return @{
-                        Area = "SharePoint Server"
-                        Name = "Database"
-                        TraceSeverity = "Unexpected"
-                        EventSeverity = "Error"
-                        DefaultTraceSeverity = "Medium"
-                        DefaultEventSeverity = "Information"
-                    }
+                    Area                 = "SharePoint Server"
+                    Name                 = "Database"
+                    TraceSeverity        = "Unexpected"
+                    EventSeverity        = "Error"
+                    DefaultTraceSeverity = "Medium"
+                    DefaultEventSeverity = "Information"
+                }
             }
 
             It "Should return values from the get method [TraceLevel]" {
@@ -271,26 +271,26 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "Desired setting for a log level item is a custom value, and the current settings do not match" -Fixture {
             $testParams = @{
-                Name = "My LogLevel Settings"
+                Name              = "My LogLevel Settings"
                 SPLogLevelSetting = @(
                     (New-CimInstance -ClassName MSFT_SPLogLevelItem -Property @{
-                        Area           = "SharePoint Server"
-                        Name    = "Database"
-                        TraceLevel = "Unexpected"
-                        EventLevel = "Error"
-                    } -ClientOnly)
+                            Area       = "SharePoint Server"
+                            Name       = "Database"
+                            TraceLevel = "Unexpected"
+                            EventLevel = "Error"
+                        } -ClientOnly)
                 )
             }
 
             Mock -CommandName Get-SPLogLevel -MockWith {
                 return @{
-                        Area = "SharePoint Server"
-                        Name = "Database"
-                        TraceSeverity = "Medium"
-                        EventSeverity = "Information"
-                        DefaultTraceSeverity = "Medium"
-                        DefaultEventSeverity = "Information"
-                    }
+                    Area                 = "SharePoint Server"
+                    Name                 = "Database"
+                    TraceSeverity        = "Medium"
+                    EventSeverity        = "Information"
+                    DefaultTraceSeverity = "Medium"
+                    DefaultEventSeverity = "Information"
+                }
             }
 
             It "Should return values from the get method [TraceLevel]" {
@@ -313,40 +313,40 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "Desired settings for an entire Area is a custom value, and all current settings match" -Fixture {
             $testParams = @{
-                Name = "My LogLevel Settings"
+                Name              = "My LogLevel Settings"
                 SPLogLevelSetting = @(
                     (New-CimInstance -ClassName MSFT_SPLogLevelItem -Property @{
-                        Area           = "SharePoint Server"
-                        Name    = "*"
-                        TraceLevel = "Medium"
-                        EventLevel = "Information"
-                    } -ClientOnly)
+                            Area       = "SharePoint Server"
+                            Name       = "*"
+                            TraceLevel = "Medium"
+                            EventLevel = "Information"
+                        } -ClientOnly)
                 )
             }
 
             Mock -CommandName Get-SPLogLevel -MockWith {
                 return @(
                     @{
-                        Area = "SharePoint Server"
-                        Name = "Database"
-                        TraceSeverity = "Medium"
-                        EventSeverity = "Information"
+                        Area                 = "SharePoint Server"
+                        Name                 = "Database"
+                        TraceSeverity        = "Medium"
+                        EventSeverity        = "Information"
                         DefaultTraceSeverity = "Medium"
                         DefaultEventSeverity = "Information"
                     },
                     @{
-                        Area = "SharePoint Server"
-                        Name = "Audit"
-                        TraceSeverity = "Medium"
-                        EventSeverity = "Information"
+                        Area                 = "SharePoint Server"
+                        Name                 = "Audit"
+                        TraceSeverity        = "Medium"
+                        EventSeverity        = "Information"
                         DefaultTraceSeverity = "Medium"
                         DefaultEventSeverity = "Information"
                     },
                     @{
-                        Area = "SharePoint Server"
-                        Name = "User Profile"
-                        TraceSeverity = "Medium"
-                        EventSeverity = "Information"
+                        Area                 = "SharePoint Server"
+                        Name                 = "User Profile"
+                        TraceSeverity        = "Medium"
+                        EventSeverity        = "Information"
                         DefaultTraceSeverity = "Medium"
                         DefaultEventSeverity = "Information"
                     }
@@ -368,40 +368,40 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "Desired settings for an entire Area is a custom value, but one category within the area does not match" -Fixture {
             $testParams = @{
-                Name = "My LogLevel Settings"
+                Name              = "My LogLevel Settings"
                 SPLogLevelSetting = @(
                     (New-CimInstance -ClassName MSFT_SPLogLevelItem -Property @{
-                        Area           = "SharePoint Server"
-                        Name    = "*"
-                        TraceLevel = "Medium"
-                        EventLevel = "Information"
-                    } -ClientOnly)
+                            Area       = "SharePoint Server"
+                            Name       = "*"
+                            TraceLevel = "Medium"
+                            EventLevel = "Information"
+                        } -ClientOnly)
                 )
             }
 
             Mock -CommandName Get-SPLogLevel -MockWith {
                 return @(
                     @{
-                        Area = "SharePoint Server"
-                        Name = "Database"
-                        TraceSeverity = "Medium"
-                        EventSeverity = "Information"
+                        Area                 = "SharePoint Server"
+                        Name                 = "Database"
+                        TraceSeverity        = "Medium"
+                        EventSeverity        = "Information"
                         DefaultTraceSeverity = "Medium"
                         DefaultEventSeverity = "Information"
                     },
                     @{
-                        Area = "SharePoint Server"
-                        Name = "Audit"
-                        TraceSeverity = "Medium"
-                        EventSeverity = "Information"
+                        Area                 = "SharePoint Server"
+                        Name                 = "Audit"
+                        TraceSeverity        = "Medium"
+                        EventSeverity        = "Information"
                         DefaultTraceSeverity = "Medium"
                         DefaultEventSeverity = "Information"
                     },
                     @{
-                        Area = "SharePoint Server"
-                        Name = "User Profile"
-                        TraceSeverity = "Verbose"
-                        EventSeverity = "Information"
+                        Area                 = "SharePoint Server"
+                        Name                 = "User Profile"
+                        TraceSeverity        = "Verbose"
+                        EventSeverity        = "Information"
                         DefaultTraceSeverity = "Medium"
                         DefaultEventSeverity = "Information"
                     }
@@ -429,64 +429,64 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "Desired settings for all areas is the Default, and the current settings match" -Fixture {
             $testParams = @{
-                Name = "My LogLevel Settings"
+                Name              = "My LogLevel Settings"
                 SPLogLevelSetting = @(
                     (New-CimInstance -ClassName MSFT_SPLogLevelItem -Property @{
-                        Area           = "*"
-                        Name    = "*"
-                        TraceLevel = "Default"
-                        EventLevel = "Default"
-                    } -ClientOnly)
+                            Area       = "*"
+                            Name       = "*"
+                            TraceLevel = "Default"
+                            EventLevel = "Default"
+                        } -ClientOnly)
                 )
             }
 
             Mock -CommandName Get-SPLogLevel -MockWith {
                 return @(
                     @{
-                        Area = "Access Services"
-                        Name = "Administration"
-                        TraceSeverity = "Medium"
-                        EventSeverity = "Information"
+                        Area                 = "Access Services"
+                        Name                 = "Administration"
+                        TraceSeverity        = "Medium"
+                        EventSeverity        = "Information"
                         DefaultTraceSeverity = "Medium"
                         DefaultEventSeverity = "Information"
                     },
                     @{
-                        Area = "Access Services"
-                        Name = "Application Design"
-                        TraceSeverity = "Medium"
-                        EventSeverity = "Information"
+                        Area                 = "Access Services"
+                        Name                 = "Application Design"
+                        TraceSeverity        = "Medium"
+                        EventSeverity        = "Information"
                         DefaultTraceSeverity = "Medium"
                         DefaultEventSeverity = "Information"
                     },
                     @{
-                        Area = "Business Connectivity Services"
-                        Name = "Business Data"
-                        TraceSeverity = "Medium"
-                        EventSeverity = "Information"
+                        Area                 = "Business Connectivity Services"
+                        Name                 = "Business Data"
+                        TraceSeverity        = "Medium"
+                        EventSeverity        = "Information"
                         DefaultTraceSeverity = "Medium"
                         DefaultEventSeverity = "Information"
                     },
                     @{
-                        Area = "SharePoint Server"
-                        Name = "Database"
-                        TraceSeverity = "Medium"
-                        EventSeverity = "Information"
+                        Area                 = "SharePoint Server"
+                        Name                 = "Database"
+                        TraceSeverity        = "Medium"
+                        EventSeverity        = "Information"
                         DefaultTraceSeverity = "Medium"
                         DefaultEventSeverity = "Information"
                     },
                     @{
-                        Area = "SharePoint Server"
-                        Name = "Audit"
-                        TraceSeverity = "Medium"
-                        EventSeverity = "Information"
+                        Area                 = "SharePoint Server"
+                        Name                 = "Audit"
+                        TraceSeverity        = "Medium"
+                        EventSeverity        = "Information"
                         DefaultTraceSeverity = "Medium"
                         DefaultEventSeverity = "Information"
                     },
                     @{
-                        Area = "SharePoint Server"
-                        Name = "User Profile"
-                        TraceSeverity = "Medium"
-                        EventSeverity = "Information"
+                        Area                 = "SharePoint Server"
+                        Name                 = "User Profile"
+                        TraceSeverity        = "Medium"
+                        EventSeverity        = "Information"
                         DefaultTraceSeverity = "Medium"
                         DefaultEventSeverity = "Information"
                     }
@@ -508,64 +508,64 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "Desired settings for all areas is a custom value, and the current settings do not match" -Fixture {
             $testParams = @{
-                Name = "My LogLevel Settings"
+                Name              = "My LogLevel Settings"
                 SPLogLevelSetting = @(
                     (New-CimInstance -ClassName MSFT_SPLogLevelItem -Property @{
-                        Area           = "*"
-                        Name    = "*"
-                        TraceLevel = "Medium"
-                        EventLevel = "Verbose"
-                    } -ClientOnly)
+                            Area       = "*"
+                            Name       = "*"
+                            TraceLevel = "Medium"
+                            EventLevel = "Verbose"
+                        } -ClientOnly)
                 )
             }
 
             Mock -CommandName Get-SPLogLevel -MockWith {
                 return @(
                     @{
-                        Area = "Access Services"
-                        Name = "Administration"
-                        TraceSeverity = "Medium"
-                        EventSeverity = "Information"
+                        Area                 = "Access Services"
+                        Name                 = "Administration"
+                        TraceSeverity        = "Medium"
+                        EventSeverity        = "Information"
                         DefaultTraceSeverity = "Medium"
                         DefaultEventSeverity = "Information"
                     },
                     @{
-                        Area = "Access Services"
-                        Name = "Application Design"
-                        TraceSeverity = "Medium"
-                        EventSeverity = "Information"
+                        Area                 = "Access Services"
+                        Name                 = "Application Design"
+                        TraceSeverity        = "Medium"
+                        EventSeverity        = "Information"
                         DefaultTraceSeverity = "Medium"
                         DefaultEventSeverity = "Information"
                     },
                     @{
-                        Area = "Business Connectivity Services"
-                        Name = "Business Data"
-                        TraceSeverity = "Medium"
-                        EventSeverity = "Information"
+                        Area                 = "Business Connectivity Services"
+                        Name                 = "Business Data"
+                        TraceSeverity        = "Medium"
+                        EventSeverity        = "Information"
                         DefaultTraceSeverity = "Medium"
                         DefaultEventSeverity = "Information"
                     },
                     @{
-                        Area = "SharePoint Server"
-                        Name = "Database"
-                        TraceSeverity = "Medium"
-                        EventSeverity = "Information"
+                        Area                 = "SharePoint Server"
+                        Name                 = "Database"
+                        TraceSeverity        = "Medium"
+                        EventSeverity        = "Information"
                         DefaultTraceSeverity = "Medium"
                         DefaultEventSeverity = "Information"
                     },
                     @{
-                        Area = "SharePoint Server"
-                        Name = "Audit"
-                        TraceSeverity = "Medium"
-                        EventSeverity = "Information"
+                        Area                 = "SharePoint Server"
+                        Name                 = "Audit"
+                        TraceSeverity        = "Medium"
+                        EventSeverity        = "Information"
                         DefaultTraceSeverity = "Medium"
                         DefaultEventSeverity = "Information"
                     },
                     @{
-                        Area = "SharePoint Server"
-                        Name = "User Profile"
-                        TraceSeverity = "Medium"
-                        EventSeverity = "Information"
+                        Area                 = "SharePoint Server"
+                        Name                 = "User Profile"
+                        TraceSeverity        = "Medium"
+                        EventSeverity        = "Information"
                         DefaultTraceSeverity = "Medium"
                         DefaultEventSeverity = "Information"
                     }
@@ -592,20 +592,20 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "Collection input, Desired settings for all is a custom value, and the current settings do not match" -Fixture {
             $testParams = @{
-                Name = "My LogLevel Settings"
+                Name              = "My LogLevel Settings"
                 SPLogLevelSetting = @(
                     (New-CimInstance -ClassName MSFT_SPLogLevelItem -Property @{
-                        Area           = "SharePoint Server"
-                        Name    = "Database"
-                        TraceLevel = "Unexpected"
-                        EventLevel = "Error"
-                    } -ClientOnly)
+                            Area       = "SharePoint Server"
+                            Name       = "Database"
+                            TraceLevel = "Unexpected"
+                            EventLevel = "Error"
+                        } -ClientOnly)
                     (New-CimInstance -ClassName MSFT_SPLogLevelItem -Property @{
-                        Area           = "SharePoint Server"
-                        Name    = "User Profile"
-                        TraceLevel = "None"
-                        EventLevel = "Warning"
-                    } -ClientOnly)
+                            Area       = "SharePoint Server"
+                            Name       = "User Profile"
+                            TraceLevel = "None"
+                            EventLevel = "Warning"
+                        } -ClientOnly)
 
                 )
             }
@@ -613,10 +613,10 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             Mock -CommandName Get-SPLogLevel -MockWith {
                 return @(
                     @{
-                        Area = "placeholder"
-                        Name = "placeholder"
-                        TraceSeverity = "Medium"
-                        EventSeverity = "Information"
+                        Area                 = "placeholder"
+                        Name                 = "placeholder"
+                        TraceSeverity        = "Medium"
+                        EventSeverity        = "Information"
                         DefaultTraceSeverity = "Medium"
                         DefaultEventSeverity = "Information"
                     }
@@ -651,20 +651,20 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "Collection input, Desired settings for all is a custom value, and the current settings match" -Fixture {
             $testParams = @{
-                Name = "My LogLevel Settings"
+                Name              = "My LogLevel Settings"
                 SPLogLevelSetting = @(
                     (New-CimInstance -ClassName MSFT_SPLogLevelItem -Property @{
-                        Area           = "SharePoint Server"
-                        Name    = "Database"
-                        TraceLevel = "Medium"
-                        EventLevel = "Information"
-                    } -ClientOnly)
+                            Area       = "SharePoint Server"
+                            Name       = "Database"
+                            TraceLevel = "Medium"
+                            EventLevel = "Information"
+                        } -ClientOnly)
                     (New-CimInstance -ClassName MSFT_SPLogLevelItem -Property @{
-                        Area           = "SharePoint Server"
-                        Name    = "User Profile"
-                        TraceLevel = "Medium"
-                        EventLevel = "Information"
-                    } -ClientOnly)
+                            Area       = "SharePoint Server"
+                            Name       = "User Profile"
+                            TraceLevel = "Medium"
+                            EventLevel = "Information"
+                        } -ClientOnly)
 
                 )
             }
@@ -672,10 +672,10 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             Mock -CommandName Get-SPLogLevel -MockWith {
                 return @(
                     @{
-                        Area = "placeholder"
-                        Name = "placeholder"
-                        TraceSeverity = "Medium"
-                        EventSeverity = "Information"
+                        Area                 = "placeholder"
+                        Name                 = "placeholder"
+                        TraceSeverity        = "Medium"
+                        EventSeverity        = "Information"
                         DefaultTraceSeverity = "Medium"
                         DefaultEventSeverity = "Information"
                     }
@@ -705,20 +705,20 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "Collection input, Desired settings for all is Default value, and the current settings match" -Fixture {
             $testParams = @{
-                Name = "My LogLevel Settings"
+                Name              = "My LogLevel Settings"
                 SPLogLevelSetting = @(
                     (New-CimInstance -ClassName MSFT_SPLogLevelItem -Property @{
-                        Area           = "SharePoint Server"
-                        Name    = "Database"
-                        TraceLevel = "Default"
-                        EventLevel = "Default"
-                    } -ClientOnly)
+                            Area       = "SharePoint Server"
+                            Name       = "Database"
+                            TraceLevel = "Default"
+                            EventLevel = "Default"
+                        } -ClientOnly)
                     (New-CimInstance -ClassName MSFT_SPLogLevelItem -Property @{
-                        Area           = "SharePoint Server"
-                        Name    = "User Profile"
-                        TraceLevel = "Default"
-                        EventLevel = "Default"
-                    } -ClientOnly)
+                            Area       = "SharePoint Server"
+                            Name       = "User Profile"
+                            TraceLevel = "Default"
+                            EventLevel = "Default"
+                        } -ClientOnly)
 
                 )
             }
@@ -726,10 +726,10 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             Mock -CommandName Get-SPLogLevel -MockWith {
                 return @(
                     @{
-                        Area = "placeholder"
-                        Name = "placeholder"
-                        TraceSeverity = "Medium"
-                        EventSeverity = "Information"
+                        Area                 = "placeholder"
+                        Name                 = "placeholder"
+                        TraceSeverity        = "Medium"
+                        EventSeverity        = "Information"
                         DefaultTraceSeverity = "Medium"
                         DefaultEventSeverity = "Information"
                     }
@@ -759,20 +759,20 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "Collection input, Desired settings for all is the Default, and the current settings do not match" -Fixture {
             $testParams = @{
-                Name = "My LogLevel Settings"
+                Name              = "My LogLevel Settings"
                 SPLogLevelSetting = @(
                     (New-CimInstance -ClassName MSFT_SPLogLevelItem -Property @{
-                        Area           = "SharePoint Server"
-                        Name    = "Database"
-                        TraceLevel = "Default"
-                        EventLevel = "Default"
-                    } -ClientOnly)
+                            Area       = "SharePoint Server"
+                            Name       = "Database"
+                            TraceLevel = "Default"
+                            EventLevel = "Default"
+                        } -ClientOnly)
                     (New-CimInstance -ClassName MSFT_SPLogLevelItem -Property @{
-                        Area           = "SharePoint Server"
-                        Name    = "User Profile"
-                        TraceLevel = "Default"
-                        EventLevel = "Default"
-                    } -ClientOnly)
+                            Area       = "SharePoint Server"
+                            Name       = "User Profile"
+                            TraceLevel = "Default"
+                            EventLevel = "Default"
+                        } -ClientOnly)
 
                 )
             }
@@ -780,10 +780,10 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             Mock -CommandName Get-SPLogLevel -MockWith {
                 return @(
                     @{
-                        Area = "placeholder"
-                        Name = "placeholder"
-                        TraceSeverity = "Verbose"
-                        EventSeverity = "Warning"
+                        Area                 = "placeholder"
+                        Name                 = "placeholder"
+                        TraceSeverity        = "Verbose"
+                        EventSeverity        = "Warning"
                         DefaultTraceSeverity = "Medium"
                         DefaultEventSeverity = "Information"
                     }

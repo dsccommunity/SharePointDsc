@@ -1,6 +1,6 @@
 @{
-  "2013" = @{
-      "RTM" = @{
+    "2013" = @{
+        "RTM" = @{
             "Products" = @'
           [HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Installer\UserData\S-1-5-18\Products]
 
@@ -2317,7 +2317,7 @@
 
           [HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Installer\UserData\S-1-5-18\Products\00005109F70100000100000000F01FEC\Usage]
 '@
-          "Patches"  = @'
+            "Patches"  = @'
           [HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Installer\UserData\S-1-5-18\Patches]
 
           [HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Installer\UserData\S-1-5-18\Patches\0AE22574CBE1266379CC1B5852EA79B8]
@@ -2356,9 +2356,9 @@
           [HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Installer\UserData\S-1-5-18\Patches\FC874E96D96E25548B839615EB3B50B4]
           "LocalPackage"="c:\\windows\\Installer\\17c2f9.msp"
 '@
-      }
-      "SP1" = @{
-          "Products" = @'
+        }
+        "SP1" = @{
+            "Products" = @'
           [HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Installer\UserData\S-1-5-18\Products]
 
           [HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Installer\UserData\S-1-5-18\Products\00005109061100000100000000F01FEC]
@@ -4634,15 +4634,15 @@
 
           [HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Installer\UserData\S-1-5-18\Products\00005109F70100000100000000F01FEC\Usage]
 '@
-          "Patches"  = @'
+            "Patches"  = @'
           [HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Installer\UserData\S-1-5-18\Patches]
 
           [HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Installer\UserData\S-1-5-18\Patches\13CC565AFC9A4EB4AB99E119F1FB7CD7]
           "LocalPackage"="C:\\Windows\\Installer\\548de.msp"
 '@
-      }
-      "CU"  = @{
-          "Products" = @'
+        }
+        "CU"  = @{
+            "Products" = @'
           [HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Installer\UserData\S-1-5-18\Products]
 
           [HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Installer\UserData\S-1-5-18\Products\00005109061100000100000000F01FEC]
@@ -7988,7 +7988,7 @@
           [HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Installer\UserData\S-1-5-18\Products\00005109F70100000100000000F01FEC\Usage]
 
 '@
-          "Patches"  = @'
+            "Patches"  = @'
           [HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Installer\UserData\S-1-5-18\Patches]
 
           [HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Installer\UserData\S-1-5-18\Patches\02D2CD0BA1A18494E95A2D6FBD92CE9B]
@@ -8204,12 +8204,12 @@
           [HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Installer\UserData\S-1-5-18\Patches\FC007DB1EA079074D91105C96F248583]
           "LocalPackage"="C:\\Windows\\Installer\\47b911.msp"
 '@
-      }
-  }
+        }
+    }
 
-  "2016" = @{
-      "RTM" = @{
-          "Products" = @'
+    "2016" = @{
+        "RTM" = @{
+            "Products" = @'
           [HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Installer\UserData\S-1-5-18\Products]
 
           [HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Installer\UserData\S-1-5-18\Products\00006109410100000100000000F01FEC]
@@ -8862,7 +8862,7 @@
 
           [HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Installer\UserData\S-1-5-18\Products\00006109F101C0400100000000F01FEC\Usage]
 '@
-          "Patches"  = @'
+            "Patches"  = @'
           [HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Installer\UserData\S-1-5-18\Patches]
 
           [HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Installer\UserData\S-1-5-18\Patches\014C4FD0FAEDDE54794B4999D7605596]
@@ -8922,9 +8922,9 @@
           [HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Installer\UserData\S-1-5-18\Patches\D283AD42AD4D69E4AB744221D4AB4A63]
           "LocalPackage"="C:\\Windows\\Installer\\757f9ad.msp"
 '@
-      }
-      "CU"  = @{
-          "Products" = @'
+        }
+        "CU"  = @{
+            "Products" = @'
           [HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Installer\UserData\S-1-5-18\Products]
 
           [HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Installer\UserData\S-1-5-18\Products\00006109211101400100000000F01FEC]
@@ -22253,7 +22253,7 @@
 
           [HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Installer\UserData\S-1-5-18\Products\00006109F101F3400100000000F01FEC\Usage]
 '@
-          "Patches"  = @'
+            "Patches"  = @'
           [HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Installer\UserData\S-1-5-18\Patches]
 
           [HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Installer\UserData\S-1-5-18\Patches\00F1E6D4C986CDB47822250CE3F14EC3]
@@ -22595,12 +22595,12 @@
           [HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Installer\UserData\S-1-5-18\Patches\FD35F77275C690E4B8253C29AD73DE3F]
           "LocalPackage"="C:\\Windows\\Installer\\22ff5b3.msp"
 '@
-      }
-  }
+        }
+    }
 
-  "2019" = @{
-      "RTM" = @{
-          "Products" = @'
+    "2019" = @{
+        "RTM" = @{
+            "Products" = @'
           [HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Installer\UserData\S-1-5-18\Products]
 
           [HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Installer\UserData\S-1-5-18\Products\00006109210100000100000000F01FEC]
@@ -23209,15 +23209,15 @@
 
           [HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Installer\UserData\S-1-5-18\Products\00006109E101C0400100000000F01FEC\Usage]
 '@
-          "Patches"  = @'
+            "Patches"  = @'
           [HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Installer\UserData\S-1-5-18\Patches]
 
           [HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Installer\UserData\S-1-5-18\Patches\014C4FD0FAEDDE54794B4999D7605596]
           "LocalPackage"="C:\\Windows\\Installer\\fe7b23.msp"
 '@
-      }
-      "CU"  = @{
-          "Products" = @'
+        }
+        "CU"  = @{
+            "Products" = @'
           [HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Installer\UserData\S-1-5-18\Products]
 
           [HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Installer\UserData\S-1-5-18\Products\00006109210100000100000000F01FEC]
@@ -24049,7 +24049,7 @@
 
           [HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Installer\UserData\S-1-5-18\Products\00006109E101C0400100000000F01FEC\Usage]
 '@
-          "Patches"  = @'
+            "Patches"  = @'
           [HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Installer\UserData\S-1-5-18\Patches]
 
           [HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Installer\UserData\S-1-5-18\Patches\014C4FD0FAEDDE54794B4999D7605596]
@@ -24064,6 +24064,6 @@
           [HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Installer\UserData\S-1-5-18\Patches\98AF5B492697215429C537A7D4A54C9F]
           "LocalPackage"="C:\\windows\\Installer\\2ccc6d.msp"
 '@
-      }
-  }
+        }
+    }
 }

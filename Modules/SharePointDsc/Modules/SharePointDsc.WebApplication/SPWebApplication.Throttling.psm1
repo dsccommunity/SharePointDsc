@@ -1,4 +1,4 @@
-function Get-SPDSCWebApplicationThrottlingConfig
+function Get-SPDscWebApplicationThrottlingConfig
 {
     [CmdletBinding()]
     [OutputType([System.Collections.Hashtable])]
@@ -25,7 +25,7 @@ function Get-SPDSCWebApplicationThrottlingConfig
     }
 }
 
-function Set-SPDSCWebApplicationThrottlingConfig
+function Set-SPDscWebApplicationThrottlingConfig
 {
     [CmdletBinding()]
     param(
@@ -69,7 +69,7 @@ function Set-SPDSCWebApplicationThrottlingConfig
 }
 
 
-function Set-SPDSCWebApplicationHappyHourConfig
+function Set-SPDscWebApplicationHappyHourConfig
 {
     [CmdletBinding()]
     param(
@@ -80,9 +80,9 @@ function Set-SPDSCWebApplicationHappyHourConfig
         $Settings
     )
 
-    if ((Test-SPDSCObjectHasProperty $Settings "Hour") -eq $false `
-      -or (Test-SPDSCObjectHasProperty $Settings "Minute") -eq $false `
-      -or (Test-SPDSCObjectHasProperty $Settings "Duration") -eq $false)
+    if ((Test-SPDscObjectHasProperty $Settings "Hour") -eq $false `
+      -or (Test-SPDscObjectHasProperty $Settings "Minute") -eq $false `
+      -or (Test-SPDscObjectHasProperty $Settings "Duration") -eq $false)
     {
         throw "Happy hour settings must include 'hour', 'minute' and 'duration'"
     }
@@ -107,7 +107,7 @@ function Set-SPDSCWebApplicationHappyHourConfig
     }
 }
 
-function Test-SPDSCWebApplicationThrottlingConfig
+function Test-SPDscWebApplicationThrottlingConfig
 {
     [CmdletBinding()]
     [OutputType([System.Boolean])]

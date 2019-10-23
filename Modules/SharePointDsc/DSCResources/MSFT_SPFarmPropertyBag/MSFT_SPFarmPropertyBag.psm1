@@ -13,7 +13,7 @@ function Get-TargetResource()
         $Value,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = 'Present',
 
@@ -24,9 +24,9 @@ function Get-TargetResource()
 
     Write-Verbose -Message "Looking for SPFarm property '$Name'"
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
-                                  -Arguments $PSBoundParameters `
-                                  -ScriptBlock {
+    $result = Invoke-SPDscCommand -Credential $InstallAccount `
+        -Arguments $PSBoundParameters `
+        -ScriptBlock {
         $params = $args[0]
 
         try
@@ -49,12 +49,12 @@ function Get-TargetResource()
             {
                 if ($spFarm.Properties.Contains($params.Key) -eq $true)
                 {
-                    $localEnsure  = "Present"
+                    $localEnsure = "Present"
                     $currentValue = $spFarm.Properties[$params.Key]
                 }
                 else
                 {
-                    $localEnsure  = "Absent"
+                    $localEnsure = "Absent"
                     $currentValue = $null
                 }
             }
@@ -62,7 +62,7 @@ function Get-TargetResource()
         else
         {
             $currentValue = $null
-            $localEnsure  = 'Absent'
+            $localEnsure = 'Absent'
         }
 
         return @{
@@ -88,7 +88,7 @@ function Set-TargetResource()
         $Value,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = 'Present',
 
@@ -99,9 +99,9 @@ function Set-TargetResource()
 
     Write-Verbose -Message "Setting SPFarm property '$Name'"
 
-    Invoke-SPDSCCommand -Credential $InstallAccount `
-                        -Arguments $PSBoundParameters `
-                        -ScriptBlock {
+    Invoke-SPDscCommand -Credential $InstallAccount `
+        -Arguments $PSBoundParameters `
+        -ScriptBlock {
         $params = $args[0]
 
         try
@@ -151,7 +151,7 @@ function Test-TargetResource()
         $Value,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = 'Present',
 
@@ -164,9 +164,12 @@ function Test-TargetResource()
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
+    Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
+    Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
+
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
-                                    -DesiredValues $PSBoundParameters `
-                                    -ValuesToCheck @('Ensure','Key','Value')
+        -DesiredValues $PSBoundParameters `
+        -ValuesToCheck @('Ensure', 'Key', 'Value')
 }
 
 Export-ModuleMember -Function *-TargetResource

@@ -10,7 +10,7 @@ function Get-TargetResource
 
         [Parameter()]
         [System.String]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         $Ensure = "Present",
 
         [Parameter()]
@@ -32,61 +32,71 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting Service Application Proxy Group $Name"
 
-    if (($Ensure -eq "Present") `
-        -and $ServiceAppProxies `
-        -and (($ServiceAppProxiesToInclude) -or ($ServiceAppProxiesToExclude)))
+    $nullReturn = @{
+        Name                       = $Name
+        Ensure                     = $null
+        ServiceAppProxies          = $null
+        ServiceAppProxiesToInclude = $null
+        ServiceAppProxiesToExclude = $null
+    }
+
+    if (($Ensure -eq "Present") -and `
+            $ServiceAppProxies -and `
+        (($ServiceAppProxiesToInclude) -or ($ServiceAppProxiesToExclude)))
     {
         Write-Verbose -Message ("Cannot use the ServiceAppProxies parameter together " + `
-                                "with the ServiceAppProxiesToInclude or " + `
-                                "ServiceAppProxiesToExclude parameters")
-        return $null
+                "with the ServiceAppProxiesToInclude or " + `
+                "ServiceAppProxiesToExclude parameters")
+        return $nullReturn
     }
 
-    if (($Ensure -eq "Present") `
-        -and !$ServiceAppProxies `
-        -and !$ServiceAppProxiesToInclude `
-        -and !$ServiceAppProxiesToExclude)
+    if (($Ensure -eq "Present") -and `
+            !$ServiceAppProxies -and `
+            !$ServiceAppProxiesToInclude -and `
+            !$ServiceAppProxiesToExclude)
     {
         Write-Verbose -Message ("At least one of the following parameters must be specified: " + `
-                                "ServiceAppProxies, ServiceAppProxiesToInclude, " + `
-                                "ServiceAppProxiesToExclude")
-        return $null
+                "ServiceAppProxies, ServiceAppProxiesToInclude, " + `
+                "ServiceAppProxiesToExclude")
+        return $nullReturn
     }
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
-            $params = $args[0]
+    $result = Invoke-SPDscCommand -Credential $InstallAccount `
+        -Arguments $PSBoundParameters `
+        -ScriptBlock {
+        $params = $args[0]
 
-            #Try to get the proxy group
-            if ($params.Name -eq "Default")
-            {
-                $ProxyGroup = Get-SPServiceApplicationProxyGroup -Default
-            }
-            else
-            {
-                $ProxyGroup = Get-SPServiceApplicationProxyGroup $params.Name -ErrorAction SilentlyContinue
-            }
+        #Try to get the proxy group
+        if ($params.Name -eq "Default")
+        {
+            $ProxyGroup = Get-SPServiceApplicationProxyGroup -Default
+        }
+        else
+        {
+            $ProxyGroup = Get-SPServiceApplicationProxyGroup $params.Name -ErrorAction SilentlyContinue
+        }
 
-            if ($ProxyGroup)
-            {
-                $Ensure = "Present"
-            }
-            else
-            {
-                $Ensure = "Absent"
-            }
+        if ($ProxyGroup)
+        {
+            $Ensure = "Present"
+        }
+        else
+        {
+            $Ensure = "Absent"
+        }
 
-            $ServiceAppProxies = $ProxyGroup.Proxies.DisplayName
+        $ServiceAppProxies = $ProxyGroup.Proxies.DisplayName
 
-            return @{
-                Name = $params.name
-                Ensure = $Ensure
-                ServiceAppProxies = $ServiceAppProxies
-                ServiceAppProxiesToInclude = $params.ServiceAppProxiesToInclude
-                ServiceAppProxiesToExclude = $params.ServiceAppProxiesToExclude
-                InstallAccount = $params.InstallAccount
-            }
-
+        return @{
+            Name                       = $params.name
+            Ensure                     = $Ensure
+            ServiceAppProxies          = $ServiceAppProxies
+            ServiceAppProxiesToInclude = $params.ServiceAppProxiesToInclude
+            ServiceAppProxiesToExclude = $params.ServiceAppProxiesToExclude
+            InstallAccount             = $params.InstallAccount
+        }
     }
+
     return $result
 }
 
@@ -101,7 +111,7 @@ function Set-TargetResource
 
         [Parameter()]
         [System.String]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         $Ensure = "Present",
 
         [Parameter()]
@@ -123,28 +133,28 @@ function Set-TargetResource
 
     Write-Verbose -Message "Setting Service Application Proxy Group $Name"
 
-    if (($Ensure -eq "Present") `
-        -and $ServiceAppProxies `
-        -and (($ServiceAppProxiesToInclude) -or ($ServiceAppProxiesToExclude)))
+    if (($Ensure -eq "Present") -and `
+            $ServiceAppProxies -and `
+        (($ServiceAppProxiesToInclude) -or ($ServiceAppProxiesToExclude)))
     {
         throw ("Cannot use the ServiceAppProxies parameter together " + `
-               "with the ServiceAppProxiesToInclude or " + `
-               "ServiceAppProxiesToExclude parameters")
+                "with the ServiceAppProxiesToInclude or " + `
+                "ServiceAppProxiesToExclude parameters")
     }
 
-    if (($Ensure -eq "Present") `
-        -and !$ServiceAppProxies `
-        -and !$ServiceAppProxiesToInclude `
-        -and !$ServiceAppProxiesToExclude)
+    if (($Ensure -eq "Present") -and `
+            !$ServiceAppProxies -and `
+            !$ServiceAppProxiesToInclude -and `
+            !$ServiceAppProxiesToExclude)
     {
         throw ("At least one of the following parameters must be specified: " + `
-               "ServiceAppProxies, ServiceAppProxiesToInclude, " + `
-               "ServiceAppProxiesToExclude")
+                "ServiceAppProxies, ServiceAppProxiesToInclude, " + `
+                "ServiceAppProxiesToExclude")
     }
 
-    Invoke-SPDSCCommand -Credential $InstallAccount `
-                        -Arguments $PSBoundParameters `
-                        -ScriptBlock {
+    Invoke-SPDscCommand -Credential $InstallAccount `
+        -Arguments $PSBoundParameters `
+        -ScriptBlock {
         $params = $args[0]
 
         if ($params.Ensure -eq "Present")
@@ -156,7 +166,7 @@ function Set-TargetResource
             else
             {
                 $ProxyGroup = Get-SPServiceApplicationProxyGroup -Identity $params.Name `
-                                                                 -ErrorAction SilentlyContinue
+                    -ErrorAction SilentlyContinue
             }
 
             if (!($ProxyGroup))
@@ -170,12 +180,12 @@ function Set-TargetResource
                 if ($ProxyGroup.Proxies.DisplayName)
                 {
                     $differences = Compare-Object -ReferenceObject $ProxyGroup.Proxies.DisplayName `
-                                                  -DifferenceObject $params.ServiceAppProxies
+                        -DifferenceObject $params.ServiceAppProxies
 
                     if ($null -eq $Differences)
                     {
                         Write-Verbose -Message ("Service Proxy Group $($params.name) " + `
-                                                "membership matches desired state")
+                                "membership matches desired state")
                     }
                     else
                     {
@@ -186,8 +196,8 @@ function Set-TargetResource
                                 $ServiceProxyName = $difference.InputObject
                                 $ServiceProxy = Get-SPServiceApplicationProxy | `
                                     Where-Object -FilterScript {
-                                        $_.DisplayName -eq $ServiceProxyName
-                                    }
+                                    $_.DisplayName -eq $ServiceProxyName
+                                }
 
                                 if (!$ServiceProxy)
                                 {
@@ -203,8 +213,8 @@ function Set-TargetResource
                                 $ServiceProxyName = $difference.InputObject
                                 $ServiceProxy = Get-SPServiceApplicationProxy | `
                                     Where-Object -FilterScript {
-                                        $_.DisplayName -eq $ServiceProxyName
-                                    }
+                                    $_.DisplayName -eq $ServiceProxyName
+                                }
 
                                 if (!$ServiceProxy)
                                 {
@@ -241,7 +251,7 @@ function Set-TargetResource
                 if ($ProxyGroup.Proxies.DisplayName)
                 {
                     $differences = Compare-Object -ReferenceObject $ProxyGroup.Proxies.DisplayName `
-                                                  -DifferenceObject $params.ServiceAppProxiesToInclude
+                        -DifferenceObject $params.ServiceAppProxiesToInclude
 
                     if ($null -eq $Differences)
                     {
@@ -256,8 +266,8 @@ function Set-TargetResource
                                 $ServiceProxyName = $difference.InputObject
                                 $ServiceProxy = Get-SPServiceApplicationProxy | `
                                     Where-Object -FilterScript {
-                                        $_.DisplayName -eq $ServiceProxyName
-                                    }
+                                    $_.DisplayName -eq $ServiceProxyName
+                                }
 
                                 if (!$ServiceProxy)
                                 {
@@ -277,8 +287,8 @@ function Set-TargetResource
                     {
                         $ServiceProxy = Get-SPServiceApplicationProxy | `
                             Where-Object -FilterScript {
-                                $_.DisplayName -eq $ServiceProxyName
-                            }
+                            $_.DisplayName -eq $ServiceProxyName
+                        }
 
                         if (!$ServiceProxy)
                         {
@@ -296,8 +306,8 @@ function Set-TargetResource
                 if ($ProxyGroup.Proxies.Displayname)
                 {
                     $differences = Compare-Object -ReferenceObject $ProxyGroup.Proxies.DisplayName `
-                                                  -DifferenceObject $params.ServiceAppProxiesToExclude `
-                                                  -IncludeEqual
+                        -DifferenceObject $params.ServiceAppProxiesToExclude `
+                        -IncludeEqual
 
                     if ($null -eq $Differences)
                     {
@@ -347,7 +357,7 @@ function Test-TargetResource
 
         [Parameter()]
         [System.String]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         $Ensure = "Present",
 
         [Parameter()]
@@ -371,10 +381,8 @@ function Test-TargetResource
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
-    if ($null -eq $CurrentValues)
-    {
-        return $false
-    }
+    Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
+    Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
 
     if ($CurrentValues.Ensure -ne $Ensure)
     {
@@ -391,7 +399,7 @@ function Test-TargetResource
         }
 
         $differences = Compare-Object -ReferenceObject $CurrentValues.ServiceAppProxies `
-                                      -DifferenceObject $ServiceAppProxies
+            -DifferenceObject $ServiceAppProxies
 
         if ($null -eq $differences)
         {
@@ -414,7 +422,7 @@ function Test-TargetResource
         }
 
         $differences = Compare-Object -ReferenceObject $CurrentValues.ServiceAppProxies `
-                                      -DifferenceObject $ServiceAppProxiesToInclude
+            -DifferenceObject $ServiceAppProxiesToInclude
 
         if ($null -eq $differences)
         {
@@ -437,12 +445,12 @@ function Test-TargetResource
         }
 
         $differences = Compare-Object -ReferenceObject $CurrentValues.ServiceAppProxies `
-                                      -DifferenceObject $ServiceAppProxiesToExclude `
-                                      -IncludeEqual
+            -DifferenceObject $ServiceAppProxiesToExclude `
+            -IncludeEqual
 
         if ($null -eq $differences)
         {
-           return $false
+            return $false
         }
         elseif ($differences.sideindicator -contains "==")
         {

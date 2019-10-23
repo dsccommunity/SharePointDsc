@@ -25,7 +25,7 @@ function Get-TargetResource
         $ApplicationPool,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present",
 
@@ -35,22 +35,22 @@ function Get-TargetResource
     )
     Write-Verbose -Message "Getting Machine Translation Service Application '$Name'"
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
-                                  -Arguments $PSBoundParameters `
-                                  -ScriptBlock {
+    $result = Invoke-SPDscCommand -Credential $InstallAccount `
+        -Arguments $PSBoundParameters `
+        -ScriptBlock {
         $params = $args[0]
 
         $serviceApps = Get-SPServiceApplication -Name $params.Name -ErrorAction SilentlyContinue
 
         $nullReturn = @{
-            Name = $params.Name
-            DatabaseName = $params.DatabaseName
-            DatabaseServer = $params.DatabaseServer
+            Name            = $params.Name
+            DatabaseName    = $params.DatabaseName
+            DatabaseServer  = $params.DatabaseServer
             ApplicationPool = $params.ApplicationPool
-            Ensure = "Absent"
+            Ensure          = "Absent"
         }
 
-        if($null -eq $serviceApps)
+        if ($null -eq $serviceApps)
         {
             return $nullReturn
         }
@@ -59,11 +59,12 @@ function Get-TargetResource
             $_.GetType().FullName -eq "Microsoft.Office.TranslationServices.TranslationServiceApplication"
         }
 
-        if($null -eq $serviceApp)
+        if ($null -eq $serviceApp)
         {
             return $nullReturn
         }
-        else {
+        else
+        {
             $serviceAppProxies = Get-SPServiceApplicationProxy -ErrorAction SilentlyContinue
             if ($null -ne $serviceAppProxies)
             {
@@ -77,12 +78,12 @@ function Get-TargetResource
             }
 
             return @{
-                Name = $params.Name
-                ProxyName = $proxyName
-                DatabaseName = $($serviceApp.Database.Name)
-                DatabaseServer = $($serviceApp.Database.NormalizedDataSource)
+                Name            = $params.Name
+                ProxyName       = $proxyName
+                DatabaseName    = $($serviceApp.Database.Name)
+                DatabaseServer  = $($serviceApp.Database.NormalizedDataSource)
                 ApplicationPool = $($serviceApp.ApplicationPool.Name)
-                Ensure = "Present"
+                Ensure          = "Present"
             }
         }
     }
@@ -117,7 +118,7 @@ function Set-TargetResource
         $ApplicationPool,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present",
 
@@ -129,13 +130,13 @@ function Set-TargetResource
     Write-Verbose "Setting Machine Translation Service Application."
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
-    if($CurrentValues.Ensure -eq "Present" -and $Ensure -eq "Present")
+    if ($CurrentValues.Ensure -eq "Present" -and $Ensure -eq "Present")
     {
         Write-Verbose "Resetting Machine Translation Service Application."
 
-        $result = Invoke-SPDSCCommand -Credential $InstallAccount `
-                                  -Arguments $PSBoundParameters `
-                                  -ScriptBlock {
+        Invoke-SPDscCommand -Credential $InstallAccount `
+            -Arguments $PSBoundParameters `
+            -ScriptBlock {
             $params = $args[0]
             $serviceApps = Get-SPServiceApplication -Identity $params.Name
 
@@ -144,50 +145,50 @@ function Set-TargetResource
             }
 
             $serviceApp | Set-SPTranslationServiceApplication -ApplicationPool $params.ApplicationPool `
-                                                              -DatabaseName $params.DatabaseName `
-                                                              -DatabaseServer $params.DatabaseServer
+                -DatabaseName $params.DatabaseName `
+                -DatabaseServer $params.DatabaseServer
         }
     }
-    if($CurrentValues.Ensure -eq "Absent" -and $Ensure -eq "Present")
+    if ($CurrentValues.Ensure -eq "Absent" -and $Ensure -eq "Present")
     {
         Write-Verbose "Creating Machine Translation Service Application."
 
-        $result = Invoke-SPDSCCommand -Credential $InstallAccount `
-                                  -Arguments $PSBoundParameters `
-                                  -ScriptBlock {
+        $result = Invoke-SPDscCommand -Credential $InstallAccount `
+            -Arguments $PSBoundParameters `
+            -ScriptBlock {
             $params = $args[0]
 
             $tsServiceApp = New-SPTranslationServiceApplication -Name $params.Name `
-                                                                -DatabaseName $params.DatabaseName `
-                                                                -DatabaseServer $params.DatabaseServer `
-                                                                -ApplicationPool $params.ApplicationPool
+                -DatabaseName $params.DatabaseName `
+                -DatabaseServer $params.DatabaseServer `
+                -ApplicationPool $params.ApplicationPool
 
             if ($params.ContainsKey("ProxyName"))
             {
                 # The New-SPTranslationServiceApplication cmdlet creates a proxy by default
                 # If a name is specified, we first need to delete the created one
                 $proxies = Get-SPServiceApplicationProxy
-                foreach($proxyInstance in $proxies)
+                foreach ($proxyInstance in $proxies)
                 {
-                    if($tsServiceApp.IsConnected($proxyInstance))
+                    if ($tsServiceApp.IsConnected($proxyInstance))
                     {
                         $proxyInstance.Delete()
                     }
                 }
 
                 New-SPTranslationServiceApplicationProxy -Name $params.ProxyName `
-                                                         -ServiceApplication $tsServiceApp | Out-Null
+                    -ServiceApplication $tsServiceApp | Out-Null
             }
 
         }
     }
-    if($Ensure -eq "Absent")
+    if ($Ensure -eq "Absent")
     {
         Write-Verbose "Removing Machine Translation Service Application."
 
-        $result = Invoke-SPDSCCommand -Credential $InstallAccount `
-                                      -Arguments $PSBoundParameters `
-                                      -ScriptBlock {
+        $result = Invoke-SPDscCommand -Credential $InstallAccount `
+            -Arguments $PSBoundParameters `
+            -ScriptBlock {
             $params = $args[0]
 
             $serviceApps = Get-SPServiceApplication -Identity $params.Name
@@ -228,7 +229,7 @@ function Test-TargetResource
         $ApplicationPool,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present",
 
@@ -243,13 +244,16 @@ function Test-TargetResource
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
+    Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
+    Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
+
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
-                                    -DesiredValues $PSBoundParameters `
-                                    -ValuesToCheck @("Name",
-                                                     "ApplicationPool",
-                                                     "DatabaseName",
-                                                     "DatabaseServer",
-                                                     "Ensure")
+        -DesiredValues $PSBoundParameters `
+        -ValuesToCheck @("Name",
+        "ApplicationPool",
+        "DatabaseName",
+        "DatabaseServer",
+        "Ensure")
 
 }
 

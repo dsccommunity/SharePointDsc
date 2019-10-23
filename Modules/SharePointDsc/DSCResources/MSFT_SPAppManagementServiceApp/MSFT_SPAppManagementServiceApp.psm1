@@ -25,7 +25,7 @@ function Get-TargetResource
         $DatabaseServer,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present",
 
@@ -36,17 +36,17 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting App management service app '$Name'"
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
-                                  -Arguments $PSBoundParameters `
-                                  -ScriptBlock {
+    $result = Invoke-SPDscCommand -Credential $InstallAccount `
+        -Arguments $PSBoundParameters `
+        -ScriptBlock {
         $params = $args[0]
 
         $serviceApps = Get-SPServiceApplication -Name $params.Name -ErrorAction SilentlyContinue
         $nullReturn = @{
-            Name = $params.Name
+            Name            = $params.Name
             ApplicationPool = $params.ApplicationPool
-            Ensure = "Absent"
-            InstallAccount = $params.InstallAccount
+            Ensure          = "Absent"
+            InstallAccount  = $params.InstallAccount
         }
         if ($null -eq $serviceApps)
         {
@@ -77,13 +77,13 @@ function Get-TargetResource
             }
 
             return  @{
-                Name = $serviceApp.DisplayName
-                ProxyName = $proxyName
+                Name            = $serviceApp.DisplayName
+                ProxyName       = $proxyName
                 ApplicationPool = $serviceApp.ApplicationPool.Name
-                DatabaseName = $serviceApp.Databases.Name
-                DatabaseServer = $serviceApp.Databases.NormalizedDataSource
-                Ensure = "Present"
-                InstallAccount = $params.InstallAccount
+                DatabaseName    = $serviceApp.Databases.Name
+                DatabaseServer  = $serviceApp.Databases.NormalizedDataSource
+                Ensure          = "Present"
+                InstallAccount  = $params.InstallAccount
             }
         }
     }
@@ -117,7 +117,7 @@ function Set-TargetResource
         $DatabaseServer,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present",
 
@@ -135,13 +135,13 @@ function Set-TargetResource
         # The service app doesn't exist but should
 
         Write-Verbose -Message "Creating App management Service Application $Name"
-        Invoke-SPDSCCommand -Credential $InstallAccount `
-                            -Arguments $PSBoundParameters `
-                            -ScriptBlock {
+        Invoke-SPDscCommand -Credential $InstallAccount `
+            -Arguments $PSBoundParameters `
+            -ScriptBlock {
             $params = $args[0]
 
             $newParams = @{
-                Name = $params.Name
+                Name            = $params.Name
                 ApplicationPool = $params.ApplicationPool
             }
             if ($params.ContainsKey("DatabaseName") -eq $true)
@@ -163,9 +163,9 @@ function Set-TargetResource
                 $pName = $params.ProxyName
             }
             New-SPAppManagementServiceApplicationProxy -Name $pName `
-                                                       -UseDefaultProxyGroup `
-                                                       -ServiceApplication $appService `
-                                                       -ErrorAction Stop | Out-Null
+                -UseDefaultProxyGroup `
+                -ServiceApplication $appService `
+                -ErrorAction Stop | Out-Null
         }
     }
 
@@ -177,9 +177,9 @@ function Set-TargetResource
         if ($result.ProxyName -eq "")
         {
             Write-Verbose -Message "Proxy not found, creating proxy"
-            Invoke-SPDSCCommand -Credential $InstallAccount `
-                                -Arguments $PSBoundParameters `
-                                -ScriptBlock {
+            Invoke-SPDscCommand -Credential $InstallAccount `
+                -Arguments $PSBoundParameters `
+                -ScriptBlock {
                 $params = $args[0]
 
                 $app = Get-SPServiceApplication -Name $params.Name | Where-Object -FilterScript {
@@ -195,9 +195,9 @@ function Set-TargetResource
                     $pName = $params.ProxyName
                 }
                 New-SPAppManagementServiceApplicationProxy -Name $pName `
-                                                           -UseDefaultProxyGroup `
-                                                           -ServiceApplication $app `
-                                                           -ErrorAction Stop | Out-Null
+                    -UseDefaultProxyGroup `
+                    -ServiceApplication $app `
+                    -ErrorAction Stop | Out-Null
             }
         }
 
@@ -205,9 +205,9 @@ function Set-TargetResource
         if ($ApplicationPool -ne $result.ApplicationPool)
         {
             Write-Verbose -Message "Updating Application Pool"
-            Invoke-SPDSCCommand -Credential $InstallAccount `
-                                -Arguments $PSBoundParameters `
-                                -ScriptBlock {
+            Invoke-SPDscCommand -Credential $InstallAccount `
+                -Arguments $PSBoundParameters `
+                -ScriptBlock {
                 $params = $args[0]
                 $appPool = Get-SPServiceApplicationPool -Identity $params.ApplicationPool
 
@@ -224,9 +224,9 @@ function Set-TargetResource
     {
         # The service app should not exit
         Write-Verbose -Message "Removing App management Service Application $Name"
-        Invoke-SPDSCCommand -Credential $InstallAccount `
-                            -Arguments $PSBoundParameters `
-                            -ScriptBlock {
+        Invoke-SPDscCommand -Credential $InstallAccount `
+            -Arguments $PSBoundParameters `
+            -ScriptBlock {
             $params = $args[0]
 
             $app = Get-SPServiceApplication -Name $params.Name | Where-Object -FilterScript {
@@ -234,9 +234,9 @@ function Set-TargetResource
             }
 
             $proxies = Get-SPServiceApplicationProxy
-            foreach($proxyInstance in $proxies)
+            foreach ($proxyInstance in $proxies)
             {
-                if($app.IsConnected($proxyInstance))
+                if ($app.IsConnected($proxyInstance))
                 {
                     $proxyInstance.Delete()
                 }
@@ -274,7 +274,7 @@ function Test-TargetResource
         $DatabaseServer,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present",
 
@@ -289,15 +289,18 @@ function Test-TargetResource
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
+    Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
+    Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
+
     if ($CurrentValues.ProxyName -eq "")
     {
         return $false
     }
 
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
-                                    -DesiredValues $PSBoundParameters `
-                                    -ValuesToCheck @("ApplicationPool", `
-                                                     "Ensure")
+        -DesiredValues $PSBoundParameters `
+        -ValuesToCheck @("ApplicationPool", `
+            "Ensure")
 }
 
 Export-ModuleMember -Function *-TargetResource

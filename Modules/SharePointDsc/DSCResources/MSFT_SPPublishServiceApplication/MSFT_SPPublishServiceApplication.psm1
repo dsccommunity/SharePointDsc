@@ -4,30 +4,30 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [Parameter(Mandatory = $true)]  
-        [System.String] 
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $Name,
 
-        [Parameter()] 
-        [System.Management.Automation.PSCredential] 
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
         $InstallAccount,
-        
-        [Parameter()] 
-        [ValidateSet("Present","Absent")] 
-        [System.String] 
+
+        [Parameter()]
+        [ValidateSet("Present", "Absent")]
+        [System.String]
         $Ensure = "Present"
     )
 
     Write-Verbose -Message "Getting service application publish status '$Name'"
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
-                                  -Arguments $PSBoundParameters `
-                                  -ScriptBlock {
+    $result = Invoke-SPDscCommand -Credential $InstallAccount `
+        -Arguments $PSBoundParameters `
+        -ScriptBlock {
         $params = $args[0]
-        
+
         $serviceApp = Get-SPServiceApplication -Name $params.Name -ErrorAction SilentlyContinue
-        
-        if ($null -eq $serviceApp) 
+
+        if ($null -eq $serviceApp)
         {
             Write-Verbose -Message "The service application $Name does not exist"
             $sharedEnsure = "Absent"
@@ -36,7 +36,7 @@ function Get-TargetResource
         if ($null -eq $serviceApp.Uri)
         {
             Write-Verbose -Message ("Only Business Data Connectivity, Machine Translation, Managed Metadata, " + `
-                                    "User Profile, Search, Secure Store are supported to be published via DSC.")
+                    "User Profile, Search, Secure Store are supported to be published via DSC.")
             $sharedEnsure = "Absent"
         }
         else
@@ -49,11 +49,11 @@ function Get-TargetResource
             {
                 $sharedEnsure = "Absent"
             }
-        }  
-               
+        }
+
         return @{
-            Name = $params.Name
-            Ensure = $sharedEnsure
+            Name           = $params.Name
+            Ensure         = $sharedEnsure
             InstallAccount = $params.InstallAccount
         }
     }
@@ -66,48 +66,48 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [Parameter(Mandatory = $true)]  
-        [System.String] 
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $Name,
 
-        [Parameter()] 
-        [System.Management.Automation.PSCredential] 
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
         $InstallAccount,
-        
-        [Parameter()] 
-        [ValidateSet("Present","Absent")] 
-        [System.String] 
+
+        [Parameter()]
+        [ValidateSet("Present", "Absent")]
+        [System.String]
         $Ensure = "Present"
     )
 
     Write-Verbose -Message "Setting service application publish status '$Name'"
 
-    Invoke-SPDSCCommand -Credential $InstallAccount `
-                        -Arguments $PSBoundParameters `
-                        -ScriptBlock {
+    Invoke-SPDscCommand -Credential $InstallAccount `
+        -Arguments $PSBoundParameters `
+        -ScriptBlock {
         $params = $args[0]
-        
-        $serviceApp = Get-SPServiceApplication -Name $params.Name -ErrorAction SilentlyContinue    
-        if ($null -eq $serviceApp) 
+
+        $serviceApp = Get-SPServiceApplication -Name $params.Name -ErrorAction SilentlyContinue
+        if ($null -eq $serviceApp)
         {
             throw [Exception] ("The service application $Name does not exist")
         }
-        
+
         if ($null -eq $serviceApp.Uri)
         {
             throw [Exception] ("Only Business Data Connectivity, Machine Translation, Managed Metadata, " + `
-                               "User Profile, Search, Secure Store are supported to be published via DSC.")
+                    "User Profile, Search, Secure Store are supported to be published via DSC.")
         }
 
-        if ($Ensure -eq "Present") 
+        if ($Ensure -eq "Present")
         {
             Write-Verbose -Message "Publishing Service Application $Name"
-            Publish-SPServiceApplication -Identity $serviceApp            
+            Publish-SPServiceApplication -Identity $serviceApp
         }
 
-        if ($Ensure -eq "Absent") 
+        if ($Ensure -eq "Absent")
         {
-            Write-Verbose -Message "Unpublishing Service Application $Name"            
+            Write-Verbose -Message "Unpublishing Service Application $Name"
             Unpublish-SPServiceApplication  -Identity $serviceApp
         }
     }
@@ -120,27 +120,30 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [Parameter(Mandatory = $true)]  
-        [System.String] 
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $Name,
 
-        [Parameter()] 
-        [System.Management.Automation.PSCredential] 
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
         $InstallAccount,
-        
-        [Parameter()] 
-        [ValidateSet("Present","Absent")] 
-        [System.String] 
+
+        [Parameter()]
+        [ValidateSet("Present", "Absent")]
+        [System.String]
         $Ensure = "Present"
     )
 
     Write-Verbose -Message "Testing service application '$Name'"
 
-    $currentValues = Get-TargetResource @PSBoundParameters
+    $CurrentValues = Get-TargetResource @PSBoundParameters
+
+    Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
+    Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
 
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
-                                    -DesiredValues $PSBoundParameters `
-                                    -ValuesToCheck @("Name", "Ensure")
+        -DesiredValues $PSBoundParameters `
+        -ValuesToCheck @("Name", "Ensure")
 }
 
 Export-ModuleMember -Function *-TargetResource

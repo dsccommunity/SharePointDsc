@@ -3,16 +3,16 @@ param(
     [Parameter()]
     [string]
     $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
-                                         -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
-                                         -Resolve)
+            -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
+            -Resolve)
 )
 
 Import-Module -Name (Join-Path -Path $PSScriptRoot `
-                                -ChildPath "..\UnitTestHelper.psm1" `
-                                -Resolve)
+        -ChildPath "..\UnitTestHelper.psm1" `
+        -Resolve)
 
 $Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointCmdletModule `
-                                              -DscResource "SPInstallLanguagePack"
+    -DscResource "SPInstallLanguagePack"
 
 Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
     InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
@@ -37,10 +37,10 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
         }
 
-        Mock -CommandName Get-SPDSCInstalledProductVersion {
+        Mock -CommandName Get-SPDscInstalledProductVersion {
             return @{
-                FileMajorPart = $Global:SPDscHelper.CurrentStubBuildNumber.Major
-                FileBuildPart = $Global:SPDscHelper.CurrentStubBuildNumber.Build
+                FileMajorPart    = $Global:SPDscHelper.CurrentStubBuildNumber.Major
+                FileBuildPart    = $Global:SPDscHelper.CurrentStubBuildNumber.Build
                 ProductBuildPart = $Global:SPDscHelper.CurrentStubBuildNumber.Build
             }
         }
@@ -72,7 +72,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 { Set-TargetResource @testParams } | Should Throw "Specified path cannot be found"
             }
 
-            It "Should throw exception in the test method"  {
+            It "Should throw exception in the test method" {
                 { Test-TargetResource @testParams } | Should Throw "Specified path cannot be found"
             }
         }
@@ -95,7 +95,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 { Set-TargetResource @testParams } | Should Throw "Setup.exe cannot be found"
             }
 
-            It "Should throw exception in the test method"  {
+            It "Should throw exception in the test method" {
                 { Test-TargetResource @testParams } | Should Throw "Setup.exe cannot be found"
             }
         }
@@ -118,7 +118,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 { Set-TargetResource @testParams } | Should Throw "Setup file is blocked!"
             }
 
-            It "Should throw exception in the test method"  {
+            It "Should throw exception in the test method" {
                 { Test-TargetResource @testParams } | Should Throw "Setup file is blocked!"
             }
         }
@@ -142,11 +142,13 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             Mock -CommandName Get-SPDscRegProductsInfo -MockWith {
                 switch ($Global:SPDscHelper.CurrentStubBuildNumber.Major)
                 {
-                    15 {
+                    15
+                    {
                         return @("Microsoft SharePoint Server 2013", "Language Pack for SharePoint and Project Server 2013  - Dutch/Nederlands")
                     }
-                    16 {
-                        if($Global:SPDscHelper.CurrentStubBuildNumber.Minor.ToString().Length -le 4)
+                    16
+                    {
+                        if ($Global:SPDscHelper.CurrentStubBuildNumber.Minor.ToString().Length -le 4)
                         {
                             return @("Microsoft SharePoint Server 2016", "Language Pack for SharePoint and Project Server 2016  - Dutch/Nederlands")
                         }
@@ -155,7 +157,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                             return @("Microsoft SharePoint Server 2019", "Language Pack for SharePoint and Project Server 2010  - Dutch/Nederlands")
                         }
                     }
-                    Default {
+                    Default
+                    {
                         throw [Exception] "A supported version of SharePoint was not used in testing"
                     }
                 }
@@ -166,7 +169,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 $result.Ensure | Should Be "Present"
             }
 
-            It "Should return true from the test method"  {
+            It "Should return true from the test method" {
                 Test-TargetResource @testParams | Should Be $true
             }
         }
@@ -190,11 +193,13 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             Mock -CommandName Get-SPDscRegProductsInfo -MockWith {
                 switch ($Global:SPDscHelper.CurrentStubBuildNumber.Major)
                 {
-                    15 {
+                    15
+                    {
                         return @("Microsoft SharePoint Server 2013", 'Language Pack for SharePoint and Project Server 2013  - Chinese (Taiwan)/中文 (繁體)')
                     }
-                    16 {
-                        if($Global:SPDscHelper.CurrentStubBuildNumber.Minor.ToString().Length -le 4)
+                    16
+                    {
+                        if ($Global:SPDscHelper.CurrentStubBuildNumber.Minor.ToString().Length -le 4)
                         {
                             return @("Microsoft SharePoint Server 2016", 'Language Pack for SharePoint and Project Server 2016  - Chinese (Taiwan)/中文 (繁體)')
                         }
@@ -203,7 +208,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                             return @("Microsoft SharePoint Server 2019", 'Language Pack for SharePoint and Project Server 2019  - Chinese (Taiwan)/中文 (繁體)')
                         }
                     }
-                    Default {
+                    Default
+                    {
                         throw [Exception] "A supported version of SharePoint was not used in testing"
                     }
                 }
@@ -214,7 +220,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 $result.Ensure | Should Be "Present"
             }
 
-            It "Should return true from the test method"  {
+            It "Should return true from the test method" {
                 Test-TargetResource @testParams | Should Be $true
             }
         }
@@ -238,11 +244,13 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             Mock -CommandName Get-SPDscRegProductsInfo -MockWith {
                 switch ($Global:SPDscHelper.CurrentStubBuildNumber.Major)
                 {
-                    15 {
+                    15
+                    {
                         return @("Microsoft SharePoint Server 2013", 'Language Pack for SharePoint and Project Server 2013  - Chinese (PRC)/中文(简体)')
                     }
-                    16 {
-                        if($Global:SPDscHelper.CurrentStubBuildNumber.Minor.ToString().Length -le 4)
+                    16
+                    {
+                        if ($Global:SPDscHelper.CurrentStubBuildNumber.Minor.ToString().Length -le 4)
                         {
                             return @("Microsoft SharePoint Server 2016", 'Language Pack for SharePoint and Project Server 2016  - Chinese (PRC)/中文(简体)')
                         }
@@ -251,7 +259,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                             return @("Microsoft SharePoint Server 2019", 'Language Pack for SharePoint and Project Server 2019  - Chinese (PRC)/中文(简体)')
                         }
                     }
-                    Default {
+                    Default
+                    {
                         throw [Exception] "A supported version of SharePoint was not used in testing"
                     }
                 }
@@ -262,7 +271,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 $result.Ensure | Should Be "Present"
             }
 
-            It "Should return true from the test method"  {
+            It "Should return true from the test method" {
                 Test-TargetResource @testParams | Should Be $true
             }
         }
@@ -286,11 +295,13 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             Mock -CommandName Get-SPDscRegProductsInfo -MockWith {
                 switch ($Global:SPDscHelper.CurrentStubBuildNumber.Major)
                 {
-                    15 {
+                    15
+                    {
                         return @("Microsoft SharePoint Server 2013", 'Language Pack for SharePoint and Project Server 2013  - درى Dari')
                     }
-                    16 {
-                        if($Global:SPDscHelper.CurrentStubBuildNumber.Minor.ToString().Length -le 4)
+                    16
+                    {
+                        if ($Global:SPDscHelper.CurrentStubBuildNumber.Minor.ToString().Length -le 4)
                         {
                             return @("Microsoft SharePoint Server 2016", 'Language Pack for SharePoint and Project Server 2016  - درى Dari')
                         }
@@ -299,7 +310,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                             return @("Microsoft SharePoint Server 2019", 'Language Pack for SharePoint and Project Server 2019  - درى Dari')
                         }
                     }
-                    Default {
+                    Default
+                    {
                         throw [Exception] "A supported version of SharePoint was not used in testing"
                     }
                 }
@@ -310,7 +322,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 $result.Ensure | Should Be "Present"
             }
 
-            It "Should return true from the test method"  {
+            It "Should return true from the test method" {
                 Test-TargetResource @testParams | Should Be $true
             }
         }
@@ -334,11 +346,13 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             Mock -CommandName Get-SPDscRegProductsInfo -MockWith {
                 switch ($Global:SPDscHelper.CurrentStubBuildNumber.Major)
                 {
-                    15 {
+                    15
+                    {
                         return @("Microsoft SharePoint Server 2013", 'Language Pack for SharePoint and Project Server 2013  - Serbian/srpski')
                     }
-                    16 {
-                        if($Global:SPDscHelper.CurrentStubBuildNumber.Minor.ToString().Length -le 4)
+                    16
+                    {
+                        if ($Global:SPDscHelper.CurrentStubBuildNumber.Minor.ToString().Length -le 4)
                         {
                             return @("Microsoft SharePoint Server 2016", 'Language Pack for SharePoint and Project Server 2016  - Serbian/srpski')
                         }
@@ -347,7 +361,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                             return @("Microsoft SharePoint Server 2019", 'Language Pack for SharePoint and Project Server 2019  - Serbian/srpski')
                         }
                     }
-                    Default {
+                    Default
+                    {
                         throw [Exception] "A supported version of SharePoint was not used in testing"
                     }
                 }
@@ -358,7 +373,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 $result.Ensure | Should Be "Present"
             }
 
-            It "Should return true from the test method"  {
+            It "Should return true from the test method" {
                 Test-TargetResource @testParams | Should Be $true
             }
         }
@@ -382,11 +397,13 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             Mock -CommandName Get-SPDscRegProductsInfo -MockWith {
                 switch ($Global:SPDscHelper.CurrentStubBuildNumber.Major)
                 {
-                    15 {
+                    15
+                    {
                         return @("Microsoft SharePoint Server 2013", 'Language Pack for SharePoint and Project Server 2013  - Serbian/српски')
                     }
-                    16 {
-                        if($Global:SPDscHelper.CurrentStubBuildNumber.Minor.ToString().Length -le 4)
+                    16
+                    {
+                        if ($Global:SPDscHelper.CurrentStubBuildNumber.Minor.ToString().Length -le 4)
                         {
                             return @("Microsoft SharePoint Server 2016", 'Language Pack for SharePoint and Project Server 2016  - Serbian/српски')
                         }
@@ -395,7 +412,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                             return @("Microsoft SharePoint Server 2019", 'Language Pack for SharePoint and Project Server 2019  - Serbian/српски')
                         }
                     }
-                    Default {
+                    Default
+                    {
                         throw [Exception] "A supported version of SharePoint was not used in testing"
                     }
                 }
@@ -406,7 +424,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 $result.Ensure | Should Be "Present"
             }
 
-            It "Should return true from the test method"  {
+            It "Should return true from the test method" {
                 Test-TargetResource @testParams | Should Be $true
             }
         }
@@ -430,11 +448,13 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             Mock -CommandName Get-SPDscRegProductsInfo -MockWith {
                 switch ($Global:SPDscHelper.CurrentStubBuildNumber.Major)
                 {
-                    15 {
+                    15
+                    {
                         return @("Microsoft SharePoint Server 2013", 'Language Pack for SharePoint and Project Server 2013  - Portuguese/Português (Brasil)')
                     }
-                    16 {
-                        if($Global:SPDscHelper.CurrentStubBuildNumber.Minor.ToString().Length -le 4)
+                    16
+                    {
+                        if ($Global:SPDscHelper.CurrentStubBuildNumber.Minor.ToString().Length -le 4)
                         {
                             return @("Microsoft SharePoint Server 2016", 'Language Pack for SharePoint and Project Server 2016  - Portuguese/Português (Brasil)')
                         }
@@ -443,7 +463,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                             return @("Microsoft SharePoint Server 2019", 'Language Pack for SharePoint and Project Server 2019  - Portuguese/Português (Brasil)')
                         }
                     }
-                    Default {
+                    Default
+                    {
                         throw [Exception] "A supported version of SharePoint was not used in testing"
                     }
                 }
@@ -454,7 +475,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 $result.Ensure | Should Be "Present"
             }
 
-            It "Should return true from the test method"  {
+            It "Should return true from the test method" {
                 Test-TargetResource @testParams | Should Be $true
             }
         }
@@ -478,11 +499,13 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             Mock -CommandName Get-SPDscRegProductsInfo -MockWith {
                 switch ($Global:SPDscHelper.CurrentStubBuildNumber.Major)
                 {
-                    15 {
+                    15
+                    {
                         return @("Microsoft SharePoint Server 2013", 'Language Pack for SharePoint and Project Server 2013  - Portuguese/Português')
                     }
-                    16 {
-                        if($Global:SPDscHelper.CurrentStubBuildNumber.Minor.ToString().Length -le 4)
+                    16
+                    {
+                        if ($Global:SPDscHelper.CurrentStubBuildNumber.Minor.ToString().Length -le 4)
                         {
                             return @("Microsoft SharePoint Server 2016", 'Language Pack for SharePoint and Project Server 2016  - Portuguese/Português')
                         }
@@ -491,7 +514,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                             return @("Microsoft SharePoint Server 2019", 'Language Pack for SharePoint and Project Server 2019  - Portuguese/Português')
                         }
                     }
-                    Default {
+                    Default
+                    {
                         throw [Exception] "A supported version of SharePoint was not used in testing"
                     }
                 }
@@ -502,7 +526,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 $result.Ensure | Should Be "Present"
             }
 
-            It "Should return true from the test method"  {
+            It "Should return true from the test method" {
                 Test-TargetResource @testParams | Should Be $true
             }
         }
@@ -526,11 +550,13 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             Mock -CommandName Get-SPDscRegProductsInfo -MockWith {
                 switch ($Global:SPDscHelper.CurrentStubBuildNumber.Major)
                 {
-                    15 {
+                    15
+                    {
                         return @("Microsoft SharePoint Server 2013", 'Language Pack for SharePoint and Project Server 2013  - Arabic/LOCAL ARABIC')
                     }
-                    16 {
-                        if($Global:SPDscHelper.CurrentStubBuildNumber.Minor.ToString().Length -le 4)
+                    16
+                    {
+                        if ($Global:SPDscHelper.CurrentStubBuildNumber.Minor.ToString().Length -le 4)
                         {
                             return @("Microsoft SharePoint Server 2016", 'Language Pack for SharePoint and Project Server 2016  - Arabic/LOCAL ARABIC')
                         }
@@ -539,7 +565,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                             return @("Microsoft SharePoint Server 2019", 'Language Pack for SharePoint and Project Server 2019  - Arabic/LOCAL ARABIC')
                         }
                     }
-                    Default {
+                    Default
+                    {
                         throw [Exception] "A supported version of SharePoint was not used in testing"
                     }
                 }
@@ -550,7 +577,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 $result.Ensure | Should Be "Present"
             }
 
-            It "Should return true from the test method"  {
+            It "Should return true from the test method" {
                 Test-TargetResource @testParams | Should Be $true
             }
         }
@@ -564,11 +591,13 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             Mock -CommandName Get-SPDscFarmProductsInfo -MockWith {
                 switch ($Global:SPDscHelper.CurrentStubBuildNumber.Major)
                 {
-                    15 {
+                    15
+                    {
                         return @("Microsoft SharePoint Server 2013")
                     }
-                    16 {
-                        if($Global:SPDscHelper.CurrentStubBuildNumber.Minor.ToString().Length -le 4)
+                    16
+                    {
+                        if ($Global:SPDscHelper.CurrentStubBuildNumber.Minor.ToString().Length -le 4)
                         {
                             return @("Microsoft SharePoint Server 2016")
                         }
@@ -577,20 +606,21 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                             return @("Microsoft SharePoint Server 2019")
                         }
                     }
-                    Default {
+                    Default
+                    {
                         throw [Exception] "A supported version of SharePoint was not used in testing"
                     }
                 }
             }
 
             Mock -CommandName Get-SPDscRegProductsInfo -MockWith {
-                if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq  15)
+                if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 15)
                 {
                     return @("Microsoft SharePoint Server 2013")
                 }
                 else
                 {
-                    if($Global:SPDscHelper.CurrentStubBuildNumber.Minor.ToString().Length -le 4)
+                    if ($Global:SPDscHelper.CurrentStubBuildNumber.Minor.ToString().Length -le 4)
                     {
                         return @("Microsoft SharePoint Server 2016")
                     }
@@ -617,7 +647,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Assert-MockCalled Start-Process
             }
 
-            It "Should return true from the test method"  {
+            It "Should return true from the test method" {
                 Test-TargetResource @testParams | Should Be $false
             }
         }
@@ -631,11 +661,13 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             Mock -CommandName Get-SPDscFarmProductsInfo -MockWith {
                 switch ($Global:SPDscHelper.CurrentStubBuildNumber.Major)
                 {
-                    15 {
+                    15
+                    {
                         return @("Microsoft SharePoint Server 2013")
                     }
-                    16 {
-                        if($Global:SPDscHelper.CurrentStubBuildNumber.Minor.ToString().Length -le 4)
+                    16
+                    {
+                        if ($Global:SPDscHelper.CurrentStubBuildNumber.Minor.ToString().Length -le 4)
                         {
                             return @("Microsoft SharePoint Server 2016")
                         }
@@ -644,20 +676,21 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                             return @("Microsoft SharePoint Server 2019")
                         }
                     }
-                    Default {
+                    Default
+                    {
                         throw [Exception] "A supported version of SharePoint was not used in testing"
                     }
                 }
             }
 
             Mock -CommandName Get-SPDscRegProductsInfo -MockWith {
-                if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq  15)
+                if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 15)
                 {
                     return @("Microsoft SharePoint Server 2013")
                 }
                 else
                 {
-                    if($Global:SPDscHelper.CurrentStubBuildNumber.Minor.ToString().Length -le 4)
+                    if ($Global:SPDscHelper.CurrentStubBuildNumber.Minor.ToString().Length -le 4)
                     {
                         return @("Microsoft SharePoint Server 2016")
                     }
@@ -693,11 +726,13 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             Mock -CommandName Get-SPDscFarmProductsInfo -MockWith {
                 switch ($Global:SPDscHelper.CurrentStubBuildNumber.Major)
                 {
-                    15 {
+                    15
+                    {
                         return @("Microsoft SharePoint Server 2013")
                     }
-                    16 {
-                        if($Global:SPDscHelper.CurrentStubBuildNumber.Minor.ToString().Length -le 4)
+                    16
+                    {
+                        if ($Global:SPDscHelper.CurrentStubBuildNumber.Minor.ToString().Length -le 4)
                         {
                             return @("Microsoft SharePoint Server 2016")
                         }
@@ -706,20 +741,21 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                             return @("Microsoft SharePoint Server 2019")
                         }
                     }
-                    Default {
+                    Default
+                    {
                         throw [Exception] "A supported version of SharePoint was not used in testing"
                     }
                 }
             }
 
             Mock -CommandName Get-SPDscRegProductsInfo -MockWith {
-                if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq  15)
+                if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 15)
                 {
                     return @("Microsoft SharePoint Server 2013")
                 }
                 else
                 {
-                    if($Global:SPDscHelper.CurrentStubBuildNumber.Minor.ToString().Length -le 4)
+                    if ($Global:SPDscHelper.CurrentStubBuildNumber.Minor.ToString().Length -le 4)
                     {
                         return @("Microsoft SharePoint Server 2016")
                     }
@@ -762,11 +798,13 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             Mock -CommandName Get-SPDscFarmProductsInfo -MockWith {
                 switch ($Global:SPDscHelper.CurrentStubBuildNumber.Major)
                 {
-                    15 {
+                    15
+                    {
                         return @("Microsoft SharePoint Server 2013")
                     }
-                    16 {
-                        if($Global:SPDscHelper.CurrentStubBuildNumber.Minor.ToString().Length -le 4)
+                    16
+                    {
+                        if ($Global:SPDscHelper.CurrentStubBuildNumber.Minor.ToString().Length -le 4)
                         {
                             return @("Microsoft SharePoint Server 2016")
                         }
@@ -775,20 +813,21 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                             return @("Microsoft SharePoint Server 2019")
                         }
                     }
-                    Default {
+                    Default
+                    {
                         throw [Exception] "A supported version of SharePoint was not used in testing"
                     }
                 }
             }
 
             Mock -CommandName Get-SPDscRegProductsInfo -MockWith {
-                if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq  15)
+                if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 15)
                 {
                     return @("Microsoft SharePoint Server 2013")
                 }
                 else
                 {
-                    if($Global:SPDscHelper.CurrentStubBuildNumber.Minor.ToString().Length -le 4)
+                    if ($Global:SPDscHelper.CurrentStubBuildNumber.Minor.ToString().Length -le 4)
                     {
                         return @("Microsoft SharePoint Server 2016")
                     }
@@ -815,7 +854,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Assert-MockCalled Start-Process
             }
 
-            It "Should return true from the test method"  {
+            It "Should return true from the test method" {
                 Test-TargetResource @testParams | Should Be $false
             }
         }
@@ -829,11 +868,13 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             Mock -CommandName Get-SPDscFarmProductsInfo -MockWith {
                 switch ($Global:SPDscHelper.CurrentStubBuildNumber.Major)
                 {
-                    15 {
+                    15
+                    {
                         return @("Microsoft SharePoint Server 2013")
                     }
-                    16 {
-                        if($Global:SPDscHelper.CurrentStubBuildNumber.Minor.ToString().Length -le 4)
+                    16
+                    {
+                        if ($Global:SPDscHelper.CurrentStubBuildNumber.Minor.ToString().Length -le 4)
                         {
                             return @("Microsoft SharePoint Server 2016")
                         }
@@ -842,20 +883,21 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                             return @("Microsoft SharePoint Server 2019")
                         }
                     }
-                    Default {
+                    Default
+                    {
                         throw [Exception] "A supported version of SharePoint was not used in testing"
                     }
                 }
             }
 
             Mock -CommandName Get-SPDscRegProductsInfo -MockWith {
-                if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq  15)
+                if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 15)
                 {
                     return @("Microsoft SharePoint Server 2013")
                 }
                 else
                 {
-                    if($Global:SPDscHelper.CurrentStubBuildNumber.Minor.ToString().Length -le 4)
+                    if ($Global:SPDscHelper.CurrentStubBuildNumber.Minor.ToString().Length -le 4)
                     {
                         return @("Microsoft SharePoint Server 2016")
                     }
@@ -882,7 +924,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Assert-MockCalled Start-Process
             }
 
-            It "Should return true from the test method"  {
+            It "Should return true from the test method" {
                 Test-TargetResource @testParams | Should Be $false
             }
         }
@@ -902,11 +944,13 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             Mock -CommandName Get-SPDscFarmProductsInfo {
                 switch ($Global:SPDscHelper.CurrentStubBuildNumber.Major)
                 {
-                    15 {
+                    15
+                    {
                         return @("Microsoft SharePoint Server 2013", "Language Pack for SharePoint and Project Server 2013  - Dutch/Nederlands")
                     }
-                    16 {
-                        if($Global:SPDscHelper.CurrentStubBuildNumber.Minor.ToString().Length -le 4)
+                    16
+                    {
+                        if ($Global:SPDscHelper.CurrentStubBuildNumber.Minor.ToString().Length -le 4)
                         {
                             return @("Microsoft SharePoint Server 2016", "Language Pack for SharePoint and Project Server 2016  - Dutch/Nederlands")
                         }
@@ -915,20 +959,21 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                             return @("Microsoft SharePoint Server 2019", "Language Pack for SharePoint and Project Server 2019  - Dutch/Nederlands")
                         }
                     }
-                    Default {
+                    Default
+                    {
                         throw [Exception] "A supported version of SharePoint was not used in testing"
                     }
                 }
             }
 
             Mock -CommandName Get-SPDscRegProductsInfo -MockWith {
-                if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq  15)
+                if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 15)
                 {
                     return @("Microsoft SharePoint Server 2013", "Language Pack for SharePoint and Project Server 2013  - Dutch/Nederlands")
                 }
                 else
                 {
-                    if($Global:SPDscHelper.CurrentStubBuildNumber.Minor.ToString().Length -le 4)
+                    if ($Global:SPDscHelper.CurrentStubBuildNumber.Minor.ToString().Length -le 4)
                     {
                         return @("Microsoft SharePoint Server 2016", "Language Pack for SharePoint and Project Server 2016  - Dutch/Nederlands")
                     }
@@ -959,11 +1004,13 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             Mock -CommandName Get-SPDscFarmProductsInfo -MockWith {
                 switch ($Global:SPDscHelper.CurrentStubBuildNumber.Major)
                 {
-                    15 {
+                    15
+                    {
                         return @("Microsoft SharePoint Server 2013", "Language Pack for SharePoint and Project Server 2013  - Dutch/Nederlands")
                     }
-                    16 {
-                        if($Global:SPDscHelper.CurrentStubBuildNumber.Minor.ToString().Length -le 4)
+                    16
+                    {
+                        if ($Global:SPDscHelper.CurrentStubBuildNumber.Minor.ToString().Length -le 4)
                         {
                             return @("Microsoft SharePoint Server 2016", "Language Pack for SharePoint and Project Server 2016  - Dutch/Nederlands")
                         }
@@ -972,20 +1019,21 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                             return @("Microsoft SharePoint Server 2019", "Language Pack for SharePoint and Project Server 2019  - Dutch/Nederlands")
                         }
                     }
-                    Default {
+                    Default
+                    {
                         throw [Exception] "A supported version of SharePoint was not used in testing"
                     }
                 }
             }
 
             Mock -CommandName Get-SPDscRegProductsInfo -MockWith {
-                if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq  15)
+                if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 15)
                 {
                     return @("Microsoft SharePoint Server 2013", "Language Pack for SharePoint and Project Server 2013  - Dutch/Nederlands")
                 }
                 else
                 {
-                    if($Global:SPDscHelper.CurrentStubBuildNumber.Minor.ToString().Length -le 4)
+                    if ($Global:SPDscHelper.CurrentStubBuildNumber.Minor.ToString().Length -le 4)
                     {
                         return @("Microsoft SharePoint Server 2016", "Language Pack for SharePoint and Project Server 2016  - Dutch/Nederlands")
                     }
@@ -1014,15 +1062,15 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "BinaryInstallDays outside range" -Fixture {
             $testParams = @{
-                BinaryDir            = "C:\SPInstall"
-                BinaryInstallDays    = "mon"
-                Ensure               = "Present"
+                BinaryDir         = "C:\SPInstall"
+                BinaryInstallDays = "mon"
+                Ensure            = "Present"
             }
 
             $testDate = Get-Date -Day 17 -Month 7 -Year 2016 -Hour 12 -Minute 00 -Second 00
 
             Mock -CommandName Get-Date -MockWith {
-                 return $testDate
+                return $testDate
             }
 
             It "Should return null from the set method" {
@@ -1032,16 +1080,16 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "BinaryInstallTime outside range" -Fixture {
             $testParams = @{
-                BinaryDir            = "C:\SPInstall"
-                BinaryInstallDays    = "sun"
-                BinaryInstallTime    = "3:00am to 5:00am"
-                Ensure               = "Present"
+                BinaryDir         = "C:\SPInstall"
+                BinaryInstallDays = "sun"
+                BinaryInstallTime = "3:00am to 5:00am"
+                Ensure            = "Present"
             }
 
             $testDate = Get-Date -Day 17 -Month 7 -Year 2016 -Hour 12 -Minute 00 -Second 00
 
             Mock -CommandName Get-Date -MockWith {
-                 return $testDate
+                return $testDate
             }
 
             It "Should return null from the set method" {
@@ -1051,16 +1099,16 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "BinaryInstallTime incorrectly formatted, too many arguments" -Fixture {
             $testParams = @{
-                BinaryDir            = "C:\SPInstall"
-                BinaryInstallDays    = "sun"
-                BinaryInstallTime    = "error 3:00am to 5:00am"
-                Ensure               = "Present"
+                BinaryDir         = "C:\SPInstall"
+                BinaryInstallDays = "sun"
+                BinaryInstallTime = "error 3:00am to 5:00am"
+                Ensure            = "Present"
             }
 
             $testDate = Get-Date -Day 17 -Month 7 -Year 2016 -Hour 12 -Minute 00 -Second 00
 
             Mock -CommandName Get-Date -MockWith {
-                 return $testDate
+                return $testDate
             }
 
             It "Should throw exception in the set method" {
@@ -1070,16 +1118,16 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "BinaryInstallTime incorrectly formatted, incorrect start time" -Fixture {
             $testParams = @{
-                BinaryDir            = "C:\SPInstall"
-                BinaryInstallDays    = "sun"
-                BinaryInstallTime    = "3:00xm to 5:00am"
-                Ensure               = "Present"
+                BinaryDir         = "C:\SPInstall"
+                BinaryInstallDays = "sun"
+                BinaryInstallTime = "3:00xm to 5:00am"
+                Ensure            = "Present"
             }
 
             $testDate = Get-Date -Day 17 -Month 7 -Year 2016 -Hour 12 -Minute 00 -Second 00
 
             Mock -CommandName Get-Date -MockWith {
-                 return $testDate
+                return $testDate
             }
 
             It "Should throw exception in the set method" {
@@ -1089,16 +1137,16 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "BinaryInstallTime incorrectly formatted, incorrect end time" -Fixture {
             $testParams = @{
-                BinaryDir            = "C:\SPInstall"
-                BinaryInstallDays    = "sun"
-                BinaryInstallTime    = "3:00am to 5:00xm"
-                Ensure               = "Present"
+                BinaryDir         = "C:\SPInstall"
+                BinaryInstallDays = "sun"
+                BinaryInstallTime = "3:00am to 5:00xm"
+                Ensure            = "Present"
             }
 
             $testDate = Get-Date -Day 17 -Month 7 -Year 2016 -Hour 12 -Minute 00 -Second 00
 
             Mock -CommandName Get-Date -MockWith {
-                 return $testDate
+                return $testDate
             }
 
             It "Should throw exception in the set method" {
@@ -1108,16 +1156,16 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "BinaryInstallTime start time larger than end time" -Fixture {
             $testParams = @{
-                BinaryDir            = "C:\SPInstall"
-                BinaryInstallDays    = "sun"
-                BinaryInstallTime    = "3:00pm to 5:00am"
-                Ensure               = "Present"
+                BinaryDir         = "C:\SPInstall"
+                BinaryInstallDays = "sun"
+                BinaryInstallTime = "3:00pm to 5:00am"
+                Ensure            = "Present"
             }
 
             $testDate = Get-Date -Day 17 -Month 7 -Year 2016 -Hour 12 -Minute 00 -Second 00
 
             Mock -CommandName Get-Date -MockWith {
-                 return $testDate
+                return $testDate
             }
 
             It "Should throw exception in the set method" {
@@ -1127,15 +1175,15 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "Ensure is set to Absent" -Fixture {
             $testParams = @{
-                BinaryDir            = "C:\SPInstall"
-                Ensure               = "Absent"
+                BinaryDir = "C:\SPInstall"
+                Ensure    = "Absent"
             }
 
             It "Should throw exception in the set method" {
                 { Set-TargetResource @testParams } | Should Throw "SharePointDsc does not support uninstalling SharePoint Language Packs. Please remove this manually."
             }
 
-            It "Should throw exception in the test method"  {
+            It "Should throw exception in the test method" {
                 { Test-TargetResource @testParams } | Should Throw "SharePointDsc does not support uninstalling SharePoint Language Packs. Please remove this manually."
             }
         }

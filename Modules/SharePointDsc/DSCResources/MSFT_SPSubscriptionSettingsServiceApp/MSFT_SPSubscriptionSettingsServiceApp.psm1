@@ -21,7 +21,7 @@ function Get-TargetResource
         $DatabaseServer,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present",
 
@@ -32,17 +32,17 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting Subscription Settings Service '$Name'"
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
-                                  -Arguments $PSBoundParameters `
-                                  -ScriptBlock {
+    $result = Invoke-SPDscCommand -Credential $InstallAccount `
+        -Arguments $PSBoundParameters `
+        -ScriptBlock {
         $params = $args[0]
 
         $serviceApps = Get-SPServiceApplication -Name $params.Name `
-                                                -ErrorAction SilentlyContinue
+            -ErrorAction SilentlyContinue
         $nullReturn = @{
-            Name = $params.Name
+            Name            = $params.Name
             ApplicationPool = $params.ApplicationPool
-            Ensure = "Absent"
+            Ensure          = "Absent"
         }
 
         if ($null -eq $serviceApps)
@@ -60,7 +60,7 @@ function Get-TargetResource
         else
         {
             $propertyFlags = [System.Reflection.BindingFlags]::Instance `
-                                -bor [System.Reflection.BindingFlags]::NonPublic
+                -bor [System.Reflection.BindingFlags]::NonPublic
 
             $propData = $serviceApp.GetType().GetProperties($propertyFlags)
 
@@ -71,12 +71,12 @@ function Get-TargetResource
             $db = $dbProp.GetValue($serviceApp)
 
             return  @{
-                Name = $serviceApp.DisplayName
+                Name            = $serviceApp.DisplayName
                 ApplicationPool = $serviceApp.ApplicationPool.Name
-                DatabaseName = $db.Name
-                DatabaseServer = $db.NormalizedDataSource
-                InstallAccount = $params.InstallAccount
-                Ensure = "Present"
+                DatabaseName    = $db.Name
+                DatabaseServer  = $db.NormalizedDataSource
+                InstallAccount  = $params.InstallAccount
+                Ensure          = "Present"
             }
         }
     }
@@ -105,7 +105,7 @@ function Set-TargetResource
         $DatabaseServer,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present",
 
@@ -121,13 +121,13 @@ function Set-TargetResource
     if ($result.Ensure -eq "Absent" -and $Ensure -eq "Present")
     {
         Write-Verbose -Message "Creating Subscription Settings Service Application $Name"
-        Invoke-SPDSCCommand -Credential $InstallAccount `
-                            -Arguments $PSBoundParameters `
-                            -ScriptBlock {
+        Invoke-SPDscCommand -Credential $InstallAccount `
+            -Arguments $PSBoundParameters `
+            -ScriptBlock {
             $params = $args[0]
 
             $newParams = @{
-                Name = $params.Name
+                Name            = $params.Name
                 ApplicationPool = $params.ApplicationPool
             }
             if ($params.ContainsKey("DatabaseName") -eq $true)
@@ -145,13 +145,13 @@ function Set-TargetResource
     if ($result.Ensure -eq "Present" -and $Ensure -eq "Present")
     {
         Write-Verbose -Message "Checking proxy for Subscription Settings Service Application $Name"
-        Invoke-SPDSCCommand -Credential $InstallAccount `
-                            -Arguments $PSBoundParameters `
-                            -ScriptBlock {
+        Invoke-SPDscCommand -Credential $InstallAccount `
+            -Arguments $PSBoundParameters `
+            -ScriptBlock {
             $params = $args[0]
 
             $serviceApp = Get-SPServiceApplication -Name $params.Name `
-                                                   -ErrorAction SilentlyContinue
+                -ErrorAction SilentlyContinue
 
             $serviceAppProxies = Get-SPServiceApplicationProxy -ErrorAction SilentlyContinue
 
@@ -177,16 +177,16 @@ function Set-TargetResource
         if ($ApplicationPool -ne $result.ApplicationPool)
         {
             Write-Verbose -Message "Updating Subscription Settings Service Application $Name"
-            Invoke-SPDSCCommand -Credential $InstallAccount `
-                                -Arguments $PSBoundParameters `
-                                -ScriptBlock {
+            Invoke-SPDscCommand -Credential $InstallAccount `
+                -Arguments $PSBoundParameters `
+                -ScriptBlock {
 
                 $params = $args[0]
                 $appPool = Get-SPServiceApplicationPool -Identity $params.ApplicationPool
                 $service = Get-SPServiceApplication -Name $params.Name `
-                    | Where-Object -FilterScript {
-                        $_.GetType().FullName -eq "Microsoft.SharePoint.SPSubscriptionSettingsServiceApplication"
-                    }
+                | Where-Object -FilterScript {
+                    $_.GetType().FullName -eq "Microsoft.SharePoint.SPSubscriptionSettingsServiceApplication"
+                }
                 $service.ApplicationPool = $appPool
                 $service.Update()
             }
@@ -195,15 +195,15 @@ function Set-TargetResource
     if ($Ensure -eq "Absent")
     {
         Write-Verbose -Message "Removing Subscription Settings Service Application $Name"
-        Invoke-SPDSCCommand -Credential $InstallAccount `
-                            -Arguments $PSBoundParameters `
-                            -ScriptBlock {
+        Invoke-SPDscCommand -Credential $InstallAccount `
+            -Arguments $PSBoundParameters `
+            -ScriptBlock {
             $params = $args[0]
 
             $service = Get-SPServiceApplication -Name $params.Name `
-                    | Where-Object -FilterScript {
-                        $_.GetType().FullName -eq "Microsoft.SharePoint.SPSubscriptionSettingsServiceApplication"
-                    }
+            | Where-Object -FilterScript {
+                $_.GetType().FullName -eq "Microsoft.SharePoint.SPSubscriptionSettingsServiceApplication"
+            }
             Remove-SPServiceApplication $service -Confirm:$false
         }
     }
@@ -232,7 +232,7 @@ function Test-TargetResource
         $DatabaseServer,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present",
 
@@ -247,17 +247,20 @@ function Test-TargetResource
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
+    Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
+    Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
+
     if ($Ensure -eq "Present")
     {
         if ($CurrentValues.Ensure -eq "Present")
         {
-            $result = Invoke-SPDSCCommand -Credential $InstallAccount `
-                                          -Arguments $PSBoundParameters `
-                                          -ScriptBlock {
+            $result = Invoke-SPDscCommand -Credential $InstallAccount `
+                -Arguments $PSBoundParameters `
+                -ScriptBlock {
                 $params = $args[0]
 
                 $serviceApp = Get-SPServiceApplication -Name $params.Name `
-                                                       -ErrorAction SilentlyContinue
+                    -ErrorAction SilentlyContinue
 
                 $serviceAppProxies = Get-SPServiceApplicationProxy -ErrorAction SilentlyContinue
 
@@ -280,14 +283,14 @@ function Test-TargetResource
         }
 
         return Test-SPDscParameterState -CurrentValues $CurrentValues `
-                                        -DesiredValues $PSBoundParameters `
-                                        -ValuesToCheck @("ApplicationPool", "Ensure")
+            -DesiredValues $PSBoundParameters `
+            -ValuesToCheck @("ApplicationPool", "Ensure")
     }
     else
     {
         return Test-SPDscParameterState -CurrentValues $CurrentValues `
-                                        -DesiredValues $PSBoundParameters `
-                                        -ValuesToCheck @("Ensure")
+            -DesiredValues $PSBoundParameters `
+            -ValuesToCheck @("Ensure")
     }
 }
 

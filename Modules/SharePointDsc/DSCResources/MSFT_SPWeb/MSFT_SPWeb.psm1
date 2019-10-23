@@ -56,7 +56,7 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting SPWeb '$Url'"
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+    $result = Invoke-SPDscCommand -Credential $InstallAccount `
         -Arguments $PSBoundParameters `
         -ScriptBlock {
         $params = $args[0]
@@ -151,7 +151,7 @@ function Set-TargetResource
 
     $PSBoundParameters.Ensure = $Ensure
 
-    Invoke-SPDSCCommand -Credential $InstallAccount `
+    Invoke-SPDscCommand -Credential $InstallAccount `
         -Arguments $PSBoundParameters `
         -ScriptBlock {
         $params = $args[0]
@@ -174,12 +174,12 @@ function Set-TargetResource
         if ($null -eq $web)
         {
             @("InstallAccount", "Ensure", "RequestAccessEmail") |
-                ForEach-Object -Process {
-                    if ($params.ContainsKey($_) -eq $true)
-                    {
-                        $params.Remove($_) | Out-Null
-                    }
+            ForEach-Object -Process {
+                if ($params.ContainsKey($_) -eq $true)
+                {
+                    $params.Remove($_) | Out-Null
                 }
+            }
 
             New-SPWeb @params | Out-Null
         }
@@ -309,6 +309,9 @@ function Test-TargetResource
     $PSBoundParameters.Ensure = $Ensure
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
+
+    Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
+    Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
 
     $valuesToCheck = @("Url",
         "Name",

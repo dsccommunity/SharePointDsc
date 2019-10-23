@@ -78,12 +78,19 @@ function Get-TargetResource
     if ($checkBlockedFile -eq $true)
     {
         Write-Verbose -Message "Checking status now"
-        $zone = Get-Item -Path $SetupFile -Stream "Zone.Identifier" -EA SilentlyContinue
+        try
+        {
+            $zone = Get-Item -Path $SetupFile -Stream "Zone.Identifier" -EA SilentlyContinue
+        }
+        catch
+        {
+            Write-Verbose -Message 'Encountered error while reading file stream. Ignoring file stream.'
+        }
 
         if ($null -ne $zone)
         {
             throw ("Setup file is blocked! Please use 'Unblock-File -Path $SetupFile' " + `
-                   "to unblock the file before continuing.")
+                    "to unblock the file before continuing.")
         }
         Write-Verbose -Message "File not blocked, continuing."
     }
@@ -306,12 +313,19 @@ function Set-TargetResource
     if ($checkBlockedFile -eq $true)
     {
         Write-Verbose -Message "Checking status now"
-        $zone = Get-Item -Path $SetupFile -Stream "Zone.Identifier" -EA SilentlyContinue
+        try
+        {
+            $zone = Get-Item -Path $SetupFile -Stream "Zone.Identifier" -EA SilentlyContinue
+        }
+        catch
+        {
+            Write-Verbose -Message 'Encountered error while reading file stream. Ignoring file stream.'
+        }
 
         if ($null -ne $zone)
         {
             throw ("Setup file is blocked! Please use 'Unblock-File -Path $SetupFile' " + `
-                   "to unblock the file before continuing.")
+                    "to unblock the file before continuing.")
         }
         Write-Verbose -Message "File not blocked, continuing."
     }
@@ -344,7 +358,7 @@ function Set-TargetResource
     if ($BinaryInstallTime)
     {
         Write-Verbose -Message ("BinaryInstallTime parameter exists, check if current time is inside " + `
-                                "of time window")
+                "of time window")
         $upgradeTimes = $BinaryInstallTime.Split(" ")
         $starttime = 0
         $endtime = 0
@@ -389,9 +403,24 @@ function Set-TargetResource
                 "any time. Starting update.")
     }
 
-    $installedVersion = Get-SPDSCInstalledProductVersion
+    $installedVersion = Get-SPDscInstalledProductVersion
 
-    if ($ShutdownServices)
+    Write-Verbose -Message "Try to load local Farm"
+
+    $farmIsAvailable = Invoke-SPDscCommand -Credential $InstallAccount `
+        -ScriptBlock {
+        try
+        {
+            $null = Get-SPFarm
+            return $true
+        }
+        catch
+        {
+            return $false
+        }
+    }
+
+    if ($ShutdownServices -and $farmIsAvailable)
     {
         Write-Verbose -Message "Stopping services to speed up installation process"
 
@@ -411,7 +440,7 @@ function Set-TargetResource
         $osearchSvc = Get-Service -Name $searchServiceName
         $hostControllerSvc = Get-Service -Name "SPSearchHostController"
 
-        $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+        Invoke-SPDscCommand -Credential $InstallAccount `
             -ScriptBlock {
             $searchSAs = Get-SPEnterpriseSearchServiceApplication
             foreach ($searchSA in $searchSAs)
@@ -451,7 +480,7 @@ function Set-TargetResource
         }
         Set-Service -Name "SPTimerV4" -StartupType Disabled
 
-        $iisreset = Start-Process -FilePath "iisreset.exe" `
+        $null = Start-Process -FilePath "iisreset.exe" `
             -ArgumentList "-stop -noforce" `
             -Wait `
             -PassThru
@@ -465,7 +494,7 @@ function Set-TargetResource
 
     Write-Verbose -Message "Beginning installation of the SharePoint update"
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+    Invoke-SPDscCommand -Credential $InstallAccount `
         -Arguments $SetupFile `
         -ScriptBlock {
         $setupFile = $args[0]
@@ -527,7 +556,7 @@ function Set-TargetResource
         }
     }
 
-    if ($ShutdownServices)
+    if ($ShutdownServices -and $farmIsAvailable)
     {
         Write-Verbose -Message "Restart stopped services"
         Set-Service -Name "SPTimerV4" -StartupType Automatic
@@ -541,7 +570,7 @@ function Set-TargetResource
         $timerSvc = Get-Service -Name "SPTimerV4"
         $timerSvc.Start()
 
-        $iisreset = Start-Process -FilePath "iisreset.exe" `
+        Start-Process -FilePath "iisreset.exe" `
             -ArgumentList "-start" `
             -Wait `
             -PassThru
@@ -565,7 +594,7 @@ function Set-TargetResource
         if ($searchPaused -eq $true)
         {
             # Resuming Search Service Application if paused###
-            $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+            Invoke-SPDscCommand -Credential $InstallAccount `
                 -ScriptBlock {
                 $searchSAs = Get-SPEnterpriseSearchServiceApplication
                 foreach ($searchSA in $searchSAs)
@@ -627,9 +656,12 @@ function Test-TargetResource
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
+    Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
+    Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
+
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
-                                    -DesiredValues $PSBoundParameters `
-                                    -ValuesToCheck @("Ensure")
+        -DesiredValues $PSBoundParameters `
+        -ValuesToCheck @("Ensure")
 }
 
 function Get-SPDscLocalVersionInfo
@@ -674,9 +706,10 @@ function Get-SPDscLocalVersionInfo
     $nullVersion = New-Object -TypeName System.Version
     $versionInfoValue = New-Object -TypeName System.Version
 
-    $officeProductKeys = $installerEntries | Where-Object -FilterScript {$_.PsPath -like "*00000000F01FEC"}
+    $officeProductKeys = $installerEntries | Where-Object -FilterScript { $_.PsPath -like "*00000000F01FEC" }
 
-    if($null -eq $installerEntries -or $null -eq $officeProductKeys ){
+    if ($null -eq $installerEntries -or $null -eq $officeProductKeys )
+    {
         return $nullVersion
     }
 
@@ -686,7 +719,8 @@ function Get-SPDscLocalVersionInfo
 
         $productInfo = Get-ItemProperty "Registry::$($officeProductKey)\InstallProperties" -ErrorAction SilentlyContinue
 
-        if($null -eq $productInfo){
+        if ($null -eq $productInfo)
+        {
             break
         }
 
@@ -775,7 +809,7 @@ function Clear-ComObject
 {
     param
     (
-        [Parameter(Mandatory=$true)]
+        [Parameter(Mandatory = $true)]
         [System.Object]
         $ComObject
     )

@@ -10,7 +10,7 @@ function Get-TargetResource
         $IsSingleInstance,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure,
 
@@ -77,30 +77,30 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting InfoPath Forms Service Configuration"
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
-                                  -Arguments $PSBoundParameters `
-                                  -ScriptBlock {
+    $result = Invoke-SPDscCommand -Credential $InstallAccount `
+        -Arguments $PSBoundParameters `
+        -ScriptBlock {
         $params = $args[0]
 
         $config = Get-SPInfoPathFormsService
         $nullReturn = @{
-            IsSingleInstance = "Yes"
-            AllowUserFormBrowserEnabling = $params.AllowUserFormBrowserEnabling
-            AllowUserFormBrowserRendering = $params.AllowUserFormBrowserRendering
-            MaxDataConnectionTimeout = $params.MaxDataConnectionTimeout
-            DefaultDataConnectionTimeout = $params.DefaultDataConnectionTimeout
-            MaxDataConnectionResponseSize = $params.MaxDataConnectionResponseSize
-            RequireSslForDataConnections = $params.RequireSslForDataConnections
-            AllowEmbeddedSqlForDataConnections = $params.AllowEmbeddedSqlForDataConnections
+            IsSingleInstance                         = "Yes"
+            AllowUserFormBrowserEnabling             = $params.AllowUserFormBrowserEnabling
+            AllowUserFormBrowserRendering            = $params.AllowUserFormBrowserRendering
+            MaxDataConnectionTimeout                 = $params.MaxDataConnectionTimeout
+            DefaultDataConnectionTimeout             = $params.DefaultDataConnectionTimeout
+            MaxDataConnectionResponseSize            = $params.MaxDataConnectionResponseSize
+            RequireSslForDataConnections             = $params.RequireSslForDataConnections
+            AllowEmbeddedSqlForDataConnections       = $params.AllowEmbeddedSqlForDataConnections
             AllowUdcAuthenticationForDataConnections = $params.AllowUdcAuthenticationForDataConnections
-            AllowUserFormCrossDomainDataConnections = $params.AllowUserFormCrossDomainDataConnections
-            AllowEventPropagation = $params.AllowEventPropagation
-            MaxPostbacksPerSession = $params.MaxPostbacksPerSession
-            MaxUserActionsPerPostback = $params.MaxUserActionsPerPostback
-            ActiveSessionsTimeout = $params.ActiveSessionsTimeout
-            MaxSizeOfUserFormState = ($params.MaxSizeOfUserFormState / 1024)
-            Ensure = "Absent"
-            InstallAccount = $params.InstallAccount
+            AllowUserFormCrossDomainDataConnections  = $params.AllowUserFormCrossDomainDataConnections
+            AllowEventPropagation                    = $params.AllowEventPropagation
+            MaxPostbacksPerSession                   = $params.MaxPostbacksPerSession
+            MaxUserActionsPerPostback                = $params.MaxUserActionsPerPostback
+            ActiveSessionsTimeout                    = $params.ActiveSessionsTimeout
+            MaxSizeOfUserFormState                   = ($params.MaxSizeOfUserFormState / 1024)
+            Ensure                                   = "Absent"
+            InstallAccount                           = $params.InstallAccount
         }
         if ($null -eq $config)
         {
@@ -108,23 +108,23 @@ function Get-TargetResource
         }
 
         return @{
-            IsSingleInstance = "Yes"
-            AllowUserFormBrowserEnabling = $config.AllowUserFormBrowserEnabling
-            AllowUserFormBrowserRendering = $config.AllowUserFormBrowserRendering
-            MaxDataConnectionTimeout = $config.MaxDataConnectionTimeout
-            DefaultDataConnectionTimeout = $config.DefaultDataConnectionTimeout
-            MaxDataConnectionResponseSize = $config.MaxDataConnectionResponseSize
-            RequireSslForDataConnections = $config.RequireSslForDataConnections
-            AllowEmbeddedSqlForDataConnections = $config.AllowEmbeddedSqlForDataConnections
+            IsSingleInstance                         = "Yes"
+            AllowUserFormBrowserEnabling             = $config.AllowUserFormBrowserEnabling
+            AllowUserFormBrowserRendering            = $config.AllowUserFormBrowserRendering
+            MaxDataConnectionTimeout                 = $config.MaxDataConnectionTimeout
+            DefaultDataConnectionTimeout             = $config.DefaultDataConnectionTimeout
+            MaxDataConnectionResponseSize            = $config.MaxDataConnectionResponseSize
+            RequireSslForDataConnections             = $config.RequireSslForDataConnections
+            AllowEmbeddedSqlForDataConnections       = $config.AllowEmbeddedSqlForDataConnections
             AllowUdcAuthenticationForDataConnections = $config.AllowUdcAuthenticationForDataConnections
-            AllowUserFormCrossDomainDataConnections = $config.AllowUserFormCrossDomainDataConnections
-            AllowEventPropagation = $config.AllowEventPropagation
-            MaxPostbacksPerSession = $config.MaxPostbacksPerSession
-            MaxUserActionsPerPostback = $config.MaxUserActionsPerPostback
-            ActiveSessionsTimeout = $config.ActiveSessionsTimeout
-            MaxSizeOfUserFormState = ($config.MaxSizeOfUserFormState / 1024)
-            Ensure = "Present"
-            InstallAccount = $params.InstallAccount
+            AllowUserFormCrossDomainDataConnections  = $config.AllowUserFormCrossDomainDataConnections
+            AllowEventPropagation                    = $config.AllowEventPropagation
+            MaxPostbacksPerSession                   = $config.MaxPostbacksPerSession
+            MaxUserActionsPerPostback                = $config.MaxUserActionsPerPostback
+            ActiveSessionsTimeout                    = $config.ActiveSessionsTimeout
+            MaxSizeOfUserFormState                   = ($config.MaxSizeOfUserFormState / 1024)
+            Ensure                                   = "Present"
+            InstallAccount                           = $params.InstallAccount
         }
     }
     return $result
@@ -141,7 +141,7 @@ function Set-TargetResource
         $IsSingleInstance,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure,
 
@@ -208,84 +208,84 @@ function Set-TargetResource
 
     Write-Verbose -Message "Setting InfoPath Forms Service Configuration"
 
-    if($Ensure -eq "Absent")
+    if ($Ensure -eq "Absent")
     {
         throw "This resource cannot undo InfoPath Forms Service Configuration changes. `
         Please set Ensure to Present or omit the resource"
     }
 
-    Invoke-SPDSCCommand -Credential $InstallAccount `
-                        -Arguments $PSBoundParameters `
-                        -ScriptBlock {
+    Invoke-SPDscCommand -Credential $InstallAccount `
+        -Arguments $PSBoundParameters `
+        -ScriptBlock {
         $params = $args[0]
         $config = Get-SPInfoPathFormsService
 
-        if($params.ContainsKey("AllowUserFormBrowserEnabling"))
+        if ($params.ContainsKey("AllowUserFormBrowserEnabling"))
         {
             $config.AllowUserFormBrowserEnabling = $params.AllowUserFormBrowserEnabling
         }
 
-        if($params.ContainsKey("AllowUserFormBrowserRendering"))
+        if ($params.ContainsKey("AllowUserFormBrowserRendering"))
         {
             $config.AllowUserFormBrowserRendering = $params.AllowUserFormBrowserRendering
         }
 
-        if($params.ContainsKey("MaxDataConnectionTimeout"))
+        if ($params.ContainsKey("MaxDataConnectionTimeout"))
         {
             $config.MaxDataConnectionTimeout = $params.MaxDataConnectionTimeout
         }
 
-        if($params.ContainsKey("DefaultDataConnectionTimeout"))
+        if ($params.ContainsKey("DefaultDataConnectionTimeout"))
         {
             $config.DefaultDataConnectionTimeout = $params.DefaultDataConnectionTimeout
         }
 
-        if($params.ContainsKey("MaxDataConnectionResponseSize"))
+        if ($params.ContainsKey("MaxDataConnectionResponseSize"))
         {
             $config.MaxDataConnectionResponseSize = $params.MaxDataConnectionResponseSize
         }
 
-        if($params.ContainsKey("RequireSslForDataConnections"))
+        if ($params.ContainsKey("RequireSslForDataConnections"))
         {
             $config.RequireSslForDataConnections = $params.RequireSslForDataConnections
         }
 
-        if($params.ContainsKey("AllowEmbeddedSqlForDataConnections"))
+        if ($params.ContainsKey("AllowEmbeddedSqlForDataConnections"))
         {
             $config.AllowEmbeddedSqlForDataConnections = $params.AllowEmbeddedSqlForDataConnections
         }
 
-        if($params.ContainsKey("AllowUdcAuthenticationForDataConnections"))
+        if ($params.ContainsKey("AllowUdcAuthenticationForDataConnections"))
         {
             $config.AllowUdcAuthenticationForDataConnections = $params.AllowUdcAuthenticationForDataConnections
         }
 
-        if($params.ContainsKey("AllowUserFormCrossDomainDataConnections"))
+        if ($params.ContainsKey("AllowUserFormCrossDomainDataConnections"))
         {
             $config.AllowUserFormCrossDomainDataConnections = $params.AllowUserFormCrossDomainDataConnections
         }
 
-        if($params.ContainsKey("AllowEventPropagation"))
+        if ($params.ContainsKey("AllowEventPropagation"))
         {
             $config.AllowEventPropagation = $params.AllowEventPropagation
         }
 
-        if($params.ContainsKey("MaxPostbacksPerSession"))
+        if ($params.ContainsKey("MaxPostbacksPerSession"))
         {
             $config.MaxPostbacksPerSession = $params.MaxPostbacksPerSession
         }
 
-        if($params.ContainsKey("MaxUserActionsPerPostback"))
+        if ($params.ContainsKey("MaxUserActionsPerPostback"))
         {
             $config.MaxUserActionsPerPostback = $params.MaxUserActionsPerPostback
         }
 
-        if($params.ContainsKey("ActiveSessionsTimeout"))
+        if ($params.ContainsKey("ActiveSessionsTimeout"))
         {
             $config.ActiveSessionsTimeout = $params.ActiveSessionsTimeout
         }
 
-        if($params.ContainsKey("MaxSizeOfUserFormState"))
+        if ($params.ContainsKey("MaxSizeOfUserFormState"))
         {
             $config.MaxSizeOfUserFormState = ($params.MaxSizeOfUserFormState * 1024)
         }
@@ -306,7 +306,7 @@ function Test-TargetResource
         $IsSingleInstance,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure,
 
@@ -377,23 +377,26 @@ function Test-TargetResource
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
+    Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
+    Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
+
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
-                                    -DesiredValues $PSBoundParameters `
-                                    -ValuesToCheck @("Ensure",
-                                                     "AllowUserFormBrowserEnabling",
-                                                     "AllowUserFormBrowserRendering",
-                                                     "MaxDataConnectionTimeout",
-                                                     "DefaultDataConnectionTimeout",
-                                                     "MaxDataConnectionResponseSize",
-                                                     "RequireSslForDataConnections",
-                                                     "AllowEmbeddedSqlForDataConnections",
-                                                     "AllowUdcAuthenticationForDataConnections",
-                                                     "AllowUserFormCrossDomainDataConnections",
-                                                     "AllowEventPropagation",
-                                                     "MaxPostbacksPerSession",
-                                                     "MaxUserActionsPerPostback",
-                                                     "ActiveSessionsTimeout",
-                                                     "MaxSizeOfUserFormState")
+        -DesiredValues $PSBoundParameters `
+        -ValuesToCheck @("Ensure",
+        "AllowUserFormBrowserEnabling",
+        "AllowUserFormBrowserRendering",
+        "MaxDataConnectionTimeout",
+        "DefaultDataConnectionTimeout",
+        "MaxDataConnectionResponseSize",
+        "RequireSslForDataConnections",
+        "AllowEmbeddedSqlForDataConnections",
+        "AllowUdcAuthenticationForDataConnections",
+        "AllowUserFormCrossDomainDataConnections",
+        "AllowEventPropagation",
+        "MaxPostbacksPerSession",
+        "MaxUserActionsPerPostback",
+        "ActiveSessionsTimeout",
+        "MaxSizeOfUserFormState")
 }
 
 Export-ModuleMember -Function *-TargetResource

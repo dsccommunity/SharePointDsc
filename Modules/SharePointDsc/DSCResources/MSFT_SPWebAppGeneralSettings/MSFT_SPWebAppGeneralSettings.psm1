@@ -33,7 +33,7 @@ function Get-TargetResource
         $BlogAPIAuthenticated,
 
         [Parameter()]
-        [ValidateSet("Strict","Permissive")]
+        [ValidateSet("Strict", "Permissive")]
         [System.String]
         $BrowserFileHandling,
 
@@ -96,9 +96,9 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting web application '$WebAppUrl' general settings"
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
-                                  -Arguments @($PSBoundParameters,$PSScriptRoot) `
-                                  -ScriptBlock {
+    $result = Invoke-SPDscCommand -Credential $InstallAccount `
+        -Arguments @($PSBoundParameters, $PSScriptRoot) `
+        -ScriptBlock {
         $params = $args[0]
         $ScriptRoot = $args[1]
 
@@ -106,34 +106,34 @@ function Get-TargetResource
         if ($null -eq $wa)
         {
             return @{
-                WebAppUrl = $params.WebAppUrl
-                TimeZone = $null
-                Alerts = $null
-                AlertsLimit = $null
-                RSS = $null
-                BlogAPI = $null
-                BlogAPIAuthenticated = $null
-                BrowserFileHandling = $null
-                SecurityValidation = $null
-                SecurityValidationExpires = $null
+                WebAppUrl                        = $params.WebAppUrl
+                TimeZone                         = $null
+                Alerts                           = $null
+                AlertsLimit                      = $null
+                RSS                              = $null
+                BlogAPI                          = $null
+                BlogAPIAuthenticated             = $null
+                BrowserFileHandling              = $null
+                SecurityValidation               = $null
+                SecurityValidationExpires        = $null
                 SecurityValidationTimeoutMinutes = $null
-                RecycleBinEnabled = $null
-                RecycleBinCleanupEnabled = $null
-                RecycleBinRetentionPeriod = $null
-                SecondStageRecycleBinQuota = $null
-                MaximumUploadSize = $null
-                CustomerExperienceProgram = $null
-                PresenceEnabled = $null
-                AllowOnlineWebPartCatalog = $null
-                SelfServiceSiteCreationEnabled = $null
-                DefaultQuotaTemplate = $null
+                RecycleBinEnabled                = $null
+                RecycleBinCleanupEnabled         = $null
+                RecycleBinRetentionPeriod        = $null
+                SecondStageRecycleBinQuota       = $null
+                MaximumUploadSize                = $null
+                CustomerExperienceProgram        = $null
+                PresenceEnabled                  = $null
+                AllowOnlineWebPartCatalog        = $null
+                SelfServiceSiteCreationEnabled   = $null
+                DefaultQuotaTemplate             = $null
             }
         }
 
         $modulePath = "..\..\Modules\SharePointDsc.WebApplication\SPWebApplication.GeneralSettings.psm1"
         Import-Module -Name (Join-Path -Path $ScriptRoot -ChildPath $modulePath -Resolve)
 
-        $result = Get-SPDSCWebApplicationGeneralConfig -WebApplication $wa
+        $result = Get-SPDscWebApplicationGeneralConfig -WebApplication $wa
         $result.Add("WebAppUrl", $params.WebAppUrl)
         $result.Add("InstallAccount", $params.InstallAccount)
         return $result
@@ -145,7 +145,7 @@ function Set-TargetResource
 {
     [CmdletBinding()]
     param
-       (
+    (
         [Parameter(Mandatory = $true)]
         [System.String]
         $WebAppUrl,
@@ -175,7 +175,7 @@ function Set-TargetResource
         $BlogAPIAuthenticated,
 
         [Parameter()]
-        [ValidateSet("Strict","Permissive")]
+        [ValidateSet("Strict", "Permissive")]
         [System.String]
         $BrowserFileHandling,
 
@@ -238,9 +238,9 @@ function Set-TargetResource
 
     Write-Verbose -Message "Setting web application '$WebAppUrl' general settings"
 
-    Invoke-SPDSCCommand -Credential $InstallAccount `
-                        -Arguments @($PSBoundParameters,$PSScriptRoot) `
-                        -ScriptBlock {
+    Invoke-SPDscCommand -Credential $InstallAccount `
+        -Arguments @($PSBoundParameters, $PSScriptRoot) `
+        -ScriptBlock {
         $params = $args[0]
         $ScriptRoot = $args[1]
 
@@ -252,7 +252,7 @@ function Set-TargetResource
 
         if ($params.ContainsKey("DefaultQuotaTemplate"))
         {
-            $admService = Get-SPDSCContentService
+            $admService = Get-SPDscContentService
 
             $quotaTemplate = $admService.QuotaTemplates[$params.DefaultQuotaTemplate]
             if ($null -eq $quotaTemplate)
@@ -264,7 +264,7 @@ function Set-TargetResource
         $modulePath = "..\..\Modules\SharePointDsc.WebApplication\SPWebApplication.GeneralSettings.psm1"
         Import-Module -Name (Join-Path -Path $ScriptRoot -ChildPath $modulePath -Resolve)
 
-        Set-SPDSCWebApplicationGeneralConfig -WebApplication $wa -Settings $params
+        Set-SPDscWebApplicationGeneralConfig -WebApplication $wa -Settings $params
         $wa.Update()
     }
 }
@@ -274,7 +274,7 @@ function Test-TargetResource
     [CmdletBinding()]
     [OutputType([System.Boolean])]
     param
-     (
+    (
         [Parameter(Mandatory = $true)]
         [System.String]
         $WebAppUrl,
@@ -304,7 +304,7 @@ function Test-TargetResource
         $BlogAPIAuthenticated,
 
         [Parameter()]
-        [ValidateSet("Strict","Permissive")]
+        [ValidateSet("Strict", "Permissive")]
         [System.String]
         $BrowserFileHandling,
 
@@ -369,10 +369,13 @@ function Test-TargetResource
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
+    Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
+    Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
+
     $modulePath = "..\..\Modules\SharePointDsc.WebApplication\SPWebApplication.GeneralSettings.psm1"
     Import-Module -Name (Join-Path -Path $PSScriptRoot -ChildPath $modulePath -Resolve)
 
-    return Test-SPDSCWebApplicationGeneralConfig -CurrentSettings $CurrentValues -DesiredSettings $PSBoundParameters
+    return Test-SPDscWebApplicationGeneralConfig -CurrentSettings $CurrentValues -DesiredSettings $PSBoundParameters
 }
 
 Export-ModuleMember -Function *-TargetResource

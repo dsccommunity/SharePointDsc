@@ -1,7 +1,7 @@
 function Get-TargetResource
 {
     [CmdletBinding()]
-    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSDSCUseIdenticalMandatoryParametersForDSC", "", Justification  =  "Temporary workaround for issue introduced in PSSA v1.18")]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSDSCUseIdenticalMandatoryParametersForDSC", "", Justification = "Temporary workaround for issue introduced in PSSA v1.18")]
     [OutputType([System.Collections.Hashtable])]
     param
     (
@@ -115,7 +115,7 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting user profile property $Name"
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+    $result = Invoke-SPDscCommand -Credential $InstallAccount `
         -Arguments $PSBoundParameters `
         -ScriptBlock {
         $params = $args[0]
@@ -138,7 +138,7 @@ function Get-TargetResource
 
         $context = Get-SPServiceContext -Site $caURL
 
-        $userProfileSubTypeManager = Get-SPDSCUserProfileSubTypeManager -Context $context
+        $userProfileSubTypeManager = Get-SPDscUserProfileSubTypeManager -Context $context
         $userProfileSubType = $userProfileSubTypeManager.GetProfileSubtype("UserProfile")
 
         $userProfileProperty = $userProfileSubType.Properties.GetPropertyByName($params.Name)
@@ -187,7 +187,7 @@ function Get-TargetResource
                     $currentMapping = $syncConnection.PropertyMapping.Item($params.Name)
                     if ($null -ne $currentMapping)
                     {
-                        $mapping = @{}
+                        $mapping = @{ }
                         $mapping.Direction = "Import"
                         $mapping.ConnectionName = $params.MappingConnectionName
                         if ($currentMapping.IsExport)
@@ -291,7 +291,7 @@ function Get-TargetResource
 function Set-TargetResource
 {
     [CmdletBinding()]
-    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSDSCUseIdenticalMandatoryParametersForDSC", "", Justification  =  "Temporary workaround for issue introduced in PSSA v1.18")]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSDSCUseIdenticalMandatoryParametersForDSC", "", Justification = "Temporary workaround for issue introduced in PSSA v1.18")]
     param
     (
         [Parameter(Mandatory = $true)]
@@ -409,7 +409,7 @@ function Set-TargetResource
 
     $PSBoundParameters.Ensure = $Ensure
 
-    Invoke-SPDSCCommand -Credential $InstallAccount `
+    Invoke-SPDscCommand -Credential $InstallAccount `
         -Arguments $PSBoundParameters `
         -ScriptBlock {
 
@@ -457,7 +457,7 @@ function Set-TargetResource
         }
         $coreProperties = $userProfileConfigManager.ProfilePropertyManager.GetCoreProperties()
 
-        $userProfileSubTypeManager = Get-SPDSCUserProfileSubTypeManager $context
+        $userProfileSubTypeManager = Get-SPDscUserProfileSubTypeManager $context
         $userProfileSubType = $userProfileSubTypeManager.GetProfileSubtype("UserProfile")
 
         $userProfileProperty = $userProfileSubType.Properties.GetPropertyByName($params.Name)
@@ -679,7 +679,7 @@ function Set-TargetResource
 function Test-TargetResource
 {
     [CmdletBinding()]
-    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSDSCUseIdenticalMandatoryParametersForDSC", "", Justification  =  "Temporary workaround for issue introduced in PSSA v1.18")]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSDSCUseIdenticalMandatoryParametersForDSC", "", Justification = "Temporary workaround for issue introduced in PSSA v1.18")]
     [OutputType([System.Boolean])]
     param
     (
@@ -797,6 +797,9 @@ function Test-TargetResource
     $PSBoundParameters.Ensure = $Ensure
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
+
+    Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
+    Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
 
     if ($Ensure -eq "Present")
     {

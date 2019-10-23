@@ -3,16 +3,16 @@ param(
     [Parameter()]
     [string]
     $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
-                                         -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
-                                         -Resolve)
+            -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
+            -Resolve)
 )
 
 Import-Module -Name (Join-Path -Path $PSScriptRoot `
-                                -ChildPath "..\UnitTestHelper.psm1" `
-                                -Resolve)
+        -ChildPath "..\UnitTestHelper.psm1" `
+        -Resolve)
 
 $Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointCmdletModule `
-                                              -DscResource "SPWebAppThrottlingSettings"
+    -DscResource "SPWebAppThrottlingSettings"
 
 Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
     InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
@@ -26,68 +26,68 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         Mock -CommandName Get-SPAuthenticationProvider -MockWith {
             return @{
                 DisableKerberos = $true
-                AllowAnonymous = $false
+                AllowAnonymous  = $false
             }
         }
 
         # Test contexts
         Context -Name "The web appliation exists and has the correct throttling settings" -Fixture {
             $testParams = @{
-                WebAppUrl = "http://sites.sharepoint.com"
-                ListViewThreshold = 1000
-                AllowObjectModelOverride = $true
-                AdminThreshold = 2000
-                ListViewLookupThreshold = 12
-                HappyHourEnabled = $true
-                HappyHour = (New-CimInstance -ClassName MSFT_SPWebApplicationHappyHour -Property @{
-                    Hour = 2
-                    Minute = 0
-                    Duration = 1
-                } -ClientOnly)
+                WebAppUrl                 = "http://sites.sharepoint.com"
+                ListViewThreshold         = 1000
+                AllowObjectModelOverride  = $true
+                AdminThreshold            = 2000
+                ListViewLookupThreshold   = 12
+                HappyHourEnabled          = $true
+                HappyHour                 = (New-CimInstance -ClassName MSFT_SPWebApplicationHappyHour -Property @{
+                        Hour     = 2
+                        Minute   = 0
+                        Duration = 1
+                    } -ClientOnly)
                 UniquePermissionThreshold = 100
-                RequestThrottling = $true
-                ChangeLogEnabled = $true
-                ChangeLogExpiryDays = 30
-                EventHandlersEnabled = $true
+                RequestThrottling         = $true
+                ChangeLogEnabled          = $true
+                ChangeLogExpiryDays       = 30
+                EventHandlersEnabled      = $true
             }
 
             Mock -CommandName Get-SPWebapplication -MockWith { return @(@{
-                DisplayName = $testParams.Name
-                ApplicationPool = @{
-                    Name = $testParams.ApplicationPool
-                    Username = $testParams.ApplicationPoolAccount
-                }
-                ContentDatabases = @(
-                    @{
-                        Name = "SP_Content_01"
-                        Server = "sql.domain.local"
-                    }
-                )
-                IisSettings = @(
-                    @{ Path = "C:\inetpub\wwwroot\something" }
-                )
-                Url = $testParams.WebAppUrl
-                MaxItemsPerThrottledOperation = $testParams.ListViewThreshold
-                AllowOMCodeOverrideThrottleSettings = $testParams.AllowObjectModelOverride
-                MaxItemsPerThrottledOperationOverride = $testParams.AdminThreshold
-                MaxQueryLookupFields = $testParams.ListViewLookupThreshold
-                UnthrottledPrivilegedOperationWindowEnabled = $testParams.HappyHourEnabled
-                DailyStartUnthrottledPrivilegedOperationsHour = $testParams.HappyHour.Hour
-                DailyStartUnthrottledPrivilegedOperationsMinute = $testParams.HappyHour.Minute
-                DailyUnthrottledPrivilegedOperationsDuration = $testParams.HappyHour.Duration
-                MaxUniquePermScopesPerList = $testParams.UniquePermissionThreshold
-                HttpThrottleSettings = @{
-                    PerformThrottle = $testParams.RequestThrottling
-                }
-                ChangeLogExpirationEnabled = $testParams.ChangeLogEnabled
-                ChangeLogRetentionPeriod = @{
-                    Days = $testParams.ChangeLogExpiryDays
-                }
-                EventHandlersEnabled = $testParams.EventHandlersEnabled
-            })}
+                        DisplayName                                     = $testParams.Name
+                        ApplicationPool                                 = @{
+                            Name     = $testParams.ApplicationPool
+                            Username = $testParams.ApplicationPoolAccount
+                        }
+                        ContentDatabases                                = @(
+                            @{
+                                Name   = "SP_Content_01"
+                                Server = "sql.domain.local"
+                            }
+                        )
+                        IisSettings                                     = @(
+                            @{ Path = "C:\inetpub\wwwroot\something" }
+                        )
+                        Url                                             = $testParams.WebAppUrl
+                        MaxItemsPerThrottledOperation                   = $testParams.ListViewThreshold
+                        AllowOMCodeOverrideThrottleSettings             = $testParams.AllowObjectModelOverride
+                        MaxItemsPerThrottledOperationOverride           = $testParams.AdminThreshold
+                        MaxQueryLookupFields                            = $testParams.ListViewLookupThreshold
+                        UnthrottledPrivilegedOperationWindowEnabled     = $testParams.HappyHourEnabled
+                        DailyStartUnthrottledPrivilegedOperationsHour   = $testParams.HappyHour.Hour
+                        DailyStartUnthrottledPrivilegedOperationsMinute = $testParams.HappyHour.Minute
+                        DailyUnthrottledPrivilegedOperationsDuration    = $testParams.HappyHour.Duration
+                        MaxUniquePermScopesPerList                      = $testParams.UniquePermissionThreshold
+                        HttpThrottleSettings                            = @{
+                            PerformThrottle = $testParams.RequestThrottling
+                        }
+                        ChangeLogExpirationEnabled                      = $testParams.ChangeLogEnabled
+                        ChangeLogRetentionPeriod                        = @{
+                            Days = $testParams.ChangeLogExpiryDays
+                        }
+                        EventHandlersEnabled                            = $testParams.EventHandlersEnabled
+                    }) }
 
             It "Should return the current data from the get method" {
-                Get-TargetResource @testParams | Should Not BeNullOrEmpty
+                (Get-TargetResource @testParams).ListViewThreshold | Should Be $testParams.ListViewThreshold
             }
 
             It "Should return true from the test method" {
@@ -97,22 +97,22 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "The web appliation exists and uses incorrect throttling settings" -Fixture {
             $testParams = @{
-                WebAppUrl = "http://sites.sharepoint.com"
-                ListViewThreshold = 1000
-                AllowObjectModelOverride = $true
-                AdminThreshold = 2000
-                ListViewLookupThreshold = 12
-                HappyHourEnabled = $true
-                HappyHour = (New-CimInstance -ClassName MSFT_SPWebApplicationHappyHour -Property @{
-                    Hour = 2
-                    Minute = 0
-                    Duration = 1
-                } -ClientOnly)
+                WebAppUrl                 = "http://sites.sharepoint.com"
+                ListViewThreshold         = 1000
+                AllowObjectModelOverride  = $true
+                AdminThreshold            = 2000
+                ListViewLookupThreshold   = 12
+                HappyHourEnabled          = $true
+                HappyHour                 = (New-CimInstance -ClassName MSFT_SPWebApplicationHappyHour -Property @{
+                        Hour     = 2
+                        Minute   = 0
+                        Duration = 1
+                    } -ClientOnly)
                 UniquePermissionThreshold = 100
-                RequestThrottling = $true
-                ChangeLogEnabled = $true
-                ChangeLogExpiryDays = 30
-                EventHandlersEnabled = $true
+                RequestThrottling         = $true
+                ChangeLogEnabled          = $true
+                ChangeLogExpiryDays       = 30
+                EventHandlersEnabled      = $true
             }
 
             Mock -CommandName Get-SPWebapplication -MockWith {
@@ -124,36 +124,36 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 } -PassThru
 
                 $webApp = @{
-                    DisplayName = $testParams.Name
-                    ApplicationPool = @{
-                        Name = $testParams.ApplicationPool
+                    DisplayName                                     = $testParams.Name
+                    ApplicationPool                                 = @{
+                        Name     = $testParams.ApplicationPool
                         Username = $testParams.ApplicationPoolAccount
                     }
-                    ContentDatabases = @(
+                    ContentDatabases                                = @(
                         @{
-                            Name = "SP_Content_01"
+                            Name   = "SP_Content_01"
                             Server = "sql.domain.local"
                         }
                     )
-                    IisSettings = @(
+                    IisSettings                                     = @(
                         @{ Path = "C:\inetpub\wwwroot\something" }
                     )
-                    Url = $testParams.WebAppUrl
-                    MaxItemsPerThrottledOperation = 1
-                    AllowOMCodeOverrideThrottleSettings = $testParams.AllowObjectModelOverride
-                    MaxItemsPerThrottledOperationOverride = $testParams.AdminThreshold
-                    MaxQueryLookupFields = $testParams.ListViewLookupThreshold
-                    UnthrottledPrivilegedOperationWindowEnabled = $testParams.HappyHourEnabled
-                    DailyStartUnthrottledPrivilegedOperationsHour = $testParams.HappyHour.Hour
+                    Url                                             = $testParams.WebAppUrl
+                    MaxItemsPerThrottledOperation                   = 1
+                    AllowOMCodeOverrideThrottleSettings             = $testParams.AllowObjectModelOverride
+                    MaxItemsPerThrottledOperationOverride           = $testParams.AdminThreshold
+                    MaxQueryLookupFields                            = $testParams.ListViewLookupThreshold
+                    UnthrottledPrivilegedOperationWindowEnabled     = $testParams.HappyHourEnabled
+                    DailyStartUnthrottledPrivilegedOperationsHour   = $testParams.HappyHour.Hour
                     DailyStartUnthrottledPrivilegedOperationsMinute = $testParams.HappyHour.Minute
-                    DailyUnthrottledPrivilegedOperationsDuration = $testParams.HappyHour.Duration
-                    MaxUniquePermScopesPerList = $testParams.UniquePermissionThreshold
-                    HttpThrottleSettings = $httpThrottle
-                    ChangeLogExpirationEnabled = $testParams.ChangeLogEnabled
-                    ChangeLogRetentionPeriod = @{
+                    DailyUnthrottledPrivilegedOperationsDuration    = $testParams.HappyHour.Duration
+                    MaxUniquePermScopesPerList                      = $testParams.UniquePermissionThreshold
+                    HttpThrottleSettings                            = $httpThrottle
+                    ChangeLogExpirationEnabled                      = $testParams.ChangeLogEnabled
+                    ChangeLogRetentionPeriod                        = @{
                         Days = $testParams.ChangeLogExpiryDays
                     }
-                    EventHandlersEnabled = $testParams.EventHandlersEnabled
+                    EventHandlersEnabled                            = $testParams.EventHandlersEnabled
                 }
                 $webApp = $webApp | Add-Member -MemberType ScriptMethod -Name Update -Value {
                     $Global:SPDscWebApplicationUpdateCalled = $true
@@ -164,7 +164,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             It "Should return the current data from the get method" {
-                Get-TargetResource @testParams | Should Not BeNullOrEmpty
+                (Get-TargetResource @testParams).ListViewThreshold | Should Be 1
             }
 
             It "Should return false from the test method" {
@@ -179,22 +179,22 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             $testParams = @{
-                WebAppUrl = "http://sites.sharepoint.com"
-                ListViewThreshold = 1000
-                AllowObjectModelOverride = $true
-                AdminThreshold = 2000
-                ListViewLookupThreshold = 12
-                HappyHourEnabled = $true
-                HappyHour = (New-CimInstance -ClassName MSFT_SPWebApplicationHappyHour -Property @{
-                    Hour = 5
-                    Minute = 0
-                    Duration = 1
-                } -ClientOnly)
+                WebAppUrl                 = "http://sites.sharepoint.com"
+                ListViewThreshold         = 1000
+                AllowObjectModelOverride  = $true
+                AdminThreshold            = 2000
+                ListViewLookupThreshold   = 12
+                HappyHourEnabled          = $true
+                HappyHour                 = (New-CimInstance -ClassName MSFT_SPWebApplicationHappyHour -Property @{
+                        Hour     = 5
+                        Minute   = 0
+                        Duration = 1
+                    } -ClientOnly)
                 UniquePermissionThreshold = 100
-                RequestThrottling = $true
-                ChangeLogEnabled = $true
-                ChangeLogExpiryDays = 30
-                EventHandlersEnabled = $true
+                RequestThrottling         = $true
+                ChangeLogEnabled          = $true
+                ChangeLogExpiryDays       = 30
+                EventHandlersEnabled      = $true
             }
             $Global:SPDscWebApplicationUpdateCalled = $false
             $Global:SPDscWebApplicationUpdateHappyHourCalled = $false
@@ -206,53 +206,53 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
             It "Should throw exceptions where invalid happy hour settings are provided" {
                 $testParams = @{
-                    Name = "SharePoint Sites"
-                    ApplicationPool = "SharePoint Web Apps"
+                    Name                   = "SharePoint Sites"
+                    ApplicationPool        = "SharePoint Web Apps"
                     ApplicationPoolAccount = "DEMO\ServiceAccount"
-                    WebAppUrl = "http://sites.sharepoint.com"
-                    AuthenticationMethod = "NTLM"
-                    ThrottlingSettings = (New-CimInstance -ClassName MSFT_SPWebApplicationThrottling -Property @{
-                        HappyHourEnabled = $true
-                        HappyHour = (New-CimInstance -ClassName MSFT_SPWebApplicationHappyHour -Property @{
-                            Hour = 100
-                            Minute = 0
-                            Duration = 1
+                    WebAppUrl              = "http://sites.sharepoint.com"
+                    AuthenticationMethod   = "NTLM"
+                    ThrottlingSettings     = (New-CimInstance -ClassName MSFT_SPWebApplicationThrottling -Property @{
+                            HappyHourEnabled = $true
+                            HappyHour        = (New-CimInstance -ClassName MSFT_SPWebApplicationHappyHour -Property @{
+                                    Hour     = 100
+                                    Minute   = 0
+                                    Duration = 1
+                                } -ClientOnly)
                         } -ClientOnly)
-                    } -ClientOnly)
                 }
                 { Set-TargetResource @testParams } | Should throw
 
                 $testParams = @{
-                    Name = "SharePoint Sites"
-                    ApplicationPool = "SharePoint Web Apps"
+                    Name                   = "SharePoint Sites"
+                    ApplicationPool        = "SharePoint Web Apps"
                     ApplicationPoolAccount = "DEMO\ServiceAccount"
-                    WebAppUrl = "http://sites.sharepoint.com"
-                    AuthenticationMethod = "NTLM"
-                    ThrottlingSettings = (New-CimInstance -ClassName MSFT_SPWebApplicationThrottling -Property @{
-                        HappyHourEnabled = $true
-                        HappyHour = (New-CimInstance -ClassName MSFT_SPWebApplicationHappyHour -Property @{
-                            Hour = 5
-                            Minute = 100
-                            Duration = 1
+                    WebAppUrl              = "http://sites.sharepoint.com"
+                    AuthenticationMethod   = "NTLM"
+                    ThrottlingSettings     = (New-CimInstance -ClassName MSFT_SPWebApplicationThrottling -Property @{
+                            HappyHourEnabled = $true
+                            HappyHour        = (New-CimInstance -ClassName MSFT_SPWebApplicationHappyHour -Property @{
+                                    Hour     = 5
+                                    Minute   = 100
+                                    Duration = 1
+                                } -ClientOnly)
                         } -ClientOnly)
-                    } -ClientOnly)
                 }
                 { Set-TargetResource @testParams } | Should throw
 
                 $testParams = @{
-                    Name = "SharePoint Sites"
-                    ApplicationPool = "SharePoint Web Apps"
+                    Name                   = "SharePoint Sites"
+                    ApplicationPool        = "SharePoint Web Apps"
                     ApplicationPoolAccount = "DEMO\ServiceAccount"
-                    WebAppUrl = "http://sites.sharepoint.com"
-                    AuthenticationMethod = "NTLM"
-                    ThrottlingSettings = (New-CimInstance -ClassName MSFT_SPWebApplicationThrottling -Property @{
-                        HappyHourEnabled = $true
-                        HappyHour = (New-CimInstance -ClassName MSFT_SPWebApplicationHappyHour -Property @{
-                            Hour = 5
-                            Minute = 0
-                            Duration = 100
+                    WebAppUrl              = "http://sites.sharepoint.com"
+                    AuthenticationMethod   = "NTLM"
+                    ThrottlingSettings     = (New-CimInstance -ClassName MSFT_SPWebApplicationThrottling -Property @{
+                            HappyHourEnabled = $true
+                            HappyHour        = (New-CimInstance -ClassName MSFT_SPWebApplicationHappyHour -Property @{
+                                    Hour     = 5
+                                    Minute   = 0
+                                    Duration = 100
+                                } -ClientOnly)
                         } -ClientOnly)
-                    } -ClientOnly)
                 }
                 { Set-TargetResource @testParams } | Should throw
             }
