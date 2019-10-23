@@ -3,16 +3,16 @@ param(
     [Parameter()]
     [string]
     $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
-                                         -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
-                                         -Resolve)
+            -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
+            -Resolve)
 )
 
 Import-Module -Name (Join-Path -Path $PSScriptRoot `
-                                -ChildPath "..\UnitTestHelper.psm1" `
-                                -Resolve)
+        -ChildPath "..\UnitTestHelper.psm1" `
+        -Resolve)
 
 $Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointCmdletModule `
-                                              -DscResource "SPBlobCacheSettings"
+    -DscResource "SPBlobCacheSettings"
 
 Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
     InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
@@ -41,34 +41,34 @@ namespace Microsoft.SharePoint.Administration {
         # Mocks for all contexts
         Mock -CommandName Get-SPWebApplication -MockWith {
             return @{
-                IISSettings =  @(@{
-                    Path = $Global:SPDscWebConfigRealPath
-                })
+                IISSettings = @(@{
+                        Path = $Global:SPDscWebConfigRealPath
+                    })
             }
         }
 
         Mock -CommandName Get-SPServiceInstance -MockWith {
             return @(
                 @{
-                    Name = ""
+                    Name     = ""
                     TypeName = "Microsoft SharePoint Foundation Web Application"
                 } | Add-Member -MemberType ScriptMethod `
                     -Name GetType `
                     -Value {
-                        return @{
-                            Name = "SPWebServiceInstance"
-                        }
-            } -PassThru -Force | Add-Member -Name Name `
-            -MemberType ScriptProperty `
-            -PassThru `
-            {
-                # get
-                ""
-            }`
-            {
-                # set
-                param ( $arg )
-            }
+                    return @{
+                        Name = "SPWebServiceInstance"
+                    }
+                } -PassThru -Force | Add-Member -Name Name `
+                    -MemberType ScriptProperty `
+                    -PassThru `
+                {
+                    # get
+                    ""
+                }`
+                {
+                    # set
+                    param ( $arg )
+                }
             )
         }
 
@@ -91,7 +91,7 @@ namespace Microsoft.SharePoint.Administration {
                 Zone        = "Default"
                 EnableCache = $true
                 Location    = "c:\BlobCache"
-                MaxSizeInGB     = 30
+                MaxSizeInGB = 30
                 FileTypes   = "\.(gif|jpg|jpeg)$"
             }
 
@@ -130,14 +130,14 @@ namespace Microsoft.SharePoint.Administration {
 
             Mock -CommandName Test-Path -MockWith { return $true }
 
-            Mock -CommandName Copy-Item -MockWith {}
+            Mock -CommandName Copy-Item -MockWith { }
 
             It "Should return 0 from the get method" {
                 (Get-TargetResource @testParams).MaxSizeInGB | Should Be 0
             }
 
             It "Should return false from the test method" {
-                Test-TargetResource @testParams  | Should Be $false
+                Test-TargetResource @testParams | Should Be $false
             }
 
             It "Should return MaxSize 30 in web.config from the set method" {
@@ -153,7 +153,7 @@ namespace Microsoft.SharePoint.Administration {
                 Zone        = "Default"
                 EnableCache = $true
                 Location    = "c:\BlobCache"
-                MaxSizeInGB     = 30
+                MaxSizeInGB = 30
                 FileTypes   = "\.(gif|jpg|jpeg)$"
             }
 
@@ -165,9 +165,9 @@ namespace Microsoft.SharePoint.Administration {
 </configuration>'
 
             Mock -CommandName Test-Path -MockWith { return $false }
-            Mock -CommandName New-Item -MockWith {}
+            Mock -CommandName New-Item -MockWith { }
 
-            Mock -CommandName Copy-Item -MockWith {}
+            Mock -CommandName Copy-Item -MockWith { }
 
             It "Should return values from the get method" {
                 Get-TargetResource @testParams | Should Not BeNullOrEmpty
@@ -203,7 +203,7 @@ namespace Microsoft.SharePoint.Administration {
 
             Mock -CommandName Test-Path -MockWith { return $true }
 
-            Mock -CommandName Copy-Item -MockWith {}
+            Mock -CommandName Copy-Item -MockWith { }
 
             It "Should return values from the get method" {
                 Get-TargetResource @testParams | Should Not BeNullOrEmpty
@@ -227,7 +227,7 @@ namespace Microsoft.SharePoint.Administration {
                 Zone        = "Default"
                 EnableCache = $true
                 Location    = "c:\BlobCache"
-                MaxSizeInGB     = 30
+                MaxSizeInGB = 30
                 FileTypes   = "\.(gif|jpg|jpeg)$"
             }
 
@@ -242,7 +242,7 @@ namespace Microsoft.SharePoint.Administration {
                 $IISSettings = @(@{
                         Path = $Global:SPDscWebConfigRealPath
                     })
-                $iisSettingsCol = {$IISSettings}.Invoke()
+                $iisSettingsCol = { $IISSettings }.Invoke()
 
 
                 $webapp = @{
@@ -254,7 +254,7 @@ namespace Microsoft.SharePoint.Administration {
 
             Mock -CommandName Test-Path -MockWith { return $true }
 
-            Mock -CommandName Copy-Item -MockWith {}
+            Mock -CommandName Copy-Item -MockWith { }
 
             It "Should return values from the get method" {
                 Get-TargetResource @testParams | Should Not BeNullOrEmpty
@@ -277,7 +277,7 @@ namespace Microsoft.SharePoint.Administration {
                 Zone        = "Default"
                 EnableCache = $true
                 Location    = "c:\BlobCache"
-                MaxSizeInGB     = 30
+                MaxSizeInGB = 30
                 FileTypes   = "\.(gif|jpg|jpeg)$"
             }
 
@@ -315,7 +315,7 @@ namespace Microsoft.SharePoint.Administration {
 
             Mock -CommandName Test-Path -MockWith { return $true }
 
-            Mock -CommandName Copy-Item -MockWith {}
+            Mock -CommandName Copy-Item -MockWith { }
 
             It "Should return values from the get method" {
                 Get-TargetResource @testParams | Should Not BeNullOrEmpty
@@ -338,7 +338,7 @@ namespace Microsoft.SharePoint.Administration {
                 Zone        = "Default"
                 EnableCache = $true
                 Location    = "c:\BlobCache"
-                MaxSizeInGB     = 30
+                MaxSizeInGB = 30
                 FileTypes   = "\.(gif|jpg|jpeg)$"
             }
 
@@ -355,20 +355,20 @@ namespace Microsoft.SharePoint.Administration {
                     $null | Add-Member -MemberType ScriptMethod `
                         -Name GetType `
                         -Value {
-                            return @{
-                                Name = "SPWebServiceInstance"
-                            }
-                } -PassThru -Force | Add-Member -Name Name `
-                -MemberType ScriptProperty `
-                -PassThru `
-                {
-                    # get
-                    ""
-                }`
-                {
-                    # set
-                    param ( $arg )
-                }
+                        return @{
+                            Name = "SPWebServiceInstance"
+                        }
+                    } -PassThru -Force | Add-Member -Name Name `
+                        -MemberType ScriptProperty `
+                        -PassThru `
+                    {
+                        # get
+                        ""
+                    }`
+                    {
+                        # set
+                        param ( $arg )
+                    }
                 )
             }
 

@@ -59,21 +59,34 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting web application '$WebAppUrl' throttling settings"
 
-    $paramArgs = @($PSBoundParameters,$PSScriptRoot)
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $paramArgs -ScriptBlock {
+    $paramArgs = @($PSBoundParameters, $PSScriptRoot)
+    $result = Invoke-SPDscCommand -Credential $InstallAccount -Arguments $paramArgs -ScriptBlock {
         $params = $args[0]
         $ScriptRoot = $args[1]
 
         $wa = Get-SPWebApplication -Identity $params.WebAppUrl -ErrorAction SilentlyContinue
         if ($null -eq $wa)
         {
-            return $null
+            return @{
+                WebAppUrl                 = $null
+                ListViewThreshold         = $null
+                AllowObjectModelOverride  = $null
+                AdminThreshold            = $null
+                ListViewLookupThreshold   = $null
+                HappyHourEnabled          = $null
+                HappyHour                 = $null
+                UniquePermissionThreshold = $null
+                RequestThrottling         = $null
+                ChangeLogEnabled          = $null
+                ChangeLogExpiryDays       = $null
+                EventHandlersEnabled      = $null
+            }
         }
 
         $relPath = "..\..\Modules\SharePointDsc.WebApplication\SPWebApplication.Throttling.psm1"
         Import-Module -Name (Join-Path -Path $ScriptRoot -ChildPath $relPath -Resolve)
 
-        $result = Get-SPDSCWebApplicationThrottlingConfig -WebApplication $wa
+        $result = Get-SPDscWebApplicationThrottlingConfig -WebApplication $wa
         $result.Add("WebAppUrl", $params.WebAppUrl)
         $result.Add("InstallAccount", $params.InstallAccount)
         return $result
@@ -141,9 +154,9 @@ function Set-TargetResource
 
     Write-Verbose -Message "Setting web application '$WebAppUrl' throttling settings"
 
-    $paramArgs = @($PSBoundParameters,$PSScriptRoot)
+    $paramArgs = @($PSBoundParameters, $PSScriptRoot)
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $paramArgs -ScriptBlock {
+    $null = Invoke-SPDscCommand -Credential $InstallAccount -Arguments $paramArgs -ScriptBlock {
         $params = $args[0]
         $ScriptRoot = $args[1]
 
@@ -151,12 +164,11 @@ function Set-TargetResource
         if ($null -eq $wa)
         {
             throw "Web application $($params.WebAppUrl) was not found"
-            return
         }
 
         $relPath = "..\..\Modules\SharePointDsc.WebApplication\SPWebApplication.Throttling.psm1"
         Import-Module -Name (Join-Path -Path $ScriptRoot -ChildPath $relPath -Resolve)
-        Set-SPDSCWebApplicationThrottlingConfig -WebApplication $wa -Settings $params
+        Set-SPDscWebApplicationThrottlingConfig -WebApplication $wa -Settings $params
         $wa.HttpThrottleSettings.Update()
         $wa.Update()
 
@@ -165,7 +177,7 @@ function Set-TargetResource
         {
             # Happy hour settins use separate update method so use a fresh web app to update these
             $wa2 = Get-SPWebApplication -Identity $params.WebAppUrl
-            Set-SPDSCWebApplicationHappyHourConfig -WebApplication $wa2 -Settings $params.HappyHour
+            Set-SPDscWebApplicationHappyHourConfig -WebApplication $wa2 -Settings $params.HappyHour
             $wa2.Update()
         }
     }
@@ -234,15 +246,13 @@ function Test-TargetResource
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
-    if ($null -eq $CurrentValues)
-    {
-        return $false
-    }
+    Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
+    Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
 
     $relPath = "..\..\Modules\SharePointDsc.WebApplication\SPWebApplication.Throttling.psm1"
     Import-Module -Name (Join-Path -Path $PSScriptRoot -ChildPath $relPath -Resolve)
-    return Test-SPDSCWebApplicationThrottlingConfig -CurrentSettings $CurrentValues `
-                                                    -DesiredSettings $PSBoundParameters
+    return Test-SPDscWebApplicationThrottlingConfig -CurrentSettings $CurrentValues `
+        -DesiredSettings $PSBoundParameters
 }
 
 Export-ModuleMember -Function *-TargetResource

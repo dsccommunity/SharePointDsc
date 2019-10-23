@@ -4,49 +4,49 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [Parameter(Mandatory = $true)]  
-        [System.String] 
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $Url,
-        
-        [Parameter()]  
+
+        [Parameter()]
         [System.String]
         $ProjectProfessionalMinBuildNumber,
 
-        [Parameter()]  
+        [Parameter()]
         [System.String]
         $ServerCurrency,
 
-        [Parameter()]  
+        [Parameter()]
         [System.Boolean]
         $EnforceServerCurrency,
 
-        [Parameter()] 
-        [System.Management.Automation.PSCredential] 
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 
     Write-Verbose -Message "Getting additional settings for $Url"
 
-    if ((Get-SPDSCInstalledProductVersion).FileMajorPart -lt 16) 
+    if ((Get-SPDscInstalledProductVersion).FileMajorPart -lt 16)
     {
         throw [Exception] ("Support for Project Server in SharePointDsc is only valid for " + `
-                           "SharePoint 2016 and 2019.")
+                "SharePoint 2016 and 2019.")
     }
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
-                                  -Arguments @($PSBoundParameters, $PSScriptRoot) `
-                                  -ScriptBlock {
+    $result = Invoke-SPDscCommand -Credential $InstallAccount `
+        -Arguments @($PSBoundParameters, $PSScriptRoot) `
+        -ScriptBlock {
         $params = $args[0]
         $scriptRoot = $args[1]
-        
+
         $modulePath = "..\..\Modules\SharePointDsc.ProjectServer\ProjectServerConnector.psm1"
         Import-Module -Name (Join-Path -Path $scriptRoot -ChildPath $modulePath -Resolve)
 
         $webAppUrl = (Get-SPSite -Identity $params.Url).WebApplication.Url
         $useKerberos = -not (Get-SPAuthenticationProvider -WebApplication $webAppUrl -Zone Default).DisableKerberos
         $adminService = New-SPDscProjectServerWebService -PwaUrl $params.Url `
-                                                         -EndpointName Admin `
-                                                         -UseKerberos:$useKerberos
+            -EndpointName Admin `
+            -UseKerberos:$useKerberos
 
         $script:ProjectProfessionalMinBuildNumberValue = $null
         $script:ServerCurrencyValue = $null
@@ -59,11 +59,11 @@ function Get-TargetResource
         }
 
         return @{
-            Url = $params.Url
+            Url                               = $params.Url
             ProjectProfessionalMinBuildNumber = $script:ProjectProfessionalMinBuildNumberValue
-            ServerCurrency = $script:ServerCurrencyValue
-            EnforceServerCurrency = $script:EnforceServerCurrencyValue
-            InstallAccount = $params.InstallAccount
+            ServerCurrency                    = $script:ServerCurrencyValue
+            EnforceServerCurrency             = $script:EnforceServerCurrencyValue
+            InstallAccount                    = $params.InstallAccount
         }
     }
     return $result
@@ -75,49 +75,49 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [Parameter(Mandatory = $true)]  
-        [System.String] 
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $Url,
-        
-        [Parameter()]  
+
+        [Parameter()]
         [System.String]
         $ProjectProfessionalMinBuildNumber,
 
-        [Parameter()]  
+        [Parameter()]
         [System.String]
         $ServerCurrency,
-        
-        [Parameter()]  
+
+        [Parameter()]
         [System.Boolean]
         $EnforceServerCurrency,
 
-        [Parameter()] 
-        [System.Management.Automation.PSCredential] 
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 
     Write-Verbose -Message "Setting additional settings for $Url"
 
-    if ((Get-SPDSCInstalledProductVersion).FileMajorPart -lt 16) 
+    if ((Get-SPDscInstalledProductVersion).FileMajorPart -lt 16)
     {
         throw [Exception] ("Support for Project Server in SharePointDsc is only valid for " + `
-                           "SharePoint 2016 and 2019.")
+                "SharePoint 2016 and 2019.")
     }
 
-    Invoke-SPDSCCommand -Credential $InstallAccount `
-                        -Arguments @($PSBoundParameters, $PSScriptRoot) `
-                        -ScriptBlock {
+    Invoke-SPDscCommand -Credential $InstallAccount `
+        -Arguments @($PSBoundParameters, $PSScriptRoot) `
+        -ScriptBlock {
         $params = $args[0]
         $scriptRoot = $args[1]
-        
+
         $modulePath = "..\..\Modules\SharePointDsc.ProjectServer\ProjectServerConnector.psm1"
         Import-Module -Name (Join-Path -Path $scriptRoot -ChildPath $modulePath -Resolve)
 
         $webAppUrl = (Get-SPSite -Identity $params.Url).WebApplication.Url
         $useKerberos = -not (Get-SPAuthenticationProvider -WebApplication $webAppUrl -Zone Default).DisableKerberos
         $adminService = New-SPDscProjectServerWebService -PwaUrl $params.Url `
-                                                         -EndpointName Admin `
-                                                         -UseKerberos:$useKerberos
+            -EndpointName Admin `
+            -UseKerberos:$useKerberos
 
         Use-SPDscProjectServerWebService -Service $adminService -ScriptBlock {
             if ($params.ContainsKey("ProjectProfessionalMinBuildNumber") -eq $true)
@@ -151,38 +151,41 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [Parameter(Mandatory = $true)]  
-        [System.String] 
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $Url,
-        
-        [Parameter()]  
+
+        [Parameter()]
         [System.String]
         $ProjectProfessionalMinBuildNumber,
 
-        [Parameter()]  
+        [Parameter()]
         [System.String]
         $ServerCurrency,
 
-        [Parameter()]  
+        [Parameter()]
         [System.Boolean]
         $EnforceServerCurrency,
 
-        [Parameter()] 
-        [System.Management.Automation.PSCredential] 
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 
     Write-Verbose -Message "Testing additional settings for $Url"
 
-    $currentValues = Get-TargetResource @PSBoundParameters
+    $CurrentValues = Get-TargetResource @PSBoundParameters
+
+    Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
+    Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
 
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
-                                    -DesiredValues $PSBoundParameters `
-                                    -ValuesToCheck @(
-                                        "ProjectProfessionalMinBuildNumber"
-                                        "ServerCurrency",
-                                        "EnforceServerCurrency"
-                                    )
+        -DesiredValues $PSBoundParameters `
+        -ValuesToCheck @(
+        "ProjectProfessionalMinBuildNumber"
+        "ServerCurrency",
+        "EnforceServerCurrency"
+    )
 }
 
 Export-ModuleMember -Function *-TargetResource

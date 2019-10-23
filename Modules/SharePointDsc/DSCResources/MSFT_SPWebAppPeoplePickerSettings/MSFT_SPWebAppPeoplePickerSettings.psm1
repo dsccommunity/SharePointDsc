@@ -1,7 +1,7 @@
 function Get-TargetResource
 {
     [CmdletBinding()]
-    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSDSCUseIdenticalMandatoryParametersForDSC", "", Justification  =  "Temporary workaround for issue introduced in PSSA v1.18")]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSDSCUseIdenticalMandatoryParametersForDSC", "", Justification = "Temporary workaround for issue introduced in PSSA v1.18")]
     [OutputType([System.Collections.Hashtable])]
     param
     (
@@ -36,13 +36,13 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting People Picker Settings for $WebAppUrl"
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
-                                  -Arguments $PSBoundParameters `
-                                  -ScriptBlock {
+    $result = Invoke-SPDscCommand -Credential $InstallAccount `
+        -Arguments $PSBoundParameters `
+        -ScriptBlock {
         $params = $args[0]
 
         $wa = Get-SPWebApplication -Identity $params.WebAppUrl `
-                                   -ErrorAction SilentlyContinue
+            -ErrorAction SilentlyContinue
 
         if ($null -eq $wa)
         {
@@ -59,20 +59,20 @@ function Get-TargetResource
         $searchADDomains = @()
         foreach ($searchDomain in $wa.PeoplePickerSettings.SearchActiveDirectoryDomains)
         {
-            $searchADDomain = @{}
+            $searchADDomain = @{ }
             $searchADDomain.FQDN = $searchDomain.DomainName
             $searchADDomain.IsForest = $searchDomain.IsForest
-            $searchADDomain.AccessAccount  = $searchDomain.LoginName
+            $searchADDomain.AccessAccount = $searchDomain.LoginName
             $searchADDomains += $searchADDomain
         }
 
         return @{
-                WebAppUrl                      = $params.WebAppUrl
-                ActiveDirectoryCustomFilter    = $wa.PeoplePickerSettings.ActiveDirectoryCustomFilter
-                ActiveDirectoryCustomQuery     = $wa.PeoplePickerSettings.ActiveDirectoryCustomQuery
-                ActiveDirectorySearchTimeout   = $wa.PeoplePickerSettings.ActiveDirectorySearchTimeout.TotalSeconds
-                OnlySearchWithinSiteCollection = $wa.PeoplePickerSettings.OnlySearchWithinSiteCollection
-                SearchActiveDirectoryDomains   = $searchADDomains
+            WebAppUrl                      = $params.WebAppUrl
+            ActiveDirectoryCustomFilter    = $wa.PeoplePickerSettings.ActiveDirectoryCustomFilter
+            ActiveDirectoryCustomQuery     = $wa.PeoplePickerSettings.ActiveDirectoryCustomQuery
+            ActiveDirectorySearchTimeout   = $wa.PeoplePickerSettings.ActiveDirectorySearchTimeout.TotalSeconds
+            OnlySearchWithinSiteCollection = $wa.PeoplePickerSettings.OnlySearchWithinSiteCollection
+            SearchActiveDirectoryDomains   = $searchADDomains
         }
     }
     return $result
@@ -81,8 +81,8 @@ function Get-TargetResource
 function Set-TargetResource
 {
     [CmdletBinding()]
-    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingConvertToSecureStringWithPlainText", "", Justification  =  "Ignoring this because the used AccessAccount does not use SecureString to handle the password")]
-    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSDSCUseIdenticalMandatoryParametersForDSC", "", Justification  =  "Temporary workaround for issue introduced in PSSA v1.18")]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingConvertToSecureStringWithPlainText", "", Justification = "Ignoring this because the used AccessAccount does not use SecureString to handle the password")]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSDSCUseIdenticalMandatoryParametersForDSC", "", Justification = "Temporary workaround for issue introduced in PSSA v1.18")]
     param
     (
         [Parameter(Mandatory = $true)]
@@ -117,10 +117,10 @@ function Set-TargetResource
     Write-Verbose -Message "Setting People Picker Settings for $WebAppUrl"
 
     ## Perform changes
-    Invoke-SPDSCCommand -Credential $InstallAccount `
-                        -Arguments $PSBoundParameters `
-                        -ScriptBlock {
-        $params      = $args[0]
+    Invoke-SPDscCommand -Credential $InstallAccount `
+        -Arguments $PSBoundParameters `
+        -ScriptBlock {
+        $params = $args[0]
 
         $wa = Get-SPWebApplication -Identity $params.WebAppUrl -ErrorAction SilentlyContinue
 
@@ -166,10 +166,10 @@ function Set-TargetResource
             foreach ($searchADDomain in $params.SearchActiveDirectoryDomains)
             {
                 $configuredDomain = $wa.PeoplePickerSettings.SearchActiveDirectoryDomains | `
-                                    Where-Object -FilterScript {
-                                        $_.DomainName -eq $searchADDomain.FQDN -and `
-                                        $_.IsForest -eq $searchADDomain.IsForest
-                                    }
+                    Where-Object -FilterScript {
+                    $_.DomainName -eq $searchADDomain.FQDN -and `
+                        $_.IsForest -eq $searchADDomain.IsForest
+                }
                 if ($null -eq $configuredDomain)
                 {
                     # Add domain
@@ -190,7 +190,7 @@ function Set-TargetResource
                     {
                         $adsearchobj.LoginName = $searchADDomain.AccessAccount.UserName
 
-                        if([string]::IsNullOrEmpty($searchADDomain.AccessAccount.Password))
+                        if ([string]::IsNullOrEmpty($searchADDomain.AccessAccount.Password))
                         {
                             $adsearchobj.SetPassword($null)
                         }
@@ -211,7 +211,7 @@ function Set-TargetResource
             {
                 $specifiedDomain = $params.SearchActiveDirectoryDomains | Where-Object -FilterScript {
                     $_.FQDN -eq $waSearchADDomain.DomainName -and `
-                    $_.IsForest -eq $waSearchADDomain.IsForest
+                        $_.IsForest -eq $waSearchADDomain.IsForest
                 }
 
                 if ($null -eq $specifiedDomain)
@@ -233,7 +233,7 @@ function Set-TargetResource
 function Test-TargetResource
 {
     [CmdletBinding()]
-    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSDSCUseIdenticalMandatoryParametersForDSC", "", Justification  =  "Temporary workaround for issue introduced in PSSA v1.18")]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSDSCUseIdenticalMandatoryParametersForDSC", "", Justification = "Temporary workaround for issue introduced in PSSA v1.18")]
     [OutputType([System.Boolean])]
     param
     (
@@ -270,14 +270,17 @@ function Test-TargetResource
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
+    Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
+    Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
+
     # Testing SearchActiveDirectoryDomains against configured values
     foreach ($searchADDomain in $SearchActiveDirectoryDomains)
     {
         $configuredDomain = $CurrentValues.SearchActiveDirectoryDomains | `
-                            Where-Object -FilterScript {
-                                $_.FQDN -eq $searchADDomain.FQDN -and `
-                                $_.IsForest -eq $searchADDomain.IsForest
-                            }
+            Where-Object -FilterScript {
+            $_.FQDN -eq $searchADDomain.FQDN -and `
+                $_.IsForest -eq $searchADDomain.IsForest
+        }
         if ($null -eq $configuredDomain)
         {
             return $false
@@ -289,7 +292,7 @@ function Test-TargetResource
     {
         $specifiedDomain = $SearchActiveDirectoryDomains | Where-Object -FilterScript {
             $_.FQDN -eq $searchADDomain.FQDN -and `
-            $_.IsForest -eq $searchADDomain.IsForest
+                $_.IsForest -eq $searchADDomain.IsForest
         }
 
         if ($null -eq $specifiedDomain)
@@ -299,11 +302,11 @@ function Test-TargetResource
     }
 
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
-                                    -DesiredValues $PSBoundParameters `
-                                    -ValuesToCheck @("ActiveDirectoryCustomFilter", `
-                                                     "ActiveDirectoryCustomQuery", `
-                                                     "ActiveDirectorySearchTimeout", `
-                                                     "OnlySearchWithinSiteCollection")
+        -DesiredValues $PSBoundParameters `
+        -ValuesToCheck @("ActiveDirectoryCustomFilter", `
+            "ActiveDirectoryCustomQuery", `
+            "ActiveDirectorySearchTimeout", `
+            "OnlySearchWithinSiteCollection")
 }
 
 Export-ModuleMember -Function *-TargetResource

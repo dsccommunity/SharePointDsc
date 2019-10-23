@@ -1,4 +1,4 @@
-function Get-SPDSCWebApplicationWorkflowConfig
+function Get-SPDscWebApplicationWorkflowConfig
 {
     [CmdletBinding()]
     [OutputType([System.Collections.Hashtable])]
@@ -16,7 +16,7 @@ function Get-SPDSCWebApplicationWorkflowConfig
     }
 }
 
-function Set-SPDSCWebApplicationWorkflowConfig
+function Set-SPDscWebApplicationWorkflowConfig
 {
     [CmdletBinding()]
     param(
@@ -44,7 +44,7 @@ function Set-SPDSCWebApplicationWorkflowConfig
     $WebApplication.UpdateWorkflowConfigurationSettings();
 }
 
-function Test-SPDSCWebApplicationWorkflowConfig {
+function Test-SPDscWebApplicationWorkflowConfig {
     [CmdletBinding()]
     [OutputType([System.Boolean])]
     param(

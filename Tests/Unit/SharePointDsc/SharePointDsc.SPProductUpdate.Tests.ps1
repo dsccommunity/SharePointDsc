@@ -14,10 +14,10 @@ Import-Module -Name (Join-Path -Path $PSScriptRoot `
 $Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointCmdletModule `
     -DscResource "SPProductUpdate"
 
-   # Write-Host $PSScriptRoot
+# Write-Host $PSScriptRoot
 $Global:TestRegistryData = Import-PowerShellDataFile -Path (Join-Path -Path $PSScriptRoot `
-    -ChildPath "SharePointDsc.SPProductUpdate.Tests.psd1" `
-    -Resolve)
+        -ChildPath "SharePointDsc.SPProductUpdate.Tests.psd1" `
+        -Resolve)
 
 Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
     InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
@@ -39,7 +39,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             )
 
             $productVersion = 2013
-            if($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 16) {
+            if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 16)
+            {
                 if ($Global:SPDscHelper.CurrentStubBuildNumber.Build.ToString().Length -eq 4)
                 {
                     $productVersion = 2016
@@ -74,7 +75,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
             reg import $modifiedFileDestination *>&1 | Out-Null
 
-            if($PrepDataForTests)
+            if ($PrepDataForTests)
             {
                 Get-Childitem "Registry::$($testRegistryPath)\HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Installer\UserData\S-1-5-18\Products" | Where-Object -FilterScript {
                     $_.PsPath -notlike "*00000000F01FEC"
@@ -86,6 +87,11 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         # Mocks for all contexts
         Mock -CommandName Test-Path {
+            return $true
+        }
+
+        # Additional mock needed for fixing #1087
+        Mock -CommandName Get-SPFarm {
             return $true
         }
 
@@ -111,7 +117,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             return $service
         }
 
-        Mock -CommandName Get-SPDSCInstalledProductVersion {
+        Mock -CommandName Get-SPDscInstalledProductVersion {
             return @{
                 FileMajorPart    = $Global:SPDscHelper.CurrentStubBuildNumber.Major
                 FileBuildPart    = $Global:SPDscHelper.CurrentStubBuildNumber.Build
@@ -129,7 +135,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
         }
 
-        Mock -CommandName Get-SPDSCRegistryKey -MockWith {
+        Mock -CommandName Get-SPDscRegistryKey -MockWith {
             if ($Value -eq "SetupType")
             {
                 return "CLEAN_INSTALL"
@@ -162,7 +168,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             $Path -and $Path.Length -eq 1 -and $Path[0].Contains("HKEY_LOCAL_MACHINE")
         }
 
-        Mock -CommandName Clear-ComObject -MockWith {}
+        Mock -CommandName Clear-ComObject -MockWith { }
 
         # Test contexts
         Context -Name "Specified update file not found" -Fixture {
@@ -184,7 +190,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 { Set-TargetResource @testParams } | Should Throw "Setup file cannot be found"
             }
 
-            It "Should throw exception in the test method"  {
+            It "Should throw exception in the test method" {
                 { Test-TargetResource @testParams } | Should Throw "Setup file cannot be found"
             }
         }
@@ -212,7 +218,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 { Set-TargetResource @testParams } | Should Throw "Setup file is blocked!"
             }
 
-            It "Should throw exception in the test method"  {
+            It "Should throw exception in the test method" {
                 { Test-TargetResource @testParams } | Should Throw "Setup file is blocked!"
             }
         }
@@ -245,6 +251,10 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             Add-TestRegistryData -PatchLevel "RTM"
+
+            Mock -CommandName Get-SPFarm {
+                throw
+            }
 
             Mock -CommandName Get-ItemProperty -MockWith {
                 if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 15)
@@ -294,6 +304,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
             It "Should run the Start-Process function in the set method" {
                 Set-TargetResource @testParams
+                # MockCalled set to 0, as there is no farm available.
+                Assert-MockCalled Get-Service -Exactly 0
                 Assert-MockCalled Start-Process
             }
 
@@ -350,24 +362,32 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             $installerMock = New-Module -AsCustomObject -ScriptBlock {
-                function GetType { # Installer
+                function GetType
+                { # Installer
                     New-Module -AsCustomObject -ScriptBlock {
-                        function InvokeMember {
+                        function InvokeMember
+                        {
                             New-Module -AsCustomObject -ScriptBlock {
-                                function GetType { # InstallerDB
+                                function GetType
+                                { # InstallerDB
                                     New-Module -AsCustomObject -ScriptBlock {
-                                        function InvokeMember {
+                                        function InvokeMember
+                                        {
                                             New-Module -AsCustomObject -ScriptBlock {
-                                                function GetType { # DBView
+                                                function GetType
+                                                { # DBView
                                                     New-Module -AsCustomObject -ScriptBlock {
-                                                        function InvokeMember {
+                                                        function InvokeMember
+                                                        {
                                                             param ($a, $b, $c, $d, $e)
                                                             if ($a -eq "Fetch")
                                                             {
                                                                 New-Module -AsCustomObject -ScriptBlock {
-                                                                    function GetType { # Value
+                                                                    function GetType
+                                                                    { # Value
                                                                         New-Module -AsCustomObject -ScriptBlock {
-                                                                            function InvokeMember {
+                                                                            function InvokeMember
+                                                                            {
                                                                                 param ($a, $b, $c, $d, $e)
                                                                                 if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 15)
                                                                                 {
@@ -468,24 +488,32 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             $installerMock = New-Module -AsCustomObject -ScriptBlock {
-                function GetType { # Installer
+                function GetType
+                { # Installer
                     New-Module -AsCustomObject -ScriptBlock {
-                        function InvokeMember {
+                        function InvokeMember
+                        {
                             New-Module -AsCustomObject -ScriptBlock {
-                                function GetType { # InstallerDB
+                                function GetType
+                                { # InstallerDB
                                     New-Module -AsCustomObject -ScriptBlock {
-                                        function InvokeMember {
+                                        function InvokeMember
+                                        {
                                             New-Module -AsCustomObject -ScriptBlock {
-                                                function GetType { # DBView
+                                                function GetType
+                                                { # DBView
                                                     New-Module -AsCustomObject -ScriptBlock {
-                                                        function InvokeMember {
+                                                        function InvokeMember
+                                                        {
                                                             param ($a, $b, $c, $d, $e)
                                                             if ($a -eq "Fetch")
                                                             {
                                                                 New-Module -AsCustomObject -ScriptBlock {
-                                                                    function GetType { # Value
+                                                                    function GetType
+                                                                    { # Value
                                                                         New-Module -AsCustomObject -ScriptBlock {
-                                                                            function InvokeMember {
+                                                                            function InvokeMember
+                                                                            {
                                                                                 param ($a, $b, $c, $d, $e)
                                                                                 if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 15)
                                                                                 {
@@ -586,24 +614,32 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             $installerMock = New-Module -AsCustomObject -ScriptBlock {
-                function GetType { # Installer
+                function GetType
+                { # Installer
                     New-Module -AsCustomObject -ScriptBlock {
-                        function InvokeMember {
+                        function InvokeMember
+                        {
                             New-Module -AsCustomObject -ScriptBlock {
-                                function GetType { # InstallerDB
+                                function GetType
+                                { # InstallerDB
                                     New-Module -AsCustomObject -ScriptBlock {
-                                        function InvokeMember {
+                                        function InvokeMember
+                                        {
                                             New-Module -AsCustomObject -ScriptBlock {
-                                                function GetType { # DBView
+                                                function GetType
+                                                { # DBView
                                                     New-Module -AsCustomObject -ScriptBlock {
-                                                        function InvokeMember {
+                                                        function InvokeMember
+                                                        {
                                                             param ($a, $b, $c, $d, $e)
                                                             if ($a -eq "Fetch")
                                                             {
                                                                 New-Module -AsCustomObject -ScriptBlock {
-                                                                    function GetType { # Value
+                                                                    function GetType
+                                                                    { # Value
                                                                         New-Module -AsCustomObject -ScriptBlock {
-                                                                            function InvokeMember {
+                                                                            function InvokeMember
+                                                                            {
                                                                                 param ($a, $b, $c, $d, $e)
                                                                                 if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 15)
                                                                                 {
@@ -652,6 +688,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
             It "Should run the Start-Process function in the set method" {
                 Set-TargetResource @testParams
+                Assert-MockCalled Get-Service -Exactly 6
                 Assert-MockCalled Start-Process
             }
 
@@ -700,24 +737,32 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 }
 
                 $installerMock = New-Module -AsCustomObject -ScriptBlock {
-                    function GetType { # Installer
+                    function GetType
+                    { # Installer
                         New-Module -AsCustomObject -ScriptBlock {
-                            function InvokeMember {
+                            function InvokeMember
+                            {
                                 New-Module -AsCustomObject -ScriptBlock {
-                                    function GetType { # InstallerDB
+                                    function GetType
+                                    { # InstallerDB
                                         New-Module -AsCustomObject -ScriptBlock {
-                                            function InvokeMember {
+                                            function InvokeMember
+                                            {
                                                 New-Module -AsCustomObject -ScriptBlock {
-                                                    function GetType { # DBView
+                                                    function GetType
+                                                    { # DBView
                                                         New-Module -AsCustomObject -ScriptBlock {
-                                                            function InvokeMember {
+                                                            function InvokeMember
+                                                            {
                                                                 param ($a, $b, $c, $d, $e)
                                                                 if ($a -eq "Fetch")
                                                                 {
                                                                     New-Module -AsCustomObject -ScriptBlock {
-                                                                        function GetType { # Value
+                                                                        function GetType
+                                                                        { # Value
                                                                             New-Module -AsCustomObject -ScriptBlock {
-                                                                                function InvokeMember {
+                                                                                function InvokeMember
+                                                                                {
                                                                                     param ($a, $b, $c, $d, $e)
                                                                                     if ($Global:SPDscHelper.CurrentStubBuildNumber.Build.ToString().Length -eq 4)
                                                                                     {
@@ -793,24 +838,32 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 }
 
                 $installerMock = New-Module -AsCustomObject -ScriptBlock {
-                    function GetType { # Installer
+                    function GetType
+                    { # Installer
                         New-Module -AsCustomObject -ScriptBlock {
-                            function InvokeMember {
+                            function InvokeMember
+                            {
                                 New-Module -AsCustomObject -ScriptBlock {
-                                    function GetType { # InstallerDB
+                                    function GetType
+                                    { # InstallerDB
                                         New-Module -AsCustomObject -ScriptBlock {
-                                            function InvokeMember {
+                                            function InvokeMember
+                                            {
                                                 New-Module -AsCustomObject -ScriptBlock {
-                                                    function GetType { # DBView
+                                                    function GetType
+                                                    { # DBView
                                                         New-Module -AsCustomObject -ScriptBlock {
-                                                            function InvokeMember {
+                                                            function InvokeMember
+                                                            {
                                                                 param ($a, $b, $c, $d, $e)
                                                                 if ($a -eq "Fetch")
                                                                 {
                                                                     New-Module -AsCustomObject -ScriptBlock {
-                                                                        function GetType { # Value
+                                                                        function GetType
+                                                                        { # Value
                                                                             New-Module -AsCustomObject -ScriptBlock {
-                                                                                function InvokeMember {
+                                                                                function InvokeMember
+                                                                                {
                                                                                     param ($a, $b, $c, $d, $e)
                                                                                     return "15.0.4569"
                                                                                 }
@@ -871,24 +924,32 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 }
 
                 $installerMock = New-Module -AsCustomObject -ScriptBlock {
-                    function GetType { # Installer
+                    function GetType
+                    { # Installer
                         New-Module -AsCustomObject -ScriptBlock {
-                            function InvokeMember {
+                            function InvokeMember
+                            {
                                 New-Module -AsCustomObject -ScriptBlock {
-                                    function GetType { # InstallerDB
+                                    function GetType
+                                    { # InstallerDB
                                         New-Module -AsCustomObject -ScriptBlock {
-                                            function InvokeMember {
+                                            function InvokeMember
+                                            {
                                                 New-Module -AsCustomObject -ScriptBlock {
-                                                    function GetType { # DBView
+                                                    function GetType
+                                                    { # DBView
                                                         New-Module -AsCustomObject -ScriptBlock {
-                                                            function InvokeMember {
+                                                            function InvokeMember
+                                                            {
                                                                 param ($a, $b, $c, $d, $e)
                                                                 if ($a -eq "Fetch")
                                                                 {
                                                                     New-Module -AsCustomObject -ScriptBlock {
-                                                                        function GetType { # Value
+                                                                        function GetType
+                                                                        { # Value
                                                                             New-Module -AsCustomObject -ScriptBlock {
-                                                                                function InvokeMember {
+                                                                                function InvokeMember
+                                                                                {
                                                                                     param ($a, $b, $c, $d, $e)
                                                                                     return "15.0.4571"
                                                                                 }
@@ -949,24 +1010,32 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 }
 
                 $installerMock = New-Module -AsCustomObject -ScriptBlock {
-                    function GetType { # Installer
+                    function GetType
+                    { # Installer
                         New-Module -AsCustomObject -ScriptBlock {
-                            function InvokeMember {
+                            function InvokeMember
+                            {
                                 New-Module -AsCustomObject -ScriptBlock {
-                                    function GetType { # InstallerDB
+                                    function GetType
+                                    { # InstallerDB
                                         New-Module -AsCustomObject -ScriptBlock {
-                                            function InvokeMember {
+                                            function InvokeMember
+                                            {
                                                 New-Module -AsCustomObject -ScriptBlock {
-                                                    function GetType { # DBView
+                                                    function GetType
+                                                    { # DBView
                                                         New-Module -AsCustomObject -ScriptBlock {
-                                                            function InvokeMember {
+                                                            function InvokeMember
+                                                            {
                                                                 param ($a, $b, $c, $d, $e)
                                                                 if ($a -eq "Fetch")
                                                                 {
                                                                     New-Module -AsCustomObject -ScriptBlock {
-                                                                        function GetType { # Value
+                                                                        function GetType
+                                                                        { # Value
                                                                             New-Module -AsCustomObject -ScriptBlock {
-                                                                                function InvokeMember {
+                                                                                function InvokeMember
+                                                                                {
                                                                                     param ($a, $b, $c, $d, $e)
                                                                                     return "15.0.4571"
                                                                                 }
@@ -1062,24 +1131,32 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             $installerMock = New-Module -AsCustomObject -ScriptBlock {
-                function GetType { # Installer
+                function GetType
+                { # Installer
                     New-Module -AsCustomObject -ScriptBlock {
-                        function InvokeMember {
+                        function InvokeMember
+                        {
                             New-Module -AsCustomObject -ScriptBlock {
-                                function GetType { # InstallerDB
+                                function GetType
+                                { # InstallerDB
                                     New-Module -AsCustomObject -ScriptBlock {
-                                        function InvokeMember {
+                                        function InvokeMember
+                                        {
                                             New-Module -AsCustomObject -ScriptBlock {
-                                                function GetType { # DBView
+                                                function GetType
+                                                { # DBView
                                                     New-Module -AsCustomObject -ScriptBlock {
-                                                        function InvokeMember {
+                                                        function InvokeMember
+                                                        {
                                                             param ($a, $b, $c, $d, $e)
                                                             if ($a -eq "Fetch")
                                                             {
                                                                 New-Module -AsCustomObject -ScriptBlock {
-                                                                    function GetType { # Value
+                                                                    function GetType
+                                                                    { # Value
                                                                         New-Module -AsCustomObject -ScriptBlock {
-                                                                            function InvokeMember {
+                                                                            function InvokeMember
+                                                                            {
                                                                                 param ($a, $b, $c, $d, $e)
                                                                                 if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 15)
                                                                                 {
@@ -1194,24 +1271,32 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             $installerMock = New-Module -AsCustomObject -ScriptBlock {
-                function GetType { # Installer
+                function GetType
+                { # Installer
                     New-Module -AsCustomObject -ScriptBlock {
-                        function InvokeMember {
+                        function InvokeMember
+                        {
                             New-Module -AsCustomObject -ScriptBlock {
-                                function GetType { # InstallerDB
+                                function GetType
+                                { # InstallerDB
                                     New-Module -AsCustomObject -ScriptBlock {
-                                        function InvokeMember {
+                                        function InvokeMember
+                                        {
                                             New-Module -AsCustomObject -ScriptBlock {
-                                                function GetType { # DBView
+                                                function GetType
+                                                { # DBView
                                                     New-Module -AsCustomObject -ScriptBlock {
-                                                        function InvokeMember {
+                                                        function InvokeMember
+                                                        {
                                                             param ($a, $b, $c, $d, $e)
                                                             if ($a -eq "Fetch")
                                                             {
                                                                 New-Module -AsCustomObject -ScriptBlock {
-                                                                    function GetType { # Value
+                                                                    function GetType
+                                                                    { # Value
                                                                         New-Module -AsCustomObject -ScriptBlock {
-                                                                            function InvokeMember {
+                                                                            function InvokeMember
+                                                                            {
                                                                                 param ($a, $b, $c, $d, $e)
                                                                                 if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 15)
                                                                                 {
@@ -1317,24 +1402,32 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             $installerMock = New-Module -AsCustomObject -ScriptBlock {
-                function GetType { # Installer
+                function GetType
+                { # Installer
                     New-Module -AsCustomObject -ScriptBlock {
-                        function InvokeMember {
+                        function InvokeMember
+                        {
                             New-Module -AsCustomObject -ScriptBlock {
-                                function GetType { # InstallerDB
+                                function GetType
+                                { # InstallerDB
                                     New-Module -AsCustomObject -ScriptBlock {
-                                        function InvokeMember {
+                                        function InvokeMember
+                                        {
                                             New-Module -AsCustomObject -ScriptBlock {
-                                                function GetType { # DBView
+                                                function GetType
+                                                { # DBView
                                                     New-Module -AsCustomObject -ScriptBlock {
-                                                        function InvokeMember {
+                                                        function InvokeMember
+                                                        {
                                                             param ($a, $b, $c, $d, $e)
                                                             if ($a -eq "Fetch")
                                                             {
                                                                 New-Module -AsCustomObject -ScriptBlock {
-                                                                    function GetType { # Value
+                                                                    function GetType
+                                                                    { # Value
                                                                         New-Module -AsCustomObject -ScriptBlock {
-                                                                            function InvokeMember {
+                                                                            function InvokeMember
+                                                                            {
                                                                                 param ($a, $b, $c, $d, $e)
                                                                                 if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 15)
                                                                                 {
@@ -1436,24 +1529,32 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             $installerMock = New-Module -AsCustomObject -ScriptBlock {
-                function GetType { # Installer
+                function GetType
+                { # Installer
                     New-Module -AsCustomObject -ScriptBlock {
-                        function InvokeMember {
+                        function InvokeMember
+                        {
                             New-Module -AsCustomObject -ScriptBlock {
-                                function GetType { # InstallerDB
+                                function GetType
+                                { # InstallerDB
                                     New-Module -AsCustomObject -ScriptBlock {
-                                        function InvokeMember {
+                                        function InvokeMember
+                                        {
                                             New-Module -AsCustomObject -ScriptBlock {
-                                                function GetType { # DBView
+                                                function GetType
+                                                { # DBView
                                                     New-Module -AsCustomObject -ScriptBlock {
-                                                        function InvokeMember {
+                                                        function InvokeMember
+                                                        {
                                                             param ($a, $b, $c, $d, $e)
                                                             if ($a -eq "Fetch")
                                                             {
                                                                 New-Module -AsCustomObject -ScriptBlock {
-                                                                    function GetType { # Value
+                                                                    function GetType
+                                                                    { # Value
                                                                         New-Module -AsCustomObject -ScriptBlock {
-                                                                            function InvokeMember {
+                                                                            function InvokeMember
+                                                                            {
                                                                                 param ($a, $b, $c, $d, $e)
                                                                                 if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 15)
                                                                                 {
@@ -1555,24 +1656,32 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             $installerMock = New-Module -AsCustomObject -ScriptBlock {
-                function GetType { # Installer
+                function GetType
+                { # Installer
                     New-Module -AsCustomObject -ScriptBlock {
-                        function InvokeMember {
+                        function InvokeMember
+                        {
                             New-Module -AsCustomObject -ScriptBlock {
-                                function GetType { # InstallerDB
+                                function GetType
+                                { # InstallerDB
                                     New-Module -AsCustomObject -ScriptBlock {
-                                        function InvokeMember {
+                                        function InvokeMember
+                                        {
                                             New-Module -AsCustomObject -ScriptBlock {
-                                                function GetType { # DBView
+                                                function GetType
+                                                { # DBView
                                                     New-Module -AsCustomObject -ScriptBlock {
-                                                        function InvokeMember {
+                                                        function InvokeMember
+                                                        {
                                                             param ($a, $b, $c, $d, $e)
                                                             if ($a -eq "Fetch")
                                                             {
                                                                 New-Module -AsCustomObject -ScriptBlock {
-                                                                    function GetType { # Value
+                                                                    function GetType
+                                                                    { # Value
                                                                         New-Module -AsCustomObject -ScriptBlock {
-                                                                            function InvokeMember {
+                                                                            function InvokeMember
+                                                                            {
                                                                                 param ($a, $b, $c, $d, $e)
                                                                                 if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 15)
                                                                                 {
@@ -1677,24 +1786,32 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             $installerMock = New-Module -AsCustomObject -ScriptBlock {
-                function GetType { # Installer
+                function GetType
+                { # Installer
                     New-Module -AsCustomObject -ScriptBlock {
-                        function InvokeMember {
+                        function InvokeMember
+                        {
                             New-Module -AsCustomObject -ScriptBlock {
-                                function GetType { # InstallerDB
+                                function GetType
+                                { # InstallerDB
                                     New-Module -AsCustomObject -ScriptBlock {
-                                        function InvokeMember {
+                                        function InvokeMember
+                                        {
                                             New-Module -AsCustomObject -ScriptBlock {
-                                                function GetType { # DBView
+                                                function GetType
+                                                { # DBView
                                                     New-Module -AsCustomObject -ScriptBlock {
-                                                        function InvokeMember {
+                                                        function InvokeMember
+                                                        {
                                                             param ($a, $b, $c, $d, $e)
                                                             if ($a -eq "Fetch")
                                                             {
                                                                 New-Module -AsCustomObject -ScriptBlock {
-                                                                    function GetType { # Value
+                                                                    function GetType
+                                                                    { # Value
                                                                         New-Module -AsCustomObject -ScriptBlock {
-                                                                            function InvokeMember {
+                                                                            function InvokeMember
+                                                                            {
                                                                                 param ($a, $b, $c, $d, $e)
                                                                                 if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 15)
                                                                                 {

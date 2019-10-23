@@ -9,7 +9,7 @@ function Get-TargetResource
         $Url,
 
         [Parameter(Mandatory = $true)]
-        [ValidateSet("SharePoint","ProjectServer")]
+        [ValidateSet("SharePoint", "ProjectServer")]
         [System.String]
         $PermissionMode,
 
@@ -20,15 +20,15 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting Project Server permission mode for site '$Url'"
 
-    if ((Get-SPDSCInstalledProductVersion).FileMajorPart -lt 16)
+    if ((Get-SPDscInstalledProductVersion).FileMajorPart -lt 16)
     {
         throw [Exception] ("Support for Project Server in SharePointDsc is only valid for " + `
-                           "SharePoint 2016 and 2019.")
+                "SharePoint 2016 and 2019.")
     }
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
-                                  -Arguments $PSBoundParameters `
-                                  -ScriptBlock {
+    $result = Invoke-SPDscCommand -Credential $InstallAccount `
+        -Arguments $PSBoundParameters `
+        -ScriptBlock {
         $params = $args[0]
 
         try
@@ -59,7 +59,7 @@ function Set-TargetResource
         $Url,
 
         [Parameter(Mandatory = $true)]
-        [ValidateSet("SharePoint","ProjectServer")]
+        [ValidateSet("SharePoint", "ProjectServer")]
         [System.String]
         $PermissionMode,
 
@@ -70,15 +70,15 @@ function Set-TargetResource
 
     Write-Verbose -Message "Setting Project Server permission mode for site '$Url'"
 
-    if ((Get-SPDSCInstalledProductVersion).FileMajorPart -lt 16)
+    if ((Get-SPDscInstalledProductVersion).FileMajorPart -lt 16)
     {
         throw [Exception] ("Support for Project Server in SharePointDsc is only valid for " + `
-                           "SharePoint 2016 and 2019.")
+                "SharePoint 2016 and 2019.")
     }
 
-    Invoke-SPDSCCommand -Credential $InstallAccount `
-                        -Arguments $PSBoundParameters `
-                        -ScriptBlock {
+    Invoke-SPDscCommand -Credential $InstallAccount `
+        -Arguments $PSBoundParameters `
+        -ScriptBlock {
         $params = $args[0]
 
         Set-SPProjectPermissionMode -Url $params.Url -Mode $params.PermissionMode
@@ -96,7 +96,7 @@ function Test-TargetResource
         $Url,
 
         [Parameter(Mandatory = $true)]
-        [ValidateSet("SharePoint","ProjectServer")]
+        [ValidateSet("SharePoint", "ProjectServer")]
         [System.String]
         $PermissionMode,
 
@@ -109,9 +109,12 @@ function Test-TargetResource
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
+    Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
+    Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
+
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
-                                    -DesiredValues $PSBoundParameters `
-                                    -ValuesToCheck @("PermissionMode")
+        -DesiredValues $PSBoundParameters `
+        -ValuesToCheck @("PermissionMode")
 
 }
 

@@ -1,4 +1,4 @@
-function Get-SPDSCSearchCrawlSchedule
+function Get-SPDscSearchCrawlSchedule
 {
     [CmdletBinding()]
     [OutputType([System.Collections.Hashtable])]
@@ -45,7 +45,7 @@ function Get-SPDSCSearchCrawlSchedule
     return $result
 }
 
-function Test-SPDSCSearchCrawlSchedule
+function Test-SPDscSearchCrawlSchedule
 {
     [CmdletBinding()]
     [OutputType([System.Boolean])]
@@ -62,25 +62,25 @@ function Test-SPDSCSearchCrawlSchedule
         return $false
     }
 
-    if ((Test-SPDSCObjectHasProperty -Object $DesiredSchedule `
+    if ((Test-SPDscObjectHasProperty -Object $DesiredSchedule `
                                      -PropertyName "CrawlScheduleRepeatDuration") -eq $true `
         -and $CurrentSchedule.CrawlScheduleRepeatDuration -ne $DesiredSchedule.CrawlScheduleRepeatDuration)
     {
         return $false
     }
-    if ((Test-SPDSCObjectHasProperty -Object $DesiredSchedule `
+    if ((Test-SPDscObjectHasProperty -Object $DesiredSchedule `
                                      -PropertyName "CrawlScheduleRepeatInterval") -eq $true `
         -and $CurrentSchedule.CrawlScheduleRepeatInterval -ne $DesiredSchedule.CrawlScheduleRepeatInterval)
     {
         return $false
     }
-    if ((Test-SPDSCObjectHasProperty -Object $DesiredSchedule `
+    if ((Test-SPDscObjectHasProperty -Object $DesiredSchedule `
                                      -PropertyName "StartHour") -eq $true `
         -and $CurrentSchedule.StartHour -ne $DesiredSchedule.StartHour)
     {
         return $false
     }
-    if ((Test-SPDSCObjectHasProperty -Object $DesiredSchedule `
+    if ((Test-SPDscObjectHasProperty -Object $DesiredSchedule `
                                      -PropertyName "StartMinute") -eq $true `
         -and $CurrentSchedule.StartMinute -ne $DesiredSchedule.StartMinute)
     {
@@ -90,7 +90,7 @@ function Test-SPDSCSearchCrawlSchedule
     switch ($CurrentSchedule.ScheduleType)
     {
         "Daily" {
-            if ((Test-SPDSCObjectHasProperty -Object $DesiredSchedule `
+            if ((Test-SPDscObjectHasProperty -Object $DesiredSchedule `
                                              -PropertyName "CrawlScheduleRunEveryInterval") -eq $true `
                 -and $CurrentSchedule.CrawlScheduleRunEveryInterval -ne $DesiredSchedule.CrawlScheduleRunEveryInterval)
             {
@@ -98,14 +98,14 @@ function Test-SPDSCSearchCrawlSchedule
             }
         }
         "Weekly" {
-            if ((Test-SPDSCObjectHasProperty -Object $DesiredSchedule `
+            if ((Test-SPDscObjectHasProperty -Object $DesiredSchedule `
                                              -PropertyName "CrawlScheduleRunEveryInterval") -eq $true `
                 -and $CurrentSchedule.CrawlScheduleRunEveryInterval -ne $DesiredSchedule.CrawlScheduleRunEveryInterval)
             {
                 return $false
             }
             $days = $CurrentSchedule.CrawlScheduleDaysOfWeek.ToString()
-            if ((Test-SPDSCObjectHasProperty -Object $DesiredSchedule `
+            if ((Test-SPDscObjectHasProperty -Object $DesiredSchedule `
                                              -PropertyName "CrawlScheduleDaysOfWeek") -eq $true `
                 -and $null -ne (Compare-Object -ReferenceObject $days.Split(', ', [System.StringSplitOptions]::RemoveEmptyEntries) `
                                                -DifferenceObject $DesiredSchedule.CrawlScheduleDaysOfWeek))
@@ -114,14 +114,14 @@ function Test-SPDSCSearchCrawlSchedule
             }
         }
         "Monthly" {
-            if ((Test-SPDSCObjectHasProperty -Object $DesiredSchedule `
+            if ((Test-SPDscObjectHasProperty -Object $DesiredSchedule `
                                              -PropertyName "CrawlScheduleDaysOfMonth") -eq $true `
                 -and $CurrentSchedule.CrawlScheduleDaysOfMonth -ne $DesiredSchedule.CrawlScheduleDaysOfMonth)
             {
                 return $false
             }
             $months = $CurrentSchedule.CrawlScheduleMonthsOfYear.ToString()
-            if ((Test-SPDSCObjectHasProperty -Object $DesiredSchedule `
+            if ((Test-SPDscObjectHasProperty -Object $DesiredSchedule `
                                              -PropertyName "CrawlScheduleMonthsOfYear") -eq $true `
                 -and $null -eq (Compare-Object -ReferenceObject $months.Split(', ', [System.StringSplitOptions]::RemoveEmptyEntries) `
                                                -DifferenceObject $DesiredSchedule.CrawlScheduleMonthsOfYear))

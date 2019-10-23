@@ -20,14 +20,12 @@ To use these files, make sure you first unblock them using Unblock-File.
 SPProductUpdate will throw an error when it detects the file is blocked.
 
 IMPORTANT:
-This resource retrieves build information from the Configuration Database.
-Therefore it requires SharePoint to be installed and a farm created. If you
-like to deploy a new farm and install updates automatically, you need to
-implement the following order:
+Since v3.3, this resource no longer relies on the farm being present to check
+the installed patches. This means it is now possible to deploy updates during
+the installation of SharePoint:
 
 1. Install the SharePoint Binaries (SPInstall)
 2. (Optional) Install SharePoint Language Pack(s) Binaries
    (SPInstallLanguagePack)
-3. Create SPFarm (SPFarm)
-4. Install Cumulative Updates (SPProductUpdate)
-5. Run the Configuration Wizard (SPConfigWizard)
+3. Install Cumulative Updates (SPProductUpdate)
+4. Create SPFarm (SPFarm)

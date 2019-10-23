@@ -5,30 +5,30 @@ function Get-TargetResource
     param
     (
         [Parameter(Mandatory = $true)]
-        [System.String] 
+        [System.String]
         $AppDomain,
 
-        [Parameter(Mandatory = $true)]  
-        [System.String] 
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $Prefix,
 
-        [Parameter()] 
-        [System.Management.Automation.PSCredential] 
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 
     Write-Verbose -Message "Getting app domain settings"
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
-                                  -Arguments $PSBoundParameters `
-                                  -ScriptBlock {
+    $result = Invoke-SPDscCommand -Credential $InstallAccount `
+        -Arguments $PSBoundParameters `
+        -ScriptBlock {
         $params = $args[0]
-        $appDomain =  Get-SPAppDomain
+        $appDomain = Get-SPAppDomain
         $prefix = Get-SPAppSiteSubscriptionName -ErrorAction Continue
 
         return @{
-            AppDomain = $appDomain
-            Prefix= $prefix
+            AppDomain      = $appDomain
+            Prefix         = $prefix
             InstallAccount = $params.InstallAccount
         }
     }
@@ -41,25 +41,25 @@ function Set-TargetResource
     param
     (
         [Parameter(Mandatory = $true)]
-        [System.String] 
+        [System.String]
         $AppDomain,
 
-        [Parameter(Mandatory = $true)]  
-        [System.String] 
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $Prefix,
 
-        [Parameter()] 
-        [System.Management.Automation.PSCredential] 
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 
     Write-Verbose -Message "Setting app domain settings"
 
-    Invoke-SPDSCCommand -Credential $InstallAccount `
-                        -Arguments $PSBoundParameters `
-                        -ScriptBlock {
+    Invoke-SPDscCommand -Credential $InstallAccount `
+        -Arguments $PSBoundParameters `
+        -ScriptBlock {
         $params = $args[0]
-        
+
         Set-SPAppDomain $params.AppDomain
         Set-SPAppSiteSubscriptionName -Name $params.Prefix -Confirm:$false
     }
@@ -72,23 +72,28 @@ function Test-TargetResource
     param
     (
         [Parameter(Mandatory = $true)]
-        [System.String] 
+        [System.String]
         $AppDomain,
 
-        [Parameter(Mandatory = $true)]  
-        [System.String] 
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $Prefix,
 
-        [Parameter()] 
-        [System.Management.Automation.PSCredential] 
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 
     Write-Verbose -Message "Getting app domain settings"
 
-    return Test-SPDscParameterState -CurrentValues (Get-TargetResource @PSBoundParameters) `
-                                    -DesiredValues $PSBoundParameters `
-                                    -ValuesToCheck @("AppDomain", "Prefix") 
+    $CurrentValues = Get-TargetResource @PSBoundParameters
+
+    Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
+    Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
+
+    return Test-SPDscParameterState -CurrentValues $CurrentValues `
+        -DesiredValues $PSBoundParameters `
+        -ValuesToCheck @("AppDomain", "Prefix")
 }
 
 Export-ModuleMember -Function *-TargetResource

@@ -3,16 +3,16 @@ param(
     [Parameter()]
     [string]
     $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
-                                         -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
-                                         -Resolve)
+            -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
+            -Resolve)
 )
 
 Import-Module -Name (Join-Path -Path $PSScriptRoot `
-                                -ChildPath "..\UnitTestHelper.psm1" `
-                                -Resolve)
+        -ChildPath "..\UnitTestHelper.psm1" `
+        -Resolve)
 
 $Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointCmdletModule `
-                                              -DscResource "SPSitePropertyBag"
+    -DscResource "SPSitePropertyBag"
 
 Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
     InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
@@ -35,8 +35,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 } -PassThru
 
                 $returnval = @{
-                    Properties = $prop
-                    AllProperties = @{}
+                    Properties    = $prop
+                    AllProperties = @{ }
                 }
 
                 $returnval = $returnval | Add-Member ScriptMethod Update {
@@ -76,13 +76,13 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Url    = "http://sharepoint.contoso.com"
                 Key    = 'PropertyKey'
                 Value  = 'NewPropertyValue'
-                Ensure ='Present'
+                Ensure = 'Present'
             }
 
             It 'Should return present from the get method' {
                 $result = Get-TargetResource @testParams
                 $result.Ensure | Should Be 'Present'
-                $result.Key    | Should Be $testParams.Key
+                $result.Key | Should Be $testParams.Key
             }
 
             It 'Should return false from the test method' {

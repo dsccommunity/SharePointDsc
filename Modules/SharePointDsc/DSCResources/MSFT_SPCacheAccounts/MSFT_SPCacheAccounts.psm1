@@ -27,9 +27,9 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting cache accounts for $WebAppUrl"
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
-                                  -Arguments $PSBoundParameters `
-                                  -ScriptBlock {
+    $result = Invoke-SPDscCommand -Credential $InstallAccount `
+        -Arguments $PSBoundParameters `
+        -ScriptBlock {
         $params = $args[0]
 
         $wa = Get-SPWebApplication -Identity $params.WebAppUrl -ErrorAction SilentlyContinue
@@ -56,8 +56,8 @@ function Get-TargetResource
             if ($wa.Properties.ContainsKey("portalsuperuseraccount"))
             {
                 $claim = New-SPClaimsPrincipal -Identity $wa.Properties["portalsuperuseraccount"] `
-                                               -IdentityType EncodedClaim `
-                                               -ErrorAction SilentlyContinue
+                    -IdentityType EncodedClaim `
+                    -ErrorAction SilentlyContinue
                 if ($null -ne $claim)
                 {
                     $returnVal.Add("SuperUserAlias", $claim.Value)
@@ -74,8 +74,8 @@ function Get-TargetResource
             if ($wa.Properties.ContainsKey("portalsuperreaderaccount"))
             {
                 $claim = New-SPClaimsPrincipal -Identity $wa.Properties["portalsuperreaderaccount"] `
-                                               -IdentityType EncodedClaim `
-                                               -ErrorAction SilentlyContinue
+                    -IdentityType EncodedClaim `
+                    -ErrorAction SilentlyContinue
                 if ($null -ne $claim)
                 {
                     $returnVal.Add("SuperReaderAlias", $claim.Value)
@@ -90,13 +90,13 @@ function Get-TargetResource
                 $returnVal.Add("SuperReaderAlias", "")
             }
             if ($wa.Policies.UserName -notcontains ((New-SPClaimsPrincipal -Identity $params.SuperReaderAlias `
-                                                                           -IdentityType WindowsSamAccountName).ToEncodedString()))
+                            -IdentityType WindowsSamAccountName).ToEncodedString()))
             {
                 $policiesSet = $false
             }
 
             if ($wa.Policies.UserName -notcontains ((New-SPClaimsPrincipal -Identity $params.SuperUserAlias `
-                                                                           -IdentityType WindowsSamAccountName).ToEncodedString()))
+                            -IdentityType WindowsSamAccountName).ToEncodedString()))
             {
                 $policiesSet = $false
             }
@@ -168,7 +168,7 @@ function Set-TargetResource
 
     $PSBoundParameters.SetWebAppPolicy = $SetWebAppPolicy
 
-    Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+    Invoke-SPDscCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
 
         $wa = Get-SPWebApplication -Identity $params.WebAppUrl -ErrorAction SilentlyContinue
@@ -180,9 +180,9 @@ function Set-TargetResource
         if ($wa.UseClaimsAuthentication -eq $true)
         {
             $wa.Properties["portalsuperuseraccount"] = (New-SPClaimsPrincipal -Identity $params.SuperUserAlias `
-                                                                              -IdentityType WindowsSamAccountName).ToEncodedString()
+                    -IdentityType WindowsSamAccountName).ToEncodedString()
             $wa.Properties["portalsuperreaderaccount"] = (New-SPClaimsPrincipal -Identity $params.SuperReaderAlias `
-                                                                                -IdentityType WindowsSamAccountName).ToEncodedString()
+                    -IdentityType WindowsSamAccountName).ToEncodedString()
         }
         else
         {
@@ -195,22 +195,22 @@ function Set-TargetResource
             if ($wa.UseClaimsAuthentication -eq $true)
             {
                 $claimsReader = (New-SPClaimsPrincipal -Identity $params.SuperReaderAlias `
-                                                       -IdentityType WindowsSamAccountName).ToEncodedString()
+                        -IdentityType WindowsSamAccountName).ToEncodedString()
                 if ($wa.Policies.UserName -contains $claimsReader)
                 {
                     $wa.Policies.Remove($claimsReader)
                 }
-                $policy     = $wa.Policies.Add($claimsReader, "Super Reader (Claims)")
+                $policy = $wa.Policies.Add($claimsReader, "Super Reader (Claims)")
                 $policyRole = $wa.PolicyRoles.GetSpecialRole([Microsoft.SharePoint.Administration.SPPolicyRoleType]::FullRead)
                 $policy.PolicyRoleBindings.Add($policyRole)
 
                 $claimsSuper = (New-SPClaimsPrincipal -Identity $params.SuperUserAlias `
-                                                      -IdentityType WindowsSamAccountName).ToEncodedString()
+                        -IdentityType WindowsSamAccountName).ToEncodedString()
                 if ($wa.Policies.UserName -contains $claimsSuper)
                 {
                     $wa.Policies.Remove($claimsSuper)
                 }
-                $policy     = $wa.Policies.Add($claimsSuper, "Super User (Claims)")
+                $policy = $wa.Policies.Add($claimsSuper, "Super User (Claims)")
                 $policyRole = $wa.PolicyRoles.GetSpecialRole([Microsoft.SharePoint.Administration.SPPolicyRoleType]::FullControl)
                 $policy.PolicyRoleBindings.Add($policyRole)
             }
@@ -221,7 +221,7 @@ function Set-TargetResource
                     $wa.Policies.Remove($params.SuperReaderAlias)
                 }
 
-                $readPolicy     = $wa.Policies.Add($params.SuperReaderAlias, "Super Reader")
+                $readPolicy = $wa.Policies.Add($params.SuperReaderAlias, "Super Reader")
                 $readPolicyRole = $wa.PolicyRoles.GetSpecialRole([Microsoft.SharePoint.Administration.SPPolicyRoleType]::FullRead)
                 $readPolicy.PolicyRoleBindings.Add($readPolicyRole)
 
@@ -229,7 +229,7 @@ function Set-TargetResource
                 {
                     $wa.Policies.Remove($params.SuperUserAlias)
                 }
-                $policy     = $wa.Policies.Add($params.SuperUserAlias, "Super User")
+                $policy = $wa.Policies.Add($params.SuperUserAlias, "Super User")
                 $policyRole = $wa.PolicyRoles.GetSpecialRole([Microsoft.SharePoint.Administration.SPPolicyRoleType]::FullControl)
                 $policy.PolicyRoleBindings.Add($policyRole)
             }
@@ -272,20 +272,23 @@ function Test-TargetResource
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
+    Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
+    Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
+
     if ($SetWebAppPolicy -eq $true)
     {
         return Test-SPDscParameterState -CurrentValues $CurrentValues `
-                                        -DesiredValues $PSBoundParameters `
-                                        -ValuesToCheck @("SuperUserAlias", `
-                                                         "SuperReaderAlias", `
-                                                         "SetWebAppPolicy")
+            -DesiredValues $PSBoundParameters `
+            -ValuesToCheck @("SuperUserAlias", `
+                "SuperReaderAlias", `
+                "SetWebAppPolicy")
     }
     else
     {
         return Test-SPDscParameterState -CurrentValues $CurrentValues `
-                                        -DesiredValues $PSBoundParameters `
-                                        -ValuesToCheck @("SuperUserAlias", `
-                                                         "SuperReaderAlias")
+            -DesiredValues $PSBoundParameters `
+            -ValuesToCheck @("SuperUserAlias", `
+                "SuperReaderAlias")
     }
 }
 

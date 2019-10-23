@@ -27,9 +27,9 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting Search Index Partition '$Index' settings"
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
-                                  -Arguments $PSBoundParameters `
-                                  -ScriptBlock {
+    $result = Invoke-SPDscCommand -Credential $InstallAccount `
+        -Arguments $PSBoundParameters `
+        -ScriptBlock {
         $params = $args[0]
         $ConfirmPreference = 'None'
 
@@ -37,10 +37,10 @@ function Get-TargetResource
         $currentTopology = $ssa.ActiveTopology
 
         $searchComponent = Get-SPEnterpriseSearchComponent -SearchTopology $currentTopology | `
-                                Where-Object -FilterScript {
-                                    ($_.GetType().Name -eq "IndexComponent") `
-                                    -and ($_.IndexPartitionOrdinal -eq $params.Index)
-                                }
+            Where-Object -FilterScript {
+            ($_.GetType().Name -eq "IndexComponent") `
+                -and ($_.IndexPartitionOrdinal -eq $params.Index)
+        }
 
         $IndexComponents = $searchComponent.ServerName
         $rootDirectory = $searchComponent.RootDirectory
@@ -53,9 +53,9 @@ function Get-TargetResource
         }
 
         return @{
-            Index = $params.Index
-            Servers = $IndexComponents
-            RootDirectory = $rootDirectory
+            Index          = $params.Index
+            Servers        = $IndexComponents
+            RootDirectory  = $rootDirectory
             ServiceAppName = $params.ServiceAppName
             InstallAccount = $params.InstallAccount
         }
@@ -93,9 +93,9 @@ function Set-TargetResource
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
-    Invoke-SPDSCCommand -Credential $InstallAccount `
-                        -Arguments @($PSBoundParameters, $CurrentValues) `
-                        -ScriptBlock {
+    Invoke-SPDscCommand -Credential $InstallAccount `
+        -Arguments @($PSBoundParameters, $CurrentValues) `
+        -ScriptBlock {
         $params = $args[0]
         $CurrentValues = $args[1]
         $ConfirmPreference = 'None'
@@ -103,10 +103,10 @@ function Set-TargetResource
         $AllSearchServers = $params.Servers
 
         # Ensure the search service instance is running on all servers
-        foreach($searchServer in $AllSearchServers)
+        foreach ($searchServer in $AllSearchServers)
         {
             $searchService = Get-SPEnterpriseSearchServiceInstance -Identity $searchServer
-            if($searchService.Status -eq "Offline")
+            if ($searchService.Status -eq "Offline")
             {
                 Write-Verbose -Message "Start Search Service Instance"
                 Start-SPEnterpriseSearchServiceInstance -Identity $searchService
@@ -128,7 +128,7 @@ function Set-TargetResource
         if ($params.ContainsKey("RootDirectory") -eq $true)
         {
             # Create the index partition directory on each remote server
-            foreach($IndexPartitionServer in $params.Servers)
+            foreach ($IndexPartitionServer in $params.Servers)
             {
                 $networkPath = "\\$IndexPartitionServer\" + $params.RootDirectory.Replace(":\", "$\")
                 New-Item -Path $networkPath -ItemType Directory -Force
@@ -142,7 +142,7 @@ function Set-TargetResource
         }
 
         # Get all service service instances to assign topology components to
-        $AllSearchServiceInstances = @{}
+        $AllSearchServiceInstances = @{ }
         foreach ($server in $AllSearchServers)
         {
             $si = Get-SPEnterpriseSearchServiceInstance -Identity $server
@@ -153,8 +153,8 @@ function Set-TargetResource
         $ssa = Get-SPEnterpriseSearchServiceApplication -Identity $params.ServiceAppName
         $currentTopology = $ssa.ActiveTopology
         $newTopology = New-SPEnterpriseSearchTopology -SearchApplication $ssa `
-                                                      -Clone `
-                                                      -SearchTopology $currentTopology
+            -Clone `
+            -SearchTopology $currentTopology
 
         $componentTypes = @{
             Servers = "IndexComponent"
@@ -177,27 +177,28 @@ function Set-TargetResource
                 $components = $params.$CurrentSearchProperty | Where-Object -FilterScript {
                     $CurrentValues.$CurrentSearchProperty.Contains($_) -eq $false
                 }
-                foreach($component in $components)
+                foreach ($component in $components)
                 {
                     $ComponentsToAdd += $component
                 }
                 $components = $CurrentValues.$CurrentSearchProperty | Where-Object -FilterScript {
                     $params.$CurrentSearchProperty.Contains($_) -eq $false
                 }
-                foreach($component in $components)
+                foreach ($component in $components)
                 {
                     $ComponentsToRemove += $component
                 }
             }
-            foreach($componentToAdd in $ComponentsToAdd)
+            foreach ($componentToAdd in $ComponentsToAdd)
             {
                 $NewComponentParams = @{
-                    SearchTopology = $newTopology
+                    SearchTopology        = $newTopology
                     SearchServiceInstance = $AllSearchServiceInstances.$componentToAdd
                 }
-                switch($componentTypes.$CurrentSearchProperty)
+                switch ($componentTypes.$CurrentSearchProperty)
                 {
-                    "IndexComponent" {
+                    "IndexComponent"
+                    {
                         $NewComponentParams.Add("IndexPartition", $params.Index)
                         if ($params.ContainsKey("RootDirectory") -eq $true)
                         {
@@ -210,20 +211,19 @@ function Set-TargetResource
                     }
                 }
             }
-            foreach($componentToRemove in $ComponentsToRemove)
+            foreach ($componentToRemove in $ComponentsToRemove)
             {
                 $component = Get-SPEnterpriseSearchComponent -SearchTopology $newTopology | `
                     Where-Object -FilterScript {
-                        ($_.GetType().Name -eq $componentTypes.$CurrentSearchProperty) `
-                            -and ($_.ServerName -eq $componentToRemove) `
-                            -and ($_.IndexPartitionOrdinal -eq $params.Index)
+                    ($_.GetType().Name -eq $componentTypes.$CurrentSearchProperty) `
+                        -and ($_.ServerName -eq $componentToRemove) `
+                        -and ($_.IndexPartitionOrdinal -eq $params.Index)
                 }
                 if ($null -ne $component)
                 {
                     $component | Remove-SPEnterpriseSearchComponent -SearchTopology $newTopology `
-                                                                    -Confirm:$false
+                        -Confirm:$false
                 }
-
             }
         }
 
@@ -263,9 +263,12 @@ function Test-TargetResource
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
+    Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
+    Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
+
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
-                                              -DesiredValues $PSBoundParameters `
-                                              -ValuesToCheck @("Servers")
+        -DesiredValues $PSBoundParameters `
+        -ValuesToCheck @("Servers")
 }
 
 Export-ModuleMember -Function *-TargetResource

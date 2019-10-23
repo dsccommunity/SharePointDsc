@@ -3,16 +3,16 @@ param(
     [Parameter()]
     [string]
     $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
-                                         -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
-                                         -Resolve)
+            -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
+            -Resolve)
 )
 
 Import-Module -Name (Join-Path -Path $PSScriptRoot `
-                                -ChildPath "..\UnitTestHelper.psm1" `
-                                -Resolve)
+        -ChildPath "..\UnitTestHelper.psm1" `
+        -Resolve)
 
 $Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointCmdletModule `
-                                              -DscResource "SPUserProfileServiceAppPermissions"
+    -DscResource "SPUserProfileServiceAppPermissions"
 
 Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
     InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
@@ -41,7 +41,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         Mock -CommandName Set-SPProfileServiceApplicationSecurity -MockWith { }
 
         Mock -CommandName Start-Sleep -MockWith { }
-        Mock -CommandName Test-SPDSCIsADUser -MockWith { return $true }
+        Mock -CommandName Test-SPDscIsADUser -MockWith { return $true }
         Mock -CommandName Write-Warning -MockWith { }
 
         Mock -CommandName Get-SPServiceApplicationProxy -MockWith {
@@ -55,7 +55,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         # Test contexts
         Context -Name "The proxy does not exist" -Fixture {
             $testParams = @{
-                ProxyName = "User Profile Service App Proxy"
+                ProxyName            = "User Profile Service App Proxy"
                 CreatePersonalSite   = @("DEMO\User2", "DEMO\User1")
                 FollowAndEditProfile = @("Everyone")
                 UseTagsAndNotes      = @("None")
@@ -83,7 +83,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "Users who should have access do not have access" -Fixture {
             $testParams = @{
-                ProxyName = "User Profile Service App Proxy"
+                ProxyName            = "User Profile Service App Proxy"
                 CreatePersonalSite   = @("DEMO\User2", "DEMO\User1")
                 FollowAndEditProfile = @("Everyone")
                 UseTagsAndNotes      = @("None")
@@ -111,7 +111,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "Users who should have access have incorrect permissions" -Fixture {
             $testParams = @{
-                ProxyName = "User Profile Service App Proxy"
+                ProxyName            = "User Profile Service App Proxy"
                 CreatePersonalSite   = @("DEMO\User2", "DEMO\User1")
                 FollowAndEditProfile = @("Everyone")
                 UseTagsAndNotes      = @("None")
@@ -121,15 +121,15 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 return @{
                     AccessRules = @(
                         @{
-                            Name = "i:0#.w|DEMO\User2"
+                            Name          = "i:0#.w|DEMO\User2"
                             AllowedRights = "UsePersonalFeatures"
                         },
                         @{
-                            Name = "i:0#.w|DEMO\User1"
+                            Name          = "i:0#.w|DEMO\User1"
                             AllowedRights = "UsePersonalFeatures"
                         },
                         @{
-                            Name = "c:0(.s|true"
+                            Name          = "c:0(.s|true"
                             AllowedRights = "CreatePersonalSite,UseMicrobloggingAndFollowing"
                         }
                     )
@@ -152,7 +152,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "Users who should have permissions have the correct permissions" -Fixture {
             $testParams = @{
-                ProxyName = "User Profile Service App Proxy"
+                ProxyName            = "User Profile Service App Proxy"
                 CreatePersonalSite   = @("DEMO\User2", "DEMO\User1")
                 FollowAndEditProfile = @("Everyone")
                 UseTagsAndNotes      = @("None")
@@ -162,15 +162,15 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 return @{
                     AccessRules = @(
                         @{
-                            Name = "i:0#.w|DEMO\User2"
+                            Name          = "i:0#.w|DEMO\User2"
                             AllowedRights = "CreatePersonalSite,UseMicrobloggingAndFollowing"
                         },
                         @{
-                            Name = "i:0#.w|DEMO\User1"
+                            Name          = "i:0#.w|DEMO\User1"
                             AllowedRights = "CreatePersonalSite,UseMicrobloggingAndFollowing"
                         },
                         @{
-                            Name = "c:0(.s|true"
+                            Name          = "c:0(.s|true"
                             AllowedRights = "UsePersonalFeatures"
                         }
                     )
@@ -188,7 +188,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "Users who should not have access have permissions assigned" -Fixture {
             $testParams = @{
-                ProxyName = "User Profile Service App Proxy"
+                ProxyName            = "User Profile Service App Proxy"
                 CreatePersonalSite   = @("DEMO\User2", "DEMO\User1")
                 FollowAndEditProfile = @("Everyone")
                 UseTagsAndNotes      = @("None")
@@ -198,19 +198,19 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 return @{
                     AccessRules = @(
                         @{
-                            Name = "i:0#.w|DEMO\User2"
+                            Name          = "i:0#.w|DEMO\User2"
                             AllowedRights = "CreatePersonalSite,UseMicrobloggingAndFollowing"
                         },
                         @{
-                            Name = "i:0#.w|DEMO\User1"
+                            Name          = "i:0#.w|DEMO\User1"
                             AllowedRights = "CreatePersonalSite,UseMicrobloggingAndFollowing"
                         },
                         @{
-                            Name = "i:0#.w|DEMO\User3"
+                            Name          = "i:0#.w|DEMO\User3"
                             AllowedRights = "CreatePersonalSite,UseMicrobloggingAndFollowing"
                         },
                         @{
-                            Name = "c:0(.s|true"
+                            Name          = "c:0(.s|true"
                             AllowedRights = "UsePersonalFeatures"
                         }
                     )
@@ -233,7 +233,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "The old non-claims 'Authenticated Users' entry exists in the permissions" -Fixture {
             $testParams = @{
-                ProxyName = "User Profile Service App Proxy"
+                ProxyName            = "User Profile Service App Proxy"
                 CreatePersonalSite   = @("DEMO\User2", "DEMO\User1")
                 FollowAndEditProfile = @("Everyone")
                 UseTagsAndNotes      = @("None")
@@ -243,19 +243,19 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 return @{
                     AccessRules = @(
                         @{
-                            Name = "i:0#.w|DEMO\User2"
+                            Name          = "i:0#.w|DEMO\User2"
                             AllowedRights = "CreatePersonalSite,UseMicrobloggingAndFollowing"
                         },
                         @{
-                            Name = "i:0#.w|DEMO\User1"
+                            Name          = "i:0#.w|DEMO\User1"
                             AllowedRights = "CreatePersonalSite,UseMicrobloggingAndFollowing"
                         },
                         @{
-                            Name = "NT Authority\Authenticated Users"
+                            Name          = "NT Authority\Authenticated Users"
                             AllowedRights = "CreatePersonalSite,UseMicrobloggingAndFollowing"
                         },
                         @{
-                            Name = "c:0(.s|true"
+                            Name          = "c:0(.s|true"
                             AllowedRights = "UsePersonalFeatures"
                         }
                     )
@@ -285,15 +285,15 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 return @{
                     AccessRules = @(
                         @{
-                            Name = "i:0#.w|DEMO\User2"
+                            Name          = "i:0#.w|DEMO\User2"
                             AllowedRights = "CreatePersonalSite,UseMicrobloggingAndFollowing"
                         },
                         @{
-                            Name = "i:0#.w|DEMO\User1"
+                            Name          = "i:0#.w|DEMO\User1"
                             AllowedRights = "CreatePersonalSite,UseMicrobloggingAndFollowing"
                         },
                         @{
-                            Name = "c:0(.s|true"
+                            Name          = "c:0(.s|true"
                             AllowedRights = "UsePersonalFeatures"
                         }
                     )

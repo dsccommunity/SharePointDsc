@@ -1,26 +1,26 @@
 [CmdletBinding()]
 param(
     [Parameter()]
-    [string] 
+    [string]
     $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
-                                         -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
-                                         -Resolve)
+            -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
+            -Resolve)
 )
 
 Import-Module -Name (Join-Path -Path $PSScriptRoot `
-                                -ChildPath "..\UnitTestHelper.psm1" `
-                                -Resolve)
+        -ChildPath "..\UnitTestHelper.psm1" `
+        -Resolve)
 
 $Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointCmdletModule `
-                                              -DscResource "SPFeature"
+    -DscResource "SPFeature"
 
 Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
     InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
         Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
-        # Mocks for all contexts   
-        Mock -CommandName Enable-SPFeature -MockWith {}
-        Mock -CommandName Disable-SPFeature -MockWith {}
+        # Mocks for all contexts
+        Mock -CommandName Enable-SPFeature -MockWith { }
+        Mock -CommandName Disable-SPFeature -MockWith { }
 
         # Test contexts
         Context -Name "A feature that is not installed in the farm should be turned on" -Fixture {
@@ -31,7 +31,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Ensure       = "Present"
             }
 
-            Mock -CommandName Get-SPFeature -MockWith { return $null } 
+            Mock -CommandName Get-SPFeature -MockWith { return $null }
 
             It "Should return null from the get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Absent"
@@ -49,10 +49,10 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Url          = "http://site.sharepoint.com"
                 Ensure       = "Present"
             }
-            
-            Mock -CommandName Get-SPFeature -MockWith { 
-                return $null 
-            } 
+
+            Mock -CommandName Get-SPFeature -MockWith {
+                return $null
+            }
 
             It "Should return null from the get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Absent"
@@ -76,10 +76,10 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Url          = "http://site.sharepoint.com"
                 Ensure       = "Present"
             }
-            
-            Mock -CommandName Get-SPFeature -MockWith { 
-                return $null 
-            } 
+
+            Mock -CommandName Get-SPFeature -MockWith {
+                return $null
+            }
 
             It "Should return null from the get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Absent"
@@ -103,10 +103,10 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Url          = "http://site.sharepoint.com"
                 Ensure       = "Absent"
             }
-            
-            Mock -CommandName Get-SPFeature -MockWith { 
-                return @{} 
-            } 
+
+            Mock -CommandName Get-SPFeature -MockWith {
+                return @{ }
+            }
 
             It "Should return null from the get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Present"
@@ -129,10 +129,10 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Url          = "http://site.sharepoint.com"
                 Ensure       = "Absent"
             }
-            
-            Mock -CommandName Get-SPFeature -MockWith { 
-                return @{}
-            } 
+
+            Mock -CommandName Get-SPFeature -MockWith {
+                return @{ }
+            }
 
             It "Should return null from the get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Present"
@@ -155,8 +155,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Url          = "http://site.sharepoint.com"
                 Ensure       = "Present"
             }
-            
-            Mock -CommandName Get-SPFeature -MockWith { return @{} }
+
+            Mock -CommandName Get-SPFeature -MockWith { return @{ } }
 
             It "Should return true from the test method" {
                 Test-TargetResource @testParams | Should Be $true
@@ -170,14 +170,14 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Url          = "http://site.sharepoint.com"
                 Ensure       = "Present"
             }
-            
-            Mock -CommandName Get-SPFeature -MockWith { return @{} }
+
+            Mock -CommandName Get-SPFeature -MockWith { return @{ } }
 
             It "Should return true from the test method" {
                 Test-TargetResource @testParams | Should Be $true
             }
         }
-        
+
         Context -Name "A site collection scoped features is enabled but has the wrong version" -Fixture {
             $testParams = @{
                 Name         = "DemoFeature"
@@ -186,13 +186,13 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Version      = "1.1.0.0"
                 Ensure       = "Present"
             }
-                        
+
             Mock -CommandName Get-SPFeature -MockWith { return @{ Version = "1.0.0.0" } }
 
             It "Should return the version from the get method" {
                 (Get-TargetResource @testParams).Version | Should Be "1.0.0.0"
             }
-            
+
             It "Should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $false
             }

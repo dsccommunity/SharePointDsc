@@ -39,9 +39,9 @@ function Get-TargetResource
         Write-Verbose -Message "No zone is specified"
     }
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
-                                  -Arguments $PSBoundParameters `
-                                  -ScriptBlock {
+    $result = Invoke-SPDscCommand -Credential $InstallAccount `
+        -Arguments $PSBoundParameters `
+        -ScriptBlock {
         $params = $args[0]
 
         $nullreturn = @{
@@ -49,7 +49,7 @@ function Get-TargetResource
         }
 
         $site = Get-SPSite -Identity $params.Url `
-                           -ErrorAction SilentlyContinue
+            -ErrorAction SilentlyContinue
 
         if ($null -eq $site)
         {
@@ -60,7 +60,7 @@ function Get-TargetResource
         if ($site.HostHeaderIsSiteName -eq $false)
         {
             Write-Verbose -Message ("Specified site $($params.Url) is not a Host Named " + `
-                                    "Site Collection")
+                    "Site Collection")
             return $nullreturn
         }
 
@@ -152,13 +152,13 @@ function Set-TargetResource
         throw "No zone specified. Please specify a zone"
     }
 
-    Invoke-SPDSCCommand -Credential $InstallAccount `
-                        -Arguments $PSBoundParameters `
-                        -ScriptBlock {
+    Invoke-SPDscCommand -Credential $InstallAccount `
+        -Arguments $PSBoundParameters `
+        -ScriptBlock {
         $params = $args[0]
 
         $site = Get-SPSite -Identity $params.Url `
-                           -ErrorAction SilentlyContinue
+            -ErrorAction SilentlyContinue
 
         if ($null -eq $site)
         {
@@ -224,7 +224,7 @@ function Set-TargetResource
             else
             {
                 throw ("Specified URL $($params.Intranet) (Zone: Intranet) is already assigned " + `
-                       "to a site collection: $($siteurl[0].Url)")
+                        "to a site collection: $($siteurl[0].Url)")
             }
         }
 
@@ -238,7 +238,7 @@ function Set-TargetResource
             else
             {
                 throw ("Specified URL $($params.Internet) (Zone: Internet) is already assigned " + `
-                       "to a site collection: $($siteurl[0].Url)")
+                        "to a site collection: $($siteurl[0].Url)")
             }
         }
 
@@ -252,7 +252,7 @@ function Set-TargetResource
             else
             {
                 throw ("Specified URL $($params.Extranet) (Zone: Extranet) is already assigned " + `
-                       "to a site collection: $($siteurl[0].Url)")
+                        "to a site collection: $($siteurl[0].Url)")
             }
         }
 
@@ -266,7 +266,7 @@ function Set-TargetResource
             else
             {
                 throw ("Specified URL $($params.Custom) (Zone: Custom) is already assigned " + `
-                       "to a site collection: $($siteurl[0].Url)")
+                        "to a site collection: $($siteurl[0].Url)")
             }
         }
     }
@@ -306,6 +306,9 @@ function Test-TargetResource
     Write-Verbose -Message "Testing site collection url for $Url"
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
+
+    Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
+    Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
 
     if ($null -eq $CurrentValues.Intranet -and
         $null -eq $CurrentValues.Internet -and

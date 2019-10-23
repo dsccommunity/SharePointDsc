@@ -25,7 +25,7 @@ function Get-TargetResource
         $MapToContents,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present",
 
@@ -36,9 +36,9 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting Metadata Category Setting for '$Name'"
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
-                                  -Arguments @($PSBoundParameters) `
-                                  -ScriptBlock {
+    $result = Invoke-SPDscCommand -Credential $InstallAccount `
+        -Arguments @($PSBoundParameters) `
+        -ScriptBlock {
         $params = $args[0]
 
         $ssa = Get-SPEnterpriseSearchServiceApplication -Identity $params.ServiceAppName
@@ -48,27 +48,27 @@ function Get-TargetResource
                    invalid. Please make sure you specify the name of an existing service application.")
         }
         $category = Get-SPEnterpriseSearchMetadataCategory -SearchApplication $ssa | `
-                                    Where-Object{$_.Name -eq $params.Name}
+            Where-Object { $_.Name -eq $params.Name }
         if ($null -eq $category)
         {
             return @{
-                Name = $params.Name
-                ServiceAppName = $params.ServiceAppName
+                Name                           = $params.Name
+                ServiceAppName                 = $params.ServiceAppName
                 AutoCreateNewManagedProperties = $null
-                DiscoverNewProperties = $null
-                MapToContents = $null
-                Ensure = "Absent"
+                DiscoverNewProperties          = $null
+                MapToContents                  = $null
+                Ensure                         = "Absent"
             }
         }
         else
         {
             $results = @{
-                Name = $params.Name
-                ServiceAppName = $params.ServiceAppName
+                Name                           = $params.Name
+                ServiceAppName                 = $params.ServiceAppName
                 AutoCreateNewManagedProperties = $category.AutoCreateNewManagedProperties
-                DiscoverNewProperties = $category.DiscoverNewProperties
-                MapToContents = $category.MapToContents
-                Ensure = "Present"
+                DiscoverNewProperties          = $category.DiscoverNewProperties
+                MapToContents                  = $category.MapToContents
+                Ensure                         = "Present"
             }
             return $results
         }
@@ -102,7 +102,7 @@ function Set-TargetResource
         $MapToContents,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present",
 
@@ -114,9 +114,9 @@ function Set-TargetResource
     Write-Verbose -Message "Setting Metadata Category Setting for '$Name'"
 
     # Validate that the specified crawled properties are all valid and existing
-    Invoke-SPDSCCommand -Credential $InstallAccount `
-                        -Arguments @($PSBoundParameters) `
-                        -ScriptBlock {
+    Invoke-SPDscCommand -Credential $InstallAccount `
+        -Arguments @($PSBoundParameters) `
+        -ScriptBlock {
         $params = $args[0]
 
         $ssa = Get-SPEnterpriseSearchServiceApplication -Identity $params.ServiceAppName
@@ -128,7 +128,7 @@ function Set-TargetResource
 
         # Set the specified properties on the Managed Property
         $category = Get-SPEnterpriseSearchMetadataCategory -Identity $params.Name `
-                                                           -SearchApplication $params.ServiceAppName
+            -SearchApplication $params.ServiceAppName
 
         # The category exists and it shouldn't, delete it;
         if ($params.Ensure -eq "Absent" -and $null -ne $category)
@@ -137,25 +137,25 @@ function Set-TargetResource
             if ($category.CrawledPropertyCount -gt 0)
             {
                 throw "Cannot delete Metadata Category $($param.Name) because it contains " + `
-                      "Crawled Properties. Please remove all associated Crawled Properties " + `
-                      "before attempting to delete this category."
+                    "Crawled Properties. Please remove all associated Crawled Properties " + `
+                    "before attempting to delete this category."
             }
             Remove-SPEnterpriseSearchMetadataCategory -Identity $params.Name `
-                                                      -SearchApplication $params.ServiceAppName `
-                                                      -Confirm:$false
+                -SearchApplication $params.ServiceAppName `
+                -Confirm:$false
         }
 
         # The category doesn't exist, but should
         if ($params.Ensure -eq "Present" -and $null -eq $category)
         {
             $category = New-SPEnterpriseSearchMetadataCategory -Name $params.Name `
-                                                               -SearchApplication $params.ServiceAppName
+                -SearchApplication $params.ServiceAppName
         }
         Set-SPEnterpriseSearchMetadataCategory -Identity $params.Name `
-                                               -SearchApplication $params.ServiceAppName `
-                                               -AutoCreateNewManagedProperties $params.AutoCreateNewManagedProperties `
-                                               -DiscoverNewProperties $params.DiscoverNewProperties `
-                                               -MapToContents $params.MapToContents
+            -SearchApplication $params.ServiceAppName `
+            -AutoCreateNewManagedProperties $params.AutoCreateNewManagedProperties `
+            -DiscoverNewProperties $params.DiscoverNewProperties `
+            -MapToContents $params.MapToContents
     }
 }
 
@@ -186,7 +186,7 @@ function Test-TargetResource
         $MapToContents,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present",
 
@@ -198,16 +198,20 @@ function Test-TargetResource
     Write-Verbose -Message "Testing Metadata Category Setting for '$Name'"
 
     $PSBoundParameters.Ensure = $Ensure
+
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
+    Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
+    Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
+
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
-                                    -DesiredValues $PSBoundParameters `
-                                    -ValuesToCheck @("Name",
-                                                     "PropertyType",
-                                                     "Ensure",
-                                                     "AutoCreateNewManagedProperties",
-                                                     "DiscoverNewProperties",
-                                                     "MapToContents")
+        -DesiredValues $PSBoundParameters `
+        -ValuesToCheck @("Name",
+        "PropertyType",
+        "Ensure",
+        "AutoCreateNewManagedProperties",
+        "DiscoverNewProperties",
+        "MapToContents")
 }
 
 Export-ModuleMember -Function *-TargetResource

@@ -14,17 +14,17 @@ function Get-TargetResource
         $MailAddress,
 
         [Parameter()]
-        [ValidateRange(0,356)]
+        [ValidateRange(0, 356)]
         [System.UInt32]
         $DaysBeforeExpiry,
 
         [Parameter()]
-        [ValidateRange(0,36000)]
+        [ValidateRange(0, 36000)]
         [System.UInt32]
         $PasswordChangeWaitTimeSeconds,
 
         [Parameter()]
-        [ValidateRange(0,99)]
+        [ValidateRange(0, 99)]
         [System.UInt32]
         $NumberOfRetries,
 
@@ -35,22 +35,27 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting farm wide automatic password change settings"
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
-                                  -Arguments $PSBoundParameters `
-                                  -ScriptBlock {
-        $params = $args[0]
-
+    $result = Invoke-SPDscCommand -Credential $InstallAccount `
+        -Arguments $PSBoundParameters `
+        -ScriptBlock {
         $farm = Get-SPFarm
         if ($null -eq $farm )
         {
-            return $null
+            return @{
+                IsSingleInstance              = "Yes"
+                MailAddress                   = $null
+                PasswordChangeWaitTimeSeconds = $null
+                NumberOfRetries               = $null
+                DaysBeforeExpiry              = $null
+            }
         }
+
         return @{
-            IsSingleInstance = "Yes"
-            MailAddress = $farm.PasswordChangeEmailAddress
-            PasswordChangeWaitTimeSeconds= $farm.PasswordChangeGuardTime
-            NumberOfRetries= $farm.PasswordChangeMaximumTries
-            DaysBeforeExpiry = $farm.DaysBeforePasswordExpirationToSendEmail
+            IsSingleInstance              = "Yes"
+            MailAddress                   = $farm.PasswordChangeEmailAddress
+            PasswordChangeWaitTimeSeconds = $farm.PasswordChangeGuardTime
+            NumberOfRetries               = $farm.PasswordChangeMaximumTries
+            DaysBeforeExpiry              = $farm.DaysBeforePasswordExpirationToSendEmail
         }
     }
     return $result
@@ -71,17 +76,17 @@ function Set-TargetResource
         $MailAddress,
 
         [Parameter()]
-        [ValidateRange(0,356)]
+        [ValidateRange(0, 356)]
         [System.UInt32]
         $DaysBeforeExpiry,
 
         [Parameter()]
-        [ValidateRange(0,36000)]
+        [ValidateRange(0, 36000)]
         [System.UInt32]
         $PasswordChangeWaitTimeSeconds,
 
         [Parameter()]
-        [ValidateRange(0,99)]
+        [ValidateRange(0, 99)]
         [System.UInt32]
         $NumberOfRetries,
 
@@ -92,9 +97,9 @@ function Set-TargetResource
 
     Write-Verbose -Message "Setting farm wide automatic password change settings"
 
-    Invoke-SPDSCCommand -Credential $InstallAccount `
-                        -Arguments $PSBoundParameters `
-                        -ScriptBlock {
+    Invoke-SPDscCommand -Credential $InstallAccount `
+        -Arguments $PSBoundParameters `
+        -ScriptBlock {
         $params = $args[0]
         $farm = Get-SPFarm -ErrorAction Continue
 
@@ -136,17 +141,17 @@ function Test-TargetResource
         $MailAddress,
 
         [Parameter()]
-        [ValidateRange(0,356)]
+        [ValidateRange(0, 356)]
         [System.UInt32]
         $DaysBeforeExpiry,
 
         [Parameter()]
-        [ValidateRange(0,36000)]
+        [ValidateRange(0, 36000)]
         [System.UInt32]
         $PasswordChangeWaitTimeSeconds,
 
         [Parameter()]
-        [ValidateRange(0,99)]
+        [ValidateRange(0, 99)]
         [System.UInt32]
         $NumberOfRetries,
 
@@ -159,17 +164,15 @@ function Test-TargetResource
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
-    if ($null -eq $CurrentValues)
-    {
-        return $false
-    }
+    Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
+    Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
 
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
-                                    -DesiredValues $PSBoundParameters `
-                                    -ValuesToCheck @("MailAddress",
-                                                     "DaysBeforeExpiry",
-                                                     "PasswordChangeWaitTimeSeconds",
-                                                     "NumberOfRetries")
+        -DesiredValues $PSBoundParameters `
+        -ValuesToCheck @("MailAddress",
+        "DaysBeforeExpiry",
+        "PasswordChangeWaitTimeSeconds",
+        "NumberOfRetries")
 }
 
 Export-ModuleMember -Function *-TargetResource

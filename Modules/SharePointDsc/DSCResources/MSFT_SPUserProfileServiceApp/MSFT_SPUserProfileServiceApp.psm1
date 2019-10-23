@@ -57,12 +57,12 @@ function Get-TargetResource
         $NoILMUsed = $false,
 
         [Parameter()]
-        [ValidateSet("Username_CollisionError","Username_CollisionDomain","Domain_Username")]
+        [ValidateSet("Username_CollisionError", "Username_CollisionDomain", "Domain_Username")]
         [System.String]
         $SiteNamingConflictResolution,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present",
 
@@ -76,12 +76,12 @@ function Get-TargetResource
     if ($PSBoundParameters.ContainsKey("MySiteHostLocation") -eq $false)
     {
         Write-Verbose -Message ("You should also specify the MySiteHostLocation parameter. " + `
-                                "This will be required as of SharePointDsc v4.0")
+                "This will be required as of SharePointDsc v4.0")
     }
 
-    $farmAccount = Invoke-SPDSCCommand -Credential $InstallAccount `
-                                       -Arguments $PSBoundParameters `
-                                       -ScriptBlock {
+    $farmAccount = Invoke-SPDscCommand -Credential $InstallAccount `
+        -Arguments $PSBoundParameters `
+        -ScriptBlock {
         return Get-SPDscFarmAccount
     }
 
@@ -93,8 +93,8 @@ function Get-TargetResource
             if ($InstallAccount.UserName -eq $farmAccount.UserName)
             {
                 throw ("Specified InstallAccount ($($InstallAccount.UserName)) is the Farm " + `
-                       "Account. Make sure the specified InstallAccount isn't the Farm Account " + `
-                       "and try again")
+                        "Account. Make sure the specified InstallAccount isn't the Farm Account " + `
+                        "and try again")
             }
         }
         else
@@ -107,7 +107,7 @@ function Get-TargetResource
                 if ($localaccount -eq $farmAccount.UserName)
                 {
                     Write-Verbose -Message ("The current user ($localaccount) is the Farm " + `
-                           "Account. Please note that this will cause issues when applying the configuration.")
+                            "Account. Please note that this will cause issues when applying the configuration.")
                 }
             }
         }
@@ -117,15 +117,15 @@ function Get-TargetResource
         throw ("Unable to retrieve the Farm Account. Check if the farm exists.")
     }
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
-                                  -Arguments $PSBoundParameters `
-                                  -ScriptBlock {
+    $result = Invoke-SPDscCommand -Credential $InstallAccount `
+        -Arguments $PSBoundParameters `
+        -ScriptBlock {
         $params = $args[0]
 
         $serviceApps = Get-SPServiceApplication -Name $params.Name -ErrorAction SilentlyContinue
         $nullReturn = @{
-            Name = $params.Name
-            Ensure = "Absent"
+            Name            = $params.Name
+            Ensure          = "Absent"
             ApplicationPool = $params.ApplicationPool
         }
         if ($null -eq $serviceApps)
@@ -142,9 +142,9 @@ function Get-TargetResource
         }
         else
         {
-            $databases = @{}
+            $databases = @{ }
             $propertyFlags = [System.Reflection.BindingFlags]::Instance -bor `
-                             [System.Reflection.BindingFlags]::NonPublic
+                [System.Reflection.BindingFlags]::NonPublic
 
             $propData = $serviceApp.GetType().GetProperties($propertyFlags)
 
@@ -179,7 +179,7 @@ function Get-TargetResource
             $upSiteConflictNaming = $null
             try
             {
-                $ca = Get-SPWebApplication -IncludeCentralAdministration | Where-Object -FilterScript {$_.IsAdministrationWebApplication}
+                $ca = Get-SPWebApplication -IncludeCentralAdministration | Where-Object -FilterScript { $_.IsAdministrationWebApplication }
                 $caSite = $ca.Sites[0]
                 $serviceContext = Get-SPServiceContext($caSite)
                 $userProfileManager = New-Object Microsoft.Office.Server.UserProfiles.UserProfileManager($serviceContext)
@@ -273,12 +273,12 @@ function Set-TargetResource
         $NoILMUsed = $false,
 
         [Parameter()]
-        [ValidateSet("Username_CollisionError","Username_CollisionDomain","Domain_Username")]
+        [ValidateSet("Username_CollisionError", "Username_CollisionDomain", "Domain_Username")]
         [System.String]
         $SiteNamingConflictResolution,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present",
 
@@ -292,14 +292,14 @@ function Set-TargetResource
     if ($PSBoundParameters.ContainsKey("MySiteHostLocation") -eq $false)
     {
         Write-Verbose -Message ("You should also specify the MySiteHostLocation parameter. " + `
-                                "This will be required as of SharePointDsc v4.0")
+                "This will be required as of SharePointDsc v4.0")
     }
 
     if ($Ensure -eq "Present")
     {
-        $farmAccount = Invoke-SPDSCCommand -Credential $InstallAccount `
-                                           -Arguments $PSBoundParameters `
-                                           -ScriptBlock {
+        $farmAccount = Invoke-SPDscCommand -Credential $InstallAccount `
+            -Arguments $PSBoundParameters `
+            -ScriptBlock {
             return Get-SPDscFarmAccount
         }
 
@@ -311,8 +311,8 @@ function Set-TargetResource
                 if ($InstallAccount.UserName -eq $farmAccount.UserName)
                 {
                     throw ("Specified InstallAccount ($($InstallAccount.UserName)) is the Farm " + `
-                           "Account. Make sure the specified InstallAccount isn't the Farm Account " + `
-                           "and try again")
+                            "Account. Make sure the specified InstallAccount isn't the Farm Account " + `
+                            "and try again")
                 }
                 $setupAccount = $InstallAccount.UserName
             }
@@ -326,8 +326,8 @@ function Set-TargetResource
                     if ($localaccount -eq $farmAccount.UserName)
                     {
                         throw ("Specified PSDSCRunAsCredential ($localaccount) is the Farm " + `
-                               "Account. Make sure the specified PSDSCRunAsCredential isn't the " + `
-                               "Farm Account and try again")
+                                "Account. Make sure the specified PSDSCRunAsCredential isn't the " + `
+                                "Farm Account and try again")
                     }
                     $setupAccount = $localaccount
                 }
@@ -341,12 +341,12 @@ function Set-TargetResource
         Write-Verbose -Message "Creating user profile service application $Name"
 
         # Add the FarmAccount to the local Administrators group, if it's not already there
-        $isLocalAdmin = Test-SPDSCUserIsLocalAdmin -UserName $farmAccount.UserName
+        $isLocalAdmin = Test-SPDscUserIsLocalAdmin -UserName $farmAccount.UserName
 
         if (!$isLocalAdmin)
         {
             Write-Verbose -Message "Adding farm account to Local Administrators group"
-            Add-SPDSCUserToLocalAdmin -UserName $farmAccount.UserName
+            Add-SPDscUserToLocalAdmin -UserName $farmAccount.UserName
 
             # Cycle the Timer Service and flush Kerberos tickets
             # so that it picks up the local Admin token
@@ -355,9 +355,9 @@ function Set-TargetResource
             Clear-SPDscKerberosToken -Account $farmAccount.UserName
         }
 
-        $null = Invoke-SPDSCCommand -Credential $FarmAccount `
-                                    -Arguments @($PSBoundParameters, $setupAccount) `
-                                    -ScriptBlock {
+        $null = Invoke-SPDscCommand -Credential $FarmAccount `
+            -Arguments @($PSBoundParameters, $setupAccount) `
+            -ScriptBlock {
             $params = $args[0]
             $setupAccount = $args[1]
 
@@ -394,13 +394,13 @@ function Set-TargetResource
                 $params.Remove("Ensure") | Out-Null
             }
 
-            $params = Rename-SPDSCParamValue -params $params `
-                                             -oldName "SyncDBName" `
-                                             -newName "ProfileSyncDBName"
+            $params = Rename-SPDscParamValue -params $params `
+                -oldName "SyncDBName" `
+                -newName "ProfileSyncDBName"
 
-            $params = Rename-SPDSCParamValue -params $params `
-                                             -oldName "SyncDBServer" `
-                                             -newName "ProfileSyncDBServer"
+            $params = Rename-SPDscParamValue -params $params `
+                -oldName "SyncDBServer" `
+                -newName "ProfileSyncDBServer"
 
             $pName = "$($params.Name) Proxy"
 
@@ -411,7 +411,7 @@ function Set-TargetResource
             }
 
             $serviceApps = Get-SPServiceApplication -Name $params.Name `
-                                                    -ErrorAction SilentlyContinue
+                -ErrorAction SilentlyContinue
             $app = $serviceApps | Select-Object -First 1
             if ($null -eq $serviceApps)
             {
@@ -419,25 +419,25 @@ function Set-TargetResource
                 if ($null -eq $app)
                 {
                     throw ("An error occurred during creation of the service application: " + `
-                           $_.Exception.Message)
+                            $_.Exception.Message)
                 }
                 New-SPProfileServiceApplicationProxy -Name $pName `
-                                                     -ServiceApplication $app `
-                                                     -DefaultProxyGroup
+                    -ServiceApplication $app `
+                    -DefaultProxyGroup
 
                 $claimsPrincipal = New-SPClaimsPrincipal -Identity $setupAccount `
-                                                         -IdentityType WindowsSamAccountName
+                    -IdentityType WindowsSamAccountName
 
                 $serviceAppSecurity = Get-SPServiceApplicationSecurity $app
                 $acl = [Microsoft.SharePoint.Administration.AccessControl.SPNamedIisWebServiceApplicationRights]::FullControl.Name
                 Grant-SPObjectSecurity -Identity $serviceAppSecurity `
-                                       -Principal $claimsPrincipal `
-                                       -Rights $acl
+                    -Principal $claimsPrincipal `
+                    -Rights $acl
                 Set-SPServiceApplicationSecurity -Identity $app `
-                                                 -ObjectSecurity $serviceAppSecurity
+                    -ObjectSecurity $serviceAppSecurity
 
                 $app = Get-SPServiceApplication -Name $params.Name `
-                                                -ErrorAction SilentlyContinue
+                    -ErrorAction SilentlyContinue
             }
 
             if (($updateEnableNetBIOS -eq $true) -or ($updateNoILMUsed -eq $true))
@@ -458,7 +458,7 @@ function Set-TargetResource
 
             if ($updateSiteNamingConflict -eq $true)
             {
-                $ca = Get-SPWebApplication -IncludeCentralAdministration | Where-Object -FilterScript {$_.IsAdministrationWebApplication}
+                $ca = Get-SPWebApplication -IncludeCentralAdministration | Where-Object -FilterScript { $_.IsAdministrationWebApplication }
                 $caSite = $ca.Sites[0]
                 $serviceContext = Get-SPServiceContext($caSite)
                 $userProfileManager = New-Object Microsoft.Office.Server.UserProfiles.UserProfileManager($serviceContext)
@@ -470,7 +470,7 @@ function Set-TargetResource
         if (!$isLocalAdmin)
         {
             Write-Verbose -Message "Removing farm account from Local Administrators group"
-            Remove-SPDSCUserToLocalAdmin -UserName $farmAccount.UserName
+            Remove-SPDscUserToLocalAdmin -UserName $farmAccount.UserName
 
             # Cycle the Timer Service and flush Kerberos tickets
             # so that it picks up the local Admin token
@@ -483,21 +483,21 @@ function Set-TargetResource
     if ($Ensure -eq "Absent")
     {
         Write-Verbose -Message "Removing user profile service application $Name"
-        Invoke-SPDSCCommand -Credential $InstallAccount `
-                            -Arguments $PSBoundParameters `
-                            -ScriptBlock {
+        Invoke-SPDscCommand -Credential $InstallAccount `
+            -Arguments $PSBoundParameters `
+            -ScriptBlock {
 
             $params = $args[0]
 
             $app = Get-SPServiceApplication -Name $params.Name `
-                    | Where-Object -FilterScript {
-                        $_.GetType().FullName -eq "Microsoft.Office.Server.Administration.UserProfileApplication"
-                    }
+            | Where-Object -FilterScript {
+                $_.GetType().FullName -eq "Microsoft.Office.Server.Administration.UserProfileApplication"
+            }
 
             $proxies = Get-SPServiceApplicationProxy
-            foreach($proxyInstance in $proxies)
+            foreach ($proxyInstance in $proxies)
             {
-                if($app.IsConnected($proxyInstance))
+                if ($app.IsConnected($proxyInstance))
                 {
                     $proxyInstance.Delete()
                 }
@@ -567,12 +567,12 @@ function Test-TargetResource
         $NoILMUsed = $false,
 
         [Parameter()]
-        [ValidateSet("Username_CollisionError","Username_CollisionDomain","Domain_Username")]
+        [ValidateSet("Username_CollisionError", "Username_CollisionDomain", "Domain_Username")]
         [System.String]
         $SiteNamingConflictResolution,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present",
 
@@ -586,28 +586,31 @@ function Test-TargetResource
     if ($PSBoundParameters.ContainsKey("MySiteHostLocation") -eq $false)
     {
         Write-Verbose -Message ("You should also specify the MySiteHostLocation parameter. " + `
-                                "This will be required as of SharePointDsc v4.0")
+                "This will be required as of SharePointDsc v4.0")
     }
 
     $PSBoundParameters.Ensure = $Ensure
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
-    if($Ensure -eq "Present")
+    Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
+    Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
+
+    if ($Ensure -eq "Present")
     {
         return Test-SPDscParameterState -CurrentValues $CurrentValues `
-                                            -DesiredValues $PSBoundParameters `
-                                            -ValuesToCheck @("Name",
-                                                             "EnableNetBIOS",
-                                                             "NoILMUsed",
-                                                             "SiteNamingConflictResolution",
-                                                             "Ensure")
+            -DesiredValues $PSBoundParameters `
+            -ValuesToCheck @("Name",
+            "EnableNetBIOS",
+            "NoILMUsed",
+            "SiteNamingConflictResolution",
+            "Ensure")
     }
     else
     {
         return Test-SPDscParameterState -CurrentValues $CurrentValues `
-                                            -DesiredValues $PSBoundParameters `
-                                            -ValuesToCheck @("Name", "Ensure")
+            -DesiredValues $PSBoundParameters `
+            -ValuesToCheck @("Name", "Ensure")
     }
 }
 

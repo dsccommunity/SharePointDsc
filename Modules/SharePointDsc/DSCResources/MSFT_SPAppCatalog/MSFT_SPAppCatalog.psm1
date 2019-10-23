@@ -15,14 +15,14 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting app catalog status of $SiteUrl"
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
-                                  -Arguments $PSBoundParameters `
-                                  -ScriptBlock {
+    $result = Invoke-SPDscCommand -Credential $InstallAccount `
+        -Arguments $PSBoundParameters `
+        -ScriptBlock {
         $params = $args[0]
 
         $site = Get-SPSite $params.SiteUrl -ErrorAction SilentlyContinue
         $nullreturn = @{
-            SiteUrl = $null
+            SiteUrl        = $null
             InstallAccount = $params.InstallAccount
         }
         if ($null -eq $site)
@@ -40,7 +40,7 @@ function Get-TargetResource
             return $nullreturn
         }
         return @{
-            SiteUrl = $site.Url
+            SiteUrl        = $site.Url
             InstallAccount = $params.InstallAccount
         }
     }
@@ -64,9 +64,9 @@ function Set-TargetResource
     Write-Verbose -Message "Setting app catalog status of $SiteUrl"
 
     Write-Verbose -Message "Retrieving farm account"
-    $farmAccount = Invoke-SPDSCCommand -Credential $InstallAccount `
-                                       -Arguments $PSBoundParameters `
-                                       -ScriptBlock {
+    $farmAccount = Invoke-SPDscCommand -Credential $InstallAccount `
+        -Arguments $PSBoundParameters `
+        -ScriptBlock {
         return Get-SPDscFarmAccount
     }
 
@@ -105,12 +105,12 @@ function Set-TargetResource
     }
 
     # Add the FarmAccount to the local Administrators group, if it's not already there
-    $isLocalAdmin = Test-SPDSCUserIsLocalAdmin -UserName $farmAccount.UserName
+    $isLocalAdmin = Test-SPDscUserIsLocalAdmin -UserName $farmAccount.UserName
 
     if (!$isLocalAdmin)
     {
         Write-Verbose -Message "Adding farm account to Local Administrators group"
-        Add-SPDSCUserToLocalAdmin -UserName $farmAccount.UserName
+        Add-SPDscUserToLocalAdmin -UserName $farmAccount.UserName
 
         # Cycle the Timer Service and flush Kerberos tickets
         # so that it picks up the local Admin token
@@ -119,9 +119,9 @@ function Set-TargetResource
         Clear-SPDscKerberosToken -Account $farmAccount.UserName
     }
 
-    Invoke-SPDSCCommand -Credential $farmAccount `
-                        -Arguments $PSBoundParameters `
-                        -ScriptBlock {
+    Invoke-SPDscCommand -Credential $farmAccount `
+        -Arguments $PSBoundParameters `
+        -ScriptBlock {
         $params = $args[0]
         try
         {
@@ -130,8 +130,8 @@ function Set-TargetResource
         catch [System.UnauthorizedAccessException]
         {
             throw ("This resource must be run as the farm account (not a setup account). " + `
-                   "Please ensure either the PsDscRunAsCredential or InstallAccount " + `
-                   "credentials are set to the farm account and run this resource again")
+                    "Please ensure either the PsDscRunAsCredential or InstallAccount " + `
+                    "credentials are set to the farm account and run this resource again")
         }
     } | Out-Null
 
@@ -139,7 +139,7 @@ function Set-TargetResource
     if (!$isLocalAdmin)
     {
         Write-Verbose -Message "Removing farm account from Local Administrators group"
-        Remove-SPDSCUserToLocalAdmin -UserName $farmAccount.UserName
+        Remove-SPDscUserToLocalAdmin -UserName $farmAccount.UserName
 
         # Cycle the Timer Service and flush Kerberos tickets
         # so that it picks up the local Admin token
@@ -166,9 +166,14 @@ function Test-TargetResource
 
     Write-Verbose -Message "Testing app catalog status of $SiteUrl"
 
-    return Test-SPDscParameterState -CurrentValues (Get-TargetResource @PSBoundParameters) `
-                                    -DesiredValues $PSBoundParameters `
-                                    -ValuesToCheck @("SiteUrl")
+    $CurrentValues = Get-TargetResource @PSBoundParameters
+
+    Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
+    Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
+
+    return Test-SPDscParameterState -CurrentValues $CurrentValues `
+        -DesiredValues $PSBoundParameters `
+        -ValuesToCheck @("SiteUrl")
 }
 
 Export-ModuleMember -Function *-TargetResource

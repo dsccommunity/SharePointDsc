@@ -50,7 +50,7 @@ function Get-TargetResource
         $DatabaseAuthenticationType,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present",
 
@@ -65,16 +65,16 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting secure store service application '$Name'"
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
-                                  -Arguments $PSBoundParameters `
-                                  -ScriptBlock {
+    $result = Invoke-SPDscCommand -Credential $InstallAccount `
+        -Arguments $PSBoundParameters `
+        -ScriptBlock {
         $params = $args[0]
 
         $nullReturn = @{
-            Name = $params.Name
+            Name            = $params.Name
             ApplicationPool = $params.ApplicationPool
             AuditingEnabled = $false
-            Ensure = "Absent"
+            Ensure          = "Absent"
         }
 
         $serviceApps = Get-SPServiceApplication -Name $params.Name -ErrorAction SilentlyContinue
@@ -105,7 +105,7 @@ function Get-TargetResource
             }
 
             $propertyFlags = [System.Reflection.BindingFlags]::Instance `
-                                -bor [System.Reflection.BindingFlags]::NonPublic
+                -bor [System.Reflection.BindingFlags]::NonPublic
 
             $propData = $serviceApp.GetType().GetProperties($propertyFlags)
 
@@ -188,7 +188,7 @@ function Set-TargetResource
         $DatabaseAuthenticationType,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present",
 
@@ -207,21 +207,21 @@ function Set-TargetResource
     $params = $PSBoundParameters
 
     if ((($params.ContainsKey("DatabaseAuthenticationType") -eq $true) -and `
-         ($params.ContainsKey("DatabaseCredentials") -eq $false)) -or `
-         (($params.ContainsKey("DatabaseCredentials") -eq $true) -and `
-         ($params.ContainsKey("DatabaseAuthenticationType") -eq $false)))
+            ($params.ContainsKey("DatabaseCredentials") -eq $false)) -or `
+        (($params.ContainsKey("DatabaseCredentials") -eq $true) -and `
+            ($params.ContainsKey("DatabaseAuthenticationType") -eq $false)))
     {
         throw ("Where DatabaseCredentials are specified you must also specify " + `
-               "DatabaseAuthenticationType to identify the type of credentials being passed")
+                "DatabaseAuthenticationType to identify the type of credentials being passed")
         return
     }
 
     if ($result.Ensure -eq "Absent" -and $Ensure -eq "Present")
     {
         Write-Verbose -Message "Creating Secure Store Service Application $Name"
-        Invoke-SPDSCCommand -Credential $InstallAccount `
-                            -Arguments $params `
-                            -ScriptBlock {
+        Invoke-SPDscCommand -Credential $InstallAccount `
+            -Arguments $params `
+            -ScriptBlock {
             $params = $args[0]
 
             if ($params.ContainsKey("Ensure"))
@@ -233,7 +233,7 @@ function Set-TargetResource
                 $params.Remove("InstallAccount") | Out-Null
             }
 
-            if($params.ContainsKey("DatabaseAuthenticationType"))
+            if ($params.ContainsKey("DatabaseAuthenticationType"))
             {
                 if ($params.DatabaseAuthenticationType -eq "SQL")
                 {
@@ -258,27 +258,27 @@ function Set-TargetResource
     if ($result.Ensure -eq "Present" -and $Ensure -eq "Present")
     {
         if ($PSBoundParameters.ContainsKey("DatabaseServer") -and `
-           ($result.DatabaseServer -ne $DatabaseServer))
+            ($result.DatabaseServer -ne $DatabaseServer))
         {
             throw ("Specified database server does not match the actual " + `
-                   "database server. This resource cannot move the database " + `
-                   "to a different SQL instance.")
+                    "database server. This resource cannot move the database " + `
+                    "to a different SQL instance.")
         }
 
         if ($PSBoundParameters.ContainsKey("DatabaseName") -and `
-           ($result.DatabaseName -ne $DatabaseName))
+            ($result.DatabaseName -ne $DatabaseName))
         {
             throw ("Specified database name does not match the actual " + `
-                   "database name. This resource cannot rename the database.")
+                    "database name. This resource cannot rename the database.")
         }
 
         if ([string]::IsNullOrEmpty($ApplicationPool) -eq $false `
-            -and $ApplicationPool -ne $result.ApplicationPool)
+                -and $ApplicationPool -ne $result.ApplicationPool)
         {
             Write-Verbose -Message "Updating Secure Store Service Application $Name"
-            Invoke-SPDSCCommand -Credential $InstallAccount `
-                                -Arguments $PSBoundParameters `
-                                -ScriptBlock {
+            Invoke-SPDscCommand -Credential $InstallAccount `
+                -Arguments $PSBoundParameters `
+                -ScriptBlock {
                 $params = $args[0]
 
                 $serviceApp = Get-SPServiceApplication -Name $params.Name | Where-Object -FilterScript {
@@ -294,20 +294,20 @@ function Set-TargetResource
     {
         # The service app should not exit
         Write-Verbose -Message "Removing Secure Store Service Application $Name"
-        Invoke-SPDSCCommand -Credential $InstallAccount `
-                            -Arguments $PSBoundParameters `
-                            -ScriptBlock {
+        Invoke-SPDscCommand -Credential $InstallAccount `
+            -Arguments $PSBoundParameters `
+            -ScriptBlock {
             $params = $args[0]
 
-            $serviceApp =  Get-SPServiceApplication -Name $params.Name | Where-Object -FilterScript {
+            $serviceApp = Get-SPServiceApplication -Name $params.Name | Where-Object -FilterScript {
                 $_.GetType().FullName -eq "Microsoft.Office.SecureStoreService.Server.SecureStoreServiceApplication"
             }
 
             # Remove the connected proxy(ies)
             $proxies = Get-SPServiceApplicationProxy
-            foreach($proxyInstance in $proxies)
+            foreach ($proxyInstance in $proxies)
             {
-                if($serviceApp.IsConnected($proxyInstance))
+                if ($serviceApp.IsConnected($proxyInstance))
                 {
                     $proxyInstance.Delete()
                 }
@@ -370,7 +370,7 @@ function Test-TargetResource
         $DatabaseAuthenticationType,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present",
 
@@ -389,26 +389,31 @@ function Test-TargetResource
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
+    Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
+    Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
+
     if ($PSBoundParameters.ContainsKey("DatabaseServer") -and `
-       ($CurrentValues.DatabaseServer -ne $DatabaseServer))
+        ($null -ne $CurrentValues.DatabaseServer) -and `
+        ($CurrentValues.DatabaseServer -ne $DatabaseServer))
     {
         Write-Verbose -Message ("Specified database server does not match the actual " + `
-                                "database server. This resource cannot move the database " + `
-                                "to a different SQL instance.")
+                "database server. This resource cannot move the database " + `
+                "to a different SQL instance.")
         return $false
     }
 
     if ($PSBoundParameters.ContainsKey("DatabaseName") -and `
-       ($CurrentValues.DatabaseName -ne $DatabaseName))
+        ($null -ne $CurrentValues.DatabaseName) -and `
+        ($CurrentValues.DatabaseName -ne $DatabaseName))
     {
         Write-Verbose -Message ("Specified database name does not match the actual " + `
-                                "database name. This resource cannot rename the database.")
+                "database name. This resource cannot rename the database.")
         return $false
     }
 
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
-                                    -DesiredValues $PSBoundParameters `
-                                    -ValuesToCheck @("ApplicationPool", "Ensure")
+        -DesiredValues $PSBoundParameters `
+        -ValuesToCheck @("ApplicationPool", "Ensure")
 }
 
 Export-ModuleMember -Function *-TargetResource

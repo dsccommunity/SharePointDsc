@@ -168,7 +168,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             CoreProperty        = $corePropertyUpdate
             TypeProperty        = $typePropertyUpdate
             UserOverridePrivacy = $false
-        }| Add-Member ScriptMethod Commit {
+        } | Add-Member ScriptMethod Commit {
             $Global:SPUPPropertyCommitCalled = $true
         } -PassThru
 
@@ -229,7 +229,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
             $Global:SPUPGetPropertyByNameCalled = $true
             return $result
-        } -PassThru| Add-Member ScriptMethod Add {
+        } -PassThru | Add-Member ScriptMethod Add {
             $Global:SPUPSubTypeAddCalled = $true
         } -PassThru -Force
 
@@ -245,9 +245,9 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         } -PassThru
 
 
-        Mock -CommandName Get-SPDSCUserProfileSubTypeManager -MockWith {
+        Mock -CommandName Get-SPDscUserProfileSubTypeManager -MockWith {
             $result = @{
-            }| Add-Member ScriptMethod GetProfileSubtype {
+            } | Add-Member ScriptMethod GetProfileSubtype {
                 $Global:SPUPGetProfileSubtypeCalled = $true
                 return @{
                     Properties = $userProfileSubTypePropertiesNoProperty
@@ -311,7 +311,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 })
         } -ParameterFilter {
             $TypeName -eq "Microsoft.Office.Server.UserProfiles.UserProfileManager" }
-        Mock Invoke-SPDSCCommand {
+        Mock Invoke-SPDscCommand {
             return Invoke-Command -ScriptBlock $ScriptBlock -ArgumentList $Arguments -NoNewScope
         }
 
@@ -325,7 +325,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             return $true
         } -PassThru
 
-        $propertyMapping = @{} | Add-Member ScriptMethod Item {
+        $propertyMapping = @{ } | Add-Member ScriptMethod Item {
             param(
                 [string]
                 $property
@@ -354,7 +354,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         $connection = $connection | Add-Member ScriptMethod Update {
             $Global:SPUPSSyncConnectionUpdateCalled = $true
-        } -PassThru  | Add-Member ScriptMethod AddPropertyMapping {
+        } -PassThru | Add-Member ScriptMethod AddPropertyMapping {
             $Global:SPUPSSyncConnectionAddPropertyMappingCalled = $true
         } -PassThru
 
@@ -452,7 +452,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "When property doesn't exist, connection doesn't exist" {
             Mock -CommandName New-Object -MockWith {
-                $ProfilePropertyManager = @{"Contoso" = $connection} | Add-Member ScriptMethod GetCoreProperties {
+                $ProfilePropertyManager = @{"Contoso" = $connection } | Add-Member ScriptMethod GetCoreProperties {
                     $Global:UpsConfigManagerGetCorePropertiesCalled = $true
                     return ($coreProperties)
                 } -PassThru | Add-Member ScriptMethod GetProfileTypeProperties {
@@ -461,7 +461,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 } -PassThru
                 return (@{
                         ProfilePropertyManager = $ProfilePropertyManager
-                        ConnectionManager      = @{}
+                        ConnectionManager      = @{ }
                     } | Add-Member ScriptMethod IsSynchronizationRunning {
                         $Global:UpsSyncIsSynchronizationRunning = $true
                         return $false
@@ -490,7 +490,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 $Global:SPUPGetPropertyByNameCalled = $false
                 $Global:SPUPSMappingItemCalled = $false
 
-                {Set-TargetResource @testParamsNewProperty} | should throw "connection not found"
+                { Set-TargetResource @testParamsNewProperty } | should throw "connection not found"
 
                 $Global:SPUPGetProfileSubtypeCalled | Should be $true
                 $Global:SPUPGetPropertyByNameCalled | Should be $true
@@ -524,7 +524,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 $Global:SPUPGetProfileSubtypeCalled = $false
                 $Global:SPUPSMappingItemCalled = $false
 
-                {Set-TargetResource @testParamsNewProperty} | should throw "Term Set $($testParamsNewProperty.TermSet) not found"
+                { Set-TargetResource @testParamsNewProperty } | should throw "Term Set $($testParamsNewProperty.TermSet) not found"
 
                 $Global:SPUPGetProfileSubtypeCalled | Should be $true
                 $Global:SPUPSMappingItemCalled | Should be $false
@@ -542,7 +542,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "When ConfigurationManager is null" {
             Mock -CommandName New-Object -MockWith {
-                $ProfilePropertyManager = @{"Contoso" = $connection} | Add-Member ScriptMethod GetCoreProperties {
+                $ProfilePropertyManager = @{"Contoso" = $connection } | Add-Member ScriptMethod GetCoreProperties {
                     $Global:UpsConfigManagerGetCorePropertiesCalled = $true
                     return ($coreProperties)
                 } -PassThru | Add-Member ScriptMethod GetProfileTypeProperties {
@@ -567,7 +567,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "When Sync Connection is set to Export" {
             Mock -CommandName New-Object -MockWith {
-                $ProfilePropertyManager = @{"Contoso" = $connection} | Add-Member ScriptMethod GetCoreProperties {
+                $ProfilePropertyManager = @{"Contoso" = $connection } | Add-Member ScriptMethod GetCoreProperties {
                     $Global:UpsConfigManagerGetCorePropertiesCalled = $true
                     return ($coreProperties)
                 } -PassThru | Add-Member ScriptMethod GetProfileTypeProperties {
@@ -613,7 +613,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 $Global:SPUPGetProfileSubtypeCalled = $false
                 $Global:SPUPSMappingItemCalled = $false
 
-                {Set-TargetResource @testParamsNewProperty} | should throw "Term Group $($testParamsNewProperty.TermGroup) not found"
+                { Set-TargetResource @testParamsNewProperty } | should throw "Term Group $($testParamsNewProperty.TermGroup) not found"
 
                 $Global:SPUPGetProfileSubtypeCalled | Should be $true
                 $Global:SPUPSMappingItemCalled | Should be $false
@@ -647,7 +647,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 $Global:SPUPGetProfileSubtypeCalled = $false
                 $Global:SPUPSMappingItemCalled = $false
 
-                {Set-TargetResource @testParamsNewProperty} | should throw "Term Store $($testParamsNewProperty.TermStore) not found"
+                { Set-TargetResource @testParamsNewProperty } | should throw "Term Store $($testParamsNewProperty.TermStore) not found"
 
                 $Global:SPUPGetProfileSubtypeCalled | Should be $true
                 $Global:SPUPSMappingItemCalled | Should be $false
@@ -657,8 +657,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         }
 
         Context -Name "When property exists and all properties match" {
-            Mock -CommandName Get-SPDSCUserProfileSubTypeManager -MockWith {
-                $result = @{}| Add-Member ScriptMethod GetProfileSubtype {
+            Mock -CommandName Get-SPDscUserProfileSubTypeManager -MockWith {
+                $result = @{ } | Add-Member ScriptMethod GetProfileSubtype {
                     $Global:SPUPGetProfileSubtypeCalled = $true
                     return @{
                         Properties = $userProfileSubTypePropertiesUpdateProperty
@@ -707,8 +707,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         Context -Name "When property exists and type is different - throws exception" {
             $currentType = $testParamsUpdateProperty.Type
             $testParamsUpdateProperty.Type = "String (Multi Value)"
-            Mock -CommandName Get-SPDSCUserProfileSubTypeManager -MockWith {
-                $result = @{}| Add-Member ScriptMethod GetProfileSubtype {
+            Mock -CommandName Get-SPDscUserProfileSubTypeManager -MockWith {
+                $result = @{ } | Add-Member ScriptMethod GetProfileSubtype {
                     $Global:SPUPGetProfileSubtypeCalled = $true
                     return @{
                         Properties = $userProfileSubTypePropertiesUpdateProperty
@@ -740,7 +740,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 $Global:SPUPGetPropertyByNameCalled = $false
                 $Global:SPUPSMappingItemCalled = $false
 
-                {Set-TargetResource @testParamsUpdateProperty} | should throw "Can't change property type. Current Type"
+                { Set-TargetResource @testParamsUpdateProperty } | should throw "Can't change property type. Current Type"
 
                 $Global:SPUPGetProfileSubtypeCalled | Should be $true
                 $Global:SPUPGetPropertyByNameCalled | Should be $true
@@ -753,8 +753,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
             #$propertyMappingItem.DataSourcePropertyName = "property"
 
-            Mock -CommandName Get-SPDSCUserProfileSubTypeManager -MockWith {
-                $result = @{}| Add-Member ScriptMethod GetProfileSubtype {
+            Mock -CommandName Get-SPDscUserProfileSubTypeManager -MockWith {
+                $result = @{ } | Add-Member ScriptMethod GetProfileSubtype {
                     $Global:SPUPGetProfileSubtypeCalled = $true
                     return @{
                         Properties = $userProfileSubTypePropertiesUpdateProperty
@@ -796,8 +796,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "When property exists and mapping does not exist" {
             $propertyMappingItem = $null
-            Mock -CommandName Get-SPDSCUserProfileSubTypeManager -MockWith {
-                $result = @{}| Add-Member ScriptMethod GetProfileSubtype {
+            Mock -CommandName Get-SPDscUserProfileSubTypeManager -MockWith {
+                $result = @{ } | Add-Member ScriptMethod GetProfileSubtype {
                     $Global:SPUPGetProfileSubtypeCalled = $true
                     return @{
                         Properties = $userProfileSubTypePropertiesUpdateProperty
@@ -838,8 +838,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         }
 
         Context -Name "When property exists and ensure equals Absent" {
-            Mock -CommandName Get-SPDSCUserProfileSubTypeManager -MockWith {
-                $result = @{}| Add-Member ScriptMethod GetProfileSubtype {
+            Mock -CommandName Get-SPDscUserProfileSubTypeManager -MockWith {
+                $result = @{ } | Add-Member ScriptMethod GetProfileSubtype {
                     $Global:SPUPGetProfileSubtypeCalled = $true
                     return @{
                         Properties = $userProfileSubTypePropertiesUpdateProperty
@@ -870,8 +870,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
             # Mocks for AD Import Connection
 
-            Mock -CommandName Get-SPDSCUserProfileSubTypeManager -MockWith {
-                $result = @{}| Add-Member ScriptMethod GetProfileSubtype {
+            Mock -CommandName Get-SPDscUserProfileSubTypeManager -MockWith {
+                $result = @{ } | Add-Member ScriptMethod GetProfileSubtype {
                     $Global:SPUPGetProfileSubtypeCalled = $true
                     return @{
                         Properties = $userProfileSubTypePropertiesUpdateProperty
@@ -881,7 +881,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 return $result
             }
 
-            $propertyMapping = ([PSCustomObject]@{}) | Add-Member ScriptMethod Item {
+            $propertyMapping = ([PSCustomObject]@{ }) | Add-Member ScriptMethod Item {
                 param(
                     [string]
                     $property
@@ -909,7 +909,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     } | Add-Member -MemberType ScriptMethod -Name Invoke -Value {
                         return @(
                             (([PSCustomObject]"Microsoft.Office.Server.UserProfiles.ADImport.UserProfileADImportPropertyMapping") `
-                                    | Add-Member -MemberType ScriptMethod -Name GetType -Value {
+                                | Add-Member -MemberType ScriptMethod -Name GetType -Value {
                                     return @{
                                         FullName = ""
                                     } | Add-Member -MemberType ScriptMethod -Name GetMembers -Value {
@@ -931,7 +931,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                                 } -PassThru -Force
                             ),
                             (([PSCustomObject]"Microsoft.Office.Server.UserProfiles.ADImport.UserProfileADImportPropertyMapping") `
-                                    | Add-Member -MemberType ScriptMethod -Name GetType -Value {
+                                | Add-Member -MemberType ScriptMethod -Name GetType -Value {
                                     return @{
                                         FullName = ""
                                     } | Add-Member -MemberType ScriptMethod -Name GetMembers -Value {

@@ -9,7 +9,7 @@ function Get-TargetResource
         $BinaryDir,
 
         [Parameter()]
-        [ValidateSet("mon","tue","wed","thu","fri","sat","sun")]
+        [ValidateSet("mon", "tue", "wed", "thu", "fri", "sat", "sun")]
         [System.String[]]
         $BinaryInstallDays,
 
@@ -18,7 +18,7 @@ function Get-TargetResource
         $BinaryInstallTime,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present",
 
@@ -71,17 +71,24 @@ function Get-TargetResource
     if ($checkBlockedFile -eq $true)
     {
         Write-Verbose -Message "Checking status now"
-        $zone = Get-Item -Path $setupExe -Stream "Zone.Identifier" -EA SilentlyContinue
+        try
+        {
+            $zone = Get-Item -Path $setupExe -Stream "Zone.Identifier" -EA SilentlyContinue
+        }
+        catch
+        {
+            Write-Verbose -Message 'Encountered error while reading file stream. Ignoring file stream.'
+        }
         if ($null -ne $zone)
         {
             throw ("Setup file is blocked! Please use 'Unblock-File -Path $setupExe' " + `
-                   "to unblock the file before continuing.")
+                    "to unblock the file before continuing.")
         }
         Write-Verbose -Message "File not blocked, continuing."
     }
 
     $osrvFolder = Get-ChildItem -Path (Join-Path -Path $BinaryDir `
-                                                 -ChildPath "\osmui*.*")
+            -ChildPath "\osmui*.*")
 
     if ($osrvFolder.Count -ne 1)
     {
@@ -96,8 +103,11 @@ function Get-TargetResource
         $parsedProduct = $product -split " - "
         switch -Regex ($parsedProduct)
         {
-            "Dari"    { $languageEN = "Dari"}
-            "Serbian" {
+            "Dari"
+            { $languageEN = "Dari"
+            }
+            "Serbian"
+            {
                 if ($parsedProduct[1] -match "srpski")
                 {
                     $languageEN = "Serbian (Latin)"
@@ -107,11 +117,13 @@ function Get-TargetResource
                     $languageEN = "Serbian (Cyrillic)"
                 }
             }
-            "Chinese" {
+            "Chinese"
+            {
                 $parsedENProduct = $parsedProduct[1] -split "/"
                 $languageEN = $parsedENProduct[0]
             }
-            "Portuguese" {
+            "Portuguese"
+            {
                 if ($parsedProduct[1] -match "\(Brasil\)")
                 {
                     $languageEN = "Portuguese (Brasil)"
@@ -121,7 +133,8 @@ function Get-TargetResource
                     $languageEN = "Portuguese (Portugal)"
                 }
             }
-            Default {
+            Default
+            {
                 $parsedENProduct = $parsedProduct[1] -split "/"
                 $parsedENProduct = $parsedENProduct[0] -split " "
                 $languageEN = $parsedENProduct[0]
@@ -143,7 +156,7 @@ function Get-TargetResource
     try
     {
         $cultureInfo = New-Object -TypeName System.Globalization.CultureInfo `
-                                  -ArgumentList $language
+            -ArgumentList $language
     }
     catch
     {
@@ -160,19 +173,36 @@ function Get-TargetResource
     $updateLanguage = $cultureInfo.EnglishName
     switch ($cultureInfo.EnglishName)
     {
-        "Dari (Afghanistan)" { $languageEnglish = "Dari" }
-        "Chinese (Simplified, China)" { $languageEnglish = "Chinese (PRC)" }
-        "Chinese (Traditional, Taiwan)" { $languageEnglish = "Chinese (Taiwan)" }
-        "Portuguese (Brazil)" { $languageEnglish = "Portuguese (Brasil)" }
-        "Portuguese (Portugal)" { $languageEnglish = "Portuguese (Portugal)" }
-        "Serbian (Cyrillic, Serbia)" { $languageEnglish = "Serbian (Cyrillic)" }
-        "Serbian (Latin, Serbia)" { $languageEnglish = "Serbian (Latin)" }
-        "Norwegian Bokmål (Norway)" { $languageEnglish = "Norwegian" }
-        Default {
+        "Dari (Afghanistan)"
+        { $languageEnglish = "Dari"
+        }
+        "Chinese (Simplified, China)"
+        { $languageEnglish = "Chinese (PRC)"
+        }
+        "Chinese (Traditional, Taiwan)"
+        { $languageEnglish = "Chinese (Taiwan)"
+        }
+        "Portuguese (Brazil)"
+        { $languageEnglish = "Portuguese (Brasil)"
+        }
+        "Portuguese (Portugal)"
+        { $languageEnglish = "Portuguese (Portugal)"
+        }
+        "Serbian (Cyrillic, Serbia)"
+        { $languageEnglish = "Serbian (Cyrillic)"
+        }
+        "Serbian (Latin, Serbia)"
+        { $languageEnglish = "Serbian (Latin)"
+        }
+        "Norwegian Bokmål (Norway)"
+        { $languageEnglish = "Norwegian"
+        }
+        Default
+        {
             if ($cultureInfo.EnglishName -match "(\w*,*\s*\w*) \([^)]*\)")
             {
                 $languageEnglish = $matches[1]
-                $updateLanguage  = $matches[0]
+                $updateLanguage = $matches[0]
                 if ($languageEnglish.contains(","))
                 {
                     $languages = $languageEnglish.Split(",")
@@ -219,7 +249,7 @@ function Set-TargetResource
         $BinaryDir,
 
         [Parameter()]
-        [ValidateSet("mon","tue","wed","thu","fri","sat","sun")]
+        [ValidateSet("mon", "tue", "wed", "thu", "fri", "sat", "sun")]
         [System.String[]]
         $BinaryInstallDays,
 
@@ -228,7 +258,7 @@ function Set-TargetResource
         $BinaryInstallTime,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present",
 
@@ -242,7 +272,7 @@ function Set-TargetResource
     if ($Ensure -eq "Absent")
     {
         throw [Exception] ("SharePointDsc does not support uninstalling SharePoint " + `
-                           "Language Packs. Please remove this manually.")
+                "Language Packs. Please remove this manually.")
         return
     }
 
@@ -288,11 +318,18 @@ function Set-TargetResource
     if ($checkBlockedFile -eq $true)
     {
         Write-Verbose -Message "Checking status now"
-        $zone = Get-Item -Path $setupExe -Stream "Zone.Identifier" -EA SilentlyContinue
+        try
+        {
+            $zone = Get-Item -Path $setupExe -Stream "Zone.Identifier" -EA SilentlyContinue
+        }
+        catch 
+        {
+            Write-Verbose -Message 'Encountered error while reading file stream. Ignoring file stream.'
+        }
         if ($null -ne $zone)
         {
             throw ("Setup file is blocked! Please use 'Unblock-File -Path $setupExe' " + `
-                   "to unblock the file before continuing.")
+                    "to unblock the file before continuing.")
         }
         Write-Verbose -Message "File not blocked, continuing."
     }
@@ -302,17 +339,17 @@ function Set-TargetResource
     if ($BinaryInstallDays)
     {
         Write-Verbose -Message "BinaryInstallDays parameter exists, check if current day is specified"
-        $currentDayOfWeek = $now.DayOfWeek.ToString().ToLower().Substring(0,3)
+        $currentDayOfWeek = $now.DayOfWeek.ToString().ToLower().Substring(0, 3)
 
         if ($BinaryInstallDays -contains $currentDayOfWeek)
         {
             Write-Verbose -Message ("Current day is present in the parameter BinaryInstallDays. " + `
-                                    "Update can be run today.")
+                    "Update can be run today.")
         }
         else
         {
             Write-Verbose -Message ("Current day is not present in the parameter BinaryInstallDays, " + `
-                                    "skipping the update")
+                    "skipping the update")
             return
         }
     }
@@ -335,12 +372,12 @@ function Set-TargetResource
         }
         else
         {
-            if ([datetime]::TryParse($upgradeTimes[0],[ref]$starttime) -ne $true)
+            if ([datetime]::TryParse($upgradeTimes[0], [ref]$starttime) -ne $true)
             {
                 throw "Error converting start time"
             }
 
-            if ([datetime]::TryParse($upgradeTimes[2],[ref]$endtime) -ne $true)
+            if ([datetime]::TryParse($upgradeTimes[2], [ref]$endtime) -ne $true)
             {
                 throw "Error converting end time"
             }
@@ -354,29 +391,29 @@ function Set-TargetResource
         if (($starttime -lt $now) -and ($endtime -gt $now))
         {
             Write-Verbose -Message ("Current time is inside of the window specified in " + `
-                                    "BinaryInstallTime. Starting update")
+                    "BinaryInstallTime. Starting update")
         }
         else
         {
             Write-Verbose -Message ("Current time is outside of the window specified in " + `
-                                    "BinaryInstallTime, skipping the update")
+                    "BinaryInstallTime, skipping the update")
             return
         }
     }
     else
     {
         Write-Verbose -Message ("No BinaryInstallTime specified, Update can be ran at " + `
-                                "any time. Starting update.")
+                "any time. Starting update.")
     }
 
     Write-Verbose -Message "To prevent an endless loop: Check if an upgrade is required."
-    if ((Get-SPDSCInstalledProductVersion).FileMajorPart -eq 15)
+    if ((Get-SPDscInstalledProductVersion).FileMajorPart -eq 15)
     {
-        $wssRegKey ="hklm:SOFTWARE\Microsoft\Shared Tools\Web Server Extensions\15.0\WSS"
+        $wssRegKey = "hklm:SOFTWARE\Microsoft\Shared Tools\Web Server Extensions\15.0\WSS"
     }
     else
     {
-        $wssRegKey ="hklm:SOFTWARE\Microsoft\Shared Tools\Web Server Extensions\16.0\WSS"
+        $wssRegKey = "hklm:SOFTWARE\Microsoft\Shared Tools\Web Server Extensions\16.0\WSS"
     }
 
     Write-Verbose -Message "Checking if BinaryDir is an UNC path"
@@ -408,14 +445,14 @@ function Set-TargetResource
     <Setting Id=`"USINGUIINSTALLMODE`" Value=`"0`"/>
     <Logging Type=`"verbose`" Path=`"%temp%`" Template=`"SharePoint "
 
-    $InstalledVersion = Get-SPDSCInstalledProductVersion
+    $InstalledVersion = Get-SPDscInstalledProductVersion
     if ($InstalledVersion.FileMajorPart -eq 15)
     {
         $configData += "2013"
     }
     else
     {
-        if($InstalledVersion.ProductBuildPart.ToString().Length -eq 4)
+        if ($InstalledVersion.ProductBuildPart.ToString().Length -eq 4)
         {
             $configData += "2016"
         }
@@ -434,9 +471,9 @@ function Set-TargetResource
     Write-Verbose -Message "Beginning installation of the SharePoint Language Pack"
 
     $setup = Start-Process -FilePath $setupExe `
-                           -ArgumentList "/config `"$configPath`"" `
-                           -Wait `
-                           -PassThru
+        -ArgumentList "/config `"$configPath`"" `
+        -Wait `
+        -PassThru
 
     if ($uncInstall -eq $true)
     {
@@ -446,14 +483,17 @@ function Set-TargetResource
 
     switch ($setup.ExitCode)
     {
-        0 {
+        0
+        {
             Write-Verbose -Message "SharePoint Language Pack binary installation complete"
         }
-        17022 {
+        17022
+        {
             Write-Verbose -Message "SharePoint Language Pack binary installation complete. Reboot required."
             $global:DSCMachineStatus = 1
         }
-        Default {
+        Default
+        {
             throw "SharePoint Language Pack install failed, exit code was $($setup.ExitCode)"
         }
     }
@@ -471,7 +511,7 @@ function Test-TargetResource
         $BinaryDir,
 
         [Parameter()]
-        [ValidateSet("mon","tue","wed","thu","fri","sat","sun")]
+        [ValidateSet("mon", "tue", "wed", "thu", "fri", "sat", "sun")]
         [System.String[]]
         $BinaryInstallDays,
 
@@ -480,7 +520,7 @@ function Test-TargetResource
         $BinaryInstallTime,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present",
 
@@ -496,15 +536,18 @@ function Test-TargetResource
     if ($Ensure -eq "Absent")
     {
         throw [Exception] ("SharePointDsc does not support uninstalling SharePoint " + `
-                           "Language Packs. Please remove this manually.")
+                "Language Packs. Please remove this manually.")
         return
     }
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
+    Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
+    Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
+
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
-                                    -DesiredValues $PSBoundParameters `
-                                    -ValuesToCheck @("Ensure")
+        -DesiredValues $PSBoundParameters `
+        -ValuesToCheck @("Ensure")
 }
 
 Export-ModuleMember -Function *-TargetResource

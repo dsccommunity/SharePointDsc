@@ -26,7 +26,7 @@ function Get-TargetResource
         $DataPath,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present"
     )
@@ -74,11 +74,18 @@ function Get-TargetResource
     if ($checkBlockedFile -eq $true)
     {
         Write-Verbose -Message "Checking status now"
-        $zone = Get-Item -Path $InstallerPath -Stream "Zone.Identifier" -EA SilentlyContinue
+        try
+        {
+            $zone = Get-Item -Path $InstallerPath -Stream "Zone.Identifier" -EA SilentlyContinue
+        }
+        catch
+        {
+            Write-Verbose -Message 'Encountered error while reading file stream. Ignoring file stream.'
+        }
         if ($null -ne $zone)
         {
             throw ("Setup file is blocked! Please use 'Unblock-File -Path $InstallerPath' " + `
-                   "to unblock the file before continuing.")
+                    "to unblock the file before continuing.")
         }
         Write-Verbose -Message "File not blocked, continuing."
     }
@@ -90,9 +97,9 @@ function Get-TargetResource
     $installedItemsX64 = Get-ItemProperty -Path $x64Path | Select-Object -Property DisplayName
 
     $installedItems = $installedItemsX86 + $installedItemsX64
-    $installedItems = $installedItems | Select-Object -Property DisplayName -Unique
+    $installedItems = $installedItems.DisplayName | Select-Object -Unique
     $spInstall = $installedItems | Where-Object -FilterScript {
-        $_ -match "Microsoft SharePoint Server (2013|2016|2019)"
+        $_ -match "^Microsoft SharePoint Server (2013|2016|2019)$"
     }
 
     if ($spInstall)
@@ -149,7 +156,7 @@ function Set-TargetResource
         $DataPath,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present"
     )
@@ -159,7 +166,7 @@ function Set-TargetResource
     if ($Ensure -eq "Absent")
     {
         throw [Exception] ("SharePointDsc does not support uninstalling SharePoint or " + `
-                           "its prerequisites. Please remove this manually.")
+                "its prerequisites. Please remove this manually.")
     }
 
     Write-Verbose -Message "Check if Binary folder exists"
@@ -174,7 +181,7 @@ function Set-TargetResource
         throw "Setup.exe cannot be found in {$BinaryDir}"
     }
 
-    $majorVersion  = (Get-SPDSCAssemblyVersion -PathToAssembly $InstallerPath)
+    $majorVersion = (Get-SPDscAssemblyVersion -PathToAssembly $InstallerPath)
     if ($majorVersion -eq 15)
     {
         $svrsetupDll = Join-Path -Path $BinaryDir -ChildPath "updates\svrsetup.dll"
@@ -209,8 +216,8 @@ function Set-TargetResource
             if ($dotNet46Installed -eq $true)
             {
                 throw [Exception] ("A known issue prevents installation of SharePoint 2013 on " + `
-                                   "servers that have .NET 4.6 already installed. See details " + `
-                                   "at https://support.microsoft.com/en-us/kb/3087184")
+                        "servers that have .NET 4.6 already installed. See details " + `
+                        "at https://support.microsoft.com/en-us/kb/3087184")
                 return
             }
         }
@@ -245,11 +252,18 @@ function Set-TargetResource
     if ($checkBlockedFile -eq $true)
     {
         Write-Verbose -Message "Checking status now"
-        $zone = Get-Item -Path $InstallerPath -Stream "Zone.Identifier" -EA SilentlyContinue
+        try
+        {
+            $zone = Get-Item -Path $InstallerPath -Stream "Zone.Identifier" -EA SilentlyContinue
+        }
+        catch
+        {
+            Write-Verbose -Message 'Encountered error while reading file stream. Ignoring file stream.'
+        }
         if ($null -ne $zone)
         {
             throw ("Setup file is blocked! Please use 'Unblock-File -Path $InstallerPath' " + `
-                   "to unblock the file before continuing.")
+                    "to unblock the file before continuing.")
         }
         Write-Verbose -Message "File not blocked, continuing."
     }
@@ -259,7 +273,7 @@ function Set-TargetResource
     if ($BinaryDir.StartsWith("\\"))
     {
         Write-Verbose -Message ("Specified BinaryDir is an UNC path. Adding servername to Local " +
-                                "Intranet Zone")
+            "Intranet Zone")
 
         $uncInstall = $true
 
@@ -316,9 +330,9 @@ function Set-TargetResource
     $setupExe = Join-Path -Path $BinaryDir -ChildPath "setup.exe"
 
     $setup = Start-Process -FilePath $setupExe `
-                           -ArgumentList "/config `"$configPath`"" `
-                           -Wait `
-                           -PassThru
+        -ArgumentList "/config `"$configPath`"" `
+        -Wait `
+        -PassThru
 
     if ($uncInstall -eq $true)
     {
@@ -326,36 +340,45 @@ function Set-TargetResource
         Remove-SPDscZoneMap -ServerName $serverName
     }
 
+    # Exit codes: https://docs.microsoft.com/en-us/windows/desktop/msi/error-codes
     switch ($setup.ExitCode)
     {
-        0 {
+        0
+        {
             Write-Verbose -Message "SharePoint binary installation complete"
             $global:DSCMachineStatus = 1
         }
-        30066 {
+        3010
+        {
+            Write-Verbose -Message "SharePoint binary installation complete, but reboot is required"
+            $global:DSCMachineStatus = 1
+        }
+        30066
+        {
             $pr1 = ("HKLM:\Software\Microsoft\Windows\CurrentVersion\" + `
                     "Component Based Servicing\RebootPending")
             $pr2 = ("HKLM:\Software\Microsoft\Windows\CurrentVersion\" + `
                     "WindowsUpdate\Auto Update\RebootRequired")
             $pr3 = "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager"
             if (    ($null -ne (Get-Item -Path $pr1 -ErrorAction SilentlyContinue)) `
-                -or ($null -ne (Get-Item -Path $pr2 -ErrorAction SilentlyContinue)) `
-                -or ((Get-Item -Path $pr3 | Get-ItemProperty).PendingFileRenameOperations.count -gt 0) `
-                )
+                    -or ($null -ne (Get-Item -Path $pr2 -ErrorAction SilentlyContinue)) `
+                    -or ((Get-Item -Path $pr3 | Get-ItemProperty).PendingFileRenameOperations.count -gt 0) `
+            )
             {
 
                 Write-Verbose -Message ("SPInstall has detected the server has pending " + `
-                                        "a reboot. Flagging to the DSC engine that the " + `
-                                        "server should reboot before continuing.")
+                        "a reboot. Flagging to the DSC engine that the " + `
+                        "server should reboot before continuing.")
                 $global:DSCMachineStatus = 1
             }
             else
             {
                 throw ("SharePoint installation has failed due to an issue with prerequisites " + `
-                       "not being installed correctly. Please review the setup logs.")
+                        "not being installed correctly. Please review the setup logs.")
             }
         }
-        Default {
+        Default
+        {
             throw "SharePoint install failed, exit code was $($setup.ExitCode)"
         }
     }
@@ -390,7 +413,7 @@ function Test-TargetResource
         $DataPath,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present"
     )
@@ -402,14 +425,17 @@ function Test-TargetResource
     if ($Ensure -eq "Absent")
     {
         throw [Exception] ("SharePointDsc does not support uninstalling SharePoint or " + `
-                           "its prerequisites. Please remove this manually.")
+                "its prerequisites. Please remove this manually.")
     }
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
+    Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
+    Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
+
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
-                                    -DesiredValues $PSBoundParameters `
-                                    -ValuesToCheck @("Ensure")
+        -DesiredValues $PSBoundParameters `
+        -ValuesToCheck @("Ensure")
 }
 
 Export-ModuleMember -Function *-TargetResource

@@ -21,7 +21,7 @@ function Get-TargetResource
         $CreateFirewallRules,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present",
 
@@ -36,13 +36,13 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting the cache host information"
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
-                                  -Arguments $PSBoundParameters `
-                                  -ScriptBlock {
+    $result = Invoke-SPDscCommand -Credential $InstallAccount `
+        -Arguments $PSBoundParameters `
+        -ScriptBlock {
         $params = $args[0]
         $nullReturnValue = @{
-            Name = $params.Name
-            Ensure = "Absent"
+            Name           = $params.Name
+            Ensure         = "Absent"
             InstallAccount = $params.InstallAccount
         }
 
@@ -57,24 +57,24 @@ function Get-TargetResource
             }
             $computerName = ([System.Net.Dns]::GetHostByName($env:computerName)).HostName
             $cachePort = ($cacheHost | Where-Object -FilterScript {
-                $_.HostName -eq $computerName
-            }).PortNo
+                    $_.HostName -eq $computerName
+                }).PortNo
             $cacheHostConfig = Get-AFCacheHostConfiguration -ComputerName $computerName `
-                                                            -CachePort $cachePort `
-                                                            -ErrorAction SilentlyContinue
+                -CachePort $cachePort `
+                -ErrorAction SilentlyContinue
 
             $windowsService = Get-CimInstance -Class Win32_Service -Filter "Name='AppFabricCachingService'"
             $firewallRule = Get-NetFirewallRule -DisplayName "SharePoint Distributed Cache" `
-                                                -ErrorAction SilentlyContinue
+                -ErrorAction SilentlyContinue
 
             return @{
-                Name = $params.Name
-                CacheSizeInMB = $cacheHostConfig.Size
-                ServiceAccount = $windowsService.StartName
-                CreateFirewallRules = ($null -ne $firewallRule)
-                Ensure = "Present"
+                Name                 = $params.Name
+                CacheSizeInMB        = $cacheHostConfig.Size
+                ServiceAccount       = $windowsService.StartName
+                CreateFirewallRules  = ($null -ne $firewallRule)
+                Ensure               = "Present"
                 ServerProvisionOrder = $params.ServerProvisionOrder
-                InstallAccount = $params.InstallAccount
+                InstallAccount       = $params.InstallAccount
             }
         }
         catch
@@ -108,7 +108,7 @@ function Set-TargetResource
         $CreateFirewallRules,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present",
 
@@ -131,32 +131,32 @@ function Set-TargetResource
         if ($createFirewallRules -eq $true)
         {
             Write-Verbose -Message "Create a firewall rule for AppFabric"
-            Invoke-SPDSCCommand -Credential $InstallAccount -ScriptBlock {
+            Invoke-SPDscCommand -Credential $InstallAccount -ScriptBlock {
                 $icmpRuleName = "File and Printer Sharing (Echo Request - ICMPv4-In)"
                 $icmpFirewallRule = Get-NetFirewallRule -DisplayName $icmpRuleName `
-                                                        -ErrorAction SilentlyContinue
+                    -ErrorAction SilentlyContinue
                 if ($null -eq $icmpFirewallRule )
                 {
                     New-NetFirewallRule -Name Allow_Ping -DisplayName $icmpRuleName `
-                                                         -Description "Allow ICMPv4 ping" `
-                                                         -Protocol ICMPv4 `
-                                                         -IcmpType 8 `
-                                                         -Enabled True `
-                                                         -Profile Any `
-                                                         -Action Allow
+                        -Description "Allow ICMPv4 ping" `
+                        -Protocol ICMPv4 `
+                        -IcmpType 8 `
+                        -Enabled True `
+                        -Profile Any `
+                        -Action Allow
                 }
                 Enable-NetFirewallRule -DisplayName $icmpRuleName
 
                 $spRuleName = "SharePoint Distributed Cache"
                 $firewallRule = Get-NetFirewallRule -DisplayName $spRuleName `
-                                                    -ErrorAction SilentlyContinue
+                    -ErrorAction SilentlyContinue
                 if ($null -eq $firewallRule)
                 {
                     New-NetFirewallRule -Name "SPDistCache" `
-                                        -DisplayName $spRuleName `
-                                        -Protocol TCP `
-                                        -LocalPort 22233-22236 `
-                                        -Group "SharePoint"
+                        -DisplayName $spRuleName `
+                        -Protocol TCP `
+                        -LocalPort 22233-22236 `
+                        -Group "SharePoint"
                 }
                 Enable-NetFirewallRule -DisplayName $spRuleName
             }
@@ -164,14 +164,14 @@ function Set-TargetResource
         }
 
         Write-Verbose -Message ("Current state is '$($CurrentState.Ensure)' " + `
-                                "and desired state is '$Ensure'")
+                "and desired state is '$Ensure'")
 
         if ($CurrentState.Ensure -ne $Ensure)
         {
             Write-Verbose -Message "Enabling distributed cache service"
-            Invoke-SPDSCCommand -Credential $InstallAccount `
-                                -Arguments $PSBoundParameters `
-                                -ScriptBlock {
+            Invoke-SPDscCommand -Credential $InstallAccount `
+                -Arguments $PSBoundParameters `
+                -ScriptBlock {
                 $params = $args[0]
 
                 if ($params.ContainsKey("ServerProvisionOrder"))
@@ -187,8 +187,8 @@ function Set-TargetResource
                         # Attempt to see if we can find the service with just the computer
                         # name, or if we need to use the FQDN
                         $si = Get-SPServiceInstance -Server $currentServer `
-                            | Where-Object -FilterScript {
-                                $_.GetType().Name -eq "SPDistributedCacheServiceInstance"
+                        | Where-Object -FilterScript {
+                            $_.GetType().Name -eq "SPDistributedCacheServiceInstance"
                         }
 
                         if ($null -eq $si)
@@ -199,38 +199,38 @@ function Set-TargetResource
 
                         Write-Verbose "Waiting for cache on $currentServer"
                         $serviceCheck = Get-SPServiceInstance -Server $currentServer `
-                            | Where-Object -FilterScript {
-                                $_.GetType().Name -eq "SPDistributedCacheServiceInstance" -and `
+                        | Where-Object -FilterScript {
+                            $_.GetType().Name -eq "SPDistributedCacheServiceInstance" -and `
                                 $_.Status -eq "Online"
                         }
 
                         while (($count -lt $maxCount) -and ($null -eq $serviceCheck))
                         {
                             Write-Verbose -Message ("$([DateTime]::Now.ToShortTimeString()) - " + `
-                                                    "Waiting for distributed cache to start " + `
-                                                    "on $currentServer (waited $count of " + `
-                                                    "$maxCount minutes)")
+                                    "Waiting for distributed cache to start " + `
+                                    "on $currentServer (waited $count of " + `
+                                    "$maxCount minutes)")
                             Start-Sleep -Seconds 60
                             $serviceCheck = Get-SPServiceInstance -Server $currentServer `
-                                | Where-Object -FilterScript {
-                                    $_.GetType().Name -eq "SPDistributedCacheServiceInstance" -and `
+                            | Where-Object -FilterScript {
+                                $_.GetType().Name -eq "SPDistributedCacheServiceInstance" -and `
                                     $_.Status -eq "Online"
                             }
                             $count++
                         }
 
                         $serviceCheck = Get-SPServiceInstance -Server $currentServer `
-                                            | Where-Object -FilterScript {
-                                                $_.GetType().Name -eq "SPDistributedCacheServiceInstance" `
-                                                -and $_.Status -eq "Online"
-                                            }
+                        | Where-Object -FilterScript {
+                            $_.GetType().Name -eq "SPDistributedCacheServiceInstance" `
+                                -and $_.Status -eq "Online"
+                        }
 
                         if ($null -eq $serviceCheck)
                         {
                             Write-Warning -Message ("Server $currentServer is not running " + `
-                                                    "distributed cache after waiting 30 " + `
-                                                    "minutes. No longer waiting for this " + `
-                                                    "server, progressing to next action")
+                                    "distributed cache after waiting 30 " + `
+                                    "minutes. No longer waiting for this " + `
+                                    "server, progressing to next action")
                         }
 
                         $serverCount++
@@ -238,7 +238,8 @@ function Set-TargetResource
                         if ($ServerCount -ge $params.ServerProvisionOrder.Length)
                         {
                             throw ("The server $($env:COMPUTERNAME) was not found in the " + `
-                                   "array for distributed cache servers")
+                                   "ServerProvisionOrder array of Distributed Cache server(s).  " + `
+								                   "The server must be included in ServerProvisionOrder or Ensure equal to Absent.")                               
                         }
                         $currentServer = $params.ServerProvisionOrder[$serverCount]
                     }
@@ -256,6 +257,7 @@ function Set-TargetResource
                 {
                     # In SharePoint 2019, Stop-SPServiceInstance throws an exception if service
                     # is not running on the server, try/catch handles this scenario
+                    Write-Verbose -Message ("Cannot stop an already stopped service. Continuing.")
                 }
 
                 $count = 0
@@ -263,18 +265,18 @@ function Set-TargetResource
 
                 $serviceCheck = Get-SPServiceInstance | Where-Object -FilterScript {
                     $_.GetType().Name -eq "SPDistributedCacheServiceInstance" -and `
-                    $_.Status -ne "Disabled"
+                        $_.Status -ne "Disabled"
                 }
 
                 while (($count -lt $maxCount) -and ($null -ne $serviceCheck))
                 {
                     Write-Verbose -Message ("$([DateTime]::Now.ToShortTimeString()) - Waiting " + `
-                                            "for distributed cache to stop on all servers " + `
-                                            "(waited $count of $maxCount minutes)")
+                            "for distributed cache to stop on all servers " + `
+                            "(waited $count of $maxCount minutes)")
                     Start-Sleep -Seconds 60
                     $serviceCheck = Get-SPServiceInstance | Where-Object -FilterScript {
                         $_.GetType().Name -eq "SPDistributedCacheServiceInstance" -and `
-                        $_.Status -ne "Disabled"
+                            $_.Status -ne "Disabled"
                     }
                     $count++
                 }
@@ -290,18 +292,18 @@ function Set-TargetResource
 
                 $serviceCheck = Get-SPServiceInstance | Where-Object -FilterScript {
                     $_.GetType().Name -eq "SPDistributedCacheServiceInstance" -and `
-                    $_.Status -ne "Online"
+                        $_.Status -ne "Online"
                 }
 
                 while (($count -lt $maxCount) -and ($null -ne $serviceCheck))
                 {
                     Write-Verbose -Message ("$([DateTime]::Now.ToShortTimeString()) - Waiting " + `
-                                            "for distributed cache to start on all servers " + `
-                                            "(waited $count of $maxCount minutes)")
+                            "for distributed cache to start on all servers " + `
+                            "(waited $count of $maxCount minutes)")
                     Start-Sleep -Seconds 60
                     $serviceCheck = Get-SPServiceInstance | Where-Object -FilterScript {
                         $_.GetType().Name -eq "SPDistributedCacheServiceInstance" -and `
-                        $_.Status -ne "Online"
+                            $_.Status -ne "Online"
                     }
                     $count++
                 }
@@ -324,68 +326,104 @@ function Set-TargetResource
                     catch
                     {
                         # In SharePoint 2019, ProcessIdentity.Deploy() may throw an exception
+                        Write-Verbose -Message ("An error has occurred while updating the " + `
+                                "ServiceAccount. The change will be retried.")
                     }
                 }
             }
         }
-        elseif ($CurrentState.CacheSizeInMB -ne $CacheSizeInMB)
+        else
         {
-            Write-Verbose -Message "Updating distributed cache service cache size"
-            Invoke-SPDSCCommand -Credential $InstallAccount `
-                                -Arguments $PSBoundParameters `
-                                -ScriptBlock {
-                $params = $args[0]
+            if ($CurrentState.ServiceAccount -ne $ServiceAccount.UserName)
+            {
+                Invoke-SPDSCCommand -Credential $InstallAccount `
+                    -Arguments $PSBoundParameters `
+                    -ScriptBlock {
+                    $params = $args[0]
+                    $farm = Get-SPFarm
+                    $cacheService = $farm.Services | Where-Object -FilterScript {
+                        $_.Name -eq "AppFabricCachingService"
+                    }
 
-                Get-SPServiceInstance | Where-Object -FilterScript {
-                    $_.GetType().Name -eq "SPDistributedCacheServiceInstance"
-                } | Stop-SPServiceInstance -Confirm:$false
-
-                $count = 0
-                $maxCount = 30
-
-                $serviceCheck = Get-SPServiceInstance | Where-Object -FilterScript {
-                    $_.GetType().Name -eq "SPDistributedCacheServiceInstance" -and `
-                    $_.Status -ne "Disabled"
+                    if ($cacheService.ProcessIdentity.ManagedAccount.Username -ne $params.ServiceAccount)
+                    {
+                        $cacheService.ProcessIdentity.CurrentIdentityType = "SpecificUser"
+                        $account = Get-SPManagedAccount -Identity $params.ServiceAccount
+                        $cacheService.ProcessIdentity.ManagedAccount = $account
+                        $cacheService.ProcessIdentity.Update()
+                        try
+                        {
+                            $cacheService.ProcessIdentity.Deploy()
+                        }
+                        catch
+                        {
+                            # In SharePoint 2019, ProcessIdentity.Deploy() may throw an exception
+                            Write-Verbose -Message ("An error has occurred while updating the " + `
+                                    "ServiceAccount. The change will be retried.")
+                        }
+                    }
                 }
+            }
 
-                while (($count -lt $maxCount) -and ($null -ne $serviceCheck))
-                {
-                    Write-Verbose -Message ("$([DateTime]::Now.ToShortTimeString()) - Waiting " + `
-                                            "for distributed cache to stop on all servers " + `
-                                            "(waited $count of $maxCount minutes)")
-                    Start-Sleep -Seconds 60
+            if ($CurrentState.CacheSizeInMB -ne $CacheSizeInMB)
+            {
+                Write-Verbose -Message "Updating distributed cache service cache size"
+                Invoke-SPDSCCommand -Credential $InstallAccount `
+                    -Arguments $PSBoundParameters `
+                    -ScriptBlock {
+                    $params = $args[0]
+
+                    Get-SPServiceInstance | Where-Object -FilterScript {
+                        $_.GetType().Name -eq "SPDistributedCacheServiceInstance"
+                    } | Stop-SPServiceInstance -Confirm:$false
+
+                    $count = 0
+                    $maxCount = 30
+
                     $serviceCheck = Get-SPServiceInstance | Where-Object -FilterScript {
                         $_.GetType().Name -eq "SPDistributedCacheServiceInstance" -and `
-                        $_.Status -ne "Disabled"
+                            $_.Status -ne "Disabled"
                     }
-                    $count++
-                }
 
-                Update-SPDistributedCacheSize -CacheSizeInMB $params.CacheSizeInMB
+                    while (($count -lt $maxCount) -and ($null -ne $serviceCheck))
+                    {
+                        Write-Verbose -Message ("$([DateTime]::Now.ToShortTimeString()) - Waiting " + `
+                                "for distributed cache to stop on all servers " + `
+                                "(waited $count of $maxCount minutes)")
+                        Start-Sleep -Seconds 60
+                        $serviceCheck = Get-SPServiceInstance | Where-Object -FilterScript {
+                            $_.GetType().Name -eq "SPDistributedCacheServiceInstance" -and `
+                                $_.Status -ne "Disabled"
+                        }
+                        $count++
+                    }
 
-                Get-SPServiceInstance | Where-Object -FilterScript {
-                    $_.GetType().Name -eq "SPDistributedCacheServiceInstance"
-                } | Start-SPServiceInstance
+                    Update-SPDistributedCacheSize -CacheSizeInMB $params.CacheSizeInMB
 
-                $count = 0
-                $maxCount = 30
+                    Get-SPServiceInstance | Where-Object -FilterScript {
+                        $_.GetType().Name -eq "SPDistributedCacheServiceInstance"
+                    } | Start-SPServiceInstance
 
-                $serviceCheck = Get-SPServiceInstance | Where-Object -FilterScript {
-                    $_.GetType().Name -eq "SPDistributedCacheServiceInstance" -and `
-                    $_.Status -ne "Online"
-                }
+                    $count = 0
+                    $maxCount = 30
 
-                while (($count -lt $maxCount) -and ($null -ne $serviceCheck))
-                {
-                    Write-Verbose -Message ("$([DateTime]::Now.ToShortTimeString()) - Waiting " + `
-                                            "for distributed cache to start on all servers " + `
-                                            "(waited $count of $maxCount minutes)")
-                    Start-Sleep -Seconds 60
                     $serviceCheck = Get-SPServiceInstance | Where-Object -FilterScript {
                         $_.GetType().Name -eq "SPDistributedCacheServiceInstance" -and `
-                        $_.Status -ne "Online"
+                            $_.Status -ne "Online"
                     }
-                    $count++
+
+                    while (($count -lt $maxCount) -and ($null -ne $serviceCheck))
+                    {
+                        Write-Verbose -Message ("$([DateTime]::Now.ToShortTimeString()) - Waiting " + `
+                                "for distributed cache to start on all servers " + `
+                                "(waited $count of $maxCount minutes)")
+                        Start-Sleep -Seconds 60
+                        $serviceCheck = Get-SPServiceInstance | Where-Object -FilterScript {
+                            $_.GetType().Name -eq "SPDistributedCacheServiceInstance" -and `
+                                $_.Status -ne "Online"
+                        }
+                        $count++
+                    }
                 }
             }
         }
@@ -393,12 +431,12 @@ function Set-TargetResource
     else
     {
         Write-Verbose -Message "Removing distributed cache to the server"
-        Invoke-SPDSCCommand -Credential $InstallAccount -ScriptBlock {
+        Invoke-SPDscCommand -Credential $InstallAccount -ScriptBlock {
             Remove-SPDistributedCacheServiceInstance
 
             $serviceInstance = Get-SPServiceInstance -Server $env:computername `
-                | Where-Object -FilterScript {
-                    $_.GetType().Name -eq "SPDistributedCacheServiceInstance"
+            | Where-Object -FilterScript {
+                $_.GetType().Name -eq "SPDistributedCacheServiceInstance"
             }
 
             if ($null -eq $serviceInstance)
@@ -406,8 +444,8 @@ function Set-TargetResource
                 $domain = (Get-CimInstance -ClassName Win32_ComputerSystem).Domain
                 $currentServer = "$($env:computername).$domain"
                 $serviceInstance = Get-SPServiceInstance -Server $currentServer `
-                    | Where-Object -FilterScript {
-                        $_.GetType().Name -eq "SPDistributedCacheServiceInstance"
+                | Where-Object -FilterScript {
+                    $_.GetType().Name -eq "SPDistributedCacheServiceInstance"
                 }
             }
             if ($null -ne $serviceInstance)
@@ -417,10 +455,10 @@ function Set-TargetResource
         }
         if ($CreateFirewallRules -eq $true)
         {
-            Invoke-SPDSCCommand -Credential $InstallAccount -ScriptBlock {
+            Invoke-SPDscCommand -Credential $InstallAccount -ScriptBlock {
                 $firewallRule = Get-NetFirewallRule -DisplayName "SharePoint Distribute Cache" `
-                                                    -ErrorAction SilentlyContinue
-                if($null -ne $firewallRule)
+                    -ErrorAction SilentlyContinue
+                if ($null -ne $firewallRule)
                 {
                     Write-Verbose -Message "Disabling firewall rules."
                     Disable-NetFirewallRule -DisplayName "SharePoint Distribute Cache"
@@ -454,7 +492,7 @@ function Test-TargetResource
         $CreateFirewallRules,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present",
 
@@ -473,19 +511,30 @@ function Test-TargetResource
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
+    Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
+    Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
+
     if ($Ensure -eq "Present")
     {
+        if ($PSBoundParameters.ContainsKey("ServiceAccount"))
+        {
+            if ($ServiceAccount -ne $CurrentValues.ServiceAccount)
+            {
+                return $false
+            }
+        }
+
         return Test-SPDscParameterState -CurrentValues $CurrentValues `
-                                        -DesiredValues $PSBoundParameters `
-                                        -ValuesToCheck @("Ensure", `
-                                                         "CreateFirewallRules", `
-                                                         "CacheSizeInMB")
+            -DesiredValues $PSBoundParameters `
+            -ValuesToCheck @("Ensure", `
+                "CreateFirewallRules", `
+                "CacheSizeInMB")
     }
     else
     {
         return Test-SPDscParameterState -CurrentValues $CurrentValues `
-                                        -DesiredValues $PSBoundParameters `
-                                        -ValuesToCheck @("Ensure")
+            -DesiredValues $PSBoundParameters `
+            -ValuesToCheck @("Ensure")
     }
 }
 
