@@ -17,6 +17,10 @@
             @{
                 NodeName = 'Server2'
                 PSDscAllowPlainTextPassword = $true
+            },
+            @{
+                NodeName = 'Server3'
+                PSDscAllowPlainTextPassword = $true
             }
         )
     }
@@ -52,6 +56,20 @@
                 ServiceAccount       = "DEMO\ServiceAccount"
                 ServerProvisionOrder = @("Server1","Server2")
                 CreateFirewallRules  = $true
+                PsDscRunAsCredential = $SetupAccount
+            }
+        }
+
+        node "Server3"
+        {
+            SPDistributedCacheService EnableDistributedCache
+            {
+                Name                 = "AppFabricCachingService"
+                CacheSizeInMB        = 8192
+                ServiceAccount       = "DEMO\ServiceAccount"
+                ServerProvisionOrder = @("Server1","Server2")
+                CreateFirewallRules  = $true
+				Ensure               = 'Absent'
                 PsDscRunAsCredential = $SetupAccount
             }
         }
