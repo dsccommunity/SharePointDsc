@@ -238,8 +238,7 @@ function Set-TargetResource
                         if ($ServerCount -ge $params.ServerProvisionOrder.Length)
                         {
                             throw ("The server $($env:COMPUTERNAME) was not found in the " + `
-                                   "ServerProvisionOrder array of Distributed Cache server(s).  " + `
-								   "Add the server to ServerProvisionOrder or change Ensure to Absent")
+                                   "array for distributed cache servers")
                         }
                         $currentServer = $params.ServerProvisionOrder[$serverCount]
                     }
