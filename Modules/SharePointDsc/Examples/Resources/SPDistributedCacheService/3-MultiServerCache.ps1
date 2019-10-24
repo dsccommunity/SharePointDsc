@@ -69,7 +69,7 @@
                 ServiceAccount       = "DEMO\ServiceAccount"
                 ServerProvisionOrder = @("Server1","Server2")
                 CreateFirewallRules  = $true
-				Ensure               = 'Absent'
+                Ensure               = 'Absent'
                 PsDscRunAsCredential = $SetupAccount
             }
         }
