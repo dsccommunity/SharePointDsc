@@ -1,5 +1,13 @@
 # Change log for SharePointDsc
 
+## v4.0
+
+The following changes will break v3.x and earlier configurations that use these
+resources:
+
+* SPSearchServiceApp
+  * Removed the WindowsServiceAccount parameter that was depricated in v3.1
+
 ## UNRELEASED
 
 * SPConfigWizard
