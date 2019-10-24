@@ -3,7 +3,9 @@
     This example applies the distributed cache service to both "server1" and
     "server2". The ServerProvisionOrder will ensure that it applies it to
     server1 first and then server2, making sure they don't both attempt to
-    create the cache at the same time, resuling in errors.
+    create the cache at the same time, resuling in errors. A third server
+    "server3", which is not included within ServerProvisionOrder, is
+    configured as Absent.
 
     Note: Do not allow plain text passwords in production environments.
 #>
