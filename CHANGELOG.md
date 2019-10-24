@@ -7,6 +7,8 @@ resources:
 
 * SPSearchServiceApp
   * Removed the WindowsServiceAccount parameter that was depricated in v3.1
+* SPUserProfileServiceApp
+  * Changed the MySiteHostLocation parameter to a required parameter
 
 ## UNRELEASED
 
