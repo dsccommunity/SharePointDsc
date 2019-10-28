@@ -246,7 +246,7 @@ function Set-TargetResource
 
                 try
                 {
-                    $spFarm = Get-SPFarm
+                    $null = Get-SPFarm
                 }
                 catch
                 {
@@ -316,7 +316,7 @@ function Set-TargetResource
 
                     try
                     {
-                        $spFarm = Get-SPFarm
+                        $null = Get-SPFarm
                     }
                     catch
                     {

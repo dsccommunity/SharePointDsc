@@ -24,14 +24,9 @@
                 WebAppUrl            = "http://sharepoint.contoso.com"
                 Default              = @(
                     MSFT_SPWebAppAuthenticationMode {
-                        AuthenticationMethod = "NTLM"
-                    }
-                )
-                Extranet             = @(
-                    MSFT_SPWebAppAuthenticationMode {
-                        AuthenticationMethod = "FBA"
-                        MembershipProvider   = "MemberPRovider"
-                        RoleProvider         = "RoleProvider"
+                        AuthenticationMethod = "WindowsAuthentication"
+                        WindowsAuthMethod    = "NTLM"
+                        UseBasicAuth         = $true
                     }
                 )
                 PsDscRunAsCredential = $SetupAccount
