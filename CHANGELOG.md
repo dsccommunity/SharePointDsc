@@ -1,9 +1,12 @@
 # Change log for SharePointDsc
 
-## UNRELEASED
+## v3.7
 
 * SPConfigWizard
   * Fixed issue with incorrect check for upgrade status of server
+* SPDistributedCacheService
+  * Improved error message for inclusion of server name into ServerProvisionOrder
+    parameters when Present or change to Ensure Absent
 * SPFarm
   * Removed SingleServer as ServerRole, since this is an invalid role.
   * Handle case where null or empty CentralAdministrationUrl is passed in
@@ -31,9 +34,6 @@
     SecondaryOwnerAlias
 * SPWebAppAuthentication
   * Fixes issue where Test method return false on NON-US OS.
-* SPDistributedCacheService
-  * Improved error message for inclusion of server name into ServerProvisionOrder
-    parameters when Present or change to Ensure Absent
 
 ## v3.6
 
