@@ -440,7 +440,7 @@ function Set-TargetResource
                         -StartAddresses $startAddresses `
                         -SharePointCrawlBehavior $newCrawlSetting
                 }
-                else if ($params.ContentSourceType -ne "Business")
+                elseif ($params.ContentSourceType -ne "Business")
                 {
                     $source = New-SPEnterpriseSearchCrawlContentSource `
                         -SearchApplication $params.ServiceAppName `
