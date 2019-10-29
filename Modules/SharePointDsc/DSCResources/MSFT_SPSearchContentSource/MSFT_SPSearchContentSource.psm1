@@ -23,7 +23,7 @@ function Get-TargetResource
         $Addresses,
 
         [Parameter()]
-        [ValidateSet("CrawlEverything", "CrawlFirstOnly", "Custom")]
+        [ValidateSet("CrawlEverything", "CrawlFirstOnly", "CrawlVirtualServers", "CrawlSites", "Custom")]
         [System.String]
         $CrawlSetting,
 
@@ -101,10 +101,10 @@ function Get-TargetResource
         {
             "SharePoint"
             {
-                $crawlSetting = "CrawlEverything"
+                $crawlSetting = "CrawlVirtualServers"
                 if ($source.SharePointCrawlBehavior -eq "CrawlSites")
                 {
-                    $crawlSetting = "CrawlFirstOnly"
+                    $crawlSetting = "CrawlSites"
                 }
 
                 $incrementalSchedule = Get-SPDscSearchCrawlSchedule `
@@ -246,7 +246,7 @@ function Set-TargetResource
         $Addresses,
 
         [Parameter()]
-        [ValidateSet("CrawlEverything", "CrawlFirstOnly", "Custom")]
+        [ValidateSet("CrawlEverything", "CrawlFirstOnly", "CrawlVirtualServers", "CrawlSites", "Custom")]
         [System.String]
         $CrawlSetting,
 
@@ -307,32 +307,42 @@ function Set-TargetResource
             {
                 throw "Parameter LimitServerHops is not valid for SharePoint content sources"
             }
-            if ($CrawlSetting -eq "Custom")
+            # Allow CrawlEverything (mapped to CrawlVirtualServers) until next major version
+            # release to deprecate as allowed value for SharePoint content source
+            if ($CrawlSetting -ne "CrawlVirtualServers" -and $CrawlSetting -ne "CrawlSites" -and $CrawlSetting -ne "CrawlEverything")
             {
-                throw ("Parameter CrawlSetting can only be set to custom for website content " + `
-                        "sources")
+                if ($CrawlSetting -eq "CrawlEverything")
+                {
+                    Write-Verbose -Message "CrawlEverything will be deprecated as an allowed CrawlSetting for " + `
+                        "SharePoint content sources.  Utilize CrawlVirtualServers or CrawlSites."
+                }
+                else
+                {
+                    throw ("Parameter CrawlSetting can only be set to CrawlVirtualServers or CrawlSites " + `
+                        "for SharePoint content sources")
+                }
             }
         }
         "Website"
         {
             if ($PSBoundParameters.ContainsKey("ContinuousCrawl") -eq $true)
             {
-                throw "Parameter ContinuousCrawl is not valid for website content sources"
+                throw "Parameter ContinuousCrawl is not valid for Website content sources"
             }
             if ($PSBoundParameters.ContainsKey("LimitServerHops") -eq $true)
             {
-                throw "Parameter LimitServerHops is not valid for website content sources"
+                throw "Parameter LimitServerHops is not valid for Website content sources"
             }
         }
         "FileShare"
         {
             if ($PSBoundParameters.ContainsKey("LimitPageDepth") -eq $true)
             {
-                throw "Parameter LimitPageDepth is not valid for file share content sources"
+                throw "Parameter LimitPageDepth is not valid for FileShare content sources"
             }
             if ($PSBoundParameters.ContainsKey("LimitServerHops") -eq $true)
             {
-                throw "Parameter LimitServerHops is not valid for file share content sources"
+                throw "Parameter LimitServerHops is not valid for FileShare content sources"
             }
             if ($CrawlSetting -eq "Custom")
             {
@@ -403,6 +413,12 @@ function Set-TargetResource
                     "SharePoint"
                     {
                         $newType = "SharePoint"
+                        $newCrawlSetting = $crawlSetting
+                        # Temporary mapping of CrawlEverything to CrawlVirtualServers until deprecated
+                        if ($newCrawlSetting -eq "CrawlEverything")
+                        {
+                            $newCrawlSetting = "CrawlVirtualServers"
+                        }
                     }
                     "Website"
                     {
@@ -417,7 +433,16 @@ function Set-TargetResource
                         $newType = "Business"
                     }
                 }
-                if ($params.ContentSourceType -ne "Business")
+                if ($params.ContentSourceType -eq "SharePoint")
+                {
+                    $source = New-SPEnterpriseSearchCrawlContentSource `
+                        -SearchApplication $params.ServiceAppName `
+                        -Type $newType `
+                        -Name $params.Name `
+                        -StartAddresses $startAddresses `
+                        -SharePointCrawlBehavior $newCrawlSetting
+                }
+                else if ($params.ContentSourceType -ne "Business")
                 {
                     $source = New-SPEnterpriseSearchCrawlContentSource `
                         -SearchApplication $params.ServiceAppName `
@@ -724,7 +749,7 @@ function Test-TargetResource
         $Addresses,
 
         [Parameter()]
-        [ValidateSet("CrawlEverything", "CrawlFirstOnly", "Custom")]
+        [ValidateSet("CrawlEverything", "CrawlFirstOnly", "CrawlVirtualServers", "CrawlSites", "Custom")]
         [System.String]
         $CrawlSetting,
 
@@ -787,32 +812,42 @@ function Test-TargetResource
             {
                 throw "Parameter LimitServerHops is not valid for SharePoint content sources"
             }
-            if ($CrawlSetting -eq "Custom")
+            # Allow CrawlEverything (mapped to CrawlVirtualServers) until next major version
+            # release to deprecate as allowed value for SharePoint content source
+            if ($CrawlSetting -ne "CrawlVirtualServers" -and $CrawlSetting -ne "CrawlSites" -and $CrawlSetting -ne "CrawlEverything")
             {
-                throw ("Parameter CrawlSetting can only be set to custom for website content " + `
-                        "sources")
+                if ($CrawlSetting -eq "CrawlEverything")
+                {
+                    Write-Verbose -Message "CrawlEverything will be deprecated as an allowed CrawlSetting for " + `
+                        "SharePoint content sources.  Utilize CrawlVirtualServers or CrawlSites."
+                }
+                else
+                {
+                    throw ("Parameter CrawlSetting can only be set to CrawlVirtualServers or CrawlSites " + `
+                        "for SharePoint content sources")
+                }
             }
         }
         "Website"
         {
             if ($PSBoundParameters.ContainsKey("ContinuousCrawl") -eq $true)
             {
-                throw "Parameter ContinuousCrawl is not valid for website content sources"
+                throw "Parameter ContinuousCrawl is not valid for Website content sources"
             }
             if ($PSBoundParameters.ContainsKey("LimitServerHops") -eq $true)
             {
-                throw "Parameter LimitServerHops is not valid for website content sources"
+                throw "Parameter LimitServerHops is not valid for Website content sources"
             }
         }
         "FileShare"
         {
             if ($PSBoundParameters.ContainsKey("LimitPageDepth") -eq $true)
             {
-                throw "Parameter LimitPageDepth is not valid for file share content sources"
+                throw "Parameter LimitPageDepth is not valid for FileShare content sources"
             }
             if ($PSBoundParameters.ContainsKey("LimitServerHops") -eq $true)
             {
-                throw "Parameter LimitServerHops is not valid for file share content sources"
+                throw "Parameter LimitServerHops is not valid for FileShare content sources"
             }
             if ($CrawlSetting -eq "Custom")
             {
