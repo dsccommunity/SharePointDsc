@@ -1,0 +1,118 @@
+.NAME
+    SPIncomingEmailSettings
+
+# Description
+    
+    **Type:** Common
+    **Requires CredSSP:** No
+    
+    This resource is used to enable and configure SharePoint incoming email.
+    Setting the Ensure parameter to 'Present' or 'Absent' will enable or disable
+    incoming email accordingly. When enabled, this resource allows for configuring
+    of required parameters for both Automatic and Advanced methods of supporting
+    SharePoint incoming email.
+    
+    This resource does not currently support setting the Active Directory OU
+    where SharePoint can create mail contacts and distribution groups.
+
+.PARAMETER IsSingleInstance
+    Key - String
+    Allowed values: Yes
+    Specifies the resource is a single instance, the value must be 'Yes'
+
+.PARAMETER Ensure
+    Required - String
+    Allowed values: Present, Absent
+    Present ensures Incoming Email is enabled. Absent disables incoming email
+
+.PARAMETER UseAutomaticSettings
+    Write - Boolean
+    Automatic Settings enables a local SMTP service on the SharePoint server. Set to False to use an external drop folder
+
+.PARAMETER UseDirectoryManagementService
+    Write - string
+    Allowed values: Yes, No, Remote
+    Set to Yes, the service supports the creation and management of e-mail distribution groups from SharePoint Sites, and creates mail contacts mail enabled SharePoint lists. Set to Remote to use a remote SharePoint Directory Management Web Service
+
+.PARAMETER RemoteDirectoryManagementURL
+    Write - String
+    URL to the remote SharePoint Directory Management Web Service
+
+.PARAMETER ServerAddress
+    Write - String
+    SMTP Server Address when Directory Managment Service mode is used
+
+.PARAMETER DLsRequireAuthenticatedSenders
+    Write - Boolean
+    SharePoint Distribution lists accept from authenticated senders only
+
+.PARAMETER DistributionGroupsEnabled
+    Write - Boolean
+    Allow creation of distribution groups from within SharePoint
+
+.PARAMETER ServerDisplayAddress
+    Write - String
+    Email server display address 'mylist@example.com'
+
+.PARAMETER DropFolder
+    Write - String
+    Path to email drop folder if not using Automatic Settings
+
+.PARAMETER InstallAccount
+    Write - String
+    POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5
+
+.EXAMPLE 1
+
+This example shows how to configure SharePoint Incoming Email in Automatic Mode
+
+Configuration Example
+{
+    param(
+        [Parameter(Mandatory = $true)]
+        [PSCredential]
+        $SetupAccount
+    )
+    Import-DscResource -ModuleName SharePointDsc
+
+    node localhost {
+        SPIncomingEmailSettings AutomaticEmail
+        {
+            IsSingleInstance     = "Yes"
+            Ensure               = "Present"
+            UseAutomaticSettings = $true
+            UseDirectoryManagementService = "No"
+            ServerDisplayAddress = "contoso.com"
+            PsDscRunAsCredential = $SetupAccount
+        }
+    }
+}
+
+.EXAMPLE 2
+
+This example shows how to configure SharePoint Incoming Email in Advanced Mode
+
+Configuration Example
+{
+    param(
+        [Parameter(Mandatory = $true)]
+        [PSCredential]
+        $SetupAccount
+    )
+    Import-DscResource -ModuleName SharePointDsc
+
+    node localhost {
+        SPIncomingEmailSettings AutomaticEmail
+        {
+            IsSingleInstance     = "Yes"
+            Ensure               = "Present"
+            UseAutomaticSettings = $false
+            UseDirectoryManagementService = "No"
+            ServerDisplayAddress = "contoso.com"
+            DropFolder           = "\\MailServer\Pickup"
+            PsDscRunAsCredential = $SetupAccount
+        }
+    }
+}
+
+
