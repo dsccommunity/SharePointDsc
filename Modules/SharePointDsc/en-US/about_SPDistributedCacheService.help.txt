@@ -25,6 +25,8 @@
     servers provisioning a cache at the same time. Note, this approach only makes
     a server check the others for distributed cache, it does not provision the
     cache automatically on all servers. If a previous server in the sequence does
+    not appear to be running distributed cache after 30 minutes, the local server
+    that was waiting will begin anyway.
     
     The default value for the Ensure parameter is Present. When not specifying this
     parameter, the distributed cache is provisioned.
@@ -118,7 +120,9 @@ firewall solution.
 This example applies the distributed cache service to both "server1" and
 "server2". The ServerProvisionOrder will ensure that it applies it to
 server1 first and then server2, making sure they don't both attempt to
-create the cache at the same time, resuling in errors.
+create the cache at the same time, resuling in errors. A third server
+"server3", which is not included within ServerProvisionOrder, is
+configured as Absent.
 
 Note: Do not allow plain text passwords in production environments.
 
@@ -130,6 +134,10 @@ Note: Do not allow plain text passwords in production environments.
             },
             @{
                 NodeName = 'Server2'
+                PSDscAllowPlainTextPassword = $true
+            },
+            @{
+                NodeName = 'Server3'
                 PSDscAllowPlainTextPassword = $true
             }
         )
@@ -166,6 +174,20 @@ Note: Do not allow plain text passwords in production environments.
                 ServiceAccount       = "DEMO\ServiceAccount"
                 ServerProvisionOrder = @("Server1","Server2")
                 CreateFirewallRules  = $true
+                PsDscRunAsCredential = $SetupAccount
+            }
+        }
+
+        node "Server3"
+        {
+            SPDistributedCacheService EnableDistributedCache
+            {
+                Name                 = "AppFabricCachingService"
+                CacheSizeInMB        = 8192
+                ServiceAccount       = "DEMO\ServiceAccount"
+                ServerProvisionOrder = @("Server1","Server2")
+                CreateFirewallRules  = $true
+                Ensure               = 'Absent'
                 PsDscRunAsCredential = $SetupAccount
             }
         }
