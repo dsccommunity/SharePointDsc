@@ -1,5 +1,11 @@
 # Change log for SharePointDsc
 
+## Unreleased
+
+* SPSearchContentSource
+  * Add CrawlVirtualServers and CrawlSites CrawlSetting for SharePoint content
+    sources.  Fix for issue #1124.
+
 ## v3.7
 
 * SPConfigWizard
@@ -37,9 +43,6 @@
 * SPDistributedCacheService
   * Improved error message for inclusion of server name into ServerProvisionOrder
     parameters when Present or change to Ensure Absent
-* SPSearchContentSource
-  * Add CrawlVirtualServers and CrawlSites CrawlSetting for SharePoint content
-    sources.  Fix for issue #1124.
 
 ## v3.6
 
