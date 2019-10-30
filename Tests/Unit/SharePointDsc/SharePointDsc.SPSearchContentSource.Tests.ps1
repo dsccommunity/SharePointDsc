@@ -67,7 +67,7 @@ namespace Microsoft.Office.Server.Search.Administration {
                 ContentSourceType = "SharePoint"
                 LimitPageDepth    = 2
                 Addresses         = @("http://site.contoso.com")
-                CrawlSetting      = "CrawlEverything"
+                CrawlSetting      = "CrawlVirtualServers"
                 Ensure            = "Present"
             }
 
@@ -87,7 +87,7 @@ namespace Microsoft.Office.Server.Search.Administration {
                 ContentSourceType = "SharePoint"
                 LimitServerHops   = 2
                 Addresses         = @("http://site.contoso.com")
-                CrawlSetting      = "CrawlEverything"
+                CrawlSetting      = "CrawlVirtualServers"
                 Ensure            = "Present"
             }
 
@@ -224,7 +224,7 @@ namespace Microsoft.Office.Server.Search.Administration {
                 ServiceAppName    = "Search Service Application"
                 ContentSourceType = "SharePoint"
                 Addresses         = @("http://site.contoso.com")
-                CrawlSetting      = "CrawlEverything"
+                CrawlSetting      = "CrawlVirtualServers"
                 Ensure            = "Present"
             }
 
@@ -309,7 +309,7 @@ namespace Microsoft.Office.Server.Search.Administration {
                 ServiceAppName    = "Search Service Application"
                 ContentSourceType = "SharePoint"
                 Addresses         = @("http://site.contoso.com")
-                CrawlSetting      = "CrawlEverything"
+                CrawlSetting      = "CrawlVirtualServers"
                 Ensure            = "Absent"
             }
             Mock -CommandName Get-SPEnterpriseSearchCrawlContentSource -MockWith {
@@ -352,7 +352,7 @@ namespace Microsoft.Office.Server.Search.Administration {
                 ServiceAppName    = "Search Service Application"
                 ContentSourceType = "SharePoint"
                 Addresses         = @("http://site.contoso.com")
-                CrawlSetting      = "CrawlEverything"
+                CrawlSetting      = "CrawlVirtualServers"
                 Ensure            = "Absent"
             }
             Mock -CommandName Get-SPEnterpriseSearchCrawlContentSource -MockWith {
@@ -375,7 +375,7 @@ namespace Microsoft.Office.Server.Search.Administration {
                 ServiceAppName    = "Search Service Application"
                 ContentSourceType = "SharePoint"
                 Addresses         = @("http://site.contoso.com")
-                CrawlSetting      = "CrawlEverything"
+                CrawlSetting      = "CrawlVirtualServers"
                 ContinuousCrawl   = $true
                 Ensure            = "Present"
             }
@@ -794,7 +794,7 @@ namespace Microsoft.Office.Server.Search.Administration {
                 ServiceAppName    = "Search Service Application"
                 ContentSourceType = "SharePoint"
                 Addresses         = @("http://site.contoso.com")
-                CrawlSetting      = "CrawlEverything"
+                CrawlSetting      = "CrawlVirtualServers"
                 Ensure            = "Present"
                 FullSchedule      = (New-CimInstance -ClassName MSFT_SPSearchCrawlSchedule -Property @{
                         ScheduleType                = "Daily"
@@ -910,7 +910,7 @@ namespace Microsoft.Office.Server.Search.Administration {
                 ServiceAppName      = "Search Service Application"
                 ContentSourceType   = "SharePoint"
                 Addresses           = @("http://site.contoso.com")
-                CrawlSetting        = "CrawlEverything"
+                CrawlSetting        = "CrawlVirtualServers"
                 Ensure              = "Present"
                 IncrementalSchedule = (New-CimInstance -ClassName MSFT_SPSearchCrawlSchedule -Property @{
                         ScheduleType            = "Weekly"
