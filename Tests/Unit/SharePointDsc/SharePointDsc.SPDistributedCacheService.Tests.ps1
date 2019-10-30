@@ -343,7 +343,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             } -ParameterFilter { $Server -eq "Server1" -or $Server -eq "Server2" }
 
             It "Should set up the cache correctly" {
-                { Set-TargetResource @testParams } | Should Throw "The server $($env:COMPUTERNAME) was not found in the array for distributed cache servers"
+                { Set-TargetResource @testParams } | Should Throw "The server $($env:COMPUTERNAME) was not found in the ServerProvisionOrder array of Distributed Cache server(s).  The server must be included in ServerProvisionOrder or Ensure equal to Absent."
             }
         }
 
