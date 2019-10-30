@@ -7,7 +7,7 @@
     parameters when Present or change to Ensure Absent
 * SPSearchContentSource
   * Add CrawlVirtualServers and CrawlSites CrawlSetting for SharePoint content
-    sources.  Fix for issue #1124.
+    sources. Fix for issue #1124.
 
 ## v3.7
 
@@ -43,6 +43,12 @@
     SecondaryOwnerAlias
 * SPWebAppAuthentication
   * Fixes issue where Test method return false on NON-US OS.
+<<<<<<< HEAD
+=======
+* SPDistributedCacheService
+  * Improved error message for inclusion of server name into ServerProvisionOrder
+    parameters when Present or change to Ensure Absent
+>>>>>>> #1124 Changelog Unreleased
 
 ## v3.6
 
