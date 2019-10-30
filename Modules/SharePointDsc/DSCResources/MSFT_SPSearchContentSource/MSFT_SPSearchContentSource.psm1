@@ -306,14 +306,14 @@ function Set-TargetResource
                 throw "Parameter LimitServerHops is not valid for SharePoint content sources"
             }
             # Temporarily allow CrawlEverything, CrawlFirstOnly and Null (mapped to CrawlVirtualServers)
-			# until next major (breaking) version, as these were not previously blocked nor
-			# implemented.  All equate to CrawlVirtualServers (default).
+            # until next major (breaking) version, as these were not previously blocked nor
+            # implemented.  All equate to CrawlVirtualServers (default).
             if ($CrawlSetting -ne "CrawlVirtualServers" -and
-			    $CrawlSetting -ne "CrawlSites" -and
-				$CrawlSetting -ne "CrawlEverything" -and # Phaseout Major Release
-				$CrawlSetting -ne "CrawlFirstOnly" -and # Phaseout Major Release
-				$CrawlSetting -ne $null # Phaseout Major Release
-				)
+                $CrawlSetting -ne "CrawlSites" -and
+                $CrawlSetting -ne "CrawlEverything" -and # Phaseout Major Release
+                $CrawlSetting -ne "CrawlFirstOnly" -and # Phaseout Major Release
+                $CrawlSetting -ne $null # Phaseout Major Release
+                )
             {
                 throw ("Parameter CrawlSetting can only be set to CrawlVirtualServers or CrawlSites " + `
                     "for SharePoint content sources")
@@ -808,14 +808,14 @@ function Test-TargetResource
                 throw "Parameter LimitServerHops is not valid for SharePoint content sources"
             }
             # Temporarily allow CrawlEverything, CrawlFirstOnly and Null (mapped to CrawlVirtualServers)
-			# until next major (breaking) version, as these were not previously blocked nor
-			# implemented.  All equate to CrawlVirtualServers (default).
+            # until next major (breaking) version, as these were not previously blocked nor
+            # implemented.  All equate to CrawlVirtualServers (default).
             if ($CrawlSetting -ne "CrawlVirtualServers" -and
-			    $CrawlSetting -ne "CrawlSites" -and
-				$CrawlSetting -ne "CrawlEverything" -and # Phaseout Major Release
-				$CrawlSetting -ne "CrawlFirstOnly" -and # Phaseout Major Release
-				$CrawlSetting -ne $null # Phaseout Major Release
-				)
+                $CrawlSetting -ne "CrawlSites" -and
+                $CrawlSetting -ne "CrawlEverything" -and # Phaseout Major Release
+                $CrawlSetting -ne "CrawlFirstOnly" -and # Phaseout Major Release
+                $CrawlSetting -ne $null # Phaseout Major Release
+                )
             {
                 throw ("Parameter CrawlSetting can only be set to CrawlVirtualServers or CrawlSites " + `
                     "for SharePoint content sources")
