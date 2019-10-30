@@ -305,20 +305,18 @@ function Set-TargetResource
             {
                 throw "Parameter LimitServerHops is not valid for SharePoint content sources"
             }
-            # Allow CrawlEverything (mapped to CrawlVirtualServers) until next major version
-            # release to deprecate as allowed value for SharePoint content source
-            if ($CrawlSetting -ne "CrawlVirtualServers" -and $CrawlSetting -ne "CrawlSites" -and $CrawlSetting -ne "CrawlEverything")
+            # Temporarily allow CrawlEverything, CrawlFirstOnly and Null (mapped to CrawlVirtualServers)
+			# until next major (breaking) version, as these were not previously blocked nor
+			# implemented.  All equate to CrawlVirtualServers (default).
+            if ($CrawlSetting -ne "CrawlVirtualServers" -and
+			    $CrawlSetting -ne "CrawlSites" -and
+				$CrawlSetting -ne "CrawlEverything" -and # Phaseout Major Release
+				$CrawlSetting -ne "CrawlFirstOnly" -and # Phaseout Major Release
+				$CrawlSetting -ne $null # Phaseout Major Release
+				)
             {
-                if ($CrawlSetting -eq "CrawlEverything")
-                {
-                    Write-Verbose -Message "CrawlEverything will be deprecated as an allowed CrawlSetting for " + `
-                        "SharePoint content sources.  Utilize CrawlVirtualServers or CrawlSites."
-                }
-                else
-                {
-                    throw ("Parameter CrawlSetting can only be set to CrawlVirtualServers or CrawlSites " + `
-                        "for SharePoint content sources")
-                }
+                throw ("Parameter CrawlSetting can only be set to CrawlVirtualServers or CrawlSites " + `
+                    "for SharePoint content sources")
             }
         }
         "Website"
@@ -412,8 +410,8 @@ function Set-TargetResource
                     {
                         $newType = "SharePoint"
                         $newCrawlSetting = $crawlSetting
-                        # Temporary mapping of CrawlEverything to CrawlVirtualServers until deprecated
-                        if ($newCrawlSetting -eq "CrawlEverything")
+                        # Temporary mapping to CrawlVirtualServers until major (breaking) change
+                        if ($newCrawlSetting -ne "CrawlSites")
                         {
                             $newCrawlSetting = "CrawlVirtualServers"
                         }
@@ -809,20 +807,18 @@ function Test-TargetResource
             {
                 throw "Parameter LimitServerHops is not valid for SharePoint content sources"
             }
-            # Allow CrawlEverything (mapped to CrawlVirtualServers) until next major version
-            # release to deprecate as allowed value for SharePoint content source
-            if ($CrawlSetting -ne "CrawlVirtualServers" -and $CrawlSetting -ne "CrawlSites" -and $CrawlSetting -ne "CrawlEverything")
+            # Temporarily allow CrawlEverything, CrawlFirstOnly and Null (mapped to CrawlVirtualServers)
+			# until next major (breaking) version, as these were not previously blocked nor
+			# implemented.  All equate to CrawlVirtualServers (default).
+            if ($CrawlSetting -ne "CrawlVirtualServers" -and
+			    $CrawlSetting -ne "CrawlSites" -and
+				$CrawlSetting -ne "CrawlEverything" -and # Phaseout Major Release
+				$CrawlSetting -ne "CrawlFirstOnly" -and # Phaseout Major Release
+				$CrawlSetting -ne $null # Phaseout Major Release
+				)
             {
-                if ($CrawlSetting -eq "CrawlEverything")
-                {
-                    Write-Verbose -Message "CrawlEverything will be deprecated as an allowed CrawlSetting for " + `
-                        "SharePoint content sources.  Utilize CrawlVirtualServers or CrawlSites."
-                }
-                else
-                {
-                    throw ("Parameter CrawlSetting can only be set to CrawlVirtualServers or CrawlSites " + `
-                        "for SharePoint content sources")
-                }
+                throw ("Parameter CrawlSetting can only be set to CrawlVirtualServers or CrawlSites " + `
+                    "for SharePoint content sources")
             }
         }
         "Website"
