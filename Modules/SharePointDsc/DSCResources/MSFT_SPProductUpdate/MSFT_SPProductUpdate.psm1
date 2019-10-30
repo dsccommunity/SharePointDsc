@@ -78,7 +78,14 @@ function Get-TargetResource
     if ($checkBlockedFile -eq $true)
     {
         Write-Verbose -Message "Checking status now"
-        $zone = Get-Item -Path $SetupFile -Stream "Zone.Identifier" -EA SilentlyContinue
+        try
+        {
+            $zone = Get-Item -Path $SetupFile -Stream "Zone.Identifier" -EA SilentlyContinue
+        }
+        catch
+        {
+            Write-Verbose -Message 'Encountered error while reading file stream. Ignoring file stream.'
+        }
 
         if ($null -ne $zone)
         {
@@ -306,7 +313,14 @@ function Set-TargetResource
     if ($checkBlockedFile -eq $true)
     {
         Write-Verbose -Message "Checking status now"
-        $zone = Get-Item -Path $SetupFile -Stream "Zone.Identifier" -EA SilentlyContinue
+        try
+        {
+            $zone = Get-Item -Path $SetupFile -Stream "Zone.Identifier" -EA SilentlyContinue
+        }
+        catch
+        {
+            Write-Verbose -Message 'Encountered error while reading file stream. Ignoring file stream.'
+        }
 
         if ($null -ne $zone)
         {
@@ -395,12 +409,15 @@ function Set-TargetResource
 
     $farmIsAvailable = Invoke-SPDscCommand -Credential $InstallAccount `
         -ScriptBlock {
-        $farm = Get-SPFarm -ErrorAction SilentlyContinue
-        if ($null -eq $farm)
+        try
+        {
+            $null = Get-SPFarm
+            return $true
+        }
+        catch
         {
             return $false
         }
-        return $true
     }
 
     if ($ShutdownServices -and $farmIsAvailable)

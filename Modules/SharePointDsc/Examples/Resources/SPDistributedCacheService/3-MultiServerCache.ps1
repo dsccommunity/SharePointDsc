@@ -3,7 +3,9 @@
     This example applies the distributed cache service to both "server1" and
     "server2". The ServerProvisionOrder will ensure that it applies it to
     server1 first and then server2, making sure they don't both attempt to
-    create the cache at the same time, resuling in errors.
+    create the cache at the same time, resuling in errors. A third server
+    "server3", which is not included within ServerProvisionOrder, is
+    configured as Absent.
 
     Note: Do not allow plain text passwords in production environments.
 #>
@@ -16,6 +18,10 @@
             },
             @{
                 NodeName = 'Server2'
+                PSDscAllowPlainTextPassword = $true
+            },
+            @{
+                NodeName = 'Server3'
                 PSDscAllowPlainTextPassword = $true
             }
         )
@@ -52,6 +58,20 @@
                 ServiceAccount       = "DEMO\ServiceAccount"
                 ServerProvisionOrder = @("Server1","Server2")
                 CreateFirewallRules  = $true
+                PsDscRunAsCredential = $SetupAccount
+            }
+        }
+
+        node "Server3"
+        {
+            SPDistributedCacheService EnableDistributedCache
+            {
+                Name                 = "AppFabricCachingService"
+                CacheSizeInMB        = 8192
+                ServiceAccount       = "DEMO\ServiceAccount"
+                ServerProvisionOrder = @("Server1","Server2")
+                CreateFirewallRules  = $true
+                Ensure               = 'Absent'
                 PsDscRunAsCredential = $SetupAccount
             }
         }

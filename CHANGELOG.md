@@ -1,5 +1,40 @@
 # Change log for SharePointDsc
 
+## v3.7
+
+* SPConfigWizard
+  * Fixed issue with incorrect check for upgrade status of server
+* SPDistributedCacheService
+  * Improved error message for inclusion of server name into ServerProvisionOrder
+    parameters when Present or change to Ensure Absent
+* SPFarm
+  * Removed SingleServer as ServerRole, since this is an invalid role.
+  * Handle case where null or empty CentralAdministrationUrl is passed in
+  * Move CentralAdministrationPort validation into parameter definition
+    to work with ReverseDsc
+  * Add NotNullOrEmpty parameter validation to CentralAdministrationUrl
+  * Fixed error when changing developer dashboard display level.
+  * Add support for updating Central Admin Authentication Method
+* SPFarmSolution
+  * Fix for Web Application scoped solutions.
+* SPInstall
+  * Fixes a terminating error for sources in weird file shares
+  * Corrected issue with incorrectly detecting SharePoint after it
+    has been uninstalled
+  * Corrected issue with detecting a paused installation
+* SPInstallLanguagePack
+  * Fixes a terminating error for sources in weird file shares
+* SPInstallPrereqs
+  * Fixes a terminating error for sources in weird file shares
+* SPProductUpdate
+  * Fixes a terminating error for sources in weird file shares
+  * Corrected incorrect farm detection, added in earlier bugfix
+* SPSite
+  * Fixed issue with incorrectly updating site OwnerAlias and
+    SecondaryOwnerAlias
+* SPWebAppAuthentication
+  * Fixes issue where Test method return false on NON-US OS.
+
 ## v3.6
 
 * SharePointDsc generic
@@ -7,7 +42,7 @@
     the current unit test file.
 * SPFarm
   * Moved check for CentralAdministrationUrl is HTTP to Set method,
-    to prevent issues with ReverseDsc.
+    to prevent issues with ReverseDsc
 * SPInstall
   * Updated error code checks to force reboot.
 * SPProductUpdate

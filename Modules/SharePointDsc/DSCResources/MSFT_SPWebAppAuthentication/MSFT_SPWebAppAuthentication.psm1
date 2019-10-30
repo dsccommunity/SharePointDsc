@@ -1,7 +1,6 @@
 function Get-TargetResource
 {
     [CmdletBinding()]
-    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSDSCUseIdenticalMandatoryParametersForDSC", "", Justification = "Temporary workaround for issue introduced in PSSA v1.18")]
     [OutputType([System.Collections.Hashtable])]
     param
     (
@@ -169,7 +168,7 @@ function Get-TargetResource
                     $roleProvider = $null
                     $membershipProvider = $null
 
-                    if ($authProvider.DisplayName -eq "Windows Authentication")
+                    if ($authProvider.ClaimProviderName -eq 'AD')
                     {
                         if ($authProvider.DisableKerberos -eq $true)
                         {
@@ -180,7 +179,7 @@ function Get-TargetResource
                             $localAuthMode = "Kerberos"
                         }
                     }
-                    elseif ($authProvider.DisplayName -eq "Forms Authentication")
+                    elseif ($authProvider.ClaimProviderName -eq 'Forms')
                     {
                         $localAuthMode = "FBA"
                         $roleProvider = $authProvider.RoleProvider
@@ -235,7 +234,6 @@ function Get-TargetResource
 function Set-TargetResource
 {
     [CmdletBinding()]
-    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSDSCUseIdenticalMandatoryParametersForDSC", "", Justification = "Temporary workaround for issue introduced in PSSA v1.18")]
     param
     (
         [Parameter(Mandatory = $true)]
@@ -453,7 +451,6 @@ function Set-TargetResource
 function Test-TargetResource
 {
     [CmdletBinding()]
-    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSDSCUseIdenticalMandatoryParametersForDSC", "", Justification = "Temporary workaround for issue introduced in PSSA v1.18")]
     [OutputType([System.Boolean])]
     param
     (
