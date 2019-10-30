@@ -29,7 +29,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 WebAppUrl = "http://sharepoint.contoso.com"
                 Default   = @(
                     (New-CimInstance -ClassName MSFT_SPWebAppAuthenticationMode -Property @{
-                            AuthenticationMethod = "NTLM"
+                            AuthenticationMethod = "WindowsAuthentication"
+                            WindowsAuthMethod    = "NTLM"
                         } -ClientOnly),
                     (New-CimInstance -ClassName MSFT_SPWebAppAuthenticationMode -Property @{
                             AuthenticationMethod   = "Federated"
@@ -64,12 +65,12 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
         }
 
-        Context -Name "AuthenticationMethod=NTLM used with AuthenticationProvider parameter" -Fixture {
+        Context -Name "AuthenticationMethod=WindowsAuthentication used without WindowsAuthMethod parameter" -Fixture {
             $testParams = @{
                 WebAppUrl = "http://sharepoint.contoso.com"
                 Default   = @(
                     (New-CimInstance -ClassName MSFT_SPWebAppAuthenticationMode -Property @{
-                            AuthenticationMethod   = "NTLM"
+                            AuthenticationMethod   = "WindowsAuthentication"
                             AuthenticationProvider = "INCORRECT"
                         } -ClientOnly)
                 )
@@ -91,16 +92,49 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             It "Should throw exception in the set method" {
-                { Set-TargetResource @testParams } | Should throw "You cannot use AuthenticationProvider, MembershipProvider or RoleProvider when using NTLM"
+                { Set-TargetResource @testParams } | Should throw "You have to specify WindowsAuthMethod when using WindowsAuthentication"
             }
         }
 
-        Context -Name "AuthenticationMethod=Kerberos used with MembershipProvider parameter" -Fixture {
+        Context -Name "AuthenticationMethod=WindowsAuthentication used with AuthenticationProvider parameter" -Fixture {
             $testParams = @{
                 WebAppUrl = "http://sharepoint.contoso.com"
                 Default   = @(
                     (New-CimInstance -ClassName MSFT_SPWebAppAuthenticationMode -Property @{
-                            AuthenticationMethod = "Kerberos"
+                            AuthenticationMethod   = "WindowsAuthentication"
+                            WindowsAuthMethod      = "NTLM"
+                            AuthenticationProvider = "INCORRECT"
+                        } -ClientOnly)
+                )
+            }
+
+            Mock -CommandName Get-SPWebapplication -MockWith { return $null }
+
+            It "Should return null from the get method" {
+                $result = Get-TargetResource @testParams
+                $result.Default | Should BeNullOrEmpty
+                $result.Intranet | Should BeNullOrEmpty
+                $result.Extranet | Should BeNullOrEmpty
+                $result.Internet | Should BeNullOrEmpty
+                $result.Custom | Should BeNullOrEmpty
+            }
+
+            It "Should return false from the test method" {
+                Test-TargetResource @testParams | Should Be $false
+            }
+
+            It "Should throw exception in the set method" {
+                { Set-TargetResource @testParams } | Should throw "You cannot use AuthenticationProvider, MembershipProvider or RoleProvider when using WindowsAuthentication"
+            }
+        }
+
+        Context -Name "AuthenticationMethod=WindowsAuthentication used with MembershipProvider parameter" -Fixture {
+            $testParams = @{
+                WebAppUrl = "http://sharepoint.contoso.com"
+                Default   = @(
+                    (New-CimInstance -ClassName MSFT_SPWebAppAuthenticationMode -Property @{
+                            AuthenticationMethod = "WindowsAuthentication"
+                            WindowsAuthMethod    = "NTLM"
                             MembershipProvider   = "INCORRECT"
                         } -ClientOnly)
                 )
@@ -122,7 +156,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             It "Should throw exception in the set method" {
-                { Set-TargetResource @testParams } | Should throw "You cannot use AuthenticationProvider, MembershipProvider or RoleProvider when using Kerberos"
+                { Set-TargetResource @testParams } | Should throw "You cannot use AuthenticationProvider, MembershipProvider or RoleProvider when using WindowsAuthentication"
             }
         }
 
@@ -252,39 +286,6 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
         }
 
-        Context -Name "AuthenticationMethod=Federated and missing AuthenticationProvider parameter" -Fixture {
-            $testParams = @{
-                WebAppUrl = "http://sharepoint.contoso.com"
-                Default   = @(
-                    (New-CimInstance -ClassName MSFT_SPWebAppAuthenticationMode -Property @{
-                            AuthenticationMethod = "NTLM"
-                        } -ClientOnly),
-                    (New-CimInstance -ClassName MSFT_SPWebAppAuthenticationMode -Property @{
-                            AuthenticationMethod = "Kerberos"
-                        } -ClientOnly)
-                )
-            }
-
-            Mock -CommandName Get-SPWebapplication -MockWith { return $null }
-
-            It "Should return null from the get method" {
-                $result = Get-TargetResource @testParams
-                $result.Default | Should BeNullOrEmpty
-                $result.Intranet | Should BeNullOrEmpty
-                $result.Extranet | Should BeNullOrEmpty
-                $result.Internet | Should BeNullOrEmpty
-                $result.Custom | Should BeNullOrEmpty
-            }
-
-            It "Should return false from the test method" {
-                Test-TargetResource @testParams | Should Be $false
-            }
-
-            It "Should throw exception in the set method" {
-                { Set-TargetResource @testParams } | Should throw "You cannot use both NTLM and Kerberos in the same zone"
-            }
-        }
-
         Context -Name "No zones are specified" -Fixture {
             $testParams = @{
                 WebAppUrl = "http://sharepoint.contoso.com"
@@ -315,7 +316,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 WebAppUrl = "http://sharepoint.contoso.com"
                 Default   = @(
                     (New-CimInstance -ClassName MSFT_SPWebAppAuthenticationMode -Property @{
-                            AuthenticationMethod = "NTLM"
+                            AuthenticationMethod = "WindowsAuthentication"
+                            WindowsAuthMethod    = "NTLM"
                         } -ClientOnly)
                 )
             }
@@ -351,7 +353,9 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 WebAppUrl = "http://sharepoint.contoso.com"
                 Default   = @(
                     (New-CimInstance -ClassName MSFT_SPWebAppAuthenticationMode -Property @{
-                            AuthenticationMethod = "NTLM"
+                            AuthenticationMethod = "WindowsAuthentication"
+                            WindowsAuthMethod    = "NTLM"
+                            UseBasicAuth         = $true
                         } -ClientOnly),
                     (New-CimInstance -ClassName MSFT_SPWebAppAuthenticationMode -Property @{
                             AuthenticationMethod   = "Federated"
@@ -375,9 +379,10 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             Mock -CommandName Get-SPAuthenticationProvider -MockWith {
                 return @(
                     @{
-                        DisplayName       = "Windows Authentication"
-                        ClaimProviderName = 'AD'
-                        DisableKerberos   = $true
+                        DisplayName            = "Windows Authentication"
+                        ClaimProviderName      = 'AD'
+                        DisableKerberos        = $true
+                        UseBasicAuthentication = $true
                     },
                     @{
                         DisplayName        = "Forms Authentication"
@@ -393,7 +398,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
             It "Should return null from the get method" {
                 $result = Get-TargetResource @testParams
-                $result.Default[0].AuthenticationMethod | Should Be "NTLM"
+                $result.Default[0].AuthenticationMethod | Should Be "WindowsAuthentication"
+                $result.Default[0].WindowsAuthMethod | Should Be "NTLM"
                 $result.Default[1].AuthenticationMethod | Should Be "FBA"
                 $result.Default[2].AuthenticationMethod | Should Be "Federated"
             }
@@ -408,7 +414,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 WebAppUrl = "http://sharepoint.contoso.com"
                 Default   = @(
                     (New-CimInstance -ClassName MSFT_SPWebAppAuthenticationMode -Property @{
-                            AuthenticationMethod = "NTLM"
+                            AuthenticationMethod = "WindowsAuthentication"
+                            WindowsAuthMethod    = "NTLM"
                         } -ClientOnly),
                     (New-CimInstance -ClassName MSFT_SPWebAppAuthenticationMode -Property @{
                             AuthenticationMethod   = "Federated"
@@ -447,7 +454,9 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 WebAppUrl = "http://sharepoint.contoso.com"
                 Default   = @(
                     (New-CimInstance -ClassName MSFT_SPWebAppAuthenticationMode -Property @{
-                            AuthenticationMethod = "NTLM"
+                            AuthenticationMethod = "WindowsAuthentication"
+                            WindowsAuthMethod    = "NTLM"
+                            UseBasicAuth         = $true
                         } -ClientOnly),
                     (New-CimInstance -ClassName MSFT_SPWebAppAuthenticationMode -Property @{
                             AuthenticationMethod   = "Federated"
@@ -471,9 +480,10 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             Mock -CommandName Get-SPAuthenticationProvider -MockWith {
                 return @(
                     @{
-                        DisplayName       = "Windows Authentication"
-                        ClaimProviderName = 'AD'
-                        DisableKerberos   = $true
+                        DisplayName            = "Windows Authentication"
+                        ClaimProviderName      = 'AD'
+                        DisableKerberos        = $true
+                        UseBasicAuthentication = $false
                     },
                     @{
                         DisplayName        = "Forms Authentication"
@@ -489,7 +499,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
             It "Should return null from the get method" {
                 $result = Get-TargetResource @testParams
-                $result.Default[0].AuthenticationMethod | Should Be "NTLM"
+                $result.Default[0].AuthenticationMethod | Should Be "WindowsAuthentication"
+                $result.Default[0].WindowsAuthMethod | Should Be "NTLM"
                 $result.Default[1].AuthenticationMethod | Should Be "FBA"
             }
 
@@ -509,7 +520,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 WebAppUrl = "http://sharepoint.contoso.com"
                 Intranet  = @(
                     (New-CimInstance -ClassName MSFT_SPWebAppAuthenticationMode -Property @{
-                            AuthenticationMethod = "NTLM"
+                            AuthenticationMethod = "WindowsAuthentication"
+                            WindowsAuthMethod    = "NTLM"
                         } -ClientOnly),
                     (New-CimInstance -ClassName MSFT_SPWebAppAuthenticationMode -Property @{
                             AuthenticationMethod   = "Federated"
@@ -551,7 +563,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
             It "Should return null from the get method" {
                 $result = Get-TargetResource @testParams
-                $result.Intranet[0].AuthenticationMethod | Should Be "NTLM"
+                $result.Intranet[0].AuthenticationMethod | Should Be "WindowsAuthentication"
+                $result.Intranet[0].WindowsAuthMethod | Should Be "NTLM"
                 $result.Intranet[1].AuthenticationMethod | Should Be "FBA"
                 $result.Intranet[2].AuthenticationMethod | Should Be "Federated"
             }
@@ -566,7 +579,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 WebAppUrl = "http://sharepoint.contoso.com"
                 Intranet  = @(
                     (New-CimInstance -ClassName MSFT_SPWebAppAuthenticationMode -Property @{
-                            AuthenticationMethod = "NTLM"
+                            AuthenticationMethod = "WindowsAuthentication"
+                            WindowsAuthMethod    = "NTLM"
                         } -ClientOnly),
                     (New-CimInstance -ClassName MSFT_SPWebAppAuthenticationMode -Property @{
                             AuthenticationMethod   = "Federated"
@@ -608,7 +622,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
             It "Should return null from the get method" {
                 $result = Get-TargetResource @testParams
-                $result.Intranet[0].AuthenticationMethod | Should Be "NTLM"
+                $result.Intranet[0].AuthenticationMethod | Should Be "WindowsAuthentication"
+                $result.Intranet[0].WindowsAuthMethod | Should Be "NTLM"
                 $result.Intranet[1].AuthenticationMethod | Should Be "FBA"
             }
 
@@ -628,7 +643,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 WebAppUrl = "http://sharepoint.contoso.com"
                 Internet  = @(
                     (New-CimInstance -ClassName MSFT_SPWebAppAuthenticationMode -Property @{
-                            AuthenticationMethod = "NTLM"
+                            AuthenticationMethod = "WindowsAuthentication"
+                            WindowsAuthMethod    = "NTLM"
                         } -ClientOnly),
                     (New-CimInstance -ClassName MSFT_SPWebAppAuthenticationMode -Property @{
                             AuthenticationMethod   = "Federated"
@@ -670,7 +686,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
             It "Should return null from the get method" {
                 $result = Get-TargetResource @testParams
-                $result.Internet[0].AuthenticationMethod | Should Be "NTLM"
+                $result.Internet[0].AuthenticationMethod | Should Be "WindowsAuthentication"
+                $result.Internet[0].WindowsAuthMethod | Should Be "NTLM"
                 $result.Internet[1].AuthenticationMethod | Should Be "FBA"
                 $result.Internet[2].AuthenticationMethod | Should Be "Federated"
             }
@@ -685,7 +702,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 WebAppUrl = "http://sharepoint.contoso.com"
                 Internet  = @(
                     (New-CimInstance -ClassName MSFT_SPWebAppAuthenticationMode -Property @{
-                            AuthenticationMethod = "NTLM"
+                            AuthenticationMethod = "WindowsAuthentication"
+                            WindowsAuthMethod    = "NTLM"
                         } -ClientOnly),
                     (New-CimInstance -ClassName MSFT_SPWebAppAuthenticationMode -Property @{
                             AuthenticationMethod   = "Federated"
@@ -727,7 +745,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
             It "Should return null from the get method" {
                 $result = Get-TargetResource @testParams
-                $result.Internet[0].AuthenticationMethod | Should Be "NTLM"
+                $result.Internet[0].AuthenticationMethod | Should Be "WindowsAuthentication"
+                $result.Internet[0].WindowsAuthMethod | Should Be "NTLM"
                 $result.Internet[1].AuthenticationMethod | Should Be "FBA"
             }
 
@@ -747,7 +766,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 WebAppUrl = "http://sharepoint.contoso.com"
                 Extranet  = @(
                     (New-CimInstance -ClassName MSFT_SPWebAppAuthenticationMode -Property @{
-                            AuthenticationMethod = "NTLM"
+                            AuthenticationMethod = "WindowsAuthentication"
+                            WindowsAuthMethod    = "NTLM"
                         } -ClientOnly),
                     (New-CimInstance -ClassName MSFT_SPWebAppAuthenticationMode -Property @{
                             AuthenticationMethod   = "Federated"
@@ -789,7 +809,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
             It "Should return null from the get method" {
                 $result = Get-TargetResource @testParams
-                $result.Extranet[0].AuthenticationMethod | Should Be "NTLM"
+                $result.Extranet[0].AuthenticationMethod | Should Be "WindowsAuthentication"
+                $result.Extranet[0].WindowsAuthMethod | Should Be "NTLM"
                 $result.Extranet[1].AuthenticationMethod | Should Be "FBA"
                 $result.Extranet[2].AuthenticationMethod | Should Be "Federated"
             }
@@ -804,7 +825,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 WebAppUrl = "http://sharepoint.contoso.com"
                 Extranet  = @(
                     (New-CimInstance -ClassName MSFT_SPWebAppAuthenticationMode -Property @{
-                            AuthenticationMethod = "NTLM"
+                            AuthenticationMethod = "WindowsAuthentication"
+                            WindowsAuthMethod    = "NTLM"
                         } -ClientOnly),
                     (New-CimInstance -ClassName MSFT_SPWebAppAuthenticationMode -Property @{
                             AuthenticationMethod   = "Federated"
@@ -844,7 +866,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
             It "Should return null from the get method" {
                 $result = Get-TargetResource @testParams
-                $result.Extranet[0].AuthenticationMethod | Should Be "NTLM"
+                $result.Extranet[0].AuthenticationMethod | Should Be "WindowsAuthentication"
+                $result.Extranet[0].WindowsAuthMethod | Should Be "NTLM"
                 $result.Extranet[1].AuthenticationMethod | Should Be "FBA"
             }
 
@@ -864,7 +887,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 WebAppUrl = "http://sharepoint.contoso.com"
                 Custom    = @(
                     (New-CimInstance -ClassName MSFT_SPWebAppAuthenticationMode -Property @{
-                            AuthenticationMethod = "NTLM"
+                            AuthenticationMethod = "WindowsAuthentication"
+                            WindowsAuthMethod    = "NTLM"
                         } -ClientOnly),
                     (New-CimInstance -ClassName MSFT_SPWebAppAuthenticationMode -Property @{
                             AuthenticationMethod   = "Federated"
@@ -906,7 +930,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
             It "Should return null from the get method" {
                 $result = Get-TargetResource @testParams
-                $result.Custom[0].AuthenticationMethod | Should Be "NTLM"
+                $result.Custom[0].AuthenticationMethod | Should Be "WindowsAuthentication"
+                $result.Custom[0].WindowsAuthMethod | Should Be "NTLM"
                 $result.Custom[1].AuthenticationMethod | Should Be "FBA"
                 $result.Custom[2].AuthenticationMethod | Should Be "Federated"
             }
@@ -921,7 +946,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 WebAppUrl = "http://sharepoint.contoso.com"
                 Custom    = @(
                     (New-CimInstance -ClassName MSFT_SPWebAppAuthenticationMode -Property @{
-                            AuthenticationMethod = "Kerberos"
+                            AuthenticationMethod = "WindowsAuthentication"
+                            WindowsAuthMethod    = "Kerberos"
                         } -ClientOnly),
                     (New-CimInstance -ClassName MSFT_SPWebAppAuthenticationMode -Property @{
                             AuthenticationMethod   = "Federated"
@@ -947,7 +973,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     @{
                         DisplayName       = "Windows Authentication"
                         ClaimProviderName = 'AD'
-                        DisableKerberos = $false
+                        DisableKerberos   = $false
                     },
                     @{
                         DisplayName        = "Forms Authentication"
@@ -963,7 +989,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
             It "Should return null from the get method" {
                 $result = Get-TargetResource @testParams
-                $result.Custom[0].AuthenticationMethod | Should Be "Kerberos"
+                $result.Custom[0].AuthenticationMethod | Should Be "WindowsAuthentication"
+                $result.Custom[0].WindowsAuthMethod | Should Be "Kerberos"
                 $result.Custom[1].AuthenticationMethod | Should Be "FBA"
             }
 

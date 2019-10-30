@@ -1005,21 +1005,17 @@ function Test-ZoneConfiguration()
             }
             "WindowsAuthentication"
             {
-                if ($null -eq $DesiredConfig.UseBasicAuth)
-                {
-                    $specifiedMethod = $DesiredConfig | `
-                        Where-Object -FilterScript {
-                        $_.AuthenticationMethod -eq $zoneConfig.AuthenticationMethod -and `
-                            $_.WindowsAuthMethod -eq $zoneConfig.WindowsAuthMethod
-                    }
+                $specifiedMethod = $DesiredConfig | `
+                    Where-Object -FilterScript {
+                    $_.AuthenticationMethod -eq $zoneConfig.AuthenticationMethod -and `
+                        $_.WindowsAuthMethod -eq $zoneConfig.WindowsAuthMethod
                 }
-                else
+
+                if ($null -ne $specifiedMethod.UseBasicAuth)
                 {
-                    $specifiedMethod = $DesiredConfig | `
+                    $specifiedMethod = $specifiedMethod | `
                         Where-Object -FilterScript {
-                        $_.AuthenticationMethod -eq $zoneConfig.AuthenticationMethod -and `
-                            $_.WindowsAuthMethod -eq $zoneConfig.WindowsAuthMethod -and `
-                            $_.UseBasicAuth -eq $zoneConfig.UseBasicAuth
+                        $_.UseBasicAuth -eq $zoneConfig.UseBasicAuth
                     }
                 }
             }
