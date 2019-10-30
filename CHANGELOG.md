@@ -40,9 +40,6 @@
     SecondaryOwnerAlias
 * SPWebAppAuthentication
   * Fixes issue where Test method return false on NON-US OS.
-* SPDistributedCacheService
-  * Improved error message for inclusion of server name into ServerProvisionOrder
-    parameters when Present or change to Ensure Absent
 
 ## v3.6
 
