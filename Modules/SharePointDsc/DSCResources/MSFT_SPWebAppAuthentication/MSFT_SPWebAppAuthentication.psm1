@@ -948,11 +948,22 @@ function Test-ZoneConfiguration()
             }
             "WindowsAuthentication"
             {
-                $configuredMethod = $CurrentConfig | `
-                    Where-Object -FilterScript {
-                    $_.AuthenticationMethod -eq $zoneConfig.AuthenticationMethod -and `
-                        $_.WindowsAuthMethod -eq $zoneConfig.WindowsAuthMethod -and `
-                        $_.UseBasicAuth -eq $zoneConfig.UseBasicAuth
+                if ($null -eq $zoneConfig.UseBasicAuth)
+                {
+                    $configuredMethod = $CurrentConfig | `
+                        Where-Object -FilterScript {
+                        $_.AuthenticationMethod -eq $zoneConfig.AuthenticationMethod -and `
+                            $_.WindowsAuthMethod -eq $zoneConfig.WindowsAuthMethod
+                    }
+                }
+                else
+                {
+                    $configuredMethod = $CurrentConfig | `
+                        Where-Object -FilterScript {
+                        $_.AuthenticationMethod -eq $zoneConfig.AuthenticationMethod -and `
+                            $_.WindowsAuthMethod -eq $zoneConfig.WindowsAuthMethod -and `
+                            $_.UseBasicAuth -eq $zoneConfig.UseBasicAuth
+                    }
                 }
             }
             "FBA"
@@ -989,16 +1000,27 @@ function Test-ZoneConfiguration()
             {
                 $specifiedMethod = $DesiredConfig | `
                     Where-Object -FilterScript {
-                    $_.AuthenticationMethod -eq $zoneConfig.AuthenticationMethod -and `
-                        $_.WindowsAuthMethod -eq $zoneConfig.WindowsAuthMethod -and `
-                        $_.UseBasicAuth -eq $zoneConfig.UseBasicAuth
+                    $_.AuthenticationMethod -eq $zoneConfig.AuthenticationMethod
                 }
             }
             "WindowsAuthentication"
             {
-                $specifiedMethod = $DesiredConfig | `
-                    Where-Object -FilterScript {
-                    $_.AuthenticationMethod -eq $zoneConfig.AuthenticationMethod
+                if ($null -eq $DesiredConfig.UseBasicAuth)
+                {
+                    $specifiedMethod = $DesiredConfig | `
+                        Where-Object -FilterScript {
+                        $_.AuthenticationMethod -eq $zoneConfig.AuthenticationMethod -and `
+                            $_.WindowsAuthMethod -eq $zoneConfig.WindowsAuthMethod
+                    }
+                }
+                else
+                {
+                    $specifiedMethod = $DesiredConfig | `
+                        Where-Object -FilterScript {
+                        $_.AuthenticationMethod -eq $zoneConfig.AuthenticationMethod -and `
+                            $_.WindowsAuthMethod -eq $zoneConfig.WindowsAuthMethod -and `
+                            $_.UseBasicAuth -eq $zoneConfig.UseBasicAuth
+                    }
                 }
             }
             "FBA"
