@@ -1,9 +1,7 @@
 <#
 .EXAMPLE
-    This example shows how to configure the authentication of a web application in the local farm using a custom
-    claim provider. A SPTrustedIdentityTokenIssuer is created named Contoso, then this SPTrustedIdentityTokenIssuer
-    is referenced by the SPWebAppAuthentication as the AuthenticationProvider and the AuthenticationMethod is set
-    to "Federated" value.
+    This example shows how to configure the authentication of a web application in the local farm using
+    Kerberos without Basic Authentication enabled.
 #>
 
     Configuration Example
@@ -24,7 +22,8 @@
                 WebAppUrl            = "http://sharepoint.contoso.com"
                 Default              = @(
                     MSFT_SPWebAppAuthenticationMode {
-                        AuthenticationMethod = "NTLM"
+                        AuthenticationMethod = "WindowsAuthentication"
+                        WindowsAuthMethod    = "Kerberos"
                     }
                 )
                 Extranet             = @(

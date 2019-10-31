@@ -48,7 +48,8 @@
                 WebAppUrl            = "http://sharepoint.contoso.com"
                 Default              = @(
                     MSFT_SPWebAppAuthenticationMode {
-                        AuthenticationMethod = "NTLM"
+                        AuthenticationMethod = "WindowsAuthentication"
+                        WindowsAuthMethod    = "NTLM"
                     }
                 )
                 Internet             = @(

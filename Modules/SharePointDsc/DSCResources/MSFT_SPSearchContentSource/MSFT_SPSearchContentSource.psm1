@@ -1,7 +1,6 @@
 function Get-TargetResource
 {
     [CmdletBinding()]
-    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSDSCUseIdenticalMandatoryParametersForDSC", "", Justification = "Temporary workaround for issue introduced in PSSA v1.18")]
     [OutputType([System.Collections.Hashtable])]
     param
     (
@@ -23,7 +22,7 @@ function Get-TargetResource
         $Addresses,
 
         [Parameter()]
-        [ValidateSet("CrawlEverything", "CrawlFirstOnly", "Custom")]
+        [ValidateSet("CrawlEverything", "CrawlFirstOnly", "CrawlVirtualServers", "CrawlSites", "Custom")]
         [System.String]
         $CrawlSetting,
 
@@ -101,10 +100,10 @@ function Get-TargetResource
         {
             "SharePoint"
             {
-                $crawlSetting = "CrawlEverything"
+                $crawlSetting = "CrawlVirtualServers"
                 if ($source.SharePointCrawlBehavior -eq "CrawlSites")
                 {
-                    $crawlSetting = "CrawlFirstOnly"
+                    $crawlSetting = "CrawlSites"
                 }
 
                 $incrementalSchedule = Get-SPDscSearchCrawlSchedule `
@@ -225,7 +224,6 @@ function Get-TargetResource
 function Set-TargetResource
 {
     [CmdletBinding()]
-    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSDSCUseIdenticalMandatoryParametersForDSC", "", Justification = "Temporary workaround for issue introduced in PSSA v1.18")]
     param
     (
         [Parameter(Mandatory = $true)]
@@ -246,7 +244,7 @@ function Set-TargetResource
         $Addresses,
 
         [Parameter()]
-        [ValidateSet("CrawlEverything", "CrawlFirstOnly", "Custom")]
+        [ValidateSet("CrawlEverything", "CrawlFirstOnly", "CrawlVirtualServers", "CrawlSites", "Custom")]
         [System.String]
         $CrawlSetting,
 
@@ -307,32 +305,40 @@ function Set-TargetResource
             {
                 throw "Parameter LimitServerHops is not valid for SharePoint content sources"
             }
-            if ($CrawlSetting -eq "Custom")
+            # Temporarily allow CrawlEverything, CrawlFirstOnly and Null (mapped to CrawlVirtualServers)
+            # until next major (breaking) version, as these were not previously blocked nor
+            # implemented.  All equate to CrawlVirtualServers (default).
+            if ($CrawlSetting -ne "CrawlVirtualServers" -and
+                $CrawlSetting -ne "CrawlSites" -and
+                $CrawlSetting -ne "CrawlEverything" -and # Phaseout Major Release
+                $CrawlSetting -ne "CrawlFirstOnly" -and # Phaseout Major Release
+                $CrawlSetting -ne $null # Phaseout Major Release
+                )
             {
-                throw ("Parameter CrawlSetting can only be set to custom for website content " + `
-                        "sources")
+                throw ("Parameter CrawlSetting can only be set to CrawlVirtualServers or CrawlSites " + `
+                    "for SharePoint content sources")
             }
         }
         "Website"
         {
             if ($PSBoundParameters.ContainsKey("ContinuousCrawl") -eq $true)
             {
-                throw "Parameter ContinuousCrawl is not valid for website content sources"
+                throw "Parameter ContinuousCrawl is not valid for Website content sources"
             }
             if ($PSBoundParameters.ContainsKey("LimitServerHops") -eq $true)
             {
-                throw "Parameter LimitServerHops is not valid for website content sources"
+                throw "Parameter LimitServerHops is not valid for Website content sources"
             }
         }
         "FileShare"
         {
             if ($PSBoundParameters.ContainsKey("LimitPageDepth") -eq $true)
             {
-                throw "Parameter LimitPageDepth is not valid for file share content sources"
+                throw "Parameter LimitPageDepth is not valid for FileShare content sources"
             }
             if ($PSBoundParameters.ContainsKey("LimitServerHops") -eq $true)
             {
-                throw "Parameter LimitServerHops is not valid for file share content sources"
+                throw "Parameter LimitServerHops is not valid for FileShare content sources"
             }
             if ($CrawlSetting -eq "Custom")
             {
@@ -403,6 +409,12 @@ function Set-TargetResource
                     "SharePoint"
                     {
                         $newType = "SharePoint"
+                        $newCrawlSetting = $crawlSetting
+                        # Temporary mapping to CrawlVirtualServers until major (breaking) change
+                        if ($newCrawlSetting -ne "CrawlSites")
+                        {
+                            $newCrawlSetting = "CrawlVirtualServers"
+                        }
                     }
                     "Website"
                     {
@@ -417,7 +429,16 @@ function Set-TargetResource
                         $newType = "Business"
                     }
                 }
-                if ($params.ContentSourceType -ne "Business")
+                if ($params.ContentSourceType -eq "SharePoint")
+                {
+                    $source = New-SPEnterpriseSearchCrawlContentSource `
+                        -SearchApplication $params.ServiceAppName `
+                        -Type $newType `
+                        -Name $params.Name `
+                        -StartAddresses $startAddresses `
+                        -SharePointCrawlBehavior $newCrawlSetting
+                }
+                elseif ($params.ContentSourceType -ne "Business")
                 {
                     $source = New-SPEnterpriseSearchCrawlContentSource `
                         -SearchApplication $params.ServiceAppName `
@@ -702,7 +723,6 @@ function Set-TargetResource
 function Test-TargetResource
 {
     [CmdletBinding()]
-    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSDSCUseIdenticalMandatoryParametersForDSC", "", Justification = "Temporary workaround for issue introduced in PSSA v1.18")]
     [OutputType([System.Boolean])]
     param
     (
@@ -724,7 +744,7 @@ function Test-TargetResource
         $Addresses,
 
         [Parameter()]
-        [ValidateSet("CrawlEverything", "CrawlFirstOnly", "Custom")]
+        [ValidateSet("CrawlEverything", "CrawlFirstOnly", "CrawlVirtualServers", "CrawlSites", "Custom")]
         [System.String]
         $CrawlSetting,
 
@@ -787,32 +807,40 @@ function Test-TargetResource
             {
                 throw "Parameter LimitServerHops is not valid for SharePoint content sources"
             }
-            if ($CrawlSetting -eq "Custom")
+            # Temporarily allow CrawlEverything, CrawlFirstOnly and Null (mapped to CrawlVirtualServers)
+            # until next major (breaking) version, as these were not previously blocked nor
+            # implemented.  All equate to CrawlVirtualServers (default).
+            if ($CrawlSetting -ne "CrawlVirtualServers" -and
+                $CrawlSetting -ne "CrawlSites" -and
+                $CrawlSetting -ne "CrawlEverything" -and # Phaseout Major Release
+                $CrawlSetting -ne "CrawlFirstOnly" -and # Phaseout Major Release
+                $CrawlSetting -ne $null # Phaseout Major Release
+                )
             {
-                throw ("Parameter CrawlSetting can only be set to custom for website content " + `
-                        "sources")
+                throw ("Parameter CrawlSetting can only be set to CrawlVirtualServers or CrawlSites " + `
+                    "for SharePoint content sources")
             }
         }
         "Website"
         {
             if ($PSBoundParameters.ContainsKey("ContinuousCrawl") -eq $true)
             {
-                throw "Parameter ContinuousCrawl is not valid for website content sources"
+                throw "Parameter ContinuousCrawl is not valid for Website content sources"
             }
             if ($PSBoundParameters.ContainsKey("LimitServerHops") -eq $true)
             {
-                throw "Parameter LimitServerHops is not valid for website content sources"
+                throw "Parameter LimitServerHops is not valid for Website content sources"
             }
         }
         "FileShare"
         {
             if ($PSBoundParameters.ContainsKey("LimitPageDepth") -eq $true)
             {
-                throw "Parameter LimitPageDepth is not valid for file share content sources"
+                throw "Parameter LimitPageDepth is not valid for FileShare content sources"
             }
             if ($PSBoundParameters.ContainsKey("LimitServerHops") -eq $true)
             {
-                throw "Parameter LimitServerHops is not valid for file share content sources"
+                throw "Parameter LimitServerHops is not valid for FileShare content sources"
             }
             if ($CrawlSetting -eq "Custom")
             {

@@ -1,9 +1,30 @@
 # Change log for SharePointDsc
 
-## UNRELEASED
+## v4.0
+
+The following changes will break v3.x and earlier configurations that use these
+resources:
+
+* SPSearchServiceApp
+  * Removed the WindowsServiceAccount parameter that was depricated in v3.1
+* SPUserProfileServiceApp
+  * Changed the MySiteHostLocation parameter to a required parameter
+* SPWebAppAuthentication
+  * Updated resource to add support for Basic Authentication
+
+## Unreleased
+
+* SPSearchContentSource
+  * Add CrawlVirtualServers and CrawlSites CrawlSetting for SharePoint content
+    sources.  Fix for issue #1124.
+
+## v3.7
 
 * SPConfigWizard
   * Fixed issue with incorrect check for upgrade status of server
+* SPDistributedCacheService
+  * Improved error message for inclusion of server name into ServerProvisionOrder
+    parameters when Present or change to Ensure Absent
 * SPFarm
   * Removed SingleServer as ServerRole, since this is an invalid role.
   * Handle case where null or empty CentralAdministrationUrl is passed in
