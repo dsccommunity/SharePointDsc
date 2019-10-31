@@ -370,7 +370,7 @@ function Set-TargetResource
 
         if ($PSBoundParameters.ContainsKey("Internet"))
         {
-            Test-ZoneIsNotClassic -Zone $Intranet
+            Test-ZoneIsNotClassic -Zone $Internet
         }
 
         if ($PSBoundParameters.ContainsKey("Extranet"))

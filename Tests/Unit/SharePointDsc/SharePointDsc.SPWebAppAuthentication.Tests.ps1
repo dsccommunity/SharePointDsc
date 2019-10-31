@@ -193,6 +193,39 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
         }
 
+        Context -Name "AuthenticationMethod=FBA used with WindowsAuthMethod parameter" -Fixture {
+            $testParams = @{
+                WebAppUrl = "http://sharepoint.contoso.com"
+                Default   = @(
+                    (New-CimInstance -ClassName MSFT_SPWebAppAuthenticationMode -Property @{
+                            AuthenticationMethod   = "FBA"
+                            MembershipProvider     = "INCORRECT"
+                            RoleProvider           = "INCORRECT"
+                            WindowsAuthMethod      = "NTLM"
+                        } -ClientOnly)
+                )
+            }
+
+            Mock -CommandName Get-SPWebapplication -MockWith { return $null }
+
+            It "Should return null from the get method" {
+                $result = Get-TargetResource @testParams
+                $result.Default | Should BeNullOrEmpty
+                $result.Intranet | Should BeNullOrEmpty
+                $result.Extranet | Should BeNullOrEmpty
+                $result.Internet | Should BeNullOrEmpty
+                $result.Custom | Should BeNullOrEmpty
+            }
+
+            It "Should return false from the test method" {
+                Test-TargetResource @testParams | Should Be $false
+            }
+
+            It "Should throw exception in the set method" {
+                { Set-TargetResource @testParams } | Should throw "You cannot use WindowsAuthMethod or UseBasicAuth when using FBA"
+            }
+        }
+
         Context -Name "AuthenticationMethod=Federated used with RoleProvider parameter" -Fixture {
             $testParams = @{
                 WebAppUrl = "http://sharepoint.contoso.com"
@@ -222,6 +255,38 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
             It "Should throw exception in the set method" {
                 { Set-TargetResource @testParams } | Should throw "You cannot use MembershipProvider or RoleProvider when using Federated"
+            }
+        }
+
+        Context -Name "AuthenticationMethod=Federated used with WindowsAuthMethod parameter" -Fixture {
+            $testParams = @{
+                WebAppUrl = "http://sharepoint.contoso.com"
+                Default   = @(
+                    (New-CimInstance -ClassName MSFT_SPWebAppAuthenticationMode -Property @{
+                            AuthenticationMethod   = "Federated"
+                            AuthenticationProvider = "INCORRECT"
+                            WindowsAuthMethod      = "NTLM"
+                        } -ClientOnly)
+                )
+            }
+
+            Mock -CommandName Get-SPWebapplication -MockWith { return $null }
+
+            It "Should return null from the get method" {
+                $result = Get-TargetResource @testParams
+                $result.Default | Should BeNullOrEmpty
+                $result.Intranet | Should BeNullOrEmpty
+                $result.Extranet | Should BeNullOrEmpty
+                $result.Internet | Should BeNullOrEmpty
+                $result.Custom | Should BeNullOrEmpty
+            }
+
+            It "Should return false from the test method" {
+                Test-TargetResource @testParams | Should Be $false
+            }
+
+            It "Should throw exception in the set method" {
+                { Set-TargetResource @testParams } | Should throw "You cannot use WindowsAuthMethod or UseBasicAuth when using Federated"
             }
         }
 
@@ -343,7 +408,119 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Test-TargetResource @testParams | Should Be $false
             }
 
-            It "Should run the Set-SPWebApplication cmdlet in the set method" {
+            It "Should throw exception in the set method" {
+                { Set-TargetResource @testParams } | Should Throw "Specified Web Application is using Classic Authentication and Claims Authentication is specified."
+            }
+        }
+
+        Context -Name "WebApplication is Classic, but Intranet Zone config is Claims" -Fixture {
+            $testParams = @{
+                WebAppUrl = "http://sharepoint.contoso.com"
+                Intranet  = @(
+                    (New-CimInstance -ClassName MSFT_SPWebAppAuthenticationMode -Property @{
+                            AuthenticationMethod = "WindowsAuthentication"
+                            WindowsAuthMethod    = "NTLM"
+                        } -ClientOnly)
+                )
+            }
+
+            Mock -CommandName Get-SPWebapplication -MockWith {
+                return @{
+                    IisSettings = @{
+                        Keys = "Intranet"
+                    }
+                }
+            }
+            Mock -CommandName Get-SPAuthenticationProvider -MockWith { }
+
+            Mock -CommandName New-SPAuthenticationProvider -MockWith { return @{ } }
+            Mock -CommandName Get-SPTrustedIdentityTokenIssuer -MockWith { return @{ } }
+
+            It "Should throw exception in the set method" {
+                { Set-TargetResource @testParams } | Should Throw "Specified Web Application is using Classic Authentication and Claims Authentication is specified."
+            }
+        }
+
+        Context -Name "WebApplication is Classic, but Internet Zone config is Claims" -Fixture {
+            $testParams = @{
+                WebAppUrl = "http://sharepoint.contoso.com"
+                Internet  = @(
+                    (New-CimInstance -ClassName MSFT_SPWebAppAuthenticationMode -Property @{
+                            AuthenticationMethod = "WindowsAuthentication"
+                            WindowsAuthMethod    = "NTLM"
+                        } -ClientOnly)
+                )
+            }
+
+            Mock -CommandName Get-SPWebapplication -MockWith {
+                return @{
+                    IisSettings = @{
+                        Keys = "Internet"
+                    }
+                }
+            }
+            Mock -CommandName Get-SPAuthenticationProvider -MockWith { }
+
+            Mock -CommandName New-SPAuthenticationProvider -MockWith { return @{ } }
+            Mock -CommandName Get-SPTrustedIdentityTokenIssuer -MockWith { return @{ } }
+
+            It "Should throw exception in the set method" {
+                { Set-TargetResource @testParams } | Should Throw "Specified Web Application is using Classic Authentication and Claims Authentication is specified."
+            }
+        }
+
+        Context -Name "WebApplication is Classic, but Extranet Zone config is Claims" -Fixture {
+            $testParams = @{
+                WebAppUrl = "http://sharepoint.contoso.com"
+                Extranet  = @(
+                    (New-CimInstance -ClassName MSFT_SPWebAppAuthenticationMode -Property @{
+                            AuthenticationMethod = "WindowsAuthentication"
+                            WindowsAuthMethod    = "NTLM"
+                        } -ClientOnly)
+                )
+            }
+
+            Mock -CommandName Get-SPWebapplication -MockWith {
+                return @{
+                    IisSettings = @{
+                        Keys = "Extranet"
+                    }
+                }
+            }
+            Mock -CommandName Get-SPAuthenticationProvider -MockWith { }
+
+            Mock -CommandName New-SPAuthenticationProvider -MockWith { return @{ } }
+            Mock -CommandName Get-SPTrustedIdentityTokenIssuer -MockWith { return @{ } }
+
+            It "Should throw exception in the set method" {
+                { Set-TargetResource @testParams } | Should Throw "Specified Web Application is using Classic Authentication and Claims Authentication is specified."
+            }
+        }
+
+        Context -Name "WebApplication is Classic, but Custom Zone config is Claims" -Fixture {
+            $testParams = @{
+                WebAppUrl = "http://sharepoint.contoso.com"
+                Custom  = @(
+                    (New-CimInstance -ClassName MSFT_SPWebAppAuthenticationMode -Property @{
+                            AuthenticationMethod = "WindowsAuthentication"
+                            WindowsAuthMethod    = "NTLM"
+                        } -ClientOnly)
+                )
+            }
+
+            Mock -CommandName Get-SPWebapplication -MockWith {
+                return @{
+                    IisSettings = @{
+                        Keys = "Custom"
+                    }
+                }
+            }
+            Mock -CommandName Get-SPAuthenticationProvider -MockWith { }
+
+            Mock -CommandName New-SPAuthenticationProvider -MockWith { return @{ } }
+            Mock -CommandName Get-SPTrustedIdentityTokenIssuer -MockWith { return @{ } }
+
+            It "Should throw exception in the set method" {
                 { Set-TargetResource @testParams } | Should Throw "Specified Web Application is using Classic Authentication and Claims Authentication is specified."
             }
         }
