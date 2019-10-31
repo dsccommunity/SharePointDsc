@@ -12,6 +12,12 @@ resources:
 * SPWebAppAuthentication
   * Updated resource to add support for Basic Authentication
 
+## Unreleased
+
+* SPSearchContentSource
+  * Add CrawlVirtualServers and CrawlSites CrawlSetting for SharePoint content
+    sources.  Fix for issue #1124.
+
 ## v3.7
 
 * SPConfigWizard
