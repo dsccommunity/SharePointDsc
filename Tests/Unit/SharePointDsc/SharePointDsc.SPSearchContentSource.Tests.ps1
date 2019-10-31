@@ -67,7 +67,7 @@ namespace Microsoft.Office.Server.Search.Administration {
                 ContentSourceType = "SharePoint"
                 LimitPageDepth    = 2
                 Addresses         = @("http://site.contoso.com")
-                CrawlSetting      = "CrawlEverything"
+                CrawlSetting      = "CrawlVirtualServers"
                 Ensure            = "Present"
             }
 
@@ -87,7 +87,7 @@ namespace Microsoft.Office.Server.Search.Administration {
                 ContentSourceType = "SharePoint"
                 LimitServerHops   = 2
                 Addresses         = @("http://site.contoso.com")
-                CrawlSetting      = "CrawlEverything"
+                CrawlSetting      = "CrawlVirtualServers"
                 Ensure            = "Present"
             }
 
@@ -111,11 +111,11 @@ namespace Microsoft.Office.Server.Search.Administration {
             }
 
             It "Should create the content source in the test method" {
-                { Test-TargetResource @testParams } | Should Throw "Parameter CrawlSetting can only be set to custom for website content sources"
+                { Test-TargetResource @testParams } | Should Throw "Parameter CrawlSetting can only be set to CrawlVirtualServers or CrawlSites for SharePoint content sources"
             }
 
             It "Should create the content source in the set method" {
-                { Set-TargetResource @testParams } | Should Throw "Parameter CrawlSetting can only be set to custom for website content sources"
+                { Set-TargetResource @testParams } | Should Throw "Parameter CrawlSetting can only be set to CrawlVirtualServers or CrawlSites for SharePoint content sources"
             }
         }
 
@@ -131,11 +131,11 @@ namespace Microsoft.Office.Server.Search.Administration {
             }
 
             It "Should create the content source in the test method" {
-                { Test-TargetResource @testParams } | Should Throw "Parameter LimitServerHops is not valid for website content sources"
+                { Test-TargetResource @testParams } | Should Throw "Parameter LimitServerHops is not valid for Website content sources"
             }
 
             It "Should create the content source in the set method" {
-                { Set-TargetResource @testParams } | Should Throw "Parameter LimitServerHops is not valid for website content sources"
+                { Set-TargetResource @testParams } | Should Throw "Parameter LimitServerHops is not valid for Website content sources"
             }
         }
 
@@ -151,11 +151,11 @@ namespace Microsoft.Office.Server.Search.Administration {
             }
 
             It "Should create the content source in the test method" {
-                { Test-TargetResource @testParams } | Should Throw "Parameter ContinuousCrawl is not valid for website content sources"
+                { Test-TargetResource @testParams } | Should Throw "Parameter ContinuousCrawl is not valid for Website content sources"
             }
 
             It "Should create the content source in the set method" {
-                { Set-TargetResource @testParams } | Should Throw "Parameter ContinuousCrawl is not valid for website content sources"
+                { Set-TargetResource @testParams } | Should Throw "Parameter ContinuousCrawl is not valid for Website content sources"
             }
         }
 
@@ -171,11 +171,11 @@ namespace Microsoft.Office.Server.Search.Administration {
             }
 
             It "Should create the content source in the test method" {
-                { Test-TargetResource @testParams } | Should Throw "Parameter LimitPageDepth is not valid for file share content sources"
+                { Test-TargetResource @testParams } | Should Throw "Parameter LimitPageDepth is not valid for FileShare content sources"
             }
 
             It "Should create the content source in the set method" {
-                { Set-TargetResource @testParams } | Should Throw "Parameter LimitPageDepth is not valid for file share content sources"
+                { Set-TargetResource @testParams } | Should Throw "Parameter LimitPageDepth is not valid for FileShare content sources"
             }
         }
 
@@ -191,11 +191,11 @@ namespace Microsoft.Office.Server.Search.Administration {
             }
 
             It "Should create the content source in the test method" {
-                { Test-TargetResource @testParams } | Should Throw "Parameter LimitServerHops is not valid for file share content sources"
+                { Test-TargetResource @testParams } | Should Throw "Parameter LimitServerHops is not valid for FileShare content sources"
             }
 
             It "Should create the content source in the set method" {
-                { Set-TargetResource @testParams } | Should Throw "Parameter LimitServerHops is not valid for file share content sources"
+                { Set-TargetResource @testParams } | Should Throw "Parameter LimitServerHops is not valid for FileShare content sources"
             }
         }
 
@@ -224,7 +224,7 @@ namespace Microsoft.Office.Server.Search.Administration {
                 ServiceAppName    = "Search Service Application"
                 ContentSourceType = "SharePoint"
                 Addresses         = @("http://site.contoso.com")
-                CrawlSetting      = "CrawlEverything"
+                CrawlSetting      = "CrawlVirtualServers"
                 Ensure            = "Present"
             }
 
@@ -272,7 +272,7 @@ namespace Microsoft.Office.Server.Search.Administration {
                 ServiceAppName    = "Search Service Application"
                 ContentSourceType = "SharePoint"
                 Addresses         = @("http://site.contoso.com")
-                CrawlSetting      = "CrawlFirstOnly"
+                CrawlSetting      = "CrawlSites"
                 Ensure            = "Present"
             }
             Mock -CommandName Get-SPEnterpriseSearchCrawlContentSource -MockWith {
@@ -309,7 +309,7 @@ namespace Microsoft.Office.Server.Search.Administration {
                 ServiceAppName    = "Search Service Application"
                 ContentSourceType = "SharePoint"
                 Addresses         = @("http://site.contoso.com")
-                CrawlSetting      = "CrawlEverything"
+                CrawlSetting      = "CrawlVirtualServers"
                 Ensure            = "Absent"
             }
             Mock -CommandName Get-SPEnterpriseSearchCrawlContentSource -MockWith {
@@ -352,7 +352,7 @@ namespace Microsoft.Office.Server.Search.Administration {
                 ServiceAppName    = "Search Service Application"
                 ContentSourceType = "SharePoint"
                 Addresses         = @("http://site.contoso.com")
-                CrawlSetting      = "CrawlEverything"
+                CrawlSetting      = "CrawlVirtualServers"
                 Ensure            = "Absent"
             }
             Mock -CommandName Get-SPEnterpriseSearchCrawlContentSource -MockWith {
@@ -375,7 +375,7 @@ namespace Microsoft.Office.Server.Search.Administration {
                 ServiceAppName    = "Search Service Application"
                 ContentSourceType = "SharePoint"
                 Addresses         = @("http://site.contoso.com")
-                CrawlSetting      = "CrawlEverything"
+                CrawlSetting      = "CrawlVirtualServers"
                 ContinuousCrawl   = $true
                 Ensure            = "Present"
             }
@@ -794,7 +794,7 @@ namespace Microsoft.Office.Server.Search.Administration {
                 ServiceAppName    = "Search Service Application"
                 ContentSourceType = "SharePoint"
                 Addresses         = @("http://site.contoso.com")
-                CrawlSetting      = "CrawlEverything"
+                CrawlSetting      = "CrawlVirtualServers"
                 Ensure            = "Present"
                 FullSchedule      = (New-CimInstance -ClassName MSFT_SPSearchCrawlSchedule -Property @{
                         ScheduleType                = "Daily"
@@ -864,7 +864,7 @@ namespace Microsoft.Office.Server.Search.Administration {
                 ServiceAppName    = "Search Service Application"
                 ContentSourceType = "SharePoint"
                 Addresses         = @("http://site.contoso.com")
-                CrawlSetting      = "CrawlEverything"
+                CrawlSetting      = "CrawlVirtualServers"
                 Ensure            = "Present"
                 FullSchedule      = (New-CimInstance -ClassName MSFT_SPSearchCrawlSchedule -Property @{
                         ScheduleType                = "Daily"
@@ -910,7 +910,7 @@ namespace Microsoft.Office.Server.Search.Administration {
                 ServiceAppName      = "Search Service Application"
                 ContentSourceType   = "SharePoint"
                 Addresses           = @("http://site.contoso.com")
-                CrawlSetting        = "CrawlEverything"
+                CrawlSetting        = "CrawlVirtualServers"
                 Ensure              = "Present"
                 IncrementalSchedule = (New-CimInstance -ClassName MSFT_SPSearchCrawlSchedule -Property @{
                         ScheduleType            = "Weekly"
@@ -958,7 +958,7 @@ namespace Microsoft.Office.Server.Search.Administration {
                 ServiceAppName      = "Search Service Application"
                 ContentSourceType   = "SharePoint"
                 Addresses           = @("http://site.contoso.com")
-                CrawlSetting        = "CrawlEverything"
+                CrawlSetting        = "CrawlVirtualServers"
                 Ensure              = "Present"
                 IncrementalSchedule = (New-CimInstance -ClassName MSFT_SPSearchCrawlSchedule -Property @{
                         ScheduleType            = "Weekly"
@@ -1201,8 +1201,8 @@ namespace Microsoft.Office.Server.Search.Administration {
             }
 
             It "Should throw Invalid parameter error" {
-                { Set-TargetResource @testParams } | Should Throw "Parameter CrawlSetting can only be set to custom for website content sources"
-                { Test-TargetResource @testParams } | Should Throw "Parameter CrawlSetting can only be set to custom for website content sources"
+                { Set-TargetResource @testParams } | Should Throw "Parameter CrawlSetting can only be set to CrawlVirtualServers or CrawlSites for SharePoint content sources"
+                { Test-TargetResource @testParams } | Should Throw "Parameter CrawlSetting can only be set to CrawlVirtualServers or CrawlSites for SharePoint content sources"
             }
         }
 
@@ -1221,8 +1221,8 @@ namespace Microsoft.Office.Server.Search.Administration {
             }
 
             It "Should throw Invalid parameter error" {
-                { Set-TargetResource @testParams } | Should Throw "Parameter ContinuousCrawl is not valid for website content sources"
-                { Test-TargetResource @testParams } | Should Throw "Parameter ContinuousCrawl is not valid for website content sources"
+                { Set-TargetResource @testParams } | Should Throw "Parameter ContinuousCrawl is not valid for Website content sources"
+                { Test-TargetResource @testParams } | Should Throw "Parameter ContinuousCrawl is not valid for Website content sources"
             }
 
             $testParams = @{
@@ -1234,8 +1234,8 @@ namespace Microsoft.Office.Server.Search.Administration {
             }
 
             It "Should throw Invalid parameter error" {
-                { Set-TargetResource @testParams } | Should Throw "Parameter LimitServerHops is not valid for website content sources"
-                { Test-TargetResource @testParams } | Should Throw "Parameter LimitServerHops is not valid for website content sources"
+                { Set-TargetResource @testParams } | Should Throw "Parameter LimitServerHops is not valid for Website content sources"
+                { Test-TargetResource @testParams } | Should Throw "Parameter LimitServerHops is not valid for Website content sources"
             }
         }
 
@@ -1254,8 +1254,8 @@ namespace Microsoft.Office.Server.Search.Administration {
             }
 
             It "Should throw Invalid parameter error" {
-                { Set-TargetResource @testParams } | Should Throw "Parameter LimitPageDepth is not valid for file share content sources"
-                { Test-TargetResource @testParams } | Should Throw "Parameter LimitPageDepth is not valid for file share content sources"
+                { Set-TargetResource @testParams } | Should Throw "Parameter LimitPageDepth is not valid for FileShare content sources"
+                { Test-TargetResource @testParams } | Should Throw "Parameter LimitPageDepth is not valid for FileShare content sources"
             }
 
             $testParams = @{
@@ -1267,8 +1267,8 @@ namespace Microsoft.Office.Server.Search.Administration {
             }
 
             It "Should throw Invalid parameter error" {
-                { Set-TargetResource @testParams } | Should Throw "Parameter LimitServerHops is not valid for file share content sources"
-                { Test-TargetResource @testParams } | Should Throw "Parameter LimitServerHops is not valid for file share content sources"
+                { Set-TargetResource @testParams } | Should Throw "Parameter LimitServerHops is not valid for FileShare content sources"
+                { Test-TargetResource @testParams } | Should Throw "Parameter LimitServerHops is not valid for FileShare content sources"
             }
 
             $testParams = @{
