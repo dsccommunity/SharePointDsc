@@ -15,7 +15,7 @@ Configuration Example
     node localhost {
         SPManagedMetaDataServiceAppDefault ManagedMetadataServiceAppDefault
         {
-            IsSingleInstance               = "Yes"
+            ServiceAppProxyGroup           = "Default"
             DefaultSiteCollectionProxyName = "Managed Metadata Service Application Proxy"
             DefaultKeywordProxyName        = "Managed Metadata Service Application Proxy"
             PsDscRunAsCredential           = $SetupAccount
