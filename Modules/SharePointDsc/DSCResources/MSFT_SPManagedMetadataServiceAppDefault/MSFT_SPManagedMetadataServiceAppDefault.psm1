@@ -145,25 +145,10 @@ function Set-TargetResource
                 -ErrorAction SilentlyContinue
         }
 
-        if ($null -eq $serviceAppProxyGroup)
-        {
-            throw "Specified ServiceAppProxyGroup $($params.ServiceAppProxyGroup) does not exist."
-        }
-
         $serviceAppProxies = $serviceAppProxyGroup.Proxies
-
-        if ($null -eq $serviceAppProxies)
-        {
-            throw "There are no Service Application Proxies available in the proxy group"
-        }
 
         $serviceAppProxies = $serviceAppProxies | Where-Object -FilterScript {
             $_.GetType().FullName -eq "Microsoft.SharePoint.Taxonomy.MetadataWebServiceApplicationProxy"
-        }
-
-        if ($null -eq $serviceAppProxies)
-        {
-            throw "There are no Managed Metadata Service Application Proxies available in the proxy group"
         }
 
         foreach ($serviceAppProxy in $serviceAppProxies)
