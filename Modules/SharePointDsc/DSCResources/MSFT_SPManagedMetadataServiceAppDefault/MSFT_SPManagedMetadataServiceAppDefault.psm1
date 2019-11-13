@@ -5,9 +5,8 @@ function Get-TargetResource
     param
     (
         [Parameter(Mandatory = $true)]
-        [ValidateSet('Yes')]
         [String]
-        $IsSingleInstance,
+        $ServiceAppProxyGroup,
 
         [Parameter(Mandatory = $true)]
         [System.String]
@@ -30,11 +29,26 @@ function Get-TargetResource
 
         $params = $args[0]
 
-        $serviceAppProxies = Get-SPServiceApplicationProxy -ErrorAction SilentlyContinue
+        if ($params.ServiceAppProxyGroup -eq 'default')
+        {
+            $serviceAppProxyGroup = Get-SPServiceApplicationProxyGroup -Default -ErrorAction SilentlyContinue
+        }
+        else
+        {
+            $serviceAppProxyGroup = Get-SPServiceApplicationProxyGroup -Identity $params.ServiceAppProxyGroup `
+                -ErrorAction SilentlyContinue
+        }
+
+        if ($null -eq $serviceAppProxyGroup)
+        {
+            throw "Specified ServiceAppProxyGroup $($params.ServiceAppProxyGroup) does not exist."
+        }
+
+        $serviceAppProxies = $serviceAppProxyGroup.Proxies
 
         if ($null -eq $serviceAppProxies)
         {
-            throw "There are no Managed Metadata Service Application Proxy available in the farm"
+            throw "There are no Service Application Proxies available in the proxy group"
         }
 
         $serviceAppProxies = $serviceAppProxies | Where-Object -FilterScript {
@@ -43,7 +57,7 @@ function Get-TargetResource
 
         if ($null -eq $serviceAppProxies)
         {
-            throw "There are no Managed Metadata Service Application Proxy available in the farm"
+            throw "There are no Managed Metadata Service Application Proxies available in the proxy group"
         }
 
         $defaultSiteCollectionProxyIsSet = $false
@@ -81,10 +95,9 @@ function Get-TargetResource
         }
 
         return @{
-            IsSingleInstance               = $params.IsSingleInstance
+            ServiceAppProxyGroup           = $params.ServiceAppProxyGroup
             DefaultSiteCollectionProxyName = $defaultSiteCollectionProxy
             DefaultKeywordProxyName        = $defaultKeywordProxy
-            InstallAccount                 = $params.InstallAccount
         }
     }
     return $result
@@ -96,9 +109,8 @@ function Set-TargetResource
     param
     (
         [Parameter(Mandatory = $true)]
-        [ValidateSet('Yes')]
         [String]
-        $IsSingleInstance,
+        $ServiceAppProxyGroup,
 
         [Parameter(Mandatory = $true)]
         [System.String]
@@ -123,10 +135,35 @@ function Set-TargetResource
 
         $params = $args[0]
 
-        $serviceAppProxies = Get-SPServiceApplicationProxy -ErrorAction SilentlyContinue
+        if ($params.ServiceAppProxyGroup -eq 'default')
+        {
+            $serviceAppProxyGroup = Get-SPServiceApplicationProxyGroup -Default -ErrorAction SilentlyContinue
+        }
+        else
+        {
+            $serviceAppProxyGroup = Get-SPServiceApplicationProxyGroup -Identity $params.ServiceAppProxyGroup `
+                -ErrorAction SilentlyContinue
+        }
+
+        if ($null -eq $serviceAppProxyGroup)
+        {
+            throw "Specified ServiceAppProxyGroup $($params.ServiceAppProxyGroup) does not exist."
+        }
+
+        $serviceAppProxies = $serviceAppProxyGroup.Proxies
+
+        if ($null -eq $serviceAppProxies)
+        {
+            throw "There are no Service Application Proxies available in the proxy group"
+        }
 
         $serviceAppProxies = $serviceAppProxies | Where-Object -FilterScript {
             $_.GetType().FullName -eq "Microsoft.SharePoint.Taxonomy.MetadataWebServiceApplicationProxy"
+        }
+
+        if ($null -eq $serviceAppProxies)
+        {
+            throw "There are no Managed Metadata Service Application Proxies available in the proxy group"
         }
 
         foreach ($serviceAppProxy in $serviceAppProxies)
@@ -158,9 +195,8 @@ function Test-TargetResource
     param
     (
         [Parameter(Mandatory = $true)]
-        [ValidateSet('Yes')]
         [String]
-        $IsSingleInstance,
+        $ServiceAppProxyGroup,
 
         [Parameter(Mandatory = $true)]
         [System.String]
