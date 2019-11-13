@@ -1,6 +1,7 @@
 <#
 .EXAMPLE
-    This example shows how to deploy the Managed Metadata service app to the local SharePoint farm.
+    This example shows how to configure a default Managed Metadata service app for the default
+    proxy group.
 #>
 
 Configuration Example
