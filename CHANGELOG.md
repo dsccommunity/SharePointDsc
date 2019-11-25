@@ -36,7 +36,7 @@
     and service applications using a (single) SQL-based credential
     instead of the default Windows credentials. Needed when e.g. using
     Azure SQL Managed Instance as SharePoint's database server.
-    UseSQLAuthentication and DatabaseCredentials paramters will need
+    UseSQLAuthentication and DatabaseCredentials parameters will need
     to be considered.
 
 ## v3.6

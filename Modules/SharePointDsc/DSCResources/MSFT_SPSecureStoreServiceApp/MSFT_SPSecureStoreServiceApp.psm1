@@ -49,11 +49,6 @@ function Get-TargetResource
         $Sharing,
 
         [Parameter()]
-        [ValidateSet("Windows", "SQL")]
-        [System.String]
-        $DatabaseAuthenticationType,
-
-        [Parameter()]
         [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present",
@@ -189,11 +184,6 @@ function Set-TargetResource
         [Parameter()]
         [System.Boolean]
         $Sharing,
-
-        [Parameter()]
-        [ValidateSet("Windows", "SQL")]
-        [System.String]
-        $DatabaseAuthenticationType,
 
         [Parameter()]
         [ValidateSet("Present", "Absent")]
@@ -363,11 +353,6 @@ function Test-TargetResource
         [Parameter()]
         [System.Boolean]
         $Sharing,
-
-        [Parameter()]
-        [ValidateSet("Windows", "SQL")]
-        [System.String]
-        $DatabaseAuthenticationType,
 
         [Parameter()]
         [ValidateSet("Present", "Absent")]
