@@ -1,6 +1,7 @@
 <#
 .EXAMPLE
-    This example shows how to deploy the Managed Metadata service app to the local SharePoint farm.
+    This example shows how to configure a default Managed Metadata service app for the default
+    proxy group.
 #>
 
 Configuration Example
@@ -15,7 +16,7 @@ Configuration Example
     node localhost {
         SPManagedMetaDataServiceAppDefault ManagedMetadataServiceAppDefault
         {
-            IsSingleInstance               = "Yes"
+            ServiceAppProxyGroup           = "Default"
             DefaultSiteCollectionProxyName = "Managed Metadata Service Application Proxy"
             DefaultKeywordProxyName        = "Managed Metadata Service Application Proxy"
             PsDscRunAsCredential           = $SetupAccount

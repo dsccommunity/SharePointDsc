@@ -114,9 +114,10 @@ namespace Microsoft.SharePoint.Administration.AccessControl {
         # Test contexts
         Context -Name "When PSDSCRunAsCredential matches the Farm Account and Service App is null" -Fixture {
             $testParams = @{
-                Name            = "User Profile Service App"
-                ApplicationPool = "SharePoint Service Applications"
-                Ensure          = "Present"
+                Name               = "User Profile Service App"
+                ApplicationPool    = "SharePoint Service Applications"
+                Ensure             = "Present"
+                MySiteHostLocation = "https://my.contoso.com"
             }
 
             Mock -CommandName Get-SPDscFarmAccount -MockWith {
@@ -144,9 +145,10 @@ namespace Microsoft.SharePoint.Administration.AccessControl {
 
         Context -Name "When PSDSCRunAsCredential matches the Farm Account and Service App is not null" -Fixture {
             $testParams = @{
-                Name            = "User Profile Service App"
-                ApplicationPool = "SharePoint Service Applications"
-                Ensure          = "Present"
+                Name               = "User Profile Service App"
+                ApplicationPool    = "SharePoint Service Applications"
+                Ensure             = "Present"
+                MySiteHostLocation = "https://my.contoso.com"
             }
 
             Mock -CommandName Get-SPDscFarmAccount -MockWith {
@@ -252,10 +254,11 @@ namespace Microsoft.SharePoint.Administration.AccessControl {
 
         Context -Name "When InstallAccount matches the Farm Account" -Fixture {
             $testParams = @{
-                Name            = "User Profile Service App"
-                ApplicationPool = "SharePoint Service Applications"
-                Ensure          = "Present"
-                InstallAccount  = $mockFarmCredential
+                Name               = "User Profile Service App"
+                ApplicationPool    = "SharePoint Service Applications"
+                Ensure             = "Present"
+                MySiteHostLocation = "https://my.contoso.com"
+                InstallAccount     = $mockFarmCredential
             }
 
             Mock -CommandName Get-SPServiceApplication -MockWith {
@@ -279,9 +282,10 @@ namespace Microsoft.SharePoint.Administration.AccessControl {
 
         Context -Name "When no service applications exist in the current farm" -Fixture {
             $testParams = @{
-                Name            = "User Profile Service App"
-                ApplicationPool = "SharePoint Service Applications"
-                Ensure          = "Present"
+                Name               = "User Profile Service App"
+                ApplicationPool    = "SharePoint Service Applications"
+                Ensure             = "Present"
+                MySiteHostLocation = "https://my.contoso.com"
             }
 
             Mock -CommandName Get-SPServiceApplication -MockWith {
@@ -310,9 +314,10 @@ namespace Microsoft.SharePoint.Administration.AccessControl {
 
         Context -Name "When service applications exist in the current farm but not the specific user profile service app" -Fixture {
             $testParams = @{
-                Name            = "User Profile Service App"
-                ApplicationPool = "SharePoint Service Applications"
-                Ensure          = "Present"
+                Name               = "User Profile Service App"
+                ApplicationPool    = "SharePoint Service Applications"
+                Ensure             = "Present"
+                MySiteHostLocation = "https://my.contoso.com"
             }
 
             Mock -CommandName Get-SPServiceApplication -MockWith {
@@ -340,10 +345,11 @@ namespace Microsoft.SharePoint.Administration.AccessControl {
 
         Context -Name "When service applications exist in the current farm and NetBios isn't enabled but it needs to be" -Fixture {
             $testParams = @{
-                Name            = "User Profile Service App"
-                ApplicationPool = "SharePoint Service Applications"
-                EnableNetBIOS   = $true
-                Ensure          = "Present"
+                Name               = "User Profile Service App"
+                ApplicationPool    = "SharePoint Service Applications"
+                EnableNetBIOS      = $true
+                Ensure             = "Present"
+                MySiteHostLocation = "https://my.contoso.com"
             }
 
             Mock -CommandName Restart-Service -MockWith { }
@@ -456,10 +462,11 @@ namespace Microsoft.SharePoint.Administration.AccessControl {
 
         Context -Name "When service applications exist in the current farm and NoILMUsed isn't enabled but it needs to be" -Fixture {
             $testParams = @{
-                Name            = "User Profile Service App"
-                ApplicationPool = "SharePoint Service Applications"
-                NoILMUsed       = $true
-                Ensure          = "Present"
+                Name               = "User Profile Service App"
+                ApplicationPool    = "SharePoint Service Applications"
+                NoILMUsed          = $true
+                Ensure             = "Present"
+                MySiteHostLocation = "https://my.contoso.com"
             }
 
             Mock -CommandName Restart-Service -MockWith { }
@@ -576,6 +583,7 @@ namespace Microsoft.SharePoint.Administration.AccessControl {
                 ApplicationPool              = "SharePoint Service Applications"
                 SiteNamingConflictResolution = "Username_CollisionDomain"
                 Ensure                       = "Present"
+                MySiteHostLocation           = "https://my.contoso.com"
             }
 
             Mock -CommandName Restart-Service -MockWith { }
@@ -682,9 +690,10 @@ namespace Microsoft.SharePoint.Administration.AccessControl {
 
         Context -Name "When a service application exists and is configured correctly" -Fixture {
             $testParams = @{
-                Name            = "User Profile Service App"
-                ApplicationPool = "SharePoint Service Applications"
-                Ensure          = "Present"
+                Name               = "User Profile Service App"
+                ApplicationPool    = "SharePoint Service Applications"
+                Ensure             = "Present"
+                MySiteHostLocation = "https://my.contoso.com"
             }
 
             Mock -CommandName Get-SPServiceApplication -MockWith {
@@ -785,9 +794,10 @@ namespace Microsoft.SharePoint.Administration.AccessControl {
 
         Context -Name "When the service app exists but it shouldn't" -Fixture {
             $testParams = @{
-                Name            = "Test App"
-                ApplicationPool = "-"
-                Ensure          = "Absent"
+                Name               = "Test App"
+                ApplicationPool    = "-"
+                Ensure             = "Absent"
+                MySiteHostLocation = "https://my.contoso.com"
             }
 
             Mock -CommandName Get-SPServiceApplication -MockWith {
@@ -893,9 +903,10 @@ namespace Microsoft.SharePoint.Administration.AccessControl {
 
         Context -Name "When the service app doesn't exist and shouldn't" -Fixture {
             $testParams = @{
-                Name            = "Test App"
-                ApplicationPool = "-"
-                Ensure          = "Absent"
+                Name               = "Test App"
+                ApplicationPool    = "-"
+                Ensure             = "Absent"
+                MySiteHostLocation = "https://my.contoso.com"
             }
 
             Mock -CommandName Get-SPServiceApplication -MockWith {

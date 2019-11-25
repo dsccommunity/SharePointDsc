@@ -57,26 +57,26 @@ function Get-TargetResource
             $version = $Solution.Properties["Version"]
             $deployedWebApplications = @($solution.DeployedWebApplications `
                 | Select-Object -ExpandProperty Url)
-        }
-        else
-        {
-            $currentState = "Absent"
-            $deployed = $false
-            $version = "0.0.0.0"
-            $deployedWebApplications = @()
-        }
-
-        return @{
-            Name          = $params.Name
-            LiteralPath   = $LiteralPath
-            Deployed      = $deployed
-            Ensure        = $currentState
-            Version       = $version
-            WebAppUrls    = $deployedWebApplications
-            SolutionLevel = $params.SolutionLevel
-        }
     }
-    return $result
+    else
+    {
+        $currentState = "Absent"
+        $deployed = $false
+        $version = "0.0.0.0"
+        $deployedWebApplications = @()
+    }
+
+    return @{
+        Name          = $params.Name
+        LiteralPath   = $LiteralPath
+        Deployed      = $deployed
+        Ensure        = $currentState
+        Version       = $version
+        WebAppUrls    = $deployedWebApplications
+        SolutionLevel = $params.SolutionLevel
+    }
+}
+return $result
 }
 
 function Set-TargetResource
@@ -308,7 +308,31 @@ function Set-TargetResource
                         {
                             $runParams["WebApplication"] = $webApp
 
-                            Install-SPSolution @runParams
+                            try
+                            {
+                                Write-Verbose "Installing solution in Web Application $webApp"
+                                Install-SPSolution @runParams -ErrorAction Stop
+                            }
+                            catch
+                            {
+                                # There may be an ongoing deployment to another web application location.
+                                # Try the exponential backoff approach.
+                                $backOff = 2
+                                while ($backOff -le 256)
+                                {
+                                    try
+                                    {
+                                        Write-Verbose "There is an active deployment ongoing. Waiting $backOff seconds."
+                                        Start-Sleep -Seconds $backOff
+                                        Install-SPSolution @runParams -ErrorAction Stop
+                                        break
+                                    }
+                                    catch
+                                    {
+                                        $backOff = $backOff * 2
+                                    }
+                                }
+                            }
                         }
                     }
                 }
