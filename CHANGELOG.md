@@ -38,6 +38,8 @@
 * SPSite
   * Fixed issue with incorrectly updating site OwnerAlias and
     SecondaryOwnerAlias
+* SPUserProfileServiceApp
+  * Implemented ability to fix incorrectly linked proxy groups
 * SPWebAppAuthentication
   * Fixes issue where Test method return false on NON-US OS.
 
