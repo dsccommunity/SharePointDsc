@@ -14,13 +14,6 @@ resources:
   * Changed the MySiteHostLocation parameter to a required parameter
 * SPWebAppAuthentication
   * Updated resource to add support for Basic Authentication
-* SharePointDSC generic
-  * Added support in several resources for creating/connecting to farm
-    and service applications using a (single) SQL-based credential
-    instead of the default Windows credentials. Needed when e.g. using
-    Azure SQL Managed Instance as SharePoint's database server.
-    UseSQLAuthentication and DatabaseCredentials parameters will need
-    to be considered.
 
 ## Unreleased
 
@@ -62,6 +55,13 @@ resources:
     SecondaryOwnerAlias
 * SPWebAppAuthentication
   * Fixes issue where Test method return false on NON-US OS.
+* SharePointDSC generic
+  * Added support in several resources for creating/connecting to farm
+    and service applications using a (single) SQL-based credential
+    instead of the default Windows credentials. Needed when e.g. using
+    Azure SQL Managed Instance as SharePoint's database server.
+    UseSQLAuthentication and DatabaseCredentials parameters will need
+    to be considered.
 
 ## v3.6
 
