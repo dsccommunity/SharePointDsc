@@ -44,6 +44,6 @@ Instead it verifies an obsolete ServiceApplicationProxyGroup property of the UPA
 which is always pointing to the default proxy group.
 
 It seems that property doesn't get updated for any Service Application when you
-modify the associations in Central Administration and it it can store only one
+modify the associations in Central Administration and it can store only one
 association (while in central administration a Service Application can be added
 to multiple proxy groups).

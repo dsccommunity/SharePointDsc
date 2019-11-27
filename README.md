@@ -12,7 +12,7 @@ Information about this module, new releases and tips/tricks will be shared on th
 [SharePointDsc blog](https://techcommunity.microsoft.com/t5/SharePointDsc/bg-p/SharePointDsc).
 
 If you would like to modify SharePointDsc module, please feel free. Please
-refer to the [Contribution Guidelines](https://github.com/PowerShell/SharePointDsc/wiki/Contributing%20to%20SharePointDSC)
+refer to the [Contribution Guidelines](https://github.com/dsccommunity/SharePointDsc/wiki/Contributing%20to%20SharePointDSC)
 for information about style guides, testing and patterns for contributing
 to DSC resources.
 
@@ -62,14 +62,14 @@ SharePoint DSC resoures available:
 The minimum PowerShell version required is 4.0, which ships in Windows 8.1
 or Windows Server 2012R2 (or higher versions). The preferred version is
 PowerShell 5.0 or higher, which ships with Windows 10 or Windows Server 2016.
-This is discussed [on the SharePointDsc wiki](https://github.com/PowerShell/SharePointDsc/wiki/Remote%20sessions%20and%20the%20InstallAccount%20variable),
+This is discussed [on the SharePointDsc wiki](https://github.com/dsccommunity/SharePointDsc/wiki/Remote%20sessions%20and%20the%20InstallAccount%20variable),
 but generally PowerShell 5 will run the SharePoint DSC resources faster and
 with improved verbose level logging.
 
 ## Documentation and examples
 
 For a full list of resources in SharePointDsc and examples on their use, check
-out the [SharePointDsc wiki](https://github.com/PowerShell/SharePointDsc/wiki).
+out the [SharePointDsc wiki](https://github.com/dsccommunity/SharePointDsc/wiki).
 You can also review the "examples" directory in the SharePointDSC module for
 some general use scenarios for all of the resources that are in the module.
 

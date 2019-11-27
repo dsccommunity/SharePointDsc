@@ -118,10 +118,10 @@
       Tags         = @('DesiredStateConfiguration', 'DSC', 'DSCResourceKit', 'DSCResource', 'preview')
 
       # A URL to the license for this module.
-      LicenseUri   = 'https://github.com/PowerShell/SharePointDsc/blob/master/LICENSE'
+      LicenseUri   = 'https://github.com/dsccommunity/SharePointDsc/blob/master/LICENSE'
 
       # A URL to the main website for this project.
-      ProjectUri   = 'https://github.com/PowerShell/SharePointDsc'
+      ProjectUri   = 'https://github.com/dsccommunity/SharePointDsc'
 
       # A URL to an icon representing this module.
       # IconUri = ''

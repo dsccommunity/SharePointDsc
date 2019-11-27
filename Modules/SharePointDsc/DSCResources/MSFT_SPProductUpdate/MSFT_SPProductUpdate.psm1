@@ -546,7 +546,7 @@ function Set-TargetResource
             17025
             {
                 Write-Verbose -Message ("The SharePoint update was already installed on your system." + `
-                        "Please report an issue about this behavior at https://github.com/PowerShell/SharePointDsc")
+                        "Please report an issue about this behavior at https://github.com/dsccommunity/SharePointDsc")
             }
             Default
             {
