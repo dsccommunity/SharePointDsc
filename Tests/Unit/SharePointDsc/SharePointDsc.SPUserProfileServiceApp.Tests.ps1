@@ -971,8 +971,8 @@ namespace Microsoft.SharePoint.Administration.AccessControl {
                 return $proxiesToReturn
             }
 
-            It "Should return UpdateProxyGroup=false from the Get method" {
-                (Get-TargetResource @testParams).UpdateProxyGroup | Should Be $false
+            It "Should return UpdateProxyGroup=true from the Get method" {
+                (Get-TargetResource @testParams).UpdateProxyGroup | Should Be $true
             }
 
             It "Should call Update method on Service Application before finishing set method" {
@@ -1116,8 +1116,8 @@ namespace Microsoft.SharePoint.Administration.AccessControl {
                 return $proxiesToReturn
             }
 
-            It "Should return UpdateProxyGroup=false from the Get method" {
-                (Get-TargetResource @testParams).UpdateProxyGroup | Should Be $false
+            It "Should return UpdateProxyGroup=true from the Get method" {
+                (Get-TargetResource @testParams).UpdateProxyGroup | Should Be $true
             }
 
             It "Should return true when the Test method is called" {

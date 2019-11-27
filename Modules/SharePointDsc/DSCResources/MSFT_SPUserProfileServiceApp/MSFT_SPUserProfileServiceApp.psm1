@@ -188,11 +188,11 @@ function Get-TargetResource
             if ($null -ne $proxyGroup -and
                 $proxyGroup -eq $serviceApp.ServiceApplicationProxyGroup)
             {
-                $updateProxyGroup = $true
+                $updateProxyGroup = $false
             }
             else
             {
-                $updateProxyGroup = $false
+                $updateProxyGroup = $true
             }
 
             $upMySiteLocation = $null
@@ -494,7 +494,7 @@ function Set-TargetResource
                 } | Select-Object -First 1
 
                 if ($null -ne $proxyGroup -and `
-                    $proxyGroup -ne $app.ServiceApplicationProxyGroup)
+                        $proxyGroup -ne $app.ServiceApplicationProxyGroup)
                 {
                     Write-Verbose -Message "Updating ServiceApplicationProxyGroup property"
                     $app.ServiceApplicationProxyGroup = $proxyGroup
@@ -675,7 +675,7 @@ function Test-TargetResource
     if ($Ensure -eq "Present")
     {
         if ($UpdateProxyGroup -eq $true -and `
-            $CurrentValues.UpdateProxyGroup -eq $false)
+                $CurrentValues.UpdateProxyGroup -eq $true)
         {
             return $false
         }
