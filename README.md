@@ -25,6 +25,8 @@ additional questions or comments.
 
 ### master
 
+[![Build Status](https://dev.azure.com/dsccommunity/SharePointDsc/_apis/build/status/dsccommunity.{repositoryName}?branchName=master)](https://dev.azure.com/dsccommunity/SharePointDsc/_build/latest?definitionId={definitionId}&branchName=master)
+
 [![Build status](https://ci.appveyor.com/api/projects/status/aj6ce04iy5j4qcd4/branch/master?svg=true)](https://ci.appveyor.com/project/PowerShell/SharePointDsc/branch/master)
 [![codecov](https://codecov.io/gh/PowerShell/SharePointDsc/branch/master/graph/badge.svg)](https://codecov.io/gh/PowerShell/SharePointDsc/branch/master)
 

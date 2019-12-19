@@ -12,19 +12,19 @@
   # RootModule = ''
 
   # Version number of this module.
-  ModuleVersion     = '3.7.0.0'
+  ModuleVersion     = '0.0.0.1'
 
   # ID used to uniquely identify this module
   GUID              = '6c1176a0-4fac-4134-8ca2-3fa8a21a7b90'
 
   # Author of this module
-  Author            = 'Microsoft Corporation'
+  Author            = 'DSC Community'
 
   # Company or vendor of this module
-  CompanyName       = 'Microsoft Corporation'
+  CompanyName       = 'DSC Community'
 
   # Copyright statement for this module
-  Copyright         = '(c) 2015-2018 Microsoft Corporation. All rights reserved.'
+  Copyright         = 'Copyright the DSC Community contributors. All rights reserved.'
 
   # Description of the functionality provided by this module
   Description       = 'This DSC module is used to deploy and configure SharePoint Server 2013, 2016 and 2019, and covers a wide range of areas including web apps, service apps and farm configuration.'
@@ -66,7 +66,7 @@
   NestedModules     = @("modules\SharePointDsc.Util\SharePointDsc.Util.psm1")
 
   # Functions to export from this module
-  #FunctionsToExport = '*'
+  FunctionsToExport = @()
 
   # Cmdlets to export from this module
   CmdletsToExport   = @("Invoke-SPDscCommand",
@@ -92,10 +92,10 @@
     "Convert-SPDscADGroupNameToID")
 
   # Variables to export from this module
-  #VariablesToExport = '*'
+  VariablesToExport = @()
 
   # Aliases to export from this module
-  #AliasesToExport = '*'
+  AliasesToExport   = @()
 
   # List of all modules packaged with this module
   # ModuleList = @()
@@ -118,49 +118,19 @@
       Tags         = @('DesiredStateConfiguration', 'DSC', 'DSCResourceKit', 'DSCResource', 'preview')
 
       # A URL to the license for this module.
-      LicenseUri   = 'https://github.com/PowerShell/SharePointDsc/blob/master/LICENSE'
+      LicenseUri   = 'https://github.com/dsccommunity/SharePointDsc/blob/master/LICENSE'
 
       # A URL to the main website for this project.
-      ProjectUri   = 'https://github.com/PowerShell/SharePointDsc'
+      ProjectUri   = 'https://github.com/dsccommunity/SharePointDsc'
 
       # A URL to an icon representing this module.
-      # IconUri = ''
+      IconUri      = 'https://dsccommunity.org/images/DSC_Logo_300p.png'
 
       # ReleaseNotes of this module
-      ReleaseNotes = "
-          * SPConfigWizard
-            * Fixed issue with incorrect check for upgrade status of server
-          * SPDistributedCacheService
-            * Improved error message for inclusion of server name into ServerProvisionOrder
-              parameters when Present or change to Ensure Absent
-          * SPFarm
-            * Removed SingleServer as ServerRole, since this is an invalid role.
-            * Handle case where null or empty CentralAdministrationUrl is passed in
-            * Move CentralAdministrationPort validation into parameter definition
-              to work with ReverseDsc
-            * Add NotNullOrEmpty parameter validation to CentralAdministrationUrl
-            * Fixed error when changing developer dashboard display level.
-            * Add support for updating Central Admin Authentication Method
-          * SPFarmSolution
-            * Fix for Web Application scoped solutions.
-          * SPInstall
-            * Fixes a terminating error for sources in weird file shares
-            * Corrected issue with incorrectly detecting SharePoint after it
-              has been uninstalled
-            * Corrected issue with detecting a paused installation
-          * SPInstallLanguagePack
-            * Fixes a terminating error for sources in weird file shares
-          * SPInstallPrereqs
-            * Fixes a terminating error for sources in weird file shares
-          * SPProductUpdate
-            * Fixes a terminating error for sources in weird file shares
-            * Corrected incorrect farm detection, added in earlier bugfix
-          * SPSite
-            * Fixed issue with incorrectly updating site OwnerAlias and
-              SecondaryOwnerAlias
-          * SPWebAppAuthentication
-            * Fixes issue where Test method return false on NON-US OS.
-"
+      ReleaseNotes = ''
+
+      # Set to a prerelease string value if the release should be a prerelease.
+      Prerelease   = ''
     } # End of PSData hashtable
 
   } # End of PrivateData hashtable
