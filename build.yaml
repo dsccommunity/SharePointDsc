@@ -57,7 +57,6 @@ BuildWorkflow:
   test:
     - Pester_Tests_Stop_On_Fail
     - Pester_if_Code_Coverage_Under_Threshold
-    - DscResource_Tests_Stop_On_Fail
 
   hqrmtest:
     - DscResource_Tests_Stop_On_Fail
@@ -84,7 +83,7 @@ Pester: #Passthru, OutputFile, CodeCoverageOutputFile not supported
   # - tests/Integration
   ExcludeTag:
   Tag:
-  CodeCoverageThreshold: 0 # Set to 0 to bypass
+  CodeCoverageThreshold: 50 # Set to 0 to bypass
 
 DscTest:
   # OutputFolder:

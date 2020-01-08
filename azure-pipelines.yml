@@ -10,7 +10,7 @@ trigger:
 #variables:
 
 stages:
-  - stage: Build_artefact
+  - stage: Build
     jobs:
       - job: BuildModuleJob
         pool:
@@ -37,126 +37,81 @@ stages:
               ArtifactName: 'output'
               publishLocation: 'Container'
 
-  - stage: test_module
-    dependsOn: Build_artefact
-    jobs:
-      - job: test_linux
-        pool:
-          vmImage: 'ubuntu 16.04'
-        steps:
-          - task: DownloadBuildArtifacts@0
-            inputs:
-              buildType: 'current'
-              downloadType: 'single'
-              artifactName: 'output'
-              downloadPath: '$(Build.SourcesDirectory)'
+  - stage: Test
+  dependsOn: Build
+  jobs:
+    - job: Test_HQRM
+      displayName: 'HQRM'
+      pool:
+        vmImage: 'windows-2019'
+      timeoutInMinutes: 0
+      steps:
+        - task: DownloadBuildArtifacts@0
+          displayName: 'Download Build Artifact'
+          inputs:
+            buildType: 'current'
+            downloadType: 'single'
+            artifactName: 'output'
+            downloadPath: '$(Build.SourcesDirectory)'
+        - task: PowerShell@2
+          name: test
+          displayName: 'Run HQRM Test'
+          inputs:
+            filePath: './build.ps1'
+            arguments: '-Tasks hqrmtest'
+            pwsh: false
+        - task: PublishTestResults@2
+          displayName: 'Publish Test Results'
+          condition: succeededOrFailed()
+          inputs:
+            testResultsFormat: 'NUnit'
+            testResultsFiles: 'output/testResults/NUnit*.xml'
+            testRunTitle: 'HQRM'
 
-          - task: PowerShell@2
-            name: Test
-            inputs:
-              filePath: './build.ps1'
-              arguments: '-tasks test'
+    - job: Test_Unit
+      displayName: 'Unit'
+      pool:
+        vmImage: 'windows-2019'
+      timeoutInMinutes: 0
+      steps:
+        - powershell: |
+            $repositoryOwner,$repositoryName = $env:BUILD_REPOSITORY_NAME -split '/'
 
-          - task: PublishTestResults@2
-            inputs:
-              testResultsFormat: 'NUnit'
-              testResultsFiles: 'output/testResults/NUnit*.xml'
-
-
-          # Publish code coverage results
-          - task: PublishCodeCoverageResults@1
-            inputs:
-              codeCoverageTool: 'JaCoCo'
-              summaryFileLocation: 'output/testResults/CodeCov*.xml'
-      - job: test_windows_core
-        pool:
-          vmImage: 'win1803'
-        steps:
-          - task: DownloadBuildArtifacts@0
-            inputs:
-              buildType: 'current'
-              downloadType: 'single'
-              artifactName: 'output'
-              downloadPath: '$(Build.SourcesDirectory)'
-
-          - task: PowerShell@2
-            name: Test
-            inputs:
-              filePath: './build.ps1'
-              arguments: '-tasks test'
-              pwsh: true
-
-          - task: PublishTestResults@2
-            inputs:
-              testResultsFormat: 'NUnit'
-              testResultsFiles: 'output/testResults/NUnit*.xml'
-
-
-          # Publish code coverage results
-          - task: PublishCodeCoverageResults@1
-            inputs:
-              codeCoverageTool: 'JaCoCo'
-              summaryFileLocation: 'output/testResults/CodeCov*.xml'
-      - job: test_windows_ps
-        pool:
-          vmImage: 'win1803'
-        steps:
-          - task: DownloadBuildArtifacts@0
-            inputs:
-              buildType: 'current'
-              downloadType: 'single'
-              artifactName: 'output'
-              downloadPath: '$(Build.SourcesDirectory)'
-
-          - task: PowerShell@2
-            name: Test
-            inputs:
-              filePath: './build.ps1'
-              arguments: '-tasks test'
-              pwsh: false
-
-          - task: PublishTestResults@2
-            inputs:
-              testResultsFormat: 'NUnit'
-              testResultsFiles: 'output/testResults/NUnit*.xml'
-
-
-          # Publish code coverage results
-          - task: PublishCodeCoverageResults@1
-            inputs:
-              codeCoverageTool: 'JaCoCo'
-              summaryFileLocation: 'output/testResults/CodeCov*.xml'
-      - job: test_macos
-        pool:
-          vmImage: 'macos-latest'
-        steps:
-          - task: DownloadBuildArtifacts@0
-            inputs:
-              buildType: 'current'
-              downloadType: 'single'
-              artifactName: 'output'
-              downloadPath: '$(Build.SourcesDirectory)'
-
-          - task: PowerShell@2
-            name: Test
-            inputs:
-              filePath: './build.ps1'
-              arguments: '-tasks test'
-              pwsh: true
-
-          - task: PublishTestResults@2
-            inputs:
-              testResultsFormat: 'NUnit'
-              testResultsFiles: 'output/testResults/NUnit*.xml'
-
-          # Publish code coverage results
-          - task: PublishCodeCoverageResults@1
-            inputs:
-              codeCoverageTool: 'JaCoCo'
-              summaryFileLocation: 'output/testResults/CodeCov*.xml'
+            echo "##vso[task.setvariable variable=RepositoryOwner;isOutput=true]$repositoryOwner"
+            echo "##vso[task.setvariable variable=RepositoryName;isOutput=true]$repositoryName"
+          name: dscBuildVariable
+          displayName: 'Set Environment Variables'
+        - task: DownloadBuildArtifacts@0
+          displayName: 'Download Build Artifact'
+          inputs:
+            buildType: 'current'
+            downloadType: 'single'
+            artifactName: 'output'
+            downloadPath: '$(Build.SourcesDirectory)'
+        - task: PowerShell@2
+          name: test
+          displayName: 'Run Unit Test'
+          inputs:
+            filePath: './build.ps1'
+            arguments: "-Tasks test -PesterScript 'tests/Unit'"
+            pwsh: false
+        - task: PublishTestResults@2
+          displayName: 'Publish Test Results'
+          condition: succeededOrFailed()
+          inputs:
+            testResultsFormat: 'NUnit'
+            testResultsFiles: 'output/testResults/NUnit*.xml'
+            testRunTitle: 'Unit (Windows Server Core)'
+        - task: PublishCodeCoverageResults@1
+          displayName: 'Publish Code Coverage'
+          condition: succeededOrFailed()
+          inputs:
+            codeCoverageTool: 'JaCoCo'
+            summaryFileLocation: 'output/testResults/CodeCov*.xml'
+            pathToSources: '$(Build.SourcesDirectory)/output/$(dscBuildVariable.RepositoryName)'
 
   - stage: Deploy
-    dependsOn: test_module
+    dependsOn: Test
     # Only execute deploy stage if we're on master and previous stage succeeded
     condition: |
       and(
