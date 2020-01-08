@@ -1,11 +1,12 @@
 function Assert-SPDscPolicyUser()
 {
-    Param (
-        [Parameter(Mandatory=$false)]
+    param
+    (
+        [Parameter()]
         [Array]
         $CurrentDifferences,
 
-        [Parameter(Mandatory=$true)]
+        [Parameter(Mandatory = $true)]
         [String]
         $UsernameToCheck
     )
@@ -22,22 +23,23 @@ function Assert-SPDscPolicyUser()
 
 function Compare-SPDscWebAppPolicy()
 {
-    Param (
-        [Parameter(Mandatory=$true)]
+    param
+    (
+        [Parameter(Mandatory = $true)]
         [Array]
         $WAPolicies,
 
-        [Parameter(Mandatory=$true)]
+        [Parameter(Mandatory = $true)]
         [Array]
         $DSCSettings,
 
-        [Parameter(Mandatory=$true)]
+        [Parameter(Mandatory = $true)]
         [String]
         $DefaultIdentityType
     )
     Import-Module -Name (Join-Path -Path $PSScriptRoot `
-                                   -ChildPath "..\SharePointDsc.Util\SharePointDsc.Util.psm1" `
-                                   -Resolve)
+            -ChildPath "..\SharePointDsc.Util\SharePointDsc.Util.psm1" `
+            -Resolve)
     $diff = @()
 
     foreach ($policy in $WAPolicies)
@@ -47,7 +49,7 @@ function Compare-SPDscWebAppPolicy()
         {
             $identityType = $DefaultIdentityType
             if ((Test-SPDscObjectHasProperty -Object $setting `
-                                             -PropertyName "IdentityType") -eq $true)
+                        -PropertyName "IdentityType") -eq $true)
             {
                 $identityType = $setting.IdentityType
             }
@@ -58,15 +60,15 @@ function Compare-SPDscWebAppPolicy()
                 $memberexists = $true
 
                 $polbinddiff = Compare-Object -ReferenceObject $policy.PermissionLevel.ToLower() `
-                                              -DifferenceObject $setting.PermissionLevel.ToLower()
+                    -DifferenceObject $setting.PermissionLevel.ToLower()
 
                 if ($null -ne $polbinddiff)
                 {
                     Write-Verbose -Message ("Permission level different for " + `
-                                            "$($policy.IdentityType) user '$($policy.Username)'")
+                            "$($policy.IdentityType) user '$($policy.Username)'")
 
                     if (-not (Assert-SPDscPolicyUser -CurrentDifferences $diff `
-                                                     -UsernameToCheck $policy.Username.ToLower()))
+                                -UsernameToCheck $policy.Username.ToLower()))
                     {
                         $diff += @{
                             Username                  = $policy.Username.ToLower()
@@ -83,16 +85,16 @@ function Compare-SPDscWebAppPolicy()
                     if ($policy.ActAsSystemAccount -ne $setting.ActAsSystemAccount)
                     {
                         Write-Verbose -Message ("System User different for " + `
-                                               "$($policy.IdentityType) user '$($policy.Username)'")
+                                "$($policy.IdentityType) user '$($policy.Username)'")
 
                         if (-not (Assert-SPDscPolicyUser -CurrentDifferences $diff `
-                                                         -UsernameToCheck $policy.Username.ToLower()))
+                                    -UsernameToCheck $policy.Username.ToLower()))
                         {
                             $diff += @{
-                                Username = $policy.Username.ToLower()
-                                Status = "Different"
-                                IdentityType = $policy.IdentityType
-                                DesiredPermissionLevel = $setting.PermissionLevel
+                                Username                  = $policy.Username.ToLower()
+                                Status                    = "Different"
+                                IdentityType              = $policy.IdentityType
+                                DesiredPermissionLevel    = $setting.PermissionLevel
                                 DesiredActAsSystemSetting = $setting.ActAsSystemAccount
                             }
                         }
@@ -104,7 +106,7 @@ function Compare-SPDscWebAppPolicy()
         if (-not $memberexists)
         {
             if (-not (Assert-SPDscPolicyUser -CurrentDifferences $diff `
-                                             -UsernameToCheck $policy.Username.ToLower()))
+                        -UsernameToCheck $policy.Username.ToLower()))
             {
                 $diff += @{
                     Username                  = $policy.Username.ToLower()
@@ -133,14 +135,14 @@ function Compare-SPDscWebAppPolicy()
                 $memberexists = $true
 
                 $polbinddiff = Compare-Object -ReferenceObject $policy.PermissionLevel.ToLower() `
-                                              -DifferenceObject $setting.PermissionLevel.ToLower()
+                    -DifferenceObject $setting.PermissionLevel.ToLower()
                 if ($null -ne $polbinddiff)
                 {
                     Write-Verbose -Message ("Permission level different for " + `
-                                           "$($policy.IdentityType) user '$($policy.Username)'")
+                            "$($policy.IdentityType) user '$($policy.Username)'")
 
                     if (-not (Assert-SPDscPolicyUser -CurrentDifferences $diff `
-                                                     -UsernameToCheck $policy.Username.ToLower()))
+                                -UsernameToCheck $policy.Username.ToLower()))
                     {
                         $diff += @{
                             Username                  = $setting.Username.ToLower()
@@ -157,10 +159,10 @@ function Compare-SPDscWebAppPolicy()
                     if ($policy.ActAsSystemAccount -ne $setting.ActAsSystemAccount)
                     {
                         Write-Verbose -Message ("System User different for " + `
-                                               "$($policy.IdentityType) user '$($policy.Username)'")
+                                "$($policy.IdentityType) user '$($policy.Username)'")
 
                         if (-not (Assert-SPDscPolicyUser -CurrentDifferences $diff `
-                                                         -UsernameToCheck $policy.Username.ToLower()))
+                                    -UsernameToCheck $policy.Username.ToLower()))
                         {
                             $diff += @{
                                 Username                  = $setting.Username.ToLower()
@@ -178,7 +180,7 @@ function Compare-SPDscWebAppPolicy()
         if (-not $memberexists)
         {
             if (-not (Assert-SPDscPolicyUser -CurrentDifferences $diff `
-                                             -UsernameToCheck $setting.Username.ToLower()))
+                        -UsernameToCheck $setting.Username.ToLower()))
             {
                 $diff += @{
                     Username                  = $setting.Username.ToLower()

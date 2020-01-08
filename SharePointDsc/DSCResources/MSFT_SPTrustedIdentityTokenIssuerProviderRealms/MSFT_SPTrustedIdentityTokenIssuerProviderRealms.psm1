@@ -335,7 +335,6 @@ function Get-ProviderRealmsStatus()
 
             if ($excludeRealms.Count -gt 0)
             {
-
                 $excludeRealms.Keys | Where-Object {
                     $currentRealms.ContainsKey($_) -and $currentRealms[$_] -eq $excludeRealms[$_]
                 } | ForEach-Object { $exclusion.Add("$($_)", "$($excludeRealms[$_])") }
@@ -373,7 +372,11 @@ function Get-ProviderRealmsStatus()
         $eqBoth = $desiredRealms.Keys | Where-Object {
             $currentRealms.ContainsKey($_) -and $currentRealms[$_] -eq $desiredRealms[$_]
         } | ForEach-Object {
-            @{ "$($_)" = "$($currentRealms[$_])" }
+            $returnval = @{
+                 "$($_)" = "$($currentRealms[$_])"
+            }
+
+            return $returnval
         }
 
         if ($eqBoth.Count -eq 0)

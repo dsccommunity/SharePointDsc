@@ -646,7 +646,7 @@ function Set-TargetResource
     if ($checkBlockedFile -eq $true)
     {
         Write-Verbose -Message "Checking status now"
-        try 
+        try
         {
             $zone = Get-Item -Path $InstallerPath -Stream "Zone.Identifier" -EA SilentlyContinue
         }
@@ -1093,9 +1093,10 @@ function Test-SPDscPrereqInstallStatus
         {
             "Equals"
             {
-                if ($null -eq ($InstalledItems | Where-Object -FilterScript {
-                            $null -ne $_.DisplayName -and $_.DisplayName.Trim() -eq $itemToCheck.SearchValue
-                        }))
+                $prereq = $InstalledItems | Where-Object -FilterScript {
+                                $null -ne $_.DisplayName -and $_.DisplayName.Trim() -eq $itemToCheck.SearchValue
+                            }
+                if ($null -eq $prereq)
                 {
                     $itemsInstalled = $false
                     Write-Verbose -Message ("Prerequisite $($itemToCheck.Name) was not found " + `
@@ -1104,9 +1105,10 @@ function Test-SPDscPrereqInstallStatus
             }
             "Match"
             {
-                if ($null -eq ($InstalledItems | Where-Object -FilterScript {
-                            $null -ne $_.DisplayName -and $_.DisplayName.Trim() -match $itemToCheck.SearchValue
-                        }))
+                $prereq = $InstalledItems | Where-Object -FilterScript {
+                                $null -ne $_.DisplayName -and $_.DisplayName.Trim() -match $itemToCheck.SearchValue
+                            }
+                if ($null -eq $prereq)
                 {
                     $itemsInstalled = $false
                     Write-Verbose -Message ("Prerequisite $($itemToCheck.Name) was not found " + `
@@ -1115,9 +1117,10 @@ function Test-SPDscPrereqInstallStatus
             }
             "Like"
             {
-                if ($null -eq ($InstalledItems | Where-Object -FilterScript {
-                            $null -ne $_.DisplayName -and $_.DisplayName.Trim() -like $itemToCheck.SearchValue
-                        }))
+                $prereq = $InstalledItems | Where-Object -FilterScript {
+                                $null -ne $_.DisplayName -and $_.DisplayName.Trim() -like $itemToCheck.SearchValue
+                            }
+                if ($null -eq $prereq)
                 {
                     $itemsInstalled = $false
                     Write-Verbose -Message ("Prerequisite $($itemToCheck.Name) was not found " + `

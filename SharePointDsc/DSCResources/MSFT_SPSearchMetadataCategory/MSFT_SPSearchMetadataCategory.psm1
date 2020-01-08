@@ -44,7 +44,7 @@ function Get-TargetResource
         $ssa = Get-SPEnterpriseSearchServiceApplication -Identity $params.ServiceAppName
         if ($null -eq $ssa)
         {
-            throw("The specified Search Service Application $($params.ServiceAppName) is  `
+            throw ("The specified Search Service Application $($params.ServiceAppName) is  `
                    invalid. Please make sure you specify the name of an existing service application.")
         }
         $category = Get-SPEnterpriseSearchMetadataCategory -SearchApplication $ssa | `
@@ -122,7 +122,7 @@ function Set-TargetResource
         $ssa = Get-SPEnterpriseSearchServiceApplication -Identity $params.ServiceAppName
         if ($null -eq $ssa)
         {
-            throw("The specified Search Service Application $($params.ServiceAppName) is  `
+            throw ("The specified Search Service Application $($params.ServiceAppName) is  `
                    invalid. Please make sure you specify the name of an existing service application.")
         }
 

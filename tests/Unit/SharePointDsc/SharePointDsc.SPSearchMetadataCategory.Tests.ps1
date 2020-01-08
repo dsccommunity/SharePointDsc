@@ -1,5 +1,6 @@
 [CmdletBinding()]
-param(
+param
+(
     [Parameter()]
     [string]
     $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
@@ -7,127 +8,162 @@ param(
             -Resolve)
 )
 
-Import-Module -Name (Join-Path -Path $PSScriptRoot `
-        -ChildPath "..\UnitTestHelper.psm1" `
-        -Resolve)
+$script:DSCModuleName = 'SharePointDsc'
+$script:DSCResourceName = 'SPSearchMetadataCategory'
+$script:DSCResourceFullName = 'MSFT_' + $script:DSCResourceName
 
-$Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointCmdletModule `
-    -DscResource "SPSearchMetadataCategory"
+function Invoke-TestSetup
+{
+    try
+    {
+        Import-Module -Name DscResource.Test -Force
 
-Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
-    InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
-        Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
+        Import-Module -Name (Join-Path -Path $PSScriptRoot `
+                -ChildPath "..\UnitTestHelper.psm1" `
+                -Resolve)
 
-        # Mocks for all contexts
-        Mock -CommandName Get-SPEnterpriseSearchServiceApplication {
-            return @{
-                SearchCenterUrl = "http://example.sharepoint.com/pages"
-            }
-        }
+        $Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointCmdletModule `
+            -DscResource $script:DSCResourceName `
+            -ModuleVersion $moduleVersionFolder
+    }
+    catch [System.IO.FileNotFoundException]
+    {
+        throw 'DscResource.Test module dependency not found. Please run ".\build.ps1 -Tasks build" first.'
+    }
 
-        Mock -CommandName New-SPEnterpriseSearchMetadataCategory {
-            return @{
-                Name = "Test Category"
-            }
-        }
+    $script:testEnvironment = Initialize-TestEnvironment `
+        -DSCModuleName $script:DSCModuleName `
+        -DSCResourceName $script:DSCResourceFullName `
+        -ResourceType 'Mof' `
+        -TestType 'Unit'
+}
 
-        Mock -CommandName Set-SPEnterpriseSearchMetadataCategory {
-            return @{ }
-        }
+function Invoke-TestCleanup
+{
+    Restore-TestEnvironment -TestEnvironment $script:testEnvironment
+}
 
-        Mock -CommandName Remove-SPEnterpriseSearchMetadataCategory {
-            return @{ }
-        }
+Invoke-TestSetup -ModuleVersion $moduleVersion
 
-        # Test contexts
-        Context -Name "A search metadata category doesn't exist and should" -Fixture {
-            Mock -CommandName Get-SPEnterpriseSearchMetadataCategory {
-                return $null
-            }
+try
+{
+    Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
+        InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
+            Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
-            $testParams = @{
-                Name                           = "Test Category"
-                ServiceAppName                 = "Search Service Application"
-                AutoCreateNewManagedProperties = $true
-                DiscoverNewProperties          = $true
-                MapToContents                  = $true
-                Ensure                         = "Present"
-            }
-
-            It "Should return absent from the get method" {
-                (Get-TargetResource @testParams).Ensure | Should Be "Absent"
-            }
-
-            It "Should return false from the test method" {
-                Test-TargetResource @testParams | Should Be $false
+            # Mocks for all contexts
+            Mock -CommandName Get-SPEnterpriseSearchServiceApplication {
+                return @{
+                    SearchCenterUrl = "http://example.sharepoint.com/pages"
+                }
             }
 
-            It "Should create the result source in the set method" {
-                Set-TargetResource @testParams
-            }
-        }
-
-        Context -Name "A search metadata category exists and shouldn't" -Fixture {
-            Mock -CommandName Get-SPEnterpriseSearchMetadataCategory {
+            Mock -CommandName New-SPEnterpriseSearchMetadataCategory {
                 return @{
                     Name = "Test Category"
                 }
             }
 
-            $testParams = @{
-                Name           = "Test Category"
-                ServiceAppName = "Search Service Application"
-                Ensure         = "Absent"
+            Mock -CommandName Set-SPEnterpriseSearchMetadataCategory {
+                return @{ }
             }
 
-            It "Should return Present from the Get Method" {
-                (Get-TargetResource @testParams).Ensure | Should Be "Present"
+            Mock -CommandName Remove-SPEnterpriseSearchMetadataCategory {
+                return @{ }
             }
 
-            It "Should delete the content source within the Set Method" {
-                Set-TargetResource @testParams
-            }
-        }
+            # Test contexts
+            Context -Name "A search metadata category doesn't exist and should" -Fixture {
+                Mock -CommandName Get-SPEnterpriseSearchMetadataCategory {
+                    return $null
+                }
 
-        Context -Name "Trying to delete a non-empty metadata category" -Fixture {
-            Mock -CommandName Get-SPEnterpriseSearchMetadataCategory {
-                return @{
-                    Name                 = "Test Category"
-                    CrawledPropertyCount = 1
+                $testParams = @{
+                    Name                           = "Test Category"
+                    ServiceAppName                 = "Search Service Application"
+                    AutoCreateNewManagedProperties = $true
+                    DiscoverNewProperties          = $true
+                    MapToContents                  = $true
+                    Ensure                         = "Present"
+                }
+
+                It "Should return absent from the get method" {
+                    (Get-TargetResource @testParams).Ensure | Should Be "Absent"
+                }
+
+                It "Should return false from the test method" {
+                    Test-TargetResource @testParams | Should Be $false
+                }
+
+                It "Should create the result source in the set method" {
+                    Set-TargetResource @testParams
                 }
             }
 
-            $testParams = @{
-                Name           = "Test Category"
-                ServiceAppName = "Search Service Application"
-                Ensure         = "Absent"
+            Context -Name "A search metadata category exists and shouldn't" -Fixture {
+                Mock -CommandName Get-SPEnterpriseSearchMetadataCategory {
+                    return @{
+                        Name = "Test Category"
+                    }
+                }
+
+                $testParams = @{
+                    Name           = "Test Category"
+                    ServiceAppName = "Search Service Application"
+                    Ensure         = "Absent"
+                }
+
+                It "Should return Present from the Get Method" {
+                    (Get-TargetResource @testParams).Ensure | Should Be "Present"
+                }
+
+                It "Should delete the content source within the Set Method" {
+                    Set-TargetResource @testParams
+                }
             }
 
-            It "Should throw an error from the Set Method" {
-                { Set-TargetResource @testParams } | Should Throw
-            }
-        }
+            Context -Name "Trying to delete a non-empty metadata category" -Fixture {
+                Mock -CommandName Get-SPEnterpriseSearchMetadataCategory {
+                    return @{
+                        Name                 = "Test Category"
+                        CrawledPropertyCount = 1
+                    }
+                }
 
-        Context -Name "An invalid Search Service Aplication was specified" -Fixture {
-            $testParams = @{
-                Name           = "Test Category"
-                ServiceAppName = "Search Service Application"
-                Ensure         = "Absent"
+                $testParams = @{
+                    Name           = "Test Category"
+                    ServiceAppName = "Search Service Application"
+                    Ensure         = "Absent"
+                }
+
+                It "Should throw an error from the Set Method" {
+                    { Set-TargetResource @testParams } | Should Throw
+                }
             }
 
-            Mock -CommandName Get-SPEnterpriseSearchServiceApplication {
-                return $null
-            }
+            Context -Name "An invalid Search Service Aplication was specified" -Fixture {
+                $testParams = @{
+                    Name           = "Test Category"
+                    ServiceAppName = "Search Service Application"
+                    Ensure         = "Absent"
+                }
 
-            It "Should throw an error in the Get Method" {
-                { Get-TargetResource @testParams } | Should Throw
-            }
+                Mock -CommandName Get-SPEnterpriseSearchServiceApplication {
+                    return $null
+                }
 
-            It "Should throw an error in the Set Method" {
-                { Set-TargetResource @testParams } | Should Throw
+                It "Should throw an error in the Get Method" {
+                    { Get-TargetResource @testParams } | Should Throw
+                }
+
+                It "Should throw an error in the Set Method" {
+                    { Set-TargetResource @testParams } | Should Throw
+                }
             }
         }
     }
 }
-
-Invoke-Command -ScriptBlock $Global:SPDscHelper.CleanupScript -NoNewScope
+finally
+{
+    Invoke-TestCleanup
+}

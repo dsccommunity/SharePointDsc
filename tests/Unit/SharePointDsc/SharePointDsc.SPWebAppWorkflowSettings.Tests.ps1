@@ -1,5 +1,6 @@
 [CmdletBinding()]
-param(
+param
+(
     [Parameter()]
     [string]
     $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
@@ -7,39 +8,110 @@ param(
             -Resolve)
 )
 
-Import-Module -Name (Join-Path -Path $PSScriptRoot `
-        -ChildPath "..\UnitTestHelper.psm1" `
-        -Resolve)
+$script:DSCModuleName = 'SharePointDsc'
+$script:DSCResourceName = 'SPWebAppWorkflowSettings'
+$script:DSCResourceFullName = 'MSFT_' + $script:DSCResourceName
 
-$Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointCmdletModule `
-    -DscResource "SPWebAppWorkflowSettings"
+function Invoke-TestSetup
+{
+    try
+    {
+        Import-Module -Name DscResource.Test -Force
 
-Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
-    InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
-        Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
+        Import-Module -Name (Join-Path -Path $PSScriptRoot `
+                -ChildPath "..\UnitTestHelper.psm1" `
+                -Resolve)
 
-        # Initialize tests
+        $Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointCmdletModule `
+            -DscResource $script:DSCResourceName `
+            -ModuleVersion $moduleVersionFolder
+    }
+    catch [System.IO.FileNotFoundException]
+    {
+        throw 'DscResource.Test module dependency not found. Please run ".\build.ps1 -Tasks build" first.'
+    }
 
-        # Mocks for all contexts
-        Mock -CommandName New-SPAuthenticationProvider -MockWith { }
-        Mock -CommandName New-SPWebApplication -MockWith { }
-        Mock -CommandName Get-SPAuthenticationProvider -MockWith {
-            return @{
-                DisableKerberos = $true
-                AllowAnonymous  = $false
+    $script:testEnvironment = Initialize-TestEnvironment `
+        -DSCModuleName $script:DSCModuleName `
+        -DSCResourceName $script:DSCResourceFullName `
+        -ResourceType 'Mof' `
+        -TestType 'Unit'
+}
+
+function Invoke-TestCleanup
+{
+    Restore-TestEnvironment -TestEnvironment $script:testEnvironment
+}
+
+Invoke-TestSetup -ModuleVersion $moduleVersion
+
+try
+{
+    Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
+        InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
+            Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
+
+            # Initialize tests
+
+            # Mocks for all contexts
+            Mock -CommandName New-SPAuthenticationProvider -MockWith { }
+            Mock -CommandName New-SPWebApplication -MockWith { }
+            Mock -CommandName Get-SPAuthenticationProvider -MockWith {
+                return @{
+                    DisableKerberos = $true
+                    AllowAnonymous  = $false
+                }
             }
-        }
 
-        # Test contexts
-        Context -Name "The web appliation exists and has the correct workflow settings" -Fixture {
-            $testParams = @{
-                WebAppUrl                                     = "http://sites.sharepoint.com"
-                ExternalWorkflowParticipantsEnabled           = $true
-                UserDefinedWorkflowsEnabled                   = $true
-                EmailToNoPermissionWorkflowParticipantsEnable = $true
+            # Test contexts
+            Context -Name "The web appliation exists and has the correct workflow settings" -Fixture {
+                $testParams = @{
+                    WebAppUrl                                     = "http://sites.sharepoint.com"
+                    ExternalWorkflowParticipantsEnabled           = $true
+                    UserDefinedWorkflowsEnabled                   = $true
+                    EmailToNoPermissionWorkflowParticipantsEnable = $true
+                }
+
+                Mock -CommandName Get-SPWebapplication -MockWith { return @(@{
+                            DisplayName                                    = $testParams.Name
+                            ApplicationPool                                = @{
+                                Name     = $testParams.ApplicationPool
+                                Username = $testParams.ApplicationPoolAccount
+                            }
+                            ContentDatabases                               = @(
+                                @{
+                                    Name   = "SP_Content_01"
+                                    Server = "sql.domain.local"
+                                }
+                            )
+                            IisSettings                                    = @(
+                                @{ Path = "C:\inetpub\wwwroot\something" }
+                            )
+                            Url                                            = $testParams.WebAppUrl
+                            UserDefinedWorkflowsEnabled                    = $true
+                            EmailToNoPermissionWorkflowParticipantsEnabled = $true
+                            ExternalWorkflowParticipantsEnabled            = $true
+                        }) }
+
+                It "Should return the current data from the get method" {
+                    Get-TargetResource @testParams | Should Not BeNullOrEmpty
+                }
+
+                It "Should return true from the test method" {
+                    Test-TargetResource @testParams | Should Be $true
+                }
             }
 
-            Mock -CommandName Get-SPWebapplication -MockWith { return @(@{
+            Context -Name "The web appliation exists and uses incorrect workflow settings" -Fixture {
+                $testParams = @{
+                    WebAppUrl                                     = "http://sites.sharepoint.com"
+                    ExternalWorkflowParticipantsEnabled           = $true
+                    UserDefinedWorkflowsEnabled                   = $true
+                    EmailToNoPermissionWorkflowParticipantsEnable = $true
+                }
+
+                Mock -CommandName Get-SPWebapplication -MockWith {
+                    $webApp = @{
                         DisplayName                                    = $testParams.Name
                         ApplicationPool                                = @{
                             Name     = $testParams.ApplicationPool
@@ -55,71 +127,35 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                             @{ Path = "C:\inetpub\wwwroot\something" }
                         )
                         Url                                            = $testParams.WebAppUrl
-                        UserDefinedWorkflowsEnabled                    = $true
-                        EmailToNoPermissionWorkflowParticipantsEnabled = $true
-                        ExternalWorkflowParticipantsEnabled            = $true
-                    }) }
-
-            It "Should return the current data from the get method" {
-                Get-TargetResource @testParams | Should Not BeNullOrEmpty
-            }
-
-            It "Should return true from the test method" {
-                Test-TargetResource @testParams | Should Be $true
-            }
-        }
-
-        Context -Name "The web appliation exists and uses incorrect workflow settings" -Fixture {
-            $testParams = @{
-                WebAppUrl                                     = "http://sites.sharepoint.com"
-                ExternalWorkflowParticipantsEnabled           = $true
-                UserDefinedWorkflowsEnabled                   = $true
-                EmailToNoPermissionWorkflowParticipantsEnable = $true
-            }
-
-            Mock -CommandName Get-SPWebapplication -MockWith {
-                $webApp = @{
-                    DisplayName                                    = $testParams.Name
-                    ApplicationPool                                = @{
-                        Name     = $testParams.ApplicationPool
-                        Username = $testParams.ApplicationPoolAccount
+                        UserDefinedWorkflowsEnabled                    = $false
+                        EmailToNoPermissionWorkflowParticipantsEnabled = $false
+                        ExternalWorkflowParticipantsEnabled            = $false
                     }
-                    ContentDatabases                               = @(
-                        @{
-                            Name   = "SP_Content_01"
-                            Server = "sql.domain.local"
-                        }
-                    )
-                    IisSettings                                    = @(
-                        @{ Path = "C:\inetpub\wwwroot\something" }
-                    )
-                    Url                                            = $testParams.WebAppUrl
-                    UserDefinedWorkflowsEnabled                    = $false
-                    EmailToNoPermissionWorkflowParticipantsEnabled = $false
-                    ExternalWorkflowParticipantsEnabled            = $false
+                    $webApp = $webApp | Add-Member -MemberType ScriptMethod -Name Update -Value { } -PassThru |
+                    Add-Member -MemberType ScriptMethod -Name UpdateWorkflowConfigurationSettings -Value {
+                        $Global:SPDscWebApplicationUpdateWorkflowCalled = $true
+                    } -PassThru
+                    return @($webApp)
                 }
-                $webApp = $webApp | Add-Member -MemberType ScriptMethod -Name Update -Value { } -PassThru |
-                Add-Member -MemberType ScriptMethod -Name UpdateWorkflowConfigurationSettings -Value {
-                    $Global:SPDscWebApplicationUpdateWorkflowCalled = $true
-                } -PassThru
-                return @($webApp)
-            }
 
-            It "Should return the current data from the get method" {
-                Get-TargetResource @testParams | Should Not BeNullOrEmpty
-            }
+                It "Should return the current data from the get method" {
+                    Get-TargetResource @testParams | Should Not BeNullOrEmpty
+                }
 
-            It "Should return false from the test method" {
-                Test-TargetResource @testParams | Should Be $false
-            }
+                It "Should return false from the test method" {
+                    Test-TargetResource @testParams | Should Be $false
+                }
 
-            $Global:SPDscWebApplicationUpdateWorkflowCalled = $false
-            It "Should update the workflow settings" {
-                Set-TargetResource @testParams
-                $Global:SPDscWebApplicationUpdateWorkflowCalled | Should Be $true
+                $Global:SPDscWebApplicationUpdateWorkflowCalled = $false
+                It "Should update the workflow settings" {
+                    Set-TargetResource @testParams
+                    $Global:SPDscWebApplicationUpdateWorkflowCalled | Should Be $true
+                }
             }
         }
     }
 }
-
-Invoke-Command -ScriptBlock $Global:SPDscHelper.CleanupScript -NoNewScope
+finally
+{
+    Invoke-TestCleanup
+}

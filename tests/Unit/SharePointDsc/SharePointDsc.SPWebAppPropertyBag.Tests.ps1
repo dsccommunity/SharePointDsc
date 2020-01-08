@@ -1,5 +1,6 @@
 [CmdletBinding()]
-param(
+param
+(
     [Parameter()]
     [string]
     $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
@@ -7,170 +8,205 @@ param(
             -Resolve)
 )
 
-Import-Module -Name (Join-Path -Path $PSScriptRoot `
-        -ChildPath "..\UnitTestHelper.psm1" `
-        -Resolve)
+$script:DSCModuleName = 'SharePointDsc'
+$script:DSCResourceName = 'SPWebAppPropertyBag'
+$script:DSCResourceFullName = 'MSFT_' + $script:DSCResourceName
 
-$Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointCmdletModule `
-    -DscResource "SPWebAppPropertyBag"
+function Invoke-TestSetup
+{
+    try
+    {
+        Import-Module -Name DscResource.Test -Force
 
-Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
-    InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
-        Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
+        Import-Module -Name (Join-Path -Path $PSScriptRoot `
+                -ChildPath "..\UnitTestHelper.psm1" `
+                -Resolve)
 
-        Mock -CommandName Get-SPWebApplication -MockWith {
-            $spWebApp = [pscustomobject]@{
-                Properties = @{
-                    PropertyKey = 'PropertyValue'
+        $Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointCmdletModule `
+            -DscResource $script:DSCResourceName `
+            -ModuleVersion $moduleVersionFolder
+    }
+    catch [System.IO.FileNotFoundException]
+    {
+        throw 'DscResource.Test module dependency not found. Please run ".\build.ps1 -Tasks build" first.'
+    }
+
+    $script:testEnvironment = Initialize-TestEnvironment `
+        -DSCModuleName $script:DSCModuleName `
+        -DSCResourceName $script:DSCResourceFullName `
+        -ResourceType 'Mof' `
+        -TestType 'Unit'
+}
+
+function Invoke-TestCleanup
+{
+    Restore-TestEnvironment -TestEnvironment $script:testEnvironment
+}
+
+Invoke-TestSetup -ModuleVersion $moduleVersion
+
+try
+{
+    Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
+        InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
+            Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
+
+            Mock -CommandName Get-SPWebApplication -MockWith {
+                $spWebApp = [pscustomobject]@{
+                    Properties = @{
+                        PropertyKey = 'PropertyValue'
+                    }
+                }
+                $spWebApp = $spWebApp | Add-Member ScriptMethod Update {
+                    $Global:SPDscWebApplicationPropertyUpdated = $true
+                } -PassThru
+                $spWebApp = $spWebApp | Add-Member ScriptMethod Remove {
+                    $Global:SPDscWebApplicationPropertyUpdated = $true
+                } -PassThru
+                return $spWebApp
+            }
+
+            Context -Name 'The web application does not exist' -Fixture {
+                $testParams = @{
+                    WebAppUrl = "http://sharepoint.contoso.com"
+                    Key       = 'PropertyKey'
+                    Value     = 'NewPropertyValue'
+                }
+                Mock -CommandName Get-SPWebApplication -MockWith {
+                    return $null
+                }
+
+                $result = Get-TargetResource @testParams
+
+                It 'Should return absent from the get method' {
+                    $result.Ensure | Should Be 'absent'
+                }
+
+                It 'Should return null value from the get method' {
+                    $result.Value | Should Be $null
                 }
             }
-            $spWebApp = $spWebApp | Add-Member ScriptMethod Update {
-                $Global:SPDscWebApplicationPropertyUpdated = $true
-            } -PassThru
-            $spWebApp = $spWebApp | Add-Member ScriptMethod Remove {
-                $Global:SPDscWebApplicationPropertyUpdated = $true
-            } -PassThru
-            return $spWebApp
-        }
 
-        Context -Name 'The web application does not exist' -Fixture {
-            $testParams = @{
-                WebAppUrl = "http://sharepoint.contoso.com"
-                Key       = 'PropertyKey'
-                Value     = 'NewPropertyValue'
-            }
-            Mock -CommandName Get-SPWebApplication -MockWith {
-                return $null
-            }
+            Context -Name 'The web application property value does not match' -Fixture {
+                $testParams = @{
+                    WebAppUrl = "http://sharepoint.contoso.com"
+                    Key       = 'PropertyKey'
+                    Value     = 'NewPropertyValue'
+                    Ensure    = 'Present'
+                }
 
-            $result = Get-TargetResource @testParams
+                $result = Get-TargetResource @testParams
 
-            It 'Should return absent from the get method' {
-                $result.Ensure | Should Be 'absent'
-            }
+                It 'Should return present from the get method' {
+                    $result.Ensure | Should Be 'present'
+                }
 
-            It 'Should return null value from the get method' {
-                $result.Value | Should Be $null
-            }
-        }
+                It 'Should return the same key value as passed as parameter' {
+                    $result.Key | Should Be $testParams.Key
+                }
 
-        Context -Name 'The web application property value does not match' -Fixture {
-            $testParams = @{
-                WebAppUrl = "http://sharepoint.contoso.com"
-                Key       = 'PropertyKey'
-                Value     = 'NewPropertyValue'
-                Ensure    = 'Present'
+                It 'Should return false from the test method' {
+                    Test-TargetResource @testParams | Should Be $false
+                }
+
+                It 'Should not throw an exception in the set method' {
+                    { Set-TargetResource @testParams } | Should not throw
+                }
+
+                $Global:SPDscWebApplicationPropertyUpdated = $false
+                It 'Calls Get-SPWebApplication and update web application property bag from the set method' {
+                    Set-TargetResource @testParams
+
+                    $Global:SPDscWebApplicationPropertyUpdated | Should Be $true
+                }
             }
 
-            $result = Get-TargetResource @testParams
+            Context -Name 'The web application property exists, and the value match' -Fixture {
+                $testParams = @{
+                    WebAppUrl = "http://sharepoint.contoso.com"
+                    Key       = 'PropertyKey'
+                    Value     = 'PropertyValue'
+                    Ensure    = 'Present'
+                }
 
-            It 'Should return present from the get method' {
-                $result.Ensure | Should Be 'present'
+                $result = Get-TargetResource @testParams
+
+                It 'Should return present from the get method' {
+                    $result.Ensure | Should Be 'present'
+                }
+
+                It 'Should return the same values as passed as parameters' {
+                    $result.Key | Should Be $testParams.Key
+                    $result.value | Should Be $testParams.value
+                }
+
+                It 'Should return true from the test method' {
+                    Test-TargetResource @testParams | Should Be $true
+                }
             }
 
-            It 'Should return the same key value as passed as parameter' {
-                $result.Key | Should Be $testParams.Key
+            Context -Name 'The web application property does not exist, and should be removed' -Fixture {
+                $testParams = @{
+                    WebAppUrl = "http://sharepoint.contoso.com"
+                    Key       = 'NonExistingPropertyKey'
+                    Value     = 'PropertyValue'
+                    Ensure    = 'Absent'
+                }
+
+                $result = Get-TargetResource @testParams
+
+                It 'Should return absent from the get method' {
+                    $result.Ensure | Should Be 'absent'
+                }
+
+                It 'Should return the same key as passed as parameter and null value.' {
+                    $result.Key | Should Be $testParams.Key
+                    $result.value | Should Be $null
+                }
+
+                It 'Should return true from the test method' {
+                    Test-TargetResource @testParams | Should Be $true
+                }
             }
 
-            It 'Should return false from the test method' {
-                Test-TargetResource @testParams | Should Be $false
-            }
+            Context -Name 'The web application property exists, and should not be' -Fixture {
+                $testParams = @{
+                    WebAppUrl = "http://sharepoint.contoso.com"
+                    Key       = 'PropertyKey'
+                    Value     = 'PropertyValue'
+                    Ensure    = 'Absent'
+                }
 
-            It 'Should not throw an exception in the set method' {
-                { Set-TargetResource @testParams } | Should not throw
-            }
+                $result = Get-TargetResource @testParams
 
-            $Global:SPDscWebApplicationPropertyUpdated = $false
-            It 'Calls Get-SPWebApplication and update web application property bag from the set method' {
-                Set-TargetResource @testParams
+                It 'Should return Present from the get method' {
+                    $result.Ensure | Should Be 'Present'
+                }
 
-                $Global:SPDscWebApplicationPropertyUpdated | Should Be $true
-            }
-        }
+                It 'Should return the same values as passed as parameters' {
+                    $result.Key | Should Be $testParams.Key
+                    $result.value | Should Be $testParams.Value
+                }
 
-        Context -Name 'The web application property exists, and the value match' -Fixture {
-            $testParams = @{
-                WebAppUrl = "http://sharepoint.contoso.com"
-                Key       = 'PropertyKey'
-                Value     = 'PropertyValue'
-                Ensure    = 'Present'
-            }
+                It 'Should return false from the test method' {
+                    Test-TargetResource @testParams | Should Be $false
+                }
 
-            $result = Get-TargetResource @testParams
+                It 'Should not throw an exception in the set method' {
+                    { Set-TargetResource @testParams } | Should not throw
+                }
 
-            It 'Should return present from the get method' {
-                $result.Ensure | Should Be 'present'
-            }
+                $Global:SPDscWebApplicationPropertyUpdated = $false
+                It 'Calls Get-SPWebApplication and remove web application property bag from the set method' {
+                    Set-TargetResource @testParams
 
-            It 'Should return the same values as passed as parameters' {
-                $result.Key | Should Be $testParams.Key
-                $result.value | Should Be $testParams.value
-            }
-
-            It 'Should return true from the test method' {
-                Test-TargetResource @testParams | Should Be $true
-            }
-        }
-
-        Context -Name 'The web application property does not exist, and should be removed' -Fixture {
-            $testParams = @{
-                WebAppUrl = "http://sharepoint.contoso.com"
-                Key       = 'NonExistingPropertyKey'
-                Value     = 'PropertyValue'
-                Ensure    = 'Absent'
-            }
-
-            $result = Get-TargetResource @testParams
-
-            It 'Should return absent from the get method' {
-                $result.Ensure | Should Be 'absent'
-            }
-
-            It 'Should return the same key as passed as parameter and null value.' {
-                $result.Key | Should Be $testParams.Key
-                $result.value | Should Be $null
-            }
-
-            It 'Should return true from the test method' {
-                Test-TargetResource @testParams | Should Be $true
-            }
-        }
-
-        Context -Name 'The web application property exists, and should not be' -Fixture {
-            $testParams = @{
-                WebAppUrl = "http://sharepoint.contoso.com"
-                Key       = 'PropertyKey'
-                Value     = 'PropertyValue'
-                Ensure    = 'Absent'
-            }
-
-            $result = Get-TargetResource @testParams
-
-            It 'Should return Present from the get method' {
-                $result.Ensure | Should Be 'Present'
-            }
-
-            It 'Should return the same values as passed as parameters' {
-                $result.Key | Should Be $testParams.Key
-                $result.value | Should Be $testParams.Value
-            }
-
-            It 'Should return false from the test method' {
-                Test-TargetResource @testParams | Should Be $false
-            }
-
-            It 'Should not throw an exception in the set method' {
-                { Set-TargetResource @testParams } | Should not throw
-            }
-
-            $Global:SPDscWebApplicationPropertyUpdated = $false
-            It 'Calls Get-SPWebApplication and remove web application property bag from the set method' {
-                Set-TargetResource @testParams
-
-                $Global:SPDscWebApplicationPropertyUpdated | Should Be $true
+                    $Global:SPDscWebApplicationPropertyUpdated | Should Be $true
+                }
             }
         }
     }
 }
-
-Invoke-Command -ScriptBlock $Global:SPDscHelper.CleanupScript -NoNewScope
+finally
+{
+    Invoke-TestCleanup
+}

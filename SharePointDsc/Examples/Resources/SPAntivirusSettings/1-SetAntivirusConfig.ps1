@@ -5,11 +5,13 @@
 
     Configuration Example
     {
-        param(
+        param
+        (
             [Parameter(Mandatory = $true)]
             [PSCredential]
             $SetupAccount
         )
+
         Import-DscResource -ModuleName SharePointDsc
 
         node localhost {
@@ -20,6 +22,7 @@
                 ScanOnUpload          = $true
                 AllowDownloadInfected = $false
                 AttemptToClean        = $false
+                PsDscRunAsCredential = $SetupAccount
             }
         }
     }

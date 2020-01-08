@@ -438,8 +438,12 @@ function Wait-SPDscSolutionJob
 
     Start-Sleep -Seconds 5
 
+    $args = @{
+        Name = $SolutionName
+    }
+
     $result = Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments @{ Name = $SolutionName } `
+        -Arguments $args `
         -ScriptBlock {
         $params = $args[0]
 

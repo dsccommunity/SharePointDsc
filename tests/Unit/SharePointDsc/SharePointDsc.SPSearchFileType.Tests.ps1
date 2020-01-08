@@ -1,5 +1,6 @@
 [CmdletBinding()]
-param(
+param
+(
     [Parameter()]
     [string]
     $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
@@ -7,264 +8,299 @@ param(
             -Resolve)
 )
 
-Import-Module -Name (Join-Path -Path $PSScriptRoot `
-        -ChildPath "..\UnitTestHelper.psm1" `
-        -Resolve)
+$script:DSCModuleName = 'SharePointDsc'
+$script:DSCResourceName = 'SPSearchFileType'
+$script:DSCResourceFullName = 'MSFT_' + $script:DSCResourceName
 
-$Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointCmdletModule `
-    -DscResource "SPSearchFileType"
+function Invoke-TestSetup
+{
+    try
+    {
+        Import-Module -Name DscResource.Test -Force
 
-Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
-    InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
-        Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
+        Import-Module -Name (Join-Path -Path $PSScriptRoot `
+                -ChildPath "..\UnitTestHelper.psm1" `
+                -Resolve)
 
-        # Initialize tests
-        $getTypeFullName = "Microsoft.Office.Server.Search.Administration.SearchServiceApplication"
+        $Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointCmdletModule `
+            -DscResource $script:DSCResourceName `
+            -ModuleVersion $moduleVersionFolder
+    }
+    catch [System.IO.FileNotFoundException]
+    {
+        throw 'DscResource.Test module dependency not found. Please run ".\build.ps1 -Tasks build" first.'
+    }
 
-        # Mocks for all contexts
-        Mock -CommandName Remove-SPEnterpriseSearchFileFormat -MockWith { }
-        Mock -CommandName New-SPEnterpriseSearchFileFormat -MockWith { }
-        Mock -CommandName Set-SPEnterpriseSearchFileFormatState -MockWith { }
+    $script:testEnvironment = Initialize-TestEnvironment `
+        -DSCModuleName $script:DSCModuleName `
+        -DSCResourceName $script:DSCResourceFullName `
+        -ResourceType 'Mof' `
+        -TestType 'Unit'
+}
 
-        Mock -CommandName Get-SPServiceApplication -MockWith {
-            return @(
-                New-Object -TypeName "Object" |
-                Add-Member -MemberType ScriptMethod `
-                    -Name GetType `
-                    -Value {
+function Invoke-TestCleanup
+{
+    Restore-TestEnvironment -TestEnvironment $script:testEnvironment
+}
+
+Invoke-TestSetup -ModuleVersion $moduleVersion
+
+try
+{
+    Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
+        InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
+            Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
+
+            # Initialize tests
+            $getTypeFullName = "Microsoft.Office.Server.Search.Administration.SearchServiceApplication"
+
+            # Mocks for all contexts
+            Mock -CommandName Remove-SPEnterpriseSearchFileFormat -MockWith { }
+            Mock -CommandName New-SPEnterpriseSearchFileFormat -MockWith { }
+            Mock -CommandName Set-SPEnterpriseSearchFileFormatState -MockWith { }
+
+            Mock -CommandName Get-SPServiceApplication -MockWith {
+                return @(
                     New-Object -TypeName "Object" |
-                    Add-Member -MemberType NoteProperty `
-                        -Name FullName `
-                        -Value $getTypeFullName `
-                        -PassThru
-                } `
-                    -PassThru -Force)
-        }
-
-        Context -Name "When no service applications exist in the current farm" -Fixture {
-            $testParams = @{
-                FileType       = "abc"
-                Description    = "ABC"
-                MimeType       = "application/abc"
-                ServiceAppName = "Search Service Application"
-                Ensure         = "Present"
+                    Add-Member -MemberType ScriptMethod `
+                        -Name GetType `
+                        -Value {
+                        New-Object -TypeName "Object" |
+                        Add-Member -MemberType NoteProperty `
+                            -Name FullName `
+                            -Value $getTypeFullName `
+                            -PassThru
+                    } `
+                        -PassThru -Force)
             }
 
-            Mock -CommandName Get-SPServiceApplication -MockWith {
-                return $null
-            }
+            Context -Name "When no service applications exist in the current farm" -Fixture {
+                $testParams = @{
+                    FileType       = "abc"
+                    Description    = "ABC"
+                    MimeType       = "application/abc"
+                    ServiceAppName = "Search Service Application"
+                    Ensure         = "Present"
+                }
 
-            It "Should return absent from the Get method" {
-                (Get-TargetResource @testParams).Ensure | Should Be "Absent"
-            }
+                Mock -CommandName Get-SPServiceApplication -MockWith {
+                    return $null
+                }
 
-            It "Should return false when the Test method is called" {
-                Test-TargetResource @testParams | Should Be $false
-            }
+                It "Should return absent from the Get method" {
+                    (Get-TargetResource @testParams).Ensure | Should Be "Absent"
+                }
 
-            It "Should throw an exception in the set method" {
-                { Set-TargetResource @testParams } | Should throw "Service Application $($testParams.ServiceAppName) is not found"
-            }
-        }
+                It "Should return false when the Test method is called" {
+                    Test-TargetResource @testParams | Should Be $false
+                }
 
-        Context -Name "When service applications exist in the current farm but the specific search app does not" -Fixture {
-            $testParams = @{
-                FileType       = "abc"
-                Description    = "ABC"
-                MimeType       = "application/abc"
-                ServiceAppName = "Search Service Application"
-                Ensure         = "Present"
-            }
-
-            Mock -CommandName Get-SPServiceApplication -MockWith {
-                return @(@{
-                        TypeName = "Some other service app type"
-                    })
-            }
-
-            It "Should return absent from the Get method" {
-                (Get-TargetResource @testParams).Ensure | Should Be "Absent"
-            }
-
-            It "Should return false when the Test method is called" {
-                Test-TargetResource @testParams | Should Be $false
-            }
-
-            It "Should throw an exception in the set method" {
-                { Set-TargetResource @testParams } | Should throw "Service Application $($testParams.ServiceAppName) is not a search service application"
-            }
-        }
-
-        Context -Name "When Ensure=Present, but Description and MimeType parameters are missing" -Fixture {
-            $testParams = @{
-                FileType       = "abc"
-                ServiceAppName = "Search Service Application"
-                Ensure         = "Present"
-            }
-
-            It "Should return absent from the Get method" {
-                (Get-TargetResource @testParams).Ensure | Should Be "Absent"
-            }
-
-            It "Should return false when the Test method is called" {
-                Test-TargetResource @testParams | Should Be $false
-            }
-
-            It "Should throw an exception in the set method" {
-                { Set-TargetResource @testParams } | Should throw "Ensure is configured as Present, but MimeType and/or Description is missing"
-            }
-        }
-
-        Context -Name "When a file type does not exists, but should be" -Fixture {
-            $testParams = @{
-                FileType       = "abc"
-                Description    = "ABC"
-                MimeType       = "application/abc"
-                ServiceAppName = "Search Service Application"
-                Ensure         = "Present"
-            }
-
-            Mock -CommandName Get-SPEnterpriseSearchFileFormat -MockWith {
-                return $null
-            }
-
-            It "Should return absent from the get method" {
-                (Get-TargetResource @testParams).Ensure | Should Be "Absent"
-            }
-
-            It "Should return false when the Test method is called" {
-                Test-TargetResource @testParams | Should Be $false
-            }
-
-            It "Should create a new file type in the set method" {
-                Set-TargetResource @testParams
-                Assert-MockCalled New-SPEnterpriseSearchFileFormat
-            }
-        }
-
-        Context -Name "When a file type does not exists, but should be" -Fixture {
-            $testParams = @{
-                FileType       = "abc"
-                ServiceAppName = "Search Service Application"
-                Ensure         = "Absent"
-            }
-
-            Mock -CommandName Get-SPEnterpriseSearchFileFormat -MockWith {
-                return @{
-                    Identity = $testParams.FileType
-                    Name     = "ABC"
-                    MimeType = "application/abc"
-                    Enabled  = $true
+                It "Should throw an exception in the set method" {
+                    { Set-TargetResource @testParams } | Should throw "Service Application $($testParams.ServiceAppName) is not found"
                 }
             }
 
-            It "Should return present from the get method" {
-                (Get-TargetResource @testParams).Ensure | Should Be "Present"
-            }
+            Context -Name "When service applications exist in the current farm but the specific search app does not" -Fixture {
+                $testParams = @{
+                    FileType       = "abc"
+                    Description    = "ABC"
+                    MimeType       = "application/abc"
+                    ServiceAppName = "Search Service Application"
+                    Ensure         = "Present"
+                }
 
-            It "Should return false when the Test method is called" {
-                Test-TargetResource @testParams | Should Be $false
-            }
+                Mock -CommandName Get-SPServiceApplication -MockWith {
+                    return @(@{
+                            TypeName = "Some other service app type"
+                        })
+                }
 
-            It "Should remove the file type in the set method" {
-                Set-TargetResource @testParams
-                Assert-MockCalled Remove-SPEnterpriseSearchFileFormat
-            }
-        }
+                It "Should return absent from the Get method" {
+                    (Get-TargetResource @testParams).Ensure | Should Be "Absent"
+                }
 
-        Context -Name "When a file type exists, but with the incorrect settings" -Fixture {
-            $testParams = @{
-                FileType       = "abc"
-                ServiceAppName = "Search Service Application"
-                Description    = "XYZ"
-                MimeType       = "application/xyz"
-                Ensure         = "Present"
-            }
+                It "Should return false when the Test method is called" {
+                    Test-TargetResource @testParams | Should Be $false
+                }
 
-            Mock -CommandName Get-SPEnterpriseSearchFileFormat -MockWith {
-                return @{
-                    Identity = $testParams.FileType
-                    Name     = "ABC"
-                    MimeType = "application/abc"
-                    Enabled  = $true
+                It "Should throw an exception in the set method" {
+                    { Set-TargetResource @testParams } | Should throw "Service Application $($testParams.ServiceAppName) is not a search service application"
                 }
             }
 
-            It "Should return present from the get method" {
-                (Get-TargetResource @testParams).Ensure | Should Be "Present"
-            }
+            Context -Name "When Ensure=Present, but Description and MimeType parameters are missing" -Fixture {
+                $testParams = @{
+                    FileType       = "abc"
+                    ServiceAppName = "Search Service Application"
+                    Ensure         = "Present"
+                }
 
-            It "Should return false when the Test method is called" {
-                Test-TargetResource @testParams | Should Be $false
-            }
+                It "Should return absent from the Get method" {
+                    (Get-TargetResource @testParams).Ensure | Should Be "Absent"
+                }
 
-            It "Should recreate the file type in the set method" {
-                Set-TargetResource @testParams
-                Assert-MockCalled Remove-SPEnterpriseSearchFileFormat
-                Assert-MockCalled New-SPEnterpriseSearchFileFormat
-            }
-        }
+                It "Should return false when the Test method is called" {
+                    Test-TargetResource @testParams | Should Be $false
+                }
 
-        Context -Name "When a file type exists, but with the incorrect state" -Fixture {
-            $testParams = @{
-                FileType       = "abc"
-                ServiceAppName = "Search Service Application"
-                Description    = "ABC"
-                MimeType       = "application/abc"
-                Enabled        = $true
-                Ensure         = "Present"
-            }
-
-            Mock -CommandName Get-SPEnterpriseSearchFileFormat -MockWith {
-                return @{
-                    Identity = $testParams.FileType
-                    Name     = "ABC"
-                    MimeType = "application/abc"
-                    Enabled  = $false
+                It "Should throw an exception in the set method" {
+                    { Set-TargetResource @testParams } | Should throw "Ensure is configured as Present, but MimeType and/or Description is missing"
                 }
             }
 
-            It "Should return present from the get method" {
-                (Get-TargetResource @testParams).Ensure | Should Be "Present"
-            }
+            Context -Name "When a file type does not exists, but should be" -Fixture {
+                $testParams = @{
+                    FileType       = "abc"
+                    Description    = "ABC"
+                    MimeType       = "application/abc"
+                    ServiceAppName = "Search Service Application"
+                    Ensure         = "Present"
+                }
 
-            It "Should return false when the Test method is called" {
-                Test-TargetResource @testParams | Should Be $false
-            }
+                Mock -CommandName Get-SPEnterpriseSearchFileFormat -MockWith {
+                    return $null
+                }
 
-            It "Should enable the file type in the set method" {
-                Set-TargetResource @testParams
-                Assert-MockCalled Set-SPEnterpriseSearchFileFormatState
-            }
-        }
+                It "Should return absent from the get method" {
+                    (Get-TargetResource @testParams).Ensure | Should Be "Absent"
+                }
 
-        Context -Name "When a file type exists and is configured correctly" -Fixture {
-            $testParams = @{
-                FileType       = "abc"
-                ServiceAppName = "Search Service Application"
-                Description    = "ABC"
-                MimeType       = "application/abc"
-                Ensure         = "Present"
-            }
+                It "Should return false when the Test method is called" {
+                    Test-TargetResource @testParams | Should Be $false
+                }
 
-            Mock -CommandName Get-SPEnterpriseSearchFileFormat -MockWith {
-                return @{
-                    Identity = $testParams.FileType
-                    Name     = "ABC"
-                    MimeType = "application/abc"
-                    Enabled  = $true
+                It "Should create a new file type in the set method" {
+                    Set-TargetResource @testParams
+                    Assert-MockCalled New-SPEnterpriseSearchFileFormat
                 }
             }
 
-            It "Should return present from the get method" {
-                (Get-TargetResource @testParams).Ensure | Should Be "Present"
+            Context -Name "When a file type does not exists, but should be" -Fixture {
+                $testParams = @{
+                    FileType       = "abc"
+                    ServiceAppName = "Search Service Application"
+                    Ensure         = "Absent"
+                }
+
+                Mock -CommandName Get-SPEnterpriseSearchFileFormat -MockWith {
+                    return @{
+                        Identity = $testParams.FileType
+                        Name     = "ABC"
+                        MimeType = "application/abc"
+                        Enabled  = $true
+                    }
+                }
+
+                It "Should return present from the get method" {
+                    (Get-TargetResource @testParams).Ensure | Should Be "Present"
+                }
+
+                It "Should return false when the Test method is called" {
+                    Test-TargetResource @testParams | Should Be $false
+                }
+
+                It "Should remove the file type in the set method" {
+                    Set-TargetResource @testParams
+                    Assert-MockCalled Remove-SPEnterpriseSearchFileFormat
+                }
             }
 
-            It "Should return true when the Test method is called" {
-                Test-TargetResource @testParams | Should Be $true
+            Context -Name "When a file type exists, but with the incorrect settings" -Fixture {
+                $testParams = @{
+                    FileType       = "abc"
+                    ServiceAppName = "Search Service Application"
+                    Description    = "XYZ"
+                    MimeType       = "application/xyz"
+                    Ensure         = "Present"
+                }
+
+                Mock -CommandName Get-SPEnterpriseSearchFileFormat -MockWith {
+                    return @{
+                        Identity = $testParams.FileType
+                        Name     = "ABC"
+                        MimeType = "application/abc"
+                        Enabled  = $true
+                    }
+                }
+
+                It "Should return present from the get method" {
+                    (Get-TargetResource @testParams).Ensure | Should Be "Present"
+                }
+
+                It "Should return false when the Test method is called" {
+                    Test-TargetResource @testParams | Should Be $false
+                }
+
+                It "Should recreate the file type in the set method" {
+                    Set-TargetResource @testParams
+                    Assert-MockCalled Remove-SPEnterpriseSearchFileFormat
+                    Assert-MockCalled New-SPEnterpriseSearchFileFormat
+                }
+            }
+
+            Context -Name "When a file type exists, but with the incorrect state" -Fixture {
+                $testParams = @{
+                    FileType       = "abc"
+                    ServiceAppName = "Search Service Application"
+                    Description    = "ABC"
+                    MimeType       = "application/abc"
+                    Enabled        = $true
+                    Ensure         = "Present"
+                }
+
+                Mock -CommandName Get-SPEnterpriseSearchFileFormat -MockWith {
+                    return @{
+                        Identity = $testParams.FileType
+                        Name     = "ABC"
+                        MimeType = "application/abc"
+                        Enabled  = $false
+                    }
+                }
+
+                It "Should return present from the get method" {
+                    (Get-TargetResource @testParams).Ensure | Should Be "Present"
+                }
+
+                It "Should return false when the Test method is called" {
+                    Test-TargetResource @testParams | Should Be $false
+                }
+
+                It "Should enable the file type in the set method" {
+                    Set-TargetResource @testParams
+                    Assert-MockCalled Set-SPEnterpriseSearchFileFormatState
+                }
+            }
+
+            Context -Name "When a file type exists and is configured correctly" -Fixture {
+                $testParams = @{
+                    FileType       = "abc"
+                    ServiceAppName = "Search Service Application"
+                    Description    = "ABC"
+                    MimeType       = "application/abc"
+                    Ensure         = "Present"
+                }
+
+                Mock -CommandName Get-SPEnterpriseSearchFileFormat -MockWith {
+                    return @{
+                        Identity = $testParams.FileType
+                        Name     = "ABC"
+                        MimeType = "application/abc"
+                        Enabled  = $true
+                    }
+                }
+
+                It "Should return present from the get method" {
+                    (Get-TargetResource @testParams).Ensure | Should Be "Present"
+                }
+
+                It "Should return true when the Test method is called" {
+                    Test-TargetResource @testParams | Should Be $true
+                }
             }
         }
     }
 }
-
-Invoke-Command -ScriptBlock $Global:SPDscHelper.CleanupScript -NoNewScope
+finally
+{
+    Invoke-TestCleanup
+}

@@ -737,9 +737,10 @@ function Test-TargetResource
         # If only checking members to include only differences or missing records count as a fail
         if ($MembersToInclude)
         {
-            if (($differences | Where-Object -FilterScript {
+            $diffcount = ($differences | Where-Object -FilterScript {
                         $_.Status -eq "Different" -or $_.Status -eq "Missing"
-                    }).Count -eq 0)
+                    }).Count
+            if ($diffcount -eq 0)
             {
                 return $true
             }
