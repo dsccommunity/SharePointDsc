@@ -21,6 +21,7 @@ about: If you have a problem, bug, or enhancement with a resource in this resour
     You may remove this comment block, and the other comment blocks,
     but please keep the headers.
 -->
+
 #### Details of the scenario you tried and the problem that is occurring
 
 #### Verbose logs showing the problem
@@ -28,11 +29,13 @@ about: If you have a problem, bug, or enhancement with a resource in this resour
 #### Suggested solution to the issue
 
 #### The DSC configuration that is used to reproduce the issue (as detailed as possible)
+
 ```powershell
 # insert configuration here
 ```
 
 #### The operating system the target node is running
+
 <!--
     Please provide as much as possible about the target node, for example
     edition, version, build and language.
@@ -51,9 +54,10 @@ about: If you have a problem, bug, or enhancement with a resource in this resour
 #### Version of SharePoint that is used (e.g. SharePoint 2016)
 
 #### Version and build of PowerShell the target node is running
+
 <!--
     To help with this information, please run this command:
     $PSVersionTable
 -->
 
-#### Version of the DSC module that was used ('dev' if using current dev branch)
+#### Version of the DSC module that was used
