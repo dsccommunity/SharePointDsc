@@ -2,7 +2,8 @@ function Get-TargetResource()
 {
     [CmdletBinding()]
     [OutputType([System.Collections.HashTable])]
-    param(
+    param
+    (
         [Parameter(Mandatory = $true)]
         [System.String]
         $Name,
@@ -69,7 +70,8 @@ function Get-TargetResource()
 function Set-TargetResource()
 {
     [CmdletBinding()]
-    param(
+    param
+    (
         [Parameter(Mandatory = $true)]
         [System.String]
         $Name,
@@ -180,7 +182,8 @@ function Test-TargetResource()
 {
     [CmdletBinding()]
     [OutputType([System.Boolean])]
-    param(
+    param
+    (
         [Parameter(Mandatory = $true)]
         [System.String]
         $Name,

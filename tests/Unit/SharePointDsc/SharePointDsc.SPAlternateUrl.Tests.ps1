@@ -1,5 +1,6 @@
 ﻿[CmdletBinding()]
-param(
+param
+(
     [Parameter()]
     [string]
     $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
@@ -7,513 +8,548 @@ param(
             -Resolve)
 )
 
-Import-Module -Name (Join-Path -Path $PSScriptRoot `
-        -ChildPath "..\UnitTestHelper.psm1" `
-        -Resolve)
+$script:DSCModuleName = 'SharePointDsc'
+$script:DSCResourceName = 'SPAlternateUrl'
+$script:DSCResourceFullName = 'MSFT_' + $script:DSCResourceName
 
-$Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointCmdletModule `
-    -DscResource "SPAlternateUrl"
+function Invoke-TestSetup
+{
+    try
+    {
+        Import-Module -Name DscResource.Test -Force
 
-Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
-    InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
-        Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
+        Import-Module -Name (Join-Path -Path $PSScriptRoot `
+                -ChildPath "..\UnitTestHelper.psm1" `
+                -Resolve)
 
-        # Mocks for all contexts
-        Mock -CommandName New-SPAlternateURL { }
-        Mock -CommandName Set-SPAlternateURL { }
-        Mock -CommandName Remove-SPAlternateURL { }
+        $Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointCmdletModule `
+            -DscResource $script:DSCResourceName `
+            -ModuleVersion $moduleVersionFolder
+    }
+    catch [System.IO.FileNotFoundException]
+    {
+        throw 'DscResource.Test module dependency not found. Please run ".\build.ps1 -Tasks build" first.'
+    }
 
-        # Test contexts
-        Context -Name "Specified web application does not exist" -Fixture {
-            $testParams = @{
-                WebAppName = "SharePoint - www.domain.com80"
-                Zone       = "Internet"
-                Url        = "http://something.contoso.local"
-                Internal   = $false
-                Ensure     = "Present"
-            }
+    $script:testEnvironment = Initialize-TestEnvironment `
+        -DSCModuleName $script:DSCModuleName `
+        -DSCResourceName $script:DSCResourceFullName `
+        -ResourceType 'Mof' `
+        -TestType 'Unit'
+}
 
-            Mock -CommandName Get-SPAlternateUrl -MockWith {
-                return @()
-            } -ParameterFilter { $Identity -eq $testParams.Url }
+function Invoke-TestCleanup
+{
+    Restore-TestEnvironment -TestEnvironment $script:testEnvironment
+}
 
-            Mock -CommandName Get-SPAlternateUrl -MockWith {
-                return @(
-                    @{
-                        PublicUrl   = "http://www.contoso.local"
-                        IncomingUrl = "http://www.contoso.local"
-                        Zone        = "Default"
-                    }
-                )
-            } -ParameterFilter { $WebApplication.DisplayName -eq $testParams.WebAppName }
+Invoke-TestSetup -ModuleVersion $moduleVersion
 
-            Mock -CommandName Get-SPWebApplication -MockWith {
-                return @()
-            }
+try
+{
+    Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
+        InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
+            Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
-            It "Should throw exception in the set method" {
-                { Set-TargetResource @testParams } | Should Throw "Web application was not found. Please check WebAppName parameter!"
-            }
-        }
+            # Mocks for all contexts
+            Mock -CommandName New-SPAlternateURL { }
+            Mock -CommandName Set-SPAlternateURL { }
+            Mock -CommandName Remove-SPAlternateURL { }
 
-        Context -Name "No internal alternate URL exists for the specified zone and web app, and there should be" -Fixture {
-            $testParams = @{
-                WebAppName = "SharePoint - www.domain.com80"
-                Zone       = "Internet"
-                Url        = "http://something.contoso.local"
-                Internal   = $true
-                Ensure     = "Present"
-            }
+            # Test contexts
+            Context -Name "Specified web application does not exist" -Fixture {
+                $testParams = @{
+                    WebAppName = "SharePoint - www.domain.com80"
+                    Zone       = "Internet"
+                    Url        = "http://something.contoso.local"
+                    Internal   = $false
+                    Ensure     = "Present"
+                }
 
-            Mock -CommandName Get-SPAlternateUrl -MockWith {
-                return @()
-            } -ParameterFilter { $Identity -eq $testParams.Url }
+                Mock -CommandName Get-SPAlternateUrl -MockWith {
+                    return @()
+                } -ParameterFilter { $Identity -eq $testParams.Url }
 
-            Mock -CommandName Get-SPAlternateUrl -MockWith {
-                return @(
-                    @{
-                        PublicUrl   = "http://www.domain.com"
-                        IncomingUrl = "http://www.domain.com"
-                        Zone        = "Default"
-                    }
-                )
-            } -ParameterFilter { $WebApplication.DisplayName -eq $testParams.WebAppName }
+                Mock -CommandName Get-SPAlternateUrl -MockWith {
+                    return @(
+                        @{
+                            PublicUrl   = "http://www.contoso.local"
+                            IncomingUrl = "http://www.contoso.local"
+                            Zone        = "Default"
+                        }
+                    )
+                } -ParameterFilter { $WebApplication.DisplayName -eq $testParams.WebAppName }
 
-            Mock -CommandName Get-SPWebApplication -MockWith {
-                return @{
-                    DisplayName = $testParams.WebAppName
+                Mock -CommandName Get-SPWebApplication -MockWith {
+                    return @()
+                }
+
+                It "Should throw exception in the set method" {
+                    { Set-TargetResource @testParams } | Should Throw "Web application was not found. Please check WebAppName parameter!"
                 }
             }
 
-            It "Should return Ensure=Absent in the get method" {
-                (Get-TargetResource @testParams).Ensure | Should Be "Absent"
-            }
+            Context -Name "No internal alternate URL exists for the specified zone and web app, and there should be" -Fixture {
+                $testParams = @{
+                    WebAppName = "SharePoint - www.domain.com80"
+                    Zone       = "Internet"
+                    Url        = "http://something.contoso.local"
+                    Internal   = $true
+                    Ensure     = "Present"
+                }
 
-            It "Should return false from the test method" {
-                Test-targetResource @testParams | Should Be $false
-            }
+                Mock -CommandName Get-SPAlternateUrl -MockWith {
+                    return @()
+                } -ParameterFilter { $Identity -eq $testParams.Url }
 
-            It "Should call the new function in the set method" {
-                Set-TargetResource @testParams
-                Assert-MockCalled New-SPAlternateURL
-            }
-        }
+                Mock -CommandName Get-SPAlternateUrl -MockWith {
+                    return @(
+                        @{
+                            PublicUrl   = "http://www.domain.com"
+                            IncomingUrl = "http://www.domain.com"
+                            Zone        = "Default"
+                        }
+                    )
+                } -ParameterFilter { $WebApplication.DisplayName -eq $testParams.WebAppName }
 
-        Context -Name "No internal alternate URL exists for the specified zone and web app, and there should be" -Fixture {
-            $testParams = @{
-                WebAppName = "SharePoint - www.domain.com80"
-                Zone       = "Internet"
-                Url        = "http://something.contoso.local"
-                Internal   = $true
-                Ensure     = "Present"
-            }
+                Mock -CommandName Get-SPWebApplication -MockWith {
+                    return @{
+                        DisplayName = $testParams.WebAppName
+                    }
+                }
 
-            Mock -CommandName Get-SPAlternateUrl -MockWith {
-                return @()
-            } -ParameterFilter { $Identity -eq $testParams.Url }
+                It "Should return Ensure=Absent in the get method" {
+                    (Get-TargetResource @testParams).Ensure | Should Be "Absent"
+                }
 
-            Mock -CommandName Get-SPAlternateUrl -MockWith {
-                return @()
-            } -ParameterFilter { $WebApplication.DisplayName -eq $testParams.WebAppName }
+                It "Should return false from the test method" {
+                    Test-targetResource @testParams | Should Be $false
+                }
 
-            Mock -CommandName Get-SPWebApplication -MockWith {
-                return @{
-                    DisplayName = $testParams.WebAppName
+                It "Should call the new function in the set method" {
+                    Set-TargetResource @testParams
+                    Assert-MockCalled New-SPAlternateURL
                 }
             }
 
-            It "Should return Ensure=Absent in the get method" {
-                (Get-TargetResource @testParams).Ensure | Should Be "Absent"
-            }
+            Context -Name "No internal alternate URL exists for the specified zone and web app, and there should be" -Fixture {
+                $testParams = @{
+                    WebAppName = "SharePoint - www.domain.com80"
+                    Zone       = "Internet"
+                    Url        = "http://something.contoso.local"
+                    Internal   = $true
+                    Ensure     = "Present"
+                }
 
-            It "Should return false from the test method" {
-                Test-targetResource @testParams | Should Be $false
-            }
+                Mock -CommandName Get-SPAlternateUrl -MockWith {
+                    return @()
+                } -ParameterFilter { $Identity -eq $testParams.Url }
 
-            It "Should call the new function in the set method" {
-                Set-TargetResource @testParams
-                Assert-MockCalled New-SPAlternateURL
-            }
-        }
+                Mock -CommandName Get-SPAlternateUrl -MockWith {
+                    return @()
+                } -ParameterFilter { $WebApplication.DisplayName -eq $testParams.WebAppName }
 
-        Context -Name "The internal alternate URL exists for the specified zone and web app, and should be" -Fixture {
-            $testParams = @{
-                WebAppName = "SharePoint - www.domain.com80"
-                Zone       = "Internet"
-                Url        = "http://something.contoso.local"
-                Internal   = $true
-                Ensure     = "Present"
-            }
-
-            Mock -CommandName Get-SPAlternateUrl -MockWith {
-                return @(
-                    @{
-                        PublicUrl   = "http://www.domain.com"
-                        IncomingUrl = "http://something.contoso.local"
-                        Zone        = "Internet"
+                Mock -CommandName Get-SPWebApplication -MockWith {
+                    return @{
+                        DisplayName = $testParams.WebAppName
                     }
-                )
-            } -ParameterFilter { $Identity -eq $testParams.Url }
+                }
 
-            Mock -CommandName Get-SPAlternateUrl -MockWith {
-                return @(
-                    @{
-                        PublicUrl   = "http://www.domain.com"
-                        IncomingUrl = "http://something.contoso.local"
-                        Zone        = "Default"
-                    }
-                )
-            } -ParameterFilter { $WebApplication.DisplayName -eq $testParams.WebAppName }
+                It "Should return Ensure=Absent in the get method" {
+                    (Get-TargetResource @testParams).Ensure | Should Be "Absent"
+                }
 
-            Mock -CommandName Get-SPWebApplication -MockWith {
-                return @{
-                    DisplayName = $testParams.WebAppName
+                It "Should return false from the test method" {
+                    Test-targetResource @testParams | Should Be $false
+                }
+
+                It "Should call the new function in the set method" {
+                    Set-TargetResource @testParams
+                    Assert-MockCalled New-SPAlternateURL
                 }
             }
 
-            It "Should return Ensure=Present in the get method" {
-                (Get-TargetResource @testParams).Ensure | Should Be "Present"
-            }
+            Context -Name "The internal alternate URL exists for the specified zone and web app, and should be" -Fixture {
+                $testParams = @{
+                    WebAppName = "SharePoint - www.domain.com80"
+                    Zone       = "Internet"
+                    Url        = "http://something.contoso.local"
+                    Internal   = $true
+                    Ensure     = "Present"
+                }
 
-            It "Should return false from the test method" {
-                Test-targetResource @testParams | Should Be $true
-            }
-        }
+                Mock -CommandName Get-SPAlternateUrl -MockWith {
+                    return @(
+                        @{
+                            PublicUrl   = "http://www.domain.com"
+                            IncomingUrl = "http://something.contoso.local"
+                            Zone        = "Internet"
+                        }
+                    )
+                } -ParameterFilter { $Identity -eq $testParams.Url }
 
-        Context -Name "The internal alternate URL exists on another zone and web app (New zone)" -Fixture {
-            $testParams = @{
-                WebAppName = "SharePoint - www.domain.com80"
-                Zone       = "Internet"
-                Url        = "http://something.contoso.local"
-                Internal   = $true
-                Ensure     = "Present"
-            }
+                Mock -CommandName Get-SPAlternateUrl -MockWith {
+                    return @(
+                        @{
+                            PublicUrl   = "http://www.domain.com"
+                            IncomingUrl = "http://something.contoso.local"
+                            Zone        = "Default"
+                        }
+                    )
+                } -ParameterFilter { $WebApplication.DisplayName -eq $testParams.WebAppName }
 
-            Mock -CommandName Get-SPAlternateUrl -MockWith {
-                return @(
-                    @{
-                        PublicUrl   = "http://www.otherdomain.com"
-                        IncomingUrl = "http://something.contoso.local"
-                        Zone        = "Default"
+                Mock -CommandName Get-SPWebApplication -MockWith {
+                    return @{
+                        DisplayName = $testParams.WebAppName
                     }
-                )
-            } -ParameterFilter { $Identity -eq $testParams.Url }
+                }
 
-            Mock -CommandName Get-SPAlternateUrl -MockWith {
-                return @()
-            } -ParameterFilter { $WebApplication.DisplayName -eq $testParams.WebAppName }
+                It "Should return Ensure=Present in the get method" {
+                    (Get-TargetResource @testParams).Ensure | Should Be "Present"
+                }
 
-            Mock -CommandName Get-SPWebApplication -MockWith {
-                return @{
-                    DisplayName = $testParams.WebAppName
+                It "Should return false from the test method" {
+                    Test-targetResource @testParams | Should Be $true
                 }
             }
 
-            It "Should return Ensure=Present in the get method" {
-                (Get-TargetResource @testParams).Ensure | Should Be "Present"
-            }
+            Context -Name "The internal alternate URL exists on another zone and web app (New zone)" -Fixture {
+                $testParams = @{
+                    WebAppName = "SharePoint - www.domain.com80"
+                    Zone       = "Internet"
+                    Url        = "http://something.contoso.local"
+                    Internal   = $true
+                    Ensure     = "Present"
+                }
 
-            It "Should return false from the test method" {
-                Test-targetResource @testParams | Should Be $false
-            }
+                Mock -CommandName Get-SPAlternateUrl -MockWith {
+                    return @(
+                        @{
+                            PublicUrl   = "http://www.otherdomain.com"
+                            IncomingUrl = "http://something.contoso.local"
+                            Zone        = "Default"
+                        }
+                    )
+                } -ParameterFilter { $Identity -eq $testParams.Url }
 
-            It "Should throw an exception in the set method" {
-                { Set-TargetResource @testParams } | Should Throw "Specified URL found on different WebApp/Zone: WebApp"
-            }
-        }
+                Mock -CommandName Get-SPAlternateUrl -MockWith {
+                    return @()
+                } -ParameterFilter { $WebApplication.DisplayName -eq $testParams.WebAppName }
 
-        Context -Name "The internal alternate URL exists on another zone and web app (Existing zone)" -Fixture {
-            $testParams = @{
-                WebAppName = "SharePoint - www.domain.com80"
-                Zone       = "Internet"
-                Url        = "http://something.contoso.local"
-                Internal   = $true
-                Ensure     = "Present"
-            }
-
-            Mock -CommandName Get-SPAlternateUrl -MockWith {
-                return @(
-                    @{
-                        PublicUrl   = "http://www.otherdomain.com"
-                        IncomingUrl = "http://something.contoso.local"
-                        Zone        = "Default"
+                Mock -CommandName Get-SPWebApplication -MockWith {
+                    return @{
+                        DisplayName = $testParams.WebAppName
                     }
-                )
-            } -ParameterFilter { $Identity -eq $testParams.Url }
+                }
 
-            Mock -CommandName Get-SPAlternateUrl -MockWith {
-                return @(
-                    @{
-                        PublicUrl   = "http://www.domain.com"
-                        IncomingUrl = "http://www.domain.com"
-                        Zone        = "Internet"
-                    }
-                )
-            } -ParameterFilter { $WebApplication.DisplayName -eq $testParams.WebAppName }
+                It "Should return Ensure=Present in the get method" {
+                    (Get-TargetResource @testParams).Ensure | Should Be "Present"
+                }
 
-            Mock -CommandName Get-SPWebApplication -MockWith {
-                return @{
-                    DisplayName = $testParams.WebAppName
+                It "Should return false from the test method" {
+                    Test-targetResource @testParams | Should Be $false
+                }
+
+                It "Should throw an exception in the set method" {
+                    { Set-TargetResource @testParams } | Should Throw "Specified URL found on different WebApp/Zone: WebApp"
                 }
             }
 
-            It "Should return Ensure=Present in the get method" {
-                (Get-TargetResource @testParams).Ensure | Should Be "Present"
-            }
+            Context -Name "The internal alternate URL exists on another zone and web app (Existing zone)" -Fixture {
+                $testParams = @{
+                    WebAppName = "SharePoint - www.domain.com80"
+                    Zone       = "Internet"
+                    Url        = "http://something.contoso.local"
+                    Internal   = $true
+                    Ensure     = "Present"
+                }
 
-            It "Should return false from the test method" {
-                Test-targetResource @testParams | Should Be $false
-            }
+                Mock -CommandName Get-SPAlternateUrl -MockWith {
+                    return @(
+                        @{
+                            PublicUrl   = "http://www.otherdomain.com"
+                            IncomingUrl = "http://something.contoso.local"
+                            Zone        = "Default"
+                        }
+                    )
+                } -ParameterFilter { $Identity -eq $testParams.Url }
 
-            It "Should throw an exception in the set method" {
-                { Set-TargetResource @testParams } | Should Throw "Specified URL"
-            }
-        }
+                Mock -CommandName Get-SPAlternateUrl -MockWith {
+                    return @(
+                        @{
+                            PublicUrl   = "http://www.domain.com"
+                            IncomingUrl = "http://www.domain.com"
+                            Zone        = "Internet"
+                        }
+                    )
+                } -ParameterFilter { $WebApplication.DisplayName -eq $testParams.WebAppName }
 
-        Context -Name "An internal URL exists for the specified zone and web app, and it should not" -Fixture {
-            $testParams = @{
-                WebAppName = "SharePoint - www.domain.com80"
-                Zone       = "Default"
-                Url        = "http://something.contoso.local"
-                Internal   = $true
-                Ensure     = "Absent"
-            }
-
-            Mock -CommandName Get-SPAlternateUrl -MockWith {
-                return @(
-                    @{
-                        PublicUrl   = "http://www.domain.com"
-                        IncomingUrl = "http://something.contoso.local"
-                        Zone        = "Default"
+                Mock -CommandName Get-SPWebApplication -MockWith {
+                    return @{
+                        DisplayName = $testParams.WebAppName
                     }
-                )
-            } -ParameterFilter { $Identity -eq $testParams.Url }
+                }
 
-            Mock -CommandName Get-SPAlternateUrl -MockWith {
-                return @(
-                    @{
-                        PublicUrl   = "http://www.domain.com"
-                        IncomingUrl = "http://www.domain.com"
-                        Zone        = "Default"
-                    },
-                    @{
-                        PublicUrl   = "http://www.domain.com"
-                        IncomingUrl = "http://something.contoso.local"
-                        Zone        = "Default"
-                    }
-                )
-            } -ParameterFilter { $WebApplication.DisplayName -eq $testParams.WebAppName }
+                It "Should return Ensure=Present in the get method" {
+                    (Get-TargetResource @testParams).Ensure | Should Be "Present"
+                }
 
-            Mock -CommandName Get-SPWebApplication -MockWith {
-                return @{
-                    Name = $testParams.WebAppName
+                It "Should return false from the test method" {
+                    Test-targetResource @testParams | Should Be $false
+                }
+
+                It "Should throw an exception in the set method" {
+                    { Set-TargetResource @testParams } | Should Throw "Specified URL"
                 }
             }
 
-            It "Should return Ensure=Present in the get method" {
-                (Get-TargetResource @testParams).Ensure | Should Be "Present"
-            }
+            Context -Name "An internal URL exists for the specified zone and web app, and it should not" -Fixture {
+                $testParams = @{
+                    WebAppName = "SharePoint - www.domain.com80"
+                    Zone       = "Default"
+                    Url        = "http://something.contoso.local"
+                    Internal   = $true
+                    Ensure     = "Absent"
+                }
 
-            It "Should return false from the test method" {
-                Test-targetResource @testParams | Should Be $false
-            }
+                Mock -CommandName Get-SPAlternateUrl -MockWith {
+                    return @(
+                        @{
+                            PublicUrl   = "http://www.domain.com"
+                            IncomingUrl = "http://something.contoso.local"
+                            Zone        = "Default"
+                        }
+                    )
+                } -ParameterFilter { $Identity -eq $testParams.Url }
 
-            It "Should call the Remove function in the set method" {
-                Set-TargetResource @testParams
-                Assert-MockCalled Remove-SPAlternateURL
-            }
-        }
+                Mock -CommandName Get-SPAlternateUrl -MockWith {
+                    return @(
+                        @{
+                            PublicUrl   = "http://www.domain.com"
+                            IncomingUrl = "http://www.domain.com"
+                            Zone        = "Default"
+                        },
+                        @{
+                            PublicUrl   = "http://www.domain.com"
+                            IncomingUrl = "http://something.contoso.local"
+                            Zone        = "Default"
+                        }
+                    )
+                } -ParameterFilter { $WebApplication.DisplayName -eq $testParams.WebAppName }
 
-        Context -Name "The URL for the specified zone and web app is incorrect, this must be changed" -Fixture {
-            $testParams = @{
-                WebAppName = "SharePoint - www.domain.com80"
-                Zone       = "Default"
-                Url        = "http://www.newdomain.com"
-                Internal   = $false
-                Ensure     = "Present"
-            }
-
-            Mock -CommandName Get-SPAlternateUrl -MockWith {
-                return @()
-            } -ParameterFilter { $Identity -eq $testParams.Url }
-
-            Mock -CommandName Get-SPAlternateUrl -MockWith {
-                return @(
-                    @{
-                        PublicUrl   = "http://www.domain.com"
-                        IncomingUrl = "http://www.domain.com"
-                        Zone        = "Default"
+                Mock -CommandName Get-SPWebApplication -MockWith {
+                    return @{
+                        Name = $testParams.WebAppName
                     }
-                )
-            } -ParameterFilter { $WebApplication.DisplayName -eq $testParams.WebAppName }
+                }
 
-            Mock -CommandName Get-SPWebApplication -MockWith {
-                return @{
-                    DisplayName = $testParams.WebAppName
+                It "Should return Ensure=Present in the get method" {
+                    (Get-TargetResource @testParams).Ensure | Should Be "Present"
+                }
+
+                It "Should return false from the test method" {
+                    Test-targetResource @testParams | Should Be $false
+                }
+
+                It "Should call the Remove function in the set method" {
+                    Set-TargetResource @testParams
+                    Assert-MockCalled Remove-SPAlternateURL
                 }
             }
 
-            It "Should return Ensure=Absent in the get method" {
-                (Get-TargetResource @testParams).Ensure | Should Be "Absent"
-            }
+            Context -Name "The URL for the specified zone and web app is incorrect, this must be changed" -Fixture {
+                $testParams = @{
+                    WebAppName = "SharePoint - www.domain.com80"
+                    Zone       = "Default"
+                    Url        = "http://www.newdomain.com"
+                    Internal   = $false
+                    Ensure     = "Present"
+                }
 
-            It "Should return false from the test method" {
-                Test-targetResource @testParams | Should Be $false
-            }
+                Mock -CommandName Get-SPAlternateUrl -MockWith {
+                    return @()
+                } -ParameterFilter { $Identity -eq $testParams.Url }
 
-            It "Should call the new function in the set method" {
-                Set-TargetResource @testParams
-                Assert-MockCalled New-SPAlternateURL
-            }
-        }
+                Mock -CommandName Get-SPAlternateUrl -MockWith {
+                    return @(
+                        @{
+                            PublicUrl   = "http://www.domain.com"
+                            IncomingUrl = "http://www.domain.com"
+                            Zone        = "Default"
+                        }
+                    )
+                } -ParameterFilter { $WebApplication.DisplayName -eq $testParams.WebAppName }
 
-        Context -Name "The URL for the specified zone and web app exists as internal url, this must be changed" -Fixture {
-            $testParams = @{
-                WebAppName = "SharePoint - www.domain.com80"
-                Zone       = "Default"
-                Url        = "http://www.newdomain.com"
-                Internal   = $false
-                Ensure     = "Present"
-            }
-
-            Mock -CommandName Get-SPAlternateUrl -MockWith {
-                return @(
-                    @{
-                        PublicUrl   = "http://www.domain.com"
-                        IncomingUrl = "http://www.newdomain.com"
-                        Zone        = "Default"
+                Mock -CommandName Get-SPWebApplication -MockWith {
+                    return @{
+                        DisplayName = $testParams.WebAppName
                     }
-                )
-            } -ParameterFilter { $Identity -eq $testParams.Url }
+                }
 
-            Mock -CommandName Get-SPAlternateUrl -MockWith {
-                return @(
-                    @{
-                        PublicUrl   = "http://www.domain.com"
-                        IncomingUrl = "http://www.domain.com"
-                        Zone        = "Default"
-                    },
-                    @{
-                        PublicUrl   = "http://www.domain.com"
-                        IncomingUrl = "http://www.newdomain.com"
-                        Zone        = "Default"
-                    }
-                )
-            } -ParameterFilter { $WebApplication.DisplayName -eq $testParams.WebAppName }
+                It "Should return Ensure=Absent in the get method" {
+                    (Get-TargetResource @testParams).Ensure | Should Be "Absent"
+                }
 
-            Mock -CommandName Get-SPWebApplication -MockWith {
-                return @{
-                    DisplayName = $testParams.WebAppName
+                It "Should return false from the test method" {
+                    Test-targetResource @testParams | Should Be $false
+                }
+
+                It "Should call the new function in the set method" {
+                    Set-TargetResource @testParams
+                    Assert-MockCalled New-SPAlternateURL
                 }
             }
 
-            It "Should return Ensure=Present in the get method" {
-                (Get-TargetResource @testParams).Ensure | Should Be "Present"
-            }
+            Context -Name "The URL for the specified zone and web app exists as internal url, this must be changed" -Fixture {
+                $testParams = @{
+                    WebAppName = "SharePoint - www.domain.com80"
+                    Zone       = "Default"
+                    Url        = "http://www.newdomain.com"
+                    Internal   = $false
+                    Ensure     = "Present"
+                }
 
-            It "Should return false from the test method" {
-                Test-targetResource @testParams | Should Be $false
-            }
+                Mock -CommandName Get-SPAlternateUrl -MockWith {
+                    return @(
+                        @{
+                            PublicUrl   = "http://www.domain.com"
+                            IncomingUrl = "http://www.newdomain.com"
+                            Zone        = "Default"
+                        }
+                    )
+                } -ParameterFilter { $Identity -eq $testParams.Url }
 
-            It "Should call the Set function in the set method" {
-                Set-TargetResource @testParams
-                Assert-MockCalled Set-SPAlternateURL
-            }
-        }
+                Mock -CommandName Get-SPAlternateUrl -MockWith {
+                    return @(
+                        @{
+                            PublicUrl   = "http://www.domain.com"
+                            IncomingUrl = "http://www.domain.com"
+                            Zone        = "Default"
+                        },
+                        @{
+                            PublicUrl   = "http://www.domain.com"
+                            IncomingUrl = "http://www.newdomain.com"
+                            Zone        = "Default"
+                        }
+                    )
+                } -ParameterFilter { $WebApplication.DisplayName -eq $testParams.WebAppName }
 
-        Context -Name "The URL for the specified zone and web app is correct, and should be" -Fixture {
-            $testParams = @{
-                WebAppName = "SharePoint - www.domain.com80"
-                Zone       = "Default"
-                Url        = "http://www.domain.com"
-                Internal   = $false
-                Ensure     = "Present"
-            }
-
-            Mock -CommandName Get-SPAlternateUrl -MockWith {
-                return @(
-                    @{
-                        PublicUrl   = "http://www.domain.com"
-                        IncomingUrl = "http://www.domain.com"
-                        Zone        = "Default"
+                Mock -CommandName Get-SPWebApplication -MockWith {
+                    return @{
+                        DisplayName = $testParams.WebAppName
                     }
-                )
-            } -ParameterFilter { $Identity -eq $testParams.Url }
+                }
 
-            Mock -CommandName Get-SPAlternateUrl -MockWith {
-                return @(
-                    @{
-                        PublicUrl   = "http://www.domain.com"
-                        IncomingUrl = "http://www.domain.com"
-                        Zone        = "Default"
-                    }
-                )
-            } -ParameterFilter { $WebApplication.DisplayName -eq $testParams.WebAppName }
+                It "Should return Ensure=Present in the get method" {
+                    (Get-TargetResource @testParams).Ensure | Should Be "Present"
+                }
 
-            Mock -CommandName Get-SPWebApplication -MockWith {
-                return @{
-                    DisplayName = $testParams.WebAppName
+                It "Should return false from the test method" {
+                    Test-targetResource @testParams | Should Be $false
+                }
+
+                It "Should call the Set function in the set method" {
+                    Set-TargetResource @testParams
+                    Assert-MockCalled Set-SPAlternateURL
                 }
             }
 
-            It "Should return Ensure=Present in the get method" {
-                (Get-TargetResource @testParams).Ensure | Should Be "Present"
-            }
+            Context -Name "The URL for the specified zone and web app is correct, and should be" -Fixture {
+                $testParams = @{
+                    WebAppName = "SharePoint - www.domain.com80"
+                    Zone       = "Default"
+                    Url        = "http://www.domain.com"
+                    Internal   = $false
+                    Ensure     = "Present"
+                }
 
-            It "Should return true from the test method" {
-                Test-targetResource @testParams | Should Be $true
-            }
-        }
+                Mock -CommandName Get-SPAlternateUrl -MockWith {
+                    return @(
+                        @{
+                            PublicUrl   = "http://www.domain.com"
+                            IncomingUrl = "http://www.domain.com"
+                            Zone        = "Default"
+                        }
+                    )
+                } -ParameterFilter { $Identity -eq $testParams.Url }
 
-        Context -Name "A URL exists for the specified zone and web app, and it should not" -Fixture {
-            $testParams = @{
-                WebAppName = "SharePoint - www.domain.com80"
-                Zone       = "Internet"
-                Url        = "http://www.domain.com"
-                Internal   = $false
-                Ensure     = "Absent"
-            }
+                Mock -CommandName Get-SPAlternateUrl -MockWith {
+                    return @(
+                        @{
+                            PublicUrl   = "http://www.domain.com"
+                            IncomingUrl = "http://www.domain.com"
+                            Zone        = "Default"
+                        }
+                    )
+                } -ParameterFilter { $WebApplication.DisplayName -eq $testParams.WebAppName }
 
-            Mock -CommandName Get-SPAlternateUrl -MockWith {
-                return @(
-                    @{
-                        PublicUrl   = "http://www.domain.com"
-                        IncomingUrl = "http://www.domain.com"
-                        Zone        = "Internet"
+                Mock -CommandName Get-SPWebApplication -MockWith {
+                    return @{
+                        DisplayName = $testParams.WebAppName
                     }
-                )
-            } -ParameterFilter { $Identity -eq $testParams.Url }
+                }
 
-            Mock -CommandName Get-SPAlternateUrl -MockWith {
-                return @(
-                    @{
-                        PublicUrl   = "http://www.domain.com"
-                        IncomingUrl = "http://www.domain.com"
-                        Zone        = "Default"
-                    }
-                )
-            } -ParameterFilter { $WebApplication.DisplayName -eq $testParams.WebAppName }
+                It "Should return Ensure=Present in the get method" {
+                    (Get-TargetResource @testParams).Ensure | Should Be "Present"
+                }
 
-            Mock -CommandName Get-SPWebApplication -MockWith {
-                return @{
-                    DisplayName = $testParams.WebAppName
+                It "Should return true from the test method" {
+                    Test-targetResource @testParams | Should Be $true
                 }
             }
 
-            It "Should return Ensure=Present in the get method" {
-                (Get-TargetResource @testParams).Ensure | Should Be "Present"
-            }
+            Context -Name "A URL exists for the specified zone and web app, and it should not" -Fixture {
+                $testParams = @{
+                    WebAppName = "SharePoint - www.domain.com80"
+                    Zone       = "Internet"
+                    Url        = "http://www.domain.com"
+                    Internal   = $false
+                    Ensure     = "Absent"
+                }
 
-            It "Should return false from the test method" {
-                Test-targetResource @testParams | Should Be $false
-            }
+                Mock -CommandName Get-SPAlternateUrl -MockWith {
+                    return @(
+                        @{
+                            PublicUrl   = "http://www.domain.com"
+                            IncomingUrl = "http://www.domain.com"
+                            Zone        = "Internet"
+                        }
+                    )
+                } -ParameterFilter { $Identity -eq $testParams.Url }
 
-            It "Should call the Remove function in the set method" {
-                Set-TargetResource @testParams
-                Assert-MockCalled Remove-SPAlternateURL
+                Mock -CommandName Get-SPAlternateUrl -MockWith {
+                    return @(
+                        @{
+                            PublicUrl   = "http://www.domain.com"
+                            IncomingUrl = "http://www.domain.com"
+                            Zone        = "Default"
+                        }
+                    )
+                } -ParameterFilter { $WebApplication.DisplayName -eq $testParams.WebAppName }
+
+                Mock -CommandName Get-SPWebApplication -MockWith {
+                    return @{
+                        DisplayName = $testParams.WebAppName
+                    }
+                }
+
+                It "Should return Ensure=Present in the get method" {
+                    (Get-TargetResource @testParams).Ensure | Should Be "Present"
+                }
+
+                It "Should return false from the test method" {
+                    Test-targetResource @testParams | Should Be $false
+                }
+
+                It "Should call the Remove function in the set method" {
+                    Set-TargetResource @testParams
+                    Assert-MockCalled Remove-SPAlternateURL
+                }
             }
         }
     }
 }
-
-Invoke-Command -ScriptBlock $Global:SPDscHelper.CleanupScript -NoNewScope
+finally
+{
+    Invoke-TestCleanup
+}

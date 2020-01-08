@@ -1,4 +1,4 @@
-﻿function Get-TargetResource
+function Get-TargetResource
 {
     [CmdletBinding()]
     [OutputType([System.Collections.Hashtable])]
@@ -265,9 +265,10 @@ function Set-TargetResource
                     $claimsMappingsArray += $newMapping
                 }
 
-                if (!($claimsMappingsArray | Where-Object -FilterScript {
-                            $_.MappedClaimType -like $params.IdentifierClaim
-                        }))
+                $mappings = ($claimsMappingsArray | Where-Object -FilterScript {
+                    $_.MappedClaimType -like $params.IdentifierClaim
+                })
+                if ($null -eq $mappings)
                 {
                     throw ("IdentifierClaim does not match any claim type specified in ClaimsMappings.")
                 }
@@ -288,9 +289,10 @@ function Set-TargetResource
                     throw "SharePoint failed to create the SPTrustedIdentityTokenIssuer."
                 }
 
-                if ((Get-SPClaimProvider | Where-Object -FilterScript {
-                            $_.DisplayName -eq $params.ClaimProviderName
-                        }))
+                $claimProvider = (Get-SPClaimProvider | Where-Object -FilterScript {
+                    $_.DisplayName -eq $params.ClaimProviderName
+                })
+                if ($null -eq $claimProvider)
                 {
                     $trust.ClaimProviderName = $params.ClaimProviderName
                 }

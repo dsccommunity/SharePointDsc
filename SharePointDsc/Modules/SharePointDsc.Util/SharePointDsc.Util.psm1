@@ -3,7 +3,7 @@ function Add-SPDscUserToLocalAdmin
     [CmdletBinding()]
     param
     (
-        [Parameter(Mandatory = $true,Position=1)]
+        [Parameter(Mandatory = $true, Position = 1)]
         [string]
         $UserName
     )
@@ -23,20 +23,20 @@ function Add-SPDscUserToLocalAdmin
 function Clear-SPDscKerberosToken
 {
     param (
-        [Parameter(Mandatory=$true)]
+        [Parameter(Mandatory = $true)]
         [System.String]
         $Account
     )
 
-    $sessions = klist sessions
+    $sessions = klist.exe sessions
     foreach ($session in $sessions)
     {
         if ($session -like "*$($Account)*")
         {
             Write-Verbose -Message "Purging Kerberos ticket for $LogonId"
             $LogonId = $session.split(' ')[3]
-            $LogonId = $LogonId.Replace('0:','')
-            klist -li $LogonId purge | Out-Null
+            $LogonId = $LogonId.Replace('0:', '')
+            klist.exe -li $LogonId purge | Out-Null
         }
 
     }
@@ -44,8 +44,9 @@ function Clear-SPDscKerberosToken
 
 function Convert-SPDscADGroupIDToName
 {
-    param(
-        [Parameter(Mandatory=$true)]
+    param
+    (
+        [Parameter(Mandatory = $true)]
         [System.Guid]
         $GroupId
     )
@@ -68,7 +69,7 @@ function Convert-SPDscADGroupIDToName
     if ($null -ne $result)
     {
         $sid = New-Object -TypeName "System.Security.Principal.SecurityIdentifier" `
-                          -ArgumentList @($result.GetDirectoryEntry().objectsid[0], 0)
+            -ArgumentList @($result.GetDirectoryEntry().objectsid[0], 0)
 
         return $sid.Translate([System.Security.Principal.NTAccount]).ToString()
     }
@@ -80,18 +81,19 @@ function Convert-SPDscADGroupIDToName
 
 function Convert-SPDscADGroupNameToID
 {
-    param(
-        [Parameter(Mandatory=$true)]
+    param
+    (
+        [Parameter(Mandatory = $true)]
         [System.String]
         $GroupName
     )
 
     $groupNTaccount = New-Object -TypeName "System.Security.Principal.NTAccount" `
-                                 -ArgumentList $groupName
+        -ArgumentList $groupName
     $groupSid = $groupNTaccount.Translate([System.Security.Principal.SecurityIdentifier])
 
     $result = New-Object -TypeName "System.DirectoryServices.DirectoryEntry" `
-                         -ArgumentList "LDAP://<SID=$($groupSid.ToString())>"
+        -ArgumentList "LDAP://<SID=$($groupSid.ToString())>"
     return ([Guid]::new($result.objectGUID.Value))
 }
 
@@ -128,7 +130,7 @@ function Convert-SPDscHashtableToString
 function Get-SPDscOSVersion
 {
     [CmdletBinding()]
-    param()
+    param ()
     return [System.Environment]::OSVersion.Version
 }
 
@@ -137,7 +139,7 @@ function Get-SPDscAssemblyVersion
     [CmdletBinding()]
     param
     (
-        [Parameter(Mandatory = $true,Position=1)]
+        [Parameter(Mandatory = $true, Position = 1)]
         [string]
         $PathToAssembly
     )
@@ -149,7 +151,7 @@ function Get-SPDscBuildVersion
     [CmdletBinding()]
     param
     (
-        [Parameter(Mandatory = $true,Position=1)]
+        [Parameter(Mandatory = $true, Position = 1)]
         [string]
         $PathToAssembly
     )
@@ -167,14 +169,14 @@ function Get-SPDscFarmAccount
     $account = Get-SPManagedAccount | Where-Object -FilterScript { $_.UserName -eq $farmaccount }
 
     $bindings = [System.Reflection.BindingFlags]::CreateInstance -bor `
-                [System.Reflection.BindingFlags]::GetField -bor `
-                [System.Reflection.BindingFlags]::Instance -bor `
-                [System.Reflection.BindingFlags]::NonPublic
+        [System.Reflection.BindingFlags]::GetField -bor `
+        [System.Reflection.BindingFlags]::Instance -bor `
+        [System.Reflection.BindingFlags]::NonPublic
 
     $pw = $account.GetType().GetField("m_Password", $bindings).GetValue($account);
 
     return New-Object -TypeName System.Management.Automation.PSCredential `
-                      -ArgumentList $farmaccount, $pw.SecureStringValue
+        -ArgumentList $farmaccount, $pw.SecureStringValue
 }
 
 
@@ -199,7 +201,7 @@ function Get-SPDscFarmVersionInfo
     $farm = Get-SPFarm
     $productVersions = [Microsoft.SharePoint.Administration.SPProductVersions]::GetProductVersions($farm)
     $server = Get-SPServer -Identity $env:COMPUTERNAME
-    $versionInfo = @{}
+    $versionInfo = @{ }
     $versionInfo.Highest = ""
     $versionInfo.Lowest = ""
 
@@ -235,7 +237,7 @@ function Get-SPDscFarmVersionInfo
                 ($patchableUnit -notmatch "XMUI") -and
                 ($patchableUnit -notmatch "Project Server") -and
                 (($patchableUnit -notmatch "Microsoft SharePoint Server (2013|2016|2019)" -or `
-                  $patchableUnit -match "Core")))
+                            $patchableUnit -match "Core")))
             {
                 $patchableUnitsInfo = $singleProductInfo.GetPatchableUnitInfoByDisplayName($patchableUnit)
                 $currentVersion = ""
@@ -282,7 +284,7 @@ function Get-SPDscRegProductsInfo
 {
     $registryLocation = Get-ChildItem -Path "HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall"
     $sharePointPrograms = $registryLocation | Where-Object -FilterScript {
-         $_.PsPath -like "*\Office*"
+        $_.PsPath -like "*\Office*"
     } | ForEach-Object -Process {
         Get-ItemProperty -Path $_.PsPath
     }
@@ -342,11 +344,11 @@ function Get-SPDscServiceContext
     [CmdletBinding()]
     param
     (
-        [Parameter(Mandatory = $true,Position=1)]
+        [Parameter(Mandatory = $true, Position = 1)]
         $ProxyGroup
     )
     Write-Verbose -Message "Getting SPContext for Proxy group $($proxyGroup)"
-    return [Microsoft.SharePoint.SPServiceContext]::GetContext($proxyGroup,[Microsoft.SharePoint.SPSiteSubscriptionIdentifier]::Default)
+    return [Microsoft.SharePoint.SPServiceContext]::GetContext($proxyGroup, [Microsoft.SharePoint.SPSiteSubscriptionIdentifier]::Default)
 }
 
 function Get-SPDscContentService
@@ -360,6 +362,7 @@ function Get-SPDscUserProfileSubTypeManager
     [CmdletBinding()]
     param
     (
+        [Parameter()]
         $Context
     )
     [System.Reflection.Assembly]::LoadWithPartialName("Microsoft.SharePoint") | Out-Null
@@ -369,7 +372,7 @@ function Get-SPDscUserProfileSubTypeManager
 function Get-SPDscInstalledProductVersion
 {
     [OutputType([System.Version])]
-    param()
+    param ()
 
     $pathToSearch = "C:\Program Files\Common Files\microsoft shared\Web Server Extensions\*\ISAPI\Microsoft.SharePoint.dll"
     $fullPath = Get-Item $pathToSearch | Sort-Object { $_.Directory } -Descending | Select-Object -First 1
@@ -417,7 +420,7 @@ function Invoke-SPDscCommand
         if ($Env:USERNAME.Contains("$"))
         {
             throw [Exception] ("You need to specify a value for either InstallAccount " + `
-                               "or PsDscRunAsCredential.")
+                    "or PsDscRunAsCredential.")
             return
         }
         Write-Verbose -Message "Executing as the local run as user $($Env:USERDOMAIN)\$($Env:USERNAME)"
@@ -431,7 +434,7 @@ function Invoke-SPDscCommand
             if ($_.Exception.Message.Contains("An update conflict has occurred, and you must re-try this action"))
             {
                 Write-Verbose -Message ("Detected an update conflict, restarting server to " + `
-                                        "allow DSC to resume and retry")
+                        "allow DSC to resume and retry")
                 $global:DSCMachineStatus = 1
             }
             else
@@ -447,24 +450,24 @@ function Invoke-SPDscCommand
             if (-not $Env:USERNAME.Contains("$"))
             {
                 throw [Exception] ("Unable to use both InstallAccount and " + `
-                                   "PsDscRunAsCredential in a single resource. Remove one " + `
-                                   "and try again.")
+                        "PsDscRunAsCredential in a single resource. Remove one " + `
+                        "and try again.")
                 return
             }
         }
         Write-Verbose -Message ("Executing using a provided credential and local PSSession " + `
-                                "as user $($Credential.UserName)")
+                "as user $($Credential.UserName)")
 
         # Running garbage collection to resolve issues related to Azure DSC extention use
         [GC]::Collect()
 
         $session = New-PSSession -ComputerName $env:COMPUTERNAME `
-                                 -Credential $Credential `
-                                 -Authentication CredSSP `
-                                 -Name "Microsoft.SharePoint.DSC" `
-                                 -SessionOption (New-PSSessionOption -OperationTimeout 0 `
-                                                                     -IdleTimeout 60000) `
-                                 -ErrorAction Continue
+            -Credential $Credential `
+            -Authentication CredSSP `
+            -Name "Microsoft.SharePoint.DSC" `
+            -SessionOption (New-PSSessionOption -OperationTimeout 0 `
+                -IdleTimeout 60000) `
+            -ErrorAction Continue
 
         if ($session)
         {
@@ -480,7 +483,7 @@ function Invoke-SPDscCommand
             if ($_.Exception.Message.Contains("An update conflict has occurred, and you must re-try this action"))
             {
                 Write-Verbose -Message ("Detected an update conflict, restarting server to " + `
-                                        "allow DSC to resume and retry")
+                        "allow DSC to resume and retry")
                 $global:DSCMachineStatus = 1
             }
             else
@@ -503,13 +506,13 @@ function Rename-SPDscParamValue
     [CmdletBinding()]
     param
     (
-        [Parameter(Mandatory = $true,Position=1,ValueFromPipeline=$true)]
+        [Parameter(Mandatory = $true, Position = 1, ValueFromPipeline = $true)]
         $Params,
 
-        [Parameter(Mandatory = $true,Position=2)]
+        [Parameter(Mandatory = $true, Position = 2)]
         $OldName,
 
-        [Parameter(Mandatory = $true,Position=3)]
+        [Parameter(Mandatory = $true, Position = 3)]
         $NewName
     )
 
@@ -526,7 +529,7 @@ function Remove-SPDscUserToLocalAdmin
     [CmdletBinding()]
     param
     (
-        [Parameter(Mandatory = $true,Position=1)]
+        [Parameter(Mandatory = $true, Position = 1)]
         [string]
         $UserName
     )
@@ -546,8 +549,9 @@ function Remove-SPDscUserToLocalAdmin
 function Remove-SPDscZoneMap
 {
     [CmdletBinding()]
-    param(
-        [parameter(Mandatory = $true)]
+    param
+    (
+        [Parameter(Mandatory = $true)]
         [string]
         $ServerName
     )
@@ -585,8 +589,9 @@ function Resolve-SPDscSecurityIdentifier
 function Set-SPDscZoneMap
 {
     [CmdletBinding()]
-    param(
-        [parameter(Mandatory = $true)]
+    param
+    (
+        [Parameter(Mandatory = $true)]
         [string]
         $ServerName
     )
@@ -622,11 +627,11 @@ function Test-SPDscObjectHasProperty
     [OutputType([System.Boolean])]
     param
     (
-        [Parameter(Mandatory = $true,Position=1)]
+        [Parameter(Mandatory = $true, Position = 1)]
         [Object]
         $Object,
 
-        [Parameter(Mandatory = $true,Position=2)]
+        [Parameter(Mandatory = $true, Position = 2)]
         [String]
         $PropertyName
     )
@@ -711,15 +716,15 @@ function Test-SPDscParameterState
     [CmdletBinding()]
     param
     (
-        [Parameter(Mandatory = $true, Position=1)]
+        [Parameter(Mandatory = $true, Position = 1)]
         [HashTable]
         $CurrentValues,
 
-        [Parameter(Mandatory = $true, Position=2)]
+        [Parameter(Mandatory = $true, Position = 2)]
         [Object]
         $DesiredValues,
 
-        [Parameter(, Position=3)]
+        [Parameter(, Position = 3)]
         [Array]
         $ValuesToCheck
     )
@@ -731,13 +736,13 @@ function Test-SPDscParameterState
         ($DesiredValues.GetType().Name -ne "PSBoundParametersDictionary"))
     {
         throw ("Property 'DesiredValues' in Test-SPDscParameterState must be either a " + `
-               "Hashtable or CimInstance. Type detected was $($DesiredValues.GetType().Name)")
+                "Hashtable or CimInstance. Type detected was $($DesiredValues.GetType().Name)")
     }
 
     if (($DesiredValues.GetType().Name -eq "CimInstance") -and ($null -eq $ValuesToCheck))
     {
         throw ("If 'DesiredValues' is a CimInstance then property 'ValuesToCheck' must contain " + `
-               "a value")
+                "a value")
     }
 
     if (($null -eq $ValuesToCheck) -or ($ValuesToCheck.Count -lt 1))
@@ -755,11 +760,11 @@ function Test-SPDscParameterState
             if (($CurrentValues.ContainsKey($_) -eq $false) -or `
                 ($CurrentValues.$_ -ne $DesiredValues.$_) -or `
                 (($DesiredValues.ContainsKey($_) -eq $true) -and `
-                 ($null -ne $DesiredValues.$_ -and `
-                 $DesiredValues.$_.GetType().IsArray)))
+                    ($null -ne $DesiredValues.$_ -and `
+                            $DesiredValues.$_.GetType().IsArray)))
             {
                 if ($DesiredValues.GetType().Name -eq "HashTable" -or `
-                    $DesiredValues.GetType().Name -eq "PSBoundParametersDictionary")
+                        $DesiredValues.GetType().Name -eq "PSBoundParametersDictionary")
                 {
                     $CheckDesiredValue = $DesiredValues.ContainsKey($_)
                 }
@@ -778,22 +783,22 @@ function Test-SPDscParameterState
                             ($null -eq $CurrentValues.$fieldName))
                         {
                             Write-Verbose -Message ("Expected to find an array value for " + `
-                                                    "property $fieldName in the current " + `
-                                                    "values, but it was either not present or " + `
-                                                    "was null. This has caused the test method " + `
-                                                    "to return false.")
+                                    "property $fieldName in the current " + `
+                                    "values, but it was either not present or " + `
+                                    "was null. This has caused the test method " + `
+                                    "to return false.")
                             $returnValue = $false
                         }
                         else
                         {
                             $arrayCompare = Compare-Object -ReferenceObject $CurrentValues.$fieldName `
-                                                           -DifferenceObject $DesiredValues.$fieldName
+                                -DifferenceObject $DesiredValues.$fieldName
                             if ($null -ne $arrayCompare)
                             {
                                 Write-Verbose -Message ("Found an array for property $fieldName " + `
-                                                        "in the current values, but this array " + `
-                                                        "does not match the desired state. " + `
-                                                        "Details of the changes are below.")
+                                        "in the current values, but this array " + `
+                                        "does not match the desired state. " + `
+                                        "Details of the changes are below.")
                                 $arrayCompare | ForEach-Object -Process {
                                     Write-Verbose -Message "$($_.InputObject) - $($_.SideIndicator)"
                                 }
@@ -805,83 +810,93 @@ function Test-SPDscParameterState
                     {
                         switch ($desiredType.Name)
                         {
-                            "String" {
+                            "String"
+                            {
                                 if ([string]::IsNullOrEmpty($CurrentValues.$fieldName) -and `
-                                    [string]::IsNullOrEmpty($DesiredValues.$fieldName))
-                                {}
+                                        [string]::IsNullOrEmpty($DesiredValues.$fieldName))
+                                {
+                                }
                                 else
                                 {
                                     Write-Verbose -Message ("String value for property " + `
-                                                            "$fieldName does not match. " + `
-                                                            "Current state is " + `
-                                                            "'$($CurrentValues.$fieldName)' " + `
-                                                            "and desired state is " + `
-                                                            "'$($DesiredValues.$fieldName)'")
+                                            "$fieldName does not match. " + `
+                                            "Current state is " + `
+                                            "'$($CurrentValues.$fieldName)' " + `
+                                            "and desired state is " + `
+                                            "'$($DesiredValues.$fieldName)'")
                                     $returnValue = $false
                                 }
                             }
-                            "Int32" {
+                            "Int32"
+                            {
                                 if (($DesiredValues.$fieldName -eq 0) -and `
                                     ($null -eq $CurrentValues.$fieldName))
-                                {}
+                                {
+                                }
                                 else
                                 {
                                     Write-Verbose -Message ("Int32 value for property " + `
-                                                            "$fieldName does not match. " + `
-                                                            "Current state is " + `
-                                                            "'$($CurrentValues.$fieldName)' " + `
-                                                            "and desired state is " + `
-                                                            "'$($DesiredValues.$fieldName)'")
+                                            "$fieldName does not match. " + `
+                                            "Current state is " + `
+                                            "'$($CurrentValues.$fieldName)' " + `
+                                            "and desired state is " + `
+                                            "'$($DesiredValues.$fieldName)'")
                                     $returnValue = $false
                                 }
                             }
-                            "Int16" {
+                            "Int16"
+                            {
                                 if (($DesiredValues.$fieldName -eq 0) -and `
                                     ($null -eq $CurrentValues.$fieldName))
-                                {}
+                                {
+                                }
                                 else
                                 {
                                     Write-Verbose -Message ("Int16 value for property " + `
-                                                            "$fieldName does not match. " + `
-                                                            "Current state is " + `
-                                                            "'$($CurrentValues.$fieldName)' " + `
-                                                            "and desired state is " + `
-                                                            "'$($DesiredValues.$fieldName)'")
+                                            "$fieldName does not match. " + `
+                                            "Current state is " + `
+                                            "'$($CurrentValues.$fieldName)' " + `
+                                            "and desired state is " + `
+                                            "'$($DesiredValues.$fieldName)'")
                                     $returnValue = $false
                                 }
                             }
-                            "Boolean" {
+                            "Boolean"
+                            {
                                 if ($CurrentValues.$fieldName -ne $DesiredValues.$fieldName)
                                 {
                                     Write-Verbose -Message ("Boolean value for property " + `
-                                                            "$fieldName does not match. " + `
-                                                            "Current state is " + `
-                                                            "'$($CurrentValues.$fieldName)' " + `
-                                                            "and desired state is " + `
-                                                            "'$($DesiredValues.$fieldName)'")
+                                            "$fieldName does not match. " + `
+                                            "Current state is " + `
+                                            "'$($CurrentValues.$fieldName)' " + `
+                                            "and desired state is " + `
+                                            "'$($DesiredValues.$fieldName)'")
                                     $returnValue = $false
                                 }
                             }
-                            "Single" {
+                            "Single"
+                            {
                                 if (($DesiredValues.$fieldName -eq 0) -and `
                                     ($null -eq $CurrentValues.$fieldName))
-                                {}
+                                {
+                                }
                                 else
                                 {
                                     Write-Verbose -Message ("Single value for property " + `
-                                                            "$fieldName does not match. " + `
-                                                            "Current state is " + `
-                                                            "'$($CurrentValues.$fieldName)' " + `
-                                                            "and desired state is " + `
-                                                            "'$($DesiredValues.$fieldName)'")
+                                            "$fieldName does not match. " + `
+                                            "Current state is " + `
+                                            "'$($CurrentValues.$fieldName)' " + `
+                                            "and desired state is " + `
+                                            "'$($DesiredValues.$fieldName)'")
                                     $returnValue = $false
                                 }
                             }
-                            default {
+                            default
+                            {
                                 Write-Verbose -Message ("Unable to compare property $fieldName " + `
-                                                        "as the type ($($desiredType.Name)) is " + `
-                                                        "not handled by the " + `
-                                                        "Test-SPDscParameterState cmdlet")
+                                        "as the type ($($desiredType.Name)) is " + `
+                                        "not handled by the " + `
+                                        "Test-SPDscParameterState cmdlet")
                                 $returnValue = $false
                             }
                         }
@@ -898,7 +913,7 @@ function Test-SPDscUserIsLocalAdmin
     [CmdletBinding()]
     param
     (
-        [Parameter(Mandatory = $true,Position=1)]
+        [Parameter(Mandatory = $true, Position = 1)]
         [string]
         $UserName
     )
@@ -913,10 +928,10 @@ function Test-SPDscUserIsLocalAdmin
 
     return ([ADSI]"WinNT://$($env:computername)/Administrators,group").PSBase.Invoke("Members") | `
         ForEach-Object -Process {
-            $_.GetType().InvokeMember("Name", 'GetProperty', $null, $_, $null)
-        } | Where-Object -FilterScript {
-            $_ -eq $accountName
-        }
+        $_.GetType().InvokeMember("Name", 'GetProperty', $null, $_, $null)
+    } | Where-Object -FilterScript {
+        $_ -eq $accountName
+    }
 }
 
 function Test-SPDscIsADUser
@@ -924,7 +939,8 @@ function Test-SPDscIsADUser
     [OutputType([System.Boolean])]
     [CmdletBinding()]
     param (
-        [string]
+        [Parameter()]
+        [System.String]
         $IdentityName
     )
 
@@ -987,7 +1003,7 @@ function Set-SPDscObjectPropertyIfValuePresent
     else
     {
         if (((Test-SPDscObjectHasProperty $ParamsValue $ParamKey) -eq $true) `
-          -and ($null -ne $ParamsValue.$ParamKey))
+                -and ($null -ne $ParamsValue.$ParamKey))
         {
             $ObjectToSet.$PropertyToSet = $ParamsValue.$ParamKey
         }
@@ -1012,19 +1028,20 @@ function Remove-SPDscGenericObject
 function Format-OfficePatchGUID
 {
     [CmdletBinding()]
-    param(
-        [parameter(Mandatory = $true)]
+    param
+    (
+        [Parameter(Mandatory = $true)]
         [String]
         $PatchGUID
     )
 
     $guidParts = $PatchGUID.Split("-")
     if ($guidParts.Count -ne 5 `
-        -or $guidParts[0].Length -ne 8 `
-        -or $guidParts[1].Length -ne 4 `
-        -or $guidParts[2].Length -ne 4 `
-        -or $guidParts[3].Length -ne 4 `
-        -or $guidParts[4].Length -ne 12)
+            -or $guidParts[0].Length -ne 8 `
+            -or $guidParts[1].Length -ne 4 `
+            -or $guidParts[2].Length -ne 4 `
+            -or $guidParts[3].Length -ne 4 `
+            -or $guidParts[4].Length -ne 12)
     {
         throw "The provided Office Patch GUID is not in the expected format (e.g. XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX"
     }
@@ -1035,15 +1052,16 @@ function Format-OfficePatchGUID
     $newPart4 = ConvertTo-TwoDigitFlipString -InputString $guidParts[3]
     $newPart5 = ConvertTo-TwoDigitFlipString -InputString $guidParts[4]
 
-    $newGUID = $newPart1 + $newPart2 +$newPart3 + $newPart4 + $newPart5
+    $newGUID = $newPart1 + $newPart2 + $newPart3 + $newPart4 + $newPart5
     return $newGUID
 }
 
 function ConvertTo-TwoDigitFlipString
 {
     [CmdletBinding()]
-    param(
-        [parameter(Mandatory = $true)]
+    param
+    (
+        [Parameter(Mandatory = $true)]
         [string]
         $InputString
     )
@@ -1057,7 +1075,7 @@ function ConvertTo-TwoDigitFlipString
 
     for ($i = 0; $i -lt $InputString.Length; $i++)
     {
-        $flippedString += $InputString[$i+1] + $InputString[$i]
+        $flippedString += $InputString[$i + 1] + $InputString[$i]
         $i++
     }
     return $flippedString
@@ -1066,8 +1084,9 @@ function ConvertTo-TwoDigitFlipString
 function ConvertTo-ReverseString
 {
     [CmdletBinding()]
-    param(
-        [parameter(Mandatory = $true)]
+    param
+    (
+        [Parameter(Mandatory = $true)]
         [string]
         $InputString
     )

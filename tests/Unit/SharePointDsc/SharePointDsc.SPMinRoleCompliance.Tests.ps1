@@ -1,5 +1,6 @@
 [CmdletBinding()]
-param(
+param
+(
     [Parameter()]
     [string]
     $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
@@ -7,233 +8,268 @@ param(
             -Resolve)
 )
 
-Import-Module -Name (Join-Path -Path $PSScriptRoot `
-        -ChildPath "..\UnitTestHelper.psm1" `
-        -Resolve)
+$script:DSCModuleName = 'SharePointDsc'
+$script:DSCResourceName = 'SPMinRoleCompliance'
+$script:DSCResourceFullName = 'MSFT_' + $script:DSCResourceName
 
-$Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointCmdletModule `
-    -DscResource "SPMinRoleCompliance"
+function Invoke-TestSetup
+{
+    try
+    {
+        Import-Module -Name DscResource.Test -Force
 
-Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
-    InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
-        Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
+        Import-Module -Name (Join-Path -Path $PSScriptRoot `
+                -ChildPath "..\UnitTestHelper.psm1" `
+                -Resolve)
 
-        # Mocks for all contexts
-        Mock -CommandName Start-SPServiceInstance -MockWith { }
-        Mock -CommandName Stop-SPServiceInstance -MockWith { }
-        Mock -CommandName Get-SPDscRoleTestMethod -MockWith {
-            $obj = New-Object -TypeName System.Object
-            $obj = $obj | Add-Member -MemberType ScriptMethod `
-                -Name Invoke `
-                -Value {
-                return $global:SPDscIsRoleCompliant
-            } -PassThru -Force
-            return $obj
-        }
+        $Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointCmdletModule `
+            -DscResource $script:DSCResourceName `
+            -ModuleVersion $moduleVersionFolder
+    }
+    catch [System.IO.FileNotFoundException]
+    {
+        throw 'DscResource.Test module dependency not found. Please run ".\build.ps1 -Tasks build" first.'
+    }
 
-        # Test contexts
-        switch ($Global:SPDscHelper.CurrentStubBuildNumber.Major)
-        {
-            15
-            {
-                Context -Name "All methods throw exceptions as MinRole doesn't exist in 2013" -Fixture {
-                    It "Should throw on the get method" {
-                        { Get-TargetResource @testParams } | Should Throw
-                    }
+    $script:testEnvironment = Initialize-TestEnvironment `
+        -DSCModuleName $script:DSCModuleName `
+        -DSCResourceName $script:DSCResourceFullName `
+        -ResourceType 'Mof' `
+        -TestType 'Unit'
+}
 
-                    It "Should throw on the test method" {
-                        { Test-TargetResource @testParams } | Should Throw
-                    }
+function Invoke-TestCleanup
+{
+    Restore-TestEnvironment -TestEnvironment $script:testEnvironment
+}
 
-                    It "Should throw on the set method" {
-                        { Set-TargetResource @testParams } | Should Throw
-                    }
-                }
+Invoke-TestSetup -ModuleVersion $moduleVersion
+
+try
+{
+    Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
+        InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
+            Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
+
+            # Mocks for all contexts
+            Mock -CommandName Start-SPServiceInstance -MockWith { }
+            Mock -CommandName Stop-SPServiceInstance -MockWith { }
+            Mock -CommandName Get-SPDscRoleTestMethod -MockWith {
+                $obj = New-Object -TypeName System.Object
+                $obj = $obj | Add-Member -MemberType ScriptMethod `
+                    -Name Invoke `
+                    -Value {
+                    return $global:SPDscIsRoleCompliant
+                } -PassThru -Force
+                return $obj
             }
-            16
+
+            # Test contexts
+            switch ($Global:SPDscHelper.CurrentStubBuildNumber.Major)
             {
-                Context -Name "The farm is not compliant as services aren't running but should be" -Fixture {
-                    $testParams = @{
-                        IsSingleInstance = "Yes"
-                        State            = "Compliant"
-                    }
+                15
+                {
+                    Context -Name "All methods throw exceptions as MinRole doesn't exist in 2013" -Fixture {
+                        It "Should throw on the get method" {
+                            { Get-TargetResource @testParams } | Should Throw
+                        }
 
-                    Mock -CommandName Get-SPService -MockWith {
-                        return @(
-                            @{
-                                CompliantWithMinRole = $true
-                                Instances            = @(
-                                    @{
-                                        Id       = (New-Guid)
-                                        Status   = "Disabled"
-                                        TypeName = "Dummy service 1"
-                                        Server   = @{
-                                            Name = "ServerName"
-                                        }
-                                    }
-                                )
-                            }
-                            @{
-                                CompliantWithMinRole = $false
-                                Instances            = @(
-                                    @{
-                                        Id       = (New-Guid)
-                                        Status   = "Disabled"
-                                        TypeName = "Dummy service 2"
-                                        Server   = @{
-                                            Name = "ServerName"
-                                        }
-                                    }
-                                )
-                            }
-                        )
-                    }
+                        It "Should throw on the test method" {
+                            { Test-TargetResource @testParams } | Should Throw
+                        }
 
-                    $global:SPDscIsRoleCompliant = $false
-
-                    It "should return NonCompliant in the get method" {
-                        (Get-TargetResource @testParams).State | Should Be "NonCompliant"
-                    }
-
-                    It "should return false in the test method" {
-                        Test-TargetResource @testParams | Should Be $false
-                    }
-
-                    It "should start the service in the set method" {
-                        Set-TargetResource @testParams
-                        Assert-MockCalled -CommandName "Start-SPServiceInstance" -Times 1
-                        Assert-MockCalled -CommandName "Stop-SPServiceInstance" -Times 0
+                        It "Should throw on the set method" {
+                            { Set-TargetResource @testParams } | Should Throw
+                        }
                     }
                 }
+                16
+                {
+                    Context -Name "The farm is not compliant as services aren't running but should be" -Fixture {
+                        $testParams = @{
+                            IsSingleInstance = "Yes"
+                            State            = "Compliant"
+                        }
 
-                Context -Name "The farm is not compliant as services are running that shouldn't be" -Fixture {
-                    $testParams = @{
-                        IsSingleInstance = "Yes"
-                        State            = "Compliant"
-                    }
-
-                    Mock -CommandName Get-SPService -MockWith {
-                        return @(
-                            @{
-                                CompliantWithMinRole = $false
-                                Instances            = @(
-                                    @{
-                                        Id       = (New-Guid)
-                                        Status   = "Online"
-                                        TypeName = "Dummy service 1"
-                                        Server   = @{
-                                            Name = "ServerName"
+                        Mock -CommandName Get-SPService -MockWith {
+                            return @(
+                                @{
+                                    CompliantWithMinRole = $true
+                                    Instances            = @(
+                                        @{
+                                            Id       = (New-Guid)
+                                            Status   = "Disabled"
+                                            TypeName = "Dummy service 1"
+                                            Server   = @{
+                                                Name = "ServerName"
+                                            }
                                         }
-                                    }
-                                )
-                            }
-                            @{
-                                CompliantWithMinRole = $true
-                                Instances            = @(
-                                    @{
-                                        Id       = (New-Guid)
-                                        Status   = "Online"
-                                        TypeName = "Dummy service 2"
-                                        Server   = @{
-                                            Name = "ServerName"
+                                    )
+                                }
+                                @{
+                                    CompliantWithMinRole = $false
+                                    Instances            = @(
+                                        @{
+                                            Id       = (New-Guid)
+                                            Status   = "Disabled"
+                                            TypeName = "Dummy service 2"
+                                            Server   = @{
+                                                Name = "ServerName"
+                                            }
                                         }
-                                    }
-                                )
-                            }
-                        )
+                                    )
+                                }
+                            )
+                        }
+
+                        $global:SPDscIsRoleCompliant = $false
+
+                        It "should return NonCompliant in the get method" {
+                            (Get-TargetResource @testParams).State | Should Be "NonCompliant"
+                        }
+
+                        It "should return false in the test method" {
+                            Test-TargetResource @testParams | Should Be $false
+                        }
+
+                        It "should start the service in the set method" {
+                            Set-TargetResource @testParams
+                            Assert-MockCalled -CommandName "Start-SPServiceInstance" -Times 1
+                            Assert-MockCalled -CommandName "Stop-SPServiceInstance" -Times 0
+                        }
                     }
 
-                    $global:SPDscIsRoleCompliant = $false
+                    Context -Name "The farm is not compliant as services are running that shouldn't be" -Fixture {
+                        $testParams = @{
+                            IsSingleInstance = "Yes"
+                            State            = "Compliant"
+                        }
 
-                    It "should return NonCompliant in the get method" {
-                        (Get-TargetResource @testParams).State | Should Be "NonCompliant"
+                        Mock -CommandName Get-SPService -MockWith {
+                            return @(
+                                @{
+                                    CompliantWithMinRole = $false
+                                    Instances            = @(
+                                        @{
+                                            Id       = (New-Guid)
+                                            Status   = "Online"
+                                            TypeName = "Dummy service 1"
+                                            Server   = @{
+                                                Name = "ServerName"
+                                            }
+                                        }
+                                    )
+                                }
+                                @{
+                                    CompliantWithMinRole = $true
+                                    Instances            = @(
+                                        @{
+                                            Id       = (New-Guid)
+                                            Status   = "Online"
+                                            TypeName = "Dummy service 2"
+                                            Server   = @{
+                                                Name = "ServerName"
+                                            }
+                                        }
+                                    )
+                                }
+                            )
+                        }
+
+                        $global:SPDscIsRoleCompliant = $false
+
+                        It "should return NonCompliant in the get method" {
+                            (Get-TargetResource @testParams).State | Should Be "NonCompliant"
+                        }
+
+                        It "should return false in the test method" {
+                            Test-TargetResource @testParams | Should Be $false
+                        }
+
+                        It "should start the service in the set method" {
+                            Set-TargetResource @testParams
+                            Assert-MockCalled -CommandName "Start-SPServiceInstance" -Times 0
+                            Assert-MockCalled -CommandName "Stop-SPServiceInstance" -Times 1
+                        }
                     }
 
-                    It "should return false in the test method" {
-                        Test-TargetResource @testParams | Should Be $false
+                    Context -Name "The farm is compliant and should be" -Fixture {
+                        $testParams = @{
+                            IsSingleInstance = "Yes"
+                            State            = "Compliant"
+                        }
+
+                        $testParams = @{
+                            IsSingleInstance = "Yes"
+                            State            = "Compliant"
+                        }
+
+                        Mock -CommandName Get-SPService -MockWith {
+                            return @(
+                                @{
+                                    CompliantWithMinRole = $true
+                                    Instances            = @(
+                                        @{
+                                            Id       = (New-Guid)
+                                            Status   = "Disabled"
+                                            TypeName = "Dummy service 1"
+                                            Server   = @{
+                                                Name = "ServerName"
+                                            }
+                                        }
+                                    )
+                                }
+                                @{
+                                    CompliantWithMinRole = $true
+                                    Instances            = @(
+                                        @{
+                                            Id       = (New-Guid)
+                                            Status   = "Disabled"
+                                            TypeName = "Dummy service 2"
+                                            Server   = @{
+                                                Name = "ServerName"
+                                            }
+                                        }
+                                    )
+                                }
+                            )
+                        }
+
+                        $global:SPDscIsRoleCompliant = $true
+
+                        It "should return NonCompliant in the get method" {
+                            (Get-TargetResource @testParams).State | Should Be "Compliant"
+                        }
+
+                        It "should return false in the test method" {
+                            Test-TargetResource @testParams | Should Be $true
+                        }
                     }
 
-                    It "should start the service in the set method" {
-                        Set-TargetResource @testParams
-                        Assert-MockCalled -CommandName "Start-SPServiceInstance" -Times 0
-                        Assert-MockCalled -CommandName "Stop-SPServiceInstance" -Times 1
+                    Context -Name "NonCompliant is requested in any function" -Fixture {
+                        $testParams = @{
+                            IsSingleInstance = "Yes"
+                            State            = "NonCompliant"
+                        }
+
+                        It "Should throw on the test method" {
+                            { Test-TargetResource @testParams } | Should Throw
+                        }
+
+                        It "Should throw on the set method" {
+                            { Set-TargetResource @testParams } | Should Throw
+                        }
                     }
                 }
-
-                Context -Name "The farm is compliant and should be" -Fixture {
-                    $testParams = @{
-                        IsSingleInstance = "Yes"
-                        State            = "Compliant"
-                    }
-
-                    $testParams = @{
-                        IsSingleInstance = "Yes"
-                        State            = "Compliant"
-                    }
-
-                    Mock -CommandName Get-SPService -MockWith {
-                        return @(
-                            @{
-                                CompliantWithMinRole = $true
-                                Instances            = @(
-                                    @{
-                                        Id       = (New-Guid)
-                                        Status   = "Disabled"
-                                        TypeName = "Dummy service 1"
-                                        Server   = @{
-                                            Name = "ServerName"
-                                        }
-                                    }
-                                )
-                            }
-                            @{
-                                CompliantWithMinRole = $true
-                                Instances            = @(
-                                    @{
-                                        Id       = (New-Guid)
-                                        Status   = "Disabled"
-                                        TypeName = "Dummy service 2"
-                                        Server   = @{
-                                            Name = "ServerName"
-                                        }
-                                    }
-                                )
-                            }
-                        )
-                    }
-
-                    $global:SPDscIsRoleCompliant = $true
-
-                    It "should return NonCompliant in the get method" {
-                        (Get-TargetResource @testParams).State | Should Be "Compliant"
-                    }
-
-                    It "should return false in the test method" {
-                        Test-TargetResource @testParams | Should Be $true
-                    }
+                Default
+                {
+                    throw [Exception] "A supported version of SharePoint was not used in testing"
                 }
-
-                Context -Name "NonCompliant is requested in any function" -Fixture {
-                    $testParams = @{
-                        IsSingleInstance = "Yes"
-                        State            = "NonCompliant"
-                    }
-
-                    It "Should throw on the test method" {
-                        { Test-TargetResource @testParams } | Should Throw
-                    }
-
-                    It "Should throw on the set method" {
-                        { Set-TargetResource @testParams } | Should Throw
-                    }
-                }
-            }
-            Default
-            {
-                throw [Exception] "A supported version of SharePoint was not used in testing"
             }
         }
     }
 }
-
-Invoke-Command -ScriptBlock $Global:SPDscHelper.CleanupScript -NoNewScope
+finally
+{
+    Invoke-TestCleanup
+}

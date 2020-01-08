@@ -417,7 +417,8 @@ function Test-TargetResource
 
 function Test-SPDscUserProfileDBReadOnly()
 {
-    param(
+    param
+    (
         [Parameter(Mandatory = $true)]
         [String]
         $UserProfileServiceAppName,

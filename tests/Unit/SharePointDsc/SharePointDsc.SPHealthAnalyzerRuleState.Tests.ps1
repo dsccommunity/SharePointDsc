@@ -1,5 +1,6 @@
 [CmdletBinding()]
-param(
+param
+(
     [Parameter()]
     [string]
     $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
@@ -7,235 +8,270 @@ param(
             -Resolve)
 )
 
-Import-Module -Name (Join-Path -Path $PSScriptRoot `
-        -ChildPath "..\UnitTestHelper.psm1" `
-        -Resolve)
+$script:DSCModuleName = 'SharePointDsc'
+$script:DSCResourceName = 'SPHealthAnalyzerRuleState'
+$script:DSCResourceFullName = 'MSFT_' + $script:DSCResourceName
 
-$Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointCmdletModule `
-    -DscResource "SPHealthAnalyzerRuleState"
+function Invoke-TestSetup
+{
+    try
+    {
+        Import-Module -Name DscResource.Test -Force
 
-Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
-    InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
-        Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
+        Import-Module -Name (Join-Path -Path $PSScriptRoot `
+                -ChildPath "..\UnitTestHelper.psm1" `
+                -Resolve)
 
-        # Initialize tests
-        Add-Type -TypeDefinition "namespace Microsoft.SharePoint { public class SPQuery { public string Query { get; set; } } }"
+        $Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointCmdletModule `
+            -DscResource $script:DSCResourceName `
+            -ModuleVersion $moduleVersionFolder
+    }
+    catch [System.IO.FileNotFoundException]
+    {
+        throw 'DscResource.Test module dependency not found. Please run ".\build.ps1 -Tasks build" first.'
+    }
 
-        # Mocks for all contexts
-        Mock -CommandName Get-SPFarm -MockWith {
-            return @{ }
-        }
+    $script:testEnvironment = Initialize-TestEnvironment `
+        -DSCModuleName $script:DSCModuleName `
+        -DSCResourceName $script:DSCResourceFullName `
+        -ResourceType 'Mof' `
+        -TestType 'Unit'
+}
 
-        Mock -CommandName Get-SPWebapplication -MockWith {
-            return @{
-                Url                            = ""
-                IsAdministrationWebApplication = $true
-            }
-        }
+function Invoke-TestCleanup
+{
+    Restore-TestEnvironment -TestEnvironment $script:testEnvironment
+}
 
-        # Test contexts
-        Context -Name "The server is not part of SharePoint farm" -Fixture {
-            $testParams = @{
-                Name             = "Drives are at risk of running out of free space."
-                Enabled          = $true
-                RuleScope        = "All Servers"
-                Schedule         = "Daily"
-                FixAutomatically = $false
-            }
+Invoke-TestSetup -ModuleVersion $moduleVersion
 
-            Mock -CommandName Get-SPFarm -MockWith { throw "Unable to detect local farm" }
+try
+{
+    Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
+        InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
+            Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
-            It "Should return null from the get method" {
-                (Get-TargetResource @testParams).Name | Should BeNullOrEmpty
-            }
+            # Initialize tests
+            Add-Type -TypeDefinition "namespace Microsoft.SharePoint { public class SPQuery { public string Query { get; set; } } }"
 
-            It "Should return false from the test method" {
-                Test-TargetResource @testParams | Should Be $false
-            }
-
-            It "Should throw an exception in the set method to say there is no local farm" {
-                { Set-TargetResource @testParams } | Should throw "No local SharePoint farm was detected"
-            }
-        }
-
-        Context -Name "The server is in a farm, but no central admin site is found" -Fixture {
-            $testParams = @{
-                Name             = "Drives are at risk of running out of free space."
-                Enabled          = $true
-                RuleScope        = "All Servers"
-                Schedule         = "Daily"
-                FixAutomatically = $false
+            # Mocks for all contexts
+            Mock -CommandName Get-SPFarm -MockWith {
+                return @{ }
             }
 
             Mock -CommandName Get-SPWebapplication -MockWith {
-                return $null
-            }
-
-            It "Should return null from the get method" {
-                (Get-TargetResource @testParams).Name | Should BeNullOrEmpty
-            }
-
-            It "Should return false from the test method" {
-                Test-TargetResource @testParams | Should Be $false
-            }
-
-            It "Should throw an exception in the set method" {
-                { Set-TargetResource @testParams } | Should throw "No Central Admin web application was found. Health Analyzer Rule settings will not be applied"
-            }
-        }
-
-        Context -Name "The server is in a farm, CA found, but no health analyzer rules list is found" -Fixture {
-            $testParams = @{
-                Name             = "Drives are at risk of running out of free space."
-                Enabled          = $true
-                RuleScope        = "All Servers"
-                Schedule         = "Daily"
-                FixAutomatically = $false
-            }
-
-            Mock -CommandName Get-SPWeb -MockWith {
                 return @{
-                    Lists = $null
+                    Url                            = ""
+                    IsAdministrationWebApplication = $true
                 }
             }
 
-            It "Should return null from the get method" {
-                (Get-TargetResource @testParams).Name | Should BeNullOrEmpty
-            }
-
-            It "Should return false from the test method" {
-                Test-TargetResource @testParams | Should Be $false
-            }
-
-            It "Should throw an exception in the set method" {
-                { Set-TargetResource @testParams } | Should throw "Could not find Health Analyzer Rules list. Health Analyzer Rule settings will not be applied"
-            }
-        }
-
-        Context -Name "The server is in a farm, CA found, Health Rules list found, but no rules match the specified rule name" -Fixture {
-            $testParams = @{
-                Name             = "Drives are at risk of running out of free space."
-                Enabled          = $true
-                RuleScope        = "All Servers"
-                Schedule         = "Daily"
-                FixAutomatically = $false
-            }
-
-            Mock -CommandName Get-SPWeb -MockWith {
-                $web = @{
-                    Lists = @{
-                        BaseTemplate = "HealthRules"
-                    } | Add-Member -MemberType ScriptMethod -Name GetItems -Value {
-                        return , @()
-                    } -PassThru
+            # Test contexts
+            Context -Name "The server is not part of SharePoint farm" -Fixture {
+                $testParams = @{
+                    Name             = "Drives are at risk of running out of free space."
+                    Enabled          = $true
+                    RuleScope        = "All Servers"
+                    Schedule         = "Daily"
+                    FixAutomatically = $false
                 }
-                return $web
-            }
 
-            Mock -CommandName Get-SPFarm -MockWith { return @{ } }
+                Mock -CommandName Get-SPFarm -MockWith { throw "Unable to detect local farm" }
 
-            It "Should return null from the get method" {
-                (Get-TargetResource @testParams).Name | Should BeNullOrEmpty
-            }
-
-            It "Should return false from the test method" {
-                Test-TargetResource @testParams | Should Be $false
-            }
-
-            It "Should throw an exception in the set method" {
-                { Set-TargetResource @testParams } | Should throw "Could not find specified Health Analyzer Rule. Health Analyzer Rule settings will not be applied"
-            }
-        }
-
-        Context -Name "The server is in a farm, CA/Health Rules list/Health Rule found, but the incorrect settings have been applied" -Fixture {
-            $testParams = @{
-                Name             = "Drives are at risk of running out of free space."
-                Enabled          = $true
-                RuleScope        = "All Servers"
-                Schedule         = "Daily"
-                FixAutomatically = $false
-            }
-
-            Mock -CommandName Get-SPWeb -MockWith {
-                $web = @{
-                    Lists = @{
-                        BaseTemplate = "HealthRules"
-                    } | Add-Member -MemberType ScriptMethod -Name GetItems -Value {
-                        $itemcol = @(@{
-                                HealthRuleCheckEnabled      = $false;
-                                HealthRuleScope             = "Any Server";
-                                HealthRuleSchedule          = "Weekly";
-                                HealthRuleAutoRepairEnabled = $true
-                            } | Add-Member -MemberType ScriptMethod -Name Update -Value {
-                                $Global:SPDscHealthRulesUpdated = $true
-                            } -PassThru )
-                        return , $itemcol
-                    } -PassThru
+                It "Should return null from the get method" {
+                    (Get-TargetResource @testParams).Name | Should BeNullOrEmpty
                 }
-                return $web
-            }
 
-            It "Should return values from the get method" {
-                $result = Get-TargetResource @testParams
-                $result.Enabled | Should Be $false
-                $result.RuleScope | Should Be 'Any Server'
-                $result.Schedule | Should Be 'Weekly'
-                $result.FixAutomatically | Should Be $true
-            }
-
-            It "Should return false from the test method" {
-                Test-TargetResource @testParams | Should Be $false
-            }
-
-            $Global:SPDscHealthRulesUpdated = $false
-            It "set the configured values for the specific Health Analyzer Rule" {
-                Set-TargetResource @testParams
-                $Global:SPDscHealthRulesUpdated | Should Be $true
-            }
-        }
-
-        Context -Name "The server is in a farm and the correct settings have been applied" -Fixture {
-            $testParams = @{
-                Name             = "Drives are at risk of running out of free space."
-                Enabled          = $true
-                RuleScope        = "All Servers"
-                Schedule         = "Daily"
-                FixAutomatically = $false
-            }
-
-            Mock -CommandName Get-SPWeb -MockWith {
-                $web = @{
-                    Lists = @{
-                        BaseTemplate = "HealthRules"
-                    } | Add-Member -MemberType ScriptMethod -Name GetItems -Value {
-                        $itemcol = @(@{
-                                HealthRuleCheckEnabled      = $true;
-                                HealthRuleScope             = "All Servers";
-                                HealthRuleSchedule          = "Daily";
-                                HealthRuleAutoRepairEnabled = $false
-                            } | Add-Member -MemberType ScriptMethod -Name Update -Value {
-                                $Global:SPDscHealthRulesUpdated = $true
-                            } -PassThru )
-                        return , $itemcol
-                    } -PassThru
+                It "Should return false from the test method" {
+                    Test-TargetResource @testParams | Should Be $false
                 }
-                return $web
+
+                It "Should throw an exception in the set method to say there is no local farm" {
+                    { Set-TargetResource @testParams } | Should throw "No local SharePoint farm was detected"
+                }
             }
 
-            It "Should return values from the get method" {
-                $result = Get-TargetResource @testParams
-                $result.Enabled | Should Be $true
-                $result.RuleScope | Should Be 'All Servers'
-                $result.Schedule | Should Be 'Daily'
-                $result.FixAutomatically | Should Be $false
+            Context -Name "The server is in a farm, but no central admin site is found" -Fixture {
+                $testParams = @{
+                    Name             = "Drives are at risk of running out of free space."
+                    Enabled          = $true
+                    RuleScope        = "All Servers"
+                    Schedule         = "Daily"
+                    FixAutomatically = $false
+                }
+
+                Mock -CommandName Get-SPWebapplication -MockWith {
+                    return $null
+                }
+
+                It "Should return null from the get method" {
+                    (Get-TargetResource @testParams).Name | Should BeNullOrEmpty
+                }
+
+                It "Should return false from the test method" {
+                    Test-TargetResource @testParams | Should Be $false
+                }
+
+                It "Should throw an exception in the set method" {
+                    { Set-TargetResource @testParams } | Should throw "No Central Admin web application was found. Health Analyzer Rule settings will not be applied"
+                }
             }
 
-            It "Should return true from the test method" {
-                Test-TargetResource @testParams | Should Be $true
+            Context -Name "The server is in a farm, CA found, but no health analyzer rules list is found" -Fixture {
+                $testParams = @{
+                    Name             = "Drives are at risk of running out of free space."
+                    Enabled          = $true
+                    RuleScope        = "All Servers"
+                    Schedule         = "Daily"
+                    FixAutomatically = $false
+                }
+
+                Mock -CommandName Get-SPWeb -MockWith {
+                    return @{
+                        Lists = $null
+                    }
+                }
+
+                It "Should return null from the get method" {
+                    (Get-TargetResource @testParams).Name | Should BeNullOrEmpty
+                }
+
+                It "Should return false from the test method" {
+                    Test-TargetResource @testParams | Should Be $false
+                }
+
+                It "Should throw an exception in the set method" {
+                    { Set-TargetResource @testParams } | Should throw "Could not find Health Analyzer Rules list. Health Analyzer Rule settings will not be applied"
+                }
             }
 
+            Context -Name "The server is in a farm, CA found, Health Rules list found, but no rules match the specified rule name" -Fixture {
+                $testParams = @{
+                    Name             = "Drives are at risk of running out of free space."
+                    Enabled          = $true
+                    RuleScope        = "All Servers"
+                    Schedule         = "Daily"
+                    FixAutomatically = $false
+                }
+
+                Mock -CommandName Get-SPWeb -MockWith {
+                    $web = @{
+                        Lists = @{
+                            BaseTemplate = "HealthRules"
+                        } | Add-Member -MemberType ScriptMethod -Name GetItems -Value {
+                            return , @()
+                        } -PassThru
+                    }
+                    return $web
+                }
+
+                Mock -CommandName Get-SPFarm -MockWith { return @{ } }
+
+                It "Should return null from the get method" {
+                    (Get-TargetResource @testParams).Name | Should BeNullOrEmpty
+                }
+
+                It "Should return false from the test method" {
+                    Test-TargetResource @testParams | Should Be $false
+                }
+
+                It "Should throw an exception in the set method" {
+                    { Set-TargetResource @testParams } | Should throw "Could not find specified Health Analyzer Rule. Health Analyzer Rule settings will not be applied"
+                }
+            }
+
+            Context -Name "The server is in a farm, CA/Health Rules list/Health Rule found, but the incorrect settings have been applied" -Fixture {
+                $testParams = @{
+                    Name             = "Drives are at risk of running out of free space."
+                    Enabled          = $true
+                    RuleScope        = "All Servers"
+                    Schedule         = "Daily"
+                    FixAutomatically = $false
+                }
+
+                Mock -CommandName Get-SPWeb -MockWith {
+                    $web = @{
+                        Lists = @{
+                            BaseTemplate = "HealthRules"
+                        } | Add-Member -MemberType ScriptMethod -Name GetItems -Value {
+                            $itemcol = @(@{
+                                    HealthRuleCheckEnabled      = $false;
+                                    HealthRuleScope             = "Any Server";
+                                    HealthRuleSchedule          = "Weekly";
+                                    HealthRuleAutoRepairEnabled = $true
+                                } | Add-Member -MemberType ScriptMethod -Name Update -Value {
+                                    $Global:SPDscHealthRulesUpdated = $true
+                                } -PassThru )
+                            return , $itemcol
+                        } -PassThru
+                    }
+                    return $web
+                }
+
+                It "Should return values from the get method" {
+                    $result = Get-TargetResource @testParams
+                    $result.Enabled | Should Be $false
+                    $result.RuleScope | Should Be 'Any Server'
+                    $result.Schedule | Should Be 'Weekly'
+                    $result.FixAutomatically | Should Be $true
+                }
+
+                It "Should return false from the test method" {
+                    Test-TargetResource @testParams | Should Be $false
+                }
+
+                $Global:SPDscHealthRulesUpdated = $false
+                It "set the configured values for the specific Health Analyzer Rule" {
+                    Set-TargetResource @testParams
+                    $Global:SPDscHealthRulesUpdated | Should Be $true
+                }
+            }
+
+            Context -Name "The server is in a farm and the correct settings have been applied" -Fixture {
+                $testParams = @{
+                    Name             = "Drives are at risk of running out of free space."
+                    Enabled          = $true
+                    RuleScope        = "All Servers"
+                    Schedule         = "Daily"
+                    FixAutomatically = $false
+                }
+
+                Mock -CommandName Get-SPWeb -MockWith {
+                    $web = @{
+                        Lists = @{
+                            BaseTemplate = "HealthRules"
+                        } | Add-Member -MemberType ScriptMethod -Name GetItems -Value {
+                            $itemcol = @(@{
+                                    HealthRuleCheckEnabled      = $true;
+                                    HealthRuleScope             = "All Servers";
+                                    HealthRuleSchedule          = "Daily";
+                                    HealthRuleAutoRepairEnabled = $false
+                                } | Add-Member -MemberType ScriptMethod -Name Update -Value {
+                                    $Global:SPDscHealthRulesUpdated = $true
+                                } -PassThru )
+                            return , $itemcol
+                        } -PassThru
+                    }
+                    return $web
+                }
+
+                It "Should return values from the get method" {
+                    $result = Get-TargetResource @testParams
+                    $result.Enabled | Should Be $true
+                    $result.RuleScope | Should Be 'All Servers'
+                    $result.Schedule | Should Be 'Daily'
+                    $result.FixAutomatically | Should Be $false
+                }
+
+                It "Should return true from the test method" {
+                    Test-TargetResource @testParams | Should Be $true
+                }
+
+            }
         }
     }
 }
-
-Invoke-Command -ScriptBlock $Global:SPDscHelper.CleanupScript -NoNewScope
+finally
+{
+    Invoke-TestCleanup
+}

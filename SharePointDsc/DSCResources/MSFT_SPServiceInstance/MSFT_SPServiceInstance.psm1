@@ -202,7 +202,8 @@ function Get-SPDscServiceTypeName
 {
     [CmdletBinding()]
     [OutputType([System.String])]
-    param(
+    param
+    (
         [Parameter(Mandatory = $true)]
         [string]
         $DisplayName

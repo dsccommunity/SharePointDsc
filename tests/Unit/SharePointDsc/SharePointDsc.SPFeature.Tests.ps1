@@ -7,203 +7,238 @@ param(
             -Resolve)
 )
 
-Import-Module -Name (Join-Path -Path $PSScriptRoot `
-        -ChildPath "..\UnitTestHelper.psm1" `
-        -Resolve)
+$script:DSCModuleName = 'SharePointDsc'
+$script:DSCResourceName = 'SPFeature'
+$script:DSCResourceFullName = 'MSFT_' + $script:DSCResourceName
 
-$Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointCmdletModule `
-    -DscResource "SPFeature"
+function Invoke-TestSetup
+{
+    try
+    {
+        Import-Module -Name DscResource.Test -Force
 
-Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
-    InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
-        Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
+        Import-Module -Name (Join-Path -Path $PSScriptRoot `
+                -ChildPath "..\UnitTestHelper.psm1" `
+                -Resolve)
 
-        # Mocks for all contexts
-        Mock -CommandName Enable-SPFeature -MockWith { }
-        Mock -CommandName Disable-SPFeature -MockWith { }
+        $Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointCmdletModule `
+            -DscResource $script:DSCResourceName `
+            -ModuleVersion $moduleVersionFolder
+    }
+    catch [System.IO.FileNotFoundException]
+    {
+        throw 'DscResource.Test module dependency not found. Please run ".\build.ps1 -Tasks build" first.'
+    }
 
-        # Test contexts
-        Context -Name "A feature that is not installed in the farm should be turned on" -Fixture {
-            $testParams = @{
-                Name         = "DemoFeature"
-                FeatureScope = "Farm"
-                Url          = "http://site.sharepoint.com"
-                Ensure       = "Present"
+    $script:testEnvironment = Initialize-TestEnvironment `
+        -DSCModuleName $script:DSCModuleName `
+        -DSCResourceName $script:DSCResourceFullName `
+        -ResourceType 'Mof' `
+        -TestType 'Unit'
+}
+
+function Invoke-TestCleanup
+{
+    Restore-TestEnvironment -TestEnvironment $script:testEnvironment
+}
+
+Invoke-TestSetup -ModuleVersion $moduleVersion
+
+try
+{
+    Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
+        InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
+            Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
+
+            # Mocks for all contexts
+            Mock -CommandName Enable-SPFeature -MockWith { }
+            Mock -CommandName Disable-SPFeature -MockWith { }
+
+            # Test contexts
+            Context -Name "A feature that is not installed in the farm should be turned on" -Fixture {
+                $testParams = @{
+                    Name         = "DemoFeature"
+                    FeatureScope = "Farm"
+                    Url          = "http://site.sharepoint.com"
+                    Ensure       = "Present"
+                }
+
+                Mock -CommandName Get-SPFeature -MockWith { return $null }
+
+                It "Should return null from the get method" {
+                    (Get-TargetResource @testParams).Ensure | Should Be "Absent"
+                }
+
+                It "Should return false from the test method" {
+                    Test-TargetResource @testParams | Should Be $false
+                }
             }
 
-            Mock -CommandName Get-SPFeature -MockWith { return $null }
+            Context -Name "A farm scoped feature is not enabled and should be" -Fixture {
+                $testParams = @{
+                    Name         = "DemoFeature"
+                    FeatureScope = "Farm"
+                    Url          = "http://site.sharepoint.com"
+                    Ensure       = "Present"
+                }
 
-            It "Should return null from the get method" {
-                (Get-TargetResource @testParams).Ensure | Should Be "Absent"
+                Mock -CommandName Get-SPFeature -MockWith {
+                    return $null
+                }
+
+                It "Should return null from the get method" {
+                    (Get-TargetResource @testParams).Ensure | Should Be "Absent"
+                }
+
+                It "Should return false from the test method" {
+                    Test-TargetResource @testParams | Should Be $false
+                }
+
+                It "Should enable the feature in the set method" {
+                    Set-TargetResource @testParams
+
+                    Assert-MockCalled Enable-SPFeature
+                }
             }
 
-            It "Should return false from the test method" {
-                Test-TargetResource @testParams | Should Be $false
-            }
-        }
+            Context -Name "A site collection scoped feature is not enabled and should be" -Fixture {
+                $testParams = @{
+                    Name         = "DemoFeature"
+                    FeatureScope = "Site"
+                    Url          = "http://site.sharepoint.com"
+                    Ensure       = "Present"
+                }
 
-        Context -Name "A farm scoped feature is not enabled and should be" -Fixture {
-            $testParams = @{
-                Name         = "DemoFeature"
-                FeatureScope = "Farm"
-                Url          = "http://site.sharepoint.com"
-                Ensure       = "Present"
-            }
+                Mock -CommandName Get-SPFeature -MockWith {
+                    return $null
+                }
 
-            Mock -CommandName Get-SPFeature -MockWith {
-                return $null
-            }
+                It "Should return null from the get method" {
+                    (Get-TargetResource @testParams).Ensure | Should Be "Absent"
+                }
 
-            It "Should return null from the get method" {
-                (Get-TargetResource @testParams).Ensure | Should Be "Absent"
-            }
+                It "Should return false from the test method" {
+                    Test-TargetResource @testParams | Should Be $false
+                }
 
-            It "Should return false from the test method" {
-                Test-TargetResource @testParams | Should Be $false
-            }
+                It "Should enable the feature in the set method" {
+                    Set-TargetResource @testParams
 
-            It "Should enable the feature in the set method" {
-                Set-TargetResource @testParams
-
-                Assert-MockCalled Enable-SPFeature
-            }
-        }
-
-        Context -Name "A site collection scoped feature is not enabled and should be" -Fixture {
-            $testParams = @{
-                Name         = "DemoFeature"
-                FeatureScope = "Site"
-                Url          = "http://site.sharepoint.com"
-                Ensure       = "Present"
+                    Assert-MockCalled Enable-SPFeature
+                }
             }
 
-            Mock -CommandName Get-SPFeature -MockWith {
-                return $null
+            Context -Name "A farm scoped feature is enabled and should not be" -Fixture {
+                $testParams = @{
+                    Name         = "DemoFeature"
+                    FeatureScope = "Farm"
+                    Url          = "http://site.sharepoint.com"
+                    Ensure       = "Absent"
+                }
+
+                Mock -CommandName Get-SPFeature -MockWith {
+                    return @{ }
+                }
+
+                It "Should return null from the get method" {
+                    (Get-TargetResource @testParams).Ensure | Should Be "Present"
+                }
+
+                It "Should return false from the test method" {
+                    Test-TargetResource @testParams | Should Be $false
+                }
+
+                It "Should enable the feature in the set method" {
+                    Set-TargetResource @testParams
+                    Assert-MockCalled Disable-SPFeature
+                }
             }
 
-            It "Should return null from the get method" {
-                (Get-TargetResource @testParams).Ensure | Should Be "Absent"
+            Context -Name "A site collection scoped feature is enabled and should not be" -Fixture {
+                $testParams = @{
+                    Name         = "DemoFeature"
+                    FeatureScope = "Site"
+                    Url          = "http://site.sharepoint.com"
+                    Ensure       = "Absent"
+                }
+
+                Mock -CommandName Get-SPFeature -MockWith {
+                    return @{ }
+                }
+
+                It "Should return null from the get method" {
+                    (Get-TargetResource @testParams).Ensure | Should Be "Present"
+                }
+
+                It "Should return false from the test method" {
+                    Test-TargetResource @testParams | Should Be $false
+                }
+
+                It "Should enable the feature in the set method" {
+                    Set-TargetResource @testParams
+                    Assert-MockCalled Disable-SPFeature
+                }
             }
 
-            It "Should return false from the test method" {
-                Test-TargetResource @testParams | Should Be $false
+            Context -Name "A farm scoped feature is enabled and should be" -Fixture {
+                $testParams = @{
+                    Name         = "DemoFeature"
+                    FeatureScope = "Farm"
+                    Url          = "http://site.sharepoint.com"
+                    Ensure       = "Present"
+                }
+
+                Mock -CommandName Get-SPFeature -MockWith { return @{ } }
+
+                It "Should return true from the test method" {
+                    Test-TargetResource @testParams | Should Be $true
+                }
             }
 
-            It "Should enable the feature in the set method" {
-                Set-TargetResource @testParams
+            Context -Name "A site collection scoped feature is enabled and should be" -Fixture {
+                $testParams = @{
+                    Name         = "DemoFeature"
+                    FeatureScope = "Site"
+                    Url          = "http://site.sharepoint.com"
+                    Ensure       = "Present"
+                }
 
-                Assert-MockCalled Enable-SPFeature
-            }
-        }
+                Mock -CommandName Get-SPFeature -MockWith { return @{ } }
 
-        Context -Name "A farm scoped feature is enabled and should not be" -Fixture {
-            $testParams = @{
-                Name         = "DemoFeature"
-                FeatureScope = "Farm"
-                Url          = "http://site.sharepoint.com"
-                Ensure       = "Absent"
-            }
-
-            Mock -CommandName Get-SPFeature -MockWith {
-                return @{ }
+                It "Should return true from the test method" {
+                    Test-TargetResource @testParams | Should Be $true
+                }
             }
 
-            It "Should return null from the get method" {
-                (Get-TargetResource @testParams).Ensure | Should Be "Present"
-            }
+            Context -Name "A site collection scoped features is enabled but has the wrong version" -Fixture {
+                $testParams = @{
+                    Name         = "DemoFeature"
+                    FeatureScope = "Site"
+                    Url          = "http://site.sharepoint.com"
+                    Version      = "1.1.0.0"
+                    Ensure       = "Present"
+                }
 
-            It "Should return false from the test method" {
-                Test-TargetResource @testParams | Should Be $false
-            }
+                Mock -CommandName Get-SPFeature -MockWith { return @{ Version = "1.0.0.0" } }
 
-            It "Should enable the feature in the set method" {
-                Set-TargetResource @testParams
-                Assert-MockCalled Disable-SPFeature
-            }
-        }
+                It "Should return the version from the get method" {
+                    (Get-TargetResource @testParams).Version | Should Be "1.0.0.0"
+                }
 
-        Context -Name "A site collection scoped feature is enabled and should not be" -Fixture {
-            $testParams = @{
-                Name         = "DemoFeature"
-                FeatureScope = "Site"
-                Url          = "http://site.sharepoint.com"
-                Ensure       = "Absent"
-            }
+                It "Should return false from the test method" {
+                    Test-TargetResource @testParams | Should Be $false
+                }
 
-            Mock -CommandName Get-SPFeature -MockWith {
-                return @{ }
-            }
-
-            It "Should return null from the get method" {
-                (Get-TargetResource @testParams).Ensure | Should Be "Present"
-            }
-
-            It "Should return false from the test method" {
-                Test-TargetResource @testParams | Should Be $false
-            }
-
-            It "Should enable the feature in the set method" {
-                Set-TargetResource @testParams
-                Assert-MockCalled Disable-SPFeature
-            }
-        }
-
-        Context -Name "A farm scoped feature is enabled and should be" -Fixture {
-            $testParams = @{
-                Name         = "DemoFeature"
-                FeatureScope = "Farm"
-                Url          = "http://site.sharepoint.com"
-                Ensure       = "Present"
-            }
-
-            Mock -CommandName Get-SPFeature -MockWith { return @{ } }
-
-            It "Should return true from the test method" {
-                Test-TargetResource @testParams | Should Be $true
-            }
-        }
-
-        Context -Name "A site collection scoped feature is enabled and should be" -Fixture {
-            $testParams = @{
-                Name         = "DemoFeature"
-                FeatureScope = "Site"
-                Url          = "http://site.sharepoint.com"
-                Ensure       = "Present"
-            }
-
-            Mock -CommandName Get-SPFeature -MockWith { return @{ } }
-
-            It "Should return true from the test method" {
-                Test-TargetResource @testParams | Should Be $true
-            }
-        }
-
-        Context -Name "A site collection scoped features is enabled but has the wrong version" -Fixture {
-            $testParams = @{
-                Name         = "DemoFeature"
-                FeatureScope = "Site"
-                Url          = "http://site.sharepoint.com"
-                Version      = "1.1.0.0"
-                Ensure       = "Present"
-            }
-
-            Mock -CommandName Get-SPFeature -MockWith { return @{ Version = "1.0.0.0" } }
-
-            It "Should return the version from the get method" {
-                (Get-TargetResource @testParams).Version | Should Be "1.0.0.0"
-            }
-
-            It "Should return false from the test method" {
-                Test-TargetResource @testParams | Should Be $false
-            }
-
-            It "reactivates the feature in the set method" {
-                Set-TargetResource @testParams
-                Assert-MockCalled Disable-SPFeature
-                Assert-MockCalled Enable-SPFeature
+                It "reactivates the feature in the set method" {
+                    Set-TargetResource @testParams
+                    Assert-MockCalled Disable-SPFeature
+                    Assert-MockCalled Enable-SPFeature
+                }
             }
         }
     }
 }
-
-Invoke-Command -ScriptBlock $Global:SPDscHelper.CleanupScript -NoNewScope
+finally
+{
+    Invoke-TestCleanup
+}

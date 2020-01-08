@@ -1,14 +1,15 @@
 function Get-SPDscProjectServerGlobalPermissionId
 {
-    param(
-        [Parameter(Mandatory=$true)]
+    param
+    (
+        [Parameter(Mandatory = $true)]
         [String]
         $PermissionName
     )
 
     $result = $null
     [Microsoft.Office.Project.Server.Library.PSSecurityGlobalPermission] `
-      | Get-Member -Static -MemberType Property | ForEach-Object -Process {
+    | Get-Member -Static -MemberType Property | ForEach-Object -Process {
         if ($PermissionName -eq $_.Name)
         {
             $result = [Microsoft.Office.Project.Server.Library.PSSecurityGlobalPermission]::($_.Name)
@@ -19,15 +20,15 @@ function Get-SPDscProjectServerGlobalPermissionId
     {
         $errorString = ""
         [Microsoft.Office.Project.Server.Library.PSSecurityGlobalPermission] `
-          | Get-Member -Static -MemberType Property | ForEach-Object -Process {
-                if ($errorString -eq "")
-                {
-                    $errorString += "$($_.Name)"
-                }
-                else
-                {
-                    $errorString += ", $($_.Name)"
-                }
+        | Get-Member -Static -MemberType Property | ForEach-Object -Process {
+            if ($errorString -eq "")
+            {
+                $errorString += "$($_.Name)"
+            }
+            else
+            {
+                $errorString += ", $($_.Name)"
+            }
         }
         throw "Unable to find permission '$PermissionName' - acceptable values are: $errorString"
     }
@@ -37,15 +38,16 @@ function Get-SPDscProjectServerGlobalPermissionId
 
 function Get-SPDscProjectServerPermissionName
 {
-    param(
-        [Parameter(Mandatory=$true)]
+    param
+    (
+        [Parameter(Mandatory = $true)]
         [System.Guid]
         $PermissionId
     )
 
     $result = $null
     [Microsoft.Office.Project.Server.Library.PSSecurityGlobalPermission] `
-      | Get-Member -Static -MemberType Property | ForEach-Object -Process {
+    | Get-Member -Static -MemberType Property | ForEach-Object -Process {
         if ($PermissionId -eq [Microsoft.Office.Project.Server.Library.PSSecurityGlobalPermission]::($_.Name))
         {
             $result = $_.Name
@@ -62,7 +64,8 @@ function Get-SPDscProjectServerPermissionName
 function Get-SPDscProjectServerResourceId
 {
     [OutputType([System.Guid])]
-    param(
+    param
+    (
         [Parameter(Mandatory = $true)]
         [System.String]
         $ResourceName,
@@ -75,8 +78,8 @@ function Get-SPDscProjectServerResourceId
     $webAppUrl = (Get-SPSite -Identity $PwaUrl).WebApplication.Url
     $useKerberos = -not (Get-SPAuthenticationProvider -WebApplication $webAppUrl -Zone Default).DisableKerberos
     $resourceService = New-SPDscProjectServerWebService -PwaUrl $PwaUrl `
-                                                        -EndpointName Resource `
-                                                        -UseKerberos:$useKerberos
+        -EndpointName Resource `
+        -UseKerberos:$useKerberos
 
     $script:SPDscReturnVal = $null
     Use-SPDscProjectServerWebService -Service $resourceService -ScriptBlock {
@@ -87,27 +90,27 @@ function Get-SPDscProjectServerResourceId
         $filter.FilterTableName = $ds.Resources.TableName
 
         $idColumn = New-Object -TypeName "Microsoft.Office.Project.Server.Library.Filter+Field" `
-                               -ArgumentList @(
-                                 $ds.Resources.TableName,
-                                 $ds.Resources.RES_UIDColumn.ColumnName,
-                                 [Microsoft.Office.Project.Server.Library.Filter+SortOrderTypeEnum]::None
-                               )
+            -ArgumentList @(
+            $ds.Resources.TableName,
+            $ds.Resources.RES_UIDColumn.ColumnName,
+            [Microsoft.Office.Project.Server.Library.Filter+SortOrderTypeEnum]::None
+        )
         $filter.Fields.Add($idColumn)
 
         $nameColumn = New-Object -TypeName "Microsoft.Office.Project.Server.Library.Filter+Field" `
-                                 -ArgumentList @(
-                                   $ds.Resources.TableName,
-                                   $ds.Resources.WRES_AccountColumn.ColumnName,
-                                   [Microsoft.Office.Project.Server.Library.Filter+SortOrderTypeEnum]::None
-                                 )
+            -ArgumentList @(
+            $ds.Resources.TableName,
+            $ds.Resources.WRES_AccountColumn.ColumnName,
+            [Microsoft.Office.Project.Server.Library.Filter+SortOrderTypeEnum]::None
+        )
         $filter.Fields.Add($nameColumn)
 
         $nameFieldFilter = New-Object -TypeName "Microsoft.Office.Project.Server.Library.Filter+FieldOperator" `
-                                      -ArgumentList @(
-                                        [Microsoft.Office.Project.Server.Library.Filter+FieldOperationType]::Contain,
-                                        $ds.Resources.WRES_AccountColumn.ColumnName,
-                                        $ResourceName
-                                      )
+            -ArgumentList @(
+            [Microsoft.Office.Project.Server.Library.Filter+FieldOperationType]::Contain,
+            $ds.Resources.WRES_AccountColumn.ColumnName,
+            $ResourceName
+        )
         $filter.Criteria = $nameFieldFilter
 
         $filterXml = $filter.GetXml()
@@ -137,7 +140,8 @@ function Get-SPDscProjectServerResourceId
 function Get-SPDscProjectServerResourceName
 {
     [OutputType([System.String])]
-    param(
+    param
+    (
         [Parameter(Mandatory = $true)]
         [System.Guid]
         $ResourceId,
@@ -150,8 +154,8 @@ function Get-SPDscProjectServerResourceName
     $webAppUrl = (Get-SPSite -Identity $PwaUrl).WebApplication.Url
     $useKerberos = -not (Get-SPAuthenticationProvider -WebApplication $webAppUrl -Zone Default).DisableKerberos
     $resourceService = New-SPDscProjectServerWebService -PwaUrl $PwaUrl `
-                                                        -EndpointName Resource `
-                                                        -UseKerberos:$useKerberos
+        -EndpointName Resource `
+        -UseKerberos:$useKerberos
 
     $script:SPDscReturnVal = ""
     Use-SPDscProjectServerWebService -Service $resourceService -ScriptBlock {
@@ -163,7 +167,8 @@ function Get-SPDscProjectServerResourceName
 function New-SPDscProjectServerWebService
 {
     [OutputType([System.IDisposable])]
-    param(
+    param
+    (
         [Parameter(Mandatory = $true)]
         [System.String]
         $PwaUrl,
@@ -171,9 +176,9 @@ function New-SPDscProjectServerWebService
         [Parameter(Mandatory = $true)]
         [System.String]
         [ValidateSet("Admin", "Archive", "Calendar", "CubeAdmin", "CustomFields",
-                     "Driver", "Events", "LookupTable", "Notifications", "ObjectLinkProvider",
-                     "PortfolioAnalyses", "Project", "QueueSystem", "ResourcePlan", "Resource",
-                     "Security", "Statusing", "TimeSheet", "Workflow", "WssInterop")]
+            "Driver", "Events", "LookupTable", "Notifications", "ObjectLinkProvider",
+            "PortfolioAnalyses", "Project", "QueueSystem", "ResourcePlan", "Resource",
+            "Security", "Statusing", "TimeSheet", "Workflow", "WssInterop")]
         $EndpointName,
 
         [Parameter()]
@@ -188,7 +193,7 @@ function New-SPDscProjectServerWebService
     if ($filehash -ne (Get-FileHash -Path $psDllPath -Algorithm SHA512).Hash)
     {
         throw ("The hash for ProjectServerServices.dll isn't the expected value. Please make " + `
-               "sure the correct file exists on the file system.")
+                "sure the correct file exists on the file system.")
     }
     $bytes = [System.IO.File]::ReadAllBytes($psDllPath)
     [System.Reflection.Assembly]::Load($bytes) | Out-Null
@@ -200,12 +205,12 @@ function New-SPDscProjectServerWebService
     if ($pwaUri.Scheme -eq [System.Uri]::UriSchemeHttps)
     {
         $binding = New-Object -TypeName "System.ServiceModel.BasicHttpBinding" `
-                              -ArgumentList ([System.ServiceModel.BasicHttpSecurityMode]::Transport)
+            -ArgumentList ([System.ServiceModel.BasicHttpSecurityMode]::Transport)
     }
     else
     {
         $binding = New-Object -TypeName "System.ServiceModel.BasicHttpBinding" `
-                              -ArgumentList ([System.ServiceModel.BasicHttpSecurityMode]::TransportCredentialOnly)
+            -ArgumentList ([System.ServiceModel.BasicHttpSecurityMode]::TransportCredentialOnly)
     }
     $binding.Name = "basicHttpConf"
     $binding.SendTimeout = [System.TimeSpan]::MaxValue
@@ -227,10 +232,10 @@ function New-SPDscProjectServerWebService
         $pwaUrl = $pwaUrl + "/"
     }
     $address = New-Object -TypeName "System.ServiceModel.EndpointAddress" `
-                          -ArgumentList ($pwaUrl + $svcRouter)
+        -ArgumentList ($pwaUrl + $svcRouter)
 
     $webService = New-Object -TypeName "Svc$($EndpointName).$($EndpointName)Client" `
-                             -ArgumentList @($binding, $address)
+        -ArgumentList @($binding, $address)
 
     $webService.ChannelFactory.Credentials.Windows.AllowedImpersonationLevel = [System.Security.Principal.TokenImpersonationLevel]::Impersonation
 

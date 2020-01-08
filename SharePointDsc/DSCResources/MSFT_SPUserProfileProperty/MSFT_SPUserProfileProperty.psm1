@@ -195,11 +195,12 @@ function Get-TargetResource
                         }
                         $mapping.PropertyName = $currentMapping.DataSourcePropertyName
 
-                        $userProfilePropertyMappings += (New-CimInstance -ClassName MSFT_SPUserProfilePropertyMapping -ClientOnly -Property @{
-                                ConnectionName = $propertyMapping.ConnectionName
-                                PropertyName   = $mapping.ConnectionName
-                                Direction      = $mapping.Direction
-                            })
+                        $property = @{
+                            ConnectionName = $propertyMapping.ConnectionName
+                            PropertyName   = $mapping.ConnectionName
+                            Direction      = $mapping.Direction
+                        }
+                        $userProfilePropertyMappings += (New-CimInstance -ClassName MSFT_SPUserProfilePropertyMapping -ClientOnly -Property $property)
                     }
                 }
                 else
@@ -241,11 +242,12 @@ function Get-TargetResource
                                     }
                                     if ($null -ne $adAttributeProperty)
                                     {
-                                        $userProfilePropertyMappings += (New-CimInstance -ClassName MSFT_SPUserProfilePropertyMapping -ClientOnly -Property @{
-                                                ConnectionName = $propertyMapping.ConnectionName
-                                                PropertyName   = $adAttributeProperty.GetValue($_)
-                                                Direction      = "Import"
-                                            })
+                                        $property = @{
+                                            ConnectionName = $propertyMapping.ConnectionName
+                                            PropertyName   = $adAttributeProperty.GetValue($_)
+                                            Direction      = "Import"
+                                        }
+                                        $userProfilePropertyMappings += (New-CimInstance -ClassName MSFT_SPUserProfilePropertyMapping -ClientOnly -Property $property)
                                     }
                                 }
                             }

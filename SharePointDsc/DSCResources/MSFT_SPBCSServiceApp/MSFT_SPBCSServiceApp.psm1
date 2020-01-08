@@ -132,7 +132,7 @@ function Set-TargetResource
         ($PSBoundParameters.ContainsKey("DatabaseName") -eq $false -or
             $PSBoundParameters.ContainsKey("DatabaseServer") -eq $false))
     {
-        Throw "Parameter DatabaseName and DatabaseServer are required when Ensure=Present"
+        throw "Parameter DatabaseName and DatabaseServer are required when Ensure=Present"
     }
 
     $result = Get-TargetResource @PSBoundParameters

@@ -1,7 +1,9 @@
 function New-SPDscUnitTestHelper
 {
     [CmdletBinding()]
-    param(
+    [OutputType([System.Collections.Hashtable])]
+    param
+    (
         [Parameter(Mandatory = $true)]
         [String]
         $SharePointStubModule,
@@ -9,6 +11,10 @@ function New-SPDscUnitTestHelper
         [Parameter(Mandatory = $true, ParameterSetName = 'DscResource')]
         [String]
         $DscResource,
+
+        [Parameter(Mandatory = $true)]
+        [String]
+        $ModuleVersion,
 
         [Parameter(Mandatory = $true, ParameterSetName = 'SubModule')]
         [String]
@@ -24,16 +30,21 @@ function New-SPDscUnitTestHelper
     )
 
     $repoRoot = Join-Path -Path $PSScriptRoot -ChildPath "..\..\" -Resolve
-    $moduleRoot = Join-Path -Path $repoRoot -ChildPath "Modules\SharePointDsc"
+    $moduleRoot = Join-Path -Path $repoRoot -ChildPath "output\SharePointDsc\$ModuleVersion"
 
-    $mainModule = Join-Path -Path $moduleRoot -ChildPath "SharePointDsc.psd1"
-    Import-Module -Name $mainModule -Global
+    $utilsModule = Join-Path -Path $moduleRoot -ChildPath "Modules\SharePointDsc.Util\SharePointDsc.Util.psm1"
+    Import-Module -Name $utilsModule -Global
+
+    # $mainModule = Join-Path -Path $moduleRoot -ChildPath "SharePointDsc.psd1"
+    # Import-Module -Name $mainModule -Global
 
     if ($PSBoundParameters.ContainsKey("SubModulePath") -eq $true)
     {
         $describeHeader = "Sub-module '$SubModulePath'"
         $moduleToLoad = Join-Path -Path $moduleRoot -ChildPath $SubModulePath
         $moduleName = (Get-Item -Path $moduleToLoad).BaseName
+
+        Import-Module -Name $moduleToLoad -Global
     }
 
     if ($PSBoundParameters.ContainsKey("DscResource") -eq $true)
@@ -50,8 +61,6 @@ function New-SPDscUnitTestHelper
     $minorBuildNumber = $spBuildParts[1]
 
     $describeHeader += " [SP Build: $spBuild]"
-
-    Import-Module -Name $moduleToLoad -Global
 
     $initScript = @"
             Set-StrictMode -Version 1
@@ -98,6 +107,7 @@ function New-SPDscUnitTestHelper
     return @{
         DescribeHeader         = $describeHeader
         ModuleName             = $moduleName
+        ModuleVersion          = $ModuleVersion
         CurrentStubModulePath  = $SharePointStubModule
         CurrentStubBuildNumber = [Version]::Parse($spBuild)
         InitializeScript       = [ScriptBlock]::Create($initScript)
@@ -154,7 +164,8 @@ function Write-SPDscStubFile
 
 function Get-SPDscRegistryValue
 {
-    param(
+    param
+    (
         [Parameter(Mandatory = $true)]
         [System.String]
         $OutPath

@@ -2,17 +2,18 @@ function Get-SPDscWebApplicationThrottlingConfig
 {
     [CmdletBinding()]
     [OutputType([System.Collections.Hashtable])]
-    param(
+    param
+    (
         [Parameter(Mandatory = $true)]
         $WebApplication
     )
     return @{
-        ListViewThreshold        = $WebApplication.MaxItemsPerThrottledOperation
-        AllowObjectModelOverride = $WebApplication.AllowOMCodeOverrideThrottleSettings
-        AdminThreshold           = $WebApplication.MaxItemsPerThrottledOperationOverride
-        ListViewLookupThreshold  = $WebApplication.MaxQueryLookupFields
-        HappyHourEnabled         = $WebApplication.UnthrottledPrivilegedOperationWindowEnabled
-        HappyHour = @{
+        ListViewThreshold         = $WebApplication.MaxItemsPerThrottledOperation
+        AllowObjectModelOverride  = $WebApplication.AllowOMCodeOverrideThrottleSettings
+        AdminThreshold            = $WebApplication.MaxItemsPerThrottledOperationOverride
+        ListViewLookupThreshold   = $WebApplication.MaxQueryLookupFields
+        HappyHourEnabled          = $WebApplication.UnthrottledPrivilegedOperationWindowEnabled
+        HappyHour                 = @{
             Hour     = $WebApplication.DailyStartUnthrottledPrivilegedOperationsHour
             Minute   = $WebApplication.DailyStartUnthrottledPrivilegedOperationsMinute
             Duration = $WebApplication.DailyUnthrottledPrivilegedOperationsDuration
@@ -28,7 +29,8 @@ function Get-SPDscWebApplicationThrottlingConfig
 function Set-SPDscWebApplicationThrottlingConfig
 {
     [CmdletBinding()]
-    param(
+    param
+    (
         [Parameter(Mandatory = $true)]
         $WebApplication,
 
@@ -49,16 +51,16 @@ function Set-SPDscWebApplicationThrottlingConfig
     }
     $mapping.Keys | ForEach-Object -Process {
         Set-SPDscObjectPropertyIfValuePresent -ObjectToSet $WebApplication `
-                                              -PropertyToSet $_ `
-                                              -ParamsValue $settings `
-                                              -ParamKey $mapping[$_]
+            -PropertyToSet $_ `
+            -ParamsValue $settings `
+            -ParamKey $mapping[$_]
     }
 
     # Set throttle settings child property seperately
     Set-SPDscObjectPropertyIfValuePresent -ObjectToSet $WebApplication.HttpThrottleSettings `
-                                          -PropertyToSet "PerformThrottle" `
-                                          -ParamsValue $Settings `
-                                          -ParamKey "RequestThrottling"
+        -PropertyToSet "PerformThrottle" `
+        -ParamsValue $Settings `
+        -ParamKey "RequestThrottling"
 
     # Create time span object separately
     if (($Settings.ContainsKey("ChangeLogExpiryDays")) -eq $true)
@@ -72,7 +74,8 @@ function Set-SPDscWebApplicationThrottlingConfig
 function Set-SPDscWebApplicationHappyHourConfig
 {
     [CmdletBinding()]
-    param(
+    param
+    (
         [Parameter(Mandatory = $true)]
         $WebApplication,
 
@@ -81,8 +84,8 @@ function Set-SPDscWebApplicationHappyHourConfig
     )
 
     if ((Test-SPDscObjectHasProperty $Settings "Hour") -eq $false `
-      -or (Test-SPDscObjectHasProperty $Settings "Minute") -eq $false `
-      -or (Test-SPDscObjectHasProperty $Settings "Duration") -eq $false)
+            -or (Test-SPDscObjectHasProperty $Settings "Minute") -eq $false `
+            -or (Test-SPDscObjectHasProperty $Settings "Duration") -eq $false)
     {
         throw "Happy hour settings must include 'hour', 'minute' and 'duration'"
     }
@@ -111,7 +114,8 @@ function Test-SPDscWebApplicationThrottlingConfig
 {
     [CmdletBinding()]
     [OutputType([System.Boolean])]
-    param(
+    param
+    (
         [Parameter(Mandatory = $true)]
         $CurrentSettings,
 
@@ -122,50 +126,52 @@ function Test-SPDscWebApplicationThrottlingConfig
     $relPath = "..\..\Modules\SharePointDsc.Util\SharePointDsc.Util.psm1"
     Import-Module -Name (Join-Path -Path $PSScriptRoot -ChildPath $relPath -Resolve)
     $testReturn = Test-SPDscParameterState -CurrentValues $CurrentSettings `
-                                                     -DesiredValues $DesiredSettings `
-                                                     -ValuesToCheck @(
-                                                         "ListViewThreshold",
-                                                         "AllowObjectModelOverride",
-                                                         "AdminThreshold",
-                                                         "ListViewLookupThreshold",
-                                                         "HappyHourEnabled",
-                                                         "UniquePermissionThreshold",
-                                                         "RequestThrottling",
-                                                         "ChangeLogEnabled",
-                                                         "ChangeLogExpiryDays",
-                                                         "EventHandlersEnabled"
-                                                     )
+        -DesiredValues $DesiredSettings `
+        -ValuesToCheck @(
+        "ListViewThreshold",
+        "AllowObjectModelOverride",
+        "AdminThreshold",
+        "ListViewLookupThreshold",
+        "HappyHourEnabled",
+        "UniquePermissionThreshold",
+        "RequestThrottling",
+        "ChangeLogEnabled",
+        "ChangeLogExpiryDays",
+        "EventHandlersEnabled"
+    )
     if ($testReturn -eq $true)
     {
-            if ($null -ne $DesiredSettings.HappyHour)
+        if ($null -ne $DesiredSettings.HappyHour)
+        {
+            $DesiredHappyHour = @{ }
+            if ($null -ne $DesiredSettings.HappyHour.Hour)
             {
-                $DesiredHappyHour = @{}
-                if ($null -ne $DesiredSettings.HappyHour.Hour)
-                {
-                    $DesiredHappyHour.Add("Hour",[int32]$DesiredSettings.HappyHour.Hour)
-                }
-                else
-                {
-                    $DesiredHappyHour.Add("Hour",$null)
-                }
-                if ($null -ne $DesiredSettings.HappyHour.Minute)
-                {
-                    $DesiredHappyHour.Add("Minute",[int32]$DesiredSettings.HappyHour.Minute)
-                } else
-                {
-                    $DesiredHappyHour.Add("Minute",$null)
-                }
-                if ($null -ne $DesiredSettings.HappyHour.Duration)
-                {
-                    $DesiredHappyHour.Add("Duration",[int32]$DesiredSettings.HappyHour.Duration)
-                } else
-                {
-                    $DesiredHappyHour.Add("Duration",$null)
-                }
+                $DesiredHappyHour.Add("Hour", [int32]$DesiredSettings.HappyHour.Hour)
+            }
+            else
+            {
+                $DesiredHappyHour.Add("Hour", $null)
+            }
+            if ($null -ne $DesiredSettings.HappyHour.Minute)
+            {
+                $DesiredHappyHour.Add("Minute", [int32]$DesiredSettings.HappyHour.Minute)
+            }
+            else
+            {
+                $DesiredHappyHour.Add("Minute", $null)
+            }
+            if ($null -ne $DesiredSettings.HappyHour.Duration)
+            {
+                $DesiredHappyHour.Add("Duration", [int32]$DesiredSettings.HappyHour.Duration)
+            }
+            else
+            {
+                $DesiredHappyHour.Add("Duration", $null)
+            }
 
             $testReturn = Test-SPDscParameterState -CurrentValues $CurrentSettings.HappyHour `
-                                                   -DesiredValues $DesiredHappyHour `
-                                                   -ValuesToCheck @("Hour", "Minute", "Duration")
+                -DesiredValues $DesiredHappyHour `
+                -ValuesToCheck @("Hour", "Minute", "Duration")
         }
     }
     return $testReturn

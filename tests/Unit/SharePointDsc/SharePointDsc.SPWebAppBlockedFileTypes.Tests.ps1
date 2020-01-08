@@ -1,5 +1,6 @@
 [CmdletBinding()]
-param(
+param
+(
     [Parameter()]
     [string]
     $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
@@ -7,292 +8,327 @@ param(
             -Resolve)
 )
 
-Import-Module -Name (Join-Path -Path $PSScriptRoot `
-        -ChildPath "..\UnitTestHelper.psm1" `
-        -Resolve)
+$script:DSCModuleName = 'SharePointDsc'
+$script:DSCResourceName = 'SPWebAppBlockedFileTypes'
+$script:DSCResourceFullName = 'MSFT_' + $script:DSCResourceName
 
-$Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointCmdletModule `
-    -DscResource "SPWebAppBlockedFileTypes"
+function Invoke-TestSetup
+{
+    try
+    {
+        Import-Module -Name DscResource.Test -Force
 
-Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
-    InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
-        Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
+        Import-Module -Name (Join-Path -Path $PSScriptRoot `
+                -ChildPath "..\UnitTestHelper.psm1" `
+                -Resolve)
 
-        # Initialize tests
+        $Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointCmdletModule `
+            -DscResource $script:DSCResourceName `
+            -ModuleVersion $moduleVersionFolder
+    }
+    catch [System.IO.FileNotFoundException]
+    {
+        throw 'DscResource.Test module dependency not found. Please run ".\build.ps1 -Tasks build" first.'
+    }
 
-        # Mocks for all contexts
-        Mock -CommandName New-SPAuthenticationProvider -MockWith { }
-        Mock -CommandName New-SPWebApplication -MockWith { }
-        Mock -CommandName Get-SPAuthenticationProvider -MockWith {
-            return @{
-                DisableKerberos = $true
-                AllowAnonymous  = $false
-            }
-        }
+    $script:testEnvironment = Initialize-TestEnvironment `
+        -DSCModuleName $script:DSCModuleName `
+        -DSCResourceName $script:DSCResourceFullName `
+        -ResourceType 'Mof' `
+        -TestType 'Unit'
+}
 
-        # Test contexts
-        Context -Name "The web appliation exists and a specific blocked file type list matches" -Fixture {
-            $testParams = @{
-                WebAppUrl = "http://sites.sharepoint.com"
-                Blocked   = @("exe", "dll", "ps1")
-            }
+function Invoke-TestCleanup
+{
+    Restore-TestEnvironment -TestEnvironment $script:testEnvironment
+}
 
-            Mock -CommandName Get-SPWebapplication -MockWith {
-                [Collections.Generic.List[String]]$CurrentBlockedFiles = @("exe", "ps1", "dll")
-                $webApp = @{
-                    DisplayName           = $testParams.Name
-                    ApplicationPool       = @{
-                        Name     = $testParams.ApplicationPool
-                        Username = $testParams.ApplicationPoolAccount
-                    }
-                    ContentDatabases      = @(
-                        @{
-                            Name   = "SP_Content_01"
-                            Server = "sql.domain.local"
-                        }
-                    )
-                    IisSettings           = @(
-                        @{ Path = "C:\inetpub\wwwroot\something" }
-                    )
-                    Url                   = $testParams.WebAppUrl
-                    BlockedFileExtensions = $CurrentBlockedFiles
+Invoke-TestSetup -ModuleVersion $moduleVersion
+
+try
+{
+    Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
+        InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
+            Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
+
+            # Initialize tests
+
+            # Mocks for all contexts
+            Mock -CommandName New-SPAuthenticationProvider -MockWith { }
+            Mock -CommandName New-SPWebApplication -MockWith { }
+            Mock -CommandName Get-SPAuthenticationProvider -MockWith {
+                return @{
+                    DisableKerberos = $true
+                    AllowAnonymous  = $false
                 }
-                $webApp = $webApp | Add-Member -MemberType ScriptMethod -Name Update -Value {
-                    $Global:SPDscWebApplicationUpdateCalled = $true
-                } -PassThru
-                return @($webApp)
             }
 
-            It "Should return the current data from the get method" {
-                (Get-TargetResource @testParams).Blocked.Count | Should Be 3
-            }
-
-            It "Should return true from the test method" {
-                Test-TargetResource @testParams | Should Be $true
-            }
-        }
-
-        Context -Name "The web appliation exists and a specific blocked file type list does not match" -Fixture {
-            $testParams = @{
-                WebAppUrl = "http://sites.sharepoint.com"
-                Blocked   = @("exe", "dll", "ps1")
-            }
-
-            Mock -CommandName Get-SPWebapplication -MockWith {
-                [Collections.Generic.List[String]]$CurrentBlockedFiles = @("exe", "pdf", "dll")
-                $webApp = @{
-                    DisplayName           = $testParams.Name
-                    ApplicationPool       = @{
-                        Name     = $testParams.ApplicationPool
-                        Username = $testParams.ApplicationPoolAccount
-                    }
-                    ContentDatabases      = @(
-                        @{
-                            Name   = "SP_Content_01"
-                            Server = "sql.domain.local"
-                        }
-                    )
-                    IisSettings           = @(
-                        @{ Path = "C:\inetpub\wwwroot\something" }
-                    )
-                    Url                   = $testParams.WebAppUrl
-                    BlockedFileExtensions = $CurrentBlockedFiles
+            # Test contexts
+            Context -Name "The web appliation exists and a specific blocked file type list matches" -Fixture {
+                $testParams = @{
+                    WebAppUrl = "http://sites.sharepoint.com"
+                    Blocked   = @("exe", "dll", "ps1")
                 }
-                $webApp = $webApp | Add-Member -MemberType ScriptMethod -Name Update -Value {
-                    $Global:SPDscWebApplicationUpdateCalled = $true
-                } -PassThru
-                return @($webApp)
-            }
 
-            It "Should return the current data from the get method" {
-                (Get-TargetResource @testParams).Blocked.Count | Should Be 3
-            }
-
-            It "Should return false from the test method" {
-                Test-TargetResource @testParams | Should Be $false
-            }
-
-            $Global:SPDscWebApplicationUpdateCalled = $false
-            It "Should update the workflow settings" {
-                Set-TargetResource @testParams
-                $Global:SPDscWebApplicationUpdateCalled | Should Be $true
-            }
-        }
-
-        Context -Name "The web appliation exists and a list of types to include and exclude both match" -Fixture {
-            $testParams = @{
-                WebAppUrl     = "http://sites.sharepoint.com"
-                EnsureBlocked = @("exe")
-                EnsureAllowed = @("pdf")
-            }
-
-            Mock -CommandName Get-SPWebapplication -MockWith {
-                [Collections.Generic.List[String]]$CurrentBlockedFiles = @("exe", "ps1", "dll")
-                $webApp = @{
-                    DisplayName           = $testParams.Name
-                    ApplicationPool       = @{
-                        Name     = $testParams.ApplicationPool
-                        Username = $testParams.ApplicationPoolAccount
-                    }
-                    ContentDatabases      = @(
-                        @{
-                            Name   = "SP_Content_01"
-                            Server = "sql.domain.local"
+                Mock -CommandName Get-SPWebapplication -MockWith {
+                    [Collections.Generic.List[String]]$CurrentBlockedFiles = @("exe", "ps1", "dll")
+                    $webApp = @{
+                        DisplayName           = $testParams.Name
+                        ApplicationPool       = @{
+                            Name     = $testParams.ApplicationPool
+                            Username = $testParams.ApplicationPoolAccount
                         }
-                    )
-                    IisSettings           = @(
-                        @{ Path = "C:\inetpub\wwwroot\something" }
-                    )
-                    Url                   = $testParams.WebAppUrl
-                    BlockedFileExtensions = $CurrentBlockedFiles
-                }
-                $webApp = $webApp | Add-Member -MemberType ScriptMethod -Name Update -Value {
-                    $Global:SPDscWebApplicationUpdateCalled = $true
-                } -PassThru
-                return @($webApp)
-            }
-
-            It "Should return the current data from the get method" {
-                (Get-TargetResource @testParams).Blocked.Count | Should Be 3
-            }
-
-            It "Should return true from the test method" {
-                Test-TargetResource @testParams | Should Be $true
-            }
-        }
-
-        Context -Name "The web appliation exists and a list of types to include and exclude both failed" -Fixture {
-            $testParams = @{
-                WebAppUrl     = "http://sites.sharepoint.com"
-                EnsureBlocked = @("exe")
-                EnsureAllowed = @("pdf")
-            }
-
-            Mock -CommandName Get-SPWebapplication -MockWith {
-                [Collections.Generic.List[String]]$CurrentBlockedFiles = @("pdf", "dll")
-                $webApp = @{
-                    DisplayName           = $testParams.Name
-                    ApplicationPool       = @{
-                        Name     = $testParams.ApplicationPool
-                        Username = $testParams.ApplicationPoolAccount
+                        ContentDatabases      = @(
+                            @{
+                                Name   = "SP_Content_01"
+                                Server = "sql.domain.local"
+                            }
+                        )
+                        IisSettings           = @(
+                            @{ Path = "C:\inetpub\wwwroot\something" }
+                        )
+                        Url                   = $testParams.WebAppUrl
+                        BlockedFileExtensions = $CurrentBlockedFiles
                     }
-                    ContentDatabases      = @(
-                        @{
-                            Name   = "SP_Content_01"
-                            Server = "sql.domain.local"
-                        }
-                    )
-                    IisSettings           = @(
-                        @{ Path = "C:\inetpub\wwwroot\something" }
-                    )
-                    Url                   = $testParams.WebAppUrl
-                    BlockedFileExtensions = $CurrentBlockedFiles
+                    $webApp = $webApp | Add-Member -MemberType ScriptMethod -Name Update -Value {
+                        $Global:SPDscWebApplicationUpdateCalled = $true
+                    } -PassThru
+                    return @($webApp)
                 }
-                $webApp = $webApp | Add-Member -MemberType ScriptMethod -Name Update -Value {
-                    $Global:SPDscWebApplicationUpdateCalled = $true
-                } -PassThru
-                return @($webApp)
+
+                It "Should return the current data from the get method" {
+                    (Get-TargetResource @testParams).Blocked.Count | Should Be 3
+                }
+
+                It "Should return true from the test method" {
+                    Test-TargetResource @testParams | Should Be $true
+                }
             }
 
-            It "Should return the current data from the get method" {
-                (Get-TargetResource @testParams).Blocked.Count | Should Be 2
-            }
+            Context -Name "The web appliation exists and a specific blocked file type list does not match" -Fixture {
+                $testParams = @{
+                    WebAppUrl = "http://sites.sharepoint.com"
+                    Blocked   = @("exe", "dll", "ps1")
+                }
 
-            It "Should return false from the test method" {
-                Test-TargetResource @testParams | Should Be $false
-            }
-
-            $Global:SPDscWebApplicationUpdateCalled = $false
-            It "Should update the workflow settings" {
-                Set-TargetResource @testParams
-                $Global:SPDscWebApplicationUpdateCalled | Should Be $true
-            }
-        }
-
-        Context -Name "All blocked file type parameters are passed to the methods" -Fixture {
-            $testParams = @{
-                WebAppUrl     = "http://sites.sharepoint.com"
-                Blocked       = @("exe", "dll", "ps1")
-                EnsureBlocked = @("exe", "dll")
-                EnsureAllowed = @("ps1")
-            }
-
-            Mock -CommandName Get-SPWebapplication -MockWith {
-                [Collections.Generic.List[String]]$CurrentBlockedFiles = @("pdf", "dll")
-                $webApp = @{
-                    DisplayName           = $testParams.Name
-                    ApplicationPool       = @{
-                        Name     = $testParams.ApplicationPool
-                        Username = $testParams.ApplicationPoolAccount
+                Mock -CommandName Get-SPWebapplication -MockWith {
+                    [Collections.Generic.List[String]]$CurrentBlockedFiles = @("exe", "pdf", "dll")
+                    $webApp = @{
+                        DisplayName           = $testParams.Name
+                        ApplicationPool       = @{
+                            Name     = $testParams.ApplicationPool
+                            Username = $testParams.ApplicationPoolAccount
+                        }
+                        ContentDatabases      = @(
+                            @{
+                                Name   = "SP_Content_01"
+                                Server = "sql.domain.local"
+                            }
+                        )
+                        IisSettings           = @(
+                            @{ Path = "C:\inetpub\wwwroot\something" }
+                        )
+                        Url                   = $testParams.WebAppUrl
+                        BlockedFileExtensions = $CurrentBlockedFiles
                     }
-                    ContentDatabases      = @(
-                        @{
-                            Name   = "SP_Content_01"
-                            Server = "sql.domain.local"
-                        }
-                    )
-                    IisSettings           = @(
-                        @{ Path = "C:\inetpub\wwwroot\something" }
-                    )
-                    Url                   = $testParams.WebAppUrl
-                    BlockedFileExtensions = $CurrentBlockedFiles
+                    $webApp = $webApp | Add-Member -MemberType ScriptMethod -Name Update -Value {
+                        $Global:SPDscWebApplicationUpdateCalled = $true
+                    } -PassThru
+                    return @($webApp)
                 }
-                $webApp = $webApp | Add-Member -MemberType ScriptMethod -Name Update -Value {
-                    $Global:SPDscWebApplicationUpdateCalled = $true
-                } -PassThru
-                return @($webApp)
+
+                It "Should return the current data from the get method" {
+                    (Get-TargetResource @testParams).Blocked.Count | Should Be 3
+                }
+
+                It "Should return false from the test method" {
+                    Test-TargetResource @testParams | Should Be $false
+                }
+
+                $Global:SPDscWebApplicationUpdateCalled = $false
+                It "Should update the workflow settings" {
+                    Set-TargetResource @testParams
+                    $Global:SPDscWebApplicationUpdateCalled | Should Be $true
+                }
             }
 
-            It "Should throw an exception on the test method" {
-                { Test-TargetResource @testParams } | Should throw
-            }
+            Context -Name "The web appliation exists and a list of types to include and exclude both match" -Fixture {
+                $testParams = @{
+                    WebAppUrl     = "http://sites.sharepoint.com"
+                    EnsureBlocked = @("exe")
+                    EnsureAllowed = @("pdf")
+                }
 
-            It "Should throw an exception on the set method" {
-                { Set-TargetResource @testParams } | Should throw
-            }
-        }
-
-        Context -Name "No blocked file type parameters are passed to the methods" -Fixture {
-            $testParams = @{
-                WebAppUrl = "http://sites.sharepoint.com"
-            }
-
-            Mock -CommandName Get-SPWebapplication -MockWith {
-                [Collections.Generic.List[String]]$CurrentBlockedFiles = @("pdf", "dll")
-                $webApp = @{
-                    DisplayName           = $testParams.Name
-                    ApplicationPool       = @{
-                        Name     = $testParams.ApplicationPool
-                        Username = $testParams.ApplicationPoolAccount
+                Mock -CommandName Get-SPWebapplication -MockWith {
+                    [Collections.Generic.List[String]]$CurrentBlockedFiles = @("exe", "ps1", "dll")
+                    $webApp = @{
+                        DisplayName           = $testParams.Name
+                        ApplicationPool       = @{
+                            Name     = $testParams.ApplicationPool
+                            Username = $testParams.ApplicationPoolAccount
+                        }
+                        ContentDatabases      = @(
+                            @{
+                                Name   = "SP_Content_01"
+                                Server = "sql.domain.local"
+                            }
+                        )
+                        IisSettings           = @(
+                            @{ Path = "C:\inetpub\wwwroot\something" }
+                        )
+                        Url                   = $testParams.WebAppUrl
+                        BlockedFileExtensions = $CurrentBlockedFiles
                     }
-                    ContentDatabases      = @(
-                        @{
-                            Name   = "SP_Content_01"
-                            Server = "sql.domain.local"
-                        }
-                    )
-                    IisSettings           = @(
-                        @{ Path = "C:\inetpub\wwwroot\something" }
-                    )
-                    Url                   = $testParams.WebAppUrl
-                    BlockedFileExtensions = $CurrentBlockedFiles
+                    $webApp = $webApp | Add-Member -MemberType ScriptMethod -Name Update -Value {
+                        $Global:SPDscWebApplicationUpdateCalled = $true
+                    } -PassThru
+                    return @($webApp)
                 }
-                $webApp = $webApp | Add-Member -MemberType ScriptMethod -Name Update -Value {
-                    $Global:SPDscWebApplicationUpdateCalled = $true
-                } -PassThru
-                return @($webApp)
+
+                It "Should return the current data from the get method" {
+                    (Get-TargetResource @testParams).Blocked.Count | Should Be 3
+                }
+
+                It "Should return true from the test method" {
+                    Test-TargetResource @testParams | Should Be $true
+                }
             }
 
+            Context -Name "The web appliation exists and a list of types to include and exclude both failed" -Fixture {
+                $testParams = @{
+                    WebAppUrl     = "http://sites.sharepoint.com"
+                    EnsureBlocked = @("exe")
+                    EnsureAllowed = @("pdf")
+                }
 
-            It "Should throw an exception on the test method" {
-                { Test-TargetResource @testParams } | Should throw
+                Mock -CommandName Get-SPWebapplication -MockWith {
+                    [Collections.Generic.List[String]]$CurrentBlockedFiles = @("pdf", "dll")
+                    $webApp = @{
+                        DisplayName           = $testParams.Name
+                        ApplicationPool       = @{
+                            Name     = $testParams.ApplicationPool
+                            Username = $testParams.ApplicationPoolAccount
+                        }
+                        ContentDatabases      = @(
+                            @{
+                                Name   = "SP_Content_01"
+                                Server = "sql.domain.local"
+                            }
+                        )
+                        IisSettings           = @(
+                            @{ Path = "C:\inetpub\wwwroot\something" }
+                        )
+                        Url                   = $testParams.WebAppUrl
+                        BlockedFileExtensions = $CurrentBlockedFiles
+                    }
+                    $webApp = $webApp | Add-Member -MemberType ScriptMethod -Name Update -Value {
+                        $Global:SPDscWebApplicationUpdateCalled = $true
+                    } -PassThru
+                    return @($webApp)
+                }
+
+                It "Should return the current data from the get method" {
+                    (Get-TargetResource @testParams).Blocked.Count | Should Be 2
+                }
+
+                It "Should return false from the test method" {
+                    Test-TargetResource @testParams | Should Be $false
+                }
+
+                $Global:SPDscWebApplicationUpdateCalled = $false
+                It "Should update the workflow settings" {
+                    Set-TargetResource @testParams
+                    $Global:SPDscWebApplicationUpdateCalled | Should Be $true
+                }
             }
 
-            It "Should throw an exception on the set method" {
-                { Set-TargetResource @testParams } | Should throw
+            Context -Name "All blocked file type parameters are passed to the methods" -Fixture {
+                $testParams = @{
+                    WebAppUrl     = "http://sites.sharepoint.com"
+                    Blocked       = @("exe", "dll", "ps1")
+                    EnsureBlocked = @("exe", "dll")
+                    EnsureAllowed = @("ps1")
+                }
+
+                Mock -CommandName Get-SPWebapplication -MockWith {
+                    [Collections.Generic.List[String]]$CurrentBlockedFiles = @("pdf", "dll")
+                    $webApp = @{
+                        DisplayName           = $testParams.Name
+                        ApplicationPool       = @{
+                            Name     = $testParams.ApplicationPool
+                            Username = $testParams.ApplicationPoolAccount
+                        }
+                        ContentDatabases      = @(
+                            @{
+                                Name   = "SP_Content_01"
+                                Server = "sql.domain.local"
+                            }
+                        )
+                        IisSettings           = @(
+                            @{ Path = "C:\inetpub\wwwroot\something" }
+                        )
+                        Url                   = $testParams.WebAppUrl
+                        BlockedFileExtensions = $CurrentBlockedFiles
+                    }
+                    $webApp = $webApp | Add-Member -MemberType ScriptMethod -Name Update -Value {
+                        $Global:SPDscWebApplicationUpdateCalled = $true
+                    } -PassThru
+                    return @($webApp)
+                }
+
+                It "Should throw an exception on the test method" {
+                    { Test-TargetResource @testParams } | Should throw
+                }
+
+                It "Should throw an exception on the set method" {
+                    { Set-TargetResource @testParams } | Should throw
+                }
+            }
+
+            Context -Name "No blocked file type parameters are passed to the methods" -Fixture {
+                $testParams = @{
+                    WebAppUrl = "http://sites.sharepoint.com"
+                }
+
+                Mock -CommandName Get-SPWebapplication -MockWith {
+                    [Collections.Generic.List[String]]$CurrentBlockedFiles = @("pdf", "dll")
+                    $webApp = @{
+                        DisplayName           = $testParams.Name
+                        ApplicationPool       = @{
+                            Name     = $testParams.ApplicationPool
+                            Username = $testParams.ApplicationPoolAccount
+                        }
+                        ContentDatabases      = @(
+                            @{
+                                Name   = "SP_Content_01"
+                                Server = "sql.domain.local"
+                            }
+                        )
+                        IisSettings           = @(
+                            @{ Path = "C:\inetpub\wwwroot\something" }
+                        )
+                        Url                   = $testParams.WebAppUrl
+                        BlockedFileExtensions = $CurrentBlockedFiles
+                    }
+                    $webApp = $webApp | Add-Member -MemberType ScriptMethod -Name Update -Value {
+                        $Global:SPDscWebApplicationUpdateCalled = $true
+                    } -PassThru
+                    return @($webApp)
+                }
+
+
+                It "Should throw an exception on the test method" {
+                    { Test-TargetResource @testParams } | Should throw
+                }
+
+                It "Should throw an exception on the set method" {
+                    { Set-TargetResource @testParams } | Should throw
+                }
             }
         }
     }
 }
-
-Invoke-Command -ScriptBlock $Global:SPDscHelper.CleanupScript -NoNewScope
+finally
+{
+    Invoke-TestCleanup
+}
