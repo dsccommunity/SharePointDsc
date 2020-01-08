@@ -85,8 +85,8 @@ function Get-TargetResource
         $ssa = Get-SPEnterpriseSearchServiceApplication -Identity $params.ServiceAppName
         if ($null -eq $ssa)
         {
-            throw("The specified Search Service Application $($params.ServiceAppName) is  `
-                   invalid. Please make sure you specify the name of an existing service application.")
+            throw ("The specified Search Service Application $($params.ServiceAppName) is " + `
+                    "invalid. Please make sure you specify the name of an existing service application.")
         }
         $managedProperty = Get-SPEnterpriseSearchMetadataManagedProperty -SearchApplication $ssa | `
             Where-Object { $_.Name -eq $params.Name }
@@ -236,8 +236,8 @@ function Set-TargetResource
         # them all.
         if ($params.IncludeAllCrawledProperties -and $params.CrawledProperties.Length -gt 0)
         {
-            throw("You cannot specify values for CrawledProperties if the property `
-                IncludeAllCrawledProperties is set to True.")
+            throw ("You cannot specify values for CrawledProperties if the property " + `
+                    "IncludeAllCrawledProperties is set to True.")
         }
 
         # Ensure that the specified crawled properties exist
@@ -247,8 +247,8 @@ function Set-TargetResource
                 -SearchApplication $params.ServiceAppName
             if (!$currentCrawlProperty)
             {
-                throw("The specified crawled property $($mappedCrawlProperty) does not exist. `
-                    Please make sure you specify valid existing crawl properties.")
+                throw ("The specified crawled property $($mappedCrawlProperty) does not exist. " + `
+                        "Please make sure you specify valid existing crawl properties.")
             }
         }
         #endregion

@@ -2,6 +2,8 @@
 {
     "powershell.scriptAnalysis.enable": true,
     "powershell.scriptAnalysis.settingsPath": ".vscode/ScriptAnalyzerSettings.psd1",
+    "powershell.codeFormatting.autoCorrectAliases": true,
+    "powershell.codeFormatting.useCorrectCasing": true,
     "powershell.codeFormatting.openBraceOnSameLine": false,
     "powershell.codeFormatting.newLineAfterOpenBrace": false,
     "powershell.codeFormatting.newLineAfterCloseBrace": true,

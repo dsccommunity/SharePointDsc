@@ -1,5 +1,6 @@
 [CmdletBinding()]
-param(
+param
+(
     [Parameter()]
     [string]
     $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
@@ -7,163 +8,198 @@ param(
             -Resolve)
 )
 
-Import-Module -Name (Join-Path -Path $PSScriptRoot `
-        -ChildPath "..\UnitTestHelper.psm1" `
-        -Resolve)
+$script:DSCModuleName = 'SharePointDsc'
+$script:DSCResourceName = 'SPAppStoreSettings'
+$script:DSCResourceFullName = 'MSFT_' + $script:DSCResourceName
 
-$Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointCmdletModule `
-    -DscResource "SPAppStoreSettings"
+function Invoke-TestSetup
+{
+    try
+    {
+        Import-Module -Name DscResource.Test -Force
 
-Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
-    InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
-        Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
+        Import-Module -Name (Join-Path -Path $PSScriptRoot `
+                -ChildPath "..\UnitTestHelper.psm1" `
+                -Resolve)
 
-        # Initialize tests
+        $Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointCmdletModule `
+            -DscResource $script:DSCResourceName `
+            -ModuleVersion $moduleVersionFolder
+    }
+    catch [System.IO.FileNotFoundException]
+    {
+        throw 'DscResource.Test module dependency not found. Please run ".\build.ps1 -Tasks build" first.'
+    }
 
-        # Mocks for all contexts
-        Mock -CommandName Set-SPAppAcquisitionConfiguration -MockWith { }
-        Mock -CommandName Set-SPOfficeStoreAppsDefaultActivation -MockWith { }
+    $script:testEnvironment = Initialize-TestEnvironment `
+        -DSCModuleName $script:DSCModuleName `
+        -DSCResourceName $script:DSCResourceFullName `
+        -ResourceType 'Mof' `
+        -TestType 'Unit'
+}
 
-        # Test contexts
-        Context -Name "The specified web application does not exist" -Fixture {
-            $testParams = @{
-                WebAppUrl          = "https://sharepoint.contoso.com"
-                AllowAppPurchases  = $true
-                AllowAppsForOffice = $true
-            }
+function Invoke-TestCleanup
+{
+    Restore-TestEnvironment -TestEnvironment $script:testEnvironment
+}
 
-            Mock -CommandName Get-SPWebApplication -MockWith {
-                return $null
-            }
+Invoke-TestSetup -ModuleVersion $moduleVersion
 
-            It "Should return null from the get method" {
-                (Get-TargetResource @testParams).WebAppUrl | Should BeNullOrEmpty
-            }
+try
+{
+    Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
+        InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
+            Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
-            It "Should return false from the test method" {
-                Test-TargetResource @testParams | Should Be $false
-            }
+            # Initialize tests
 
-            It "Should throw exception when executed" {
-                { Set-TargetResource @testParams } | Should Throw "Specified web application does not exist."
-            }
-        }
+            # Mocks for all contexts
+            Mock -CommandName Set-SPAppAcquisitionConfiguration -MockWith { }
+            Mock -CommandName Set-SPOfficeStoreAppsDefaultActivation -MockWith { }
 
-        Context -Name "The specified settings do not match" -Fixture {
-            $testParams = @{
-                WebAppUrl          = "https://sharepoint.contoso.com"
-                AllowAppPurchases  = $true
-                AllowAppsForOffice = $true
-            }
-
-            Mock -CommandName Get-SPAppAcquisitionConfiguration -MockWith {
-                return @{
-                    Enabled = $false
+            # Test contexts
+            Context -Name "The specified web application does not exist" -Fixture {
+                $testParams = @{
+                    WebAppUrl          = "https://sharepoint.contoso.com"
+                    AllowAppPurchases  = $true
+                    AllowAppsForOffice = $true
                 }
-            }
-            Mock -CommandName Get-SPOfficeStoreAppsDefaultActivation -MockWith {
-                return @{
-                    Enable = $false
+
+                Mock -CommandName Get-SPWebApplication -MockWith {
+                    return $null
                 }
-            }
 
-            Mock -CommandName Get-SPWebApplication -MockWith {
-                return @{
-                    Url = "https://sharepoint.contoso.com"
+                It "Should return null from the get method" {
+                    (Get-TargetResource @testParams).WebAppUrl | Should BeNullOrEmpty
                 }
-            }
 
-            It "Should return values from the get method" {
-                $result = Get-TargetResource @testParams
-                $result.AllowAppPurchases | Should Be $false
-                $result.AllowAppsForOffice | Should Be $false
-            }
-
-            It "Should return false from the test method" {
-                Test-TargetResource @testParams | Should Be $false
-            }
-
-            It "Should update the settings" {
-                Set-TargetResource @testParams
-                Assert-MockCalled Set-SPAppAcquisitionConfiguration
-                Assert-MockCalled Set-SPOfficeStoreAppsDefaultActivation
-            }
-        }
-
-        Context -Name "The specified settings match" -Fixture {
-            $testParams = @{
-                WebAppUrl          = "https://sharepoint.contoso.com"
-                AllowAppPurchases  = $true
-                AllowAppsForOffice = $true
-            }
-
-            Mock -CommandName Get-SPAppAcquisitionConfiguration -MockWith {
-                return @{
-                    Enabled = $true
+                It "Should return false from the test method" {
+                    Test-TargetResource @testParams | Should Be $false
                 }
-            }
-            Mock -CommandName Get-SPOfficeStoreAppsDefaultActivation -MockWith {
-                return @{
-                    Enable = $true
+
+                It "Should throw exception when executed" {
+                    { Set-TargetResource @testParams } | Should Throw "Specified web application does not exist."
                 }
             }
 
-            Mock -CommandName Get-SPWebApplication -MockWith {
-                return @{
-                    Url = "https://sharepoint.contoso.com"
+            Context -Name "The specified settings do not match" -Fixture {
+                $testParams = @{
+                    WebAppUrl          = "https://sharepoint.contoso.com"
+                    AllowAppPurchases  = $true
+                    AllowAppsForOffice = $true
+                }
+
+                Mock -CommandName Get-SPAppAcquisitionConfiguration -MockWith {
+                    return @{
+                        Enabled = $false
+                    }
+                }
+                Mock -CommandName Get-SPOfficeStoreAppsDefaultActivation -MockWith {
+                    return @{
+                        Enable = $false
+                    }
+                }
+
+                Mock -CommandName Get-SPWebApplication -MockWith {
+                    return @{
+                        Url = "https://sharepoint.contoso.com"
+                    }
+                }
+
+                It "Should return values from the get method" {
+                    $result = Get-TargetResource @testParams
+                    $result.AllowAppPurchases | Should Be $false
+                    $result.AllowAppsForOffice | Should Be $false
+                }
+
+                It "Should return false from the test method" {
+                    Test-TargetResource @testParams | Should Be $false
+                }
+
+                It "Should update the settings" {
+                    Set-TargetResource @testParams
+                    Assert-MockCalled Set-SPAppAcquisitionConfiguration
+                    Assert-MockCalled Set-SPOfficeStoreAppsDefaultActivation
                 }
             }
 
-            It "Should return values from the get method" {
-                $result = Get-TargetResource @testParams
-                $result.AllowAppPurchases | Should Be $true
-                $result.AllowAppsForOffice | Should Be $true
-            }
+            Context -Name "The specified settings match" -Fixture {
+                $testParams = @{
+                    WebAppUrl          = "https://sharepoint.contoso.com"
+                    AllowAppPurchases  = $true
+                    AllowAppsForOffice = $true
+                }
 
-            It "Should returns false from the test method" {
-                Test-TargetResource @testParams | Should Be $true
-            }
-        }
+                Mock -CommandName Get-SPAppAcquisitionConfiguration -MockWith {
+                    return @{
+                        Enabled = $true
+                    }
+                }
+                Mock -CommandName Get-SPOfficeStoreAppsDefaultActivation -MockWith {
+                    return @{
+                        Enable = $true
+                    }
+                }
 
-        Context -Name "The specified setting does not match" -Fixture {
-            $testParams = @{
-                WebAppUrl         = "https://sharepoint.contoso.com"
-                AllowAppPurchases = $true
-            }
+                Mock -CommandName Get-SPWebApplication -MockWith {
+                    return @{
+                        Url = "https://sharepoint.contoso.com"
+                    }
+                }
 
-            Mock -CommandName Get-SPAppAcquisitionConfiguration -MockWith {
-                return @{
-                    Enabled = $false
+                It "Should return values from the get method" {
+                    $result = Get-TargetResource @testParams
+                    $result.AllowAppPurchases | Should Be $true
+                    $result.AllowAppsForOffice | Should Be $true
+                }
+
+                It "Should returns false from the test method" {
+                    Test-TargetResource @testParams | Should Be $true
                 }
             }
-            Mock -CommandName Get-SPOfficeStoreAppsDefaultActivation -MockWith {
-                return @{
-                    Enable = $true
+
+            Context -Name "The specified setting does not match" -Fixture {
+                $testParams = @{
+                    WebAppUrl         = "https://sharepoint.contoso.com"
+                    AllowAppPurchases = $true
                 }
-            }
 
-            Mock -CommandName Get-SPWebApplication -MockWith {
-                return @{
-                    Url = "https://sharepoint.contoso.com"
+                Mock -CommandName Get-SPAppAcquisitionConfiguration -MockWith {
+                    return @{
+                        Enabled = $false
+                    }
                 }
-            }
+                Mock -CommandName Get-SPOfficeStoreAppsDefaultActivation -MockWith {
+                    return @{
+                        Enable = $true
+                    }
+                }
 
-            It "Should return values from the get method" {
-                $result = Get-TargetResource @testParams
-                $result.AllowAppPurchases | Should Be $false
-                $result.AllowAppsForOffice | Should Be $true
-            }
+                Mock -CommandName Get-SPWebApplication -MockWith {
+                    return @{
+                        Url = "https://sharepoint.contoso.com"
+                    }
+                }
 
-            It "Should return false from the test method" {
-                Test-TargetResource @testParams | Should Be $false
-            }
+                It "Should return values from the get method" {
+                    $result = Get-TargetResource @testParams
+                    $result.AllowAppPurchases | Should Be $false
+                    $result.AllowAppsForOffice | Should Be $true
+                }
 
-            It "Should update the settings" {
-                Set-TargetResource @testParams
-                Assert-MockCalled Set-SPAppAcquisitionConfiguration
+                It "Should return false from the test method" {
+                    Test-TargetResource @testParams | Should Be $false
+                }
+
+                It "Should update the settings" {
+                    Set-TargetResource @testParams
+                    Assert-MockCalled Set-SPAppAcquisitionConfiguration
+                }
             }
         }
     }
 }
-
-Invoke-Command -ScriptBlock $Global:SPDscHelper.CleanupScript -NoNewScope
+finally
+{
+    Invoke-TestCleanup
+}

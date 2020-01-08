@@ -1,4 +1,4 @@
-﻿function Get-TargetResource
+function Get-TargetResource
 {
     [CmdletBinding()]
     [OutputType([System.Collections.Hashtable])]
@@ -12,6 +12,7 @@
         [String]
         $Description,
 
+        [Parameter()]
         [String]
         $RegisteredIssuerNameIdentifier,
 
@@ -150,6 +151,7 @@ function Set-TargetResource
         [String]
         $Description,
 
+        [Parameter()]
         [String]
         $RegisteredIssuerNameIdentifier,
 
@@ -349,6 +351,7 @@ function Test-TargetResource
         [String]
         $Description,
 
+        [Parameter()]
         [String]
         $RegisteredIssuerNameIdentifier,
 

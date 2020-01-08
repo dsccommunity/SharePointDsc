@@ -9,7 +9,7 @@
 @{
 
   # Script module or binary module file associated with this manifest.
-  # RootModule = ''
+  # RootModule        = ''
 
   # Version number of this module.
   ModuleVersion     = '0.0.0.1'
@@ -63,7 +63,7 @@
   # FormatsToProcess = @()
 
   # Modules to import as nested modules of the module specified in RootModule/ModuleToProcess
-  NestedModules     = @("modules\SharePointDsc.Util\SharePointDsc.Util.psm1")
+  NestedModules     = @("Modules\SharePointDsc.Util\SharePointDsc.Util.psm1")
 
   # Functions to export from this module
   FunctionsToExport = @()
@@ -92,10 +92,10 @@
     "Convert-SPDscADGroupNameToID")
 
   # Variables to export from this module
-  VariablesToExport = @()
+  # VariablesToExport = @()
 
   # Aliases to export from this module
-  AliasesToExport   = @()
+  # AliasesToExport   = @()
 
   # List of all modules packaged with this module
   # ModuleList = @()

@@ -631,7 +631,8 @@ This method is not intensed for public use, and was created to facilitate unit t
 #>
 function Get-SPDscADSIObject
 {
-    param(
+    param
+    (
         [Parameter()]
         [string] $LdapPath
     )

@@ -1,5 +1,6 @@
 [CmdletBinding()]
-param(
+param
+(
     [Parameter()]
     [string]
     $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
@@ -7,141 +8,176 @@ param(
             -Resolve)
 )
 
-Import-Module -Name (Join-Path -Path $PSScriptRoot `
-        -ChildPath "..\UnitTestHelper.psm1" `
-        -Resolve)
+$script:DSCModuleName = 'SharePointDsc'
+$script:DSCResourceName = 'SPWebApplicationAppDomain'
+$script:DSCResourceFullName = 'MSFT_' + $script:DSCResourceName
 
-$Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointCmdletModule `
-    -DscResource "SPWebApplicationAppDomain"
+function Invoke-TestSetup
+{
+    try
+    {
+        Import-Module -Name DscResource.Test -Force
 
-Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
-    InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
-        Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
+        Import-Module -Name (Join-Path -Path $PSScriptRoot `
+                -ChildPath "..\UnitTestHelper.psm1" `
+                -Resolve)
 
-        # Initialize tests
+        $Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointCmdletModule `
+            -DscResource $script:DSCResourceName `
+            -ModuleVersion $moduleVersionFolder
+    }
+    catch [System.IO.FileNotFoundException]
+    {
+        throw 'DscResource.Test module dependency not found. Please run ".\build.ps1 -Tasks build" first.'
+    }
 
-        # Mocks for all contexts
-        Mock -CommandName New-SPWebApplicationAppDomain -MockWith { }
-        Mock -CommandName Remove-SPWebApplicationAppDomain -MockWith { }
-        Mock -CommandName Start-Sleep -MockWith { }
+    $script:testEnvironment = Initialize-TestEnvironment `
+        -DSCModuleName $script:DSCModuleName `
+        -DSCResourceName $script:DSCResourceFullName `
+        -ResourceType 'Mof' `
+        -TestType 'Unit'
+}
 
-        # Test contexts
-        Context -Name "No app domain settings have been configured for the specified web app and zone" -Fixture {
-            $testParams = @{
-                AppDomain = "contosointranetapps.com"
-                WebAppUrl = "http://portal.contoso.com"
-                Zone      = "Default"
-                Port      = 80;
-                SSL       = $false
-            }
+function Invoke-TestCleanup
+{
+    Restore-TestEnvironment -TestEnvironment $script:testEnvironment
+}
 
-            Mock -CommandName Get-SPWebApplicationAppDomain -MockWith { return $null }
+Invoke-TestSetup -ModuleVersion $moduleVersion
 
-            It "Should return null from the get method" {
-                (Get-TargetResource @testParams).AppDomain | Should BeNullOrEmpty
-            }
+try
+{
+    Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
+        InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
+            Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
-            It "Should return false from the test method" {
-                Test-TargetResource @testParams | Should Be $false
-            }
+            # Initialize tests
 
-            It "Should create the new app domain entry" {
-                Set-TargetResource @testParams
-                Assert-MockCalled New-SPWebApplicationAppDomain
-            }
-        }
+            # Mocks for all contexts
+            Mock -CommandName New-SPWebApplicationAppDomain -MockWith { }
+            Mock -CommandName Remove-SPWebApplicationAppDomain -MockWith { }
+            Mock -CommandName Start-Sleep -MockWith { }
 
-        Context -Name "An app domain has been configured for the specified web app and zone but it's not correct" -Fixture {
-            $testParams = @{
-                AppDomain = "contosointranetapps.com"
-                WebAppUrl = "http://portal.contoso.com"
-                Zone      = "Default"
-                Port      = 80;
-                SSL       = $false
-            }
+            # Test contexts
+            Context -Name "No app domain settings have been configured for the specified web app and zone" -Fixture {
+                $testParams = @{
+                    AppDomain = "contosointranetapps.com"
+                    WebAppUrl = "http://portal.contoso.com"
+                    Zone      = "Default"
+                    Port      = 80;
+                    SSL       = $false
+                }
 
-            Mock -CommandName Get-SPWebApplicationAppDomain -MockWith {
-                return @{
-                    AppDomain   = "wrong.domain"
-                    UrlZone     = $testParams.Zone
-                    Port        = $testParams.Port
-                    IsSchemeSSL = $testParams.SSL
+                Mock -CommandName Get-SPWebApplicationAppDomain -MockWith { return $null }
+
+                It "Should return null from the get method" {
+                    (Get-TargetResource @testParams).AppDomain | Should BeNullOrEmpty
+                }
+
+                It "Should return false from the test method" {
+                    Test-TargetResource @testParams | Should Be $false
+                }
+
+                It "Should create the new app domain entry" {
+                    Set-TargetResource @testParams
+                    Assert-MockCalled New-SPWebApplicationAppDomain
                 }
             }
 
-            It "Should return null from the get method" {
-                (Get-TargetResource @testParams).AppDomain | Should Be "wrong.domain"
-            }
+            Context -Name "An app domain has been configured for the specified web app and zone but it's not correct" -Fixture {
+                $testParams = @{
+                    AppDomain = "contosointranetapps.com"
+                    WebAppUrl = "http://portal.contoso.com"
+                    Zone      = "Default"
+                    Port      = 80;
+                    SSL       = $false
+                }
 
-            It "Should return false from the test method" {
-                Test-TargetResource @testParams | Should Be $false
-            }
+                Mock -CommandName Get-SPWebApplicationAppDomain -MockWith {
+                    return @{
+                        AppDomain   = "wrong.domain"
+                        UrlZone     = $testParams.Zone
+                        Port        = $testParams.Port
+                        IsSchemeSSL = $testParams.SSL
+                    }
+                }
 
-            It "Should create the new app domain entry" {
-                Set-TargetResource @testParams
-                Assert-MockCalled Remove-SPWebApplicationAppDomain
-                Assert-MockCalled New-SPWebApplicationAppDomain
-            }
-        }
+                It "Should return null from the get method" {
+                    (Get-TargetResource @testParams).AppDomain | Should Be "wrong.domain"
+                }
 
-        Context -Name "The correct app domain has been configued for the requested web app and zone" -Fixture {
-            $testParams = @{
-                AppDomain = "contosointranetapps.com"
-                WebAppUrl = "http://portal.contoso.com"
-                Zone      = "Default"
-                Port      = 80;
-                SSL       = $false
-            }
+                It "Should return false from the test method" {
+                    Test-TargetResource @testParams | Should Be $false
+                }
 
-            Mock -CommandName Get-SPWebApplicationAppDomain -MockWith {
-                return @{
-                    AppDomain   = $testParams.AppDomain
-                    UrlZone     = $testParams.Zone
-                    Port        = $testParams.Port
-                    IsSchemeSSL = $testParams.SSL
+                It "Should create the new app domain entry" {
+                    Set-TargetResource @testParams
+                    Assert-MockCalled Remove-SPWebApplicationAppDomain
+                    Assert-MockCalled New-SPWebApplicationAppDomain
                 }
             }
 
-            It "Should return null from the get method" {
-                (Get-TargetResource @testParams).AppDomain | Should Be $testParams.AppDomain
-            }
+            Context -Name "The correct app domain has been configued for the requested web app and zone" -Fixture {
+                $testParams = @{
+                    AppDomain = "contosointranetapps.com"
+                    WebAppUrl = "http://portal.contoso.com"
+                    Zone      = "Default"
+                    Port      = 80;
+                    SSL       = $false
+                }
 
-            It "Should return false from the test method" {
-                Test-TargetResource @testParams | Should Be $true
-            }
-        }
+                Mock -CommandName Get-SPWebApplicationAppDomain -MockWith {
+                    return @{
+                        AppDomain   = $testParams.AppDomain
+                        UrlZone     = $testParams.Zone
+                        Port        = $testParams.Port
+                        IsSchemeSSL = $testParams.SSL
+                    }
+                }
 
-        Context -Name "The functions operate without optional parameters included" -Fixture {
-            $testParams = @{
-                AppDomain = "contosointranetapps.com"
-                WebAppUrl = "http://portal.contoso.com"
-                Zone      = "Default"
-            }
+                It "Should return null from the get method" {
+                    (Get-TargetResource @testParams).AppDomain | Should Be $testParams.AppDomain
+                }
 
-            Mock -CommandName Get-SPWebApplicationAppDomain -MockWith {
-                return @{
-                    AppDomain   = "invalid.domain"
-                    UrlZone     = $testParams.Zone
-                    Port        = $testParams.Port
-                    IsSchemeSSL = $testParams.SSL
+                It "Should return false from the test method" {
+                    Test-TargetResource @testParams | Should Be $true
                 }
             }
 
-            It "Should return null from the get method" {
-                (Get-TargetResource @testParams).AppDomain | Should Be "invalid.domain"
-            }
+            Context -Name "The functions operate without optional parameters included" -Fixture {
+                $testParams = @{
+                    AppDomain = "contosointranetapps.com"
+                    WebAppUrl = "http://portal.contoso.com"
+                    Zone      = "Default"
+                }
 
-            It "Should return false from the test method" {
-                Test-TargetResource @testParams | Should Be $false
-            }
+                Mock -CommandName Get-SPWebApplicationAppDomain -MockWith {
+                    return @{
+                        AppDomain   = "invalid.domain"
+                        UrlZone     = $testParams.Zone
+                        Port        = $testParams.Port
+                        IsSchemeSSL = $testParams.SSL
+                    }
+                }
 
-            It "Should create the new app domain entry" {
-                Set-TargetResource @testParams
-                Assert-MockCalled Remove-SPWebApplicationAppDomain
-                Assert-MockCalled New-SPWebApplicationAppDomain
+                It "Should return null from the get method" {
+                    (Get-TargetResource @testParams).AppDomain | Should Be "invalid.domain"
+                }
+
+                It "Should return false from the test method" {
+                    Test-TargetResource @testParams | Should Be $false
+                }
+
+                It "Should create the new app domain entry" {
+                    Set-TargetResource @testParams
+                    Assert-MockCalled Remove-SPWebApplicationAppDomain
+                    Assert-MockCalled New-SPWebApplicationAppDomain
+                }
             }
         }
     }
 }
-
-Invoke-Command -ScriptBlock $Global:SPDscHelper.CleanupScript -NoNewScope
+finally
+{
+    Invoke-TestCleanup
+}

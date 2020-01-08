@@ -1,7 +1,8 @@
 function Expand-AccessLevel
 {
     [OutputType([System.String[]])]
-    param(
+    param
+    (
         [Parameter()]
         $Security,
 

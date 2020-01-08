@@ -140,12 +140,12 @@ function Set-TargetResource
 
     if ($StorageMaxInMB -lt $StorageWarningInMB)
     {
-        Throw "StorageMaxInMB must be equal to or larger than StorageWarningInMB."
+        throw "StorageMaxInMB must be equal to or larger than StorageWarningInMB."
     }
 
     if ($MaximumUsagePointsSolutions -lt $WarningUsagePointsSolutions)
     {
-        Throw ("MaximumUsagePointsSolutions must be equal to or larger than " + `
+        throw ("MaximumUsagePointsSolutions must be equal to or larger than " + `
                 "WarningUsagePointsSolutions.")
     }
 
@@ -232,7 +232,7 @@ function Set-TargetResource
                     -or $MaximumUsagePointsSolutions `
                     -or $WarningUsagePointsSolutions)
             {
-                Throw ("Do not use StorageMaxInMB, StorageWarningInMB, " + `
+                throw ("Do not use StorageMaxInMB, StorageWarningInMB, " + `
                         "MaximumUsagePointsSolutions or WarningUsagePointsSolutions " + `
                         "when Ensure is specified as Absent")
             }
@@ -305,12 +305,12 @@ function Test-TargetResource
 
     if ($StorageMaxInMB -lt $StorageWarningInMB)
     {
-        Throw "StorageMaxInMB must be equal to or larger than StorageWarningInMB."
+        throw "StorageMaxInMB must be equal to or larger than StorageWarningInMB."
     }
 
     if ($MaximumUsagePointsSolutions -lt $WarningUsagePointsSolutions)
     {
-        Throw ("MaximumUsagePointsSolutions must be equal to or larger than " + `
+        throw ("MaximumUsagePointsSolutions must be equal to or larger than " + `
                 "WarningUsagePointsSolutions.")
     }
 

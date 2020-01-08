@@ -502,9 +502,10 @@ function Test-TargetResource
                 Write-Verbose -Message "Proxy library list matches - checking that SupportAppAuthentication match on each object"
                 foreach ($currentProxyLibrary in $CurrentValues.ProxyLibraries)
                 {
-                    if ($currentProxyLibrary.SupportAppAuthentication -ne ($ProxyLibraries | Where-Object -FilterScript {
-                                $_.AssemblyName -eq $currentProxyLibrary.AssemblyName
-                            } | Select-Object -First 1).SupportAppAuthentication)
+                    $supportAppAuth = ($ProxyLibraries | Where-Object -FilterScript {
+                                                            $_.AssemblyName -eq $currentProxyLibrary.AssemblyName
+                                                        } | Select-Object -First 1).SupportAppAuthentication
+                    if ($currentProxyLibrary.SupportAppAuthentication -ne $supportAppAuth)
                     {
                         Write-Verbose -Message "$($currentProxyLibrary.AssemblyName) has incorrect SupportAppAuthentication. Test failed."
                         return $false
@@ -543,9 +544,10 @@ function Test-TargetResource
             else
             {
                 Write-Verbose -Message "$($proxyLibrary.AssemblyName) is already registered as a proxy library. Checking SupportAppAuthentication..."
-                if ($proxyLibrary.SupportAppAuthentication -ne ($CurrentValues.ProxyLibraries | Where-Object -FilterScript {
-                            $_.AssemblyName -eq $proxyLibrary.AssemblyName
-                        } | Select-Object -First 1).SupportAppAuthentication)
+                $supportAppAuth = ($CurrentValues.ProxyLibraries | Where-Object -FilterScript {
+                                                                    $_.AssemblyName -eq $proxyLibrary.AssemblyName
+                                                                } | Select-Object -First 1).SupportAppAuthentication
+                if ($proxyLibrary.SupportAppAuthentication -ne $supportAppAuth)
                 {
                     Write-Verbose -Message "$($proxyLibrary.AssemblyName) has incorrect SupportAppAuthentication. Test failed."
                     return $false

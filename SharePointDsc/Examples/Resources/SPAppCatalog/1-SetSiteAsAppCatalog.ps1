@@ -3,13 +3,15 @@
     This example shows how to configure the AppCatalog in the farm
 #>
 
-    Configuration Example 
+    Configuration Example
     {
-        param(
+        param
+        (
             [Parameter(Mandatory = $true)]
             [PSCredential]
             $SetupAccount
         )
+
         Import-DscResource -ModuleName SharePointDsc
 
         node localhost {

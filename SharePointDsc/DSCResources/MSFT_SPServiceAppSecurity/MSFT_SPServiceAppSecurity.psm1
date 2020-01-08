@@ -350,9 +350,10 @@ function Set-TargetResource
 
                 if ($CurrentValues.Members.Username -contains $desiredMember.Username)
                 {
-                    if ($null -ne (Compare-Object -ReferenceObject ($CurrentValues.Members | Where-Object -FilterScript {
+                    $compare = Compare-Object -ReferenceObject ($CurrentValues.Members | Where-Object -FilterScript {
                                     $_.Username -eq $desiredMember.Username
-                                } | Select-Object -First 1).AccessLevels -DifferenceObject $desiredMember.AccessLevels))
+                                } | Select-Object -First 1).AccessLevels -DifferenceObject $desiredMember.AccessLevels
+                    if ($null -ne $compare)
                     {
                         Grant-SPObjectSecurity -Identity $security `
                             -Principal $claim `
@@ -420,9 +421,10 @@ function Set-TargetResource
 
                 if ($CurrentValues.Members.Username -contains $desiredMember.Username)
                 {
-                    if ($null -ne (Compare-Object -ReferenceObject ($CurrentValues.Members | Where-Object -FilterScript {
+                    $compare = Compare-Object -ReferenceObject ($CurrentValues.Members | Where-Object -FilterScript {
                                     $_.Username -eq $desiredMember.Username
-                                } | Select-Object -First 1).AccessLevels -DifferenceObject $desiredMember.AccessLevels))
+                                } | Select-Object -First 1).AccessLevels -DifferenceObject $desiredMember.AccessLevels
+                    if ($null -ne $compare)
                     {
                         Grant-SPObjectSecurity -Identity $security `
                             -Principal $claim `
@@ -616,9 +618,10 @@ function Test-TargetResource
                     Write-Verbose -Message "$($member.Username) already has access. Checking permission..."
                     $expandedAccessLevels = Expand-AccessLevel -Security $security -AccessLevels $member.AccessLevels
 
-                    if ($null -ne (Compare-Object -DifferenceObject $expandedAccessLevels -ReferenceObject ($CurrentValues.Members | Where-Object -FilterScript {
+                    $compare = Compare-Object -DifferenceObject $expandedAccessLevels -ReferenceObject ($CurrentValues.Members | Where-Object -FilterScript {
                                     $_.Username -eq $member.Username
-                                } | Select-Object -First 1).AccessLevels))
+                                } | Select-Object -First 1).AccessLevels
+                    if ($null -ne $compare)
                     {
                         Write-Verbose -Message "$($member.Username) has incorrect permission level. Test failed."
                         return $false

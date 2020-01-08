@@ -26,7 +26,8 @@ Get-SPDscConfigDBStatus -SQLServer sql.contoso.com -Database SP_Config
 #>
 function Get-SPDscConfigDBStatus
 {
-    param(
+    param
+    (
         [Parameter(Mandatory = $true)]
         [String]
         $SQLServer,
@@ -103,7 +104,8 @@ Get-SPDscConfigDBStatus -SQLServer sql.contoso.com
 #>
 function Get-SPDscSQLInstanceStatus
 {
-    param(
+    param
+    (
         [Parameter(Mandatory = $true)]
         [String]
         $SQLServer
@@ -165,7 +167,8 @@ Add-SPDscConfigDBLock -SQLServer sql.contoso.com -Database SP_Config
 #>
 function Add-SPDscConfigDBLock
 {
-    param(
+    param
+    (
         [Parameter(Mandatory = $true)]
         [String]
         $SQLServer,
@@ -226,7 +229,8 @@ Remove-SPDscConfigDBLock -SQLServer sql.contoso.com -Database SP_Config
 #>
 function Remove-SPDscConfigDBLock
 {
-    param(
+    param
+    (
         [Parameter(Mandatory = $true)]
         [String]
         $SQLServer,
