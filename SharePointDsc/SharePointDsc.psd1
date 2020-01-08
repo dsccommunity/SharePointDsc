@@ -12,25 +12,25 @@
   # RootModule        = ''
 
   # Version number of this module.
-  ModuleVersion     = '0.0.0.1'
+  ModuleVersion        = '0.0.0.1'
 
   # ID used to uniquely identify this module
-  GUID              = '6c1176a0-4fac-4134-8ca2-3fa8a21a7b90'
+  GUID                 = '6c1176a0-4fac-4134-8ca2-3fa8a21a7b90'
 
   # Author of this module
-  Author            = 'DSC Community'
+  Author               = 'DSC Community'
 
   # Company or vendor of this module
-  CompanyName       = 'DSC Community'
+  CompanyName          = 'DSC Community'
 
   # Copyright statement for this module
-  Copyright         = 'Copyright the DSC Community contributors. All rights reserved.'
+  Copyright            = 'Copyright the DSC Community contributors. All rights reserved.'
 
   # Description of the functionality provided by this module
-  Description       = 'This DSC module is used to deploy and configure SharePoint Server 2013, 2016 and 2019, and covers a wide range of areas including web apps, service apps and farm configuration.'
+  Description          = 'This DSC module is used to deploy and configure SharePoint Server 2013, 2016 and 2019, and covers a wide range of areas including web apps, service apps and farm configuration.'
 
   # Minimum version of the Windows PowerShell engine required by this module
-  PowerShellVersion = '4.0'
+  PowerShellVersion    = '4.0'
 
   # Name of the Windows PowerShell host required by this module
   # PowerShellHostName = ''
@@ -63,13 +63,13 @@
   # FormatsToProcess = @()
 
   # Modules to import as nested modules of the module specified in RootModule/ModuleToProcess
-  NestedModules     = @("Modules\SharePointDsc.Util\SharePointDsc.Util.psm1")
+  NestedModules        = @("Modules\SharePointDsc.Util\SharePointDsc.Util.psm1")
 
   # Functions to export from this module
-  FunctionsToExport = @()
+  FunctionsToExport    = @()
 
   # Cmdlets to export from this module
-  CmdletsToExport   = @("Invoke-SPDscCommand",
+  CmdletsToExport      = @("Invoke-SPDscCommand",
     "Get-SPDscInstalledProductVersion",
     "Get-SPDscContentService",
     "Rename-SPDscParamValue",
@@ -92,10 +92,134 @@
     "Convert-SPDscADGroupNameToID")
 
   # Variables to export from this module
-  # VariablesToExport = @()
+  VariablesToExport    = @()
 
   # Aliases to export from this module
-  # AliasesToExport   = @()
+  AliasesToExport      = @()
+
+  # DSCResources to export from this module
+  DscResourcesToExport = @(
+    'SPAccessServiceApp',
+    'SPAccessServices2010',
+    'SPAlternateUrl',
+    'SPAntivirusSettings',
+    'SPAppCatalog',
+    'SPAppDomain',
+    'SPAppManagementServiceApp',
+    'SPAppStoreSettings',
+    'SPAuthenticationRealm',
+    'SPBCSServiceApp',
+    'SPBlobCacheSettings',
+    'SPCacheAccounts',
+    'SPConfigWizard',
+    'SPContentDatabase',
+    'SPDatabaseAAG',
+    'SPDesignerSettings',
+    'SPDiagnosticLoggingSettings',
+    'SPDiagnosticsProvider',
+    'SPDistributedCacheClientSettings',
+    'SPDistributedCacheService',
+    'SPExcelServiceApp',
+    'SPFarm',
+    'SPFarmAdministrators',
+    'SPFarmPropertyBag',
+    'SPFarmSolution',
+    'SPFeature',
+    'SPHealthAnalyzerRuleState',
+    'SPIncomingEmailSettings',
+    'SPInfoPathFormsServiceConfig',
+    'SPInstall',
+    'SPInstallLanguagePack',
+    'SPInstallPrereqs',
+    'SPIrmSettings',
+    'SPLogLevel',
+    'SPMachineTranslationServiceApp',
+    'SPManagedAccount',
+    'SPManagedMetadataServiceApp',
+    'SPManagedMetadataServiceAppDefault',
+    'SPManagedPath',
+    'SPMinRoleCompliance',
+    'SPOfficeOnlineServerBinding',
+    'SPOutgoingEmailSettings',
+    'SPPasswordChangeSettings',
+    'SPPerformancePointServiceApp',
+    'SPPowerPointAutomationServiceApp',
+    'SPProductUpdate',
+    'SPProjectServerAdditionalSettings',
+    'SPProjectServerADResourcePoolSync',
+    'SPProjectServerGlobalPermissions',
+    'SPProjectServerGroup',
+    'SPProjectServerLicense',
+    'SPProjectServerPermissionMode',
+    'SPProjectServerServiceApp',
+    'SPProjectServerTimeSheetSettings',
+    'SPProjectServerUserSyncSettings',
+    'SPProjectServerWssSettings',
+    'SPPublishServiceApplication',
+    'SPQuotaTemplate',
+    'SPRemoteFarmTrust',
+    'SPSearchAuthoritativePage',
+    'SPSearchContentSource',
+    'SPSearchCrawlerImpactRule',
+    'SPSearchCrawlMapping',
+    'SPSearchCrawlRule',
+    'SPSearchFileType',
+    'SPSearchIndexPartition',
+    'SPSearchManagedProperty',
+    'SPSearchMetadataCategory',
+    'SPSearchResultSource',
+    'SPSearchServiceApp',
+    'SPSearchServiceSettings',
+    'SPSearchTopology',
+    'SPSecureStoreServiceApp',
+    'SPSecurityTokenServiceConfig',
+    'SPSelfServiceSiteCreation',
+    'SPServiceAppPool',
+    'SPServiceAppProxyGroup',
+    'SPServiceAppSecurity',
+    'SPServiceIdentity',
+    'SPServiceInstance',
+    'SPSessionStateService',
+    'SPShellAdmins',
+    'SPSite',
+    'SPSitePropertyBag',
+    'SPSiteUrl',
+    'SPStateServiceApp',
+    'SPSubscriptionSettingsServiceApp',
+    'SPTimerJobState',
+    'SPTrustedIdentityTokenIssuer',
+    'SPTrustedIdentityTokenIssuerProviderRealms',
+    'SPTrustedRootAuthority',
+    'SPTrustedSecurityTokenIssuer',
+    'SPUsageApplication',
+    'SPUserProfileProperty',
+    'SPUserProfileSection',
+    'SPUserProfileServiceApp',
+    'SPUserProfileServiceAppPermissions',
+    'SPUserProfileSyncConnection',
+    'SPUserProfileSyncService',
+    'SPVisioServiceApp',
+    'SPWeb',
+    'SPWebAppAuthentication',
+    'SPWebAppBlockedFileTypes',
+    'SPWebAppClientCallableSettings',
+    'SPWebAppGeneralSettings',
+    'SPWebApplication',
+    'SPWebApplicationAppDomain',
+    'SPWebApplicationExtension',
+    'SPWebAppPeoplePickerSettings',
+    'SPWebAppPermissions',
+    'SPWebAppPolicy',
+    'SPWebAppPropertyBag',
+    'SPWebAppProxyGroup',
+    'SPWebAppSiteUseAndDeletion',
+    'SPWebAppSuiteBar',
+    'SPWebAppThrottlingSettings',
+    'SPWebAppWorkflowSettings',
+    'SPWordAutomationServiceApp',
+    'SPWorkflowService',
+    'SPWorkManagementServiceApp'
+  )
 
   # List of all modules packaged with this module
   # ModuleList = @()
@@ -110,7 +234,7 @@
   # DefaultCommandPrefix = ''
 
   # Private data to pass to the module specified in RootModule/ModuleToProcess. This may also contain a PSData hashtable with additional module metadata used by PowerShell.
-  PrivateData       = @{
+  PrivateData          = @{
 
     PSData = @{
 

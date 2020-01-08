@@ -15,8 +15,8 @@ NOTE:
     writing code, sharing opinions, and provided feedback.
 
 TROUBLESHOOTING NOTE:
-    Look in Github repository for read about issues and submit a new issue.
-    https://github.com/dsccommunity/SharePointDsc/issues
+    Go to the Github repository for read about issues, submit a new issue, and read
+    about new releases. https://github.com/dsccommunity/SharePointDsc
 
 SEE ALSO
 - https://github.com/dsccommunity/SharePointDsc

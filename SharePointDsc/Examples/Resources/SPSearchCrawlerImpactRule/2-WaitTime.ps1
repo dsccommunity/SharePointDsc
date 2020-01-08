@@ -35,8 +35,7 @@ Updated author, copyright notice, and URLs.
 <#
 
 .DESCRIPTION
- This example applies permissions for the user profile service application to limit
- access to specific features.
+ This example shows how to create a Crawler Impact Rule with a Wait Time
 
 #>
 
@@ -50,12 +49,12 @@ Updated author, copyright notice, and URLs.
         Import-DscResource -ModuleName SharePointDsc
 
         node localhost {
-            SPUserProfileServiceAppPermissions UPAPermissions
+            SPSearchCrawlerImpactRule IntranetCrawlerImpactWaitTimeRule
             {
-                ProxyName            = "User Profile Service Application Proxy"
-                CreatePersonalSite   = @("DEMO\Group", "DEMO\User1")
-                FollowAndEditProfile = @("Everyone")
-                UseTagsAndNotes      = @("None")
+                ServiceAppName = "Search Service Application"
+                Name = "https://intranet.sharepoint.contoso.com"
+                WaitTime = 60
+                Ensure = "Present"
                 PsDscRunAsCredential = $SetupAccount
             }
         }
