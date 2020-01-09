@@ -18,8 +18,7 @@
     'DscResource.AnalyzerRules' = 'latest'
     MarkdownLinkCheck           = 'latest'
     xDSCResourceDesigner        = 'latest'
-    xWebAdministration          = 'latest'
 
-    #required for DSC authoring
-    # xDscResourceDesigner = 'latest'
+    # Required for examples
+    xWebAdministration          = '3.1.0'
 }
