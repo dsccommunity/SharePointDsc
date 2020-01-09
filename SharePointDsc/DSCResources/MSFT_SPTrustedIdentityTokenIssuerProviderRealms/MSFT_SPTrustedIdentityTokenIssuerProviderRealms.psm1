@@ -373,7 +373,7 @@ function Get-ProviderRealmsStatus()
             $currentRealms.ContainsKey($_) -and $currentRealms[$_] -eq $desiredRealms[$_]
         } | ForEach-Object {
             $returnval = @{
-                 "$($_)" = "$($currentRealms[$_])"
+                "$($_)" = "$($currentRealms[$_])"
             }
 
             return $returnval
