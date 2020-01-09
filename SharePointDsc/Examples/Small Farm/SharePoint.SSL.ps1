@@ -64,7 +64,7 @@ Configuration Example
 
     Import-DscResource -ModuleName PSDesiredStateConfiguration
     Import-DscResource -ModuleName SharePointDsc
-    Import-DscResource -ModuleName xWebAdministration
+    Import-DscResource -ModuleName xWebAdministration -ModuleVersion 3.1.0
 
     node "Server1"
     {
