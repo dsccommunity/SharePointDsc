@@ -17,6 +17,8 @@
     'DscResource.Test'          = 'latest'
     'DscResource.AnalyzerRules' = 'latest'
     MarkdownLinkCheck           = 'latest'
+    xDSCResourceDesigner        = 'latest'
+    xWebAdministration          = 'latest'
 
     #required for DSC authoring
     # xDscResourceDesigner = 'latest'
