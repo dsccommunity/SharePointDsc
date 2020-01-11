@@ -106,7 +106,8 @@ try
                 $modifiedFileDestination = $(Join-Path $testDrivePath.FullName -ChildPath $tempFileName)
                 $registryFileContent.Replace("[HKEY_LOCAL_MACHINE\", "[$($testRegistryPath.Name)\HKEY_LOCAL_MACHINE\") | Out-File -FilePath $modifiedFileDestination
 
-                $null = Start-Process -FilePath 'reg.exe' -ArgumentList "import $modifiedFileDestination" -Wait -PassThru
+                $null = Invoke-Command -ScriptBlock { reg import $args[0] *>&1 | Out-Null } -ArgumentList $modifiedFileDestination
+                # $null = Start-Process -FilePath 'reg.exe' -ArgumentList "import $modifiedFileDestination" -Wait -PassThru
 
                 if ($PrepDataForTests)
                 {
