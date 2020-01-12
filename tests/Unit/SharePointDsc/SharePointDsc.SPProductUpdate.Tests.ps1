@@ -106,17 +106,14 @@ try
                 $modifiedFileDestination = $(Join-Path $testDrivePath.FullName -ChildPath $tempFileName)
                 $registryFileContent.Replace("[HKEY_LOCAL_MACHINE\", "[$($testRegistryPath.Name)\HKEY_LOCAL_MACHINE\") | Out-File -FilePath $modifiedFileDestination
 
-                # Try/catch to catch errors
+                # Using Try/Catch because reg.exe generates a complete message that
+                # triggers an exception in the Azure DevOps pipeline.
                 try
                 {
                     reg import $modifiedFileDestination *>&1 | Out-Null
-                    #$null = Invoke-Command -ScriptBlock { reg import $args[0] *>&1 | Out-Null } -ArgumentList $modifiedFileDestination
                 }
                 catch
-                {
-                    # Do nothing
-                }
-                # $null = Start-Process -FilePath 'reg.exe' -ArgumentList "import $modifiedFileDestination" -Wait -PassThru
+                {}
 
                 if ($PrepDataForTests)
                 {
@@ -124,7 +121,14 @@ try
                         $_.PsPath -notlike "*00000000F01FEC"
                     } | Remove-Item -Confirm:$false -Force -Recurse
 
-                    reg export "$($testRegistryPath)\HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Installer\UserData\S-1-5-18\Products" "C:\temp\$($tempFileName)"  *>&1 | Out-Null
+                    # Using Try/Catch because reg.exe generates a complete message that
+                    # triggers an exception in the Azure DevOps pipeline.
+                    try
+                    {
+                        reg export "$($testRegistryPath)\HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Installer\UserData\S-1-5-18\Products" "C:\temp\$($tempFileName)"  *>&1 | Out-Null
+                    }
+                    catch
+                    {}
                 }
             }
 
