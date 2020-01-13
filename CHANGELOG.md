@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+* SPAzureAccessControlServiceAppProxy
+  * Added new resource to create Azure Access Control Service Application Proxy
+* SPOAppPrincipalMgmtServiceAppProxy
+  * Added new resource to create SharePoint Online Application Principal
+    Management Service Application Proxy
 * SPSearchContentSource
   * Add CrawlVirtualServers and CrawlSites CrawlSetting for SharePoint content
     sources.  Fix for issue #1124.
