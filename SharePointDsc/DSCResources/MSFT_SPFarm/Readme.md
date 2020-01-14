@@ -44,6 +44,12 @@ begins with HTTPS, and will default to port 443.
 DeveloperDashboard can be specified as "On", "Off" and (only when using
 SharePoint 2013) to "OnDemand".
 
+ApplicationCredentialKey is used to set the application credential key on the
+local server, which is used by certain features to encrypt and decrypt passwords.
+The application credential key will only be set during initial farm creation and
+when joining the farm. The ApplicationCredentialKey needs to be the same on each
+server in the farm. ApplicationCredentialKey is only supported for SharePoint 2019.
+
 NOTE:
 When using SharePoint 2016 and later and enabling the Developer Dashboard,
 please make sure you also provision the Usage and Health service application
