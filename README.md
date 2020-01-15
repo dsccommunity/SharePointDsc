@@ -1,12 +1,10 @@
 # SharePointDsc
 
-[![Build Status](https://dev.azure.com/dsccommunity/SharePointDsc/_apis/build/status/dsccommunity.SharePointDsc?branchName=master)](https://dev.azure.com/dsccommunity/SharePointDsc/_build/latest?definitionId={definitionId}&branchName=master)
-![Azure DevOps coverage (branch)](https://img.shields.io/azure-devops/coverage/dsccommunity/SharePointDsc/{definitionId}/master)
-[![Azure DevOps tests](https://img.shields.io/azure-devops/tests/dsccommunity/SharePointDsc/{definitionId}/master)](https://dsccommunity.visualstudio.com/SharePointDsc/_test/analytics?definitionId={definitionId}&contextType=build)
+[![Build Status](https://dev.azure.com/dsccommunity/SharePointDsc/_apis/build/status/dsccommunity.SharePointDsc?branchName=master)](https://dev.azure.com/dsccommunity/SharePointDsc/_build/latest?definitionId=14&branchName=master)
+![Azure DevOps coverage (branch)](https://img.shields.io/azure-devops/coverage/dsccommunity/SharePointDsc/14/master)
+[![Azure DevOps tests](https://img.shields.io/azure-devops/tests/dsccommunity/SharePointDsc/14/master)](https://dsccommunity.visualstudio.com/SharePointDsc/_test/analytics?definitionId=14&contextType=build)
 [![PowerShell Gallery (with prereleases)](https://img.shields.io/powershellgallery/vpre/SharePointDsc?label=SharePointDsc%20Preview)](https://www.powershellgallery.com/packages/SharePointDsc/)
 [![PowerShell Gallery](https://img.shields.io/powershellgallery/v/SharePointDsc?label=SharePointDsc)](https://www.powershellgallery.com/packages/SharePointDsc/)
-
-Discuss SharePointDsc now: [![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/PowerShell/xSharePoint?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 
 The SharePointDsc PowerShell module (formerly known as xSharePoint) provides
 DSC resources that can be used to deploy and manage a SharePoint farm.
