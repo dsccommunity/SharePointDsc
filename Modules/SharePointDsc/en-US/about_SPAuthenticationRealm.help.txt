@@ -1,0 +1,55 @@
+.NAME
+    SPAuthenticationRealm
+
+# Description
+    
+    **Type:** Distributed
+    **Requires CredSSP:** No
+    
+    This resource is used to set the authentication realm for a farm.
+    By default the authentication realm for a new farm installation
+    is the same as the farm id.
+    
+    Note:
+    
+    SharePoint automatically converts the realm to lower case ASCII printable characters.
+    The specified authentication realm must therefore conform to this for the test
+    method to be able to detect a correct configuration.
+
+.PARAMETER IsSingleInstance
+    Key - String
+    Allowed values: Yes
+    Specifies the resource is a single instance, the value must be 'Yes'
+
+.PARAMETER AuthenticationRealm
+    Required - String
+    The authentication realm to be set
+
+.PARAMETER InstallAccount
+    Write - String
+    POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5
+
+.EXAMPLE 1
+
+This example sets the farm atuhentication realm.
+
+    Configuration Example
+    {
+        param(
+            [Parameter(Mandatory = $true)]
+            [PSCredential]
+            $SetupAccount
+        )
+        Import-DscResource -ModuleName SharePointDsc
+
+        node localhost {
+            SPAuthenticationRealm AuthenticationRealm
+            {
+                IsSingleInstance     = "Yes"
+                AuthenticationRealm  = "14757a87-4d74-4323-83b9-fb1e77e8f22f"
+                PsDscRunAsCredential = $SetupAccount
+            }
+        }
+    }
+
+
