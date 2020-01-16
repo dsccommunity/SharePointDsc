@@ -1,3 +1,8 @@
+$script:resourceModulePath = Split-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -Parent
+$script:modulesFolderPath = Join-Path -Path $script:resourceModulePath -ChildPath 'Modules'
+$script:resourceHelperModulePath = Join-Path -Path $script:modulesFolderPath -ChildPath 'SharePointDsc.Util'
+Import-Module -Name (Join-Path -Path $script:resourceHelperModulePath -ChildPath 'SharePointDsc.Util.psm1')
+
 function Get-TargetResource
 {
     [CmdletBinding()]
@@ -57,26 +62,26 @@ function Get-TargetResource
             $version = $Solution.Properties["Version"]
             $deployedWebApplications = @($solution.DeployedWebApplications `
                 | Select-Object -ExpandProperty Url)
-    }
-    else
-    {
-        $currentState = "Absent"
-        $deployed = $false
-        $version = "0.0.0.0"
-        $deployedWebApplications = @()
-    }
+        }
+        else
+        {
+            $currentState = "Absent"
+            $deployed = $false
+            $version = "0.0.0.0"
+            $deployedWebApplications = @()
+        }
 
-    return @{
-        Name          = $params.Name
-        LiteralPath   = $LiteralPath
-        Deployed      = $deployed
-        Ensure        = $currentState
-        Version       = $version
-        WebAppUrls    = $deployedWebApplications
-        SolutionLevel = $params.SolutionLevel
+        return @{
+            Name          = $params.Name
+            LiteralPath   = $LiteralPath
+            Deployed      = $deployed
+            Ensure        = $currentState
+            Version       = $version
+            WebAppUrls    = $deployedWebApplications
+            SolutionLevel = $params.SolutionLevel
+        }
     }
-}
-return $result
+    return $result
 }
 
 function Set-TargetResource

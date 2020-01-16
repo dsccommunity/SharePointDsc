@@ -1,3 +1,8 @@
+$script:resourceModulePath = Split-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -Parent
+$script:modulesFolderPath = Join-Path -Path $script:resourceModulePath -ChildPath 'Modules'
+$script:resourceHelperModulePath = Join-Path -Path $script:modulesFolderPath -ChildPath 'SharePointDsc.Util'
+Import-Module -Name (Join-Path -Path $script:resourceHelperModulePath -ChildPath 'SharePointDsc.Util.psm1')
+
 function Get-TargetResource
 {
     [CmdletBinding()]
@@ -80,7 +85,7 @@ function Get-TargetResource
             $providerSignOutUri = $sptrust.ProviderSignOutUri.OriginalString
             $useWReplyParameter = $sptrust.UseWReplyParameter
 
-            $spTrust.ClaimTypeInformation | Foreach-Object -Process {
+            $spTrust.ClaimTypeInformation | ForEach-Object -Process {
                 $claimsMappings = $claimsMappings + @{
                     Name              = $_.DisplayName
                     IncomingClaimType = $_.InputClaimType
@@ -247,7 +252,7 @@ function Set-TargetResource
                 }
 
                 $claimsMappingsArray = @()
-                $params.ClaimsMappings | Foreach-Object -Process {
+                $params.ClaimsMappings | ForEach-Object -Process {
                     $runParams = @{ }
                     $runParams.Add("IncomingClaimTypeDisplayName", $_.Name)
                     $runParams.Add("IncomingClaimType", $_.IncomingClaimType)
@@ -266,8 +271,8 @@ function Set-TargetResource
                 }
 
                 $mappings = ($claimsMappingsArray | Where-Object -FilterScript {
-                    $_.MappedClaimType -like $params.IdentifierClaim
-                })
+                        $_.MappedClaimType -like $params.IdentifierClaim
+                    })
                 if ($null -eq $mappings)
                 {
                     throw ("IdentifierClaim does not match any claim type specified in ClaimsMappings.")
@@ -290,8 +295,8 @@ function Set-TargetResource
                 }
 
                 $claimProvider = (Get-SPClaimProvider | Where-Object -FilterScript {
-                    $_.DisplayName -eq $params.ClaimProviderName
-                })
+                        $_.DisplayName -eq $params.ClaimProviderName
+                    })
                 if ($null -eq $claimProvider)
                 {
                     $trust.ClaimProviderName = $params.ClaimProviderName
@@ -315,12 +320,12 @@ function Set-TargetResource
             $Name = $params.Name
             # SPTrustedIdentityTokenIssuer must be removed from each zone of each web app before
             # it can be deleted
-            Get-SPWebApplication | Foreach-Object -Process {
+            Get-SPWebApplication | ForEach-Object -Process {
                 $wa = $_
                 $webAppUrl = $wa.Url
                 $update = $false
                 $urlZones = [Enum]::GetNames([Microsoft.SharePoint.Administration.SPUrlZone])
-                $urlZones | Foreach-Object -Process {
+                $urlZones | ForEach-Object -Process {
                     $zone = $_
                     $providers = Get-SPAuthenticationProvider -WebApplication $wa.Url `
                         -Zone $zone `
