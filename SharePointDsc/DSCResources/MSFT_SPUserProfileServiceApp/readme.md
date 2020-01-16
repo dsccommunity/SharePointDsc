@@ -35,3 +35,15 @@ http://www.powershellmagazine.com/2014/03/06/accidental-sabotage-beware-of-creds
 NOTE2:
 You should always specify the MySiteHostLocation parameter. Currently this is not
 a required parameter, but will be as of SharePointDsc v4.0.
+
+NOTE3:
+The UpdateProxyGroup parameter fixes the following issue:
+The User Profile service is looking up the proxy groups to find the correct MMS.
+Unfortunately it doesn't follow what you configured in Central Administration.
+Instead it verifies an obsolete ServiceApplicationProxyGroup property of the UPA,
+which is always pointing to the default proxy group.
+
+It seems that property doesn't get updated for any Service Application when you
+modify the associations in Central Administration and it can store only one
+association (while in central administration a Service Application can be added
+to multiple proxy groups).

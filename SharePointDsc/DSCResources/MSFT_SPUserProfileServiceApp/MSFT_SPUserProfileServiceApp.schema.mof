@@ -15,6 +15,7 @@ class MSFT_SPUserProfileServiceApp : OMI_BaseResource
     [Write, Description("Whether Farm should resolve NetBIOS domain names")] boolean EnableNetBIOS;
     [Write, Description("Specifies if the service application should be configured to use AD Import")] boolean NoILMUsed;
     [Write, Description("Specifies which SiteNamingConflictResolution should be used"), ValueMap{"Username_CollisionError","Username_CollisionDomain","Domain_Username"}, Values{"Username_CollisionError","Username_CollisionDomain","Domain_Username"}] string SiteNamingConflictResolution;
+    [Write, Description("Specifies if an issue with Service App Proxy Groups should be automatically corrected (see wiki for more info). Default value is true.")] boolean UpdateProxyGroup;
     [Write, Description("Present if the service app should exist, absent if it should not"), ValueMap{"Present","Absent"}, Values{"Present","Absent"}] string Ensure;
     [Write, Description("POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5"), EmbeddedInstance("MSFT_Credential")] String InstallAccount;
 };

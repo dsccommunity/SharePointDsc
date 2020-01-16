@@ -16,12 +16,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/PowerShell/SharePointDsc.git"
+    "url": "git+https://github.com/dsccommunity/SharePointDsc.git"
   },
   "author": "Microsoft Corporation",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/PowerShell/SharePointDsc/issues"
+    "url": "https://github.com/dsccommunity/SharePointDsc/issues"
   },
-  "homepage": "https://github.com/PowerShell/SharePointDsc#readme"
+  "homepage": "https://github.com/dsccommunity/SharePointDsc#readme"
 }
