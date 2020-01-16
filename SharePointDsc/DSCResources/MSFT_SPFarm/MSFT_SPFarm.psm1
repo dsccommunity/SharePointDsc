@@ -573,10 +573,13 @@ function Set-TargetResource
                         # Write-Verbose -Message "Removing Central Admin web application in order to reprovision it"
                         Remove-SPWebApplication -Identity $centralAdminSite.Url -Zone Default -DeleteIisSite
 
+                        $farm = Get-SPFarm
+                        $ca_service = $farm.Services | Where-Object -FilterScript { $_.TypeName -eq "Central Administration" }
+
                         Write-Verbose -Message "Re-provisioning Central Admin web application"
                         $webAppParams = @{
                             Identity             = $centralAdminSite.Url
-                            Name                 = "SharePoint Central Administration v4"
+                            Name                 = $ca_service.ApplicationPools.Name
                             Zone                 = "Default"
                             HostHeader           = $desiredUri.Host
                             Port                 = $desiredUri.Port

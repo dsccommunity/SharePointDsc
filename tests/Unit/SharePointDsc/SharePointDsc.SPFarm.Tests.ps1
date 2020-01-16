@@ -542,6 +542,12 @@ namespace Microsoft.SharePoint.Administration {
                             Name = $testParams.DatabaseServer
                         }
                         AdminContentDatabaseName = $testParams.AdminContentDatabaseName
+                        Services                 = @{
+                            TypeName         = "Central Administration"
+                            ApplicationPools = @{
+                                Name = "SharePoint Central Administration v4"
+                            }
+                        }
                     }
                 }
                 Mock -CommandName Get-SPDscConfigDBStatus -MockWith {
@@ -1018,6 +1024,12 @@ namespace Microsoft.SharePoint.Administration {
                             Name = $testParams.DatabaseServer
                         }
                         AdminContentDatabaseName = $testParams.AdminContentDatabaseName
+                        Services                 = @{
+                            TypeName         = "Central Administration"
+                            ApplicationPools = @{
+                                Name = "SharePoint Central Administration v4"
+                            }
+                        }
                     }
                 }
                 Mock -CommandName Get-SPDscConfigDBStatus -MockWith {
@@ -1153,6 +1165,12 @@ namespace Microsoft.SharePoint.Administration {
                             Name = $testParams.DatabaseServer
                         }
                         AdminContentDatabaseName = $testParams.AdminContentDatabaseName
+                        Services                 = @{
+                            TypeName         = "Central Administration"
+                            ApplicationPools = @{
+                                Name = "SharePoint Central Administration v4"
+                            }
+                        }
                     }
                 }
                 Mock -CommandName Get-SPDscConfigDBStatus -MockWith {
@@ -1440,6 +1458,12 @@ namespace Microsoft.SharePoint.Administration {
                             Name = $testParams.DatabaseServer
                         }
                         AdminContentDatabaseName = $testParams.AdminContentDatabaseName
+                        Services                 = @{
+                            TypeName         = "Central Administration"
+                            ApplicationPools = @{
+                                Name = "SharePoint Central Administration v4"
+                            }
+                        }
                     }
                 }
                 Mock -CommandName Get-SPDscConfigDBStatus -MockWith {
