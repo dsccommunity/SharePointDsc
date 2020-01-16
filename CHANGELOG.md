@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - SPOAppPrincipalMgmtServiceAppProxy
   - Added new resource to create SharePoint Online Application Principal
     Management Service Application Proxy
+
 ### Changed
 
 - None
