@@ -13,7 +13,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- None
+- SPConfigWizard
+  - Updated checks in Set method to make sure the resource also runs when
+    a language pack is installed
 
 ### Deprecated
 
