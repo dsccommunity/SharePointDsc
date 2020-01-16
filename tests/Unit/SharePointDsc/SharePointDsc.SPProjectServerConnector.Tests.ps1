@@ -24,8 +24,7 @@ function Invoke-TestSetup
 
         $Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointCmdletModule `
             -SubModulePath "Modules\SharePointDsc.ProjectServer\ProjectServerConnector.psm1" `
-            -ExcludeInvokeHelper `
-            -ModuleVersion $moduleVersionFolder
+            -ExcludeInvokeHelper
     }
     catch [System.IO.FileNotFoundException]
     {
@@ -44,7 +43,7 @@ function Invoke-TestCleanup
     # Restore-TestEnvironment -TestEnvironment $script:testEnvironment
 }
 
-Invoke-TestSetup -ModuleVersion $moduleVersion
+Invoke-TestSetup
 
 try
 {

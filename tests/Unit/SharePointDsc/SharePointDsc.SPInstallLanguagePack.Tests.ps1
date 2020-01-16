@@ -22,8 +22,7 @@ function Invoke-TestSetup
                 -Resolve)
 
         $Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointCmdletModule `
-            -DscResource $script:DSCResourceName `
-            -ModuleVersion $moduleVersionFolder
+            -DscResource $script:DSCResourceName
     }
     catch [System.IO.FileNotFoundException]
     {
@@ -42,7 +41,7 @@ function Invoke-TestCleanup
     Restore-TestEnvironment -TestEnvironment $script:testEnvironment
 }
 
-Invoke-TestSetup -ModuleVersion $moduleVersion
+Invoke-TestSetup
 
 try
 {

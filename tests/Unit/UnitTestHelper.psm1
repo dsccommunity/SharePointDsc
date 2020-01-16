@@ -12,7 +12,7 @@ function New-SPDscUnitTestHelper
         [String]
         $DscResource,
 
-        [Parameter(Mandatory = $true)]
+        [Parameter()]
         [String]
         $ModuleVersion,
 
@@ -29,14 +29,22 @@ function New-SPDscUnitTestHelper
         $IncludeDistributedCacheStubs
     )
 
+    $spBuild = (Get-Item -Path $SharePointStubModule).Directory.BaseName
+    $spBuildParts = $spBuild.Split('.')
+    $majorBuildNumber = $spBuildParts[0]
+    $minorBuildNumber = $spBuildParts[1]
+
+    $describeHeader += " [SP Build: $spBuild]"
+
     $repoRoot = Join-Path -Path $PSScriptRoot -ChildPath "..\..\" -Resolve
     $moduleRoot = Join-Path -Path $repoRoot -ChildPath "output\SharePointDsc\$ModuleVersion"
 
-    $utilsModule = Join-Path -Path $moduleRoot -ChildPath "Modules\SharePointDsc.Util\SharePointDsc.Util.psm1"
-    Import-Module -Name $utilsModule -Global
+    $initScript = @"
+    Set-StrictMode -Version 1
+    Remove-Module -Name "Microsoft.SharePoint.PowerShell" -Force -ErrorAction SilentlyContinue
+    Import-Module -Name "$SharePointStubModule" -WarningAction SilentlyContinue
 
-    # $mainModule = Join-Path -Path $moduleRoot -ChildPath "SharePointDsc.psd1"
-    # Import-Module -Name $mainModule -Global
+"@
 
     if ($PSBoundParameters.ContainsKey("SubModulePath") -eq $true)
     {
@@ -45,42 +53,33 @@ function New-SPDscUnitTestHelper
         $moduleName = (Get-Item -Path $moduleToLoad).BaseName
 
         Import-Module -Name $moduleToLoad -Global
+
+        $initScript += @"
+        Import-Module -Name "$moduleToLoad"
+
+"@
     }
 
     if ($PSBoundParameters.ContainsKey("DscResource") -eq $true)
     {
         $describeHeader = "DSC Resource '$DscResource'"
         $moduleName = "MSFT_$DscResource"
-        $modulePath = "DSCResources\MSFT_$DscResource\MSFT_$DscResource.psm1"
-        $moduleToLoad = Join-Path -Path $moduleRoot -ChildPath $modulePath
     }
 
-    $spBuild = (Get-Item -Path $SharePointStubModule).Directory.BaseName
-    $spBuildParts = $spBuild.Split('.')
-    $majorBuildNumber = $spBuildParts[0]
-    $minorBuildNumber = $spBuildParts[1]
+    $initScript += @"
+    Mock -CommandName Get-SPDscInstalledProductVersion -MockWith {
+        return @{
+            FileMajorPart = $majorBuildNumber
+        }
+    }
 
-    $describeHeader += " [SP Build: $spBuild]"
+    Mock -CommandName Get-SPDscAssemblyVersion -MockWith {
+        return $majorBuildNumber
+    }
 
-    $initScript = @"
-            Set-StrictMode -Version 1
-            Remove-Module -Name "Microsoft.SharePoint.PowerShell" -Force -ErrorAction SilentlyContinue
-            Import-Module -Name "$SharePointStubModule" -WarningAction SilentlyContinue
-            Import-Module -Name "$moduleToLoad"
-
-            Mock -CommandName Get-SPDscInstalledProductVersion -MockWith {
-                return @{
-                    FileMajorPart = $majorBuildNumber
-                }
-            }
-
-            Mock -CommandName Get-SPDscAssemblyVersion -MockWith {
-                return $majorBuildNumber
-            }
-
-            Mock -CommandName Get-SPDscBuildVersion -MockWith {
-                return $minorBuildNumber
-            }
+    Mock -CommandName Get-SPDscBuildVersion -MockWith {
+        return $minorBuildNumber
+    }
 
 "@
 
@@ -134,7 +133,7 @@ function Write-SPDscStubFile
 
     $SPStubContent = ((Get-Command | Where-Object -FilterScript {
                 $_.Source -eq "Microsoft.SharePoint.PowerShell"
-            } )  |  ForEach-Object -Process {
+            } ) | ForEach-Object -Process {
             $signature = $null
             $command = $_
             $metadata = New-Object -TypeName System.Management.Automation.CommandMetaData `
@@ -175,7 +174,7 @@ function Get-SPDscRegistryValue
 
     $installerRegistryPath = "Registry::HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Installer\UserData\S-1-5-18\Products"
     $installerEntries = Get-ChildItem $installerRegistryPath -ErrorAction SilentlyContinue
-    $officeProductKeys = $installerEntries | Where-Object -FilterScript {$_.PsPath -like "*00000000F01FEC"}
+    $officeProductKeys = $installerEntries | Where-Object -FilterScript { $_.PsPath -like "*00000000F01FEC" }
 
     $productInfo = @()
     $productPatches = @()
