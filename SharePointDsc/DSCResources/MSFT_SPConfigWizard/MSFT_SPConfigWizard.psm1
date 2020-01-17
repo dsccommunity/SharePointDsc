@@ -1,3 +1,8 @@
+$script:resourceModulePath = Split-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -Parent
+$script:modulesFolderPath = Join-Path -Path $script:resourceModulePath -ChildPath 'Modules'
+$script:resourceHelperModulePath = Join-Path -Path $script:modulesFolderPath -ChildPath 'SharePointDsc.Util'
+Import-Module -Name (Join-Path -Path $script:resourceHelperModulePath -ChildPath 'SharePointDsc.Util.psm1')
+
 function Get-TargetResource
 {
     [CmdletBinding()]
@@ -97,15 +102,39 @@ function Set-TargetResource
 
     Write-Verbose -Message "Setting status of Configuration Wizard"
 
-    Write-Verbose -Message "Checking if all servers in the farm have the binaries installed"
+    # Check which version of SharePoint is installed
+    if ((Get-SPDscInstalledProductVersion).FileMajorPart -eq 15)
+    {
+        $wssRegKey = "hklm:SOFTWARE\Microsoft\Shared Tools\Web Server Extensions\15.0\WSS"
+    }
+    else
+    {
+        $wssRegKey = "hklm:SOFTWARE\Microsoft\Shared Tools\Web Server Extensions\16.0\WSS"
+    }
+
+    # Read LanguagePackInstalled and SetupType registry keys
+    $languagePackInstalled = Get-SPDscRegistryKey -Key $wssRegKey -Value "LanguagePackInstalled"
+
+    # Getting the servers patch status from SharePoint
+    # https://docs.microsoft.com/en-us/dotnet/api/microsoft.sharepoint.administration.spserverproductinfo.statustype
     $statusType = Get-SPDscServerPatchStatus
 
-    Write-Verbose -Message ("Server status: $statusType (Has to be 'UpgradeAvailable' or " + `
-            "'UpgradeRequired' to continue)")
-    if ($statusType -ne "UpgradeRequired" -and $statusType -ne "UpgradeAvailable")
+    if ($languagePackInstalled -eq 1)
     {
-        Write-Verbose -Message "Upgrade not possible, not all servers have the same binaries installed"
-        return
+        Write-Verbose -Message "Config Wizard required because of language pack install"
+    }
+    else
+    {
+        Write-Verbose -Message ("No language pack was installed. Checking if all servers in " + `
+                "the farm have the binaries installed")
+        Write-Verbose -Message ("Server status: $statusType (Has to be 'UpgradeAvailable' or " + `
+                "'UpgradeRequired' to continue)")
+        if ($statusType -ne "UpgradeRequired" -and $statusType -ne "UpgradeAvailable")
+        {
+            Write-Verbose -Message ("WARNING: Upgrade not possible, not all servers have the " + `
+                    "same binaries installed. Skipping Config Wizard!")
+            return
+        }
     }
 
     # Check if DatabaseUpgradeDays parameter exists

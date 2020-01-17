@@ -23,8 +23,7 @@ function Invoke-TestSetup
                 -Resolve)
 
         $Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointCmdletModule `
-            -DscResource $script:DSCResourceName `
-            -ModuleVersion $moduleVersionFolder
+            -DscResource $script:DSCResourceName
     }
     catch [System.IO.FileNotFoundException]
     {
@@ -43,7 +42,7 @@ function Invoke-TestCleanup
     Restore-TestEnvironment -TestEnvironment $script:testEnvironment
 }
 
-Invoke-TestSetup -ModuleVersion $moduleVersion
+Invoke-TestSetup
 
 try
 {
@@ -58,8 +57,8 @@ try
             $mockPassphrase = New-Object -TypeName "System.Management.Automation.PSCredential" `
                 -ArgumentList @('PASSPHRASEUSER', $mockPassword)
 
-            $modulePath = "output\SharePointDsc\$($Global:SPDscHelper.ModuleVersion)\Modules\SharePointDsc.Farm\SPFarm.psm1"
-            Import-Module -Name (Join-Path -Path $Global:SPDscHelper.RepoRoot -ChildPath $modulePath -Resolve)
+#            $modulePath = "output\SharePointDsc\$($Global:SPDscHelper.ModuleVersion)\Modules\SharePointDsc.Farm\SPFarm.psm1"
+#            Import-Module -Name (Join-Path -Path $Global:SPDscHelper.RepoRoot -ChildPath $modulePath -Resolve)
 
             try
             {
@@ -542,6 +541,12 @@ namespace Microsoft.SharePoint.Administration {
                             Name = $testParams.DatabaseServer
                         }
                         AdminContentDatabaseName = $testParams.AdminContentDatabaseName
+                        Services                 = @{
+                            TypeName         = "Central Administration"
+                            ApplicationPools = @{
+                                Name = "SharePoint Central Administration v4"
+                            }
+                        }
                     }
                 }
                 Mock -CommandName Get-SPDscConfigDBStatus -MockWith {
@@ -1018,6 +1023,12 @@ namespace Microsoft.SharePoint.Administration {
                             Name = $testParams.DatabaseServer
                         }
                         AdminContentDatabaseName = $testParams.AdminContentDatabaseName
+                        Services                 = @{
+                            TypeName         = "Central Administration"
+                            ApplicationPools = @{
+                                Name = "SharePoint Central Administration v4"
+                            }
+                        }
                     }
                 }
                 Mock -CommandName Get-SPDscConfigDBStatus -MockWith {
@@ -1153,6 +1164,12 @@ namespace Microsoft.SharePoint.Administration {
                             Name = $testParams.DatabaseServer
                         }
                         AdminContentDatabaseName = $testParams.AdminContentDatabaseName
+                        Services                 = @{
+                            TypeName         = "Central Administration"
+                            ApplicationPools = @{
+                                Name = "SharePoint Central Administration v4"
+                            }
+                        }
                     }
                 }
                 Mock -CommandName Get-SPDscConfigDBStatus -MockWith {
@@ -1440,6 +1457,12 @@ namespace Microsoft.SharePoint.Administration {
                             Name = $testParams.DatabaseServer
                         }
                         AdminContentDatabaseName = $testParams.AdminContentDatabaseName
+                        Services                 = @{
+                            TypeName         = "Central Administration"
+                            ApplicationPools = @{
+                                Name = "SharePoint Central Administration v4"
+                            }
+                        }
                     }
                 }
                 Mock -CommandName Get-SPDscConfigDBStatus -MockWith {

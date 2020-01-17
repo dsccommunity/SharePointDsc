@@ -12,7 +12,7 @@ depends on the prerequisites already being installed, which can be done
 NOTE:
 This resource only supports SharePoint Server. SharePoint Foundation
 is not supported. For examples to install SharePoint Foundation using DSC, see:
-https://github.com/PowerShell/SharePointDsc/wiki/SPInstall (Example 3)
+https://github.com/dsccommunity/SharePointDsc/wiki/SPInstall (Example 3)
 
 NOTE 2:
 When files are downloaded from the Internet, a Zone.Identifier alternate data

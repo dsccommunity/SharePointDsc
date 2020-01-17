@@ -24,8 +24,7 @@ function Invoke-TestSetup
                 -Resolve)
 
         $Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointCmdletModule `
-            -DscResource $script:DSCResourceName `
-            -ModuleVersion $moduleVersionFolder
+            -DscResource $script:DSCResourceName
     }
     catch [System.IO.FileNotFoundException]
     {
@@ -44,7 +43,7 @@ function Invoke-TestCleanup
     Restore-TestEnvironment -TestEnvironment $script:testEnvironment
 }
 
-Invoke-TestSetup -ModuleVersion $moduleVersion
+Invoke-TestSetup
 
 try
 {
@@ -115,15 +114,37 @@ try
 "@
 
             # Mocks for all contexts
+            $correctProxy = @{
+                DisplayName = "UPS"
+            }
+
+            $incorrectProxy = @{
+                DisplayName = "Incorrect"
+            }
+
+            $proxyGroup = @{
+                FriendlyName = "ProxyGroup"
+                Name = "ProxyGroup"
+                Proxies = @($correctProxy, $incorrectProxy)
+            }
+
             Mock -CommandName Get-SPDscFarmAccount -MockWith {
                 return $mockFarmCredential
             }
             Mock -CommandName New-SPProfileServiceApplication -MockWith {
-                return (@{
-                        NetBIOSDomainNamesEnabled = $false
-                        NoILMUsed                 = $false
-                    }
-                )
+                $returnval = @{
+                        NetBIOSDomainNamesEnabled    = $false
+                        NoILMUsed                    = $false
+                        ServiceApplicationProxyGroup = $proxyGroup
+                }
+
+                $returnval = $returnval | Add-Member -MemberType ScriptMethod `
+                                                -Name IsConnected `
+                                                -Value {
+                                                    return $true
+                                            } -PassThru
+
+                return $returnval
             }
             Mock -CommandName New-SPProfileServiceApplicationProxy -MockWith { }
             Mock -CommandName Add-SPDscUserToLocalAdmin -MockWith { }
@@ -182,6 +203,10 @@ try
                     Ensure          = "Present"
                 }
 
+                Mock -CommandName Get-SPServiceApplicationProxyGroup -MockWith {
+                    return @($proxyGroup)
+                }
+
                 Mock -CommandName Get-SPDscFarmAccount -MockWith {
                     return $mockCredential
                 }
@@ -200,13 +225,22 @@ try
                         Add-Member -MemberType ScriptMethod `
                             -Name Update `
                             -Value {
-                            $Global:SPDscUPSAUpdateCalled = $true
-                        } -PassThru |
+                                $Global:SPDscUPSAUpdateCalled = $true
+                            } -PassThru |
                         Add-Member -MemberType NoteProperty `
                             -Name ApplicationPool `
                             -Value @{
-                            Name = $testParams.ApplicationPool
-                        } -PassThru |
+                                Name = $testParams.ApplicationPool
+                            } -PassThru |
+                        Add-Member -MemberType NoteProperty `
+                            -Name ServiceApplicationProxyGroup `
+                            -Value $proxyGroup `
+                            -PassThru |
+                        Add-Member -MemberType ScriptMethod `
+                            -Name IsConnected `
+                            -Value {
+                                return $true
+                            } -PassThru |
                         Add-Member -MemberType ScriptMethod `
                             -Name GetType `
                             -Value {
@@ -268,6 +302,18 @@ try
                         } -PassThru -Force
                     )
                 }
+
+                Mock -CommandName Get-SPServiceApplicationProxy -MockWith {
+                    $proxiesToReturn = @()
+                    $proxy = @{
+                        Name        = "UPS"
+                        DisplayName = "UPS"
+                    }
+                    $proxiesToReturn += $proxy
+
+                    return $proxiesToReturn
+                }
+
                 Mock -CommandName Restart-Service { }
 
                 It "Should NOT throw exception in the Get method" {
@@ -318,8 +364,32 @@ try
                 }
 
                 Mock -CommandName Get-SPServiceApplication -MockWith {
-                    return $null
+                    if ($global:ranGetServiceApp -eq $false)
+                    {
+                        $global:ranGetServiceApp = $true
+                        return $null
+                    }
+                    else
+                    {
+                        return @(
+                            New-Object -TypeName "Object" |
+                            Add-Member -MemberType NoteProperty `
+                                -Name DisplayName `
+                                -Value $testParams.Name `
+                                -PassThru |
+                            Add-Member -MemberType NoteProperty `
+                                -Name ServiceApplicationProxyGroup `
+                                -Value $proxyGroup `
+                                -PassThru |
+                            Add-Member -MemberType ScriptMethod `
+                                -Name IsConnected `
+                                -Value {
+                                    return $true
+                                } -PassThru
+                        )
+                    }
                 }
+
                 Mock -CommandName New-SPClaimsPrincipal -MockWith { return @("") }
                 Mock -CommandName Get-SPServiceApplicationSecurity -MockWith { return @("") }
                 Mock -CommandName Grant-SPObjectSecurity -MockWith { }
@@ -327,14 +397,32 @@ try
 
                 Mock -CommandName Restart-Service { }
 
+                Mock -CommandName Get-SPServiceApplicationProxyGroup -MockWith {
+                    return @($proxyGroup)
+                }
+
+                Mock -CommandName Get-SPServiceApplicationProxy -MockWith {
+                    $proxiesToReturn = @()
+                    $proxy = @{
+                        Name        = "UPS"
+                        DisplayName = "UPS"
+                    }
+                    $proxiesToReturn += $proxy
+
+                    return $proxiesToReturn
+                }
+
+                $global:ranGetServiceApp = $false
                 It "Should return absent from the Get method" {
                     (Get-TargetResource @testParams).Ensure | Should Be "Absent"
                 }
 
+                $global:ranGetServiceApp = $false
                 It "Should return false when the Test method is called" {
                     Test-TargetResource @testParams | Should Be $false
                 }
 
+                $global:ranGetServiceApp = $false
                 It "Should create a new service application in the set method" {
                     Set-TargetResource @testParams
                     Assert-MockCalled New-SPProfileServiceApplication
@@ -405,6 +493,15 @@ try
                             -Value @{
                             Name = $testParams.ApplicationPool
                         } -PassThru |
+                        Add-Member -MemberType NoteProperty `
+                            -Name ServiceApplicationProxyGroup `
+                            -Value $proxyGroup `
+                            -PassThru |
+                        Add-Member -MemberType ScriptMethod `
+                            -Name IsConnected `
+                            -Value {
+                                return $true
+                            } -PassThru |
                         Add-Member -MemberType ScriptMethod `
                             -Name GetType `
                             -Value {
@@ -465,6 +562,21 @@ try
                             } -PassThru
                         } -PassThru -Force
                     )
+                }
+
+                Mock -CommandName Get-SPServiceApplicationProxyGroup -MockWith {
+                    return @($proxyGroup)
+                }
+
+                Mock -CommandName Get-SPServiceApplicationProxy -MockWith {
+                    $proxiesToReturn = @()
+                    $proxy = @{
+                        Name        = "UPS"
+                        DisplayName = "UPS"
+                    }
+                    $proxiesToReturn += $proxy
+
+                    return $proxiesToReturn
                 }
 
                 It "Should return false from the Get method" {
@@ -521,6 +633,15 @@ try
                             -Value @{
                             Name = $testParams.ApplicationPool
                         } -PassThru |
+                        Add-Member -MemberType NoteProperty `
+                            -Name ServiceApplicationProxyGroup `
+                            -Value $proxyGroup `
+                            -PassThru |
+                        Add-Member -MemberType ScriptMethod `
+                            -Name IsConnected `
+                            -Value {
+                                return $true
+                            } -PassThru |
                         Add-Member -MemberType ScriptMethod `
                             -Name GetType `
                             -Value {
@@ -581,6 +702,21 @@ try
                             } -PassThru
                         } -PassThru -Force
                     )
+                }
+
+                Mock -CommandName Get-SPServiceApplicationProxyGroup -MockWith {
+                    return @($proxyGroup)
+                }
+
+                Mock -CommandName Get-SPServiceApplicationProxy -MockWith {
+                    $proxiesToReturn = @()
+                    $proxy = @{
+                        Name        = "UPS"
+                        DisplayName = "UPS"
+                    }
+                    $proxiesToReturn += $proxy
+
+                    return $proxiesToReturn
                 }
 
                 It "Should return false from the Get method" {
@@ -637,6 +773,15 @@ try
                             -Value @{
                             Name = $testParams.ApplicationPool
                         } -PassThru |
+                        Add-Member -MemberType NoteProperty `
+                            -Name ServiceApplicationProxyGroup `
+                            -Value $proxyGroup `
+                            -PassThru |
+                        Add-Member -MemberType ScriptMethod `
+                            -Name IsConnected `
+                            -Value {
+                                return $true
+                            } -PassThru |
                         Add-Member -MemberType ScriptMethod `
                             -Name GetType `
                             -Value {
@@ -699,6 +844,21 @@ try
                     )
                 }
 
+                Mock -CommandName Get-SPServiceApplicationProxyGroup -MockWith {
+                    return @($proxyGroup)
+                }
+
+                Mock -CommandName Get-SPServiceApplicationProxy -MockWith {
+                    $proxiesToReturn = @()
+                    $proxy = @{
+                        Name        = "UPS"
+                        DisplayName = "UPS"
+                    }
+                    $proxiesToReturn += $proxy
+
+                    return $proxiesToReturn
+                }
+
                 It "Should return SiteNamingConflictResolution=Domain_Username from the Get method" {
                     (Get-TargetResource @testParams).SiteNamingConflictResolution | Should Be "Domain_Username"
                 }
@@ -710,6 +870,290 @@ try
 
                 It "Should return false when the Test method is called" {
                     Test-TargetResource @testParams | Should Be $false
+                }
+            }
+
+            Context -Name "When service applications exist in the current farm and UpdateProxyGroup is True, so should update" -Fixture {
+                $testParams = @{
+                    Name             = "User Profile Service App"
+                    ApplicationPool  = "SharePoint Service Applications"
+                    UpdateProxyGroup = $true
+                    Ensure           = "Present"
+                }
+
+                $incorrectProxy = @{
+                    DisplayName = "Incorrect"
+                }
+
+                $incorrectProxyGroup = @{
+                    FriendlyName = "ProxyGroup2"
+                    Name = "ProxyGroup2"
+                    Proxies = @($incorrectProxy)
+                }
+
+                Mock -CommandName Restart-Service -MockWith { }
+                Mock -CommandName Get-SPServiceApplication -MockWith {
+                    return @(
+                        New-Object -TypeName "Object" |
+                        Add-Member -MemberType NoteProperty `
+                            -Name TypeName `
+                            -Value "User Profile Service Application" `
+                            -PassThru |
+                        Add-Member -MemberType NoteProperty `
+                            -Name DisplayName `
+                            -Value $testParams.Name `
+                            -PassThru |
+                        Add-Member -MemberType NoteProperty `
+                            -Name "NoILMUsed" `
+                            -Value $false `
+                            -PassThru |
+                        Add-Member -MemberType ScriptMethod `
+                            -Name Update `
+                            -Value {
+                            $Global:SPDscUPSAUpdateCalled = $true
+                        } -PassThru |
+                        Add-Member -MemberType NoteProperty `
+                            -Name ApplicationPool `
+                            -Value @{
+                            Name = $testParams.ApplicationPool
+                        } -PassThru |
+                        Add-Member -MemberType NoteProperty `
+                            -Name ServiceApplicationProxyGroup `
+                            -Value $incorrectProxyGroup `
+                            -PassThru |
+                        Add-Member -MemberType ScriptMethod `
+                            -Name IsConnected `
+                            -Value {
+                                return $true
+                            } -PassThru |
+                        Add-Member -MemberType ScriptMethod `
+                            -Name GetType `
+                            -Value {
+                            New-Object -TypeName "Object" |
+                            Add-Member -MemberType NoteProperty `
+                                -Name FullName `
+                                -Value $getTypeFullName `
+                                -PassThru |
+                            Add-Member -MemberType ScriptMethod `
+                                -Name GetProperties `
+                                -Value {
+                                param($x)
+                                return @(
+                                    (New-Object -TypeName "Object" |
+                                        Add-Member -MemberType NoteProperty `
+                                            -Name Name `
+                                            -Value "SocialDatabase" `
+                                            -PassThru |
+                                        Add-Member -MemberType ScriptMethod `
+                                            -Name GetValue `
+                                            -Value {
+                                            param($x)
+                                            return @{
+                                                Name                 = "SP_SocialDB"
+                                                NormalizedDataSource = "SQL.domain.local"
+                                            }
+                                        } -PassThru
+                                    ),
+                                    (New-Object -TypeName "Object" |
+                                        Add-Member -MemberType NoteProperty `
+                                            -Name Name `
+                                            -Value "ProfileDatabase" `
+                                            -PassThru |
+                                        Add-Member -MemberType ScriptMethod `
+                                            -Name GetValue `
+                                            -Value {
+                                            return @{
+                                                Name                 = "SP_ProfileDB"
+                                                NormalizedDataSource = "SQL.domain.local"
+                                            }
+                                        } -PassThru
+                                    ),
+                                    (New-Object -TypeName "Object" |
+                                        Add-Member -MemberType NoteProperty `
+                                            -Name Name `
+                                            -Value "SynchronizationDatabase" `
+                                            -PassThru |
+                                        Add-Member -MemberType ScriptMethod `
+                                            -Name GetValue `
+                                            -Value {
+                                            return @{
+                                                Name                 = "SP_ProfileSyncDB"
+                                                NormalizedDataSource = "SQL.domain.local"
+                                            }
+                                        } -PassThru
+                                    )
+                                )
+                            } -PassThru
+                        } -PassThru -Force
+                    )
+                }
+
+                Mock -CommandName Get-SPServiceApplicationProxyGroup -MockWith {
+                    return @($proxyGroup)
+                }
+
+                Mock -CommandName Get-SPServiceApplicationProxy -MockWith {
+                    $proxiesToReturn = @()
+                    $proxy = @{
+                        Name        = "UPS"
+                        DisplayName = "UPS"
+                    }
+                    $proxiesToReturn += $proxy
+
+                    return $proxiesToReturn
+                }
+
+                It "Should return UpdateProxyGroup=true from the Get method" {
+                    (Get-TargetResource @testParams).UpdateProxyGroup | Should Be $true
+                }
+
+                It "Should call Update method on Service Application before finishing set method" {
+                    $Global:SPDscUPSAUpdateCalled = $false
+                    Set-TargetResource @testParams
+                    $Global:SPDscUPSAUpdateCalled | Should Be $true
+                }
+
+                It "Should return false when the Test method is called" {
+                    Test-TargetResource @testParams | Should Be $false
+                }
+            }
+
+            Context -Name "When service applications exist in the current farm and UpdateProxyGroup is False, so should not update" -Fixture {
+                $testParams = @{
+                    Name             = "User Profile Service App"
+                    ApplicationPool  = "SharePoint Service Applications"
+                    UpdateProxyGroup = $false
+                    Ensure           = "Present"
+                }
+
+                Mock -CommandName Restart-Service -MockWith { }
+                Mock -CommandName Get-SPServiceApplication -MockWith {
+                    return @(
+                        New-Object -TypeName "Object" |
+                        Add-Member -MemberType NoteProperty `
+                            -Name TypeName `
+                            -Value "User Profile Service Application" `
+                            -PassThru |
+                        Add-Member -MemberType NoteProperty `
+                            -Name DisplayName `
+                            -Value $testParams.Name `
+                            -PassThru |
+                        Add-Member -MemberType NoteProperty `
+                            -Name "NoILMUsed" `
+                            -Value $false `
+                            -PassThru |
+                        Add-Member -MemberType ScriptMethod `
+                            -Name Update `
+                            -Value {
+                            $Global:SPDscUPSAUpdateCalled = $true
+                        } -PassThru |
+                        Add-Member -MemberType NoteProperty `
+                            -Name ApplicationPool `
+                            -Value @{
+                            Name = $testParams.ApplicationPool
+                        } -PassThru |
+                        Add-Member -MemberType NoteProperty `
+                            -Name ServiceApplicationProxyGroup `
+                            -Value $proxyGroup `
+                            -PassThru |
+                        Add-Member -MemberType ScriptMethod `
+                            -Name IsConnected `
+                            -Value {
+                                return $true
+                            } -PassThru |
+                        Add-Member -MemberType ScriptMethod `
+                            -Name GetType `
+                            -Value {
+                            New-Object -TypeName "Object" |
+                            Add-Member -MemberType NoteProperty `
+                                -Name FullName `
+                                -Value $getTypeFullName `
+                                -PassThru |
+                            Add-Member -MemberType ScriptMethod `
+                                -Name GetProperties `
+                                -Value {
+                                param($x)
+                                return @(
+                                    (New-Object -TypeName "Object" |
+                                        Add-Member -MemberType NoteProperty `
+                                            -Name Name `
+                                            -Value "SocialDatabase" `
+                                            -PassThru |
+                                        Add-Member -MemberType ScriptMethod `
+                                            -Name GetValue `
+                                            -Value {
+                                            param($x)
+                                            return @{
+                                                Name                 = "SP_SocialDB"
+                                                NormalizedDataSource = "SQL.domain.local"
+                                            }
+                                        } -PassThru
+                                    ),
+                                    (New-Object -TypeName "Object" |
+                                        Add-Member -MemberType NoteProperty `
+                                            -Name Name `
+                                            -Value "ProfileDatabase" `
+                                            -PassThru |
+                                        Add-Member -MemberType ScriptMethod `
+                                            -Name GetValue `
+                                            -Value {
+                                            return @{
+                                                Name                 = "SP_ProfileDB"
+                                                NormalizedDataSource = "SQL.domain.local"
+                                            }
+                                        } -PassThru
+                                    ),
+                                    (New-Object -TypeName "Object" |
+                                        Add-Member -MemberType NoteProperty `
+                                            -Name Name `
+                                            -Value "SynchronizationDatabase" `
+                                            -PassThru |
+                                        Add-Member -MemberType ScriptMethod `
+                                            -Name GetValue `
+                                            -Value {
+                                            return @{
+                                                Name                 = "SP_ProfileSyncDB"
+                                                NormalizedDataSource = "SQL.domain.local"
+                                            }
+                                        } -PassThru
+                                    )
+                                )
+                            } -PassThru
+                        } -PassThru -Force
+                    )
+                }
+
+                $incorrectProxy = @{
+                    DisplayName = "Incorrect"
+                }
+
+                $incorrectProxyGroup = @{
+                    FriendlyName = "ProxyGroup"
+                    Name = "ProxyGroup"
+                    Proxies = @($incorrectProxy)
+                }
+
+                Mock -CommandName Get-SPServiceApplicationProxyGroup -MockWith {
+                    return @($incorrectProxyGroup)
+                }
+
+                Mock -CommandName Get-SPServiceApplicationProxy -MockWith {
+                    $proxiesToReturn = @()
+                    $proxy = @{
+                        Name        = "UPS"
+                        DisplayName = "UPS"
+                    }
+                    $proxiesToReturn += $proxy
+
+                    return $proxiesToReturn
+                }
+
+                It "Should return UpdateProxyGroup=true from the Get method" {
+                    (Get-TargetResource @testParams).UpdateProxyGroup | Should Be $true
+                }
+
+                It "Should return true when the Test method is called" {
+                    Test-TargetResource @testParams | Should Be $true
                 }
             }
 
@@ -745,6 +1189,15 @@ try
                             -Value @{
                             Name = $testParams.ApplicationPool
                         } -PassThru |
+                        Add-Member -MemberType NoteProperty `
+                            -Name ServiceApplicationProxyGroup `
+                            -Value $proxyGroup `
+                            -PassThru |
+                        Add-Member -MemberType ScriptMethod `
+                            -Name IsConnected `
+                            -Value {
+                                return $true
+                            } -PassThru |
                         Add-Member -MemberType ScriptMethod `
                             -Name GetType `
                             -Value {
@@ -805,6 +1258,21 @@ try
                             } -PassThru
                         } -PassThru -Force
                     )
+                }
+
+                Mock -CommandName Get-SPServiceApplicationProxyGroup -MockWith {
+                    return @($proxyGroup)
+                }
+
+                Mock -CommandName Get-SPServiceApplicationProxy -MockWith {
+                    $proxiesToReturn = @()
+                    $proxy = @{
+                        Name        = "UPS"
+                        DisplayName = "UPS"
+                    }
+                    $proxiesToReturn += $proxy
+
+                    return $proxiesToReturn
                 }
 
                 It "Should return present from the get method" {
@@ -848,6 +1316,15 @@ try
                             -Value @{
                             Name = $testParams.ApplicationPool
                         } -PassThru |
+                        Add-Member -MemberType NoteProperty `
+                            -Name ServiceApplicationProxyGroup `
+                            -Value $proxyGroup `
+                            -PassThru |
+                        Add-Member -MemberType ScriptMethod `
+                            -Name IsConnected `
+                            -Value {
+                                return $true
+                            } -PassThru |
                         Add-Member -MemberType ScriptMethod `
                             -Name GetType `
                             -Value {
@@ -908,6 +1385,26 @@ try
                             } -PassThru
                         } -PassThru -Force
                     )
+                }
+
+                Mock -CommandName Get-SPServiceApplicationProxyGroup -MockWith {
+                    return @($proxyGroup)
+                }
+
+                Mock -CommandName Get-SPServiceApplicationProxy -MockWith {
+                    $proxiesToReturn = @()
+                    $proxy = @{
+                        Name        = "UPS"
+                        DisplayName = "UPS"
+                    }
+                    $proxiesToReturn += $proxy
+
+                    $proxiesToReturn = $proxiesToReturn | Add-Member -MemberType ScriptMethod `
+                        -Name Delete `
+                        -Value {
+                            return $null
+                        } -PassThru
+                    return $proxiesToReturn
                 }
 
                 It "Should return present from the Get method" {
