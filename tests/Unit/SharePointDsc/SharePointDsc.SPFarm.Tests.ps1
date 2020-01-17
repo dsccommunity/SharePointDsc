@@ -57,8 +57,8 @@ try
             $mockPassphrase = New-Object -TypeName "System.Management.Automation.PSCredential" `
                 -ArgumentList @('PASSPHRASEUSER', $mockPassword)
 
-            $modulePath = "output\SharePointDsc\$($Global:SPDscHelper.ModuleVersion)\Modules\SharePointDsc.Farm\SPFarm.psm1"
-            Import-Module -Name (Join-Path -Path $Global:SPDscHelper.RepoRoot -ChildPath $modulePath -Resolve)
+#            $modulePath = "output\SharePointDsc\$($Global:SPDscHelper.ModuleVersion)\Modules\SharePointDsc.Farm\SPFarm.psm1"
+#            Import-Module -Name (Join-Path -Path $Global:SPDscHelper.RepoRoot -ChildPath $modulePath -Resolve)
 
             try
             {
