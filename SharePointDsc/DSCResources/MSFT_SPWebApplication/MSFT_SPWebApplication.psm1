@@ -94,7 +94,7 @@ function Get-TargetResource
             DatabaseName           = $wa.ContentDatabases[0].Name
             DatabaseServer         = $wa.ContentDatabases[0].Server
             HostHeader             = (New-Object -TypeName System.Uri $wa.Url).Host
-            Path                   = $wa.IisSettings[0].Path
+            Path                   = $wa.IisSettings[0].Path.ToString()
             Port                   = (New-Object -TypeName System.Uri $wa.Url).Port
             UseClassic             = $classicAuth
             InstallAccount         = $params.InstallAccount
