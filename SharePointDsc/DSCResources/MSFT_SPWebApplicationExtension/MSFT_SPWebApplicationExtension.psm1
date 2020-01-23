@@ -109,7 +109,7 @@ function Get-TargetResource
             Url            = $PublicURL
             AllowAnonymous = $waExt.AllowAnonymous
             HostHeader     = $HostHeader
-            Path           = $waExt.Path
+            Path           = $waExt.Path.ToString()
             Port           = $Port
             Zone           = $params.zone
             UseSSL         = $UseSSL
