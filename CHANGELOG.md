@@ -26,6 +26,8 @@ resources:
 
 - SPUserProfileServiceApp
   - Changed the MySiteHostLocation parameter to a required parameter
+- SPWebAppAuthentication
+  - Updated resource to add support for Basic Authentication
 
 ### Deprecated
 
