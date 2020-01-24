@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - SharePointDsc
-  - Added automatic release with a new CI pipeline.
+  - Added automatic release with a new CI pipeline
   - Updated PULL_REQUEST_TEMPLATE.md to match DSC standard
 - SPAzureAccessControlServiceAppProxy
   - Added new resource to create Azure Access Control Service Application Proxy
@@ -18,7 +18,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- None
+- SharePointDsc
+  - Updated all resources to load Utils module, which broke with the new CI
+- SPConfigWizard
+  - Updated checks in Set method to make sure the resource also runs when
+    a language pack is installed
+- SPUserProfileServiceApp
+  - Implemented ability to fix incorrectly linked proxy groups
 
 ### Deprecated
 

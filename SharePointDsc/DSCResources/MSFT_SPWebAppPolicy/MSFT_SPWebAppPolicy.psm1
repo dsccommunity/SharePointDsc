@@ -1,3 +1,8 @@
+$script:resourceModulePath = Split-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -Parent
+$script:modulesFolderPath = Join-Path -Path $script:resourceModulePath -ChildPath 'Modules'
+$script:resourceHelperModulePath = Join-Path -Path $script:modulesFolderPath -ChildPath 'SharePointDsc.Util'
+Import-Module -Name (Join-Path -Path $script:resourceHelperModulePath -ChildPath 'SharePointDsc.Util.psm1')
+
 function Get-TargetResource
 {
     [CmdletBinding()]
@@ -738,8 +743,8 @@ function Test-TargetResource
         if ($MembersToInclude)
         {
             $diffcount = ($differences | Where-Object -FilterScript {
-                        $_.Status -eq "Different" -or $_.Status -eq "Missing"
-                    }).Count
+                    $_.Status -eq "Different" -or $_.Status -eq "Missing"
+                }).Count
             if ($diffcount -eq 0)
             {
                 return $true

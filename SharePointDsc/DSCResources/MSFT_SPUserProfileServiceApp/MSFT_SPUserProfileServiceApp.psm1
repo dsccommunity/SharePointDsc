@@ -1,3 +1,8 @@
+$script:resourceModulePath = Split-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -Parent
+$script:modulesFolderPath = Join-Path -Path $script:resourceModulePath -ChildPath 'Modules'
+$script:resourceHelperModulePath = Join-Path -Path $script:modulesFolderPath -ChildPath 'SharePointDsc.Util'
+Import-Module -Name (Join-Path -Path $script:resourceHelperModulePath -ChildPath 'SharePointDsc.Util.psm1')
+
 function Get-TargetResource
 {
     [CmdletBinding()]
@@ -60,6 +65,10 @@ function Get-TargetResource
         [ValidateSet("Username_CollisionError", "Username_CollisionDomain", "Domain_Username")]
         [System.String]
         $SiteNamingConflictResolution,
+
+        [Parameter()]
+        [System.Boolean]
+        $UpdateProxyGroup = $true,
 
         [Parameter()]
         [ValidateSet("Present", "Absent")]
@@ -174,6 +183,23 @@ function Get-TargetResource
                     $proxyName = $serviceAppProxy.Name
                 }
             }
+
+            $proxyGroups = Get-SPServiceApplicationProxyGroup
+
+            $proxyGroup = $proxyGroups | Where-Object -FilterScript {
+                $_.Proxies.DisplayName -contains $proxyName
+            } | Select-Object -First 1
+
+            if ($null -ne $proxyGroup -and
+                $proxyGroup -eq $serviceApp.ServiceApplicationProxyGroup)
+            {
+                $updateProxyGroup = $false
+            }
+            else
+            {
+                $updateProxyGroup = $true
+            }
+
             $upMySiteLocation = $null
             $upMySiteManagedPath = $null
             $upSiteConflictNaming = $null
@@ -208,6 +234,7 @@ function Get-TargetResource
                 EnableNetBIOS                = $serviceApp.NetBIOSDomainNamesEnabled
                 NoILMUsed                    = $serviceApp.NoILMUsed
                 SiteNamingConflictResolution = $upSiteConflictNaming
+                UpdateProxyGroup             = $updateProxyGroup
                 Ensure                       = "Present"
             }
         }
@@ -278,6 +305,10 @@ function Set-TargetResource
         $SiteNamingConflictResolution,
 
         [Parameter()]
+        [System.Boolean]
+        $UpdateProxyGroup = $true,
+
+        [Parameter()]
         [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present",
@@ -297,6 +328,8 @@ function Set-TargetResource
 
     if ($Ensure -eq "Present")
     {
+        $PSBoundParameters.UpdateProxyGroup = $UpdateProxyGroup
+
         $farmAccount = Invoke-SPDscCommand -Credential $InstallAccount `
             -Arguments $PSBoundParameters `
             -ScriptBlock {
@@ -377,6 +410,9 @@ function Set-TargetResource
                 $params.Remove("NoILMUsed") | Out-Null
             }
 
+            $updateProxyGroup = $params.UpdateProxyGroup
+            $params.Remove("UpdateProxyGroup") | Out-Null
+
             $updateSiteNamingConflict = $false
             if ($params.ContainsKey("SiteNamingConflictResolution"))
             {
@@ -440,24 +476,64 @@ function Set-TargetResource
                     -ErrorAction SilentlyContinue
             }
 
+            $updateServiceApp = $false
+
+            $serviceAppProxies = Get-SPServiceApplicationProxy -ErrorAction SilentlyContinue
+            if ($null -ne $serviceAppProxies)
+            {
+                $serviceAppProxy = $serviceAppProxies | Where-Object -FilterScript {
+                    $app.IsConnected($_)
+                }
+                if ($null -ne $serviceAppProxy)
+                {
+                    $proxyName = $serviceAppProxy.Name
+                }
+            }
+
+            if ($updateProxyGroup -eq $true)
+            {
+                $proxyGroups = Get-SPServiceApplicationProxyGroup
+
+                $proxyGroup = $proxyGroups | Where-Object -FilterScript {
+                    $_.Proxies.DisplayName -contains $proxyName
+                } | Select-Object -First 1
+
+                if ($null -ne $proxyGroup -and `
+                        $proxyGroup -ne $app.ServiceApplicationProxyGroup)
+                {
+                    Write-Verbose -Message "Updating ServiceApplicationProxyGroup property"
+                    $app.ServiceApplicationProxyGroup = $proxyGroup
+                    $updateServiceApp = $true
+                }
+            }
+
             if (($updateEnableNetBIOS -eq $true) -or ($updateNoILMUsed -eq $true))
             {
                 if (($updateEnableNetBIOS -eq $true) -and `
                     ($app.NetBIOSDomainNamesEnabled -ne $enableNetBIOS))
                 {
+                    Write-Verbose -Message "Updating NetBIOSDomainNamesEnabled property"
                     $app.NetBIOSDomainNamesEnabled = $enableNetBIOS
                 }
 
                 if (($updateNoILMUsed -eq $true) -and `
                     ($app.NoILMUsed -ne $NoILMUsed))
                 {
+                    Write-Verbose -Message "Updating NoILMUsed property"
                     $app.NoILMUsed = $NoILMUsed
                 }
+                $updateServiceApp = $true
+            }
+
+            if ($updateServiceApp -eq $true)
+            {
+                Write-Verbose -Message "Storing updated UPS Service App settings"
                 $app.Update()
             }
 
             if ($updateSiteNamingConflict -eq $true)
             {
+                Write-Verbose -Message "Updating SiteNamingConflict setting"
                 $ca = Get-SPWebApplication -IncludeCentralAdministration | Where-Object -FilterScript { $_.IsAdministrationWebApplication }
                 $caSite = $ca.Sites[0]
                 $serviceContext = Get-SPServiceContext($caSite)
@@ -572,6 +648,10 @@ function Test-TargetResource
         $SiteNamingConflictResolution,
 
         [Parameter()]
+        [System.Boolean]
+        $UpdateProxyGroup = $true,
+
+        [Parameter()]
         [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present",
@@ -590,6 +670,7 @@ function Test-TargetResource
     }
 
     $PSBoundParameters.Ensure = $Ensure
+    $PSBoundParameters.UpdateProxyGroup = $UpdateProxyGroup
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
@@ -598,6 +679,12 @@ function Test-TargetResource
 
     if ($Ensure -eq "Present")
     {
+        if ($UpdateProxyGroup -eq $true -and `
+                $CurrentValues.UpdateProxyGroup -eq $true)
+        {
+            return $false
+        }
+
         return Test-SPDscParameterState -CurrentValues $CurrentValues `
             -DesiredValues $PSBoundParameters `
             -ValuesToCheck @("Name",

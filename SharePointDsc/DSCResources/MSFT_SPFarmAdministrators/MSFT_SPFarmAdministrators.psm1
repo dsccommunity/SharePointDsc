@@ -1,3 +1,8 @@
+$script:resourceModulePath = Split-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -Parent
+$script:modulesFolderPath = Join-Path -Path $script:resourceModulePath -ChildPath 'Modules'
+$script:resourceHelperModulePath = Join-Path -Path $script:modulesFolderPath -ChildPath 'SharePointDsc.Util'
+Import-Module -Name (Join-Path -Path $script:resourceHelperModulePath -ChildPath 'SharePointDsc.Util.psm1')
+
 function Get-TargetResource
 {
     [CmdletBinding()]
@@ -52,7 +57,7 @@ function Get-TargetResource
             MembersToExclude = $null
         }
 
-        $webApps = Get-SPwebapplication -IncludeCentralAdministration
+        $webApps = Get-SPWebApplication -IncludeCentralAdministration
         $caWebapp = $webApps | Where-Object -FilterScript {
             $_.IsAdministrationWebApplication
         }

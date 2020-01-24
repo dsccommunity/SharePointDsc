@@ -1,3 +1,8 @@
+$script:resourceModulePath = Split-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -Parent
+$script:modulesFolderPath = Join-Path -Path $script:resourceModulePath -ChildPath 'Modules'
+$script:resourceHelperModulePath = Join-Path -Path $script:modulesFolderPath -ChildPath 'SharePointDsc.Util'
+Import-Module -Name (Join-Path -Path $script:resourceHelperModulePath -ChildPath 'SharePointDsc.Util.psm1')
+
 function Get-TargetResource
 {
     [CmdletBinding()]
@@ -546,7 +551,7 @@ function Set-TargetResource
             17025
             {
                 Write-Verbose -Message ("The SharePoint update was already installed on your system." + `
-                        "Please report an issue about this behavior at https://github.com/PowerShell/SharePointDsc")
+                        "Please report an issue about this behavior at https://github.com/dsccommunity/SharePointDsc")
             }
             Default
             {
@@ -760,7 +765,7 @@ function Get-SPDscLocalVersionInfo
                             $value = $databaseView.GetType().InvokeMember("Fetch", "InvokeMethod", $null, $databaseView, $null)
                             $versionInfo = [System.Version]$value.GetType().InvokeMember("StringData", "GetProperty", $null, $value, 1)
 
-                            # https://github.com/PowerShell/DscResources/issues/383
+                            # https://github.com/dsccommunity/DscResources/issues/383
 
                             Clear-ComObject -ComObject $databaseView
                             Clear-ComObject -ComObject $value
