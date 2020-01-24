@@ -24,6 +24,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 The following changes will break v3.x and earlier configurations that use these
 resources:
 
+- SPManagedMetaDataServiceAppDefault
+  - Updated resource to allow the configuration of default per service application
+    proxy groups instead of per farm
 - SPUserProfileServiceApp
   - Changed the MySiteHostLocation parameter to a required parameter
 - SPWebAppAuthentication
