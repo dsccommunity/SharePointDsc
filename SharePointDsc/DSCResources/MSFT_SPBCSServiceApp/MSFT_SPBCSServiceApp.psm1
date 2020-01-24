@@ -169,7 +169,9 @@ function Set-TargetResource
 
             if ($params.UseSQLAuthentication -eq $true)
             {
-                $databaseCredentialsParam = @{DatabaseCredentials = $params.DatabaseCredentials }
+                $databaseCredentialsParam = @{
+                    DatabaseCredentials = $params.DatabaseCredentials
+                }
             }
             else
             {
