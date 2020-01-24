@@ -30,6 +30,14 @@ function Get-TargetResource
         $DatabaseName,
 
         [Parameter()]
+        [System.Boolean]
+        $UseSQLAuthentication,
+
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
+        $DatabaseCredentials,
+
+        [Parameter()]
         [System.String[]]
         $TermStoreAdministrators,
 
@@ -282,6 +290,14 @@ function Set-TargetResource
         $DatabaseName,
 
         [Parameter()]
+        [System.Boolean]
+        $UseSQLAuthentication,
+
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
+        $DatabaseCredentials,
+
+        [Parameter()]
         [System.String[]]
         $TermStoreAdministrators,
 
@@ -349,6 +365,16 @@ function Set-TargetResource
             if ($params.ContainsKey("ContentTypeHubUrl") -eq $true)
             {
                 $newParams.Add("HubUri", $params.ContentTypeHubUrl)
+            }
+
+            if ($params.useSQLAuthentication -eq $true)
+            {
+                Write-Verbose -Message "Using SQL authentication to create service application as `$useSQLAuthentication is set to $($params.useSQLAuthentication))."
+                $newParams.Add("DatabaseCredentials", $params.DatabaseCredentials)
+            }
+            else
+            {
+                Write-Verbose -Message "`$useSQLAuthentication is false or not specified; using default Windows authentication."
             }
 
             $app = New-SPMetadataServiceApplication @newParams
@@ -713,6 +739,14 @@ function Test-TargetResource
         [Parameter()]
         [System.String]
         $DatabaseName,
+
+        [Parameter()]
+        [System.Boolean]
+        $UseSQLAuthentication,
+
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
+        $DatabaseCredentials,
 
         [Parameter()]
         [System.String[]]

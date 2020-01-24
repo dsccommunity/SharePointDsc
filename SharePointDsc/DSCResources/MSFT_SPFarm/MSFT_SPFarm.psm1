@@ -31,6 +31,14 @@ function Get-TargetResource
         [System.String]
         $DatabaseServer,
 
+        [Parameter()]
+        [System.Boolean]
+        $UseSQLAuthentication,
+
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
+        $DatabaseCredentials,
+
         [Parameter(Mandatory = $true)]
         [System.Management.Automation.PSCredential]
         $FarmAccount,
@@ -333,6 +341,14 @@ function Set-TargetResource
         [Parameter(Mandatory = $true)]
         [System.String]
         $DatabaseServer,
+
+        [Parameter()]
+        [System.Boolean]
+        $useSQLAuthentication,
+
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
+        $DatabaseCredentials,
 
         [Parameter(Mandatory = $true)]
         [System.Management.Automation.PSCredential]
@@ -656,7 +672,16 @@ function Set-TargetResource
             $modulePath = "..\..\Modules\SharePointDsc.Farm\SPFarm.psm1"
             Import-Module -Name (Join-Path -Path $scriptRoot -ChildPath $modulePath -Resolve)
 
-            $sqlInstanceStatus = Get-SPDscSQLInstanceStatus -SQLServer $params.DatabaseServer
+            if ($params.UseSQLAuthentication -eq $true)
+            {
+                $databaseCredentialsParam = @{DatabaseCredentials = $params.DatabaseCredentials }
+            }
+            else
+            {
+                $databaseCredentialsParam = ""
+            }
+
+            $sqlInstanceStatus = Get-SPDscSQLInstanceStatus -SQLServer $params.DatabaseServer @databaseCredentialsParam
 
             if ($sqlInstanceStatus.MaxDOPCorrect -ne $true)
             {
@@ -664,7 +689,8 @@ function Set-TargetResource
             }
 
             $dbStatus = Get-SPDscConfigDBStatus -SQLServer $params.DatabaseServer `
-                -Database $params.FarmConfigDatabaseName
+                -Database $params.FarmConfigDatabaseName `
+                @databaseCredentialsParam
 
             while ($dbStatus.Locked -eq $true)
             {
@@ -673,7 +699,8 @@ function Set-TargetResource
                     "server, this server will wait for this to complete")
                 Start-Sleep -Seconds 30
                 $dbStatus = Get-SPDscConfigDBStatus -SQLServer $params.DatabaseServer `
-                    -Database $params.FarmConfigDatabaseName
+                    -Database $params.FarmConfigDatabaseName `
+                    @databaseCredentialsParam
             }
 
             if ($dbStatus.ValidPermissions -eq $false)
@@ -686,6 +713,16 @@ function Set-TargetResource
                 DatabaseName                       = $params.FarmConfigDatabaseName
                 Passphrase                         = $params.Passphrase.Password
                 SkipRegisterAsDistributedCacheHost = $true
+            }
+
+            if ($params.useSQLAuthentication -eq $true)
+            {
+                Write-Verbose -Message "Using SQL authentication to connect to / create farm as `$useSQLAuthentication is set to $($params.useSQLAuthentication))."
+                $executeArgs.Add("DatabaseCredentials", $params.DatabaseCredentials)
+            }
+            else
+            {
+                Write-Verbose -Message "`$useSQLAuthentication is false or not specified; using default Windows authentication."
             }
 
             $installedVersion = Get-SPDscInstalledProductVersion
@@ -766,7 +803,8 @@ function Set-TargetResource
             if ($createFarm -eq $false)
             {
                 $dbStatus = Get-SPDscConfigDBStatus -SQLServer $params.DatabaseServer `
-                    -Database $params.FarmConfigDatabaseName
+                    -Database $params.FarmConfigDatabaseName `
+                    @databaseCredentialsParam
                 $loopCount = 0
                 while ($dbStatus.DatabaseExists -eq $false -and $loopCount -lt 15)
                 {
@@ -776,7 +814,8 @@ function Set-TargetResource
                     Start-Sleep -Seconds 60
                     $loopCount++
                     $dbStatus = Get-SPDscConfigDBStatus -SQLServer $params.DatabaseServer `
-                        -Database $params.FarmConfigDatabaseName
+                        -Database $params.FarmConfigDatabaseName `
+                        @databaseCredentialsParam
                 }
 
                 Write-Verbose -Message "The database exists, so attempt to join the server to the farm"
@@ -827,7 +866,8 @@ function Set-TargetResource
 
                 Write-Verbose -Message "Creating Lock database to prevent two servers creating the same farm"
                 Add-SPDscConfigDBLock -SQLServer $params.DatabaseServer `
-                    -Database $params.FarmConfigDatabaseName
+                    -Database $params.FarmConfigDatabaseName `
+                    @databaseCredentialsParam
 
                 try
                 {
@@ -837,6 +877,11 @@ function Set-TargetResource
                     }
 
                     Write-Verbose -Message "Creating new Config database"
+                    Write-Verbose -Message "executeArgs is:"
+                    foreach ($arg in $executeArgs.Keys)
+                    {
+                        Write-Verbose -Message "$arg $($executeArgs[$arg])"
+                    }
                     New-SPConfigurationDatabase @executeArgs
 
                     $farmAction = "CreatedFarm"
@@ -845,7 +890,8 @@ function Set-TargetResource
                 {
                     Write-Verbose -Message "Removing Lock database"
                     Remove-SPDscConfigDBLock -SQLServer $params.DatabaseServer `
-                        -Database $params.FarmConfigDatabaseName
+                        -Database $params.FarmConfigDatabaseName `
+                        @databaseCredentialsParam
                 }
             }
 
@@ -1012,6 +1058,14 @@ function Test-TargetResource
         [Parameter(Mandatory = $true)]
         [System.String]
         $DatabaseServer,
+
+        [Parameter()]
+        [System.Boolean]
+        $UseSQLAuthentication,
+
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
+        $DatabaseCredentials,
 
         [Parameter(Mandatory = $true)]
         [System.Management.Automation.PSCredential]

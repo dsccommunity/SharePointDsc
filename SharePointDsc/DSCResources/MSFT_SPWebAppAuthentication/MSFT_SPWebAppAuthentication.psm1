@@ -135,12 +135,16 @@ function Get-TargetResource
             if ($null -eq $authProviders)
             {
                 $localAuthMode = "Classic"
+                $windowsAuthMethod = $null
+                $basicAuth = $null
                 $authenticationProvider = $null
                 $roleProvider = $null
                 $membershipProvider = $null
 
                 $provider = @{
                     AuthenticationMethod   = $localAuthMode
+                    WindowsAuthMethod      = $windowsAuthMethod
+                    UseBasicAuth           = $basicAuth
                     AuthenticationProvider = $authenticationProvider
                     MembershipProvider     = $membershipProvider
                     RoleProvider           = $roleProvider
@@ -148,19 +152,24 @@ function Get-TargetResource
                 switch ($zone)
                 {
                     "Default"
-                    { $default += $provider
+                    {
+                        $default += $provider
                     }
                     "Intranet"
-                    { $intranet += $provider
+                    {
+                        $intranet += $provider
                     }
                     "Internet"
-                    { $internet += $provider
+                    {
+                        $internet += $provider
                     }
                     "Extranet"
-                    { $extranet += $provider
+                    {
+                        $extranet += $provider
                     }
                     "Custom"
-                    { $custom += $provider
+                    {
+                        $custom += $provider
                     }
                 }
             }
@@ -169,19 +178,31 @@ function Get-TargetResource
                 foreach ($authProvider in $authProviders)
                 {
                     $localAuthMode = $null
+                    $windowsAuthMethod = $null
+                    $basicAuth = $null
                     $authenticationProvider = $null
                     $roleProvider = $null
                     $membershipProvider = $null
 
                     if ($authProvider.ClaimProviderName -eq 'AD')
                     {
+                        $localAuthMode = "WindowsAuthentication"
                         if ($authProvider.DisableKerberos -eq $true)
                         {
-                            $localAuthMode = "NTLM"
+                            $windowsAuthMethod = "NTLM"
                         }
                         else
                         {
-                            $localAuthMode = "Kerberos"
+                            $windowsAuthMethod = "Kerberos"
+                        }
+
+                        if ($authProvider.UseBasicAuthentication -eq $true)
+                        {
+                            $basicAuth = $true
+                        }
+                        else
+                        {
+                            $basicAuth = $false
                         }
                     }
                     elseif ($authProvider.ClaimProviderName -eq 'Forms')
@@ -198,6 +219,8 @@ function Get-TargetResource
 
                     $provider = @{
                         AuthenticationMethod   = $localAuthMode
+                        WindowsAuthMethod      = $windowsAuthMethod
+                        UseBasicAuth           = $basicAuth
                         AuthenticationProvider = $authenticationProvider
                         MembershipProvider     = $membershipProvider
                         RoleProvider           = $roleProvider
@@ -205,19 +228,24 @@ function Get-TargetResource
                     switch ($zone)
                     {
                         "Default"
-                        { $default += $provider
+                        {
+                            $default += $provider
                         }
                         "Intranet"
-                        { $intranet += $provider
+                        {
+                            $intranet += $provider
                         }
                         "Internet"
-                        { $internet += $provider
+                        {
+                            $internet += $provider
                         }
                         "Extranet"
-                        { $extranet += $provider
+                        {
+                            $extranet += $provider
                         }
                         "Custom"
-                        { $custom += $provider
+                        {
+                            $custom += $provider
                         }
                     }
                 }
@@ -347,7 +375,7 @@ function Set-TargetResource
 
         if ($PSBoundParameters.ContainsKey("Internet"))
         {
-            Test-ZoneIsNotClassic -Zone $Intranet
+            Test-ZoneIsNotClassic -Zone $Internet
         }
 
         if ($PSBoundParameters.ContainsKey("Extranet"))
@@ -595,11 +623,11 @@ function Test-Parameter()
         $Exception
     )
 
-    $ntlmUsed = $false
-    $kerberosUsed = $false
     foreach ($zoneConfig in $Zone)
     {
         $authProviderUsed = $false
+        $winAuthMethodUsed = $false
+        $useBasicAuthUsed = $false
         $membProviderUsed = $false
         $roleProviderUsed = $false
         # Check if the config contains the AuthenticationProvider Property
@@ -609,6 +637,33 @@ function Test-Parameter()
         if ($null -ne $prop.Value)
         {
             $authProviderUsed = $true
+        }
+
+        # Check if the config contains the MembershipProvider Property
+        $prop = $zoneConfig.CimInstanceProperties | Where-Object -FilterScript {
+            $_.Name -eq "MembershipProvider"
+        }
+        if ($null -ne $prop.Value)
+        {
+            $membProviderUsed = $true
+        }
+
+        # Check if the config contains the WindowsAuthMethod Property
+        $prop = $zoneConfig.CimInstanceProperties | Where-Object -FilterScript {
+            $_.Name -eq "WindowsAuthMethod"
+        }
+        if ($null -ne $prop.Value)
+        {
+            $winAuthMethodUsed = $true
+        }
+
+        # Check if the config contains the UseBasicAuth Property
+        $prop = $zoneConfig.CimInstanceProperties | Where-Object -FilterScript {
+            $_.Name -eq "UseBasicAuth"
+        }
+        if ($null -ne $prop.Value)
+        {
+            $useBasicAuthUsed = $true
         }
 
         # Check if the config contains the MembershipProvider Property
@@ -631,15 +686,21 @@ function Test-Parameter()
 
         switch ($zoneConfig.AuthenticationMethod)
         {
-            "NTLM"
+            "Classic"
             {
-                $ntlmUsed = $true
-                if ($authProviderUsed -eq $true -or `
-                        $membProviderUsed -eq $true -or `
-                        $roleProviderUsed -eq $true)
+                $InstalledVersion = Get-SPDscInstalledProductVersion
+                if ($InstalledVersion.FileMajorPart -ge 16)
                 {
-                    $message = "You cannot use AuthenticationProvider, MembershipProvider " + `
-                        "or RoleProvider when using NTLM"
+                    Write-Verbose ("AuthenticationMethod is set to Classic. Please note this " + `
+                            "is unsupported for Production use in SharePoint 2016 and later")
+                }
+            }
+            "WindowsAuthentication"
+            {
+                if ($winAuthMethodUsed -eq $false)
+                {
+                    $message = "You have to specify WindowsAuthMethod when " + `
+                        "using WindowsAuthentication"
                     if ($Exception)
                     {
                         throw $message
@@ -650,16 +711,13 @@ function Test-Parameter()
                         return $false
                     }
                 }
-            }
-            "Kerberos"
-            {
-                $kerberosUsed = $true
+
                 if ($authProviderUsed -eq $true -or `
                         $membProviderUsed -eq $true -or `
                         $roleProviderUsed -eq $true)
                 {
                     $message = "You cannot use AuthenticationProvider, MembershipProvider " + `
-                        "or RoleProvider when using Kerberos"
+                        "or RoleProvider when using WindowsAuthentication"
                     if ($Exception)
                     {
                         throw $message
@@ -678,6 +736,22 @@ function Test-Parameter()
                 {
                     $message = "You have to specify MembershipProvider and " + `
                         "RoleProvider when using FBA"
+                    if ($Exception)
+                    {
+                        throw $message
+                    }
+                    else
+                    {
+                        Write-Verbose -Message $message
+                        return $false
+                    }
+                }
+
+                if ($winAuthMethodUsed -eq $true -or `
+                        $useBasicAuthUsed -eq $true)
+                {
+                    $message = "You cannot use WindowsAuthMethod or UseBasicAuth " + `
+                        "when using FBA"
                     if ($Exception)
                     {
                         throw $message
@@ -722,6 +796,22 @@ function Test-Parameter()
                     }
                 }
 
+                if ($winAuthMethodUsed -eq $true -or `
+                        $useBasicAuthUsed -eq $true)
+                {
+                    $message = "You cannot use WindowsAuthMethod or UseBasicAuth " + `
+                        "when using Federated"
+                    if ($Exception)
+                    {
+                        throw $message
+                    }
+                    else
+                    {
+                        Write-Verbose -Message $message
+                        return $false
+                    }
+                }
+
                 if ($authProviderUsed -eq $false)
                 {
                     $message = "You have to specify AuthenticationProvider when " + `
@@ -737,20 +827,6 @@ function Test-Parameter()
                     }
                 }
 
-            }
-        }
-
-        if ($ntlmUsed -and $kerberosUsed)
-        {
-            $message = "You cannot use both NTLM and Kerberos in the same zone"
-            if ($Exception)
-            {
-                throw $message
-            }
-            else
-            {
-                Write-Verbose -Message $message
-                return $false
             }
         }
     }
@@ -806,14 +882,23 @@ function Set-ZoneConfiguration()
         {
             switch ($zoneConfig.AuthenticationMethod)
             {
-                "NTLM"
+                "WindowsAuthentication"
                 {
-                    $newap = New-SPAuthenticationProvider -UseWindowsIntegratedAuthentication
-                }
-                "Kerberos"
-                {
-                    $newap = New-SPAuthenticationProvider -UseWindowsIntegratedAuthentication `
-                        -DisableKerberos:$false
+                    $apParams = @{
+                        UseWindowsIntegratedAuthentication = $true
+                    }
+
+                    if ($zoneConfig.WindowsAuthMethod -eq "Kerberos")
+                    {
+                        $apParams.DisableKerberos = $false
+                    }
+
+                    if ($zoneConfig.UseBasicAuth -eq $true)
+                    {
+                        $apParams.UseBasicAuthentication = $true
+                    }
+
+                    $newap = New-SPAuthenticationProvider @apParams
                 }
                 "FBA"
                 {
@@ -856,11 +941,31 @@ function Test-ZoneConfiguration()
     {
         switch ($zoneConfig.AuthenticationMethod)
         {
-            { $_ -in @("NTLM", "Kerberos", "Classic") }
+            "Classic"
             {
                 $configuredMethod = $CurrentConfig | `
                     Where-Object -FilterScript {
                     $_.AuthenticationMethod -eq $zoneConfig.AuthenticationMethod
+                }
+            }
+            "WindowsAuthentication"
+            {
+                if ($null -eq $zoneConfig.UseBasicAuth)
+                {
+                    $configuredMethod = $CurrentConfig | `
+                        Where-Object -FilterScript {
+                        $_.AuthenticationMethod -eq $zoneConfig.AuthenticationMethod -and `
+                            $_.WindowsAuthMethod -eq $zoneConfig.WindowsAuthMethod
+                    }
+                }
+                else
+                {
+                    $configuredMethod = $CurrentConfig | `
+                        Where-Object -FilterScript {
+                        $_.AuthenticationMethod -eq $zoneConfig.AuthenticationMethod -and `
+                            $_.WindowsAuthMethod -eq $zoneConfig.WindowsAuthMethod -and `
+                            $_.UseBasicAuth -eq $zoneConfig.UseBasicAuth
+                    }
                 }
             }
             "FBA"
@@ -893,11 +998,27 @@ function Test-ZoneConfiguration()
     {
         switch ($zoneConfig.AuthenticationMethod)
         {
-            { $_ -in @("NTLM", "Kerberos", "Classic") }
+            "Classic"
             {
                 $specifiedMethod = $DesiredConfig | `
                     Where-Object -FilterScript {
                     $_.AuthenticationMethod -eq $zoneConfig.AuthenticationMethod
+                }
+            }
+            "WindowsAuthentication"
+            {
+                $specifiedMethod = $DesiredConfig | `
+                    Where-Object -FilterScript {
+                    $_.AuthenticationMethod -eq $zoneConfig.AuthenticationMethod -and `
+                        $_.WindowsAuthMethod -eq $zoneConfig.WindowsAuthMethod
+                }
+
+                if ($null -ne $specifiedMethod.UseBasicAuth)
+                {
+                    $specifiedMethod = $specifiedMethod | `
+                        Where-Object -FilterScript {
+                        $_.UseBasicAuth -eq $zoneConfig.UseBasicAuth
+                    }
                 }
             }
             "FBA"

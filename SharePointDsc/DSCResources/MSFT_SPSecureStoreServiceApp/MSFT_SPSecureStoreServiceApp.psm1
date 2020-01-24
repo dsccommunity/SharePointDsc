@@ -38,6 +38,10 @@ function Get-TargetResource
         $DatabaseServer,
 
         [Parameter()]
+        [System.Boolean]
+        $UseSQLAuthentication,
+
+        [Parameter()]
         [System.String]
         $FailoverDatabaseServer,
 
@@ -48,11 +52,6 @@ function Get-TargetResource
         [Parameter()]
         [System.Boolean]
         $Sharing,
-
-        [Parameter()]
-        [ValidateSet("Windows", "SQL")]
-        [System.String]
-        $DatabaseAuthenticationType,
 
         [Parameter()]
         [ValidateSet("Present", "Absent")]
@@ -176,6 +175,10 @@ function Set-TargetResource
         $DatabaseServer,
 
         [Parameter()]
+        [System.Boolean]
+        $UseSQLAuthentication,
+
+        [Parameter()]
         [System.String]
         $FailoverDatabaseServer,
 
@@ -186,11 +189,6 @@ function Set-TargetResource
         [Parameter()]
         [System.Boolean]
         $Sharing,
-
-        [Parameter()]
-        [ValidateSet("Windows", "SQL")]
-        [System.String]
-        $DatabaseAuthenticationType,
 
         [Parameter()]
         [ValidateSet("Present", "Absent")]
@@ -211,16 +209,6 @@ function Set-TargetResource
     $result = Get-TargetResource @PSBoundParameters
     $params = $PSBoundParameters
 
-    if ((($params.ContainsKey("DatabaseAuthenticationType") -eq $true) -and `
-            ($params.ContainsKey("DatabaseCredentials") -eq $false)) -or `
-        (($params.ContainsKey("DatabaseCredentials") -eq $true) -and `
-            ($params.ContainsKey("DatabaseAuthenticationType") -eq $false)))
-    {
-        throw ("Where DatabaseCredentials are specified you must also specify " + `
-                "DatabaseAuthenticationType to identify the type of credentials being passed")
-        return
-    }
-
     if ($result.Ensure -eq "Absent" -and $Ensure -eq "Present")
     {
         Write-Verbose -Message "Creating Secure Store Service Application $Name"
@@ -238,15 +226,13 @@ function Set-TargetResource
                 $params.Remove("InstallAccount") | Out-Null
             }
 
-            if ($params.ContainsKey("DatabaseAuthenticationType"))
+            if ($params.UseSQLAuthentication -eq $true)
             {
-                if ($params.DatabaseAuthenticationType -eq "SQL")
-                {
-                    $params.Add("DatabaseUsername", $params.DatabaseCredentials.Username)
-                    $params.Add("DatabasePassword", $params.DatabaseCredentials.Password)
-                }
-                $params.Remove("DatabaseAuthenticationType")
+                $params.Add("DatabaseUsername", $params.DatabaseCredentials.Username)
+                $params.Add("DatabasePassword", $params.DatabaseCredentials.Password)
             }
+            $params.Remove("UseSQLAuthentication") | Out-Null
+            $params.Remove("DatabaseCredentials") | Out-Null
 
             $pName = "$($params.Name) Proxy"
 
@@ -358,6 +344,10 @@ function Test-TargetResource
         $DatabaseServer,
 
         [Parameter()]
+        [System.Boolean]
+        $UseSQLAuthentication,
+
+        [Parameter()]
         [System.String]
         $FailoverDatabaseServer,
 
@@ -368,11 +358,6 @@ function Test-TargetResource
         [Parameter()]
         [System.Boolean]
         $Sharing,
-
-        [Parameter()]
-        [ValidateSet("Windows", "SQL")]
-        [System.String]
-        $DatabaseAuthenticationType,
 
         [Parameter()]
         [ValidateSet("Present", "Absent")]

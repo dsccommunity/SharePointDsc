@@ -34,11 +34,25 @@ function Get-SPDscConfigDBStatus
 
         [Parameter(Mandatory = $true)]
         [String]
-        $Database
+        $Database,
+
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
+        $DatabaseCredentials
     )
 
     $connection = New-Object -TypeName "System.Data.SqlClient.SqlConnection"
-    $connection.ConnectionString = "Server=$SQLServer;Integrated Security=SSPI;Database=Master"
+    # If we specified SQL credentials then try to use them
+    if ($PSBoundParameters.ContainsKey("DatabaseCredentials"))
+    {
+        $marshal = [Runtime.InteropServices.Marshal]
+        $dbCredentialsPlainPassword = $marshal::PtrToStringAuto($marshal::SecureStringToBSTR($DatabaseCredentials.Password))
+        $connection.ConnectionString = "Server=$SQLServer;Integrated Security=False;User ID=$($DatabaseCredentials.Username);Password=$dbCredentialsPlainPassword;Database=Master"
+    }
+    else # Just use Windows integrated auth
+    {
+        $connection.ConnectionString = "Server=$SQLServer;Integrated Security=SSPI;Database=Master"
+    }
     $command = New-Object -TypeName "System.Data.SqlClient.SqlCommand"
 
     try
@@ -108,11 +122,25 @@ function Get-SPDscSQLInstanceStatus
     (
         [Parameter(Mandatory = $true)]
         [String]
-        $SQLServer
+        $SQLServer,
+
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
+        $DatabaseCredentials
     )
 
     $connection = New-Object -TypeName "System.Data.SqlClient.SqlConnection"
-    $connection.ConnectionString = "Server=$SQLServer;Integrated Security=SSPI;Database=Master"
+    # If we specified SQL credentials then try to use them
+    if ($PSBoundParameters.ContainsKey("DatabaseCredentials"))
+    {
+        $marshal = [Runtime.InteropServices.Marshal]
+        $dbCredentialsPlainPassword = $marshal::PtrToStringAuto($marshal::SecureStringToBSTR($DatabaseCredentials.Password))
+        $connection.ConnectionString = "Server=$SQLServer;Integrated Security=False;User ID=$($DatabaseCredentials.Username);Password=$dbCredentialsPlainPassword;Database=Master"
+    }
+    else # Just use Windows integrated auth
+    {
+        $connection.ConnectionString = "Server=$SQLServer;Integrated Security=SSPI;Database=Master"
+    }
     $command = New-Object -TypeName "System.Data.SqlClient.SqlCommand"
 
     try
@@ -175,13 +203,27 @@ function Add-SPDscConfigDBLock
 
         [Parameter(Mandatory = $true)]
         [String]
-        $Database
+        $Database,
+
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
+        $DatabaseCredentials
     )
 
     Write-Verbose -Message "Creating lock database $($Database)_Lock"
 
     $connection = New-Object -TypeName "System.Data.SqlClient.SqlConnection"
-    $connection.ConnectionString = "Server=$SQLServer;Integrated Security=SSPI;Database=Master"
+    # If we specified SQL credentials then try to use them
+    if ($PSBoundParameters.ContainsKey("DatabaseCredentials"))
+    {
+        $marshal = [Runtime.InteropServices.Marshal]
+        $dbCredentialsPlainPassword = $marshal::PtrToStringAuto($marshal::SecureStringToBSTR($DatabaseCredentials.Password))
+        $connection.ConnectionString = "Server=$SQLServer;Integrated Security=False;User ID=$($DatabaseCredentials.Username);Password=$dbCredentialsPlainPassword;Database=Master"
+    }
+    else # Just use Windows integrated auth
+    {
+        $connection.ConnectionString = "Server=$SQLServer;Integrated Security=SSPI;Database=Master"
+    }
     $command = New-Object -TypeName "System.Data.SqlClient.SqlCommand"
 
     try
@@ -237,13 +279,27 @@ function Remove-SPDscConfigDBLock
 
         [Parameter(Mandatory = $true)]
         [String]
-        $Database
+        $Database,
+
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
+        $DatabaseCredentials
     )
 
     Write-Verbose -Message "Removing lock database $($Database)_Lock"
 
     $connection = New-Object -TypeName "System.Data.SqlClient.SqlConnection"
-    $connection.ConnectionString = "Server=$SQLServer;Integrated Security=SSPI;Database=Master"
+    # If we specified SQL credentials then try to use them
+    if ($PSBoundParameters.ContainsKey("DatabaseCredentials"))
+    {
+        $marshal = [Runtime.InteropServices.Marshal]
+        $dbCredentialsPlainPassword = $marshal::PtrToStringAuto($marshal::SecureStringToBSTR($DatabaseCredentials.Password))
+        $connection.ConnectionString = "Server=$SQLServer;Integrated Security=False;User ID=$($DatabaseCredentials.Username);Password=$dbCredentialsPlainPassword;Database=Master"
+    }
+    else # Just use Windows integrated auth
+    {
+        $connection.ConnectionString = "Server=$SQLServer;Integrated Security=SSPI;Database=Master"
+    }
     $command = New-Object -TypeName "System.Data.SqlClient.SqlCommand"
 
     try

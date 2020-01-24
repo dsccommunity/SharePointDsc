@@ -31,6 +31,10 @@ function Get-TargetResource
         $Ensure = "Present",
 
         [Parameter()]
+        [System.Boolean]
+        $UseSQLAuthentication,
+
+        [Parameter()]
         [System.Management.Automation.PSCredential]
         $DatabaseCredentials,
 
@@ -109,6 +113,10 @@ function Set-TargetResource
         [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present",
+
+        [Parameter()]
+        [System.Boolean]
+        $UseSQLAuthentication,
 
         [Parameter()]
         [System.Management.Automation.PSCredential]
@@ -212,6 +220,10 @@ function Test-TargetResource
         [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present",
+
+        [Parameter()]
+        [System.Boolean]
+        $UseSQLAuthentication,
 
         [Parameter()]
         [System.Management.Automation.PSCredential]

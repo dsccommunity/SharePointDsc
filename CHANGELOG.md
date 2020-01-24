@@ -10,6 +10,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - SharePointDsc
   - Added automatic release with a new CI pipeline
   - Updated PULL_REQUEST_TEMPLATE.md to match DSC standard
+- SharePointDSC generic
+  - Added support in several resources for creating/connecting to farm
+    and service applications using a (single) SQL-based credential
+    instead of the default Windows credentials. Needed when e.g. using
+    Azure SQL Managed Instance as SharePoint's database server.
+    UseSQLAuthentication and DatabaseCredentials parameters will need
+    to be considered.
 
 ### Changed
 

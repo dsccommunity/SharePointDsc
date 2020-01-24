@@ -38,6 +38,14 @@ function Get-TargetResource
         $DatabaseServer,
 
         [Parameter()]
+        [System.Boolean]
+        $UseSQLAuthentication,
+
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
+        $DatabaseCredentials,
+
+        [Parameter()]
         [System.String]
         $HostHeader,
 
@@ -142,6 +150,14 @@ function Set-TargetResource
         [Parameter()]
         [System.String]
         $DatabaseServer,
+
+        [Parameter()]
+        [System.Boolean]
+        $UseSQLAuthentication,
+
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
+        $DatabaseCredentials,
 
         [Parameter()]
         [System.String]
@@ -255,6 +271,15 @@ function Set-TargetResource
                 {
                     $newWebAppParams.Add("SecureSocketsLayer", $true)
                 }
+                if ($params.useSQLAuthentication -eq $true)
+                {
+                    Write-Verbose -Message "Using SQL authentication to create web app as `$useSQLAuthentication is set to $($params.useSQLAuthentication))."
+                    $newWebAppParams.Add("DatabaseCredentials", $params.DatabaseCredentials)
+                }
+                else
+                {
+                    Write-Verbose -Message "`$useSQLAuthentication is false or not specified; using default Windows authentication."
+                }
 
                 New-SPWebApplication @newWebAppParams | Out-Null
             }
@@ -310,6 +335,14 @@ function Test-TargetResource
         [Parameter()]
         [System.String]
         $DatabaseServer,
+
+        [Parameter()]
+        [System.Boolean]
+        $UseSQLAuthentication,
+
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
+        $DatabaseCredentials,
 
         [Parameter()]
         [System.String]
