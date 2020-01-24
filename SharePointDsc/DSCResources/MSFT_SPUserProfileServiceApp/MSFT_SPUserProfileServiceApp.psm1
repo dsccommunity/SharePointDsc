@@ -21,7 +21,7 @@ function Get-TargetResource
         [System.String]
         $ApplicationPool,
 
-        [Parameter()]
+        [Parameter(Mandatory = $true)]
         [System.String]
         $MySiteHostLocation,
 
@@ -81,12 +81,6 @@ function Get-TargetResource
     )
 
     Write-Verbose -Message "Getting user profile service application $Name"
-
-    if ($PSBoundParameters.ContainsKey("MySiteHostLocation") -eq $false)
-    {
-        Write-Verbose -Message ("You should also specify the MySiteHostLocation parameter. " + `
-                "This will be required as of SharePointDsc v4.0")
-    }
 
     $farmAccount = Invoke-SPDscCommand -Credential $InstallAccount `
         -Arguments $PSBoundParameters `
@@ -259,7 +253,7 @@ function Set-TargetResource
         [System.String]
         $ApplicationPool,
 
-        [Parameter()]
+        [Parameter(Mandatory = $true)]
         [System.String]
         $MySiteHostLocation,
 
@@ -319,12 +313,6 @@ function Set-TargetResource
     )
 
     Write-Verbose -Message "Setting user profile service application $Name"
-
-    if ($PSBoundParameters.ContainsKey("MySiteHostLocation") -eq $false)
-    {
-        Write-Verbose -Message ("You should also specify the MySiteHostLocation parameter. " + `
-                "This will be required as of SharePointDsc v4.0")
-    }
 
     if ($Ensure -eq "Present")
     {
@@ -602,7 +590,7 @@ function Test-TargetResource
         [System.String]
         $ApplicationPool,
 
-        [Parameter()]
+        [Parameter(Mandatory = $true)]
         [System.String]
         $MySiteHostLocation,
 
@@ -662,12 +650,6 @@ function Test-TargetResource
     )
 
     Write-Verbose -Message "Testing for user profile service application $Name"
-
-    if ($PSBoundParameters.ContainsKey("MySiteHostLocation") -eq $false)
-    {
-        Write-Verbose -Message ("You should also specify the MySiteHostLocation parameter. " + `
-                "This will be required as of SharePointDsc v4.0")
-    }
 
     $PSBoundParameters.Ensure = $Ensure
     $PSBoundParameters.UpdateProxyGroup = $UpdateProxyGroup

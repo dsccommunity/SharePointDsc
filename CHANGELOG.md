@@ -21,6 +21,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - SPUserProfileServiceApp
   - Implemented ability to fix incorrectly linked proxy groups
 
+The following changes will break v3.x and earlier configurations that use these
+resources:
+
+- SPUserProfileServiceApp
+  - Changed the MySiteHostLocation parameter to a required parameter
+
 ### Deprecated
 
 - None
