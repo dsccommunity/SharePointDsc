@@ -106,10 +106,9 @@ try
             # Test contexts
             Context -Name "When no service applications exist in the current farm" -Fixture {
                 $testParams = @{
-                    Name                  = "Search Service Application"
-                    ApplicationPool       = "SharePoint Search Services"
-                    Ensure                = "Present"
-                    WindowsServiceAccount = $mockCredential
+                    Name            = "Search Service Application"
+                    ApplicationPool = "SharePoint Search Services"
+                    Ensure          = "Present"
                 }
 
                 Mock -CommandName Get-SPServiceApplicationPool -MockWith {
@@ -123,11 +122,10 @@ try
 
             Context -Name "When no service applications exist in the current farm" -Fixture {
                 $testParams = @{
-                    Name                  = "Search Service Application"
-                    ApplicationPool       = "SharePoint Search Services"
-                    AlertsEnabled         = $true
-                    Ensure                = "Present"
-                    WindowsServiceAccount = $mockCredential
+                    Name            = "Search Service Application"
+                    ApplicationPool = "SharePoint Search Services"
+                    AlertsEnabled   = $true
+                    Ensure          = "Present"
                 }
 
                 $global:SPDscCounter = 0
@@ -796,39 +794,6 @@ try
 
                 It "Should throw an error in the set method if the version of SharePoint isn't high enough" {
                     { Set-TargetResource @testParams } | Should Throw
-                }
-            }
-
-            Context "A service app exists that has a correct windows service account in use" -Fixture {
-                $testParams = @{
-                    Name                  = "Search Service Application"
-                    ApplicationPool       = "SharePoint Search Services"
-                    Ensure                = "Present"
-                    WindowsServiceAccount = $mockCredential
-                }
-
-                Mock -CommandName Get-SPServiceApplication -MockWith {
-                    $spServiceApp = [PSCustomObject]@{
-                        TypeName        = "Search Service Application"
-                        DisplayName     = $testParams.Name
-                        ApplicationPool = @{ Name = $testParams.ApplicationPool }
-                        Database        = @{
-                            Name                 = $testParams.DatabaseName
-                            NormalizedDataSource = $testParams.DatabaseServer
-                        }
-                    }
-                    $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value {
-                        return @{ FullName = $getTypeFullName }
-                    } -PassThru -Force
-                    return $spServiceApp
-                }
-
-                It "Should return the current value in the get method" {
-                    (Get-TargetResource @testParams).WindowsServiceAccount | Should Not BeNullOrEmpty
-                }
-
-                It "Should return true in the test method" {
-                    Test-TargetResource @testParams | Should Be $true
                 }
             }
         }
