@@ -44,7 +44,7 @@ function Invoke-TestCleanup
     # Restore-TestEnvironment -TestEnvironment $script:testEnvironment
 }
 
-Invoke-TestSetup -ModuleVersion $moduleVersion
+Invoke-TestSetup
 
 try
 {

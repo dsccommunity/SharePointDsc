@@ -1,3 +1,8 @@
+$script:resourceModulePath = Split-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -Parent
+$script:modulesFolderPath = Join-Path -Path $script:resourceModulePath -ChildPath 'Modules'
+$script:resourceHelperModulePath = Join-Path -Path $script:modulesFolderPath -ChildPath 'SharePointDsc.Util'
+Import-Module -Name (Join-Path -Path $script:resourceHelperModulePath -ChildPath 'SharePointDsc.Util.psm1')
+
 function Get-TargetResource
 {
     [CmdletBinding()]
@@ -322,7 +327,7 @@ function Set-TargetResource
         {
             $zone = Get-Item -Path $setupExe -Stream "Zone.Identifier" -EA SilentlyContinue
         }
-        catch 
+        catch
         {
             Write-Verbose -Message 'Encountered error while reading file stream. Ignoring file stream.'
         }

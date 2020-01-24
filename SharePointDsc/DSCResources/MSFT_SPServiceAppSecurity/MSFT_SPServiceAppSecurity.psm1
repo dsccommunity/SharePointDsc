@@ -1,3 +1,8 @@
+$script:resourceModulePath = Split-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -Parent
+$script:modulesFolderPath = Join-Path -Path $script:resourceModulePath -ChildPath 'Modules'
+$script:resourceHelperModulePath = Join-Path -Path $script:modulesFolderPath -ChildPath 'SharePointDsc.Util'
+Import-Module -Name (Join-Path -Path $script:resourceHelperModulePath -ChildPath 'SharePointDsc.Util.psm1')
+
 function Get-TargetResource
 {
     [CmdletBinding()]
@@ -351,8 +356,8 @@ function Set-TargetResource
                 if ($CurrentValues.Members.Username -contains $desiredMember.Username)
                 {
                     $compare = Compare-Object -ReferenceObject ($CurrentValues.Members | Where-Object -FilterScript {
-                                    $_.Username -eq $desiredMember.Username
-                                } | Select-Object -First 1).AccessLevels -DifferenceObject $desiredMember.AccessLevels
+                            $_.Username -eq $desiredMember.Username
+                        } | Select-Object -First 1).AccessLevels -DifferenceObject $desiredMember.AccessLevels
                     if ($null -ne $compare)
                     {
                         Grant-SPObjectSecurity -Identity $security `
@@ -422,8 +427,8 @@ function Set-TargetResource
                 if ($CurrentValues.Members.Username -contains $desiredMember.Username)
                 {
                     $compare = Compare-Object -ReferenceObject ($CurrentValues.Members | Where-Object -FilterScript {
-                                    $_.Username -eq $desiredMember.Username
-                                } | Select-Object -First 1).AccessLevels -DifferenceObject $desiredMember.AccessLevels
+                            $_.Username -eq $desiredMember.Username
+                        } | Select-Object -First 1).AccessLevels -DifferenceObject $desiredMember.AccessLevels
                     if ($null -ne $compare)
                     {
                         Grant-SPObjectSecurity -Identity $security `
@@ -619,8 +624,8 @@ function Test-TargetResource
                     $expandedAccessLevels = Expand-AccessLevel -Security $security -AccessLevels $member.AccessLevels
 
                     $compare = Compare-Object -DifferenceObject $expandedAccessLevels -ReferenceObject ($CurrentValues.Members | Where-Object -FilterScript {
-                                    $_.Username -eq $member.Username
-                                } | Select-Object -First 1).AccessLevels
+                            $_.Username -eq $member.Username
+                        } | Select-Object -First 1).AccessLevels
                     if ($null -ne $compare)
                     {
                         Write-Verbose -Message "$($member.Username) has incorrect permission level. Test failed."
