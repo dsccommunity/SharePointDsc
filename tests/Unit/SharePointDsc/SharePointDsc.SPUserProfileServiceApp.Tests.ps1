@@ -124,8 +124,8 @@ try
 
             $proxyGroup = @{
                 FriendlyName = "ProxyGroup"
-                Name = "ProxyGroup"
-                Proxies = @($correctProxy, $incorrectProxy)
+                Name         = "ProxyGroup"
+                Proxies      = @($correctProxy, $incorrectProxy)
             }
 
             Mock -CommandName Get-SPDscFarmAccount -MockWith {
@@ -133,16 +133,16 @@ try
             }
             Mock -CommandName New-SPProfileServiceApplication -MockWith {
                 $returnval = @{
-                        NetBIOSDomainNamesEnabled    = $false
-                        NoILMUsed                    = $false
-                        ServiceApplicationProxyGroup = $proxyGroup
+                    NetBIOSDomainNamesEnabled    = $false
+                    NoILMUsed                    = $false
+                    ServiceApplicationProxyGroup = $proxyGroup
                 }
 
                 $returnval = $returnval | Add-Member -MemberType ScriptMethod `
-                                                -Name IsConnected `
-                                                -Value {
-                                                    return $true
-                                            } -PassThru
+                    -Name IsConnected `
+                    -Value {
+                    return $true
+                } -PassThru
 
                 return $returnval
             }
@@ -168,9 +168,10 @@ try
             # Test contexts
             Context -Name "When PSDSCRunAsCredential matches the Farm Account and Service App is null" -Fixture {
                 $testParams = @{
-                    Name            = "User Profile Service App"
-                    ApplicationPool = "SharePoint Service Applications"
-                    Ensure          = "Present"
+                    Name               = "User Profile Service App"
+                    ApplicationPool    = "SharePoint Service Applications"
+                    Ensure             = "Present"
+                    MySiteHostLocation = "https://my.contoso.com"
                 }
 
                 Mock -CommandName Get-SPDscFarmAccount -MockWith {
@@ -198,9 +199,10 @@ try
 
             Context -Name "When PSDSCRunAsCredential matches the Farm Account and Service App is not null" -Fixture {
                 $testParams = @{
-                    Name            = "User Profile Service App"
-                    ApplicationPool = "SharePoint Service Applications"
-                    Ensure          = "Present"
+                    Name               = "User Profile Service App"
+                    ApplicationPool    = "SharePoint Service Applications"
+                    Ensure             = "Present"
+                    MySiteHostLocation = "https://my.contoso.com"
                 }
 
                 Mock -CommandName Get-SPServiceApplicationProxyGroup -MockWith {
@@ -225,13 +227,13 @@ try
                         Add-Member -MemberType ScriptMethod `
                             -Name Update `
                             -Value {
-                                $Global:SPDscUPSAUpdateCalled = $true
-                            } -PassThru |
+                            $Global:SPDscUPSAUpdateCalled = $true
+                        } -PassThru |
                         Add-Member -MemberType NoteProperty `
                             -Name ApplicationPool `
                             -Value @{
-                                Name = $testParams.ApplicationPool
-                            } -PassThru |
+                            Name = $testParams.ApplicationPool
+                        } -PassThru |
                         Add-Member -MemberType NoteProperty `
                             -Name ServiceApplicationProxyGroup `
                             -Value $proxyGroup `
@@ -239,8 +241,8 @@ try
                         Add-Member -MemberType ScriptMethod `
                             -Name IsConnected `
                             -Value {
-                                return $true
-                            } -PassThru |
+                            return $true
+                        } -PassThru |
                         Add-Member -MemberType ScriptMethod `
                             -Name GetType `
                             -Value {
@@ -331,10 +333,11 @@ try
 
             Context -Name "When InstallAccount matches the Farm Account" -Fixture {
                 $testParams = @{
-                    Name            = "User Profile Service App"
-                    ApplicationPool = "SharePoint Service Applications"
-                    Ensure          = "Present"
-                    InstallAccount  = $mockFarmCredential
+                    Name               = "User Profile Service App"
+                    ApplicationPool    = "SharePoint Service Applications"
+                    Ensure             = "Present"
+                    MySiteHostLocation = "https://my.contoso.com"
+                    InstallAccount     = $mockFarmCredential
                 }
 
                 Mock -CommandName Get-SPServiceApplication -MockWith {
@@ -358,9 +361,10 @@ try
 
             Context -Name "When no service applications exist in the current farm" -Fixture {
                 $testParams = @{
-                    Name            = "User Profile Service App"
-                    ApplicationPool = "SharePoint Service Applications"
-                    Ensure          = "Present"
+                    Name               = "User Profile Service App"
+                    ApplicationPool    = "SharePoint Service Applications"
+                    Ensure             = "Present"
+                    MySiteHostLocation = "https://my.contoso.com"
                 }
 
                 Mock -CommandName Get-SPServiceApplication -MockWith {
@@ -384,8 +388,8 @@ try
                             Add-Member -MemberType ScriptMethod `
                                 -Name IsConnected `
                                 -Value {
-                                    return $true
-                                } -PassThru
+                                return $true
+                            } -PassThru
                         )
                     }
                 }
@@ -431,9 +435,10 @@ try
 
             Context -Name "When service applications exist in the current farm but not the specific user profile service app" -Fixture {
                 $testParams = @{
-                    Name            = "User Profile Service App"
-                    ApplicationPool = "SharePoint Service Applications"
-                    Ensure          = "Present"
+                    Name               = "User Profile Service App"
+                    ApplicationPool    = "SharePoint Service Applications"
+                    Ensure             = "Present"
+                    MySiteHostLocation = "https://my.contoso.com"
                 }
 
                 Mock -CommandName Get-SPServiceApplication -MockWith {
@@ -461,10 +466,11 @@ try
 
             Context -Name "When service applications exist in the current farm and NetBios isn't enabled but it needs to be" -Fixture {
                 $testParams = @{
-                    Name            = "User Profile Service App"
-                    ApplicationPool = "SharePoint Service Applications"
-                    EnableNetBIOS   = $true
-                    Ensure          = "Present"
+                    Name               = "User Profile Service App"
+                    ApplicationPool    = "SharePoint Service Applications"
+                    EnableNetBIOS      = $true
+                    Ensure             = "Present"
+                    MySiteHostLocation = "https://my.contoso.com"
                 }
 
                 Mock -CommandName Restart-Service -MockWith { }
@@ -500,8 +506,8 @@ try
                         Add-Member -MemberType ScriptMethod `
                             -Name IsConnected `
                             -Value {
-                                return $true
-                            } -PassThru |
+                            return $true
+                        } -PassThru |
                         Add-Member -MemberType ScriptMethod `
                             -Name GetType `
                             -Value {
@@ -601,10 +607,11 @@ try
 
             Context -Name "When service applications exist in the current farm and NoILMUsed isn't enabled but it needs to be" -Fixture {
                 $testParams = @{
-                    Name            = "User Profile Service App"
-                    ApplicationPool = "SharePoint Service Applications"
-                    NoILMUsed       = $true
-                    Ensure          = "Present"
+                    Name               = "User Profile Service App"
+                    ApplicationPool    = "SharePoint Service Applications"
+                    NoILMUsed          = $true
+                    Ensure             = "Present"
+                    MySiteHostLocation = "https://my.contoso.com"
                 }
 
                 Mock -CommandName Restart-Service -MockWith { }
@@ -640,8 +647,8 @@ try
                         Add-Member -MemberType ScriptMethod `
                             -Name IsConnected `
                             -Value {
-                                return $true
-                            } -PassThru |
+                            return $true
+                        } -PassThru |
                         Add-Member -MemberType ScriptMethod `
                             -Name GetType `
                             -Value {
@@ -745,6 +752,7 @@ try
                     ApplicationPool              = "SharePoint Service Applications"
                     SiteNamingConflictResolution = "Username_CollisionDomain"
                     Ensure                       = "Present"
+                    MySiteHostLocation           = "https://my.contoso.com"
                 }
 
                 Mock -CommandName Restart-Service -MockWith { }
@@ -780,8 +788,8 @@ try
                         Add-Member -MemberType ScriptMethod `
                             -Name IsConnected `
                             -Value {
-                                return $true
-                            } -PassThru |
+                            return $true
+                        } -PassThru |
                         Add-Member -MemberType ScriptMethod `
                             -Name GetType `
                             -Value {
@@ -875,10 +883,11 @@ try
 
             Context -Name "When service applications exist in the current farm and UpdateProxyGroup is True, so should update" -Fixture {
                 $testParams = @{
-                    Name             = "User Profile Service App"
-                    ApplicationPool  = "SharePoint Service Applications"
-                    UpdateProxyGroup = $true
-                    Ensure           = "Present"
+                    Name               = "User Profile Service App"
+                    ApplicationPool    = "SharePoint Service Applications"
+                    UpdateProxyGroup   = $true
+                    Ensure             = "Present"
+                    MySiteHostLocation = "https://my.contoso.com"
                 }
 
                 $incorrectProxy = @{
@@ -887,8 +896,8 @@ try
 
                 $incorrectProxyGroup = @{
                     FriendlyName = "ProxyGroup2"
-                    Name = "ProxyGroup2"
-                    Proxies = @($incorrectProxy)
+                    Name         = "ProxyGroup2"
+                    Proxies      = @($incorrectProxy)
                 }
 
                 Mock -CommandName Restart-Service -MockWith { }
@@ -924,8 +933,8 @@ try
                         Add-Member -MemberType ScriptMethod `
                             -Name IsConnected `
                             -Value {
-                                return $true
-                            } -PassThru |
+                            return $true
+                        } -PassThru |
                         Add-Member -MemberType ScriptMethod `
                             -Name GetType `
                             -Value {
@@ -1020,10 +1029,11 @@ try
 
             Context -Name "When service applications exist in the current farm and UpdateProxyGroup is False, so should not update" -Fixture {
                 $testParams = @{
-                    Name             = "User Profile Service App"
-                    ApplicationPool  = "SharePoint Service Applications"
-                    UpdateProxyGroup = $false
-                    Ensure           = "Present"
+                    Name               = "User Profile Service App"
+                    ApplicationPool    = "SharePoint Service Applications"
+                    UpdateProxyGroup   = $false
+                    Ensure             = "Present"
+                    MySiteHostLocation = "https://my.contoso.com"
                 }
 
                 Mock -CommandName Restart-Service -MockWith { }
@@ -1059,8 +1069,8 @@ try
                         Add-Member -MemberType ScriptMethod `
                             -Name IsConnected `
                             -Value {
-                                return $true
-                            } -PassThru |
+                            return $true
+                        } -PassThru |
                         Add-Member -MemberType ScriptMethod `
                             -Name GetType `
                             -Value {
@@ -1129,8 +1139,8 @@ try
 
                 $incorrectProxyGroup = @{
                     FriendlyName = "ProxyGroup"
-                    Name = "ProxyGroup"
-                    Proxies = @($incorrectProxy)
+                    Name         = "ProxyGroup"
+                    Proxies      = @($incorrectProxy)
                 }
 
                 Mock -CommandName Get-SPServiceApplicationProxyGroup -MockWith {
@@ -1159,9 +1169,10 @@ try
 
             Context -Name "When a service application exists and is configured correctly" -Fixture {
                 $testParams = @{
-                    Name            = "User Profile Service App"
-                    ApplicationPool = "SharePoint Service Applications"
-                    Ensure          = "Present"
+                    Name               = "User Profile Service App"
+                    ApplicationPool    = "SharePoint Service Applications"
+                    Ensure             = "Present"
+                    MySiteHostLocation = "https://my.contoso.com"
                 }
 
                 Mock -CommandName Get-SPServiceApplication -MockWith {
@@ -1196,8 +1207,8 @@ try
                         Add-Member -MemberType ScriptMethod `
                             -Name IsConnected `
                             -Value {
-                                return $true
-                            } -PassThru |
+                            return $true
+                        } -PassThru |
                         Add-Member -MemberType ScriptMethod `
                             -Name GetType `
                             -Value {
@@ -1286,9 +1297,10 @@ try
 
             Context -Name "When the service app exists but it shouldn't" -Fixture {
                 $testParams = @{
-                    Name            = "Test App"
-                    ApplicationPool = "-"
-                    Ensure          = "Absent"
+                    Name               = "Test App"
+                    ApplicationPool    = "-"
+                    Ensure             = "Absent"
+                    MySiteHostLocation = "https://my.contoso.com"
                 }
 
                 Mock -CommandName Get-SPServiceApplication -MockWith {
@@ -1323,8 +1335,8 @@ try
                         Add-Member -MemberType ScriptMethod `
                             -Name IsConnected `
                             -Value {
-                                return $true
-                            } -PassThru |
+                            return $true
+                        } -PassThru |
                         Add-Member -MemberType ScriptMethod `
                             -Name GetType `
                             -Value {
@@ -1402,8 +1414,8 @@ try
                     $proxiesToReturn = $proxiesToReturn | Add-Member -MemberType ScriptMethod `
                         -Name Delete `
                         -Value {
-                            return $null
-                        } -PassThru
+                        return $null
+                    } -PassThru
                     return $proxiesToReturn
                 }
 
@@ -1423,9 +1435,10 @@ try
 
             Context -Name "When the service app doesn't exist and shouldn't" -Fixture {
                 $testParams = @{
-                    Name            = "Test App"
-                    ApplicationPool = "-"
-                    Ensure          = "Absent"
+                    Name               = "Test App"
+                    ApplicationPool    = "-"
+                    Ensure             = "Absent"
+                    MySiteHostLocation = "https://my.contoso.com"
                 }
 
                 Mock -CommandName Get-SPServiceApplication -MockWith {

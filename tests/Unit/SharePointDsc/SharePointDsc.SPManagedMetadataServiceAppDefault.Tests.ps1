@@ -98,56 +98,85 @@ try
             } `
                 -PassThru -Force
 
-            Mock -CommandName Get-SPServiceApplicationProxy -MockWith {
-                return @(
-                    $managedMetadataServiceApplicationProxy,
-                    $managedMetadataServiceApplicationProxyDefault
-                )
+            Mock -CommandName Get-SPServiceApplicationProxyGroup -MockWith {
+                return @{
+                    Proxies = @(
+                        $managedMetadataServiceApplicationProxy,
+                        $managedMetadataServiceApplicationProxyDefault
+                    )
+                }
             }
 
-            Context -Name "When no service application proxy or managed metadata service application proxy exist in the farm" -Fixture {
+            Context -Name "Specified proxy group does not exist" -Fixture {
                 $testParams = @{
-                    IsSingleInstance               = "Yes"
+                    ServiceAppProxyGroup           = "DoesNotExist"
                     DefaultSiteCollectionProxyName = "DefaultSiteCollectionProxyName"
                     DefaultKeywordProxyName        = "DefaultKeywordProxyName"
                 }
 
-                Mock -CommandName Get-SPServiceApplicationProxy -MockWith {
+                Mock -CommandName Get-SPServiceApplicationProxyGroup -MockWith {
                     return $null
                 }
 
-                It "Should throw an error, when no Service Application Proxy is available" {
-                    { Get-TargetResource @testParams } | Should Throw "There are no Managed Metadata Service Application Proxy available in the farm"
+                It "Should throw an error in the Get Method, when the Service Application Proxy Group does not exist" {
+                    { Get-TargetResource @testParams } | Should Throw "Specified ServiceAppProxyGroup $($testParams.ServiceAppProxyGroup) does not exist."
                 }
 
-                $mockProxy = @{
-                    TypeName = "Mock Proxy"
-                    Name     = "Mock Proxy"
+                It "Should throw an error in the Set Method, when the Service Application Proxy Group does not exist" {
+                    { Set-TargetResource @testParams } | Should Throw "Specified ServiceAppProxyGroup $($testParams.ServiceAppProxyGroup) does not exist."
+                }
+            }
 
-                } `
-                | Add-Member -MemberType ScriptMethod `
-                    -Name GetType `
-                    -Value { `
-                        return (@{
-                            FullName = "Mock Proxy"
-                        }) `
-                } `
-                    -PassThru -Force
-
-                Mock -CommandName Get-SPServiceApplicationProxy -MockWith {
-                    return @(
-                        $mockProxy
-                    )
+            Context -Name "When no service application proxy or managed metadata service application proxy exist in the farm" -Fixture {
+                $testParams = @{
+                    ServiceAppProxyGroup           = "ProxyGroup"
+                    DefaultSiteCollectionProxyName = "DefaultSiteCollectionProxyName"
+                    DefaultKeywordProxyName        = "DefaultKeywordProxyName"
                 }
 
-                It "Should throw an error, when no Service Application Proxy is available" {
-                    { Get-TargetResource @testParams } | Should Throw "There are no Managed Metadata Service Application Proxy available in the farm"
+                Mock -CommandName Get-SPServiceApplicationProxyGroup -MockWith {
+                    return @{
+                        Proxies = $null
+                    }
+                }
+
+                It "Should throw an error in the Get Method, when no Service Application Proxy is available" {
+                    { Get-TargetResource @testParams } | Should Throw "There are no Service Application Proxies available in the proxy group"
+                }
+
+                It "Should throw an error in the Set Method, when no Service Application Proxy is available" {
+                    { Set-TargetResource @testParams } | Should Throw "There are no Service Application Proxies available in the proxy group"
+                }
+
+                Mock -CommandName Get-SPServiceApplicationProxyGroup -MockWith {
+                    return @{
+                        Proxies = @{
+                            TypeName = "Mock Proxy"
+                            Name     = "Mock Proxy"
+                        } `
+                        | Add-Member -MemberType ScriptMethod `
+                            -Name GetType `
+                            -Value { `
+                                return (@{
+                                    FullName = "Mock Proxy"
+                                }) `
+                        } `
+                            -PassThru -Force
+                    }
+                }
+
+                It "Should throw an error in the Get method, when no MMS Service Application Proxy is available" {
+                    { Get-TargetResource @testParams } | Should Throw "There are no Managed Metadata Service Application Proxies available in the proxy group"
+                }
+
+                It "Should throw an error in the Set method, when no MMS Service Application Proxy is available" {
+                    { Set-TargetResource @testParams } | Should Throw "There are no Managed Metadata Service Application Proxies available in the proxy group"
                 }
             }
 
             Context -Name "When one managed metadata service application proxy exists and should be the default" -Fixture {
                 $testParams = @{
-                    IsSingleInstance               = "Yes"
+                    ServiceAppProxyGroup           = "Default"
                     DefaultSiteCollectionProxyName = "Managed Metadata Service Application Proxy"
                     DefaultKeywordProxyName        = "Managed Metadata Service Application Proxy"
                 }
@@ -175,10 +204,12 @@ try
                 } `
                     -PassThru -Force
 
-                Mock -CommandName Get-SPServiceApplicationProxy -MockWith {
-                    return @(
-                        $managedMetadataServiceApplicationProxyMock
-                    )
+                Mock -CommandName Get-SPServiceApplicationProxyGroup -MockWith {
+                    return @{
+                        Proxies = @(
+                            $managedMetadataServiceApplicationProxyMock
+                        )
+                    }
                 }
 
                 It "Should return false when the test method is called" {
@@ -204,7 +235,7 @@ try
 
             Context -Name "When several managed metadata service application proxy exists and another should be the default" -Fixture {
                 $testParams = @{
-                    IsSingleInstance               = "Yes"
+                    ServiceAppProxyGroup           = "ProxyGroup"
                     DefaultSiteCollectionProxyName = "Managed Metadata Service Application Proxy"
                     DefaultKeywordProxyName        = "Managed Metadata Service Application Proxy"
                 }
@@ -238,7 +269,7 @@ try
 
             Context -Name "When several managed metadata service application proxy exists, both are default" -Fixture {
                 $testParams = @{
-                    IsSingleInstance               = "Yes"
+                    ServiceAppProxyGroup           = "ProxyGroup"
                     DefaultSiteCollectionProxyName = "Managed Metadata Service Application Proxy"
                     DefaultKeywordProxyName        = "Managed Metadata Service Application Proxy"
                 }
@@ -266,11 +297,13 @@ try
                 } `
                     -PassThru -Force
 
-                Mock -CommandName Get-SPServiceApplicationProxy -MockWith {
-                    return @(
-                        $managedMetadataServiceApplicationProxyDefault,
-                        $managedMetadataServiceApplicationProxyDefault
-                    )
+                Mock -CommandName Get-SPServiceApplicationProxyGroup -MockWith {
+                    return @{
+                        Proxies = @(
+                            $managedMetadataServiceApplicationProxyDefault,
+                            $managedMetadataServiceApplicationProxyDefault
+                        )
+                    }
                 }
 
                 It "Should return false when the test method is called" {
