@@ -228,6 +228,7 @@ function Set-TargetResource
 
             if ($params.UseSQLAuthentication -eq $true)
             {
+                Write-Verbose -Message "Using SQL authentication to create service application as `$useSQLAuthentication is set to $($params.useSQLAuthentication)."
                 $params.Add("DatabaseUsername", $params.DatabaseCredentials.Username)
                 $params.Add("DatabasePassword", $params.DatabaseCredentials.Password)
             }
@@ -248,8 +249,9 @@ function Set-TargetResource
 
     if ($result.Ensure -eq "Present" -and $Ensure -eq "Present")
     {
+        # Updated check to -notlike with a wildcard as $result.DatabaseServer might not be a FQDN when we are using an Always On AG
         if ($PSBoundParameters.ContainsKey("DatabaseServer") -and `
-            ($result.DatabaseServer -ne $DatabaseServer))
+            ($DatabaseServer -notlike "$($result.DatabaseServer).*"))
         {
             throw ("Specified database server does not match the actual " + `
                     "database server. This resource cannot move the database " + `
@@ -382,9 +384,10 @@ function Test-TargetResource
     Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
     Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
 
+    # Updated check to -notlike with a wildcard as $CurrentValues.DatabaseServer might not be a FQDN when we are using an Always On AG
     if ($PSBoundParameters.ContainsKey("DatabaseServer") -and `
         ($null -ne $CurrentValues.DatabaseServer) -and `
-        ($CurrentValues.DatabaseServer -ne $DatabaseServer))
+        ($DatabaseServer -notlike "$($CurrentValues.DatabaseServer).*"))
     {
         Write-Verbose -Message ("Specified database server does not match the actual " + `
                 "database server. This resource cannot move the database " + `

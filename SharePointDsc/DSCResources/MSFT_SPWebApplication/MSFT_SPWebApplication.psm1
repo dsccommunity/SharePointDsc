@@ -273,7 +273,7 @@ function Set-TargetResource
                 }
                 if ($params.useSQLAuthentication -eq $true)
                 {
-                    Write-Verbose -Message "Using SQL authentication to create web app as `$useSQLAuthentication is set to $($params.useSQLAuthentication))."
+                    Write-Verbose -Message "Using SQL authentication to create web app as `$useSQLAuthentication is set to $($params.useSQLAuthentication)."
                     $newWebAppParams.Add("DatabaseCredentials", $params.DatabaseCredentials)
                 }
                 else

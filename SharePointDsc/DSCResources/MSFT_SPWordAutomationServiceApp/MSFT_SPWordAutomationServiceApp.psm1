@@ -373,7 +373,7 @@ function Set-TargetResource
 
                 if ($params.useSQLAuthentication -eq $true)
                 {
-                    Write-Verbose -Message "Using SQL authentication to create service application as `$useSQLAuthentication is set to $($params.useSQLAuthentication))."
+                    Write-Verbose -Message "Using SQL authentication to create service application as `$useSQLAuthentication is set to $($params.useSQLAuthentication)."
                     $cmdletparams.Add("DatabaseCredentials", $params.DatabaseCredentials)
                 }
                 else

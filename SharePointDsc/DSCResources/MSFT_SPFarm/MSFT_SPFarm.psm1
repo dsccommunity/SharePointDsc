@@ -674,7 +674,10 @@ function Set-TargetResource
 
             if ($params.UseSQLAuthentication -eq $true)
             {
-                $databaseCredentialsParam = @{DatabaseCredentials = $params.DatabaseCredentials }
+                Write-Verbose -Message "Using SQL authentication to create service application as `$useSQLAuthentication is set to $($params.useSQLAuthentication)."
+                $databaseCredentialsParam = @{
+                    DatabaseCredentials = $params.DatabaseCredentials
+                }
             }
             else
             {
@@ -717,7 +720,7 @@ function Set-TargetResource
 
             if ($params.useSQLAuthentication -eq $true)
             {
-                Write-Verbose -Message "Using SQL authentication to connect to / create farm as `$useSQLAuthentication is set to $($params.useSQLAuthentication))."
+                Write-Verbose -Message "Using SQL authentication to connect to / create farm as `$useSQLAuthentication is set to $($params.useSQLAuthentication)."
                 $executeArgs.Add("DatabaseCredentials", $params.DatabaseCredentials)
             }
             else
