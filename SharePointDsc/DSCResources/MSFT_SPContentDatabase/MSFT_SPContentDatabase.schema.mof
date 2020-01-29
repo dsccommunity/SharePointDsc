@@ -2,7 +2,7 @@
 class MSFT_SPContentDatabase : OMI_BaseResource
 {
     [Key, Description("Specifies the name of the content database")] String Name;
-    [Write, Description("The name of the database server to host the content DB")] string DatabaseServer;
+    [Required, Description("The name of the database server to host the content DB")] string DatabaseServer;
     [Required, Description("The URL of the web application")] string WebAppUrl;
     [Write, Description("Should the database be enabled")] Boolean Enabled;
     [Write, Description("Specify the site collection warning limit for the content database")] Uint16 WarningSiteCount;

@@ -108,7 +108,7 @@ function Set-TargetResource
         [System.String]
         $Name,
 
-        [Parameter()]
+        [Parameter(Mandatory = $true)]
         [System.String]
         $DatabaseServer,
 
@@ -357,7 +357,7 @@ function Test-TargetResource
         [System.String]
         $Name,
 
-        [Parameter()]
+        [Parameter(Mandatory = $true)]
         [System.String]
         $DatabaseServer,
 
