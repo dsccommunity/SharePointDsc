@@ -13,7 +13,7 @@ function Get-TargetResource
         [System.String]
         $Name,
 
-        [Parameter()]
+        [Parameter(Mandatory = $true)]
         [System.String]
         $DatabaseServer,
 
