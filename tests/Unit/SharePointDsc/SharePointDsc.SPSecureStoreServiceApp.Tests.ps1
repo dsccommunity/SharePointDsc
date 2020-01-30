@@ -292,13 +292,13 @@ try
 
             Context -Name "When specific windows credentials are to be used for the database" -Fixture {
                 $testParams = @{
-                    Name                       = "Secure Store Service Application"
-                    ApplicationPool            = "SharePoint Search Services"
-                    AuditingEnabled            = $false
-                    DatabaseName               = "SP_ManagedMetadata"
-                    DatabaseCredentials        = $mockCredential
-                    DatabaseAuthenticationType = "Windows"
-                    Ensure                     = "Present"
+                    Name                = "Secure Store Service Application"
+                    ApplicationPool     = "SharePoint Search Services"
+                    AuditingEnabled     = $false
+                    DatabaseName        = "SP_ManagedMetadata"
+                    DatabaseCredentials = $mockCredential
+                    ##DatabaseAuthenticationType = "Windows"
+                    Ensure              = "Present"
                 }
 
                 Mock -CommandName Get-SPServiceApplication -MockWith {
@@ -310,7 +310,7 @@ try
                     Assert-MockCalled New-SPSecureStoreServiceApplication
                 }
 
-                It "Should throw an exception if database authentication type is not specified" {
+                <#                 It "Should throw an exception if database authentication type is not specified" {
                     $testParams.Remove("DatabaseAuthenticationType")
                     { Set-TargetResource @testParams } | Should Throw
                 }
@@ -320,17 +320,17 @@ try
                     $testParams.Remove("DatabaseCredentials")
                     { Set-TargetResource @testParams } | Should Throw
                 }
-            }
+ #>            }
 
             Context -Name "When specific SQL credentials are to be used for the database" -Fixture {
                 $testParams = @{
-                    Name                       = "Secure Store Service Application"
-                    ApplicationPool            = "SharePoint Search Services"
-                    AuditingEnabled            = $false
-                    DatabaseName               = "SP_ManagedMetadata"
-                    DatabaseCredentials        = $mockCredential
-                    DatabaseAuthenticationType = "SQL"
-                    Ensure                     = "Present"
+                    Name                = "Secure Store Service Application"
+                    ApplicationPool     = "SharePoint Search Services"
+                    AuditingEnabled     = $false
+                    DatabaseName        = "SP_ManagedMetadata"
+                    DatabaseCredentials = $mockCredential
+                    ##DatabaseAuthenticationType = "SQL"
+                    Ensure              = "Present"
                 }
 
                 Mock -CommandName Get-SPServiceApplication -MockWith { return $null }
@@ -340,7 +340,7 @@ try
                     Assert-MockCalled New-SPSecureStoreServiceApplication
                 }
 
-                It "Should throw an exception if database authentication type is not specified" {
+                <#                 It "Should throw an exception if database authentication type is not specified" {
                     $testParams.Remove("DatabaseAuthenticationType")
                     { Set-TargetResource @testParams } | Should Throw
                 }
@@ -350,7 +350,7 @@ try
                     $testParams.Remove("DatabaseCredentials")
                     { Set-TargetResource @testParams } | Should Throw
                 }
-            }
+ #>            }
 
             Context -Name "When the service app exists but it shouldn't" -Fixture {
                 $testParams = @{

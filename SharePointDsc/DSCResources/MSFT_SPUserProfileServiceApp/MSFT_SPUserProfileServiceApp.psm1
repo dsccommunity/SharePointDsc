@@ -395,6 +395,9 @@ function Set-TargetResource
         $null = Invoke-SPDscCommand -Credential $FarmAccount `
             -Arguments @($PSBoundParameters, $setupAccount) `
             -ScriptBlock {
+            # For some reason (new CI platform?) we need to explicitly import the SharePointDsc.Util module now
+            Write-Verbose -Message "Importing the SharePointDsc.Util module under the '$($FarmAccount.Username)' profile..."
+            Import-Module -Name (Join-Path -Path (Get-Module -Name SharePointDSC -ListAvailable).ModuleBase -ChildPath "Modules\SharePointDsc.Util\SharePointDsc.Util.psm1") -Force
             $params = $args[0]
             $setupAccount = $args[1]
 
