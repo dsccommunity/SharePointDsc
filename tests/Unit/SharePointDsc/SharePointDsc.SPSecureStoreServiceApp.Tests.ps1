@@ -297,7 +297,6 @@ try
                     AuditingEnabled     = $false
                     DatabaseName        = "SP_ManagedMetadata"
                     DatabaseCredentials = $mockCredential
-                    ##DatabaseAuthenticationType = "Windows"
                     Ensure              = "Present"
                 }
 
@@ -310,17 +309,7 @@ try
                     Assert-MockCalled New-SPSecureStoreServiceApplication
                 }
 
-                <#                 It "Should throw an exception if database authentication type is not specified" {
-                    $testParams.Remove("DatabaseAuthenticationType")
-                    { Set-TargetResource @testParams } | Should Throw
-                }
-
-                It "Should throw an exception if the credentials aren't provided and the authentication type is set" {
-                    $testParams.Add("DatabaseAuthenticationType", "Windows")
-                    $testParams.Remove("DatabaseCredentials")
-                    { Set-TargetResource @testParams } | Should Throw
-                }
- #>            }
+            }
 
             Context -Name "When specific SQL credentials are to be used for the database" -Fixture {
                 $testParams = @{
@@ -329,7 +318,6 @@ try
                     AuditingEnabled     = $false
                     DatabaseName        = "SP_ManagedMetadata"
                     DatabaseCredentials = $mockCredential
-                    ##DatabaseAuthenticationType = "SQL"
                     Ensure              = "Present"
                 }
 
@@ -340,17 +328,7 @@ try
                     Assert-MockCalled New-SPSecureStoreServiceApplication
                 }
 
-                <#                 It "Should throw an exception if database authentication type is not specified" {
-                    $testParams.Remove("DatabaseAuthenticationType")
-                    { Set-TargetResource @testParams } | Should Throw
-                }
-
-                It "Should throw an exception if the credentials aren't provided and the authentication type is set" {
-                    $testParams.Add("DatabaseAuthenticationType", "Windows")
-                    $testParams.Remove("DatabaseCredentials")
-                    { Set-TargetResource @testParams } | Should Throw
-                }
- #>            }
+            }
 
             Context -Name "When the service app exists but it shouldn't" -Fixture {
                 $testParams = @{
