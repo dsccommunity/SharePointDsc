@@ -1,3 +1,8 @@
+$script:resourceModulePath = Split-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -Parent
+$script:modulesFolderPath = Join-Path -Path $script:resourceModulePath -ChildPath 'Modules'
+$script:resourceHelperModulePath = Join-Path -Path $script:modulesFolderPath -ChildPath 'SharePointDsc.Util'
+Import-Module -Name (Join-Path -Path $script:resourceHelperModulePath -ChildPath 'SharePointDsc.Util.psm1')
+
 function Get-TargetResource
 {
     [CmdletBinding()]
@@ -24,7 +29,7 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting SPO application principal management service app proxy '$Name'"
 
-    $result = Invoke-SPDscCommand -Credential $InstallAccount `
+    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
         -Arguments $PSBoundParameters `
         -ScriptBlock {
         $params = $args[0]
@@ -89,7 +94,7 @@ function Set-TargetResource
     {
         # The service app proxy doesn't exist but should
         Write-Verbose -Message "Creating SPO application principal management service app proxy $Name"
-        Invoke-SPDscCommand -Credential $InstallAccount `
+        Invoke-SPDSCCommand -Credential $InstallAccount `
             -Arguments $PSBoundParameters `
             -ScriptBlock {
             $params = $args[0]
@@ -105,7 +110,7 @@ function Set-TargetResource
         if ($OnlineTenantUri -ne $result.OnlineTenantUri)
         {
             Write-Verbose -Message "Recreating SPO application principal management service app proxy $Name"
-            Invoke-SPDscCommand -Credential $InstallAccount `
+            Invoke-SPDSCCommand -Credential $InstallAccount `
                 -Arguments $PSBoundParameters `
                 -ScriptBlock {
                 $params = $args[0]
@@ -129,7 +134,7 @@ function Set-TargetResource
     {
         # The service app proxy should not exit
         Write-Verbose -Message "Removing SPO application principal management service app proxy $Name"
-        Invoke-SPDscCommand -Credential $InstallAccount `
+        Invoke-SPDSCCommand -Credential $InstallAccount `
             -Arguments $PSBoundParameters `
             -ScriptBlock {
             $params = $args[0]
