@@ -2166,6 +2166,103 @@ namespace Microsoft.SharePoint.Administration {
                 }
             }
 
+            if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 16 -and
+                $Global:SPDscHelper.CurrentStubBuildNumber.Build.ToString().Length -ne 4)
+            {
+                Context -Name "ApplicationCredentialKey is specified on SP2019 installation" -Fixture {
+                    $testParams = @{
+                        IsSingleInstance         = "Yes"
+                        Ensure                   = "Present"
+                        FarmConfigDatabaseName   = "SP_Config"
+                        DatabaseServer           = "sql.contoso.com"
+                        FarmAccount              = $mockFarmAccount
+                        Passphrase               = $mockPassphrase
+                        AdminContentDatabaseName = "SP_AdminContent"
+                        RunCentralAdmin          = $false
+                    }
+
+                    Mock -CommandName "Get-SPDscRegistryKey" -MockWith { return $null }
+                    Mock -CommandName "Get-SPFarm" -MockWith { return $null }
+                    Mock -CommandName "Get-SPDscConfigDBStatus" -MockWith {
+                        return @{
+                            Locked           = $false
+                            ValidPermissions = $true
+                            DatabaseExists   = $true
+                        }
+                    }
+                    Mock -CommandName "Get-SPDscSQLInstanceStatus" -MockWith {
+                        return @{
+                            MaxDOPCorrect = $true
+                        }
+                    }
+                    Mock -CommandName "Get-SPWebApplication" -MockWith {
+                        return @{
+                            IsAdministrationWebApplication = $true
+                            Url                            = "http://localhost:9999"
+                        }
+                    }
+                    Mock -CommandName "Get-CimInstance" -MockWith {
+                        return @{
+                            Domain = "test.lab"
+                        }
+                    }
+                    Mock -CommandName "Get-SPServiceInstance" -MockWith {
+                        if ($global:SPDscCentralAdminCheckDone -eq $true)
+                        {
+                            return @(
+                                $null | Add-Member -MemberType ScriptMethod `
+                                    -Name GetType `
+                                    -Value {
+                                    return @{
+                                        Name = "SPWebServiceInstance"
+                                    }
+                                } -PassThru -Force | Add-Member -Name Name `
+                                    -MemberType ScriptProperty `
+                                    -PassThru `
+                                {
+                                    # get
+                                    ""
+                                }`
+                                {
+                                    # set
+                                    param ( $arg )
+                                }
+                            )
+                        }
+                        else
+                        {
+                            $global:SPDscCentralAdminCheckDone = $true
+                            return $null
+                        }
+                    }
+
+                    Mock -CommandName "Get-SPWebApplication" -MockWith {
+                        return @{
+                            IsAdministrationWebApplication = $true
+                            ContentDatabases               = @(@{
+                                    Name = $testParams.AdminContentDatabaseName
+                                })
+                            Url                            = "http://localhost:9999"
+                        }
+                    }
+
+                    Mock -CommandName Set-SPApplicationCredentialKey -MockWith { return $null }
+
+                    It "Should not throw an exception in the get method" {
+                        { Get-TargetResource @testParams } | Should Not Throw "Specifying ApplicationCredentialKey is only supported on SharePoint 2019"
+                    }
+
+                    It "Should set application credential key" {
+                        Set-TargetResource @testParams
+                        Assert-MockCalled -CommandName "Set-SPApplicationCredentialKey"
+                    }
+
+                    It "Should not throw an exception in the test method" {
+                        { Test-TargetResource @testParams } | Should not Throw "Specifying ApplicationCredentialKey is only supported on SharePoint 2019"
+                    }
+                }
+            }
+
             Context -Name "no serverrole is specified but get-targetresource needs to identify and return it" -Fixture {
                 $testParams = @{
                     IsSingleInstance         = "Yes"

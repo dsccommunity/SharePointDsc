@@ -12,9 +12,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Updated PULL_REQUEST_TEMPLATE.md to match DSC standard
 - SPAzureAccessControlServiceAppProxy
   - Added new resource to create Azure Access Control Service Application Proxy
+- SPFarm
+  - Added possibility to set application credential key.
 - SPOAppPrincipalMgmtServiceAppProxy
   - Added new resource to create SharePoint Online Application Principal
     Management Service Application Proxy
+- SPTrustedSecurityTokenIssuer
+  - Fixed RegisteredIssuerNameRealm not applied if specified.
 
 ### Changed
 
