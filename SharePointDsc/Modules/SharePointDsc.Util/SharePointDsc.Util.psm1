@@ -412,6 +412,11 @@ function Invoke-SPDscCommand
             Add-PSSnapin Microsoft.SharePoint.PowerShell
         }
 
+        `$SaveVerbosePreference = `$VerbosePreference
+        `$VerbosePreference = 'SilentlyContinue'
+        Import-Module "$(Join-Path -Path $PSScriptRoot -ChildPath 'SharePointDsc.Util.psm1')"
+        `$VerbosePreference = `$SaveVerbosePreference
+
 "@
 
     $invokeArgs = @{
