@@ -70,7 +70,7 @@ try
                 }
                 16
                 {
-                    $modulePath = "Modules\SharePointDsc\Modules\SharePointDsc.ProjectServer\ProjectServerConnector.psm1"
+                    $modulePath = "SharePointDsc\Modules\SharePointDsc.ProjectServer\ProjectServerConnector.psm1"
                     Import-Module -Name (Join-Path -Path $Global:SPDscHelper.RepoRoot -ChildPath $modulePath -Resolve)
 
                     try
