@@ -10,6 +10,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - SharePointDsc
   - Added automatic release with a new CI pipeline
   - Updated PULL_REQUEST_TEMPLATE.md to match DSC standard
+- SPFarm
+  - Added possibility to set application credential key.
+- SPTrustedSecurityTokenIssuer
+  - Fixed RegisteredIssuerNameRealm not applied if specified.
 
 ### Changed
 
