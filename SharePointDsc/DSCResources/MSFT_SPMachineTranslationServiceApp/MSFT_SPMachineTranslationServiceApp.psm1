@@ -25,6 +25,14 @@ function Get-TargetResource
         [System.String]
         $DatabaseServer,
 
+        [Parameter()]
+        [System.Boolean]
+        $UseSQLAuthentication,
+
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
+        $DatabaseCredentials,
+
         [Parameter(Mandatory = $true)]
         [System.String]
         $ApplicationPool,
@@ -118,6 +126,14 @@ function Set-TargetResource
         [System.String]
         $DatabaseServer,
 
+        [Parameter()]
+        [System.Boolean]
+        $UseSQLAuthentication,
+
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
+        $DatabaseCredentials,
+
         [Parameter(Mandatory = $true)]
         [System.String]
         $ApplicationPool,
@@ -143,6 +159,18 @@ function Set-TargetResource
             -Arguments $PSBoundParameters `
             -ScriptBlock {
             $params = $args[0]
+            if ($params.UseSQLAuthentication -eq $true)
+            {
+                Write-Verbose -Message "Using SQL authentication to configure service application as `$useSQLAuthentication is set to $($params.useSQLAuthentication)."
+                $databaseCredentialsParam = @{
+                    DatabaseCredentials = $params.DatabaseCredentials
+                }
+            }
+            else
+            {
+                $databaseCredentialsParam = ""
+            }
+
             $serviceApps = Get-SPServiceApplication -Identity $params.Name
 
             $serviceApp = $serviceApps | Where-Object -FilterScript {
@@ -151,7 +179,8 @@ function Set-TargetResource
 
             $serviceApp | Set-SPTranslationServiceApplication -ApplicationPool $params.ApplicationPool `
                 -DatabaseName $params.DatabaseName `
-                -DatabaseServer $params.DatabaseServer
+                -DatabaseServer $params.DatabaseServer `
+                @databaseCredentialsParam
         }
     }
     if ($CurrentValues.Ensure -eq "Absent" -and $Ensure -eq "Present")
@@ -163,10 +192,23 @@ function Set-TargetResource
             -ScriptBlock {
             $params = $args[0]
 
+            if ($params.UseSQLAuthentication -eq $true)
+            {
+                Write-Verbose -Message "Using SQL authentication to create service application as `$useSQLAuthentication is set to $($params.useSQLAuthentication)."
+                $databaseCredentialsParam = @{
+                    DatabaseCredentials = $params.DatabaseCredentials
+                }
+            }
+            else
+            {
+                $databaseCredentialsParam = ""
+            }
+
             $tsServiceApp = New-SPTranslationServiceApplication -Name $params.Name `
                 -DatabaseName $params.DatabaseName `
                 -DatabaseServer $params.DatabaseServer `
-                -ApplicationPool $params.ApplicationPool
+                -ApplicationPool $params.ApplicationPool `
+                @databaseCredentialsParam
 
             if ($params.ContainsKey("ProxyName"))
             {
@@ -228,6 +270,14 @@ function Test-TargetResource
         [Parameter(Mandatory = $true)]
         [System.String]
         $DatabaseServer,
+
+        [Parameter()]
+        [System.Boolean]
+        $UseSQLAuthentication,
+
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
+        $DatabaseCredentials,
 
         [Parameter(Mandatory = $true)]
         [System.String]

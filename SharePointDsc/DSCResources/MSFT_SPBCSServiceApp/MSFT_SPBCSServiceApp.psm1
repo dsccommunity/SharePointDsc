@@ -30,6 +30,14 @@ function Get-TargetResource
         $DatabaseServer,
 
         [Parameter()]
+        [System.Boolean]
+        $UseSQLAuthentication,
+
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
+        $DatabaseCredentials,
+
+        [Parameter()]
         [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present",
@@ -122,6 +130,14 @@ function Set-TargetResource
         $DatabaseServer,
 
         [Parameter()]
+        [System.Boolean]
+        $UseSQLAuthentication,
+
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
+        $DatabaseCredentials,
+
+        [Parameter()]
         [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present",
@@ -151,10 +167,23 @@ function Set-TargetResource
             -ScriptBlock {
             $params = $args[0]
 
+            if ($params.UseSQLAuthentication -eq $true)
+            {
+                Write-Verbose -Message "Using SQL authentication to create service application as `$useSQLAuthentication is set to $($params.useSQLAuthentication)."
+                $databaseCredentialsParam = @{
+                    DatabaseCredentials = $params.DatabaseCredentials
+                }
+            }
+            else
+            {
+                $databaseCredentialsParam = ""
+            }
+
             $bcsServiceApp = New-SPBusinessDataCatalogServiceApplication -Name $params.Name `
                 -ApplicationPool $params.ApplicationPool `
                 -DatabaseName $params.DatabaseName `
-                -DatabaseServer $params.DatabaseServer
+                -DatabaseServer $params.DatabaseServer `
+                @databaseCredentialsParam
 
             if ($params.ContainsKey("ProxyName"))
             {
@@ -249,6 +278,14 @@ function Test-TargetResource
         [Parameter()]
         [System.String]
         $DatabaseServer,
+
+        [Parameter()]
+        [System.Boolean]
+        $UseSQLAuthentication,
+
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
+        $DatabaseCredentials,
 
         [Parameter()]
         [ValidateSet("Present", "Absent")]
