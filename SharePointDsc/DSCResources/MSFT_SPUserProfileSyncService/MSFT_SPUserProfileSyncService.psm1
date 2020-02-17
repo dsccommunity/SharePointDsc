@@ -133,7 +133,6 @@ function Get-TargetResource
         return @{
             UserProfileServiceAppName = $upa.Name
             Ensure                    = $localEnsure
-            FarmAccount               = $params.FarmAccount
             RunOnlyWhenWriteable      = $params.RunOnlyWhenWriteable
             InstallAccount            = $params.InstallAccount
         }
