@@ -44,11 +44,7 @@ Updated author, copyright notice, and URLs.
         param(
             [Parameter(Mandatory = $true)]
             [PSCredential]
-            $SetupAccount,
-
-            [Parameter(Mandatory = $true)]
-            [PSCredential]
-            $FarmAccount
+            $SetupAccount
         )
         Import-DscResource -ModuleName SharePointDsc
 
@@ -57,7 +53,6 @@ Updated author, copyright notice, and URLs.
             {
                 UserProfileServiceAppName = "User Profile Service Application"
                 Ensure                    = "Present"
-                FarmAccount               = $FarmAccount
                 RunOnlyWhenWriteable      = $true
                 PsDscRunAsCredential      = $SetupAccount
             }
