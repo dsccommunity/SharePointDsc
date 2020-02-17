@@ -12,6 +12,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Updated PULL_REQUEST_TEMPLATE.md to match DSC standard
 - SPExcelServiceApp
   - Documentation update for SharePoint 2016/2019 deprecation.
+- SPInstallPrereqs
+  - Documentation update for SharePoint 2019 offline install parameters.
 - SPFarm
   - Added possibility to set application credential key.
 - SPTrustedSecurityTokenIssuer
