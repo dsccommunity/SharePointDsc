@@ -165,7 +165,6 @@ try
                     Context -Name "When PSDSCRunAsCredential is not the Farm Account" -Fixture {
                         $testParams = @{
                             UserProfileServiceAppName = "User Profile Sync Service App"
-                            FarmAccount               = $mockCredential
                             Ensure                    = "Present"
                         }
 
@@ -193,7 +192,6 @@ try
                     Context -Name "When InstallAccount is the Farm Account" -Fixture {
                         $testParams = @{
                             UserProfileServiceAppName = "User Profile Service Service App"
-                            FarmAccount               = $mockCredential
                             Ensure                    = "Present"
                             InstallAccount            = $mockFarmCredential
                         }
@@ -218,7 +216,6 @@ try
                     Context -Name "User profile sync service is not found locally" -Fixture {
                         $testParams = @{
                             UserProfileServiceAppName = "User Profile Service Service App"
-                            FarmAccount               = $mockCredential
                             Ensure                    = "Present"
                         }
 
@@ -235,7 +232,6 @@ try
                     Context -Name "User profile sync service is not running and should be" -Fixture {
                         $testParams = @{
                             UserProfileServiceAppName = "User Profile Service Service App"
-                            FarmAccount               = $mockCredential
                             Ensure                    = "Present"
                         }
 
@@ -321,7 +317,6 @@ try
                     Context -Name "User profile sync service is running and should be" -Fixture {
                         $testParams = @{
                             UserProfileServiceAppName = "User Profile Service Service App"
-                            FarmAccount               = $mockCredential
                             Ensure                    = "Present"
                         }
 
@@ -350,7 +345,6 @@ try
                     Context -Name "User profile sync service is running and shouldn't be" -Fixture {
                         $testParams = @{
                             UserProfileServiceAppName = "User Profile Service Service App"
-                            FarmAccount               = $mockCredential
                             Ensure                    = "Absent"
                         }
 
@@ -397,7 +391,6 @@ try
                     Context -Name "User profile sync service is not running and shouldn't be" -Fixture {
                         $testParams = @{
                             UserProfileServiceAppName = "User Profile Service Service App"
-                            FarmAccount               = $mockCredential
                             Ensure                    = "Absent"
                         }
 
@@ -426,7 +419,6 @@ try
                     Context -Name "User profile sync service is not running and shouldn't be because the database is read only" -Fixture {
                         $testParams = @{
                             UserProfileServiceAppName = "User Profile Service Service App"
-                            FarmAccount               = $mockCredential
                             Ensure                    = "Present"
                             RunOnlyWhenWriteable      = $true
                         }
@@ -465,7 +457,6 @@ try
                     Context -Name "User profile sync service is running and shouldn't be because the database is read only" -Fixture {
                         $testParams = @{
                             UserProfileServiceAppName = "User Profile Service Service App"
-                            FarmAccount               = $mockCredential
                             Ensure                    = "Present"
                             RunOnlyWhenWriteable      = $true
                         }
@@ -513,7 +504,6 @@ try
                     Context -Name "User profile sync service is not found" -Fixture {
                         $testParams = @{
                             UserProfileServiceAppName = "User Profile Service Service App"
-                            FarmAccount               = $mockCredential
                             Ensure                    = "Present"
                             RunOnlyWhenWriteable      = $true
                         }
@@ -540,7 +530,6 @@ try
                     Context -Name "Can't get the Farm Account" -Fixture {
                         $testParams = @{
                             UserProfileServiceAppName = "User Profile Service Service App"
-                            FarmAccount               = $mockCredential
                             Ensure                    = "Present"
                             RunOnlyWhenWriteable      = $true
                         }
@@ -563,7 +552,6 @@ try
                     Context -Name "All methods throw exceptions as user profile sync doesn't exist in 2016" -Fixture {
                         $testParams = @{
                             UserProfileServiceAppName = "User Profile Service Service App"
-                            FarmAccount               = $mockCredential
                         }
 
                         It "Should throw on the get method" {
