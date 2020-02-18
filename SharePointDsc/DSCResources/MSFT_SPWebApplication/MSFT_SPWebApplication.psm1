@@ -90,6 +90,11 @@ function Get-TargetResource
             $classicAuth = $true
         }
 
+        $IISPath = $wa.IisSettings[0].Path
+        if (-not [System.String]::IsNullOrEmpty($IISPath))
+        {
+            $IISPath = $IISPath.ToString()
+        }
         return @{
             Name                   = $wa.DisplayName
             ApplicationPool        = $wa.ApplicationPool.Name
@@ -99,7 +104,7 @@ function Get-TargetResource
             DatabaseName           = $wa.ContentDatabases[0].Name
             DatabaseServer         = $wa.ContentDatabases[0].Server
             HostHeader             = (New-Object -TypeName System.Uri $wa.Url).Host
-            Path                   = $wa.IisSettings[0].Path.ToString()
+            Path                   = $IISPath
             Port                   = (New-Object -TypeName System.Uri $wa.Url).Port
             UseClassic             = $classicAuth
             InstallAccount         = $params.InstallAccount
