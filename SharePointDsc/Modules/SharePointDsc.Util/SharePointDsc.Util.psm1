@@ -110,11 +110,15 @@ function Convert-SPDscHashtableToString
     {
         if ($pair.Value -is [System.Array])
         {
-            $str = "$($pair.Key)=($($pair.Value -join ","))"
+            $str = "$($pair.Key)=$(Convert-SPDscArrayToString -Array $pair.Value)"
         }
         elseif ($pair.Value -is [System.Collections.Hashtable])
         {
             $str = "$($pair.Key)={$(Convert-SPDscHashtableToString -Hashtable $pair.Value)}"
+        }
+        elseif ($pair.Value -is [Microsoft.Management.Infrastructure.CimInstance])
+        {
+            $str = "$($pair.Key)=$(Convert-SPDscCIMInstanceToString -CIMInstance $pair.Value)"
         }
         else
         {
@@ -125,6 +129,67 @@ function Convert-SPDscHashtableToString
 
     [array]::Sort($values)
     return ($values -join "; ")
+}
+
+function Convert-SPDscArrayToString
+{
+    param
+    (
+        [Parameter()]
+        [System.Array]
+        $Array
+    )
+
+    $str = "("
+    for ($i = 0; $i -lt $Array.Count; $i++)
+    {
+        $item = $Array[$i]
+        if ($item -is [System.Collections.Hashtable])
+        {
+            $str += "{"
+            $str += Convert-SPDscHashtableToString -Hashtable $item
+            $str += "}"
+        }
+        elseif ($Array[$i] -is [Microsoft.Management.Infrastructure.CimInstance])
+        {
+            $str += Convert-SPDscCIMInstanceToString -CIMInstance $item
+        }
+        else
+        {
+            $str += $item
+        }
+
+        if ($i -lt ($Array.Count - 1))
+        {
+            $str += ","
+        }
+    }
+    $str += ")"
+
+    return $str
+}
+
+function Convert-SPDscCIMInstanceToString
+{
+    param
+    (
+        [Parameter()]
+        [Microsoft.Management.Infrastructure.CimInstance]
+        $CIMInstance
+    )
+
+    $str = "{"
+    foreach ($prop in $CIMInstance.CimInstanceProperties)
+    {
+        if ($str -notmatch "{$")
+        {
+            $str += "; "
+        }
+        $str += "$($prop.Name)=$($prop.Value)"
+    }
+    $str += "}"
+
+    return $str
 }
 
 function Get-SPDscOSVersion
