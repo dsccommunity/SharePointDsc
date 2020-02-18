@@ -10,18 +10,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - SharePointDsc
   - Added automatic release with a new CI pipeline
   - Updated PULL_REQUEST_TEMPLATE.md to match DSC standard
-- SharePointDSC generic
+- SharePointDSC generic (v4.0)
   - Added support in several resources for creating/connecting to farm
     and service applications using a (single) SQL-based credential
     instead of the default Windows credentials. Needed when e.g. using
     Azure SQL Managed Instance as SharePoint's database server.
     UseSQLAuthentication and DatabaseCredentials parameters will need
     to be considered.
+- SPAzureAccessControlServiceAppProxy
+  - Added new resource to create Azure Access Control Service Application Proxy
+- SPFarm
+  - Added possibility to set application credential key.
+- SPOAppPrincipalMgmtServiceAppProxy
+  - Added new resource to create SharePoint Online Application Principal
+    Management Service Application Proxy
+- SPTrustedSecurityTokenIssuer
+  - Fixed RegisteredIssuerNameRealm not applied if specified.
 
 ### Changed
 
 - SharePointDsc
-  - Updated all resources to load Utils module, which broke with the new CI
+  - Updated all resources and Invoke-SPDscCommand function to automatically
+    load Utils module, which broke with the new CI
 - SPConfigWizard
   - Updated checks in Set method to make sure the resource also runs when
     a language pack is installed

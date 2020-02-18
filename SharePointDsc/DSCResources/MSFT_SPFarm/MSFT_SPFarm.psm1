@@ -88,6 +88,10 @@ function Get-TargetResource
 
         [Parameter()]
         [System.Management.Automation.PSCredential]
+        $ApplicationCredentialKey,
+
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 
@@ -98,6 +102,7 @@ function Get-TargetResource
         throw "SharePointDsc does not support removing a server from a farm, please set the ensure property to 'present'"
     }
 
+    $supportsSettingApplicationCredentialKey = $false
     $installedVersion = Get-SPDscInstalledProductVersion
     switch ($installedVersion.FileMajorPart)
     {
@@ -127,6 +132,7 @@ function Get-TargetResource
             else
             {
                 Write-Verbose -Message "Detected installation of SharePoint 2019"
+                $supportsSettingApplicationCredentialKey = $true
             }
         }
         default
@@ -134,6 +140,13 @@ function Get-TargetResource
             throw ("Detected an unsupported major version of SharePoint. SharePointDsc only " +
                 "supports SharePoint 2013, 2016 or 2019.")
         }
+    }
+
+    if ($PSBoundParameters.ContainsKey("ApplicationCredentialKey") -and
+        -not $supportsSettingApplicationCredentialKey)
+    {
+        throw [Exception] ("Specifying ApplicationCredentialKey is only supported " +
+            "on SharePoint 2019")
     }
 
     if (($PSBoundParameters.ContainsKey("ServerRole") -eq $true) -and
@@ -244,6 +257,7 @@ function Get-TargetResource
                 CentralAdministrationPort = (New-Object -TypeName System.Uri $centralAdminSite.Url).Port
                 CentralAdministrationAuth = $centralAdminAuth
                 DeveloperDashboard        = $developerDashboardStatus
+                ApplicationCredentialKey  = $null
             }
             $installedVersion = Get-SPDscInstalledProductVersion
             if ($installedVersion.FileMajorPart -eq 16)
@@ -288,6 +302,7 @@ function Get-TargetResource
                 CentralAdministrationUrl  = $null
                 CentralAdministrationPort = $null
                 CentralAdministrationAuth = $null
+                ApplicationCredentialKey  = $null
                 Ensure                    = "Present"
             }
         }
@@ -312,6 +327,7 @@ function Get-TargetResource
             CentralAdministrationUrl  = $null
             CentralAdministrationPort = $null
             CentralAdministrationAuth = $null
+            ApplicationCredentialKey  = $null
             Ensure                    = "Absent"
         }
     }
@@ -397,6 +413,9 @@ function Set-TargetResource
         [System.String]
         $DeveloperDashboard,
 
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
+        $ApplicationCredentialKey,
 
         [Parameter()]
         [System.Management.Automation.PSCredential]
@@ -718,6 +737,8 @@ function Set-TargetResource
                 SkipRegisterAsDistributedCacheHost = $true
             }
 
+            $supportsSettingApplicationCredentialKey = $false
+
             if ($params.useSQLAuthentication -eq $true)
             {
                 Write-Verbose -Message "Using SQL authentication to connect to / create farm as `$useSQLAuthentication is set to $($params.useSQLAuthentication)."
@@ -748,6 +769,7 @@ function Set-TargetResource
                         {
                             Write-Verbose -Message ("Detected Version: SharePoint 2019 - " +
                                 "configuring server as $($params.ServerRole)")
+                            $supportsSettingApplicationCredentialKey = $true
                         }
                         $executeArgs.Add("LocalServerRole", $params.ServerRole)
                     }
@@ -764,6 +786,7 @@ function Set-TargetResource
                             Write-Verbose -Message ("Detected Version: SharePoint 2019 - no server " +
                                 "role provided, configuring server without a " +
                                 "specific role")
+                            $supportsSettingApplicationCredentialKey = $true
                         }
                         $executeArgs.Add("ServerRoleOptional", $true)
                     }
@@ -774,6 +797,13 @@ function Set-TargetResource
                         "was detected. Only versions 15 (SharePoint 2013) and" +
                         "16 (SharePoint 2016 or SharePoint 2019) are supported.")
                 }
+            }
+
+            if ($params.ContainsKey("ApplicationCredentialKey") -and
+                -not $supportsSettingApplicationCredentialKey)
+            {
+                throw [Exception] ("Specifying ApplicationCredentialKey is only supported " +
+                    "on SharePoint 2019")
             }
 
             if ($dbStatus.DatabaseExists -eq $true)
@@ -910,6 +940,12 @@ function Set-TargetResource
 
             Write-Verbose -Message "Starting Install-SPFeature"
             Install-SPFeature -AllExistingFeatures -Force | Out-Null
+
+            if ($params.ContainsKey("ApplicationCredentialKey"))
+            {
+                Write-Verbose -Message "Setting application credential key"
+                Set-SPApplicationCredentialKey -Password $params.ApplicationCredentialKey.Password
+            }
 
             # Provision central administration
             if ($params.RunCentralAdmin -eq $true)
@@ -1116,6 +1152,10 @@ function Test-TargetResource
         [ValidateSet("Off", "On", "OnDemand")]
         [System.String]
         $DeveloperDashboard,
+
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
+        $ApplicationCredentialKey,
 
         [Parameter()]
         [System.Management.Automation.PSCredential]
