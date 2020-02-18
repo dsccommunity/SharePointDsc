@@ -22,6 +22,8 @@ function Invoke-TestSetup
                 -ChildPath "..\UnitTestHelper.psm1" `
                 -Resolve)
 
+        $moduleVersionFolder = ($ModuleVersion -split "-")[0]
+
         $Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointCmdletModule `
             -SubModulePath "Modules\SharePointDsc.ProjectServer\ProjectServerConnector.psm1" `
             -ExcludeInvokeHelper `

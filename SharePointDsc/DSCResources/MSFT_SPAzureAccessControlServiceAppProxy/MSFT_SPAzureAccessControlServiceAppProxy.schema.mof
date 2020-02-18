@@ -1,0 +1,9 @@
+[ClassVersion("1.0.0.0"), FriendlyName("SPAzureAccessControlServiceAppProxy")]
+class MSFT_SPAzureAccessControlServiceAppProxy : OMI_BaseResource
+{
+    [Key, Description("The name of the Azure Access Control service application proxy")] string Name;
+    [Write, Description("Present ensures service app proxy exists, absent ensures it is removed"), ValueMap{"Present","Absent"}, Values{"Present","Absent"}] string Ensure;
+    [Required, Description("Specifies the URL of the Azure Access Control Service's metadata document.")] string MetadataServiceEndpointUri;
+    [Write, Description("POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5"), EmbeddedInstance("MSFT_Credential")] String InstallAccount;
+};
+

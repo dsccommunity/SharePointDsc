@@ -300,6 +300,11 @@ function Set-TargetResource
                     Write-Verbose -Message "RegisteredIssuerNameRealm is not specified, use Get-SPAuthenticationRealm instead."
                     $registeredIssuerNameRealm = Get-SPAuthenticationRealm
                 }
+                else
+                {
+                    $registeredIssuerNameRealm = $params.RegisteredIssuerNameRealm
+                }
+
                 $registeredIssuerName = "$($params.RegisteredIssuerNameIdentifier)@$registeredIssuerNameRealm"
 
                 $runParams.Add("RegisteredIssuerName", $registeredIssuerName)
