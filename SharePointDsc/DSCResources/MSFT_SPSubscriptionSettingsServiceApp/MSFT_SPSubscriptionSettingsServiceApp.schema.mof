@@ -1,5 +1,5 @@
 [ClassVersion("1.0.0.0"), FriendlyName("SPSubscriptionSettingsServiceApp")]
-class MSFT_SPSubscriptionSettingsServiceApp  : OMI_BaseResource
+class MSFT_SPSubscriptionSettingsServiceApp : OMI_BaseResource
 {
     [Key, Description("The name of the subscription settings service app")] string Name;
     [Required, Description("The name of the application pool the service app runs in")] String ApplicationPool;
