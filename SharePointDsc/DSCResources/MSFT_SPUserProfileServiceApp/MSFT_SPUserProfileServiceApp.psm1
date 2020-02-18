@@ -55,6 +55,14 @@ function Get-TargetResource
 
         [Parameter()]
         [System.Boolean]
+        $UseSQLAuthentication,
+
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
+        $DatabaseCredentials,
+
+        [Parameter()]
+        [System.Boolean]
         $EnableNetBIOS = $false,
 
         [Parameter()]
@@ -287,6 +295,14 @@ function Set-TargetResource
 
         [Parameter()]
         [System.Boolean]
+        $UseSQLAuthentication,
+
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
+        $DatabaseCredentials,
+
+        [Parameter()]
+        [System.Boolean]
         $EnableNetBIOS = $false,
 
         [Parameter()]
@@ -433,6 +449,20 @@ function Set-TargetResource
                 $pName = $params.ProxyName
                 $params.Remove("ProxyName") | Out-Null
             }
+
+            if ($params.UseSQLAuthentication -eq $true)
+            {
+                Write-Verbose -Message "Using SQL authentication to create service application as `$UseSQLAuthentication is set to $($params.useSQLAuthentication)."
+                $params.Add("ProfileDBCredentials", $params.DatabaseCredentials)
+                $params.Add("ProfileSyncDBCredentials", $params.DatabaseCredentials)
+                $params.Add("SocialDBCredentials", $params.DatabaseCredentials)
+            }
+            else
+            {
+                Write-Verbose -Message "`$UseSQLAuthentication is false or not specified; using default Windows authentication."
+            }
+            $params.Remove("UseSQLAuthentication") | Out-Null
+            $params.Remove("DatabaseCredentials") | Out-Null
 
             $serviceApps = Get-SPServiceApplication -Name $params.Name `
                 -ErrorAction SilentlyContinue
@@ -621,6 +651,14 @@ function Test-TargetResource
         [Parameter()]
         [System.String]
         $SyncDBServer,
+
+        [Parameter()]
+        [System.Boolean]
+        $UseSQLAuthentication,
+
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
+        $DatabaseCredentials,
 
         [Parameter()]
         [System.Boolean]
