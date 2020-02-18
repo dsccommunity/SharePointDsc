@@ -23,6 +23,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     Management Service Application Proxy
 - SPTrustedSecurityTokenIssuer
   - Fixed RegisteredIssuerNameRealm not applied if specified.
+- SPUserProfileProperty
+  - Added IsReplicable property.
 
 ### Changed
 
