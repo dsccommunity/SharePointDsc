@@ -10,12 +10,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - SharePointDsc
   - Added automatic release with a new CI pipeline
   - Updated PULL_REQUEST_TEMPLATE.md to match DSC standard
+- SPAzureAccessControlServiceAppProxy
+  - Added new resource to create Azure Access Control Service Application Proxy
 - SPExcelServiceApp
   - Documentation update for SharePoint 2016/2019 deprecation.
 - SPInstallPrereqs
   - Documentation update for SharePoint 2019 offline install parameters.
 - SPFarm
   - Added possibility to set application credential key.
+- SPOAppPrincipalMgmtServiceAppProxy
+  - Added new resource to create SharePoint Online Application Principal
+    Management Service Application Proxy
 - SPTrustedSecurityTokenIssuer
   - Fixed RegisteredIssuerNameRealm not applied if specified.
 
