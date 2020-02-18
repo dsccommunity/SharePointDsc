@@ -818,7 +818,7 @@ function Test-TargetResource
             "IsVisibleOnViewer",
             "IsUserEditable",
             "IsAlias",
-            "IsSearchabe",
+            "IsSearchable",
             "UserOverridePrivacy",
             "TermGroup",
             "TermStore",
