@@ -48,6 +48,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - SPSearchContentSource
   - Add CrawlVirtualServers and CrawlSites CrawlSetting for SharePoint content
     sources.
+- SPUserProfileProperty
+  - Fixed typo in user profile property test for IsSearchable.
 
 ### Security
 
