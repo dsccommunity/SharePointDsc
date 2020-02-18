@@ -80,6 +80,7 @@ try
                 IsUserEditable      = $true
                 IsAlias             = $false
                 IsSearchable        = $false
+                IsReplicable        = $false
                 TermStore           = "Managed Metadata service"
                 TermGroup           = "People"
                 TermSet             = "Department"
@@ -110,6 +111,7 @@ try
                 IsUserEditable      = $true
                 IsAlias             = $true
                 IsSearchable        = $true
+                IsReplicable        = $true
                 TermStore           = "Managed Metadata service"
                 TermGroup           = "People"
                 TermSet             = "Location"
@@ -151,6 +153,7 @@ try
                 }
                 Length        = 25
                 IsSearchable  = $true
+                IsReplicable  = $true
             } | Add-Member ScriptMethod Commit {
                 $Global:SPUPSPropertyCommitCalled = $true
             } -PassThru -Force | Add-Member ScriptMethod Delete {
@@ -221,6 +224,7 @@ try
                 }
                 Length        = $testParamsNewProperty.Length
                 IsSearchable  = $testParamsNewProperty.IsSearchable
+                IsReplicable  = $testParamsNewProperty.IsReplicable
             } | Add-Member ScriptMethod Commit {
                 $Global:SPUPSPropertyCommitCalled = $true
             } -PassThru | Add-Member ScriptMethod Delete {

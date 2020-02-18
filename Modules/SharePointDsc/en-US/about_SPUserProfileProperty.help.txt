@@ -92,6 +92,10 @@
     Write - boolean
     Is this field able to be searched upon
 
+.PARAMETER IsReplicable
+    Write - boolean
+    Is this field replicated to Microsoft SharePoint Foundation 2010 sites
+
 .PARAMETER UserOverridePrivacy
     Write - boolean
     Can users override the default privacy policy
@@ -153,6 +157,7 @@ Configuration Example
             IsUserEditable       = $true
             IsAlias              = $false
             IsSearchable         = $false
+            IsReplicable         = $false
             TermStore            = ""
             TermGroup            = ""
             TermSet              = ""
