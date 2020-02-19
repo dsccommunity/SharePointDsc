@@ -282,7 +282,7 @@ function Get-TargetResource
             IsUserEditable      = $userProfileProperty.IsUserEditable
             IsAlias             = $userProfileProperty.IsAlias
             IsSearchable        = $userProfileProperty.CoreProperty.IsSearchable
-            IsReplicable        = $userProfileProperty.CoreProperty.IsReplicable
+            IsReplicable        = $userProfileProperty.TypeProperty.IsReplicable
             TermStore           = $termSet.TermStore
             TermGroup           = $termSet.TermGroup
             TermSet             = $termSet.TermSet
@@ -588,7 +588,7 @@ function Set-TargetResource
             -ParamsValue $params `
             -ParamKey "IsSearchable"
 
-        Set-SPDscObjectPropertyIfValuePresent -ObjectToSet $coreProperty `
+        Set-SPDscObjectPropertyIfValuePresent -ObjectToSet $userProfileTypeProperty `
             -PropertyToSet "IsReplicable" `
             -ParamsValue $params `
             -ParamKey "IsReplicable"
