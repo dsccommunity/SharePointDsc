@@ -18,10 +18,6 @@ function Get-TargetResource
         [System.String] $Ensure = "Present",
 
         [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $FarmAccount,
-
-        [Parameter()]
         [System.Boolean]
         $RunOnlyWhenWriteable,
 
@@ -137,7 +133,6 @@ function Get-TargetResource
         return @{
             UserProfileServiceAppName = $upa.Name
             Ensure                    = $localEnsure
-            FarmAccount               = $params.FarmAccount
             RunOnlyWhenWriteable      = $params.RunOnlyWhenWriteable
             InstallAccount            = $params.InstallAccount
         }
@@ -158,10 +153,6 @@ function Set-TargetResource
         [Parameter()]
         [ValidateSet("Present", "Absent")]
         [System.String] $Ensure = "Present",
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $FarmAccount,
 
         [Parameter()]
         [System.Boolean]
@@ -368,10 +359,6 @@ function Test-TargetResource
         [Parameter()]
         [ValidateSet("Present", "Absent")]
         [System.String] $Ensure = "Present",
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        $FarmAccount,
 
         [Parameter()]
         [System.Boolean]

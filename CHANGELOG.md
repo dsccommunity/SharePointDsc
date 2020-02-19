@@ -60,6 +60,8 @@ resources:
 
 - SPSearchServiceApp
   - Removed the WindowsServiceAccount parameter that was depricated in v3.1
+- SPUserProfileSyncService
+  - Removed the FarmAccount parameter that was depricated in v2.2
 
 ### Fixed
 

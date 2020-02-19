@@ -44,11 +44,7 @@ Updated author, copyright notice, and URLs.
         param(
             [Parameter(Mandatory = $true)]
             [PSCredential]
-            $SetupAccount,
-
-            [Parameter(Mandatory = $true)]
-            [PSCredential]
-            $FarmAccount
+            $SetupAccount
         )
         Import-DscResource -ModuleName SharePointDsc
 
