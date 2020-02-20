@@ -18,7 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - SharePointDsc
   - Added automatic release with a new CI pipeline
   - Updated PULL_REQUEST_TEMPLATE.md to match DSC standard
-  - Prepared Conceptual Help and Wiki Content generation
+  - Added Conceptual Help generation
 - SPAzureAccessControlServiceAppProxy
   - Added new resource to create Azure Access Control Service Application Proxy
 - SPExcelServiceApp
