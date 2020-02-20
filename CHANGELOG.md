@@ -23,6 +23,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - SPConfigWizard
   - Updated checks in Set method to make sure the resource also runs when
     a language pack is installed
+- SPWebApplicationExtension
+  - Forced the conversion of Paths to string
 - SPUserProfileServiceApp
   - Implemented ability to fix incorrectly linked proxy groups
 
