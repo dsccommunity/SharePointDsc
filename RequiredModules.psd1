@@ -16,6 +16,7 @@
     Sampler                     = 'latest'
     'DscResource.Test'          = 'latest'
     'DscResource.AnalyzerRules' = 'latest'
+    'DscResource.DocGenerator'  = 'latest'
     MarkdownLinkCheck           = 'latest'
     xDSCResourceDesigner        = 'latest'
 
