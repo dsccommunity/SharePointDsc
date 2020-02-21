@@ -38,6 +38,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Updated DatabaseServer parameter to support null value
 - SPUserProfileServiceApp
   - Implemented ability to fix incorrectly linked proxy groups
+- SPWebApplicationExtension
+  - Forced the conversion of Paths to string
 
 ### Deprecated
 
