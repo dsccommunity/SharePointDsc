@@ -167,7 +167,7 @@ function Set-TargetResource
             # Check if database exists
             if ($null -ne $cdb)
             {
-                if ($cdb.Server -ne $params.DatabaseServer)
+                if ($params.ContainsKey('DatabaseServer') -and $params.DatabaseServer -ne $null -and $cdb.Server -ne $params.DatabaseServer)
                 {
                     throw ("Specified database server does not match the actual database " + `
                             "server. This resource cannot move the database to a different " + `
@@ -396,7 +396,7 @@ function Test-TargetResource
     Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
     Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
 
-    if ($CurrentValues.DatabaseServer -ne $DatabaseServer)
+    if ($PSBoundParameters.ContainsKey('DatabaseServer') -and $PSBoundParameters.DatabaseServer -ne $null -and $CurrentValues.DatabaseServer -ne $PSBoundParameters.DatabaseServer)
     {
         Write-Verbose -Message ("Specified database server does not match the actual " + `
                 "database server. This resource cannot move the database " + `
