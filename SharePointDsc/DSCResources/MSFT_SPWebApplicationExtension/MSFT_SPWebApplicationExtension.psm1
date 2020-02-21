@@ -108,13 +108,18 @@ function Get-TargetResource
             $UseSSL = $false
         }
 
+        $waExtPath = $waExt.Path
+        if (-not [System.String]::IsNullOrEmpty($waExtPath))
+        {
+            $waExtPath = $waExtPath.ToString()
+        }
         return @{
             WebAppUrl      = $params.WebAppUrl
             Name           = $waExt.ServerComment
             Url            = $PublicURL
             AllowAnonymous = $waExt.AllowAnonymous
             HostHeader     = $HostHeader
-            Path           = $waExt.Path
+            Path           = $waExtPath
             Port           = $Port
             Zone           = $params.zone
             UseSSL         = $UseSSL
