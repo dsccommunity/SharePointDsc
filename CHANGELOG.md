@@ -23,6 +23,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     Management Service Application Proxy
 - SPTrustedSecurityTokenIssuer
   - Fixed RegisteredIssuerNameRealm not applied if specified.
+- SPUserProfileProperty
+  - Added IsReplicable property.
 
 ### Changed
 
@@ -32,10 +34,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - SPConfigWizard
   - Updated checks in Set method to make sure the resource also runs when
     a language pack is installed
-- SPWebApplicationExtension
-  - Forced the conversion of Paths to string
+- SPContentDatabase
+  - Updated DatabaseServer parameter to support null value
 - SPUserProfileServiceApp
   - Implemented ability to fix incorrectly linked proxy groups
+- SPWebApplicationExtension
+  - Forced the conversion of Paths to string
 
 ### Deprecated
 
@@ -50,6 +54,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - SPSearchContentSource
   - Add CrawlVirtualServers and CrawlSites CrawlSetting for SharePoint content
     sources.
+- SPUserProfileProperty
+  - Fixed typo in user profile property test for IsSearchable.
 
 ### Security
 

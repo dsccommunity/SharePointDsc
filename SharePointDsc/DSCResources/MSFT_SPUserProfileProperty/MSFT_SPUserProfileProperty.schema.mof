@@ -26,6 +26,7 @@ class MSFT_SPUserProfileProperty : OMI_BaseResource
     [Write, Description("Is this field able to be edited by a user, or only an administrator")] boolean IsUserEditable;
     [Write, Description("Is this field an alias that can be used to refer to a user by")] boolean IsAlias;
     [Write, Description("Is this field able to be searched upon")] boolean IsSearchable;
+    [Write, Description("Is this field replicated to Microsoft SharePoint Foundation 2010 sites")] boolean IsReplicable;
     [Write, Description("Can users override the default privacy policy")] boolean UserOverridePrivacy;
     [Write, Description("The name of the term store to look up managed terms from")] string TermStore;
     [Write, Description("The name of the term store group that terms are in for this field")] string TermGroup;
