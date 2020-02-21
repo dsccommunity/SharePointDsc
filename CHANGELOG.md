@@ -24,6 +24,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     Management Service Application Proxy
 - SPTrustedSecurityTokenIssuer
   - Fixed RegisteredIssuerNameRealm not applied if specified.
+- SPUserProfileProperty
+  - Added IsReplicable property.
 
 ### Changed
 
@@ -35,6 +37,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - SPConfigWizard
   - Updated checks in Set method to make sure the resource also runs when
     a language pack is installed
+- SPContentDatabase
+  - Updated DatabaseServer parameter to support null value
 - SPSearchIndexPartition
   - Updated documentation to specifically mention that each index partition
     requires its own dedicated RootDirectory
@@ -61,6 +65,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     sources.
 - SPSubscriptionSettingServiceApp
   - Corrected incorrect information in Readme file
+- SPUserProfileProperty
+  - Fixed typo in user profile property test for IsSearchable.
 
 ### Security
 

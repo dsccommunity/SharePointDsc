@@ -98,6 +98,10 @@ function Get-TargetResource
 
         [Parameter()]
         [System.Boolean]
+        $IsReplicable,
+
+        [Parameter()]
+        [System.Boolean]
         $UserOverridePrivacy,
 
         [Parameter()]
@@ -283,6 +287,7 @@ function Get-TargetResource
             IsUserEditable      = $userProfileProperty.IsUserEditable
             IsAlias             = $userProfileProperty.IsAlias
             IsSearchable        = $userProfileProperty.CoreProperty.IsSearchable
+            IsReplicable        = $userProfileProperty.TypeProperty.IsReplicable
             TermStore           = $termSet.TermStore
             TermGroup           = $termSet.TermGroup
             TermSet             = $termSet.TermSet
@@ -385,6 +390,10 @@ function Set-TargetResource
         [Parameter()]
         [System.Boolean]
         $IsSearchable,
+
+        [Parameter()]
+        [System.Boolean]
+        $IsReplicable,
 
         [Parameter()]
         [System.Boolean]
@@ -584,6 +593,11 @@ function Set-TargetResource
             -ParamsValue $params `
             -ParamKey "IsSearchable"
 
+        Set-SPDscObjectPropertyIfValuePresent -ObjectToSet $userProfileTypeProperty `
+            -PropertyToSet "IsReplicable" `
+            -ParamsValue $params `
+            -ParamKey "IsReplicable"
+
         Set-SPDscObjectPropertyIfValuePresent -ObjectToSet $userProfileProperty `
             -PropertyToSet "DefaultPrivacy" `
             -ParamsValue $params `
@@ -776,6 +790,10 @@ function Test-TargetResource
 
         [Parameter()]
         [System.Boolean]
+        $IsReplicable,
+
+        [Parameter()]
+        [System.Boolean]
         $UserOverridePrivacy,
 
         [Parameter()]
@@ -823,7 +841,8 @@ function Test-TargetResource
             "IsVisibleOnViewer",
             "IsUserEditable",
             "IsAlias",
-            "IsSearchabe",
+            "IsSearchable",
+            "IsReplicable",
             "UserOverridePrivacy",
             "TermGroup",
             "TermStore",

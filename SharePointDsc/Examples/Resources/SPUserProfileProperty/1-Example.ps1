@@ -76,6 +76,7 @@ Configuration Example
             IsUserEditable       = $true
             IsAlias              = $false
             IsSearchable         = $false
+            IsReplicable         = $false
             TermStore            = ""
             TermGroup            = ""
             TermSet              = ""
