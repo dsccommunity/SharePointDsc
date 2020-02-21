@@ -45,6 +45,7 @@ BuildWorkflow:
     - Build_Module_ModuleBuilder
     - Build_NestedModules_ModuleBuilder
     - Create_changelog_release_output
+    #- Generate_Conceptual_Help
 
   pack:
     - build
@@ -60,6 +61,9 @@ BuildWorkflow:
 
   hqrmtest:
     - DscResource_Tests_Stop_On_Fail
+
+  #documentation:
+  #  - Generate_Wiki_Content
 
   publish:
     - Publish_release_to_GitHub
@@ -83,7 +87,7 @@ Pester: #Passthru, OutputFile, CodeCoverageOutputFile not supported
   # - tests/Integration
   ExcludeTag:
   Tag:
-  CodeCoverageThreshold: 50 # Set to 0 to bypass
+  CodeCoverageThreshold: 70 # Set to 0 to bypass
 
 DscTest:
   # OutputFolder:
@@ -110,6 +114,8 @@ ModuleBuildTasks:
   # - ModuleName: 'alias to search'
   Sampler:
     - '*.build.Sampler.ib.tasks' # this means: import (dot source) all aliases ending with .ib.tasks exported by sampler module
+  DscResource.DocGenerator:
+    - 'Task.*'
 
 # Invoke-Build Header to be used to 'decorate' the terminal output of the tasks.
 TaskHeader: |

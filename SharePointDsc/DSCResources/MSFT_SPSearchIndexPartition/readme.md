@@ -12,9 +12,14 @@ before creating additional indexes. The first index will be created through
 the use of the SPSearchRoles resource. Additional search index partitions can
 be created through using this resource.
 
-Note that for the search topology to apply correctly, the path specified for
-RootDirectory needs to exist on the server that is executing this resource. For
-example, if the below example was executed on "Server1" it would also need to
-ensure that it was able to create the index path at I:\. If no disk labeled I:
-was available on server1, this would fail, even though it will not hold an
+NOTE 1:
+To make sure that the search topology is applied correctly, the path specified
+for RootDirectory needs to exist on the server that is executing this resource.
+For example, if the below example was executed on "Server1" it would also need
+to ensure that it was able to create the index path at I:\. If no disk labeled
+I: was available on server1, this would fail, even though it will not hold an
 actual index component.
+
+NOTE 2:
+Make sure that each created index partition uses its own RootDirectory folder,
+else you will get an error stating that the specified directory is not empty.

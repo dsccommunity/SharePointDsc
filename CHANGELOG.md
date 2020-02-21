@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - SharePointDsc
   - Added automatic release with a new CI pipeline
   - Updated PULL_REQUEST_TEMPLATE.md to match DSC standard
+  - Prepared Conceptual Help and Wiki Content generation
 - SPAzureAccessControlServiceAppProxy
   - Added new resource to create Azure Access Control Service Application Proxy
 - SPExcelServiceApp
@@ -31,11 +32,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - SharePointDsc
   - Updated all resources and Invoke-SPDscCommand function to automatically
     load Utils module, which broke with the new CI
+  - Extended Convert-SPDscHashtableToString function to support complex types
+    in arrays and the CIMInstance type
 - SPConfigWizard
   - Updated checks in Set method to make sure the resource also runs when
     a language pack is installed
 - SPContentDatabase
   - Updated DatabaseServer parameter to support null value
+- SPSearchIndexPartition
+  - Updated documentation to specifically mention that each index partition
+    requires its own dedicated RootDirectory
 - SPUserProfileServiceApp
   - Implemented ability to fix incorrectly linked proxy groups
 - SPWebApplicationExtension
@@ -51,9 +57,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- SharePointDsc
+  - Corrected schema.mof files of SPSubscriptionSettingServiceApp and
+    SPPasswordChangeSettings resources, which caused failed Wiki generation
 - SPSearchContentSource
   - Add CrawlVirtualServers and CrawlSites CrawlSetting for SharePoint content
     sources.
+- SPSubscriptionSettingServiceApp
+  - Corrected incorrect information in Readme file
 - SPUserProfileProperty
   - Fixed typo in user profile property test for IsSearchable.
 
