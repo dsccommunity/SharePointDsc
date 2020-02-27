@@ -192,8 +192,12 @@ function Test-TargetResource
         $PSBoundParameters.UseADRMS = $false
     }
 
-    return Test-SPDscParameterState -CurrentValues $CurrentValues `
+    $result = Test-SPDscParameterState -CurrentValues $CurrentValues `
         -DesiredValues $PSBoundParameters
+
+    Write-Verbose -Message "Test-TargetResource returned $result"
+
+    return $result
 }
 
 Export-ModuleMember -Function *-TargetResource

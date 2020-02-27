@@ -476,6 +476,7 @@ function Test-TargetResource
     if ($null -eq $CurrentValues.ProxyLibraries)
     {
         Write-Verbose -Message "Proxy library list does not have a valid value"
+        Write-Verbose -Message "Test-TargetResource returned false"
         return $false
     }
 
@@ -488,6 +489,7 @@ function Test-TargetResource
             if ($ProxyLibraries.Count -gt 0)
             {
                 Write-Verbose -Message "Proxy library list does not match"
+                Write-Verbose -Message "Test-TargetResource returned false"
                 return $false
             }
         }
@@ -496,6 +498,7 @@ function Test-TargetResource
             if ($ProxyLibraries.Count -eq 0)
             {
                 Write-Verbose -Message "Proxy library list does not match"
+                Write-Verbose -Message "Test-TargetResource returned false"
                 return $false
             }
 
@@ -512,7 +515,8 @@ function Test-TargetResource
                         } | Select-Object -First 1).SupportAppAuthentication
                     if ($currentProxyLibrary.SupportAppAuthentication -ne $supportAppAuth)
                     {
-                        Write-Verbose -Message "$($currentProxyLibrary.AssemblyName) has incorrect SupportAppAuthentication. Test failed."
+                        Write-Verbose -Message "$($currentProxyLibrary.AssemblyName) has incorrect SupportAppAuthentication."
+                        Write-Verbose -Message "Test-TargetResource returned false"
                         return $false
                     }
                 }
@@ -520,6 +524,7 @@ function Test-TargetResource
             else
             {
                 Write-Verbose -Message "Proxy library list does not match"
+                Write-Verbose -Message "Test-TargetResource returned false"
                 return $false
             }
         }
@@ -534,6 +539,7 @@ function Test-TargetResource
             if ($ProxyLibrariesToInclude.Count -gt 0)
             {
                 Write-Verbose -Message "Proxy library list to include does not match"
+                Write-Verbose -Message "Test-TargetResource returned false"
                 return $false
             }
         }
@@ -543,7 +549,8 @@ function Test-TargetResource
         {
             if (-not($CurrentValues.ProxyLibraries.AssemblyName -contains $proxyLibrary.AssemblyName))
             {
-                Write-Verbose -Message "$($proxyLibrary.AssemblyName) is not registered as a proxy library. Set result to false"
+                Write-Verbose -Message "$($proxyLibrary.AssemblyName) is not registered as a proxy library."
+                Write-Verbose -Message "Test-TargetResource returned false"
                 return $false
             }
             else
@@ -554,7 +561,8 @@ function Test-TargetResource
                     } | Select-Object -First 1).SupportAppAuthentication
                 if ($proxyLibrary.SupportAppAuthentication -ne $supportAppAuth)
                 {
-                    Write-Verbose -Message "$($proxyLibrary.AssemblyName) has incorrect SupportAppAuthentication. Test failed."
+                    Write-Verbose -Message "$($proxyLibrary.AssemblyName) has incorrect SupportAppAuthentication."
+                    Write-Verbose -Message "Test-TargetResource returned false"
                     return $false
                 }
             }
@@ -571,7 +579,8 @@ function Test-TargetResource
             {
                 if ($CurrentValues.ProxyLibraries.AssemblyName -contains $proxyLibrary)
                 {
-                    Write-Verbose -Message "$proxyLibrary is already registered as proxy library. Set result to false"
+                    Write-Verbose -Message "$proxyLibrary is already registered as proxy library."
+                    Write-Verbose -Message "Test-TargetResource returned false"
                     return $false
                 }
                 else
@@ -582,7 +591,7 @@ function Test-TargetResource
         }
     }
 
-    return Test-SPDscParameterState -CurrentValues $CurrentValues `
+    $result = Test-SPDscParameterState -CurrentValues $CurrentValues `
         -DesiredValues $PSBoundParameters `
         -ValuesToCheck @("WebAppUrl",
         "MaxResourcesPerRequest",
@@ -594,6 +603,10 @@ function Test-TargetResource
         "RequestUsageExecutionTimeThreshold",
         "LogActionsIfHasRequestException",
         "EnableRequestUsage")
+
+    Write-Verbose -Message "Test-TargetResource returned $result"
+
+    return $result
 }
 
 Export-ModuleMember -Function *-TargetResource

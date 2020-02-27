@@ -151,6 +151,8 @@ function Test-TargetResource
     if ($null -eq $currentValues.WebAppUrl)
     {
         Write-Verbose -Message "Specified web application does not exist."
+
+        Write-Verbose -Message "Test-TargetResource returned false"
         return $false
     }
 
@@ -158,6 +160,7 @@ function Test-TargetResource
     {
         if ($AllowAppPurchases -ne $CurrentValues.AllowAppPurchases)
         {
+            Write-Verbose -Message "Test-TargetResource returned false"
             return $false
         }
     }
@@ -166,10 +169,12 @@ function Test-TargetResource
     {
         if ($AllowAppsForOffice -ne $CurrentValues.AllowAppsForOffice)
         {
+            Write-Verbose -Message "Test-TargetResource returned false"
             return $false
         }
     }
 
+    Write-Verbose -Message "Test-TargetResource returned true"
     return $true
 }
 

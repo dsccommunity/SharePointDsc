@@ -409,6 +409,7 @@ function Test-TargetResource
             -ValuesToCheck @("Members")
         if ($membersMatch -eq $false)
         {
+            Write-Verbose -Message "Test-TargetResource returned false"
             return $false
         }
     }
@@ -425,7 +426,8 @@ function Test-TargetResource
         }
         if ($missingMembers -eq $true)
         {
-            Write-Verbose -Message "Users from the MembersToInclude property are not included, returning false"
+            Write-Verbose -Message "Users from the MembersToInclude property are not included"
+            Write-Verbose -Message "Test-TargetResource returned false"
             return $false
         }
     }
@@ -442,12 +444,13 @@ function Test-TargetResource
         }
         if ($extraMembers -eq $true)
         {
-            Write-Verbose -Message "Users from the MembersToExclude property are included, returning false"
+            Write-Verbose -Message "Users from the MembersToExclude property are included"
+            Write-Verbose -Message "Test-TargetResource returned false"
             return $false
         }
     }
 
-    return Test-SPDscParameterState -CurrentValues $CurrentValues `
+    $result = Test-SPDscParameterState -CurrentValues $CurrentValues `
         -DesiredValues $PSBoundParameters `
         -ValuesToCheck @(
         "Name",
@@ -455,6 +458,10 @@ function Test-TargetResource
         "ADGroup",
         "Ensure"
     )
+
+    Write-Verbose -Message "Test-TargetResource returned $result"
+
+    return $result
 }
 
 Export-ModuleMember -Function *-TargetResource

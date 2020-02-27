@@ -276,6 +276,7 @@ function Test-TargetResource
                     }
                     if ($null -eq $serviceAppProxy)
                     {
+                        Write-Verbose -Message "Test-TargetResource returned false"
                         return $false
                     }
                 }
@@ -283,20 +284,25 @@ function Test-TargetResource
 
             if ($result -eq $false)
             {
+                Write-Verbose -Message "Test-TargetResource returned false"
                 return $false
             }
         }
 
-        return Test-SPDscParameterState -CurrentValues $CurrentValues `
+        $result = Test-SPDscParameterState -CurrentValues $CurrentValues `
             -DesiredValues $PSBoundParameters `
             -ValuesToCheck @("ApplicationPool", "Ensure")
     }
     else
     {
-        return Test-SPDscParameterState -CurrentValues $CurrentValues `
+        $result = Test-SPDscParameterState -CurrentValues $CurrentValues `
             -DesiredValues $PSBoundParameters `
             -ValuesToCheck @("Ensure")
     }
+
+    Write-Verbose -Message "Test-TargetResource returned $result"
+
+    return $result
 }
 
 Export-ModuleMember -Function *-TargetResource

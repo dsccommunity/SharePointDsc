@@ -320,29 +320,35 @@ function Test-TargetResource
         $null -eq $CurrentValues.Extranet -and
         $null -eq $CurrentValues.Custom)
     {
+        Write-Verbose -Message "Test-TargetResource returned false"
         return $false
     }
 
     if ([String]$CurrentValues.Intranet -ne $Intranet)
     {
+        Write-Verbose -Message "Test-TargetResource returned false"
         return $false
     }
 
     if ([String]$CurrentValues.Internet -ne $Internet)
     {
+        Write-Verbose -Message "Test-TargetResource returned false"
         return $false
     }
 
     if ([String]$CurrentValues.Extranet -ne $Extranet)
     {
+        Write-Verbose -Message "Test-TargetResource returned false"
         return $false
     }
 
     if ([String]$CurrentValues.Custom -ne $Custom)
     {
+        Write-Verbose -Message "Test-TargetResource returned false"
         return $false
     }
 
+    Write-Verbose -Message "Test-TargetResource returned true"
     return $true
 }
 

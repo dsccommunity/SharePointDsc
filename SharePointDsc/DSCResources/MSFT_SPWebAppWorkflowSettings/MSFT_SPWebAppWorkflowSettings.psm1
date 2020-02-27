@@ -146,8 +146,12 @@ function Test-TargetResource
 
     $relPath = "..\..\Modules\SharePointDsc.WebApplication\SPWebApplication.Workflow.psm1"
     Import-Module (Join-Path $PSScriptRoot $relPath -Resolve)
-    return Test-SPDscWebApplicationWorkflowConfig -CurrentSettings $CurrentValues `
+    $result = Test-SPDscWebApplicationWorkflowConfig -CurrentSettings $CurrentValues `
         -DesiredSettings $PSBoundParameters
+
+    Write-Verbose -Message "Test-TargetResource returned $result"
+
+    return $result
 }
 
 Export-ModuleMember -Function *-TargetResource

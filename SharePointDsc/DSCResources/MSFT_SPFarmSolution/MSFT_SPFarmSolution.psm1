@@ -428,9 +428,13 @@ function Test-TargetResource
         $valuesToCheck += "WebAppUrls"
     }
 
-    return Test-SPDscParameterState -CurrentValues $CurrentValues `
+    $result = Test-SPDscParameterState -CurrentValues $CurrentValues `
         -DesiredValues $PSBoundParameters `
         -ValuesToCheck $valuesToCheck
+
+    Write-Verbose -Message "Test-TargetResource returned $result"
+
+    return $result
 }
 
 function Wait-SPDscSolutionJob

@@ -534,11 +534,13 @@ function Test-TargetResource
                     -DifferenceObject $CurrentValues.CrawlConfigurationRules
                 if ($null -ne $compareObject)
                 {
+                    Write-Verbose -Message "Test-TargetResource returned false"
                     return $false
                 }
             }
             else
             {
+                Write-Verbose -Message "Test-TargetResource returned false"
                 return $false
             }
         }
@@ -547,11 +549,12 @@ function Test-TargetResource
         {
             if ($AuthenticationCredentials.UserName -ne $CurrentValues.AuthenticationCredentials)
             {
+                Write-Verbose -Message "Test-TargetResource returned false"
                 return $false
             }
         }
 
-        return Test-SPDscParameterState -CurrentValues $CurrentValues `
+        $result = Test-SPDscParameterState -CurrentValues $CurrentValues `
             -DesiredValues $PSBoundParameters `
             -ValuesToCheck @("Ensure",
             "AuthenticationType",
@@ -560,10 +563,14 @@ function Test-TargetResource
     }
     else
     {
-        return Test-SPDscParameterState -CurrentValues $CurrentValues `
+        $result = Test-SPDscParameterState -CurrentValues $CurrentValues `
             -DesiredValues $PSBoundParameters `
             -ValuesToCheck @("Ensure")
     }
+
+    Write-Verbose -Message "Test-TargetResource returned $result"
+
+    return $result
 }
 
 Export-ModuleMember -Function *-TargetResource

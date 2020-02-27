@@ -121,17 +121,23 @@ function Test-TargetResource
 
     if (($null -eq $CurrentValues.WebAppUrl) -or ($null -eq $CurrentValues.ServiceAppProxyGroup))
     {
-        return $false
-    }
-
-    if ($CurrentValues.ServiceAppProxyGroup -eq $ServiceAppProxyGroup)
-    {
-        return $true
+        $result = $false
     }
     else
     {
-        return $false
+        if ($CurrentValues.ServiceAppProxyGroup -eq $ServiceAppProxyGroup)
+        {
+            $result = $true
+        }
+        else
+        {
+            $result = $false
+        }
     }
+
+    Write-Verbose -Message "Test-TargetResource returned $result"
+
+    return $result
 }
 
 Export-ModuleMember -Function *-TargetResource

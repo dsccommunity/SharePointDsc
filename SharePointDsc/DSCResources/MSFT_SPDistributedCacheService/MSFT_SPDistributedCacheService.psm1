@@ -243,8 +243,8 @@ function Set-TargetResource
                         if ($ServerCount -ge $params.ServerProvisionOrder.Length)
                         {
                             throw ("The server $($env:COMPUTERNAME) was not found in the " + `
-                                   "ServerProvisionOrder array of Distributed Cache server(s).  " + `
-                                   "The server must be included in ServerProvisionOrder or Ensure equal to Absent.")
+                                    "ServerProvisionOrder array of Distributed Cache server(s).  " + `
+                                    "The server must be included in ServerProvisionOrder or Ensure equal to Absent.")
                         }
                         $currentServer = $params.ServerProvisionOrder[$serverCount]
                     }
@@ -525,11 +525,13 @@ function Test-TargetResource
         {
             if ($ServiceAccount -ne $CurrentValues.ServiceAccount)
             {
+                Write-Verbose -Message "Test-TargetResource returned false"
+
                 return $false
             }
         }
 
-        return Test-SPDscParameterState -CurrentValues $CurrentValues `
+        $result = Test-SPDscParameterState -CurrentValues $CurrentValues `
             -DesiredValues $PSBoundParameters `
             -ValuesToCheck @("Ensure", `
                 "CreateFirewallRules", `
@@ -537,10 +539,14 @@ function Test-TargetResource
     }
     else
     {
-        return Test-SPDscParameterState -CurrentValues $CurrentValues `
+        $result = Test-SPDscParameterState -CurrentValues $CurrentValues `
             -DesiredValues $PSBoundParameters `
             -ValuesToCheck @("Ensure")
     }
+
+    Write-Verbose -Message "Test-TargetResource returned $result"
+
+    return $result
 }
 
 Export-ModuleMember -Function *-TargetResource

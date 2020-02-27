@@ -318,10 +318,10 @@ function Set-TargetResource
                 $CrawlSetting -ne "CrawlEverything" -and # Phaseout Major Release
                 $CrawlSetting -ne "CrawlFirstOnly" -and # Phaseout Major Release
                 $CrawlSetting -ne $null # Phaseout Major Release
-                )
+            )
             {
                 throw ("Parameter CrawlSetting can only be set to CrawlVirtualServers or CrawlSites " + `
-                    "for SharePoint content sources")
+                        "for SharePoint content sources")
             }
         }
         "Website"
@@ -820,10 +820,10 @@ function Test-TargetResource
                 $CrawlSetting -ne "CrawlEverything" -and # Phaseout Major Release
                 $CrawlSetting -ne "CrawlFirstOnly" -and # Phaseout Major Release
                 $CrawlSetting -ne $null # Phaseout Major Release
-                )
+            )
             {
                 throw ("Parameter CrawlSetting can only be set to CrawlVirtualServers or CrawlSites " + `
-                    "for SharePoint content sources")
+                        "for SharePoint content sources")
             }
         }
         "Website"
@@ -876,9 +876,13 @@ function Test-TargetResource
 
     if ($Ensure -eq "Absent" -or $CurrentValues.Ensure -eq "Absent")
     {
-        return Test-SPDscParameterState -CurrentValues $CurrentValues `
+        $result = Test-SPDscParameterState -CurrentValues $CurrentValues `
             -DesiredValues $PSBoundParameters `
             -ValuesToCheck @("Ensure")
+
+        Write-Verbose -Message "Test-TargetResource returned $result"
+
+        return $result
     }
 
     $relativePath = "..\..\Modules\SharePointDsc.Search\SPSearchContentSource.Schedules.psm1"
@@ -893,6 +897,7 @@ function Test-TargetResource
             -DesiredSchedule $IncrementalSchedule
         if ($propertyTest -eq $false)
         {
+            Write-Verbose -Message "Test-TargetResource returned false"
             return $false
         }
     }
@@ -903,6 +908,7 @@ function Test-TargetResource
             -DesiredSchedule $FullSchedule
         if ($propertyTest -eq $false)
         {
+            Write-Verbose -Message "Test-TargetResource returned false"
             return $false
         }
     }
@@ -924,17 +930,23 @@ function Test-TargetResource
     {
         return $false
     }
+    else
+    {
+        $result = Test-SPDscParameterState -CurrentValues $CurrentValues `
+            -DesiredValues $PSBoundParameters `
+            -ValuesToCheck @("ContentSourceType",
+            "CrawlSetting",
+            "ContinuousCrawl",
+            "Priority",
+            "LimitPageDepth",
+            "LimitServerHops",
+            "LOBSystemSet",
+            "Ensure")
+    }
 
-    return Test-SPDscParameterState -CurrentValues $CurrentValues `
-        -DesiredValues $PSBoundParameters `
-        -ValuesToCheck @("ContentSourceType",
-        "CrawlSetting",
-        "ContinuousCrawl",
-        "Priority",
-        "LimitPageDepth",
-        "LimitServerHops",
-        "LOBSystemSet",
-        "Ensure")
+    Write-Verbose -Message "Test-TargetResource returned $result"
+
+    return $result
 }
 
 Export-ModuleMember -Function *-TargetResource

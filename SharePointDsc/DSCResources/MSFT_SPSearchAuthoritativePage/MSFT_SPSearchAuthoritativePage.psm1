@@ -283,7 +283,7 @@ function Test-TargetResource
     {
         if ($Action -eq "Authoratative")
         {
-            return Test-SPDscParameterState -CurrentValues $CurrentValues `
+            $result = Test-SPDscParameterState -CurrentValues $CurrentValues `
                 -DesiredValues $PSBoundParameters `
                 -ValuesToCheck @("ServiceAppName",
                 "Path",
@@ -293,7 +293,7 @@ function Test-TargetResource
         }
         else
         {
-            return Test-SPDscParameterState -CurrentValues $CurrentValues `
+            $result = Test-SPDscParameterState -CurrentValues $CurrentValues `
                 -DesiredValues $PSBoundParameters `
                 -ValuesToCheck @("ServiceAppName",
                 "Path",
@@ -303,12 +303,16 @@ function Test-TargetResource
     }
     else
     {
-        return Test-SPDscParameterState -CurrentValues $CurrentValues `
+        $result = Test-SPDscParameterState -CurrentValues $CurrentValues `
             -DesiredValues $PSBoundParameters `
             -ValuesToCheck @("ServiceAppName",
             "Action",
             "Ensure")
     }
+
+    Write-Verbose -Message "Test-TargetResource returned $result"
+
+    return $result
 }
 
 Export-ModuleMember -Function *-TargetResource

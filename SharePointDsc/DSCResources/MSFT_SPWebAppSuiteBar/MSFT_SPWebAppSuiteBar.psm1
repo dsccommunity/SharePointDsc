@@ -251,6 +251,7 @@ function Test-TargetResource
 
     if ($null -eq $CurrentValues.WebAppUrl)
     {
+        Write-Verbose -Message "Test-TargetResource returned false"
         return $false
     }
 
@@ -258,13 +259,13 @@ function Test-TargetResource
 
     if ($installedVersion.FileMajorPart -eq 15)
     {
-        return Test-SPDscParameterState -CurrentValues $CurrentValues `
+        $result = Test-SPDscParameterState -CurrentValues $CurrentValues `
             -DesiredValues $PSBoundParameters `
             -ValuesToCheck @("SuiteBarBrandingElementHtml");
     }
     else
     {
-        return Test-SPDscParameterState -CurrentValues $CurrentValues `
+        $result = Test-SPDscParameterState -CurrentValues $CurrentValues `
             -DesiredValues $PSBoundParameters `
             -ValuesToCheck @("SuiteBarBrandingElementHtml",
             "SuiteNavBrandingLogoNavigationUrl",
@@ -272,6 +273,10 @@ function Test-TargetResource
             "SuiteNavBrandingLogoUrl",
             "SuiteNavBrandingText")
     }
+
+    Write-Verbose -Message "Test-TargetResource returned $result"
+
+    return $result
 }
 
 Export-ModuleMember -Function *-TargetResource

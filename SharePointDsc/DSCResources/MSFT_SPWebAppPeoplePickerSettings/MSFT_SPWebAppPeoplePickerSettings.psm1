@@ -285,6 +285,7 @@ function Test-TargetResource
         }
         if ($null -eq $configuredDomain)
         {
+            Write-Verbose -Message "Test-TargetResource returned false"
             return $false
         }
     }
@@ -299,16 +300,21 @@ function Test-TargetResource
 
         if ($null -eq $specifiedDomain)
         {
+            Write-Verbose -Message "Test-TargetResource returned false"
             return $false
         }
     }
 
-    return Test-SPDscParameterState -CurrentValues $CurrentValues `
+    $result = Test-SPDscParameterState -CurrentValues $CurrentValues `
         -DesiredValues $PSBoundParameters `
         -ValuesToCheck @("ActiveDirectoryCustomFilter", `
             "ActiveDirectoryCustomQuery", `
             "ActiveDirectorySearchTimeout", `
             "OnlySearchWithinSiteCollection")
+
+    Write-Verbose -Message "Test-TargetResource returned $result"
+
+    return $result
 }
 
 Export-ModuleMember -Function *-TargetResource

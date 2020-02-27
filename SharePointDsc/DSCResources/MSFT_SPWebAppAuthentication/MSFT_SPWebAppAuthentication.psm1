@@ -501,6 +501,7 @@ function Test-TargetResource
             $null -eq $CurrentValues.Extranet -and `
             $null -eq $CurrentValues.Custom)
     {
+        Write-Verbose -Message "Test-TargetResource returned false"
         return $false
     }
 
@@ -511,6 +512,7 @@ function Test-TargetResource
 
         if ($result -eq $false)
         {
+            Write-Verbose -Message "Test-TargetResource returned false"
             return $false
         }
     }
@@ -527,6 +529,7 @@ function Test-TargetResource
 
         if ($result -eq $false)
         {
+            Write-Verbose -Message "Test-TargetResource returned false"
             return $false
         }
     }
@@ -543,6 +546,7 @@ function Test-TargetResource
 
         if ($result -eq $false)
         {
+            Write-Verbose -Message "Test-TargetResource returned false"
             return $false
         }
     }
@@ -559,6 +563,7 @@ function Test-TargetResource
 
         if ($result -eq $false)
         {
+            Write-Verbose -Message "Test-TargetResource returned false"
             return $false
         }
     }
@@ -567,6 +572,7 @@ function Test-TargetResource
     {
         if ($CurrentValues.ContainsKey("Custom") -eq $false)
         {
+            Write-Verbose -Message "Test-TargetResource returned false"
             throw "Specified zone Custom does not exist"
         }
 
@@ -575,10 +581,12 @@ function Test-TargetResource
 
         if ($result -eq $false)
         {
+            Write-Verbose -Message "Test-TargetResource returned false"
             return $false
         }
     }
 
+    Write-Verbose -Message "Test-TargetResource returned true"
     return $true
 }
 

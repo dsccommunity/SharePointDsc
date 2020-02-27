@@ -404,6 +404,7 @@ function Test-TargetResource
         Write-Verbose -Message ("Specified database server does not match the actual " + `
                 "database server. This resource cannot move the database " + `
                 "to a different SQL instance.")
+        Write-Verbose -Message "Test-TargetResource returned false"
         return $false
     }
 
@@ -413,12 +414,17 @@ function Test-TargetResource
     {
         Write-Verbose -Message ("Specified database name does not match the actual " + `
                 "database name. This resource cannot rename the database.")
+        Write-Verbose -Message "Test-TargetResource returned false"
         return $false
     }
 
-    return Test-SPDscParameterState -CurrentValues $CurrentValues `
+    $result = Test-SPDscParameterState -CurrentValues $CurrentValues `
         -DesiredValues $PSBoundParameters `
         -ValuesToCheck @("ApplicationPool", "Ensure")
+
+    Write-Verbose -Message "Test-TargetResource returned $result"
+
+    return $result
 }
 
 Export-ModuleMember -Function *-TargetResource

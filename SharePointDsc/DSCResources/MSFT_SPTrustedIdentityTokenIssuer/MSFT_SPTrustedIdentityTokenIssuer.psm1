@@ -428,7 +428,6 @@ function Test-TargetResource
             $PSBoundParameters.ContainsKey("SigningCertificateFilePath"))
     {
         throw ("Cannot use both parameters SigningCertificateThumbprint and SigningCertificateFilePath at the same time.")
-        return
     }
 
     if ($PSBoundParameters.ContainsKey("SigningCertificateThumbprint") -eq $false -and `
@@ -436,7 +435,6 @@ function Test-TargetResource
     {
         throw ("At least one of the following parameters must be specified: " + `
                 "SigningCertificateThumbprint, SigningCertificateFilePath.")
-        return
     }
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
@@ -444,9 +442,13 @@ function Test-TargetResource
     Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
     Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
 
-    return Test-SPDscParameterState -CurrentValues $CurrentValues `
+    $result = Test-SPDscParameterState -CurrentValues $CurrentValues `
         -DesiredValues $PSBoundParameters `
         -ValuesToCheck @("Ensure")
+
+    Write-Verbose -Message "Test-TargetResource returned $result"
+
+    return $result
 }
 
 Export-ModuleMember -Function *-TargetResource

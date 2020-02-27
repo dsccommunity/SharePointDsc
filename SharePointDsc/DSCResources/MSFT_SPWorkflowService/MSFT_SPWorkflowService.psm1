@@ -164,6 +164,7 @@ function Test-TargetResource
 
     if ($null -eq $CurrentValues.WorkflowHostUri)
     {
+        Write-Verbose -Message "Test-TargetResource returned false"
         return $false
     }
 
@@ -175,9 +176,13 @@ function Test-TargetResource
         $valuesToCheck += "ScopeName"
     }
 
-    return Test-SPDscParameterState -CurrentValues $CurrentValues `
+    $result = Test-SPDscParameterState -CurrentValues $CurrentValues `
         -DesiredValues $PSBoundParameters `
         -ValuesToCheck $valuesToCheck
+
+    Write-Verbose -Message "Test-TargetResource returned $result"
+
+    return $result
 }
 
 Export-ModuleMember -Function *-TargetResource

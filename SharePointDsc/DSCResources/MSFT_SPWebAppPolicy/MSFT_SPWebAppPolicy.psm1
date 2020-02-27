@@ -649,6 +649,7 @@ function Test-TargetResource
 
     if ($null -eq $CurrentValues.WebAppUrl)
     {
+        Write-Verbose -Message "Test-TargetResource returned false"
         return $false
     }
 
@@ -730,13 +731,16 @@ function Test-TargetResource
         {
             if ($differences.Count -eq 0)
             {
-                return $true
+                $result = $true
             }
             else
             {
                 Write-Verbose -Message "Differences in the policy were found, returning false"
-                return $false
+                $result = $false
             }
+
+            Write-Verbose -Message "Test-TargetResource returned $result"
+            return $result
         }
 
         # If only checking members to include only differences or missing records count as a fail
@@ -747,22 +751,27 @@ function Test-TargetResource
                 }).Count
             if ($diffcount -eq 0)
             {
-                return $true
+                $result = $true
             }
             else
             {
                 Write-Verbose -Message "Different or Missing policy was found, returning false"
-                return $false
+                $result = $false
             }
+
+            Write-Verbose -Message "Test-TargetResource returned $result"
+            return $result
         }
     }
 
-    # If checking members to exlclude, simply compare the list of user names to the current
+    # If checking members to exclude, simply compare the list of user names to the current
     # membership list
     if ($MembersToExclude)
     {
         Write-Verbose -Message ("MembersToExclude property is set - checking for permissions " + `
                 "that need to be removed")
+
+        $result = $true
         foreach ($member in $MembersToExclude)
         {
             if (($cacheAccounts.SuperUserAccount -eq $member.Username) -or `
@@ -775,11 +784,14 @@ function Test-TargetResource
             {
                 if ($policy.Username -eq $member.Username)
                 {
-                    return $false
+                    $result = $false
                 }
             }
         }
-        return $true
+
+        Write-Verbose -Message "Test-TargetResource returned $result"
+
+        return $result
     }
 }
 

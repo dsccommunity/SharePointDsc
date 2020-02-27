@@ -374,18 +374,23 @@ function Test-TargetResource
     {
         if (-not (Test-Path -Path $Location))
         {
-            Write-Verbose "Blob Cache Folder $Location does not exist"
+            Write-Verbose -Message "Blob Cache Folder $Location does not exist"
+            Write-Verbose -Message "Test-TargetResource returned false"
             return $false
         }
     }
 
-    return Test-SPDscParameterState -CurrentValues $CurrentValues `
+    $result = Test-SPDscParameterState -CurrentValues $CurrentValues `
         -DesiredValues $PSBoundParameters `
         -ValuesToCheck @("EnableCache",
         "Location",
         "MaxSizeInGB",
         "FileType",
         "MaxAgeInSeconds")
+
+    Write-Verbose -Message "Test-TargetResource returned $result"
+
+    return $result
 }
 
 Export-ModuleMember -Function *-TargetResource

@@ -526,41 +526,45 @@ function Test-TargetResource
     {
         if ($CurrentValues.ContainsKey("AllPermissions"))
         {
-            return Test-SPDscParameterState -CurrentValues $CurrentValues `
+            $result = Test-SPDscParameterState -CurrentValues $CurrentValues `
                 -DesiredValues $PSBoundParameters `
                 -ValuesToCheck @("AllPermissions")
         }
         else
         {
-            return $false
+            $result = $false
         }
     }
     else
     {
         if ($CurrentValues.ContainsKey("AllPermissions"))
         {
-            return $false
+            $result = $false
         }
         else
         {
+            $result = $true
             if ($null -ne (Compare-Object -ReferenceObject $ListPermissions `
                         -DifferenceObject $CurrentValues.ListPermissions))
             {
-                return $false
+                $result = $false
             }
             if ($null -ne (Compare-Object -ReferenceObject $SitePermissions `
                         -DifferenceObject $CurrentValues.SitePermissions))
             {
-                return $false
+                $result = $false
             }
             if ($null -ne (Compare-Object -ReferenceObject $PersonalPermissions `
                         -DifferenceObject $CurrentValues.PersonalPermissions))
             {
-                return $false
+                $result = $false
             }
-            return $true
         }
     }
+
+    Write-Verbose -Message "Test-TargetResource returned $result"
+
+    return $result
 }
 
 function Test-SPDscInput()

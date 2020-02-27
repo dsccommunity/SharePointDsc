@@ -778,6 +778,7 @@ function Test-TargetResource
             $null -eq $CurrentValues.MembersToInclude -and `
             $null -eq $CurrentValues.MembersToExclude)
     {
+        Write-Verbose -Message "Test-TargetResource returned false"
         return $false
     }
 
@@ -786,6 +787,7 @@ function Test-TargetResource
         Write-Verbose -Message "Processing Members parameter"
         if (-not $CurrentValues.Members)
         {
+            Write-Verbose -Message "Test-TargetResource returned false"
             return $false
         }
 
@@ -799,6 +801,7 @@ function Test-TargetResource
         else
         {
             Write-Verbose -Message "Shell Admins group does not match"
+            Write-Verbose -Message "Test-TargetResource returned false"
             return $false
         }
     }
@@ -808,6 +811,7 @@ function Test-TargetResource
         Write-Verbose -Message "Processing MembersToInclude parameter"
         if (-not $CurrentValues.Members)
         {
+            Write-Verbose -Message "Test-TargetResource returned false"
             return $false
         }
 
@@ -815,7 +819,8 @@ function Test-TargetResource
         {
             if (-not($CurrentValues.Members.Contains($member)))
             {
-                Write-Verbose -Message "$member is not a Shell Admin. Set result to false"
+                Write-Verbose -Message "$member is not a Shell Admin."
+                Write-Verbose -Message "Test-TargetResource returned false"
                 return $false
             }
             else
@@ -834,7 +839,8 @@ function Test-TargetResource
             {
                 if ($CurrentValues.Members.Contains($member))
                 {
-                    Write-Verbose -Message "$member is a Shell Admin. Set result to false"
+                    Write-Verbose -Message "$member is a Shell Admin."
+                    Write-Verbose -Message "Test-TargetResource returned false"
                     return $false
                 }
                 else
@@ -860,6 +866,7 @@ function Test-TargetResource
             {
                 if (-not $database.Members)
                 {
+                    Write-Verbose -Message "Test-TargetResource returned false"
                     return $false
                 }
 
@@ -873,6 +880,7 @@ function Test-TargetResource
                 else
                 {
                     Write-Verbose -Message "Shell Admins group does not match"
+                    Write-Verbose -Message "Test-TargetResource returned false"
                     return $false
                 }
             }
@@ -881,6 +889,7 @@ function Test-TargetResource
             {
                 if (-not $database.Members)
                 {
+                    Write-Verbose -Message "Test-TargetResource returned false"
                     return $false
                 }
 
@@ -888,7 +897,8 @@ function Test-TargetResource
                 {
                     if (-not($database.Members.Contains($member)))
                     {
-                        Write-Verbose -Message "$member is not a Shell Admin. Set result to false"
+                        Write-Verbose -Message "$member is not a Shell Admin."
+                        Write-Verbose -Message "Test-TargetResource returned false"
                         return $false
                     }
                     else
@@ -906,7 +916,8 @@ function Test-TargetResource
                     {
                         if ($database.Members.Contains($member))
                         {
-                            Write-Verbose -Message "$member is a Shell Admin. Set result to false"
+                            Write-Verbose -Message "$member is a Shell Admin."
+                            Write-Verbose -Message "Test-TargetResource returned false"
                             return $false
                         }
                         else
@@ -941,6 +952,7 @@ function Test-TargetResource
                     Write-Verbose -Message "Processing Members parameter"
                     if (-not $currentCDB.Members)
                     {
+                        Write-Verbose -Message "Test-TargetResource returned false"
                         return $false
                     }
 
@@ -954,6 +966,7 @@ function Test-TargetResource
                     else
                     {
                         Write-Verbose -Message "Shell Admins group does not match"
+                        Write-Verbose -Message "Test-TargetResource returned false"
                         return $false
                     }
                 }
@@ -963,6 +976,7 @@ function Test-TargetResource
                     Write-Verbose -Message "Processing MembersToInclude parameter"
                     if (-not $currentCDB.Members)
                     {
+                        Write-Verbose -Message "Test-TargetResource returned false"
                         return $false
                     }
 
@@ -970,7 +984,8 @@ function Test-TargetResource
                     {
                         if (-not($currentCDB.Members.Contains($member)))
                         {
-                            Write-Verbose -Message "$member is not a Shell Admin. Set result to false"
+                            Write-Verbose -Message "$member is not a Shell Admin."
+                            Write-Verbose -Message "Test-TargetResource returned false"
                             return $false
                         }
                         else
@@ -989,7 +1004,8 @@ function Test-TargetResource
                         {
                             if ($currentCDB.Members.Contains($member))
                             {
-                                Write-Verbose -Message "$member is a Shell Admin. Set result to false"
+                                Write-Verbose -Message "$member is a Shell Admin."
+                                Write-Verbose -Message "Test-TargetResource returned false"
                                 return $false
                             }
                             else
@@ -1007,6 +1023,7 @@ function Test-TargetResource
         }
     }
 
+    Write-Verbose -Message "Test-TargetResource returned true"
     return $true
 }
 

@@ -292,6 +292,8 @@ function Test-TargetResource
 
     if ($null -eq $CurrentValues.SPLogLevelSetting)
     {
+        Write-Verbose -Message "Test-TargetResource returned false"
+
         return $false
     }
 
@@ -312,10 +314,14 @@ function Test-TargetResource
 
     if ($mismatchedSettingFound)
     {
-        return $false
+        $result = $false
     }
     else
     {
-        return $true
+        $result = $true
     }
+
+    Write-Verbose -Message "Test-TargetResource returned $result"
+
+    return $result
 }

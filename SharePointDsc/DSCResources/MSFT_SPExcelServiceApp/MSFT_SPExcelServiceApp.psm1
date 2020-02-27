@@ -645,6 +645,9 @@ function Test-TargetResource
         }
         if ($locationCheck -contains $false)
         {
+
+            Write-Verbose -Message "Test-TargetResource returned false"
+
             return $false
         }
 
@@ -665,15 +668,21 @@ function Test-TargetResource
         }
         if ($locationCheck -contains $false)
         {
+            Write-Verbose -Message "Test-TargetResource returned false"
+
             return $false
         }
 
         # at this point if no other value has been returned, all desired entires exist and are
         # correct, and no existing entries exist that are not in desired state, so return true
+        Write-Verbose -Message "Test-TargetResource returned true"
+
         return $true
     }
     else
     {
+        Write-Verbose -Message "Test-TargetResource returned $mainCheck"
+
         return $mainCheck
     }
 }

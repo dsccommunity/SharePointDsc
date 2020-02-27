@@ -391,6 +391,7 @@ function Test-TargetResource
 
     if ($CurrentValues.Ensure -ne $Ensure)
     {
+        Write-Verbose -Message "Test-TargetResource returned false"
         return $false
     }
 
@@ -400,6 +401,7 @@ function Test-TargetResource
 
         if (-not $CurrentValues.ServiceAppProxies)
         {
+            Write-Verbose -Message "Test-TargetResource returned false"
             return $false
         }
 
@@ -413,6 +415,7 @@ function Test-TargetResource
         else
         {
             Write-Verbose -Message "ServiceAppProxies do not match"
+            Write-Verbose -Message "Test-TargetResource returned false"
             return $false
         }
     }
@@ -423,6 +426,7 @@ function Test-TargetResource
 
         if (-not $CurrentValues.ServiceAppProxies)
         {
+            Write-Verbose -Message "Test-TargetResource returned false"
             return $false
         }
 
@@ -436,6 +440,7 @@ function Test-TargetResource
         elseif ($differences.sideindicator -contains "=>")
         {
             Write-Verbose -Message "ServiceAppProxiesToInclude does not match"
+            Write-Verbose -Message "Test-TargetResource returned false"
             return $false
         }
     }
@@ -446,6 +451,7 @@ function Test-TargetResource
 
         if (-not $CurrentValues.ServiceAppProxies)
         {
+            Write-Verbose -Message "Test-TargetResource returned true"
             return $true
         }
 
@@ -455,14 +461,17 @@ function Test-TargetResource
 
         if ($null -eq $differences)
         {
+            Write-Verbose -Message "Test-TargetResource returned false"
             return $false
         }
         elseif ($differences.sideindicator -contains "==")
         {
             Write-Verbose -Message "ServiceAppProxiesToExclude does not match"
+            Write-Verbose -Message "Test-TargetResource returned false"
             return $false
         }
     }
 
+    Write-Verbose -Message "Test-TargetResource returned true"
     return $true
 }

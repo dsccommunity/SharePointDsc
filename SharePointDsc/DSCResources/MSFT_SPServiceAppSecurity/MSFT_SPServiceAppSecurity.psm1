@@ -532,6 +532,7 @@ function Test-TargetResource
 
     if ([System.String]::IsNullOrEmpty($CurrentValues.ServiceAppName) -eq $true)
     {
+        Write-Verbose -Message "Test-TargetResource returned false"
         return $false
     }
 
@@ -654,6 +655,8 @@ function Test-TargetResource
 
         return $result
     }
+
+    Write-Verbose -Message "Test-TargetResource returned $result"
 
     return $result
 }
