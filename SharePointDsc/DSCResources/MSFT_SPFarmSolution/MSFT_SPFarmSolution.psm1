@@ -345,10 +345,16 @@ function Set-TargetResource
         }
     }
 
-    Wait-SPDscSolutionJob -SolutionName $Name -InstallAccount $InstallAccount
-
-    if ($Ensure -eq "Absent")
+    if ($Ensure -eq "Present")
     {
+        Write-Verbose -Message "Waiting for farm solution '$Name' job"
+        Wait-SPDscSolutionJob -SolutionName $Name -InstallAccount $InstallAccount
+    }
+
+    if ($Ensure -eq "Absent" -and $CurrentValues.Ensure -ne "Absent")
+    {
+        Write-Verbose -Message "Removing farm solution '$Name'"
+
         $result = Invoke-SPDscCommand -Credential $InstallAccount `
             -Arguments $PSBoundParameters `
             -ScriptBlock {
