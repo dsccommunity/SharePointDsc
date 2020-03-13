@@ -405,20 +405,22 @@ function Test-TargetResource
     if ($Ensure -eq "Present")
     {
         $result = Test-SPDscParameterState -CurrentValues $CurrentValues `
+            -Source $($MyInvocation.MyCommand.Source) `
             -DesiredValues $PSBoundParameters `
             -ValuesToCheck @("ApplicationPool",
-            "MinimumTimeBetweenEwsSyncSubscriptionSearches",
-            "MinimumTimeBetweenProviderRefreshes",
-            "MinimumTimeBetweenSearchQueries",
-            "Name",
-            "NumberOfSubscriptionSyncsPerEwsSyncRun",
-            "NumberOfUsersEwsSyncWillProcessAtOnce",
-            "NumberOfUsersPerEwsSyncBatch",
-            "Ensure")
+                "MinimumTimeBetweenEwsSyncSubscriptionSearches",
+                "MinimumTimeBetweenProviderRefreshes",
+                "MinimumTimeBetweenSearchQueries",
+                "Name",
+                "NumberOfSubscriptionSyncsPerEwsSyncRun",
+                "NumberOfUsersEwsSyncWillProcessAtOnce",
+                "NumberOfUsersPerEwsSyncBatch",
+                "Ensure")
     }
     else
     {
         $result = Test-SPDscParameterState -CurrentValues $CurrentValues `
+            -Source $($MyInvocation.MyCommand.Source) `
             -DesiredValues $PSBoundParameters `
             -ValuesToCheck @("Ensure")
     }

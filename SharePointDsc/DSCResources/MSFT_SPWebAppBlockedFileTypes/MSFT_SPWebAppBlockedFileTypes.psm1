@@ -148,6 +148,7 @@ function Test-TargetResource
     Import-Module -Name (Join-Path -Path $PSScriptRoot -ChildPath $modulePath -Resolve)
 
     $result = Test-SPDscWebApplicationBlockedFileTypeConfig -CurrentSettings $CurrentValues `
+        -Source $($MyInvocation.MyCommand.Source) `
         -DesiredSettings $PSBoundParameters
 
     Write-Verbose -Message "Test-TargetResource returned $result"

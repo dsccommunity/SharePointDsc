@@ -167,6 +167,14 @@ function Test-TargetResource
 
     $result = ($CurrentValues.ManagedAccount -eq $ManagedAccount)
 
+    if ($result -eq $false)
+    {
+        $message = ("Specfied ManagedAccount {$($CurrentValues.ManagedAccount)} is not in the " + `
+                    "desired state {$ManagedAccount}.")
+        Write-Verbose -Message $message
+        Add-SPDscEvent -Message $message -EntryType 'Error' -EventID 1 -Source $MyInvocation.MyCommand.Source
+    }
+
     Write-Verbose -Message "Test-TargetResource returned $result"
 
     return $result

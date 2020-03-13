@@ -260,6 +260,7 @@ function Test-TargetResource
     if ($installedVersion.FileMajorPart -eq 15)
     {
         $result = Test-SPDscParameterState -CurrentValues $CurrentValues `
+            -Source $($MyInvocation.MyCommand.Source) `
             -DesiredValues $PSBoundParameters `
             -ValuesToCheck @("SuiteBarBrandingElementHtml");
     }
@@ -268,10 +269,10 @@ function Test-TargetResource
         $result = Test-SPDscParameterState -CurrentValues $CurrentValues `
             -DesiredValues $PSBoundParameters `
             -ValuesToCheck @("SuiteBarBrandingElementHtml",
-            "SuiteNavBrandingLogoNavigationUrl",
-            "SuiteNavBrandingLogoTitle",
-            "SuiteNavBrandingLogoUrl",
-            "SuiteNavBrandingText")
+                "SuiteNavBrandingLogoNavigationUrl",
+                "SuiteNavBrandingLogoTitle",
+                "SuiteNavBrandingLogoUrl",
+                "SuiteNavBrandingText")
     }
 
     Write-Verbose -Message "Test-TargetResource returned $result"

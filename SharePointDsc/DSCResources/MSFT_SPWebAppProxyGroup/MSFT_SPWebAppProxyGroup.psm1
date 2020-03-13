@@ -29,7 +29,7 @@ function Get-TargetResource
         -ScriptBlock {
         $params = $args[0]
 
-        $WebApp = get-spwebapplication $params.WebAppUrl
+        $WebApp = Get-SPWebApplication $params.WebAppUrl
         if (!$WebApp)
         {
             return  @{
@@ -121,6 +121,9 @@ function Test-TargetResource
 
     if (($null -eq $CurrentValues.WebAppUrl) -or ($null -eq $CurrentValues.ServiceAppProxyGroup))
     {
+        $message = "Specified web application {$WebAppUrl} does not exist."
+        Add-SPDscEvent -Message $message -EntryType 'Error' -EventID 1 -Source $MyInvocation.MyCommand.Source
+
         $result = $false
     }
     else
@@ -131,6 +134,11 @@ function Test-TargetResource
         }
         else
         {
+            $message = ("Current ServiceAppProxyGroup {$($CurrentValues.ServiceAppProxyGroup)} " + `
+                        "is not in the desired state {$ServiceAppProxyGroup}.")
+            Write-Verbose -Message $message
+            Add-SPDscEvent -Message $message -EntryType 'Error' -EventID 1 -Source $MyInvocation.MyCommand.Source
+
             $result = $false
         }
     }

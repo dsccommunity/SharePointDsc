@@ -682,11 +682,16 @@ function Test-TargetResource
         if ($UpdateProxyGroup -eq $true -and `
                 $CurrentValues.UpdateProxyGroup -eq $true)
         {
+            $message = "ProxyGroup fix is not implemented"
+            Write-Verbose -Message $message
+            Add-SPDscEvent -Message $message -EntryType 'Error' -EventID 1 -Source $MyInvocation.MyCommand.Source
+
             $result = $false
         }
         else
         {
             $result = Test-SPDscParameterState -CurrentValues $CurrentValues `
+                -Source $($MyInvocation.MyCommand.Source) `
                 -DesiredValues $PSBoundParameters `
                 -ValuesToCheck @("Name",
                 "EnableNetBIOS",
@@ -698,6 +703,7 @@ function Test-TargetResource
     else
     {
         $result = Test-SPDscParameterState -CurrentValues $CurrentValues `
+            -Source $($MyInvocation.MyCommand.Source) `
             -DesiredValues $PSBoundParameters `
             -ValuesToCheck @("Name", "Ensure")
     }

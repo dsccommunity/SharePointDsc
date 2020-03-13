@@ -527,6 +527,7 @@ function Test-TargetResource
         if ($CurrentValues.ContainsKey("AllPermissions"))
         {
             $result = Test-SPDscParameterState -CurrentValues $CurrentValues `
+                -Source $($MyInvocation.MyCommand.Source) `
                 -DesiredValues $PSBoundParameters `
                 -ValuesToCheck @("AllPermissions")
         }
@@ -539,26 +540,46 @@ function Test-TargetResource
     {
         if ($CurrentValues.ContainsKey("AllPermissions"))
         {
+            $source = $MyInvocation.MyCommand.Source
+            $EventMessage = "<SPDscEvent>`r`n"
+            $EventMessage += "    <ConfigurationDrift Source=`"$source`">`r`n"
+            $EventMessage += "        <ParametersNotInDesiredState>`r`n"
+            $EventMessage += "            <Param Name=`"AllPermissions`"> AllPermissions is configured, but Desired State has individual permissions specified.</Param>`r`n"
+            $EventMessage += "        </ParametersNotInDesiredState>`r`n"
+            $EventMessage += "        <DesiredState>`r`n"
+            $EventMessage += "            <WebAppUrl>$WebAppUrl</WebAppUrl>`r`n"
+            if ($PSBoundParameters.ContainsKey('ListPermissions'))
+            {
+                $EventMessage += "            <ListPermissions>$($ListPermissions -join ", ")</ListPermissions>`r`n"
+
+            }
+            if ($PSBoundParameters.ContainsKey('SitePermissions'))
+            {
+                $EventMessage += "            <SitePermissions>$($SitePermissions -join ", ")</SitePermissions>`r`n"
+
+            }
+            if ($PSBoundParameters.ContainsKey('PersonalPermissions'))
+            {
+                $EventMessage += "            <PersonalPermissions>$($PersonalPermissions -join ", ")</PersonalPermissions>`r`n"
+
+            }
+            $EventMessage += "        </DesiredState>`r`n"
+            $EventMessage += "    </ConfigurationDrift>`r`n"
+            $EventMessage += "</SPDscEvent>"
+
+            Add-SPDscEvent -Message $EventMessage -EntryType 'Error' -EventID 1 -Source $source
+
             $result = $false
         }
         else
         {
-            $result = $true
-            if ($null -ne (Compare-Object -ReferenceObject $ListPermissions `
-                        -DifferenceObject $CurrentValues.ListPermissions))
-            {
-                $result = $false
-            }
-            if ($null -ne (Compare-Object -ReferenceObject $SitePermissions `
-                        -DifferenceObject $CurrentValues.SitePermissions))
-            {
-                $result = $false
-            }
-            if ($null -ne (Compare-Object -ReferenceObject $PersonalPermissions `
-                        -DifferenceObject $CurrentValues.PersonalPermissions))
-            {
-                $result = $false
-            }
+            $result = Test-SPDscParameterState -CurrentValues $CurrentValues `
+                -Source $($MyInvocation.MyCommand.Source) `
+                -DesiredValues $PSBoundParameters `
+                -ValuesToCheck @("ListPermissions",
+                                "SitePermissions",
+                                "PersonalPermissions"
+                )
         }
     }
 

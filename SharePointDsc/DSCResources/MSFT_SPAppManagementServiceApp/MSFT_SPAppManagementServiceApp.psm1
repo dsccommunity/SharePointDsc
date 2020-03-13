@@ -299,14 +299,19 @@ function Test-TargetResource
 
     if ($CurrentValues.ProxyName -eq "")
     {
-        return $false
+        $message = "The specified ProxyName is empty"
+        Write-Verbose -Message $message
+        Add-SPDscEvent -Message $message -EntryType 'Error' -EventID 1 -Source $MyInvocation.MyCommand.Source
+        $result = $false
     }
-
-    $result = Test-SPDscParameterState -CurrentValues $CurrentValues `
-        -DesiredValues $PSBoundParameters `
-        -ValuesToCheck @("ApplicationPool", `
-            "Ensure")
-
+    else
+    {
+        $result = Test-SPDscParameterState -CurrentValues $CurrentValues `
+            -Source $($MyInvocation.MyCommand.Source) `
+            -DesiredValues $PSBoundParameters `
+            -ValuesToCheck @("ApplicationPool", `
+                "Ensure")
+    }
 
     Write-Verbose -Message "Test-TargetResource returned $result"
 

@@ -448,20 +448,21 @@ function Test-TargetResource
     Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
 
     $result = Test-SPDscParameterState -CurrentValues $CurrentValues `
+        -Source $($MyInvocation.MyCommand.Source) `
         -DesiredValues $PSBoundParameters `
         -ValuesToCheck @("Name",
-        "PropertyType",
-        "Ensure",
-        "HasMultipleValues",
-        "Retrievable",
-        "Searchable",
-        "Refinable",
-        "Searchable",
-        "NoWordBreaker",
-        "IncludeAllCrawledProperties",
-        "Aliases",
-        "Sortable",
-        "SafeForAnonymous")
+            "PropertyType",
+            "Ensure",
+            "HasMultipleValues",
+            "Retrievable",
+            "Searchable",
+            "Refinable",
+            "Searchable",
+            "NoWordBreaker",
+            "IncludeAllCrawledProperties",
+            "Aliases",
+            "Sortable",
+            "SafeForAnonymous")
 
     Write-Verbose -Message "Test-TargetResource returned $result"
 

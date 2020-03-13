@@ -185,12 +185,13 @@ function Test-TargetResource
     Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
 
     $result = Test-SPDscParameterState -CurrentValues $CurrentValues `
+        -Source $($MyInvocation.MyCommand.Source) `
         -DesiredValues $PSBoundParameters `
         -ValuesToCheck @(
-        "ProjectProfessionalMinBuildNumber"
-        "ServerCurrency",
-        "EnforceServerCurrency"
-    )
+            "ProjectProfessionalMinBuildNumber"
+            "ServerCurrency",
+            "EnforceServerCurrency"
+        )
 
     Write-Verbose -Message "Test-TargetResource returned $result"
 

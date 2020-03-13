@@ -227,15 +227,17 @@ function Test-TargetResource
     if ($Ensure -eq "Present")
     {
         $result = Test-SPDscParameterState -CurrentValues $CurrentValues `
+            -Source $($MyInvocation.MyCommand.Source) `
             -DesiredValues $PSBoundParameters `
             -ValuesToCheck @("Name",
-            "DisplayName",
-            "DisplayOrder",
-            "Ensure")
+                "DisplayName",
+                "DisplayOrder",
+                "Ensure")
     }
     else
     {
         $result = Test-SPDscParameterState -CurrentValues $CurrentValues `
+            -Source $($MyInvocation.MyCommand.Source) `
             -DesiredValues $PSBoundParameters `
             -ValuesToCheck @("Ensure")
     }

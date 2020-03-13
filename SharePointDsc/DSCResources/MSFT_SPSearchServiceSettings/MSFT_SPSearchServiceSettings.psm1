@@ -214,7 +214,7 @@ function Test-TargetResource
 
     if ($PSBoundParameters.ContainsKey("PerformanceLevel") -eq $false -and
         $PSBoundParameters.ContainsKey("ContactEmail") -eq $false -and `
-            $PSBoundParameters.ContainsKey("WindowsServiceAccount") -eq $false)
+        $PSBoundParameters.ContainsKey("WindowsServiceAccount") -eq $false)
     {
         Write-Verbose -Message ("You have to specify at least one of the following parameters: " + `
                 "PerformanceLevel, ContactEmail or WindowsServiceAccount")
@@ -233,13 +233,18 @@ function Test-TargetResource
 
         if ($desired -ne $current)
         {
-            Write-Verbose -Message "Windows service account is different, returning false"
+            $message = ("Specified Windows service account is not in the desired state" + `
+                        "Actual: $current Desired: $desired")
+            Write-Verbose -Message $message
+            Add-SPDscEvent -Message $message -EntryType 'Error' -EventID 1 -Source $MyInvocation.MyCommand.Source
+
             Write-Verbose -Message "Desired: $desired. Current: $current."
             return $false
         }
     }
 
     $result = Test-SPDscParameterState -CurrentValues $CurrentValues `
+        -Source $($MyInvocation.MyCommand.Source) `
         -DesiredValues $PSBoundParameters `
         -ValuesToCheck @("PerformanceLevel",
         "ContactEmail")

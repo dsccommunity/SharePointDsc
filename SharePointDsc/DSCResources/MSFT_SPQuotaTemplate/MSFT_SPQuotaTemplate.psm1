@@ -330,11 +330,17 @@ function Test-TargetResource
         {
             if ($CurrentValues.Ensure -eq "Absent")
             {
+                $message = "Ensure {$($CurrentValues.Ensure)} does not match the desired state {$Ensure}"
+                Write-Verbose -Message $message
+                Add-SPDscEvent -Message $message -EntryType 'Error' -EventID 1 -Source $MyInvocation.MyCommand.Source
+
                 $result = $false
             }
             else
             {
-                $result = Test-SPDscParameterState -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters
+                $result = Test-SPDscParameterState -CurrentValues $CurrentValues `
+                                                   -Source $($MyInvocation.MyCommand.Source) `
+                                                   -DesiredValues $PSBoundParameters
             }
         }
         "Absent"
@@ -352,6 +358,10 @@ function Test-TargetResource
             if ($CurrentValues.Ensure -eq "Present")
             {
                 # Error occured in Get method or template exists, which is not supposed to be. Return false
+                $message = "Ensure {$($CurrentValues.Ensure)} does not match the desired state {$Ensure}"
+                Write-Verbose -Message $message
+                Add-SPDscEvent -Message $message -EntryType 'Error' -EventID 1 -Source $MyInvocation.MyCommand.Source
+
                 $result = $false
             }
             else

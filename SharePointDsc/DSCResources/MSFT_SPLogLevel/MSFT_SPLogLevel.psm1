@@ -292,12 +292,16 @@ function Test-TargetResource
 
     if ($null -eq $CurrentValues.SPLogLevelSetting)
     {
-        Write-Verbose -Message "Test-TargetResource returned false"
+        $message = "Error retrieving SPLogLevelSetting for $Name"
+        Write-Verbose -Message $message
+        Add-SPDscEvent -Message $message -EntryType 'Error' -EventID 1 -Source $MyInvocation.MyCommand.Source
 
+        Write-Verbose -Message "Test-TargetResource returned false"
         return $false
     }
 
     $mismatchedSettingFound = $false
+    $mismatchedSettings = @()
 
     foreach ($DesiredSetting in $SPLogLevelSetting)
     {
@@ -307,6 +311,11 @@ function Test-TargetResource
 
         if (($null -ne $DesiredSetting.TraceLevel -and $CurrentSetting.TraceLevel -ne $DesiredSetting.TraceLevel) -or ($null -ne $DesiredSetting.EventLevel -and $CurrentSetting.EventLevel -ne $DesiredSetting.EventLevel))
         {
+            $mismatchedSettings += @{
+                Name = $Name
+                DesiredSetting = $DesiredSetting
+                $CurrentSetting = $CurrentSetting
+            }
             Write-Verbose -Message "SP Log Level setting for $($DesiredSetting.Area):$($DesiredSetting.Name) is not in the desired state"
             $mismatchedSettingFound = $true
         }
@@ -314,6 +323,27 @@ function Test-TargetResource
 
     if ($mismatchedSettingFound)
     {
+        $EventMessage = "<SPDscEvent>`r`n"
+        $EventMessage += "    <ConfigurationDrift Source=`"$($MyInvocation.MyCommand.Source)`">`r`n"
+
+        $EventMessage += "        <ParametersNotInDesiredState>`r`n"
+        $driftedValue = ''
+        foreach ($setting in $mismatchedSettings)
+        {
+            $EventMessage += "            <LogLevel Area=`"$($setting.CurrentSetting.Area)`" Name=`"$($setting.CurrentSetting.Area)`"> TraceLevel: " + $setting.CurrentSetting.TraceLevel + " - EventLevel: " + $setting.CurrentSetting.EventLevel + "</Param>`r`n"
+        }
+        $EventMessage += "        </ParametersNotInDesiredState>`r`n"
+        $EventMessage += "    </ConfigurationDrift>`r`n"
+        $EventMessage += "    <DesiredValues>`r`n"
+        foreach ($setting in $mismatchedSettings)
+        {
+            $EventMessage += "            <LogLevel Area=`"$($setting.DesiredSetting.Area)`" Name=`"$($setting.DesiredSetting.Area)`"> TraceLevel: " + $setting.DesiredSetting.TraceLevel + " - EventLevel: " + $setting.DesiredSetting.EventLevel + "</Param>`r`n"
+        }
+        $EventMessage += "    }"
+        $EventMessage += "    </DesiredValues>`r`n"
+        $EventMessage += "</SPDscEvent>"
+        Add-SPDscEvent -Message $EventMessage -EntryType 'Error' -EventID 1 -Source $MyInvocation.MyCommand.Source
+
         $result = $false
     }
     else

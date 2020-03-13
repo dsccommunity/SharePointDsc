@@ -5,6 +5,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- SharePointDsc
+  - Added verbose logging of the test results in the Test method
+  - Added function to create SharePointDsc event log and add log entries
+  - Added the logging of all test results to the new SharePointDsc event log
+
 ### Fixed
 
 - SPFarmSolution

@@ -525,13 +525,19 @@ function Test-TargetResource
         {
             if ($ServiceAccount -ne $CurrentValues.ServiceAccount)
             {
-                Write-Verbose -Message "Test-TargetResource returned false"
+                $message = ("The parameter ServiceAccount is not in the desired "+ `
+                            "state. Actual: $($CurrentValues.ServiceAccount), " + `
+                            "Desired: $ServiceAccount")
+                Write-Verbose -Message $message
+                Add-SPDscEvent -Message $message -EntryType 'Error' -EventID 1 -Source $MyInvocation.MyCommand.Source
 
+                Write-Verbose -Message "Test-TargetResource returned false"
                 return $false
             }
         }
 
         $result = Test-SPDscParameterState -CurrentValues $CurrentValues `
+            -Source $($MyInvocation.MyCommand.Source) `
             -DesiredValues $PSBoundParameters `
             -ValuesToCheck @("Ensure", `
                 "CreateFirewallRules", `
@@ -540,6 +546,7 @@ function Test-TargetResource
     else
     {
         $result = Test-SPDscParameterState -CurrentValues $CurrentValues `
+            -Source $($MyInvocation.MyCommand.Source) `
             -DesiredValues $PSBoundParameters `
             -ValuesToCheck @("Ensure")
     }

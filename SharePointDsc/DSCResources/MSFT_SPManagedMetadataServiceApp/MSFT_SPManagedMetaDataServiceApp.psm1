@@ -772,6 +772,7 @@ function Test-TargetResource
         "ProxyName")
 
     $result = Test-SPDscParameterState -CurrentValues $CurrentValues `
+        -Source $($MyInvocation.MyCommand.Source) `
         -DesiredValues $PSBoundParameters `
         -ValuesToCheck $valuesToCheck
 

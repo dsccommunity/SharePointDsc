@@ -194,6 +194,12 @@ public class SPServiceContext {
                     return $spServiceApp
                 }
 
+                Mock -CommandName Get-SPAccessServicesDatabaseServer -MockWith {
+                    return @{
+                        ServerName = $testParams.DatabaseServer
+                    }
+                }
+
                 It "Should return present from the Get method" {
                     (Get-TargetResource @testParams).Ensure | Should Be "Present"
                 }

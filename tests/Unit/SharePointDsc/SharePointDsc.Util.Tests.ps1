@@ -148,6 +148,7 @@ try
                 It "Should return true for two identical tables" {
                     $desired = @{ Example = "test" }
                     Test-SPDscParameterState -CurrentValues $desired `
+                        -Source 'SharePointDsc.Util' `
                         -DesiredValues $desired | Should Be $true
                 }
 
@@ -155,6 +156,7 @@ try
                     $current = @{ Example = "something" }
                     $desired = @{ Example = "test" }
                     Test-SPDscParameterState -CurrentValues $current `
+                        -Source 'SharePointDsc.Util' `
                         -DesiredValues $desired | Should Be $false
                 }
 
@@ -162,6 +164,7 @@ try
                     $current = @{ }
                     $desired = @{ Example = "test" }
                     Test-SPDscParameterState -CurrentValues $current `
+                        -Source 'SharePointDsc.Util' `
                         -DesiredValues $desired | Should Be $false
                 }
 
@@ -169,6 +172,7 @@ try
                     $current = @{ Example = "test"; SecondExample = "true" }
                     $desired = @{ Example = "test"; SecondExample = "false" }
                     Test-SPDscParameterState -CurrentValues $current `
+                        -Source 'SharePointDsc.Util' `
                         -DesiredValues $desired `
                         -ValuesToCheck @("Example") | Should Be $true
                 }
@@ -177,6 +181,7 @@ try
                     $current = @{ Example = "test"; SecondExample = "true" }
                     $desired = @{ Example = "test"; SecondExample = "false" }
                     Test-SPDscParameterState -CurrentValues $current `
+                        -Source 'SharePointDsc.Util' `
                         -DesiredValues $desired `
                         -ValuesToCheck @("SecondExample") | Should Be $false
                 }
@@ -185,6 +190,7 @@ try
                     $current = @{ }
                     $desired = @{ Example = "test"; SecondExample = "false" }
                     Test-SPDscParameterState -CurrentValues $current `
+                        -Source 'SharePointDsc.Util' `
                         -DesiredValues $desired | Should Be $false
                 }
             }

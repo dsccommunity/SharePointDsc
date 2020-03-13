@@ -164,6 +164,10 @@ function Test-TargetResource
 
     if ($null -eq $CurrentValues.WorkflowHostUri)
     {
+        $message = "WorkflowHostUri is not configured"
+        Write-Verbose -Message $message
+        Add-SPDscEvent -Message $message -EntryType 'Error' -EventID 1 -Source $MyInvocation.MyCommand.Source
+
         Write-Verbose -Message "Test-TargetResource returned false"
         return $false
     }
@@ -177,6 +181,7 @@ function Test-TargetResource
     }
 
     $result = Test-SPDscParameterState -CurrentValues $CurrentValues `
+        -Source $($MyInvocation.MyCommand.Source) `
         -DesiredValues $PSBoundParameters `
         -ValuesToCheck $valuesToCheck
 

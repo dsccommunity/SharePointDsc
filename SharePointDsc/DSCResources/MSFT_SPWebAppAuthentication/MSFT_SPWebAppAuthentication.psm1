@@ -508,7 +508,8 @@ function Test-TargetResource
     if ($PSBoundParameters.ContainsKey("Default"))
     {
         $result = Test-ZoneConfiguration -DesiredConfig $Default `
-            -CurrentConfig $CurrentValues.Default
+            -CurrentConfig $CurrentValues.Default `
+            -ZoneName "Default"
 
         if ($result -eq $false)
         {
@@ -525,7 +526,8 @@ function Test-TargetResource
         }
 
         $result = Test-ZoneConfiguration -DesiredConfig $Intranet `
-            -CurrentConfig $CurrentValues.Intranet
+            -CurrentConfig $CurrentValues.Intranet `
+            -ZoneName "Intranet"
 
         if ($result -eq $false)
         {
@@ -542,7 +544,8 @@ function Test-TargetResource
         }
 
         $result = Test-ZoneConfiguration -DesiredConfig $Internet `
-            -CurrentConfig $CurrentValues.Internet
+            -CurrentConfig $CurrentValues.Internet `
+            -ZoneName "Internet"
 
         if ($result -eq $false)
         {
@@ -559,7 +562,8 @@ function Test-TargetResource
         }
 
         $result = Test-ZoneConfiguration -DesiredConfig $Extranet `
-            -CurrentConfig $CurrentValues.Extranet
+            -CurrentConfig $CurrentValues.Extranet `
+            -ZoneName "Extranet"
 
         if ($result -eq $false)
         {
@@ -577,7 +581,8 @@ function Test-TargetResource
         }
 
         $result = Test-ZoneConfiguration -DesiredConfig $Custom `
-            -CurrentConfig $CurrentValues.Custom
+            -CurrentConfig $CurrentValues.Custom `
+            -ZoneName "Custom"
 
         if ($result -eq $false)
         {
@@ -856,7 +861,11 @@ function Test-ZoneConfiguration()
 
         [Parameter(Mandatory = $true)]
         [System.Collections.Hashtable[]]
-        $CurrentConfig
+        $CurrentConfig,
+
+        [Parameter()]
+        [System.String]
+        $ZoneName
     )
 
     # Testing specified configuration against configured values
@@ -892,6 +901,48 @@ function Test-ZoneConfiguration()
 
         if ($null -eq $configuredMethod)
         {
+            if ($PSBoundParameters.ContainsKey('ZoneName') -eq $true)
+            {
+                $source = $MyInvocation.MyCommand.Source
+
+                $EventMessage = "<SPDscEvent>`r`n"
+                $EventMessage += "    <ConfigurationDrift Source=`"$source`">`r`n"
+
+                $EventMessage += "        <ParametersNotInDesiredState>`r`n"
+                foreach ($item in $CurrentConfig)
+                {
+                    $EventMessage += "            <AuthenticationMethod>`r`n"
+                    foreach ($key in $item.Keys)
+                    {
+                        if (-not ([String]::IsNullOrEmpty($item.$key)))
+                        {
+                            $EventMessage += "                <Param Name=`"$($key)`">" + $item.$key + "</Param>`r`n"
+                        }
+                    }
+                    $EventMessage += "            </AuthenticationMethod>`r`n"
+                }
+                $EventMessage += "        </ParametersNotInDesiredState>`r`n"
+                $EventMessage += "    </ConfigurationDrift>`r`n"
+                $EventMessage += "    <DesiredValues>`r`n"
+                $EventMessage += "        <Zone>`r`n"
+                $EventMessage += "            <ZoneName>$ZoneName</ZoneName>`r`n"
+                foreach ($desired in $DesiredConfig)
+                {
+                    $EventMessage += "                <AuthenticationMethod>`r`n"
+                    foreach ($prop in $desired.CimInstanceProperties)
+                    {
+                        $EventMessage += "                    <Param Name=`"$($prop.Name)`">" + $prop.Value + "</Param>`r`n"
+
+                    }
+                    $EventMessage += "                </AuthenticationMethod>`r`n"
+                }
+                $EventMessage += "        </Zone>`r`n"
+                $EventMessage += "    </DesiredValues>`r`n"
+                $EventMessage += "</SPDscEvent>"
+
+                Add-SPDscEvent -Message $EventMessage -EntryType 'Error' -EventID 1 -Source $source
+            }
+
             return $false
         }
     }
@@ -929,6 +980,48 @@ function Test-ZoneConfiguration()
 
         if ($null -eq $specifiedMethod)
         {
+            if ($PSBoundParameters.ContainsKey('ZoneName') -eq $true)
+            {
+                $source = $MyInvocation.MyCommand.Source
+
+                $EventMessage = "<SPDscEvent>`r`n"
+                $EventMessage += "    <ConfigurationDrift Source=`"$source`">`r`n"
+
+                $EventMessage += "        <ParametersNotInDesiredState>`r`n"
+                foreach ($item in $CurrentConfig)
+                {
+                    $EventMessage += "            <AuthenticationMethod>`r`n"
+                    foreach ($key in $item.Keys)
+                    {
+                        if (-not ([String]::IsNullOrEmpty($item.$key)))
+                        {
+                            $EventMessage += "                <Param Name=`"$($key)`">" + $item.$key + "</Param>`r`n"
+                        }
+                    }
+                    $EventMessage += "            </AuthenticationMethod>`r`n"
+                }
+                $EventMessage += "        </ParametersNotInDesiredState>`r`n"
+                $EventMessage += "    </ConfigurationDrift>`r`n"
+                $EventMessage += "    <DesiredValues>`r`n"
+                $EventMessage += "        <Zone>`r`n"
+                $EventMessage += "            <ZoneName>$ZoneName</ZoneName>`r`n"
+                foreach ($desired in $DesiredConfig)
+                {
+                    $EventMessage += "                <AuthenticationMethod>`r`n"
+                    foreach ($prop in $desired.CimInstanceProperties)
+                    {
+                        $EventMessage += "                    <Param Name=`"$($prop.Name)`">" + $prop.Value + "</Param>`r`n"
+
+                    }
+                    $EventMessage += "                </AuthenticationMethod>`r`n"
+                }
+                $EventMessage += "        </Zone>`r`n"
+                $EventMessage += "    </DesiredValues>`r`n"
+                $EventMessage += "</SPDscEvent>"
+
+                Add-SPDscEvent -Message $EventMessage -EntryType 'Error' -EventID 1 -Source $source
+            }
+
             return $false
         }
     }

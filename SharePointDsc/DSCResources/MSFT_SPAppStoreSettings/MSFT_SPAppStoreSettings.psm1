@@ -150,7 +150,9 @@ function Test-TargetResource
 
     if ($null -eq $currentValues.WebAppUrl)
     {
-        Write-Verbose -Message "Specified web application does not exist."
+        $message = "Specified web application does not exist."
+        Write-Verbose -Message $message
+        Add-SPDscEvent -Message $message -EntryType 'Error' -EventID 1 -Source $MyInvocation.MyCommand.Source
 
         Write-Verbose -Message "Test-TargetResource returned false"
         return $false
@@ -160,6 +162,12 @@ function Test-TargetResource
     {
         if ($AllowAppPurchases -ne $CurrentValues.AllowAppPurchases)
         {
+            $message = ("The parameter AllowAppPurchases for web application $WebAppUrl "+ `
+                       "is not in the desired state. Actual: " + `
+                       "$($CurrentValues.AllowAppPurchases), Desired: $AllowAppPurchases")
+            Write-Verbose -Message $message
+            Add-SPDscEvent -Message $message -EntryType 'Error' -EventID 1 -Source $MyInvocation.MyCommand.Source
+
             Write-Verbose -Message "Test-TargetResource returned false"
             return $false
         }
@@ -169,6 +177,12 @@ function Test-TargetResource
     {
         if ($AllowAppsForOffice -ne $CurrentValues.AllowAppsForOffice)
         {
+            $message = ("The parameter AllowAppsForOffice for web application $WebAppUrl "+ `
+                       "is not in the desired state. Actual: " + `
+                       "$($CurrentValues.AllowAppsForOffice), Desired: $AllowAppsForOffice")
+            Write-Verbose -Message $message
+            Add-SPDscEvent -Message $message -EntryType 'Error' -EventID 1 -Source $MyInvocation.MyCommand.Source
+
             Write-Verbose -Message "Test-TargetResource returned false"
             return $false
         }

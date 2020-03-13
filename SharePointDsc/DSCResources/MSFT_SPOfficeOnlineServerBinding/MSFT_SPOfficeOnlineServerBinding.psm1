@@ -175,6 +175,7 @@ function Test-TargetResource
         $paramsToCheck += @("Zone", "DnsName")
     }
     $result = Test-SPDscParameterState -CurrentValues $CurrentValues `
+        -Source $($MyInvocation.MyCommand.Source) `
         -DesiredValues $PSBoundParameters `
         -ValuesToCheck $paramsToCheck
 

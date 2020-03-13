@@ -534,12 +534,20 @@ function Test-TargetResource
                     -DifferenceObject $CurrentValues.CrawlConfigurationRules
                 if ($null -ne $compareObject)
                 {
+                    $message = ("Specified CrawlConfigurationRules does not match the actual value." + `
+                                "Actual: $($CurrentValues.CrawlConfigurationRules -join ", ") Desired: " + `
+                                "$($CrawlConfigurationRules -join ", ")")
+                    Add-SPDscEvent -Message $message -EntryType 'Error' -EventID 1 -Source $MyInvocation.MyCommand.Source
+
                     Write-Verbose -Message "Test-TargetResource returned false"
                     return $false
                 }
             }
             else
             {
+                $message = "No CrawlConfigurationRules are currently configured"
+                Add-SPDscEvent -Message $message -EntryType 'Error' -EventID 1 -Source $MyInvocation.MyCommand.Source
+
                 Write-Verbose -Message "Test-TargetResource returned false"
                 return $false
             }
@@ -549,21 +557,28 @@ function Test-TargetResource
         {
             if ($AuthenticationCredentials.UserName -ne $CurrentValues.AuthenticationCredentials)
             {
+                $message = ("Specified AuthenticationCredentials does not match the actual value." + `
+                            "Actual: $($CurrentValues.AuthenticationCredentials) Desired: " + `
+                            "$($AuthenticationCredentials.UserName)")
+                Add-SPDscEvent -Message $message -EntryType 'Error' -EventID 1 -Source $MyInvocation.MyCommand.Source
+
                 Write-Verbose -Message "Test-TargetResource returned false"
                 return $false
             }
         }
 
         $result = Test-SPDscParameterState -CurrentValues $CurrentValues `
+            -Source $($MyInvocation.MyCommand.Source) `
             -DesiredValues $PSBoundParameters `
             -ValuesToCheck @("Ensure",
-            "AuthenticationType",
-            "RuleType",
-            "CertificateName")
+                "AuthenticationType",
+                "RuleType",
+                "CertificateName")
     }
     else
     {
         $result = Test-SPDscParameterState -CurrentValues $CurrentValues `
+            -Source $($MyInvocation.MyCommand.Source) `
             -DesiredValues $PSBoundParameters `
             -ValuesToCheck @("Ensure")
     }

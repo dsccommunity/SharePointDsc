@@ -193,6 +193,7 @@ function Test-TargetResource
     }
 
     $result = Test-SPDscParameterState -CurrentValues $CurrentValues `
+        -Source $($MyInvocation.MyCommand.Source) `
         -DesiredValues $PSBoundParameters
 
     Write-Verbose -Message "Test-TargetResource returned $result"

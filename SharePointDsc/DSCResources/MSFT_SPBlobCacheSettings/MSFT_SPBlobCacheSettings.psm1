@@ -374,19 +374,23 @@ function Test-TargetResource
     {
         if (-not (Test-Path -Path $Location))
         {
-            Write-Verbose -Message "Blob Cache Folder $Location does not exist"
+            $message = "Blob Cache Folder $Location does not exist"
+            Write-Verbose -Message $message
+            Add-SPDscEvent -Message $message -EntryType 'Error' -EventID 1 -Source $MyInvocation.MyCommand.Source
+
             Write-Verbose -Message "Test-TargetResource returned false"
             return $false
         }
     }
 
     $result = Test-SPDscParameterState -CurrentValues $CurrentValues `
+        -Source $($MyInvocation.MyCommand.Source) `
         -DesiredValues $PSBoundParameters `
         -ValuesToCheck @("EnableCache",
-        "Location",
-        "MaxSizeInGB",
-        "FileType",
-        "MaxAgeInSeconds")
+            "Location",
+            "MaxSizeInGB",
+            "FileType",
+            "MaxAgeInSeconds")
 
     Write-Verbose -Message "Test-TargetResource returned $result"
 

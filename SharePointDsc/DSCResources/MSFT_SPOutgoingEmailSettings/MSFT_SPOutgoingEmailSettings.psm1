@@ -258,13 +258,14 @@ function Test-TargetResource
     Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
 
     $result = Test-SPDscParameterState -CurrentValues $CurrentValues `
+        -Source $($MyInvocation.MyCommand.Source) `
         -DesiredValues $PSBoundParameters `
         -ValuesToCheck @("SMTPServer",
-        "FromAddress",
-        "ReplyToAddress",
-        "CharacterSet",
-        "UseTLS",
-        "SMTPPort")
+            "FromAddress",
+            "ReplyToAddress",
+            "CharacterSet",
+            "UseTLS",
+            "SMTPPort")
 
     Write-Verbose -Message "Test-TargetResource returned $result"
 

@@ -589,26 +589,27 @@ function Test-TargetResource
     Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
 
     $mainCheck = Test-SPDscParameterState -CurrentValues $CurrentValues `
+        -Source $($MyInvocation.MyCommand.Source) `
         -DesiredValues $PSBoundParameters `
         -ValuesToCheck @(
-        "Ensure",
-        "CachingOfUnusedFilesEnable",
-        "CrossDomainAccessAllowed",
-        "EncryptedUserConnectionRequired",
-        "ExternalDataConnectionLifetime",
-        "FileAccessMethod",
-        "LoadBalancingScheme",
-        "MemoryCacheThreshold",
-        "PrivateBytesMax",
-        "SessionsPerUserMax",
-        "SiteCollectionAnonymousSessionsMax",
-        "TerminateProcessOnAccessViolation",
-        "ThrottleAccessViolationsPerSiteCollection",
-        "UnattendedAccountApplicationId",
-        "UnusedObjectAgeMax",
-        "WorkbookCache",
-        "WorkbookCacheSizeMax"
-    )
+            "Ensure",
+            "CachingOfUnusedFilesEnable",
+            "CrossDomainAccessAllowed",
+            "EncryptedUserConnectionRequired",
+            "ExternalDataConnectionLifetime",
+            "FileAccessMethod",
+            "LoadBalancingScheme",
+            "MemoryCacheThreshold",
+            "PrivateBytesMax",
+            "SessionsPerUserMax",
+            "SiteCollectionAnonymousSessionsMax",
+            "TerminateProcessOnAccessViolation",
+            "ThrottleAccessViolationsPerSiteCollection",
+            "UnattendedAccountApplicationId",
+            "UnusedObjectAgeMax",
+            "WorkbookCache",
+            "WorkbookCacheSizeMax"
+        )
 
 
     if ($Ensure -eq "Present" -and $mainCheck -eq $true -and $null -ne $TrustedFileLocations)
@@ -621,8 +622,11 @@ function Test-TargetResource
             }
             if ($null -eq $matchingCurrentValue)
             {
-                Write-Verbose -Message ("Trusted file location '$($_.Address)' was not found " + `
-                        "in the Excel service app. Desired state is false.")
+                $message = ("Trusted file location '$($_.Address)' was not found " + `
+                            "in the Excel service app. Desired state is false.")
+                Write-Verbose -Message $message
+                Add-SPDscEvent -Message $message -EntryType 'Error' -EventID 1 -Source $MyInvocation.MyCommand.Source
+
                 return $false
             }
             else
@@ -632,10 +636,13 @@ function Test-TargetResource
                     {
                         if ($desiredLocation.$_ -ne $matchingCurrentValue.$_)
                         {
-                            Write-Verbose -Message ("Trusted file location '$($desiredLocation.Address)' did not match " + `
-                                    "desired property '$_'. Desired value is " + `
-                                    "'$($desiredLocation.$_)' but the current value is " + `
-                                    "'$($matchingCurrentValue.$_)'")
+                            $message = ("Trusted file location '$($desiredLocation.Address)' did not match " + `
+                                "desired property '$_'. Desired value is " + `
+                                "'$($desiredLocation.$_)' but the current value is " + `
+                                "'$($matchingCurrentValue.$_)'")
+                            Write-Verbose -Message $message
+                            Add-SPDscEvent -Message $message -EntryType 'Error' -EventID 1 -Source $MyInvocation.MyCommand.Source
+
                             return $false
                         }
                     }
@@ -645,7 +652,6 @@ function Test-TargetResource
         }
         if ($locationCheck -contains $false)
         {
-
             Write-Verbose -Message "Test-TargetResource returned false"
 
             return $false
@@ -659,9 +665,12 @@ function Test-TargetResource
             }
             if ($null -eq $matchingDesiredValue)
             {
-                Write-Verbose -Message ("Existing trusted file location '$($_.Address)' was not " + `
-                        "found in the desired state for this service " + `
-                        "application. Desired state is false.")
+                $message = ("Existing trusted file location '$($_.Address)' was not " + `
+                            "found in the desired state for this service " + `
+                            "application. Desired state is false.")
+                Write-Verbose -Message $message
+                Add-SPDscEvent -Message $message -EntryType 'Error' -EventID 1 -Source $MyInvocation.MyCommand.Source
+
                 return $false
             }
             return $true
@@ -682,7 +691,6 @@ function Test-TargetResource
     else
     {
         Write-Verbose -Message "Test-TargetResource returned $mainCheck"
-
         return $mainCheck
     }
 }

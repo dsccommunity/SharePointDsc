@@ -877,6 +877,7 @@ function Test-TargetResource
     if ($Ensure -eq "Absent" -or $CurrentValues.Ensure -eq "Absent")
     {
         $result = Test-SPDscParameterState -CurrentValues $CurrentValues `
+            -Source $($MyInvocation.MyCommand.Source) `
             -DesiredValues $PSBoundParameters `
             -ValuesToCheck @("Ensure")
 
@@ -894,9 +895,13 @@ function Test-TargetResource
     if (($PSBoundParameters.ContainsKey("IncrementalSchedule") -eq $true) -and ($null -ne $IncrementalSchedule))
     {
         $propertyTest = Test-SPDscSearchCrawlSchedule -CurrentSchedule $CurrentValues.IncrementalSchedule `
-            -DesiredSchedule $IncrementalSchedule
+                                                      -DesiredSchedule $IncrementalSchedule
         if ($propertyTest -eq $false)
         {
+            $message = ("Specified IncrementalSchedule does not match desired state.")
+            Write-Verbose -Message $message
+            Add-SPDscEvent -Message $message -EntryType 'Error' -EventID 1 -Source $MyInvocation.MyCommand.Source
+
             Write-Verbose -Message "Test-TargetResource returned false"
             return $false
         }
@@ -905,9 +910,13 @@ function Test-TargetResource
     if (($PSBoundParameters.ContainsKey("FullSchedule") -eq $true) -and ($null -ne $FullSchedule))
     {
         $propertyTest = Test-SPDscSearchCrawlSchedule -CurrentSchedule $CurrentValues.FullSchedule `
-            -DesiredSchedule $FullSchedule
+                                                      -DesiredSchedule $FullSchedule
         if ($propertyTest -eq $false)
         {
+            $message = ("Specified FullSchedule does not match desired state.")
+            Write-Verbose -Message $message
+            Add-SPDscEvent -Message $message -EntryType 'Error' -EventID 1 -Source $MyInvocation.MyCommand.Source
+
             Write-Verbose -Message "Test-TargetResource returned false"
             return $false
         }
@@ -928,20 +937,28 @@ function Test-TargetResource
     if ($null -ne (Compare-Object -ReferenceObject $currentAddresses `
                 -DifferenceObject $desiredAddresses))
     {
+        $message = ("Specified addresses do not match desired state: " + `
+                    "Actual: $($currentAddresses -join ", ") Desired: " + `
+                    "$($desiredAddresses -join ", ")")
+        Write-Verbose -Message $message
+        Add-SPDscEvent -Message $message -EntryType 'Error' -EventID 1 -Source $MyInvocation.MyCommand.Source
+
+        Write-Verbose -Message "Test-TargetResource returned false"
         return $false
     }
     else
     {
         $result = Test-SPDscParameterState -CurrentValues $CurrentValues `
+            -Source $($MyInvocation.MyCommand.Source) `
             -DesiredValues $PSBoundParameters `
             -ValuesToCheck @("ContentSourceType",
-            "CrawlSetting",
-            "ContinuousCrawl",
-            "Priority",
-            "LimitPageDepth",
-            "LimitServerHops",
-            "LOBSystemSet",
-            "Ensure")
+                "CrawlSetting",
+                "ContinuousCrawl",
+                "Priority",
+                "LimitPageDepth",
+                "LimitServerHops",
+                "LOBSystemSet",
+                "Ensure")
     }
 
     Write-Verbose -Message "Test-TargetResource returned $result"

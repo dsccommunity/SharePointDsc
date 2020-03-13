@@ -592,17 +592,18 @@ function Test-TargetResource
     }
 
     $result = Test-SPDscParameterState -CurrentValues $CurrentValues `
+        -Source $($MyInvocation.MyCommand.Source) `
         -DesiredValues $PSBoundParameters `
         -ValuesToCheck @("WebAppUrl",
-        "MaxResourcesPerRequest",
-        "MaxObjectPaths",
-        "ExecutionTimeout",
-        "RequestXmlMaxDepth",
-        "EnableXsdValidation",
-        "EnableStackTrace",
-        "RequestUsageExecutionTimeThreshold",
-        "LogActionsIfHasRequestException",
-        "EnableRequestUsage")
+            "MaxResourcesPerRequest",
+            "MaxObjectPaths",
+            "ExecutionTimeout",
+            "RequestXmlMaxDepth",
+            "EnableXsdValidation",
+            "EnableStackTrace",
+            "RequestUsageExecutionTimeThreshold",
+            "LogActionsIfHasRequestException",
+            "EnableRequestUsage")
 
     Write-Verbose -Message "Test-TargetResource returned $result"
 

@@ -1138,13 +1138,14 @@ function Test-TargetResource
     Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
 
     $result = Test-SPDscParameterState -CurrentValues $CurrentValues `
+        -Source $($MyInvocation.MyCommand.Source) `
         -DesiredValues $PSBoundParameters `
         -ValuesToCheck @("Ensure",
-        "RunCentralAdmin",
-        "CentralAdministrationUrl",
-        "CentralAdministrationPort",
-        "CentralAdministrationAuth",
-        "DeveloperDashboard")
+            "RunCentralAdmin",
+            "CentralAdministrationUrl",
+            "CentralAdministrationPort",
+            "CentralAdministrationAuth",
+            "DeveloperDashboard")
 
     Write-Verbose -Message "Test-TargetResource returned $result"
 

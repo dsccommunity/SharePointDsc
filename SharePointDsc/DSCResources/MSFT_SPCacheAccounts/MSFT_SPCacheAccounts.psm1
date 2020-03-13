@@ -283,6 +283,7 @@ function Test-TargetResource
     if ($SetWebAppPolicy -eq $true)
     {
         $result = Test-SPDscParameterState -CurrentValues $CurrentValues `
+            -Source $($MyInvocation.MyCommand.Source) `
             -DesiredValues $PSBoundParameters `
             -ValuesToCheck @("SuperUserAlias", `
                 "SuperReaderAlias", `
@@ -291,6 +292,7 @@ function Test-TargetResource
     else
     {
         $result = Test-SPDscParameterState -CurrentValues $CurrentValues `
+            -Source $($MyInvocation.MyCommand.Source) `
             -DesiredValues $PSBoundParameters `
             -ValuesToCheck @("SuperUserAlias", `
                 "SuperReaderAlias")

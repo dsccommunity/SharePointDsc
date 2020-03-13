@@ -329,20 +329,27 @@ function Test-TargetResource
         {
             if ($Enabled -ne $CurrentValues.Enabled)
             {
+                $message = ("Specified Enabled does not match the actual value." + `
+                            "Actual: $($CurrentValues.Enabled) Desired: " + `
+                            "$($Enabled)")
+                Add-SPDscEvent -Message $message -EntryType 'Error' -EventID 1 -Source $MyInvocation.MyCommand.Source
+
                 Write-Verbose -Message "Test-TargetResource returned false"
                 return $false
             }
         }
 
         $result = Test-SPDscParameterState -CurrentValues $CurrentValues `
+            -Source $($MyInvocation.MyCommand.Source) `
             -DesiredValues $PSBoundParameters `
             -ValuesToCheck @("Ensure",
-            "Description",
-            "MimeType")
+                "Description",
+                "MimeType")
     }
     else
     {
         $result = Test-SPDscParameterState -CurrentValues $CurrentValues `
+            -Source $($MyInvocation.MyCommand.Source) `
             -DesiredValues $PSBoundParameters `
             -ValuesToCheck @("Ensure")
     }

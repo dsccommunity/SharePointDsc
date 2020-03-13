@@ -532,16 +532,21 @@ function Test-TargetResource
 
     if ([System.String]::IsNullOrEmpty($CurrentValues.ServiceAppName) -eq $true)
     {
+        $message = "ServiceAppName is currently not configured in the environment."
+        Write-Verbose -Message $message
+        Add-SPDscEvent -Message $message -EntryType 'Error' -EventID 1 -Source $MyInvocation.MyCommand.Source
+
         Write-Verbose -Message "Test-TargetResource returned false"
         return $false
     }
 
     $result = Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments @($PSBoundParameters, $CurrentValues, $PSScriptRoot) `
+        -Arguments @($PSBoundParameters, $CurrentValues, $PSScriptRoot, $MyInvocation.MyCommand.Source) `
         -ScriptBlock {
         $params = $args[0]
         $CurrentValues = $args[1]
         $ScriptRoot = $args[2]
+        $Source = $args[3]
 
         $relPath = "..\..\Modules\SharePointDsc.ServiceAppSecurity\SPServiceAppSecurity.psm1"
         Import-Module (Join-Path -Path $ScriptRoot -ChildPath $relPath -Resolve)
@@ -567,7 +572,11 @@ function Test-TargetResource
             {
                 if ($params.Members.Count -gt 0)
                 {
-                    Write-Verbose -Message "Security list does not match"
+                    $message = ("Security list does not match. Actual: $($CurrentValues.Members.Username -join ", "). " + `
+                                "Desired: $($params.Members.Username -join ", ")")
+                    Write-Verbose -Message $message
+                    Add-SPDscEvent -Message $message -EntryType 'Error' -EventID 1 -Source $Source
+
                     return $false
                 }
                 else
@@ -578,7 +587,11 @@ function Test-TargetResource
             }
             elseif ($params.Members.Count -eq 0)
             {
-                Write-Verbose -Message "Security list does not match"
+                $message = ("Security list does not match. Actual: $($CurrentValues.Members.Username -join ", "). " + `
+                            "Desired: $($params.Members.Username -join ", ")")
+                Write-Verbose -Message $message
+                Add-SPDscEvent -Message $message -EntryType 'Error' -EventID 1 -Source $Source
+
                 return $false
             }
 
@@ -595,7 +608,10 @@ function Test-TargetResource
                         } | Select-Object -First 1).AccessLevels
                     if ($null -ne (Compare-Object -DifferenceObject $currentMember.AccessLevels -ReferenceObject $expandedAccessLevels))
                     {
-                        Write-Verbose -Message "$($currentMember.Username) has incorrect permission level. Test failed."
+                        $message = "$($currentMember.Username) has incorrect permission level. Test failed."
+                        Write-Verbose -Message $message
+                        Add-SPDscEvent -Message $message -EntryType 'Error' -EventID 1 -Source $Source
+
                         return $false
                     }
                 }
@@ -603,7 +619,11 @@ function Test-TargetResource
             }
             else
             {
-                Write-Verbose -Message "Security list does not match"
+                $message = ("Security list does not match. Actual: $($CurrentValues.Members.Username -join ", "). " + `
+                            "Desired: $($params.Members.Username -join ", ")")
+                Write-Verbose -Message $message
+                Add-SPDscEvent -Message $message -EntryType 'Error' -EventID 1 -Source $Source
+
                 return $false
             }
         }
@@ -616,7 +636,10 @@ function Test-TargetResource
             {
                 if (-not($CurrentValues.Members.Username -contains $member.Username))
                 {
-                    Write-Verbose -Message "$($member.Username) does not have access. Set result to false"
+                    $message = "$($member.Username) does not have access. Test failed."
+                    Write-Verbose -Message $message
+                    Add-SPDscEvent -Message $message -EntryType 'Error' -EventID 1 -Source $Source
+
                     $result = $false
                 }
                 else
@@ -629,7 +652,10 @@ function Test-TargetResource
                         } | Select-Object -First 1).AccessLevels
                     if ($null -ne $compare)
                     {
-                        Write-Verbose -Message "$($member.Username) has incorrect permission level. Test failed."
+                        $message = "$($member.Username) has incorrect permission level. Test failed."
+                        Write-Verbose -Message $message
+                        Add-SPDscEvent -Message $message -EntryType 'Error' -EventID 1 -Source $Source
+
                         return $false
                     }
                 }
@@ -643,7 +669,10 @@ function Test-TargetResource
             {
                 if ($CurrentValues.Members.Username -contains $member)
                 {
-                    Write-Verbose -Message "$member already has access. Set result to false"
+                    $message = "$member already has access. Set result to false"
+                    Write-Verbose -Message $message
+                    Add-SPDscEvent -Message $message -EntryType 'Error' -EventID 1 -Source $Source
+
                     $result = $false
                 }
                 else

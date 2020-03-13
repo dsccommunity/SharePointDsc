@@ -649,6 +649,10 @@ function Test-TargetResource
 
     if ($null -eq $CurrentValues.WebAppUrl)
     {
+        $message = "One of the specified parameters is incorrect. Please check if these are correct."
+        Write-Verbose -Message $message
+        Add-SPDscEvent -Message $message -EntryType 'Error' -EventID 1 -Source $MyInvocation.MyCommand.Source
+
         Write-Verbose -Message "Test-TargetResource returned false"
         return $false
     }
@@ -722,7 +726,7 @@ function Test-TargetResource
         }
 
         # Get the list of differences from the current configuration
-        $differences = Compare-SPDscWebAppPolicy -WAPolicies $CurrentValues.Members `
+        [Array]$differences = Compare-SPDscWebAppPolicy -WAPolicies $CurrentValues.Members `
             -DSCSettings $allMembers `
             -DefaultIdentityType $defaultIdentityType
 
@@ -735,6 +739,37 @@ function Test-TargetResource
             }
             else
             {
+                $source = $MyInvocation.MyCommand.Source
+
+                $EventMessage = "<SPDscEvent>`r`n"
+                $EventMessage += "    <ConfigurationDrift Source=`"$source`">`r`n"
+
+                $EventMessage += "        <ParametersNotInDesiredState>`r`n"
+                $driftedValue = ''
+                foreach ($item in $differences)
+                {
+                    $EventMessage += "            <Param Name=`"Members`">" + $item.Username + " is " + $item.Status + "</Param>`r`n"
+                }
+                $EventMessage += "        </ParametersNotInDesiredState>`r`n"
+                $EventMessage += "        <DesiredState>`r`n"
+                $EventMessage += "            <WebAppUrl>$WebAppUrl</WebAppUrl>`r`n"
+                $EventMessage += "            <Members>`r`n"
+                foreach ($member in $Members)
+                {
+                    $EventMessage += "                <Member>`r`n"
+                    $EventMessage += "                    <UserName>$($member.UserName)</UserName>`r`n"
+                    $EventMessage += "                    <PermissionLevel>$($member.PermissionLevel)</PermissionLevel>`r`n"
+                    $EventMessage += "                    <IdentityType>$($member.IdentityType)</IdentityType>`r`n"
+                    $EventMessage += "                    <ActAsSystemAccount>$($member.ActAsSystemAccount)</ActAsSystemAccount>`r`n"
+                    $EventMessage += "                </Member>`r`n"
+                }
+                $EventMessage += "            </Members>`r`n"
+                $EventMessage += "        </DesiredState>`r`n"
+                $EventMessage += "    </ConfigurationDrift>`r`n"
+                $EventMessage += "</SPDscEvent>"
+
+                Add-SPDscEvent -Message $EventMessage -EntryType 'Error' -EventID 1 -Source $source
+
                 Write-Verbose -Message "Differences in the policy were found, returning false"
                 $result = $false
             }
@@ -746,15 +781,47 @@ function Test-TargetResource
         # If only checking members to include only differences or missing records count as a fail
         if ($MembersToInclude)
         {
-            $diffcount = ($differences | Where-Object -FilterScript {
-                    $_.Status -eq "Different" -or $_.Status -eq "Missing"
-                }).Count
+            $diffs = $differences | Where-Object -FilterScript {
+                $_.Status -eq "Different" -or $_.Status -eq "Missing"
+            }
+            $diffcount = $diffs.Count
             if ($diffcount -eq 0)
             {
                 $result = $true
             }
             else
             {
+                $source = $MyInvocation.MyCommand.Source
+
+                $EventMessage = "<SPDscEvent>`r`n"
+                $EventMessage += "    <ConfigurationDrift Source=`"$source`">`r`n"
+
+                $EventMessage += "        <ParametersNotInDesiredState>`r`n"
+                $driftedValue = ''
+                foreach ($item in $diffs)
+                {
+                    $EventMessage += "            <Param Name=`"MembersToInclude`">" + $item.Username + " is " + $item.Status + "</Param>`r`n"
+                }
+                $EventMessage += "        </ParametersNotInDesiredState>`r`n"
+                $EventMessage += "        <DesiredState>`r`n"
+                $EventMessage += "            <WebAppUrl>$WebAppUrl</WebAppUrl>`r`n"
+                $EventMessage += "            <MembersToInclude>`r`n"
+                foreach ($member in $MembersToInclude)
+                {
+                    $EventMessage += "                <Member>`r`n"
+                    $EventMessage += "                    <UserName>$($member.UserName)</UserName>`r`n"
+                    $EventMessage += "                    <PermissionLevel>$($member.PermissionLevel)</PermissionLevel>`r`n"
+                    $EventMessage += "                    <IdentityType>$($member.IdentityType)</IdentityType>`r`n"
+                    $EventMessage += "                    <ActAsSystemAccount>$($member.ActAsSystemAccount)</ActAsSystemAccount>`r`n"
+                    $EventMessage += "                </Member>`r`n"
+                }
+                $EventMessage += "            </MembersToInclude>`r`n"
+                $EventMessage += "        </DesiredState>`r`n"
+                $EventMessage += "    </ConfigurationDrift>`r`n"
+                $EventMessage += "</SPDscEvent>"
+
+                Add-SPDscEvent -Message $EventMessage -EntryType 'Error' -EventID 1 -Source $source
+
                 Write-Verbose -Message "Different or Missing policy was found, returning false"
                 $result = $false
             }
@@ -772,6 +839,7 @@ function Test-TargetResource
                 "that need to be removed")
 
         $result = $true
+        $presentAccounts = @()
         foreach ($member in $MembersToExclude)
         {
             if (($cacheAccounts.SuperUserAccount -eq $member.Username) -or `
@@ -784,9 +852,39 @@ function Test-TargetResource
             {
                 if ($policy.Username -eq $member.Username)
                 {
+                    $presentAccounts += $member.Username
                     $result = $false
                 }
             }
+        }
+
+        if ($result -eq $false)
+        {
+            $source = $MyInvocation.MyCommand.Source
+
+            $EventMessage = "<SPDscEvent>`r`n"
+            $EventMessage += "    <ConfigurationDrift Source=`"$source`">`r`n"
+            $EventMessage += "        <ParametersNotInDesiredState>`r`n"
+            $EventMessage += "            <Param Name=`"MembersToExclude`">" + ($presentAccounts -join ", ") + " is/are added to the policy</Param>`r`n"
+            $EventMessage += "        </ParametersNotInDesiredState>`r`n"
+            $EventMessage += "        <DesiredState>`r`n"
+            $EventMessage += "            <WebAppUrl>$WebAppUrl</WebAppUrl>`r`n"
+            $EventMessage += "            <MembersToExclude>`r`n"
+            foreach ($member in $MembersToExclude)
+            {
+                $EventMessage += "                <Member>`r`n"
+                $EventMessage += "                    <UserName>$($member.UserName)</UserName>`r`n"
+                $EventMessage += "                    <PermissionLevel>$($member.PermissionLevel)</PermissionLevel>`r`n"
+                $EventMessage += "                    <IdentityType>$($member.IdentityType)</IdentityType>`r`n"
+                $EventMessage += "                    <ActAsSystemAccount>$($member.ActAsSystemAccount)</ActAsSystemAccount>`r`n"
+                $EventMessage += "                </Member>`r`n"
+            }
+            $EventMessage += "            </MembersToExclude>`r`n"
+            $EventMessage += "        </DesiredState>`r`n"
+            $EventMessage += "    </ConfigurationDrift>`r`n"
+            $EventMessage += "</SPDscEvent>"
+
+            Add-SPDscEvent -Message $EventMessage -EntryType 'Error' -EventID 1 -Source $source
         }
 
         Write-Verbose -Message "Test-TargetResource returned $result"

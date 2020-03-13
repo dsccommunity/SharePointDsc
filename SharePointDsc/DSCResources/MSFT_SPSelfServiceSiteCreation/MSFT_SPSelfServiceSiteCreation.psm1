@@ -520,6 +520,7 @@ function Test-TargetResource
     if ($Enabled)
     {
         $result = Test-SPDscParameterState -CurrentValues $CurrentValues `
+            -Source $($MyInvocation.MyCommand.Source) `
             -DesiredValues $PSBoundParameters `
             -ValuesToCheck @("WebAppUrl", `
                 "Enabled", `
@@ -537,6 +538,7 @@ function Test-TargetResource
     else
     {
         $result = Test-SPDscParameterState -CurrentValues $CurrentValues `
+            -Source $($MyInvocation.MyCommand.Source) `
             -DesiredValues $PSBoundParameters `
             -ValuesToCheck @("WebAppUrl", `
                 "Enabled", `
