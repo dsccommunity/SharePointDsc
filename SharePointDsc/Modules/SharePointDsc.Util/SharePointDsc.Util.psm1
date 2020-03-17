@@ -1,7 +1,8 @@
 function Add-SPDscEvent
 {
     [CmdletBinding()]
-    param(
+    param
+    (
         [Parameter(Mandatory = $true)]
         [System.String]
         $Message,
@@ -917,7 +918,7 @@ function Test-SPDscParameterState
 
     $returnValue = $true
 
-    $DriftedParameters = @{}
+    $DriftedParameters = @{ }
 
     if (($DesiredValues.GetType().Name -ne "HashTable") -and `
         ($DesiredValues.GetType().Name -ne "CimInstance") -and `
@@ -1015,7 +1016,7 @@ function Test-SPDscParameterState
                             $arrayCompare = Compare-Object -ReferenceObject $CurrentValues.$fieldName `
                                 -DifferenceObject $DesiredValues.$fieldName
                             if ($null -ne $arrayCompare -and `
-                                -not [System.String]::IsNullOrEmpty($arrayCompare.InputObject))
+                                    -not [System.String]::IsNullOrEmpty($arrayCompare.InputObject))
                             {
                                 Write-Verbose -Message ("Found an array for property $fieldName " + `
                                         "in the current values, but this array " + `
@@ -1173,7 +1174,7 @@ function Test-SPDscParameterState
                                         $AllCurrentValuesAsArray += [PSCustomObject]$currentEntry
                                     }
                                     $arrayCompare = Compare-PSCustomObjectArrays -CurrentValues $AllCurrentValuesAsArray `
-                                    -DesiredValues $AllCurrentValuesAsArray
+                                        -DesiredValues $AllCurrentValuesAsArray
                                     if ($null -ne $arrayCompare)
                                     {
                                         foreach ($item in $arrayCompare)
