@@ -29,7 +29,7 @@ function Get-TargetResource
         -ScriptBlock {
         $params = $args[0]
 
-        $WebApp = get-spwebapplication $params.WebAppUrl
+        $WebApp = Get-SPWebApplication $params.WebAppUrl
         if (!$WebApp)
         {
             return  @{
@@ -121,17 +121,31 @@ function Test-TargetResource
 
     if (($null -eq $CurrentValues.WebAppUrl) -or ($null -eq $CurrentValues.ServiceAppProxyGroup))
     {
-        return $false
-    }
+        $message = "Specified web application {$WebAppUrl} does not exist."
+        Add-SPDscEvent -Message $message -EntryType 'Error' -EventID 1 -Source $MyInvocation.MyCommand.Source
 
-    if ($CurrentValues.ServiceAppProxyGroup -eq $ServiceAppProxyGroup)
-    {
-        return $true
+        $result = $false
     }
     else
     {
-        return $false
+        if ($CurrentValues.ServiceAppProxyGroup -eq $ServiceAppProxyGroup)
+        {
+            $result = $true
+        }
+        else
+        {
+            $message = ("Current ServiceAppProxyGroup {$($CurrentValues.ServiceAppProxyGroup)} " + `
+                        "is not in the desired state {$ServiceAppProxyGroup}.")
+            Write-Verbose -Message $message
+            Add-SPDscEvent -Message $message -EntryType 'Error' -EventID 1 -Source $MyInvocation.MyCommand.Source
+
+            $result = $false
+        }
     }
+
+    Write-Verbose -Message "Test-TargetResource returned $result"
+
+    return $result
 }
 
 Export-ModuleMember -Function *-TargetResource

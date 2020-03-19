@@ -778,6 +778,11 @@ function Test-TargetResource
             $null -eq $CurrentValues.MembersToInclude -and `
             $null -eq $CurrentValues.MembersToExclude)
     {
+        $message = "Members, MembersToInclude or MembersToExclude not specified."
+        Write-Verbose -Message $message
+        Add-SPDscEvent -Message $message -EntryType 'Error' -EventID 1 -Source $MyInvocation.MyCommand.Source
+
+        Write-Verbose -Message "Test-TargetResource returned false"
         return $false
     }
 
@@ -786,6 +791,11 @@ function Test-TargetResource
         Write-Verbose -Message "Processing Members parameter"
         if (-not $CurrentValues.Members)
         {
+            $message = "No members currently configured."
+            Write-Verbose -Message $message
+            Add-SPDscEvent -Message $message -EntryType 'Error' -EventID 1 -Source $MyInvocation.MyCommand.Source
+
+            Write-Verbose -Message "Test-TargetResource returned false"
             return $false
         }
 
@@ -798,7 +808,12 @@ function Test-TargetResource
         }
         else
         {
-            Write-Verbose -Message "Shell Admins group does not match"
+            $message = ("Shell Admins group does not match. Actual: $($CurrentValues.Members -join ", "). " + `
+                        "Desired: $($Members -join ", ")")
+            Write-Verbose -Message $message
+            Add-SPDscEvent -Message $message -EntryType 'Error' -EventID 1 -Source $MyInvocation.MyCommand.Source
+
+            Write-Verbose -Message "Test-TargetResource returned false"
             return $false
         }
     }
@@ -808,6 +823,11 @@ function Test-TargetResource
         Write-Verbose -Message "Processing MembersToInclude parameter"
         if (-not $CurrentValues.Members)
         {
+            $message = "No members currently configured."
+            Write-Verbose -Message $message
+            Add-SPDscEvent -Message $message -EntryType 'Error' -EventID 1 -Source $MyInvocation.MyCommand.Source
+
+            Write-Verbose -Message "Test-TargetResource returned false"
             return $false
         }
 
@@ -815,7 +835,11 @@ function Test-TargetResource
         {
             if (-not($CurrentValues.Members.Contains($member)))
             {
-                Write-Verbose -Message "$member is not a Shell Admin. Set result to false"
+                $message = "$member is not a Shell Admin."
+                Write-Verbose -Message $message
+                Add-SPDscEvent -Message $message -EntryType 'Error' -EventID 1 -Source $MyInvocation.MyCommand.Source
+
+                Write-Verbose -Message "Test-TargetResource returned false"
                 return $false
             }
             else
@@ -834,7 +858,11 @@ function Test-TargetResource
             {
                 if ($CurrentValues.Members.Contains($member))
                 {
-                    Write-Verbose -Message "$member is a Shell Admin. Set result to false"
+                    $message = "$member is a Shell Admin."
+                    Write-Verbose -Message $message
+                    Add-SPDscEvent -Message $message -EntryType 'Error' -EventID 1 -Source $MyInvocation.MyCommand.Source
+
+                    Write-Verbose -Message "Test-TargetResource returned false"
                     return $false
                 }
                 else
@@ -860,6 +888,11 @@ function Test-TargetResource
             {
                 if (-not $database.Members)
                 {
+                    $message = "No members currently configured."
+                    Write-Verbose -Message $message
+                    Add-SPDscEvent -Message $message -EntryType 'Error' -EventID 1 -Source $MyInvocation.MyCommand.Source
+
+                    Write-Verbose -Message "Test-TargetResource returned false"
                     return $false
                 }
 
@@ -872,7 +905,12 @@ function Test-TargetResource
                 }
                 else
                 {
-                    Write-Verbose -Message "Shell Admins group does not match"
+                    $message = ("Shell Admins group does not match. Actual: $($database.Members -join ", "). " + `
+                                "Desired: $($Members -join ", ")")
+                    Write-Verbose -Message $message
+                    Add-SPDscEvent -Message $message -EntryType 'Error' -EventID 1 -Source $MyInvocation.MyCommand.Source
+
+                    Write-Verbose -Message "Test-TargetResource returned false"
                     return $false
                 }
             }
@@ -881,6 +919,11 @@ function Test-TargetResource
             {
                 if (-not $database.Members)
                 {
+                    $message = "No members currently configured."
+                    Write-Verbose -Message $message
+                    Add-SPDscEvent -Message $message -EntryType 'Error' -EventID 1 -Source $MyInvocation.MyCommand.Source
+
+                    Write-Verbose -Message "Test-TargetResource returned false"
                     return $false
                 }
 
@@ -888,7 +931,11 @@ function Test-TargetResource
                 {
                     if (-not($database.Members.Contains($member)))
                     {
-                        Write-Verbose -Message "$member is not a Shell Admin. Set result to false"
+                        $message = "$member is not a Shell Admin."
+                        Write-Verbose -Message $message
+                        Add-SPDscEvent -Message $message -EntryType 'Error' -EventID 1 -Source $MyInvocation.MyCommand.Source
+
+                        Write-Verbose -Message "Test-TargetResource returned false"
                         return $false
                     }
                     else
@@ -906,7 +953,11 @@ function Test-TargetResource
                     {
                         if ($database.Members.Contains($member))
                         {
-                            Write-Verbose -Message "$member is a Shell Admin. Set result to false"
+                            $message = "$member is a Shell Admin."
+                            Write-Verbose -Message $message
+                            Add-SPDscEvent -Message $message -EntryType 'Error' -EventID 1 -Source $MyInvocation.MyCommand.Source
+
+                            Write-Verbose -Message "Test-TargetResource returned false"
                             return $false
                         }
                         else
@@ -941,6 +992,11 @@ function Test-TargetResource
                     Write-Verbose -Message "Processing Members parameter"
                     if (-not $currentCDB.Members)
                     {
+                        $message = "No members currently configured."
+                        Write-Verbose -Message $message
+                        Add-SPDscEvent -Message $message -EntryType 'Error' -EventID 1 -Source $MyInvocation.MyCommand.Source
+
+                        Write-Verbose -Message "Test-TargetResource returned false"
                         return $false
                     }
 
@@ -953,7 +1009,12 @@ function Test-TargetResource
                     }
                     else
                     {
-                        Write-Verbose -Message "Shell Admins group does not match"
+                        $message = ("Shell Admins group does not match. Actual: $($currentCDB.Members -join ", "). " + `
+                                    "Desired: $($database.Members -join ", ")")
+                        Write-Verbose -Message $message
+                        Add-SPDscEvent -Message $message -EntryType 'Error' -EventID 1 -Source $MyInvocation.MyCommand.Source
+
+                        Write-Verbose -Message "Test-TargetResource returned false"
                         return $false
                     }
                 }
@@ -963,6 +1024,11 @@ function Test-TargetResource
                     Write-Verbose -Message "Processing MembersToInclude parameter"
                     if (-not $currentCDB.Members)
                     {
+                        $message = "No members currently configured."
+                        Write-Verbose -Message $message
+                        Add-SPDscEvent -Message $message -EntryType 'Error' -EventID 1 -Source $MyInvocation.MyCommand.Source
+
+                        Write-Verbose -Message "Test-TargetResource returned false"
                         return $false
                     }
 
@@ -970,7 +1036,11 @@ function Test-TargetResource
                     {
                         if (-not($currentCDB.Members.Contains($member)))
                         {
-                            Write-Verbose -Message "$member is not a Shell Admin. Set result to false"
+                            $message = "$member is not a Shell Admin."
+                            Write-Verbose -Message $message
+                            Add-SPDscEvent -Message $message -EntryType 'Error' -EventID 1 -Source $MyInvocation.MyCommand.Source
+
+                            Write-Verbose -Message "Test-TargetResource returned false"
                             return $false
                         }
                         else
@@ -989,7 +1059,11 @@ function Test-TargetResource
                         {
                             if ($currentCDB.Members.Contains($member))
                             {
-                                Write-Verbose -Message "$member is a Shell Admin. Set result to false"
+                                $message = "$member is a Shell Admin."
+                                Write-Verbose -Message $message
+                                Add-SPDscEvent -Message $message -EntryType 'Error' -EventID 1 -Source $MyInvocation.MyCommand.Source
+
+                                Write-Verbose -Message "Test-TargetResource returned false"
                                 return $false
                             }
                             else
@@ -1007,6 +1081,7 @@ function Test-TargetResource
         }
     }
 
+    Write-Verbose -Message "Test-TargetResource returned true"
     return $true
 }
 

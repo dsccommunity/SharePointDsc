@@ -526,41 +526,66 @@ function Test-TargetResource
     {
         if ($CurrentValues.ContainsKey("AllPermissions"))
         {
-            return Test-SPDscParameterState -CurrentValues $CurrentValues `
+            $result = Test-SPDscParameterState -CurrentValues $CurrentValues `
+                -Source $($MyInvocation.MyCommand.Source) `
                 -DesiredValues $PSBoundParameters `
                 -ValuesToCheck @("AllPermissions")
         }
         else
         {
-            return $false
+            $result = $false
         }
     }
     else
     {
         if ($CurrentValues.ContainsKey("AllPermissions"))
         {
-            return $false
+            $source = $MyInvocation.MyCommand.Source
+            $EventMessage = "<SPDscEvent>`r`n"
+            $EventMessage += "    <ConfigurationDrift Source=`"$source`">`r`n"
+            $EventMessage += "        <ParametersNotInDesiredState>`r`n"
+            $EventMessage += "            <Param Name=`"AllPermissions`"> AllPermissions is configured, but Desired State has individual permissions specified.</Param>`r`n"
+            $EventMessage += "        </ParametersNotInDesiredState>`r`n"
+            $EventMessage += "        <DesiredState>`r`n"
+            $EventMessage += "            <WebAppUrl>$WebAppUrl</WebAppUrl>`r`n"
+            if ($PSBoundParameters.ContainsKey('ListPermissions'))
+            {
+                $EventMessage += "            <ListPermissions>$($ListPermissions -join ", ")</ListPermissions>`r`n"
+
+            }
+            if ($PSBoundParameters.ContainsKey('SitePermissions'))
+            {
+                $EventMessage += "            <SitePermissions>$($SitePermissions -join ", ")</SitePermissions>`r`n"
+
+            }
+            if ($PSBoundParameters.ContainsKey('PersonalPermissions'))
+            {
+                $EventMessage += "            <PersonalPermissions>$($PersonalPermissions -join ", ")</PersonalPermissions>`r`n"
+
+            }
+            $EventMessage += "        </DesiredState>`r`n"
+            $EventMessage += "    </ConfigurationDrift>`r`n"
+            $EventMessage += "</SPDscEvent>"
+
+            Add-SPDscEvent -Message $EventMessage -EntryType 'Error' -EventID 1 -Source $source
+
+            $result = $false
         }
         else
         {
-            if ($null -ne (Compare-Object -ReferenceObject $ListPermissions `
-                        -DifferenceObject $CurrentValues.ListPermissions))
-            {
-                return $false
-            }
-            if ($null -ne (Compare-Object -ReferenceObject $SitePermissions `
-                        -DifferenceObject $CurrentValues.SitePermissions))
-            {
-                return $false
-            }
-            if ($null -ne (Compare-Object -ReferenceObject $PersonalPermissions `
-                        -DifferenceObject $CurrentValues.PersonalPermissions))
-            {
-                return $false
-            }
-            return $true
+            $result = Test-SPDscParameterState -CurrentValues $CurrentValues `
+                -Source $($MyInvocation.MyCommand.Source) `
+                -DesiredValues $PSBoundParameters `
+                -ValuesToCheck @("ListPermissions",
+                                "SitePermissions",
+                                "PersonalPermissions"
+                )
         }
     }
+
+    Write-Verbose -Message "Test-TargetResource returned $result"
+
+    return $result
 }
 
 function Test-SPDscInput()

@@ -519,7 +519,8 @@ function Test-TargetResource
 
     if ($Enabled)
     {
-        return Test-SPDscParameterState -CurrentValues $CurrentValues `
+        $result = Test-SPDscParameterState -CurrentValues $CurrentValues `
+            -Source $($MyInvocation.MyCommand.Source) `
             -DesiredValues $PSBoundParameters `
             -ValuesToCheck @("WebAppUrl", `
                 "Enabled", `
@@ -536,10 +537,15 @@ function Test-TargetResource
     }
     else
     {
-        return Test-SPDscParameterState -CurrentValues $CurrentValues `
+        $result = Test-SPDscParameterState -CurrentValues $CurrentValues `
+            -Source $($MyInvocation.MyCommand.Source) `
             -DesiredValues $PSBoundParameters `
             -ValuesToCheck @("WebAppUrl", `
                 "Enabled", `
                 "ShowStartASiteMenuItem")
     }
+
+    Write-Verbose -Message "Test-TargetResource returned $result"
+
+    return $result
 }

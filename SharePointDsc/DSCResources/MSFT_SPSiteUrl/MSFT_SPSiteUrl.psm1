@@ -320,29 +320,55 @@ function Test-TargetResource
         $null -eq $CurrentValues.Extranet -and
         $null -eq $CurrentValues.Custom)
     {
+        $message = "All zones do not have a SiteUrl configured"
+        Write-Verbose -Message $message
+        Add-SPDscEvent -Message $message -EntryType 'Error' -EventID 1 -Source $MyInvocation.MyCommand.Source
+
+        Write-Verbose -Message "Test-TargetResource returned false"
         return $false
     }
 
     if ([String]$CurrentValues.Intranet -ne $Intranet)
     {
+        $message = "The Intranet zone {$($CurrentValues.Intranet)} is not configured as desired $Intranet"
+        Write-Verbose -Message $message
+        Add-SPDscEvent -Message $message -EntryType 'Error' -EventID 1 -Source $MyInvocation.MyCommand.Source
+
+        Write-Verbose -Message "Test-TargetResource returned false"
         return $false
     }
 
     if ([String]$CurrentValues.Internet -ne $Internet)
     {
+        $message = "The Internet zone {$($CurrentValues.Internet)} is not configured as desired $Internet"
+        Write-Verbose -Message $message
+        Add-SPDscEvent -Message $message -EntryType 'Error' -EventID 1 -Source $MyInvocation.MyCommand.Source
+
+        Write-Verbose -Message "Test-TargetResource returned false"
         return $false
     }
 
     if ([String]$CurrentValues.Extranet -ne $Extranet)
     {
+        $message = "The Extranet zone {$($CurrentValues.Extranet)} is not configured as desired $Extranet"
+        Write-Verbose -Message $message
+        Add-SPDscEvent -Message $message -EntryType 'Error' -EventID 1 -Source $MyInvocation.MyCommand.Source
+
+        Write-Verbose -Message "Test-TargetResource returned false"
         return $false
     }
 
     if ([String]$CurrentValues.Custom -ne $Custom)
     {
+        $message = "The Custom zone {$($CurrentValues.Custom)} is not configured as desired $Custom"
+        Write-Verbose -Message $message
+        Add-SPDscEvent -Message $message -EntryType 'Error' -EventID 1 -Source $MyInvocation.MyCommand.Source
+
+        Write-Verbose -Message "Test-TargetResource returned false"
         return $false
     }
 
+    Write-Verbose -Message "Test-TargetResource returned true"
     return $true
 }
 

@@ -617,6 +617,7 @@ function Test-TargetResource
     {
         if ($Force -eq $true)
         {
+            Write-Verbose -Message "Test-TargetResource returned false"
             return $false
         }
 
@@ -624,9 +625,14 @@ function Test-TargetResource
         $valuesToCheck += "Server"
     }
 
-    return Test-SPDscParameterState -CurrentValues $CurrentValues `
+    $result = Test-SPDscParameterState -CurrentValues $CurrentValues `
+        -Source $($MyInvocation.MyCommand.Source) `
         -DesiredValues $PSBoundParameters `
         -ValuesToCheck $valuesToCheck
+
+    Write-Verbose -Message "Test-TargetResource returned $result"
+
+    return $result
 }
 
 <#

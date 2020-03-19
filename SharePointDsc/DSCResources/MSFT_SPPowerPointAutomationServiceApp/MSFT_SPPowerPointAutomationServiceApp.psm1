@@ -414,15 +414,21 @@ function Test-TargetResource
 
     if ($Ensure -eq "Absent")
     {
-        return Test-SPDscParameterState -CurrentValues $CurrentValues `
+        $result = Test-SPDscParameterState -CurrentValues $CurrentValues `
+            -Source $($MyInvocation.MyCommand.Source) `
             -DesiredValues $PSBoundParameters `
             -ValuesToCheck @("Ensure")
     }
     else
     {
-        return Test-SPDscParameterState -CurrentValues $CurrentValues `
+        $result = Test-SPDscParameterState -CurrentValues $CurrentValues `
+            -Source $($MyInvocation.MyCommand.Source) `
             -DesiredValues $PSBoundParameters
     }
+
+    Write-Verbose -Message "Test-TargetResource returned $result"
+
+    return $result
 }
 
 Export-ModuleMember -Function *-TargetResource

@@ -188,15 +188,25 @@ function Test-TargetResource
 
     if ($CurrentValues.DatabaseServer -ne $DatabaseServer)
     {
-        Write-Verbose -Message ("Specified database server does not match the actual " + `
-                "database server. This resource cannot move the database " + `
-                "to a different SQL instance.")
-        return $false
+        $message = "Specified database server does not match the actual database " + `
+                   "server. This resource cannot move the database to a different " + `
+                   "SQL instance. Actual: $($CurrentValues.DatabaseServer), " + `
+                   "Desired: $DatabaseServer"
+        Write-Verbose -Message $message
+        Add-SPDscEvent -Message $message -EntryType 'Error' -EventID 1 -Source $MyInvocation.MyCommand.Source
+        $result = $false
+    }
+    else
+    {
+        $result = Test-SPDscParameterState -CurrentValues $CurrentValues `
+            -Source $($MyInvocation.MyCommand.Source) `
+            -DesiredValues $PSBoundParameters `
+            -ValuesToCheck @("Ensure")
     }
 
-    return Test-SPDscParameterState -CurrentValues $CurrentValues `
-        -DesiredValues $PSBoundParameters `
-        -ValuesToCheck @("Ensure")
+    Write-Verbose -Message "Test-TargetResource returned $result"
+
+    return $result
 }
 
 Export-ModuleMember -Function *-TargetResource

@@ -56,7 +56,11 @@ function Test-SPDscWebApplicationWorkflowConfig
         $CurrentSettings,
 
         [Parameter(Mandatory = $true)]
-        $DesiredSettings
+        $DesiredSettings,
+
+        [Parameter(Mandatory = $true)]
+        [System.String]
+        $Source
     )
 
     $relPath = "..\..\Modules\SharePointDsc.Util\SharePointDsc.Util.psm1"
@@ -66,7 +70,8 @@ function Test-SPDscWebApplicationWorkflowConfig
                        "ExternalWorkflowParticipantsEnabled")
     $testReturn = Test-SPDscParameterState -CurrentValues $CurrentSettings `
                                            -DesiredValues $DesiredSettings `
-                                           -ValuesToCheck $valuesTocheck
+                                           -ValuesToCheck $valuesTocheck `
+                                           -Source $Source
     return $testReturn
 }
 

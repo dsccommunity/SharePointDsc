@@ -147,8 +147,13 @@ function Test-TargetResource
     $modulePath = "..\..\Modules\SharePointDsc.WebApplication\SPWebApplication.BlockedFileTypes.psm1"
     Import-Module -Name (Join-Path -Path $PSScriptRoot -ChildPath $modulePath -Resolve)
 
-    return Test-SPDscWebApplicationBlockedFileTypeConfig -CurrentSettings $CurrentValues `
+    $result = Test-SPDscWebApplicationBlockedFileTypeConfig -CurrentSettings $CurrentValues `
+        -Source $($MyInvocation.MyCommand.Source) `
         -DesiredSettings $PSBoundParameters
+
+    Write-Verbose -Message "Test-TargetResource returned $result"
+
+    return $result
 }
 
 Export-ModuleMember -Function *-TargetResource

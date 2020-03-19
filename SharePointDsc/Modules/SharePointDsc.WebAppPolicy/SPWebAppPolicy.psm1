@@ -11,12 +11,10 @@ function Assert-SPDscPolicyUser()
         $UsernameToCheck
     )
 
-    foreach ($difference in $CurrentDifferences)
+    $diffcol = $CurrentDifferences | Where { $_.Username -eq $UsernameToCheck }
+    if ($diffcol.Count -gt 0)
     {
-        if ($difference.ContainsKey($UsernameToCheck))
-        {
-            return $true
-        }
+        return $true
     }
     return $false
 }

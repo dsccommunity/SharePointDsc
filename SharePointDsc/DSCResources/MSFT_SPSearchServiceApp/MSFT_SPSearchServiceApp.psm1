@@ -535,7 +535,11 @@ function Test-TargetResource
 
         if ($desired -ne $current)
         {
-            Write-Verbose -Message "Default content access account is different, returning false"
+            $message = ("Specified Default content access account is not in the desired state" + `
+                        "Actual: $current Desired: $desired")
+            Write-Verbose -Message $message
+            Add-SPDscEvent -Message $message -EntryType 'Error' -EventID 1 -Source $MyInvocation.MyCommand.Source
+
             Write-Verbose -Message "Desired: $desired. Current: $current."
             return $false
         }
@@ -543,20 +547,26 @@ function Test-TargetResource
 
     if ($Ensure -eq "Present")
     {
-        return Test-SPDscParameterState -CurrentValues $CurrentValues `
+        $result = Test-SPDscParameterState -CurrentValues $CurrentValues `
+            -Source $($MyInvocation.MyCommand.Source) `
             -DesiredValues $PSBoundParameters `
             -ValuesToCheck @("Ensure",
-            "ApplicationPool",
-            "SearchCenterUrl",
-            "ProxyName",
-            "AlertsEnabled")
+                "ApplicationPool",
+                "SearchCenterUrl",
+                "ProxyName",
+                "AlertsEnabled")
     }
     else
     {
-        return Test-SPDscParameterState -CurrentValues $CurrentValues `
+        $result = Test-SPDscParameterState -CurrentValues $CurrentValues `
+            -Source $($MyInvocation.MyCommand.Source) `
             -DesiredValues $PSBoundParameters `
             -ValuesToCheck @("Ensure")
     }
+
+    Write-Verbose -Message "Test-TargetResource returned $result"
+
+    return $result
 }
 
 Export-ModuleMember -Function *-TargetResource

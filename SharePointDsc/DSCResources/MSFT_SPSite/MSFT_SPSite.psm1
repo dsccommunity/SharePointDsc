@@ -488,17 +488,27 @@ function Test-TargetResource
     {
         if ($CurrentValues.CreateDefaultGroups -ne $true)
         {
+            $message = "The default site groups are not configured as desired."
+            Write-Verbose -Message $message
+            Add-SPDscEvent -Message $message -EntryType 'Error' -EventID 1 -Source $MyInvocation.MyCommand.Source
+
+            Write-Verbose -Message "Test-TargetResource returned false"
             return $false
         }
     }
 
-    return Test-SPDscParameterState -CurrentValues $CurrentValues `
+    $result = Test-SPDscParameterState -CurrentValues $CurrentValues `
+        -Source $($MyInvocation.MyCommand.Source) `
         -DesiredValues $PSBoundParameters `
         -ValuesToCheck @("Url",
-        "QuotaTemplate",
-        "OwnerAlias",
-        "SecondaryOwnerAlias",
-        "AdministrationSiteType")
+            "QuotaTemplate",
+            "OwnerAlias",
+            "SecondaryOwnerAlias",
+            "AdministrationSiteType")
+
+    Write-Verbose -Message "Test-TargetResource returned $result"
+
+    return $result
 }
 
 Export-ModuleMember -Function *-TargetResource

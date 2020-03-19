@@ -391,6 +391,11 @@ function Test-TargetResource
 
     if ($CurrentValues.Ensure -ne $Ensure)
     {
+        $message = "Ensure {$($CurrentValues.Ensure)} does not match the desired value {$Ensure}"
+        Write-Verbose -Message $message
+        Add-SPDscEvent -Message $message -EntryType 'Error' -EventID 1 -Source $MyInvocation.MyCommand.Source
+
+        Write-Verbose -Message "Test-TargetResource returned false"
         return $false
     }
 
@@ -400,6 +405,11 @@ function Test-TargetResource
 
         if (-not $CurrentValues.ServiceAppProxies)
         {
+            $message = "Proxy Group $Name does not contain any proxies"
+            Write-Verbose -Message $message
+            Add-SPDscEvent -Message $message -EntryType 'Error' -EventID 1 -Source $MyInvocation.MyCommand.Source
+
+            Write-Verbose -Message "Test-TargetResource returned false"
             return $false
         }
 
@@ -412,7 +422,13 @@ function Test-TargetResource
         }
         else
         {
-            Write-Verbose -Message "ServiceAppProxies do not match"
+            $message = ("Proxies in proxy Group $Name does not match. Actual: " + `
+                        "$($CurrentValues.$ServiceAppProxies -join ", "). Desired: " + `
+                        "$($ServiceAppProxies -join ", ")")
+            Write-Verbose -Message $message
+            Add-SPDscEvent -Message $message -EntryType 'Error' -EventID 1 -Source $MyInvocation.MyCommand.Source
+
+            Write-Verbose -Message "Test-TargetResource returned false"
             return $false
         }
     }
@@ -423,6 +439,11 @@ function Test-TargetResource
 
         if (-not $CurrentValues.ServiceAppProxies)
         {
+            $message = "Proxy Group $Name does not contain any proxies"
+            Write-Verbose -Message $message
+            Add-SPDscEvent -Message $message -EntryType 'Error' -EventID 1 -Source $MyInvocation.MyCommand.Source
+
+            Write-Verbose -Message "Test-TargetResource returned false"
             return $false
         }
 
@@ -435,7 +456,13 @@ function Test-TargetResource
         }
         elseif ($differences.sideindicator -contains "=>")
         {
-            Write-Verbose -Message "ServiceAppProxiesToInclude does not match"
+            $message = ("Included proxies in proxy Group $Name does not match. Actual: " + `
+                        "$($CurrentValues.ServiceAppProxies -join ", "). Desired: " + `
+                        "$($ServiceAppProxiesToInclude -join ", ")")
+            Write-Verbose -Message $message
+            Add-SPDscEvent -Message $message -EntryType 'Error' -EventID 1 -Source $MyInvocation.MyCommand.Source
+
+            Write-Verbose -Message "Test-TargetResource returned false"
             return $false
         }
     }
@@ -446,6 +473,7 @@ function Test-TargetResource
 
         if (-not $CurrentValues.ServiceAppProxies)
         {
+            Write-Verbose -Message "Test-TargetResource returned true"
             return $true
         }
 
@@ -455,14 +483,22 @@ function Test-TargetResource
 
         if ($null -eq $differences)
         {
+            Write-Verbose -Message "Test-TargetResource returned false"
             return $false
         }
         elseif ($differences.sideindicator -contains "==")
         {
-            Write-Verbose -Message "ServiceAppProxiesToExclude does not match"
+            $message = ("Excluded proxies in proxy Group $Name does not match. Actual: " + `
+                        "$($CurrentValues.ServiceAppProxies -join ", "). Desired: " + `
+                        "$($ServiceAppProxiesToExclude -join ", ")")
+            Write-Verbose -Message $message
+            Add-SPDscEvent -Message $message -EntryType 'Error' -EventID 1 -Source $MyInvocation.MyCommand.Source
+
+            Write-Verbose -Message "Test-TargetResource returned false"
             return $false
         }
     }
 
+    Write-Verbose -Message "Test-TargetResource returned true"
     return $true
 }

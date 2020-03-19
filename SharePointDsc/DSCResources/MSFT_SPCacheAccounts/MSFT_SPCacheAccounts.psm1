@@ -282,7 +282,8 @@ function Test-TargetResource
 
     if ($SetWebAppPolicy -eq $true)
     {
-        return Test-SPDscParameterState -CurrentValues $CurrentValues `
+        $result = Test-SPDscParameterState -CurrentValues $CurrentValues `
+            -Source $($MyInvocation.MyCommand.Source) `
             -DesiredValues $PSBoundParameters `
             -ValuesToCheck @("SuperUserAlias", `
                 "SuperReaderAlias", `
@@ -290,11 +291,16 @@ function Test-TargetResource
     }
     else
     {
-        return Test-SPDscParameterState -CurrentValues $CurrentValues `
+        $result = Test-SPDscParameterState -CurrentValues $CurrentValues `
+            -Source $($MyInvocation.MyCommand.Source) `
             -DesiredValues $PSBoundParameters `
             -ValuesToCheck @("SuperUserAlias", `
                 "SuperReaderAlias")
     }
+
+    Write-Verbose -Message "Test-TargetResource returned $result"
+
+    return $result
 }
 
 Export-ModuleMember -Function *-TargetResource

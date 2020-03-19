@@ -317,20 +317,26 @@ function Test-TargetResource
 
     if ($Ensure -eq "Present")
     {
-        return Test-SPDscParameterState -CurrentValues $CurrentValues `
+        $result = Test-SPDscParameterState -CurrentValues $CurrentValues `
+            -Source $($MyInvocation.MyCommand.Source) `
             -DesiredValues $PSBoundParameters `
             -ValuesToCheck @("UsageLogCutTime",
-            "UsageLogLocation",
-            "UsageLogMaxFileSizeKB",
-            "UsageLogMaxSpaceGB",
-            "Ensure")
+                "UsageLogLocation",
+                "UsageLogMaxFileSizeKB",
+                "UsageLogMaxSpaceGB",
+                "Ensure")
     }
     else
     {
-        return Test-SPDscParameterState -CurrentValues $CurrentValues `
+        $result = Test-SPDscParameterState -CurrentValues $CurrentValues `
+            -Source $($MyInvocation.MyCommand.Source) `
             -DesiredValues $PSBoundParameters `
             -ValuesToCheck @("Ensure")
     }
+
+    Write-Verbose -Message "Test-TargetResource returned $result"
+
+    return $result
 }
 
 Export-ModuleMember -Function *-TargetResource

@@ -85,8 +85,15 @@ function Test-SPDscWebApplicationBlockedFileTypeConfig
         $CurrentSettings,
 
         [Parameter(Mandatory = $true)]
-        $DesiredSettings
+        $DesiredSettings,
+
+        [Parameter(Mandatory = $true)]
+        [System.String]
+        $Source
     )
+
+    $relPath = "..\..\Modules\SharePointDsc.Util\SharePointDsc.Util.psm1"
+    Import-Module (Join-Path $PSScriptRoot $relPath -Resolve)
 
     if (($DesiredSettings.ContainsKey("Blocked") -eq $true) `
             -and (($DesiredSettings.ContainsKey("EnsureBlocked") -eq $true) `
@@ -114,6 +121,11 @@ function Test-SPDscWebApplicationBlockedFileTypeConfig
         }
         else
         {
+            $message = ("The parameter Blocked does not match the desired state. " + `
+                        "Actual: $($CurrentSettings.Blocked). Desired: $($DesiredSettings.Blocked)")
+            Write-Verbose -Message $message
+            Add-SPDscEvent -Message $message -EntryType 'Error' -EventID 1 -Source $Source
+
             return $false
         }
     }
@@ -126,6 +138,11 @@ function Test-SPDscWebApplicationBlockedFileTypeConfig
         }
         if ($null -ne $itemsToAdd)
         {
+            $message = ("The parameter EnsureBlocked does not match the desired state. " + `
+                        "Actual: $($CurrentSettings.Blocked). Desired: $($DesiredSettings.EnsureBlocked)")
+            Write-Verbose -Message $message
+            Add-SPDscEvent -Message $message -EntryType 'Error' -EventID 1 -Source $Source
+
             return $false
         }
     }
@@ -137,6 +154,11 @@ function Test-SPDscWebApplicationBlockedFileTypeConfig
             -ExcludeDifferent -IncludeEqual
         if ($null -ne $itemsToRemove)
         {
+            $message = ("The parameter EnsureAllowed does not match the desired state. " + `
+                        "Actual: $($CurrentSettings.Blocked). Desired: $($DesiredSettings.EnsureAllowed)")
+            Write-Verbose -Message $message
+            Add-SPDscEvent -Message $message -EntryType 'Error' -EventID 1 -Source $Source
+
             return $false
         }
     }

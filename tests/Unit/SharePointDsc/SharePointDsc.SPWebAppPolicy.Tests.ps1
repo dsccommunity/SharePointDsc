@@ -795,6 +795,12 @@ try
                                 IdentityType       = "Native"
                                 ActAsSystemAccount = $false
                             } -ClientOnly)
+                        (New-CimInstance -ClassName MSFT_SPWebAppPolicy -Property @{
+                                Username           = "contoso\user3"
+                                PermissionLevel    = "Full Control"
+                                IdentityType       = "Native"
+                                ActAsSystemAccount = $false
+                            } -ClientOnly)
                     )
                 }
                 Mock -CommandName Get-SPWebapplication -MockWith {

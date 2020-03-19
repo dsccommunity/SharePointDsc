@@ -292,6 +292,11 @@ function Test-TargetResource
 
     if ($null -eq $CurrentValues.Members)
     {
+        $message = "There are no users configured as Farm Administrator"
+        Write-Verbose -Message $message
+        Add-SPDscEvent -Message $message -EntryType 'Error' -EventID 1 -Source $MyInvocation.MyCommand.Source
+
+        Write-Verbose -Message "Test-TargetResource returned false"
         return $false
     }
 
@@ -303,12 +308,19 @@ function Test-TargetResource
 
         if ($null -eq $differences)
         {
-            Write-Verbose "Farm Administrators group matches"
+            Write-Verbose -Message "Farm Administrators group matches the specified Members"
+
+            Write-Verbose -Message "Test-TargetResource returned true"
             return $true
         }
         else
         {
-            Write-Verbose "Farm Administrators group does not match"
+            $message = ("Farm Administrators group does not match the specified Members" + `
+                        "Actual: $($CurrentValues.Members -join ", "). Desired: $($Members -join ", ")")
+            Write-Verbose -Message $message
+            Add-SPDscEvent -Message $message -EntryType 'Error' -EventID 1 -Source $MyInvocation.MyCommand.Source
+
+            Write-Verbose -Message "Test-TargetResource returned false"
             return $false
         }
     }
@@ -321,7 +333,11 @@ function Test-TargetResource
         {
             if (-not($CurrentValues.Members -contains $member))
             {
-                Write-Verbose "$member is not a Farm Administrator. Set result to false"
+                $message = ("$member is not a Farm Administrator, but is included in MembersToInclude: " + `
+                            "$($MembersToInclude -join ", ")")
+                Write-Verbose -Message $message
+                Add-SPDscEvent -Message $message -EntryType 'Error' -EventID 1 -Source $MyInvocation.MyCommand.Source
+
                 $result = $false
             }
             else
@@ -338,7 +354,11 @@ function Test-TargetResource
         {
             if ($CurrentValues.Members -contains $member)
             {
-                Write-Verbose "$member is a Farm Administrator. Set result to false"
+                $message = ("$member is a Farm Administrator, but is included in MembersToExclude: " + `
+                            "$($MembersToExclude -join ", ")")
+                Write-Verbose -Message $message
+                Add-SPDscEvent -Message $message -EntryType 'Error' -EventID 1 -Source $MyInvocation.MyCommand.Source
+
                 $result = $false
             }
             else
@@ -347,6 +367,8 @@ function Test-TargetResource
             }
         }
     }
+
+    Write-Verbose -Message "Test-TargetResource returned $result"
 
     return $result
 }

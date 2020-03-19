@@ -1,3 +1,52 @@
+function Add-SPDscEvent
+{
+    [CmdletBinding()]
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [System.String]
+        $Message,
+
+        [Parameter(Mandatory = $true)]
+        [System.String]
+        $Source = 'Generic',
+
+        [Parameter()]
+        [ValidateSet('Error', 'Information', 'FailureAudit', 'SuccessAudit', 'Warning')]
+        [System.String]
+        $EntryType = 'Information',
+
+        [Parameter()]
+        [System.UInt32]
+        $EventID = 1
+    )
+
+    try
+    {
+        $CurrentLog = Get-EventLog -LogName 'SharePointDsc' -Source $Source -ErrorAction SilentlyContinue
+        if ($null -eq $CurrentLog)
+        {
+            $CurrentLog = New-EventLog -LogName 'SharePointDsc' -Source $Source -ErrorAction SilentlyContinue
+        }
+        [System.Diagnostics.EventLog]::CreateEventSource($Source, "SharePointDsc")
+    }
+    catch
+    {
+        Write-Verbose $_
+    }
+
+    try
+    {
+        Write-EventLog -LogName 'SharePointDsc' -Source $Source `
+            -EventID $EventID -Message $Message -EntryType $EntryType `
+            -ErrorAction SilentlyContinue
+    }
+    catch
+    {
+        Write-Verbose $_
+    }
+}
+
 function Add-SPDscUserToLocalAdmin
 {
     [CmdletBinding()]
@@ -40,6 +89,63 @@ function Clear-SPDscKerberosToken
         }
 
     }
+}
+
+function Compare-PSCustomObjectArrays
+{
+    [CmdletBinding()]
+    [OutputType([System.Object[]])]
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [AllowEmptyCollection()]
+        [System.Object[]]
+        $DesiredValues,
+
+        [Parameter(Mandatory = $true)]
+        [AllowEmptyCollection()]
+        [System.Object[]]
+        $CurrentValues
+    )
+
+    $DriftedProperties = @()
+    foreach ($DesiredEntry in $DesiredValues)
+    {
+        $Properties = $DesiredEntry.PSObject.Properties
+        $KeyProperty = $Properties.Name[0]
+
+        $EquivalentEntryInCurrent = $CurrentValues | Where-Object -FilterScript { $_.$KeyProperty -eq $DesiredEntry.$KeyProperty }
+        if ($null -eq $EquivalentEntryInCurrent)
+        {
+            $result = @{
+                Property     = $DesiredEntry
+                PropertyName = $KeyProperty
+                Desired      = $DesiredEntry.$KeyProperty
+                Current      = $null
+            }
+            $DriftedProperties += $DesiredEntry
+        }
+        else
+        {
+            foreach ($property in $Properties)
+            {
+                $propertyName = $property.Name
+
+                if ($DesiredEntry.$PropertyName -ne $EquivalentEntryInCurrent.$PropertyName)
+                {
+                    $result = @{
+                        Property     = $DesiredEntry
+                        PropertyName = $PropertyName
+                        Desired      = $DesiredEntry.$PropertyName
+                        Current      = $EquivalentEntryInCurrent.$PropertyName
+                    }
+                    $DriftedProperties += $result
+                }
+            }
+        }
+    }
+
+    return $DriftedProperties
 }
 
 function Convert-SPDscADGroupIDToName
@@ -801,12 +907,18 @@ function Test-SPDscParameterState
         [Object]
         $DesiredValues,
 
-        [Parameter(, Position = 3)]
+        [Parameter(Position = 3)]
         [Array]
-        $ValuesToCheck
+        $ValuesToCheck,
+
+        [Parameter(Position = 4)]
+        [System.String]
+        $Source = 'Generic'
     )
 
     $returnValue = $true
+
+    $DriftedParameters = @{ }
 
     if (($DesiredValues.GetType().Name -ne "HashTable") -and `
         ($DesiredValues.GetType().Name -ne "CimInstance") -and `
@@ -864,13 +976,47 @@ function Test-SPDscParameterState
                                     "values, but it was either not present or " + `
                                     "was null. This has caused the test method " + `
                                     "to return false.")
+                            $DriftedParameters.Add($fieldName, '')
                             $returnValue = $false
+                        }
+                        elseif ($desiredType.Name -eq 'ciminstance[]')
+                        {
+                            Write-Verbose "The current property {$_} is a CimInstance[]"
+                            $AllDesiredValuesAsArray = @()
+                            foreach ($item in $DesiredValues.$_)
+                            {
+                                $currentEntry = @{ }
+                                foreach ($prop in $item.CIMInstanceProperties)
+                                {
+                                    $value = $prop.Value
+                                    if ([System.String]::IsNullOrEmpty($value))
+                                    {
+                                        $value = $null
+                                    }
+                                    $currentEntry.Add($prop.Name, $value)
+                                }
+                                $AllDesiredValuesAsArray += [PSCustomObject]$currentEntry
+                            }
+
+                            $arrayCompare = Compare-PSCustomObjectArrays -CurrentValues $CurrentValues.$fieldName `
+                                -DesiredValues $AllDesiredValuesAsArray
+                            if ($null -ne $arrayCompare)
+                            {
+                                foreach ($item in $arrayCompare)
+                                {
+                                    $EventValue = "<CurrentValue>[$($item.PropertyName)]$($item.CurrentValue)</CurrentValue>"
+                                    $EventValue += "<DesiredValue>[$($item.PropertyName)]$($item.DesiredValue)</DesiredValue>"
+                                    $DriftedParameters.Add($fieldName, $EventValue)
+                                }
+                                $returnValue = $false
+                            }
                         }
                         else
                         {
                             $arrayCompare = Compare-Object -ReferenceObject $CurrentValues.$fieldName `
                                 -DifferenceObject $DesiredValues.$fieldName
-                            if ($null -ne $arrayCompare)
+                            if ($null -ne $arrayCompare -and `
+                                    -not [System.String]::IsNullOrEmpty($arrayCompare.InputObject))
                             {
                                 Write-Verbose -Message ("Found an array for property $fieldName " + `
                                         "in the current values, but this array " + `
@@ -879,6 +1025,10 @@ function Test-SPDscParameterState
                                 $arrayCompare | ForEach-Object -Process {
                                     Write-Verbose -Message "$($_.InputObject) - $($_.SideIndicator)"
                                 }
+
+                                $EventValue = "<CurrentValue>$($CurrentValues.$fieldName -join ", ")</CurrentValue>"
+                                $EventValue += "<DesiredValue>$($DesiredValues.$fieldName -join ", ")</DesiredValue>"
+                                $DriftedParameters.Add($fieldName, $EventValue)
                                 $returnValue = $false
                             }
                         }
@@ -901,6 +1051,9 @@ function Test-SPDscParameterState
                                             "'$($CurrentValues.$fieldName)' " + `
                                             "and desired state is " + `
                                             "'$($DesiredValues.$fieldName)'")
+                                    $EventValue = "<CurrentValue>$($CurrentValues.$fieldName)</CurrentValue>"
+                                    $EventValue += "<DesiredValue>$($DesiredValues.$fieldName)</DesiredValue>"
+                                    $DriftedParameters.Add($fieldName, $EventValue)
                                     $returnValue = $false
                                 }
                             }
@@ -918,6 +1071,9 @@ function Test-SPDscParameterState
                                             "'$($CurrentValues.$fieldName)' " + `
                                             "and desired state is " + `
                                             "'$($DesiredValues.$fieldName)'")
+                                    $EventValue = "<CurrentValue>$($CurrentValues.$fieldName)</CurrentValue>"
+                                    $EventValue += "<DesiredValue>$($DesiredValues.$fieldName)</DesiredValue>"
+                                    $DriftedParameters.Add($fieldName, $EventValue)
                                     $returnValue = $false
                                 }
                             }
@@ -935,6 +1091,9 @@ function Test-SPDscParameterState
                                             "'$($CurrentValues.$fieldName)' " + `
                                             "and desired state is " + `
                                             "'$($DesiredValues.$fieldName)'")
+                                    $EventValue = "<CurrentValue>$($CurrentValues.$fieldName)</CurrentValue>"
+                                    $EventValue += "<DesiredValue>$($DesiredValues.$fieldName)</DesiredValue>"
+                                    $DriftedParameters.Add($fieldName, $EventValue)
                                     $returnValue = $false
                                 }
                             }
@@ -948,6 +1107,9 @@ function Test-SPDscParameterState
                                             "'$($CurrentValues.$fieldName)' " + `
                                             "and desired state is " + `
                                             "'$($DesiredValues.$fieldName)'")
+                                    $EventValue = "<CurrentValue>$($CurrentValues.$fieldName)</CurrentValue>"
+                                    $EventValue += "<DesiredValue>$($DesiredValues.$fieldName)</DesiredValue>"
+                                    $DriftedParameters.Add($fieldName, $EventValue)
                                     $returnValue = $false
                                 }
                             }
@@ -965,7 +1127,64 @@ function Test-SPDscParameterState
                                             "'$($CurrentValues.$fieldName)' " + `
                                             "and desired state is " + `
                                             "'$($DesiredValues.$fieldName)'")
+                                    $EventValue = "<CurrentValue>$($CurrentValues.$fieldName)</CurrentValue>"
+                                    $EventValue += "<DesiredValue>$($DesiredValues.$fieldName)</DesiredValue>"
+                                    $DriftedParameters.Add($fieldName, $EventValue)
                                     $returnValue = $false
+                                }
+                            }
+                            "Hashtable"
+                            {
+                                Write-Verbose -Message "The current property {$fieldName} is a Hashtable"
+                                $AllDesiredValuesAsArray = @()
+                                foreach ($item in $DesiredValues.$fieldName)
+                                {
+                                    $currentEntry = @{ }
+                                    foreach ($key in $item.Keys)
+                                    {
+                                        $value = $item.$key
+                                        if ([System.String]::IsNullOrEmpty($value))
+                                        {
+                                            $value = $null
+                                        }
+                                        $currentEntry.Add($key, $value)
+                                    }
+                                    $AllDesiredValuesAsArray += [PSCustomObject]$currentEntry
+                                }
+
+                                if ($null -ne $DesiredValues.$fieldName -and $null -eq $CurrentValues.$fieldName)
+                                {
+                                    $returnValue = $false
+                                }
+                                else
+                                {
+                                    $AllCurrentValuesAsArray = @()
+                                    foreach ($item in $CurrentValues.$fieldName)
+                                    {
+                                        $currentEntry = @{ }
+                                        foreach ($key in $item.Keys)
+                                        {
+                                            $value = $item.$key
+                                            if ([System.String]::IsNullOrEmpty($value))
+                                            {
+                                                $value = $null
+                                            }
+                                            $currentEntry.Add($key, $value)
+                                        }
+                                        $AllCurrentValuesAsArray += [PSCustomObject]$currentEntry
+                                    }
+                                    $arrayCompare = Compare-PSCustomObjectArrays -CurrentValues $AllCurrentValuesAsArray `
+                                        -DesiredValues $AllCurrentValuesAsArray
+                                    if ($null -ne $arrayCompare)
+                                    {
+                                        foreach ($item in $arrayCompare)
+                                        {
+                                            $EventValue = "<CurrentValue>[$($item.PropertyName)]$($item.CurrentValue)</CurrentValue>"
+                                            $EventValue += "<DesiredValue>[$($item.PropertyName)]$($item.DesiredValue)</DesiredValue>"
+                                            $DriftedParameters.Add($fieldName, $EventValue)
+                                        }
+                                        $returnValue = $false
+                                    }
                                 }
                             }
                             default
@@ -974,6 +1193,9 @@ function Test-SPDscParameterState
                                         "as the type ($($desiredType.Name)) is " + `
                                         "not handled by the " + `
                                         "Test-SPDscParameterState cmdlet")
+                                $EventValue = "<CurrentValue>$($CurrentValues.$fieldName)</CurrentValue>"
+                                $EventValue += "<DesiredValue>$($DesiredValues.$fieldName)</DesiredValue>"
+                                $DriftedParameters.Add($fieldName, $EventValue)
                                 $returnValue = $false
                             }
                         }
@@ -982,6 +1204,37 @@ function Test-SPDscParameterState
             }
         }
     }
+
+    if ($returnValue -eq $false)
+    {
+        $EventMessage = "<SPDscEvent>`r`n"
+        $EventMessage += "    <ConfigurationDrift Source=`"$Source`">`r`n"
+
+        $EventMessage += "        <ParametersNotInDesiredState>`r`n"
+        $driftedValue = ''
+        foreach ($key in $DriftedParameters.Keys)
+        {
+            Write-Verbose -Message "Detected Drifted Parameter [$Source]$key"
+            $EventMessage += "            <Param Name=`"$key`">" + $DriftedParameters.$key + "</Param>`r`n"
+        }
+        $EventMessage += "        </ParametersNotInDesiredState>`r`n"
+        $EventMessage += "    </ConfigurationDrift>`r`n"
+        $EventMessage += "    <DesiredValues>`r`n"
+        foreach ($Key in $DesiredValues.Keys)
+        {
+            $Value = $DesiredValues.$Key -join ", "
+            if ([System.String]::IsNullOrEmpty($Value))
+            {
+                $Value = "`$null"
+            }
+            $EventMessage += "        <Param Name =`"$key`">$Value</Param>`r`n"
+        }
+        $EventMessage += "    </DesiredValues>`r`n"
+        $EventMessage += "</SPDscEvent>"
+
+        Add-SPDscEvent -Message $EventMessage -EntryType 'Error' -EventID 1 -Source $Source
+    }
+
     return $returnValue
 }
 

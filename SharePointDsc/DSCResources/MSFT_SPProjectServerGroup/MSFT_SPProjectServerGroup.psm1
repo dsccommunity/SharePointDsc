@@ -405,10 +405,13 @@ function Test-TargetResource
     if ($PSBoundParameters.ContainsKey("Members") -eq $true)
     {
         $membersMatch = Test-SPDscParameterState -CurrentValues $CurrentValues `
+            -Source $($MyInvocation.MyCommand.Source) `
             -DesiredValues $PSBoundParameters `
             -ValuesToCheck @("Members")
+
         if ($membersMatch -eq $false)
         {
+            Write-Verbose -Message "Test-TargetResource returned false"
             return $false
         }
     }
@@ -425,7 +428,11 @@ function Test-TargetResource
         }
         if ($missingMembers -eq $true)
         {
-            Write-Verbose -Message "Users from the MembersToInclude property are not included, returning false"
+            $message = "Users from the MembersToInclude property are not included"
+            Write-Verbose -Message $message
+            Add-SPDscEvent -Message $message -EntryType 'Error' -EventID 1 -Source $MyInvocation.MyCommand.Source
+
+            Write-Verbose -Message "Test-TargetResource returned false"
             return $false
         }
     }
@@ -442,19 +449,28 @@ function Test-TargetResource
         }
         if ($extraMembers -eq $true)
         {
-            Write-Verbose -Message "Users from the MembersToExclude property are included, returning false"
+            $message = "Users from the MembersToExclude property are included"
+            Write-Verbose -Message $message
+            Add-SPDscEvent -Message $message -EntryType 'Error' -EventID 1 -Source $MyInvocation.MyCommand.Source
+
+            Write-Verbose -Message "Test-TargetResource returned false"
             return $false
         }
     }
 
-    return Test-SPDscParameterState -CurrentValues $CurrentValues `
+    $result = Test-SPDscParameterState -CurrentValues $CurrentValues `
+        -Source $($MyInvocation.MyCommand.Source) `
         -DesiredValues $PSBoundParameters `
         -ValuesToCheck @(
-        "Name",
-        "Description",
-        "ADGroup",
-        "Ensure"
-    )
+            "Name",
+            "Description",
+            "ADGroup",
+            "Ensure"
+        )
+
+    Write-Verbose -Message "Test-TargetResource returned $result"
+
+    return $result
 }
 
 Export-ModuleMember -Function *-TargetResource

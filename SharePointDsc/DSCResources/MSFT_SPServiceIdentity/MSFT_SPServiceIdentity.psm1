@@ -165,5 +165,17 @@ function Test-TargetResource
     Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
     Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
 
-    return ($CurrentValues.ManagedAccount -eq $ManagedAccount)
+    $result = ($CurrentValues.ManagedAccount -eq $ManagedAccount)
+
+    if ($result -eq $false)
+    {
+        $message = ("Specfied ManagedAccount {$($CurrentValues.ManagedAccount)} is not in the " + `
+                    "desired state {$ManagedAccount}.")
+        Write-Verbose -Message $message
+        Add-SPDscEvent -Message $message -EntryType 'Error' -EventID 1 -Source $MyInvocation.MyCommand.Source
+    }
+
+    Write-Verbose -Message "Test-TargetResource returned $result"
+
+    return $result
 }

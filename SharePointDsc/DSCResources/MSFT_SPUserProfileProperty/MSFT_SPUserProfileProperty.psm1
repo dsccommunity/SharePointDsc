@@ -825,36 +825,42 @@ function Test-TargetResource
 
     if ($Ensure -eq "Present")
     {
-        return Test-SPDscParameterState -CurrentValues $CurrentValues `
+        $result = Test-SPDscParameterState -CurrentValues $CurrentValues `
+            -Source $($MyInvocation.MyCommand.Source) `
             -DesiredValues $PSBoundParameters `
             -ValuesToCheck @("Name",
-            "DisplayName",
-            "Type",
-            "Description",
-            "PolicySetting",
-            "PrivacySetting",
-            "PropertyMappings",
-            "Length",
-            "DisplayOrder",
-            "IsEventLog",
-            "IsVisibleOnEditor",
-            "IsVisibleOnViewer",
-            "IsUserEditable",
-            "IsAlias",
-            "IsSearchable",
-            "IsReplicable",
-            "UserOverridePrivacy",
-            "TermGroup",
-            "TermStore",
-            "TermSet",
-            "Ensure")
+                "DisplayName",
+                "Type",
+                "Description",
+                "PolicySetting",
+                "PrivacySetting",
+                "PropertyMappings",
+                "Length",
+                "DisplayOrder",
+                "IsEventLog",
+                "IsVisibleOnEditor",
+                "IsVisibleOnViewer",
+                "IsUserEditable",
+                "IsAlias",
+                "IsSearchable",
+                "IsReplicable",
+                "UserOverridePrivacy",
+                "TermGroup",
+                "TermStore",
+                "TermSet",
+                "Ensure")
     }
     else
     {
-        return Test-SPDscParameterState -CurrentValues $CurrentValues `
+        $result = Test-SPDscParameterState -CurrentValues $CurrentValues `
+            -Source $($MyInvocation.MyCommand.Source) `
             -DesiredValues $PSBoundParameters `
             -ValuesToCheck @("Ensure")
     }
+
+    Write-Verbose -Message "Test-TargetResource returned $result"
+
+    return $result
 }
 
 Export-ModuleMember -Function *-TargetResource

@@ -682,23 +682,35 @@ function Test-TargetResource
         if ($UpdateProxyGroup -eq $true -and `
                 $CurrentValues.UpdateProxyGroup -eq $true)
         {
-            return $false
-        }
+            $message = "ProxyGroup fix is not implemented"
+            Write-Verbose -Message $message
+            Add-SPDscEvent -Message $message -EntryType 'Error' -EventID 1 -Source $MyInvocation.MyCommand.Source
 
-        return Test-SPDscParameterState -CurrentValues $CurrentValues `
-            -DesiredValues $PSBoundParameters `
-            -ValuesToCheck @("Name",
-            "EnableNetBIOS",
-            "NoILMUsed",
-            "SiteNamingConflictResolution",
-            "Ensure")
+            $result = $false
+        }
+        else
+        {
+            $result = Test-SPDscParameterState -CurrentValues $CurrentValues `
+                -Source $($MyInvocation.MyCommand.Source) `
+                -DesiredValues $PSBoundParameters `
+                -ValuesToCheck @("Name",
+                "EnableNetBIOS",
+                "NoILMUsed",
+                "SiteNamingConflictResolution",
+                "Ensure")
+        }
     }
     else
     {
-        return Test-SPDscParameterState -CurrentValues $CurrentValues `
+        $result = Test-SPDscParameterState -CurrentValues $CurrentValues `
+            -Source $($MyInvocation.MyCommand.Source) `
             -DesiredValues $PSBoundParameters `
             -ValuesToCheck @("Name", "Ensure")
     }
+
+    Write-Verbose -Message "Test-TargetResource returned $result"
+
+    return $result
 }
 
 Export-ModuleMember -Function *-TargetResource

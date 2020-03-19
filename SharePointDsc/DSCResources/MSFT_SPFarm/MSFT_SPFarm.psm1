@@ -1137,14 +1137,19 @@ function Test-TargetResource
     Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
     Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
 
-    return Test-SPDscParameterState -CurrentValues $CurrentValues `
+    $result = Test-SPDscParameterState -CurrentValues $CurrentValues `
+        -Source $($MyInvocation.MyCommand.Source) `
         -DesiredValues $PSBoundParameters `
         -ValuesToCheck @("Ensure",
-        "RunCentralAdmin",
-        "CentralAdministrationUrl",
-        "CentralAdministrationPort",
-        "CentralAdministrationAuth",
-        "DeveloperDashboard")
+            "RunCentralAdmin",
+            "CentralAdministrationUrl",
+            "CentralAdministrationPort",
+            "CentralAdministrationAuth",
+            "DeveloperDashboard")
+
+    Write-Verbose -Message "Test-TargetResource returned $result"
+
+    return $result
 }
 
 Export-ModuleMember -Function *-TargetResource

@@ -285,6 +285,11 @@ function Test-TargetResource
         }
         if ($null -eq $configuredDomain)
         {
+            $message = "Current SearchActiveDirectoryDomains does not match the desired state."
+            Write-Verbose -Message $message
+            Add-SPDscEvent -Message $message -EntryType 'Error' -EventID 1 -Source $MyInvocation.MyCommand.Source
+
+            Write-Verbose -Message "Test-TargetResource returned false"
             return $false
         }
     }
@@ -299,16 +304,26 @@ function Test-TargetResource
 
         if ($null -eq $specifiedDomain)
         {
+            $message = "Current SearchActiveDirectoryDomains does not match the desired state."
+            Write-Verbose -Message $message
+            Add-SPDscEvent -Message $message -EntryType 'Error' -EventID 1 -Source $MyInvocation.MyCommand.Source
+
+            Write-Verbose -Message "Test-TargetResource returned false"
             return $false
         }
     }
 
-    return Test-SPDscParameterState -CurrentValues $CurrentValues `
+    $result = Test-SPDscParameterState -CurrentValues $CurrentValues `
+        -Source $($MyInvocation.MyCommand.Source) `
         -DesiredValues $PSBoundParameters `
         -ValuesToCheck @("ActiveDirectoryCustomFilter", `
             "ActiveDirectoryCustomQuery", `
             "ActiveDirectorySearchTimeout", `
             "OnlySearchWithinSiteCollection")
+
+    Write-Verbose -Message "Test-TargetResource returned $result"
+
+    return $result
 }
 
 Export-ModuleMember -Function *-TargetResource

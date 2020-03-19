@@ -1068,9 +1068,14 @@ function Test-TargetResource
     Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
     Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
 
-    return Test-SPDscParameterState -CurrentValues $CurrentValues `
+    $result = Test-SPDscParameterState -CurrentValues $CurrentValues `
+        -Source $($MyInvocation.MyCommand.Source) `
         -DesiredValues $PSBoundParameters `
         -ValuesToCheck @("Ensure")
+
+    Write-Verbose -Message "Test-TargetResource returned $result"
+
+    return $result
 }
 
 function Test-SPDscPrereqInstallStatus
@@ -1099,8 +1104,8 @@ function Test-SPDscPrereqInstallStatus
             "Equals"
             {
                 $prereq = $InstalledItems | Where-Object -FilterScript {
-                                $null -ne $_.DisplayName -and $_.DisplayName.Trim() -eq $itemToCheck.SearchValue
-                            }
+                    $null -ne $_.DisplayName -and $_.DisplayName.Trim() -eq $itemToCheck.SearchValue
+                }
                 if ($null -eq $prereq)
                 {
                     $itemsInstalled = $false
@@ -1111,8 +1116,8 @@ function Test-SPDscPrereqInstallStatus
             "Match"
             {
                 $prereq = $InstalledItems | Where-Object -FilterScript {
-                                $null -ne $_.DisplayName -and $_.DisplayName.Trim() -match $itemToCheck.SearchValue
-                            }
+                    $null -ne $_.DisplayName -and $_.DisplayName.Trim() -match $itemToCheck.SearchValue
+                }
                 if ($null -eq $prereq)
                 {
                     $itemsInstalled = $false
@@ -1123,8 +1128,8 @@ function Test-SPDscPrereqInstallStatus
             "Like"
             {
                 $prereq = $InstalledItems | Where-Object -FilterScript {
-                                $null -ne $_.DisplayName -and $_.DisplayName.Trim() -like $itemToCheck.SearchValue
-                            }
+                    $null -ne $_.DisplayName -and $_.DisplayName.Trim() -like $itemToCheck.SearchValue
+                }
                 if ($null -eq $prereq)
                 {
                     $itemsInstalled = $false

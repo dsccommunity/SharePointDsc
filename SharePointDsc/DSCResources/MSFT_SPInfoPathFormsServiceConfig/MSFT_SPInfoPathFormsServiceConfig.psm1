@@ -385,23 +385,28 @@ function Test-TargetResource
     Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
     Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
 
-    return Test-SPDscParameterState -CurrentValues $CurrentValues `
+    $result = Test-SPDscParameterState -CurrentValues $CurrentValues `
+        -Source $($MyInvocation.MyCommand.Source) `
         -DesiredValues $PSBoundParameters `
         -ValuesToCheck @("Ensure",
-        "AllowUserFormBrowserEnabling",
-        "AllowUserFormBrowserRendering",
-        "MaxDataConnectionTimeout",
-        "DefaultDataConnectionTimeout",
-        "MaxDataConnectionResponseSize",
-        "RequireSslForDataConnections",
-        "AllowEmbeddedSqlForDataConnections",
-        "AllowUdcAuthenticationForDataConnections",
-        "AllowUserFormCrossDomainDataConnections",
-        "AllowEventPropagation",
-        "MaxPostbacksPerSession",
-        "MaxUserActionsPerPostback",
-        "ActiveSessionsTimeout",
-        "MaxSizeOfUserFormState")
+            "AllowUserFormBrowserEnabling",
+            "AllowUserFormBrowserRendering",
+            "MaxDataConnectionTimeout",
+            "DefaultDataConnectionTimeout",
+            "MaxDataConnectionResponseSize",
+            "RequireSslForDataConnections",
+            "AllowEmbeddedSqlForDataConnections",
+            "AllowUdcAuthenticationForDataConnections",
+            "AllowUserFormCrossDomainDataConnections",
+            "AllowEventPropagation",
+            "MaxPostbacksPerSession",
+            "MaxUserActionsPerPostback",
+            "ActiveSessionsTimeout",
+            "MaxSizeOfUserFormState")
+
+    Write-Verbose -Message "Test-TargetResource returned $result"
+
+    return $result
 }
 
 Export-ModuleMember -Function *-TargetResource

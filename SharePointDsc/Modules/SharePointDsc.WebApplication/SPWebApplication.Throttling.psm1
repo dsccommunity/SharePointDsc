@@ -120,25 +120,30 @@ function Test-SPDscWebApplicationThrottlingConfig
         $CurrentSettings,
 
         [Parameter(Mandatory = $true)]
-        $DesiredSettings
+        $DesiredSettings,
+
+        [Parameter(Mandatory = $true)]
+        [System.String]
+        $Source
     )
 
     $relPath = "..\..\Modules\SharePointDsc.Util\SharePointDsc.Util.psm1"
     Import-Module -Name (Join-Path -Path $PSScriptRoot -ChildPath $relPath -Resolve)
     $testReturn = Test-SPDscParameterState -CurrentValues $CurrentSettings `
+        -Source $Source `
         -DesiredValues $DesiredSettings `
         -ValuesToCheck @(
-        "ListViewThreshold",
-        "AllowObjectModelOverride",
-        "AdminThreshold",
-        "ListViewLookupThreshold",
-        "HappyHourEnabled",
-        "UniquePermissionThreshold",
-        "RequestThrottling",
-        "ChangeLogEnabled",
-        "ChangeLogExpiryDays",
-        "EventHandlersEnabled"
-    )
+            "ListViewThreshold",
+            "AllowObjectModelOverride",
+            "AdminThreshold",
+            "ListViewLookupThreshold",
+            "HappyHourEnabled",
+            "UniquePermissionThreshold",
+            "RequestThrottling",
+            "ChangeLogEnabled",
+            "ChangeLogExpiryDays",
+            "EventHandlersEnabled"
+        )
     if ($testReturn -eq $true)
     {
         if ($null -ne $DesiredSettings.HappyHour)
@@ -170,6 +175,7 @@ function Test-SPDscWebApplicationThrottlingConfig
             }
 
             $testReturn = Test-SPDscParameterState -CurrentValues $CurrentSettings.HappyHour `
+                -Source $Source `
                 -DesiredValues $DesiredHappyHour `
                 -ValuesToCheck @("Hour", "Minute", "Duration")
         }

@@ -243,8 +243,8 @@ function Set-TargetResource
                         if ($ServerCount -ge $params.ServerProvisionOrder.Length)
                         {
                             throw ("The server $($env:COMPUTERNAME) was not found in the " + `
-                                   "ServerProvisionOrder array of Distributed Cache server(s).  " + `
-                                   "The server must be included in ServerProvisionOrder or Ensure equal to Absent.")
+                                    "ServerProvisionOrder array of Distributed Cache server(s).  " + `
+                                    "The server must be included in ServerProvisionOrder or Ensure equal to Absent.")
                         }
                         $currentServer = $params.ServerProvisionOrder[$serverCount]
                     }
@@ -525,11 +525,19 @@ function Test-TargetResource
         {
             if ($ServiceAccount -ne $CurrentValues.ServiceAccount)
             {
+                $message = ("The parameter ServiceAccount is not in the desired "+ `
+                            "state. Actual: $($CurrentValues.ServiceAccount), " + `
+                            "Desired: $ServiceAccount")
+                Write-Verbose -Message $message
+                Add-SPDscEvent -Message $message -EntryType 'Error' -EventID 1 -Source $MyInvocation.MyCommand.Source
+
+                Write-Verbose -Message "Test-TargetResource returned false"
                 return $false
             }
         }
 
-        return Test-SPDscParameterState -CurrentValues $CurrentValues `
+        $result = Test-SPDscParameterState -CurrentValues $CurrentValues `
+            -Source $($MyInvocation.MyCommand.Source) `
             -DesiredValues $PSBoundParameters `
             -ValuesToCheck @("Ensure", `
                 "CreateFirewallRules", `
@@ -537,10 +545,15 @@ function Test-TargetResource
     }
     else
     {
-        return Test-SPDscParameterState -CurrentValues $CurrentValues `
+        $result = Test-SPDscParameterState -CurrentValues $CurrentValues `
+            -Source $($MyInvocation.MyCommand.Source) `
             -DesiredValues $PSBoundParameters `
             -ValuesToCheck @("Ensure")
     }
+
+    Write-Verbose -Message "Test-TargetResource returned $result"
+
+    return $result
 }
 
 Export-ModuleMember -Function *-TargetResource
