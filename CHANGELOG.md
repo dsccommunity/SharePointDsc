@@ -11,12 +11,41 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Added verbose logging of the test results in the Test method
   - Added function to create SharePointDsc event log and add log entries
   - Added the logging of all test results to the new SharePointDsc event log
+  - Added support in several resources for creating/connecting to farm
+    and service applications using a (single) SQL-based credential
+    instead of the default Windows credentials. Needed when e.g. using
+    Azure SQL Managed Instance as SharePoint's database server.
+    UseSQLAuthentication and DatabaseCredentials parameters will need
+    to be considered.
+
+### Changed
+
+The following changes will break v3.x and earlier configurations that use these
+resources:
+
+- SPManagedMetaDataServiceAppDefault
+  - Updated resource to allow the configuration of default per service application
+    proxy groups instead of per farm
+- SPUserProfileServiceApp
+  - Changed the MySiteHostLocation parameter to a required parameter
+- SPWebAppAuthentication
+  - Updated resource to add support for Basic Authentication
 
 ### Fixed
 
 - SPFarmSolution
   - Corrected bug running Solution Job wait for an Absent solution.
   - Corrected bug trying to remove an already Absent solution.
+
+### Removed
+
+The following changes will break v3.x and earlier configurations that use these
+resources:
+
+- SPSearchServiceApp
+  - Removed the WindowsServiceAccount parameter that was depricated in v3.1
+- SPUserProfileSyncService
+  - Removed the FarmAccount parameter that was depricated in v2.2
 
 ## [3.8.0] - 2020-02-27
 
@@ -62,14 +91,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - SPWebApplicationExtension
   - Forced the conversion of Paths to string
 
-### Deprecated
-
-- None
-
-### Removed
-
-- None
-
 ### Fixed
 
 - SharePointDsc
@@ -82,10 +103,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Corrected incorrect information in Readme file
 - SPUserProfileProperty
   - Fixed typo in user profile property test for IsSearchable.
-
-### Security
-
-- None
 
 ## [3.7.0.0] - 2019-10-30
 

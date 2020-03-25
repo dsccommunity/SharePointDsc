@@ -21,7 +21,7 @@ function Get-TargetResource
         [System.String]
         $ApplicationPool,
 
-        [Parameter()]
+        [Parameter(Mandatory = $true)]
         [System.String]
         $MySiteHostLocation,
 
@@ -55,6 +55,14 @@ function Get-TargetResource
 
         [Parameter()]
         [System.Boolean]
+        $UseSQLAuthentication,
+
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
+        $DatabaseCredentials,
+
+        [Parameter()]
+        [System.Boolean]
         $EnableNetBIOS = $false,
 
         [Parameter()]
@@ -81,12 +89,6 @@ function Get-TargetResource
     )
 
     Write-Verbose -Message "Getting user profile service application $Name"
-
-    if ($PSBoundParameters.ContainsKey("MySiteHostLocation") -eq $false)
-    {
-        Write-Verbose -Message ("You should also specify the MySiteHostLocation parameter. " + `
-                "This will be required as of SharePointDsc v4.0")
-    }
 
     $farmAccount = Invoke-SPDscCommand -Credential $InstallAccount `
         -Arguments $PSBoundParameters `
@@ -259,7 +261,7 @@ function Set-TargetResource
         [System.String]
         $ApplicationPool,
 
-        [Parameter()]
+        [Parameter(Mandatory = $true)]
         [System.String]
         $MySiteHostLocation,
 
@@ -293,6 +295,14 @@ function Set-TargetResource
 
         [Parameter()]
         [System.Boolean]
+        $UseSQLAuthentication,
+
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
+        $DatabaseCredentials,
+
+        [Parameter()]
+        [System.Boolean]
         $EnableNetBIOS = $false,
 
         [Parameter()]
@@ -319,12 +329,6 @@ function Set-TargetResource
     )
 
     Write-Verbose -Message "Setting user profile service application $Name"
-
-    if ($PSBoundParameters.ContainsKey("MySiteHostLocation") -eq $false)
-    {
-        Write-Verbose -Message ("You should also specify the MySiteHostLocation parameter. " + `
-                "This will be required as of SharePointDsc v4.0")
-    }
 
     if ($Ensure -eq "Present")
     {
@@ -445,6 +449,20 @@ function Set-TargetResource
                 $pName = $params.ProxyName
                 $params.Remove("ProxyName") | Out-Null
             }
+
+            if ($params.UseSQLAuthentication -eq $true)
+            {
+                Write-Verbose -Message "Using SQL authentication to create service application as `$UseSQLAuthentication is set to $($params.useSQLAuthentication)."
+                $params.Add("ProfileDBCredentials", $params.DatabaseCredentials)
+                $params.Add("ProfileSyncDBCredentials", $params.DatabaseCredentials)
+                $params.Add("SocialDBCredentials", $params.DatabaseCredentials)
+            }
+            else
+            {
+                Write-Verbose -Message "`$UseSQLAuthentication is false or not specified; using default Windows authentication."
+            }
+            $params.Remove("UseSQLAuthentication") | Out-Null
+            $params.Remove("DatabaseCredentials") | Out-Null
 
             $serviceApps = Get-SPServiceApplication -Name $params.Name `
                 -ErrorAction SilentlyContinue
@@ -602,7 +620,7 @@ function Test-TargetResource
         [System.String]
         $ApplicationPool,
 
-        [Parameter()]
+        [Parameter(Mandatory = $true)]
         [System.String]
         $MySiteHostLocation,
 
@@ -636,6 +654,14 @@ function Test-TargetResource
 
         [Parameter()]
         [System.Boolean]
+        $UseSQLAuthentication,
+
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
+        $DatabaseCredentials,
+
+        [Parameter()]
+        [System.Boolean]
         $EnableNetBIOS = $false,
 
         [Parameter()]
@@ -662,12 +688,6 @@ function Test-TargetResource
     )
 
     Write-Verbose -Message "Testing for user profile service application $Name"
-
-    if ($PSBoundParameters.ContainsKey("MySiteHostLocation") -eq $false)
-    {
-        Write-Verbose -Message ("You should also specify the MySiteHostLocation parameter. " + `
-                "This will be required as of SharePointDsc v4.0")
-    }
 
     $PSBoundParameters.Ensure = $Ensure
     $PSBoundParameters.UpdateProxyGroup = $UpdateProxyGroup

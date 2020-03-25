@@ -31,6 +31,14 @@ function Get-TargetResource
         $DatabaseServer,
 
         [Parameter()]
+        [System.Boolean]
+        $UseSQLAuthentication,
+
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
+        $DatabaseCredentials,
+
+        [Parameter()]
         [ValidateSet("docx", "doc", "mht", "rtf", "xml")]
         [System.String[]]
         $SupportedFileFormats,
@@ -231,6 +239,14 @@ function Set-TargetResource
         $DatabaseServer,
 
         [Parameter()]
+        [System.Boolean]
+        $UseSQLAuthentication,
+
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
+        $DatabaseCredentials,
+
+        [Parameter()]
         [ValidateSet("docx", "doc", "mht", "rtf", "xml")]
         [System.String[]]
         $SupportedFileFormats,
@@ -353,6 +369,16 @@ function Set-TargetResource
                 if ($params.Name)
                 {
                     $cmdletparams.ApplicationPool = $params.ApplicationPool
+                }
+
+                if ($params.useSQLAuthentication -eq $true)
+                {
+                    Write-Verbose -Message "Using SQL authentication to create service application as `$useSQLAuthentication is set to $($params.useSQLAuthentication)."
+                    $cmdletparams.Add("DatabaseCredentials", $params.DatabaseCredentials)
+                }
+                else
+                {
+                    Write-Verbose -Message "`$useSQLAuthentication is false or not specified; using default Windows authentication."
                 }
 
                 $null = New-SPWordConversionServiceApplication @cmdletparams
@@ -569,6 +595,14 @@ function Test-TargetResource
         [Parameter()]
         [System.String]
         $DatabaseServer,
+
+        [Parameter()]
+        [System.Boolean]
+        $UseSQLAuthentication,
+
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
+        $DatabaseCredentials,
 
         [Parameter()]
         [ValidateSet("docx", "doc", "mht", "rtf", "xml")]
