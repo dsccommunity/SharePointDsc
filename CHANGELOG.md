@@ -26,6 +26,10 @@ resources:
 - SPManagedMetaDataServiceAppDefault
   - Updated resource to allow the configuration of default per service application
     proxy groups instead of per farm
+- SPSearchContentSource
+  - Discontinued CrawlEverything, CrawlFirstOnly and null as allowable CrawlSetting
+    values for a SharePoint based content source, requiring CrawlVirtualServers or
+    CrawlSites
 - SPUserProfileServiceApp
   - Changed the MySiteHostLocation parameter to a required parameter
 - SPWebAppAuthentication
