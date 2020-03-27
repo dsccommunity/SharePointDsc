@@ -55,7 +55,7 @@ Updated author, copyright notice, and URLs.
                 ServiceAppName       = "Search Service Application"
                 ContentSourceType    = "SharePoint"
                 Addresses            = @("http://sharepointsite1.contoso.com", "http://sharepointsite2.contoso.com")
-                CrawlSetting         = "CrawlEverything"
+                CrawlSetting         = "CrawlSites"
                 ContinuousCrawl      = $true
                 FullSchedule         = $null
                 Priority             = "Normal"
