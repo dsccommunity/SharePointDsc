@@ -36,6 +36,8 @@ resources:
 - SPFarmSolution
   - Corrected bug running Solution Job wait for an Absent solution.
   - Corrected bug trying to remove an already Absent solution.
+- SPWebAppAuthentication
+  - Updated to support passing of null/empty collections for zones not utilized.
 
 ### Removed
 
