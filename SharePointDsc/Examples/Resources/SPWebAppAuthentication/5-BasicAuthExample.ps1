@@ -35,27 +35,35 @@ Updated author, copyright notice, and URLs.
 <#
 
 .DESCRIPTION
- This example shows how to configure a default Managed Metadata service app for the default
- proxy group.
+ This example shows how to configure the authentication of a web application
+ in the local farm using NTLM Windows authentication with Basic authentication.
 
 #>
 
 Configuration Example
 {
-    param(
+    param
+    (
         [Parameter(Mandatory = $true)]
         [PSCredential]
         $SetupAccount
     )
+
     Import-DscResource -ModuleName SharePointDsc
 
     node localhost {
-        SPManagedMetaDataServiceAppDefault ManagedMetadataServiceAppDefault
+
+        SPWebAppAuthentication ContosoAuthentication
         {
-            ServiceAppProxyGroup           = "Default"
-            DefaultSiteCollectionProxyName = "Managed Metadata Service Application Proxy"
-            DefaultKeywordProxyName        = "Managed Metadata Service Application Proxy"
-            PsDscRunAsCredential           = $SetupAccount
+            WebAppUrl            = "http://sharepoint.contoso.com"
+            Default              = @(
+                MSFT_SPWebAppAuthenticationMode {
+                    AuthenticationMethod = "WindowsAuthentication"
+                    WindowsAuthMethod    = "NTLM"
+                    UseBasicAuth         = $true
+                }
+            )
+            PsDscRunAsCredential = $SetupAccount
         }
     }
 }

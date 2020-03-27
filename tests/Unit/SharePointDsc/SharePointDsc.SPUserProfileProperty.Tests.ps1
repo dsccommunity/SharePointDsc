@@ -52,10 +52,6 @@ try
         InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
             Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
-            $mockPassword = ConvertTo-SecureString -String "password" -AsPlainText -Force
-            $farmAccount = New-Object -TypeName "System.Management.Automation.PSCredential" `
-                -ArgumentList @("username", $mockPassword)
-
             $testParamsNewProperty = @{
                 Name                = "WorkEmailNew"
                 UserProfileService  = "User Profile Service Application"
@@ -437,7 +433,6 @@ try
                 Name                         = "User Profile Service Application"
                 TypeName                     = "User Profile Service Application"
                 ApplicationPool              = "SharePoint Service Applications"
-                FarmAccount                  = $farmAccount
                 ServiceApplicationProxyGroup = "Proxy Group"
                 ConnectionManager            = @($connection)
             }

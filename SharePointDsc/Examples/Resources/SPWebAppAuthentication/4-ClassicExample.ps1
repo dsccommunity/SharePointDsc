@@ -40,28 +40,28 @@ Updated author, copyright notice, and URLs.
 
 #>
 
-    Configuration Example
+Configuration Example
+{
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [PSCredential]
+        $SetupAccount
+    )
+
+    Import-DscResource -ModuleName SharePointDsc
+
+    node localhost
     {
-        param
-        (
-            [Parameter(Mandatory = $true)]
-            [PSCredential]
-            $SetupAccount
-        )
-
-        Import-DscResource -ModuleName SharePointDsc
-
-        node localhost
+        SPWebAppAuthentication ContosoAuthentication
         {
-            SPWebAppAuthentication ContosoAuthentication
-            {
-                WebAppUrl            = "http://sharepoint.contoso.com"
-                Default              = @(
-                    MSFT_SPWebAppAuthenticationMode {
-                        AuthenticationMethod = "Classic"
-                    }
-                )
-                PsDscRunAsCredential = $SetupAccount
-            }
+            WebAppUrl            = "http://sharepoint.contoso.com"
+            Default              = @(
+                MSFT_SPWebAppAuthenticationMode {
+                    AuthenticationMethod = "Classic"
+                }
+            )
+            PsDscRunAsCredential = $SetupAccount
         }
     }
+}

@@ -11,7 +11,8 @@ class MSFT_SPSearchServiceApp : OMI_BaseResource
     [Write, Description("Should this search service application be a cloud based service app")] boolean CloudIndex;
     [Write, Description("Should alerts be enabled for this search service application")] boolean AlertsEnabled;
     [Write, Description("Present if the service app should exist, absent if it should not"), ValueMap{"Present","Absent"}, Values{"Present","Absent"}] string Ensure;
-    [Write, Description("This setting is moved to SPSearchServiceSettings and deprecated here."), EmbeddedInstance("MSFT_Credential")] string WindowsServiceAccount;
     [Write, Description("POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5"), EmbeddedInstance("MSFT_Credential")] String InstallAccount;
+    [Write, Description("Should SQL Server authentication be used to connect to the database?")] Boolean UseSQLAuthentication;
+    [Write, Description("If using SQL authentication, the SQL credentials to use to connect to the instance"), EmbeddedInstance("MSFT_Credential")] String DatabaseCredentials;
 };
 

@@ -247,7 +247,6 @@ try
                 Name                         = "User Profile Service Application"
                 TypeName                     = "User Profile Service Application"
                 ApplicationPool              = "SharePoint Service Applications"
-                FarmAccount                  = $mockCredential
                 ServiceApplicationProxyGroup = "Proxy Group"
                 ConnectionManager            = New-Object -TypeName System.Collections.ArrayList
             }
@@ -308,7 +307,6 @@ try
                 $userProfileServiceNoConnections = @{
                     Name                         = "User Profile Service Application"
                     ApplicationPool              = "SharePoint Service Applications"
-                    FarmAccount                  = $mockCredential
                     ServiceApplicationProxyGroup = "Proxy Group"
                     ConnnectionManager           = @()
                 }
@@ -435,7 +433,6 @@ try
                     Name                         = "User Profile Service Application"
                     TypeName                     = "User Profile Service Application"
                     ApplicationPool              = "SharePoint Service Applications"
-                    FarmAccount                  = $mockCredential
                     ServiceApplicationProxyGroup = "Proxy Group"
                     ConnectionManager            = New-Object -TypeName System.Collections.ArrayList
                 }
@@ -578,7 +575,6 @@ try
                     Name                         = "User Profile Service Application"
                     TypeName                     = "User Profile Service Application"
                     ApplicationPool              = "SharePoint Service Applications"
-                    FarmAccount                  = $mockCredential
                     ServiceApplicationProxyGroup = "Proxy Group"
                     ConnectionManager            = New-Object -TypeName System.Collections.ArrayList
                 } | Add-Member -MemberType ScriptMethod -Name GetMethod -Value {
@@ -664,7 +660,6 @@ try
                     Name                         = "User Profile Service Application"
                     TypeName                     = "User Profile Service Application"
                     ApplicationPool              = "SharePoint Service Applications"
-                    FarmAccount                  = $mockCredential
                     ServiceApplicationProxyGroup = "Proxy Group"
                     ConnectionManager            = New-Object -TypeName System.Collections.ArrayList
                 } | Add-Member -MemberType ScriptMethod -Name GetMethod -Value {
@@ -773,7 +768,6 @@ try
                     Name                         = "User Profile Service Application"
                     TypeName                     = "User Profile Service Application"
                     ApplicationPool              = "SharePoint Service Applications"
-                    FarmAccount                  = $mockCredential
                     ServiceApplicationProxyGroup = "Proxy Group"
                     ConnectionManager            = New-Object -TypeName System.Collections.ArrayList
                 } | Add-Member -MemberType ScriptMethod -Name GetMethod -Value {
@@ -866,7 +860,6 @@ try
                         Name                         = "User Profile Service Application"
                         TypeName                     = "User Profile Service Application"
                         ApplicationPool              = "SharePoint Service Applications"
-                        FarmAccount                  = $mockCredential
                         ServiceApplicationProxyGroup = "Proxy Group"
                         ConnectionManager            = New-Object -TypeName System.Collections.ArrayList
                     } | Add-Member -MemberType ScriptMethod -Name GetMethod -Value {
@@ -946,7 +939,6 @@ try
                         Name                         = "User Profile Service Application"
                         TypeName                     = "User Profile Service Application"
                         ApplicationPool              = "SharePoint Service Applications"
-                        FarmAccount                  = $mockCredential
                         ServiceApplicationProxyGroup = "Proxy Group"
                         ConnectionManager            = New-Object -TypeName System.Collections.ArrayList
                     } | Add-Member -MemberType ScriptMethod -Name GetMethod -Value {
@@ -1030,7 +1022,6 @@ try
                         Name                         = "User Profile Service Application"
                         TypeName                     = "User Profile Service Application"
                         ApplicationPool              = "SharePoint Service Applications"
-                        FarmAccount                  = $mockCredential
                         ServiceApplicationProxyGroup = "Proxy Group"
                         ConnectionManager            = New-Object -TypeName System.Collections.ArrayList
                     } | Add-Member -MemberType ScriptMethod -Name GetMethod -Value {
