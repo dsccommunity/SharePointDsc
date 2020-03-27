@@ -17,6 +17,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - SPFarmSolution
   - Corrected bug running Solution Job wait for an Absent solution.
   - Corrected bug trying to remove an already Absent solution.
+- SPWebAppAuthentication
+  - Updated to support passing of null/empty collections for zones not utilized.
 
 ## [3.8.0] - 2020-02-27
 
