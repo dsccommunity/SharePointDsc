@@ -391,7 +391,7 @@ function Set-TargetResource
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
-    if ($PSBoundParameters.ContainsKey("Default"))
+    if ($Default)
     {
         # Test is current config matches desired config
         $result = Test-ZoneConfiguration -DesiredConfig $Default `
@@ -404,7 +404,7 @@ function Set-TargetResource
         }
     }
 
-    if ($PSBoundParameters.ContainsKey("Intranet"))
+    if ($Intranet)
     {
         # Check if specified zone exists
         if ($CurrentValues.ContainsKey("Intranet") -eq $false)
@@ -423,7 +423,7 @@ function Set-TargetResource
         }
     }
 
-    if ($PSBoundParameters.ContainsKey("Internet"))
+    if ($Internet)
     {
         # Check if specified zone exists
         if ($CurrentValues.ContainsKey("Internet") -eq $false)
@@ -442,7 +442,7 @@ function Set-TargetResource
         }
     }
 
-    if ($PSBoundParameters.ContainsKey("Extranet"))
+    if ($Extranet)
     {
         # Check if specified zone exists
         if ($CurrentValues.ContainsKey("Extranet") -eq $false)
@@ -461,7 +461,7 @@ function Set-TargetResource
         }
     }
 
-    if ($PSBoundParameters.ContainsKey("Custom"))
+    if ($Custom)
     {
         # Check if specified zone exists
         if ($CurrentValues.ContainsKey("Custom") -eq $false)
@@ -533,7 +533,7 @@ function Test-TargetResource
         return $false
     }
 
-    if ($PSBoundParameters.ContainsKey("Default"))
+    if ($Default)
     {
         $result = Test-ZoneConfiguration -DesiredConfig $Default `
             -CurrentConfig $CurrentValues.Default `
@@ -546,7 +546,7 @@ function Test-TargetResource
         }
     }
 
-    if ($PSBoundParameters.ContainsKey("Intranet"))
+    if ($Intranet)
     {
         if ($CurrentValues.ContainsKey("Intranet") -eq $false)
         {
@@ -564,7 +564,7 @@ function Test-TargetResource
         }
     }
 
-    if ($PSBoundParameters.ContainsKey("Internet"))
+    if ($Internet)
     {
         if ($CurrentValues.ContainsKey("Internet") -eq $false)
         {
@@ -582,7 +582,7 @@ function Test-TargetResource
         }
     }
 
-    if ($PSBoundParameters.ContainsKey("Extranet"))
+    if ($Extranet)
     {
         if ($CurrentValues.ContainsKey("Extranet") -eq $false)
         {
@@ -600,7 +600,7 @@ function Test-TargetResource
         }
     }
 
-    if ($PSBoundParameters.ContainsKey("Custom"))
+    if ($Custom)
     {
         if ($CurrentValues.ContainsKey("Custom") -eq $false)
         {
