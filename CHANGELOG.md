@@ -40,6 +40,8 @@ resources:
 - SPFarmSolution
   - Corrected bug running Solution Job wait for an Absent solution.
   - Corrected bug trying to remove an already Absent solution.
+- SPSearchAuthoritativePage
+  - Corrected bug when checking for an existing Demoted Action
 - SPWebAppAuthentication
   - Updated to support passing of null/empty collections for zones not utilized.
 
