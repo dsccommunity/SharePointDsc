@@ -87,7 +87,7 @@ function Get-TargetResource
         }
         else
         {
-            $queryDemoted = $serviceApp | Get-SPEnterpriseSearchQueryDemoted -Identity $params.Path `
+            $queryDemoted = Get-SPEnterpriseSearchQueryDemoted -Identity $params.Path `
                 -Owner $searchOwner `
                 -SearchApplication $serviceApp `
                 -ErrorAction SilentlyContinue
