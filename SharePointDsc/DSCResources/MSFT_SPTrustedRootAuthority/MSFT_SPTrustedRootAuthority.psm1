@@ -33,13 +33,6 @@ function Get-TargetResource
 
     Write-Verbose "Getting Trusted Root Authority with name '$Name'"
 
-    if ($PSBoundParameters.ContainsKey("CertificateThumbprint") -and `
-            $PSBoundParameters.ContainsKey("CertificateFilePath"))
-    {
-        Write-Verbose -Message ("Cannot use both parameters CertificateThumbprint and " + `
-                "CertificateFilePath at the same time.")
-    }
-
     if (-not ($PSBoundParameters.ContainsKey("CertificateThumbprint")) -and `
             -not($PSBoundParameters.ContainsKey("CertificateFilePath")))
     {
@@ -47,9 +40,10 @@ function Get-TargetResource
                 "CertificateThumbprint, CertificateFilePath.")
     }
 
-    if ($PSBoundParameters.ContainsKey("CertificateFilePath"))
+    if ($PSBoundParameters.ContainsKey("CertificateFilePath") -and `
+            -not ($PSBoundParameters.ContainsKey("CertificateThumbprint")))
     {
-        if (-not(Test-Path -Path $CertificateFilePath))
+        if (-not (Test-Path -Path $CertificateFilePath))
         {
             throw ("Specified CertificateFilePath does not exist: $CertificateFilePath")
         }
@@ -118,13 +112,6 @@ function Set-TargetResource
 
     Write-Verbose -Message "Setting SPTrustedRootAuthority '$Name'"
 
-    if ($PSBoundParameters.ContainsKey("CertificateThumbprint") -and `
-            $PSBoundParameters.ContainsKey("CertificateFilePath"))
-    {
-        throw ("Cannot use both parameters CertificateThumbprint and CertificateFilePath " + `
-                "at the same time.")
-    }
-
     if (-not ($PSBoundParameters.ContainsKey("CertificateThumbprint")) -and `
             -not($PSBoundParameters.ContainsKey("CertificateFilePath")))
     {
@@ -132,9 +119,10 @@ function Set-TargetResource
                 "CertificateThumbprint, CertificateFilePath.")
     }
 
-    if ($PSBoundParameters.ContainsKey("CertificateFilePath"))
+    if ($PSBoundParameters.ContainsKey("CertificateFilePath") -and `
+            -not ($PSBoundParameters.ContainsKey("CertificateThumbprint")))
     {
-        if (-not(Test-Path -Path $CertificateFilePath))
+        if (-not (Test-Path -Path $CertificateFilePath))
         {
             throw ("Specified CertificateFilePath does not exist: $CertificateFilePath")
         }
@@ -148,18 +136,6 @@ function Set-TargetResource
             -Arguments $PSBoundParameters `
             -ScriptBlock {
             $params = $args[0]
-
-            if ($params.ContainsKey("CertificateThumbprint"))
-            {
-                Write-Verbose -Message "Importing certificate from CertificateThumbprint"
-                $cert = Get-Item -Path "CERT:\LocalMachine\My\$($params.CertificateThumbprint)" `
-                    -ErrorAction SilentlyContinue
-
-                if ($null -eq $cert)
-                {
-                    throw "Certificate not found in the local Certificate Store"
-                }
-            }
 
             if ($params.ContainsKey("CertificateFilePath"))
             {
@@ -177,6 +153,25 @@ function Set-TargetResource
                 if ($null -eq $cert)
                 {
                     throw "Import of certificate failed."
+                }
+
+                if ($params.ContainsKey("CertificateThumbprint"))
+                {
+                    if (-not $params.CertificateThumbprint.Equals($cert.Thumbprint))
+                    {
+                        throw "Imported certificate thumbprint ($($cert.Thumbprint)) does not match expected thumbprint ($($params.CertificateThumbprint))."
+                    }
+                }
+            }
+            else
+            {
+                Write-Verbose -Message "Importing certificate from CertificateThumbprint"
+                $cert = Get-Item -Path "CERT:\LocalMachine\My\$($params.CertificateThumbprint)" `
+                    -ErrorAction SilentlyContinue
+
+                if ($null -eq $cert)
+                {
+                    throw "Certificate not found in the local Certificate Store"
                 }
             }
 
@@ -202,18 +197,6 @@ function Set-TargetResource
             -ScriptBlock {
             $params = $args[0]
 
-            if ($params.ContainsKey("CertificateThumbprint"))
-            {
-                Write-Verbose -Message "Importing certificate from CertificateThumbprint"
-                $cert = Get-Item -Path "CERT:\LocalMachine\My\$($params.CertificateThumbprint)" `
-                    -ErrorAction SilentlyContinue
-
-                if ($null -eq $cert)
-                {
-                    throw "Certificate not found in the local Certificate Store"
-                }
-            }
-
             if ($params.ContainsKey("CertificateFilePath"))
             {
                 Write-Verbose -Message "Importing certificate from CertificateFilePath"
@@ -230,6 +213,25 @@ function Set-TargetResource
                 if ($null -eq $cert)
                 {
                     throw "Import of certificate failed."
+                }
+
+                if ($params.ContainsKey("CertificateThumbprint"))
+                {
+                    if (-not $params.CertificateThumbprint.Equals($cert.Thumbprint))
+                    {
+                        throw "Imported certificate thumbprint ($($cert.Thumbprint)) does not match expected thumbprint ($($params.CertificateThumbprint))."
+                    }
+                }
+            }
+            else
+            {
+                Write-Verbose -Message "Importing certificate from CertificateThumbprint"
+                $cert = Get-Item -Path "CERT:\LocalMachine\My\$($params.CertificateThumbprint)" `
+                    -ErrorAction SilentlyContinue
+
+                if ($null -eq $cert)
+                {
+                    throw "Certificate not found in the local Certificate Store"
                 }
             }
 
@@ -289,13 +291,6 @@ function Test-TargetResource
 
     Write-Verbose -Message "Testing SPTrustedRootAuthority '$Name'"
 
-    if ($PSBoundParameters.ContainsKey("CertificateThumbprint") -and `
-            $PSBoundParameters.ContainsKey("CertificateFilePath"))
-    {
-        throw ("Cannot use both parameters CertificateThumbprint and CertificateFilePath " + `
-                "at the same time.")
-    }
-
     if (-not ($PSBoundParameters.ContainsKey("CertificateThumbprint")) -and `
             -not($PSBoundParameters.ContainsKey("CertificateFilePath")))
     {
@@ -303,12 +298,22 @@ function Test-TargetResource
                 "CertificateThumbprint, CertificateFilePath.")
     }
 
+    if ($PSBoundParameters.ContainsKey("CertificateFilePath") -and `
+            -not ($PSBoundParameters.ContainsKey("CertificateThumbprint")))
+    {
+        if (-not (Test-Path -Path $CertificateFilePath))
+        {
+            throw ("Specified CertificateFilePath does not exist: $CertificateFilePath")
+        }
+    }
+
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
     Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
     Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
 
-    if ($PSBoundParameters.ContainsKey("CertificateFilePath"))
+    if ($PSBoundParameters.ContainsKey("CertificateFilePath") -and `
+            -not ($PSBoundParameters.ContainsKey("CertificateThumbprint")))
     {
         Write-Verbose "Retrieving thumbprint of CertificateFilePath"
         $cert = New-Object System.Security.Cryptography.X509Certificates.X509Certificate2
