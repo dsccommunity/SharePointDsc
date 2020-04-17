@@ -30,6 +30,9 @@ resources:
   - Discontinued CrawlEverything, CrawlFirstOnly and null as allowable CrawlSetting
     values for a SharePoint based content source, requiring CrawlVirtualServers or
     CrawlSites
+- SPTrustedRootAuthority
+  - It's now possible to specify both CertificateFilePath and CertificateThumbprint
+    so that the certificate thumbprint can be verified before importing.
 - SPUserProfileServiceApp
   - Changed the MySiteHostLocation parameter to a required parameter
 - SPWebAppAuthentication
