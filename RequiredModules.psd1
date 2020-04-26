@@ -13,7 +13,7 @@
     Plaster                     = 'latest'
     ModuleBuilder               = '1.0.0'
     ChangelogManagement         = 'latest'
-    Sampler                     = '0.104.0'
+    Sampler                     = 'latest'
     'DscResource.Test'          = 'latest'
     'DscResource.AnalyzerRules' = 'latest'
     'DscResource.DocGenerator'  = 'latest'
