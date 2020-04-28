@@ -54,7 +54,7 @@ try
             Mock -CommandName Set-SPTrustedRootAuthority -MockWith { }
             Mock -CommandName New-SPTrustedRootAuthority -MockWith { }
 
-            Context -Name "When both CertificalThumbprint and CertificateFilePath are specified" -Fixture {
+            Context -Name "When both CertificalThumbprint and CertificateFilePath are specified and thumbprints does not match (root authority exists)" -Fixture {
                 $testParams = @{
                     Name                  = "CertIdentifier"
                     CertificateThumbprint = "770515261D1AB169057E246E0EE6431D557C3AFB"
@@ -62,12 +62,16 @@ try
                     Ensure                = "Present"
                 }
 
-                Mock -CommandName Get-Item -MockWith {
-                    return @{
-                        Subject    = "CN=CertName"
-                        Thumbprint = $testParams.CertificateThumbprint
+                Mock -CommandName New-Object -MockWith {
+                    $retVal = [pscustomobject]@{
+                        Subject       = "CN=CertIdentifer"
+                        Thumbprint    = "1111111111111111111111111111111111111111"
+                        HasPrivateKey = $false
                     }
-                }
+                    Add-Member -InputObject $retVal -MemberType ScriptMethod Import { }
+
+                    return $retVal
+                } -ParameterFilter { $TypeName -eq "System.Security.Cryptography.X509Certificates.X509Certificate2" }
 
                 Mock -CommandName Test-Path -MockWith {
                     return $true
@@ -86,12 +90,44 @@ try
                     (Get-TargetResource @testParams).Ensure | Should Be "Present"
                 }
 
-                It "Should return true when the Test method is called" {
-                    { Test-TargetResource @testParams } | Should Throw "Cannot use both parameters CertificateThumbprint and CertificateFilePath"
+                It "Should fail validation of signing certificate parameters in the Set method" {
+                    { Set-TargetResource @testParams } | Should Throw "Imported certificate thumbprint (1111111111111111111111111111111111111111) does not match expected thumbprint (770515261D1AB169057E246E0EE6431D557C3AFB)."
+                }
+            }
+
+            Context -Name "When both CertificalThumbprint and CertificateFilePath are specified and thumbprints does not match (root authority does not exists)" -Fixture {
+                $testParams = @{
+                    Name                  = "CertIdentifier"
+                    CertificateThumbprint = "770515261D1AB169057E246E0EE6431D557C3AFB"
+                    CertificateFilePath   = "C:\cert.cer"
+                    Ensure                = "Present"
                 }
 
-                It "Should Update the SP Trusted Root Authority in the set method" {
-                    { Set-TargetResource @testParams } | Should Throw "Cannot use both parameters CertificateThumbprint and CertificateFilePath"
+                Mock -CommandName New-Object -MockWith {
+                    $retVal = [pscustomobject]@{
+                        Subject       = "CN=CertIdentifer"
+                        Thumbprint    = "1111111111111111111111111111111111111111"
+                        HasPrivateKey = $false
+                    }
+                    Add-Member -InputObject $retVal -MemberType ScriptMethod Import { }
+
+                    return $retVal
+                } -ParameterFilter { $TypeName -eq "System.Security.Cryptography.X509Certificates.X509Certificate2" }
+
+                Mock -CommandName Test-Path -MockWith {
+                    return $true
+                }
+
+                Mock -CommandName Get-SPTrustedRootAuthority -MockWith {
+                    return $null
+                }
+
+                It "Should return Present from the Get method" {
+                    (Get-TargetResource @testParams).Ensure | Should Be "Absent"
+                }
+
+                It "Should fail validation of signing certificate parameters in the Set method" {
+                    { Set-TargetResource @testParams } | Should Throw "Imported certificate thumbprint (1111111111111111111111111111111111111111) does not match expected thumbprint (770515261D1AB169057E246E0EE6431D557C3AFB)."
                 }
             }
 
@@ -216,20 +252,13 @@ try
 
             Context -Name "When TrustedRootAuthority should exist and does exist in the farm (FilePath)." -Fixture {
                 $testParams = @{
-                    Name                  = "CertIdentifier"
-                    CertificateThumbprint = "770515261D1AB169057E246E0EE6431D557C3AFB"
-                    Ensure                = "Present"
+                    Name                = "CertIdentifier"
+                    CertificateFilePath = "C:\cert.cer"
+                    Ensure              = "Present"
                 }
 
                 Mock -CommandName Test-Path -MockWith {
                     return $true
-                }
-
-                Mock -CommandName Get-Item -MockWith {
-                    return  @{
-                        Subject    = "CN=CertName"
-                        Thumbprint = $testParams.CertificateThumbprint
-                    }
                 }
 
                 Mock -CommandName New-Object -MockWith {
@@ -247,7 +276,54 @@ try
                     return @{
                         Name        = $testParams.Name
                         Certificate = @{
-                            Thumbprint = $testParams.CertificateThumbprint
+                            Thumbprint = "770515261D1AB169057E246E0EE6431D557C3AFC"
+                        }
+                    }
+                }
+
+                It "Should return Present from the Get method" {
+                    (Get-TargetResource @testParams).Ensure | Should Be "Present"
+                }
+
+                It "Should return true when the Test method is called" {
+                    Test-TargetResource @testParams | Should Be $true
+                }
+
+                It "Should Update the SP Trusted Root Authority in the set method" {
+                    Set-TargetResource @testParams
+                    Assert-MockCalled Get-SPTrustedRootAuthority -Times 1
+                    Assert-MockCalled Set-SPTrustedRootAuthority -Times 1
+                }
+            }
+
+            Context -Name "When TrustedRootAuthority should exist and does exist in the farm (FilePath and Thumbprint)." -Fixture {
+                $testParams = @{
+                    Name                  = "CertIdentifier"
+                    CertificateFilePath   = "C:\cert.cer"
+                    CertificateThumbprint = "770515261D1AB169057E246E0EE6431D557C3AFC"
+                    Ensure                = "Present"
+                }
+
+                Mock -CommandName Test-Path -MockWith {
+                    return $true
+                }
+
+                Mock -CommandName New-Object -MockWith {
+                    $retVal = [pscustomobject]@{
+                        Subject       = "CN=CertIdentifer"
+                        Thumbprint    = "770515261D1AB169057E246E0EE6431D557C3AFC"
+                        HasPrivateKey = $false
+                    }
+                    Add-Member -InputObject $retVal -MemberType ScriptMethod Import { }
+
+                    return $retVal
+                } -ParameterFilter { $TypeName -eq "System.Security.Cryptography.X509Certificates.X509Certificate2" }
+
+                Mock -CommandName Get-SPTrustedRootAuthority -MockWith {
+                    return @{
+                        Name        = $testParams.Name
+                        Certificate = @{
+                            Thumbprint = "770515261D1AB169057E246E0EE6431D557C3AFC"
                         }
                     }
                 }
@@ -358,6 +434,53 @@ try
                 }
             }
 
+            Context -Name "When TrustedRootAuthority should exist and does exist in the farm, but has incorrect certificate (FilePath and Thumbprint)." -Fixture {
+                $testParams = @{
+                    Name                  = "CertIdentifier"
+                    CertificateFilePath   = "C:\cert.cer"
+                    CertificateThumbprint = "770515261D1AB169057E246E0EE6431D557C3AFB"
+                    Ensure                = "Present"
+                }
+
+                Mock -CommandName Test-Path -MockWith {
+                    return $true
+                }
+
+                Mock -CommandName New-Object -MockWith {
+                    $retVal = [pscustomobject]@{
+                        Subject       = "CN=CertIdentifer"
+                        Thumbprint    = "770515261D1AB169057E246E0EE6431D557C3AFB"
+                        HasPrivateKey = $false
+                    }
+                    Add-Member -InputObject $retVal -MemberType ScriptMethod Import { }
+
+                    return $retVal
+                } -ParameterFilter { $TypeName -eq "System.Security.Cryptography.X509Certificates.X509Certificate2" }
+
+                Mock -CommandName Get-SPTrustedRootAuthority -MockWith {
+                    return @{
+                        Name        = $testParams.Name
+                        Certificate = @{
+                            Thumbprint = "770515261D1AB169057E246E0EE6431D557C3AFC"
+                        }
+                    }
+                }
+
+                It "Should return Present from the Get method" {
+                    (Get-TargetResource @testParams).Ensure | Should Be "Present"
+                }
+
+                It "Should return false when the Test method is called" {
+                    Test-TargetResource @testParams | Should Be $false
+                }
+
+                It "Should Update the SP Trusted Root Authority in the set method" {
+                    Set-TargetResource @testParams
+                    Assert-MockCalled Get-SPTrustedRootAuthority -Times 1
+                    Assert-MockCalled Set-SPTrustedRootAuthority -Times 1
+                }
+            }
+
             Context -Name "When TrustedRootAuthority should exist and does exist in the farm, but has incorrect certificate, but specified certificate doesn't exist;" -Fixture {
                 $testParams = @{
                     Name                  = "CertIdentifier"
@@ -445,7 +568,7 @@ try
                     Test-TargetResource @testParams | Should Be $false
                 }
 
-                It "Should create a new service application in the set method" {
+                It "Should create a new trusted root authority in the set method" {
                     Set-TargetResource @testParams
                     Assert-MockCalled Get-Item -Times 1
                     Assert-MockCalled New-SPTrustedRootAuthority -Times 1
@@ -493,50 +616,41 @@ try
                     Test-TargetResource @testParams | Should Be $false
                 }
 
-                It "Should create a new service application in the set method" {
+                It "Should create a new trusted root authority in the set method" {
                     Set-TargetResource @testParams
                     Assert-MockCalled New-SPTrustedRootAuthority -Times 1
                 }
             }
 
-            Context -Name "When TrustedRootAuthority should exist and doesn't exist in the farm, but specified cert contains a private key" -Fixture {
+            Context -Name "When TrustedRootAuthority should exist and doesn't exist in the farm (FilePath and Thumbprint)." -Fixture {
                 $testParams = @{
                     Name                  = "CertIdentifier"
                     CertificateThumbprint = "770515261D1AB169057E246E0EE6431D557C3AFB"
+                    CertificateFilePath   = "c:\cert.cer"
                     Ensure                = "Present"
                 }
 
-                Mock -CommandName Get-Item `
-                    -MockWith {
+                Mock -CommandName Test-Path -MockWith {
+                    return $true
+                }
+
+                Mock -CommandName Get-Item -MockWith {
+                    return  @{
+                        Subject    = "CN=CertName"
+                        Thumbprint = $testParams.CertificateThumbprint
+                    }
+                }
+
+                Mock -CommandName New-Object -MockWith {
                     $retVal = [pscustomobject]@{
-                        Subject       = "CN=CertIdentifier"
-                        Thumbprint    = $testParams.CertificateThumbprint
-                        HasPrivateKey = $true
+                        Subject       = "CN=CertIdentifer"
+                        Thumbprint    = "770515261D1AB169057E246E0EE6431D557C3AFB"
+                        HasPrivateKey = $false
                     }
-
-                    Add-Member -InputObject $retVal -MemberType ScriptMethod Export {
-                        $bytes = [System.Byte[]]::CreateInstance([System.Byte], 512)
-                        return $bytes
-                    }
+                    Add-Member -InputObject $retVal -MemberType ScriptMethod Import { }
 
                     return $retVal
-                }
-
-                Mock -CommandName New-Object `
-                    -ParameterFilter { $TypeName -eq "System.Security.Cryptography.X509Certificates.X509Certificate2" } `
-                    -MockWith {
-                    $retVal = [pscustomobject]@{ }
-                    Add-Member -InputObject $retVal -MemberType ScriptMethod Import {
-                        param([System.Byte[]]$bytes)
-                        return @{
-                            Subject       = "CN=CertIdentifer"
-                            Thumbprint    = $testParams.CertificateThumbprint
-                            HasPrivateKey = $false
-                        }
-                    }
-
-                    return $retVal
-                }
+                } -ParameterFilter { $TypeName -eq "System.Security.Cryptography.X509Certificates.X509Certificate2" }
 
                 Mock -CommandName Get-SPTrustedRootAuthority -MockWith {
                     return $null
@@ -552,7 +666,6 @@ try
 
                 It "Should create a new Trusted Root Authority in the set method" {
                     Set-TargetResource @testParams
-                    Assert-MockCalled Get-Item -Times 1
                     Assert-MockCalled New-SPTrustedRootAuthority -Times 1
                     Assert-MockCalled New-Object -Times 1
                 }
