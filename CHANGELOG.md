@@ -33,6 +33,10 @@ resources:
 - SPTrustedRootAuthority
   - It's now possible to specify both CertificateFilePath and CertificateThumbprint
     so that the certificate thumbprint can be verified before importing.
+- SPTrustedSecurityTokenIssuer
+  - It's now possible to specify both SigningCertificateFilePath and
+    SigningCertificateThumbprint so that the certificate thumbprint can be verified
+    before importing.
 - SPUserProfileServiceApp
   - Changed the MySiteHostLocation parameter to a required parameter
 - SPWebAppAuthentication

@@ -97,7 +97,10 @@ function Get-TargetResource
                     # Signing certificate is conform to the one specified
                     # Set signingCertificateThumbprint and signingCertificateFilePath to same value as passed to Get
                     # so that Test method sees this is conform
-                    $signingCertificateThumbprint = $params.SigningCertificateThumbprint
+                    if (-not $params.SigningCertificateThumbprint)
+                    {
+                        $signingCertificateThumbprint = $cert.Thumbprint
+                    }
                     $signingCertificateFilePath = $params.SigningCertificateFilePath
                     Write-Verbose -Message "Existing signing certificate in SPTrustedSecurityTokenIssuer '$($params.Name)' has the same thumbprint as the signing certificate passed in parameter, as expected."
                 }
@@ -197,12 +200,6 @@ function Set-TargetResource
     if ($Ensure -eq "Present")
     {
         if ($PSBoundParameters.ContainsKey("SigningCertificateThumbprint") -and `
-                $PSBoundParameters.ContainsKey("SigningCertificateFilePath"))
-        {
-            throw ("Cannot use both parameters SigningCertificateThumbprint and SigningCertificateFilePath at the same time.")
-        }
-
-        if ($PSBoundParameters.ContainsKey("SigningCertificateThumbprint") -and `
                 $PSBoundParameters.ContainsKey("MetadataEndPoint"))
         {
             throw ("Cannot use both parameters SigningCertificateThumbprint and MetadataEndPoint at the same time.")
@@ -261,7 +258,27 @@ function Set-TargetResource
             else
             {
                 # Configure OAuth trust with specified certificate and a RegisteredIssuerName
-                if ($params.SigningCertificateThumbprint)
+                if ($params.SigningCertificateFilePath)
+                {
+                    Write-Verbose -Message "Getting signing certificate from file system path '$($params.SigningCertificateFilePath)'"
+                    try
+                    {
+                        $cert = New-Object -TypeName "System.Security.Cryptography.X509Certificates.X509Certificate2" `
+                            -ArgumentList @($params.SigningCertificateFilePath)
+                    }
+                    catch
+                    {
+                        throw ("Signing certificate was not found in path '$($params.SigningCertificateFilePath)'.")
+                    }
+                    if ($params.SigningCertificateThumbprint)
+                    {
+                        if (-not ($params.SigningCertificateThumbprint -eq $cert.Thumbprint))
+                        {
+                            throw "Imported certificate thumbprint ($($cert.Thumbprint)) does not match expected thumbprint ($($params.SigningCertificateThumbprint))."
+                        }
+                    }
+                }
+                else
                 {
                     Write-Verbose -Message ("Getting signing certificate with thumbprint " + `
                             "$($params.SigningCertificateThumbprint) from the certificate store 'LocalMachine\My'")
@@ -279,19 +296,6 @@ function Set-TargetResource
                     {
                         throw ("Signing certificate with thumbprint $($params.SigningCertificateThumbprint) " + `
                                 "was not found in certificate store 'LocalMachine\My'.")
-                    }
-                }
-                else
-                {
-                    Write-Verbose -Message "Getting signing certificate from file system path '$($params.SigningCertificateFilePath)'"
-                    try
-                    {
-                        $cert = New-Object -TypeName "System.Security.Cryptography.X509Certificates.X509Certificate2" `
-                            -ArgumentList @($params.SigningCertificateFilePath)
-                    }
-                    catch
-                    {
-                        throw ("Signing certificate was not found in path '$($params.SigningCertificateFilePath)'.")
                     }
                 }
 
@@ -398,12 +402,6 @@ function Test-TargetResource
     Write-Verbose -Message "Testing SPTrustedSecurityTokenIssuer '$Name' settings"
 
     if ($PSBoundParameters.ContainsKey("SigningCertificateThumbprint") -and `
-            $PSBoundParameters.ContainsKey("SigningCertificateFilePath"))
-    {
-        throw ("Cannot use both parameters SigningCertificateThumbprint and SigningCertificateFilePath at the same time.")
-    }
-
-    if ($PSBoundParameters.ContainsKey("SigningCertificateThumbprint") -and `
             $PSBoundParameters.ContainsKey("MetadataEndPoint"))
     {
         throw ("Cannot use both parameters SigningCertificateThumbprint and MetadataEndPoint at the same time.")
@@ -440,6 +438,17 @@ function Test-TargetResource
     if ($PSBoundParameters.ContainsKey("RegisteredIssuerNameRealm") -eq $false)
     {
         $PSBoundParameters.Add("RegisteredIssuerNameRealm", "")
+    }
+
+    if ($PSBoundParameters.ContainsKey("SigningCertificateFilePath") -and `
+            -not ($PSBoundParameters.ContainsKey("SigningCertificateThumbprint")))
+    {
+        Write-Verbose "Retrieving thumbprint of SigningCertificateThumbprint"
+        $cert = New-Object System.Security.Cryptography.X509Certificates.X509Certificate2
+        $cert.Import($SigningCertificateFilePath)
+
+        Write-Verbose "Thumbprint is $($cert.Thumbprint)"
+        $PSBoundParameters.SigningCertificateThumbprint = $cert.Thumbprint
     }
 
     # If SigningCertificateThumbprint was not set, it won't be present in the $PSBoundParameters
