@@ -7,7 +7,10 @@ This resource is used to create or remove SPTrustedIdentityTokenIssuer in a
 SharePoint farm.
 
 Either parameter SigningCertificateThumbPrint or SigningCertificateFilePath
-must be set, but not both.
+must be set. If specifying both SigningCertificateThumbPrint and
+SigningCertificateFilePath, the certificate thumbprint will be verified
+with the specified SigningCertificateThumbPrint. If the thumbprints doesn't
+match an exception will be thrown.
 
 The SigningCertificateThumbPrint must be the thumbprint of the signing
 certificate stored in the certificate store LocalMachine\My of the server
