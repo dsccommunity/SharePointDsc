@@ -34,6 +34,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- SPTrustedRootAuthority
+  - It's now possible to specify both CertificateFilePath and CertificateThumbprint
+    so that the certificate thumbprint can be verified before importing.
+- SPTrustedSecurityTokenIssuer
+  - It's now possible to specify both SigningCertificateFilePath and
+    SigningCertificateThumbprint so that the certificate thumbprint can be verified
+    before importing.
+
 The following changes will break v3.x and earlier configurations that use these
 resources:
 
@@ -44,13 +52,6 @@ resources:
   - Discontinued CrawlEverything, CrawlFirstOnly and null as allowable CrawlSetting
     values for a SharePoint based content source, requiring CrawlVirtualServers or
     CrawlSites
-- SPTrustedRootAuthority
-  - It's now possible to specify both CertificateFilePath and CertificateThumbprint
-    so that the certificate thumbprint can be verified before importing.
-- SPTrustedSecurityTokenIssuer
-  - It's now possible to specify both SigningCertificateFilePath and
-    SigningCertificateThumbprint so that the certificate thumbprint can be verified
-    before importing.
 - SPUserProfileServiceApp
   - Changed the MySiteHostLocation parameter to a required parameter
 - SPWebAppAuthentication
