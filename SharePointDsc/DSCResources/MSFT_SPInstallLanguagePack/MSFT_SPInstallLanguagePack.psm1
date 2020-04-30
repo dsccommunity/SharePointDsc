@@ -175,39 +175,69 @@ function Get-TargetResource
     }
 
     Write-Verbose -Message "Extract English name of the language code"
-    $updateLanguage = $cultureInfo.EnglishName
     switch ($cultureInfo.EnglishName)
     {
         "Dari (Afghanistan)"
-        { $languageEnglish = "Dari"
+        {
+            $languageEnglish = "Dari"
         }
         "Chinese (Simplified, China)"
-        { $languageEnglish = "Chinese (PRC)"
+        {
+            # Language name of Chinese SP2013/2016 and SP2019 install package are different
+            $installedVersion = Get-SPDscInstalledProductVersion
+            if ($installedVersion.FileMajorPart -eq 16 -and `
+                    $installedVersion.ProductBuildPart.ToString().Length -gt 4)
+            {
+                # SP2019
+                $languageEnglish = "Chinese (Simplified)"
+            }
+            else
+            {
+                # SP2013/2016
+                $languageEnglish = "Chinese (PRC)"
+            }
         }
         "Chinese (Traditional, Taiwan)"
-        { $languageEnglish = "Chinese (Taiwan)"
+        {
+            # Language name of Chinese SP2013/2016 and SP2019 install package are different
+            $installedVersion = Get-SPDscInstalledProductVersion
+            if ($installedVersion.FileMajorPart -eq 16 -and `
+                    $installedVersion.ProductBuildPart.ToString().Length -gt 4)
+            {
+                # SP2019
+                $languageEnglish = "Chinese (Traditional)"
+            }
+            else
+            {
+                # SP2013/2016
+                $languageEnglish = "Chinese (Taiwan)"
+            }
         }
         "Portuguese (Brazil)"
-        { $languageEnglish = "Portuguese (Brasil)"
+        {
+            $languageEnglish = "Portuguese (Brasil)"
         }
         "Portuguese (Portugal)"
-        { $languageEnglish = "Portuguese (Portugal)"
+        {
+            $languageEnglish = "Portuguese (Portugal)"
         }
         "Serbian (Cyrillic, Serbia)"
-        { $languageEnglish = "Serbian (Cyrillic)"
+        {
+            $languageEnglish = "Serbian (Cyrillic)"
         }
         "Serbian (Latin, Serbia)"
-        { $languageEnglish = "Serbian (Latin)"
+        {
+            $languageEnglish = "Serbian (Latin)"
         }
         "Norwegian Bokmål (Norway)"
-        { $languageEnglish = "Norwegian"
+        {
+            $languageEnglish = "Norwegian"
         }
         Default
         {
             if ($cultureInfo.EnglishName -match "(\w*,*\s*\w*) \([^)]*\)")
             {
                 $languageEnglish = $matches[1]
-                $updateLanguage = $matches[0]
                 if ($languageEnglish.contains(","))
                 {
                     $languages = $languageEnglish.Split(",")
@@ -409,16 +439,6 @@ function Set-TargetResource
     {
         Write-Verbose -Message ("No BinaryInstallTime specified, Update can be ran at " + `
                 "any time. Starting update.")
-    }
-
-    Write-Verbose -Message "To prevent an endless loop: Check if an upgrade is required."
-    if ((Get-SPDscInstalledProductVersion).FileMajorPart -eq 15)
-    {
-        $wssRegKey = "hklm:SOFTWARE\Microsoft\Shared Tools\Web Server Extensions\15.0\WSS"
-    }
-    else
-    {
-        $wssRegKey = "hklm:SOFTWARE\Microsoft\Shared Tools\Web Server Extensions\16.0\WSS"
     }
 
     Write-Verbose -Message "Checking if BinaryDir is an UNC path"

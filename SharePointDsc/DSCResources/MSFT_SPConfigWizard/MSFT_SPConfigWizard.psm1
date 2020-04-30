@@ -117,7 +117,11 @@ function Set-TargetResource
 
     # Getting the servers patch status from SharePoint
     # https://docs.microsoft.com/en-us/dotnet/api/microsoft.sharepoint.administration.spserverproductinfo.statustype
-    $statusType = Get-SPDscServerPatchStatus
+    $statusType = Invoke-SPDscCommand -Credential $InstallAccount `
+        -Arguments $PSBoundParameters `
+        -ScriptBlock {
+        return Get-SPDscServerPatchStatus
+    }
 
     if ($languagePackInstalled -eq 1)
     {

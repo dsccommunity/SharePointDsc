@@ -46,6 +46,7 @@ BuildWorkflow:
     - Build_NestedModules_ModuleBuilder
     - Create_changelog_release_output
     #- Generate_Conceptual_Help
+    - Generate_Wiki_Content
 
   pack:
     - build
@@ -96,7 +97,8 @@ DscTest:
     - 'Common Tests - New Error-Level Script Analyzer Rules'
     - 'Common Tests - Validate Localization'
     - 'Common Tests - Validate Example Files To Be Published'
-  # ExcludeSourceFile:
+    ExcludeSourceFile:
+    - output
   # ExcludeModuleFile:
   # Tag:
 
@@ -132,6 +134,6 @@ TaskHeader: |
 GitHubConfig:
   GitHubFilesToAdd:
     - 'CHANGELOG.md'
-  GitHubConfigUserName: ykuijs
-  GitHubConfigUserEmail: ykuijs@hotmail.com
+  GitHubConfigUserName: dscbot
+  GitHubConfigUserEmail: dsccommunity@outlook.com
   UpdateChangelogOnPrerelease: false
