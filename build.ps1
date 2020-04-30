@@ -374,7 +374,8 @@ Begin
             $null = $PSBoundParameters.Remove('ResolveDependency')
         }
         Write-Host -foregroundColor Green "[build] Starting build with InvokeBuild."
-        Invoke-Build @PSBoundParameters -Task $Tasks -File $MyInvocation.MyCommand.Path
+        $PSDefaultParameterValues = @{"Get-ModuleVersion:Verbose" = $true }
+        Invoke-Build @PSBoundParameters -Task $Tasks -File $MyInvocation.MyCommand.Path -Verbose
         Pop-Location -StackName BuildModule
         return
     }
