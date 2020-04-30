@@ -46,14 +46,11 @@ BuildWorkflow:
     - Build_NestedModules_ModuleBuilder
     - Create_changelog_release_output
     #- Generate_Conceptual_Help
-    - Generate_Wiki_Content
+    # - Generate_Wiki_Content
 
   pack:
     - build
     - package_module_nupkg
-
-  unittest:
-    - Pester_Tests_Stop_On_Fail
 
   # defining test task to be run when invoking `./build.ps1 -Tasks test`
   test:
@@ -113,8 +110,8 @@ ModuleBuildTasks:
   # - ModuleName: 'alias to search'
   Sampler:
     - '*.build.Sampler.ib.tasks' # this means: import (dot source) all aliases ending with .ib.tasks exported by sampler module
-  DscResource.DocGenerator:
-    - 'Task.*'
+  # DscResource.DocGenerator:
+  #   - 'Task.*'
 
 # Invoke-Build Header to be used to 'decorate' the terminal output of the tasks.
 TaskHeader: |
