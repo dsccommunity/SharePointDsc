@@ -42,12 +42,12 @@ stages:
               ArtifactName: 'output'
               publishLocation: 'Container'
 
-          - task: PublishBuildArtifacts@1
-            displayName: 'Publish Wiki Content Artifact'
-            inputs:
-              pathToPublish: 'output/WikiContent/'
-              artifactName: 'WikiContent'
-              publishLocation: 'Container'
+          # - task: PublishBuildArtifacts@1
+          #   displayName: 'Publish Wiki Content Artifact'
+          #   inputs:
+          #     pathToPublish: 'output/WikiContent/'
+          #     artifactName: 'WikiContent'
+          #     publishLocation: 'Container'
 
   - stage: Test
     dependsOn: Build
