@@ -5,10 +5,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Fixed
+### Added
 
 - SharePointDsc
   - Added Wiki generation to build task
+  - Re-enabled Unit tests for Sharepoint 2016 and 2019
+
+### Fixed
+
+- SharePointDsc
   - Fixed an issue where Test-SPDscParameterState would throw an error due to duplicate
     keys when a desired value is of type CimInstance[] and multiple values
     are specified.
