@@ -385,7 +385,7 @@ Begin
         }
 
         Write-Host -foregroundColor Green "[pre-build] Starting bootstrap process."
-        Resolve-Dependency.ps1 @ResolveDependencyParams
+        .\Resolve-Dependency.ps1 @ResolveDependencyParams
     }
 
     if ($MyInvocation.ScriptName -notLike '*Invoke-Build.ps1')
