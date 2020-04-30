@@ -52,10 +52,16 @@ function New-SPDscUnitTestHelper
         $moduleToLoad = Join-Path -Path $moduleRoot -ChildPath $SubModulePath
         $moduleName = (Get-Item -Path $moduleToLoad).BaseName
 
-        Import-Module -Name $moduleToLoad -Global
+        if ($null -eq (Get-Module -Name $moduleName))
+        {
+            Import-Module -Name $moduleToLoad -Global
+        }
 
         $initScript += @"
-        Import-Module -Name "$moduleToLoad"
+        if (`$null -eq (Get-Module -Name $moduleName))
+        {
+            Import-Module -Name "$moduleToLoad"
+        }
 
 "@
     }
