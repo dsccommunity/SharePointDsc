@@ -94,8 +94,6 @@ process
     try
     {
         Write-Host -ForeGroundColor magenta "[build] Parsing defined tasks"
-        Write-Host -foregroundColor Green "[TESTING 4] ModuleVersion: $ModuleVersion"
-        #Write-Host -foregroundColor Green "[TESTING 4] Env:ModuleVersion: $env:ModuleVersion"
 
         # Load Default BuildInfo if not provided as parameter
         if (!$PSBoundParameters.ContainsKey('BuildInfo'))
@@ -139,8 +137,6 @@ process
                     Write-Host -Object "Configuration file $BuildConfig not found" -ForegroundColor Red
                     $BuildInfo = @{ }
                 }
-                Write-Host -foregroundColor Green "[TESTING 5] ModuleVersion: $ModuleVersion"
-                #Write-Host -foregroundColor Green "[TESTING 5] Env:ModuleVersion: $env:ModuleVersion"
             }
             catch
             {
@@ -163,9 +159,6 @@ process
         {
             foreach ($Module in $BuildInfo['ModuleBuildTasks'].Keys)
             {
-                Write-Host -foregroundColor Green "[TESTING 6] ModuleVersion: $ModuleVersion"
-                #Write-Host -foregroundColor Green "[TESTING 6] Env:ModuleVersion: $env:ModuleVersion"
-
                 try
                 {
                     Write-Host -ForegroundColor DarkGray -Verbose "Importing tasks from module $Module"
@@ -190,8 +183,6 @@ process
             }
         }
 
-        Write-Host -foregroundColor Green "[TESTING 7] ModuleVersion: $ModuleVersion"
-        #Write-Host -foregroundColor Green "[TESTING 7] Env:ModuleVersion: $env:ModuleVersion"
         # Loading Build Tasks defined in the .build/ folder (will override the ones imported above if same task name)
         Get-ChildItem -Path ".build/" -Recurse -Include *.ps1 -ErrorAction Ignore | ForEach-Object {
             "Importing file $($_.BaseName)" | Write-Verbose
@@ -210,8 +201,6 @@ process
         Write-Host -ForegroundColor DarkGray "Adding Workflow from configuration:"
         foreach ($Workflow in $BuildInfo.BuildWorkflow.keys)
         {
-            Write-Host -foregroundColor Green "[TESTING 8] ModuleVersion: $ModuleVersion"
-            #Write-Host -foregroundColor Green "[TESTING 8] Env:ModuleVersion: $env:ModuleVersion"
             Write-Verbose "Creating Build Workflow '$Workflow' with tasks $($BuildInfo.BuildWorkflow.($Workflow) -join ', ')"
             $WorkflowItem = $BuildInfo.BuildWorkflow.($Workflow)
             if ($WorkflowItem.Trim() -match '^\{(?<sb>[\w\W]*)\}$')
@@ -229,33 +218,23 @@ process
     {
         Pop-Location -StackName BeforeBuild
     }
-    Write-Host -foregroundColor Green "[TESTING 9] ModuleVersion: $ModuleVersion"
-    #Write-Host -foregroundColor Green "[TESTING 9] Env:ModuleVersion: $env:ModuleVersion"
 }
 
 Begin
 {
-    Write-Host -foregroundColor Green "[TESTING 1] ModuleVersion: $ModuleVersion"
-    #Write-Host -foregroundColor Green "[TESTING 1] Env:ModuleVersion: $env:ModuleVersion"
-
     # Find build config if not specified
-    if (-not $BuildConfig)
-    {
+    if (-not $BuildConfig) {
         $config = Get-ChildItem -Path "$PSScriptRoot\*" -Include 'build.y*ml', 'build.psd1', 'build.json*' -ErrorAction:Ignore
-        if (-not $config -or ($config -is [array] -and $config.Length -le 0))
-        {
+        if (-not $config -or ($config -is [array] -and $config.Length -le 0)) {
             throw "No build configuration found. Specify path via -BuildConfig"
         }
-        elseif ($config -is [array])
-        {
-            if ($config.Length -gt 1)
-            {
+        elseif ($config -is [array]) {
+            if ($config.Length -gt 1) {
                 throw "More than one build configuration found. Specify which one to use via -BuildConfig"
             }
             $BuildConfig = $config[0]
         }
-        else
-        {
+        else {
             $BuildConfig = $config
         }
     }
@@ -348,8 +327,6 @@ Begin
         # Tell Resolve-Dependency to use $RequiredModulesPath as -PSDependTarget if not overridden in Build.psd1
         $PSDependTarget = $RequiredModulesPath
     }
-    Write-Host -foregroundColor Green "[TESTING 2] ModuleVersion: $ModuleVersion"
-    #Write-Host -foregroundColor Green "[TESTING 2] Env:ModuleVersion: $env:ModuleVersion"
 
     if ($ResolveDependency)
     {
@@ -397,11 +374,8 @@ Begin
             $null = $PSBoundParameters.Remove('ResolveDependency')
         }
         Write-Host -foregroundColor Green "[build] Starting build with InvokeBuild."
-        $PSDefaultParameterValues = @{"Get-ModuleVersion:Verbose" = $true }
-        Invoke-Build @PSBoundParameters -Task $Tasks -File $MyInvocation.MyCommand.Path -Verbose
+        Invoke-Build @PSBoundParameters -Task $Tasks -File $MyInvocation.MyCommand.Path
         Pop-Location -StackName BuildModule
         return
     }
-    Write-Host -foregroundColor Green "[TESTING 3] ModuleVersion: $ModuleVersion"
-    #Write-Host -foregroundColor Green "[TESTING 3] Env:ModuleVersion: $env:ModuleVersion"
 }
