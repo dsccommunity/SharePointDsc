@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - SharePointDsc generic
-  - Fixed an issue where Test-Resource would throw an error due to duplicate
+  - Fixed an issue where Test-SPDscParameterState would throw an error due to duplicate
     keys when a desired value is of type CimInstance[] and multiple values
     are specified.
 
