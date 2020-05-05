@@ -123,7 +123,7 @@ function Compare-PSCustomObjectArrays
                 Desired      = $DesiredEntry.$KeyProperty
                 Current      = $null
             }
-            $DriftedProperties += $DesiredEntry
+            $DriftedProperties += $result
         }
         else
         {
@@ -1004,9 +1004,13 @@ function Test-SPDscParameterState
                             {
                                 foreach ($item in $arrayCompare)
                                 {
-                                    $EventValue = "<CurrentValue>[$($item.PropertyName)]$($item.CurrentValue)</CurrentValue>"
-                                    $EventValue += "<DesiredValue>[$($item.PropertyName)]$($item.DesiredValue)</DesiredValue>"
-                                    $DriftedParameters.Add($fieldName, $EventValue)
+                                    $EventValue = "<CurrentValue>[$($item.PropertyName)]$($item.Current)</CurrentValue>"
+                                    $EventValue += "<DesiredValue>[$($item.PropertyName)]$($item.Desired)</DesiredValue>"
+                                    if (-not $DriftedParameters.ContainsKey($fieldName))
+                                    {
+                                        $DriftedParameters.Add($fieldName, @())
+                                    }
+                                    $DriftedParameters[$fieldName] = $DriftedParameters[$fieldName] += $EventValue
                                 }
                                 $returnValue = $false
                             }
@@ -1179,9 +1183,13 @@ function Test-SPDscParameterState
                                     {
                                         foreach ($item in $arrayCompare)
                                         {
-                                            $EventValue = "<CurrentValue>[$($item.PropertyName)]$($item.CurrentValue)</CurrentValue>"
-                                            $EventValue += "<DesiredValue>[$($item.PropertyName)]$($item.DesiredValue)</DesiredValue>"
-                                            $DriftedParameters.Add($fieldName, $EventValue)
+                                            $EventValue = "<CurrentValue>[$($item.PropertyName)]$($item.Current)</CurrentValue>"
+                                            $EventValue += "<DesiredValue>[$($item.PropertyName)]$($item.Desired)</DesiredValue>"
+                                            if (-not $DriftedParameters.ContainsKey($fieldName))
+                                            {
+                                                $DriftedParameters.Add($fieldName, @())
+                                            }
+                                            $DriftedParameters[$fieldName] = $DriftedParameters[$fieldName] += $EventValue
                                         }
                                         $returnValue = $false
                                     }

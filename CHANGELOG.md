@@ -5,6 +5,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- SharePointDsc generic
+  - Fixed an issue where Test-SPDscParameterState would throw an error due to duplicate
+    keys when a desired value is of type CimInstance[] and multiple values
+    are specified.
+
 ## [4.0.0] - 2020-04-28
 
 ### Added
