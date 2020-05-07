@@ -114,7 +114,6 @@ function Get-TargetResource
                             $spdSettings.AllowSavePublishDeclarativeWorkflow
                         AllowSaveDeclarativeWorkflowAsTemplate = `
                             $spdSettings.AllowSaveDeclarativeWorkflowAsTemplate
-                        InstallAccount                         = $params.InstallAccount
                     }
                 }
             }
@@ -174,7 +173,6 @@ function Get-TargetResource
                                 $site.AllowSavePublishDeclarativeWorkflow
                             AllowSaveDeclarativeWorkflowAsTemplate = `
                                 $site.AllowSaveDeclarativeWorkflowAsTemplate
-                            InstallAccount                         = $params.InstallAccount
                         }
                     }
                 }

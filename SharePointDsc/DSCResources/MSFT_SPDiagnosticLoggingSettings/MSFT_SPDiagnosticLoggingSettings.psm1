@@ -147,7 +147,6 @@ function Get-TargetResource
             ScriptErrorReportingEnabled                 = $dc.ScriptErrorReportingEnabled
             ScriptErrorReportingRequireAuth             = $dc.ScriptErrorReportingRequireAuth
             ScriptErrorReportingDelay                   = $dc.ScriptErrorReportingDelay
-            InstallAccount                              = $params.InstallAccount
         }
     }
     return $result

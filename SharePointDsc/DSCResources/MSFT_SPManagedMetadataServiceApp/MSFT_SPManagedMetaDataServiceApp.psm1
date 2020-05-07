@@ -257,7 +257,6 @@ function Get-TargetResource
                 Languages                     = $termStoreLanguages
                 ContentTypePushdownEnabled    = $contentTypePushDownEnabled
                 ContentTypeSyndicationEnabled = $contentTypeSyndicationEnabled
-                InstallAccount                = $params.InstallAccount
             }
         }
     }

@@ -72,7 +72,6 @@ function Get-TargetResource
                 MaximumUsagePointsSolutions = 0
                 WarningUsagePointsSolutions = 0
                 Ensure                      = "Absent"
-                InstallAccount              = $params.InstallAccount
             }
         }
 
@@ -83,9 +82,8 @@ function Get-TargetResource
         if ($null -eq $template)
         {
             return @{
-                Name           = $params.Name
-                Ensure         = "Absent"
-                InstallAccount = $params.InstallAccount
+                Name   = $params.Name
+                Ensure = "Absent"
             }
         }
         else
@@ -99,7 +97,6 @@ function Get-TargetResource
                 MaximumUsagePointsSolutions = $template.UserCodeMaximumLevel
                 WarningUsagePointsSolutions = $template.UserCodeWarningLevel
                 Ensure                      = "Present"
-                InstallAccount              = $params.InstallAccount
             }
         }
     }
@@ -339,8 +336,8 @@ function Test-TargetResource
             else
             {
                 $result = Test-SPDscParameterState -CurrentValues $CurrentValues `
-                                                   -Source $($MyInvocation.MyCommand.Source) `
-                                                   -DesiredValues $PSBoundParameters
+                    -Source $($MyInvocation.MyCommand.Source) `
+                    -DesiredValues $PSBoundParameters
             }
         }
         "Absent"

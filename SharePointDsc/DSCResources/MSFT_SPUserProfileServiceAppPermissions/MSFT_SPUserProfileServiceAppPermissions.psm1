@@ -45,7 +45,6 @@ function Get-TargetResource
                 CreatePersonalSite   = $null
                 FollowAndEditProfile = $null
                 UseTagsAndNotes      = $null
-                InstallAccount       = $params.InstallAccount
             }
         }
         $security = Get-SPProfileServiceApplicationSecurity -ProfileServiceApplicationProxy $proxy
@@ -109,7 +108,6 @@ function Get-TargetResource
             CreatePersonalSite   = $createPersonalSite
             FollowAndEditProfile = $followAndEditProfile
             UseTagsAndNotes      = $useTagsAndNotes
-            InstallAccount       = $params.InstallAccount
         }
     }
     return $result

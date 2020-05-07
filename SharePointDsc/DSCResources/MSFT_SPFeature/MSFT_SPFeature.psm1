@@ -66,12 +66,11 @@ function Get-TargetResource
         }
 
         return @{
-            Name           = $params.Name
-            FeatureScope   = $params.FeatureScope
-            Url            = $params.Url
-            Version        = $featureAtScope.Version
-            Ensure         = $currentState
-            InstallAccount = $params.InstallAccount
+            Name         = $params.Name
+            FeatureScope = $params.FeatureScope
+            Url          = $params.Url
+            Version      = $featureAtScope.Version
+            Ensure       = $currentState
         }
     }
     return $result

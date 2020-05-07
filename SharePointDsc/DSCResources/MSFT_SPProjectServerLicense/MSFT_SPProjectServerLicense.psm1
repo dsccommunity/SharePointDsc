@@ -72,7 +72,6 @@ function Get-TargetResource
                     IsSingleInstance = "Yes"
                     Ensure           = $status
                     ProductKey       = $params.ProductKey
-                    InstallAccount   = $params.InstallAccount
                 }
             }
             else
@@ -82,7 +81,6 @@ function Get-TargetResource
                     IsSingleInstance = "Yes"
                     Ensure           = "Absent"
                     ProductKey       = $params.ProductKey
-                    InstallAccount   = $params.InstallAccount
                 }
             }
         }
@@ -93,7 +91,6 @@ function Get-TargetResource
                 IsSingleInstance = "Yes"
                 Ensure           = "Absent"
                 ProductKey       = $params.ProductKey
-                InstallAccount   = $params.InstallAccount
             }
         }
     }

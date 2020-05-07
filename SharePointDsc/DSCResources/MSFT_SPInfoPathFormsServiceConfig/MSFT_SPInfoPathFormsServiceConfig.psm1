@@ -105,7 +105,6 @@ function Get-TargetResource
             ActiveSessionsTimeout                    = $params.ActiveSessionsTimeout
             MaxSizeOfUserFormState                   = ($params.MaxSizeOfUserFormState / 1024)
             Ensure                                   = "Absent"
-            InstallAccount                           = $params.InstallAccount
         }
         if ($null -eq $config)
         {
@@ -129,7 +128,6 @@ function Get-TargetResource
             ActiveSessionsTimeout                    = $config.ActiveSessionsTimeout
             MaxSizeOfUserFormState                   = ($config.MaxSizeOfUserFormState / 1024)
             Ensure                                   = "Present"
-            InstallAccount                           = $params.InstallAccount
         }
     }
     return $result
@@ -389,20 +387,20 @@ function Test-TargetResource
         -Source $($MyInvocation.MyCommand.Source) `
         -DesiredValues $PSBoundParameters `
         -ValuesToCheck @("Ensure",
-            "AllowUserFormBrowserEnabling",
-            "AllowUserFormBrowserRendering",
-            "MaxDataConnectionTimeout",
-            "DefaultDataConnectionTimeout",
-            "MaxDataConnectionResponseSize",
-            "RequireSslForDataConnections",
-            "AllowEmbeddedSqlForDataConnections",
-            "AllowUdcAuthenticationForDataConnections",
-            "AllowUserFormCrossDomainDataConnections",
-            "AllowEventPropagation",
-            "MaxPostbacksPerSession",
-            "MaxUserActionsPerPostback",
-            "ActiveSessionsTimeout",
-            "MaxSizeOfUserFormState")
+        "AllowUserFormBrowserEnabling",
+        "AllowUserFormBrowserRendering",
+        "MaxDataConnectionTimeout",
+        "DefaultDataConnectionTimeout",
+        "MaxDataConnectionResponseSize",
+        "RequireSslForDataConnections",
+        "AllowEmbeddedSqlForDataConnections",
+        "AllowUdcAuthenticationForDataConnections",
+        "AllowUserFormCrossDomainDataConnections",
+        "AllowEventPropagation",
+        "MaxPostbacksPerSession",
+        "MaxUserActionsPerPostback",
+        "ActiveSessionsTimeout",
+        "MaxSizeOfUserFormState")
 
     Write-Verbose -Message "Test-TargetResource returned $result"
 

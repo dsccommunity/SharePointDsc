@@ -59,7 +59,6 @@ function Get-TargetResource
             Name            = $params.Name
             ApplicationPool = $params.ApplicationPool
             Ensure          = "Absent"
-            InstallAccount  = $params.InstallAccount
         }
         if ($null -eq $serviceApps)
         {
@@ -96,7 +95,6 @@ function Get-TargetResource
                 DatabaseName    = $serviceApp.Databases.Name
                 DatabaseServer  = $serviceApp.Databases.NormalizedDataSource
                 Ensure          = "Present"
-                InstallAccount  = $params.InstallAccount
             }
         }
     }

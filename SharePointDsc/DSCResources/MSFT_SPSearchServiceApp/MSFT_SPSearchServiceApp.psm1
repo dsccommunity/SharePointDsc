@@ -154,7 +154,6 @@ function Get-TargetResource
                 DefaultContentAccessAccount = $defaultAccount
                 CloudIndex                  = $cloudIndex
                 AlertsEnabled               = $serviceApp.AlertsEnabled
-                InstallAccount              = $params.InstallAccount
             }
             return $returnVal
         }
@@ -540,7 +539,7 @@ function Test-TargetResource
         if ($desired -ne $current)
         {
             $message = ("Specified Default content access account is not in the desired state" + `
-                        "Actual: $current Desired: $desired")
+                    "Actual: $current Desired: $desired")
             Write-Verbose -Message $message
             Add-SPDscEvent -Message $message -EntryType 'Error' -EventID 1 -Source $MyInvocation.MyCommand.Source
 
@@ -555,10 +554,10 @@ function Test-TargetResource
             -Source $($MyInvocation.MyCommand.Source) `
             -DesiredValues $PSBoundParameters `
             -ValuesToCheck @("Ensure",
-                "ApplicationPool",
-                "SearchCenterUrl",
-                "ProxyName",
-                "AlertsEnabled")
+            "ApplicationPool",
+            "SearchCenterUrl",
+            "ProxyName",
+            "AlertsEnabled")
     }
     else
     {

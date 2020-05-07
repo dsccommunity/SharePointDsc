@@ -65,12 +65,11 @@ function Get-TargetResource
         $wa = Get-SPWebApplication -Identity $aam.PublicUrl
 
         return @{
-            WebAppName     = $wa.DisplayName
-            Zone           = $aam.Zone
-            Url            = $aam.IncomingUrl
-            Internal       = $internal
-            Ensure         = "Present"
-            InstallAccount = $params.InstallAccount
+            WebAppName = $wa.DisplayName
+            Zone       = $aam.Zone
+            Url        = $aam.IncomingUrl
+            Internal   = $internal
+            Ensure     = "Present"
         }
     }
     return $result

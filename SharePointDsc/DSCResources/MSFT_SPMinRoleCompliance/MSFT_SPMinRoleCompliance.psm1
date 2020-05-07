@@ -45,7 +45,6 @@ function Get-TargetResource
             return @{
                 IsSingleInstance = "Yes"
                 State            = "Compliant"
-                InstallAccount   = $params.InstallAccount
             }
         }
         else
@@ -53,7 +52,6 @@ function Get-TargetResource
             return @{
                 IsSingleInstance = "Yes"
                 State            = "NonCompliant"
-                InstallAccount   = $params.InstallAccount
             }
         }
     }

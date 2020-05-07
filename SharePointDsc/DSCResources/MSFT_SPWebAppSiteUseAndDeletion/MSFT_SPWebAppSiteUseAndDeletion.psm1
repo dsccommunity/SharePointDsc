@@ -76,7 +76,6 @@ function Get-TargetResource
             UnusedSiteNotificationPeriod             = $wa.UnusedSiteNotificationPeriod.TotalDays
             AutomaticallyDeleteUnusedSiteCollections = $wa.AutomaticallyDeleteUnusedSiteCollections
             UnusedSiteNotificationsBeforeDeletion    = $wa.UnusedSiteNotificationsBeforeDeletion
-            InstallAccount                           = $params.InstallAccount
         }
     }
 

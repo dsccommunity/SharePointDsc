@@ -146,7 +146,6 @@ function Get-TargetResource
             Name            = $params.Name
             ApplicationPool = $params.ApplicationPool
             Ensure          = "Absent"
-            InstallAccount  = $params.InstallAccount
         }
         if ($null -eq $serviceApps)
         {
@@ -212,7 +211,6 @@ function Get-TargetResource
                 UnusedObjectAgeMax                        = $serviceApp.UnusedObjectAgeMax
                 WorkbookCache                             = $serviceApp.WorkbookCache
                 WorkbookCacheSizeMax                      = $serviceApp.WorkbookCacheSizeMax
-                InstallAccount                            = $params.InstallAccount
             }
             return $returnVal
         }
@@ -592,24 +590,24 @@ function Test-TargetResource
         -Source $($MyInvocation.MyCommand.Source) `
         -DesiredValues $PSBoundParameters `
         -ValuesToCheck @(
-            "Ensure",
-            "CachingOfUnusedFilesEnable",
-            "CrossDomainAccessAllowed",
-            "EncryptedUserConnectionRequired",
-            "ExternalDataConnectionLifetime",
-            "FileAccessMethod",
-            "LoadBalancingScheme",
-            "MemoryCacheThreshold",
-            "PrivateBytesMax",
-            "SessionsPerUserMax",
-            "SiteCollectionAnonymousSessionsMax",
-            "TerminateProcessOnAccessViolation",
-            "ThrottleAccessViolationsPerSiteCollection",
-            "UnattendedAccountApplicationId",
-            "UnusedObjectAgeMax",
-            "WorkbookCache",
-            "WorkbookCacheSizeMax"
-        )
+        "Ensure",
+        "CachingOfUnusedFilesEnable",
+        "CrossDomainAccessAllowed",
+        "EncryptedUserConnectionRequired",
+        "ExternalDataConnectionLifetime",
+        "FileAccessMethod",
+        "LoadBalancingScheme",
+        "MemoryCacheThreshold",
+        "PrivateBytesMax",
+        "SessionsPerUserMax",
+        "SiteCollectionAnonymousSessionsMax",
+        "TerminateProcessOnAccessViolation",
+        "ThrottleAccessViolationsPerSiteCollection",
+        "UnattendedAccountApplicationId",
+        "UnusedObjectAgeMax",
+        "WorkbookCache",
+        "WorkbookCacheSizeMax"
+    )
 
 
     if ($Ensure -eq "Present" -and $mainCheck -eq $true -and $null -ne $TrustedFileLocations)
@@ -623,7 +621,7 @@ function Test-TargetResource
             if ($null -eq $matchingCurrentValue)
             {
                 $message = ("Trusted file location '$($_.Address)' was not found " + `
-                            "in the Excel service app. Desired state is false.")
+                        "in the Excel service app. Desired state is false.")
                 Write-Verbose -Message $message
                 Add-SPDscEvent -Message $message -EntryType 'Error' -EventID 1 -Source $MyInvocation.MyCommand.Source
 
@@ -637,9 +635,9 @@ function Test-TargetResource
                         if ($desiredLocation.$_ -ne $matchingCurrentValue.$_)
                         {
                             $message = ("Trusted file location '$($desiredLocation.Address)' did not match " + `
-                                "desired property '$_'. Desired value is " + `
-                                "'$($desiredLocation.$_)' but the current value is " + `
-                                "'$($matchingCurrentValue.$_)'")
+                                    "desired property '$_'. Desired value is " + `
+                                    "'$($desiredLocation.$_)' but the current value is " + `
+                                    "'$($matchingCurrentValue.$_)'")
                             Write-Verbose -Message $message
                             Add-SPDscEvent -Message $message -EntryType 'Error' -EventID 1 -Source $MyInvocation.MyCommand.Source
 
@@ -666,8 +664,8 @@ function Test-TargetResource
             if ($null -eq $matchingDesiredValue)
             {
                 $message = ("Existing trusted file location '$($_.Address)' was not " + `
-                            "found in the desired state for this service " + `
-                            "application. Desired state is false.")
+                        "found in the desired state for this service " + `
+                        "application. Desired state is false.")
                 Write-Verbose -Message $message
                 Add-SPDscEvent -Message $message -EntryType 'Error' -EventID 1 -Source $MyInvocation.MyCommand.Source
 

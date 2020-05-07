@@ -76,7 +76,6 @@ function Get-TargetResource
                 ProxyName       = $proxyName
                 ApplicationPool = $serviceApp.ApplicationPool.Name
                 Ensure          = "Present"
-                InstallAccount  = $params.InstallAccount
             }
         }
     }

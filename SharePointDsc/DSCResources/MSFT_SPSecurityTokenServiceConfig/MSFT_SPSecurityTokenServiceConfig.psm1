@@ -60,7 +60,6 @@ function Get-TargetResource
             AllowOAuthOverHttp    = $params.AllowOAuthOverHttp
             AllowMetadataOverHttp = $params.AllowMetadataOverHttp
             Ensure                = "Absent"
-            InstallAccount        = $params.InstallAccount
         }
         if ($null -eq $config)
         {
@@ -75,7 +74,6 @@ function Get-TargetResource
             AllowOAuthOverHttp    = $config.AllowOAuthOverHttp
             AllowMetadataOverHttp = $config.AllowMetadataOverHttp
             Ensure                = "Present"
-            InstallAccount        = $params.InstallAccount
         }
     }
     return $result
@@ -214,10 +212,10 @@ function Test-TargetResource
         -Source $($MyInvocation.MyCommand.Source) `
         -DesiredValues $PSBoundParameters `
         -ValuesToCheck @("Ensure",
-            "NameIdentifier",
-            "UseSessionCookies",
-            "AllowOAuthOverHttp",
-            "AllowMetadataOverHttp")
+        "NameIdentifier",
+        "UseSessionCookies",
+        "AllowOAuthOverHttp",
+        "AllowMetadataOverHttp")
 
     Write-Verbose -Message "Test-TargetResource returned $result"
 

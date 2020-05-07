@@ -51,10 +51,9 @@ function Get-TargetResource
         if ($null -eq $ma)
         {
             return @{
-                AccountName    = $params.AccountName
-                Account        = $params.Account
-                Ensure         = "Absent"
-                InstallAccount = $params.InstallAccount
+                AccountName = $params.AccountName
+                Account     = $params.Account
+                Ensure      = "Absent"
             }
         }
         $schedule = $null
@@ -69,7 +68,6 @@ function Get-TargetResource
             Schedule          = $schedule
             Account           = $params.Account
             Ensure            = "Present"
-            InstallAccount    = $params.InstallAccount
         }
     }
     return $result
@@ -219,10 +217,10 @@ function Test-TargetResource
         -Source $($MyInvocation.MyCommand.Source) `
         -DesiredValues $PSBoundParameters `
         -ValuesToCheck @("AccountName",
-            "Schedule",
-            "PreExpireDays",
-            "EmailNotification",
-            "Ensure")
+        "Schedule",
+        "PreExpireDays",
+        "EmailNotification",
+        "Ensure")
 
     Write-Verbose -Message "Test-TargetResource returned $result"
 

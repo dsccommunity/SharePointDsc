@@ -119,7 +119,6 @@ function Get-TargetResource
             WorkerProcessCount              = $serviceApp.WorkerProcessCount
             WorkerTimeoutInSeconds          = $serviceApp.WorkerTimeoutInSeconds
             Ensure                          = "Present"
-            InstallAccount                  = $params.InstallAccount
 
         }
         return $returnVal

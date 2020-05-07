@@ -68,7 +68,6 @@ function Get-TargetResource
             ProjectProfessionalMinBuildNumber = $script:ProjectProfessionalMinBuildNumberValue
             ServerCurrency                    = $script:ServerCurrencyValue
             EnforceServerCurrency             = $script:EnforceServerCurrencyValue
-            InstallAccount                    = $params.InstallAccount
         }
     }
     return $result
@@ -188,10 +187,10 @@ function Test-TargetResource
         -Source $($MyInvocation.MyCommand.Source) `
         -DesiredValues $PSBoundParameters `
         -ValuesToCheck @(
-            "ProjectProfessionalMinBuildNumber"
-            "ServerCurrency",
-            "EnforceServerCurrency"
-        )
+        "ProjectProfessionalMinBuildNumber"
+        "ServerCurrency",
+        "EnforceServerCurrency"
+    )
 
     Write-Verbose -Message "Test-TargetResource returned $result"
 

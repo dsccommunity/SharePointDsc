@@ -59,7 +59,6 @@ function Get-TargetResource
                 Name            = $serviceApp.DisplayName
                 ApplicationPool = $serviceApp.ApplicationPool.Name
                 Ensure          = "Present"
-                InstallAccount  = $params.InstallAccount
             }
         }
     }

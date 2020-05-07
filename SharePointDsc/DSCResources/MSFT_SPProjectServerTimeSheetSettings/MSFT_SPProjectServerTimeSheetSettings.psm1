@@ -149,7 +149,6 @@ function Get-TargetResource
                 SingleEntryMode                            = $false
                 DefaultTrackingMode                        = ""
                 ForceTrackingModeForAllProjects            = $false
-                InstallAccount                             = $params.InstallAccount
             }
         }
         else
@@ -252,7 +251,6 @@ function Get-TargetResource
                 SingleEntryMode                            = $script:currentSettings.WADMIN_TS_TIED_MODE
                 DefaultTrackingMode                        = $currentDefaultTrackingMode
                 ForceTrackingModeForAllProjects            = $script:currentSettings.WADMIN_IS_TRACKING_METHOD_LOCKED
-                InstallAccount                             = $params.InstallAccount
             }
         }
     }

@@ -96,7 +96,6 @@ function Get-TargetResource
             $service = Get-SPUsageService
             return @{
                 Name                   = $serviceApp.DisplayName
-                InstallAccount         = $params.InstallAccount
                 DatabaseName           = $serviceApp.UsageDatabase.Name
                 DatabaseServer         = $serviceApp.UsageDatabase.NormalizedDataSource
                 DatabaseCredentials    = $params.DatabaseCredentials
@@ -326,10 +325,10 @@ function Test-TargetResource
             -Source $($MyInvocation.MyCommand.Source) `
             -DesiredValues $PSBoundParameters `
             -ValuesToCheck @("UsageLogCutTime",
-                "UsageLogLocation",
-                "UsageLogMaxFileSizeKB",
-                "UsageLogMaxSpaceGB",
-                "Ensure")
+            "UsageLogLocation",
+            "UsageLogMaxFileSizeKB",
+            "UsageLogMaxSpaceGB",
+            "Ensure")
     }
     else
     {

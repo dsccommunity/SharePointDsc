@@ -47,7 +47,6 @@ function Get-TargetResource
                 Url            = $params.Url
                 Target         = ""
                 Ensure         = "Absent"
-                InstallAccount = $params.InstallAccount
             }
             return $returnVal
         }
@@ -62,7 +61,6 @@ function Get-TargetResource
                 Url            = $params.Url
                 Target         = ""
                 Ensure         = "Absent"
-                InstallAccount = $params.InstallAccount
             }
             return $returnVal
         }
@@ -77,7 +75,6 @@ function Get-TargetResource
                 Url            = $params.Url
                 Target         = ""
                 Ensure         = "Absent"
-                InstallAccount = $params.InstallAccount
             }
             return $returnVal
         }
@@ -89,7 +86,6 @@ function Get-TargetResource
                 Url            = $mapping.Source
                 Target         = $mapping.Target
                 Ensure         = "Present"
-                InstallAccount = $params.InstallAccount
             }
             return $returnVal
         }

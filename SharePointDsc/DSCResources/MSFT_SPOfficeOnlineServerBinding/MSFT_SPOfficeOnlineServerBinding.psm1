@@ -41,19 +41,17 @@ function Get-TargetResource
         if ($null -eq $bindings)
         {
             return @{
-                Zone           = $currentZone
-                DnsName        = $null
-                Ensure         = "Absent"
-                InstallAccount = $params.InstallAccount
+                Zone    = $currentZone
+                DnsName = $null
+                Ensure  = "Absent"
             }
         }
         else
         {
             return @{
-                Zone           = $currentZone
-                DnsName        = ($bindings | Select-Object -First 1).ServerName
-                Ensure         = "Present"
-                InstallAccount = $params.InstallAccount
+                Zone    = $currentZone
+                DnsName = ($bindings | Select-Object -First 1).ServerName
+                Ensure  = "Present"
             }
         }
     }

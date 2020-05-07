@@ -69,7 +69,6 @@ function Get-TargetResource
                 GroupNames          = @()
                 Ensure              = "Absent"
                 AutoReactivateUsers = $false
-                InstallAccount      = $params.InstallAccount
             }
         }
         else
@@ -81,7 +80,6 @@ function Get-TargetResource
                     GroupNames          = @()
                     Ensure              = "Absent"
                     AutoReactivateUsers = $script:reactivateUsers
-                    InstallAccount      = $params.InstallAccount
                 }
             }
             else
@@ -97,7 +95,6 @@ function Get-TargetResource
                     GroupNames          = $adGroups
                     Ensure              = "Present"
                     AutoReactivateUsers = $script:reactivateUsers
-                    InstallAccount      = $params.InstallAccount
                 }
             }
         }

@@ -66,7 +66,6 @@ function Get-TargetResource
             FileType       = $params.FileType
             ServiceAppName = $params.ServiceAppName
             Ensure         = "Absent"
-            InstallAccount = $params.InstallAccount
         }
 
         if ($null -eq $serviceApps)
@@ -105,7 +104,6 @@ function Get-TargetResource
                     MimeType       = $fileType.MimeType
                     Enabled        = $fileType.Enabled
                     Ensure         = "Present"
-                    InstallAccount = $params.InstallAccount
                 }
 
                 return $returnVal
@@ -330,8 +328,8 @@ function Test-TargetResource
             if ($Enabled -ne $CurrentValues.Enabled)
             {
                 $message = ("Specified Enabled does not match the actual value." + `
-                            "Actual: $($CurrentValues.Enabled) Desired: " + `
-                            "$($Enabled)")
+                        "Actual: $($CurrentValues.Enabled) Desired: " + `
+                        "$($Enabled)")
                 Add-SPDscEvent -Message $message -EntryType 'Error' -EventID 1 -Source $MyInvocation.MyCommand.Source
 
                 Write-Verbose -Message "Test-TargetResource returned false"
@@ -343,8 +341,8 @@ function Test-TargetResource
             -Source $($MyInvocation.MyCommand.Source) `
             -DesiredValues $PSBoundParameters `
             -ValuesToCheck @("Ensure",
-                "Description",
-                "MimeType")
+            "Description",
+            "MimeType")
     }
     else
     {

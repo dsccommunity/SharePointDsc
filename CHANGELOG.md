@@ -10,6 +10,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - SharePointDsc
   - Added Wiki generation to build task
   - Re-enabled Unit tests for Sharepoint 2016 and 2019
+  - Removed returning the InstallAccount parameter from all Get methods.
+    These are not used and only add noise during troubleshooting
+- SPAppCatalog
+  - Added more logging in the Get method to ease troubleshooting
+- SPSite
+  - Fixed issue where the default groups were checked, even though
+    that parameter wasn't specified in the config
 
 ### Fixed
 

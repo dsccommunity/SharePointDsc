@@ -42,7 +42,6 @@ function Get-TargetResource()
             RemoteWebAppUrl = $params.RemoteWebAppUrl
             LocalWebAppUrl  = $params.LocalWebAppUrl
             Ensure          = "Absent"
-            InstallAccount  = $params.InstallAccount
         }
 
         $issuer = Get-SPTrustedSecurityTokenIssuer -Identity $params.Name `

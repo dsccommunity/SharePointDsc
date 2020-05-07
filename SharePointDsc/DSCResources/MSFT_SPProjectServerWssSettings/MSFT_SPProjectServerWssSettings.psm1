@@ -78,7 +78,6 @@ function Get-TargetResource
         return @{
             Url                   = $params.Url
             CreateProjectSiteMode = $currentValue
-            InstallAccount        = $params.InstallAccount
         }
     }
     return $result

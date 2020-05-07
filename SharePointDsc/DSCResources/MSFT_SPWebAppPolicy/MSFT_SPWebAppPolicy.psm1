@@ -192,7 +192,6 @@ function Get-TargetResource
             MembersToInclude       = $params.MembersToInclude
             MembersToExclude       = $params.MembersToExclude
             SetCacheAccountsPolicy = $SetCacheAccountsPolicy
-            InstallAccount         = $params.InstallAccount
         }
 
         return $returnval

@@ -62,7 +62,6 @@ function Get-TargetResource
             Servers        = $IndexComponents
             RootDirectory  = $rootDirectory
             ServiceAppName = $params.ServiceAppName
-            InstallAccount = $params.InstallAccount
         }
     }
     return $result

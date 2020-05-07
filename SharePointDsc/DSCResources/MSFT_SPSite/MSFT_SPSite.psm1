@@ -186,7 +186,6 @@ function Get-TargetResource
                 Template                 = "$($site.RootWeb.WebTemplate)#$($site.RootWeb.Configuration)"
                 CreateDefaultGroups      = $CreateDefaultGroups
                 AdministrationSiteType   = $site.AdministrationSiteType
-                InstallAccount           = $params.InstallAccount
             }
         }
     }
@@ -484,7 +483,7 @@ function Test-TargetResource
     Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
     Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
 
-    if ($CreateDefaultGroups -eq $true)
+    if ($PSBoundParameters.ContainsKey("CreateDefaultGroups") -eq $true)
     {
         if ($CurrentValues.CreateDefaultGroups -ne $true)
         {
@@ -501,10 +500,10 @@ function Test-TargetResource
         -Source $($MyInvocation.MyCommand.Source) `
         -DesiredValues $PSBoundParameters `
         -ValuesToCheck @("Url",
-            "QuotaTemplate",
-            "OwnerAlias",
-            "SecondaryOwnerAlias",
-            "AdministrationSiteType")
+        "QuotaTemplate",
+        "OwnerAlias",
+        "SecondaryOwnerAlias",
+        "AdministrationSiteType")
 
     Write-Verbose -Message "Test-TargetResource returned $result"
 

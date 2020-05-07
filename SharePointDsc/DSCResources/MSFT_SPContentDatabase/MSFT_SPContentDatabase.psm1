@@ -74,7 +74,6 @@ function Get-TargetResource
                 WarningSiteCount = $params.WarningSiteCount
                 MaximumSiteCount = $params.MaximumSiteCount
                 Ensure           = "Absent"
-                InstallAccount   = $params.InstallAccount
             }
         }
         else
@@ -97,7 +96,6 @@ function Get-TargetResource
                 WarningSiteCount = $cdb.WarningSiteCount
                 MaximumSiteCount = $cdb.MaximumSiteCount
                 Ensure           = "Present"
-                InstallAccount   = $params.InstallAccount
             }
             return $returnVal
         }
@@ -423,8 +421,8 @@ function Test-TargetResource
     if ($PSBoundParameters.ContainsKey('DatabaseServer') -and $PSBoundParameters.DatabaseServer -ne $null -and $CurrentValues.DatabaseServer -ne $PSBoundParameters.DatabaseServer)
     {
         $message = ("Specified database server $DatabaseServer does not match the actual " + `
-            "database server $($CurrentValues.DatabaseServer). This resource cannot move " + `
-            "the database to a different SQL instance.")
+                "database server $($CurrentValues.DatabaseServer). This resource cannot move " + `
+                "the database to a different SQL instance.")
         Write-Verbose -Message $message
         Add-SPDscEvent -Message $message -EntryType 'Error' -EventID 1 -Source $MyInvocation.MyCommand.Source
 

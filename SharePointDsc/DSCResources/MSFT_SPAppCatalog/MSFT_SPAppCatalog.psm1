@@ -27,26 +27,27 @@ function Get-TargetResource
 
         $site = Get-SPSite $params.SiteUrl -ErrorAction SilentlyContinue
         $nullreturn = @{
-            SiteUrl        = $null
-            InstallAccount = $params.InstallAccount
+            SiteUrl = $null
         }
         if ($null -eq $site)
         {
+            Write-Verbose -Message "Could not find site collection"
             return $nullreturn
         }
         $wa = $site.WebApplication
         $feature = $wa.Features.Item([Guid]::Parse("f8bea737-255e-4758-ab82-e34bb46f5828"))
         if ($null -eq $feature)
         {
+            Write-Verbose -Message "Could not find app catalog feature in site collection"
             return $nullreturn
         }
         if ($site.ID -ne $feature.Properties["__AppCatSiteId"].Value)
         {
+            Write-Verbose -Message "AppCatSiteId does not match Site ID"
             return $nullreturn
         }
         return @{
-            SiteUrl        = $site.Url
-            InstallAccount = $params.InstallAccount
+            SiteUrl = $site.Url
         }
     }
     return $result

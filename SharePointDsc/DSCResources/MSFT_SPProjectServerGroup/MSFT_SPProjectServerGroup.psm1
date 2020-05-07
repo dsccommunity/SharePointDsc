@@ -116,7 +116,6 @@ function Get-TargetResource
                 MembersToInclude = $null
                 MembersToExclude = $null
                 Ensure           = "Absent"
-                InstallAccount   = $params.InstallAccount
             }
         }
         else
@@ -156,7 +155,6 @@ function Get-TargetResource
                 MembersToInclude = $null
                 MembersToExclude = $null
                 Ensure           = "Present"
-                InstallAccount   = $params.InstallAccount
             }
         }
     }
@@ -462,11 +460,11 @@ function Test-TargetResource
         -Source $($MyInvocation.MyCommand.Source) `
         -DesiredValues $PSBoundParameters `
         -ValuesToCheck @(
-            "Name",
-            "Description",
-            "ADGroup",
-            "Ensure"
-        )
+        "Name",
+        "Description",
+        "ADGroup",
+        "Ensure"
+    )
 
     Write-Verbose -Message "Test-TargetResource returned $result"
 

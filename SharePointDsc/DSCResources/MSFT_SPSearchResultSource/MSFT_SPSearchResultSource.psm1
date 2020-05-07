@@ -67,7 +67,6 @@ function Get-TargetResource
             ConnectionUrl        = $null
             ScopeUrl             = $null
             Ensure               = "Absent"
-            InstallAccount       = $params.InstallAccount
         }
         $serviceApp = Get-SPEnterpriseSearchServiceApplication -Identity $params.SearchServiceAppName
         if ($null -eq $serviceApp)
@@ -117,7 +116,6 @@ function Get-TargetResource
                 ConnectionUrl        = $source.ConnectionUrlTemplate
                 ScopeUrl             = $params.ScopeUrl
                 Ensure               = "Present"
-                InstallAccount       = $params.InstallAccount
             }
         }
         else

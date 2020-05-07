@@ -189,7 +189,6 @@ function Get-TargetResource
             QueryProcessing         = $QueryProcessingComponents -replace ".$domain"
             FirstPartitionDirectory = $firstPartition
             IndexPartition          = $IndexComponents -replace ".$domain"
-            InstallAccount          = $params.InstallAccount
         }
     }
 
@@ -538,13 +537,13 @@ function Test-TargetResource
         -Source $($MyInvocation.MyCommand.Source) `
         -DesiredValues $PSBoundParameters `
         -ValuesToCheck @(
-            "Admin",
-            "Crawler",
-            "ContentProcessing",
-            "AnalyticsProcessing",
-            "QueryProcessing",
-            "IndexPartition"
-        )
+        "Admin",
+        "Crawler",
+        "ContentProcessing",
+        "AnalyticsProcessing",
+        "QueryProcessing",
+        "IndexPartition"
+    )
 
     Write-Verbose -Message "Test-TargetResource returned $result"
 

@@ -140,7 +140,6 @@ function Get-TargetResource
 
         $result = Get-SPDscWebApplicationGeneralConfig -WebApplication $wa
         $result.Add("WebAppUrl", $params.WebAppUrl)
-        $result.Add("InstallAccount", $params.InstallAccount)
         return $result
     }
     return $result
@@ -381,7 +380,7 @@ function Test-TargetResource
     Import-Module -Name (Join-Path -Path $PSScriptRoot -ChildPath $modulePath -Resolve)
 
     $result = Test-SPDscWebApplicationGeneralConfig -CurrentSettings $CurrentValues `
-                                                    -DesiredSettings $PSBoundParameters
+        -DesiredSettings $PSBoundParameters
 
     Write-Verbose -Message "Test-TargetResource returned $result"
 

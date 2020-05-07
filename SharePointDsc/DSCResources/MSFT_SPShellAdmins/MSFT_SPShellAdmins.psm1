@@ -156,7 +156,6 @@ function Get-TargetResource
             MembersToExclude = $params.MembersToExclude
             Databases        = $cdbPermissions
             AllDatabases     = $params.AllDatabases
-            InstallAccount   = $params.InstallAccount
         }
     }
     return $result
@@ -809,7 +808,7 @@ function Test-TargetResource
         else
         {
             $message = ("Shell Admins group does not match. Actual: $($CurrentValues.Members -join ", "). " + `
-                        "Desired: $($Members -join ", ")")
+                    "Desired: $($Members -join ", ")")
             Write-Verbose -Message $message
             Add-SPDscEvent -Message $message -EntryType 'Error' -EventID 1 -Source $MyInvocation.MyCommand.Source
 
@@ -906,7 +905,7 @@ function Test-TargetResource
                 else
                 {
                     $message = ("Shell Admins group does not match. Actual: $($database.Members -join ", "). " + `
-                                "Desired: $($Members -join ", ")")
+                            "Desired: $($Members -join ", ")")
                     Write-Verbose -Message $message
                     Add-SPDscEvent -Message $message -EntryType 'Error' -EventID 1 -Source $MyInvocation.MyCommand.Source
 
@@ -1010,7 +1009,7 @@ function Test-TargetResource
                     else
                     {
                         $message = ("Shell Admins group does not match. Actual: $($currentCDB.Members -join ", "). " + `
-                                    "Desired: $($database.Members -join ", ")")
+                                "Desired: $($database.Members -join ", ")")
                         Write-Verbose -Message $message
                         Add-SPDscEvent -Message $message -EntryType 'Error' -EventID 1 -Source $MyInvocation.MyCommand.Source
 

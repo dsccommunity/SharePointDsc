@@ -32,9 +32,8 @@ function Get-TargetResource
         $prefix = Get-SPAppSiteSubscriptionName -ErrorAction Continue
 
         return @{
-            AppDomain      = $appDomain
-            Prefix         = $prefix
-            InstallAccount = $params.InstallAccount
+            AppDomain = $appDomain
+            Prefix    = $prefix
         }
     }
     return $result

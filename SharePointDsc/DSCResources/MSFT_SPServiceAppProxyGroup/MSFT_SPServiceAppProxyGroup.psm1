@@ -98,7 +98,6 @@ function Get-TargetResource
             ServiceAppProxies          = $ServiceAppProxies
             ServiceAppProxiesToInclude = $params.ServiceAppProxiesToInclude
             ServiceAppProxiesToExclude = $params.ServiceAppProxiesToExclude
-            InstallAccount             = $params.InstallAccount
         }
     }
 
@@ -423,8 +422,8 @@ function Test-TargetResource
         else
         {
             $message = ("Proxies in proxy Group $Name does not match. Actual: " + `
-                        "$($CurrentValues.$ServiceAppProxies -join ", "). Desired: " + `
-                        "$($ServiceAppProxies -join ", ")")
+                    "$($CurrentValues.$ServiceAppProxies -join ", "). Desired: " + `
+                    "$($ServiceAppProxies -join ", ")")
             Write-Verbose -Message $message
             Add-SPDscEvent -Message $message -EntryType 'Error' -EventID 1 -Source $MyInvocation.MyCommand.Source
 
@@ -457,8 +456,8 @@ function Test-TargetResource
         elseif ($differences.sideindicator -contains "=>")
         {
             $message = ("Included proxies in proxy Group $Name does not match. Actual: " + `
-                        "$($CurrentValues.ServiceAppProxies -join ", "). Desired: " + `
-                        "$($ServiceAppProxiesToInclude -join ", ")")
+                    "$($CurrentValues.ServiceAppProxies -join ", "). Desired: " + `
+                    "$($ServiceAppProxiesToInclude -join ", ")")
             Write-Verbose -Message $message
             Add-SPDscEvent -Message $message -EntryType 'Error' -EventID 1 -Source $MyInvocation.MyCommand.Source
 
@@ -489,8 +488,8 @@ function Test-TargetResource
         elseif ($differences.sideindicator -contains "==")
         {
             $message = ("Excluded proxies in proxy Group $Name does not match. Actual: " + `
-                        "$($CurrentValues.ServiceAppProxies -join ", "). Desired: " + `
-                        "$($ServiceAppProxiesToExclude -join ", ")")
+                    "$($CurrentValues.ServiceAppProxies -join ", "). Desired: " + `
+                    "$($ServiceAppProxiesToExclude -join ", ")")
             Write-Verbose -Message $message
             Add-SPDscEvent -Message $message -EntryType 'Error' -EventID 1 -Source $MyInvocation.MyCommand.Source
 

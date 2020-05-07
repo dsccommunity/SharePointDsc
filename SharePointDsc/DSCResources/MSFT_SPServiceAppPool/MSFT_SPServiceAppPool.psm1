@@ -41,14 +41,12 @@ function Get-TargetResource
             return @{
                 Name           = $params.Name
                 ServiceAccount = $params.ProcessAccountName
-                InstallAccount = $params.InstallAccount
                 Ensure         = "Absent"
             }
         }
         return @{
             Name           = $sap.Name
             ServiceAccount = $sap.ProcessAccountName
-            InstallAccount = $params.InstallAccount
             Ensure         = "Present"
         }
     }

@@ -133,7 +133,6 @@ function Get-TargetResource
                 DatabaseName           = $db.Name
                 DatabaseServer         = $db.NormalizedDataSource
                 FailoverDatabaseServer = $db.FailoverServer
-                InstallAccount         = $params.InstallAccount
                 Ensure                 = "Present"
             }
         }
@@ -392,8 +391,8 @@ function Test-TargetResource
         ($DatabaseServer -notlike "$($CurrentValues.DatabaseServer).*"))
     {
         $message = ("Specified database server {$DatabaseServer} does not match the actual " + `
-                    "database server {$($CurrentValues.DatabaseServer)}. This resource " + `
-                    "cannot move the database to a different SQL instance.")
+                "database server {$($CurrentValues.DatabaseServer)}. This resource " + `
+                "cannot move the database to a different SQL instance.")
         Write-Verbose -Message $message
         Add-SPDscEvent -Message $message -EntryType 'Error' -EventID 1 -Source $MyInvocation.MyCommand.Source
 
@@ -406,8 +405,8 @@ function Test-TargetResource
         ($CurrentValues.DatabaseName -ne $DatabaseName))
     {
         $message = ("Specified database name {$DatabaseName} does not match the " + `
-                    "actual database name {$($($CurrentValues.DatabaseName))}. This " + `
-                    "resource cannot rename the database.")
+                "actual database name {$($($CurrentValues.DatabaseName))}. This " + `
+                "resource cannot rename the database.")
         Write-Verbose -Message $message
         Add-SPDscEvent -Message $message -EntryType 'Error' -EventID 1 -Source $MyInvocation.MyCommand.Source
 

@@ -55,9 +55,8 @@ function Get-TargetResource
         if ($null -eq $si)
         {
             return @{
-                Name           = $params.Name
-                Ensure         = "Absent"
-                InstallAccount = $params.InstallAccount
+                Name   = $params.Name
+                Ensure = "Absent"
             }
         }
         if ($si.Status -eq "Online")
@@ -70,9 +69,8 @@ function Get-TargetResource
         }
 
         return @{
-            Name           = $params.Name
-            Ensure         = $localEnsure
-            InstallAccount = $params.InstallAccount
+            Name   = $params.Name
+            Ensure = $localEnsure
         }
     }
     return $result
