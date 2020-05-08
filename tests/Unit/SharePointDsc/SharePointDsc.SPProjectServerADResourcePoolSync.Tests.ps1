@@ -70,8 +70,22 @@ try
                 }
                 16
                 {
-                    $modulePath = "SharePointDsc\Modules\SharePointDsc.ProjectServer\ProjectServerConnector.psm1"
-                    Import-Module -Name (Join-Path -Path $Global:SPDscHelper.RepoRoot -ChildPath $modulePath -Resolve)
+                    $script:projectPath = "$PSScriptRoot\..\..\.." | Convert-Path
+                    $script:projectName = (Get-ChildItem -Path "$script:projectPath\*\*.psd1" | Where-Object -FilterScript {
+                            ($_.Directory.Name -match 'source|src' -or $_.Directory.Name -eq $_.BaseName) -and
+                            $(try
+                                { Test-ModuleManifest -Path $_.FullName -ErrorAction Stop
+                                }
+                                catch
+                                { $false
+                                })
+                        }).BaseName
+
+                    $script:parentModule = Get-Module -Name $script:projectName -ListAvailable | Select-Object -First 1
+                    $script:subModulesFolder = Join-Path -Path $script:parentModule.ModuleBase -ChildPath 'Modules'
+
+                    $modulePath = Join-Path -Path $script:subModulesFolder -ChildPath "SharePointDsc.ProjectServerConnector\SharePointDsc.ProjectServerConnector.psm1" -Resolve
+                    Import-Module -Name $modulePath
 
                     try
                     {

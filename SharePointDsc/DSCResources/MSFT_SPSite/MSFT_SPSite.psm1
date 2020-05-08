@@ -483,7 +483,8 @@ function Test-TargetResource
     Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
     Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
 
-    if ($PSBoundParameters.ContainsKey("CreateDefaultGroups") -eq $true)
+    if ($PSBoundParameters.ContainsKey("CreateDefaultGroups") -eq $true -and `
+            $CreateDefaultGroups -eq $true)
     {
         if ($CurrentValues.CreateDefaultGroups -ne $true)
         {

@@ -81,11 +81,14 @@ try
                 Mock -CommandName Get-SPWebapplication -MockWith { return $null }
 
                 It "Should return exception from the get method" {
-                    { Get-TargetResource @testParams } | Should throw "The specified web application could not be found."
+                    $result = Get-TargetResource @testParams
+                    $result.ListPermissions | Should BeNullOrEmpty
+                    $result.SitePermissions | Should BeNullOrEmpty
+                    $result.PersonalPermissions | Should BeNullOrEmpty
                 }
 
                 It "Should return exception from the test method" {
-                    { Test-TargetResource @testParams } | Should throw "The specified web application could not be found."
+                    Test-TargetResource @testParams | Should Be $false
                 }
 
                 It "Should return exception from the set method" {

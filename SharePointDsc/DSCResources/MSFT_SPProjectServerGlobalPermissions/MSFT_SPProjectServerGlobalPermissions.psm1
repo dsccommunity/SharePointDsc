@@ -55,7 +55,7 @@ function Get-TargetResource
                     "permissions mode only, and this site is set to SharePoint mode")
         }
 
-        $modulePath = "..\..\Modules\SharePointDsc.ProjectServer\ProjectServerConnector.psm1"
+        $modulePath = "..\..\Modules\SharePointDsc.ProjectServerConnector\SharePointDsc.ProjectServerConnector.psm1"
         Import-Module -Name (Join-Path -Path $scriptRoot -ChildPath $modulePath -Resolve)
 
         $allowPermissions = @()
@@ -160,7 +160,7 @@ function Set-TargetResource
         $scriptRoot = $args[1]
         $currentValues = $args[2]
 
-        $modulePath = "..\..\Modules\SharePointDsc.ProjectServer\ProjectServerConnector.psm1"
+        $modulePath = "..\..\Modules\SharePointDsc.ProjectServerConnector\SharePointDsc.ProjectServerConnector.psm1"
         Import-Module -Name (Join-Path -Path $scriptRoot -ChildPath $modulePath -Resolve)
 
 
@@ -357,9 +357,9 @@ function Test-TargetResource
         -Source $($MyInvocation.MyCommand.Source) `
         -DesiredValues $PSBoundParameters `
         -ValuesToCheck @(
-            "AllowPermissions",
-            "DenyPermissions"
-        )
+        "AllowPermissions",
+        "DenyPermissions"
+    )
 
     Write-Verbose -Message "Test-TargetResource returned $result"
 

@@ -10,13 +10,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - SharePointDsc
   - Added Wiki generation to build task
   - Re-enabled Unit tests for Sharepoint 2016 and 2019
-  - Removed returning the InstallAccount parameter from all Get methods.
-    These are not used and only add noise during troubleshooting
 - SPAppCatalog
   - Added more logging in the Get method to ease troubleshooting
-- SPSite
-  - Fixed issue where the default groups were checked, even though
-    that parameter wasn't specified in the config
+
+### Changed
+
+- SPWebAppPermissions
+  - Changed Get method not to throw an exception when the web application
+    cannot be found to prevent issue
 
 ### Fixed
 
@@ -24,10 +25,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Fixed an issue where Test-SPDscParameterState would throw an error due to duplicate
     keys when a desired value is of type CimInstance[] and multiple values
     are specified.
+  - Fixed issue with logging to the custom event log where the event log
+    wasn't created correctly.
+  - Fixed various unit tests for Sharepoint 2016 and 2019
 - SPConfigWizard
   - Fixed a call to Get-SPFarm without loading the snap-in first
 - SPInstallLanguagePack
   - Fixed issue with detection of Chinese language pack in SharePoint 2019
+- SPSite
+  - Fixed issue where the default groups were checked, even though
+    that parameter wasn't specified in the config
+
+### Removed
+
+- SharePointDsc
+  - Removed returning the InstallAccount parameter from all Get methods.
+    These are not used and only add noise during troubleshooting
 
 ## [4.0.0] - 2020-04-28
 
