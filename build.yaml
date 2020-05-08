@@ -60,6 +60,9 @@ BuildWorkflow:
   hqrmtest:
     - DscResource_Tests_Stop_On_Fail
 
+  merge:
+    - Merge_CodeCoverage_Files
+
   publish:
     - Publish_release_to_GitHub
     - publish_module_to_gallery # runs if nuget is not available
