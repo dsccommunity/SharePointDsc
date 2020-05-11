@@ -9,7 +9,7 @@ function Add-SPDscEvent
 
         [Parameter(Mandatory = $true)]
         [System.String]
-        $Source = 'Generic',
+        $Source,
 
         [Parameter()]
         [ValidateSet('Error', 'Information', 'FailureAudit', 'SuccessAudit', 'Warning')]
@@ -23,16 +23,22 @@ function Add-SPDscEvent
 
     try
     {
-        $CurrentLog = Get-EventLog -LogName 'SharePointDsc' -Source $Source -ErrorAction SilentlyContinue
-        if ($null -eq $CurrentLog)
-        {
-            $CurrentLog = New-EventLog -LogName 'SharePointDsc' -Source $Source -ErrorAction SilentlyContinue
-        }
         [System.Diagnostics.EventLog]::CreateEventSource($Source, "SharePointDsc")
     }
     catch
     {
-        Write-Verbose $_
+        if ($_.Exception -notmatch "Source \w* already exists on the local computer.")
+        {
+            try
+            {
+                $null = New-EventLog -LogName 'SharePointDsc' -Source $Source -ErrorAction Stop
+                [System.Diagnostics.EventLog]::CreateEventSource($Source, "SharePointDsc")
+            }
+            catch
+            {
+                Write-Verbose $_
+            }
+        }
     }
 
     try
@@ -1219,7 +1225,6 @@ function Test-SPDscParameterState
         $EventMessage += "    <ConfigurationDrift Source=`"$Source`">`r`n"
 
         $EventMessage += "        <ParametersNotInDesiredState>`r`n"
-        $driftedValue = ''
         foreach ($key in $DriftedParameters.Keys)
         {
             Write-Verbose -Message "Detected Drifted Parameter [$Source]$key"
@@ -1261,7 +1266,6 @@ function Test-SPDscUserIsLocalAdmin
         throw [Exception] "Usernames should be formatted as domain\username"
     }
 
-    $domainName = $UserName.Split('\')[0]
     $accountName = $UserName.Split('\')[1]
 
     return ([ADSI]"WinNT://$($env:computername)/Administrators,group").PSBase.Invoke("Members") | `

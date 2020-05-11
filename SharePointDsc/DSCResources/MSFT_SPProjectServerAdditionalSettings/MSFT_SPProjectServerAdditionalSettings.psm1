@@ -44,7 +44,7 @@ function Get-TargetResource
         $params = $args[0]
         $scriptRoot = $args[1]
 
-        $modulePath = "..\..\Modules\SharePointDsc.ProjectServer\ProjectServerConnector.psm1"
+        $modulePath = "..\..\Modules\SharePointDsc.ProjectServerConnector\SharePointDsc.ProjectServerConnector.psm1"
         Import-Module -Name (Join-Path -Path $scriptRoot -ChildPath $modulePath -Resolve)
 
         $webAppUrl = (Get-SPSite -Identity $params.Url).WebApplication.Url
@@ -68,7 +68,6 @@ function Get-TargetResource
             ProjectProfessionalMinBuildNumber = $script:ProjectProfessionalMinBuildNumberValue
             ServerCurrency                    = $script:ServerCurrencyValue
             EnforceServerCurrency             = $script:EnforceServerCurrencyValue
-            InstallAccount                    = $params.InstallAccount
         }
     }
     return $result
@@ -115,7 +114,7 @@ function Set-TargetResource
         $params = $args[0]
         $scriptRoot = $args[1]
 
-        $modulePath = "..\..\Modules\SharePointDsc.ProjectServer\ProjectServerConnector.psm1"
+        $modulePath = "..\..\Modules\SharePointDsc.ProjectServerConnector\SharePointDsc.ProjectServerConnector.psm1"
         Import-Module -Name (Join-Path -Path $scriptRoot -ChildPath $modulePath -Resolve)
 
         $webAppUrl = (Get-SPSite -Identity $params.Url).WebApplication.Url
@@ -188,10 +187,10 @@ function Test-TargetResource
         -Source $($MyInvocation.MyCommand.Source) `
         -DesiredValues $PSBoundParameters `
         -ValuesToCheck @(
-            "ProjectProfessionalMinBuildNumber"
-            "ServerCurrency",
-            "EnforceServerCurrency"
-        )
+        "ProjectProfessionalMinBuildNumber"
+        "ServerCurrency",
+        "EnforceServerCurrency"
+    )
 
     Write-Verbose -Message "Test-TargetResource returned $result"
 

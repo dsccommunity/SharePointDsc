@@ -59,7 +59,9 @@ function Get-TargetResource
 
         if ($null -eq $wa)
         {
-            throw "The specified web application could not be found."
+            return @{
+                WebAppUrl = $params.WebAppUrl
+            }
         }
 
         if ($wa.RightsMask -eq [Microsoft.SharePoint.SPBasePermissions]::FullMask)
@@ -577,9 +579,9 @@ function Test-TargetResource
                 -Source $($MyInvocation.MyCommand.Source) `
                 -DesiredValues $PSBoundParameters `
                 -ValuesToCheck @("ListPermissions",
-                                "SitePermissions",
-                                "PersonalPermissions"
-                )
+                "SitePermissions",
+                "PersonalPermissions"
+            )
         }
     }
 

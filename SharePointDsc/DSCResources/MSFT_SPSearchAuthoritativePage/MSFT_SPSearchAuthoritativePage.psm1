@@ -50,7 +50,6 @@ function Get-TargetResource
             Level          = $params.Level
             Action         = $params.Action
             Ensure         = "Absent"
-            InstallAccount = $params.InstallAccount
         }
 
         $serviceApp = Get-SPEnterpriseSearchServiceApplication -Identity $params.ServiceAppName
@@ -81,7 +80,6 @@ function Get-TargetResource
                     Level          = $queryAuthority.Level
                     Action         = $params.Action
                     Ensure         = "Present"
-                    InstallAccount = $params.InstallAccount
                 }
             }
         }
@@ -102,7 +100,6 @@ function Get-TargetResource
                     Path           = $params.Path
                     Action         = $params.Action
                     Ensure         = "Present"
-                    InstallAccount = $params.InstallAccount
                 }
             }
         }
@@ -287,10 +284,10 @@ function Test-TargetResource
                 -Source $($MyInvocation.MyCommand.Source) `
                 -DesiredValues $PSBoundParameters `
                 -ValuesToCheck @("ServiceAppName",
-                    "Path",
-                    "Level",
-                    "Action",
-                    "Ensure")
+                "Path",
+                "Level",
+                "Action",
+                "Ensure")
         }
         else
         {
@@ -298,9 +295,9 @@ function Test-TargetResource
                 -Source $($MyInvocation.MyCommand.Source) `
                 -DesiredValues $PSBoundParameters `
                 -ValuesToCheck @("ServiceAppName",
-                    "Path",
-                    "Action",
-                    "Ensure")
+                "Path",
+                "Action",
+                "Ensure")
         }
     }
     else
@@ -309,8 +306,8 @@ function Test-TargetResource
             -Source $($MyInvocation.MyCommand.Source) `
             -DesiredValues $PSBoundParameters `
             -ValuesToCheck @("ServiceAppName",
-                "Action",
-                "Ensure")
+            "Action",
+            "Ensure")
     }
 
     Write-Verbose -Message "Test-TargetResource returned $result"

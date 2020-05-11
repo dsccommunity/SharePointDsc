@@ -230,13 +230,13 @@ try
                         }
                         16
                         {
-                            if ($Global:SPDscHelper.CurrentStubBuildNumber.Minor.ToString().Length -le 4)
+                            if ($Global:SPDscHelper.CurrentStubBuildNumber.Build.ToString().Length -le 4)
                             {
                                 return @("Microsoft SharePoint Server 2016", 'Language Pack for SharePoint and Project Server 2016  - Chinese (Taiwan)/中文 (繁體)')
                             }
                             else
                             {
-                                return @("Microsoft SharePoint Server 2019", 'Language Pack for SharePoint and Project Server 2019  - Chinese (Taiwan)/中文 (繁體)')
+                                return @("Microsoft SharePoint Server 2019", 'Language Pack for SharePoint and Project Server 2019 - Chinese (Traditional)/中文 (繁體)')
                             }
                         }
                         Default
@@ -281,13 +281,13 @@ try
                         }
                         16
                         {
-                            if ($Global:SPDscHelper.CurrentStubBuildNumber.Minor.ToString().Length -le 4)
+                            if ($Global:SPDscHelper.CurrentStubBuildNumber.Build.ToString().Length -le 4)
                             {
                                 return @("Microsoft SharePoint Server 2016", 'Language Pack for SharePoint and Project Server 2016  - Chinese (PRC)/中文(简体)')
                             }
                             else
                             {
-                                return @("Microsoft SharePoint Server 2019", 'Language Pack for SharePoint and Project Server 2019  - Chinese (PRC)/中文(简体)')
+                                return @("Microsoft SharePoint Server 2019", 'Language Pack for SharePoint and Project Server 2019  - Chinese (Simplified)/中文(简体)')
                             }
                         }
                         Default

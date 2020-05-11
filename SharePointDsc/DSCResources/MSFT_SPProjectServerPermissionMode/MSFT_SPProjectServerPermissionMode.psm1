@@ -48,7 +48,6 @@ function Get-TargetResource
         return @{
             Url            = $params.Url
             PermissionMode = $mode
-            InstallAccount = $params.InstallAccount
         }
     }
     return $result

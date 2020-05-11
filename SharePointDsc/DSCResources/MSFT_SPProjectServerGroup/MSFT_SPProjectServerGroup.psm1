@@ -84,7 +84,7 @@ function Get-TargetResource
                     "mode only, and this site is set to SharePoint mode")
         }
 
-        $modulePath = "..\..\Modules\SharePointDsc.ProjectServer\ProjectServerConnector.psm1"
+        $modulePath = "..\..\Modules\SharePointDsc.ProjectServerConnector\SharePointDsc.ProjectServerConnector.psm1"
         Import-Module -Name (Join-Path -Path $scriptRoot -ChildPath $modulePath -Resolve)
 
         $webAppUrl = (Get-SPSite -Identity $params.Url).WebApplication.Url
@@ -116,7 +116,6 @@ function Get-TargetResource
                 MembersToInclude = $null
                 MembersToExclude = $null
                 Ensure           = "Absent"
-                InstallAccount   = $params.InstallAccount
             }
         }
         else
@@ -156,7 +155,6 @@ function Get-TargetResource
                 MembersToInclude = $null
                 MembersToExclude = $null
                 Ensure           = "Present"
-                InstallAccount   = $params.InstallAccount
             }
         }
     }
@@ -221,7 +219,7 @@ function Set-TargetResource
             $scriptRoot = $args[1]
             $currentSettings = $args[2]
 
-            $modulePath = "..\..\Modules\SharePointDsc.ProjectServer\ProjectServerConnector.psm1"
+            $modulePath = "..\..\Modules\SharePointDsc.ProjectServerConnector\SharePointDsc.ProjectServerConnector.psm1"
             Import-Module -Name (Join-Path -Path $scriptRoot -ChildPath $modulePath -Resolve)
 
             $webAppUrl = (Get-SPSite -Identity $params.Url).WebApplication.Url
@@ -324,7 +322,7 @@ function Set-TargetResource
             $params = $args[0]
             $scriptRoot = $args[1]
 
-            $modulePath = "..\..\Modules\SharePointDsc.ProjectServer\ProjectServerConnector.psm1"
+            $modulePath = "..\..\Modules\SharePointDsc.ProjectServerConnector\SharePointDsc.ProjectServerConnector.psm1"
             Import-Module -Name (Join-Path -Path $scriptRoot -ChildPath $modulePath -Resolve)
 
             $webAppUrl = (Get-SPSite -Identity $params.Url).WebApplication.Url
@@ -462,11 +460,11 @@ function Test-TargetResource
         -Source $($MyInvocation.MyCommand.Source) `
         -DesiredValues $PSBoundParameters `
         -ValuesToCheck @(
-            "Name",
-            "Description",
-            "ADGroup",
-            "Ensure"
-        )
+        "Name",
+        "Description",
+        "ADGroup",
+        "Ensure"
+    )
 
     Write-Verbose -Message "Test-TargetResource returned $result"
 

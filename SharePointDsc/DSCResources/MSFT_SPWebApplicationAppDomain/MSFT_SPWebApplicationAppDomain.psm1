@@ -57,12 +57,11 @@ function Get-TargetResource
         else
         {
             return @{
-                WebAppUrl      = $params.WebAppUrl
-                AppDomain      = $webAppAppDomain.AppDomain
-                Zone           = $webAppAppDomain.UrlZone
-                Port           = $webAppAppDomain.Port
-                SSL            = $webAppAppDomain.IsSchemeSSL
-                InstallAccount = $params.InstallAccount
+                WebAppUrl = $params.WebAppUrl
+                AppDomain = $webAppAppDomain.AppDomain
+                Zone      = $webAppAppDomain.UrlZone
+                Port      = $webAppAppDomain.Port
+                SSL       = $webAppAppDomain.IsSchemeSSL
             }
         }
     }

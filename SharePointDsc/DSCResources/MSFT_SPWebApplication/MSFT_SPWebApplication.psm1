@@ -115,7 +115,6 @@ function Get-TargetResource
             Path                   = $IISPath
             Port                   = (New-Object -TypeName System.Uri $wa.Url).Port
             UseClassic             = $classicAuth
-            InstallAccount         = $params.InstallAccount
             Ensure                 = "Present"
         }
     }

@@ -60,7 +60,6 @@ function Get-TargetResource
         $nullReturn = @{
             ServiceAppName = ""
             SecurityType   = $params.SecurityType
-            InstallAccount = $params.InstallAccount
         }
 
         if ($null -eq $serviceApp)
@@ -197,7 +196,6 @@ function Get-TargetResource
             Members          = $members
             MembersToInclude = $params.MembersToInclude
             MembersToExclude = $params.MembersToExclude
-            InstallAccount   = $params.InstallAccount
         }
     }
     return $result
@@ -573,7 +571,7 @@ function Test-TargetResource
                 if ($params.Members.Count -gt 0)
                 {
                     $message = ("Security list does not match. Actual: $($CurrentValues.Members.Username -join ", "). " + `
-                                "Desired: $($params.Members.Username -join ", ")")
+                            "Desired: $($params.Members.Username -join ", ")")
                     Write-Verbose -Message $message
                     Add-SPDscEvent -Message $message -EntryType 'Error' -EventID 1 -Source $Source
 
@@ -588,7 +586,7 @@ function Test-TargetResource
             elseif ($params.Members.Count -eq 0)
             {
                 $message = ("Security list does not match. Actual: $($CurrentValues.Members.Username -join ", "). " + `
-                            "Desired: $($params.Members.Username -join ", ")")
+                        "Desired: $($params.Members.Username -join ", ")")
                 Write-Verbose -Message $message
                 Add-SPDscEvent -Message $message -EntryType 'Error' -EventID 1 -Source $Source
 
@@ -620,7 +618,7 @@ function Test-TargetResource
             else
             {
                 $message = ("Security list does not match. Actual: $($CurrentValues.Members.Username -join ", "). " + `
-                            "Desired: $($params.Members.Username -join ", ")")
+                        "Desired: $($params.Members.Username -join ", ")")
                 Write-Verbose -Message $message
                 Add-SPDscEvent -Message $message -EntryType 'Error' -EventID 1 -Source $Source
 

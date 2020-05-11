@@ -106,7 +106,6 @@ function Get-TargetResource
                     RuleScope        = $item["HealthRuleScope"]
                     Schedule         = $ruleschedule
                     FixAutomatically = $item["HealthRuleAutoRepairEnabled"]
-                    InstallAccount   = $params.InstallAccount
                 }
             }
             else

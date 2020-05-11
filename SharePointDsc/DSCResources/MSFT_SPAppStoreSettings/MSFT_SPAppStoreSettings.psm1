@@ -34,8 +34,7 @@ function Get-TargetResource
         $params = $args[0]
 
         $nullreturn = @{
-            WebAppUrl      = $null
-            InstallAccount = $params.InstallAccount
+            WebAppUrl = $null
         }
 
         $wa = Get-SPWebApplication -Identity $params.WebAppUrl -ErrorAction SilentlyContinue
@@ -53,7 +52,6 @@ function Get-TargetResource
             WebAppUrl          = $params.WebAppUrl
             AllowAppPurchases  = $AllowAppPurchases
             AllowAppsForOffice = $AllowAppsForOffice
-            InstallAccount     = $params.InstallAccount
         }
     }
     return $result
@@ -162,9 +160,9 @@ function Test-TargetResource
     {
         if ($AllowAppPurchases -ne $CurrentValues.AllowAppPurchases)
         {
-            $message = ("The parameter AllowAppPurchases for web application $WebAppUrl "+ `
-                       "is not in the desired state. Actual: " + `
-                       "$($CurrentValues.AllowAppPurchases), Desired: $AllowAppPurchases")
+            $message = ("The parameter AllowAppPurchases for web application $WebAppUrl " + `
+                    "is not in the desired state. Actual: " + `
+                    "$($CurrentValues.AllowAppPurchases), Desired: $AllowAppPurchases")
             Write-Verbose -Message $message
             Add-SPDscEvent -Message $message -EntryType 'Error' -EventID 1 -Source $MyInvocation.MyCommand.Source
 
@@ -177,9 +175,9 @@ function Test-TargetResource
     {
         if ($AllowAppsForOffice -ne $CurrentValues.AllowAppsForOffice)
         {
-            $message = ("The parameter AllowAppsForOffice for web application $WebAppUrl "+ `
-                       "is not in the desired state. Actual: " + `
-                       "$($CurrentValues.AllowAppsForOffice), Desired: $AllowAppsForOffice")
+            $message = ("The parameter AllowAppsForOffice for web application $WebAppUrl " + `
+                    "is not in the desired state. Actual: " + `
+                    "$($CurrentValues.AllowAppsForOffice), Desired: $AllowAppsForOffice")
             Write-Verbose -Message $message
             Add-SPDscEvent -Message $message -EntryType 'Error' -EventID 1 -Source $MyInvocation.MyCommand.Source
 

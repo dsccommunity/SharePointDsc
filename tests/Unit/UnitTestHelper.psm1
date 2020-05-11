@@ -34,7 +34,7 @@ function New-SPDscUnitTestHelper
     $majorBuildNumber = $spBuildParts[0]
     $minorBuildNumber = $spBuildParts[1]
 
-    $describeHeader += " [SP Build: $spBuild]"
+    $describeHeader += "[SP Build: $spBuild] "
 
     $repoRoot = Join-Path -Path $PSScriptRoot -ChildPath "..\..\" -Resolve
     $moduleRoot = Join-Path -Path $repoRoot -ChildPath "output\SharePointDsc\$ModuleVersion"
@@ -48,21 +48,27 @@ function New-SPDscUnitTestHelper
 
     if ($PSBoundParameters.ContainsKey("SubModulePath") -eq $true)
     {
-        $describeHeader = "Sub-module '$SubModulePath'"
+        $describeHeader += "Sub-module '$SubModulePath'"
         $moduleToLoad = Join-Path -Path $moduleRoot -ChildPath $SubModulePath
         $moduleName = (Get-Item -Path $moduleToLoad).BaseName
 
-        Import-Module -Name $moduleToLoad -Global
+        if ($null -eq (Get-Module -Name $moduleName))
+        {
+            Import-Module -Name $moduleToLoad -Global
+        }
 
-        $initScript += @"
-        Import-Module -Name "$moduleToLoad"
+        #$initScript += @"
+        #if (`$null -eq (Get-Module -Name $moduleName))
+        #{
+        #    Import-Module -Name "$moduleToLoad"
+        #}
 
-"@
+        #"@
     }
 
     if ($PSBoundParameters.ContainsKey("DscResource") -eq $true)
     {
-        $describeHeader = "DSC Resource '$DscResource'"
+        $describeHeader += "DSC Resource '$DscResource'"
         $moduleName = "MSFT_$DscResource"
     }
 

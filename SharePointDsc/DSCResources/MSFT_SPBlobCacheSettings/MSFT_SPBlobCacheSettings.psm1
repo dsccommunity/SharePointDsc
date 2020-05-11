@@ -68,7 +68,6 @@ function Get-TargetResource
                 MaxSizeInGB     = $null
                 MaxAgeInSeconds = $null
                 FileTypes       = $null
-                InstallAccount  = $params.InstallAccount
             }
         }
 
@@ -86,7 +85,6 @@ function Get-TargetResource
                 MaxSizeInGB     = $null
                 MaxAgeInSeconds = $null
                 FileTypes       = $null
-                InstallAccount  = $params.InstallAccount
             }
         }
 
@@ -140,7 +138,6 @@ function Get-TargetResource
             MaxSizeInGB     = $maxsize
             MaxAgeInSeconds = $maxage
             FileTypes       = $webconfig.configuration.SharePoint.BlobCache.path
-            InstallAccount  = $params.InstallAccount
         }
 
         return $returnval
@@ -387,10 +384,10 @@ function Test-TargetResource
         -Source $($MyInvocation.MyCommand.Source) `
         -DesiredValues $PSBoundParameters `
         -ValuesToCheck @("EnableCache",
-            "Location",
-            "MaxSizeInGB",
-            "FileType",
-            "MaxAgeInSeconds")
+        "Location",
+        "MaxSizeInGB",
+        "FileType",
+        "MaxAgeInSeconds")
 
     Write-Verbose -Message "Test-TargetResource returned $result"
 

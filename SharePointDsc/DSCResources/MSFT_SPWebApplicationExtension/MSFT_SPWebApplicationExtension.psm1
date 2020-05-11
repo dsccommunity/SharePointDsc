@@ -123,7 +123,6 @@ function Get-TargetResource
             Port           = $Port
             Zone           = $params.zone
             UseSSL         = $UseSSL
-            InstallAccount = $params.InstallAccount
             Ensure         = "Present"
         }
     }

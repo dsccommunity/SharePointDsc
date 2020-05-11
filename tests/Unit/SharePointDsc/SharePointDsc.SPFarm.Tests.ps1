@@ -57,9 +57,6 @@ try
             $mockPassphrase = New-Object -TypeName "System.Management.Automation.PSCredential" `
                 -ArgumentList @('PASSPHRASEUSER', $mockPassword)
 
-#            $modulePath = "output\SharePointDsc\$($Global:SPDscHelper.ModuleVersion)\Modules\SharePointDsc.Farm\SPFarm.psm1"
-#            Import-Module -Name (Join-Path -Path $Global:SPDscHelper.RepoRoot -ChildPath $modulePath -Resolve)
-
             try
             {
                 [Microsoft.SharePoint.Administration.SPDeveloperDashboardLevel]
@@ -2178,6 +2175,7 @@ namespace Microsoft.SharePoint.Administration {
                         FarmAccount              = $mockFarmAccount
                         Passphrase               = $mockPassphrase
                         AdminContentDatabaseName = "SP_AdminContent"
+                        ApplicationCredentialKey = $mockPassphrase
                         RunCentralAdmin          = $false
                     }
 

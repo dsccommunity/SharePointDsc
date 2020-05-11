@@ -5,12 +5,42 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- SharePointDsc
+  - Added Wiki generation to build task
+  - Re-enabled Unit tests for Sharepoint 2016 and 2019
+- SPAppCatalog
+  - Added more logging in the Get method to ease troubleshooting
+
+### Changed
+
+- SPWebAppPermissions
+  - Changed Get method not to throw an exception when the web application
+    cannot be found to prevent issue
+
 ### Fixed
 
-- SharePointDsc generic
+- SharePointDsc
   - Fixed an issue where Test-SPDscParameterState would throw an error due to duplicate
     keys when a desired value is of type CimInstance[] and multiple values
     are specified.
+  - Fixed issue with logging to the custom event log where the event log
+    wasn't created correctly.
+  - Fixed various unit tests for Sharepoint 2016 and 2019
+- SPConfigWizard
+  - Fixed a call to Get-SPFarm without loading the snap-in first
+- SPInstallLanguagePack
+  - Fixed issue with detection of Chinese language pack in SharePoint 2019
+- SPSite
+  - Fixed issue where the default groups were checked, even though
+    that parameter wasn't specified in the config
+
+### Removed
+
+- SharePointDsc
+  - Removed returning the InstallAccount parameter from all Get methods.
+    These are not used and only add noise during troubleshooting
 
 ## [4.0.0] - 2020-04-28
 
@@ -29,6 +59,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- SPTrustedRootAuthority
+  - It's now possible to specify both CertificateFilePath and CertificateThumbprint
+    so that the certificate thumbprint can be verified before importing.
+- SPTrustedSecurityTokenIssuer
+  - It's now possible to specify both SigningCertificateFilePath and
+    SigningCertificateThumbprint so that the certificate thumbprint can be verified
+    before importing.
+
 The following changes will break v3.x and earlier configurations that use these
 resources:
 
@@ -39,13 +77,6 @@ resources:
   - Discontinued CrawlEverything, CrawlFirstOnly and null as allowable CrawlSetting
     values for a SharePoint based content source, requiring CrawlVirtualServers or
     CrawlSites
-- SPTrustedRootAuthority
-  - It's now possible to specify both CertificateFilePath and CertificateThumbprint
-    so that the certificate thumbprint can be verified before importing.
-- SPTrustedSecurityTokenIssuer
-  - It's now possible to specify both SigningCertificateFilePath and
-    SigningCertificateThumbprint so that the certificate thumbprint can be verified
-    before importing.
 - SPUserProfileServiceApp
   - Changed the MySiteHostLocation parameter to a required parameter
 - SPWebAppAuthentication
@@ -127,101 +158,5 @@ resources:
   - Corrected incorrect information in Readme file
 - SPUserProfileProperty
   - Fixed typo in user profile property test for IsSearchable.
-
-## [3.7.0.0] - 2019-10-30
-
-### Added
-
-- None
-
-### Changed
-
-- None
-
-### Deprecated
-
-- None
-
-### Removed
-
-- None
-
-### Fixed
-
-- SPConfigWizard
-  - Fixed issue with incorrect check for upgrade status of server
-- SPDistributedCacheService
-  - Improved error message for inclusion of server name into ServerProvisionOrder
-    parameters when Present or change to Ensure Absent
-- SPFarm
-  - Removed SingleServer as ServerRole, since this is an invalid role.
-  - Handle case where null or empty CentralAdministrationUrl is passed in
-  - Move CentralAdministrationPort validation into parameter definition
-    to work with ReverseDsc
-  - Add NotNullOrEmpty parameter validation to CentralAdministrationUrl
-  - Fixed error when changing developer dashboard display level.
-  - Add support for updating Central Admin Authentication Method
-- SPFarmSolution
-  - Fix for Web Application scoped solutions.
-- SPInstall
-  - Fixes a terminating error for sources in weird file shares
-  - Corrected issue with incorrectly detecting SharePoint after it
-    has been uninstalled
-  - Corrected issue with detecting a paused installation
-- SPInstallLanguagePack
-  - Fixes a terminating error for sources in weird file shares
-- SPInstallPrereqs
-  - Fixes a terminating error for sources in weird file shares
-- SPProductUpdate
-  - Fixes a terminating error for sources in weird file shares
-  - Corrected incorrect farm detection, added in earlier bugfix
-- SPSite
-  - Fixed issue with incorrectly updating site OwnerAlias and
-    SecondaryOwnerAlias
-- SPWebAppAuthentication
-  - Fixes issue where Test method return false on NON-US OS.
-
-### Security
-
-- None
-
-## [3.6.0.0] - 2019-08-07
-
-### Added
-
-- SPTrustedSecurityTokenIssuer
-  - New resource for configuring OAuth trusts
-
-### Changed
-
-- None
-
-### Deprecated
-
-- None
-
-### Removed
-
-- None
-
-### Fixed
-
-- SharePointDsc generic
-  - Added new launch actions to vscode to allow code coverage reports for
-    the current unit test file.
-- SPFarm
-  - Moved check for CentralAdministrationUrl is HTTP to Set method,
-    to prevent issues with ReverseDsc
-- SPInstall
-  - Updated error code checks to force reboot.
-- SPProductUpdate
-  - Fixes an issue using ShutdownServices when no Farm is available.
-- SPTrustedRootAuthority
-  - Fixes issue where Set method throws an error because the
-    parameter CertificateFilePath is not read correctly.
-
-### Security
-
-- None
 
 For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md).

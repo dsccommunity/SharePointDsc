@@ -106,12 +106,11 @@ function Get-TargetResource
             }
         }
         return @{
-            Url            = $params.Url
-            Intranet       = $intranetUrl
-            Internet       = $internetUrl
-            Extranet       = $extranetUrl
-            Custom         = $customUrl
-            InstallAccount = $params.InstallAccount
+            Url      = $params.Url
+            Intranet = $intranetUrl
+            Internet = $internetUrl
+            Extranet = $extranetUrl
+            Custom   = $customUrl
         }
     }
     return $result

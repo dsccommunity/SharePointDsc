@@ -46,13 +46,11 @@ function Get-TargetResource
                 SuperUserAlias   = $null
                 SuperReaderAlias = $null
                 SetWebAppPolicy  = $false
-                InstallAccount   = $params.InstallAccount
             }
         }
 
         $returnVal = @{
-            InstallAccount = $params.InstallAccount
-            WebAppUrl      = $params.WebAppUrl
+            WebAppUrl = $params.WebAppUrl
         }
 
         $policiesSet = $true

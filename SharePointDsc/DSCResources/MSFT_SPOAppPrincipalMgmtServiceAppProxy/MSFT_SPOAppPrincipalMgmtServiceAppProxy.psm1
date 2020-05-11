@@ -43,7 +43,6 @@ function Get-TargetResource
             Name            = $params.Name
             OnlineTenantUri = $null
             Ensure          = "Absent"
-            InstallAccount  = $params.InstallAccount
         }
         if ($null -eq $serviceAppProxy)
         {
@@ -55,7 +54,6 @@ function Get-TargetResource
                 Name            = $serviceAppProxy.Name
                 OnlineTenantUri = $serviceAppProxy.OnlineTenantUri.OriginalString
                 Ensure          = "Present"
-                InstallAccount  = $params.InstallAccount
             }
             return $returnVal
         }

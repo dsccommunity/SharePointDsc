@@ -44,7 +44,7 @@ function Get-TargetResource
         $params = $args[0]
         $scriptRoot = $args[1]
 
-        $modulePath = "..\..\Modules\SharePointDsc.ProjectServer\ProjectServerConnector.psm1"
+        $modulePath = "..\..\Modules\SharePointDsc.ProjectServerConnector\SharePointDsc.ProjectServerConnector.psm1"
         Import-Module -Name (Join-Path -Path $scriptRoot -ChildPath $modulePath -Resolve)
 
         $webAppUrl = (Get-SPSite -Identity $params.Url).WebApplication.Url
@@ -69,7 +69,6 @@ function Get-TargetResource
                 EnableProjectWebAppSync             = $false
                 EnableProjectSiteSync               = $false
                 EnableProjectSiteSyncForSPTaskLists = $false
-                InstallAccount                      = $params.InstallAccount
             }
         }
         else
@@ -81,7 +80,6 @@ function Get-TargetResource
                 EnableProjectWebAppSync             = ($bits[3] -eq "0")
                 EnableProjectSiteSync               = ($bits[2] -eq "0")
                 EnableProjectSiteSyncForSPTaskLists = ($bits[0] -eq "0")
-                InstallAccount                      = $params.InstallAccount
             }
         }
     }

@@ -81,11 +81,10 @@ function Get-TargetResource
             }
 
             return @{
-                DatabaseName   = $dbname
-                AGName         = $params.AGName
-                FileShare      = $params.FileShare
-                Ensure         = $Ensure
-                InstallAccount = $params.InstallAccount
+                DatabaseName = $dbname
+                AGName       = $params.AGName
+                FileShare    = $params.FileShare
+                Ensure       = $Ensure
             }
         }
     }
@@ -121,11 +120,10 @@ function Get-TargetResource
             }
 
             return @{
-                DatabaseName   = $dbname
-                AGName         = $params.AGName
-                FileShare      = $params.FileShare
-                Ensure         = $Ensure
-                InstallAccount = $params.InstallAccount
+                DatabaseName = $dbname
+                AGName       = $params.AGName
+                FileShare    = $params.FileShare
+                Ensure       = $Ensure
             }
         }
     }

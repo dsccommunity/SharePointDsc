@@ -54,7 +54,6 @@ function Get-TargetResource
             RequestLimit   = $null
             WaitTime       = $null
             Ensure         = "Absent"
-            InstallAccount = $params.InstallAccount
         }
 
 
@@ -81,7 +80,6 @@ function Get-TargetResource
                         RequestLimit   = $crawlerImpactRule.HitRate
                         WaitTime       = 0
                         Ensure         = "Present"
-                        InstallAccount = $params.InstallAccount
                     }
                 }
                 else
@@ -92,7 +90,6 @@ function Get-TargetResource
                         RequestLimit   = 0
                         WaitTime       = $crawlerImpactRule.HitRate
                         Ensure         = "Present"
-                        InstallAccount = $params.InstallAccount
                     }
                 }
             }

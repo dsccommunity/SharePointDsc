@@ -87,7 +87,6 @@ function Get-TargetResource
                 UserProfileServiceAppName = $params.UserProfileServiceAppName
                 Ensure                    = "Absent"
                 RunOnlyWhenWriteable      = $params.RunOnlyWhenWriteable
-                InstallAccount            = $params.InstallAccount
             }
         }
 
@@ -112,7 +111,6 @@ function Get-TargetResource
                 UserProfileServiceAppName = $params.UserProfileServiceAppName
                 Ensure                    = "Absent"
                 RunOnlyWhenWriteable      = $params.RunOnlyWhenWriteable
-                InstallAccount            = $params.InstallAccount
             }
         }
         if ($null -ne $syncService.UserProfileApplicationGuid -and `
@@ -134,7 +132,6 @@ function Get-TargetResource
             UserProfileServiceAppName = $upa.Name
             Ensure                    = $localEnsure
             RunOnlyWhenWriteable      = $params.RunOnlyWhenWriteable
-            InstallAccount            = $params.InstallAccount
         }
     }
     return $result

@@ -204,7 +204,6 @@ function Get-TargetResource
             MaximumSyncConversionRequests   = $serviceApp.MaximumSyncConversionRequests
             KeepAliveTimeout                = $serviceApp.KeepAliveTimeout.TotalSeconds
             MaximumConversionTime           = $serviceApp.MaximumConversionTime.TotalSeconds
-            InstallAccount                  = $params.InstallAccount
         }
         return $returnVal
     }

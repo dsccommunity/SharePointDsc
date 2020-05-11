@@ -93,7 +93,6 @@ function Get-TargetResource
 
         $result = Get-SPDscWebApplicationThrottlingConfig -WebApplication $wa
         $result.Add("WebAppUrl", $params.WebAppUrl)
-        $result.Add("InstallAccount", $params.InstallAccount)
         return $result
     }
     return $result

@@ -232,7 +232,6 @@ function Get-TargetResource
                 SocialDBServer               = $databases.SocialDatabase.NormalizedDataSource
                 SyncDBName                   = $databases.SynchronizationDatabase.Name
                 SyncDBServer                 = $databases.SynchronizationDatabase.NormalizedDataSource
-                InstallAccount               = $params.InstallAccount
                 EnableNetBIOS                = $serviceApp.NetBIOSDomainNamesEnabled
                 NoILMUsed                    = $serviceApp.NoILMUsed
                 SiteNamingConflictResolution = $upSiteConflictNaming

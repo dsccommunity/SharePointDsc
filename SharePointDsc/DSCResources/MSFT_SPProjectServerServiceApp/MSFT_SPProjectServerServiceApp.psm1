@@ -51,7 +51,6 @@ function Get-TargetResource
             ApplicationPool = ""
             ProxyName       = ""
             Ensure          = "Absent"
-            InstallAccount  = $params.InstallAccount
         }
         if ($null -eq $serviceApps)
         {
@@ -84,7 +83,6 @@ function Get-TargetResource
                 ApplicationPool = $serviceApp.ApplicationPool.Name
                 ProxyName       = $proxyName
                 Ensure          = "Present"
-                InstallAccount  = $params.InstallAccount
             }
         }
     }

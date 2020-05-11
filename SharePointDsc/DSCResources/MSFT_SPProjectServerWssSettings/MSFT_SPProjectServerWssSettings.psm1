@@ -37,7 +37,7 @@ function Get-TargetResource
         $params = $args[0]
         $scriptRoot = $args[1]
 
-        $modulePath = "..\..\Modules\SharePointDsc.ProjectServer\ProjectServerConnector.psm1"
+        $modulePath = "..\..\Modules\SharePointDsc.ProjectServerConnector\SharePointDsc.ProjectServerConnector.psm1"
         Import-Module -Name (Join-Path -Path $scriptRoot -ChildPath $modulePath -Resolve)
 
         $webAppUrl = (Get-SPSite -Identity $params.Url).WebApplication.Url
@@ -78,7 +78,6 @@ function Get-TargetResource
         return @{
             Url                   = $params.Url
             CreateProjectSiteMode = $currentValue
-            InstallAccount        = $params.InstallAccount
         }
     }
     return $result
@@ -112,7 +111,7 @@ function Set-TargetResource
         $params = $args[0]
         $scriptRoot = $args[1]
 
-        $modulePath = "..\..\Modules\SharePointDsc.ProjectServer\ProjectServerConnector.psm1"
+        $modulePath = "..\..\Modules\SharePointDsc.ProjectServerConnector\SharePointDsc.ProjectServerConnector.psm1"
         Import-Module -Name (Join-Path -Path $scriptRoot -ChildPath $modulePath -Resolve)
 
         $webAppUrl = (Get-SPSite -Identity $params.Url).WebApplication.Url

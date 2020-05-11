@@ -44,7 +44,6 @@ function Get-TargetResource
             ApplicationPool = $params.ApplicationPool
             DatabaseServer  = $params.DatabaseServer
             Ensure          = "Absent"
-            InstallAccount  = $params.InstallAccount
         }
         if ($null -eq $serviceApps)
         {

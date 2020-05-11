@@ -112,7 +112,7 @@ function Get-TargetResource
         $params = $args[0]
         $scriptRoot = $args[1]
 
-        $modulePath = "..\..\Modules\SharePointDsc.ProjectServer\ProjectServerConnector.psm1"
+        $modulePath = "..\..\Modules\SharePointDsc.ProjectServerConnector\SharePointDsc.ProjectServerConnector.psm1"
         Import-Module -Name (Join-Path -Path $scriptRoot -ChildPath $modulePath -Resolve)
 
         $webAppUrl = (Get-SPSite -Identity $params.Url).WebApplication.Url
@@ -149,7 +149,6 @@ function Get-TargetResource
                 SingleEntryMode                            = $false
                 DefaultTrackingMode                        = ""
                 ForceTrackingModeForAllProjects            = $false
-                InstallAccount                             = $params.InstallAccount
             }
         }
         else
@@ -252,7 +251,6 @@ function Get-TargetResource
                 SingleEntryMode                            = $script:currentSettings.WADMIN_TS_TIED_MODE
                 DefaultTrackingMode                        = $currentDefaultTrackingMode
                 ForceTrackingModeForAllProjects            = $script:currentSettings.WADMIN_IS_TRACKING_METHOD_LOCKED
-                InstallAccount                             = $params.InstallAccount
             }
         }
     }

@@ -53,14 +53,14 @@ try
             # Initialize tests
             $getTypeFullName = "Microsoft.Office.Server.WorkManagement.WorkManagementServiceApplication"
 
-            # Mocks for all contexts
-            Mock -CommandName Remove-SPServiceApplication -MockWith { }
-            Mock -CommandName New-SPWorkManagementServiceApplication -MockWith { }
-            Mock -CommandName New-SPWorkManagementServiceApplicationProxy -MockWith { }
-
             # Test contexts
             if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 15)
             {
+                # Mocks for all contexts
+                Mock -CommandName Remove-SPServiceApplication -MockWith { }
+                Mock -CommandName New-SPWorkManagementServiceApplication -MockWith { }
+                Mock -CommandName New-SPWorkManagementServiceApplicationProxy -MockWith { }
+
                 Context -Name "When a service application exists and Ensure equals 'Absent'" -Fixture {
                     $testParams = @{
                         Name   = "Test Work Management App"
@@ -171,9 +171,9 @@ try
                             DisplayName     = $testParams.Name
                             ApplicationPool = @{ Name = $testParams.ApplicationPool }
                             AdminSettings   = @{
-                                MinimumTimeBetweenEwsSyncSubscriptionSearches = (new-timespan -minutes 10)
-                                MinimumTimeBetweenProviderRefreshes           = (new-timespan -minutes 10)
-                                MinimumTimeBetweenSearchQueries               = (new-timespan -minutes 10)
+                                MinimumTimeBetweenEwsSyncSubscriptionSearches = (New-TimeSpan -minutes 10)
+                                MinimumTimeBetweenProviderRefreshes           = (New-TimeSpan -minutes 10)
+                                MinimumTimeBetweenSearchQueries               = (New-TimeSpan -minutes 10)
                                 NumberOfSubscriptionSyncsPerEwsSyncRun        = 10
                                 NumberOfUsersEwsSyncWillProcessAtOnce         = 10
                                 NumberOfUsersPerEwsSyncBatch                  = 10
@@ -211,9 +211,9 @@ try
                             DisplayName     = $testParams.Name
                             ApplicationPool = @{ Name = "Wrong App Pool Name" }
                             AdminSettings   = @{
-                                MinimumTimeBetweenEwsSyncSubscriptionSearches = (new-timespan -minutes 10)
-                                MinimumTimeBetweenProviderRefreshes           = (new-timespan -minutes 10)
-                                MinimumTimeBetweenSearchQueries               = (new-timespan -minutes 10)
+                                MinimumTimeBetweenEwsSyncSubscriptionSearches = (New-TimeSpan -minutes 10)
+                                MinimumTimeBetweenProviderRefreshes           = (New-TimeSpan -minutes 10)
+                                MinimumTimeBetweenSearchQueries               = (New-TimeSpan -minutes 10)
                                 NumberOfSubscriptionSyncsPerEwsSyncRun        = 10
                                 NumberOfUsersEwsSyncWillProcessAtOnce         = 10
                                 NumberOfUsersPerEwsSyncBatch                  = 10

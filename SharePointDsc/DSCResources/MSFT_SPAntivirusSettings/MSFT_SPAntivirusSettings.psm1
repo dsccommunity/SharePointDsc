@@ -67,7 +67,6 @@ function Get-TargetResource
                 AttemptToClean        = $false
                 NumberOfThreads       = 0
                 TimeoutDuration       = 0
-                InstallAccount        = $params.InstallAccount
             }
         }
 
@@ -83,7 +82,6 @@ function Get-TargetResource
             AttemptToClean        = $admService.AntivirusSettings.CleaningEnabled
             NumberOfThreads       = $admService.AntivirusSettings.NumberOfThreads
             TimeoutDuration       = $admService.AntivirusSettings.Timeout.TotalSeconds
-            InstallAccount        = $params.InstallAccount
         }
     }
     return $result

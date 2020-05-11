@@ -49,7 +49,6 @@ function Get-TargetResource
             MaxTotalSizeInBytes = $params.MaxTotalSizeInBytes
             Enabled             = $params.Enabled
             Ensure              = "Absent"
-            InstallAccount      = $params.InstallAccount
         }
         if ($null -eq $diagnosticProvider)
         {
@@ -62,7 +61,6 @@ function Get-TargetResource
             MaxTotalSizeInBytes = $diagnosticProvider.MaxTotalSizeInBytes
             Enabled             = $diagnosticProvider.Enabled
             Ensure              = "Present"
-            InstallAccount      = $params.InstallAccount
         }
     }
     return $result

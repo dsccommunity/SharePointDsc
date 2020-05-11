@@ -10,9 +10,27 @@ param
             -Resolve)
 )
 
-$script:DSCModuleName = 'SharePointDsc'
-$script:DSCResourceName = 'SharePointDsc.Util'
-$script:DSCResourceFullName = 'MSFT_' + $script:DSCResourceName
+#region HEADER
+$script:projectPath = "$PSScriptRoot\..\..\.." | Convert-Path
+$script:projectName = (Get-ChildItem -Path "$script:projectPath\*\*.psd1" | Where-Object -FilterScript {
+        ($_.Directory.Name -match 'source|src' -or $_.Directory.Name -eq $_.BaseName) -and
+        $(try
+            { Test-ModuleManifest -Path $_.FullName -ErrorAction Stop 
+            }
+            catch
+            { $false 
+            })
+    }).BaseName
+
+$script:parentModule = Get-Module -Name $script:projectName -ListAvailable | Select-Object -First 1
+$script:subModulesFolder = Join-Path -Path $script:parentModule.ModuleBase -ChildPath 'Modules'
+Remove-Module -Name $script:parentModule -Force -ErrorAction 'SilentlyContinue'
+
+$script:subModuleName = (Split-Path -Path $PSCommandPath -Leaf) -replace '\.Tests.ps1'
+$script:subModuleFile = Join-Path -Path $script:subModulesFolder -ChildPath "$($script:subModuleName)"
+
+Import-Module $script:subModuleFile -Force -ErrorAction Stop
+#endregion HEADER
 
 function Invoke-TestSetup
 {
@@ -27,25 +45,18 @@ function Invoke-TestSetup
         $moduleVersionFolder = ($ModuleVersion -split "-")[0]
 
         $Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointCmdletModule `
-                -SubModulePath "Modules\SharePointDsc.Util\SharePointDsc.Util.psm1" `
-                -ExcludeInvokeHelper `
-                -ModuleVersion $moduleVersionFolder
+            -SubModulePath "Modules\SharePointDsc.Util\SharePointDsc.Util.psm1" `
+            -ExcludeInvokeHelper `
+            -ModuleVersion $moduleVersionFolder
     }
     catch [System.IO.FileNotFoundException]
     {
         throw 'DscResource.Test module dependency not found. Please run ".\build.ps1 -Tasks build" first.'
     }
-
-    # $script:testEnvironment = Initialize-TestEnvironment `
-    #     -DSCModuleName $script:DSCModuleName `
-    #     -DSCResourceName $script:DSCResourceFullName `
-    #     -ResourceType 'Mof' `
-    #     -TestType 'Unit'
 }
 
 function Invoke-TestCleanup
 {
-    # Restore-TestEnvironment -TestEnvironment $script:testEnvironment
 }
 
 Invoke-TestSetup
@@ -366,5 +377,4 @@ try
 }
 finally
 {
-    Invoke-TestCleanup
 }

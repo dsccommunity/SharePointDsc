@@ -57,22 +57,20 @@ function Get-TargetResource
         if ($null -eq $path)
         {
             return @{
-                WebAppUrl      = $params.WebAppUrl
-                RelativeUrl    = $params.RelativeUrl
-                Explicit       = $params.Explicit
-                HostHeader     = $params.HostHeader
-                InstallAccount = $params.InstallAccount
-                Ensure         = "Absent"
+                WebAppUrl   = $params.WebAppUrl
+                RelativeUrl = $params.RelativeUrl
+                Explicit    = $params.Explicit
+                HostHeader  = $params.HostHeader
+                Ensure      = "Absent"
             }
         }
 
         return @{
-            RelativeUrl    = $path.Name
-            Explicit       = ($path.Type -eq "ExplicitInclusion")
-            WebAppUrl      = $params.WebAppUrl
-            HostHeader     = $params.HostHeader
-            InstallAccount = $params.InstallAccount
-            Ensure         = "Present"
+            RelativeUrl = $path.Name
+            Explicit    = ($path.Type -eq "ExplicitInclusion")
+            WebAppUrl   = $params.WebAppUrl
+            HostHeader  = $params.HostHeader
+            Ensure      = "Present"
         }
     }
     return $result
@@ -207,10 +205,10 @@ function Test-TargetResource
         -Source $($MyInvocation.MyCommand.Source) `
         -DesiredValues $PSBoundParameters `
         -ValuesToCheck @("WebAppUrl",
-            "RelativeUrl",
-            "Explicit",
-            "HostHeader",
-            "Ensure")
+        "RelativeUrl",
+        "Explicit",
+        "HostHeader",
+        "Ensure")
 
     Write-Verbose -Message "Test-TargetResource returned $result"
 

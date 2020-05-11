@@ -46,9 +46,8 @@ function Get-TargetResource
         -ScriptBlock {
         $params = $args[0]
         $nullReturnValue = @{
-            Name           = $params.Name
-            Ensure         = "Absent"
-            InstallAccount = $params.InstallAccount
+            Name   = $params.Name
+            Ensure = "Absent"
         }
 
         try
@@ -79,7 +78,6 @@ function Get-TargetResource
                 CreateFirewallRules  = ($null -ne $firewallRule)
                 Ensure               = "Present"
                 ServerProvisionOrder = $params.ServerProvisionOrder
-                InstallAccount       = $params.InstallAccount
             }
         }
         catch
@@ -525,9 +523,9 @@ function Test-TargetResource
         {
             if ($ServiceAccount -ne $CurrentValues.ServiceAccount)
             {
-                $message = ("The parameter ServiceAccount is not in the desired "+ `
-                            "state. Actual: $($CurrentValues.ServiceAccount), " + `
-                            "Desired: $ServiceAccount")
+                $message = ("The parameter ServiceAccount is not in the desired " + `
+                        "state. Actual: $($CurrentValues.ServiceAccount), " + `
+                        "Desired: $ServiceAccount")
                 Write-Verbose -Message $message
                 Add-SPDscEvent -Message $message -EntryType 'Error' -EventID 1 -Source $MyInvocation.MyCommand.Source
 
