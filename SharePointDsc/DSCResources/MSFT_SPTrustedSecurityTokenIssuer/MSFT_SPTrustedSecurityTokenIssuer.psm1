@@ -195,6 +195,8 @@ function Set-TargetResource
 
     Write-Verbose -Message "Setting SPTrustedSecurityTokenIssuer '$Name' settings"
 
+    $PSBoundParameters.IsTrustBroker = $IsTrustBroker
+
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
     if ($Ensure -eq "Present")
@@ -292,63 +294,63 @@ function Set-TargetResource
                         $_.Thumbprint -match $params.SigningCertificateThumbprint
                     }
 
-                    if (!$cert)
-                    {
-                        throw ("Signing certificate with thumbprint $($params.SigningCertificateThumbprint) " + `
-                                "was not found in certificate store 'LocalMachine\My'.")
-                    }
-                }
-
-                if ([string]::IsNullOrEmpty($params.RegisteredIssuerNameRealm))
+                if (!$cert)
                 {
-                    Write-Verbose -Message "RegisteredIssuerNameRealm is not specified, use Get-SPAuthenticationRealm instead."
-                    $registeredIssuerNameRealm = Get-SPAuthenticationRealm
+                    throw ("Signing certificate with thumbprint $($params.SigningCertificateThumbprint) " + `
+                            "was not found in certificate store 'LocalMachine\My'.")
                 }
-                else
-                {
-                    $registeredIssuerNameRealm = $params.RegisteredIssuerNameRealm
-                }
-
-                $registeredIssuerName = "$($params.RegisteredIssuerNameIdentifier)@$registeredIssuerNameRealm"
-
-                $runParams.Add("RegisteredIssuerName", $registeredIssuerName)
-                $runParams.Add("Certificate", $cert)
             }
 
-            if ($params.CurrentValues.Ensure -eq "Absent")
+            if ([string]::IsNullOrEmpty($params.RegisteredIssuerNameRealm))
             {
-                $runParams.Add("Name", $params.Name)
-                Write-Verbose -Message "Creating SPTrustedSecurityTokenIssuer '$($params.Name)'"
-                New-SPTrustedSecurityTokenIssuer @runParams
+                Write-Verbose -Message "RegisteredIssuerNameRealm is not specified, use Get-SPAuthenticationRealm instead."
+                $registeredIssuerNameRealm = Get-SPAuthenticationRealm
             }
             else
             {
-                $runParams.Add("Identity", $params.Name)
-                $runParams.Add("Confirm", $false)
-                Write-Verbose -Message "Updating SPTrustedSecurityTokenIssuer '$($params.Name)'"
-                Write-Verbose -Message "New Values: $(Convert-SPDscHashtableToString -Hashtable $runParams)"
-                Set-SPTrustedSecurityTokenIssuer @runParams
+                $registeredIssuerNameRealm = $params.RegisteredIssuerNameRealm
             }
-        }
-    }
-    else
-    {
-        if ($CurrentValues.Ensure -eq "Present")
-        {
-            Write-Verbose "Removing SPTrustedSecurityTokenIssuer '$Name'"
-            $null = Invoke-SPDscCommand -Credential $InstallAccount `
-                -Arguments $PSBoundParameters `
-                -ScriptBlock {
-                $params = $args[0]
 
-                $runParams = @{
-                    Identity = $params.Name
-                    Confirm  = $false
-                }
-                Remove-SPTrustedSecurityTokenIssuer @runParams
-            }
+            $registeredIssuerName = "$($params.RegisteredIssuerNameIdentifier)@$registeredIssuerNameRealm"
+
+            $runParams.Add("RegisteredIssuerName", $registeredIssuerName)
+            $runParams.Add("Certificate", $cert)
+        }
+
+        if ($params.CurrentValues.Ensure -eq "Absent")
+        {
+            $runParams.Add("Name", $params.Name)
+            Write-Verbose -Message "Creating SPTrustedSecurityTokenIssuer '$($params.Name)'"
+            New-SPTrustedSecurityTokenIssuer @runParams
+        }
+        else
+        {
+            $runParams.Add("Identity", $params.Name)
+            $runParams.Add("Confirm", $false)
+            Write-Verbose -Message "Updating SPTrustedSecurityTokenIssuer '$($params.Name)'"
+            Write-Verbose -Message "New Values: $(Convert-SPDscHashtableToString -Hashtable $runParams)"
+            Set-SPTrustedSecurityTokenIssuer @runParams
         }
     }
+}
+else
+{
+    if ($CurrentValues.Ensure -eq "Present")
+    {
+        Write-Verbose "Removing SPTrustedSecurityTokenIssuer '$Name'"
+        $null = Invoke-SPDscCommand -Credential $InstallAccount `
+            -Arguments $PSBoundParameters `
+            -ScriptBlock {
+            $params = $args[0]
+
+            $runParams = @{
+                Identity = $params.Name
+                Confirm  = $false
+            }
+            Remove-SPTrustedSecurityTokenIssuer @runParams
+        }
+    }
+}
 }
 
 function Test-TargetResource
@@ -400,6 +402,9 @@ function Test-TargetResource
     )
 
     Write-Verbose -Message "Testing SPTrustedSecurityTokenIssuer '$Name' settings"
+
+    $PSBoundParameters.Ensure = $Ensure
+    $PSBoundParameters.IsTrustBroker = $IsTrustBroker
 
     if ($PSBoundParameters.ContainsKey("SigningCertificateThumbprint") -and `
             $PSBoundParameters.ContainsKey("MetadataEndPoint"))
@@ -463,13 +468,6 @@ function Test-TargetResource
     if ($PSBoundParameters.ContainsKey("SigningCertificateFilePath") -eq $false)
     {
         $PSBoundParameters.Add("SigningCertificateFilePath", "")
-    }
-
-    # If IsTrustBroker was not set, it won't be present in the $PSBoundParameters
-    # Since it is set in the Get method, it must be added to be tested correctly by Test-SPDscParameterState
-    if ($PSBoundParameters.ContainsKey("IsTrustBroker") -eq $false)
-    {
-        $PSBoundParameters.Add("IsTrustBroker", $false)
     }
 
     # If MetadataEndPoint was not set, it won't be present in the $PSBoundParameters

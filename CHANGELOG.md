@@ -35,6 +35,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - SPSite
   - Fixed issue where the default groups were checked, even though
     that parameter wasn't specified in the config
+- SPTrustedSecurityTokenIssuer
+  - Fixed incorrect storing the default value of IsTrustBroker in the Set
+    and Test method
 
 ### Removed
 
