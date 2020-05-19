@@ -228,16 +228,16 @@ try
                     return $false
                 }
 
-                It "Should throw exception in the get method" {
-                    { Get-TargetResource @testParams } | Should Throw "Setup file cannot be found"
+                It "Should return Absent from the get method" {
+                    (Get-TargetResource @testParams).Ensure | Should Be "Absent"
                 }
 
                 It "Should throw exception in the set method" {
                     { Set-TargetResource @testParams } | Should Throw "Setup file cannot be found"
                 }
 
-                It "Should throw exception in the test method" {
-                    { Test-TargetResource @testParams } | Should Throw "Setup file cannot be found"
+                It "Should return false from the test method" {
+                    Test-TargetResource @testParams | Should Be $false
                 }
             }
 

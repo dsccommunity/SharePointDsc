@@ -32,7 +32,7 @@ function New-SPDscUnitTestHelper
     $spBuild = (Get-Item -Path $SharePointStubModule).Directory.BaseName
     $spBuildParts = $spBuild.Split('.')
     $majorBuildNumber = $spBuildParts[0]
-    $minorBuildNumber = $spBuildParts[1]
+    $minorBuildNumber = $spBuildParts[2]
 
     $describeHeader += "[SP Build: $spBuild] "
 
@@ -76,6 +76,8 @@ function New-SPDscUnitTestHelper
     Mock -CommandName Get-SPDscInstalledProductVersion -MockWith {
         return @{
             FileMajorPart = $majorBuildNumber
+            FileBuildPart = $minorBuildNumber
+            ProductBuildPart = $minorBuildNumber
         }
     }
 
@@ -140,21 +142,21 @@ function Write-SPDscStubFile
     $SPStubContent = ((Get-Command | Where-Object -FilterScript {
                 $_.Source -eq "Microsoft.SharePoint.PowerShell"
             } ) | ForEach-Object -Process {
-            $signature = $null
-            $command = $_
-            $metadata = New-Object -TypeName System.Management.Automation.CommandMetaData `
-                -ArgumentList $command
-            $definition = [System.Management.Automation.ProxyCommand]::Create($metadata)
-            foreach ($line in $definition -split "`n")
+        $signature = $null
+        $command = $_
+        $metadata = New-Object -TypeName System.Management.Automation.CommandMetaData `
+            -ArgumentList $command
+        $definition = [System.Management.Automation.ProxyCommand]::Create($metadata)
+        foreach ($line in $definition -split "`n")
+        {
+            if ($line.Trim() -eq 'begin')
             {
-                if ($line.Trim() -eq 'begin')
-                {
-                    break
-                }
-                $signature += $line
+                break
             }
-            "function $($command.Name) { `n  $signature `n } `n"
-        }) | Out-String
+            $signature += $line
+        }
+        "function $($command.Name) { `n  $signature `n } `n"
+    }) | Out-String
 
     foreach ($line in $SPStubContent.Split([Environment]::NewLine))
     {

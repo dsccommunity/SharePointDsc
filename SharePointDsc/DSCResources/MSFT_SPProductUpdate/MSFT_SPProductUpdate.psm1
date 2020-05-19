@@ -51,7 +51,13 @@ function Get-TargetResource
     Write-Verbose -Message "Check if the setup file exists"
     if (-not(Test-Path -Path $SetupFile))
     {
-        throw "Setup file cannot be found: {$SetupFile}"
+        return @{
+            SetupFile         = $SetupFile
+            ShutdownServices  = $ShutdownServices
+            BinaryInstallDays = $BinaryInstallDays
+            BinaryInstallTime = $BinaryInstallTime
+            Ensure            = "Absent"
+        }
     }
 
     Write-Verbose -Message "Checking file status of $SetupFile"
@@ -656,7 +662,6 @@ function Test-TargetResource
     if ($Ensure -eq "Absent")
     {
         throw [Exception] "SharePoint does not support uninstalling updates."
-        return
     }
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
@@ -718,100 +723,100 @@ function Get-SPDscLocalVersionInfo
 
     $officeProductKeys = $installerEntries | Where-Object -FilterScript { $_.PsPath -like "*00000000F01FEC" }
 
-    if ($null -eq $installerEntries -or $null -eq $officeProductKeys )
+if ($null -eq $installerEntries -or $null -eq $officeProductKeys )
+{
+    return $nullVersion
+}
+
+# $null - one command returns an empty value
+$null = $officeProductKeys | ForEach-Object -Process {
+    $officeProductKey = $_
+
+    $productInfo = Get-ItemProperty "Registry::$($officeProductKey)\InstallProperties" -ErrorAction SilentlyContinue
+
+    if ($null -eq $productInfo)
     {
-        return $nullVersion
+        break
     }
 
-    # $null - one command returns an empty value
-    $null = $officeProductKeys | ForEach-Object -Process {
-        $officeProductKey = $_
+    $prodName = $productInfo.DisplayName
 
-        $productInfo = Get-ItemProperty "Registry::$($officeProductKey)\InstallProperties" -ErrorAction SilentlyContinue
-
-        if ($null -eq $productInfo)
+    if ($prodName -match $productNameRegEx)
+    {
+        Write-Verbose "Gathering Information for $($prodName)"
+        $patchInformationFolder = Get-ItemProperty "Registry::$($officeProductKey)\Patches"
+        # SharePoint 2013 with SP 1 has a minimum of two Items in this key
+        if ($patchInformationFolder.AllPatches.GetType().Name -eq "String[]" -and $patchInformationFolder.AllPatches.Length -gt 0)
         {
-            break
+            $patchGuid = $patchInformationFolder.AllPatches[$patchInformationFolder.AllPatches.Length - 1]
+        }
+        else
+        {
+            $patchGuid = $patchInformationFolder.AllPatches
         }
 
-        $prodName = $productInfo.DisplayName
-
-        if ($prodName -match $productNameRegEx)
+        if ($null -ne $patchGuid)
         {
-            Write-Verbose "Gathering Information for $($prodName)"
-            $patchInformationFolder = Get-ItemProperty "Registry::$($officeProductKey)\Patches"
-            # SharePoint 2013 with SP 1 has a minimum of two Items in this key
-            if ($patchInformationFolder.AllPatches.GetType().Name -eq "String[]" -and $patchInformationFolder.AllPatches.Length -gt 0)
-            {
-                $patchGuid = $patchInformationFolder.AllPatches[$patchInformationFolder.AllPatches.Length - 1]
-            }
-            else
-            {
-                $patchGuid = $patchInformationFolder.AllPatches
-            }
+            $detailedPatchInformation = Get-ItemProperty "$($patchRegistryPath)\$($patchGuid)"
+            $localPackage = $detailedPatchInformation.LocalPackage
 
-            if ($null -ne $patchGuid)
+            if ($null -ne $localPackage)
             {
-                $detailedPatchInformation = Get-ItemProperty "$($patchRegistryPath)\$($patchGuid)"
-                $localPackage = $detailedPatchInformation.LocalPackage
-
-                if ($null -ne $localPackage)
+                $patchFileInformation = New-Object -TypeName System.IO.FileInfo -ArgumentList $localPackage
+                if ($patchFileInformation.Extension -eq ".msp")
                 {
-                    $patchFileInformation = New-Object -TypeName System.IO.FileInfo -ArgumentList $localPackage
-                    if ($patchFileInformation.Extension -eq ".msp")
+                    try
                     {
-                        try
-                        {
-                            $windowsInstaller = New-Object -ComObject WindowsInstaller.Installer
-                            $installerDatabase = $windowsInstaller.GetType().InvokeMember("OpenDatabase", "InvokeMethod", $null, $windowsInstaller, ($localPackage , 32))
-                            $databaseQuery = "SELECT Value FROM MsiPatchMetadata WHERE Property = 'BuildNumber'"
-                            $databaseView = $installerDatabase.GetType().InvokeMember("OpenView", "InvokeMethod", $null, $installerDatabase, ($databaseQuery))
-                            $databaseView.GetType().InvokeMember("Execute", "InvokeMethod", $null, $databaseView, $null)
-                            $value = $databaseView.GetType().InvokeMember("Fetch", "InvokeMethod", $null, $databaseView, $null)
-                            $versionInfo = [System.Version]$value.GetType().InvokeMember("StringData", "GetProperty", $null, $value, 1)
+                        $windowsInstaller = New-Object -ComObject WindowsInstaller.Installer
+                        $installerDatabase = $windowsInstaller.GetType().InvokeMember("OpenDatabase", "InvokeMethod", $null, $windowsInstaller, ($localPackage , 32))
+                        $databaseQuery = "SELECT Value FROM MsiPatchMetadata WHERE Property = 'BuildNumber'"
+                        $databaseView = $installerDatabase.GetType().InvokeMember("OpenView", "InvokeMethod", $null, $installerDatabase, ($databaseQuery))
+                        $databaseView.GetType().InvokeMember("Execute", "InvokeMethod", $null, $databaseView, $null)
+                        $value = $databaseView.GetType().InvokeMember("Fetch", "InvokeMethod", $null, $databaseView, $null)
+                        $versionInfo = [System.Version]$value.GetType().InvokeMember("StringData", "GetProperty", $null, $value, 1)
 
-                            # https://github.com/dsccommunity/DscResources/issues/383
+                        # https://github.com/dsccommunity/DscResources/issues/383
 
-                            Clear-ComObject -ComObject $databaseView
-                            Clear-ComObject -ComObject $value
-                            Clear-ComObject -ComObject $installerDatabase
-                            Clear-ComObject -ComObject $windowsInstaller
-                        }
-                        catch [Exception]
-                        {
-                            throw [Exception] "An error occured during the collection of data about installed products in Get-SPDscLocalVersionInfo."
-                        }
+                        Clear-ComObject -ComObject $databaseView
+                        Clear-ComObject -ComObject $value
+                        Clear-ComObject -ComObject $installerDatabase
+                        Clear-ComObject -ComObject $windowsInstaller
+                    }
+                    catch [Exception]
+                    {
+                        throw [Exception] "An error occured during the collection of data about installed products in Get-SPDscLocalVersionInfo."
                     }
                 }
-                else
-                {
-                    $versionInfo = New-Object -TypeName System.Version -ArgumentList $productInfo.DisplayVersion
-                }
-            }
-
-            # Collect Information about language packs
-            if ($IsWssPackage `
-                    -and (  $versionInfoValue -eq $nullVersion `
-                        -or $versionInfoValue -gt $versionInfo) `
-            )
-            {
-                $versionInfoValue = $versionInfo
             }
             else
             {
-                $versionInfoValue = $versionInfo
+                $versionInfo = New-Object -TypeName System.Version -ArgumentList $productInfo.DisplayVersion
             }
-            Write-Verbose "Version Information for $($prodName): $($versionInfoValue)"
-
         }
-    }
 
-    if ($nullVersion -ne $versionInfoValue)
-    {
-        return $versionInfoValue
-    }
+        # Collect Information about language packs
+        if ($IsWssPackage `
+                -and (  $versionInfoValue -eq $nullVersion `
+                    -or $versionInfoValue -gt $versionInfo) `
+        )
+        {
+            $versionInfoValue = $versionInfo
+        }
+        else
+        {
+            $versionInfoValue = $versionInfo
+        }
+        Write-Verbose "Version Information for $($prodName): $($versionInfoValue)"
 
-    return $nullVersion
+    }
+}
+
+if ($nullVersion -ne $versionInfoValue)
+{
+    return $versionInfoValue
+}
+
+return $nullVersion
 }
 
 # Function required for Mocking the static .Net call
