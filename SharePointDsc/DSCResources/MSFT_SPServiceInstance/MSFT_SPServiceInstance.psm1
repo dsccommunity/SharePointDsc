@@ -111,7 +111,8 @@ function Set-TargetResource
             $params = $args[0]
             $newName = $args[1]
 
-            $si = Get-SPServiceInstance -Server $env:COMPUTERNAME -All | Where-Object -FilterScript {
+            $computerName = $env:COMPUTERNAME
+            $si = Get-SPServiceInstance -Server $computerName -All | Where-Object -FilterScript {
                 $_.TypeName -eq $params.Name -or `
                     $_.TypeName -eq $newName -or `
                     $_.GetType().Name -eq $newName
@@ -120,18 +121,40 @@ function Set-TargetResource
             if ($null -eq $si)
             {
                 $domain = (Get-CimInstance -ClassName Win32_ComputerSystem).Domain
-                $fqdn = "$($env:COMPUTERNAME).$domain"
-                $si = Get-SPServiceInstance -Server $fqdn -All | Where-Object -FilterScript {
+                $computerName = "$($env:COMPUTERNAME).$domain"
+                $si = Get-SPServiceInstance -Server $computerName -All | Where-Object -FilterScript {
                     $_.TypeName -eq $params.Name -or `
                         $_.TypeName -eq $newName -or `
                         $_.GetType().Name -eq $newName
                 }
             }
+
             if ($null -eq $si)
             {
                 throw [Exception] "Unable to locate service instance '$($params.Name)'"
             }
+
             Start-SPServiceInstance -Identity $si
+
+            # Waiting for the service to start before continuing (max 30 minutes)
+            $serviceCheck = Get-SPServiceInstance -Server $si.Server.Name -All | Where-Object -FilterScript {
+                $_.TypeName -eq $si.TypeName
+            }
+
+            $count = 0
+            $maxCount = 30
+
+            while (($count -lt $maxCount) -and ($serviceCheck.Status -ne "Online"))
+            {
+                Write-Verbose -Message ("$([DateTime]::Now.ToShortTimeString()) - Waiting " + `
+                                        "for service instance to start. Current status: $($serviceCheck.Status) " + `
+                                        "(waited $count of $maxCount minutes)")
+                Start-Sleep -Seconds 60
+                $serviceCheck = Get-SPServiceInstance -Server $si.Server.Name -All | Where-Object -FilterScript {
+                    $_.TypeName -eq $si.TypeName
+                }
+                $count++
+            }
         }
     }
     else
@@ -163,6 +186,26 @@ function Set-TargetResource
                 throw [Exception] "Unable to locate service instance '$($params.Name)'"
             }
             Stop-SPServiceInstance -Identity $si
+
+            # Waiting for the service to stop before continuing (max 30 minutes)
+            $serviceCheck = Get-SPServiceInstance -Server $si.Server.Name -All | Where-Object -FilterScript {
+                $_.TypeName -eq $si.TypeName
+            }
+
+            $count = 0
+            $maxCount = 30
+
+            while (($count -lt $maxCount) -and ($serviceCheck.Status -ne "Disabled"))
+            {
+                Write-Verbose -Message ("$([DateTime]::Now.ToShortTimeString()) - Waiting " + `
+                                        "for service instance to stop. Current status: $($serviceCheck.Status) " + `
+                                        "(waited $count of $maxCount minutes)")
+                Start-Sleep -Seconds 60
+                $serviceCheck = Get-SPServiceInstance -Server $si.Server.Name -All | Where-Object -FilterScript {
+                    $_.TypeName -eq $si.TypeName
+                }
+                $count++
+            }
         }
     }
 }

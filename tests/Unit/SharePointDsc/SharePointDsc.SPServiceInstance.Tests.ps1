@@ -84,8 +84,13 @@ try
                     return @(@{
                             TypeName = $testParams.Name
                             Status   = "Disabled"
+                            Server   = @{
+                                Name = $env:COMPUTERNAME
+                            }
                         })
                 }
+
+                Mock -CommandName Start-Sleep -MockWith {}
 
                 It "Should return absent from the get method" {
                     (Get-TargetResource @testParams).Ensure | Should Be "Absent"
@@ -170,8 +175,13 @@ try
                     return @(@{
                             TypeName = $testParams.Name
                             Status   = "Online"
+                            Server   = @{
+                                Name = $env:COMPUTERNAME
+                            }
                         })
                 }
+
+                Mock -CommandName Start-Sleep -MockWith {}
 
                 It "Should return present from the get method" {
                     (Get-TargetResource @testParams).Ensure | Should Be "Present"

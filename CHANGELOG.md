@@ -12,6 +12,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Re-enabled Unit tests for Sharepoint 2016 and 2019
 - SPAppCatalog
   - Added more logging in the Get method to ease troubleshooting
+- SPServiceInstance
+  - Added logic to wait for a service start/stop, to make sure no conflicts
+    can occur because of the asynchronous nature of service instance starts.
 
 ### Changed
 
