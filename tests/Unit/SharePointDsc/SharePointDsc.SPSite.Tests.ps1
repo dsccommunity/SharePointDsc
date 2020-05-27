@@ -438,6 +438,14 @@ try
                 It "Should return the site data from the get method where a secondary site contact exists" {
                     Get-TargetResource @testParams | Should Not BeNullOrEmpty
                 }
+
+                Mock -CommandName New-SPClaimsPrincipal -MockWith {
+                    return $null
+                }
+
+                It "Should return the site data from the get method where the site owner is in classic format" {
+                    Get-TargetResource @testParams | Should Not BeNullOrEmpty
+                }
             }
 
             Context -Name "The site exists and uses classic authentication" -Fixture {
