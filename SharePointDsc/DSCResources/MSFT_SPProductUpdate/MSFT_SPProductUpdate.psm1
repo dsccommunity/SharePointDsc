@@ -723,100 +723,100 @@ function Get-SPDscLocalVersionInfo
 
     $officeProductKeys = $installerEntries | Where-Object -FilterScript { $_.PsPath -like "*00000000F01FEC" }
 
-if ($null -eq $installerEntries -or $null -eq $officeProductKeys )
-{
-    return $nullVersion
-}
-
-# $null - one command returns an empty value
-$null = $officeProductKeys | ForEach-Object -Process {
-    $officeProductKey = $_
-
-    $productInfo = Get-ItemProperty "Registry::$($officeProductKey)\InstallProperties" -ErrorAction SilentlyContinue
-
-    if ($null -eq $productInfo)
+    if ($null -eq $installerEntries -or $null -eq $officeProductKeys )
     {
-        break
+        return $nullVersion
     }
 
-    $prodName = $productInfo.DisplayName
+    # $null - one command returns an empty value
+    $null = $officeProductKeys | ForEach-Object -Process {
+        $officeProductKey = $_
 
-    if ($prodName -match $productNameRegEx)
-    {
-        Write-Verbose "Gathering Information for $($prodName)"
-        $patchInformationFolder = Get-ItemProperty "Registry::$($officeProductKey)\Patches"
-        # SharePoint 2013 with SP 1 has a minimum of two Items in this key
-        if ($patchInformationFolder.AllPatches.GetType().Name -eq "String[]" -and $patchInformationFolder.AllPatches.Length -gt 0)
+        $productInfo = Get-ItemProperty "Registry::$($officeProductKey)\InstallProperties" -ErrorAction SilentlyContinue
+
+        if ($null -eq $productInfo)
         {
-            $patchGuid = $patchInformationFolder.AllPatches[$patchInformationFolder.AllPatches.Length - 1]
-        }
-        else
-        {
-            $patchGuid = $patchInformationFolder.AllPatches
+            break
         }
 
-        if ($null -ne $patchGuid)
-        {
-            $detailedPatchInformation = Get-ItemProperty "$($patchRegistryPath)\$($patchGuid)"
-            $localPackage = $detailedPatchInformation.LocalPackage
+        $prodName = $productInfo.DisplayName
 
-            if ($null -ne $localPackage)
+        if ($prodName -match $productNameRegEx)
+        {
+            Write-Verbose "Gathering Information for $($prodName)"
+            $patchInformationFolder = Get-ItemProperty "Registry::$($officeProductKey)\Patches"
+            # SharePoint 2013 with SP 1 has a minimum of two Items in this key
+            if ($patchInformationFolder.AllPatches.GetType().Name -eq "String[]" -and $patchInformationFolder.AllPatches.Length -gt 0)
             {
-                $patchFileInformation = New-Object -TypeName System.IO.FileInfo -ArgumentList $localPackage
-                if ($patchFileInformation.Extension -eq ".msp")
-                {
-                    try
-                    {
-                        $windowsInstaller = New-Object -ComObject WindowsInstaller.Installer
-                        $installerDatabase = $windowsInstaller.GetType().InvokeMember("OpenDatabase", "InvokeMethod", $null, $windowsInstaller, ($localPackage , 32))
-                        $databaseQuery = "SELECT Value FROM MsiPatchMetadata WHERE Property = 'BuildNumber'"
-                        $databaseView = $installerDatabase.GetType().InvokeMember("OpenView", "InvokeMethod", $null, $installerDatabase, ($databaseQuery))
-                        $databaseView.GetType().InvokeMember("Execute", "InvokeMethod", $null, $databaseView, $null)
-                        $value = $databaseView.GetType().InvokeMember("Fetch", "InvokeMethod", $null, $databaseView, $null)
-                        $versionInfo = [System.Version]$value.GetType().InvokeMember("StringData", "GetProperty", $null, $value, 1)
-
-                        # https://github.com/dsccommunity/DscResources/issues/383
-
-                        Clear-ComObject -ComObject $databaseView
-                        Clear-ComObject -ComObject $value
-                        Clear-ComObject -ComObject $installerDatabase
-                        Clear-ComObject -ComObject $windowsInstaller
-                    }
-                    catch [Exception]
-                    {
-                        throw [Exception] "An error occured during the collection of data about installed products in Get-SPDscLocalVersionInfo."
-                    }
-                }
+                $patchGuid = $patchInformationFolder.AllPatches[$patchInformationFolder.AllPatches.Length - 1]
             }
             else
             {
-                $versionInfo = New-Object -TypeName System.Version -ArgumentList $productInfo.DisplayVersion
+                $patchGuid = $patchInformationFolder.AllPatches
             }
-        }
 
-        # Collect Information about language packs
-        if ($IsWssPackage `
-                -and (  $versionInfoValue -eq $nullVersion `
-                    -or $versionInfoValue -gt $versionInfo) `
-        )
-        {
-            $versionInfoValue = $versionInfo
-        }
-        else
-        {
-            $versionInfoValue = $versionInfo
-        }
-        Write-Verbose "Version Information for $($prodName): $($versionInfoValue)"
+            if ($null -ne $patchGuid)
+            {
+                $detailedPatchInformation = Get-ItemProperty "$($patchRegistryPath)\$($patchGuid)"
+                $localPackage = $detailedPatchInformation.LocalPackage
 
+                if ($null -ne $localPackage)
+                {
+                    $patchFileInformation = New-Object -TypeName System.IO.FileInfo -ArgumentList $localPackage
+                    if ($patchFileInformation.Extension -eq ".msp")
+                    {
+                        try
+                        {
+                            $windowsInstaller = New-Object -ComObject WindowsInstaller.Installer
+                            $installerDatabase = $windowsInstaller.GetType().InvokeMember("OpenDatabase", "InvokeMethod", $null, $windowsInstaller, ($localPackage , 32))
+                            $databaseQuery = "SELECT Value FROM MsiPatchMetadata WHERE Property = 'BuildNumber'"
+                            $databaseView = $installerDatabase.GetType().InvokeMember("OpenView", "InvokeMethod", $null, $installerDatabase, ($databaseQuery))
+                            $databaseView.GetType().InvokeMember("Execute", "InvokeMethod", $null, $databaseView, $null)
+                            $value = $databaseView.GetType().InvokeMember("Fetch", "InvokeMethod", $null, $databaseView, $null)
+                            $versionInfo = [System.Version]$value.GetType().InvokeMember("StringData", "GetProperty", $null, $value, 1)
+
+                            # https://github.com/dsccommunity/DscResources/issues/383
+
+                            Clear-ComObject -ComObject $databaseView
+                            Clear-ComObject -ComObject $value
+                            Clear-ComObject -ComObject $installerDatabase
+                            Clear-ComObject -ComObject $windowsInstaller
+                        }
+                        catch [Exception]
+                        {
+                            throw [Exception] "An error occured during the collection of data about installed products in Get-SPDscLocalVersionInfo."
+                        }
+                    }
+                }
+                else
+                {
+                    $versionInfo = New-Object -TypeName System.Version -ArgumentList $productInfo.DisplayVersion
+                }
+            }
+
+            # Collect Information about language packs
+            if ($IsWssPackage `
+                    -and (  $versionInfoValue -eq $nullVersion `
+                        -or $versionInfoValue -gt $versionInfo) `
+            )
+            {
+                $versionInfoValue = $versionInfo
+            }
+            else
+            {
+                $versionInfoValue = $versionInfo
+            }
+            Write-Verbose "Version Information for $($prodName): $($versionInfoValue)"
+
+        }
     }
-}
 
-if ($nullVersion -ne $versionInfoValue)
-{
-    return $versionInfoValue
-}
+    if ($nullVersion -ne $versionInfoValue)
+    {
+        return $versionInfoValue
+    }
 
-return $nullVersion
+    return $nullVersion
 }
 
 # Function required for Mocking the static .Net call
