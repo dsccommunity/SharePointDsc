@@ -135,7 +135,7 @@ function Set-TargetResource
         15
         {
             <# Exception: One of the SP2016/SP2019 specific parameter was passed with SP2013 #>
-            Write-Verbose "SharePoint 2013 is used"
+            Write-Verbose -Message "SharePoint 2013 is used"
             if ($PSBoundParameters.ContainsKey("SuiteNavBrandingLogoNavigationUrl") `
                     -or $PSBoundParameters.ContainsKey("SuiteNavBrandingLogoTitle") `
                     -or $PSBoundParameters.ContainsKey("SuiteNavBrandingLogoUrl") `
@@ -157,11 +157,11 @@ function Set-TargetResource
         {
             if ($installedVersion.ProductBuildPart.ToString().Length -eq 4)
             {
-                Write-Verbose "SharePoint 2016 is used"
+                Write-Verbose -Message "SharePoint 2016 is used"
                 if ($PSBoundParameters.ContainsKey("SuiteBarBrandingElementHtml"))
                 {
-                    Write-Verbose ("SuiteBarBrandingElementHtml with SharePoint 2016 only works " + `
-                            "if using a SharePoint 2013 masterpage")
+                    Write-Verbose -Message ("SuiteBarBrandingElementHtml with SharePoint 2016 only " + `
+                            "works if using a SharePoint 2013 masterpage")
                 }
 
                 <# Exception: All the optional parameters are null for SP2016. #>
@@ -178,7 +178,7 @@ function Set-TargetResource
             }
             else
             {
-                Write-Verbose "SharePoint 2019 is used"
+                Write-Verbose -Message "SharePoint 2019 is used"
                 throw "Changing the Suite Bar is not possible in SharePoint 2019"
             }
         }

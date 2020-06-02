@@ -28,8 +28,8 @@ function Add-SPDscEvent
         $sourceLogName = [System.Diagnostics.EventLog]::LogNameFromSourceName($Source, ".")
         if ($LogName -ne $sourceLogName)
         {
-            Write-Output "[ERROR] Specified source {$Source} already exists on log {$sourceLogName}"
-            exit
+            Write-Verbose -Message "[ERROR] Specified source {$Source} already exists on log {$sourceLogName}"
+            return
         }
     }
     else
