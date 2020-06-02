@@ -21,35 +21,38 @@ function Add-SPDscEvent
         $EventID = 1
     )
 
-    try
+    $LogName = 'SharePointDsc'
+
+    if ([System.Diagnostics.EventLog]::SourceExists($Source))
     {
-        [System.Diagnostics.EventLog]::CreateEventSource($Source, "SharePointDsc")
-    }
-    catch
-    {
-        if ($_.Exception -notmatch "Source \w* already exists on the local computer.")
+        $sourceLogName = [System.Diagnostics.EventLog]::LogNameFromSourceName($Source, ".")
+        if ($LogName -ne $sourceLogName)
         {
-            try
-            {
-                $null = New-EventLog -LogName 'SharePointDsc' -Source $Source -ErrorAction Stop
-                [System.Diagnostics.EventLog]::CreateEventSource($Source, "SharePointDsc")
-            }
-            catch
-            {
-                Write-Verbose $_
-            }
+            Write-Verbose -Message "[ERROR] Specified source {$Source} already exists on log {$sourceLogName}"
+            return
+        }
+    }
+    else
+    {
+        if ([System.Diagnostics.EventLog]::Exists($LogName) -eq $false)
+        {
+            #Create event log
+            $null = New-EventLog -LogName $LogName -Source $Source
+        }
+        else
+        {
+            [System.Diagnostics.EventLog]::CreateEventSource($Source, $LogName)
         }
     }
 
     try
     {
-        Write-EventLog -LogName 'SharePointDsc' -Source $Source `
-            -EventID $EventID -Message $Message -EntryType $EntryType `
-            -ErrorAction SilentlyContinue
+        Write-EventLog -LogName $LogName -Source $Source `
+            -EventID $EventID -Message $Message -EntryType $EntryType
     }
     catch
     {
-        Write-Verbose $_
+        Write-Verbose -Message $_
     }
 }
 
@@ -92,9 +95,9 @@ function Clear-SPDscKerberosToken
             $LogonId = $session.split(' ')[3]
             $LogonId = $LogonId.Replace('0:', '')
             klist.exe -li $LogonId purge | Out-Null
-        }
-
     }
+
+}
 }
 
 function Compare-PSCustomObjectArrays
@@ -121,37 +124,37 @@ function Compare-PSCustomObjectArrays
         $KeyProperty = $Properties.Name[0]
 
         $EquivalentEntryInCurrent = $CurrentValues | Where-Object -FilterScript { $_.$KeyProperty -eq $DesiredEntry.$KeyProperty }
-        if ($null -eq $EquivalentEntryInCurrent)
-        {
-            $result = @{
-                Property     = $DesiredEntry
-                PropertyName = $KeyProperty
-                Desired      = $DesiredEntry.$KeyProperty
-                Current      = $null
-            }
-            $DriftedProperties += $result
+    if ($null -eq $EquivalentEntryInCurrent)
+    {
+        $result = @{
+            Property     = $DesiredEntry
+            PropertyName = $KeyProperty
+            Desired      = $DesiredEntry.$KeyProperty
+            Current      = $null
         }
-        else
+        $DriftedProperties += $result
+    }
+    else
+    {
+        foreach ($property in $Properties)
         {
-            foreach ($property in $Properties)
-            {
-                $propertyName = $property.Name
+            $propertyName = $property.Name
 
-                if ($DesiredEntry.$PropertyName -ne $EquivalentEntryInCurrent.$PropertyName)
-                {
-                    $result = @{
-                        Property     = $DesiredEntry
-                        PropertyName = $PropertyName
-                        Desired      = $DesiredEntry.$PropertyName
-                        Current      = $EquivalentEntryInCurrent.$PropertyName
-                    }
-                    $DriftedProperties += $result
+            if ($DesiredEntry.$PropertyName -ne $EquivalentEntryInCurrent.$PropertyName)
+            {
+                $result = @{
+                    Property     = $DesiredEntry
+                    PropertyName = $PropertyName
+                    Desired      = $DesiredEntry.$PropertyName
+                    Current      = $EquivalentEntryInCurrent.$PropertyName
                 }
+                $DriftedProperties += $result
             }
         }
     }
+}
 
-    return $DriftedProperties
+return $DriftedProperties
 }
 
 function Convert-SPDscADGroupIDToName
@@ -169,26 +172,26 @@ function Convert-SPDscADGroupIDToName
         $queryGuid += "\" + $_.ToString("x2")
     }
 
-    $domain = New-Object -TypeName "System.DirectoryServices.DirectoryEntry"
-    $search = New-Object -TypeName "System.DirectoryServices.DirectorySearcher"
-    $search.SearchRoot = $domain
-    $search.PageSize = 1
-    $search.Filter = "(&(objectGuid=$queryGuid))"
-    $search.SearchScope = "Subtree"
-    $search.PropertiesToLoad.Add("name") | Out-Null
-    $result = $search.FindOne()
+$domain = New-Object -TypeName "System.DirectoryServices.DirectoryEntry"
+$search = New-Object -TypeName "System.DirectoryServices.DirectorySearcher"
+$search.SearchRoot = $domain
+$search.PageSize = 1
+$search.Filter = "(&(objectGuid=$queryGuid))"
+$search.SearchScope = "Subtree"
+$search.PropertiesToLoad.Add("name") | Out-Null
+$result = $search.FindOne()
 
-    if ($null -ne $result)
-    {
-        $sid = New-Object -TypeName "System.Security.Principal.SecurityIdentifier" `
-            -ArgumentList @($result.GetDirectoryEntry().objectsid[0], 0)
+if ($null -ne $result)
+{
+    $sid = New-Object -TypeName "System.Security.Principal.SecurityIdentifier" `
+        -ArgumentList @($result.GetDirectoryEntry().objectsid[0], 0)
 
-        return $sid.Translate([System.Security.Principal.NTAccount]).ToString()
-    }
-    else
-    {
-        throw "Unable to locate group with id $GroupId"
-    }
+    return $sid.Translate([System.Security.Principal.NTAccount]).ToString()
+}
+else
+{
+    throw "Unable to locate group with id $GroupId"
+}
 }
 
 function Convert-SPDscADGroupNameToID
@@ -345,15 +348,15 @@ function Get-SPDscFarmAccount
 
     $account = Get-SPManagedAccount | Where-Object -FilterScript { $_.UserName -eq $farmaccount }
 
-    $bindings = [System.Reflection.BindingFlags]::CreateInstance -bor `
-        [System.Reflection.BindingFlags]::GetField -bor `
-        [System.Reflection.BindingFlags]::Instance -bor `
-        [System.Reflection.BindingFlags]::NonPublic
+$bindings = [System.Reflection.BindingFlags]::CreateInstance -bor `
+    [System.Reflection.BindingFlags]::GetField -bor `
+    [System.Reflection.BindingFlags]::Instance -bor `
+    [System.Reflection.BindingFlags]::NonPublic
 
-    $pw = $account.GetType().GetField("m_Password", $bindings).GetValue($account);
+$pw = $account.GetType().GetField("m_Password", $bindings).GetValue($account);
 
-    return New-Object -TypeName System.Management.Automation.PSCredential `
-        -ArgumentList $farmaccount, $pw.SecureStringValue
+return New-Object -TypeName System.Management.Automation.PSCredential `
+    -ArgumentList $farmaccount, $pw.SecureStringValue
 }
 
 
@@ -391,60 +394,60 @@ function Get-SPDscFarmVersionInfo
             $_ -eq $ProductToCheck
         }
 
-        if ($null -eq $products)
-        {
-            throw "Product not found: $ProductToCheck"
-        }
-    }
-
-    # Loop through all products
-    foreach ($product in $products)
+    if ($null -eq $products)
     {
-        $singleProductInfo = $serverProductInfo.GetSingleProductInfo($product)
-        $patchableUnits = $singleProductInfo.PatchableUnitDisplayNames
+        throw "Product not found: $ProductToCheck"
+    }
+}
 
-        # Loop through all individual components within the product
-        foreach ($patchableUnit in $patchableUnits)
+# Loop through all products
+foreach ($product in $products)
+{
+    $singleProductInfo = $serverProductInfo.GetSingleProductInfo($product)
+    $patchableUnits = $singleProductInfo.PatchableUnitDisplayNames
+
+    # Loop through all individual components within the product
+    foreach ($patchableUnit in $patchableUnits)
+    {
+        # Check if the displayname is the Proofing tools (always mentioned in first product,
+        # generates noise)
+        if (($patchableUnit -notmatch "Microsoft Server Proof") -and
+            ($patchableUnit -notmatch "SQL Express") -and
+            ($patchableUnit -notmatch "OMUI") -and
+            ($patchableUnit -notmatch "XMUI") -and
+            ($patchableUnit -notmatch "Project Server") -and
+            (($patchableUnit -notmatch "Microsoft SharePoint Server (2013|2016|2019)" -or `
+                        $patchableUnit -match "Core")))
         {
-            # Check if the displayname is the Proofing tools (always mentioned in first product,
-            # generates noise)
-            if (($patchableUnit -notmatch "Microsoft Server Proof") -and
-                ($patchableUnit -notmatch "SQL Express") -and
-                ($patchableUnit -notmatch "OMUI") -and
-                ($patchableUnit -notmatch "XMUI") -and
-                ($patchableUnit -notmatch "Project Server") -and
-                (($patchableUnit -notmatch "Microsoft SharePoint Server (2013|2016|2019)" -or `
-                            $patchableUnit -match "Core")))
+            $patchableUnitsInfo = $singleProductInfo.GetPatchableUnitInfoByDisplayName($patchableUnit)
+            $currentVersion = ""
+            foreach ($patchableUnitInfo in $patchableUnitsInfo)
             {
-                $patchableUnitsInfo = $singleProductInfo.GetPatchableUnitInfoByDisplayName($patchableUnit)
-                $currentVersion = ""
-                foreach ($patchableUnitInfo in $patchableUnitsInfo)
+                # Loop through version of the patchableUnit
+                $currentVersion = $patchableUnitInfo.LatestPatch.Version.ToString()
+
+                # Check if the version of the patchableUnit is the highest for the installed product
+                if ($currentVersion -gt $versionInfo.Highest)
                 {
-                    # Loop through version of the patchableUnit
-                    $currentVersion = $patchableUnitInfo.LatestPatch.Version.ToString()
+                    $versionInfo.Highest = $currentVersion
+                }
 
-                    # Check if the version of the patchableUnit is the highest for the installed product
-                    if ($currentVersion -gt $versionInfo.Highest)
-                    {
-                        $versionInfo.Highest = $currentVersion
-                    }
-
-                    if ($versionInfo.Lowest -eq "")
+                if ($versionInfo.Lowest -eq "")
+                {
+                    $versionInfo.Lowest = $currentVersion
+                }
+                else
+                {
+                    if ($currentversion -lt $versionInfo.Lowest)
                     {
                         $versionInfo.Lowest = $currentVersion
-                    }
-                    else
-                    {
-                        if ($currentversion -lt $versionInfo.Lowest)
-                        {
-                            $versionInfo.Lowest = $currentVersion
-                        }
                     }
                 }
             }
         }
     }
-    return $versionInfo
+}
+return $versionInfo
 }
 
 function Get-SPDscFarmProductsInfo
@@ -466,7 +469,7 @@ function Get-SPDscRegProductsInfo
         Get-ItemProperty -Path $_.PsPath
     }
 
-    return $sharePointPrograms.DisplayName
+return $sharePointPrograms.DisplayName
 }
 
 function Get-SPDscRegistryKey
@@ -531,7 +534,7 @@ function Get-SPDscServiceContext
 function Get-SPDscContentService
 {
     [System.Reflection.Assembly]::LoadWithPartialName("Microsoft.SharePoint") | Out-Null
-    return [Microsoft.SharePoint.Administration.SPWebService]::ContentService
+return [Microsoft.SharePoint.Administration.SPWebService]::ContentService
 }
 
 function Get-SPDscUserProfileSubTypeManager
@@ -543,7 +546,7 @@ function Get-SPDscUserProfileSubTypeManager
         $Context
     )
     [System.Reflection.Assembly]::LoadWithPartialName("Microsoft.SharePoint") | Out-Null
-    return [Microsoft.Office.Server.UserProfiles.ProfileSubtypeManager]::Get($Context)
+return [Microsoft.Office.Server.UserProfiles.ProfileSubtypeManager]::Get($Context)
 }
 
 function Get-SPDscInstalledProductVersion
@@ -553,14 +556,14 @@ function Get-SPDscInstalledProductVersion
 
     $pathToSearch = 'C:\Program Files\Common Files\microsoft shared\Web Server Extensions\*\ISAPI\Microsoft.SharePoint.dll'
     $fullPath = Get-Item $pathToSearch -ErrorAction SilentlyContinue | Sort-Object { $_.Directory } -Descending | Select-Object -First 1
-    if ($null -eq $fullPath)
-    {
-        throw 'SharePoint path {C:\Program Files\Common Files\microsoft shared\Web Server Extensions} does not exist'
-    }
-    else
-    {
-        return (Get-Command $fullPath).FileVersionInfo
-    }
+if ($null -eq $fullPath)
+{
+    throw 'SharePoint path {C:\Program Files\Common Files\microsoft shared\Web Server Extensions} does not exist'
+}
+else
+{
+    return (Get-Command $fullPath).FileVersionInfo
+}
 }
 
 function Invoke-SPDscCommand
@@ -709,8 +712,8 @@ function Rename-SPDscParamValue
     {
         $Params.Add($NewName, $Params.$OldName)
         $Params.Remove($OldName) | Out-Null
-    }
-    return $Params
+}
+return $Params
 }
 
 function Remove-SPDscUserToLocalAdmin
@@ -1036,118 +1039,140 @@ function Test-SPDscParameterState
                                     Write-Verbose -Message "$($_.InputObject) - $($_.SideIndicator)"
                                 }
 
-                                $EventValue = "<CurrentValue>$($CurrentValues.$fieldName -join ", ")</CurrentValue>"
-                                $EventValue += "<DesiredValue>$($DesiredValues.$fieldName -join ", ")</DesiredValue>"
+                            $EventValue = "<CurrentValue>$($CurrentValues.$fieldName -join ", ")</CurrentValue>"
+                            $EventValue += "<DesiredValue>$($DesiredValues.$fieldName -join ", ")</DesiredValue>"
+                            $DriftedParameters.Add($fieldName, $EventValue)
+                            $returnValue = $false
+                        }
+                    }
+                }
+                else
+                {
+                    switch ($desiredType.Name)
+                    {
+                        "String"
+                        {
+                            if ([string]::IsNullOrEmpty($CurrentValues.$fieldName) -and `
+                                    [string]::IsNullOrEmpty($DesiredValues.$fieldName))
+                            {
+                            }
+                            else
+                            {
+                                Write-Verbose -Message ("String value for property " + `
+                                        "$fieldName does not match. " + `
+                                        "Current state is " + `
+                                        "'$($CurrentValues.$fieldName)' " + `
+                                        "and desired state is " + `
+                                        "'$($DesiredValues.$fieldName)'")
+                                $EventValue = "<CurrentValue>$($CurrentValues.$fieldName)</CurrentValue>"
+                                $EventValue += "<DesiredValue>$($DesiredValues.$fieldName)</DesiredValue>"
                                 $DriftedParameters.Add($fieldName, $EventValue)
                                 $returnValue = $false
                             }
                         }
-                    }
-                    else
-                    {
-                        switch ($desiredType.Name)
+                        "Int32"
                         {
-                            "String"
+                            if (($DesiredValues.$fieldName -eq 0) -and `
+                                ($null -eq $CurrentValues.$fieldName))
                             {
-                                if ([string]::IsNullOrEmpty($CurrentValues.$fieldName) -and `
-                                        [string]::IsNullOrEmpty($DesiredValues.$fieldName))
-                                {
-                                }
-                                else
-                                {
-                                    Write-Verbose -Message ("String value for property " + `
-                                            "$fieldName does not match. " + `
-                                            "Current state is " + `
-                                            "'$($CurrentValues.$fieldName)' " + `
-                                            "and desired state is " + `
-                                            "'$($DesiredValues.$fieldName)'")
-                                    $EventValue = "<CurrentValue>$($CurrentValues.$fieldName)</CurrentValue>"
-                                    $EventValue += "<DesiredValue>$($DesiredValues.$fieldName)</DesiredValue>"
-                                    $DriftedParameters.Add($fieldName, $EventValue)
-                                    $returnValue = $false
-                                }
                             }
-                            "Int32"
+                            else
                             {
-                                if (($DesiredValues.$fieldName -eq 0) -and `
-                                    ($null -eq $CurrentValues.$fieldName))
-                                {
-                                }
-                                else
-                                {
-                                    Write-Verbose -Message ("Int32 value for property " + `
-                                            "$fieldName does not match. " + `
-                                            "Current state is " + `
-                                            "'$($CurrentValues.$fieldName)' " + `
-                                            "and desired state is " + `
-                                            "'$($DesiredValues.$fieldName)'")
-                                    $EventValue = "<CurrentValue>$($CurrentValues.$fieldName)</CurrentValue>"
-                                    $EventValue += "<DesiredValue>$($DesiredValues.$fieldName)</DesiredValue>"
-                                    $DriftedParameters.Add($fieldName, $EventValue)
-                                    $returnValue = $false
-                                }
+                                Write-Verbose -Message ("Int32 value for property " + `
+                                        "$fieldName does not match. " + `
+                                        "Current state is " + `
+                                        "'$($CurrentValues.$fieldName)' " + `
+                                        "and desired state is " + `
+                                        "'$($DesiredValues.$fieldName)'")
+                                $EventValue = "<CurrentValue>$($CurrentValues.$fieldName)</CurrentValue>"
+                                $EventValue += "<DesiredValue>$($DesiredValues.$fieldName)</DesiredValue>"
+                                $DriftedParameters.Add($fieldName, $EventValue)
+                                $returnValue = $false
                             }
-                            "Int16"
+                        }
+                        "Int16"
+                        {
+                            if (($DesiredValues.$fieldName -eq 0) -and `
+                                ($null -eq $CurrentValues.$fieldName))
                             {
-                                if (($DesiredValues.$fieldName -eq 0) -and `
-                                    ($null -eq $CurrentValues.$fieldName))
-                                {
-                                }
-                                else
-                                {
-                                    Write-Verbose -Message ("Int16 value for property " + `
-                                            "$fieldName does not match. " + `
-                                            "Current state is " + `
-                                            "'$($CurrentValues.$fieldName)' " + `
-                                            "and desired state is " + `
-                                            "'$($DesiredValues.$fieldName)'")
-                                    $EventValue = "<CurrentValue>$($CurrentValues.$fieldName)</CurrentValue>"
-                                    $EventValue += "<DesiredValue>$($DesiredValues.$fieldName)</DesiredValue>"
-                                    $DriftedParameters.Add($fieldName, $EventValue)
-                                    $returnValue = $false
-                                }
                             }
-                            "Boolean"
+                            else
                             {
-                                if ($CurrentValues.$fieldName -ne $DesiredValues.$fieldName)
-                                {
-                                    Write-Verbose -Message ("Boolean value for property " + `
-                                            "$fieldName does not match. " + `
-                                            "Current state is " + `
-                                            "'$($CurrentValues.$fieldName)' " + `
-                                            "and desired state is " + `
-                                            "'$($DesiredValues.$fieldName)'")
-                                    $EventValue = "<CurrentValue>$($CurrentValues.$fieldName)</CurrentValue>"
-                                    $EventValue += "<DesiredValue>$($DesiredValues.$fieldName)</DesiredValue>"
-                                    $DriftedParameters.Add($fieldName, $EventValue)
-                                    $returnValue = $false
-                                }
+                                Write-Verbose -Message ("Int16 value for property " + `
+                                        "$fieldName does not match. " + `
+                                        "Current state is " + `
+                                        "'$($CurrentValues.$fieldName)' " + `
+                                        "and desired state is " + `
+                                        "'$($DesiredValues.$fieldName)'")
+                                $EventValue = "<CurrentValue>$($CurrentValues.$fieldName)</CurrentValue>"
+                                $EventValue += "<DesiredValue>$($DesiredValues.$fieldName)</DesiredValue>"
+                                $DriftedParameters.Add($fieldName, $EventValue)
+                                $returnValue = $false
                             }
-                            "Single"
+                        }
+                        "Boolean"
+                        {
+                            if ($CurrentValues.$fieldName -ne $DesiredValues.$fieldName)
                             {
-                                if (($DesiredValues.$fieldName -eq 0) -and `
-                                    ($null -eq $CurrentValues.$fieldName))
-                                {
-                                }
-                                else
-                                {
-                                    Write-Verbose -Message ("Single value for property " + `
-                                            "$fieldName does not match. " + `
-                                            "Current state is " + `
-                                            "'$($CurrentValues.$fieldName)' " + `
-                                            "and desired state is " + `
-                                            "'$($DesiredValues.$fieldName)'")
-                                    $EventValue = "<CurrentValue>$($CurrentValues.$fieldName)</CurrentValue>"
-                                    $EventValue += "<DesiredValue>$($DesiredValues.$fieldName)</DesiredValue>"
-                                    $DriftedParameters.Add($fieldName, $EventValue)
-                                    $returnValue = $false
-                                }
+                                Write-Verbose -Message ("Boolean value for property " + `
+                                        "$fieldName does not match. " + `
+                                        "Current state is " + `
+                                        "'$($CurrentValues.$fieldName)' " + `
+                                        "and desired state is " + `
+                                        "'$($DesiredValues.$fieldName)'")
+                                $EventValue = "<CurrentValue>$($CurrentValues.$fieldName)</CurrentValue>"
+                                $EventValue += "<DesiredValue>$($DesiredValues.$fieldName)</DesiredValue>"
+                                $DriftedParameters.Add($fieldName, $EventValue)
+                                $returnValue = $false
                             }
-                            "Hashtable"
+                        }
+                        "Single"
+                        {
+                            if (($DesiredValues.$fieldName -eq 0) -and `
+                                ($null -eq $CurrentValues.$fieldName))
                             {
-                                Write-Verbose -Message "The current property {$fieldName} is a Hashtable"
-                                $AllDesiredValuesAsArray = @()
-                                foreach ($item in $DesiredValues.$fieldName)
+                            }
+                            else
+                            {
+                                Write-Verbose -Message ("Single value for property " + `
+                                        "$fieldName does not match. " + `
+                                        "Current state is " + `
+                                        "'$($CurrentValues.$fieldName)' " + `
+                                        "and desired state is " + `
+                                        "'$($DesiredValues.$fieldName)'")
+                                $EventValue = "<CurrentValue>$($CurrentValues.$fieldName)</CurrentValue>"
+                                $EventValue += "<DesiredValue>$($DesiredValues.$fieldName)</DesiredValue>"
+                                $DriftedParameters.Add($fieldName, $EventValue)
+                                $returnValue = $false
+                            }
+                        }
+                        "Hashtable"
+                        {
+                            Write-Verbose -Message "The current property {$fieldName} is a Hashtable"
+                            $AllDesiredValuesAsArray = @()
+                            foreach ($item in $DesiredValues.$fieldName)
+                            {
+                                $currentEntry = @{ }
+                                foreach ($key in $item.Keys)
+                                {
+                                    $value = $item.$key
+                                    if ([System.String]::IsNullOrEmpty($value))
+                                    {
+                                        $value = $null
+                                    }
+                                    $currentEntry.Add($key, $value)
+                                }
+                                $AllDesiredValuesAsArray += [PSCustomObject]$currentEntry
+                            }
+
+                            if ($null -ne $DesiredValues.$fieldName -and $null -eq $CurrentValues.$fieldName)
+                            {
+                                $returnValue = $false
+                            }
+                            else
+                            {
+                                $AllCurrentValuesAsArray = @()
+                                foreach ($item in $CurrentValues.$fieldName)
                                 {
                                     $currentEntry = @{ }
                                     foreach ($key in $item.Keys)
@@ -1159,96 +1184,74 @@ function Test-SPDscParameterState
                                         }
                                         $currentEntry.Add($key, $value)
                                     }
-                                    $AllDesiredValuesAsArray += [PSCustomObject]$currentEntry
+                                    $AllCurrentValuesAsArray += [PSCustomObject]$currentEntry
                                 }
-
-                                if ($null -ne $DesiredValues.$fieldName -and $null -eq $CurrentValues.$fieldName)
+                                $arrayCompare = Compare-PSCustomObjectArrays -CurrentValues $AllCurrentValuesAsArray `
+                                    -DesiredValues $AllCurrentValuesAsArray
+                                if ($null -ne $arrayCompare)
                                 {
+                                    foreach ($item in $arrayCompare)
+                                    {
+                                        $EventValue = "<CurrentValue>[$($item.PropertyName)]$($item.Current)</CurrentValue>"
+                                        $EventValue += "<DesiredValue>[$($item.PropertyName)]$($item.Desired)</DesiredValue>"
+                                        if (-not $DriftedParameters.ContainsKey($fieldName))
+                                        {
+                                            $DriftedParameters.Add($fieldName, @())
+                                        }
+                                        $DriftedParameters[$fieldName] = $DriftedParameters[$fieldName] += $EventValue
+                                    }
                                     $returnValue = $false
                                 }
-                                else
-                                {
-                                    $AllCurrentValuesAsArray = @()
-                                    foreach ($item in $CurrentValues.$fieldName)
-                                    {
-                                        $currentEntry = @{ }
-                                        foreach ($key in $item.Keys)
-                                        {
-                                            $value = $item.$key
-                                            if ([System.String]::IsNullOrEmpty($value))
-                                            {
-                                                $value = $null
-                                            }
-                                            $currentEntry.Add($key, $value)
-                                        }
-                                        $AllCurrentValuesAsArray += [PSCustomObject]$currentEntry
-                                    }
-                                    $arrayCompare = Compare-PSCustomObjectArrays -CurrentValues $AllCurrentValuesAsArray `
-                                        -DesiredValues $AllCurrentValuesAsArray
-                                    if ($null -ne $arrayCompare)
-                                    {
-                                        foreach ($item in $arrayCompare)
-                                        {
-                                            $EventValue = "<CurrentValue>[$($item.PropertyName)]$($item.Current)</CurrentValue>"
-                                            $EventValue += "<DesiredValue>[$($item.PropertyName)]$($item.Desired)</DesiredValue>"
-                                            if (-not $DriftedParameters.ContainsKey($fieldName))
-                                            {
-                                                $DriftedParameters.Add($fieldName, @())
-                                            }
-                                            $DriftedParameters[$fieldName] = $DriftedParameters[$fieldName] += $EventValue
-                                        }
-                                        $returnValue = $false
-                                    }
-                                }
                             }
-                            default
-                            {
-                                Write-Verbose -Message ("Unable to compare property $fieldName " + `
-                                        "as the type ($($desiredType.Name)) is " + `
-                                        "not handled by the " + `
-                                        "Test-SPDscParameterState cmdlet")
-                                $EventValue = "<CurrentValue>$($CurrentValues.$fieldName)</CurrentValue>"
-                                $EventValue += "<DesiredValue>$($DesiredValues.$fieldName)</DesiredValue>"
-                                $DriftedParameters.Add($fieldName, $EventValue)
-                                $returnValue = $false
-                            }
+                        }
+                        default
+                        {
+                            Write-Verbose -Message ("Unable to compare property $fieldName " + `
+                                    "as the type ($($desiredType.Name)) is " + `
+                                    "not handled by the " + `
+                                    "Test-SPDscParameterState cmdlet")
+                            $EventValue = "<CurrentValue>$($CurrentValues.$fieldName)</CurrentValue>"
+                            $EventValue += "<DesiredValue>$($DesiredValues.$fieldName)</DesiredValue>"
+                            $DriftedParameters.Add($fieldName, $EventValue)
+                            $returnValue = $false
                         }
                     }
                 }
             }
         }
     }
+}
 
-    if ($returnValue -eq $false)
+if ($returnValue -eq $false)
+{
+    $EventMessage = "<SPDscEvent>`r`n"
+    $EventMessage += "    <ConfigurationDrift Source=`"$Source`">`r`n"
+
+    $EventMessage += "        <ParametersNotInDesiredState>`r`n"
+    foreach ($key in $DriftedParameters.Keys)
     {
-        $EventMessage = "<SPDscEvent>`r`n"
-        $EventMessage += "    <ConfigurationDrift Source=`"$Source`">`r`n"
-
-        $EventMessage += "        <ParametersNotInDesiredState>`r`n"
-        foreach ($key in $DriftedParameters.Keys)
-        {
-            Write-Verbose -Message "Detected Drifted Parameter [$Source]$key"
-            $EventMessage += "            <Param Name=`"$key`">" + $DriftedParameters.$key + "</Param>`r`n"
-        }
-        $EventMessage += "        </ParametersNotInDesiredState>`r`n"
-        $EventMessage += "    </ConfigurationDrift>`r`n"
-        $EventMessage += "    <DesiredValues>`r`n"
-        foreach ($Key in $DesiredValues.Keys)
-        {
-            $Value = $DesiredValues.$Key -join ", "
-            if ([System.String]::IsNullOrEmpty($Value))
-            {
-                $Value = "`$null"
-            }
-            $EventMessage += "        <Param Name =`"$key`">$Value</Param>`r`n"
-        }
-        $EventMessage += "    </DesiredValues>`r`n"
-        $EventMessage += "</SPDscEvent>"
-
-        Add-SPDscEvent -Message $EventMessage -EntryType 'Error' -EventID 1 -Source $Source
+        Write-Verbose -Message "Detected Drifted Parameter [$Source]$key"
+        $EventMessage += "            <Param Name=`"$key`">" + $DriftedParameters.$key + "</Param>`r`n"
     }
+    $EventMessage += "        </ParametersNotInDesiredState>`r`n"
+    $EventMessage += "    </ConfigurationDrift>`r`n"
+    $EventMessage += "    <DesiredValues>`r`n"
+    foreach ($Key in $DesiredValues.Keys)
+    {
+        $Value = $DesiredValues.$Key -join ", "
+        if ([System.String]::IsNullOrEmpty($Value))
+        {
+            $Value = "`$null"
+        }
+        $EventMessage += "        <Param Name =`"$key`">$Value</Param>`r`n"
+    }
+    $EventMessage += "    </DesiredValues>`r`n"
+    $EventMessage += "</SPDscEvent>"
 
-    return $returnValue
+    Add-SPDscEvent -Message $EventMessage -EntryType 'Error' -EventID 1 -Source $Source
+}
+
+return $returnValue
 }
 
 function Test-SPDscUserIsLocalAdmin
@@ -1269,11 +1272,11 @@ function Test-SPDscUserIsLocalAdmin
     $accountName = $UserName.Split('\')[1]
 
     return ([ADSI]"WinNT://$($env:computername)/Administrators,group").PSBase.Invoke("Members") | `
-        ForEach-Object -Process {
-        $_.GetType().InvokeMember("Name", 'GetProperty', $null, $_, $null)
-    } | Where-Object -FilterScript {
-        $_ -eq $accountName
-    }
+            ForEach-Object -Process {
+            $_.GetType().InvokeMember("Name", 'GetProperty', $null, $_, $null)
+        } | Where-Object -FilterScript {
+            $_ -eq $accountName
+        }
 }
 
 function Test-SPDscIsADUser
@@ -1295,23 +1298,23 @@ function Test-SPDscIsADUser
     $searcher.filter = "((samAccountName=$IdentityName))"
     $searcher.SearchScope = "subtree"
     $searcher.PropertiesToLoad.Add("objectClass") | Out-Null
-    $searcher.PropertiesToLoad.Add("objectCategory") | Out-Null
-    $searcher.PropertiesToLoad.Add("name") | Out-Null
-    $result = $searcher.FindOne()
+$searcher.PropertiesToLoad.Add("objectCategory") | Out-Null
+$searcher.PropertiesToLoad.Add("name") | Out-Null
+$result = $searcher.FindOne()
 
-    if ($null -eq $result)
-    {
-        throw "Unable to locate identity '$IdentityName' in the current domain."
-    }
+if ($null -eq $result)
+{
+    throw "Unable to locate identity '$IdentityName' in the current domain."
+}
 
-    if ($result[0].Properties.objectclass -contains "user")
-    {
-        return $true
-    }
-    else
-    {
-        return $false
-    }
+if ($result[0].Properties.objectclass -contains "user")
+{
+    return $true
+}
+else
+{
+    return $false
+}
 }
 
 function Set-SPDscObjectPropertyIfValuePresent

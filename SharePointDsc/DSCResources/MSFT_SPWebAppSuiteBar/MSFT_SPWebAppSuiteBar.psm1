@@ -73,10 +73,17 @@ function Get-TargetResource
 
         if ($installedVersion.FileMajorPart -ge 16)
         {
-            $returnval.SuiteNavBrandingLogoNavigationUrl = $wa.SuiteNavBrandingLogoNavigationUrl
-            $returnval.SuiteNavBrandingLogoTitle = $wa.SuiteNavBrandingLogoTitle
-            $returnval.SuiteNavBrandingLogoUrl = $wa.SuiteNavBrandingLogoUrl
-            $returnval.SuiteNavBrandingText = $wa.SuiteNavBrandingText
+            if ($installedVersion.ProductBuildPart.ToString().Length -eq 4)
+            {
+                $returnval.SuiteNavBrandingLogoNavigationUrl = $wa.SuiteNavBrandingLogoNavigationUrl
+                $returnval.SuiteNavBrandingLogoTitle = $wa.SuiteNavBrandingLogoTitle
+                $returnval.SuiteNavBrandingLogoUrl = $wa.SuiteNavBrandingLogoUrl
+                $returnval.SuiteNavBrandingText = $wa.SuiteNavBrandingText
+            }
+            else
+            {
+                return $returnval
+            }
         }
 
         return $returnval
@@ -128,6 +135,7 @@ function Set-TargetResource
         15
         {
             <# Exception: One of the SP2016/SP2019 specific parameter was passed with SP2013 #>
+            Write-Verbose -Message "SharePoint 2013 is used"
             if ($PSBoundParameters.ContainsKey("SuiteNavBrandingLogoNavigationUrl") `
                     -or $PSBoundParameters.ContainsKey("SuiteNavBrandingLogoTitle") `
                     -or $PSBoundParameters.ContainsKey("SuiteNavBrandingLogoUrl") `
@@ -147,22 +155,31 @@ function Set-TargetResource
         }
         16
         {
-            if ($PSBoundParameters.ContainsKey("SuiteBarBrandingElementHtml"))
+            if ($installedVersion.ProductBuildPart.ToString().Length -eq 4)
             {
-                Write-Verbose ("SuiteBarBrandingElementHtml with SharePoint 2016 and 2019 only works " + `
-                        "if using a SharePoint 2013 masterpage")
-            }
+                Write-Verbose -Message "SharePoint 2016 is used"
+                if ($PSBoundParameters.ContainsKey("SuiteBarBrandingElementHtml"))
+                {
+                    Write-Verbose -Message ("SuiteBarBrandingElementHtml with SharePoint 2016 only " + `
+                            "works if using a SharePoint 2013 masterpage")
+                }
 
-            <# Exception: All the optional parameters are null for SP2016/SP2019. #>
-            if (!$PSBoundParameters.ContainsKey("SuiteNavBrandingLogoNavigationUrl") `
-                    -and !$PSBoundParameters.ContainsKey("SuiteNavBrandingLogoTitle") `
-                    -and !$PSBoundParameters.ContainsKey("SuiteNavBrandingLogoUrl") `
-                    -and !$PSBoundParameters.ContainsKey("SuiteNavBrandingText") `
-                    -and !$PSBoundParameters.ContainsKey("SuiteBarBrandingElementHtml"))
+                <# Exception: All the optional parameters are null for SP2016. #>
+                if (!$PSBoundParameters.ContainsKey("SuiteNavBrandingLogoNavigationUrl") `
+                        -and !$PSBoundParameters.ContainsKey("SuiteNavBrandingLogoTitle") `
+                        -and !$PSBoundParameters.ContainsKey("SuiteNavBrandingLogoUrl") `
+                        -and !$PSBoundParameters.ContainsKey("SuiteNavBrandingText") `
+                        -and !$PSBoundParameters.ContainsKey("SuiteBarBrandingElementHtml"))
+                {
+                    throw ("You need to specify a value for either SuiteNavBrandingLogoNavigationUrl, " + `
+                            "SuiteNavBrandingLogoTitle, SuiteNavBrandingLogoUrl, SuiteNavBrandingText " + `
+                            "or SuiteBarBrandingElementHtml with SharePoint 2016")
+                }
+            }
+            else
             {
-                throw ("You need to specify a value for either SuiteNavBrandingLogoNavigationUrl, " + `
-                        "SuiteNavBrandingLogoTitle, SuiteNavBrandingLogoUrl, SuiteNavBrandingText " + `
-                        "or SuiteBarBrandingElementHtml with SharePoint 2016 or 2019")
+                Write-Verbose -Message "SharePoint 2019 is used"
+                throw "Changing the Suite Bar is not possible in SharePoint 2019"
             }
         }
     }
@@ -269,10 +286,10 @@ function Test-TargetResource
         $result = Test-SPDscParameterState -CurrentValues $CurrentValues `
             -DesiredValues $PSBoundParameters `
             -ValuesToCheck @("SuiteBarBrandingElementHtml",
-                "SuiteNavBrandingLogoNavigationUrl",
-                "SuiteNavBrandingLogoTitle",
-                "SuiteNavBrandingLogoUrl",
-                "SuiteNavBrandingText")
+            "SuiteNavBrandingLogoNavigationUrl",
+            "SuiteNavBrandingLogoTitle",
+            "SuiteNavBrandingLogoUrl",
+            "SuiteNavBrandingText")
     }
 
     Write-Verbose -Message "Test-TargetResource returned $result"

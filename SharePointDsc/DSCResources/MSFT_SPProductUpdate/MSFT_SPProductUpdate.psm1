@@ -51,7 +51,13 @@ function Get-TargetResource
     Write-Verbose -Message "Check if the setup file exists"
     if (-not(Test-Path -Path $SetupFile))
     {
-        throw "Setup file cannot be found: {$SetupFile}"
+        return @{
+            SetupFile         = $SetupFile
+            ShutdownServices  = $ShutdownServices
+            BinaryInstallDays = $BinaryInstallDays
+            BinaryInstallTime = $BinaryInstallTime
+            Ensure            = "Absent"
+        }
     }
 
     Write-Verbose -Message "Checking file status of $SetupFile"
@@ -656,7 +662,6 @@ function Test-TargetResource
     if ($Ensure -eq "Absent")
     {
         throw [Exception] "SharePoint does not support uninstalling updates."
-        return
     }
 
     $CurrentValues = Get-TargetResource @PSBoundParameters

@@ -12,12 +12,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Re-enabled Unit tests for Sharepoint 2016 and 2019
 - SPAppCatalog
   - Added more logging in the Get method to ease troubleshooting
+- SPServiceInstance
+  - Added logic to wait for a service start/stop, to make sure no conflicts
+    can occur because of the asynchronous nature of service instance starts.
 
 ### Changed
 
+- SPProductUpdate
+  - Updated Get method to display a Verbose message when the setup file is
+    not found
 - SPWebAppPermissions
   - Changed Get method not to throw an exception when the web application
     cannot be found to prevent issue
+- SPWebAppSuiteBar
+  - This resource does not work on SharePoint 2019. Changed resource to display
+    a Verbose message when on 2019
 
 ### Fixed
 
@@ -28,6 +37,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Fixed issue with logging to the custom event log where the event log
     wasn't created correctly.
   - Fixed various unit tests for Sharepoint 2016 and 2019
+  - Corrected export of Get-SPDscInstalledProductVersion function, which is used
+    by ReverseDsc
 - SPConfigWizard
   - Fixed a call to Get-SPFarm without loading the snap-in first
 - SPInstallLanguagePack
@@ -35,6 +46,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - SPSite
   - Fixed issue where the default groups were checked, even though
     that parameter wasn't specified in the config
+  - Fixed issue where the Get method threw an error when the site owner was
+    still in classic format (caused by an earlier migration).
+- SPTrustedSecurityTokenIssuer
+  - Fixed incorrect storing the default value of IsTrustBroker in the Set
+    and Test method
 
 ### Removed
 
