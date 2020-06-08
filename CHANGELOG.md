@@ -43,6 +43,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Fixed a call to Get-SPFarm without loading the snap-in first
 - SPInstallLanguagePack
   - Fixed issue with detection of Chinese language pack in SharePoint 2019
+- SPSearchTopology
+  - Fixed issue where an issue was thrown when the FirstPartitionDirectory didn't
+    exist on the local server (which isn't always required)
 - SPSite
   - Fixed issue where the default groups were checked, even though
     that parameter wasn't specified in the config

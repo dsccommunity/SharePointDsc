@@ -312,13 +312,19 @@ function Set-TargetResource
         {
             $networkPath = "\\$IndexPartitionServer\" + `
                 $params.FirstPartitionDirectory.Replace(":\", "$\")
-            New-Item $networkPath -ItemType Directory -Force
-        }
-
-        # Create the directory on the local server as it will not apply the topology without it
-        if ((Test-Path -Path $params.FirstPartitionDirectory) -eq $false)
-        {
-            New-Item $params.FirstPartitionDirectory -ItemType Directory -Force
+            try
+            {
+                $null = New-Item -Path $networkPath `
+                    -ItemType Directory `
+                    -Force `
+                    -ErrorAction SilentlyContinue
+            }
+            catch
+            {
+                Write-Verbose -Message ("Unable to create folder {$($params.FirstPartitionDirectory)} " + `
+                        "on {$IndexPartitionServer}.")
+                Write-Verbose -Message "  Error: $($_.Exception.Message)"
+            }
         }
 
         # Get all service service instances to assign topology components to
@@ -403,41 +409,61 @@ function Set-TargetResource
                 {
                     "AdminComponent"
                     {
-                        New-SPEnterpriseSearchAdminComponent @NewComponentParams
+                        Write-Verbose -Message "Adding $ComponentToAdd to run an AdminComponent"
+                        $null = New-SPEnterpriseSearchAdminComponent @NewComponentParams
                     }
                     "CrawlComponent"
                     {
-                        New-SPEnterpriseSearchCrawlComponent @NewComponentParams
+                        Write-Verbose -Message "Adding $ComponentToAdd to run a CrawlComponent"
+                        $null = New-SPEnterpriseSearchCrawlComponent @NewComponentParams
                     }
                     "ContentProcessingComponent"
                     {
-                        New-SPEnterpriseSearchContentProcessingComponent @NewComponentParams
+                        Write-Verbose -Message "Adding $ComponentToAdd to run a ContentProcessingComponent"
+                        $null = New-SPEnterpriseSearchContentProcessingComponent @NewComponentParams
                     }
                     "AnalyticsProcessingComponent"
                     {
-                        New-SPEnterpriseSearchAnalyticsProcessingComponent @NewComponentParams
+                        Write-Verbose -Message "Adding $ComponentToAdd to run an AnalyticsProcessingComponent"
+                        $null = New-SPEnterpriseSearchAnalyticsProcessingComponent @NewComponentParams
                     }
                     "QueryProcessingComponent"
                     {
-                        New-SPEnterpriseSearchQueryProcessingComponent @NewComponentParams
+                        Write-Verbose -Message "Adding $ComponentToAdd to run a QueryComponent"
+                        $null = New-SPEnterpriseSearchQueryProcessingComponent @NewComponentParams
                     }
                     "IndexComponent"
                     {
-                        $NewComponentParams.Add("IndexPartition", 0)
-                        if ($params.ContainsKey("FirstPartitionDirectory") -eq $true)
+                        Write-Verbose -Message "Adding $ComponentToAdd to run an IndexComponent"
+                        $installedVersion = Get-SPDscInstalledProductVersion
+                        if ($installedVersion.FileMajorPart -eq 15)
                         {
-                            if ([string]::IsNullOrEmpty($params.FirstPartitionDirectory) -eq $false)
-                            {
-                                $dir = $params.FirstPartitionDirectory
-                                $NewComponentParams.Add("RootDirectory", $dir)
-                            }
+                            Write-Verbose -Message "Using SharePoint 2013"
+                            $indexServer = (Get-SPServer $ComponentToAdd).Name
+                            $indexComponent = (New-Object Microsoft.Office.Server.Search.Administration.Topology.IndexComponent $indexServer, 0);
+                            $indexComponent.RootDirectory = $params.FirstPartitionDirectory
+                            $newTopology.AddComponent($indexComponent)
                         }
-                        New-SPEnterpriseSearchIndexComponent @NewComponentParams
+                        else
+                        {
+                            Write-Verbose -Message "Using SharePoint 2016 or later"
+                            $NewComponentParams.Add("IndexPartition", 0)
+                            if ($params.ContainsKey("FirstPartitionDirectory") -eq $true)
+                            {
+                                if ([string]::IsNullOrEmpty($params.FirstPartitionDirectory) -eq $false)
+                                {
+                                    $dir = $params.FirstPartitionDirectory
+                                    $NewComponentParams.Add("RootDirectory", $dir)
+                                }
+                            }
+                            $null = New-SPEnterpriseSearchIndexComponent @NewComponentParams
+                        }
                     }
                 }
             }
             foreach ($ComponentToRemove in $ComponentsToRemove)
             {
+                Write-Verbose -Message "Removing $($componentTypes.$CurrentSearchProperty) from $ComponentToRemove"
                 if ($componentTypes.$CurrentSearchProperty -eq "IndexComponent")
                 {
                     $component = Get-SPEnterpriseSearchComponent -SearchTopology $newTopology | `
@@ -455,10 +481,11 @@ function Set-TargetResource
                             -and ($_.ServerName -eq $ComponentToRemove)
                     }
                 }
+
                 if ($null -ne $component)
                 {
                     $component | Remove-SPEnterpriseSearchComponent -SearchTopology $newTopology `
-                        -confirm:$false
+                        -Confirm:$false
                 }
             }
         }
@@ -475,10 +502,11 @@ function Set-TargetResource
                 $_.ComponentId -eq $id
             } | `
                 Remove-SPEnterpriseSearchComponent -SearchTopology $newTopology `
-                -confirm:$false
+                -Confirm:$false
         }
 
         # Apply the new topology to the farm
+        Write-Verbose -Message "Applying new Search topology"
         Set-SPEnterpriseSearchTopology -Identity $newTopology
     }
 }
