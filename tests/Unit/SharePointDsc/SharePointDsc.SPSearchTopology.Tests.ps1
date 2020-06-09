@@ -115,7 +115,13 @@ try
                 return $null
             }
             Mock -CommandName New-SPEnterpriseSearchTopology -MockWith {
-                return @{ }
+                $returnval = @{ }
+                $returnval = $returnval | Add-Member -MemberType ScriptMethod `
+                    -Name AddComponent `
+                    -Value { } `
+                    -PassThru `
+                    -Force
+                return $returnval
             }
             Mock -CommandName New-SPEnterpriseSearchAdminComponent -MockWith {
                 return @{ }

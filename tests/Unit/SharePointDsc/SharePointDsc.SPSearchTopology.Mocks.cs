@@ -11,35 +11,38 @@ namespace Microsoft.Office.Server.Search.Administration.Topology
     {
         public string ServerName { get; set; }
         public System.Guid ComponentId { get; set; }
-        public System.Guid ServerId {get; set;}
+        public System.Guid ServerId { get; set; }
     }
 
     public class ContentProcessingComponent
     {
         public string ServerName { get; set; }
         public System.Guid ComponentId { get; set; }
-        public System.Guid ServerId {get; set;}
+        public System.Guid ServerId { get; set; }
     }
 
     public class AnalyticsProcessingComponent
     {
         public string ServerName { get; set; }
         public System.Guid ComponentId { get; set; }
-        public System.Guid ServerId {get; set;}
+        public System.Guid ServerId { get; set; }
     }
 
     public class QueryProcessingComponent
     {
         public string ServerName { get; set; }
         public System.Guid ComponentId { get; set; }
-        public System.Guid ServerId {get; set;}
+        public System.Guid ServerId { get; set; }
     }
 
     public class IndexComponent
     {
+        public IndexComponent() { }
+        public IndexComponent(string server, uint IndexPartitionOrdinal) { }
         public string ServerName { get; set; }
         public System.Guid ComponentId { get; set; }
         public System.Int32 IndexPartitionOrdinal { get; set; }
         public System.Guid ServerId { get; set; }
+        public System.String RootDirectory { get; set; }
     }
 }
