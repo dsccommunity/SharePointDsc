@@ -317,7 +317,7 @@ function Set-TargetResource
                 $null = New-Item -Path $networkPath `
                     -ItemType Directory `
                     -Force `
-                    -ErrorAction SilentlyContinue
+                    -ErrorAction Stop
             }
             catch
             {
