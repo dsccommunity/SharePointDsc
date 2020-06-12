@@ -21,7 +21,7 @@ function Add-SPDscEvent
         $EventID = 1
     )
 
-    $LogName = 'SharePointDsc'
+    $LogName = 'SPDsc'
 
     if ([System.Diagnostics.EventLog]::SourceExists($Source))
     {
