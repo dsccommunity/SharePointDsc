@@ -59,7 +59,7 @@ try
 
             # Mocks for all contexts
             Mock -CommandName Remove-SPServiceApplication -MockWith { }
-            Mock -CommandName New-SPSecureStoreServiceApplication -MockWith { }
+            Mock -CommandName New-SPSecureStoreServiceApplication -MockWith { return "" }
             Mock -CommandName New-SPSecureStoreServiceApplicationProxy -MockWith { }
             Mock -CommandName Set-SPSecureStoreServiceApplication -MockWith { }
 
@@ -67,7 +67,7 @@ try
             Context -Name "When no service application exists in the current farm" -Fixture {
                 $testParams = @{
                     Name            = "Secure Store Service Application"
-                    ApplicationPool = "SharePoint Search Services"
+                    ApplicationPool = "SharePoint Services"
                     AuditingEnabled = $false
                     Ensure          = "Present"
                 }
@@ -75,6 +75,8 @@ try
                 Mock -CommandName Get-SPServiceApplication -MockWith {
                     return $null
                 }
+
+                Mock -CommandName Update-SPSecureStoreMasterKey -MockWith { }
 
                 It "Should return absent from the Get method" {
                     (Get-TargetResource @testParams).Ensure | Should Be "Absent"
@@ -92,14 +94,55 @@ try
                 $testParams.Add("DatabaseName", "SP_SecureStore")
                 It "Should create a new service application in the set method where parameters beyond the minimum required set" {
                     Set-TargetResource @testParams
-                    Assert-MockCalled New-SPSecureStoreServiceApplication
+                    Assert-MockCalled -CommandName New-SPSecureStoreServiceApplication -Times 1
+                    Assert-MockCalled -CommandName New-SPSecureStoreServiceApplicationProxy -Times 1
+                    Assert-MockCalled -CommandName Update-SPSecureStoreMasterKey -Times 0
+                }
+            }
+
+            Context -Name "When no service application exists in the current farm, MasterKey specified" -Fixture {
+                $mockSecret = ConvertTo-SecureString -String 'password' -AsPlainText -Force
+                $mockMasterKey = New-Object -TypeName 'System.Management.Automation.PSCredential' `
+                    -ArgumentList @('dummy', $mockSecret)
+
+                $testParams = @{
+                    Name            = "Secure Store Service Application"
+                    ApplicationPool = "SharePoint Services"
+                    AuditingEnabled = $false
+                    MasterKey       = $mockMasterKey
+                    Ensure          = "Present"
+                }
+
+                Mock -CommandName Get-SPServiceApplication -MockWith {
+                    return $null
+                }
+
+                Mock -CommandName Update-SPSecureStoreMasterKey -MockWith { }
+
+                It "Should return absent from the Get method" {
+                    (Get-TargetResource @testParams).Ensure | Should Be "Absent"
+                }
+
+                It "Should return false when the Test method is called" {
+                    Test-TargetResource @testParams | Should Be $false
+                }
+
+                It "Should create a new service application in the set method" {
+                    Mock -CommandName Get-SPServiceApplicationProxy -MockWith {
+                        return @{ Name = "$($testParams.Name) Proxy" }
+                    }
+
+                    Set-TargetResource @testParams
+                    Assert-MockCalled -CommandName New-SPSecureStoreServiceApplication -Times 1
+                    Assert-MockCalled -CommandName New-SPSecureStoreServiceApplicationProxy -Times 1
+                    Assert-MockCalled -CommandName Update-SPSecureStoreMasterKey -Times 1
                 }
             }
 
             Context -Name "When service applications exist in the current farm but the specific search app does not" -Fixture {
                 $testParams = @{
                     Name            = "Secure Store Service Application"
-                    ApplicationPool = "SharePoint Search Services"
+                    ApplicationPool = "SharePoint Services"
                     AuditingEnabled = $false
                     Ensure          = "Present"
                 }
@@ -130,7 +173,7 @@ try
             Context -Name "When a service application exists and is configured correctly" -Fixture {
                 $testParams = @{
                     Name            = "Secure Store Service Application"
-                    ApplicationPool = "SharePoint Search Services"
+                    ApplicationPool = "SharePoint Services"
                     AuditingEnabled = $false
                     Ensure          = "Present"
                 }
@@ -207,7 +250,7 @@ try
             Context -Name "When a service application exists and the app pool is not configured correctly" -Fixture {
                 $testParams = @{
                     Name            = "Secure Store Service Application"
-                    ApplicationPool = "SharePoint Search Services"
+                    ApplicationPool = "SharePoint Services"
                     AuditingEnabled = $false
                     Ensure          = "Present"
                 }
@@ -293,7 +336,7 @@ try
             Context -Name "When specific windows credentials are to be used for the database" -Fixture {
                 $testParams = @{
                     Name                = "Secure Store Service Application"
-                    ApplicationPool     = "SharePoint Search Services"
+                    ApplicationPool     = "SharePoint Services"
                     AuditingEnabled     = $false
                     DatabaseName        = "SP_ManagedMetadata"
                     DatabaseCredentials = $mockCredential
@@ -314,7 +357,7 @@ try
             Context -Name "When specific SQL credentials are to be used for the database" -Fixture {
                 $testParams = @{
                     Name                = "Secure Store Service Application"
-                    ApplicationPool     = "SharePoint Search Services"
+                    ApplicationPool     = "SharePoint Services"
                     AuditingEnabled     = $false
                     DatabaseName        = "SP_ManagedMetadata"
                     DatabaseCredentials = $mockCredential

@@ -54,6 +54,10 @@ function Get-TargetResource
         $Sharing,
 
         [Parameter()]
+        [System.Management.Automation.PSCredential]
+        $MasterKey,
+
+        [Parameter()]
         [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present",
@@ -190,6 +194,10 @@ function Set-TargetResource
         $Sharing,
 
         [Parameter()]
+        [System.Management.Automation.PSCredential]
+        $MasterKey,
+
+        [Parameter()]
         [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present",
@@ -216,33 +224,34 @@ function Set-TargetResource
             -ScriptBlock {
             $params = $args[0]
 
-            if ($params.ContainsKey("Ensure"))
-            {
-                $params.Remove("Ensure") | Out-Null
-            }
-            if ($params.ContainsKey("InstallAccount"))
-            {
-                $params.Remove("InstallAccount") | Out-Null
+            $newParams = @{
+                Name            = $params.Name
+                ApplicationPool = $params.ApplicationPool
+                AuditingEnabled = $params.AuditingEnabled
             }
 
             if ($params.UseSQLAuthentication -eq $true)
             {
                 Write-Verbose -Message "Using SQL authentication to create service application as `$useSQLAuthentication is set to $($params.useSQLAuthentication)."
-                $params.Add("DatabaseUsername", $params.DatabaseCredentials.Username)
-                $params.Add("DatabasePassword", $params.DatabaseCredentials.Password)
+                $newParams.Add("DatabaseUsername", $params.DatabaseCredentials.Username)
+                $newParams.Add("DatabasePassword", $params.DatabaseCredentials.Password)
             }
-            $params.Remove("UseSQLAuthentication") | Out-Null
-            $params.Remove("DatabaseCredentials") | Out-Null
 
             $pName = "$($params.Name) Proxy"
 
             if ($params.ContainsKey("ProxyName") -and $null -ne $params.ProxyName)
             {
                 $pName = $params.ProxyName
-                $params.Remove("ProxyName") | Out-Null
             }
 
-            New-SPSecureStoreServiceApplication @params | New-SPSecureStoreServiceApplicationProxy -Name $pName
+            New-SPSecureStoreServiceApplication @newParams | New-SPSecureStoreServiceApplicationProxy -Name $pName
+
+            if ($params.ContainsKey("MasterKey"))
+            {
+                $newPassPhrase = $params.MasterKey.GetNetworkCredential().Password
+                $proxy = Get-SPServiceApplicationProxy | Where-Object -FilterScript { $_.Name -eq $pName }
+                Update-SPSecureStoreMasterKey -ServiceApplicationProxy $proxy -Passphrase $newPassPhrase
+            }
         }
     }
 
@@ -360,6 +369,10 @@ function Test-TargetResource
         [Parameter()]
         [System.Boolean]
         $Sharing,
+
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
+        $MasterKey,
 
         [Parameter()]
         [ValidateSet("Present", "Absent")]
