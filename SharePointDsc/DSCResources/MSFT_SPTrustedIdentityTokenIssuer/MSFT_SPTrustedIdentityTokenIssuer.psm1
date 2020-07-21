@@ -297,13 +297,13 @@ function Set-TargetResource
                 if ($false -eq [String]::IsNullOrWhiteSpace($params.ClaimProviderName))
                 {
                     $claimProvider = (Get-SPClaimProvider | Where-Object -FilterScript {
-                        $_.DisplayName -eq $params.ClaimProviderName
-                    })
+                            $_.DisplayName -eq $params.ClaimProviderName
+                        })
                     if ($null -eq $claimProvider)
                     {
                         $trust.ClaimProviderName = $params.ClaimProviderName
                     }
-                }               
+                }
 
                 if ($params.ProviderSignOutUri)
                 {
