@@ -294,13 +294,16 @@ function Set-TargetResource
                     throw "SharePoint failed to create the SPTrustedIdentityTokenIssuer."
                 }
 
-                $claimProvider = (Get-SPClaimProvider | Where-Object -FilterScript {
+                if ($false -eq [String]::IsNullOrWhiteSpace($params.ClaimProviderName))
+                {
+                    $claimProvider = (Get-SPClaimProvider | Where-Object -FilterScript {
                         $_.DisplayName -eq $params.ClaimProviderName
                     })
-                if ($null -eq $claimProvider)
-                {
-                    $trust.ClaimProviderName = $params.ClaimProviderName
-                }
+                    if ($null -eq $claimProvider)
+                    {
+                        $trust.ClaimProviderName = $params.ClaimProviderName
+                    }
+                }               
 
                 if ($params.ProviderSignOutUri)
                 {
