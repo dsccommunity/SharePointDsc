@@ -5,6 +5,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+- SPTrustedIdentityTokenIssuer
+  - Run Get-SPClaimProvider only if property ClaimProviderName is omitted/null/empty.
+
 ### Fixed
 
 - SharePointDsc
