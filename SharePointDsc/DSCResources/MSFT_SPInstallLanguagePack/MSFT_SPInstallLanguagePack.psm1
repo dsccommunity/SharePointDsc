@@ -126,6 +126,16 @@ function Get-TargetResource
             {
                 $parsedENProduct = $parsedProduct[1] -split "/"
                 $languageEN = $parsedENProduct[0]
+
+                if ($languageEN -eq "Chinese (Simplified)")
+                {
+                    $languageEN = "Chinese (PRC)"
+                }
+
+                if ($languageEN -eq "Chinese (Traditional)")
+                {
+                    $languageEN = "Chinese (Taiwan)"
+                }
             }
             "Portuguese"
             {
@@ -183,35 +193,11 @@ function Get-TargetResource
         }
         "Chinese (Simplified, China)"
         {
-            # Language name of Chinese SP2013/2016 and SP2019 install package are different
-            $installedVersion = Get-SPDscInstalledProductVersion
-            if ($installedVersion.FileMajorPart -eq 16 -and `
-                    $installedVersion.ProductBuildPart.ToString().Length -gt 4)
-            {
-                # SP2019
-                $languageEnglish = "Chinese (Simplified)"
-            }
-            else
-            {
-                # SP2013/2016
-                $languageEnglish = "Chinese (PRC)"
-            }
+            $languageEnglish = "Chinese (PRC)"
         }
         "Chinese (Traditional, Taiwan)"
         {
-            # Language name of Chinese SP2013/2016 and SP2019 install package are different
-            $installedVersion = Get-SPDscInstalledProductVersion
-            if ($installedVersion.FileMajorPart -eq 16 -and `
-                    $installedVersion.ProductBuildPart.ToString().Length -gt 4)
-            {
-                # SP2019
-                $languageEnglish = "Chinese (Traditional)"
-            }
-            else
-            {
-                # SP2013/2016
-                $languageEnglish = "Chinese (Taiwan)"
-            }
+            $languageEnglish = "Chinese (Taiwan)"
         }
         "Portuguese (Brazil)"
         {

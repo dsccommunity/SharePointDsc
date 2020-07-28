@@ -418,6 +418,15 @@ function Test-TargetResource
     $PSBoundParameters.Ensure = $Ensure
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
+    if ($CurrentValues.Contains("WebAppUrls"))
+    {
+        $CurrentValues.WebAppUrls = $CurrentValues.WebAppUrls.TrimEnd("/")
+    }
+
+    if ($PSBoundParameters.Contains("WebAppUrls"))
+    {
+        $PSBoundParameters.WebAppUrls = $PSBoundParameters.WebAppUrls.TrimEnd("/")
+    }
 
     Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
     Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"

@@ -66,7 +66,7 @@
     NestedModules        = @("Modules\SharePointDsc.Util\SharePointDsc.Util.psm1")
 
     # Functions to export from this module
-    FunctionsToExport    = @("Get-SPDscInstalledProductVersion")
+    FunctionsToExport    = @("Get-SPDscInstalledProductVersion", "Invoke-SPDscCommand")
 
     # Cmdlets to export from this module
     CmdletsToExport      = @()

@@ -51,6 +51,7 @@ function Get-TargetResource
     Write-Verbose -Message "Check if the setup file exists"
     if (-not(Test-Path -Path $SetupFile))
     {
+        Write-Verbose -Message "ERROR: Setup files could not be found: $SetupFile"
         return @{
             SetupFile         = $SetupFile
             ShutdownServices  = $ShutdownServices
