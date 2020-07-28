@@ -26,11 +26,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     value didn't contain any slashes
 - SPInstallLanguagePack
   - Fixed issue with detection of Chinese language pack in SharePoint 2019
-
-## [4.2.0] - 2020-06-12
-
 - SPTrustedIdentityTokenIssuer
   - Run Get-SPClaimProvider only if property ClaimProviderName is omitted/null/empty.
+
+## [4.2.0] - 2020-06-12
 
 ### Fixed
 
