@@ -44,8 +44,6 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting install status of SP binaries"
 
-    $languagepack = $false
-    $servicepack = $false
     $language = ""
 
     Write-Verbose -Message "Check if the setup file exists"
@@ -135,7 +133,6 @@ function Get-TargetResource
     {
         Write-Verbose -Message "Update is a Language Pack Service Pack."
         # Retrieve language from file and check version for that language pack.
-        $languagepack = $true
 
         # Extract language from filename
         if ($setupFileInfo.Name -match "\w*-(\w{2}-\w{2}).exe")
@@ -203,7 +200,6 @@ function Get-TargetResource
     {
         Write-Verbose -Message "Update is a Service Pack for SharePoint."
         # Check SharePoint version information.
-        $servicepack = $true
         $versionInfo = Get-SPDscLocalVersionInfo -ProductVersion $sharePointVersion
     }
     else

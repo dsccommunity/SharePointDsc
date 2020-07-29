@@ -467,7 +467,7 @@ function Wait-SPDscSolutionJob
         Name = $SolutionName
     }
 
-    $result = Invoke-SPDscCommand -Credential $InstallAccount `
+    $null = Invoke-SPDscCommand -Credential $InstallAccount `
         -Arguments $args `
         -ScriptBlock {
         $params = $args[0]
