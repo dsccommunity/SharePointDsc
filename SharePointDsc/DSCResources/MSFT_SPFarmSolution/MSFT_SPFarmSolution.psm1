@@ -418,12 +418,12 @@ function Test-TargetResource
     $PSBoundParameters.Ensure = $Ensure
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
-    if ($CurrentValues.Contains("WebAppUrls"))
+    if ($CurrentValues.ContainsKey("WebAppUrls") -and $CurrentValues.WebAppUrls.Count -ne 0)
     {
         $CurrentValues.WebAppUrls = $CurrentValues.WebAppUrls.TrimEnd("/")
     }
 
-    if ($PSBoundParameters.Contains("WebAppUrls"))
+    if ($PSBoundParameters.ContainsKey("WebAppUrls") -and $PSBoundParameters.WebAppUrls.Count -ne 0)
     {
         $PSBoundParameters.WebAppUrls = $PSBoundParameters.WebAppUrls.TrimEnd("/")
     }
