@@ -5,8 +5,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- SPProductUpdate
+  - Added extra logging when the setup file was not found
+- SPSecureStoreServiceApp
+  - Added possibility to set the Master Key during creation of the service
+    application
+
+### Fixed
+
+- SharePointDsc
+  - Fixed issue where Invoke-SPDscCommand wasn't available anymore for the script
+    resource
+- SPContentDatabase
+  - Fixed issue where the set method didn't do anything when the Ensure parameter
+    wasn't specified
+- SPFarmSolution
+  - Fixed issue where web applications weren't compared properly when the desired
+    value didn't contain any slashes
+- SPInstallLanguagePack
+  - Fixed issue with detection of Chinese language pack in SharePoint 2019
+- SPStateServiceApp
+  - Fixed issue where code failed because the State database already existed
 - SPTrustedIdentityTokenIssuer
-  - Run Get-SPClaimProvider only if property ClaimProviderName is omitted/null/empty.
+  - Run Get-SPClaimProvider only if property ClaimProviderName is omitted/null/empty
+
+## [4.2.0] - 2020-06-12
 
 ### Fixed
 

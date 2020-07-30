@@ -418,6 +418,15 @@ function Test-TargetResource
     $PSBoundParameters.Ensure = $Ensure
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
+    if ($CurrentValues.ContainsKey("WebAppUrls") -and $CurrentValues.WebAppUrls.Count -ne 0)
+    {
+        $CurrentValues.WebAppUrls = $CurrentValues.WebAppUrls.TrimEnd("/")
+    }
+
+    if ($PSBoundParameters.ContainsKey("WebAppUrls") -and $PSBoundParameters.WebAppUrls.Count -ne 0)
+    {
+        $PSBoundParameters.WebAppUrls = $PSBoundParameters.WebAppUrls.TrimEnd("/")
+    }
 
     Write-Verbose -Message "Current Values: $(Convert-SPDscHashtableToString -Hashtable $CurrentValues)"
     Write-Verbose -Message "Target Values: $(Convert-SPDscHashtableToString -Hashtable $PSBoundParameters)"
@@ -458,7 +467,7 @@ function Wait-SPDscSolutionJob
         Name = $SolutionName
     }
 
-    $result = Invoke-SPDscCommand -Credential $InstallAccount `
+    $null = Invoke-SPDscCommand -Credential $InstallAccount `
         -Arguments $args `
         -ScriptBlock {
         $params = $args[0]

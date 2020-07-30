@@ -137,21 +137,6 @@ function Set-TargetResource
 
             $params = $args[0]
 
-            $dbParams = @{ }
-
-            if ($params.ContainsKey("DatabaseName"))
-            {
-                $dbParams.Add("Name", $params.DatabaseName)
-            }
-            if ($params.ContainsKey("DatabaseServer"))
-            {
-                $dbParams.Add("DatabaseServer", $params.DatabaseServer)
-            }
-            if ($params.ContainsKey("DatabaseCredentials"))
-            {
-                $dbParams.Add("DatabaseCredentials", $params.DatabaseCredentials)
-            }
-
             if ($params.ContainsKey("ProxyName"))
             {
                 $pName = $params.ProxyName
@@ -161,11 +146,31 @@ function Set-TargetResource
                 $pName = "$($params.Name) Proxy"
             }
 
-            $database = New-SPStateServiceDatabase @dbParams
+            $database = Get-SPStateServiceDatabase -Identity $params.DatabaseName
+            if ($null -eq $database)
+            {
+                $dbParams = @{ }
+
+                if ($params.ContainsKey("DatabaseName"))
+                {
+                    $dbParams.Add("Name", $params.DatabaseName)
+                }
+                if ($params.ContainsKey("DatabaseServer"))
+                {
+                    $dbParams.Add("DatabaseServer", $params.DatabaseServer)
+                }
+                if ($params.ContainsKey("DatabaseCredentials"))
+                {
+                    $dbParams.Add("DatabaseCredentials", $params.DatabaseCredentials)
+                }
+
+                $database = New-SPStateServiceDatabase @dbParams
+            }
+
             $app = New-SPStateServiceApplication -Name $params.Name -Database $database
-            New-SPStateServiceApplicationProxy -Name $pName `
+            $null = New-SPStateServiceApplicationProxy -Name $pName `
                 -ServiceApplication $app `
-                -DefaultProxyGroup | Out-Null
+                -DefaultProxyGroup
         }
     }
     if ($Ensure -eq "Absent")
