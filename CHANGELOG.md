@@ -26,6 +26,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - SPContentDatabase
   - Fixed issue where the set method didn't do anything when the Ensure parameter
     wasn't specified
+- SPFarmAdministrators
+  - Fixed issue in SP2016 where an error was thrown in the Set method since v3.8
 - SPFarmSolution
   - Fixed issue where web applications weren't compared properly when the desired
     value didn't contain any slashes

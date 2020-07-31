@@ -1,8 +1,3 @@
-$script:resourceModulePath = Split-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -Parent
-$script:modulesFolderPath = Join-Path -Path $script:resourceModulePath -ChildPath 'Modules'
-$script:resourceHelperModulePath = Join-Path -Path $script:modulesFolderPath -ChildPath 'SharePointDsc.Util'
-Import-Module -Name (Join-Path -Path $script:resourceHelperModulePath -ChildPath 'SharePointDsc.Util.psm1')
-
 function Get-TargetResource
 {
     [CmdletBinding()]
@@ -595,15 +590,15 @@ function Test-TargetResource
         -Source $($MyInvocation.MyCommand.Source) `
         -DesiredValues $PSBoundParameters `
         -ValuesToCheck @("WebAppUrl",
-            "MaxResourcesPerRequest",
-            "MaxObjectPaths",
-            "ExecutionTimeout",
-            "RequestXmlMaxDepth",
-            "EnableXsdValidation",
-            "EnableStackTrace",
-            "RequestUsageExecutionTimeThreshold",
-            "LogActionsIfHasRequestException",
-            "EnableRequestUsage")
+        "MaxResourcesPerRequest",
+        "MaxObjectPaths",
+        "ExecutionTimeout",
+        "RequestXmlMaxDepth",
+        "EnableXsdValidation",
+        "EnableStackTrace",
+        "RequestUsageExecutionTimeThreshold",
+        "LogActionsIfHasRequestException",
+        "EnableRequestUsage")
 
     Write-Verbose -Message "Test-TargetResource returned $result"
 

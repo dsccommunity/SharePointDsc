@@ -66,7 +66,46 @@
     NestedModules        = @("Modules\SharePointDsc.Util\SharePointDsc.Util.psm1")
 
     # Functions to export from this module
-    FunctionsToExport    = @("Get-SPDscInstalledProductVersion", "Invoke-SPDscCommand")
+    FunctionsToExport    = @(
+        'Add-SPDscEvent',
+        'Add-SPDscUserToLocalAdmin',
+        'Clear-SPDscKerberosToken',
+        'Compare-PSCustomObjectArrays',
+        'Convert-SPDscADGroupIDToName',
+        'Convert-SPDscADGroupNameToID',
+        'Convert-SPDscHashtableToString',
+        'ConvertTo-ReverseString',
+        'ConvertTo-TwoDigitFlipString',
+        'Format-OfficePatchGUID',
+        'Get-SPDscAssemblyVersion',
+        'Get-SPDscBuildVersion',
+        'Get-SPDscContentService',
+        'Get-SPDscFarmAccount',
+        'Get-SPDscFarmAccountName',
+        'Get-SPDscFarmProductsInfo',
+        'Get-SPDscFarmVersionInfo',
+        'Get-SPDscInstalledProductVersion',
+        'Get-SPDscOSVersion',
+        'Get-SPDscRegistryKey',
+        'Get-SPDscRegProductsInfo',
+        'Get-SPDscServerPatchStatus',
+        'Get-SPDscServiceContext',
+        'Get-SPDscUserProfileSubTypeManager',
+        'Invoke-SPDscCommand',
+        'Remove-SPDscGenericObject',
+        'Remove-SPDscUserToLocalAdmin',
+        'Remove-SPDscZoneMap',
+        'Rename-SPDscParamValue',
+        'Resolve-SPDscSecurityIdentifier',
+        'Set-SPDscObjectPropertyIfValuePresent',
+        'Set-SPDscZoneMap',
+        'Test-SPDscIsADUser',
+        'Test-SPDscObjectHasProperty',
+        'Test-SPDscParameterState',
+        'Test-SPDscRunAsCredential',
+        'Test-SPDscRunningAsFarmAccount',
+        'Test-SPDscUserIsLocalAdmin'
+    )
 
     # Cmdlets to export from this module
     CmdletsToExport      = @()

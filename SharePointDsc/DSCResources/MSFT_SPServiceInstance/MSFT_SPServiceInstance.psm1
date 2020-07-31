@@ -1,8 +1,3 @@
-$script:resourceModulePath = Split-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -Parent
-$script:modulesFolderPath = Join-Path -Path $script:resourceModulePath -ChildPath 'Modules'
-$script:resourceHelperModulePath = Join-Path -Path $script:modulesFolderPath -ChildPath 'SharePointDsc.Util'
-Import-Module -Name (Join-Path -Path $script:resourceHelperModulePath -ChildPath 'SharePointDsc.Util.psm1')
-
 function Get-TargetResource
 {
     [CmdletBinding()]
@@ -147,8 +142,8 @@ function Set-TargetResource
             while (($count -lt $maxCount) -and ($serviceCheck.Status -ne "Online"))
             {
                 Write-Verbose -Message ("$([DateTime]::Now.ToShortTimeString()) - Waiting " + `
-                                        "for service instance to start. Current status: $($serviceCheck.Status) " + `
-                                        "(waited $count of $maxCount minutes)")
+                        "for service instance to start. Current status: $($serviceCheck.Status) " + `
+                        "(waited $count of $maxCount minutes)")
                 Start-Sleep -Seconds 60
                 $serviceCheck = Get-SPServiceInstance -Server $si.Server.Name -All | Where-Object -FilterScript {
                     $_.TypeName -eq $si.TypeName
@@ -198,8 +193,8 @@ function Set-TargetResource
             while (($count -lt $maxCount) -and ($serviceCheck.Status -ne "Disabled"))
             {
                 Write-Verbose -Message ("$([DateTime]::Now.ToShortTimeString()) - Waiting " + `
-                                        "for service instance to stop. Current status: $($serviceCheck.Status) " + `
-                                        "(waited $count of $maxCount minutes)")
+                        "for service instance to stop. Current status: $($serviceCheck.Status) " + `
+                        "(waited $count of $maxCount minutes)")
                 Start-Sleep -Seconds 60
                 $serviceCheck = Get-SPServiceInstance -Server $si.Server.Name -All | Where-Object -FilterScript {
                     $_.TypeName -eq $si.TypeName
