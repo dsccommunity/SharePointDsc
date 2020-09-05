@@ -299,7 +299,7 @@ function Set-TargetResource
                     $claimProvider = (Get-SPClaimProvider | Where-Object -FilterScript {
                             $_.DisplayName -eq $params.ClaimProviderName
                         })
-                    if ($null -eq $claimProvider)
+                    if ($null -ne $claimProvider)
                     {
                         $trust.ClaimProviderName = $params.ClaimProviderName
                     }
