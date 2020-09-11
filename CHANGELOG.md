@@ -18,6 +18,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Added possibility to set the Master Key during creation of the service
     application
 
+### Changed
+- SharePointDsc
+  - Changed ModuleBuilder module to latest version
+
 ### Fixed
 
 - SharePointDsc
@@ -33,10 +37,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     value didn't contain any slashes
 - SPInstallLanguagePack
   - Fixed issue with detection of Chinese language pack in SharePoint 2019
+- SPServiceAppSecurity
+  - Fixed incorrect example
 - SPStateServiceApp
   - Fixed issue where code failed because the State database already existed
 - SPTrustedIdentityTokenIssuer
   - Run Get-SPClaimProvider only if property ClaimProviderName is omitted/null/empty
+- SPWeb
+  - Fixed issue with incorrect detection of SPWeb that has to be absent
 
 ## [4.2.0] - 2020-06-12
 

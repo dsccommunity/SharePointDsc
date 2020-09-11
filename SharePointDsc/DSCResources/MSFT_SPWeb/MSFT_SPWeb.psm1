@@ -65,27 +65,24 @@ function Get-TargetResource
 
         if ($web)
         {
-            $ensureResult = "Present"
-            $templateResult = "$($web.WebTemplate)#$($web.WebTemplateId)"
-            $parentTopNav = $web.Navigation.UseShared
+            return @{
+                Url                = $params.Url
+                Ensure             = "Present"
+                Description        = $web.Description
+                Name               = $web.Title
+                Language           = $web.Language
+                Template           = "$($web.WebTemplate)#$($web.WebTemplateId)"
+                UniquePermissions  = $web.HasUniquePerm
+                UseParentTopNav    = $web.Navigation.UseShared
+                RequestAccessEmail = $web.RequestAccessEmail
+            }
         }
         else
         {
-            $ensureResult = "Absent"
-            $templateResult = $null
-            $parentTopNav = $null
-        }
-
-        return @{
-            Url                = $web.Url
-            Ensure             = $ensureResult
-            Description        = $web.Description
-            Name               = $web.Title
-            Language           = $web.Language
-            Template           = $templateResult
-            UniquePermissions  = $web.HasUniquePerm
-            UseParentTopNav    = $parentTopNav
-            RequestAccessEmail = $web.RequestAccessEmail
+            return @{
+                Url    = $params.Url
+                Ensure = "Absent"
+            }
         }
     }
 

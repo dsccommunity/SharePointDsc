@@ -11,7 +11,7 @@
     PSScriptAnalyzer            = 'latest'
     pester                      = '4.10.1'
     Plaster                     = 'latest'
-    ModuleBuilder               = '1.0.0'
+    ModuleBuilder               = 'latest'
     ChangelogManagement         = 'latest'
     Sampler                     = 'latest'
     'DscResource.Test'          = 'latest'
