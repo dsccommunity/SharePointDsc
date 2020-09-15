@@ -208,11 +208,11 @@ try
                 $Global:SPDscCurrentResultSourceMocks = $null
 
                 It "Should return absent from the get method" {
-                    (Get-TargetResource @testParams).Ensure | Should Be "Absent"
+                    (Get-TargetResource @testParams).Ensure | Should -Be "Absent"
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should create the result source in the set method" {
@@ -241,11 +241,11 @@ try
                 }
 
                 It "Should return present from the get method" {
-                    (Get-TargetResource @testParams).Ensure | Should Be "Present"
+                    (Get-TargetResource @testParams).Ensure | Should -Be "Present"
                 }
 
                 It "Should return true from the test method" {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
             }
 
@@ -270,11 +270,11 @@ try
                 }
 
                 It "Should return present from the get method" {
-                    (Get-TargetResource @testParams).Ensure | Should Be "Present"
+                    (Get-TargetResource @testParams).Ensure | Should -Be "Present"
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should remove the result source in the set method" {
@@ -297,11 +297,11 @@ try
                 $Global:SPDscCurrentResultSourceMocks = $null
 
                 It "Should return absent from the get method" {
-                    (Get-TargetResource @testParams).Ensure | Should be "Absent"
+                    (Get-TargetResource @testParams).Ensure | Should -Be "Absent"
                 }
 
                 It "Should return true from the test method" {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
             }
 
@@ -318,11 +318,11 @@ try
                 }
 
                 It "Should return absent from the get method" {
-                    (Get-TargetResource @testParams).Ensure | Should Be "Absent"
+                    (Get-TargetResource @testParams).Ensure | Should -Be "Absent"
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should create the result source in the set method" {
@@ -343,11 +343,11 @@ try
                 }
 
                 It "Should return absent from the get method" {
-                    (Get-TargetResource @testParams).Ensure | Should Be "Absent"
+                    (Get-TargetResource @testParams).Ensure | Should -Be "Absent"
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should create the result source in the set method" {
@@ -371,15 +371,15 @@ try
                 $Global:SPDscResultSourceProviders = @()
 
                 It "Should return absent from the get method" {
-                    (Get-TargetResource @testParams).Ensure | Should Be "Absent"
+                    (Get-TargetResource @testParams).Ensure | Should -Be "Absent"
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should create the result source in the set method" {
-                    { Set-TargetResource @testParams } | Should Throw "Unknown ProviderType"
+                    { Set-TargetResource @testParams } | Should -Throw "Unknown ProviderType"
                 }
             }
         }

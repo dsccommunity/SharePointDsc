@@ -60,15 +60,15 @@ try
                 Mock -CommandName Get-SPwebapplication -MockWith { return $null }
 
                 It "Should return null from the get method" {
-                    (Get-TargetResource @testParams).Members | Should BeNullOrEmpty
+                    (Get-TargetResource @testParams).Members | Should -BeNullOrEmpty
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should throw an exception in the set method" {
-                    { Set-TargetResource @testParams } | Should throw "Unable to locate central administration website"
+                    { Set-TargetResource @testParams } | Should -Throw "Unable to locate central administration website"
                 }
             }
 
@@ -102,11 +102,11 @@ try
                 }
 
                 It "Should return values from the get method" {
-                    (Get-TargetResource @testParams).Members.Count | Should Be 2
+                    (Get-TargetResource @testParams).Members.Count | Should -Be 2
                 }
 
                 It "Should return true from the test method" {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
             }
 
@@ -158,11 +158,11 @@ try
                 }
 
                 It "Should return values from the get method" {
-                    (Get-TargetResource @testParams).Members.Count | Should Be 1
+                    (Get-TargetResource @testParams).Members.Count | Should -Be 1
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should update the members list" {
@@ -216,11 +216,11 @@ try
                 }
 
                 It "Should return values from the get method" {
-                    (Get-TargetResource @testParams).Members.Count | Should Be 2
+                    (Get-TargetResource @testParams).Members.Count | Should -Be 2
                 }
 
                 It "Should return true from the test method" {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
             }
 
@@ -267,11 +267,11 @@ try
                 }
 
                 It "Should return values from the get method" {
-                    (Get-TargetResource @testParams).Members.Count | Should Be 1
+                    (Get-TargetResource @testParams).Members.Count | Should -Be 1
                 }
 
                 It "Should return true from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should update the members list" {
@@ -325,11 +325,11 @@ try
                 }
 
                 It "Should return values from the get method" {
-                    (Get-TargetResource @testParams).Members.Count | Should Be 2
+                    (Get-TargetResource @testParams).Members.Count | Should -Be 2
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should update the members list" {
@@ -377,11 +377,11 @@ try
                 }
 
                 It "Should return values from the get method" {
-                    (Get-TargetResource @testParams).Members.Count | Should Be 1
+                    (Get-TargetResource @testParams).Members.Count | Should -Be 1
                 }
 
                 It "Should return true from the test method" {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
             }
 
@@ -429,15 +429,15 @@ try
                 }
 
                 It "Should throw in the get method" {
-                    { Get-TargetResource @testParams } | Should throw
+                    { Get-TargetResource @testParams } | Should -Throw
                 }
 
                 It "Should throw in the test method" {
-                    { Test-TargetResource @testParams } | Should throw
+                    { Test-TargetResource @testParams } | Should -Throw
                 }
 
                 It "Should throw in the set method" {
-                    { Set-TargetResource @testParams } | Should throw
+                    { Set-TargetResource @testParams } | Should -Throw
                 }
             }
 
@@ -483,15 +483,15 @@ try
                 }
 
                 It "Should throw in the get method" {
-                    { Get-TargetResource @testParams } | Should throw
+                    { Get-TargetResource @testParams } | Should -Throw
                 }
 
                 It "Should throw in the test method" {
-                    { Test-TargetResource @testParams } | Should throw
+                    { Test-TargetResource @testParams } | Should -Throw
                 }
 
                 It "Should throw in the set method" {
-                    { Set-TargetResource @testParams } | Should throw
+                    { Set-TargetResource @testParams } | Should -Throw
                 }
             }
         }

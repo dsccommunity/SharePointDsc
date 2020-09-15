@@ -56,15 +56,15 @@ try
                 {
                     Context -Name "All methods throw exceptions as Project Server support in SharePointDsc is only for 2016" -Fixture {
                         It "Should throw on the get method" {
-                            { Get-TargetResource @testParams } | Should Throw
+                            { Get-TargetResource @testParams } | Should -Throw
                         }
 
                         It "Should throw on the test method" {
-                            { Test-TargetResource @testParams } | Should Throw
+                            { Test-TargetResource @testParams } | Should -Throw
                         }
 
                         It "Should throw on the set method" {
-                            { Set-TargetResource @testParams } | Should Throw
+                            { Set-TargetResource @testParams } | Should -Throw
                         }
                     }
                 }
@@ -198,7 +198,7 @@ try
                         return $service
                     }
 
-                    Mock -CommandName "Get-SPDscProjectServerResourceId" -MockWIth {
+                    Mock -CommandName "Get-SPDscProjectServerResourceId" -MockWith {
                         return New-Guid
                     }
 
@@ -255,20 +255,20 @@ try
 
                         It "should return absent from the get method" {
                             $global:SPDscCreateGroupsCalled = $false
-                            (Get-TargetResource @testParams).Ensure | Should Be "Absent"
+                            (Get-TargetResource @testParams).Ensure | Should -Be "Absent"
                         }
 
                         It "should return false from the test method" {
                             $global:SPDscCreateGroupsCalled = $false
-                            Test-TargetResource @testParams | Should Be $false
+                            Test-TargetResource @testParams | Should -Be $false
                         }
 
                         It "should create the group in the set method" {
                             $global:SPDscCreateGroupsCalled = $false
                             $global:SPDscSetGroupsCalled = $false
                             Set-TargetResource @testParams
-                            $global:SPDscCreateGroupsCalled | Should Be $true
-                            $global:SPDscSetGroupsCalled | Should Be $true
+                            $global:SPDscCreateGroupsCalled | Should -Be $true
+                            $global:SPDscSetGroupsCalled | Should -Be $true
                         }
                     }
 
@@ -318,12 +318,12 @@ try
 
                         It "should return present from the get method" {
                             $global:SPDscCreateGroupsCalled = $true
-                            (Get-TargetResource @testParams).Ensure | Should Be "Present"
+                            (Get-TargetResource @testParams).Ensure | Should -Be "Present"
                         }
 
                         It "should return true from the test method" {
                             $global:SPDscCreateGroupsCalled = $true
-                            Test-TargetResource @testParams | Should Be $true
+                            Test-TargetResource @testParams | Should -Be $true
                         }
                     }
 
@@ -373,18 +373,18 @@ try
 
                         It "should return present from the get method" {
                             $global:SPDscCreateGroupsCalled = $true
-                            (Get-TargetResource @testParams).Ensure | Should Be "Present"
+                            (Get-TargetResource @testParams).Ensure | Should -Be "Present"
                         }
 
                         It "should return false from the test method" {
                             $global:SPDscCreateGroupsCalled = $true
-                            Test-TargetResource @testParams | Should Be $false
+                            Test-TargetResource @testParams | Should -Be $false
                         }
 
                         It "should remove the group in the set method" {
                             $global:SPDscDeleteGroupsCalled = $false
                             Set-TargetResource @testParams
-                            $global:SPDscDeleteGroupsCalled | Should Be $true
+                            $global:SPDscDeleteGroupsCalled | Should -Be $true
                         }
                     }
 
@@ -408,12 +408,12 @@ try
 
                         It "should return absent from the get method" {
                             $global:SPDscCreateGroupsCalled = $false
-                            (Get-TargetResource @testParams).Ensure | Should Be "Absent"
+                            (Get-TargetResource @testParams).Ensure | Should -Be "Absent"
                         }
 
                         It "should return true from the test method" {
                             $global:SPDscCreateGroupsCalled = $false
-                            Test-TargetResource @testParams | Should Be $true
+                            Test-TargetResource @testParams | Should -Be $true
                         }
                     }
 
@@ -463,19 +463,19 @@ try
 
                         It "should return present from the get method" {
                             $global:SPDscCreateGroupsCalled = $true
-                            (Get-TargetResource @testParams).Ensure | Should Be "Present"
+                            (Get-TargetResource @testParams).Ensure | Should -Be "Present"
                         }
 
                         It "should return false from the test method" {
                             $global:SPDscCreateGroupsCalled = $true
-                            Test-TargetResource @testParams | Should Be $false
+                            Test-TargetResource @testParams | Should -Be $false
                         }
 
                         It "should create the group in the set method" {
                             $global:SPDscCreateGroupsCalled = $false
                             $global:SPDscSetGroupsCalled = $false
                             Set-TargetResource @testParams
-                            $global:SPDscSetGroupsCalled | Should Be $true
+                            $global:SPDscSetGroupsCalled | Should -Be $true
                         }
                     }
 
@@ -529,19 +529,19 @@ try
 
                         It "should return present from the get method" {
                             $global:SPDscCreateGroupsCalled = $true
-                            (Get-TargetResource @testParams).Ensure | Should Be "Present"
+                            (Get-TargetResource @testParams).Ensure | Should -Be "Present"
                         }
 
                         It "should return false from the test method" {
                             $global:SPDscCreateGroupsCalled = $true
-                            Test-TargetResource @testParams | Should Be $false
+                            Test-TargetResource @testParams | Should -Be $false
                         }
 
                         It "should create the group in the set method" {
                             $global:SPDscCreateGroupsCalled = $false
                             $global:SPDscSetGroupsCalled = $false
                             Set-TargetResource @testParams
-                            $global:SPDscSetGroupsCalled | Should Be $true
+                            $global:SPDscSetGroupsCalled | Should -Be $true
                         }
                     }
 
@@ -595,12 +595,12 @@ try
 
                         It "should return present from the get method" {
                             $global:SPDscCreateGroupsCalled = $true
-                            (Get-TargetResource @testParams).Ensure | Should Be "Present"
+                            (Get-TargetResource @testParams).Ensure | Should -Be "Present"
                         }
 
                         It "should return true from the test method" {
                             $global:SPDscCreateGroupsCalled = $true
-                            Test-TargetResource @testParams | Should Be $true
+                            Test-TargetResource @testParams | Should -Be $true
                         }
                     }
 
@@ -691,13 +691,13 @@ try
                         It "should return current members from the get method" {
                             $global:SPDscCreateGroupsCalled = $true
                             $global:SPDscCurrentMembersReadCount = 0
-                            (Get-TargetResource @testParams).Members.Count | Should BeGreaterThan 0
+                            (Get-TargetResource @testParams).Members.Count | Should -BeGreaterThan 0
                         }
 
                         It "should return false from the test method" {
                             $global:SPDscCreateGroupsCalled = $true
                             $global:SPDscCurrentMembersReadCount = 0
-                            Test-TargetResource @testParams | Should Be $false
+                            Test-TargetResource @testParams | Should -Be $false
                         }
 
                         It "should update the members group in the set method" {
@@ -707,9 +707,9 @@ try
                             $global:SPDscMemberRowAddedCalled = $false
                             $global:SPDscSetGroupsCalled = $false
                             Set-TargetResource @testParams
-                            $global:SPDscMemberDeleteCalled | Should Be $true
-                            $global:SPDscMemberRowAddedCalled | Should Be $true
-                            $global:SPDscSetGroupsCalled | Should Be $true
+                            $global:SPDscMemberDeleteCalled | Should -Be $true
+                            $global:SPDscMemberRowAddedCalled | Should -Be $true
+                            $global:SPDscSetGroupsCalled | Should -Be $true
                         }
                     }
 
@@ -801,13 +801,13 @@ try
                         It "should return current members from the get method" {
                             $global:SPDscCreateGroupsCalled = $true
                             $global:SPDscCurrentMembersReadCount = 0
-                            (Get-TargetResource @testParams).Members.Count | Should BeGreaterThan 0
+                            (Get-TargetResource @testParams).Members.Count | Should -BeGreaterThan 0
                         }
 
                         It "should return true from the test method" {
                             $global:SPDscCreateGroupsCalled = $true
                             $global:SPDscCurrentMembersReadCount = 0
-                            Test-TargetResource @testParams | Should Be $true
+                            Test-TargetResource @testParams | Should -Be $true
                         }
                     }
 
@@ -897,13 +897,13 @@ try
                         It "should return current members from the get method" {
                             $global:SPDscCreateGroupsCalled = $true
                             $global:SPDscCurrentMembersReadCount = 0
-                            (Get-TargetResource @testParams).Members.Count | Should BeGreaterThan 0
+                            (Get-TargetResource @testParams).Members.Count | Should -BeGreaterThan 0
                         }
 
                         It "should return false from the test method" {
                             $global:SPDscCreateGroupsCalled = $true
                             $global:SPDscCurrentMembersReadCount = 0
-                            Test-TargetResource @testParams | Should Be $false
+                            Test-TargetResource @testParams | Should -Be $false
                         }
 
                         It "should update the members group in the set method" {
@@ -913,8 +913,8 @@ try
                             $global:SPDscMemberRowAddedCalled = $false
                             $global:SPDscSetGroupsCalled = $false
                             Set-TargetResource @testParams
-                            $global:SPDscMemberRowAddedCalled | Should Be $true
-                            $global:SPDscSetGroupsCalled | Should Be $true
+                            $global:SPDscMemberRowAddedCalled | Should -Be $true
+                            $global:SPDscSetGroupsCalled | Should -Be $true
                         }
                     }
 
@@ -1004,13 +1004,13 @@ try
                         It "should return current members from the get method" {
                             $global:SPDscCreateGroupsCalled = $true
                             $global:SPDscCurrentMembersReadCount = 0
-                            (Get-TargetResource @testParams).Members.Count | Should BeGreaterThan 0
+                            (Get-TargetResource @testParams).Members.Count | Should -BeGreaterThan 0
                         }
 
                         It "should return true from the test method" {
                             $global:SPDscCreateGroupsCalled = $true
                             $global:SPDscCurrentMembersReadCount = 0
-                            Test-TargetResource @testParams | Should Be $true
+                            Test-TargetResource @testParams | Should -Be $true
                         }
                     }
 
@@ -1100,13 +1100,13 @@ try
                         It "should return current members from the get method" {
                             $global:SPDscCreateGroupsCalled = $true
                             $global:SPDscCurrentMembersReadCount = 0
-                            (Get-TargetResource @testParams).Members.Count | Should BeGreaterThan 0
+                            (Get-TargetResource @testParams).Members.Count | Should -BeGreaterThan 0
                         }
 
                         It "should return false from the test method" {
                             $global:SPDscCreateGroupsCalled = $true
                             $global:SPDscCurrentMembersReadCount = 0
-                            Test-TargetResource @testParams | Should Be $false
+                            Test-TargetResource @testParams | Should -Be $false
                         }
 
                         It "should update the members group in the set method" {
@@ -1116,8 +1116,8 @@ try
                             $global:SPDscMemberRowAddedCalled = $false
                             $global:SPDscSetGroupsCalled = $false
                             Set-TargetResource @testParams
-                            $global:SPDscMemberDeleteCalled | Should Be $true
-                            $global:SPDscSetGroupsCalled | Should Be $true
+                            $global:SPDscMemberDeleteCalled | Should -Be $true
+                            $global:SPDscSetGroupsCalled | Should -Be $true
                         }
                     }
 
@@ -1207,13 +1207,13 @@ try
                         It "should return current members from the get method" {
                             $global:SPDscCreateGroupsCalled = $true
                             $global:SPDscCurrentMembersReadCount = 0
-                            (Get-TargetResource @testParams).Members.Count | Should BeGreaterThan 0
+                            (Get-TargetResource @testParams).Members.Count | Should -BeGreaterThan 0
                         }
 
                         It "should return true from the test method" {
                             $global:SPDscCreateGroupsCalled = $true
                             $global:SPDscCurrentMembersReadCount = 0
-                            Test-TargetResource @testParams | Should Be $true
+                            Test-TargetResource @testParams | Should -Be $true
                         }
                     }
                 }

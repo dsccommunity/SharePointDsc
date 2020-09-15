@@ -144,25 +144,25 @@ try
 
                 It "Should return the current data from the get method" {
                     $result = Get-TargetResource @testParams
-                    $result.WebAppUrl | Should Be "http://sites.sharepoint.com"
-                    $result.MaxResourcesPerRequest | Should Be 16
-                    $result.MaxObjectPaths | Should Be 256
-                    $result.ExecutionTimeout | Should Be 90
-                    $result.RequestXmlMaxDepth | Should Be 32
-                    $result.EnableXsdValidation | Should Be $true
-                    $result.EnableStackTrace | Should Be $false
-                    $result.RequestUsageExecutionTimeThreshold | Should Be 800
-                    $result.EnableRequestUsage | Should Be $true
-                    $result.LogActionsIfHasRequestException | Should Be $true
+                    $result.WebAppUrl | Should -Be "http://sites.sharepoint.com"
+                    $result.MaxResourcesPerRequest | Should -Be 16
+                    $result.MaxObjectPaths | Should -Be 256
+                    $result.ExecutionTimeout | Should -Be 90
+                    $result.RequestXmlMaxDepth | Should -Be 32
+                    $result.EnableXsdValidation | Should -Be $true
+                    $result.EnableStackTrace | Should -Be $false
+                    $result.RequestUsageExecutionTimeThreshold | Should -Be 800
+                    $result.EnableRequestUsage | Should -Be $true
+                    $result.LogActionsIfHasRequestException | Should -Be $true
                 }
 
                 It "Should return true from the test method" {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
 
                 It "Should not call web application update from the set method" {
                     Set-TargetResource @testParams
-                    $Script:SPDscWebApplication.UpdateCalled | Should Be $false
+                    $Script:SPDscWebApplication.UpdateCalled | Should -Be $false
                 }
             }
 
@@ -198,35 +198,35 @@ try
 
                 It "Should return the current data from the get method" {
                     $result = Get-TargetResource @testParams
-                    $result.WebAppUrl | Should Be "http://sites.sharepoint.com"
-                    $result.MaxResourcesPerRequest | Should Be 16
-                    $result.MaxObjectPaths | Should Be 256
-                    $result.ExecutionTimeout | Should Be 90
-                    $result.RequestXmlMaxDepth | Should Be 32
-                    $result.EnableXsdValidation | Should Be $true
-                    $result.EnableStackTrace | Should Be $false
-                    $result.RequestUsageExecutionTimeThreshold | Should Be 800
-                    $result.EnableRequestUsage | Should Be $true
-                    $result.LogActionsIfHasRequestException | Should Be $true
+                    $result.WebAppUrl | Should -Be "http://sites.sharepoint.com"
+                    $result.MaxResourcesPerRequest | Should -Be 16
+                    $result.MaxObjectPaths | Should -Be 256
+                    $result.ExecutionTimeout | Should -Be 90
+                    $result.RequestXmlMaxDepth | Should -Be 32
+                    $result.EnableXsdValidation | Should -Be $true
+                    $result.EnableStackTrace | Should -Be $false
+                    $result.RequestUsageExecutionTimeThreshold | Should -Be 800
+                    $result.EnableRequestUsage | Should -Be $true
+                    $result.LogActionsIfHasRequestException | Should -Be $true
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should call web application update from the set method, and set expected values" {
                     Set-TargetResource @testParams
-                    $Script:SPDscWebApplication.UpdateCalled | Should Be $true
-                    $Script:SPDscWebApplication.ClientCallableSettings.ProxyLibraries.Count | Should Be 0
-                    $Script:SPDscWebApplication.ClientCallableSettings.MaxResourcesPerRequest | Should Be 8
-                    $Script:SPDscWebApplication.ClientCallableSettings.MaxObjectPaths | Should Be 128
-                    $Script:SPDscWebApplication.ClientCallableSettings.ExecutionTimeout.TotalMinutes | Should Be 45
-                    $Script:SPDscWebApplication.ClientCallableSettings.RequestXmlMaxDepth | Should Be 16
-                    $Script:SPDscWebApplication.ClientCallableSettings.EnableXsdValidation | Should Be $false
-                    $Script:SPDscWebApplication.ClientCallableSettings.EnableStackTrace | Should Be $true
-                    $Script:SPDscWebApplication.ClientCallableSettings.RequestUsageExecutionTimeThreshold | Should Be 400
-                    $Script:SPDscWebApplication.ClientCallableSettings.EnableRequestUsage | Should Be $false
-                    $Script:SPDscWebApplication.ClientCallableSettings.LogActionsIfHasRequestException | Should Be $false
+                    $Script:SPDscWebApplication.UpdateCalled | Should -Be $true
+                    $Script:SPDscWebApplication.ClientCallableSettings.ProxyLibraries.Count | Should -Be 0
+                    $Script:SPDscWebApplication.ClientCallableSettings.MaxResourcesPerRequest | Should -Be 8
+                    $Script:SPDscWebApplication.ClientCallableSettings.MaxObjectPaths | Should -Be 128
+                    $Script:SPDscWebApplication.ClientCallableSettings.ExecutionTimeout.TotalMinutes | Should -Be 45
+                    $Script:SPDscWebApplication.ClientCallableSettings.RequestXmlMaxDepth | Should -Be 16
+                    $Script:SPDscWebApplication.ClientCallableSettings.EnableXsdValidation | Should -Be $false
+                    $Script:SPDscWebApplication.ClientCallableSettings.EnableStackTrace | Should -Be $true
+                    $Script:SPDscWebApplication.ClientCallableSettings.RequestUsageExecutionTimeThreshold | Should -Be 400
+                    $Script:SPDscWebApplication.ClientCallableSettings.EnableRequestUsage | Should -Be $false
+                    $Script:SPDscWebApplication.ClientCallableSettings.LogActionsIfHasRequestException | Should -Be $false
                 }
             }
 
@@ -257,15 +257,15 @@ try
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should call web application update from the set method, and set expected values" {
                     Set-TargetResource @testParams
-                    $Script:SPDscWebApplication.UpdateCalled | Should Be $true
-                    $Script:SPDscWebApplication.ClientCallableSettings.ProxyLibraries.Count | Should Be 1
-                    $Script:SPDscWebApplication.ClientCallableSettings.ProxyLibraries[0].AssemblyName | Should Be "Assembly"
-                    $Script:SPDscWebApplication.ClientCallableSettings.ProxyLibraries[0].SupportAppAuthentication | Should Be $true
+                    $Script:SPDscWebApplication.UpdateCalled | Should -Be $true
+                    $Script:SPDscWebApplication.ClientCallableSettings.ProxyLibraries.Count | Should -Be 1
+                    $Script:SPDscWebApplication.ClientCallableSettings.ProxyLibraries[0].AssemblyName | Should -Be "Assembly"
+                    $Script:SPDscWebApplication.ClientCallableSettings.ProxyLibraries[0].SupportAppAuthentication | Should -Be $true
                 }
             }
 
@@ -296,15 +296,15 @@ try
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should call web application update from the set method, and set expected values" {
                     Set-TargetResource @testParams
-                    $Script:SPDscWebApplication.UpdateCalled | Should Be $true
-                    $Script:SPDscWebApplication.ClientCallableSettings.ProxyLibraries.Count | Should Be 1
-                    $Script:SPDscWebApplication.ClientCallableSettings.ProxyLibraries[0].AssemblyName | Should Be "Assembly"
-                    $Script:SPDscWebApplication.ClientCallableSettings.ProxyLibraries[0].SupportAppAuthentication | Should Be $true
+                    $Script:SPDscWebApplication.UpdateCalled | Should -Be $true
+                    $Script:SPDscWebApplication.ClientCallableSettings.ProxyLibraries.Count | Should -Be 1
+                    $Script:SPDscWebApplication.ClientCallableSettings.ProxyLibraries[0].AssemblyName | Should -Be "Assembly"
+                    $Script:SPDscWebApplication.ClientCallableSettings.ProxyLibraries[0].SupportAppAuthentication | Should -Be $true
                 }
             }
 
@@ -335,15 +335,15 @@ try
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should call web application update from the set method, and set expected values" {
                     Set-TargetResource @testParams
-                    $Script:SPDscWebApplication.UpdateCalled | Should Be $true
-                    $Script:SPDscWebApplication.ClientCallableSettings.ProxyLibraries.Count | Should Be 1
-                    $Script:SPDscWebApplication.ClientCallableSettings.ProxyLibraries[0].AssemblyName | Should Be "NewAssembly"
-                    $Script:SPDscWebApplication.ClientCallableSettings.ProxyLibraries[0].SupportAppAuthentication | Should Be $true
+                    $Script:SPDscWebApplication.UpdateCalled | Should -Be $true
+                    $Script:SPDscWebApplication.ClientCallableSettings.ProxyLibraries.Count | Should -Be 1
+                    $Script:SPDscWebApplication.ClientCallableSettings.ProxyLibraries[0].AssemblyName | Should -Be "NewAssembly"
+                    $Script:SPDscWebApplication.ClientCallableSettings.ProxyLibraries[0].SupportAppAuthentication | Should -Be $true
                 }
             }
 
@@ -384,17 +384,17 @@ try
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
 
                 It "Should not call web application update from the set method" {
                     Set-TargetResource @testParams
-                    $Script:SPDscWebApplication.UpdateCalled | Should Be $false
-                    $Script:SPDscWebApplication.ClientCallableSettings.ProxyLibraries.Count | Should Be 2
-                    $Script:SPDscWebApplication.ClientCallableSettings.ProxyLibraries[0].AssemblyName | Should Be "Assembly2"
-                    $Script:SPDscWebApplication.ClientCallableSettings.ProxyLibraries[0].SupportAppAuthentication | Should Be $true
-                    $Script:SPDscWebApplication.ClientCallableSettings.ProxyLibraries[1].AssemblyName | Should Be "Assembly1"
-                    $Script:SPDscWebApplication.ClientCallableSettings.ProxyLibraries[1].SupportAppAuthentication | Should Be $true
+                    $Script:SPDscWebApplication.UpdateCalled | Should -Be $false
+                    $Script:SPDscWebApplication.ClientCallableSettings.ProxyLibraries.Count | Should -Be 2
+                    $Script:SPDscWebApplication.ClientCallableSettings.ProxyLibraries[0].AssemblyName | Should -Be "Assembly2"
+                    $Script:SPDscWebApplication.ClientCallableSettings.ProxyLibraries[0].SupportAppAuthentication | Should -Be $true
+                    $Script:SPDscWebApplication.ClientCallableSettings.ProxyLibraries[1].AssemblyName | Should -Be "Assembly1"
+                    $Script:SPDscWebApplication.ClientCallableSettings.ProxyLibraries[1].SupportAppAuthentication | Should -Be $true
                 }
             }
 
@@ -425,17 +425,17 @@ try
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should call web application update from the set method, and set expected values" {
                     Set-TargetResource @testParams
-                    $Script:SPDscWebApplication.UpdateCalled | Should Be $true
-                    $Script:SPDscWebApplication.ClientCallableSettings.ProxyLibraries.Count | Should Be 2
-                    $Script:SPDscWebApplication.ClientCallableSettings.ProxyLibraries[0].AssemblyName | Should Be "Assembly"
-                    $Script:SPDscWebApplication.ClientCallableSettings.ProxyLibraries[0].SupportAppAuthentication | Should Be $true
-                    $Script:SPDscWebApplication.ClientCallableSettings.ProxyLibraries[1].AssemblyName | Should Be "NewAssembly"
-                    $Script:SPDscWebApplication.ClientCallableSettings.ProxyLibraries[1].SupportAppAuthentication | Should Be $true
+                    $Script:SPDscWebApplication.UpdateCalled | Should -Be $true
+                    $Script:SPDscWebApplication.ClientCallableSettings.ProxyLibraries.Count | Should -Be 2
+                    $Script:SPDscWebApplication.ClientCallableSettings.ProxyLibraries[0].AssemblyName | Should -Be "Assembly"
+                    $Script:SPDscWebApplication.ClientCallableSettings.ProxyLibraries[0].SupportAppAuthentication | Should -Be $true
+                    $Script:SPDscWebApplication.ClientCallableSettings.ProxyLibraries[1].AssemblyName | Should -Be "NewAssembly"
+                    $Script:SPDscWebApplication.ClientCallableSettings.ProxyLibraries[1].SupportAppAuthentication | Should -Be $true
                 }
             }
 
@@ -466,15 +466,15 @@ try
                 }
 
                 It "Should return true from the test method" {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
 
                 It "Should not call web application update from the set method, proxy libraries should not change" {
                     Set-TargetResource @testParams
-                    $Script:SPDscWebApplication.UpdateCalled | Should Be $false
-                    $Script:SPDscWebApplication.ClientCallableSettings.ProxyLibraries.Count | Should Be 1
-                    $Script:SPDscWebApplication.ClientCallableSettings.ProxyLibraries[0].AssemblyName | Should Be "Assembly"
-                    $Script:SPDscWebApplication.ClientCallableSettings.ProxyLibraries[0].SupportAppAuthentication | Should Be $true
+                    $Script:SPDscWebApplication.UpdateCalled | Should -Be $false
+                    $Script:SPDscWebApplication.ClientCallableSettings.ProxyLibraries.Count | Should -Be 1
+                    $Script:SPDscWebApplication.ClientCallableSettings.ProxyLibraries[0].AssemblyName | Should -Be "Assembly"
+                    $Script:SPDscWebApplication.ClientCallableSettings.ProxyLibraries[0].SupportAppAuthentication | Should -Be $true
                 }
             }
 
@@ -503,15 +503,15 @@ try
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should call web application update from the set method, and set expected values" {
                     Set-TargetResource @testParams
-                    $Script:SPDscWebApplication.UpdateCalled | Should Be $true
-                    $Script:SPDscWebApplication.ClientCallableSettings.ProxyLibraries.Count | Should Be 1
-                    $Script:SPDscWebApplication.ClientCallableSettings.ProxyLibraries[0].AssemblyName | Should Be "AnotherAssembly"
-                    $Script:SPDscWebApplication.ClientCallableSettings.ProxyLibraries[0].SupportAppAuthentication | Should Be $false
+                    $Script:SPDscWebApplication.UpdateCalled | Should -Be $true
+                    $Script:SPDscWebApplication.ClientCallableSettings.ProxyLibraries.Count | Should -Be 1
+                    $Script:SPDscWebApplication.ClientCallableSettings.ProxyLibraries[0].AssemblyName | Should -Be "AnotherAssembly"
+                    $Script:SPDscWebApplication.ClientCallableSettings.ProxyLibraries[0].SupportAppAuthentication | Should -Be $false
                 }
             }
 
@@ -535,15 +535,15 @@ try
                 }
 
                 It "Should return true from the test method" {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
 
                 It "Should not call web application update from the set method, proxy libraries should not change" {
                     Set-TargetResource @testParams
-                    $Script:SPDscWebApplication.UpdateCalled | Should Be $false
-                    $Script:SPDscWebApplication.ClientCallableSettings.ProxyLibraries.Count | Should Be 1
-                    $Script:SPDscWebApplication.ClientCallableSettings.ProxyLibraries[0].AssemblyName | Should Be "AnotherAssembly"
-                    $Script:SPDscWebApplication.ClientCallableSettings.ProxyLibraries[0].SupportAppAuthentication | Should Be $true
+                    $Script:SPDscWebApplication.UpdateCalled | Should -Be $false
+                    $Script:SPDscWebApplication.ClientCallableSettings.ProxyLibraries.Count | Should -Be 1
+                    $Script:SPDscWebApplication.ClientCallableSettings.ProxyLibraries[0].AssemblyName | Should -Be "AnotherAssembly"
+                    $Script:SPDscWebApplication.ClientCallableSettings.ProxyLibraries[0].SupportAppAuthentication | Should -Be $true
                 }
             }
 
@@ -567,7 +567,7 @@ try
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
             }
 
@@ -584,7 +584,7 @@ try
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
             }
 
@@ -608,13 +608,13 @@ try
                 }
 
                 It "Should return true from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should call web application update from the set method and update proxy libraries" {
                     Set-TargetResource @testParams
-                    $Script:SPDscWebApplication.UpdateCalled | Should Be $true
-                    $Script:SPDscWebApplication.ClientCallableSettings.ProxyLibraries.Count | Should Be 0
+                    $Script:SPDscWebApplication.UpdateCalled | Should -Be $true
+                    $Script:SPDscWebApplication.ClientCallableSettings.ProxyLibraries.Count | Should -Be 0
                 }
             }
 
@@ -638,7 +638,7 @@ try
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
             }
 
@@ -655,7 +655,7 @@ try
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
             }
 
@@ -685,15 +685,15 @@ try
                 }
 
                 It "Should throw an exception from the get method" {
-                    { Get-TargetResource @testParams } | Should Throw
+                    { Get-TargetResource @testParams } | Should -Throw
                 }
 
                 It "Should throw an exception from the test method" {
-                    { Test-TargetResource @testParams } | Should Throw
+                    { Test-TargetResource @testParams } | Should -Throw
                 }
 
                 It "Should throw an exception from the set method" {
-                    { Set-TargetResource @testParams } | Should Throw
+                    { Set-TargetResource @testParams } | Should -Throw
                 }
             }
 
@@ -716,15 +716,15 @@ try
                 }
 
                 It "Should throw an exception from the get method" {
-                    { Get-TargetResource @testParams } | Should Throw
+                    { Get-TargetResource @testParams } | Should -Throw
                 }
 
                 It "Should throw an exception from the test method" {
-                    { Test-TargetResource @testParams } | Should Throw
+                    { Test-TargetResource @testParams } | Should -Throw
                 }
 
                 It "Should throw an exception from the set method" {
-                    { Set-TargetResource @testParams } | Should Throw
+                    { Set-TargetResource @testParams } | Should -Throw
                 }
             }
 
@@ -755,15 +755,15 @@ try
                 }
 
                 It "Should throw an exception from the get method" {
-                    { Get-TargetResource @testParams } | Should Throw
+                    { Get-TargetResource @testParams } | Should -Throw
                 }
 
                 It "Should throw an exception from the test method" {
-                    { Test-TargetResource @testParams } | Should Throw
+                    { Test-TargetResource @testParams } | Should -Throw
                 }
 
                 It "Should throw an exception from the set method" {
-                    { Set-TargetResource @testParams } | Should Throw
+                    { Set-TargetResource @testParams } | Should -Throw
                 }
             }
 
@@ -778,28 +778,28 @@ try
 
                 It "Should return a valid object with null on all properties" {
                     $result = Get-TargetResource @testParams
-                    $result | Should Not BeNullOrEmpty
-                    $result.WebAppUrl | Should Be $null
-                    $result.ProxyLibraries | Should Be $null
-                    $result.ProxyLibrariesToInclude | Should Be $null
-                    $result.ProxyLibrariesToExclude | Should Be $null
-                    $result.MaxResourcesPerRequest | Should Be $null
-                    $result.MaxObjectPaths | Should Be $null
-                    $result.ExecutionTimeout | Should Be $null
-                    $result.RequestXmlMaxDepth | Should Be $null
-                    $result.EnableXsdValidation | Should Be $null
-                    $result.EnableStackTrace | Should Be $null
-                    $result.RequestUsageExecutionTimeThreshold | Should Be $null
-                    $result.EnableRequestUsage | Should Be $null
-                    $result.LogActionsIfHasRequestException | Should Be $null
+                    $result | Should -Not -BeNullOrEmpty
+                    $result.WebAppUrl | Should -Be $null
+                    $result.ProxyLibraries | Should -Be $null
+                    $result.ProxyLibrariesToInclude | Should -Be $null
+                    $result.ProxyLibrariesToExclude | Should -Be $null
+                    $result.MaxResourcesPerRequest | Should -Be $null
+                    $result.MaxObjectPaths | Should -Be $null
+                    $result.ExecutionTimeout | Should -Be $null
+                    $result.RequestXmlMaxDepth | Should -Be $null
+                    $result.EnableXsdValidation | Should -Be $null
+                    $result.EnableStackTrace | Should -Be $null
+                    $result.RequestUsageExecutionTimeThreshold | Should -Be $null
+                    $result.EnableRequestUsage | Should -Be $null
+                    $result.LogActionsIfHasRequestException | Should -Be $null
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should throw an exception from the set method" {
-                    { Set-TargetResource @testParams } | Should Throw
+                    { Set-TargetResource @testParams } | Should -Throw
                 }
             }
         }

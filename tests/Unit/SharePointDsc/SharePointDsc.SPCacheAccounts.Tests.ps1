@@ -94,16 +94,16 @@ namespace Microsoft.SharePoint.Administration {
 
                 It "Should return empty values from the get method" {
                     $results = Get-TargetResource @testParams
-                    $results.SuperUserAlias | Should BeNullOrEmpty
-                    $results.SuperReaderAlias | Should BeNullOrEmpty
+                    $results.SuperUserAlias | Should -BeNullOrEmpty
+                    $results.SuperReaderAlias | Should -BeNullOrEmpty
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should throw and exception where set is called" {
-                    { Set-TargetResource @testParams } | Should Throw
+                    { Set-TargetResource @testParams } | Should -Throw
                 }
             }
 
@@ -165,12 +165,12 @@ namespace Microsoft.SharePoint.Administration {
 
                 It "Should return empty strings from the Get method" {
                     $results = Get-TargetResource @testParams
-                    $results.SuperUserAlias | Should BeNullOrEmpty
-                    $results.SuperReaderAlias | Should BeNullOrEmpty
+                    $results.SuperUserAlias | Should -BeNullOrEmpty
+                    $results.SuperReaderAlias | Should -BeNullOrEmpty
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should update the accounts when set is called" {
@@ -236,12 +236,12 @@ namespace Microsoft.SharePoint.Administration {
 
                 It "Should return empty strings from the Get method" {
                     $results = Get-TargetResource @testParams
-                    $results.SuperUserAlias | Should BeNullOrEmpty
-                    $results.SuperReaderAlias | Should BeNullOrEmpty
+                    $results.SuperUserAlias | Should -BeNullOrEmpty
+                    $results.SuperReaderAlias | Should -BeNullOrEmpty
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should update the accounts when set is called" {
@@ -303,12 +303,12 @@ namespace Microsoft.SharePoint.Administration {
 
                 It "Should return the values from the get method" {
                     $results = Get-TargetResource @testParams
-                    $results.SuperUserAlias | Should Not BeNullOrEmpty
-                    $results.SuperReaderAlias | Should Not BeNullOrEmpty
+                    $results.SuperUserAlias | Should -Not -BeNullOrEmpty
+                    $results.SuperReaderAlias | Should -Not -BeNullOrEmpty
                 }
 
                 It "Should return true from the test method" {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
             }
 
@@ -365,12 +365,12 @@ namespace Microsoft.SharePoint.Administration {
 
                 It "Should return the values from the get method" {
                     $results = Get-TargetResource @testParams
-                    $results.SuperUserAlias | Should Not BeNullOrEmpty
-                    $results.SuperReaderAlias | Should Not BeNullOrEmpty
+                    $results.SuperUserAlias | Should -Not -BeNullOrEmpty
+                    $results.SuperReaderAlias | Should -Not -BeNullOrEmpty
                 }
 
                 It "Should return true from the test method" {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
             }
 
@@ -431,7 +431,7 @@ namespace Microsoft.SharePoint.Administration {
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should set the correct accounts to the web app again" {
@@ -494,7 +494,7 @@ namespace Microsoft.SharePoint.Administration {
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should set the correct accounts to the web app again" {

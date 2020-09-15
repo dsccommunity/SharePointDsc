@@ -96,15 +96,15 @@ try
                 } -ParameterFilter { $Path -eq $testParams.BinaryDir }
 
                 It "Should throw exception in the get method" {
-                    { Get-TargetResource @testParams } | Should Throw "Specified path cannot be found"
+                    { Get-TargetResource @testParams } | Should -Throw "Specified path cannot be found"
                 }
 
                 It "Should throw exception in the set method" {
-                    { Set-TargetResource @testParams } | Should Throw "Specified path cannot be found"
+                    { Set-TargetResource @testParams } | Should -Throw "Specified path cannot be found"
                 }
 
                 It "Should throw exception in the test method" {
-                    { Test-TargetResource @testParams } | Should Throw "Specified path cannot be found"
+                    { Test-TargetResource @testParams } | Should -Throw "Specified path cannot be found"
                 }
             }
 
@@ -119,15 +119,15 @@ try
                 } -ParameterFilter { $Path -eq (Join-Path -Path $testParams.BinaryDir -ChildPath "setup.exe") }
 
                 It "Should throw exception in the get method" {
-                    { Get-TargetResource @testParams } | Should Throw "Setup.exe cannot be found"
+                    { Get-TargetResource @testParams } | Should -Throw "Setup.exe cannot be found"
                 }
 
                 It "Should throw exception in the set method" {
-                    { Set-TargetResource @testParams } | Should Throw "Setup.exe cannot be found"
+                    { Set-TargetResource @testParams } | Should -Throw "Setup.exe cannot be found"
                 }
 
                 It "Should throw exception in the test method" {
-                    { Test-TargetResource @testParams } | Should Throw "Setup.exe cannot be found"
+                    { Test-TargetResource @testParams } | Should -Throw "Setup.exe cannot be found"
                 }
             }
 
@@ -142,15 +142,15 @@ try
                 }
 
                 It "Should throw exception in the get method" {
-                    { Get-TargetResource @testParams } | Should Throw "Setup file is blocked!"
+                    { Get-TargetResource @testParams } | Should -Throw "Setup file is blocked!"
                 }
 
                 It "Should throw exception in the set method" {
-                    { Set-TargetResource @testParams } | Should Throw "Setup file is blocked!"
+                    { Set-TargetResource @testParams } | Should -Throw "Setup file is blocked!"
                 }
 
                 It "Should throw exception in the test method" {
-                    { Test-TargetResource @testParams } | Should Throw "Setup file is blocked!"
+                    { Test-TargetResource @testParams } | Should -Throw "Setup file is blocked!"
                 }
             }
 
@@ -197,11 +197,11 @@ try
 
                 It "Should return Ensure is Present from the get method" {
                     $result = Get-TargetResource @testParams
-                    $result.Ensure | Should Be "Present"
+                    $result.Ensure | Should -Be "Present"
                 }
 
                 It "Should return true from the test method" {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
             }
 
@@ -248,11 +248,11 @@ try
 
                 It "Should return Ensure is Present from the get method" {
                     $result = Get-TargetResource @testParams
-                    $result.Ensure | Should Be "Present"
+                    $result.Ensure | Should -Be "Present"
                 }
 
                 It "Should return true from the test method" {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
             }
 
@@ -299,11 +299,11 @@ try
 
                 It "Should return Ensure is Present from the get method" {
                     $result = Get-TargetResource @testParams
-                    $result.Ensure | Should Be "Present"
+                    $result.Ensure | Should -Be "Present"
                 }
 
                 It "Should return true from the test method" {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
             }
 
@@ -350,11 +350,11 @@ try
 
                 It "Should return Ensure is Present from the get method" {
                     $result = Get-TargetResource @testParams
-                    $result.Ensure | Should Be "Present"
+                    $result.Ensure | Should -Be "Present"
                 }
 
                 It "Should return true from the test method" {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
             }
 
@@ -401,11 +401,11 @@ try
 
                 It "Should return Ensure is Present from the get method" {
                     $result = Get-TargetResource @testParams
-                    $result.Ensure | Should Be "Present"
+                    $result.Ensure | Should -Be "Present"
                 }
 
                 It "Should return true from the test method" {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
             }
 
@@ -452,11 +452,11 @@ try
 
                 It "Should return Ensure is Present from the get method" {
                     $result = Get-TargetResource @testParams
-                    $result.Ensure | Should Be "Present"
+                    $result.Ensure | Should -Be "Present"
                 }
 
                 It "Should return true from the test method" {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
             }
 
@@ -503,11 +503,11 @@ try
 
                 It "Should return Ensure is Present from the get method" {
                     $result = Get-TargetResource @testParams
-                    $result.Ensure | Should Be "Present"
+                    $result.Ensure | Should -Be "Present"
                 }
 
                 It "Should return true from the test method" {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
             }
 
@@ -554,11 +554,11 @@ try
 
                 It "Should return Ensure is Present from the get method" {
                     $result = Get-TargetResource @testParams
-                    $result.Ensure | Should Be "Present"
+                    $result.Ensure | Should -Be "Present"
                 }
 
                 It "Should return true from the test method" {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
             }
 
@@ -605,11 +605,11 @@ try
 
                 It "Should return Ensure is Present from the get method" {
                     $result = Get-TargetResource @testParams
-                    $result.Ensure | Should Be "Present"
+                    $result.Ensure | Should -Be "Present"
                 }
 
                 It "Should return true from the test method" {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
             }
 
@@ -670,7 +670,7 @@ try
 
                 It "Should return Ensure is Present from the get method" {
                     $result = Get-TargetResource @testParams
-                    $result.Ensure | Should Be "Absent"
+                    $result.Ensure | Should -Be "Absent"
                 }
 
                 It "Should run the Start-Process function in the set method" {
@@ -679,7 +679,7 @@ try
                 }
 
                 It "Should return true from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
             }
 
@@ -877,7 +877,7 @@ try
 
                 It "Should return Ensure is Present from the get method" {
                     $result = Get-TargetResource @testParams
-                    $result.Ensure | Should Be "Absent"
+                    $result.Ensure | Should -Be "Absent"
                 }
 
                 It "Should run the Start-Process function in the set method" {
@@ -886,7 +886,7 @@ try
                 }
 
                 It "Should return true from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
             }
 
@@ -947,16 +947,16 @@ try
 
                 It "Should return Ensure is Present from the get method" {
                     $result = Get-TargetResource @testParams
-                    $result.Ensure | Should Be "Absent"
+                    $result.Ensure | Should -Be "Absent"
                 }
 
                 It "Should run the Start-Process function in the set method" {
-                    { Set-TargetResource @testParams } | Should Throw "SharePoint Language Pack install failed, exit code was 1"
+                    { Set-TargetResource @testParams } | Should -Throw "SharePoint Language Pack install failed, exit code was 1"
                     Assert-MockCalled Start-Process
                 }
 
                 It "Should return true from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
             }
 
@@ -1016,7 +1016,7 @@ try
                 }
 
                 It "Should throw exception in the get method" {
-                    { Get-TargetResource @testParams } | Should Throw "Update does not contain the language code in the correct format."
+                    { Get-TargetResource @testParams } | Should -Throw "Update does not contain the language code in the correct format."
                 }
             }
 
@@ -1076,7 +1076,7 @@ try
                 }
 
                 It "Should throw exception in the get method" {
-                    { Get-TargetResource @testParams } | Should Throw "Error while converting language information:"
+                    { Get-TargetResource @testParams } | Should -Throw "Error while converting language information:"
                 }
             }
 
@@ -1087,7 +1087,7 @@ try
                 }
 
                 It "Should return null from  the set method" {
-                    Set-TargetResource @testParams | Should BeNullOrEmpty
+                    Set-TargetResource @testParams | Should -BeNullOrEmpty
                 }
             }
 
@@ -1105,7 +1105,7 @@ try
                 }
 
                 It "Should return null from the set method" {
-                    Set-TargetResource @testParams | Should BeNullOrEmpty
+                    Set-TargetResource @testParams | Should -BeNullOrEmpty
                 }
             }
 
@@ -1124,7 +1124,7 @@ try
                 }
 
                 It "Should return null from the set method" {
-                    Set-TargetResource @testParams | Should BeNullOrEmpty
+                    Set-TargetResource @testParams | Should -BeNullOrEmpty
                 }
             }
 
@@ -1143,7 +1143,7 @@ try
                 }
 
                 It "Should throw exception in the set method" {
-                    { Set-TargetResource @testParams } | Should Throw "Time window incorrectly formatted."
+                    { Set-TargetResource @testParams } | Should -Throw "Time window incorrectly formatted."
                 }
             }
 
@@ -1162,7 +1162,7 @@ try
                 }
 
                 It "Should throw exception in the set method" {
-                    { Set-TargetResource @testParams } | Should Throw "Error converting start time"
+                    { Set-TargetResource @testParams } | Should -Throw "Error converting start time"
                 }
             }
 
@@ -1181,7 +1181,7 @@ try
                 }
 
                 It "Should throw exception in the set method" {
-                    { Set-TargetResource @testParams } | Should Throw "Error converting end time"
+                    { Set-TargetResource @testParams } | Should -Throw "Error converting end time"
                 }
             }
 
@@ -1200,7 +1200,7 @@ try
                 }
 
                 It "Should throw exception in the set method" {
-                    { Set-TargetResource @testParams } | Should Throw "Error: Start time cannot be larger than end time"
+                    { Set-TargetResource @testParams } | Should -Throw "Error: Start time cannot be larger than end time"
                 }
             }
 
@@ -1211,11 +1211,11 @@ try
                 }
 
                 It "Should throw exception in the set method" {
-                    { Set-TargetResource @testParams } | Should Throw "SharePointDsc does not support uninstalling SharePoint Language Packs. Please remove this manually."
+                    { Set-TargetResource @testParams } | Should -Throw "SharePointDsc does not support uninstalling SharePoint Language Packs. Please remove this manually."
                 }
 
                 It "Should throw exception in the test method" {
-                    { Test-TargetResource @testParams } | Should Throw "SharePointDsc does not support uninstalling SharePoint Language Packs. Please remove this manually."
+                    { Test-TargetResource @testParams } | Should -Throw "SharePointDsc does not support uninstalling SharePoint Language Packs. Please remove this manually."
                 }
             }
         }

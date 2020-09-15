@@ -69,15 +69,15 @@ try
                 }
 
                 It "Should return null from the get method" {
-                    (Get-TargetResource @testParams).WebAppUrl | Should BeNullOrEmpty
+                    (Get-TargetResource @testParams).WebAppUrl | Should -BeNullOrEmpty
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should throw exception when executed" {
-                    { Set-TargetResource @testParams } | Should Throw "Specified web application does not exist."
+                    { Set-TargetResource @testParams } | Should -Throw "Specified web application does not exist."
                 }
             }
 
@@ -107,12 +107,12 @@ try
 
                 It "Should return values from the get method" {
                     $result = Get-TargetResource @testParams
-                    $result.AllowAppPurchases | Should Be $false
-                    $result.AllowAppsForOffice | Should Be $false
+                    $result.AllowAppPurchases | Should -Be $false
+                    $result.AllowAppsForOffice | Should -Be $false
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should update the settings" {
@@ -148,12 +148,12 @@ try
 
                 It "Should return values from the get method" {
                     $result = Get-TargetResource @testParams
-                    $result.AllowAppPurchases | Should Be $true
-                    $result.AllowAppsForOffice | Should Be $true
+                    $result.AllowAppPurchases | Should -Be $true
+                    $result.AllowAppsForOffice | Should -Be $true
                 }
 
                 It "Should returns false from the test method" {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
             }
 
@@ -182,12 +182,12 @@ try
 
                 It "Should return values from the get method" {
                     $result = Get-TargetResource @testParams
-                    $result.AllowAppPurchases | Should Be $false
-                    $result.AllowAppsForOffice | Should Be $true
+                    $result.AllowAppPurchases | Should -Be $false
+                    $result.AllowAppsForOffice | Should -Be $true
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should update the settings" {

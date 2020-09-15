@@ -77,9 +77,9 @@ try
                 }
 
                 It "Should throw an exception as additional parameters are not allowed when Ensure = 'Absent'" {
-                    { Get-TargetResource @testParams } | Should throw "You cannot use any of the parameters when Ensure is specified as Absent"
-                    { Test-TargetResource @testParams } | Should throw "You cannot use any of the parameters when Ensure is specified as Absent"
-                    { Set-TargetResource @testParams } | Should throw "You cannot use any of the parameters when Ensure is specified as Absent"
+                    { Get-TargetResource @testParams } | Should -Throw "You cannot use any of the parameters when Ensure is specified as Absent"
+                    { Test-TargetResource @testParams } | Should -Throw "You cannot use any of the parameters when Ensure is specified as Absent"
+                    { Set-TargetResource @testParams } | Should -Throw "You cannot use any of the parameters when Ensure is specified as Absent"
                 }
             }
 
@@ -100,9 +100,9 @@ try
                 }
 
                 It "Should throw an exception as additional parameters are not allowed when Ensure = 'Absent'" {
-                    { Get-TargetResource @testParams } | Should throw "An Application Pool is required to configure the PowerPoint Automation Service Application"
-                    { Test-TargetResource @testParams } | Should throw "An Application Pool is required to configure the PowerPoint Automation Service Application"
-                    { Set-TargetResource @testParams } | Should throw "An Application Pool is required to configure the PowerPoint Automation Service Application"
+                    { Get-TargetResource @testParams } | Should -Throw "An Application Pool is required to configure the PowerPoint Automation Service Application"
+                    { Test-TargetResource @testParams } | Should -Throw "An Application Pool is required to configure the PowerPoint Automation Service Application"
+                    { Set-TargetResource @testParams } | Should -Throw "An Application Pool is required to configure the PowerPoint Automation Service Application"
                 }
             }
 
@@ -159,10 +159,10 @@ try
                 }
 
                 It "Should return absent from the Get method" {
-                    (Get-TargetResource @testParams).Ensure | Should Be "Absent"
+                    (Get-TargetResource @testParams).Ensure | Should -Be "Absent"
                 }
                 It "Should return false when the Test method is called" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
                 It "Should create a new PowerPoint Automation Service application in the set method" {
                     Set-TargetResource @testParams
@@ -238,10 +238,10 @@ try
                 }
 
                 It "Should return 'Absent' from the Get method" {
-                    (Get-TargetResource @testParams).Ensure | Should Be "Absent"
+                    (Get-TargetResource @testParams).Ensure | Should -Be "Absent"
                 }
                 It "Should return 'false' from the Test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
                 It "Should create a new Power Point Automation Service Application from the Set method" {
                     Set-TargetResource @testParams
@@ -283,13 +283,13 @@ try
                 }
 
                 It "Should return 'Absent' from the Get method" {
-                    (Get-TargetResource @testParams).Ensure | Should Be "Absent"
+                    (Get-TargetResource @testParams).Ensure | Should -Be "Absent"
                 }
                 It "Should return 'false' from the Test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
                 It "Should create a new Power Point Automation Service Application from the Set method" {
-                    { Set-TargetResource @testParams } | Should throw "Specified application pool does not exist"
+                    { Set-TargetResource @testParams } | Should -Throw "Specified application pool does not exist"
                 }
             }
 
@@ -340,11 +340,11 @@ try
                 }
 
                 It "Should return Present from the get method" {
-                    (Get-TargetResource @testParams).Ensure | Should Be "Present"
+                    (Get-TargetResource @testParams).Ensure | Should -Be "Present"
                 }
 
                 It "Should return true when the Test method is called" {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
             }
 
@@ -423,11 +423,11 @@ try
                 }
 
                 It "Should return Present from the get method" {
-                    (Get-TargetResource @testParams).Ensure | Should Be "Present"
+                    (Get-TargetResource @testParams).Ensure | Should -Be "Present"
                 }
 
                 It "Should return false when the Test method is called" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
                 It "Should call Get-SPServiceApplicationProxy when Set method is called." {
                     Set-TargetResource @testParams
@@ -464,10 +464,10 @@ try
                 }
 
                 It "Should return Present from the get method" {
-                    (Get-TargetResource @testParams).Ensure | Should Be "Present"
+                    (Get-TargetResource @testParams).Ensure | Should -Be "Present"
                 }
                 It "Should return false when the Test method is called" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
             }
 
@@ -493,11 +493,11 @@ try
                 }
 
                 It "Should return present from the Get method" {
-                    (Get-TargetResource @testParams).Ensure | Should Be "Present"
+                    (Get-TargetResource @testParams).Ensure | Should -Be "Present"
                 }
 
                 It "Should return false when the Test method is called" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should call the remove service application cmdlet in the set method" {
@@ -517,11 +517,11 @@ try
                 }
 
                 It "Should return absent from the Get method" {
-                    (Get-TargetResource @testParams).Ensure | Should Be "Absent"
+                    (Get-TargetResource @testParams).Ensure | Should -Be "Absent"
                 }
 
                 It "Should return true when the Test method is called" {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
             }
 
@@ -543,11 +543,11 @@ try
                 }
 
                 It "Should return Absent from the get method" {
-                    (Get-TargetResource @testParams).Ensure | Should Be "Absent"
+                    (Get-TargetResource @testParams).Ensure | Should -Be "Absent"
                 }
 
                 It "Should return false when the Test method is called" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
             }
 

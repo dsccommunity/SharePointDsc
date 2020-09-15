@@ -68,20 +68,20 @@ try
 
                 It "Should return null from the get method" {
                     $result = Get-TargetResource @testParams
-                    $result.AllowDownloadInfected | Should Be $false
-                    $result.ScanOnDownload | Should Be $false
-                    $result.ScanOnUpload | Should Be $false
-                    $result.AttemptToClean | Should Be $false
-                    $result.NumberOfThreads | Should Be 0
-                    $result.TimeoutDuration | Should Be 0
+                    $result.AllowDownloadInfected | Should -Be $false
+                    $result.ScanOnDownload | Should -Be $false
+                    $result.ScanOnUpload | Should -Be $false
+                    $result.AttemptToClean | Should -Be $false
+                    $result.NumberOfThreads | Should -Be 0
+                    $result.TimeoutDuration | Should -Be 0
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should throw an exception in the set method to say there is no local farm" {
-                    { Set-TargetResource @testParams } | Should throw "No local SharePoint farm was detected"
+                    { Set-TargetResource @testParams } | Should -Throw "No local SharePoint farm was detected"
                 }
             }
 
@@ -117,17 +117,17 @@ try
                 Mock -CommandName Get-SPFarm -MockWith { return @{ } }
 
                 It "Should return values from the get method" {
-                    Get-TargetResource @testParams | Should Not BeNullOrEmpty
+                    Get-TargetResource @testParams | Should -Not -BeNullOrEmpty
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 $Global:SPDscAntivirusUpdated = $false
                 It "Should update the antivirus settings" {
                     Set-TargetResource @testParams
-                    $Global:SPDscAntivirusUpdated | Should Be $true
+                    $Global:SPDscAntivirusUpdated | Should -Be $true
                 }
             }
 
@@ -160,11 +160,11 @@ try
                 Mock -CommandName Get-SPFarm -MockWith { return @{ } }
 
                 It "Should return values from the get method" {
-                    Get-TargetResource @testParams | Should Not BeNullOrEmpty
+                    Get-TargetResource @testParams | Should -Not -BeNullOrEmpty
                 }
 
                 It "Should return true from the test method" {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
             }
         }

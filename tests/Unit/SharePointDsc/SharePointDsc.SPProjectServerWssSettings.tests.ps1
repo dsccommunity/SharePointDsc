@@ -56,15 +56,15 @@ try
                 {
                     Context -Name "All methods throw exceptions as Project Server support in SharePointDsc is only for 2016" -Fixture {
                         It "Should throw on the get method" {
-                            { Get-TargetResource @testParams } | Should Throw
+                            { Get-TargetResource @testParams } | Should -Throw
                         }
 
                         It "Should throw on the test method" {
-                            { Test-TargetResource @testParams } | Should Throw
+                            { Test-TargetResource @testParams } | Should -Throw
                         }
 
                         It "Should throw on the set method" {
-                            { Set-TargetResource @testParams } | Should Throw
+                            { Set-TargetResource @testParams } | Should -Throw
                         }
                     }
                 }
@@ -169,7 +169,7 @@ try
                         $global:SPDscCurrentWssSettings = $null
 
                         It "Should return unknown on settings in the get method" {
-                            (Get-TargetResource @testParams).CreateProjectSiteMode | Should Be "Unknown"
+                            (Get-TargetResource @testParams).CreateProjectSiteMode | Should -Be "Unknown"
                         }
                     }
 
@@ -186,17 +186,17 @@ try
                         }
 
                         It "should return false on the values from the get method" {
-                            (Get-TargetResource @testParams).CreateProjectSiteMode | Should Be "DontCreate"
+                            (Get-TargetResource @testParams).CreateProjectSiteMode | Should -Be "DontCreate"
                         }
 
                         It "should return false from the test method" {
-                            Test-TargetResource @testParams | Should Be $false
+                            Test-TargetResource @testParams | Should -Be $false
                         }
 
                         It "should call update from the set method" {
                             $global:SPDscUpdateWssSettingsCalled = $false
                             Set-TargetResource @testParams
-                            $global:SPDscUpdateWssSettingsCalled | Should Be $true
+                            $global:SPDscUpdateWssSettingsCalled | Should -Be $true
                         }
                     }
 
@@ -213,11 +213,11 @@ try
                         }
 
                         It "should return true on the values from the get method" {
-                            (Get-TargetResource @testParams).CreateProjectSiteMode | Should Be "AutoCreate"
+                            (Get-TargetResource @testParams).CreateProjectSiteMode | Should -Be "AutoCreate"
                         }
 
                         It "should return true from the test method" {
-                            Test-TargetResource @testParams | Should Be $true
+                            Test-TargetResource @testParams | Should -Be $true
                         }
                     }
                 }

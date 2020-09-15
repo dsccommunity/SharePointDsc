@@ -96,7 +96,7 @@ try
                 }
 
                 It "Should return false when the Test method is called" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
             }
 
@@ -121,7 +121,7 @@ try
                 }
 
                 It "Should return false when the Test method is called" {
-                    { Set-TargetResource @testParams } | Should throw "This resource cannot undo InfoPath Forms Service Configuration changes. " `
+                    { Set-TargetResource @testParams } | Should -Throw "This resource cannot undo InfoPath Forms Service Configuration changes. " `
                         "Please set Ensure to Present or omit the resource"
                 }
             }
@@ -147,17 +147,17 @@ try
                 }
 
                 It "Should return true when the Test method is called" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should return the proper MaxSizeOfUserFormState value" {
-                    (Get-TargetResource @testParams).MaxSizeOfUserFormState | Should be 4096
+                    (Get-TargetResource @testParams).MaxSizeOfUserFormState | Should -Be 4096
                 }
 
                 $global:InfoPathSettingsUpdated = $false
                 It "Should properly configure the InfoPath Forms Service" {
                     Set-TargetResource @testParams
-                    $global:InfoPathSettingsUpdated | Should Be $true
+                    $global:InfoPathSettingsUpdated | Should -Be $true
                 }
             }
 
@@ -182,11 +182,11 @@ try
                 }
 
                 It "Should return true when the Test method is called" {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
 
                 It "Should return the proper MaxSizeOfUserFormState value" {
-                    (Get-TargetResource @testParams).MaxSizeOfUserFormState | Should be 4096
+                    (Get-TargetResource @testParams).MaxSizeOfUserFormState | Should -Be 4096
                 }
 
                 It "Should properly configure the InfoPath Forms Service" {

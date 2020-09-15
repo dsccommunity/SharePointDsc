@@ -78,11 +78,11 @@ try
                         }
 
                         It "Should return absent from the Get method" {
-                            (Get-TargetResource @testParams).Ensure | Should Be "Absent"
+                            (Get-TargetResource @testParams).Ensure | Should -Be "Absent"
                         }
 
                         It "Should return false when the Test method is called" {
-                            Test-TargetResource @testParams | Should Be $false
+                            Test-TargetResource @testParams | Should -Be $false
                         }
 
                         It "Should create a new service application in the set method" {
@@ -116,7 +116,7 @@ try
                                 }) }
 
                         It "Should return absent from the Get method" {
-                            (Get-TargetResource @testParams).Ensure | Should Be "Absent"
+                            (Get-TargetResource @testParams).Ensure | Should -Be "Absent"
                         }
 
                     }
@@ -140,11 +140,11 @@ try
                         }
 
                         It "Should return values from the get method" {
-                            (Get-TargetResource @testParams).Ensure | Should Be "Present"
+                            (Get-TargetResource @testParams).Ensure | Should -Be "Present"
                         }
 
                         It "Should return true when the Test method is called" {
-                            Test-TargetResource @testParams | Should Be $true
+                            Test-TargetResource @testParams | Should -Be $true
                         }
                     }
 
@@ -168,11 +168,11 @@ try
                         }
 
                         It "Should return present from the Get method" {
-                            (Get-TargetResource @testParams).Ensure | Should Be "Present"
+                            (Get-TargetResource @testParams).Ensure | Should -Be "Present"
                         }
 
                         It "Should return false when the Test method is called" {
-                            Test-TargetResource @testParams | Should Be $false
+                            Test-TargetResource @testParams | Should -Be $false
                         }
 
                         It "Should call the remove service application cmdlet in the set method" {
@@ -191,11 +191,11 @@ try
                         Mock -CommandName Get-SPServiceApplication -MockWith { return $null }
 
                         It "Should return absent from the Get method" {
-                            (Get-TargetResource @testParams).Ensure | Should Be "Absent"
+                            (Get-TargetResource @testParams).Ensure | Should -Be "Absent"
                         }
 
                         It "Should return true when the Test method is called" {
-                            Test-TargetResource @testParams | Should Be $true
+                            Test-TargetResource @testParams | Should -Be $true
                         }
                     }
 
@@ -229,11 +229,11 @@ try
                         }
 
                         It "Should return no trusted location results from the get method" {
-                            (Get-TargetResource @testParams).TrustedFileLocations | Should BeNullOrEmpty
+                            (Get-TargetResource @testParams).TrustedFileLocations | Should -BeNullOrEmpty
                         }
 
                         It "Should return false from the test method" {
-                            Test-TargetResource @testParams | Should Be $false
+                            Test-TargetResource @testParams | Should -Be $false
                         }
 
                         It "Should create the trusted location in the set method" {
@@ -276,11 +276,11 @@ try
                         }
 
                         It "Should return trusted location results from the get method" {
-                            (Get-TargetResource @testParams).TrustedFileLocations | Should Not BeNullOrEmpty
+                            (Get-TargetResource @testParams).TrustedFileLocations | Should -Not -BeNullOrEmpty
                         }
 
                         It "Should return false from the test method" {
-                            Test-TargetResource @testParams | Should Be $false
+                            Test-TargetResource @testParams | Should -Be $false
                         }
 
                         It "Should update the trusted location in the set method" {
@@ -323,11 +323,11 @@ try
                         }
 
                         It "Should return trusted location results from the get method" {
-                            (Get-TargetResource @testParams).TrustedFileLocations | Should Not BeNullOrEmpty
+                            (Get-TargetResource @testParams).TrustedFileLocations | Should -Not -BeNullOrEmpty
                         }
 
                         It "Should return true from the test method" {
-                            Test-TargetResource @testParams | Should Be $true
+                            Test-TargetResource @testParams | Should -Be $true
                         }
                     }
 
@@ -370,11 +370,11 @@ try
                         }
 
                         It "Should return trusted location results from the get method" {
-                            (Get-TargetResource @testParams).TrustedFileLocations | Should Not BeNullOrEmpty
+                            (Get-TargetResource @testParams).TrustedFileLocations | Should -Not -BeNullOrEmpty
                         }
 
                         It "Should return false from the test method" {
-                            Test-TargetResource @testParams | Should Be $false
+                            Test-TargetResource @testParams | Should -Be $false
                         }
 
                         It "Should remove the trusted location in the set method" {
@@ -387,15 +387,15 @@ try
                 {
                     Context -Name "All methods throw exceptions as Excel Services doesn't exist in 2016/2019" -Fixture {
                         It "Should throw on the get method" {
-                            { Get-TargetResource @testParams } | Should Throw
+                            { Get-TargetResource @testParams } | Should -Throw
                         }
 
                         It "Should throw on the test method" {
-                            { Test-TargetResource @testParams } | Should Throw
+                            { Test-TargetResource @testParams } | Should -Throw
                         }
 
                         It "Should throw on the set method" {
-                            { Set-TargetResource @testParams } | Should Throw
+                            { Set-TargetResource @testParams } | Should -Throw
                         }
                     }
                 }

@@ -96,11 +96,11 @@ try
                 }
 
                 It "Should return the current data from the get method" {
-                    (Get-TargetResource @testParams).Blocked.Count | Should Be 3
+                    (Get-TargetResource @testParams).Blocked.Count | Should -Be 3
                 }
 
                 It "Should return true from the test method" {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
             }
 
@@ -137,17 +137,17 @@ try
                 }
 
                 It "Should return the current data from the get method" {
-                    (Get-TargetResource @testParams).Blocked.Count | Should Be 3
+                    (Get-TargetResource @testParams).Blocked.Count | Should -Be 3
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 $Global:SPDscWebApplicationUpdateCalled = $false
                 It "Should update the workflow settings" {
                     Set-TargetResource @testParams
-                    $Global:SPDscWebApplicationUpdateCalled | Should Be $true
+                    $Global:SPDscWebApplicationUpdateCalled | Should -Be $true
                 }
             }
 
@@ -185,11 +185,11 @@ try
                 }
 
                 It "Should return the current data from the get method" {
-                    (Get-TargetResource @testParams).Blocked.Count | Should Be 3
+                    (Get-TargetResource @testParams).Blocked.Count | Should -Be 3
                 }
 
                 It "Should return true from the test method" {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
             }
 
@@ -227,17 +227,17 @@ try
                 }
 
                 It "Should return the current data from the get method" {
-                    (Get-TargetResource @testParams).Blocked.Count | Should Be 2
+                    (Get-TargetResource @testParams).Blocked.Count | Should -Be 2
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 $Global:SPDscWebApplicationUpdateCalled = $false
                 It "Should update the workflow settings" {
                     Set-TargetResource @testParams
-                    $Global:SPDscWebApplicationUpdateCalled | Should Be $true
+                    $Global:SPDscWebApplicationUpdateCalled | Should -Be $true
                 }
             }
 
@@ -276,11 +276,11 @@ try
                 }
 
                 It "Should throw an exception on the test method" {
-                    { Test-TargetResource @testParams } | Should throw
+                    { Test-TargetResource @testParams } | Should -Throw
                 }
 
                 It "Should throw an exception on the set method" {
-                    { Set-TargetResource @testParams } | Should throw
+                    { Set-TargetResource @testParams } | Should -Throw
                 }
             }
 
@@ -317,11 +317,11 @@ try
 
 
                 It "Should throw an exception on the test method" {
-                    { Test-TargetResource @testParams } | Should throw
+                    { Test-TargetResource @testParams } | Should -Throw
                 }
 
                 It "Should throw an exception on the set method" {
-                    { Set-TargetResource @testParams } | Should throw
+                    { Set-TargetResource @testParams } | Should -Throw
                 }
             }
         }

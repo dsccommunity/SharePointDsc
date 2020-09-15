@@ -79,11 +79,11 @@ try
                 Mock -CommandName Update-SPSecureStoreMasterKey -MockWith { }
 
                 It "Should return absent from the Get method" {
-                    (Get-TargetResource @testParams).Ensure | Should Be "Absent"
+                    (Get-TargetResource @testParams).Ensure | Should -Be "Absent"
                 }
 
                 It "Should return false when the Test method is called" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should create a new service application in the set method" {
@@ -120,11 +120,11 @@ try
                 Mock -CommandName Update-SPSecureStoreMasterKey -MockWith { }
 
                 It "Should return absent from the Get method" {
-                    (Get-TargetResource @testParams).Ensure | Should Be "Absent"
+                    (Get-TargetResource @testParams).Ensure | Should -Be "Absent"
                 }
 
                 It "Should return false when the Test method is called" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should create a new service application in the set method" {
@@ -162,11 +162,11 @@ try
                 }
 
                 It "Should return absent from the Get method" {
-                    (Get-TargetResource @testParams).Ensure | Should Be "Absent"
+                    (Get-TargetResource @testParams).Ensure | Should -Be "Absent"
                 }
 
                 It "Should return false when the Test method is called" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
             }
 
@@ -239,11 +239,11 @@ try
                 }
 
                 It "Should return present from the get method" {
-                    (Get-TargetResource @testParams).Ensure | Should Be "Present"
+                    (Get-TargetResource @testParams).Ensure | Should -Be "Present"
                 }
 
                 It "Should return true when the Test method is called" {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
             }
 
@@ -322,7 +322,7 @@ try
                 }
 
                 It "Should return false when the Test method is called" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should call the update service app cmdlet from the set method" {
@@ -442,11 +442,11 @@ try
                 }
 
                 It "Should return present from the Get method" {
-                    (Get-TargetResource @testParams).Ensure | Should Be "Present"
+                    (Get-TargetResource @testParams).Ensure | Should -Be "Present"
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should remove the service application in the set method" {
@@ -526,15 +526,15 @@ try
 
                 It "Should return present from the Get method" {
                     $result = Get-TargetResource @testParams
-                    $result.Ensure | Should Be "Present"
+                    $result.Ensure | Should -Be "Present"
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should throw exception in the set method" {
-                    { Set-TargetResource @testParams } | Should Throw ("Specified database name does not match " + `
+                    { Set-TargetResource @testParams } | Should -Throw ("Specified database name does not match " + `
                             "the actual database name. This resource " + `
                             "cannot rename the database.")
                 }
@@ -612,15 +612,15 @@ try
 
                 It "Should return present from the Get method" {
                     $result = Get-TargetResource @testParams
-                    $result.Ensure | Should Be "Present"
+                    $result.Ensure | Should -Be "Present"
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should throw exception in the set method" {
-                    { Set-TargetResource @testParams } | Should Throw ("Specified database server does " + `
+                    { Set-TargetResource @testParams } | Should -Throw ("Specified database server does " + `
                             "not match the actual database server. " + `
                             "This resource cannot move the database " + `
                             "to a different SQL instance.")
@@ -640,11 +640,11 @@ try
                 }
 
                 It "Should return absent from the Get method" {
-                    (Get-TargetResource @testParams).Ensure | Should Be "Absent"
+                    (Get-TargetResource @testParams).Ensure | Should -Be "Absent"
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
             }
         }

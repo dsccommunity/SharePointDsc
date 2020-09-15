@@ -106,15 +106,15 @@ try
                 Mock -CommandName Get-SPWebapplication -MockWith { return $null }
 
                 It "Should return WebAppUrl=null from the get method" {
-                    (Get-TargetResource @testParams).WebAppUrl | Should BeNullOrEmpty
+                    (Get-TargetResource @testParams).WebAppUrl | Should -BeNullOrEmpty
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should return null from the set method" {
-                    { Set-TargetResource @testParams } | Should throw "Web application does not exist"
+                    { Set-TargetResource @testParams } | Should -Throw "Web application does not exist"
                 }
             }
 
@@ -138,15 +138,15 @@ try
                 }
 
                 It "Should return WebAppUrl=null from the get method" {
-                    (Get-TargetResource @testParams).WebAppUrl | Should BeNullOrEmpty
+                    (Get-TargetResource @testParams).WebAppUrl | Should -BeNullOrEmpty
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should throw an exception in the set method" {
-                    { Set-TargetResource @testParams } | Should throw "Cannot use the Members parameter together with the MembersToInclude or MembersToExclude parameters"
+                    { Set-TargetResource @testParams } | Should -Throw "Cannot use the Members parameter together with the MembersToInclude or MembersToExclude parameters"
                 }
             }
 
@@ -156,15 +156,15 @@ try
                 }
 
                 It "Should return WebAppUrl=null from the get method" {
-                    (Get-TargetResource @testParams).WebAppUrl | Should BeNullOrEmpty
+                    (Get-TargetResource @testParams).WebAppUrl | Should -BeNullOrEmpty
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should throw an exception in the set method" {
-                    { Set-TargetResource @testParams } | Should throw "At least one of the following parameters must be specified: Members, MembersToInclude, MembersToExclude"
+                    { Set-TargetResource @testParams } | Should -Throw "At least one of the following parameters must be specified: Members, MembersToInclude, MembersToExclude"
                 }
             }
 
@@ -181,15 +181,15 @@ try
                 }
 
                 It "Should return WebAppUrl=null from the get method" {
-                    (Get-TargetResource @testParams).WebAppUrl | Should BeNullOrEmpty
+                    (Get-TargetResource @testParams).WebAppUrl | Should -BeNullOrEmpty
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should throw an exception in the set method" {
-                    { Set-TargetResource @testParams } | Should throw "Members Parameter: You cannot specify ActAsSystemAccount with any other permission than Full Control"
+                    { Set-TargetResource @testParams } | Should -Throw "Members Parameter: You cannot specify ActAsSystemAccount with any other permission than Full Control"
                 }
             }
 
@@ -206,15 +206,15 @@ try
                 }
 
                 It "Should return WebAppUrl=null from the get method" {
-                    (Get-TargetResource @testParams).WebAppUrl | Should BeNullOrEmpty
+                    (Get-TargetResource @testParams).WebAppUrl | Should -BeNullOrEmpty
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should throw an exception in the set method" {
-                    { Set-TargetResource @testParams } | Should throw "MembersToInclude Parameter: You cannot specify ActAsSystemAccount with any other permission than Full Control"
+                    { Set-TargetResource @testParams } | Should -Throw "MembersToInclude Parameter: You cannot specify ActAsSystemAccount with any other permission than Full Control"
                 }
             }
 
@@ -279,17 +279,17 @@ try
                 }
 
                 It "Should return a set of 1 Members from the get method" {
-                    (Get-TargetResource @testParams).Members.Count | Should Be 1
+                    (Get-TargetResource @testParams).Members.Count | Should -Be 1
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 $Global:SPDscWebApplicationUpdateCalled = $false
                 It "add user policy from the set method" {
                     Set-TargetResource @testParams
-                    $Global:SPDscWebApplicationUpdateCalled | Should Be $true
+                    $Global:SPDscWebApplicationUpdateCalled | Should -Be $true
                 }
             }
 
@@ -354,17 +354,17 @@ try
                 }
 
                 It "Should return a set of 1 Members from the get method" {
-                    (Get-TargetResource @testParams).Members.Count | Should Be 1
+                    (Get-TargetResource @testParams).Members.Count | Should -Be 1
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 $Global:SPDscWebApplicationUpdateCalled = $false
                 It "add user policy from the set method" {
                     Set-TargetResource @testParams
-                    $Global:SPDscWebApplicationUpdateCalled | Should Be $true
+                    $Global:SPDscWebApplicationUpdateCalled | Should -Be $true
                 }
             }
 
@@ -427,15 +427,15 @@ try
                 }
 
                 It "Should return a set of 1 Members from the get method" {
-                    (Get-TargetResource @testParams).Members.Count | Should Be 1
+                    (Get-TargetResource @testParams).Members.Count | Should -Be 1
                 }
 
                 It "Should throw exception in the test method" {
-                    { Test-TargetResource @testParams } | Should throw "Cache accounts not configured properly. PortalSuperUserAccount or PortalSuperReaderAccount property is not configured."
+                    { Test-TargetResource @testParams } | Should -Throw "Cache accounts not configured properly. PortalSuperUserAccount or PortalSuperReaderAccount property is not configured."
                 }
 
                 It "Should throw exception in the set method" {
-                    { Set-TargetResource @testParams } | Should throw "Cache accounts not configured properly. PortalSuperUserAccount or PortalSuperReaderAccount property is not configured."
+                    { Set-TargetResource @testParams } | Should -Throw "Cache accounts not configured properly. PortalSuperUserAccount or PortalSuperReaderAccount property is not configured."
                 }
             }
 
@@ -498,15 +498,15 @@ try
                 }
 
                 It "Should return a set of 1 Members from the get method" {
-                    (Get-TargetResource @testParams).Members.Count | Should Be 1
+                    (Get-TargetResource @testParams).Members.Count | Should -Be 1
                 }
 
                 It "Should throw exception in the test method" {
-                    { Test-TargetResource @testParams } | Should throw "Cache accounts not configured properly. PortalSuperUserAccount or PortalSuperReaderAccount property is not configured."
+                    { Test-TargetResource @testParams } | Should -Throw "Cache accounts not configured properly. PortalSuperUserAccount or PortalSuperReaderAccount property is not configured."
                 }
 
                 It "Should throw exception in the set method" {
-                    { Set-TargetResource @testParams } | Should throw "Cache accounts not configured properly. PortalSuperUserAccount or PortalSuperReaderAccount property is not configured."
+                    { Set-TargetResource @testParams } | Should -Throw "Cache accounts not configured properly. PortalSuperUserAccount or PortalSuperReaderAccount property is not configured."
                 }
             }
 
@@ -590,11 +590,11 @@ try
                 }
 
                 It "Should return a set of 3 Members from the get method" {
-                    (Get-TargetResource @testParams).Members.Count | Should Be 3
+                    (Get-TargetResource @testParams).Members.Count | Should -Be 3
                 }
 
                 It "Should return true from the test method" {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
             }
 
@@ -679,11 +679,11 @@ try
                 }
 
                 It "Should return a set of 3 Members from the get method" {
-                    (Get-TargetResource @testParams).Members.Count | Should Be 3
+                    (Get-TargetResource @testParams).Members.Count | Should -Be 3
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
             }
 
@@ -767,15 +767,15 @@ try
                 }
 
                 It "Should return a set of 3 Members from the get method" {
-                    (Get-TargetResource @testParams).Members.Count | Should Be 3
+                    (Get-TargetResource @testParams).Members.Count | Should -Be 3
                 }
 
                 It "Should throw exception in the test method" {
-                    { Test-TargetResource @testParams } | Should throw "You cannot exclude the Cache accounts from the Web Application Policy"
+                    { Test-TargetResource @testParams } | Should -Throw "You cannot exclude the Cache accounts from the Web Application Policy"
                 }
 
                 It "Should throw exception in the set method" {
-                    { Set-TargetResource @testParams } | Should throw "You cannot exclude the Cache accounts from the Web Application Policy"
+                    { Set-TargetResource @testParams } | Should -Throw "You cannot exclude the Cache accounts from the Web Application Policy"
                 }
             }
 
@@ -846,17 +846,17 @@ try
                 }
 
                 It "Should return a set of 1 Members from the get method" {
-                    (Get-TargetResource @testParams).Members.Count | Should Be 1
+                    (Get-TargetResource @testParams).Members.Count | Should -Be 1
                 }
 
                 It "Should return false from the set method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 $Global:SPDscWebApplicationUpdateCalled = $false
                 It "add user policy from the set method" {
                     Set-TargetResource @testParams
-                    $Global:SPDscWebApplicationUpdateCalled | Should Be $true
+                    $Global:SPDscWebApplicationUpdateCalled | Should -Be $true
                 }
             }
 
@@ -911,17 +911,17 @@ try
                 }
 
                 It "Should return a set of 2 Members from the get method" {
-                    (Get-TargetResource @testParams).Members.Count | Should Be 2
+                    (Get-TargetResource @testParams).Members.Count | Should -Be 2
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 $Global:SPDscWebApplicationUpdateCalled = $false
                 It "remove user policy from the set method" {
                     Set-TargetResource @testParams
-                    $Global:SPDscWebApplicationUpdateCalled | Should Be $true
+                    $Global:SPDscWebApplicationUpdateCalled | Should -Be $true
                 }
             }
 
@@ -986,17 +986,17 @@ try
                 }
 
                 It "Should return a set of 1 Members from the get method" {
-                    (Get-TargetResource @testParams).Members.Count | Should Be 1
+                    (Get-TargetResource @testParams).Members.Count | Should -Be 1
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 $Global:SPDscWebApplicationUpdateCalled = $false
                 It "add user policy from the set method" {
                     Set-TargetResource @testParams
-                    $Global:SPDscWebApplicationUpdateCalled | Should Be $true
+                    $Global:SPDscWebApplicationUpdateCalled | Should -Be $true
                 }
             }
 
@@ -1045,11 +1045,11 @@ try
                 }
 
                 It "Should return a set of 2 Members from the get method" {
-                    (Get-TargetResource @testParams).Members.Count | Should Be 2
+                    (Get-TargetResource @testParams).Members.Count | Should -Be 2
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
             }
 
@@ -1102,17 +1102,17 @@ try
                 }
 
                 It "Should return a set of 2 Members from the get method" {
-                    (Get-TargetResource @testParams).Members.Count | Should Be 2
+                    (Get-TargetResource @testParams).Members.Count | Should -Be 2
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 $Global:SPDscWebApplicationUpdateCalled = $false
                 It "remove user policy from the set method" {
                     Set-TargetResource @testParams
-                    $Global:SPDscWebApplicationUpdateCalled | Should Be $true
+                    $Global:SPDscWebApplicationUpdateCalled | Should -Be $true
                 }
             }
 
@@ -1174,17 +1174,17 @@ try
                 }
 
                 It "Should return a set of 1 Members from the get method" {
-                    (Get-TargetResource @testParams).Members.Count | Should Be 1
+                    (Get-TargetResource @testParams).Members.Count | Should -Be 1
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 $Global:SPDscWebApplicationUpdateCalled = $false
                 It "correct user policy from the set method" {
                     Set-TargetResource @testParams
-                    $Global:SPDscWebApplicationUpdateCalled | Should Be $true
+                    $Global:SPDscWebApplicationUpdateCalled | Should -Be $true
                 }
             }
 
@@ -1246,17 +1246,17 @@ try
                 }
 
                 It "Should return a set of 1 Members from the get method" {
-                    (Get-TargetResource @testParams).Members.Count | Should Be 1
+                    (Get-TargetResource @testParams).Members.Count | Should -Be 1
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 $Global:SPDscWebApplicationUpdateCalled = $false
                 It "correct user policy from the set method" {
                     Set-TargetResource @testParams
-                    $Global:SPDscWebApplicationUpdateCalled | Should Be $true
+                    $Global:SPDscWebApplicationUpdateCalled | Should -Be $true
                 }
             }
 
@@ -1318,17 +1318,17 @@ try
                 }
 
                 It "Should return a set of 1 Members from the get method" {
-                    (Get-TargetResource @testParams).Members.Count | Should Be 1
+                    (Get-TargetResource @testParams).Members.Count | Should -Be 1
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 $Global:SPDscWebApplicationUpdateCalled = $false
                 It "correct user policy from the set method" {
                     Set-TargetResource @testParams
-                    $Global:SPDscWebApplicationUpdateCalled | Should Be $true
+                    $Global:SPDscWebApplicationUpdateCalled | Should -Be $true
                 }
             }
 
@@ -1390,17 +1390,17 @@ try
                 }
 
                 It "Should return a set of 1 Members from the get method" {
-                    (Get-TargetResource @testParams).Members.Count | Should Be 1
+                    (Get-TargetResource @testParams).Members.Count | Should -Be 1
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 $Global:SPDscWebApplicationUpdateCalled = $false
                 It "correct user policy from the set method" {
                     Set-TargetResource @testParams
-                    $Global:SPDscWebApplicationUpdateCalled | Should Be $true
+                    $Global:SPDscWebApplicationUpdateCalled | Should -Be $true
                 }
             }
 
@@ -1444,11 +1444,11 @@ try
                 }
 
                 It "Should return a set of 1 Members from the get method" {
-                    (Get-TargetResource @testParams).Members.Count | Should Be 1
+                    (Get-TargetResource @testParams).Members.Count | Should -Be 1
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
             }
 
@@ -1492,11 +1492,11 @@ try
                 }
 
                 It "Should return a set of 1 Members from the get method" {
-                    (Get-TargetResource @testParams).Members.Count | Should Be 1
+                    (Get-TargetResource @testParams).Members.Count | Should -Be 1
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
             }
 
@@ -1539,11 +1539,11 @@ try
                 }
 
                 It "Should return a set of 1 Members from the get method" {
-                    (Get-TargetResource @testParams).Members.Count | Should Be 1
+                    (Get-TargetResource @testParams).Members.Count | Should -Be 1
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
             }
 
@@ -1584,11 +1584,11 @@ try
                 }
 
                 It "Should return a set of 1 Members from the get method" {
-                    (Get-TargetResource @testParams).Members.Count | Should Be 1
+                    (Get-TargetResource @testParams).Members.Count | Should -Be 1
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
             }
 
@@ -1635,11 +1635,11 @@ try
                 }
 
                 It "Should return a set of 1 Members from the get method" {
-                    (Get-TargetResource @testParams).Members.Count | Should Be 1
+                    (Get-TargetResource @testParams).Members.Count | Should -Be 1
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
             }
         }

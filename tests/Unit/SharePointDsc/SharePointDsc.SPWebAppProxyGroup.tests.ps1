@@ -62,14 +62,14 @@ try
                     ServiceAppProxyGroup = "Web1ProxyGroup"
                 }
 
-                Mock -CommandName Get-SPWebApplication -MockWIth { }
+                Mock -CommandName Get-SPWebApplication -MockWith { }
 
                 It "Should return null property from the get method" {
-                    (Get-TargetResource @testParams).WebAppUrl | Should Be $null
+                    (Get-TargetResource @testParams).WebAppUrl | Should -Be $null
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
             }
@@ -80,7 +80,7 @@ try
                     ServiceAppProxyGroup = "Web1ProxyGroup"
                 }
 
-                Mock -CommandName Get-SPWebApplication -MockWIth {
+                Mock -CommandName Get-SPWebApplication -MockWith {
                     return @{
                         ServiceApplicationProxyGroup = @{
                             Name = "Web1ProxyGroup"
@@ -89,11 +89,11 @@ try
                 }
 
                 It "Should return values from the get method" {
-                    (Get-TargetResource @testParams).ServiceAppProxyGroup | Should Be "Web1ProxyGroup"
+                    (Get-TargetResource @testParams).ServiceAppProxyGroup | Should -Be "Web1ProxyGroup"
                 }
 
                 It "Should return true from the test method" {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
             }
 
@@ -103,7 +103,7 @@ try
                     ServiceAppProxyGroup = "Default"
                 }
 
-                Mock -CommandName Get-SPWebApplication -MockWIth {
+                Mock -CommandName Get-SPWebApplication -MockWith {
                     return @{
                         ServiceApplicationProxyGroup = @{
                             Name = "Web1ProxyGroup"
@@ -112,11 +112,11 @@ try
                 }
 
                 It "Should return values from the get method" {
-                    (Get-TargetResource @testParams).ServiceAppProxyGroup | Should Be "Web1ProxyGroup"
+                    (Get-TargetResource @testParams).ServiceAppProxyGroup | Should -Be "Web1ProxyGroup"
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should update the webapplication from the set method" {

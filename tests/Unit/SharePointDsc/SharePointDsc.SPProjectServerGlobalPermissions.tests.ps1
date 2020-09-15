@@ -56,15 +56,15 @@ try
                 {
                     Context -Name "All methods throw exceptions as Project Server support in SharePointDsc is only for 2016" -Fixture {
                         It "Should throw on the get method" {
-                            { Get-TargetResource @testParams } | Should Throw
+                            { Get-TargetResource @testParams } | Should -Throw
                         }
 
                         It "Should throw on the test method" {
-                            { Test-TargetResource @testParams } | Should Throw
+                            { Test-TargetResource @testParams } | Should -Throw
                         }
 
                         It "Should throw on the set method" {
-                            { Set-TargetResource @testParams } | Should Throw
+                            { Set-TargetResource @testParams } | Should -Throw
                         }
                     }
                 }
@@ -275,17 +275,17 @@ try
                         )
 
                         It "Should return the current permissions from the get method" {
-                            (Get-TargetResource @testParams).AllowPermissions | Should Not BeNullOrEmpty
+                            (Get-TargetResource @testParams).AllowPermissions | Should -Not -BeNullOrEmpty
                         }
 
                         It "Should return false from the set method" {
-                            Test-TargetResource @testParams | Should Be $false
+                            Test-TargetResource @testParams | Should -Be $false
                         }
 
                         It "Should call methods to add the missing permissions in the set method" {
                             $global:SPDscUpdateResourcesCalled = $false
                             Set-TargetResource @testParams
-                            $global:SPDscUpdateResourcesCalled | Should Be $true
+                            $global:SPDscUpdateResourcesCalled | Should -Be $true
                         }
                     }
 
@@ -330,17 +330,17 @@ try
                         )
 
                         It "Should return the current permissions from the get method" {
-                            (Get-TargetResource @testParams).AllowPermissions | Should Not BeNullOrEmpty
+                            (Get-TargetResource @testParams).AllowPermissions | Should -Not -BeNullOrEmpty
                         }
 
                         It "Should return false from the set method" {
-                            Test-TargetResource @testParams | Should Be $false
+                            Test-TargetResource @testParams | Should -Be $false
                         }
 
                         It "Should call methods to add the missing permissions in the set method" {
                             $global:SPDscUpdateResourcesCalled = $false
                             Set-TargetResource @testParams
-                            $global:SPDscUpdateResourcesCalled | Should Be $true
+                            $global:SPDscUpdateResourcesCalled | Should -Be $true
                         }
                     }
 
@@ -387,11 +387,11 @@ try
                         )
 
                         It "Should return the current permissions from the get method" {
-                            (Get-TargetResource @testParams).AllowPermissions | Should Not BeNullOrEmpty
+                            (Get-TargetResource @testParams).AllowPermissions | Should -Not -BeNullOrEmpty
                         }
 
                         It "Should return true from the set method" {
-                            Test-TargetResource @testParams | Should Be $true
+                            Test-TargetResource @testParams | Should -Be $true
                         }
                     }
 
@@ -426,17 +426,17 @@ try
                         )
 
                         It "Should return the current permissions from the get method" {
-                            (Get-TargetResource @testParams).AllowPermissions | Should Not BeNullOrEmpty
+                            (Get-TargetResource @testParams).AllowPermissions | Should -Not -BeNullOrEmpty
                         }
 
                         It "Should return false from the set method" {
-                            Test-TargetResource @testParams | Should Be $false
+                            Test-TargetResource @testParams | Should -Be $false
                         }
 
                         It "Should call methods to add the missing permissions in the set method" {
                             $global:SPDscSetGroupsCalled = $false
                             Set-TargetResource @testParams
-                            $global:SPDscSetGroupsCalled | Should Be $true
+                            $global:SPDscSetGroupsCalled | Should -Be $true
                         }
                     }
 
@@ -481,17 +481,17 @@ try
                         )
 
                         It "Should return the current permissions from the get method" {
-                            (Get-TargetResource @testParams).AllowPermissions | Should Not BeNullOrEmpty
+                            (Get-TargetResource @testParams).AllowPermissions | Should -Not -BeNullOrEmpty
                         }
 
                         It "Should return false from the set method" {
-                            Test-TargetResource @testParams | Should Be $false
+                            Test-TargetResource @testParams | Should -Be $false
                         }
 
                         It "Should call methods to add the missing permissions in the set method" {
                             $global:SPDscSetGroupsCalled = $false
                             Set-TargetResource @testParams
-                            $global:SPDscSetGroupsCalled | Should Be $true
+                            $global:SPDscSetGroupsCalled | Should -Be $true
                         }
                     }
 
@@ -538,11 +538,11 @@ try
                         )
 
                         It "Should return the current permissions from the get method" {
-                            (Get-TargetResource @testParams).AllowPermissions | Should Not BeNullOrEmpty
+                            (Get-TargetResource @testParams).AllowPermissions | Should -Not -BeNullOrEmpty
                         }
 
                         It "Should return true from the set method" {
-                            Test-TargetResource @testParams | Should Be $true
+                            Test-TargetResource @testParams | Should -Be $true
                         }
                     }
                 }

@@ -112,7 +112,7 @@ try
                         $mockService.Read() | Out-Null
                     }
 
-                    { $mockService.Read() } | Should Throw "Cannot read from a closed TextReader"
+                    { $mockService.Read() } | Should -Throw "Cannot read from a closed TextReader"
                 }
 
                 It "disposes of a service when there is an exception" {
@@ -129,7 +129,7 @@ try
                         "Doing nothing with the actual exception so the test passes" | Out-Null
                     }
 
-                    { $mockService.Read() } | Should Throw "Cannot read from a closed TextReader"
+                    { $mockService.Read() } | Should -Throw "Cannot read from a closed TextReader"
                 }
             }
 
@@ -173,7 +173,7 @@ try
                 }
 
                 It "Should return the name of a resource based on its ID" {
-                    Get-SPDscProjectServerResourceName -ResourceId (New-Guid) -PwaUrl "http://server/pwa" | Should Be "DEMO\user"
+                    Get-SPDscProjectServerResourceName -ResourceId (New-Guid) -PwaUrl "http://server/pwa" | Should -Be "DEMO\user"
                 }
             }
 
@@ -250,7 +250,7 @@ try
                 }
 
                 It "should return the ID of a specified user" {
-                    Get-SPDscProjectServerResourceId -ResourceName "demo\user1" -PwaUrl "http://server/pwa" | Should Not BeNullOrEmpty
+                    Get-SPDscProjectServerResourceId -ResourceName "demo\user1" -PwaUrl "http://server/pwa" | Should -Not -BeNullOrEmpty
                 }
 
                 Mock -CommandName "New-SPDscProjectServerWebService" -MockWith {
@@ -278,7 +278,7 @@ try
                 }
 
                 It "should throw when a user isn't in the returned data set" {
-                    { Get-SPDscProjectServerResourceId -ResourceName "demo\user3" -PwaUrl "http://server/pwa" } | Should Throw
+                    { Get-SPDscProjectServerResourceId -ResourceName "demo\user3" -PwaUrl "http://server/pwa" } | Should -Throw
                 }
 
                 Mock -CommandName "New-SPDscProjectServerWebService" -MockWith {
@@ -297,7 +297,7 @@ try
                 }
 
                 It "should throw when no users are in the returned data set" {
-                    { Get-SPDscProjectServerResourceId -ResourceName "demo\user3" -PwaUrl "http://server/pwa" } | Should Throw
+                    { Get-SPDscProjectServerResourceId -ResourceName "demo\user3" -PwaUrl "http://server/pwa" } | Should -Throw
                 }
             }
 
@@ -325,11 +325,11 @@ try
                 }
 
                 It "should return a value when an exiting permission is requested" {
-                    Get-SPDscProjectServerGlobalPermissionId -PermissionName "ExamplePermission" | Should Not BeNullOrEmpty
+                    Get-SPDscProjectServerGlobalPermissionId -PermissionName "ExamplePermission" | Should -Not -BeNullOrEmpty
                 }
 
                 It "should return null when a permission that doesn't exist is requested" {
-                    { Get-SPDscProjectServerGlobalPermissionId -PermissionName "DoesntExist" } | Should Throw
+                    { Get-SPDscProjectServerGlobalPermissionId -PermissionName "DoesntExist" } | Should -Throw
                 }
             }
         }

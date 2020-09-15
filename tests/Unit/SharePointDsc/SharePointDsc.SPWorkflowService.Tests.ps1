@@ -61,7 +61,7 @@ try
                         -Value {
                         return "http://workflow.sharepoint.com"
                     } -PassThru `
-                | Add-Member -MemberType ScriptMethod `
+                    | Add-Member -MemberType ScriptMethod `
                         -Name GetWorkflowScopeName `
                         -Value {
                         return "SharePoint"
@@ -93,18 +93,18 @@ try
                 }
 
                 It "return error that invalid the specified site collection doesn't exist" {
-                    { Set-TargetResource @testParams } | Should Throw "Specified site collection could not be found."
+                    { Set-TargetResource @testParams } | Should -Throw "Specified site collection could not be found."
                 }
 
                 It "return empty workflow service instance" {
                     $result = Get-TargetResource @testParams
-                    $result.WorkflowHostUri | Should Be $null
-                    $result.SPSiteUrl | Should Be "http://sites.sharepoint.com"
-                    $result.ScopeName | Should Be $null
+                    $result.WorkflowHostUri | Should -Be $null
+                    $result.SPSiteUrl | Should -Be "http://sites.sharepoint.com"
+                    $result.ScopeName | Should -Be $null
                 }
 
                 It "return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
             }
 
@@ -128,14 +128,14 @@ try
 
                 It "returns the workflow service instance" {
                     $result = Get-TargetResource @testParams
-                    $result.WorkflowHostUri | Should Be "http://workflow.sharepoint.com"
+                    $result.WorkflowHostUri | Should -Be "http://workflow.sharepoint.com"
                     $result.SPSiteUrl = "http://sites.sharepoint.com"
-                    $result.ScopeName | Should Be "SharePoint"
+                    $result.ScopeName | Should -Be "SharePoint"
                     Assert-MockCalled Get-SPWorkflowServiceApplicationProxy
                 }
 
                 It "return true from the test method" {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
             }
 
@@ -153,7 +153,7 @@ try
                 }
 
                 It "return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
             }
 
@@ -166,7 +166,7 @@ try
                 }
 
                 It "return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
             }
 
@@ -178,7 +178,7 @@ try
                 }
 
                 It "return true from the test method" {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
             }
         }

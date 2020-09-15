@@ -132,25 +132,25 @@ try
 
                 It "Should return the current data from the get method" {
                     $result = Get-TargetResource @testParams
-                    $result.WebAppUrl | Should Be "http://sites.sharepoint.com"
-                    $result.Enabled | Should Be $true
-                    $result.OnlineEnabled | Should Be $false
-                    $result.QuotaTemplate | Should Be "SSCQoutaTemplate"
-                    $result.ShowStartASiteMenuItem | Should Be $true
-                    $result.CreateIndividualSite | Should Be $false
-                    $result.ParentSiteUrl | Should Be "/sites/SSC"
-                    $result.CustomFormUrl | Should Be ""
-                    $result.PolicyOption | Should Be "CanHavePolicy"
-                    $result.RequireSecondaryContact | Should Be $true
+                    $result.WebAppUrl | Should -Be "http://sites.sharepoint.com"
+                    $result.Enabled | Should -Be $true
+                    $result.OnlineEnabled | Should -Be $false
+                    $result.QuotaTemplate | Should -Be "SSCQoutaTemplate"
+                    $result.ShowStartASiteMenuItem | Should -Be $true
+                    $result.CreateIndividualSite | Should -Be $false
+                    $result.ParentSiteUrl | Should -Be "/sites/SSC"
+                    $result.CustomFormUrl | Should -Be ""
+                    $result.PolicyOption | Should -Be "CanHavePolicy"
+                    $result.RequireSecondaryContact | Should -Be $true
                 }
 
                 It "Should return true from the test method" {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
 
                 It "Should not call web application update from the set method" {
                     Set-TargetResource @testParams
-                    $Script:SPDscWebApplication.UpdateCalled | Should Be $false
+                    $Script:SPDscWebApplication.UpdateCalled | Should -Be $false
                 }
             }
 
@@ -177,21 +177,21 @@ try
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should call web application update from the set method" {
                     Set-TargetResource @testParams
-                    $Script:SPDscWebApplication.UpdateCalled | Should Be $true
-                    $Script:SPDscWebApplication.SelfServiceSiteCreationEnabled | Should Be $true
-                    $Script:SPDscWebApplication.SelfServiceSiteCreationOnlineEnabled | Should Be $false
-                    $Script:SPDscWebApplication.SelfServiceCreationQuotaTemplate | Should Be "SSCQoutaTemplate"
-                    $Script:SPDscWebApplication.ShowStartASiteMenuItem | Should Be $true
-                    $Script:SPDscWebApplication.SelfServiceCreateIndividualSite | Should Be $false
-                    $Script:SPDscWebApplication.SelfServiceCreationParentSiteUrl | Should Be "/sites/SSC"
-                    $Script:SPDscWebApplication.SelfServiceSiteCustomFormUrl | Should Be "http://CustomForm.SharePoint.com"
-                    $Script:SPDscWebApplication.Properties["PolicyOption"] | Should Be "CanHavePolicy"
-                    $Script:SPDscWebApplication.RequireContactForSelfServiceSiteCreation | Should Be $true
+                    $Script:SPDscWebApplication.UpdateCalled | Should -Be $true
+                    $Script:SPDscWebApplication.SelfServiceSiteCreationEnabled | Should -Be $true
+                    $Script:SPDscWebApplication.SelfServiceSiteCreationOnlineEnabled | Should -Be $false
+                    $Script:SPDscWebApplication.SelfServiceCreationQuotaTemplate | Should -Be "SSCQoutaTemplate"
+                    $Script:SPDscWebApplication.ShowStartASiteMenuItem | Should -Be $true
+                    $Script:SPDscWebApplication.SelfServiceCreateIndividualSite | Should -Be $false
+                    $Script:SPDscWebApplication.SelfServiceCreationParentSiteUrl | Should -Be "/sites/SSC"
+                    $Script:SPDscWebApplication.SelfServiceSiteCustomFormUrl | Should -Be "http://CustomForm.SharePoint.com"
+                    $Script:SPDscWebApplication.Properties["PolicyOption"] | Should -Be "CanHavePolicy"
+                    $Script:SPDscWebApplication.RequireContactForSelfServiceSiteCreation | Should -Be $true
                 }
             }
 
@@ -221,14 +221,14 @@ try
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should call web application update from the set method and disable SSC and start a site link" {
                     Set-TargetResource @testParams
-                    $Script:SPDscWebApplication.UpdateCalled | Should Be $true
-                    $Script:SPDscWebApplication.SelfServiceSiteCreationEnabled | Should Be $false
-                    $Script:SPDscWebApplication.ShowStartASiteMenuItem | Should Be $false
+                    $Script:SPDscWebApplication.UpdateCalled | Should -Be $true
+                    $Script:SPDscWebApplication.SelfServiceSiteCreationEnabled | Should -Be $false
+                    $Script:SPDscWebApplication.ShowStartASiteMenuItem | Should -Be $false
                 }
             }
 
@@ -259,11 +259,11 @@ try
                 }
 
                 It "Should throw from the test method" {
-                    { Test-TargetResource @testParams } | Should Throw "It is not allowed to set the ShowStartASiteMenuItem to true when self service site creation is disabled."
+                    { Test-TargetResource @testParams } | Should -Throw "It is not allowed to set the ShowStartASiteMenuItem to true when self service site creation is disabled."
                 }
 
                 It "Should throw from the update method" {
-                    { Set-TargetResource @testParams } | Should Throw "It is not allowed to set the ShowStartASiteMenuItem to true when self service site creation is disabled."
+                    { Set-TargetResource @testParams } | Should -Throw "It is not allowed to set the ShowStartASiteMenuItem to true when self service site creation is disabled."
                 }
             }
 
@@ -279,25 +279,25 @@ try
 
                 It "Should return a valid object with null on all properties" {
                     $result = Get-TargetResource @testParams
-                    $result | Should Not BeNullOrEmpty
-                    $result.WebAppUrl | Should Be $null
-                    $result.Enabled | Should Be $null
-                    $result.OnlineEnabled | Should Be $null
-                    $result.QuotaTemplate | Should Be $null
-                    $result.ShowStartASiteMenuItem | Should Be $null
-                    $result.CreateIndividualSite | Should Be $null
-                    $result.ParentSiteUrl | Should Be $null
-                    $result.CustomFormUrl | Should Be $null
-                    $result.PolicyOption | Should Be $null
-                    $result.RequireSecondaryContact | Should Be $null
+                    $result | Should -Not -BeNullOrEmpty
+                    $result.WebAppUrl | Should -Be $null
+                    $result.Enabled | Should -Be $null
+                    $result.OnlineEnabled | Should -Be $null
+                    $result.QuotaTemplate | Should -Be $null
+                    $result.ShowStartASiteMenuItem | Should -Be $null
+                    $result.CreateIndividualSite | Should -Be $null
+                    $result.ParentSiteUrl | Should -Be $null
+                    $result.CustomFormUrl | Should -Be $null
+                    $result.PolicyOption | Should -Be $null
+                    $result.RequireSecondaryContact | Should -Be $null
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should throw an exception from the set method" {
-                    { Set-TargetResource @testParams } | Should Throw
+                    { Set-TargetResource @testParams } | Should -Throw
                 }
             }
 
@@ -320,7 +320,7 @@ try
                     }
 
                     It "Should throw and execption for ManagedPath from the set method" {
-                        { Set-TargetResource @testParams } | Should Throw "Parameter ManagedPath is only supported in SharePoint 2019"
+                        { Set-TargetResource @testParams } | Should -Throw "Parameter ManagedPath is only supported in SharePoint 2019"
                     }
 
                     $testParams = @{
@@ -338,7 +338,7 @@ try
                     }
 
                     It "Should throw and execption for AlternateUrl from the set method" {
-                        { Set-TargetResource @testParams } | Should Throw "Parameter AlternateUrl is only supported in SharePoint 2019"
+                        { Set-TargetResource @testParams } | Should -Throw "Parameter AlternateUrl is only supported in SharePoint 2019"
                     }
 
                     $testParams = @{
@@ -356,7 +356,7 @@ try
                     }
 
                     It "Should throw and execption for UserExperienceVersion from the set method" {
-                        { Set-TargetResource @testParams } | Should Throw "Parameter UserExperienceVersion is only supported in SharePoint 2019"
+                        { Set-TargetResource @testParams } | Should -Throw "Parameter UserExperienceVersion is only supported in SharePoint 2019"
                     }
                 }
             }
@@ -381,7 +381,7 @@ try
                     }
 
                     It "Should throw and execption for ManagedPath from the set method" {
-                        { Set-TargetResource @testParams } | Should Throw "You cannot specify both AlternateUrl and ManagedPath. Please use just one of these."
+                        { Set-TargetResource @testParams } | Should -Throw "You cannot specify both AlternateUrl and ManagedPath. Please use just one of these."
                     }
                 }
             }

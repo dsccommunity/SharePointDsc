@@ -56,15 +56,15 @@ try
                 {
                     Context -Name "All methods throw exceptions as Project Server support in SharePointDsc is only for 2016" -Fixture {
                         It "Should throw on the get method" {
-                            { Get-TargetResource @testParams } | Should Throw
+                            { Get-TargetResource @testParams } | Should -Throw
                         }
 
                         It "Should throw on the test method" {
-                            { Test-TargetResource @testParams } | Should Throw
+                            { Test-TargetResource @testParams } | Should -Throw
                         }
 
                         It "Should throw on the set method" {
-                            { Set-TargetResource @testParams } | Should Throw
+                            { Set-TargetResource @testParams } | Should -Throw
                         }
                     }
                 }
@@ -167,9 +167,9 @@ try
 
                         It "Should return false on settings in the get method" {
                             $result = Get-TargetResource @testParams
-                            $result.EnableProjectWebAppSync | Should Be $false
-                            $result.EnableProjectSiteSync | Should Be $false
-                            $result.EnableProjectSiteSyncForSPTaskLists | Should Be $false
+                            $result.EnableProjectWebAppSync | Should -Be $false
+                            $result.EnableProjectSiteSync | Should -Be $false
+                            $result.EnableProjectSiteSyncForSPTaskLists | Should -Be $false
                         }
                     }
 
@@ -189,13 +189,13 @@ try
 
                         It "should return false on the values from the get method" {
                             $result = Get-TargetResource @testParams
-                            $result.EnableProjectWebAppSync | Should Be $false
-                            $result.EnableProjectSiteSync | Should Be $false
-                            $result.EnableProjectSiteSyncForSPTaskLists | Should Be $false
+                            $result.EnableProjectWebAppSync | Should -Be $false
+                            $result.EnableProjectSiteSync | Should -Be $false
+                            $result.EnableProjectSiteSyncForSPTaskLists | Should -Be $false
                         }
 
                         It "should return false from the test method" {
-                            Test-TargetResource @testParams | Should Be $false
+                            Test-TargetResource @testParams | Should -Be $false
                         }
 
                         It "should call update from the set method" {
@@ -220,13 +220,13 @@ try
 
                         It "should return true on the values from the get method" {
                             $result = Get-TargetResource @testParams
-                            $result.EnableProjectWebAppSync | Should Be $true
-                            $result.EnableProjectSiteSync | Should Be $true
-                            $result.EnableProjectSiteSyncForSPTaskLists | Should Be $true
+                            $result.EnableProjectWebAppSync | Should -Be $true
+                            $result.EnableProjectSiteSync | Should -Be $true
+                            $result.EnableProjectSiteSyncForSPTaskLists | Should -Be $true
                         }
 
                         It "should return true from the test method" {
-                            Test-TargetResource @testParams | Should Be $true
+                            Test-TargetResource @testParams | Should -Be $true
                         }
                     }
                 }

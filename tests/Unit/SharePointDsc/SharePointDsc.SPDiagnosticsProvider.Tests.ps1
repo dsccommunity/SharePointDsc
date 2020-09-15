@@ -73,15 +73,15 @@ try
                 }
 
                 It "Should return false when the Test method is called" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should throw an error about a non-existing provider" {
-                    { Set-TargetResource @testParams } | Should throw "The specified Diagnostic Provider {MyFakeProvider} could not be found."
+                    { Set-TargetResource @testParams } | Should -Throw "The specified Diagnostic Provider {MyFakeProvider} could not be found."
                 }
 
                 It "Should return absent from the Get method" {
-                    (Get-TargetResource @testParams).Ensure | Should be "Absent"
+                    (Get-TargetResource @testParams).Ensure | Should -Be "Absent"
                 }
             }
 
@@ -96,7 +96,7 @@ try
                 }
 
                 It "Should return false when the Test method is called" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should properly configure the provider" {
@@ -105,7 +105,7 @@ try
                 }
 
                 It "Should return a Retention period of 14 from the Get method" {
-                    (Get-TargetResource @testParams).Retention | Should be 14
+                    (Get-TargetResource @testParams).Retention | Should -Be 14
                 }
             }
 
@@ -120,7 +120,7 @@ try
                 }
 
                 It "Should properly configure the provider" {
-                    { Set-TargetResource @testParams } | Should throw "This resource cannot remove Diagnostics Provider. Please use ensure equals Present."
+                    { Set-TargetResource @testParams } | Should -Throw "This resource cannot remove Diagnostics Provider. Please use ensure equals Present."
                 }
             }
         }

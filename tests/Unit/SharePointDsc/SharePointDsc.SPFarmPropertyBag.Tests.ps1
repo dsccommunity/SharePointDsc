@@ -64,23 +64,23 @@ try
                 $result = Get-TargetResource @testParams
 
                 It 'Should return absent from the get method' {
-                    $result.Ensure | Should Be 'absent'
+                    $result.Ensure | Should -Be 'absent'
                 }
 
                 It 'Should return the same values as passed as parameters' {
-                    $result.Key | Should Be $testParams.Key
+                    $result.Key | Should -Be $testParams.Key
                 }
 
                 It 'Should return null as the value used' {
-                    $result.value | Should Be $null
+                    $result.value | Should -Be $null
                 }
 
                 It 'Should return false from the test method' {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It 'Should throw an exception in the set method to say there is no local farm' {
-                    { Set-TargetResource @testParams } | Should throw "No local SharePoint farm was detected"
+                    { Set-TargetResource @testParams } | Should -Throw "No local SharePoint farm was detected"
                 }
             }
 
@@ -108,26 +108,26 @@ try
                 $result = Get-TargetResource @testParams
 
                 It 'Should return present from the get method' {
-                    $result.Ensure | Should Be 'present'
+                    $result.Ensure | Should -Be 'present'
                 }
 
                 It 'Should return the same key value as passed as parameter' {
-                    $result.Key | Should Be $testParams.Key
+                    $result.Key | Should -Be $testParams.Key
                 }
 
                 It 'Should return false from the test method' {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It 'Should not throw an exception in the set method' {
-                    { Set-TargetResource @testParams } | Should not throw
+                    { Set-TargetResource @testParams } | Should -Not -Throw
                 }
 
                 $Global:SPDscFarmPropertyUpdated = $false
                 It 'Calls Get-SPFarm and update farm property bag from the set method' {
                     Set-TargetResource @testParams
 
-                    $Global:SPDscFarmPropertyUpdated | Should Be $true
+                    $Global:SPDscFarmPropertyUpdated | Should -Be $true
                 }
             }
 
@@ -141,16 +141,16 @@ try
                 $result = Get-TargetResource @testParams
 
                 It 'Should return present from the get method' {
-                    $result.Ensure | Should Be 'present'
+                    $result.Ensure | Should -Be 'present'
                 }
 
                 It 'Should return the same values as passed as parameters' {
-                    $result.Key | Should Be $testParams.Key
-                    $result.value | Should Be $testParams.value
+                    $result.Key | Should -Be $testParams.Key
+                    $result.value | Should -Be $testParams.value
                 }
 
                 It 'Should return true from the test method' {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
             }
 
@@ -163,16 +163,16 @@ try
                 $result = Get-TargetResource @testParams
 
                 It 'Should return absent from the get method' {
-                    $result.Ensure | Should Be 'absent'
+                    $result.Ensure | Should -Be 'absent'
                 }
 
                 It 'Should return the same values as passed as parameters' {
-                    $result.Key | Should Be $testParams.Key
-                    $result.value | Should Be $testParams.value
+                    $result.Key | Should -Be $testParams.Key
+                    $result.value | Should -Be $testParams.value
                 }
 
                 It 'Should return true from the test method' {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
             }
 
@@ -186,27 +186,27 @@ try
                 $result = Get-TargetResource @testParams
 
                 It 'Should return Present from the get method' {
-                    $result.Ensure | Should Be 'Present'
+                    $result.Ensure | Should -Be 'Present'
                 }
 
                 It 'Should return the same values as passed as parameters' {
-                    $result.Key | Should Be $testParams.Key
-                    $result.value | Should Be $testParams.Value
+                    $result.Key | Should -Be $testParams.Key
+                    $result.value | Should -Be $testParams.Value
                 }
 
                 It 'Should return false from the test method' {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It 'Should not throw an exception in the set method' {
-                    { Set-TargetResource @testParams } | Should not throw
+                    { Set-TargetResource @testParams } | Should -Not -Throw
                 }
 
                 $Global:SPDscFarmPropertyUpdated = $false
                 It 'Calls Get-SPFarm and remove farm property bag from the set method' {
                     Set-TargetResource @testParams
 
-                    $Global:SPDscFarmPropertyUpdated | Should Be $true
+                    $Global:SPDscFarmPropertyUpdated | Should -Be $true
                 }
             }
         }

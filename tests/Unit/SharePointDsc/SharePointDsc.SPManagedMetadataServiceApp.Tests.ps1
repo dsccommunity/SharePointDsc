@@ -212,11 +212,11 @@ try
                 Mock -CommandName Get-SPServiceApplication -MockWith { return $null }
 
                 It "Should return absent from the Get method" {
-                    (Get-TargetResource @testParams).Ensure | Should Be "Absent"
+                    (Get-TargetResource @testParams).Ensure | Should -Be "Absent"
                 }
 
                 It "Should return false when the Test method is called" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should create a new service application in the set method" {
@@ -255,11 +255,11 @@ try
                 }
 
                 It "Should return absent from the Get method" {
-                    (Get-TargetResource @testParams).Ensure | Should Be "Absent"
+                    (Get-TargetResource @testParams).Ensure | Should -Be "Absent"
                 }
 
                 It "Should return false when the Test method is called" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
             }
 
@@ -375,12 +375,12 @@ try
 
                 It "Should return present from the get method" {
                     $results = Get-TargetResource @testParams
-                    $results.Ensure | Should Be "Present"
-                    $results.ContentTypeHubUrl | Should Not BeNullOrEmpty
+                    $results.Ensure | Should -Be "Present"
+                    $results.ContentTypeHubUrl | Should -Not -BeNullOrEmpty
                 }
 
                 It "Should return true when the Test method is called" {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
             }
 
@@ -503,11 +503,11 @@ try
                 }
 
                 It "Should return Wrong App Pool Name from the Get method" {
-                    (Get-TargetResource @testParams).ApplicationPool | Should Be "Wrong App Pool Name"
+                    (Get-TargetResource @testParams).ApplicationPool | Should -Be "Wrong App Pool Name"
                 }
 
                 It "Should return false when the Test method is called" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should call the update service app cmdlet from the set method" {
@@ -639,11 +639,11 @@ try
                 }
 
                 It "Should return wrong content type url from the Get method" {
-                    (Get-TargetResource @testParams).ContentTypeHubUrl | Should Be "https://contenttypes.contoso.com/wrong"
+                    (Get-TargetResource @testParams).ContentTypeHubUrl | Should -Be "https://contenttypes.contoso.com/wrong"
                 }
 
                 It "Should return false when the Test method is called" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should call the update service app cmdlet from the set method" {
@@ -777,11 +777,11 @@ try
                 }
 
                 It "Should return present from the Get method" {
-                    (Get-TargetResource @testParams).Ensure | Should Be "Present"
+                    (Get-TargetResource @testParams).Ensure | Should -Be "Present"
                 }
 
                 It "Should return false when the Test method is called" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should call the remove service application cmdlet in the set method" {
@@ -789,7 +789,7 @@ try
 
                     Set-TargetResource @testParams
                     Assert-MockCalled Remove-SPServiceApplication
-                    $Global:SPDscServiceProxyDeleteCalled | Should be $true
+                    $Global:SPDscServiceProxyDeleteCalled | Should -Be $true
                 }
             }
 
@@ -805,11 +805,11 @@ try
                 }
 
                 It "Should return absent from the Get method" {
-                    (Get-TargetResource @testParams).Ensure | Should Be "Absent"
+                    (Get-TargetResource @testParams).Ensure | Should -Be "Absent"
                 }
 
                 It "Should return true when the Test method is called" {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
             }
 
@@ -860,11 +860,11 @@ try
                 }
 
                 It "Should return the current users from the get method" {
-                    (Get-TargetResource @testParams).TermStoreAdministrators | Should Not BeNullOrEmpty
+                    (Get-TargetResource @testParams).TermStoreAdministrators | Should -Not -BeNullOrEmpty
                 }
 
                 It "Should return true from the test method" {
-                    Test-TargetResource @testParams | Should be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
             }
 
@@ -916,11 +916,11 @@ try
                 }
 
                 It "Should return the current users from the get method" {
-                    (Get-TargetResource @testParams).TermStoreAdministrators | Should Not BeNullOrEmpty
+                    (Get-TargetResource @testParams).TermStoreAdministrators | Should -Not -BeNullOrEmpty
                 }
 
                 It "Should return true from the test method" {
-                    Test-TargetResource @testParams | Should be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should call the add method from the set method" {
@@ -928,7 +928,7 @@ try
                     $Global:SPDscDeleteUserCalled = $false
                     Set-TargetResource @testParams
 
-                    $Global:SPDscAddUserCalled | Should Be $true
+                    $Global:SPDscAddUserCalled | Should -Be $true
                 }
             }
 
@@ -1027,11 +1027,11 @@ try
                 }
 
                 It "Should return the current users from the get method" {
-                    (Get-TargetResource @testParams).TermStoreAdministrators | Should Not BeNullOrEmpty
+                    (Get-TargetResource @testParams).TermStoreAdministrators | Should -Not -BeNullOrEmpty
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should call the delete method from the set method" {
@@ -1039,7 +1039,7 @@ try
                     $Global:SPDscDeleteUserCalled = $false
                     Set-TargetResource @testParams
 
-                    $Global:SPDscDeleteUserCalled | Should Be $true
+                    $Global:SPDscDeleteUserCalled | Should -Be $true
                 }
             }
 
@@ -1099,14 +1099,14 @@ try
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should call the delete method from the set method" {
                     $Global:SPDscServiceProxyUpdateCalled = $false
                     Set-TargetResource @testParams
 
-                    $Global:SPDscServiceProxyUpdateCalled | Should Be $true
+                    $Global:SPDscServiceProxyUpdateCalled | Should -Be $true
                 }
             }
 
@@ -1199,11 +1199,11 @@ try
                 }
 
                 It "Should return the current users from the get method" {
-                    (Get-TargetResource @testParams).TermStoreAdministrators | Should Not BeNullOrEmpty
+                    (Get-TargetResource @testParams).TermStoreAdministrators | Should -Not -BeNullOrEmpty
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should call the delete method from the set method" {
@@ -1211,7 +1211,7 @@ try
                     $Global:SPDscDeleteUserCalled = $false
                     Set-TargetResource @testParams
 
-                    $Global:SPDscDeleteUserCalled | Should Be $true
+                    $Global:SPDscDeleteUserCalled | Should -Be $true
                 }
             }
 
@@ -1263,7 +1263,7 @@ try
                 }
 
                 It "Should return the proxy name" {
-                    (Get-TargetResource @testParams).ProxyName | Should Be "$($testParams.Name) Proxy Test"
+                    (Get-TargetResource @testParams).ProxyName | Should -Be "$($testParams.Name) Proxy Test"
                 }
             }
 
@@ -1453,27 +1453,27 @@ try
                 }
 
                 It "Should return false when the Test method is called" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should match the mocked values" {
                     $result = Get-TargetResource @testParams
-                    $result.DefaultLanguage | Should Be 1031
-                    $result.Languages | Should Be @(1031)
+                    $result.DefaultLanguage | Should -Be 1031
+                    $result.Languages | Should -Be @(1031)
                 }
 
                 It "Should change the value for 'Default Language'" {
                     $result = Get-TargetResource @testParams
                     Set-TargetResource @testParams
-                    $termStores["$($result.ProxyName)"].DefaultLanguage | Should Be $testParams.DefaultLanguage
+                    $termStores["$($result.ProxyName)"].DefaultLanguage | Should -Be $testParams.DefaultLanguage
                 }
 
                 It "Should change the value for 'Languages'" {
                     $Global:SPDscAddLanguageCalled = $false
                     $Global:SPDscDeleteLanguageCalled = $false
                     Set-TargetResource @testParams
-                    $Global:SPDscAddLanguageCalled | Should Be $true
-                    $Global:SPDscDeleteLanguageCalled | Should Be $true
+                    $Global:SPDscAddLanguageCalled | Should -Be $true
+                    $Global:SPDscDeleteLanguageCalled | Should -Be $true
                 }
 
                 It "Should change the value for 'ContentTypePushdownEnabled'" {
@@ -1491,8 +1491,8 @@ try
 
                     $Global:SPDscMetaDataServiceApplicationProxyUpdateCalled = $false
                     Set-TargetResource @testParams
-                    $Global:SPDscMetaDataServiceApplicationProxyUpdateCalled | Should Be $true
-                    $metadataServiceApplicationProxy.Properties["IsContentTypePushdownEnabled"] | Should be $true
+                    $Global:SPDscMetaDataServiceApplicationProxyUpdateCalled | Should -Be $true
+                    $metadataServiceApplicationProxy.Properties["IsContentTypePushdownEnabled"] | Should -Be $true
                 }
 
                 It "Should change the value for 'ContentTypeSyndicationEnabled'" {
@@ -1510,8 +1510,8 @@ try
 
                     $Global:SPDscMetaDataServiceApplicationProxyUpdateCalled = $false
                     Set-TargetResource @testParams
-                    $Global:SPDscMetaDataServiceApplicationProxyUpdateCalled | Should Be $true
-                    $metadataServiceApplicationProxy.Properties["IsNPContentTypeSyndicationEnabled"] | Should be $true
+                    $Global:SPDscMetaDataServiceApplicationProxyUpdateCalled | Should -Be $true
+                    $metadataServiceApplicationProxy.Properties["IsNPContentTypeSyndicationEnabled"] | Should -Be $true
                 }
             }
 
@@ -1536,11 +1536,11 @@ try
                 Mock -CommandName Get-SPServiceApplication -MockWith { return $null }
 
                 It "Should return absent from the Get method" {
-                    (Get-TargetResource @testParams).Ensure | Should Be "Absent"
+                    (Get-TargetResource @testParams).Ensure | Should -Be "Absent"
                 }
 
                 It "Should return false when the Test method is called" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should create a new service application and proxy in the set method" {
@@ -1728,7 +1728,7 @@ try
 
                     Set-TargetResource @testParams
 
-                    $Global:SPDscAddUserCalled | Should Be $true
+                    $Global:SPDscAddUserCalled | Should -Be $true
                 }
 
                 It "Should change the value for 'Default Language'" {
@@ -1737,9 +1737,9 @@ try
 
                     Set-TargetResource @testParams
 
-                    $termStores["$($testParams.ProxyName)"].DefaultLanguage | Should Be $testParams.DefaultLanguage
-                    $Global:SPDscAddUserCalled | Should Be $true
-                    $Global:SPDscDeleteUserCalled | Should Be $true
+                    $termStores["$($testParams.ProxyName)"].DefaultLanguage | Should -Be $testParams.DefaultLanguage
+                    $Global:SPDscAddUserCalled | Should -Be $true
+                    $Global:SPDscDeleteUserCalled | Should -Be $true
                 }
 
                 It "Should change the value for 'Languages'" {
@@ -1750,10 +1750,10 @@ try
 
                     Set-TargetResource @testParams
 
-                    $Global:SPDscAddLanguageCalled | Should Be $true
-                    $Global:SPDscDeleteLanguageCalled | Should Be $true
-                    $Global:SPDscAddUserCalled | Should Be $true
-                    $Global:SPDscDeleteUserCalled | Should Be $true
+                    $Global:SPDscAddLanguageCalled | Should -Be $true
+                    $Global:SPDscDeleteLanguageCalled | Should -Be $true
+                    $Global:SPDscAddUserCalled | Should -Be $true
+                    $Global:SPDscDeleteUserCalled | Should -Be $true
                 }
             }
         }

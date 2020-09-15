@@ -66,7 +66,7 @@ try
                 Mock -CommandName Get-SPTrustedIdentityTokenIssuer -MockWith { return $null }
 
                 It "Ensure should be Absent, since SPTrustedIdentityTokenIssuer 'Contoso' was not found" {
-                    (Get-TargetResource @testParams).Ensure | Should Be "Absent"
+                    (Get-TargetResource @testParams).Ensure | Should -Be "Absent"
                 }
             }
 
@@ -98,12 +98,12 @@ try
                 }
 
                 It "Test-TargetResource: Should return true" {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
 
                 It "Get-TargetResource: Should return present" {
                     $getResults = Get-TargetResource @testParams
-                    $getResults.Ensure | Should Be "Present"
+                    $getResults.Ensure | Should -Be "Present"
                 }
             }
 
@@ -150,17 +150,17 @@ try
 
                 It "Get-TargetResource: Should return absent" {
                     $getResults = Get-TargetResource @testParams
-                    $getResults.Ensure | Should Be "Absent"
+                    $getResults.Ensure | Should -Be "Absent"
                 }
 
                 It "Test-TargetResource: Should return false" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Set-TargetResource: Realm added to SPTrustedIdentityTokenIssuer.ProviderRealms" {
                     Set-TargetResource @testParams
                     $($Global:SPTrustedIdentityTokenIssuerUpdateCalledCount -eq 1 `
-                            -and $Global:SPTrustedIdentityTokenIssuerAddProviderRealmCalledCount -eq 2) | Should Be $true
+                            -and $Global:SPTrustedIdentityTokenIssuerAddProviderRealmCalledCount -eq 2) | Should -Be $true
                 }
             }
 
@@ -207,17 +207,17 @@ try
 
                 It "Get-TargetResource: Should return absent" {
                     $getResults = Get-TargetResource @testParams
-                    $getResults.Ensure | Should Be "Absent"
+                    $getResults.Ensure | Should -Be "Absent"
                 }
 
                 It "Test-TargetResource: Should return false" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Set-TargetResource: Realms added to SPTrustedIdentityTokenIssuer.ProviderRealms" {
                     Set-TargetResource @testParams
                     $($Global:SPTrustedIdentityTokenIssuerAddProviderRealmCalledCount -eq 2 `
-                            -and $Global:SPTrustedIdentityTokenIssuerUpdateCalledCount -eq 1 ) | Should Be $true
+                            -and $Global:SPTrustedIdentityTokenIssuerUpdateCalledCount -eq 1 ) | Should -Be $true
                 }
             }
 
@@ -261,16 +261,16 @@ try
 
                 It "Get-TargetResource: Should return present" {
                     $getResults = Get-TargetResource @testParams
-                    $getResults.Ensure | Should Be "Present"
+                    $getResults.Ensure | Should -Be "Present"
                 }
 
                 It "Test-TargetResource: Should return false" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Set-TargetResource: Realm removed from SPTrustedIdentityTokenIssuer.ProviderRealms" {
                     Set-TargetResource @testParams
-                    $($Global:SPTrustedIdentityTokenIssuerUpdateCalledCount -eq 1) | Should Be $true
+                    $($Global:SPTrustedIdentityTokenIssuerUpdateCalledCount -eq 1) | Should -Be $true
                 }
             }
 
@@ -311,16 +311,16 @@ try
 
                 It "Get-TargetResource: Should return present" {
                     $getResults = Get-TargetResource @testParams
-                    $getResults.Ensure | Should Be "Present"
+                    $getResults.Ensure | Should -Be "Present"
                 }
 
                 It "Test-TargetResource: Should return false" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Set-TargetResource: Realms removed from SPTrustedIdentityTokenIssuer.ProviderRealms" {
                     Set-TargetResource @testParams
-                    $($Global:SPTrustedIdentityTokenIssuerUpdateCalledCount -eq 1) | Should Be $true
+                    $($Global:SPTrustedIdentityTokenIssuerUpdateCalledCount -eq 1) | Should -Be $true
                 }
             }
 
@@ -368,17 +368,17 @@ try
 
                 It "Get-TargetResource: Should return absent" {
                     $getResults = Get-TargetResource @testParams
-                    $getResults.Ensure | Should Be "Absent"
+                    $getResults.Ensure | Should -Be "Absent"
                 }
 
                 It "Test-TargetResource: Should return false" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Set-TargetResource: Realm updated in SPTrustedIdentityTokenIssuer.ProviderRealms" {
                     Set-TargetResource @testParams
                     $($Global:SPTrustedIdentityTokenIssuerAddProviderRealmCalledCount -eq 2 `
-                            -and $Global:SPTrustedIdentityTokenIssuerUpdateCalledCount -eq 1) | Should Be $true
+                            -and $Global:SPTrustedIdentityTokenIssuerUpdateCalledCount -eq 1) | Should -Be $true
                 }
             }
 
@@ -429,17 +429,17 @@ try
 
                 It "Get-TargetResource: Should return absent" {
                     $getResults = Get-TargetResource @testParams
-                    $getResults.Ensure | Should Be "Absent"
+                    $getResults.Ensure | Should -Be "Absent"
                 }
 
                 It "Test-TargetResource: Should return false" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Set-TargetResource: Realm removed in SPTrustedIdentityTokenIssuer.ProviderRealms" {
                     Set-TargetResource @testParams
                     $($Global:SPTrustedIdentityTokenIssuerAddProviderRealmCalledCount -eq 1 `
-                            -and $Global:SPTrustedIdentityTokenIssuerUpdateCalledCount -eq 1) | Should Be $true
+                            -and $Global:SPTrustedIdentityTokenIssuerUpdateCalledCount -eq 1) | Should -Be $true
                 }
             }
 
@@ -479,11 +479,11 @@ try
 
                 It "Get-TargetResource: Should return present" {
                     $getResults = Get-TargetResource @testParams
-                    $getResults.Ensure | Should Be "Present"
+                    $getResults.Ensure | Should -Be "Present"
                 }
 
                 It "Test-TargetResource: Should return true" {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
             }
 
@@ -534,17 +534,17 @@ try
 
                 It "Get-TargetResource: Should return absent" {
                     $getResults = Get-TargetResource @testParams
-                    $getResults.Ensure | Should Be "Absent"
+                    $getResults.Ensure | Should -Be "Absent"
                 }
 
                 It "Test-TargetResource: Should return false" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Set-TargetResource: Realm added in SPTrustedIdentityTokenIssuer.ProviderRealms" {
                     Set-TargetResource @testParams
                     $($Global:SPTrustedIdentityTokenIssuerAddProviderRealmCalledCount -eq 3 `
-                            -and $Global:SPTrustedIdentityTokenIssuerUpdateCalledCount -eq 1) | Should Be $true
+                            -and $Global:SPTrustedIdentityTokenIssuerUpdateCalledCount -eq 1) | Should -Be $true
                 }
             }
 
@@ -601,17 +601,17 @@ try
 
                 It "Get-TargetResource: Should return absent" {
                     $getResults = Get-TargetResource @testParams
-                    $getResults.Ensure | Should Be "Absent"
+                    $getResults.Ensure | Should -Be "Absent"
                 }
 
                 It "Test-TargetResource: Should return false" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Set-TargetResource: Realms included in to SPTrustedIdentityTokenIssuer.ProviderRealms" {
                     Set-TargetResource @testParams
                     $($Global:SPTrustedIdentityTokenIssuerAddProviderRealmCalledCount -eq 2 `
-                            -and $Global:SPTrustedIdentityTokenIssuerUpdateCalledCount -eq 1) | Should Be $true
+                            -and $Global:SPTrustedIdentityTokenIssuerUpdateCalledCount -eq 1) | Should -Be $true
                 }
             }
 
@@ -651,11 +651,11 @@ try
 
                 It "Get-TargetResource: Should return present" {
                     $getResults = Get-TargetResource @testParams
-                    $getResults.Ensure | Should Be "Present"
+                    $getResults.Ensure | Should -Be "Present"
                 }
 
                 It "Test-TargetResource: Should return true" {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
             }
 
@@ -706,17 +706,17 @@ try
 
                 It "Get-TargetResource: Should return present" {
                     $getResults = Get-TargetResource @testParams
-                    $getResults.Ensure | Should Be "Absent"
+                    $getResults.Ensure | Should -Be "Absent"
                 }
 
                 It "Test-TargetResource: Should return false" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Set-TargetResource: Realm updated in SPTrustedIdentityTokenIssuer.ProviderRealms" {
                     Set-TargetResource @testParams
                     $($Global:SPTrustedIdentityTokenIssuerAddProviderRealmCalledCount -eq 2 `
-                            -and $Global:SPTrustedIdentityTokenIssuerUpdateCalledCount -eq 1) | Should Be $true
+                            -and $Global:SPTrustedIdentityTokenIssuerUpdateCalledCount -eq 1) | Should -Be $true
                 }
             }
         }

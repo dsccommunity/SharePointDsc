@@ -79,7 +79,7 @@ try
                     }
 
                     It "Should return true when the Test method is called" {
-                        Test-TargetResource @testParams | Should Be $false
+                        Test-TargetResource @testParams | Should -Be $false
                     }
 
                     It "Should call the remove service app cmdlet from the set method" {
@@ -97,7 +97,7 @@ try
                     Mock -CommandName Get-SPServiceApplication { return $null }
 
                     It "Should throw an exception in the set method" {
-                        { Set-TargetResource @testParams } | Should throw "Parameter ApplicationPool is required unless service is being removed(Ensure='Absent')"
+                        { Set-TargetResource @testParams } | Should -Throw "Parameter ApplicationPool is required unless service is being removed(Ensure='Absent')"
                     }
                 }
 
@@ -111,11 +111,11 @@ try
                     Mock -CommandName Get-SPServiceApplication { return $null }
 
                     It "Should return null from the Get method" {
-                        (Get-TargetResource @testParams).Ensure | Should Be "Absent"
+                        (Get-TargetResource @testParams).Ensure | Should -Be "Absent"
                     }
 
                     It "Should return false when the Test method is called" {
-                        Test-TargetResource @testParams | Should Be $false
+                        Test-TargetResource @testParams | Should -Be $false
                     }
 
                     It "Should create a new service application in the set method" {
@@ -141,11 +141,11 @@ try
                     }
 
                     It "Should return absent from the Get method" {
-                        (Get-TargetResource @testParams).Ensure | Should Be "Absent"
+                        (Get-TargetResource @testParams).Ensure | Should -Be "Absent"
                     }
 
                     It "Should return false when the Test method is called" {
-                        Test-TargetResource @testParams | Should Be $false
+                        Test-TargetResource @testParams | Should -Be $false
                     }
 
                     It "Should create a new service application in the set method" {
@@ -171,9 +171,9 @@ try
                             DisplayName     = $testParams.Name
                             ApplicationPool = @{ Name = $testParams.ApplicationPool }
                             AdminSettings   = @{
-                                MinimumTimeBetweenEwsSyncSubscriptionSearches = (New-TimeSpan -minutes 10)
-                                MinimumTimeBetweenProviderRefreshes           = (New-TimeSpan -minutes 10)
-                                MinimumTimeBetweenSearchQueries               = (New-TimeSpan -minutes 10)
+                                MinimumTimeBetweenEwsSyncSubscriptionSearches = (New-TimeSpan -Minutes 10)
+                                MinimumTimeBetweenProviderRefreshes           = (New-TimeSpan -Minutes 10)
+                                MinimumTimeBetweenSearchQueries               = (New-TimeSpan -Minutes 10)
                                 NumberOfSubscriptionSyncsPerEwsSyncRun        = 10
                                 NumberOfUsersEwsSyncWillProcessAtOnce         = 10
                                 NumberOfUsersPerEwsSyncBatch                  = 10
@@ -186,11 +186,11 @@ try
                     }
 
                     It "Should return values from the get method" {
-                        (Get-TargetResource @testParams).Ensure | Should Be "Present"
+                        (Get-TargetResource @testParams).Ensure | Should -Be "Present"
                     }
 
                     It "Should return true when the Test method is called" {
-                        Test-TargetResource @testParams | Should Be $true
+                        Test-TargetResource @testParams | Should -Be $true
                     }
                 }
 
@@ -211,9 +211,9 @@ try
                             DisplayName     = $testParams.Name
                             ApplicationPool = @{ Name = "Wrong App Pool Name" }
                             AdminSettings   = @{
-                                MinimumTimeBetweenEwsSyncSubscriptionSearches = (New-TimeSpan -minutes 10)
-                                MinimumTimeBetweenProviderRefreshes           = (New-TimeSpan -minutes 10)
-                                MinimumTimeBetweenSearchQueries               = (New-TimeSpan -minutes 10)
+                                MinimumTimeBetweenEwsSyncSubscriptionSearches = (New-TimeSpan -Minutes 10)
+                                MinimumTimeBetweenProviderRefreshes           = (New-TimeSpan -Minutes 10)
+                                MinimumTimeBetweenSearchQueries               = (New-TimeSpan -Minutes 10)
                                 NumberOfSubscriptionSyncsPerEwsSyncRun        = 10
                                 NumberOfUsersEwsSyncWillProcessAtOnce         = 10
                                 NumberOfUsersPerEwsSyncBatch                  = 10
@@ -227,11 +227,11 @@ try
                     Mock -CommandName Set-SPWorkManagementServiceApplication { }
 
                     It "Should return values from the get method" {
-                        (Get-TargetResource @testParams).Ensure | Should Be "Present"
+                        (Get-TargetResource @testParams).Ensure | Should -Be "Present"
                     }
 
                     It "Should return false when the Test method is called" {
-                        Test-TargetResource @testParams | Should Be $false
+                        Test-TargetResource @testParams | Should -Be $false
                     }
 
                     It "Should call the update service app cmdlet from the set method" {
@@ -257,15 +257,15 @@ try
                     }
 
                     It "Should throw an exception in the Get method" {
-                        { Get-TargetResource @testParams } | Should throw "Work Management Service Application is no longer available in SharePoint 2016/2019"
+                        { Get-TargetResource @testParams } | Should -Throw "Work Management Service Application is no longer available in SharePoint 2016/2019"
                     }
 
                     It "Should throw an exception in the Test method" {
-                        { Test-TargetResource @testParams } | Should throw "Work Management Service Application is no longer available in SharePoint 2016/2019"
+                        { Test-TargetResource @testParams } | Should -Throw "Work Management Service Application is no longer available in SharePoint 2016/2019"
                     }
 
                     It "Should throw an exception in the Set method" {
-                        { Set-TargetResource @testParams } | Should throw "Work Management Service Application is no longer available in SharePoint 2016/2019"
+                        { Set-TargetResource @testParams } | Should -Throw "Work Management Service Application is no longer available in SharePoint 2016/2019"
                     }
                 }
             }

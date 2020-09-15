@@ -56,15 +56,15 @@ try
                 {
                     Context -Name "All methods throw exceptions as Project Server support in SharePointDsc is only for 2016" -Fixture {
                         It "Should throw on the get method" {
-                            { Get-TargetResource @testParams } | Should Throw
+                            { Get-TargetResource @testParams } | Should -Throw
                         }
 
                         It "Should throw on the test method" {
-                            { Test-TargetResource @testParams } | Should Throw
+                            { Test-TargetResource @testParams } | Should -Throw
                         }
 
                         It "Should throw on the set method" {
-                            { Set-TargetResource @testParams } | Should Throw
+                            { Set-TargetResource @testParams } | Should -Throw
                         }
                     }
                 }
@@ -185,7 +185,7 @@ try
                         $global:SPDscCurrentTimeSheetSettings = $null
 
                         It "should return null values on properties from the get method" {
-                            (Get-TargetResource @testParams).DefaultTimesheetCreationMode | Should BeNullOrEmpty
+                            (Get-TargetResource @testParams).DefaultTimesheetCreationMode | Should -BeNullOrEmpty
                         }
                     }
 
@@ -238,17 +238,17 @@ try
                         }
 
                         It "Should return the current values from the get method" {
-                            (Get-TargetResource @testParams).DefaultTimesheetCreationMode | Should Be "NoPrepopulation"
+                            (Get-TargetResource @testParams).DefaultTimesheetCreationMode | Should -Be "NoPrepopulation"
                         }
 
                         It "Should return false from the test method" {
-                            Test-TargetResource @testParams | Should Be $false
+                            Test-TargetResource @testParams | Should -Be $false
                         }
 
                         It "Should call update in the set method" {
                             $global:SPDscUpdateTimeSheetSettingsCalled = $false
                             Set-TargetResource @testParams
-                            $global:SPDscUpdateTimeSheetSettingsCalled | Should Be $true
+                            $global:SPDscUpdateTimeSheetSettingsCalled | Should -Be $true
                         }
                     }
 
@@ -301,11 +301,11 @@ try
                         }
 
                         It "Should return the current values from the get method" {
-                            (Get-TargetResource @testParams).DefaultTimesheetCreationMode | Should Be "CurrentProjects"
+                            (Get-TargetResource @testParams).DefaultTimesheetCreationMode | Should -Be "CurrentProjects"
                         }
 
                         It "Should return true from the test method" {
-                            Test-TargetResource @testParams | Should Be $true
+                            Test-TargetResource @testParams | Should -Be $true
                         }
                     }
                 }

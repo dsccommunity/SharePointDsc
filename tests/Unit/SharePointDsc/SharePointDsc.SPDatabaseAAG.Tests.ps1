@@ -81,11 +81,11 @@ try
                 }
 
                 It "Should return the current values from the get method" {
-                    Get-TargetResource @testParams | Should Not BeNullOrEmpty
+                    Get-TargetResource @testParams | Should -Not -BeNullOrEmpty
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should call the add cmdlet in the set method" {
@@ -115,11 +115,11 @@ try
                 }
 
                 It "Should return the current values from the get method" {
-                    Get-TargetResource @testParams | Should Not BeNullOrEmpty
+                    Get-TargetResource @testParams | Should -Not -BeNullOrEmpty
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should call the add cmdlet in the set method" {
@@ -151,11 +151,11 @@ try
                 }
 
                 It "Should return the current values from the get method" {
-                    Get-TargetResource @testParams | Should Not BeNullOrEmpty
+                    Get-TargetResource @testParams | Should -Not -BeNullOrEmpty
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should call the add cmdlet in the set method" {
@@ -181,11 +181,11 @@ try
                 }
 
                 It "Should return the current values from the get method" {
-                    Get-TargetResource @testParams | Should Not BeNullOrEmpty
+                    Get-TargetResource @testParams | Should -Not -BeNullOrEmpty
                 }
 
                 It "Should return true from the test method" {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
             }
 
@@ -210,11 +210,11 @@ try
                 }
 
                 It "Should return the current values from the get method" {
-                    Get-TargetResource @testParams | Should Not BeNullOrEmpty
+                    Get-TargetResource @testParams | Should -Not -BeNullOrEmpty
                 }
 
                 It "Should return true from the test method" {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
             }
 
@@ -237,11 +237,11 @@ try
                 }
 
                 It "Should return the current values from the get method" {
-                    Get-TargetResource @testParams | Should Not BeNullOrEmpty
+                    Get-TargetResource @testParams | Should -Not -BeNullOrEmpty
                 }
 
                 It "Should return true from the test method" {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
             }
 
@@ -270,11 +270,11 @@ try
                 }
 
                 It "Should return the current values from the get method" {
-                    Get-TargetResource @testParams | Should Not BeNullOrEmpty
+                    Get-TargetResource @testParams | Should -Not -BeNullOrEmpty
                 }
 
                 It "Should return true from the test method" {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
             }
 
@@ -297,11 +297,11 @@ try
                 }
 
                 It "Should return the current values from the get method" {
-                    Get-TargetResource @testParams | Should Not BeNullOrEmpty
+                    Get-TargetResource @testParams | Should -Not -BeNullOrEmpty
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should call the remove cmdlet in the set method" {
@@ -335,11 +335,11 @@ try
                 }
 
                 It "Should return the current values from the get method" {
-                    Get-TargetResource @testParams | Should Not BeNullOrEmpty
+                    Get-TargetResource @testParams | Should -Not -BeNullOrEmpty
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should call the remove cmdlet in the set method" {
@@ -373,11 +373,11 @@ try
                 }
 
                 It "Should return the current values from the get method" {
-                    Get-TargetResource @testParams | Should Not BeNullOrEmpty
+                    Get-TargetResource @testParams | Should -Not -BeNullOrEmpty
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should call the remove cmdlet in the set method" {
@@ -405,11 +405,11 @@ try
                 }
 
                 It "Should return the current values from the get method" {
-                    Get-TargetResource @testParams | Should Not BeNullOrEmpty
+                    Get-TargetResource @testParams | Should -Not -BeNullOrEmpty
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should call the remove and add cmdlets in the set method" {
@@ -444,11 +444,11 @@ try
                 }
 
                 It "Should return the current values from the get method" {
-                    Get-TargetResource @testParams | Should Not BeNullOrEmpty
+                    Get-TargetResource @testParams | Should -Not -BeNullOrEmpty
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should call the remove and add cmdlets in the set method" {
@@ -477,15 +477,15 @@ try
                 }
 
                 It "Should return DatabaseName='' from the get method" {
-                    (Get-TargetResource @testParams).DatabaseName | Should Be ""
+                    (Get-TargetResource @testParams).DatabaseName | Should -Be ""
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should throw an exception in the set method" {
-                    { Set-TargetResource @testParams } | Should Throw "Specified database(s) not found."
+                    { Set-TargetResource @testParams } | Should -Throw "Specified database(s) not found."
                 }
             }
 
@@ -506,15 +506,15 @@ try
                     }
 
                     It "Should throw when an unsupported version is installed and get is called" {
-                        { Get-TargetResource @testParams } | Should throw "Adding databases to SQL Always-On Availability Groups require the SharePoint 2013 April 2014 CU to be installed"
+                        { Get-TargetResource @testParams } | Should -Throw "Adding databases to SQL Always-On Availability Groups require the SharePoint 2013 April 2014 CU to be installed"
                     }
 
                     It "Should throw when an unsupported version is installed and test is called" {
-                        { Test-TargetResource @testParams } | Should throw "Adding databases to SQL Always-On Availability Groups require the SharePoint 2013 April 2014 CU to be installed"
+                        { Test-TargetResource @testParams } | Should -Throw "Adding databases to SQL Always-On Availability Groups require the SharePoint 2013 April 2014 CU to be installed"
                     }
 
                     It "Should throw when an unsupported version is installed and set is called" {
-                        { Set-TargetResource @testParams } | Should throw "Adding databases to SQL Always-On Availability Groups require the SharePoint 2013 April 2014 CU to be installed"
+                        { Set-TargetResource @testParams } | Should -Throw "Adding databases to SQL Always-On Availability Groups require the SharePoint 2013 April 2014 CU to be installed"
                     }
                 }
             }

@@ -65,15 +65,15 @@ try
                 }
 
                 It "Should return null from the get method" {
-                    (Get-TargetResource @testParams).WebAppUrl | Should BeNullOrEmpty
+                    (Get-TargetResource @testParams).WebAppUrl | Should -BeNullOrEmpty
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should throw an exception in the set method" {
-                    { Set-TargetResource @testParams } | Should throw
+                    { Set-TargetResource @testParams } | Should -Throw
                 }
             }
 
@@ -101,11 +101,11 @@ try
                 }
 
                 It "Should return web app properties from the get method" {
-                    (Get-TargetResource @testParams).WebAppUrl | Should Be $testParams.WebAppUrl
+                    (Get-TargetResource @testParams).WebAppUrl | Should -Be $testParams.WebAppUrl
                 }
 
                 It "Should return true from the test method" {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
             }
 
@@ -151,17 +151,17 @@ try
                 }
 
                 It "Should return false from the get method" {
-                    (Get-TargetResource @testParams).WebAppUrl | Should Be $testParams.WebAppUrl
+                    (Get-TargetResource @testParams).WebAppUrl | Should -Be $testParams.WebAppUrl
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should call the new and set methods from the set function" {
                     $Global:SPDscUpdateMailSettingsCalled = $false
                     Set-TargetResource @testParams
-                    $Global:SPDscUpdateMailSettingsCalled | Should Be $true
+                    $Global:SPDscUpdateMailSettingsCalled | Should -Be $true
                 }
             }
 
@@ -178,15 +178,15 @@ try
                     }
 
                     It "Should throw an exception in the get method" {
-                        { Get-TargetResource @testParams } | Should Throw "UseTLS is only supported in SharePoint 2016 and SharePoint 2019."
+                        { Get-TargetResource @testParams } | Should -Throw "UseTLS is only supported in SharePoint 2016 and SharePoint 2019."
                     }
 
                     It "Should throw an exception in the test method" {
-                        { Test-TargetResource @testParams } | Should Throw "UseTLS is only supported in SharePoint 2016 and SharePoint 2019."
+                        { Test-TargetResource @testParams } | Should -Throw "UseTLS is only supported in SharePoint 2016 and SharePoint 2019."
                     }
 
                     It "Should throw an exception in the set method" {
-                        { Set-TargetResource @testParams } | Should Throw "UseTLS is only supported in SharePoint 2016 and SharePoint 2019."
+                        { Set-TargetResource @testParams } | Should -Throw "UseTLS is only supported in SharePoint 2016 and SharePoint 2019."
                     }
                 }
 
@@ -201,15 +201,15 @@ try
                     }
 
                     It "Should throw an exception in the get method" {
-                        { Get-TargetResource @testParams } | Should Throw "SMTPPort is only supported in SharePoint 2016 and SharePoint 2019."
+                        { Get-TargetResource @testParams } | Should -Throw "SMTPPort is only supported in SharePoint 2016 and SharePoint 2019."
                     }
 
                     It "Should throw an exception in the test method" {
-                        { Test-TargetResource @testParams } | Should Throw "SMTPPort is only supported in SharePoint 2016 and SharePoint 2019."
+                        { Test-TargetResource @testParams } | Should -Throw "SMTPPort is only supported in SharePoint 2016 and SharePoint 2019."
                     }
 
                     It "Should throw an exception in the set method" {
-                        { Set-TargetResource @testParams } | Should Throw "SMTPPort is only supported in SharePoint 2016 and SharePoint 2019."
+                        { Set-TargetResource @testParams } | Should -Throw "SMTPPort is only supported in SharePoint 2016 and SharePoint 2019."
                     }
                 }
             }
@@ -244,11 +244,11 @@ try
                     }
 
                     It "Should return web app properties from the get method" {
-                        (Get-TargetResource @testParams).WebAppUrl | Should Be $testParams.WebAppUrl
+                        (Get-TargetResource @testParams).WebAppUrl | Should -Be $testParams.WebAppUrl
                     }
 
                     It "Should return true from the test method" {
-                        Test-TargetResource @testParams | Should Be $true
+                        Test-TargetResource @testParams | Should -Be $true
                     }
                 }
 
@@ -305,18 +305,18 @@ try
                     }
 
                     It "Should return false from the get method" {
-                        (Get-TargetResource @testParams).SMTPPort | Should Be 25
-                        (Get-TargetResource @testParams).UseTLS | Should Be $false
+                        (Get-TargetResource @testParams).SMTPPort | Should -Be 25
+                        (Get-TargetResource @testParams).UseTLS | Should -Be $false
                     }
 
                     It "Should return false from the test method" {
-                        Test-TargetResource @testParams | Should Be $false
+                        Test-TargetResource @testParams | Should -Be $false
                     }
 
                     It "Should call the new and set methods from the set function" {
                         $Global:SPDscUpdateMailSettingsCalled = $false
                         Set-TargetResource @testParams
-                        $Global:SPDscUpdateMailSettingsCalled | Should Be $true
+                        $Global:SPDscUpdateMailSettingsCalled | Should -Be $true
                     }
                 }
             }

@@ -69,15 +69,15 @@ try
 
 
                 It "Should return null from the get method" {
-                    (Get-TargetResource @testParams).SPLogLevelSetting | Should BeNullOrEmpty
+                    (Get-TargetResource @testParams).SPLogLevelSetting | Should -BeNullOrEmpty
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should throw an error from the set method" {
-                    { Set-TargetResource @testParams } | Should throw "Exactly one log area, or the wildcard character '*' must be provided for each log item"
+                    { Set-TargetResource @testParams } | Should -Throw "Exactly one log area, or the wildcard character '*' must be provided for each log item"
                 }
             }
 
@@ -95,15 +95,15 @@ try
                 }
 
                 It "Should return null from the get method" {
-                    (Get-TargetResource @testParams).SPLogLevelSetting | Should BeNullOrEmpty
+                    (Get-TargetResource @testParams).SPLogLevelSetting | Should -BeNullOrEmpty
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should throw an error from the set method" {
-                    { Set-TargetResource @testParams } | Should throw "Exactly one log name, or the wildcard character '*' must be provided for each log item"
+                    { Set-TargetResource @testParams } | Should -Throw "Exactly one log name, or the wildcard character '*' must be provided for each log item"
                 }
             }
 
@@ -119,15 +119,15 @@ try
                 }
 
                 It "Should return null from the get method" {
-                    (Get-TargetResource @testParams).SPLogLevelSetting | Should BeNullOrEmpty
+                    (Get-TargetResource @testParams).SPLogLevelSetting | Should -BeNullOrEmpty
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should throw an error from the set method" {
-                    { Set-TargetResource @testParams } | Should throw "TraceLevel and / or EventLevel must be provided for each Area"
+                    { Set-TargetResource @testParams } | Should -Throw "TraceLevel and / or EventLevel must be provided for each Area"
                 }
             }
 
@@ -145,15 +145,15 @@ try
                 }
 
                 It "Should return null from the get method" {
-                    (Get-TargetResource @testParams).SPLogLevelSetting | Should BeNullOrEmpty
+                    (Get-TargetResource @testParams).SPLogLevelSetting | Should -BeNullOrEmpty
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should throw an error from the set method" {
-                    { Set-TargetResource @testParams } | Should throw "TraceLevel detailed is not valid, must specify exactly one of None,Unexpected,Monitorable,High,Medium,Verbose,VerboseEx, or Default"
+                    { Set-TargetResource @testParams } | Should -Throw "TraceLevel detailed is not valid, must specify exactly one of None,Unexpected,Monitorable,High,Medium,Verbose,VerboseEx, or Default"
                 }
             }
 
@@ -171,15 +171,15 @@ try
                 }
 
                 It "Should return null from the get method" {
-                    (Get-TargetResource @testParams).SPLogLevelSetting | Should BeNullOrEmpty
+                    (Get-TargetResource @testParams).SPLogLevelSetting | Should -BeNullOrEmpty
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should throw an error from the set method" {
-                    { Set-TargetResource @testParams } | Should throw "EventLevel detailed is not valid, must specify exactly one of None,ErrorCritical,Error,Warning,Information,Verbose, or Default"
+                    { Set-TargetResource @testParams } | Should -Throw "EventLevel detailed is not valid, must specify exactly one of None,ErrorCritical,Error,Warning,Information,Verbose, or Default"
                 }
             }
 
@@ -208,15 +208,15 @@ try
                 }
 
                 It "Should return 'Default' from the get method [TraceLevel]" {
-                    (Get-TargetResource @testParams).SPLogLevelSetting.TraceLevel | Should Be "Default"
+                    (Get-TargetResource @testParams).SPLogLevelSetting.TraceLevel | Should -Be "Default"
                 }
 
                 It "Should return 'Default' from the get method [EventLevel]" {
-                    (Get-TargetResource @testParams).SPLogLevelSetting.EventLevel | Should Be "Default"
+                    (Get-TargetResource @testParams).SPLogLevelSetting.EventLevel | Should -Be "Default"
                 }
 
                 It "Should return true from the test method" {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
 
             }
@@ -246,15 +246,15 @@ try
                 }
 
                 It "Should return values from the get method [TraceLevel]" {
-                    (Get-TargetResource @testParams).SPLogLevelSetting.TraceLevel | Should Be "Unexpected"
+                    (Get-TargetResource @testParams).SPLogLevelSetting.TraceLevel | Should -Be "Unexpected"
                 }
 
                 It "Should return values from the get method [EventLevel]" {
-                    (Get-TargetResource @testParams).SPLogLevelSetting.EventLevel | Should Be "Error"
+                    (Get-TargetResource @testParams).SPLogLevelSetting.EventLevel | Should -Be "Error"
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should call Set-SPLogLevel for the set method" {
@@ -288,15 +288,15 @@ try
                 }
 
                 It "Should return values from the get method [TraceLevel]" {
-                    (Get-TargetResource @testParams).SPLogLevelSetting.TraceLevel | Should Be "Unexpected"
+                    (Get-TargetResource @testParams).SPLogLevelSetting.TraceLevel | Should -Be "Unexpected"
                 }
 
                 It "Should return values from the get method [EventLevel]" {
-                    (Get-TargetResource @testParams).SPLogLevelSetting.EventLevel | Should Be "Error"
+                    (Get-TargetResource @testParams).SPLogLevelSetting.EventLevel | Should -Be "Error"
                 }
 
                 It "Should return true from the test method" {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
 
             }
@@ -326,15 +326,15 @@ try
                 }
 
                 It "Should return values from the get method [TraceLevel]" {
-                    (Get-TargetResource @testParams).SPLogLevelSetting.TraceLevel | Should Be "Medium"
+                    (Get-TargetResource @testParams).SPLogLevelSetting.TraceLevel | Should -Be "Medium"
                 }
 
                 It "Should return values from the get method [EventLevel]" {
-                    (Get-TargetResource @testParams).SPLogLevelSetting.EventLevel | Should Be "Information"
+                    (Get-TargetResource @testParams).SPLogLevelSetting.EventLevel | Should -Be "Information"
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should call Set-SPLogLevel for the set method" {
@@ -386,15 +386,15 @@ try
                 }
 
                 It "Should return values from the get method [TraceLevel]" {
-                    (Get-TargetResource @testParams).SPLogLevelSetting.TraceLevel | Should Be "Medium"
+                    (Get-TargetResource @testParams).SPLogLevelSetting.TraceLevel | Should -Be "Medium"
                 }
 
                 It "Should return values from the get method [EventLevel]" {
-                    (Get-TargetResource @testParams).SPLogLevelSetting.EventLevel | Should Be "Information"
+                    (Get-TargetResource @testParams).SPLogLevelSetting.EventLevel | Should -Be "Information"
                 }
 
                 It "Should return true from the test method" {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
             }
 
@@ -441,15 +441,15 @@ try
                 }
 
                 It "Should return values from the get method [TraceLevel]" {
-                    (Get-TargetResource @testParams).SPLogLevelSetting.TraceLevel | Should Be "Medium,Verbose"
+                    (Get-TargetResource @testParams).SPLogLevelSetting.TraceLevel | Should -Be "Medium,Verbose"
                 }
 
                 It "Should return values from the get method [EventLevel]" {
-                    (Get-TargetResource @testParams).SPLogLevelSetting.EventLevel | Should Be "Information"
+                    (Get-TargetResource @testParams).SPLogLevelSetting.EventLevel | Should -Be "Information"
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should call Set-SPLogLevel for the set method" {
@@ -526,15 +526,15 @@ try
                 }
 
                 It "Should return values from the get method [TraceLevel]" {
-                    (Get-TargetResource @testParams).SPLogLevelSetting.TraceLevel | Should Be "Default"
+                    (Get-TargetResource @testParams).SPLogLevelSetting.TraceLevel | Should -Be "Default"
                 }
 
                 It "Should return values from the get method [EventLevel]" {
-                    (Get-TargetResource @testParams).SPLogLevelSetting.EventLevel | Should Be "Default"
+                    (Get-TargetResource @testParams).SPLogLevelSetting.EventLevel | Should -Be "Default"
                 }
 
                 It "Should return true from the test method" {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
             }
 
@@ -605,15 +605,15 @@ try
                 }
 
                 It "Should return values from the get method [TraceLevel]" {
-                    (Get-TargetResource @testParams).SPLogLevelSetting.TraceLevel | Should Be "Medium"
+                    (Get-TargetResource @testParams).SPLogLevelSetting.TraceLevel | Should -Be "Medium"
                 }
 
                 It "Should return values from the get method [EventLevel]" {
-                    (Get-TargetResource @testParams).SPLogLevelSetting.EventLevel | Should Be "Information"
+                    (Get-TargetResource @testParams).SPLogLevelSetting.EventLevel | Should -Be "Information"
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should call Set-SPLogLevel for the set method" {
@@ -656,23 +656,23 @@ try
                 }
 
                 It "Should return values from the get method [TraceLevel, first item]" {
-                    ((Get-TargetResource @testParams).SPLogLevelSetting)[0].TraceLevel | Should Be "Medium"
+                    ((Get-TargetResource @testParams).SPLogLevelSetting)[0].TraceLevel | Should -Be "Medium"
                 }
 
                 It "Should return values from the get method [EventLevel], first item" {
-                    ((Get-TargetResource @testParams).SPLogLevelSetting)[0].EventLevel | Should Be "Information"
+                    ((Get-TargetResource @testParams).SPLogLevelSetting)[0].EventLevel | Should -Be "Information"
                 }
 
                 It "Should return values from the get method [TraceLevel, second item]" {
-                    ((Get-TargetResource @testParams).SPLogLevelSetting)[1].TraceLevel | Should Be "Medium"
+                    ((Get-TargetResource @testParams).SPLogLevelSetting)[1].TraceLevel | Should -Be "Medium"
                 }
 
                 It "Should return values from the get method [EventLevel], second item" {
-                    ((Get-TargetResource @testParams).SPLogLevelSetting)[1].EventLevel | Should Be "Information"
+                    ((Get-TargetResource @testParams).SPLogLevelSetting)[1].EventLevel | Should -Be "Information"
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should call Set-SPLogLevel for the set method" {
@@ -715,23 +715,23 @@ try
                 }
 
                 It "Should return values from the get method [TraceLevel, first item]" {
-                    ((Get-TargetResource @testParams).SPLogLevelSetting)[0].TraceLevel | Should Be "Medium"
+                    ((Get-TargetResource @testParams).SPLogLevelSetting)[0].TraceLevel | Should -Be "Medium"
                 }
 
                 It "Should return values from the get method [EventLevel], first item" {
-                    ((Get-TargetResource @testParams).SPLogLevelSetting)[0].EventLevel | Should Be "Information"
+                    ((Get-TargetResource @testParams).SPLogLevelSetting)[0].EventLevel | Should -Be "Information"
                 }
 
                 It "Should return values from the get method [TraceLevel, second item]" {
-                    ((Get-TargetResource @testParams).SPLogLevelSetting)[1].TraceLevel | Should Be "Medium"
+                    ((Get-TargetResource @testParams).SPLogLevelSetting)[1].TraceLevel | Should -Be "Medium"
                 }
 
                 It "Should return values from the get method [EventLevel], second item" {
-                    ((Get-TargetResource @testParams).SPLogLevelSetting)[1].EventLevel | Should Be "Information"
+                    ((Get-TargetResource @testParams).SPLogLevelSetting)[1].EventLevel | Should -Be "Information"
                 }
 
                 It "Should return true from the test method" {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
             }
 
@@ -769,23 +769,23 @@ try
                 }
 
                 It "Should return Default from the get method [TraceLevel, first item]" {
-                    ((Get-TargetResource @testParams).SPLogLevelSetting)[0].TraceLevel | Should Be "Default"
+                    ((Get-TargetResource @testParams).SPLogLevelSetting)[0].TraceLevel | Should -Be "Default"
                 }
 
                 It "Should return Default from the get method [EventLevel], first item" {
-                    ((Get-TargetResource @testParams).SPLogLevelSetting)[0].EventLevel | Should Be "Default"
+                    ((Get-TargetResource @testParams).SPLogLevelSetting)[0].EventLevel | Should -Be "Default"
                 }
 
                 It "Should return Default from the get method [TraceLevel, second item]" {
-                    ((Get-TargetResource @testParams).SPLogLevelSetting)[1].TraceLevel | Should Be "Default"
+                    ((Get-TargetResource @testParams).SPLogLevelSetting)[1].TraceLevel | Should -Be "Default"
                 }
 
                 It "Should return Default from the get method [EventLevel], second item" {
-                    ((Get-TargetResource @testParams).SPLogLevelSetting)[1].EventLevel | Should Be "Default"
+                    ((Get-TargetResource @testParams).SPLogLevelSetting)[1].EventLevel | Should -Be "Default"
                 }
 
                 It "Should return true from the test method" {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
             }
 
@@ -823,23 +823,23 @@ try
                 }
 
                 It "Should return values from the get method [TraceLevel, first item]" {
-                    ((Get-TargetResource @testParams).SPLogLevelSetting)[0].TraceLevel | Should Be "Verbose"
+                    ((Get-TargetResource @testParams).SPLogLevelSetting)[0].TraceLevel | Should -Be "Verbose"
                 }
 
                 It "Should return values from the get method [EventLevel], first item" {
-                    ((Get-TargetResource @testParams).SPLogLevelSetting)[0].EventLevel | Should Be "Warning"
+                    ((Get-TargetResource @testParams).SPLogLevelSetting)[0].EventLevel | Should -Be "Warning"
                 }
 
                 It "Should return values from the get method [TraceLevel, second item]" {
-                    ((Get-TargetResource @testParams).SPLogLevelSetting)[1].TraceLevel | Should Be "Verbose"
+                    ((Get-TargetResource @testParams).SPLogLevelSetting)[1].TraceLevel | Should -Be "Verbose"
                 }
 
                 It "Should return values from the get method [EventLevel], second item" {
-                    ((Get-TargetResource @testParams).SPLogLevelSetting)[1].EventLevel | Should Be "Warning"
+                    ((Get-TargetResource @testParams).SPLogLevelSetting)[1].EventLevel | Should -Be "Warning"
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should call Set-SPLogLevel for the set method" {

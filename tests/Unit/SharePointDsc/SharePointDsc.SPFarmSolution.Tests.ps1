@@ -94,13 +94,13 @@ try
                 $getResults = Get-TargetResource @testParams
 
                 It "Should return the expected empty values from the get method" {
-                    $getResults.Ensure | Should Be "Absent"
-                    $getResults.Version | Should Be "0.0.0.0"
-                    $getResults.Deployed | Should Be $false
+                    $getResults.Ensure | Should -Be "Absent"
+                    $getResults.Version | Should -Be "0.0.0.0"
+                    $getResults.Deployed | Should -Be $false
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "uploads and installes the solution to the farm" {
@@ -159,14 +159,14 @@ try
                 It "Should return the expected empty values from the get method" {
                     $global:SPDscLoopCount = 0
                     $getResults = Get-TargetResource @testParams
-                    $getResults.Ensure | Should Be "Absent"
-                    $getResults.Version | Should Be "0.0.0.0"
-                    $getResults.Deployed | Should Be $false
+                    $getResults.Ensure | Should -Be "Absent"
+                    $getResults.Version | Should -Be "0.0.0.0"
+                    $getResults.Deployed | Should -Be $false
                 }
 
                 It "Should return false from the test method" {
                     $global:SPDscLoopCount = 0
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "uploads and installes the solution to the farm" {
@@ -200,13 +200,13 @@ try
                 $getResults = Get-TargetResource @testParams
 
                 It "Should return the expected values from the get method" {
-                    $getResults.Ensure | Should Be "Present"
-                    $getResults.Version | Should Be "1.0.0.0"
-                    $getResults.Deployed | Should Be $true
+                    $getResults.Ensure | Should -Be "Present"
+                    $getResults.Version | Should -Be "1.0.0.0"
+                    $getResults.Deployed | Should -Be $true
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "uninstalles and removes the solution from the web apps and the farm" {
@@ -231,13 +231,13 @@ try
                 $getResults = Get-TargetResource @testParams
 
                 It "Should return the expected empty values from the get method" {
-                    $getResults.Ensure | Should Be "Absent"
-                    $getResults.Version | Should Be "0.0.0.0"
-                    $getResults.Deployed | Should Be $false
+                    $getResults.Ensure | Should -Be "Absent"
+                    $getResults.Version | Should -Be "0.0.0.0"
+                    $getResults.Deployed | Should -Be $false
                 }
 
                 It "Should return true from the test method" {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
             }
 
@@ -265,13 +265,13 @@ try
                 $getResults = Get-TargetResource @testParams
 
                 It "Should return the expected values from the get method" {
-                    $getResults.Ensure | Should Be "Present"
-                    $getResults.Version | Should Be "1.0.0.0"
-                    $getResults.Deployed | Should Be $true
+                    $getResults.Ensure | Should -Be "Present"
+                    $getResults.Version | Should -Be "1.0.0.0"
+                    $getResults.Deployed | Should -Be $true
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should update the solution in the set method" {
@@ -303,13 +303,13 @@ try
                 $getResults = Get-TargetResource @testParams
 
                 It "Should return the expected values from the get method" {
-                    $getResults.Ensure | Should Be "Present"
-                    $getResults.Version | Should Be "1.0.0.0"
-                    $getResults.Deployed | Should Be $true
+                    $getResults.Ensure | Should -Be "Present"
+                    $getResults.Version | Should -Be "1.0.0.0"
+                    $getResults.Deployed | Should -Be $true
                 }
 
                 It "Should return true from the test method" {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
             }
 
@@ -337,13 +337,13 @@ try
                 $getResults = Get-TargetResource @testParams
 
                 It "Should return the expected values from the get method" {
-                    $getResults.Ensure | Should Be "Present"
-                    $getResults.Version | Should Be "1.0.0.0"
-                    $getResults.Deployed | Should Be $false
+                    $getResults.Ensure | Should -Be "Present"
+                    $getResults.Version | Should -Be "1.0.0.0"
+                    $getResults.Deployed | Should -Be $false
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should update the solution in the set method" {

@@ -193,15 +193,15 @@ try
 
                 It "Should return null from the Get method" {
                     $Global:UpsConfigManagerGetSectionByNameCalled = $false
-                    (Get-TargetResource @testParams).Ensure | Should Be "Absent"
+                    (Get-TargetResource @testParams).Ensure | Should -Be "Absent"
                     Assert-MockCalled Get-SPServiceApplication -ParameterFilter { $Name -eq $testParams.UserProfileService }
-                    $Global:UpsConfigManagerGetSectionByNameCalled | Should be $true
+                    $Global:UpsConfigManagerGetSectionByNameCalled | Should -Be $true
                 }
 
                 It "Should return false when the Test method is called" {
                     $Global:UpsConfigManagerGetSectionByNameCalled = $false
-                    Test-TargetResource @testParams | Should Be $false
-                    $Global:UpsConfigManagerGetSectionByNameCalled | Should be $true
+                    Test-TargetResource @testParams | Should -Be $false
+                    $Global:UpsConfigManagerGetSectionByNameCalled | Should -Be $true
                 }
 
                 It "Should create a new user profile section in the set method" {
@@ -210,9 +210,9 @@ try
                     $Global:SPUPSPropertyCommitCalled = $false;
 
                     Set-TargetResource @testParams
-                    $Global:SPUPSubTypeCreateCalled | Should be $false
-                    $Global:SPUPSPropertyCommitCalled | Should be $true
-                    $Global:UpsConfigManagerSetDisplayOrderBySectionNameCalled | Should be $true
+                    $Global:SPUPSubTypeCreateCalled | Should -Be $false
+                    $Global:SPUPSPropertyCommitCalled | Should -Be $true
+                    $Global:UpsConfigManagerSetDisplayOrderBySectionNameCalled | Should -Be $true
                 }
 
             }
@@ -220,19 +220,19 @@ try
                 It "Should return valid value from the Get method" {
                     $Global:UpsConfigManagerGetSectionByNameCalled = $true
 
-                    (Get-TargetResource @testParams).Ensure | Should Be "Present"
-                    $Global:UpsConfigManagerGetSectionByNameCalled | Should be $true
+                    (Get-TargetResource @testParams).Ensure | Should -Be "Present"
+                    $Global:UpsConfigManagerGetSectionByNameCalled | Should -Be $true
                 }
 
                 It "Should return true when the Test method is called" {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
                 It "Should update an user profile property in the set method" {
                     $Global:UpsConfigManagerCommitCalled = $false
                     $Global:UpsConfigManagerSetDisplayOrderBySectionNameCalled = $false
                     Set-TargetResource @testParams
-                    $Global:UpsConfigManagerCommitCalled | Should be $false
-                    $Global:UpsConfigManagerSetDisplayOrderBySectionNameCalled | Should be $true
+                    $Global:UpsConfigManagerCommitCalled | Should -Be $false
+                    $Global:UpsConfigManagerSetDisplayOrderBySectionNameCalled | Should -Be $true
                 }
             }
 
@@ -251,7 +251,7 @@ try
 
                 It "Should return true when the Test method is called" {
                     $Global:SPUPGetSectionByNameCalled = $true
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
 
                 }
 
@@ -260,7 +260,7 @@ try
                     $Global:UpsConfigManagerGetSectionByNameCalled = $true
                     $Global:UpsConfigManagerRemoveSectionByNameCalled = $false
                     Set-TargetResource @testParams
-                    $Global:UpsConfigManagerRemoveSectionByNameCalled | Should be $true
+                    $Global:UpsConfigManagerRemoveSectionByNameCalled | Should -Be $true
                 }
             }
 
@@ -282,13 +282,13 @@ try
                 It "Should return valid value from the Get method" {
                     $Global:SPUPGetSectionByNameCalled = $true
                     $currentValues = Get-TargetResource @testParams
-                    $currentValues.Ensure | Should Be "Present"
+                    $currentValues.Ensure | Should -Be "Present"
                     Assert-MockCalled Get-SPServiceApplication -ParameterFilter { $Name -eq $testParams.UserProfileService }
                 }
 
                 It "Should return false when the Test method is called" {
                     $Global:SPUPGetSectionByNameCalled = $true
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
                 It "Should update an user profile property in the set method" {
                     $Global:SPUPSubTypeCreateCalled = $false
@@ -296,8 +296,8 @@ try
                     $Global:SPUPGetSectionByNameCalled = $true
                     Set-TargetResource @testParams
                     Assert-MockCalled Set-SPDscObjectPropertyIfValuePresent
-                    $Global:SPUPSubTypeCreateCalled | Should be $false
-                    $Global:UpsConfigManagerSetDisplayOrderBySectionNameCalled | Should be $true
+                    $Global:SPUPSubTypeCreateCalled | Should -Be $false
+                    $Global:UpsConfigManagerSetDisplayOrderBySectionNameCalled | Should -Be $true
                 }
             }
         }

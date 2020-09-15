@@ -84,7 +84,7 @@ try
                 }
 
                 It "Should throw exception in the set method" {
-                    { Set-TargetResource @testParams } | Should Throw "Web application was not found. Please check WebAppName parameter!"
+                    { Set-TargetResource @testParams } | Should -Throw "Web application was not found. Please check WebAppName parameter!"
                 }
             }
 
@@ -118,11 +118,11 @@ try
                 }
 
                 It "Should return Ensure=Absent in the get method" {
-                    (Get-TargetResource @testParams).Ensure | Should Be "Absent"
+                    (Get-TargetResource @testParams).Ensure | Should -Be "Absent"
                 }
 
                 It "Should return false from the test method" {
-                    Test-targetResource @testParams | Should Be $false
+                    Test-targetResource @testParams | Should -Be $false
                 }
 
                 It "Should call the new function in the set method" {
@@ -155,11 +155,11 @@ try
                 }
 
                 It "Should return Ensure=Absent in the get method" {
-                    (Get-TargetResource @testParams).Ensure | Should Be "Absent"
+                    (Get-TargetResource @testParams).Ensure | Should -Be "Absent"
                 }
 
                 It "Should return false from the test method" {
-                    Test-targetResource @testParams | Should Be $false
+                    Test-targetResource @testParams | Should -Be $false
                 }
 
                 It "Should call the new function in the set method" {
@@ -204,11 +204,11 @@ try
                 }
 
                 It "Should return Ensure=Present in the get method" {
-                    (Get-TargetResource @testParams).Ensure | Should Be "Present"
+                    (Get-TargetResource @testParams).Ensure | Should -Be "Present"
                 }
 
                 It "Should return false from the test method" {
-                    Test-targetResource @testParams | Should Be $true
+                    Test-targetResource @testParams | Should -Be $true
                 }
             }
 
@@ -242,15 +242,15 @@ try
                 }
 
                 It "Should return Ensure=Present in the get method" {
-                    (Get-TargetResource @testParams).Ensure | Should Be "Present"
+                    (Get-TargetResource @testParams).Ensure | Should -Be "Present"
                 }
 
                 It "Should return false from the test method" {
-                    Test-targetResource @testParams | Should Be $false
+                    Test-targetResource @testParams | Should -Be $false
                 }
 
                 It "Should throw an exception in the set method" {
-                    { Set-TargetResource @testParams } | Should Throw "Specified URL found on different WebApp/Zone: WebApp"
+                    { Set-TargetResource @testParams } | Should -Throw "Specified URL found on different WebApp/Zone: WebApp"
                 }
             }
 
@@ -290,15 +290,15 @@ try
                 }
 
                 It "Should return Ensure=Present in the get method" {
-                    (Get-TargetResource @testParams).Ensure | Should Be "Present"
+                    (Get-TargetResource @testParams).Ensure | Should -Be "Present"
                 }
 
                 It "Should return false from the test method" {
-                    Test-targetResource @testParams | Should Be $false
+                    Test-targetResource @testParams | Should -Be $false
                 }
 
                 It "Should throw an exception in the set method" {
-                    { Set-TargetResource @testParams } | Should Throw "Specified URL"
+                    { Set-TargetResource @testParams } | Should -Throw "Specified URL"
                 }
             }
 
@@ -343,11 +343,11 @@ try
                 }
 
                 It "Should return Ensure=Present in the get method" {
-                    (Get-TargetResource @testParams).Ensure | Should Be "Present"
+                    (Get-TargetResource @testParams).Ensure | Should -Be "Present"
                 }
 
                 It "Should return false from the test method" {
-                    Test-targetResource @testParams | Should Be $false
+                    Test-targetResource @testParams | Should -Be $false
                 }
 
                 It "Should call the Remove function in the set method" {
@@ -386,11 +386,11 @@ try
                 }
 
                 It "Should return Ensure=Absent in the get method" {
-                    (Get-TargetResource @testParams).Ensure | Should Be "Absent"
+                    (Get-TargetResource @testParams).Ensure | Should -Be "Absent"
                 }
 
                 It "Should return false from the test method" {
-                    Test-targetResource @testParams | Should Be $false
+                    Test-targetResource @testParams | Should -Be $false
                 }
 
                 It "Should call the new function in the set method" {
@@ -440,11 +440,11 @@ try
                 }
 
                 It "Should return Ensure=Present in the get method" {
-                    (Get-TargetResource @testParams).Ensure | Should Be "Present"
+                    (Get-TargetResource @testParams).Ensure | Should -Be "Present"
                 }
 
                 It "Should return false from the test method" {
-                    Test-targetResource @testParams | Should Be $false
+                    Test-targetResource @testParams | Should -Be $false
                 }
 
                 It "Should call the Set function in the set method" {
@@ -489,11 +489,11 @@ try
                 }
 
                 It "Should return Ensure=Present in the get method" {
-                    (Get-TargetResource @testParams).Ensure | Should Be "Present"
+                    (Get-TargetResource @testParams).Ensure | Should -Be "Present"
                 }
 
                 It "Should return true from the test method" {
-                    Test-targetResource @testParams | Should Be $true
+                    Test-targetResource @testParams | Should -Be $true
                 }
             }
 
@@ -533,11 +533,11 @@ try
                 }
 
                 It "Should return Ensure=Present in the get method" {
-                    (Get-TargetResource @testParams).Ensure | Should Be "Present"
+                    (Get-TargetResource @testParams).Ensure | Should -Be "Present"
                 }
 
                 It "Should return false from the test method" {
-                    Test-targetResource @testParams | Should Be $false
+                    Test-targetResource @testParams | Should -Be $false
                 }
 
                 It "Should call the Remove function in the set method" {

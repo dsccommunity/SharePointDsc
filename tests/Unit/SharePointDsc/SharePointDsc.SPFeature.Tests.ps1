@@ -65,11 +65,11 @@ try
                 Mock -CommandName Get-SPFeature -MockWith { return $null }
 
                 It "Should return null from the get method" {
-                    (Get-TargetResource @testParams).Ensure | Should Be "Absent"
+                    (Get-TargetResource @testParams).Ensure | Should -Be "Absent"
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
             }
 
@@ -86,11 +86,11 @@ try
                 }
 
                 It "Should return null from the get method" {
-                    (Get-TargetResource @testParams).Ensure | Should Be "Absent"
+                    (Get-TargetResource @testParams).Ensure | Should -Be "Absent"
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should enable the feature in the set method" {
@@ -113,11 +113,11 @@ try
                 }
 
                 It "Should return null from the get method" {
-                    (Get-TargetResource @testParams).Ensure | Should Be "Absent"
+                    (Get-TargetResource @testParams).Ensure | Should -Be "Absent"
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should enable the feature in the set method" {
@@ -140,11 +140,11 @@ try
                 }
 
                 It "Should return null from the get method" {
-                    (Get-TargetResource @testParams).Ensure | Should Be "Present"
+                    (Get-TargetResource @testParams).Ensure | Should -Be "Present"
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should enable the feature in the set method" {
@@ -166,11 +166,11 @@ try
                 }
 
                 It "Should return null from the get method" {
-                    (Get-TargetResource @testParams).Ensure | Should Be "Present"
+                    (Get-TargetResource @testParams).Ensure | Should -Be "Present"
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should enable the feature in the set method" {
@@ -190,7 +190,7 @@ try
                 Mock -CommandName Get-SPFeature -MockWith { return @{ } }
 
                 It "Should return true from the test method" {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
             }
 
@@ -205,7 +205,7 @@ try
                 Mock -CommandName Get-SPFeature -MockWith { return @{ } }
 
                 It "Should return true from the test method" {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
             }
 
@@ -221,11 +221,11 @@ try
                 Mock -CommandName Get-SPFeature -MockWith { return @{ Version = "1.0.0.0" } }
 
                 It "Should return the version from the get method" {
-                    (Get-TargetResource @testParams).Version | Should Be "1.0.0.0"
+                    (Get-TargetResource @testParams).Version | Should -Be "1.0.0.0"
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "reactivates the feature in the set method" {

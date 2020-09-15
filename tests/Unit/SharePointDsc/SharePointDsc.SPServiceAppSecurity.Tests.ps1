@@ -108,15 +108,15 @@ try
                 }
 
                 It "Should return empty members list from the get method" {
-                    (Get-TargetResource @testParams).Members | Should BeNullOrEmpty
+                    (Get-TargetResource @testParams).Members | Should -BeNullOrEmpty
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should throw an exception in the set method" {
-                    { Set-TargetResource @testParams } | Should Throw
+                    { Set-TargetResource @testParams } | Should -Throw
                 }
             }
 
@@ -127,11 +127,11 @@ try
                 }
 
                 It "Should throw an exception from the test method" {
-                    { Test-TargetResource @testParams } | Should Throw
+                    { Test-TargetResource @testParams } | Should -Throw
                 }
 
                 It "Should throw an exception from the set method" {
-                    { Set-TargetResource @testParams } | Should Throw
+                    { Set-TargetResource @testParams } | Should -Throw
                 }
             }
 
@@ -159,11 +159,11 @@ try
                 }
 
                 It "Should throw an exception from the test method" {
-                    { Test-TargetResource @testParams } | Should Throw
+                    { Test-TargetResource @testParams } | Should -Throw
                 }
 
                 It "Should throw an exception from the set method" {
-                    { Set-TargetResource @testParams } | Should Throw
+                    { Set-TargetResource @testParams } | Should -Throw
                 }
             }
 
@@ -204,15 +204,15 @@ try
                 }
 
                 It "Should return en empty ServiceAppName from the get method" {
-                    (Get-TargetResource @testParams).ServiceAppName | Should Be ""
+                    (Get-TargetResource @testParams).ServiceAppName | Should -Be ""
                 }
 
                 It "Should return False from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should throw an exception in the set method" {
-                    { Set-TargetResource @testParams } | Should Throw "Unknown AccessLevel is used"
+                    { Set-TargetResource @testParams } | Should -Throw "Unknown AccessLevel is used"
                 }
             }
 
@@ -253,15 +253,15 @@ try
                 }
 
                 It "Should return en empty ServiceAppName from the get method" {
-                    (Get-TargetResource @testParams).ServiceAppName | Should Be ""
+                    (Get-TargetResource @testParams).ServiceAppName | Should -Be ""
                 }
 
                 It "Should return False from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should throw an exception in the set method" {
-                    { Set-TargetResource @testParams } | Should Throw "Unknown AccessLevel is used"
+                    { Set-TargetResource @testParams } | Should -Throw "Unknown AccessLevel is used"
                 }
             }
 
@@ -317,12 +317,12 @@ try
 
                 $Global:SPDscRunCount = 0
                 It "Should return a list of current members from the get method" {
-                    (Get-TargetResource @testParams).Members | Should Not BeNullOrEmpty
+                    (Get-TargetResource @testParams).Members | Should -Not -BeNullOrEmpty
                 }
 
                 $Global:SPDscRunCount = 0
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 $Global:SPDscRunCount = 0
@@ -396,11 +396,11 @@ try
                 }
 
                 It "Should return a list of current members from the get method" {
-                    (Get-TargetResource @testParams).Members | Should Not BeNullOrEmpty
+                    (Get-TargetResource @testParams).Members | Should -Not -BeNullOrEmpty
                 }
 
                 It "Should return true from the test method" {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
             }
 
@@ -451,12 +451,12 @@ try
 
                 $Global:SPDscRunCount = 0
                 It "Should return a list of current members from the get method" {
-                    (Get-TargetResource @testParams).Members | Should Not BeNullOrEmpty
+                    (Get-TargetResource @testParams).Members | Should -Not -BeNullOrEmpty
                 }
 
                 $Global:SPDscRunCount = 0
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 $Global:SPDscRunCount = 0
@@ -491,11 +491,11 @@ try
                 }
 
                 It "Should return a list of current members from the get method" {
-                    (Get-TargetResource @testParams).Members | Should Not BeNullOrEmpty
+                    (Get-TargetResource @testParams).Members | Should -Not -BeNullOrEmpty
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should call the update cmdlet from the set method" {
@@ -556,11 +556,11 @@ try
                 }
 
                 It "Should return a list of current members from the get method" {
-                    (Get-TargetResource @testParams).Members | Should Not BeNullOrEmpty
+                    (Get-TargetResource @testParams).Members | Should -Not -BeNullOrEmpty
                 }
 
                 It "Should return true from the test method" {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
             }
 
@@ -613,7 +613,7 @@ try
 
                 $Global:SPDscRunCount = 0
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
             }
 
@@ -663,7 +663,7 @@ try
 
                 $Global:SPDscRunCount = 0
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 $Global:SPDscRunCount = 0
@@ -720,7 +720,7 @@ try
 
                 $Global:SPDscRunCount = 0
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 $Global:SPDscRunCount = 0
@@ -749,7 +749,7 @@ try
                 }
 
                 It "Should return true from the test method" {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
                 It "Should call the update cmdlet from the set method" {
                     Set-TargetResource @testParams
@@ -781,7 +781,7 @@ try
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
                 It "Should call the update cmdlet from the set method" {
                     Set-TargetResource @testParams
@@ -846,11 +846,11 @@ try
                 }
 
                 It "Should return a list of current members from the get method" {
-                    (Get-TargetResource @testParams).Members | Should Not BeNullOrEmpty
+                    (Get-TargetResource @testParams).Members | Should -Not -BeNullOrEmpty
                 }
 
                 It "Should return true from the test method" {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
             }
 
@@ -906,11 +906,11 @@ try
 
                 It "Should return local farm token in the list of current members from the get method" {
                     $members = (Get-TargetResource @testParams).Members
-                    $members[0].Username | Should Be "{LocalFarm}"
+                    $members[0].Username | Should -Be "{LocalFarm}"
                 }
 
                 It "Should return true from the test method" {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
             }
 
@@ -956,7 +956,7 @@ try
 
                 $Global:SPDscRunCount = 0
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 $Global:SPDscRunCount = 0
@@ -1014,7 +1014,7 @@ try
 
                 $Global:SPDscRunCount = 0
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 $Global:SPDscRunCount = 0
@@ -1049,7 +1049,7 @@ try
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should call the update cmdlet from the set method" {
@@ -1083,7 +1083,7 @@ try
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should call the update cmdlet from the set method" {
@@ -1156,12 +1156,12 @@ try
 
                 It "Should return list of all named access rights included for user" {
                     $result = Get-TargetResource @testParams
-                    $result.Members | Should Not BeNullOrEmpty
-                    $result.Members[0].AccessLevels | Should Be @("Contribute", "Read")
+                    $result.Members | Should -Not -BeNullOrEmpty
+                    $result.Members[0].AccessLevels | Should -Be @("Contribute", "Read")
                 }
 
                 It "Should return true from the test method" {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
             }
         }

@@ -117,7 +117,7 @@ try
                 }
 
                 It "Should return DLTCMaxConnectionsToServer equals 5" {
-                    (Get-TargetResource @testParams).DLTCMaxConnectionsToServer | Should Be 5
+                    (Get-TargetResource @testParams).DLTCMaxConnectionsToServer | Should -Be 5
                 }
 
                 It "Should properly set the settings" {
@@ -126,7 +126,7 @@ try
                 }
 
                 It "Should return false from Test-TargetResource" {
-                    (Test-TargetResource @testParams) | Should Be $false
+                    (Test-TargetResource @testParams) | Should -Be $false
                 }
             }
 
@@ -192,11 +192,11 @@ try
                 }
 
                 It "Should return DLTCMaxConnectionsToServer equals 5" {
-                    (Get-TargetResource @testParams).DLTCMaxConnectionsToServer | Should Be 1
+                    (Get-TargetResource @testParams).DLTCMaxConnectionsToServer | Should -Be 1
                 }
 
                 It "Should return true from test the resource" {
-                    (Test-TargetResource @testParams) | Should Be $true
+                    (Test-TargetResource @testParams) | Should -Be $true
                 }
             }
 
@@ -220,15 +220,15 @@ try
                     }
 
                     It "Should throw exception in the Get method" {
-                        { Get-TargetResource @testParams } | Should Throw "The following parameters are only supported in SharePoint 2016 and above"
+                        { Get-TargetResource @testParams } | Should -Throw "The following parameters are only supported in SharePoint 2016 and above"
                     }
 
                     It "Should throw exception in the Set method" {
-                        { Set-TargetResource @testParams } | Should Throw "The following parameters are only supported in SharePoint 2016 and above"
+                        { Set-TargetResource @testParams } | Should -Throw "The following parameters are only supported in SharePoint 2016 and above"
                     }
 
                     It "Should throw exception in the Test method" {
-                        { Test-TargetResource @testParams } | Should Throw "The following parameters are only supported in SharePoint 2016 and above"
+                        { Test-TargetResource @testParams } | Should -Throw "The following parameters are only supported in SharePoint 2016 and above"
                     }
                 }
             }

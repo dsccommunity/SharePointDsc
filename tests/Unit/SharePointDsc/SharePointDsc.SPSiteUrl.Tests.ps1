@@ -88,11 +88,11 @@ try
                 Mock -CommandName Get-SPSite -MockWith { return $null }
 
                 It "Should return null for Intranet zone from the get method" {
-                    (Get-TargetResource @testParams).Intranet | Should BeNullOrEmpty
+                    (Get-TargetResource @testParams).Intranet | Should -BeNullOrEmpty
                 }
 
                 It "Should create a new site from the set method" {
-                    { Set-TargetResource @testParams } | Should Throw "No zone specified. Please specify a zone"
+                    { Set-TargetResource @testParams } | Should -Throw "No zone specified. Please specify a zone"
                 }
             }
 
@@ -107,15 +107,15 @@ try
                 }
 
                 It "Should return null for Intranet zone from the get method" {
-                    (Get-TargetResource @testParams).Intranet | Should BeNullOrEmpty
+                    (Get-TargetResource @testParams).Intranet | Should -BeNullOrEmpty
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should return true from the test method" {
-                    { Set-TargetResource @testParams } | Should Throw "Specified site $($testParams.Url) does not exist"
+                    { Set-TargetResource @testParams } | Should -Throw "Specified site $($testParams.Url) does not exist"
                 }
             }
 
@@ -132,15 +132,15 @@ try
                 }
 
                 It "Should return null for Intranet zone from the get method" {
-                    (Get-TargetResource @testParams).Intranet | Should BeNullOrEmpty
+                    (Get-TargetResource @testParams).Intranet | Should -BeNullOrEmpty
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should throw exception from the set method" {
-                    { Set-TargetResource @testParams } | Should Throw "Specified site $($testParams.Url) is not a Host Named Site Collection"
+                    { Set-TargetResource @testParams } | Should -Throw "Specified site $($testParams.Url) is not a Host Named Site Collection"
                 }
             }
 
@@ -167,7 +167,7 @@ try
                 }
 
                 It "Should throw an exception in the set method" {
-                    { Set-TargetResource @testParams } | Should Throw "Specified URL $($testParams.Intranet) (Zone: Intranet) is already assigned to a site collection"
+                    { Set-TargetResource @testParams } | Should -Throw "Specified URL $($testParams.Intranet) (Zone: Intranet) is already assigned to a site collection"
                 }
             }
 
@@ -193,7 +193,7 @@ try
                 }
 
                 It "Should throw an exception in the set method" {
-                    { Set-TargetResource @testParams } | Should Throw "Specified URL $($testParams.Internet) (Zone: Internet) is already assigned to a site collection"
+                    { Set-TargetResource @testParams } | Should -Throw "Specified URL $($testParams.Internet) (Zone: Internet) is already assigned to a site collection"
                 }
             }
 
@@ -219,7 +219,7 @@ try
                 }
 
                 It "Should throw an exception in the set method" {
-                    { Set-TargetResource @testParams } | Should Throw "Specified URL $($testParams.Extranet) (Zone: Extranet) is already assigned to a site collection"
+                    { Set-TargetResource @testParams } | Should -Throw "Specified URL $($testParams.Extranet) (Zone: Extranet) is already assigned to a site collection"
                 }
             }
 
@@ -245,7 +245,7 @@ try
                 }
 
                 It "Should throw an exception in the set method" {
-                    { Set-TargetResource @testParams } | Should Throw "Specified URL $($testParams.Custom) (Zone: Custom) is already assigned to a site collection"
+                    { Set-TargetResource @testParams } | Should -Throw "Specified URL $($testParams.Custom) (Zone: Custom) is already assigned to a site collection"
                 }
             }
 
@@ -263,12 +263,12 @@ try
 
                 It "Should return values for the Intranet and Internet zones from the get method" {
                     $result = Get-TargetResource @testParams
-                    $result.Intranet | Should Be "http://sharepoint.contoso.com"
-                    $result.Internet | Should Be "https://sharepoint.contoso.com"
+                    $result.Intranet | Should -Be "http://sharepoint.contoso.com"
+                    $result.Internet | Should -Be "https://sharepoint.contoso.com"
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 $global:SpDscSPSiteUrlRanOnce = $false
@@ -319,12 +319,12 @@ try
                 $global:SpDscSPSiteUrlRanOnce = $false
                 It "Should return values for the Intranet and Internet zones from the get method" {
                     $result = Get-TargetResource @testParams
-                    $result.Extranet | Should Be "http://sharepoint.contoso.com"
-                    $result.Custom | Should Be "https://sharepoint.contoso.com"
+                    $result.Extranet | Should -Be "http://sharepoint.contoso.com"
+                    $result.Custom | Should -Be "https://sharepoint.contoso.com"
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 $global:SpDscSPSiteUrlRanOnce = $false
@@ -376,12 +376,12 @@ try
                 $global:SpDscSPSiteUrlRanOnce = $false
                 It "Should return values for the Intranet and Internet zones from the get method" {
                     $result = Get-TargetResource @testParams
-                    $result.Intranet | Should Be "http://sharepoint.contoso.com"
-                    $result.Internet | Should Be "https://sharepoint.contoso.com"
+                    $result.Intranet | Should -Be "http://sharepoint.contoso.com"
+                    $result.Internet | Should -Be "https://sharepoint.contoso.com"
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 $global:SpDscSPSiteUrlRanOnce = $false
@@ -408,13 +408,13 @@ try
                 $global:SpDscSPSiteUrlRanOnce = $false
                 It "Should return values for the Intranet and Internet zones from the get method" {
                     $result = Get-TargetResource @testParams
-                    $result.Intranet | Should Be "http://sharepoint.contoso.com"
-                    $result.Internet | Should Be "https://sharepoint.contoso.com"
+                    $result.Intranet | Should -Be "http://sharepoint.contoso.com"
+                    $result.Internet | Should -Be "https://sharepoint.contoso.com"
                 }
 
                 $global:SpDscSPSiteUrlRanOnce = $false
                 It "Should return true from the test method" {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
             }
         }

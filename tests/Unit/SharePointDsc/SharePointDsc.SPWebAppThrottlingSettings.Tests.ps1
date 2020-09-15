@@ -119,11 +119,11 @@ try
                         }) }
 
                 It "Should return the current data from the get method" {
-                    (Get-TargetResource @testParams).ListViewThreshold | Should Be $testParams.ListViewThreshold
+                    (Get-TargetResource @testParams).ListViewThreshold | Should -Be $testParams.ListViewThreshold
                 }
 
                 It "Should return true from the test method" {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
             }
 
@@ -196,18 +196,18 @@ try
                 }
 
                 It "Should return the current data from the get method" {
-                    (Get-TargetResource @testParams).ListViewThreshold | Should Be 1
+                    (Get-TargetResource @testParams).ListViewThreshold | Should -Be 1
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 $Global:SPDscWebApplicationUpdateCalled = $false
                 $Global:SPDscWebApplicationUpdateHappyHourCalled = $false
                 It "Should update the throttling settings" {
                     Set-TargetResource @testParams
-                    $Global:SPDscWebApplicationUpdateCalled | Should Be $true
+                    $Global:SPDscWebApplicationUpdateCalled | Should -Be $true
                 }
 
                 $testParams = @{
@@ -232,8 +232,8 @@ try
                 $Global:SPDscWebApplicationUpdateHappyHourCalled = $false
                 It "Should update the incorrect happy hour settings" {
                     Set-TargetResource @testParams
-                    $Global:SPDscWebApplicationUpdateCalled | Should Be $true
-                    $Global:SPDscWebApplicationUpdateHappyHourCalled | Should Be $true
+                    $Global:SPDscWebApplicationUpdateCalled | Should -Be $true
+                    $Global:SPDscWebApplicationUpdateHappyHourCalled | Should -Be $true
                 }
 
                 It "Should throw exceptions where invalid happy hour settings are provided" {
@@ -252,7 +252,7 @@ try
                                     } -ClientOnly)
                             } -ClientOnly)
                     }
-                    { Set-TargetResource @testParams } | Should throw
+                    { Set-TargetResource @testParams } | Should -Throw
 
                     $testParams = @{
                         Name                   = "SharePoint Sites"
@@ -269,7 +269,7 @@ try
                                     } -ClientOnly)
                             } -ClientOnly)
                     }
-                    { Set-TargetResource @testParams } | Should throw
+                    { Set-TargetResource @testParams } | Should -Throw
 
                     $testParams = @{
                         Name                   = "SharePoint Sites"
@@ -286,7 +286,7 @@ try
                                     } -ClientOnly)
                             } -ClientOnly)
                     }
-                    { Set-TargetResource @testParams } | Should throw
+                    { Set-TargetResource @testParams } | Should -Throw
                 }
             }
         }

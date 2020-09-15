@@ -158,7 +158,7 @@ try
                 }
 
                 It "Should return false from the Test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
             }
 
@@ -244,11 +244,11 @@ try
                 } -ParameterFilter { $TypeName -eq "System.Security.Cryptography.X509Certificates.X509Certificate2" }
 
                 It "should fail validation of signing certificate parameters in the Set method" {
-                    { Set-TargetResource @testParams } | Should Throw "Imported certificate thumbprint (1111111111111111111111111111111111111111) does not match expected thumbprint ($SPTrustSigningCertificateThumbprint)."
+                    { Set-TargetResource @testParams } | Should -Throw "Imported certificate thumbprint (1111111111111111111111111111111111111111) does not match expected thumbprint ($SPTrustSigningCertificateThumbprint)."
                 }
 
                 It "should fail validation of signing certificate parameters in the Test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
             }
 
@@ -287,11 +287,11 @@ try
                 } -ParameterFilter { $TypeName -eq "System.Security.Cryptography.X509Certificates.X509Certificate2" }
 
                 It "should fail validation of signing certificate parameters in the Set method" {
-                    { Set-TargetResource @testParams } | Should Not Throw
+                    { Set-TargetResource @testParams } | Should -Not -Throw
                 }
 
                 It "should fail validation of signing certificate parameters in the Test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
             }
 
@@ -307,11 +307,11 @@ try
                 }
 
                 It "should fail validation of signing certificate parameters in the Set method" {
-                    { Set-TargetResource @testParams } | Should Throw "Cannot use both parameters SigningCertificateThumbprint and MetadataEndPoint at the same time."
+                    { Set-TargetResource @testParams } | Should -Throw "Cannot use both parameters SigningCertificateThumbprint and MetadataEndPoint at the same time."
                 }
 
                 It "should fail validation of signing certificate parameters in the Test method" {
-                    { Test-TargetResource @testParams } | Should Throw "Cannot use both parameters SigningCertificateThumbprint and MetadataEndPoint at the same time."
+                    { Test-TargetResource @testParams } | Should -Throw "Cannot use both parameters SigningCertificateThumbprint and MetadataEndPoint at the same time."
                 }
             }
 
@@ -327,11 +327,11 @@ try
                 }
 
                 It "should fail validation of signing certificate parameters in the Set method" {
-                    { Set-TargetResource @testParams } | Should Throw "Cannot use both parameters SigningCertificateFilePath and MetadataEndPoint at the same time."
+                    { Set-TargetResource @testParams } | Should -Throw "Cannot use both parameters SigningCertificateFilePath and MetadataEndPoint at the same time."
                 }
 
                 It "should fail validation of signing certificate parameters in the Test method" {
-                    { Test-TargetResource @testParams } | Should Throw "Cannot use both parameters SigningCertificateFilePath and MetadataEndPoint at the same time."
+                    { Test-TargetResource @testParams } | Should -Throw "Cannot use both parameters SigningCertificateFilePath and MetadataEndPoint at the same time."
                 }
             }
 
@@ -346,7 +346,7 @@ try
                 }
 
                 It "should fail validation of parameter SigningCertificateThumbprint in the Set method" {
-                    { Set-TargetResource @testParams } | Should Throw "Parameter SigningCertificateThumbprint does not match valid format '^[A-Fa-f0-9]{40}$'."
+                    { Set-TargetResource @testParams } | Should -Throw "Parameter SigningCertificateThumbprint does not match valid format '^[A-Fa-f0-9]{40}$'."
                 }
             }
 
@@ -375,16 +375,16 @@ try
 
                 It "Should be returned the get method with expected properties" {
                     $getResults = Get-TargetResource @testParams
-                    $getResults.Ensure | Should Be "Present"
-                    $getResults.Description | Should Be "$($testParams.Description)"
-                    $getResults.RegisteredIssuerNameIdentifier | Should Be "$($testParams.RegisteredIssuerNameIdentifier)"
-                    $getResults.RegisteredIssuerNameRealm | Should Be $null
-                    $getResults.SigningCertificateThumbprint | Should Be "$($testParams.SigningCertificateThumbprint)"
-                    $getResults.IsTrustBroker | Should Be "$($testParams.IsTrustBroker)"
+                    $getResults.Ensure | Should -Be "Present"
+                    $getResults.Description | Should -Be "$($testParams.Description)"
+                    $getResults.RegisteredIssuerNameIdentifier | Should -Be "$($testParams.RegisteredIssuerNameIdentifier)"
+                    $getResults.RegisteredIssuerNameRealm | Should -Be $null
+                    $getResults.SigningCertificateThumbprint | Should -Be "$($testParams.SigningCertificateThumbprint)"
+                    $getResults.IsTrustBroker | Should -Be "$($testParams.IsTrustBroker)"
                 }
 
                 It "Should return true from the Test method" {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
             }
 
@@ -424,16 +424,16 @@ try
 
                 It "Should be returned the get method with expected properties" {
                     $getResults = Get-TargetResource @testParams
-                    $getResults.Ensure | Should Be "Present"
-                    $getResults.Description | Should Be "$($testParams.Description)"
-                    $getResults.RegisteredIssuerNameIdentifier | Should Be "$($testParams.RegisteredIssuerNameIdentifier)"
-                    $getResults.RegisteredIssuerNameRealm | Should Be $null
-                    $getResults.SigningCertificateFilePath | Should Be "$($testParams.SigningCertificateFilePath)"
-                    $getResults.IsTrustBroker | Should Be "$($testParams.IsTrustBroker)"
+                    $getResults.Ensure | Should -Be "Present"
+                    $getResults.Description | Should -Be "$($testParams.Description)"
+                    $getResults.RegisteredIssuerNameIdentifier | Should -Be "$($testParams.RegisteredIssuerNameIdentifier)"
+                    $getResults.RegisteredIssuerNameRealm | Should -Be $null
+                    $getResults.SigningCertificateFilePath | Should -Be "$($testParams.SigningCertificateFilePath)"
+                    $getResults.IsTrustBroker | Should -Be "$($testParams.IsTrustBroker)"
                 }
 
                 It "Should return true from the Test method" {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
             }
 
@@ -459,13 +459,13 @@ try
 
                 It "Should be returned the get method with expected properties" {
                     $getResults = Get-TargetResource @testParams
-                    $getResults.Ensure | Should Be "Present"
-                    $getResults.RegisteredIssuerNameIdentifier | Should Be "$($testParams.RegisteredIssuerNameIdentifier)"
-                    $getResults.RegisteredIssuerNameRealm | Should Be $null
+                    $getResults.Ensure | Should -Be "Present"
+                    $getResults.RegisteredIssuerNameIdentifier | Should -Be "$($testParams.RegisteredIssuerNameIdentifier)"
+                    $getResults.RegisteredIssuerNameRealm | Should -Be $null
                 }
 
                 It "Should return false from the Test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should remove the SPTrustedSecurityTokenIssuer" {
@@ -499,11 +499,11 @@ try
 
                 It "Should be returned the get method with expected properties" {
                     $getResults = Get-TargetResource @testParams
-                    $getResults.Ensure | Should Be "Present"
+                    $getResults.Ensure | Should -Be "Present"
                 }
 
                 It "Should return false from the Test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should update the SPTrustedSecurityTokenIssuer" {
@@ -538,11 +538,11 @@ try
 
                 It "Should be returned the get method with expected properties" {
                     $getResults = Get-TargetResource @testParams
-                    $getResults.Ensure | Should Be "Present"
+                    $getResults.Ensure | Should -Be "Present"
                 }
 
                 It "Should return false from the Test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should update the SPTrustedSecurityTokenIssuer" {
@@ -576,11 +576,11 @@ try
 
                 It "Should be returned the get method with expected properties" {
                     $getResults = Get-TargetResource @testParams
-                    $getResults.Ensure | Should Be "Present"
+                    $getResults.Ensure | Should -Be "Present"
                 }
 
                 It "Should return false from the Test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should update the SPTrustedSecurityTokenIssuer" {

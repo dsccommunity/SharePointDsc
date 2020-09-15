@@ -112,15 +112,15 @@ try
                 } -ParameterFilter { $Path -eq $testParams.BinaryDir }
 
                 It "Should throw exception in the get method" {
-                    { Get-TargetResource @testParams } | Should Throw "Specified path cannot be found"
+                    { Get-TargetResource @testParams } | Should -Throw "Specified path cannot be found"
                 }
 
                 It "Should throw exception in the set method" {
-                    { Set-TargetResource @testParams } | Should Throw "Specified path cannot be found"
+                    { Set-TargetResource @testParams } | Should -Throw "Specified path cannot be found"
                 }
 
                 It "Should throw exception in the test method" {
-                    { Test-TargetResource @testParams } | Should Throw "Specified path cannot be found"
+                    { Test-TargetResource @testParams } | Should -Throw "Specified path cannot be found"
                 }
             }
 
@@ -137,15 +137,15 @@ try
                 } -ParameterFilter { $Path -eq (Join-Path -Path $testParams.BinaryDir -ChildPath "setup.exe") }
 
                 It "Should throw exception in the get method" {
-                    { Get-TargetResource @testParams } | Should Throw "Setup.exe cannot be found"
+                    { Get-TargetResource @testParams } | Should -Throw "Setup.exe cannot be found"
                 }
 
                 It "Should throw exception in the set method" {
-                    { Set-TargetResource @testParams } | Should Throw "Setup.exe cannot be found"
+                    { Set-TargetResource @testParams } | Should -Throw "Setup.exe cannot be found"
                 }
 
                 It "Should throw exception in the test method" {
-                    { Test-TargetResource @testParams } | Should Throw "Setup.exe cannot be found"
+                    { Test-TargetResource @testParams } | Should -Throw "Setup.exe cannot be found"
                 }
             }
 
@@ -162,15 +162,15 @@ try
                 }
 
                 It "Should throw exception in the get method" {
-                    { Get-TargetResource @testParams } | Should Throw "Setup file is blocked!"
+                    { Get-TargetResource @testParams } | Should -Throw "Setup file is blocked!"
                 }
 
                 It "Should throw exception in the set method" {
-                    { Set-TargetResource @testParams } | Should Throw "Setup file is blocked!"
+                    { Set-TargetResource @testParams } | Should -Throw "Setup file is blocked!"
                 }
 
                 It "Should throw exception in the test method" {
-                    { Test-TargetResource @testParams } | Should Throw "Setup file is blocked!"
+                    { Test-TargetResource @testParams } | Should -Throw "Setup file is blocked!"
                 }
             }
 
@@ -258,11 +258,11 @@ try
                 }
 
                 It "Should return absent from the get method" {
-                    (Get-TargetResource @testParams).Ensure | Should Be "Absent"
+                    (Get-TargetResource @testParams).Ensure | Should -Be "Absent"
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
             }
 
@@ -294,11 +294,11 @@ try
                 }
 
                 It "Should return present from the get method" {
-                    (Get-TargetResource @testParams).Ensure | Should Be "Present"
+                    (Get-TargetResource @testParams).Ensure | Should -Be "Present"
                 }
 
                 It "Should return true from the test method" {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
             }
 
@@ -318,7 +318,7 @@ try
 
                 It "reboots the server after a successful installation" {
                     Set-TargetResource @testParams
-                    $global:DSCMachineStatus | Should Be 1
+                    $global:DSCMachineStatus | Should -Be 1
                 }
             }
 
@@ -337,7 +337,7 @@ try
                 }
 
                 It "Should throw an exception on an unknown exit code" {
-                    { Set-TargetResource @testParams } | Should Throw
+                    { Set-TargetResource @testParams } | Should -Throw
                 }
             }
 
@@ -352,11 +352,11 @@ try
                 Mock -CommandName Get-ItemProperty -MockWith { return @{ } }  -ParameterFilter { $null -ne $Path }
 
                 It "Should throw in the test method because uninstall is unsupported" {
-                    { Test-TargetResource @testParams } | Should Throw
+                    { Test-TargetResource @testParams } | Should -Throw
                 }
 
                 It "Should throw in the set method because uninstall is unsupported" {
-                    { Set-TargetResource @testParams } | Should Throw
+                    { Set-TargetResource @testParams } | Should -Throw
                 }
             }
 
@@ -387,7 +387,7 @@ try
                 }
 
                 It "Should throw an error in the set method" {
-                    { Set-TargetResource @testParams } | Should Throw
+                    { Set-TargetResource @testParams } | Should -Throw
                 }
             }
 
@@ -408,11 +408,11 @@ try
                 }
 
                 It "Should return absent from the get method" {
-                    (Get-TargetResource @testParams).Ensure | Should Be "Absent"
+                    (Get-TargetResource @testParams).Ensure | Should -Be "Absent"
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 Mock -CommandName Start-Process {
@@ -423,7 +423,7 @@ try
 
                 It "reboots the server after a successful installation" {
                     Set-TargetResource @testParams
-                    $global:DSCMachineStatus | Should Be 1
+                    $global:DSCMachineStatus | Should -Be 1
                 }
             }
         }

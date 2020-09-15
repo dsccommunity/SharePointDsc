@@ -113,7 +113,7 @@ try
                         FormDigestSettings              = @{
                             Enabled = $testParams.SecurityValidation
                             Expires = $testParams.SecurityValidationExpires
-                            Timeout = (New-TimeSpan -minutes $testParams.SecurityValidationTimeoutMinutes)
+                            Timeout = (New-TimeSpan -Minutes $testParams.SecurityValidationTimeoutMinutes)
                         }
                         RecycleBinEnabled               = $testParams.RecycleBinEnabled
                         RecycleBinCleanupEnabled        = $testParams.RecycleBinCleanupEnabled
@@ -131,11 +131,11 @@ try
                 }
 
                 It "Should return the current data from the get method" {
-                    Get-TargetResource @testParams | Should Not BeNullOrEmpty
+                    Get-TargetResource @testParams | Should -Not -BeNullOrEmpty
                 }
 
                 It "Should return true from the test method" {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
             }
 
@@ -218,17 +218,17 @@ try
                 }
 
                 It "Should return the current data from the get method" {
-                    Get-TargetResource @testParams | Should Not BeNullOrEmpty
+                    Get-TargetResource @testParams | Should -Not -BeNullOrEmpty
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 $Global:SPDscWebApplicationUpdateCalled = $false
                 It "Should update the general settings" {
                     Set-TargetResource @testParams
-                    $Global:SPDscWebApplicationUpdateCalled | Should Be $true
+                    $Global:SPDscWebApplicationUpdateCalled | Should -Be $true
                 }
             }
 
@@ -260,11 +260,11 @@ try
                 }
 
                 It "Should return the current data from the get method" {
-                    (Get-TargetResource @testParams).TimeZone | Should BeNullOrEmpty
+                    (Get-TargetResource @testParams).TimeZone | Should -BeNullOrEmpty
                 }
 
                 It "Should throw an exception" {
-                    { Set-TargetResource @testParams } | Should Throw "Web application http://sites.sharepoint.com was not found"
+                    { Set-TargetResource @testParams } | Should -Throw "Web application http://sites.sharepoint.com was not found"
                 }
             }
 
@@ -348,7 +348,7 @@ try
 
                 $Global:SPDscWebApplicationUpdateCalled = $false
                 It "Should throw an exception" {
-                    { Set-TargetResource @testParams } | Should Throw "Quota template NotExist was not found"
+                    { Set-TargetResource @testParams } | Should -Throw "Quota template NotExist was not found"
                 }
             }
         }

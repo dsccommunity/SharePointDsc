@@ -67,17 +67,17 @@ try
 
                 It "Should return null from the get method" {
                     $result = Get-TargetResource @testParams
-                    $result.Members | Should BeNullOrEmpty
-                    $result.MembersToInclude | Should BeNullOrEmpty
-                    $result.MembersToExclude | Should BeNullOrEmpty
+                    $result.Members | Should -BeNullOrEmpty
+                    $result.MembersToInclude | Should -BeNullOrEmpty
+                    $result.MembersToExclude | Should -BeNullOrEmpty
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should throw an exception in the set method to say there is no local farm" {
-                    { Set-TargetResource @testParams } | Should throw "No local SharePoint farm was detected"
+                    { Set-TargetResource @testParams } | Should -Throw "No local SharePoint farm was detected"
                 }
             }
 
@@ -96,17 +96,17 @@ try
 
                 It "Should return null from the get method" {
                     $result = Get-TargetResource @testParams
-                    $result.Members | Should BeNullOrEmpty
-                    $result.MembersToInclude | Should BeNullOrEmpty
-                    $result.MembersToExclude | Should BeNullOrEmpty
+                    $result.Members | Should -BeNullOrEmpty
+                    $result.MembersToInclude | Should -BeNullOrEmpty
+                    $result.MembersToExclude | Should -BeNullOrEmpty
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should throw an exception in the set method" {
-                    { Set-TargetResource @testParams } | Should throw "Cannot use the Databases parameter together with the AllDatabases parameter"
+                    { Set-TargetResource @testParams } | Should -Throw "Cannot use the Databases parameter together with the AllDatabases parameter"
                 }
             }
 
@@ -119,17 +119,17 @@ try
 
                 It "Should return null from the get method" {
                     $result = Get-TargetResource @testParams
-                    $result.Members | Should BeNullOrEmpty
-                    $result.MembersToInclude | Should BeNullOrEmpty
-                    $result.MembersToExclude | Should BeNullOrEmpty
+                    $result.Members | Should -BeNullOrEmpty
+                    $result.MembersToInclude | Should -BeNullOrEmpty
+                    $result.MembersToExclude | Should -BeNullOrEmpty
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should throw an exception in the set method" {
-                    { Set-TargetResource @testParams } | Should throw "Cannot use the Members parameter together with the MembersToInclude or MembersToExclude parameters"
+                    { Set-TargetResource @testParams } | Should -Throw "Cannot use the Members parameter together with the MembersToInclude or MembersToExclude parameters"
                 }
             }
 
@@ -140,17 +140,17 @@ try
 
                 It "Should return null from the get method" {
                     $result = Get-TargetResource @testParams
-                    $result.Members | Should BeNullOrEmpty
-                    $result.MembersToInclude | Should BeNullOrEmpty
-                    $result.MembersToExclude | Should BeNullOrEmpty
+                    $result.Members | Should -BeNullOrEmpty
+                    $result.MembersToInclude | Should -BeNullOrEmpty
+                    $result.MembersToExclude | Should -BeNullOrEmpty
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should throw an exception in the set method" {
-                    { Set-TargetResource @testParams } | Should throw "At least one of the following parameters must be specified: Members, MembersToInclude, MembersToExclude"
+                    { Set-TargetResource @testParams } | Should -Throw "At least one of the following parameters must be specified: Members, MembersToInclude, MembersToExclude"
                 }
             }
 
@@ -168,17 +168,17 @@ try
 
                 It "Should return null from the get method" {
                     $result = Get-TargetResource @testParams
-                    $result.Members | Should BeNullOrEmpty
-                    $result.MembersToInclude | Should BeNullOrEmpty
-                    $result.MembersToExclude | Should BeNullOrEmpty
+                    $result.Members | Should -BeNullOrEmpty
+                    $result.MembersToInclude | Should -BeNullOrEmpty
+                    $result.MembersToExclude | Should -BeNullOrEmpty
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should throw an exception in the set method" {
-                    { Set-TargetResource @testParams } | Should throw "Databases: Cannot use the Members parameter together with the MembersToInclude or MembersToExclude parameters"
+                    { Set-TargetResource @testParams } | Should -Throw "Databases: Cannot use the Members parameter together with the MembersToInclude or MembersToExclude parameters"
                 }
             }
 
@@ -195,15 +195,15 @@ try
                 }
 
                 It "Should return null from the get method" {
-                    (Get-TargetResource @testParams).Name | Should BeNullOrEmpty
+                    (Get-TargetResource @testParams).Name | Should -BeNullOrEmpty
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should throw an exception in the set method" {
-                    { Set-TargetResource @testParams } | Should throw "Cannot use the Databases parameter together with the ExcludeDatabases parameter"
+                    { Set-TargetResource @testParams } | Should -Throw "Cannot use the Databases parameter together with the ExcludeDatabases parameter"
                 }
             }
 
@@ -219,17 +219,17 @@ try
 
                 It "Should return null from the get method" {
                     $result = Get-TargetResource @testParams
-                    $result.Members | Should BeNullOrEmpty
-                    $result.MembersToInclude | Should BeNullOrEmpty
-                    $result.MembersToExclude | Should BeNullOrEmpty
+                    $result.Members | Should -BeNullOrEmpty
+                    $result.MembersToInclude | Should -BeNullOrEmpty
+                    $result.MembersToExclude | Should -BeNullOrEmpty
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should throw an exception in the set method" {
-                    { Set-TargetResource @testParams } | Should throw "Databases: At least one of the following parameters must be specified: Members, MembersToInclude, MembersToExclude"
+                    { Set-TargetResource @testParams } | Should -Throw "Databases: At least one of the following parameters must be specified: Members, MembersToInclude, MembersToExclude"
                 }
             }
 
@@ -258,15 +258,15 @@ try
                 }
 
                 It "Should return null from the get method" {
-                    Get-TargetResource @testParams | Should Not BeNullOrEmpty
+                    Get-TargetResource @testParams | Should -Not -BeNullOrEmpty
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should throw an exception in the set method" {
-                    { Set-TargetResource @testParams } | Should throw "Specified database does not exist"
+                    { Set-TargetResource @testParams } | Should -Throw "Specified database does not exist"
                 }
             }
 
@@ -308,11 +308,11 @@ try
                 }
 
                 It "Should return null from the get method" {
-                    Get-TargetResource @testParams | Should Not BeNullOrEmpty
+                    Get-TargetResource @testParams | Should -Not -BeNullOrEmpty
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should throw an exception in the set method" {
@@ -365,11 +365,11 @@ try
                 }
 
                 It "Should return null from the get method" {
-                    Get-TargetResource @testParams | Should Not BeNullOrEmpty
+                    Get-TargetResource @testParams | Should -Not -BeNullOrEmpty
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should throw an exception in the set method" {
@@ -399,11 +399,11 @@ try
                 }
 
                 It "Should return null from the get method" {
-                    Get-TargetResource @testParams | Should Not BeNullOrEmpty
+                    Get-TargetResource @testParams | Should -Not -BeNullOrEmpty
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should throw an exception in the set method" {
@@ -435,11 +435,11 @@ try
                 }
 
                 It "Should return null from the get method" {
-                    Get-TargetResource @testParams | Should Not BeNullOrEmpty
+                    Get-TargetResource @testParams | Should -Not -BeNullOrEmpty
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
             }
 
@@ -489,11 +489,11 @@ try
                 }
 
                 It "Should return null from the get method" {
-                    Get-TargetResource @testParams | Should Not BeNullOrEmpty
+                    Get-TargetResource @testParams | Should -Not -BeNullOrEmpty
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should throw an exception in the set method" {
@@ -549,11 +549,11 @@ try
                 }
 
                 It "Should return null from the get method" {
-                    Get-TargetResource @testParams | Should Not BeNullOrEmpty
+                    Get-TargetResource @testParams | Should -Not -BeNullOrEmpty
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
             }
 
@@ -579,11 +579,11 @@ try
                 }
 
                 It "Should return null from the get method" {
-                    Get-TargetResource @testParams | Should Not BeNullOrEmpty
+                    Get-TargetResource @testParams | Should -Not -BeNullOrEmpty
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should throw an exception in the set method" {
@@ -614,11 +614,11 @@ try
                 }
 
                 It "Should return null from the get method" {
-                    Get-TargetResource @testParams | Should Not BeNullOrEmpty
+                    Get-TargetResource @testParams | Should -Not -BeNullOrEmpty
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
             }
 
@@ -668,11 +668,11 @@ try
                 }
 
                 It "Should return null from the get method" {
-                    Get-TargetResource @testParams | Should Not BeNullOrEmpty
+                    Get-TargetResource @testParams | Should -Not -BeNullOrEmpty
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should throw an exception in the set method" {
@@ -727,11 +727,11 @@ try
                 }
 
                 It "Should return null from the get method" {
-                    Get-TargetResource @testParams | Should Not BeNullOrEmpty
+                    Get-TargetResource @testParams | Should -Not -BeNullOrEmpty
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
             }
 
@@ -757,11 +757,11 @@ try
                 }
 
                 It "Should return null from the get method" {
-                    Get-TargetResource @testParams | Should Not BeNullOrEmpty
+                    Get-TargetResource @testParams | Should -Not -BeNullOrEmpty
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should throw an exception in the set method" {
@@ -792,11 +792,11 @@ try
                 }
 
                 It "Should return null from the get method" {
-                    Get-TargetResource @testParams | Should Not BeNullOrEmpty
+                    Get-TargetResource @testParams | Should -Not -BeNullOrEmpty
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
             }
 
@@ -846,11 +846,11 @@ try
                 }
 
                 It "Should return null from the get method" {
-                    Get-TargetResource @testParams | Should Not BeNullOrEmpty
+                    Get-TargetResource @testParams | Should -Not -BeNullOrEmpty
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should throw an exception in the set method" {
@@ -905,11 +905,11 @@ try
                 }
 
                 It "Should return null from the get method" {
-                    Get-TargetResource @testParams | Should Not BeNullOrEmpty
+                    Get-TargetResource @testParams | Should -Not -BeNullOrEmpty
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
             }
         }

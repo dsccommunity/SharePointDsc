@@ -82,17 +82,17 @@ try
 
                 It "Should return exception from the get method" {
                     $result = Get-TargetResource @testParams
-                    $result.ListPermissions | Should BeNullOrEmpty
-                    $result.SitePermissions | Should BeNullOrEmpty
-                    $result.PersonalPermissions | Should BeNullOrEmpty
+                    $result.ListPermissions | Should -BeNullOrEmpty
+                    $result.SitePermissions | Should -BeNullOrEmpty
+                    $result.PersonalPermissions | Should -BeNullOrEmpty
                 }
 
                 It "Should return exception from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should return exception from the set method" {
-                    { Set-TargetResource @testParams } | Should throw "The specified web application could not be found."
+                    { Set-TargetResource @testParams } | Should -Throw "The specified web application could not be found."
                 }
             }
 
@@ -119,19 +119,19 @@ try
                 Mock -CommandName Get-SPWebapplication -MockWith { return $null }
 
                 It "Should return exception from the get method" {
-                    { Get-TargetResource @testParams } | Should throw ("Do not specify parameters " + `
+                    { Get-TargetResource @testParams } | Should -Throw ("Do not specify parameters " + `
                             "ListPermissions, SitePermissions or PersonalPermissions when " + `
                             "specifying parameter AllPermissions")
                 }
 
                 It "Should return exception from the test method" {
-                    { Test-TargetResource @testParams } | Should throw ("Do not specify parameters " + `
+                    { Test-TargetResource @testParams } | Should -Throw ("Do not specify parameters " + `
                             "ListPermissions, SitePermissions or PersonalPermissions when " + `
                             "specifying parameter AllPermissions")
                 }
 
                 It "Should return exception from the set method" {
-                    { Set-TargetResource @testParams } | Should throw ("Do not specify parameters " + `
+                    { Set-TargetResource @testParams } | Should -Throw ("Do not specify parameters " + `
                             "ListPermissions, SitePermissions or PersonalPermissions when " + `
                             "specifying parameter AllPermissions")
                 }
@@ -151,17 +151,17 @@ try
                 Mock -CommandName Get-SPWebapplication -MockWith { return $null }
 
                 It "Should return exception from the get method" {
-                    { Get-TargetResource @testParams } | Should throw ("One of the parameters " + `
+                    { Get-TargetResource @testParams } | Should -Throw ("One of the parameters " + `
                             "ListPermissions, SitePermissions or PersonalPermissions is missing")
                 }
 
                 It "Should return exception from the test method" {
-                    { Test-TargetResource @testParams } | Should throw ("One of the parameters " + `
+                    { Test-TargetResource @testParams } | Should -Throw ("One of the parameters " + `
                             "ListPermissions, SitePermissions or PersonalPermissions is missing")
                 }
 
                 It "Should return exception from the set method" {
-                    { Set-TargetResource @testParams } | Should throw ("One of the parameters " + `
+                    { Set-TargetResource @testParams } | Should -Throw ("One of the parameters " + `
                             "ListPermissions, SitePermissions or PersonalPermissions is missing")
                 }
             }
@@ -189,15 +189,15 @@ try
                 Mock -CommandName Get-SPWebapplication -MockWith { return $null }
 
                 It "Should return exception from the get method" {
-                    { Get-TargetResource @testParams } | Should throw "Edit Items is required when specifying Approve Items"
+                    { Get-TargetResource @testParams } | Should -Throw "Edit Items is required when specifying Approve Items"
                 }
 
                 It "Should return exception from the test method" {
-                    { Test-TargetResource @testParams } | Should throw "Edit Items is required when specifying Approve Items"
+                    { Test-TargetResource @testParams } | Should -Throw "Edit Items is required when specifying Approve Items"
                 }
 
                 It "Should return exception from the set method" {
-                    { Set-TargetResource @testParams } | Should throw "Edit Items is required when specifying Approve Items"
+                    { Set-TargetResource @testParams } | Should -Throw "Edit Items is required when specifying Approve Items"
                 }
             }
 
@@ -224,7 +224,7 @@ try
                 Mock -CommandName Get-SPWebapplication -MockWith { return $null }
 
                 It "Should return exception from the get method" {
-                    { Get-TargetResource @testParams } | Should throw ("View Items is required when " + `
+                    { Get-TargetResource @testParams } | Should -Throw ("View Items is required when " + `
                             "specifying Manage Lists, Override List Behaviors, Add Items, Edit " + `
                             "Items, Delete Items, Approve Items, Open Items, View Versions, Delete " + `
                             "Versions, Create Alerts, Manage Permissions, Manage Web Site, Add and " + `
@@ -234,7 +234,7 @@ try
                 }
 
                 It "Should return exception from the test method" {
-                    { Test-TargetResource @testParams } | Should throw ("View Items is required when " + `
+                    { Test-TargetResource @testParams } | Should -Throw ("View Items is required when " + `
                             "specifying Manage Lists, Override List Behaviors, Add Items, Edit " + `
                             "Items, Delete Items, Approve Items, Open Items, View Versions, Delete " + `
                             "Versions, Create Alerts, Manage Permissions, Manage Web Site, Add and " + `
@@ -244,7 +244,7 @@ try
                 }
 
                 It "Should return exception from the set method" {
-                    { Set-TargetResource @testParams } | Should throw ("View Items is required when " + `
+                    { Set-TargetResource @testParams } | Should -Throw ("View Items is required when " + `
                             "specifying Manage Lists, Override List Behaviors, Add Items, Edit " + `
                             "Items, Delete Items, Approve Items, Open Items, View Versions, Delete " + `
                             "Versions, Create Alerts, Manage Permissions, Manage Web Site, Add and " + `
@@ -277,17 +277,17 @@ try
                 Mock -CommandName Get-SPWebapplication -MockWith { return $null }
 
                 It "Should return exception from the get method" {
-                    { Get-TargetResource @testParams } | Should throw ("Open Items is required when " + `
+                    { Get-TargetResource @testParams } | Should -Throw ("Open Items is required when " + `
                             "specifying View Versions or Manage Permissions")
                 }
 
                 It "Should return exception from the test method" {
-                    { Test-TargetResource @testParams } | Should throw ("Open Items is required when " + `
+                    { Test-TargetResource @testParams } | Should -Throw ("Open Items is required when " + `
                             "specifying View Versions or Manage Permissions")
                 }
 
                 It "Should return exception from the set method" {
-                    { Set-TargetResource @testParams } | Should throw ("Open Items is required when " + `
+                    { Set-TargetResource @testParams } | Should -Throw ("Open Items is required when " + `
                             "specifying View Versions or Manage Permissions")
                 }
             }
@@ -315,17 +315,17 @@ try
                 Mock -CommandName Get-SPWebapplication -MockWith { return $null }
 
                 It "Should return exception from the get method" {
-                    { Get-TargetResource @testParams } | Should throw ("View Versions is required " + `
+                    { Get-TargetResource @testParams } | Should -Throw ("View Versions is required " + `
                             "when specifying Delete Versions or Manage Permissions")
                 }
 
                 It "Should return exception from the test method" {
-                    { Test-TargetResource @testParams } | Should throw ("View Versions is required " + `
+                    { Test-TargetResource @testParams } | Should -Throw ("View Versions is required " + `
                             "when specifying Delete Versions or Manage Permissions")
                 }
 
                 It "Should return exception from the set method" {
-                    { Set-TargetResource @testParams } | Should throw ("View Versions is required " + `
+                    { Set-TargetResource @testParams } | Should -Throw ("View Versions is required " + `
                             "when specifying Delete Versions or Manage Permissions")
                 }
             }
@@ -353,15 +353,15 @@ try
                 Mock -CommandName Get-SPWebapplication -MockWith { return $null }
 
                 It "Should return exception from the get method" {
-                    { Get-TargetResource @testParams } | Should throw "Create Alerts is required when specifying Manage Alerts"
+                    { Get-TargetResource @testParams } | Should -Throw "Create Alerts is required when specifying Manage Alerts"
                 }
 
                 It "Should return exception from the test method" {
-                    { Test-TargetResource @testParams } | Should throw "Create Alerts is required when specifying Manage Alerts"
+                    { Test-TargetResource @testParams } | Should -Throw "Create Alerts is required when specifying Manage Alerts"
                 }
 
                 It "Should return exception from the set method" {
-                    { Set-TargetResource @testParams } | Should throw "Create Alerts is required when specifying Manage Alerts"
+                    { Set-TargetResource @testParams } | Should -Throw "Create Alerts is required when specifying Manage Alerts"
                 }
             }
 
@@ -387,15 +387,15 @@ try
                 Mock -CommandName Get-SPWebapplication -MockWith { return $null }
 
                 It "Should return exception from the get method" {
-                    { Get-TargetResource @testParams } | Should throw "Add and Customize Pages is required when specifying Manage Web Site"
+                    { Get-TargetResource @testParams } | Should -Throw "Add and Customize Pages is required when specifying Manage Web Site"
                 }
 
                 It "Should return exception from the test method" {
-                    { Test-TargetResource @testParams } | Should throw "Add and Customize Pages is required when specifying Manage Web Site"
+                    { Test-TargetResource @testParams } | Should -Throw "Add and Customize Pages is required when specifying Manage Web Site"
                 }
 
                 It "Should return exception from the set method" {
-                    { Set-TargetResource @testParams } | Should throw "Add and Customize Pages is required when specifying Manage Web Site"
+                    { Set-TargetResource @testParams } | Should -Throw "Add and Customize Pages is required when specifying Manage Web Site"
                 }
             }
 
@@ -421,19 +421,19 @@ try
                 Mock -CommandName Get-SPWebapplication -MockWith { return $null }
 
                 It "Should return exception from the get method" {
-                    { Get-TargetResource @testParams } | Should throw ("Browse Directories is " + `
+                    { Get-TargetResource @testParams } | Should -Throw ("Browse Directories is " + `
                             "required when specifying Manage Permissions, Manage Web Site, " + `
                             "Add and Customize Pages or Enumerate Permissions")
                 }
 
                 It "Should return exception from the test method" {
-                    { Test-TargetResource @testParams } | Should throw ("Browse Directories is " + `
+                    { Test-TargetResource @testParams } | Should -Throw ("Browse Directories is " + `
                             "required when specifying Manage Permissions, Manage Web Site, " + `
                             "Add and Customize Pages or Enumerate Permissions")
                 }
 
                 It "Should return exception from the set method" {
-                    { Set-TargetResource @testParams } | Should throw ("Browse Directories is " + `
+                    { Set-TargetResource @testParams } | Should -Throw ("Browse Directories is " + `
                             "required when specifying Manage Permissions, Manage Web Site, " + `
                             "Add and Customize Pages or Enumerate Permissions")
                 }
@@ -460,7 +460,7 @@ try
                 Mock -CommandName Get-SPWebapplication -MockWith { return $null }
 
                 It "Should return exception from the get method" {
-                    { Get-TargetResource @testParams } | Should throw ("View Pages is required when " + `
+                    { Get-TargetResource @testParams } | Should -Throw ("View Pages is required when " + `
                             "specifying Manage Lists, Override List Behaviors, Add Items, Edit " + `
                             "Items, Delete Items, View Items, Approve Items, Open Items, View " + `
                             "Versions, Delete Versions, Create Alerts, Manage Permissions, View " + `
@@ -472,7 +472,7 @@ try
                 }
 
                 It "Should return exception from the test method" {
-                    { Test-TargetResource @testParams } | Should throw ("View Pages is required when " + `
+                    { Test-TargetResource @testParams } | Should -Throw ("View Pages is required when " + `
                             "specifying Manage Lists, Override List Behaviors, Add Items, Edit " + `
                             "Items, Delete Items, View Items, Approve Items, Open Items, View " + `
                             "Versions, Delete Versions, Create Alerts, Manage Permissions, View " + `
@@ -484,7 +484,7 @@ try
                 }
 
                 It "Should return exception from the set method" {
-                    { Set-TargetResource @testParams } | Should throw ("View Pages is required when " + `
+                    { Set-TargetResource @testParams } | Should -Throw ("View Pages is required when " + `
                             "specifying Manage Lists, Override List Behaviors, Add Items, Edit " + `
                             "Items, Delete Items, View Items, Approve Items, Open Items, View " + `
                             "Versions, Delete Versions, Create Alerts, Manage Permissions, View " + `
@@ -518,15 +518,15 @@ try
                 Mock -CommandName Get-SPWebapplication -MockWith { return $null }
 
                 It "Should return exception from the get method" {
-                    { Get-TargetResource @testParams } | Should throw "Enumerate Permissions is required when specifying Manage Permissions or Manage Web Site"
+                    { Get-TargetResource @testParams } | Should -Throw "Enumerate Permissions is required when specifying Manage Permissions or Manage Web Site"
                 }
 
                 It "Should return exception from the test method" {
-                    { Test-TargetResource @testParams } | Should throw "Enumerate Permissions is required when specifying Manage Permissions or Manage Web Site"
+                    { Test-TargetResource @testParams } | Should -Throw "Enumerate Permissions is required when specifying Manage Permissions or Manage Web Site"
                 }
 
                 It "Should return exception from the set method" {
-                    { Set-TargetResource @testParams } | Should throw "Enumerate Permissions is required when specifying Manage Permissions or Manage Web Site"
+                    { Set-TargetResource @testParams } | Should -Throw "Enumerate Permissions is required when specifying Manage Permissions or Manage Web Site"
                 }
             }
 
@@ -551,21 +551,21 @@ try
                 Mock -CommandName Get-SPWebapplication -MockWith { return $null }
 
                 It "Should return exception from the get method" {
-                    { Get-TargetResource @testParams } | Should throw ("Browse User Information is " + `
+                    { Get-TargetResource @testParams } | Should -Throw ("Browse User Information is " + `
                             "required when specifying Manage Permissions, Create Subsites, " + `
                             "Manage Web Site, Create Groups, Use Self-Service Site Creation, " + `
                             "Enumerate Permissions or Edit Personal User Information")
                 }
 
                 It "Should return exception from the test method" {
-                    { Test-TargetResource @testParams } | Should throw ("Browse User Information is " + `
+                    { Test-TargetResource @testParams } | Should -Throw ("Browse User Information is " + `
                             "required when specifying Manage Permissions, Create Subsites, " + `
                             "Manage Web Site, Create Groups, Use Self-Service Site Creation, " + `
                             "Enumerate Permissions or Edit Personal User Information")
                 }
 
                 It "Should return exception from the set method" {
-                    { Set-TargetResource @testParams } | Should throw ("Browse User Information is " + `
+                    { Set-TargetResource @testParams } | Should -Throw ("Browse User Information is " + `
                             "required when specifying Manage Permissions, Create Subsites, " + `
                             "Manage Web Site, Create Groups, Use Self-Service Site Creation, " + `
                             "Enumerate Permissions or Edit Personal User Information")
@@ -594,15 +594,15 @@ try
                 Mock -CommandName Get-SPWebapplication -MockWith { return $null }
 
                 It "Should return exception from the get method" {
-                    { Get-TargetResource @testParams } | Should throw "Use Remote Interfaces is required when specifying Use Client Integration Features"
+                    { Get-TargetResource @testParams } | Should -Throw "Use Remote Interfaces is required when specifying Use Client Integration Features"
                 }
 
                 It "Should return exception from the test method" {
-                    { Test-TargetResource @testParams } | Should throw "Use Remote Interfaces is required when specifying Use Client Integration Features"
+                    { Test-TargetResource @testParams } | Should -Throw "Use Remote Interfaces is required when specifying Use Client Integration Features"
                 }
 
                 It "Should return exception from the set method" {
-                    { Set-TargetResource @testParams } | Should throw "Use Remote Interfaces is required when specifying Use Client Integration Features"
+                    { Set-TargetResource @testParams } | Should -Throw "Use Remote Interfaces is required when specifying Use Client Integration Features"
                 }
             }
 
@@ -629,15 +629,15 @@ try
                 Mock -CommandName Get-SPWebapplication -MockWith { return $null }
 
                 It "Should return exception from the get method" {
-                    { Get-TargetResource @testParams } | Should throw "Open is required when specifying any of the other permissions"
+                    { Get-TargetResource @testParams } | Should -Throw "Open is required when specifying any of the other permissions"
                 }
 
                 It "Should return exception from the test method" {
-                    { Test-TargetResource @testParams } | Should throw "Open is required when specifying any of the other permissions"
+                    { Test-TargetResource @testParams } | Should -Throw "Open is required when specifying any of the other permissions"
                 }
 
                 It "Should return exception from the set method" {
-                    { Set-TargetResource @testParams } | Should throw "Open is required when specifying any of the other permissions"
+                    { Set-TargetResource @testParams } | Should -Throw "Open is required when specifying any of the other permissions"
                 }
             }
 
@@ -663,15 +663,15 @@ try
                 Mock -CommandName Get-SPWebapplication -MockWith { return $null }
 
                 It "Should return exception from the get method" {
-                    { Get-TargetResource @testParams } | Should throw "Update Personal Web Parts is required when specifying Add/Remove Personal Web Parts"
+                    { Get-TargetResource @testParams } | Should -Throw "Update Personal Web Parts is required when specifying Add/Remove Personal Web Parts"
                 }
 
                 It "Should return exception from the test method" {
-                    { Test-TargetResource @testParams } | Should throw "Update Personal Web Parts is required when specifying Add/Remove Personal Web Parts"
+                    { Test-TargetResource @testParams } | Should -Throw "Update Personal Web Parts is required when specifying Add/Remove Personal Web Parts"
                 }
 
                 It "Should return exception from the set method" {
-                    { Set-TargetResource @testParams } | Should throw "Update Personal Web Parts is required when specifying Add/Remove Personal Web Parts"
+                    { Set-TargetResource @testParams } | Should -Throw "Update Personal Web Parts is required when specifying Add/Remove Personal Web Parts"
                 }
             }
 
@@ -695,17 +695,17 @@ try
                 }
 
                 It "Should return values from the get method" {
-                    Get-TargetResource @testParams | Should Not BeNullOrEmpty
+                    Get-TargetResource @testParams | Should -Not -BeNullOrEmpty
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 $Global:SPDscWebApplicationUpdateCalled = $false
                 It "Should update Web App permissions from the set method" {
                     Set-TargetResource @testParams
-                    $Global:SPDscWebApplicationUpdateCalled | Should Be $true
+                    $Global:SPDscWebApplicationUpdateCalled | Should -Be $true
                 }
             }
 
@@ -741,17 +741,17 @@ try
                 }
 
                 It "Should return values from the get method" {
-                    Get-TargetResource @testParams | Should Not BeNullOrEmpty
+                    Get-TargetResource @testParams | Should -Not -BeNullOrEmpty
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 $Global:SPDscWebApplicationUpdateCalled = $false
                 It "Should update Web App permissions from the set method" {
                     Set-TargetResource @testParams
-                    $Global:SPDscWebApplicationUpdateCalled | Should Be $true
+                    $Global:SPDscWebApplicationUpdateCalled | Should -Be $true
                 }
             }
 
@@ -773,11 +773,11 @@ try
                 }
 
                 It "Should return values from the get method" {
-                    Get-TargetResource @testParams | Should Not BeNullOrEmpty
+                    Get-TargetResource @testParams | Should -Not -BeNullOrEmpty
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
             }
 
@@ -821,17 +821,17 @@ try
                 }
 
                 It "Should return values from the get method" {
-                    Get-TargetResource @testParams | Should Not BeNullOrEmpty
+                    Get-TargetResource @testParams | Should -Not -BeNullOrEmpty
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 $Global:SPDscWebApplicationUpdateCalled = $false
                 It "Should update Web App permissions from the set method" {
                     Set-TargetResource @testParams
-                    $Global:SPDscWebApplicationUpdateCalled | Should Be $true
+                    $Global:SPDscWebApplicationUpdateCalled | Should -Be $true
                 }
             }
 
@@ -876,17 +876,17 @@ try
                 }
 
                 It "Should return values from the get method" {
-                    Get-TargetResource @testParams | Should Not BeNullOrEmpty
+                    Get-TargetResource @testParams | Should -Not -BeNullOrEmpty
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 $Global:SPDscWebApplicationUpdateCalled = $false
                 It "Should update Web App permissions from the set method" {
                     Set-TargetResource @testParams
-                    $Global:SPDscWebApplicationUpdateCalled | Should Be $true
+                    $Global:SPDscWebApplicationUpdateCalled | Should -Be $true
                 }
             }
 
@@ -930,17 +930,17 @@ try
                 }
 
                 It "Should return values from the get method" {
-                    Get-TargetResource @testParams | Should Not BeNullOrEmpty
+                    Get-TargetResource @testParams | Should -Not -BeNullOrEmpty
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 $Global:SPDscWebApplicationUpdateCalled = $false
                 It "Should update Web App permissions from the set method" {
                     Set-TargetResource @testParams
-                    $Global:SPDscWebApplicationUpdateCalled | Should Be $true
+                    $Global:SPDscWebApplicationUpdateCalled | Should -Be $true
                 }
             }
 
@@ -985,11 +985,11 @@ try
                 }
 
                 It "Should return values from the get method" {
-                    Get-TargetResource @testParams | Should Not BeNullOrEmpty
+                    Get-TargetResource @testParams | Should -Not -BeNullOrEmpty
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
             }
         }

@@ -69,9 +69,9 @@ try
                     }
                 }
                 $serviceInstance = $serviceInstance | Add-Member -MemberType ScriptMethod -Name GetType -Value {
-                    return @{ FullName = "Microsoft.SharePoint.Administration.SPIncomingEmailServiceInstance" } } -force -PassThru
+                    return @{ FullName = "Microsoft.SharePoint.Administration.SPIncomingEmailServiceInstance" } } -Force -PassThru
                 $serviceInstance.Service = $serviceInstance.Service | Add-Member -MemberType ScriptMethod -Name GetType -Value {
-                    return @{ FullName = "Microsoft.SharePoint.Administration.SPIncomingEmailService" } } -force -PassThru
+                    return @{ FullName = "Microsoft.SharePoint.Administration.SPIncomingEmailService" } } -Force -PassThru
                 $serviceInstance.Service = $serviceInstance.Service | Add-Member -MemberType ScriptMethod -Name Update -Value {
                     $Global:SPDscUpdateCalled = $true } -PassThru
                 return @($serviceInstance)
@@ -89,29 +89,29 @@ try
                 Mock -CommandName 'Get-SPServiceInstance' -MockWith {
                     $serviceInstance = @{ }
                     $serviceInstance = $serviceInstance | Add-Member -MemberType ScriptMethod -Name GetType -Value {
-                        return $null } -force -PassThru
+                        return $null } -Force -PassThru
                     return @($serviceInstance)
                 }
 
                 It 'Should return null values for the Get method' {
                     $result = Get-TargetResource @testParams
-                    $result.Ensure | Should BeNullorEmpty
-                    $result.UseAutomaticSettings | Should BeNullorEmpty
-                    $result.UseDirectoryManagementService | Should BeNullorEmpty
-                    $result.RemoteDirectoryManagementURL | Should BeNullorEmpty
-                    $result.ServerAddress | Should BeNullorEmpty
-                    $result.DLsRequireAuthenticatedSenders | Should BeNullorEmpty
-                    $result.DistributionGroupsEnabled | Should BeNullorEmpty
-                    $result.ServerDisplayAddress | Should BeNullorEmpty
-                    $result.DropFolder | Should BeNullorEmpty
+                    $result.Ensure | Should -BeNullorEmpty
+                    $result.UseAutomaticSettings | Should -BeNullorEmpty
+                    $result.UseDirectoryManagementService | Should -BeNullorEmpty
+                    $result.RemoteDirectoryManagementURL | Should -BeNullorEmpty
+                    $result.ServerAddress | Should -BeNullorEmpty
+                    $result.DLsRequireAuthenticatedSenders | Should -BeNullorEmpty
+                    $result.DistributionGroupsEnabled | Should -BeNullorEmpty
+                    $result.ServerDisplayAddress | Should -BeNullorEmpty
+                    $result.DropFolder | Should -BeNullorEmpty
                 }
 
                 It 'Should return false for the Test method' {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It 'Should throw and exception for the Set method' {
-                    { Set-TargetResource @testParams } | Should throw "Error getting the SharePoint Incoming Email Service"
+                    { Set-TargetResource @testParams } | Should -Throw "Error getting the SharePoint Incoming Email Service"
                 }
             }
 
@@ -144,18 +144,18 @@ try
 
                 It "Should return current values for the Get method" {
                     $result = Get-TargetResource @testParams
-                    $result.Ensure | Should Be $testParams.Ensure
-                    $result.UseAutomaticSettings | Should Be $testParams.UseAutomaticSettings
-                    $result.UseDirectoryManagementService | Should Be $testParams.UseDirectoryManagementService
-                    $result.RemoteDirectoryManagementURL | Should Be $testParams.RemoteDirectoryManagementURL
-                    $result.DLsRequireAuthenticatedSenders | Should Be $testParams.DLsRequireAuthenticatedSenders
-                    $result.DistributionGroupsEnabled | Should Be $testParams.DistributionGroupsEnabled
-                    $result.ServerDisplayAddress | Should Be $testParams.ServerDisplayAddress
-                    $result.DropFolder | Should Be $testParams.DropFolder
+                    $result.Ensure | Should -Be $testParams.Ensure
+                    $result.UseAutomaticSettings | Should -Be $testParams.UseAutomaticSettings
+                    $result.UseDirectoryManagementService | Should -Be $testParams.UseDirectoryManagementService
+                    $result.RemoteDirectoryManagementURL | Should -Be $testParams.RemoteDirectoryManagementURL
+                    $result.DLsRequireAuthenticatedSenders | Should -Be $testParams.DLsRequireAuthenticatedSenders
+                    $result.DistributionGroupsEnabled | Should -Be $testParams.DistributionGroupsEnabled
+                    $result.ServerDisplayAddress | Should -Be $testParams.ServerDisplayAddress
+                    $result.DropFolder | Should -Be $testParams.DropFolder
                 }
 
                 It "Should return True for the Test method" {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
 
             }
@@ -188,23 +188,23 @@ try
 
                 It "Should return current values for the Get method" {
                     $result = Get-TargetResource @testParams
-                    $result.Ensure | Should Be $testParams.Ensure
-                    $result.UseAutomaticSettings | Should Be (-not $testParams.UseAutomaticSettings)
-                    $result.UseDirectoryManagementService | Should Be $true
-                    $result.RemoteDirectoryManagementURL | Should BeNullorEmpty
-                    $result.DLsRequireAuthenticatedSenders | Should Be $testParams.DLsRequireAuthenticatedSenders
-                    $result.DistributionGroupsEnabled | Should Be $testParams.DistributionGroupsEnabled
-                    $result.ServerDisplayAddress | Should Be $testParams.ServerDisplayAddress
-                    $result.DropFolder | Should BeNullorEmpty
+                    $result.Ensure | Should -Be $testParams.Ensure
+                    $result.UseAutomaticSettings | Should -Be (-not $testParams.UseAutomaticSettings)
+                    $result.UseDirectoryManagementService | Should -Be $true
+                    $result.RemoteDirectoryManagementURL | Should -BeNullorEmpty
+                    $result.DLsRequireAuthenticatedSenders | Should -Be $testParams.DLsRequireAuthenticatedSenders
+                    $result.DistributionGroupsEnabled | Should -Be $testParams.DistributionGroupsEnabled
+                    $result.ServerDisplayAddress | Should -Be $testParams.ServerDisplayAddress
+                    $result.DropFolder | Should -BeNullorEmpty
                 }
 
                 It "Should return False for the Test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should update settings for the Set method" {
                     Set-TargetResource @testParams
-                    $Global:SPDscUpdateCalled | Should Be $true
+                    $Global:SPDscUpdateCalled | Should -Be $true
                 }
             }
 
@@ -236,23 +236,23 @@ try
 
                 It "Should return null values for the Get method" {
                     $result = Get-TargetResource @testParams
-                    $result.Ensure | Should Be 'Absent'
-                    $result.UseAutomaticSettings | Should BeNullorEmpty
-                    $result.UseDirectoryManagementService | Should BeNullorEmpty
-                    $result.RemoteDirectoryManagementURL | Should BeNullorEmpty
-                    $result.DLsRequireAuthenticatedSenders | Should BeNullorEmpty
-                    $result.DistributionGroupsEnabled | Should BeNullorEmpty
-                    $result.ServerDisplayAddress | Should BeNullorEmpty
-                    $result.DropFolder | Should BeNullorEmpty
+                    $result.Ensure | Should -Be 'Absent'
+                    $result.UseAutomaticSettings | Should -BeNullorEmpty
+                    $result.UseDirectoryManagementService | Should -BeNullorEmpty
+                    $result.RemoteDirectoryManagementURL | Should -BeNullorEmpty
+                    $result.DLsRequireAuthenticatedSenders | Should -BeNullorEmpty
+                    $result.DistributionGroupsEnabled | Should -BeNullorEmpty
+                    $result.ServerDisplayAddress | Should -BeNullorEmpty
+                    $result.DropFolder | Should -BeNullorEmpty
                 }
 
                 It "Should return False for the Test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should update settings for the Set method" {
                     Set-TargetResource @testParams
-                    $Global:SPDscUpdateCalled | Should Be $true
+                    $Global:SPDscUpdateCalled | Should -Be $true
                 }
             }
 
@@ -277,23 +277,23 @@ try
 
                 It "Should return current values for the Get method" {
                     $result = Get-TargetResource @testParams
-                    $result.Ensure | Should Be 'Present'
-                    $result.UseAutomaticSettings | Should Be $mock.UseAutomaticSettings
-                    $result.UseDirectoryManagementService | Should Be 'No'
-                    $result.RemoteDirectoryManagementURL | Should BeNullorEmpty
-                    $result.DLsRequireAuthenticatedSenders | Should Be $mock.DLsRequireAuthenticatedSenders
-                    $result.DistributionGroupsEnabled | Should Be $mock.DistributionGroupsEnabled
-                    $result.ServerDisplayAddress | Should Be $mock.ServerDisplayAddress
-                    $result.DropFolder | Should BeNullorEmpty
+                    $result.Ensure | Should -Be 'Present'
+                    $result.UseAutomaticSettings | Should -Be $mock.UseAutomaticSettings
+                    $result.UseDirectoryManagementService | Should -Be 'No'
+                    $result.RemoteDirectoryManagementURL | Should -BeNullorEmpty
+                    $result.DLsRequireAuthenticatedSenders | Should -Be $mock.DLsRequireAuthenticatedSenders
+                    $result.DistributionGroupsEnabled | Should -Be $mock.DistributionGroupsEnabled
+                    $result.ServerDisplayAddress | Should -Be $mock.ServerDisplayAddress
+                    $result.DropFolder | Should -BeNullorEmpty
                 }
 
                 It "Should return False for the Test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should update settings for the Set method" {
                     Set-TargetResource @testParams
-                    $Global:SPDscUpdateCalled | Should Be $true
+                    $Global:SPDscUpdateCalled | Should -Be $true
                 }
             }
 
@@ -321,23 +321,23 @@ try
 
                 It "Should return current values for the Get method" {
                     $result = Get-TargetResource @testParams
-                    $result.Ensure | Should Be $testParams.Ensure
-                    $result.UseAutomaticSettings | Should Be (-not $testParams.UseAutomaticSettings)
-                    $result.UseDirectoryManagementService | Should Be $testParams.UseDirectoryManagementService
-                    $result.RemoteDirectoryManagementURL | Should BeNullorEmpty
-                    $result.DLsRequireAuthenticatedSenders | Should Be $mock.DLsRequireAuthenticatedSenders
-                    $result.DistributionGroupsEnabled | Should Be $mock.DistributionGroupsEnabled
-                    $result.ServerDisplayAddress | Should Be $testParams.ServerDisplayAddress
-                    $result.DropFolder | Should Be $mock.DropFolder
+                    $result.Ensure | Should -Be $testParams.Ensure
+                    $result.UseAutomaticSettings | Should -Be (-not $testParams.UseAutomaticSettings)
+                    $result.UseDirectoryManagementService | Should -Be $testParams.UseDirectoryManagementService
+                    $result.RemoteDirectoryManagementURL | Should -BeNullorEmpty
+                    $result.DLsRequireAuthenticatedSenders | Should -Be $mock.DLsRequireAuthenticatedSenders
+                    $result.DistributionGroupsEnabled | Should -Be $mock.DistributionGroupsEnabled
+                    $result.ServerDisplayAddress | Should -Be $testParams.ServerDisplayAddress
+                    $result.DropFolder | Should -Be $mock.DropFolder
                 }
 
                 It "Should return False for the Test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should update settings for the Set method" {
                     Set-TargetResource @testParams
-                    $Global:SPDscUpdateCalled | Should Be $true
+                    $Global:SPDscUpdateCalled | Should -Be $true
                 }
             }
 
@@ -367,24 +367,24 @@ try
 
                 It "Should return null values for the Get method" {
                     $result = Get-TargetResource @testParams
-                    $result.Ensure | Should Be 'Present'
-                    $result.UseAutomaticSettings | Should Be $mock.UseAutomaticSettings
-                    $result.UseDirectoryManagementService | Should Be 'Remote'
-                    $result.RemoteDirectoryManagementURL | Should Be $mock.DirectoryManagementServiceURL
-                    $result.DLsRequireAuthenticatedSenders | Should Be $mock.DLsRequireAuthenticatedSenders
-                    $result.DistributionGroupsEnabled | Should Be $mock.DistributionGroupsEnabled
-                    $result.ServerDisplayAddress | Should Be $mock.ServerDisplayAddress
-                    $result.ServerAddress | Should Be $mock.ServerAddress
-                    $result.DropFolder | Should Be $mock.DropFolder
+                    $result.Ensure | Should -Be 'Present'
+                    $result.UseAutomaticSettings | Should -Be $mock.UseAutomaticSettings
+                    $result.UseDirectoryManagementService | Should -Be 'Remote'
+                    $result.RemoteDirectoryManagementURL | Should -Be $mock.DirectoryManagementServiceURL
+                    $result.DLsRequireAuthenticatedSenders | Should -Be $mock.DLsRequireAuthenticatedSenders
+                    $result.DistributionGroupsEnabled | Should -Be $mock.DistributionGroupsEnabled
+                    $result.ServerDisplayAddress | Should -Be $mock.ServerDisplayAddress
+                    $result.ServerAddress | Should -Be $mock.ServerAddress
+                    $result.DropFolder | Should -Be $mock.DropFolder
                 }
 
                 It "Should return False for the Test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should update settings for the Set method" {
                     Set-TargetResource @testParams
-                    $Global:SPDscUpdateCalled | Should Be $true
+                    $Global:SPDscUpdateCalled | Should -Be $true
                 }
             }
 
@@ -416,22 +416,22 @@ try
 
                 It "Should return current values for the Get method" {
                     $result = Get-TargetResource @testParams
-                    $result.Ensure | Should Be $testParams.Ensure
-                    $result.UseAutomaticSettings | Should Be $testParams.UseAutomaticSettings
-                    $result.UseDirectoryManagementService | Should Be $testParams.UseDirectoryManagementService
-                    $result.RemoteDirectoryManagementURL | Should Be $testParams.RemoteDirectoryManagementURL
-                    $result.DLsRequireAuthenticatedSenders | Should Be $testParams.DLsRequireAuthenticatedSenders
-                    $result.DistributionGroupsEnabled | Should Be $testParams.DistributionGroupsEnabled
-                    $result.ServerDisplayAddress | Should Be $testParams.ServerDisplayAddress
-                    $result.DropFolder | Should BeNullorEmpty
+                    $result.Ensure | Should -Be $testParams.Ensure
+                    $result.UseAutomaticSettings | Should -Be $testParams.UseAutomaticSettings
+                    $result.UseDirectoryManagementService | Should -Be $testParams.UseDirectoryManagementService
+                    $result.RemoteDirectoryManagementURL | Should -Be $testParams.RemoteDirectoryManagementURL
+                    $result.DLsRequireAuthenticatedSenders | Should -Be $testParams.DLsRequireAuthenticatedSenders
+                    $result.DistributionGroupsEnabled | Should -Be $testParams.DistributionGroupsEnabled
+                    $result.ServerDisplayAddress | Should -Be $testParams.ServerDisplayAddress
+                    $result.DropFolder | Should -BeNullorEmpty
                 }
 
                 It "Should return False for the Test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should throw an exception for the Set method" {
-                    { Set-TargetResource @testParams } | Should throw "ServerDisplayAddress parameter must be specified when enabling incoming email"
+                    { Set-TargetResource @testParams } | Should -Throw "ServerDisplayAddress parameter must be specified when enabling incoming email"
                 }
             }
 
@@ -463,22 +463,22 @@ try
 
                 It "Should return current values for the Get method" {
                     $result = Get-TargetResource @testParams
-                    $result.Ensure | Should Be $testParams.Ensure
-                    $result.UseAutomaticSettings | Should Be $mock.UseAutomaticSettings
-                    $result.UseDirectoryManagementService | Should Be $testParams.UseDirectoryManagementService
-                    $result.RemoteDirectoryManagementURL | Should Be $testParams.RemoteDirectoryManagementURL
-                    $result.DLsRequireAuthenticatedSenders | Should Be $testParams.DLsRequireAuthenticatedSenders
-                    $result.DistributionGroupsEnabled | Should Be $testParams.DistributionGroupsEnabled
-                    $result.ServerDisplayAddress | Should Be $testParams.ServerDisplayAddress
-                    $result.DropFolder | Should BeNullorEmpty
+                    $result.Ensure | Should -Be $testParams.Ensure
+                    $result.UseAutomaticSettings | Should -Be $mock.UseAutomaticSettings
+                    $result.UseDirectoryManagementService | Should -Be $testParams.UseDirectoryManagementService
+                    $result.RemoteDirectoryManagementURL | Should -Be $testParams.RemoteDirectoryManagementURL
+                    $result.DLsRequireAuthenticatedSenders | Should -Be $testParams.DLsRequireAuthenticatedSenders
+                    $result.DistributionGroupsEnabled | Should -Be $testParams.DistributionGroupsEnabled
+                    $result.ServerDisplayAddress | Should -Be $testParams.ServerDisplayAddress
+                    $result.DropFolder | Should -BeNullorEmpty
                 }
 
                 It "Should return False for the Test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should throw an exception for the Set method" {
-                    { Set-TargetResource @testParams } | Should throw "UseAutomaticSettings parameter must be specified when enabling incoming email."
+                    { Set-TargetResource @testParams } | Should -Throw "UseAutomaticSettings parameter must be specified when enabling incoming email."
                 }
             }
 
@@ -510,22 +510,22 @@ try
 
                 It "Should return current values for the Get method" {
                     $result = Get-TargetResource @testParams
-                    $result.Ensure | Should Be $testParams.Ensure
-                    $result.UseAutomaticSettings | Should Be $testParams.UseAutomaticSettings
-                    $result.UseDirectoryManagementService | Should Be $testParams.UseDirectoryManagementService
-                    $result.RemoteDirectoryManagementURL | Should Be $testParams.RemoteDirectoryManagementURL
-                    $result.DLsRequireAuthenticatedSenders | Should Be $testParams.DLsRequireAuthenticatedSenders
-                    $result.DistributionGroupsEnabled | Should Be $testParams.DistributionGroupsEnabled
-                    $result.ServerDisplayAddress | Should Be $testParams.ServerDisplayAddress
-                    $result.DropFolder | Should BeNullorEmpty
+                    $result.Ensure | Should -Be $testParams.Ensure
+                    $result.UseAutomaticSettings | Should -Be $testParams.UseAutomaticSettings
+                    $result.UseDirectoryManagementService | Should -Be $testParams.UseDirectoryManagementService
+                    $result.RemoteDirectoryManagementURL | Should -Be $testParams.RemoteDirectoryManagementURL
+                    $result.DLsRequireAuthenticatedSenders | Should -Be $testParams.DLsRequireAuthenticatedSenders
+                    $result.DistributionGroupsEnabled | Should -Be $testParams.DistributionGroupsEnabled
+                    $result.ServerDisplayAddress | Should -Be $testParams.ServerDisplayAddress
+                    $result.DropFolder | Should -BeNullorEmpty
                 }
 
                 It "Should return False for the Test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should throw an exception for the Set method" {
-                    { Set-TargetResource @testParams } | Should throw "RemoteDirectoryManagementURL must be specified only when UseDirectoryManagementService is set to 'Remote'"
+                    { Set-TargetResource @testParams } | Should -Throw "RemoteDirectoryManagementURL must be specified only when UseDirectoryManagementService is set to 'Remote'"
                 }
             }
 
@@ -557,22 +557,22 @@ try
 
                 It "Should return current values for the Get method" {
                     $result = Get-TargetResource @testParams
-                    $result.Ensure | Should Be $testParams.Ensure
-                    $result.UseAutomaticSettings | Should Be $true
-                    $result.UseDirectoryManagementService | Should Be $testParams.UseDirectoryManagementService
-                    $result.RemoteDirectoryManagementURL | Should Be $testParams.RemoteDirectoryManagementURL
-                    $result.DLsRequireAuthenticatedSenders | Should Be $testParams.DLsRequireAuthenticatedSenders
-                    $result.DistributionGroupsEnabled | Should Be $testParams.DistributionGroupsEnabled
-                    $result.ServerDisplayAddress | Should Be $testParams.ServerDisplayAddress
-                    $result.DropFolder | Should BeNullorEmpty
+                    $result.Ensure | Should -Be $testParams.Ensure
+                    $result.UseAutomaticSettings | Should -Be $true
+                    $result.UseDirectoryManagementService | Should -Be $testParams.UseDirectoryManagementService
+                    $result.RemoteDirectoryManagementURL | Should -Be $testParams.RemoteDirectoryManagementURL
+                    $result.DLsRequireAuthenticatedSenders | Should -Be $testParams.DLsRequireAuthenticatedSenders
+                    $result.DistributionGroupsEnabled | Should -Be $testParams.DistributionGroupsEnabled
+                    $result.ServerDisplayAddress | Should -Be $testParams.ServerDisplayAddress
+                    $result.DropFolder | Should -BeNullorEmpty
                 }
 
                 It "Should return False for the Test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should throw an exception for the Set method" {
-                    { Set-TargetResource @testParams } | Should throw "DropFolder parameter must be specified when not using Automatic Mode"
+                    { Set-TargetResource @testParams } | Should -Throw "DropFolder parameter must be specified when not using Automatic Mode"
                 }
             }
 
@@ -604,22 +604,22 @@ try
 
                 It "Should return current values for the Get method" {
                     $result = Get-TargetResource @testParams
-                    $result.Ensure | Should Be $testParams.Ensure
-                    $result.UseAutomaticSettings | Should Be $testParams.UseAutomaticSettings
-                    $result.UseDirectoryManagementService | Should Be $testParams.UseDirectoryManagementService
-                    $result.RemoteDirectoryManagementURL | Should Be $testParams.RemoteDirectoryManagementURL
-                    $result.DLsRequireAuthenticatedSenders | Should Be $testParams.DLsRequireAuthenticatedSenders
-                    $result.DistributionGroupsEnabled | Should Be $testParams.DistributionGroupsEnabled
-                    $result.ServerDisplayAddress | Should Be $testParams.ServerDisplayAddress
-                    $result.DropFolder | Should BeNullorEmpty
+                    $result.Ensure | Should -Be $testParams.Ensure
+                    $result.UseAutomaticSettings | Should -Be $testParams.UseAutomaticSettings
+                    $result.UseDirectoryManagementService | Should -Be $testParams.UseDirectoryManagementService
+                    $result.RemoteDirectoryManagementURL | Should -Be $testParams.RemoteDirectoryManagementURL
+                    $result.DLsRequireAuthenticatedSenders | Should -Be $testParams.DLsRequireAuthenticatedSenders
+                    $result.DistributionGroupsEnabled | Should -Be $testParams.DistributionGroupsEnabled
+                    $result.ServerDisplayAddress | Should -Be $testParams.ServerDisplayAddress
+                    $result.DropFolder | Should -BeNullorEmpty
                 }
 
                 It "Should return False for the Test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should throw an exception for the Set method" {
-                    { Set-TargetResource @testParams } | Should throw "DropFolder parameter is not valid when using Automatic Mode"
+                    { Set-TargetResource @testParams } | Should -Throw "DropFolder parameter is not valid when using Automatic Mode"
                 }
             }
 

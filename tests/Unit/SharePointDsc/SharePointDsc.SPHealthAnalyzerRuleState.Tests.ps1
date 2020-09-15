@@ -78,15 +78,15 @@ try
                 Mock -CommandName Get-SPFarm -MockWith { throw "Unable to detect local farm" }
 
                 It "Should return null from the get method" {
-                    (Get-TargetResource @testParams).Name | Should BeNullOrEmpty
+                    (Get-TargetResource @testParams).Name | Should -BeNullOrEmpty
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should throw an exception in the set method to say there is no local farm" {
-                    { Set-TargetResource @testParams } | Should throw "No local SharePoint farm was detected"
+                    { Set-TargetResource @testParams } | Should -Throw "No local SharePoint farm was detected"
                 }
             }
 
@@ -104,15 +104,15 @@ try
                 }
 
                 It "Should return null from the get method" {
-                    (Get-TargetResource @testParams).Name | Should BeNullOrEmpty
+                    (Get-TargetResource @testParams).Name | Should -BeNullOrEmpty
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should throw an exception in the set method" {
-                    { Set-TargetResource @testParams } | Should throw "No Central Admin web application was found. Health Analyzer Rule settings will not be applied"
+                    { Set-TargetResource @testParams } | Should -Throw "No Central Admin web application was found. Health Analyzer Rule settings will not be applied"
                 }
             }
 
@@ -132,15 +132,15 @@ try
                 }
 
                 It "Should return null from the get method" {
-                    (Get-TargetResource @testParams).Name | Should BeNullOrEmpty
+                    (Get-TargetResource @testParams).Name | Should -BeNullOrEmpty
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should throw an exception in the set method" {
-                    { Set-TargetResource @testParams } | Should throw "Could not find Health Analyzer Rules list. Health Analyzer Rule settings will not be applied"
+                    { Set-TargetResource @testParams } | Should -Throw "Could not find Health Analyzer Rules list. Health Analyzer Rule settings will not be applied"
                 }
             }
 
@@ -167,15 +167,15 @@ try
                 Mock -CommandName Get-SPFarm -MockWith { return @{ } }
 
                 It "Should return null from the get method" {
-                    (Get-TargetResource @testParams).Name | Should BeNullOrEmpty
+                    (Get-TargetResource @testParams).Name | Should -BeNullOrEmpty
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should throw an exception in the set method" {
-                    { Set-TargetResource @testParams } | Should throw "Could not find specified Health Analyzer Rule. Health Analyzer Rule settings will not be applied"
+                    { Set-TargetResource @testParams } | Should -Throw "Could not find specified Health Analyzer Rule. Health Analyzer Rule settings will not be applied"
                 }
             }
 
@@ -209,20 +209,20 @@ try
 
                 It "Should return values from the get method" {
                     $result = Get-TargetResource @testParams
-                    $result.Enabled | Should Be $false
-                    $result.RuleScope | Should Be 'Any Server'
-                    $result.Schedule | Should Be 'Weekly'
-                    $result.FixAutomatically | Should Be $true
+                    $result.Enabled | Should -Be $false
+                    $result.RuleScope | Should -Be 'Any Server'
+                    $result.Schedule | Should -Be 'Weekly'
+                    $result.FixAutomatically | Should -Be $true
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 $Global:SPDscHealthRulesUpdated = $false
                 It "set the configured values for the specific Health Analyzer Rule" {
                     Set-TargetResource @testParams
-                    $Global:SPDscHealthRulesUpdated | Should Be $true
+                    $Global:SPDscHealthRulesUpdated | Should -Be $true
                 }
             }
 
@@ -256,14 +256,14 @@ try
 
                 It "Should return values from the get method" {
                     $result = Get-TargetResource @testParams
-                    $result.Enabled | Should Be $true
-                    $result.RuleScope | Should Be 'All Servers'
-                    $result.Schedule | Should Be 'Daily'
-                    $result.FixAutomatically | Should Be $false
+                    $result.Enabled | Should -Be $true
+                    $result.RuleScope | Should -Be 'All Servers'
+                    $result.Schedule | Should -Be 'Daily'
+                    $result.FixAutomatically | Should -Be $false
                 }
 
                 It "Should return true from the test method" {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
 
             }

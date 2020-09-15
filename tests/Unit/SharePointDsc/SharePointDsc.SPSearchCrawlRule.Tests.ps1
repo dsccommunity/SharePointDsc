@@ -84,15 +84,15 @@ try
                 }
 
                 It "Should return null from the Get method" {
-                    { Get-TargetResource @testParams } | Should throw "When AuthenticationType=CertificateRuleAccess, the parameter CertificateName is required"
+                    { Get-TargetResource @testParams } | Should -Throw "When AuthenticationType=CertificateRuleAccess, the parameter CertificateName is required"
                 }
 
                 It "Should return false when the Test method is called" {
-                    { Test-TargetResource @testParams } | Should throw "When AuthenticationType=CertificateRuleAccess, the parameter CertificateName is required"
+                    { Test-TargetResource @testParams } | Should -Throw "When AuthenticationType=CertificateRuleAccess, the parameter CertificateName is required"
                 }
 
                 It "Should throw exception in the set method" {
-                    { Set-TargetResource @testParams } | Should throw "When AuthenticationType=CertificateRuleAccess, the parameter CertificateName is required"
+                    { Set-TargetResource @testParams } | Should -Throw "When AuthenticationType=CertificateRuleAccess, the parameter CertificateName is required"
                 }
             }
 
@@ -107,15 +107,15 @@ try
                 }
 
                 It "Should return null from the Get method" {
-                    { Get-TargetResource @testParams } | Should throw "When specifying CertificateName, the AuthenticationType parameter is required"
+                    { Get-TargetResource @testParams } | Should -Throw "When specifying CertificateName, the AuthenticationType parameter is required"
                 }
 
                 It "Should return false when the Test method is called" {
-                    { Test-TargetResource @testParams } | Should throw "When specifying CertificateName, the AuthenticationType parameter is required"
+                    { Test-TargetResource @testParams } | Should -Throw "When specifying CertificateName, the AuthenticationType parameter is required"
                 }
 
                 It "Should throw exception in the set method" {
-                    { Set-TargetResource @testParams } | Should throw "When specifying CertificateName, the AuthenticationType parameter is required"
+                    { Set-TargetResource @testParams } | Should -Throw "When specifying CertificateName, the AuthenticationType parameter is required"
                 }
             }
 
@@ -129,15 +129,15 @@ try
                 }
 
                 It "Should return null from the Get method" {
-                    { Get-TargetResource @testParams } | Should throw "When AuthenticationType is NTLMAccountRuleAccess or BasicAccountRuleAccess, the parameter AuthenticationCredentials is required"
+                    { Get-TargetResource @testParams } | Should -Throw "When AuthenticationType is NTLMAccountRuleAccess or BasicAccountRuleAccess, the parameter AuthenticationCredentials is required"
                 }
 
                 It "Should return false when the Test method is called" {
-                    { Test-TargetResource @testParams } | Should throw "When AuthenticationType is NTLMAccountRuleAccess or BasicAccountRuleAccess, the parameter AuthenticationCredentials is required"
+                    { Test-TargetResource @testParams } | Should -Throw "When AuthenticationType is NTLMAccountRuleAccess or BasicAccountRuleAccess, the parameter AuthenticationCredentials is required"
                 }
 
                 It "Should throw exception in the set method" {
-                    { Set-TargetResource @testParams } | Should throw "When AuthenticationType is NTLMAccountRuleAccess or BasicAccountRuleAccess, the parameter AuthenticationCredentials is required"
+                    { Set-TargetResource @testParams } | Should -Throw "When AuthenticationType is NTLMAccountRuleAccess or BasicAccountRuleAccess, the parameter AuthenticationCredentials is required"
                 }
             }
 
@@ -156,15 +156,15 @@ try
                 }
 
                 It "Should return null from the Get method" {
-                    { Get-TargetResource @testParams } | Should throw "When specifying AuthenticationCredentials, the AuthenticationType parameter is required"
+                    { Get-TargetResource @testParams } | Should -Throw "When specifying AuthenticationCredentials, the AuthenticationType parameter is required"
                 }
 
                 It "Should return false when the Test method is called" {
-                    { Test-TargetResource @testParams } | Should throw "When specifying AuthenticationCredentials, the AuthenticationType parameter is required"
+                    { Test-TargetResource @testParams } | Should -Throw "When specifying AuthenticationCredentials, the AuthenticationType parameter is required"
                 }
 
                 It "Should throw exception in the set method" {
-                    { Set-TargetResource @testParams } | Should throw "When specifying AuthenticationCredentials, the AuthenticationType parameter is required"
+                    { Set-TargetResource @testParams } | Should -Throw "When specifying AuthenticationCredentials, the AuthenticationType parameter is required"
                 }
             }
 
@@ -179,15 +179,15 @@ try
                 }
 
                 It "Should return null from the Get method" {
-                    { Get-TargetResource @testParams } | Should throw "When RuleType=ExclusionRule, CrawlConfigurationRules cannot contain the values FollowLinksNoPageCrawl or CrawlAsHTTP"
+                    { Get-TargetResource @testParams } | Should -Throw "When RuleType=ExclusionRule, CrawlConfigurationRules cannot contain the values FollowLinksNoPageCrawl or CrawlAsHTTP"
                 }
 
                 It "Should return false when the Test method is called" {
-                    { Test-TargetResource @testParams } | Should throw "When RuleType=ExclusionRule, CrawlConfigurationRules cannot contain the values FollowLinksNoPageCrawl or CrawlAsHTTP"
+                    { Test-TargetResource @testParams } | Should -Throw "When RuleType=ExclusionRule, CrawlConfigurationRules cannot contain the values FollowLinksNoPageCrawl or CrawlAsHTTP"
                 }
 
                 It "Should throw exception in the set method" {
-                    { Set-TargetResource @testParams } | Should throw "When RuleType=ExclusionRule, CrawlConfigurationRules cannot contain the values FollowLinksNoPageCrawl or CrawlAsHTTP"
+                    { Set-TargetResource @testParams } | Should -Throw "When RuleType=ExclusionRule, CrawlConfigurationRules cannot contain the values FollowLinksNoPageCrawl or CrawlAsHTTP"
                 }
             }
 
@@ -202,15 +202,15 @@ try
                 }
 
                 It "Should return null from the Get method" {
-                    { Get-TargetResource @testParams } | Should throw "When Type=ExclusionRule, parameters AuthenticationCredentials, CertificateName or AuthenticationType are not allowed"
+                    { Get-TargetResource @testParams } | Should -Throw "When Type=ExclusionRule, parameters AuthenticationCredentials, CertificateName or AuthenticationType are not allowed"
                 }
 
                 It "Should return false when the Test method is called" {
-                    { Test-TargetResource @testParams } | Should throw "When Type=ExclusionRule, parameters AuthenticationCredentials, CertificateName or AuthenticationType are not allowed"
+                    { Test-TargetResource @testParams } | Should -Throw "When Type=ExclusionRule, parameters AuthenticationCredentials, CertificateName or AuthenticationType are not allowed"
                 }
 
                 It "Should throw exception in the set method" {
-                    { Set-TargetResource @testParams } | Should throw "When Type=ExclusionRule, parameters AuthenticationCredentials, CertificateName or AuthenticationType are not allowed"
+                    { Set-TargetResource @testParams } | Should -Throw "When Type=ExclusionRule, parameters AuthenticationCredentials, CertificateName or AuthenticationType are not allowed"
                 }
             }
 
@@ -229,11 +229,11 @@ try
                 }
 
                 It "Should return absent from the Get method" {
-                    (Get-TargetResource @testParams).Ensure | Should Be "Absent"
+                    (Get-TargetResource @testParams).Ensure | Should -Be "Absent"
                 }
 
                 It "Should return false when the Test method is called" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should create a new service application in the set method" {
@@ -259,11 +259,11 @@ try
                 }
 
                 It "Should return absent from the Get method" {
-                    (Get-TargetResource @testParams).Ensure | Should Be "Absent"
+                    (Get-TargetResource @testParams).Ensure | Should -Be "Absent"
                 }
 
                 It "Should return false when the Test method is called" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should create a new service application in the set method" {
@@ -293,11 +293,11 @@ try
                 }
 
                 It "Should return present from the get method" {
-                    (Get-TargetResource @testParams).Ensure | Should Be "Present"
+                    (Get-TargetResource @testParams).Ensure | Should -Be "Present"
                 }
 
                 It "Should return true when the Test method is called" {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
             }
 
@@ -322,11 +322,11 @@ try
                 }
 
                 It "Should return present from the get method" {
-                    (Get-TargetResource @testParams).Ensure | Should Be "Present"
+                    (Get-TargetResource @testParams).Ensure | Should -Be "Present"
                 }
 
                 It "Should return false when the Test method is called" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should call the update service app cmdlet from the set method" {

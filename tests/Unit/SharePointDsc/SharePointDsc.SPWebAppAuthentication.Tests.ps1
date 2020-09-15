@@ -80,20 +80,20 @@ try
 
                 It "Should return null from the get method" {
                     $result = Get-TargetResource @testParams
-                    $result.Default | Should BeNullOrEmpty
-                    $result.Intranet | Should BeNullOrEmpty
-                    $result.Extranet | Should BeNullOrEmpty
-                    $result.Internet | Should BeNullOrEmpty
-                    $result.Custom | Should BeNullOrEmpty
-                    $result.WebAppUrl | Should Not BeNullOrEmpty
+                    $result.Default | Should -BeNullOrEmpty
+                    $result.Intranet | Should -BeNullOrEmpty
+                    $result.Extranet | Should -BeNullOrEmpty
+                    $result.Internet | Should -BeNullOrEmpty
+                    $result.Custom | Should -BeNullOrEmpty
+                    $result.WebAppUrl | Should -Not -BeNullOrEmpty
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should throw exception in the set method" {
-                    { Set-TargetResource @testParams } | Should throw "Specified Web Application $($testparams.WebAppUrl) does not exist"
+                    { Set-TargetResource @testParams } | Should -Throw "Specified Web Application $($testparams.WebAppUrl) does not exist"
                 }
             }
 
@@ -112,19 +112,19 @@ try
 
                 It "Should return null from the get method" {
                     $result = Get-TargetResource @testParams
-                    $result.Default | Should BeNullOrEmpty
-                    $result.Intranet | Should BeNullOrEmpty
-                    $result.Extranet | Should BeNullOrEmpty
-                    $result.Internet | Should BeNullOrEmpty
-                    $result.Custom | Should BeNullOrEmpty
+                    $result.Default | Should -BeNullOrEmpty
+                    $result.Intranet | Should -BeNullOrEmpty
+                    $result.Extranet | Should -BeNullOrEmpty
+                    $result.Internet | Should -BeNullOrEmpty
+                    $result.Custom | Should -BeNullOrEmpty
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should throw exception in the set method" {
-                    { Set-TargetResource @testParams } | Should throw "You have to specify WindowsAuthMethod when using WindowsAuthentication"
+                    { Set-TargetResource @testParams } | Should -Throw "You have to specify WindowsAuthMethod when using WindowsAuthentication"
                 }
             }
 
@@ -144,19 +144,19 @@ try
 
                 It "Should return null from the get method" {
                     $result = Get-TargetResource @testParams
-                    $result.Default | Should BeNullOrEmpty
-                    $result.Intranet | Should BeNullOrEmpty
-                    $result.Extranet | Should BeNullOrEmpty
-                    $result.Internet | Should BeNullOrEmpty
-                    $result.Custom | Should BeNullOrEmpty
+                    $result.Default | Should -BeNullOrEmpty
+                    $result.Intranet | Should -BeNullOrEmpty
+                    $result.Extranet | Should -BeNullOrEmpty
+                    $result.Internet | Should -BeNullOrEmpty
+                    $result.Custom | Should -BeNullOrEmpty
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should throw exception in the set method" {
-                    { Set-TargetResource @testParams } | Should throw "You cannot use AuthenticationProvider, MembershipProvider or RoleProvider when using WindowsAuthentication"
+                    { Set-TargetResource @testParams } | Should -Throw "You cannot use AuthenticationProvider, MembershipProvider or RoleProvider when using WindowsAuthentication"
                 }
             }
 
@@ -176,19 +176,19 @@ try
 
                 It "Should return null from the get method" {
                     $result = Get-TargetResource @testParams
-                    $result.Default | Should BeNullOrEmpty
-                    $result.Intranet | Should BeNullOrEmpty
-                    $result.Extranet | Should BeNullOrEmpty
-                    $result.Internet | Should BeNullOrEmpty
-                    $result.Custom | Should BeNullOrEmpty
+                    $result.Default | Should -BeNullOrEmpty
+                    $result.Intranet | Should -BeNullOrEmpty
+                    $result.Extranet | Should -BeNullOrEmpty
+                    $result.Internet | Should -BeNullOrEmpty
+                    $result.Custom | Should -BeNullOrEmpty
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should throw exception in the set method" {
-                    { Set-TargetResource @testParams } | Should throw "You cannot use AuthenticationProvider, MembershipProvider or RoleProvider when using WindowsAuthentication"
+                    { Set-TargetResource @testParams } | Should -Throw "You cannot use AuthenticationProvider, MembershipProvider or RoleProvider when using WindowsAuthentication"
                 }
             }
 
@@ -209,19 +209,19 @@ try
 
                 It "Should return null from the get method" {
                     $result = Get-TargetResource @testParams
-                    $result.Default | Should BeNullOrEmpty
-                    $result.Intranet | Should BeNullOrEmpty
-                    $result.Extranet | Should BeNullOrEmpty
-                    $result.Internet | Should BeNullOrEmpty
-                    $result.Custom | Should BeNullOrEmpty
+                    $result.Default | Should -BeNullOrEmpty
+                    $result.Intranet | Should -BeNullOrEmpty
+                    $result.Extranet | Should -BeNullOrEmpty
+                    $result.Internet | Should -BeNullOrEmpty
+                    $result.Custom | Should -BeNullOrEmpty
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should throw exception in the set method" {
-                    { Set-TargetResource @testParams } | Should throw "You cannot use AuthenticationProvider when using FBA"
+                    { Set-TargetResource @testParams } | Should -Throw "You cannot use AuthenticationProvider when using FBA"
                 }
             }
 
@@ -230,10 +230,10 @@ try
                     WebAppUrl = "http://sharepoint.contoso.com"
                     Default   = @(
                         (New-CimInstance -ClassName MSFT_SPWebAppAuthenticationMode -Property @{
-                                AuthenticationMethod   = "FBA"
-                                MembershipProvider     = "INCORRECT"
-                                RoleProvider           = "INCORRECT"
-                                WindowsAuthMethod      = "NTLM"
+                                AuthenticationMethod = "FBA"
+                                MembershipProvider   = "INCORRECT"
+                                RoleProvider         = "INCORRECT"
+                                WindowsAuthMethod    = "NTLM"
                             } -ClientOnly)
                     )
                 }
@@ -242,19 +242,19 @@ try
 
                 It "Should return null from the get method" {
                     $result = Get-TargetResource @testParams
-                    $result.Default | Should BeNullOrEmpty
-                    $result.Intranet | Should BeNullOrEmpty
-                    $result.Extranet | Should BeNullOrEmpty
-                    $result.Internet | Should BeNullOrEmpty
-                    $result.Custom | Should BeNullOrEmpty
+                    $result.Default | Should -BeNullOrEmpty
+                    $result.Intranet | Should -BeNullOrEmpty
+                    $result.Extranet | Should -BeNullOrEmpty
+                    $result.Internet | Should -BeNullOrEmpty
+                    $result.Custom | Should -BeNullOrEmpty
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should throw exception in the set method" {
-                    { Set-TargetResource @testParams } | Should throw "You cannot use WindowsAuthMethod or UseBasicAuth when using FBA"
+                    { Set-TargetResource @testParams } | Should -Throw "You cannot use WindowsAuthMethod or UseBasicAuth when using FBA"
                 }
             }
 
@@ -274,19 +274,19 @@ try
 
                 It "Should return null from the get method" {
                     $result = Get-TargetResource @testParams
-                    $result.Default | Should BeNullOrEmpty
-                    $result.Intranet | Should BeNullOrEmpty
-                    $result.Extranet | Should BeNullOrEmpty
-                    $result.Internet | Should BeNullOrEmpty
-                    $result.Custom | Should BeNullOrEmpty
+                    $result.Default | Should -BeNullOrEmpty
+                    $result.Intranet | Should -BeNullOrEmpty
+                    $result.Extranet | Should -BeNullOrEmpty
+                    $result.Internet | Should -BeNullOrEmpty
+                    $result.Custom | Should -BeNullOrEmpty
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should throw exception in the set method" {
-                    { Set-TargetResource @testParams } | Should throw "You cannot use MembershipProvider or RoleProvider when using Federated"
+                    { Set-TargetResource @testParams } | Should -Throw "You cannot use MembershipProvider or RoleProvider when using Federated"
                 }
             }
 
@@ -306,19 +306,19 @@ try
 
                 It "Should return null from the get method" {
                     $result = Get-TargetResource @testParams
-                    $result.Default | Should BeNullOrEmpty
-                    $result.Intranet | Should BeNullOrEmpty
-                    $result.Extranet | Should BeNullOrEmpty
-                    $result.Internet | Should BeNullOrEmpty
-                    $result.Custom | Should BeNullOrEmpty
+                    $result.Default | Should -BeNullOrEmpty
+                    $result.Intranet | Should -BeNullOrEmpty
+                    $result.Extranet | Should -BeNullOrEmpty
+                    $result.Internet | Should -BeNullOrEmpty
+                    $result.Custom | Should -BeNullOrEmpty
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should throw exception in the set method" {
-                    { Set-TargetResource @testParams } | Should throw "You cannot use WindowsAuthMethod or UseBasicAuth when using Federated"
+                    { Set-TargetResource @testParams } | Should -Throw "You cannot use WindowsAuthMethod or UseBasicAuth when using Federated"
                 }
             }
 
@@ -337,19 +337,19 @@ try
 
                 It "Should return null from the get method" {
                     $result = Get-TargetResource @testParams
-                    $result.Default | Should BeNullOrEmpty
-                    $result.Intranet | Should BeNullOrEmpty
-                    $result.Extranet | Should BeNullOrEmpty
-                    $result.Internet | Should BeNullOrEmpty
-                    $result.Custom | Should BeNullOrEmpty
+                    $result.Default | Should -BeNullOrEmpty
+                    $result.Intranet | Should -BeNullOrEmpty
+                    $result.Extranet | Should -BeNullOrEmpty
+                    $result.Internet | Should -BeNullOrEmpty
+                    $result.Custom | Should -BeNullOrEmpty
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should throw exception in the set method" {
-                    { Set-TargetResource @testParams } | Should throw "You have to specify MembershipProvider and RoleProvider when using FBA"
+                    { Set-TargetResource @testParams } | Should -Throw "You have to specify MembershipProvider and RoleProvider when using FBA"
                 }
             }
 
@@ -367,19 +367,19 @@ try
 
                 It "Should return null from the get method" {
                     $result = Get-TargetResource @testParams
-                    $result.Default | Should BeNullOrEmpty
-                    $result.Intranet | Should BeNullOrEmpty
-                    $result.Extranet | Should BeNullOrEmpty
-                    $result.Internet | Should BeNullOrEmpty
-                    $result.Custom | Should BeNullOrEmpty
+                    $result.Default | Should -BeNullOrEmpty
+                    $result.Intranet | Should -BeNullOrEmpty
+                    $result.Extranet | Should -BeNullOrEmpty
+                    $result.Internet | Should -BeNullOrEmpty
+                    $result.Custom | Should -BeNullOrEmpty
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should throw exception in the set method" {
-                    { Set-TargetResource @testParams } | Should throw "You have to specify AuthenticationProvider when using Federated"
+                    { Set-TargetResource @testParams } | Should -Throw "You have to specify AuthenticationProvider when using Federated"
                 }
             }
 
@@ -392,19 +392,19 @@ try
 
                 It "Should throw exception in the get method" {
                     $result = Get-TargetResource @testParams
-                    $result.Default | Should BeNullOrEmpty
-                    $result.Intranet | Should BeNullOrEmpty
-                    $result.Extranet | Should BeNullOrEmpty
-                    $result.Internet | Should BeNullOrEmpty
-                    $result.Custom | Should BeNullOrEmpty
+                    $result.Default | Should -BeNullOrEmpty
+                    $result.Intranet | Should -BeNullOrEmpty
+                    $result.Extranet | Should -BeNullOrEmpty
+                    $result.Internet | Should -BeNullOrEmpty
+                    $result.Custom | Should -BeNullOrEmpty
                 }
 
                 It "Should throw exception in the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should throw exception in the set method" {
-                    { Set-TargetResource @testParams } | Should throw "You have to specify at least one zone."
+                    { Set-TargetResource @testParams } | Should -Throw "You have to specify at least one zone."
                 }
             }
 
@@ -433,15 +433,15 @@ try
 
                 It "Should return null from the get method" {
                     $result = Get-TargetResource @testParams
-                    $result.Default[0].AuthenticationMethod | Should Be "Classic"
+                    $result.Default[0].AuthenticationMethod | Should -Be "Classic"
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should throw exception in the set method" {
-                    { Set-TargetResource @testParams } | Should Throw "Specified Web Application is using Classic Authentication and Claims Authentication is specified."
+                    { Set-TargetResource @testParams } | Should -Throw "Specified Web Application is using Classic Authentication and Claims Authentication is specified."
                 }
             }
 
@@ -469,7 +469,7 @@ try
                 Mock -CommandName Get-SPTrustedIdentityTokenIssuer -MockWith { return @{ } }
 
                 It "Should throw exception in the set method" {
-                    { Set-TargetResource @testParams } | Should Throw "Specified Web Application is using Classic Authentication and Claims Authentication is specified."
+                    { Set-TargetResource @testParams } | Should -Throw "Specified Web Application is using Classic Authentication and Claims Authentication is specified."
                 }
             }
 
@@ -497,7 +497,7 @@ try
                 Mock -CommandName Get-SPTrustedIdentityTokenIssuer -MockWith { return @{ } }
 
                 It "Should throw exception in the set method" {
-                    { Set-TargetResource @testParams } | Should Throw "Specified Web Application is using Classic Authentication and Claims Authentication is specified."
+                    { Set-TargetResource @testParams } | Should -Throw "Specified Web Application is using Classic Authentication and Claims Authentication is specified."
                 }
             }
 
@@ -525,14 +525,14 @@ try
                 Mock -CommandName Get-SPTrustedIdentityTokenIssuer -MockWith { return @{ } }
 
                 It "Should throw exception in the set method" {
-                    { Set-TargetResource @testParams } | Should Throw "Specified Web Application is using Classic Authentication and Claims Authentication is specified."
+                    { Set-TargetResource @testParams } | Should -Throw "Specified Web Application is using Classic Authentication and Claims Authentication is specified."
                 }
             }
 
             Context -Name "WebApplication is Classic, but Custom Zone config is Claims" -Fixture {
                 $testParams = @{
                     WebAppUrl = "http://sharepoint.contoso.com"
-                    Custom  = @(
+                    Custom    = @(
                         (New-CimInstance -ClassName MSFT_SPWebAppAuthenticationMode -Property @{
                                 AuthenticationMethod = "WindowsAuthentication"
                                 WindowsAuthMethod    = "NTLM"
@@ -553,7 +553,7 @@ try
                 Mock -CommandName Get-SPTrustedIdentityTokenIssuer -MockWith { return @{ } }
 
                 It "Should throw exception in the set method" {
-                    { Set-TargetResource @testParams } | Should Throw "Specified Web Application is using Classic Authentication and Claims Authentication is specified."
+                    { Set-TargetResource @testParams } | Should -Throw "Specified Web Application is using Classic Authentication and Claims Authentication is specified."
                 }
             }
 
@@ -607,14 +607,14 @@ try
 
                 It "Should return null from the get method" {
                     $result = Get-TargetResource @testParams
-                    $result.Default[0].AuthenticationMethod | Should Be "WindowsAuthentication"
-                    $result.Default[0].WindowsAuthMethod | Should Be "NTLM"
-                    $result.Default[1].AuthenticationMethod | Should Be "FBA"
-                    $result.Default[2].AuthenticationMethod | Should Be "Federated"
+                    $result.Default[0].AuthenticationMethod | Should -Be "WindowsAuthentication"
+                    $result.Default[0].WindowsAuthMethod | Should -Be "NTLM"
+                    $result.Default[1].AuthenticationMethod | Should -Be "FBA"
+                    $result.Default[2].AuthenticationMethod | Should -Be "Federated"
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
             }
 
@@ -654,7 +654,7 @@ try
                 Mock -CommandName Get-SPTrustedIdentityTokenIssuer -MockWith { return $null }
 
                 It "Should throw exception in the set method" {
-                    { Set-TargetResource @testParams } | Should Throw "Specified AuthenticationProvider ADFS does not exist"
+                    { Set-TargetResource @testParams } | Should -Throw "Specified AuthenticationProvider ADFS does not exist"
                 }
             }
 
@@ -708,13 +708,13 @@ try
 
                 It "Should return null from the get method" {
                     $result = Get-TargetResource @testParams
-                    $result.Default[0].AuthenticationMethod | Should Be "WindowsAuthentication"
-                    $result.Default[0].WindowsAuthMethod | Should Be "NTLM"
-                    $result.Default[1].AuthenticationMethod | Should Be "FBA"
+                    $result.Default[0].AuthenticationMethod | Should -Be "WindowsAuthentication"
+                    $result.Default[0].WindowsAuthMethod | Should -Be "NTLM"
+                    $result.Default[1].AuthenticationMethod | Should -Be "FBA"
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should run the Set-SPWebApplication cmdlet in the set method" {
@@ -772,14 +772,14 @@ try
 
                 It "Should return null from the get method" {
                     $result = Get-TargetResource @testParams
-                    $result.Intranet[0].AuthenticationMethod | Should Be "WindowsAuthentication"
-                    $result.Intranet[0].WindowsAuthMethod | Should Be "NTLM"
-                    $result.Intranet[1].AuthenticationMethod | Should Be "FBA"
-                    $result.Intranet[2].AuthenticationMethod | Should Be "Federated"
+                    $result.Intranet[0].AuthenticationMethod | Should -Be "WindowsAuthentication"
+                    $result.Intranet[0].WindowsAuthMethod | Should -Be "NTLM"
+                    $result.Intranet[1].AuthenticationMethod | Should -Be "FBA"
+                    $result.Intranet[2].AuthenticationMethod | Should -Be "Federated"
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
             }
 
@@ -831,13 +831,13 @@ try
 
                 It "Should return null from the get method" {
                     $result = Get-TargetResource @testParams
-                    $result.Intranet[0].AuthenticationMethod | Should Be "WindowsAuthentication"
-                    $result.Intranet[0].WindowsAuthMethod | Should Be "NTLM"
-                    $result.Intranet[1].AuthenticationMethod | Should Be "FBA"
+                    $result.Intranet[0].AuthenticationMethod | Should -Be "WindowsAuthentication"
+                    $result.Intranet[0].WindowsAuthMethod | Should -Be "NTLM"
+                    $result.Intranet[1].AuthenticationMethod | Should -Be "FBA"
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should run the Set-SPWebApplication cmdlet in the set method" {
@@ -895,14 +895,14 @@ try
 
                 It "Should return null from the get method" {
                     $result = Get-TargetResource @testParams
-                    $result.Internet[0].AuthenticationMethod | Should Be "WindowsAuthentication"
-                    $result.Internet[0].WindowsAuthMethod | Should Be "NTLM"
-                    $result.Internet[1].AuthenticationMethod | Should Be "FBA"
-                    $result.Internet[2].AuthenticationMethod | Should Be "Federated"
+                    $result.Internet[0].AuthenticationMethod | Should -Be "WindowsAuthentication"
+                    $result.Internet[0].WindowsAuthMethod | Should -Be "NTLM"
+                    $result.Internet[1].AuthenticationMethod | Should -Be "FBA"
+                    $result.Internet[2].AuthenticationMethod | Should -Be "Federated"
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
             }
 
@@ -954,13 +954,13 @@ try
 
                 It "Should return null from the get method" {
                     $result = Get-TargetResource @testParams
-                    $result.Internet[0].AuthenticationMethod | Should Be "WindowsAuthentication"
-                    $result.Internet[0].WindowsAuthMethod | Should Be "NTLM"
-                    $result.Internet[1].AuthenticationMethod | Should Be "FBA"
+                    $result.Internet[0].AuthenticationMethod | Should -Be "WindowsAuthentication"
+                    $result.Internet[0].WindowsAuthMethod | Should -Be "NTLM"
+                    $result.Internet[1].AuthenticationMethod | Should -Be "FBA"
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should run the Set-SPWebApplication cmdlet in the set method" {
@@ -1018,14 +1018,14 @@ try
 
                 It "Should return null from the get method" {
                     $result = Get-TargetResource @testParams
-                    $result.Extranet[0].AuthenticationMethod | Should Be "WindowsAuthentication"
-                    $result.Extranet[0].WindowsAuthMethod | Should Be "NTLM"
-                    $result.Extranet[1].AuthenticationMethod | Should Be "FBA"
-                    $result.Extranet[2].AuthenticationMethod | Should Be "Federated"
+                    $result.Extranet[0].AuthenticationMethod | Should -Be "WindowsAuthentication"
+                    $result.Extranet[0].WindowsAuthMethod | Should -Be "NTLM"
+                    $result.Extranet[1].AuthenticationMethod | Should -Be "FBA"
+                    $result.Extranet[2].AuthenticationMethod | Should -Be "Federated"
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
             }
 
@@ -1075,13 +1075,13 @@ try
 
                 It "Should return null from the get method" {
                     $result = Get-TargetResource @testParams
-                    $result.Extranet[0].AuthenticationMethod | Should Be "WindowsAuthentication"
-                    $result.Extranet[0].WindowsAuthMethod | Should Be "NTLM"
-                    $result.Extranet[1].AuthenticationMethod | Should Be "FBA"
+                    $result.Extranet[0].AuthenticationMethod | Should -Be "WindowsAuthentication"
+                    $result.Extranet[0].WindowsAuthMethod | Should -Be "NTLM"
+                    $result.Extranet[1].AuthenticationMethod | Should -Be "FBA"
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should run the Set-SPWebApplication cmdlet in the set method" {
@@ -1139,14 +1139,14 @@ try
 
                 It "Should return null from the get method" {
                     $result = Get-TargetResource @testParams
-                    $result.Custom[0].AuthenticationMethod | Should Be "WindowsAuthentication"
-                    $result.Custom[0].WindowsAuthMethod | Should Be "NTLM"
-                    $result.Custom[1].AuthenticationMethod | Should Be "FBA"
-                    $result.Custom[2].AuthenticationMethod | Should Be "Federated"
+                    $result.Custom[0].AuthenticationMethod | Should -Be "WindowsAuthentication"
+                    $result.Custom[0].WindowsAuthMethod | Should -Be "NTLM"
+                    $result.Custom[1].AuthenticationMethod | Should -Be "FBA"
+                    $result.Custom[2].AuthenticationMethod | Should -Be "Federated"
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
             }
 
@@ -1198,13 +1198,13 @@ try
 
                 It "Should return null from the get method" {
                     $result = Get-TargetResource @testParams
-                    $result.Custom[0].AuthenticationMethod | Should Be "WindowsAuthentication"
-                    $result.Custom[0].WindowsAuthMethod | Should Be "Kerberos"
-                    $result.Custom[1].AuthenticationMethod | Should Be "FBA"
+                    $result.Custom[0].AuthenticationMethod | Should -Be "WindowsAuthentication"
+                    $result.Custom[0].WindowsAuthMethod | Should -Be "Kerberos"
+                    $result.Custom[1].AuthenticationMethod | Should -Be "FBA"
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should run the Set-SPWebApplication cmdlet in the set method" {

@@ -91,7 +91,7 @@ try
                 }
 
                 It "Should throw exception when executed" {
-                    { Set-TargetResource @testParams } | Should Throw "Specified PSDSCRunAsCredential"
+                    { Set-TargetResource @testParams } | Should -Throw "Specified PSDSCRunAsCredential"
                 }
             }
 
@@ -115,15 +115,15 @@ try
                 }
 
                 It "Should return null from the get method" {
-                    (Get-TargetResource @testParams).SiteUrl | Should BeNullOrEmpty
+                    (Get-TargetResource @testParams).SiteUrl | Should -BeNullOrEmpty
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should throw exception when executed" {
-                    { Set-TargetResource @testParams } | Should throw
+                    { Set-TargetResource @testParams } | Should -Throw
                 }
             }
 
@@ -147,11 +147,11 @@ try
                 }
 
                 It "Should return null from the get method" {
-                    (Get-TargetResource @testParams).SiteUrl | Should BeNullOrEmpty
+                    (Get-TargetResource @testParams).SiteUrl | Should -BeNullOrEmpty
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should update the settings in the set method" {
@@ -188,11 +188,11 @@ try
                 }
 
                 It "Should return value from the get method" {
-                    (Get-TargetResource @testParams).SiteUrl | Should Not BeNullOrEmpty
+                    (Get-TargetResource @testParams).SiteUrl | Should -Not -BeNullOrEmpty
                 }
 
                 It "Should return true from the test method" {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
             }
 
@@ -219,15 +219,15 @@ try
                 }
 
                 It "Should return null from the get method" {
-                    (Get-TargetResource @testParams).SiteUrl | Should BeNullOrEmpty
+                    (Get-TargetResource @testParams).SiteUrl | Should -BeNullOrEmpty
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should throw an exception in the set method" {
-                    { Set-TargetResource @testParams } | Should throw `
+                    { Set-TargetResource @testParams } | Should -Throw `
                     ("This resource must be run as the farm account (not a setup account). " + `
                             "Please ensure either the PsDscRunAsCredential or InstallAccount " + `
                             "credentials are set to the farm account and run this resource again")

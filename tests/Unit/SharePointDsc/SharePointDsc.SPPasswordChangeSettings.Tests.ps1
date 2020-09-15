@@ -64,11 +64,11 @@ try
                 }
 
                 It "Should return null from the get method" {
-                    (Get-TargetResource @testParams).MailAddress | Should BeNullOrEmpty
+                    (Get-TargetResource @testParams).MailAddress | Should -BeNullOrEmpty
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
             }
 
@@ -91,11 +91,11 @@ try
                 }
 
                 It "Should return farm properties from the get method" {
-                    (Get-TargetResource @testParams).MailAddress | Should Be "e@mail.com"
+                    (Get-TargetResource @testParams).MailAddress | Should -Be "e@mail.com"
                 }
 
                 It "Should return true from the test method" {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
             }
 
@@ -123,18 +123,18 @@ try
                 }
 
                 It "Should return farm properties from the get method" {
-                    (Get-TargetResource @testParams).MailAddress | Should Be ""
+                    (Get-TargetResource @testParams).MailAddress | Should -Be ""
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should call the new and set methods from the set function" {
                     $Global:SPDscFarmUpdateCalled = $false
                     Set-TargetResource @testParams
                     Assert-MockCalled Get-SPFarm
-                    $Global:SPDscFarmUpdateCalled | Should Be $true
+                    $Global:SPDscFarmUpdateCalled | Should -Be $true
                 }
             }
         }

@@ -87,11 +87,11 @@ try
                 }
 
                 It "Should return Present from the Get method" {
-                    (Get-TargetResource @testParams).Ensure | Should Be "Present"
+                    (Get-TargetResource @testParams).Ensure | Should -Be "Present"
                 }
 
                 It "Should fail validation of signing certificate parameters in the Set method" {
-                    { Set-TargetResource @testParams } | Should Throw "Imported certificate thumbprint (1111111111111111111111111111111111111111) does not match expected thumbprint (770515261D1AB169057E246E0EE6431D557C3AFB)."
+                    { Set-TargetResource @testParams } | Should -Throw "Imported certificate thumbprint (1111111111111111111111111111111111111111) does not match expected thumbprint (770515261D1AB169057E246E0EE6431D557C3AFB)."
                 }
             }
 
@@ -123,11 +123,11 @@ try
                 }
 
                 It "Should return Present from the Get method" {
-                    (Get-TargetResource @testParams).Ensure | Should Be "Absent"
+                    (Get-TargetResource @testParams).Ensure | Should -Be "Absent"
                 }
 
                 It "Should fail validation of signing certificate parameters in the Set method" {
-                    { Set-TargetResource @testParams } | Should Throw "Imported certificate thumbprint (1111111111111111111111111111111111111111) does not match expected thumbprint (770515261D1AB169057E246E0EE6431D557C3AFB)."
+                    { Set-TargetResource @testParams } | Should -Throw "Imported certificate thumbprint (1111111111111111111111111111111111111111) does not match expected thumbprint (770515261D1AB169057E246E0EE6431D557C3AFB)."
                 }
             }
 
@@ -158,15 +158,15 @@ try
                 }
 
                 It "Should return Present from the Get method" {
-                    (Get-TargetResource @testParams).Ensure | Should Be "Present"
+                    (Get-TargetResource @testParams).Ensure | Should -Be "Present"
                 }
 
                 It "Should return true when the Test method is called" {
-                    { Test-TargetResource @testParams } | Should Throw "At least one of the following parameters must be specified"
+                    { Test-TargetResource @testParams } | Should -Throw "At least one of the following parameters must be specified"
                 }
 
                 It "Should Update the SP Trusted Root Authority in the set method" {
-                    { Set-TargetResource @testParams } | Should Throw "At least one of the following parameters must be specified"
+                    { Set-TargetResource @testParams } | Should -Throw "At least one of the following parameters must be specified"
                 }
             }
 
@@ -198,15 +198,15 @@ try
                 }
 
                 It "Should return Present from the Get method" {
-                    { Get-TargetResource @testParams } | Should Throw "Specified CertificateFilePath does not exist"
+                    { Get-TargetResource @testParams } | Should -Throw "Specified CertificateFilePath does not exist"
                 }
 
                 It "Should return true when the Test method is called" {
-                    { Test-TargetResource @testParams } | Should Throw "Specified CertificateFilePath does not exist"
+                    { Test-TargetResource @testParams } | Should -Throw "Specified CertificateFilePath does not exist"
                 }
 
                 It "Should Update the SP Trusted Root Authority in the set method" {
-                    { Set-TargetResource @testParams } | Should Throw "Specified CertificateFilePath does not exist"
+                    { Set-TargetResource @testParams } | Should -Throw "Specified CertificateFilePath does not exist"
                 }
             }
 
@@ -236,11 +236,11 @@ try
                 }
 
                 It "Should return Present from the Get method" {
-                    (Get-TargetResource @testParams).Ensure | Should Be "Present"
+                    (Get-TargetResource @testParams).Ensure | Should -Be "Present"
                 }
 
                 It "Should return true when the Test method is called" {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
 
                 It "Should Update the SP Trusted Root Authority in the set method" {
@@ -282,11 +282,11 @@ try
                 }
 
                 It "Should return Present from the Get method" {
-                    (Get-TargetResource @testParams).Ensure | Should Be "Present"
+                    (Get-TargetResource @testParams).Ensure | Should -Be "Present"
                 }
 
                 It "Should return true when the Test method is called" {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
 
                 It "Should Update the SP Trusted Root Authority in the set method" {
@@ -329,11 +329,11 @@ try
                 }
 
                 It "Should return Present from the Get method" {
-                    (Get-TargetResource @testParams).Ensure | Should Be "Present"
+                    (Get-TargetResource @testParams).Ensure | Should -Be "Present"
                 }
 
                 It "Should return true when the Test method is called" {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
 
                 It "Should Update the SP Trusted Root Authority in the set method" {
@@ -367,11 +367,11 @@ try
                 }
 
                 It "Should return Present from the Get method" {
-                    (Get-TargetResource @testParams).Ensure | Should Be "Present"
+                    (Get-TargetResource @testParams).Ensure | Should -Be "Present"
                 }
 
                 It "Should return false when the Test method is called" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should update the certificate in the set method" {
@@ -420,11 +420,11 @@ try
                 } -ParameterFilter { $TypeName -eq "System.Security.Cryptography.X509Certificates.X509Certificate2" }
 
                 It "Should return Present from the Get method" {
-                    (Get-TargetResource @testParams).Ensure | Should Be "Present"
+                    (Get-TargetResource @testParams).Ensure | Should -Be "Present"
                 }
 
                 It "Should return false when the Test method is called" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should update the certificate in the set method" {
@@ -467,11 +467,11 @@ try
                 }
 
                 It "Should return Present from the Get method" {
-                    (Get-TargetResource @testParams).Ensure | Should Be "Present"
+                    (Get-TargetResource @testParams).Ensure | Should -Be "Present"
                 }
 
                 It "Should return false when the Test method is called" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should Update the SP Trusted Root Authority in the set method" {
@@ -502,15 +502,15 @@ try
                 }
 
                 It "Should return Present from the Get method" {
-                    (Get-TargetResource @testParams).Ensure | Should Be "Present"
+                    (Get-TargetResource @testParams).Ensure | Should -Be "Present"
                 }
 
                 It "Should return false when the Test method is called" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should thorw Certificate not found error in the set method" {
-                    { Set-TargetResource @testParams } | Should Throw "Certificate not found in the local Certificate Store"
+                    { Set-TargetResource @testParams } | Should -Throw "Certificate not found in the local Certificate Store"
                 }
             }
 
@@ -530,15 +530,15 @@ try
                 }
 
                 It "Should return Absent from the Get method" {
-                    (Get-TargetResource @testParams).Ensure | Should Be "Absent"
+                    (Get-TargetResource @testParams).Ensure | Should -Be "Absent"
                 }
 
                 It "Should return false when the Test method is called" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should throw a Certificate not found error" {
-                    { Set-TargetResource @testParams } | Should Throw "Certificate not found in the local Certificate Store"
+                    { Set-TargetResource @testParams } | Should -Throw "Certificate not found in the local Certificate Store"
                 }
             }
 
@@ -561,11 +561,11 @@ try
                 }
 
                 It "Should return Absent from the Get method" {
-                    (Get-TargetResource @testParams).Ensure | Should Be "Absent"
+                    (Get-TargetResource @testParams).Ensure | Should -Be "Absent"
                 }
 
                 It "Should return true when the Test method is called" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should create a new trusted root authority in the set method" {
@@ -609,11 +609,11 @@ try
                 }
 
                 It "Should return Absent from the Get method" {
-                    (Get-TargetResource @testParams).Ensure | Should Be "Absent"
+                    (Get-TargetResource @testParams).Ensure | Should -Be "Absent"
                 }
 
                 It "Should return true when the Test method is called" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should create a new trusted root authority in the set method" {
@@ -657,11 +657,11 @@ try
                 }
 
                 It "Should return Absent from the Get method" {
-                    (Get-TargetResource @testParams).Ensure | Should Be "Absent"
+                    (Get-TargetResource @testParams).Ensure | Should -Be "Absent"
                 }
 
                 It "Should return true when the Test method is called" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should create a new Trusted Root Authority in the set method" {
@@ -717,11 +717,11 @@ try
                 }
 
                 It "Should return Absent from the Get method" {
-                    (Get-TargetResource @testParams).Ensure | Should Be "Present"
+                    (Get-TargetResource @testParams).Ensure | Should -Be "Present"
                 }
 
                 It "Should return true when the Test method is called" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should create a new Trusted Root Authority in the set method" {
@@ -756,11 +756,11 @@ try
                 }
 
                 It "Should return Present from the Get method" {
-                    (Get-TargetResource @testParams).Ensure | Should Be "Present"
+                    (Get-TargetResource @testParams).Ensure | Should -Be "Present"
                 }
 
                 It "Should return false when the Test method is called" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should remove the Trusted Root Authority" {
@@ -788,11 +788,11 @@ try
                 }
 
                 It "Should return Absent from the Get method" {
-                    (Get-TargetResource @testParams).Ensure | Should Be "Absent"
+                    (Get-TargetResource @testParams).Ensure | Should -Be "Absent"
                 }
 
                 It "Should return false when the Test method is called" {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
 
                 It "Should remove the Trusted Root Authority" {

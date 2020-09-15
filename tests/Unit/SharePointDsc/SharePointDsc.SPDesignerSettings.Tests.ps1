@@ -74,15 +74,15 @@ try
                 }
 
                 It "Should return null from the get method" {
-                    (Get-TargetResource @testParams).AllowSharePointDesigner | Should Be $null
+                    (Get-TargetResource @testParams).AllowSharePointDesigner | Should -Be $null
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should throw an exception in the set method to say there is no local farm" {
-                    { Set-TargetResource @testParams } | Should throw "No local SharePoint farm was detected"
+                    { Set-TargetResource @testParams } | Should -Throw "No local SharePoint farm was detected"
                 }
             }
 
@@ -123,17 +123,17 @@ try
                 }
 
                 It "Should return values from the get method" {
-                    (Get-TargetResource @testParams).AllowSharePointDesigner | Should Be $true
+                    (Get-TargetResource @testParams).AllowSharePointDesigner | Should -Be $true
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 $Global:SPDscDesignerUpdated = $false
                 It "Should update the SharePoint Designer settings" {
                     Set-TargetResource @testParams
-                    $Global:SPDscDesignerUpdated | Should Be $true
+                    $Global:SPDscDesignerUpdated | Should -Be $true
                 }
             }
 
@@ -166,11 +166,11 @@ try
                 Mock -CommandName Test-SPDscRunAsCredential { return $true }
 
                 It "Should return values from the get method" {
-                    (Get-TargetResource @testParams).AllowSharePointDesigner | Should Be $true
+                    (Get-TargetResource @testParams).AllowSharePointDesigner | Should -Be $true
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should update the SharePoint Designer settings" {
@@ -205,15 +205,15 @@ try
                 Mock -CommandName Test-SPDscRunAsCredential { return $false }
 
                 It "Should throw an exception in the get method to say that this is not supported" {
-                    { Get-TargetResource @testParams } | Should throw "http://aka.ms/xSharePointRemoteIssues"
+                    { Get-TargetResource @testParams } | Should -Throw "http://aka.ms/xSharePointRemoteIssues"
                 }
 
                 It "Should throw an exception in the test method to say that this is not supported" {
-                    { Test-TargetResource @testParams } | Should throw "http://aka.ms/xSharePointRemoteIssues"
+                    { Test-TargetResource @testParams } | Should -Throw "http://aka.ms/xSharePointRemoteIssues"
                 }
 
                 It "Should throw an exception in the set method to say that this is not supported" {
-                    { Set-TargetResource @testParams } | Should throw "http://aka.ms/xSharePointRemoteIssues"
+                    { Set-TargetResource @testParams } | Should -Throw "http://aka.ms/xSharePointRemoteIssues"
                 }
             }
 
@@ -258,11 +258,11 @@ try
                 }
 
                 It "Should return values from the get method" {
-                    (Get-TargetResource @testParams).AllowSharePointDesigner | Should Be $false
+                    (Get-TargetResource @testParams).AllowSharePointDesigner | Should -Be $false
                 }
 
                 It "Should return true from the test method" {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
             }
 
@@ -299,11 +299,11 @@ try
                 Mock -CommandName Test-SPDscRunAsCredential -MockWith { return $true }
 
                 It "Should return values from the get method" {
-                    (Get-TargetResource @testParams).AllowSharePointDesigner | Should Be $false
+                    (Get-TargetResource @testParams).AllowSharePointDesigner | Should -Be $false
                 }
 
                 It "Should return true from the test method" {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
             }
         }

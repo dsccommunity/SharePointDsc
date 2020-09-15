@@ -70,11 +70,11 @@ try
                 Mock -CommandName Get-SPWebApplicationAppDomain -MockWith { return $null }
 
                 It "Should return null from the get method" {
-                    (Get-TargetResource @testParams).AppDomain | Should BeNullOrEmpty
+                    (Get-TargetResource @testParams).AppDomain | Should -BeNullOrEmpty
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should create the new app domain entry" {
@@ -102,11 +102,11 @@ try
                 }
 
                 It "Should return null from the get method" {
-                    (Get-TargetResource @testParams).AppDomain | Should Be "wrong.domain"
+                    (Get-TargetResource @testParams).AppDomain | Should -Be "wrong.domain"
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should create the new app domain entry" {
@@ -135,11 +135,11 @@ try
                 }
 
                 It "Should return null from the get method" {
-                    (Get-TargetResource @testParams).AppDomain | Should Be $testParams.AppDomain
+                    (Get-TargetResource @testParams).AppDomain | Should -Be $testParams.AppDomain
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
             }
 
@@ -160,11 +160,11 @@ try
                 }
 
                 It "Should return null from the get method" {
-                    (Get-TargetResource @testParams).AppDomain | Should Be "invalid.domain"
+                    (Get-TargetResource @testParams).AppDomain | Should -Be "invalid.domain"
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should create the new app domain entry" {

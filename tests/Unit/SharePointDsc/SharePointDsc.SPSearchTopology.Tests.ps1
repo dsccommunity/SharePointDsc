@@ -175,15 +175,15 @@ try
 
                 It "Should return empty values from the get method" {
                     $result = Get-TargetResource @testParams
-                    $result.Admin | Should BeNullOrEmpty
-                    $result.Crawler | Should BeNullOrEmpty
-                    $result.ContentProcessing | Should BeNullOrEmpty
-                    $result.AnalyticsProcessing | Should BeNullOrEmpty
-                    $result.QueryProcessing | Should BeNullOrEmpty
+                    $result.Admin | Should -BeNullOrEmpty
+                    $result.Crawler | Should -BeNullOrEmpty
+                    $result.ContentProcessing | Should -BeNullOrEmpty
+                    $result.AnalyticsProcessing | Should -BeNullOrEmpty
+                    $result.QueryProcessing | Should -BeNullOrEmpty
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should set the desired topology for the current server" {
@@ -228,15 +228,15 @@ try
 
                 It "Should return empty values from the get method" {
                     $result = Get-TargetResource @testParams
-                    $result.Admin | Should BeNullOrEmpty
-                    $result.Crawler | Should BeNullOrEmpty
-                    $result.ContentProcessing | Should BeNullOrEmpty
-                    $result.AnalyticsProcessing | Should BeNullOrEmpty
-                    $result.QueryProcessing | Should BeNullOrEmpty
+                    $result.Admin | Should -BeNullOrEmpty
+                    $result.Crawler | Should -BeNullOrEmpty
+                    $result.ContentProcessing | Should -BeNullOrEmpty
+                    $result.AnalyticsProcessing | Should -BeNullOrEmpty
+                    $result.QueryProcessing | Should -BeNullOrEmpty
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should set the desired topology for the current server" {
@@ -426,11 +426,11 @@ try
                 }
 
                 It "Should return true from the test method" {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
 
                 It "Should return the FirstIndexPartition location" {
-                    (Get-TargetResource @testParams).FirstPartitionDirectory | Should Be "D:\Index"
+                    (Get-TargetResource @testParams).FirstPartitionDirectory | Should -Be "D:\Index"
                 }
             }
 
@@ -454,15 +454,15 @@ try
                 }
 
                 It "Should return empty values from the get method" {
-                    (Get-TargetResource @testParams).Admin | Should BeNullOrEmpty
+                    (Get-TargetResource @testParams).Admin | Should -BeNullOrEmpty
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should set the desired topology for the current server" {
-                    { Set-TargetResource @testParams } | Should Throw
+                    { Set-TargetResource @testParams } | Should -Throw
                 }
             }
 
@@ -529,7 +529,7 @@ try
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should update the topology in the set method" {

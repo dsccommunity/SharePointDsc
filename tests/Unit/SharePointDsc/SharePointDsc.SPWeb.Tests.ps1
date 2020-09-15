@@ -78,11 +78,11 @@ try
                 Mock -CommandName Get-SPWeb -MockWith { return $null }
 
                 It "Should return 'Absent' from the get method" {
-                    (Get-TargetResource @testParams).Ensure | Should Be "Absent"
+                    (Get-TargetResource @testParams).Ensure | Should -Be "Absent"
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should create a new SPWeb from the set method" {
@@ -120,15 +120,15 @@ try
 
                     $result = Get-TargetResource @testParams
 
-                    $result.Ensure | Should be "Present"
-                    $result.Template | Should be "STS#0"
-                    $result.UniquePermissions | Should be $false
-                    $result.UseParentTopNav | Should be $true
-                    $result.RequestAccessEmail | Should be "valid@contoso.com"
+                    $result.Ensure | Should -Be "Present"
+                    $result.Template | Should -Be "STS#0"
+                    $result.UniquePermissions | Should -Be $false
+                    $result.UseParentTopNav | Should -Be $true
+                    $result.RequestAccessEmail | Should -Be "valid@contoso.com"
                 }
 
                 It "Should return true from the test method" {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
             }
 
@@ -147,11 +147,11 @@ try
                 }
 
                 It "Should return 'Present' from the get method" {
-                    (Get-TargetResource @testParams).Ensure | Should be "Present"
+                    (Get-TargetResource @testParams).Ensure | Should -Be "Present"
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should remove the SPWeb in the set method" {
@@ -188,24 +188,24 @@ try
 
                     $result = Get-TargetResource @testParams
 
-                    $result.Ensure | Should be "Present"
-                    $result.UniquePermissions | Should be $false
-                    $result.UseParentTopNav | Should be $true
+                    $result.Ensure | Should -Be "Present"
+                    $result.UniquePermissions | Should -Be $false
+                    $result.UseParentTopNav | Should -Be $true
 
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should update the values in the set method" {
 
                     Set-TargetResource @testParams
 
-                    $web.Title | Should be $testParams.Name
-                    $web.Description | Should be $testParams.Description
-                    $web.Navigation.UseShared | Should be $false
-                    $web.HasUniquePerm | Should be $true
+                    $web.Title | Should -Be $testParams.Name
+                    $web.Description | Should -Be $testParams.Description
+                    $web.Navigation.UseShared | Should -Be $false
+                    $web.HasUniquePerm | Should -Be $true
 
                     Assert-MockCalled New-Object
                 }
@@ -230,14 +230,14 @@ try
                 Mock -CommandName Get-SPWeb -MockWith { $web }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should update the values in the set method" {
 
                     Set-TargetResource @testParams
 
-                    $web.RequestAccessEmail | Should be $testParams.RequestAccessEmail
+                    $web.RequestAccessEmail | Should -Be $testParams.RequestAccessEmail
 
                     Assert-MockCalled New-Object
                 }
@@ -262,14 +262,14 @@ try
                 Mock -CommandName Get-SPWeb -MockWith { $web }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should update the values in the set method" {
 
                     Set-TargetResource @testParams
 
-                    $web.RequestAccessEmail | Should be ""
+                    $web.RequestAccessEmail | Should -Be ""
 
                     Assert-MockCalled New-Object
                 }
@@ -295,15 +295,15 @@ try
                 Mock -CommandName Get-SPWeb -MockWith { $web }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
 
                 It "Should not update the values set method" {
 
                     Set-TargetResource @testParams
 
-                    $web.RequestAccessEmail | Should be "valid@contoso.com"
-                    $web.HasUniquePerm | Should be $false
+                    $web.RequestAccessEmail | Should -Be "valid@contoso.com"
+                    $web.HasUniquePerm | Should -Be $false
 
                     Assert-MockCalled New-Object
                 }
@@ -329,15 +329,15 @@ try
                 Mock -CommandName Get-SPWeb -MockWith { $web }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should update the value of unique permissions and not change the request access email in the set method" {
 
                     Set-TargetResource @testParams
 
-                    $web.RequestAccessEmail | Should be "notvalid@contoso.com"
-                    $web.HasUniquePerm | Should be $false
+                    $web.RequestAccessEmail | Should -Be "notvalid@contoso.com"
+                    $web.HasUniquePerm | Should -Be $false
 
                     Assert-MockCalled New-Object
                 }

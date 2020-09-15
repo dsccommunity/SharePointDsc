@@ -75,11 +75,11 @@ try
                 }
 
                 It "Should return absent from the get method" {
-                    (Get-TargetResource @testParams).Ensure | Should Be "Absent"
+                    (Get-TargetResource @testParams).Ensure | Should -Be "Absent"
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should run Start-Process in the set method" {
@@ -107,11 +107,11 @@ try
                 }
 
                 It "Should return Ensure=Absent from the get method" {
-                    (Get-TargetResource @testParams).Ensure | Should Be "Absent"
+                    (Get-TargetResource @testParams).Ensure | Should -Be "Absent"
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should run Start-Process in the set method" {
@@ -161,15 +161,15 @@ try
                 }
 
                 It "Should return Ensure=Absent from the get method" {
-                    (Get-TargetResource @testParams).Ensure | Should Be "Absent"
+                    (Get-TargetResource @testParams).Ensure | Should -Be "Absent"
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should run Start-Process in the set method" {
-                    Set-TargetResource @testParams | Should BeNullOrEmpty
+                    Set-TargetResource @testParams | Should -BeNullOrEmpty
                 }
             }
 
@@ -193,7 +193,7 @@ try
                 }
 
                 It "Should return null from the set method" {
-                    Set-TargetResource @testParams | Should BeNullOrEmpty
+                    Set-TargetResource @testParams | Should -BeNullOrEmpty
                 }
             }
 
@@ -217,7 +217,7 @@ try
                 }
 
                 It "Should return exception from the set method" {
-                    { Set-TargetResource @testParams } | Should Throw "Time window incorrectly formatted."
+                    { Set-TargetResource @testParams } | Should -Throw "Time window incorrectly formatted."
                 }
             }
 
@@ -241,7 +241,7 @@ try
                 }
 
                 It "Should return exception from the set method" {
-                    { Set-TargetResource @testParams } | Should Throw "Error converting start time"
+                    { Set-TargetResource @testParams } | Should -Throw "Error converting start time"
                 }
             }
 
@@ -265,7 +265,7 @@ try
                 }
 
                 It "Should return exception from the set method" {
-                    { Set-TargetResource @testParams } | Should Throw "Error converting end time"
+                    { Set-TargetResource @testParams } | Should -Throw "Error converting end time"
                 }
             }
 
@@ -289,7 +289,7 @@ try
                 }
 
                 It "Should return exception from the set method" {
-                    { Set-TargetResource @testParams } | Should Throw "Error: Start time cannot be larger than end time"
+                    { Set-TargetResource @testParams } | Should -Throw "Error: Start time cannot be larger than end time"
                 }
             }
 
@@ -312,15 +312,15 @@ try
                 }
 
                 It "Should return Ensure=Absent from the get method" {
-                    (Get-TargetResource @testParams).Ensure | Should Be "Absent"
+                    (Get-TargetResource @testParams).Ensure | Should -Be "Absent"
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should throw an exception in the set method" {
-                    { Set-TargetResource @testParams } | Should Throw "SharePoint Post Setup Configuration Wizard failed, exit code was"
+                    { Set-TargetResource @testParams } | Should -Throw "SharePoint Post Setup Configuration Wizard failed, exit code was"
                 }
             }
 
@@ -341,15 +341,15 @@ try
                 }
 
                 It "Should return Ensure=Present from the get method" {
-                    (Get-TargetResource @testParams).Ensure | Should Be "Present"
+                    (Get-TargetResource @testParams).Ensure | Should -Be "Present"
                 }
 
                 It "Should return true from the test method" {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
 
                 It "Should return null from the set method" {
-                    Set-TargetResource @testParams | Should BeNullOrEmpty
+                    Set-TargetResource @testParams | Should -BeNullOrEmpty
                 }
             }
         }

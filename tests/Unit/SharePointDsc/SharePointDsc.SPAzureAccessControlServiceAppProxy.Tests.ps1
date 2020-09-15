@@ -66,7 +66,7 @@ try
                 Mock -CommandName Get-SPServiceApplicationProxy -MockWith { return $null }
                 Mock -CommandName New-SPAzureAccessControlServiceApplicationProxy -MockWith {
                     $returnVal = @{
-                        Name = "ServiceApp"
+                        Name                       = "ServiceApp"
                         MetadataServiceEndpointUri = [Uri]"https://accounts.accesscontrol.windows.net/contoso.onmicrosoft.com/metadata/json/1"
                     }
 
@@ -74,12 +74,12 @@ try
                 }
 
                 It "Should return absent from the get method" {
-                    (Get-TargetResource @testParams).Ensure | Should Be "Absent"
+                    (Get-TargetResource @testParams).Ensure | Should -Be "Absent"
                     Assert-MockCalled Get-SPServiceApplicationProxy
                 }
 
                 It "Should return false when the test method is called" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should create a new service application in the set method" {
@@ -117,13 +117,13 @@ try
 
                 It "Should return present from the get method" {
                     $result = Get-TargetResource @testParams
-                    $result.Ensure | Should Be "Present"
-                    $result.MetadataServiceEndpointUri | Should Be "https://accounts.accesscontrol.windows.net/litware.onmicrosoft.com/metadata/json/1"
+                    $result.Ensure | Should -Be "Present"
+                    $result.MetadataServiceEndpointUri | Should -Be "https://accounts.accesscontrol.windows.net/litware.onmicrosoft.com/metadata/json/1"
                     Assert-MockCalled Get-SPServiceApplicationProxy
                 }
 
                 It "Should return false when the Test method is called" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should recreate the application proxy from the set method" {
@@ -157,12 +157,12 @@ try
                 }
 
                 It "Should return values from the get method" {
-                    (Get-TargetResource @testParams).Ensure | Should Be "Present"
+                    (Get-TargetResource @testParams).Ensure | Should -Be "Present"
                     Assert-MockCalled Get-SPServiceApplicationProxy
                 }
 
                 It "Should return true when the Test method is called" {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
             }
 
@@ -185,11 +185,11 @@ try
                 }
 
                 It "Should return present from the Get method" {
-                    (Get-TargetResource @testParams).Ensure | Should Be "Present"
+                    (Get-TargetResource @testParams).Ensure | Should -Be "Present"
                 }
 
                 It "Should return false when the Test method is called" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should call the remove service application cmdlet in the set method" {
@@ -208,11 +208,11 @@ try
                 Mock -CommandName Get-SPServiceApplicationProxy -MockWith { return $null }
 
                 It "Should return absent from the Get method" {
-                    (Get-TargetResource @testParams).Ensure | Should Be "Absent"
+                    (Get-TargetResource @testParams).Ensure | Should -Be "Absent"
                 }
 
                 It "Should return true when the Test method is called" {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
             }
         }

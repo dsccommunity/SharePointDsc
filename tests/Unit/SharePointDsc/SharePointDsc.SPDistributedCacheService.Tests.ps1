@@ -187,11 +187,11 @@ try
                 $Global:SPDscDCacheOnline = $false
 
                 It "Should return null from the get method" {
-                    (Get-TargetResource @testParams).Ensure | Should Be "Absent"
+                    (Get-TargetResource @testParams).Ensure | Should -Be "Absent"
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should set up the cache correctly" {
@@ -327,11 +327,11 @@ try
                 } -ParameterFilter { $Server -eq "Server1" }
 
                 It "Should return null from the get method" {
-                    (Get-TargetResource @testParams).Ensure | Should Be "Absent"
+                    (Get-TargetResource @testParams).Ensure | Should -Be "Absent"
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should set up the cache correctly" {
@@ -375,7 +375,7 @@ try
                 } -ParameterFilter { $Server -eq "Server1" -or $Server -eq "Server2" }
 
                 It "Should set up the cache correctly" {
-                    { Set-TargetResource @testParams } | Should Throw "The server $($env:COMPUTERNAME) was not found in the ServerProvisionOrder array of Distributed Cache server(s).  The server must be included in ServerProvisionOrder or Ensure equal to Absent."
+                    { Set-TargetResource @testParams } | Should -Throw "The server $($env:COMPUTERNAME) was not found in the ServerProvisionOrder array of Distributed Cache server(s).  The server must be included in ServerProvisionOrder or Ensure equal to Absent."
                 }
             }
 
@@ -408,7 +408,7 @@ try
                 }
 
                 It "Should return true from the test method" {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
             }
 
@@ -441,17 +441,17 @@ try
                 }
 
                 It "Should return DOMAIN\wronguser from the get method" {
-                    (Get-TargetResource @testParams).ServiceAccount | Should Be "DOMAIN\wronguser"
+                    (Get-TargetResource @testParams).ServiceAccount | Should -Be "DOMAIN\wronguser"
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 $global:SPDscUpdatedProcessID = $false
                 It "Should correct the service account in the set method" {
                     Set-TargetResource @testParams
-                    $global:SPDscUpdatedProcessID | Should Be $true
+                    $global:SPDscUpdatedProcessID | Should -Be $true
                 }
             }
 
@@ -548,7 +548,7 @@ try
 
                 $Global:SPDscRunCount = 0
                 It "Should return CacheSizeInMB = 2048 from the get method" {
-                    (Get-TargetResource @testParams).CacheSizeInMB | Should Be 2048
+                    (Get-TargetResource @testParams).CacheSizeInMB | Should -Be 2048
                 }
 
                 It "Should configure the distributed cache service cache size" {
@@ -557,7 +557,7 @@ try
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
             }
 
@@ -577,7 +577,7 @@ try
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should configure the firewall rules" {
@@ -613,7 +613,7 @@ try
                 Mock -CommandName Remove-SPDistributedCacheServiceInstance -MockWith { }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "shuts down the distributed cache service" {

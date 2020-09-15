@@ -183,11 +183,11 @@ try
                 Mock -CommandName Get-SPSite -MockWith { return $null }
 
                 It "Should return OwnerAlias=Null from the get method" {
-                    (Get-TargetResource @testParams).OwnerAlias | Should BeNullOrEmpty
+                    (Get-TargetResource @testParams).OwnerAlias | Should -BeNullOrEmpty
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should create a new site from the set method" {
@@ -259,10 +259,10 @@ try
 
                 It "Should return the site data from the get method" {
                     $result = Get-TargetResource @testParams
-                    $result.OwnerAlias | Should Be "DEMO\owner"
-                    $result.SecondaryOwnerAlias | Should Be "DEMO\SecondOwner"
-                    $result.QuotaTemplate | Should Be "WrongTemplate"
-                    $result.AdministrationSiteType | Should Be "None"
+                    $result.OwnerAlias | Should -Be "DEMO\owner"
+                    $result.SecondaryOwnerAlias | Should -Be "DEMO\SecondOwner"
+                    $result.QuotaTemplate | Should -Be "WrongTemplate"
+                    $result.AdministrationSiteType | Should -Be "None"
                 }
 
                 It "Should update owner and quota in the set method" {
@@ -271,7 +271,7 @@ try
                 }
 
                 It "Should return true from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
             }
 
@@ -312,11 +312,11 @@ try
                 }
 
                 It "Should return the site data from the get method" {
-                    (Get-TargetResource @testParams).OwnerAlias | Should Be "DEMO\owner"
+                    (Get-TargetResource @testParams).OwnerAlias | Should -Be "DEMO\owner"
                 }
 
                 It "Should return true from the test method" {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
             }
 
@@ -344,16 +344,16 @@ try
                 }
 
                 It "Should return CreateDefaultGroups=False from the get method" {
-                    (Get-TargetResource @testParams).CreateDefaultGroups | Should Be $false
+                    (Get-TargetResource @testParams).CreateDefaultGroups | Should -Be $false
                 }
 
                 It "Should return true from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should update the groups in the set method" {
                     Set-TargetResource @testParams
-                    $Script:SPDscSystemAccountSite.RootWeb.CreateDefaultAssociatedGroupsCalled | Should Be $true
+                    $Script:SPDscSystemAccountSite.RootWeb.CreateDefaultAssociatedGroupsCalled | Should -Be $true
                 }
             }
 
@@ -401,11 +401,11 @@ try
                 }
 
                 It "Should return the site data from the get method" {
-                    Get-TargetResource @testParams | Should Not BeNullOrEmpty
+                    Get-TargetResource @testParams | Should -Not -BeNullOrEmpty
                 }
 
                 It "Should return true from the test method" {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
 
                 Mock -CommandName New-Object -MockWith {
@@ -420,7 +420,7 @@ try
                 }
 
                 It "Should return the site data from the get method where a valid site collection admin does not exist" {
-                    Get-TargetResource @testParams | Should Not BeNullOrEmpty
+                    Get-TargetResource @testParams | Should -Not -BeNullOrEmpty
                 }
 
                 Mock -CommandName New-Object -MockWith {
@@ -436,7 +436,7 @@ try
                 }
 
                 It "Should return the site data from the get method where a secondary site contact exists" {
-                    Get-TargetResource @testParams | Should Not BeNullOrEmpty
+                    Get-TargetResource @testParams | Should -Not -BeNullOrEmpty
                 }
 
                 Mock -CommandName New-SPClaimsPrincipal -MockWith {
@@ -444,7 +444,7 @@ try
                 }
 
                 It "Should return the site data from the get method where the site owner is in classic format" {
-                    Get-TargetResource @testParams | Should Not BeNullOrEmpty
+                    Get-TargetResource @testParams | Should -Not -BeNullOrEmpty
                 }
             }
 
@@ -486,11 +486,11 @@ try
                 }
 
                 It "Should return the site data from the get method" {
-                    Get-TargetResource @testParams | Should Not BeNullOrEmpty
+                    Get-TargetResource @testParams | Should -Not -BeNullOrEmpty
                 }
 
                 It "Should return true from the test method" {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
 
                 Mock -CommandName Get-SPSite -MockWith {
@@ -508,7 +508,7 @@ try
                 }
 
                 It "Should return the site data from the get method where a secondary site contact exists" {
-                    Get-TargetResource @testParams | Should Not BeNullOrEmpty
+                    Get-TargetResource @testParams | Should -Not -BeNullOrEmpty
                 }
             }
 
@@ -551,11 +551,11 @@ try
                 }
 
                 It "Should return CreateDefaultGroups=False from the get method" {
-                    (Get-TargetResource @testParams).CreateDefaultGroups | Should Be $false
+                    (Get-TargetResource @testParams).CreateDefaultGroups | Should -Be $false
                 }
 
                 It "Should return true from the test method" {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
             }
         }

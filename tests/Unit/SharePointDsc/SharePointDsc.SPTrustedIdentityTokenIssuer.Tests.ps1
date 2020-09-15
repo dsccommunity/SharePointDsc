@@ -134,11 +134,11 @@ try
 
                 It "Should return absent from the get method" {
                     $getResults = Get-TargetResource @testParams
-                    $getResults.Ensure | Should Be "Absent"
+                    $getResults.Ensure | Should -Be "Absent"
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should create the SPTrustedIdentityTokenIssuer" {
@@ -181,11 +181,11 @@ try
 
                 It "Should return absent from the get method" {
                     $getResults = Get-TargetResource @testParams
-                    $getResults.Ensure | Should Be "Absent"
+                    $getResults.Ensure | Should -Be "Absent"
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should create the SPTrustedIdentityTokenIssuer" {
@@ -220,7 +220,7 @@ try
                 }
 
                 It "should fail validation of signing certificate parameters in the set method" {
-                    { Set-TargetResource @testParams } | Should Throw "Cannot use both parameters SigningCertificateThumbprint and SigningCertificateFilePath at the same time."
+                    { Set-TargetResource @testParams } | Should -Throw "Cannot use both parameters SigningCertificateThumbprint and SigningCertificateFilePath at the same time."
                 }
             }
 
@@ -248,7 +248,7 @@ try
                 }
 
                 It "should fail validation of signing certificate parameters in the set method" {
-                    { Set-TargetResource @testParams } | Should Throw "At least one of the following parameters must be specified: SigningCertificateThumbprint, SigningCertificateFilePath."
+                    { Set-TargetResource @testParams } | Should -Throw "At least one of the following parameters must be specified: SigningCertificateThumbprint, SigningCertificateFilePath."
                 }
             }
 
@@ -277,7 +277,7 @@ try
                 }
 
                 It "should fail validation of parameter SigningCertificateThumbprint in the set method" {
-                    { Set-TargetResource @testParams } | Should Throw "Parameter SigningCertificateThumbprint does not match valid format '^[A-Fa-f0-9]{40}$'."
+                    { Set-TargetResource @testParams } | Should -Throw "Parameter SigningCertificateThumbprint does not match valid format '^[A-Fa-f0-9]{40}$'."
                 }
             }
 
@@ -315,7 +315,7 @@ try
                 } -ParameterFilter { $Path -eq 'Cert:\LocalMachine\My' }
 
                 It "should fail validation of certificate in the set method" {
-                    { Set-TargetResource @testParams } | Should Throw "SharePoint requires that the private key of the signing certificate is not installed in the certificate store."
+                    { Set-TargetResource @testParams } | Should -Throw "SharePoint requires that the private key of the signing certificate is not installed in the certificate store."
                 }
             }
 
@@ -355,7 +355,7 @@ try
                 It "Should create the SPTrustedLoginProvider with claims provider set" {
                     Set-TargetResource @testParams
                     $getResults = Get-TargetResource @testParams
-                    $getResults.ClaimProviderName | Should Be $testParams.ClaimProviderName
+                    $getResults.ClaimProviderName | Should -Be $testParams.ClaimProviderName
                 }
             }
 
@@ -393,11 +393,11 @@ try
 
                 It "Should return present from the get method" {
                     $getResults = Get-TargetResource @testParams
-                    $getResults.Ensure | Should Be "Present"
+                    $getResults.Ensure | Should -Be "Present"
                 }
 
                 It "Should return true from the test method" {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
             }
 
@@ -460,11 +460,11 @@ try
                 Mock -CommandName Remove-SPTrustedIdentityTokenIssuer -MockWith { }
 
                 It "Should return absent from the get method" {
-                    (Get-TargetResource @testParams).Ensure | Should Be "Present"
+                    (Get-TargetResource @testParams).Ensure | Should -Be "Present"
                 }
 
                 It "Should return true from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should remove the SPTrustedIdentityTokenIssuer" {
@@ -504,7 +504,7 @@ try
                 }
 
                 It "should fail validation of IdentifierClaim in the set method" {
-                    { Set-TargetResource @testParams } | Should Throw "IdentifierClaim does not match any claim type specified in ClaimsMappings."
+                    { Set-TargetResource @testParams } | Should -Throw "IdentifierClaim does not match any claim type specified in ClaimsMappings."
                 }
             }
         }

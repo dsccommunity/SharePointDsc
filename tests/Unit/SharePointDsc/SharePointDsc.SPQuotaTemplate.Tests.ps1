@@ -86,15 +86,15 @@ try
                 }
 
                 It "Should throw an exception in the get method to say MaxPoints need to be larger than WarningPoints" {
-                    { Get-TargetResource @testParams } | Should throw "MaximumUsagePointsSolutions must be equal to or larger than"
+                    { Get-TargetResource @testParams } | Should -Throw "MaximumUsagePointsSolutions must be equal to or larger than"
                 }
 
                 It "Should throw an exception in the test method to say MaxPoints need to be larger than WarningPoints" {
-                    { Test-TargetResource @testParams } | Should throw "MaximumUsagePointsSolutions must be equal to or larger than"
+                    { Test-TargetResource @testParams } | Should -Throw "MaximumUsagePointsSolutions must be equal to or larger than"
                 }
 
                 It "Should throw an exception in the set method to say MaxPoints need to be larger than WarningPoints" {
-                    { Set-TargetResource @testParams } | Should throw "MaximumUsagePointsSolutions must be equal to or larger than"
+                    { Set-TargetResource @testParams } | Should -Throw "MaximumUsagePointsSolutions must be equal to or larger than"
                 }
             }
 
@@ -113,15 +113,15 @@ try
                 }
 
                 It "Should throw an exception in the get method to say StorageMax need to be larger than StorageWarning" {
-                    { Get-TargetResource @testParams } | Should throw "StorageMaxInMB must be equal to or larger than StorageWarningInMB."
+                    { Get-TargetResource @testParams } | Should -Throw "StorageMaxInMB must be equal to or larger than StorageWarningInMB."
                 }
 
                 It "Should throw an exception in the test method to say StorageMax need to be larger than StorageWarning" {
-                    { Test-TargetResource @testParams } | Should throw "StorageMaxInMB must be equal to or larger than StorageWarningInMB."
+                    { Test-TargetResource @testParams } | Should -Throw "StorageMaxInMB must be equal to or larger than StorageWarningInMB."
                 }
 
                 It "Should throw an exception in the set method to say StorageMax need to be larger than StorageWarning" {
-                    { Set-TargetResource @testParams } | Should throw "StorageMaxInMB must be equal to or larger than StorageWarningInMB."
+                    { Set-TargetResource @testParams } | Should -Throw "StorageMaxInMB must be equal to or larger than StorageWarningInMB."
                 }
             }
 
@@ -140,15 +140,15 @@ try
                 }
 
                 It "Should return Ensure=Absent" {
-                    (Get-TargetResource @testParams).Ensure | Should Be "Absent"
+                    (Get-TargetResource @testParams).Ensure | Should -Be "Absent"
                 }
 
                 It "Should throw an exception in the test method to say Max and Warning parameters should not be used" {
-                    { Test-TargetResource @testParams } | Should throw "Do not use StorageMaxInMB, StorageWarningInMB"
+                    { Test-TargetResource @testParams } | Should -Throw "Do not use StorageMaxInMB, StorageWarningInMB"
                 }
 
                 It "Should throw an exception in the set method to say Max and Warning parameters should not be used" {
-                    { Set-TargetResource @testParams } | Should throw "Do not use StorageMaxInMB, StorageWarningInMB"
+                    { Set-TargetResource @testParams } | Should -Throw "Do not use StorageMaxInMB, StorageWarningInMB"
                 }
             }
 
@@ -167,15 +167,15 @@ try
                 }
 
                 It "Should return null from the get method" {
-                    (Get-TargetResource @testParams).Ensure | Should Be "Absent"
+                    (Get-TargetResource @testParams).Ensure | Should -Be "Absent"
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should throw an exception in the set method to say there is no local farm" {
-                    { Set-TargetResource @testParams } | Should throw "No local SharePoint farm was detected"
+                    { Set-TargetResource @testParams } | Should -Throw "No local SharePoint farm was detected"
                 }
             }
 
@@ -213,17 +213,17 @@ try
                 }
 
                 It "Should return values from the get method" {
-                    Get-TargetResource @testParams | Should Not BeNullOrEmpty
+                    Get-TargetResource @testParams | Should -Not -BeNullOrEmpty
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 $Global:SPDscQuotaTemplatesUpdated = $false
                 It "Should update the quota template settings" {
                     Set-TargetResource @testParams
-                    $Global:SPDscQuotaTemplatesUpdated | Should Be $true
+                    $Global:SPDscQuotaTemplatesUpdated | Should -Be $true
                 }
             }
 
@@ -256,17 +256,17 @@ try
                 }
 
                 It "Should return values from the get method" {
-                    (Get-TargetResource @testParams).Ensure | Should Be 'Absent'
+                    (Get-TargetResource @testParams).Ensure | Should -Be 'Absent'
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 $Global:SPDscQuotaTemplatesUpdated = $false
                 It "Should create a new quota template" {
                     Set-TargetResource @testParams
-                    $Global:SPDscQuotaTemplatesUpdated | Should Be $true
+                    $Global:SPDscQuotaTemplatesUpdated | Should -Be $true
                 }
             }
 
@@ -301,12 +301,12 @@ try
 
                 It "Should return values from the get method" {
                     $result = Get-TargetResource @testParams
-                    $result.Ensure | Should Be 'Present'
-                    $result.StorageMaxInMB | Should Be 1024
+                    $result.Ensure | Should -Be 'Present'
+                    $result.StorageMaxInMB | Should -Be 1024
                 }
 
                 It "Should return true from the test method" {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
 
             }

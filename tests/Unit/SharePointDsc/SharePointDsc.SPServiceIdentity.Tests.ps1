@@ -98,12 +98,12 @@ try
                 }
 
                 It "Should return the current identity from the get method" {
-                    (Get-TargetResource @testParams).ManagedAccount | Should Not BeNullOrEmpty
+                    (Get-TargetResource @testParams).ManagedAccount | Should -Not -BeNullOrEmpty
 
                 }
 
                 It "Should return true for the test method" {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
             }
 
@@ -136,17 +136,17 @@ try
                 }
 
                 It "Should return the current identity from the get method" {
-                    (Get-TargetResource @testParams).ManagedAccount | Should Not BeNullOrEmpty
+                    (Get-TargetResource @testParams).ManagedAccount | Should -Not -BeNullOrEmpty
                 }
 
                 It "Should return false for the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 $Global:SPDscSPServiceInstanceUpdateCalled = $false
                 It "Should call the SPServiceInstance update method" {
                     Set-TargetResource @testParams
-                    $Global:SPDscSPServiceInstanceUpdateCalled | Should Be $true
+                    $Global:SPDscSPServiceInstanceUpdateCalled | Should -Be $true
                 }
             }
 
@@ -179,17 +179,17 @@ try
                 }
 
                 It "Should return the current identity from the get method" {
-                    (Get-TargetResource @testParams).ManagedAccount | Should Not BeNullOrEmpty
+                    (Get-TargetResource @testParams).ManagedAccount | Should -Not -BeNullOrEmpty
                 }
 
                 It "Should return false for the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 $Global:SPDscSPServiceInstanceUpdateCalled = $false
                 It "Should call the SPServiceInstance update method" {
                     Set-TargetResource @testParams
-                    $Global:SPDscSPServiceInstanceUpdateCalled | Should Be $true
+                    $Global:SPDscSPServiceInstanceUpdateCalled | Should -Be $true
                 }
             }
 
@@ -222,17 +222,17 @@ try
                 }
 
                 It "Should return the current identity from the get method" {
-                    (Get-TargetResource @testParams).ManagedAccount | Should Not BeNullOrEmpty
+                    (Get-TargetResource @testParams).ManagedAccount | Should -Not -BeNullOrEmpty
                 }
 
                 It "Should return false for the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 $Global:SPDscSPServiceInstanceUpdateCalled = $false
                 It "Should call the SPServiceInstance update method" {
                     Set-TargetResource @testParams
-                    $Global:SPDscSPServiceInstanceUpdateCalled | Should Be $true
+                    $Global:SPDscSPServiceInstanceUpdateCalled | Should -Be $true
                 }
             }
 
@@ -248,16 +248,16 @@ try
                 }
 
                 It "Should return null from the get method" {
-                    (Get-TargetResource @testParams).ManagedAccount | Should BeNullOrEmpty
+                    (Get-TargetResource @testParams).ManagedAccount | Should -BeNullOrEmpty
 
                 }
 
                 It "Should return false for the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should throw an error for the set method" {
-                    { Set-TargetResource @testParams } | Should throw "Unable to locate service $($testParams.name)"
+                    { Set-TargetResource @testParams } | Should -Throw "Unable to locate service $($testParams.name)"
                 }
             }
 
@@ -295,16 +295,16 @@ try
                 }
 
                 It "Should return the current identity from the get method" {
-                    (Get-TargetResource @testParams).ManagedAccount | Should Not BeNullOrEmpty
+                    (Get-TargetResource @testParams).ManagedAccount | Should -Not -BeNullOrEmpty
 
                 }
 
                 It "Should return false for the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should throw an error for the set method" {
-                    { Set-TargetResource @testParams } | Should throw "Unable to locate Managed Account $($testParams.ManagedAccount)"
+                    { Set-TargetResource @testParams } | Should -Throw "Unable to locate Managed Account $($testParams.ManagedAccount)"
                 }
             }
 
@@ -331,18 +331,18 @@ try
                 }
 
                 It "Should return null for the current identity from the get method" {
-                    (Get-TargetResource @testParams).ManagedAccount | Should BeNullOrEmpty
+                    (Get-TargetResource @testParams).ManagedAccount | Should -BeNullOrEmpty
                 }
 
                 It "Should return false for the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should throw an error for the set method" {
                     Mock -CommandName Get-SPManagedAccount -MockWith {
                         return "CONTOSO\svc.mts"
                     }
-                    { Set-TargetResource @testParams } | Should throw "Service $($testParams.name) does not support setting the process identity"
+                    { Set-TargetResource @testParams } | Should -Throw "Service $($testParams.name) does not support setting the process identity"
                 }
             }
         }

@@ -34,10 +34,10 @@ Describe -Tags @("PostSite") "SPAppCatalog - Integration Tests" {
             }
             . $configName -ConfigurationData $global:SPDscIntegrationConfigData -OutputPath "TestDrive:\$configName"
             Start-DscConfiguration -Wait -Force -Path "TestDrive:\$configName" -ComputerName "localhost"
-            (Test-DscConfiguration -ComputerName "localhost" -ReferenceConfiguration "TestDrive:\$configName\localhost.mof").InDesiredState | Should be $true   
+            (Test-DscConfiguration -ComputerName "localhost" -ReferenceConfiguration "TestDrive:\$configName\localhost.mof").InDesiredState | Should -Be $true
         }
     }
-    
+
     AfterEach {
         Remove-DscConfigurationDocument -Stage Current, Pending, Previous -Force -Confirm:$false
     }

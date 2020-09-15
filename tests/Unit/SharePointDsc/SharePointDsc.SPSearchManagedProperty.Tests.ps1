@@ -195,7 +195,7 @@ try
                 }
 
                 It "Should return absent from the Get method" {
-                    (Get-TargetResource @testParams).Ensure | Should Be "Absent"
+                    (Get-TargetResource @testParams).Ensure | Should -Be "Absent"
                 }
 
                 It "Should create the managed property" {
@@ -204,7 +204,7 @@ try
                 }
 
                 It "Should now return Present from the Get method" {
-                    (Get-TargetResource @testParams).Ensure | Should Be "Present"
+                    (Get-TargetResource @testParams).Ensure | Should -Be "Present"
                 }
             }
 
@@ -262,7 +262,7 @@ try
                 }
 
                 It "Should return present from the Get method" {
-                    (Get-TargetResource @testParams).Ensure | Should Be "Present"
+                    (Get-TargetResource @testParams).Ensure | Should -Be "Present"
                 }
 
                 It "Should do nothing" {
@@ -326,7 +326,7 @@ try
                 }
 
                 It "Should return present from the Get method" {
-                    (Get-TargetResource @testParams).Ensure | Should Be "Present"
+                    (Get-TargetResource @testParams).Ensure | Should -Be "Present"
                 }
 
                 It "Should recreate the property with the proper type" {
@@ -390,7 +390,7 @@ try
                 }
 
                 It "Should return present from the Get method" {
-                    (Get-TargetResource @testParams).Ensure | Should Be "Present"
+                    (Get-TargetResource @testParams).Ensure | Should -Be "Present"
                 }
 
                 It "Should recreate the property with the proper type" {
@@ -413,7 +413,7 @@ try
                 }
 
                 It "Should throw an error" {
-                    { Get-TargetResource @testParams } | Should Throw "The specified Search Service Application InvalidSSA is invalid. Please make sure you specify the name of an existing service application."
+                    { Get-TargetResource @testParams } | Should -Throw "The specified Search Service Application InvalidSSA is invalid. Please make sure you specify the name of an existing service application."
                 }
             }
 
@@ -430,7 +430,7 @@ try
                 }
 
                 It "Should throw an error" {
-                    { Get-TargetResource @testParams } | Should Throw "The specified Search Service Application InvalidSSA is invalid. Please make sure you specify the name of an existing service application."
+                    { Get-TargetResource @testParams } | Should -Throw "The specified Search Service Application InvalidSSA is invalid. Please make sure you specify the name of an existing service application."
                 }
             }
         }

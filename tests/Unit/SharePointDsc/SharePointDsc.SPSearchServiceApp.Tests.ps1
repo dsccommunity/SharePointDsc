@@ -116,7 +116,7 @@ try
                 }
 
                 It "Should throw an exception in the set method" {
-                    { Set-TargetResource @testParams } | Should Throw "Specified service application pool"
+                    { Set-TargetResource @testParams } | Should -Throw "Specified service application pool"
                 }
             }
 
@@ -161,11 +161,11 @@ try
                 }
 
                 It "Should return absent from the Get method" {
-                    (Get-TargetResource @testParams).Ensure | Should Be "Absent"
+                    (Get-TargetResource @testParams).Ensure | Should -Be "Absent"
                 }
 
                 It "Should return false when the Test method is called" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 $global:SPDscCounter = 0
@@ -197,11 +197,11 @@ try
                 }
 
                 It "Should return absent from the Get method" {
-                    (Get-TargetResource @testParams).Ensure | Should Be "Absent"
+                    (Get-TargetResource @testParams).Ensure | Should -Be "Absent"
                 }
 
                 It "Should return false when the Test method is called" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should create a new service application in the set method" {
@@ -234,12 +234,12 @@ try
                 }
 
                 It "Should return present from the get method" {
-                    (Get-TargetResource @testParams).Ensure | Should Be "Present"
+                    (Get-TargetResource @testParams).Ensure | Should -Be "Present"
                     Assert-MockCalled Get-SPServiceApplication -ParameterFilter { $Name -eq $testParams.Name }
                 }
 
                 It "Should return true when the Test method is called" {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
             }
 
@@ -282,7 +282,7 @@ try
                 }
 
                 It "Should return false when the Test method is called" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should call the update service app cmdlet from the set method" {
@@ -337,13 +337,13 @@ try
                 }
 
                 It "Should return false when the Test method is called" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 $global:SPDscProxyUpdateCalled = $false
                 It "Should update the service app proxy name in the set method" {
                     Set-TargetResource @testParams
-                    $global:SPDscProxyUpdateCalled | Should Be $true
+                    $global:SPDscProxyUpdateCalled | Should -Be $true
                 }
             }
 
@@ -385,7 +385,7 @@ try
                 }
 
                 It "Should return false when the Test method is called" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should create a new proxy in the set method" {
@@ -436,7 +436,7 @@ try
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "changes the content access account" {
@@ -482,7 +482,7 @@ try
                 }
 
                 It "Should return true from the test method" {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
             }
 
@@ -540,12 +540,12 @@ try
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should update the service app in the set method" {
                     Set-TargetResource @testParams
-                    $Global:SPDscSearchURLUpdated | Should Be $true
+                    $Global:SPDscSearchURLUpdated | Should -Be $true
                 }
             }
 
@@ -603,12 +603,12 @@ try
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should update the service app in the set method" {
                     Set-TargetResource @testParams
-                    $Global:SPDscAlertsEnabledUpdated | Should Be $true
+                    $Global:SPDscAlertsEnabledUpdated | Should -Be $true
                 }
             }
 
@@ -651,7 +651,7 @@ try
                 }
 
                 It "Should return true from the test method" {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
             }
 
@@ -681,11 +681,11 @@ try
                 }
 
                 It "Should return present from the Get method" {
-                    (Get-TargetResource @testParams).Ensure | Should Be "Present"
+                    (Get-TargetResource @testParams).Ensure | Should -Be "Present"
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should remove the service application in the set method" {
@@ -706,11 +706,11 @@ try
                 }
 
                 It "Should return absent from the Get method" {
-                    (Get-TargetResource @testParams).Ensure | Should Be "Absent"
+                    (Get-TargetResource @testParams).Ensure | Should -Be "Absent"
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
             }
 
@@ -747,7 +747,7 @@ try
                 }
 
                 It "Should return false if the version is too low" {
-                    (Get-TargetResource @testParams).CloudIndex | Should Be $false
+                    (Get-TargetResource @testParams).CloudIndex | Should -Be $false
                 }
 
                 Mock -CommandName Get-SPDscInstalledProductVersion -MockWith {
@@ -758,7 +758,7 @@ try
                 }
 
                 It "Should return that the web app is hybrid enabled from the get method" {
-                    (Get-TargetResource @testParams).CloudIndex | Should Be $true
+                    (Get-TargetResource @testParams).CloudIndex | Should -Be $true
                 }
             }
 
@@ -793,7 +793,7 @@ try
                 }
 
                 It "Should throw an error in the set method if the version of SharePoint isn't high enough" {
-                    { Set-TargetResource @testParams } | Should Throw
+                    { Set-TargetResource @testParams } | Should -Throw
                 }
             }
         }

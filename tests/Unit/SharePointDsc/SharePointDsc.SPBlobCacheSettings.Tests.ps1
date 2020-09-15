@@ -131,15 +131,15 @@ namespace Microsoft.SharePoint.Administration {
                 Mock -CommandName Test-Path -MockWith { return $false }
 
                 It "Should throw exception from the get method" {
-                    (Get-TargetResource @testParams).WebAppUrl | Should Be $null
+                    (Get-TargetResource @testParams).WebAppUrl | Should -Be $null
                 }
 
                 It "Should throw exception from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should throw exception from the set method" {
-                    { Set-TargetResource @testParams } | Should throw "Specified web application could not be found."
+                    { Set-TargetResource @testParams } | Should -Throw "Specified web application could not be found."
                 }
             }
 
@@ -165,17 +165,17 @@ namespace Microsoft.SharePoint.Administration {
                 Mock -CommandName Copy-Item -MockWith { }
 
                 It "Should return 0 from the get method" {
-                    (Get-TargetResource @testParams).MaxSizeInGB | Should Be 0
+                    (Get-TargetResource @testParams).MaxSizeInGB | Should -Be 0
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should return MaxSize 30 in web.config from the set method" {
                     Set-TargetResource @testParams
                     [xml] $webcfg = Get-Content -Path $Global:SPDscWebConfigFile
-                    $webcfg.configuration.SharePoint.BlobCache.maxsize | Should Be "30"
+                    $webcfg.configuration.SharePoint.BlobCache.maxsize | Should -Be "30"
                 }
             }
 
@@ -202,11 +202,11 @@ namespace Microsoft.SharePoint.Administration {
                 Mock -CommandName Copy-Item -MockWith { }
 
                 It "Should return values from the get method" {
-                    Get-TargetResource @testParams | Should Not BeNullOrEmpty
+                    Get-TargetResource @testParams | Should -Not -BeNullOrEmpty
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should check if function is called in the set method" {
@@ -238,18 +238,18 @@ namespace Microsoft.SharePoint.Administration {
                 Mock -CommandName Copy-Item -MockWith { }
 
                 It "Should return values from the get method" {
-                    Get-TargetResource @testParams | Should Not BeNullOrEmpty
+                    Get-TargetResource @testParams | Should -Not -BeNullOrEmpty
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should return MaxSize 30 from the set method" {
                     Set-TargetResource @testParams
                     [xml] $webcfg = Get-Content -Path $Global:SPDscWebConfigFile
-                    $webcfg.configuration.SharePoint.BlobCache.maxsize | Should Be "30"
-                    $webcfg.configuration.SharePoint.BlobCache."max-age" | Should Be "30"
+                    $webcfg.configuration.SharePoint.BlobCache.maxsize | Should -Be "30"
+                    $webcfg.configuration.SharePoint.BlobCache."max-age" | Should -Be "30"
                 }
             }
 
@@ -289,17 +289,17 @@ namespace Microsoft.SharePoint.Administration {
                 Mock -CommandName Copy-Item -MockWith { }
 
                 It "Should return values from the get method" {
-                    Get-TargetResource @testParams | Should Not BeNullOrEmpty
+                    Get-TargetResource @testParams | Should -Not -BeNullOrEmpty
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should return Enabled False from the set method" {
                     Set-TargetResource @testParams
                     [xml] $webcfg = Get-Content -Path $Global:SPDscWebConfigFile
-                    $webcfg.configuration.SharePoint.BlobCache.enabled | Should Be "True"
+                    $webcfg.configuration.SharePoint.BlobCache.enabled | Should -Be "True"
                 }
             }
 
@@ -323,11 +323,11 @@ namespace Microsoft.SharePoint.Administration {
                 Mock -CommandName Test-Path -MockWith { return $true }
 
                 It "Should return values from the get method" {
-                    Get-TargetResource @testParams | Should Not BeNullOrEmpty
+                    Get-TargetResource @testParams | Should -Not -BeNullOrEmpty
                 }
 
                 It "Should return true from the test method" {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
             }
 
@@ -350,17 +350,17 @@ namespace Microsoft.SharePoint.Administration {
                 Mock -CommandName Copy-Item -MockWith { }
 
                 It "Should return values from the get method" {
-                    Get-TargetResource @testParams | Should Not BeNullOrEmpty
+                    Get-TargetResource @testParams | Should -Not -BeNullOrEmpty
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should return correct values in the config file after the set method" {
                     Set-TargetResource @testParams
                     [xml] $webcfg = Get-Content -Path $Global:SPDscWebConfigFile
-                    $webcfg.configuration.SharePoint.BlobCache.enabled | Should Be "False"
+                    $webcfg.configuration.SharePoint.BlobCache.enabled | Should -Be "False"
                 }
             }
 
@@ -405,15 +405,15 @@ namespace Microsoft.SharePoint.Administration {
                 }
 
                 It "Should return values from the get method" {
-                    (Get-TargetResource @testParams).WebAppUrl | Should BeNullOrEmpty
+                    (Get-TargetResource @testParams).WebAppUrl | Should -BeNullOrEmpty
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should throw exception in the set method" {
-                    { Set-TargetResource @testParams } | Should throw "Server isn't running the Web Application role"
+                    { Set-TargetResource @testParams } | Should -Throw "Server isn't running the Web Application role"
                 }
             }
         }

@@ -93,11 +93,11 @@ try
                         }) }
 
                 It "Should return the current data from the get method" {
-                    Get-TargetResource @testParams | Should Not BeNullOrEmpty
+                    Get-TargetResource @testParams | Should -Not -BeNullOrEmpty
                 }
 
                 It "Should return true from the test method" {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
             }
 
@@ -138,17 +138,17 @@ try
                 }
 
                 It "Should return the current data from the get method" {
-                    Get-TargetResource @testParams | Should Not BeNullOrEmpty
+                    Get-TargetResource @testParams | Should -Not -BeNullOrEmpty
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 $Global:SPDscWebApplicationUpdateWorkflowCalled = $false
                 It "Should update the workflow settings" {
                     Set-TargetResource @testParams
-                    $Global:SPDscWebApplicationUpdateWorkflowCalled | Should Be $true
+                    $Global:SPDscWebApplicationUpdateWorkflowCalled | Should -Be $true
                 }
             }
         }

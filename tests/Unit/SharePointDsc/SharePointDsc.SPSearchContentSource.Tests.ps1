@@ -104,11 +104,11 @@ try
                 }
 
                 It "Should create the content source in the test method" {
-                    { Test-TargetResource @testParams } | Should Throw "Parameter LimitPageDepth is not valid for SharePoint content sources"
+                    { Test-TargetResource @testParams } | Should -Throw "Parameter LimitPageDepth is not valid for SharePoint content sources"
                 }
 
                 It "Should create the content source in the set method" {
-                    { Set-TargetResource @testParams } | Should Throw "Parameter LimitPageDepth is not valid for SharePoint content sources"
+                    { Set-TargetResource @testParams } | Should -Throw "Parameter LimitPageDepth is not valid for SharePoint content sources"
                 }
             }
 
@@ -124,11 +124,11 @@ try
                 }
 
                 It "Should create the content source in the test method" {
-                    { Test-TargetResource @testParams } | Should Throw "Parameter LimitServerHops is not valid for SharePoint content sources"
+                    { Test-TargetResource @testParams } | Should -Throw "Parameter LimitServerHops is not valid for SharePoint content sources"
                 }
 
                 It "Should create the content source in the set method" {
-                    { Set-TargetResource @testParams } | Should Throw "Parameter LimitServerHops is not valid for SharePoint content sources"
+                    { Set-TargetResource @testParams } | Should -Throw "Parameter LimitServerHops is not valid for SharePoint content sources"
                 }
             }
 
@@ -143,11 +143,11 @@ try
                 }
 
                 It "Should create the content source in the test method" {
-                    { Test-TargetResource @testParams } | Should Throw "Parameter CrawlSetting can only be set to CrawlVirtualServers or CrawlSites for SharePoint content sources"
+                    { Test-TargetResource @testParams } | Should -Throw "Parameter CrawlSetting can only be set to CrawlVirtualServers or CrawlSites for SharePoint content sources"
                 }
 
                 It "Should create the content source in the set method" {
-                    { Set-TargetResource @testParams } | Should Throw "Parameter CrawlSetting can only be set to CrawlVirtualServers or CrawlSites for SharePoint content sources"
+                    { Set-TargetResource @testParams } | Should -Throw "Parameter CrawlSetting can only be set to CrawlVirtualServers or CrawlSites for SharePoint content sources"
                 }
             }
 
@@ -163,11 +163,11 @@ try
                 }
 
                 It "Should create the content source in the test method" {
-                    { Test-TargetResource @testParams } | Should Throw "Parameter LimitServerHops is not valid for Website content sources"
+                    { Test-TargetResource @testParams } | Should -Throw "Parameter LimitServerHops is not valid for Website content sources"
                 }
 
                 It "Should create the content source in the set method" {
-                    { Set-TargetResource @testParams } | Should Throw "Parameter LimitServerHops is not valid for Website content sources"
+                    { Set-TargetResource @testParams } | Should -Throw "Parameter LimitServerHops is not valid for Website content sources"
                 }
             }
 
@@ -183,11 +183,11 @@ try
                 }
 
                 It "Should create the content source in the test method" {
-                    { Test-TargetResource @testParams } | Should Throw "Parameter ContinuousCrawl is not valid for Website content sources"
+                    { Test-TargetResource @testParams } | Should -Throw "Parameter ContinuousCrawl is not valid for Website content sources"
                 }
 
                 It "Should create the content source in the set method" {
-                    { Set-TargetResource @testParams } | Should Throw "Parameter ContinuousCrawl is not valid for Website content sources"
+                    { Set-TargetResource @testParams } | Should -Throw "Parameter ContinuousCrawl is not valid for Website content sources"
                 }
             }
 
@@ -203,11 +203,11 @@ try
                 }
 
                 It "Should create the content source in the test method" {
-                    { Test-TargetResource @testParams } | Should Throw "Parameter LimitPageDepth is not valid for FileShare content sources"
+                    { Test-TargetResource @testParams } | Should -Throw "Parameter LimitPageDepth is not valid for FileShare content sources"
                 }
 
                 It "Should create the content source in the set method" {
-                    { Set-TargetResource @testParams } | Should Throw "Parameter LimitPageDepth is not valid for FileShare content sources"
+                    { Set-TargetResource @testParams } | Should -Throw "Parameter LimitPageDepth is not valid for FileShare content sources"
                 }
             }
 
@@ -223,11 +223,11 @@ try
                 }
 
                 It "Should create the content source in the test method" {
-                    { Test-TargetResource @testParams } | Should Throw "Parameter LimitServerHops is not valid for FileShare content sources"
+                    { Test-TargetResource @testParams } | Should -Throw "Parameter LimitServerHops is not valid for FileShare content sources"
                 }
 
                 It "Should create the content source in the set method" {
-                    { Set-TargetResource @testParams } | Should Throw "Parameter LimitServerHops is not valid for FileShare content sources"
+                    { Set-TargetResource @testParams } | Should -Throw "Parameter LimitServerHops is not valid for FileShare content sources"
                 }
             }
 
@@ -242,11 +242,11 @@ try
                 }
 
                 It "Should create the content source in the test method" {
-                    { Test-TargetResource @testParams } | Should Throw "Parameter CrawlSetting can only be set to custom for website content sources"
+                    { Test-TargetResource @testParams } | Should -Throw "Parameter CrawlSetting can only be set to custom for website content sources"
                 }
 
                 It "Should create the content source in the set method" {
-                    { Set-TargetResource @testParams } | Should Throw "Parameter CrawlSetting can only be set to custom for website content sources"
+                    { Set-TargetResource @testParams } | Should -Throw "Parameter CrawlSetting can only be set to custom for website content sources"
                 }
             }
 
@@ -283,11 +283,11 @@ try
 
                 It "Should return absent from the get method" {
                     $result = Get-TargetResource @testParams
-                    $result.Ensure | Should Be "Absent"
+                    $result.Ensure | Should -Be "Absent"
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should create the content source in the set method" {
@@ -327,11 +327,11 @@ try
 
                 It "Should return present from the get method" {
                     $result = Get-TargetResource @testParams
-                    $result.Ensure | Should Be "Present"
+                    $result.Ensure | Should -Be "Present"
                 }
 
                 It "Should return true from the test method" {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
             }
 
@@ -364,11 +364,11 @@ try
 
                 It "Should return present from the get method" {
                     $result = Get-TargetResource @testParams
-                    $result.Ensure | Should Be "Present"
+                    $result.Ensure | Should -Be "Present"
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should remove the content source in the set method" {
@@ -393,11 +393,11 @@ try
 
                 It "Should return absent from the get method" {
                     $result = Get-TargetResource @testParams
-                    $result.Ensure | Should Be "Absent"
+                    $result.Ensure | Should -Be "Absent"
                 }
 
                 It "Should return true from the test method" {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
             }
 
@@ -430,7 +430,7 @@ try
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should disable continuous crawl and then re-enable it when updating the content source" {
@@ -476,11 +476,11 @@ try
 
                 It "Should return absent from the get method" {
                     $result = Get-TargetResource @testParams
-                    $result.Ensure | Should Be "Absent"
+                    $result.Ensure | Should -Be "Absent"
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should create the content source in the set method" {
@@ -520,11 +520,11 @@ try
 
                 It "Should return present from the get method" {
                     $result = Get-TargetResource @testParams
-                    $result.Ensure | Should Be "Present"
+                    $result.Ensure | Should -Be "Present"
                 }
 
                 It "Should return true from the test method" {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
             }
 
@@ -558,11 +558,11 @@ try
 
                 It "Should return present from the get method" {
                     $result = Get-TargetResource @testParams
-                    $result.Ensure | Should Be "Present"
+                    $result.Ensure | Should -Be "Present"
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should remove the content source in the set method" {
@@ -588,11 +588,11 @@ try
 
                 It "Should return absent from the get method" {
                     $result = Get-TargetResource @testParams
-                    $result.Ensure | Should Be "Absent"
+                    $result.Ensure | Should -Be "Absent"
                 }
 
                 It "Should return true from the test method" {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
             }
 
@@ -625,7 +625,7 @@ try
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should update the settings in the set method" {
@@ -665,11 +665,11 @@ try
 
                 It "Should return absent from the get method" {
                     $result = Get-TargetResource @testParams
-                    $result.Ensure | Should Be "Absent"
+                    $result.Ensure | Should -Be "Absent"
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should create the content source in the set method" {
@@ -709,11 +709,11 @@ try
 
                 It "Should return present from the get method" {
                     $result = Get-TargetResource @testParams
-                    $result.Ensure | Should Be "Present"
+                    $result.Ensure | Should -Be "Present"
                 }
 
                 It "Should return true from the test method" {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
             }
 
@@ -746,11 +746,11 @@ try
 
                 It "Should return present from the get method" {
                     $result = Get-TargetResource @testParams
-                    $result.Ensure | Should Be "Present"
+                    $result.Ensure | Should -Be "Present"
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should remove the content source in the set method" {
@@ -775,11 +775,11 @@ try
 
                 It "Should return absent from the get method" {
                     $result = Get-TargetResource @testParams
-                    $result.Ensure | Should Be "Absent"
+                    $result.Ensure | Should -Be "Absent"
                 }
 
                 It "Should return true from the test method" {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
             }
 
@@ -810,7 +810,7 @@ try
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should update the settings in the set method" {
@@ -880,7 +880,7 @@ try
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 $Global:SPDscContentSourceLoopCount = 0
@@ -932,7 +932,7 @@ try
                 }
 
                 It "Should return true from the test method" {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
             }
 
@@ -975,7 +975,7 @@ try
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should update the schedule in the set method" {
@@ -1023,7 +1023,7 @@ try
                 }
 
                 It "Should return true from the test method" {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
             }
 
@@ -1052,16 +1052,16 @@ try
 
                 It "Should return present from the get method" {
                     $result = Get-TargetResource @testParams
-                    $result.Ensure | Should Be "Present"
+                    $result.Ensure | Should -Be "Present"
                 }
 
                 It "Should return the correct LOBSystemSet from the get method" {
                     $result = Get-TargetResource @testParams
-                    $result.LOBSystemSet | Should Be $testParams.LOBSystemSet
+                    $result.LOBSystemSet | Should -Be $testParams.LOBSystemSet
                 }
 
                 It "Should return true from the test method" {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
             }
 
@@ -1096,11 +1096,11 @@ try
 
                 It "Should return absent from the get method" {
                     $result = Get-TargetResource @testParams
-                    $result.Ensure | Should Be "Absent"
+                    $result.Ensure | Should -Be "Absent"
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should create the new content source in the set method" {
@@ -1136,11 +1136,11 @@ try
 
                 It "Should return present from the get method" {
                     $result = Get-TargetResource @testParams
-                    $result.Ensure | Should Be "Present"
+                    $result.Ensure | Should -Be "Present"
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should remove the content source in the set method" {
@@ -1165,11 +1165,11 @@ try
 
                 It "Should return absent from the get method" {
                     $result = Get-TargetResource @testParams
-                    $result.Ensure | Should Be "Absent"
+                    $result.Ensure | Should -Be "Absent"
                 }
 
                 It "Should return true from the test method" {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
             }
 
@@ -1188,7 +1188,7 @@ try
                 }
 
                 It "Should throw unsupported type error" {
-                    { Get-TargetResource @testParams } | Should Throw "SharePointDsc does not currently support 'FakeType' content sources. Please use only 'SharePoint', 'FileShare', 'Website' or 'Business'."
+                    { Get-TargetResource @testParams } | Should -Throw "SharePointDsc does not currently support 'FakeType' content sources. Please use only 'SharePoint', 'FileShare', 'Website' or 'Business'."
                 }
             }
 
@@ -1207,8 +1207,8 @@ try
                 }
 
                 It "Should throw Invalid parameter error" {
-                    { Set-TargetResource @testParams } | Should Throw "Parameter LimitPageDepth is not valid for SharePoint content sources"
-                    { Test-TargetResource @testParams } | Should Throw "Parameter LimitPageDepth is not valid for SharePoint content sources"
+                    { Set-TargetResource @testParams } | Should -Throw "Parameter LimitPageDepth is not valid for SharePoint content sources"
+                    { Test-TargetResource @testParams } | Should -Throw "Parameter LimitPageDepth is not valid for SharePoint content sources"
                 }
 
                 $testParams = @{
@@ -1220,8 +1220,8 @@ try
                 }
 
                 It "Should throw Invalid parameter error" {
-                    { Set-TargetResource @testParams } | Should Throw "Parameter LimitServerHops is not valid for SharePoint content sources"
-                    { Test-TargetResource @testParams } | Should Throw "Parameter LimitServerHops is not valid for SharePoint content sources"
+                    { Set-TargetResource @testParams } | Should -Throw "Parameter LimitServerHops is not valid for SharePoint content sources"
+                    { Test-TargetResource @testParams } | Should -Throw "Parameter LimitServerHops is not valid for SharePoint content sources"
                 }
 
                 $testParams = @{
@@ -1233,8 +1233,8 @@ try
                 }
 
                 It "Should throw Invalid parameter error" {
-                    { Set-TargetResource @testParams } | Should Throw "Parameter CrawlSetting can only be set to CrawlVirtualServers or CrawlSites for SharePoint content sources"
-                    { Test-TargetResource @testParams } | Should Throw "Parameter CrawlSetting can only be set to CrawlVirtualServers or CrawlSites for SharePoint content sources"
+                    { Set-TargetResource @testParams } | Should -Throw "Parameter CrawlSetting can only be set to CrawlVirtualServers or CrawlSites for SharePoint content sources"
+                    { Test-TargetResource @testParams } | Should -Throw "Parameter CrawlSetting can only be set to CrawlVirtualServers or CrawlSites for SharePoint content sources"
                 }
             }
 
@@ -1253,8 +1253,8 @@ try
                 }
 
                 It "Should throw Invalid parameter error" {
-                    { Set-TargetResource @testParams } | Should Throw "Parameter ContinuousCrawl is not valid for Website content sources"
-                    { Test-TargetResource @testParams } | Should Throw "Parameter ContinuousCrawl is not valid for Website content sources"
+                    { Set-TargetResource @testParams } | Should -Throw "Parameter ContinuousCrawl is not valid for Website content sources"
+                    { Test-TargetResource @testParams } | Should -Throw "Parameter ContinuousCrawl is not valid for Website content sources"
                 }
 
                 $testParams = @{
@@ -1266,8 +1266,8 @@ try
                 }
 
                 It "Should throw Invalid parameter error" {
-                    { Set-TargetResource @testParams } | Should Throw "Parameter LimitServerHops is not valid for Website content sources"
-                    { Test-TargetResource @testParams } | Should Throw "Parameter LimitServerHops is not valid for Website content sources"
+                    { Set-TargetResource @testParams } | Should -Throw "Parameter LimitServerHops is not valid for Website content sources"
+                    { Test-TargetResource @testParams } | Should -Throw "Parameter LimitServerHops is not valid for Website content sources"
                 }
             }
 
@@ -1286,8 +1286,8 @@ try
                 }
 
                 It "Should throw Invalid parameter error" {
-                    { Set-TargetResource @testParams } | Should Throw "Parameter LimitPageDepth is not valid for FileShare content sources"
-                    { Test-TargetResource @testParams } | Should Throw "Parameter LimitPageDepth is not valid for FileShare content sources"
+                    { Set-TargetResource @testParams } | Should -Throw "Parameter LimitPageDepth is not valid for FileShare content sources"
+                    { Test-TargetResource @testParams } | Should -Throw "Parameter LimitPageDepth is not valid for FileShare content sources"
                 }
 
                 $testParams = @{
@@ -1299,8 +1299,8 @@ try
                 }
 
                 It "Should throw Invalid parameter error" {
-                    { Set-TargetResource @testParams } | Should Throw "Parameter LimitServerHops is not valid for FileShare content sources"
-                    { Test-TargetResource @testParams } | Should Throw "Parameter LimitServerHops is not valid for FileShare content sources"
+                    { Set-TargetResource @testParams } | Should -Throw "Parameter LimitServerHops is not valid for FileShare content sources"
+                    { Test-TargetResource @testParams } | Should -Throw "Parameter LimitServerHops is not valid for FileShare content sources"
                 }
 
                 $testParams = @{
@@ -1312,8 +1312,8 @@ try
                 }
 
                 It "Should throw Invalid parameter error" {
-                    { Set-TargetResource @testParams } | Should Throw "Parameter CrawlSetting can only be set to custom for website content sources"
-                    { Test-TargetResource @testParams } | Should Throw "Parameter CrawlSetting can only be set to custom for website content sources"
+                    { Set-TargetResource @testParams } | Should -Throw "Parameter CrawlSetting can only be set to custom for website content sources"
+                    { Test-TargetResource @testParams } | Should -Throw "Parameter CrawlSetting can only be set to custom for website content sources"
                 }
             }
 
@@ -1332,8 +1332,8 @@ try
                 }
 
                 It "Should throw Invalid parameter error" {
-                    { Set-TargetResource @testParams } | Should Throw "Parameter LimitPageDepth is not valid for Business content sources"
-                    { Test-TargetResource @testParams } | Should Throw "Parameter LimitPageDepth is not valid for Business content sources"
+                    { Set-TargetResource @testParams } | Should -Throw "Parameter LimitPageDepth is not valid for Business content sources"
+                    { Test-TargetResource @testParams } | Should -Throw "Parameter LimitPageDepth is not valid for Business content sources"
                 }
 
                 $testParams = @{
@@ -1345,8 +1345,8 @@ try
                 }
 
                 It "Should throw Invalid parameter error" {
-                    { Set-TargetResource @testParams } | Should Throw "Parameter LimitServerHops is not valid for Business content sources"
-                    { Test-TargetResource @testParams } | Should Throw "Parameter LimitServerHops is not valid for Business content sources"
+                    { Set-TargetResource @testParams } | Should -Throw "Parameter LimitServerHops is not valid for Business content sources"
+                    { Test-TargetResource @testParams } | Should -Throw "Parameter LimitServerHops is not valid for Business content sources"
                 }
 
                 $testParams = @{
@@ -1358,7 +1358,7 @@ try
                 }
 
                 It "Should throw Invalid parameter error" {
-                    { Set-TargetResource @testParams } | Should Throw "Parameter ContinuousCrawl is not valid for Business content sources"
+                    { Set-TargetResource @testParams } | Should -Throw "Parameter ContinuousCrawl is not valid for Business content sources"
                 }
             }
 
@@ -1388,7 +1388,7 @@ try
                 }
 
                 It "Should throw error complaining cannot change type without the force parameter" {
-                    { Set-TargetResource @testParams } | Should Throw "The type of the a search content source can not be changed from 'Business' to 'FileShare' without deleting and adding it again. Specify 'Force = `$true' in order to allow DSC to do this, or manually remove the existing content source and re-run the configuration."
+                    { Set-TargetResource @testParams } | Should -Throw "The type of the a search content source can not be changed from 'Business' to 'FileShare' without deleting and adding it again. Specify 'Force = `$true' in order to allow DSC to do this, or manually remove the existing content source and re-run the configuration."
                 }
 
                 $testParams = @{

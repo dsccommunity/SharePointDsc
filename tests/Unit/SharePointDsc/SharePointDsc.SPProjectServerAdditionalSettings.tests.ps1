@@ -56,15 +56,15 @@ try
                 {
                     Context -Name "All methods throw exceptions as Project Server support in SharePointDsc is only for 2016" -Fixture {
                         It "Should throw on the get method" {
-                            { Get-TargetResource @testParams } | Should Throw
+                            { Get-TargetResource @testParams } | Should -Throw
                         }
 
                         It "Should throw on the test method" {
-                            { Test-TargetResource @testParams } | Should Throw
+                            { Test-TargetResource @testParams } | Should -Throw
                         }
 
                         It "Should throw on the set method" {
-                            { Set-TargetResource @testParams } | Should Throw
+                            { Set-TargetResource @testParams } | Should -Throw
                         }
                     }
                 }
@@ -193,11 +193,11 @@ try
                         }
 
                         It "Should return current settings from the get method" {
-                            Get-TargetResource @testParams | Should Not BeNullOrEmpty
+                            Get-TargetResource @testParams | Should -Not -BeNullOrEmpty
                         }
 
                         It "Should return false from the test method" {
-                            Test-TargetResource @testParams | Should Be $false
+                            Test-TargetResource @testParams | Should -Be $false
                         }
 
                         It "Should update all settings from the set method" {
@@ -205,9 +205,9 @@ try
                             $global:SPDscSetServerCurrencyCalled = $false
                             $global:SPDscSetSingleCurrencyEnforcedCalled = $false
                             Set-TargetResource @testParams
-                            $global:SPDscSetProjectProfessionalMinimumBuildNumbersCalled | Should Be $true
-                            $global:SPDscSetServerCurrencyCalled | Should Be $true
-                            $global:SPDscSetSingleCurrencyEnforcedCalled | Should Be $true
+                            $global:SPDscSetProjectProfessionalMinimumBuildNumbersCalled | Should -Be $true
+                            $global:SPDscSetServerCurrencyCalled | Should -Be $true
+                            $global:SPDscSetSingleCurrencyEnforcedCalled | Should -Be $true
                         }
                     }
 
@@ -220,11 +220,11 @@ try
                         }
 
                         It "Should return current settings from the get method" {
-                            Get-TargetResource @testParams | Should Not BeNullOrEmpty
+                            Get-TargetResource @testParams | Should -Not -BeNullOrEmpty
                         }
 
                         It "Should return true from the test method" {
-                            Test-TargetResource @testParams | Should Be $true
+                            Test-TargetResource @testParams | Should -Be $true
                         }
                     }
 

@@ -61,7 +61,7 @@ try
                 }
 
                 It "Should return false when the Test method is called" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
             }
 
@@ -88,12 +88,12 @@ try
                 }
 
                 It "Should return ensure equals Present" {
-                    (Get-TargetResource @params).Ensure | Should be "Present"
+                    (Get-TargetResource @params).Ensure | Should -Be "Present"
                 }
 
                 It "Should throw an error when trying to set to Absent" {
                     $params.Ensure = "Absent"
-                    { Set-TargetResource @params } | Should throw "This resource cannot undo Security " `
+                    { Set-TargetResource @params } | Should -Throw "This resource cannot undo Security " `
                         "Token Service Configuration changes. Please set Ensure to Present or omit the resource"
                 }
             }

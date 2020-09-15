@@ -70,15 +70,15 @@ try
                 {
                     Context -Name "All methods throw exceptions as MinRole doesn't exist in 2013" -Fixture {
                         It "Should throw on the get method" {
-                            { Get-TargetResource @testParams } | Should Throw
+                            { Get-TargetResource @testParams } | Should -Throw
                         }
 
                         It "Should throw on the test method" {
-                            { Test-TargetResource @testParams } | Should Throw
+                            { Test-TargetResource @testParams } | Should -Throw
                         }
 
                         It "Should throw on the set method" {
-                            { Set-TargetResource @testParams } | Should Throw
+                            { Set-TargetResource @testParams } | Should -Throw
                         }
                     }
                 }
@@ -124,11 +124,11 @@ try
                         $global:SPDscIsRoleCompliant = $false
 
                         It "should return NonCompliant in the get method" {
-                            (Get-TargetResource @testParams).State | Should Be "NonCompliant"
+                            (Get-TargetResource @testParams).State | Should -Be "NonCompliant"
                         }
 
                         It "should return false in the test method" {
-                            Test-TargetResource @testParams | Should Be $false
+                            Test-TargetResource @testParams | Should -Be $false
                         }
 
                         It "should start the service in the set method" {
@@ -178,11 +178,11 @@ try
                         $global:SPDscIsRoleCompliant = $false
 
                         It "should return NonCompliant in the get method" {
-                            (Get-TargetResource @testParams).State | Should Be "NonCompliant"
+                            (Get-TargetResource @testParams).State | Should -Be "NonCompliant"
                         }
 
                         It "should return false in the test method" {
-                            Test-TargetResource @testParams | Should Be $false
+                            Test-TargetResource @testParams | Should -Be $false
                         }
 
                         It "should start the service in the set method" {
@@ -237,11 +237,11 @@ try
                         $global:SPDscIsRoleCompliant = $true
 
                         It "should return NonCompliant in the get method" {
-                            (Get-TargetResource @testParams).State | Should Be "Compliant"
+                            (Get-TargetResource @testParams).State | Should -Be "Compliant"
                         }
 
                         It "should return false in the test method" {
-                            Test-TargetResource @testParams | Should Be $true
+                            Test-TargetResource @testParams | Should -Be $true
                         }
                     }
 
@@ -252,11 +252,11 @@ try
                         }
 
                         It "Should throw on the test method" {
-                            { Test-TargetResource @testParams } | Should Throw
+                            { Test-TargetResource @testParams } | Should -Throw
                         }
 
                         It "Should throw on the set method" {
-                            { Set-TargetResource @testParams } | Should Throw
+                            { Set-TargetResource @testParams } | Should -Throw
                         }
                     }
                 }

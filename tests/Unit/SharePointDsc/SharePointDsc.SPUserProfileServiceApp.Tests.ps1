@@ -185,15 +185,15 @@ try
                 Mock -CommandName Restart-Service { }
 
                 It "Should throw exception in the Get method" {
-                    (Get-TargetResource @testParams).Ensure | Should Be "Absent"
+                    (Get-TargetResource @testParams).Ensure | Should -Be "Absent"
                 }
 
                 It "Should throw exception in the Test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should throw exception in the set method" {
-                    { Set-TargetResource @testParams } | Should throw "Specified PSDSCRunAsCredential "
+                    { Set-TargetResource @testParams } | Should -Throw "Specified PSDSCRunAsCredential "
                 }
             }
 
@@ -319,15 +319,15 @@ try
                 Mock -CommandName Restart-Service { }
 
                 It "Should NOT throw exception in the Get method" {
-                    (Get-TargetResource @testParams).Ensure | Should Be "Present"
+                    (Get-TargetResource @testParams).Ensure | Should -Be "Present"
                 }
 
                 It "Should throw exception in the Test method" {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
 
                 It "Should throw exception in the set method" {
-                    { Set-TargetResource @testParams } | Should throw "Specified PSDSCRunAsCredential "
+                    { Set-TargetResource @testParams } | Should -Throw "Specified PSDSCRunAsCredential "
                 }
             }
 
@@ -347,15 +347,15 @@ try
                 Mock -CommandName Restart-Service { }
 
                 It "Should throw exception in the Get method" {
-                    { Get-TargetResource @testParams } | Should throw "Specified InstallAccount "
+                    { Get-TargetResource @testParams } | Should -Throw "Specified InstallAccount "
                 }
 
                 It "Should throw exception in the Test method" {
-                    { Test-TargetResource @testParams } | Should throw "Specified InstallAccount "
+                    { Test-TargetResource @testParams } | Should -Throw "Specified InstallAccount "
                 }
 
                 It "Should throw exception in the set method" {
-                    { Set-TargetResource @testParams } | Should throw "Specified InstallAccount "
+                    { Set-TargetResource @testParams } | Should -Throw "Specified InstallAccount "
                 }
             }
 
@@ -418,12 +418,12 @@ try
 
                 $global:ranGetServiceApp = $false
                 It "Should return absent from the Get method" {
-                    (Get-TargetResource @testParams).Ensure | Should Be "Absent"
+                    (Get-TargetResource @testParams).Ensure | Should -Be "Absent"
                 }
 
                 $global:ranGetServiceApp = $false
                 It "Should return false when the Test method is called" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 $global:ranGetServiceApp = $false
@@ -456,11 +456,11 @@ try
                 }
 
                 It "Should return absent from the Get method" {
-                    (Get-TargetResource @testParams).Ensure | Should Be "Absent"
+                    (Get-TargetResource @testParams).Ensure | Should -Be "Absent"
                 }
 
                 It "Should return false when the Test method is called" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
             }
 
@@ -586,22 +586,22 @@ try
                 }
 
                 It "Should return false from the Get method" {
-                    (Get-TargetResource @testParams).EnableNetBIOS | Should Be $false
+                    (Get-TargetResource @testParams).EnableNetBIOS | Should -Be $false
                 }
 
                 It "Should call Update method on Service Application before finishing set method" {
                     $Global:SPDscUPSAUpdateCalled = $false
                     Set-TargetResource @testParams
-                    $Global:SPDscUPSAUpdateCalled | Should Be $true
+                    $Global:SPDscUPSAUpdateCalled | Should -Be $true
                 }
 
                 It "Should return false when the Test method is called" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should return true when the Test method is called" {
                     $testParams.EnableNetBIOS = $false
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
             }
 
@@ -727,22 +727,22 @@ try
                 }
 
                 It "Should return false from the Get method" {
-                    (Get-TargetResource @testParams).NoILMUsed | Should Be $false
+                    (Get-TargetResource @testParams).NoILMUsed | Should -Be $false
                 }
 
                 It "Should call Update method on Service Application before finishing set method" {
                     $Global:SPDscUPSAUpdateCalled = $false
                     Set-TargetResource @testParams
-                    $Global:SPDscUPSAUpdateCalled | Should Be $true
+                    $Global:SPDscUPSAUpdateCalled | Should -Be $true
                 }
 
                 It "Should return false when the Test method is called" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should return true when the Test method is called" {
                     $testParams.NoILMUsed = $false
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
             }
 
@@ -868,7 +868,7 @@ try
                 }
 
                 It "Should return SiteNamingConflictResolution=Domain_Username from the Get method" {
-                    (Get-TargetResource @testParams).SiteNamingConflictResolution | Should Be "Domain_Username"
+                    (Get-TargetResource @testParams).SiteNamingConflictResolution | Should -Be "Domain_Username"
                 }
 
                 It "Should call Get-SPWebApplication before finishing set method" {
@@ -877,7 +877,7 @@ try
                 }
 
                 It "Should return false when the Test method is called" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
             }
 
@@ -1013,17 +1013,17 @@ try
                 }
 
                 It "Should return UpdateProxyGroup=true from the Get method" {
-                    (Get-TargetResource @testParams).UpdateProxyGroup | Should Be $true
+                    (Get-TargetResource @testParams).UpdateProxyGroup | Should -Be $true
                 }
 
                 It "Should call Update method on Service Application before finishing set method" {
                     $Global:SPDscUPSAUpdateCalled = $false
                     Set-TargetResource @testParams
-                    $Global:SPDscUPSAUpdateCalled | Should Be $true
+                    $Global:SPDscUPSAUpdateCalled | Should -Be $true
                 }
 
                 It "Should return false when the Test method is called" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
             }
 
@@ -1159,11 +1159,11 @@ try
                 }
 
                 It "Should return UpdateProxyGroup=true from the Get method" {
-                    (Get-TargetResource @testParams).UpdateProxyGroup | Should Be $true
+                    (Get-TargetResource @testParams).UpdateProxyGroup | Should -Be $true
                 }
 
                 It "Should return true when the Test method is called" {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
             }
 
@@ -1287,11 +1287,11 @@ try
                 }
 
                 It "Should return present from the get method" {
-                    (Get-TargetResource @testParams).Ensure | Should Be "Present"
+                    (Get-TargetResource @testParams).Ensure | Should -Be "Present"
                 }
 
                 It "Should return true when the Test method is called" {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
             }
 
@@ -1420,11 +1420,11 @@ try
                 }
 
                 It "Should return present from the Get method" {
-                    (Get-TargetResource @testParams).Ensure | Should Be "Present"
+                    (Get-TargetResource @testParams).Ensure | Should -Be "Present"
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should remove the service application in the set method" {
@@ -1446,11 +1446,11 @@ try
                 }
 
                 It "Should return absent from the Get method" {
-                    (Get-TargetResource @testParams).Ensure | Should Be "Absent"
+                    (Get-TargetResource @testParams).Ensure | Should -Be "Absent"
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
             }
         }

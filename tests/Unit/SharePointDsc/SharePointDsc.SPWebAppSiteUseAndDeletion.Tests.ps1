@@ -67,15 +67,15 @@ try
                 Mock -CommandName Get-SPFarm -MockWith { throw "Unable to detect local farm" }
 
                 It "Should return SendUnusedSiteCollectionNotifications=null from the get method" {
-                    (Get-TargetResource @testParams).SendUnusedSiteCollectionNotifications | Should BeNullOrEmpty
+                    (Get-TargetResource @testParams).SendUnusedSiteCollectionNotifications | Should -BeNullOrEmpty
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should throw an exception in the set method to say there is no local farm" {
-                    { Set-TargetResource @testParams } | Should throw "No local SharePoint farm was detected"
+                    { Set-TargetResource @testParams } | Should -Throw "No local SharePoint farm was detected"
                 }
             }
 
@@ -93,15 +93,15 @@ try
                 }
 
                 It "Should return SendUnusedSiteCollectionNotifications=null from the get method" {
-                    (Get-TargetResource @testParams).SendUnusedSiteCollectionNotifications | Should BeNullOrEmpty
+                    (Get-TargetResource @testParams).SendUnusedSiteCollectionNotifications | Should -BeNullOrEmpty
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should throw an exception in the set method" {
-                    { Set-TargetResource @testParams } | Should throw "Configured web application could not be found"
+                    { Set-TargetResource @testParams } | Should -Throw "Configured web application could not be found"
                 }
             }
 
@@ -137,7 +137,7 @@ try
                     }
                     $testParams.UnusedSiteNotificationsBeforeDeletion = 24
 
-                    { Set-TargetResource @testParams } | Should throw "Value of UnusedSiteNotificationsBeforeDeletion has to be >28 and"
+                    { Set-TargetResource @testParams } | Should -Throw "Value of UnusedSiteNotificationsBeforeDeletion has to be >28 and"
                 }
 
                 It "Should throw an exception - Weekly schedule" {
@@ -150,7 +150,7 @@ try
                     }
                     $testParams.UnusedSiteNotificationsBeforeDeletion = 28
 
-                    { Set-TargetResource @testParams } | Should throw "Value of UnusedSiteNotificationsBeforeDeletion has to be >4 and"
+                    { Set-TargetResource @testParams } | Should -Throw "Value of UnusedSiteNotificationsBeforeDeletion has to be >4 and"
                 }
 
                 It "Should throw an exception - Weekly schedule" {
@@ -163,7 +163,7 @@ try
                     }
                     $testParams.UnusedSiteNotificationsBeforeDeletion = 12
 
-                    { Set-TargetResource @testParams } | Should throw "Value of UnusedSiteNotificationsBeforeDeletion has to be >2 and"
+                    { Set-TargetResource @testParams } | Should -Throw "Value of UnusedSiteNotificationsBeforeDeletion has to be >2 and"
                 }
             }
 
@@ -190,7 +190,7 @@ try
                 Mock -CommandName Get-SPTimerJob -MockWith { return $null }
 
                 It "Should update the Site Use and Deletion settings" {
-                    { Set-TargetResource @testParams } | Should throw "Dead Site Delete timer job for web application"
+                    { Set-TargetResource @testParams } | Should -Throw "Dead Site Delete timer job for web application"
                 }
             }
 
@@ -224,17 +224,17 @@ try
                 }
 
                 It "Should return SendUnusedSiteCollectionNotifications=False from the get method" {
-                    (Get-TargetResource @testParams).SendUnusedSiteCollectionNotifications | Should Be $false
+                    (Get-TargetResource @testParams).SendUnusedSiteCollectionNotifications | Should -Be $false
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 $Global:SPDscSiteUseUpdated = $false
                 It "Should update the Site Use and Deletion settings" {
                     Set-TargetResource @testParams
-                    $Global:SPDscSiteUseUpdated | Should Be $true
+                    $Global:SPDscSiteUseUpdated | Should -Be $true
                 }
             }
 
@@ -260,11 +260,11 @@ try
                 Mock -CommandName Get-SPFarm -MockWith { return @{ } }
 
                 It "Should return SendUnusedSiteCollectionNotifications=True from the get method" {
-                    (Get-TargetResource @testParams).SendUnusedSiteCollectionNotifications | Should Be $true
+                    (Get-TargetResource @testParams).SendUnusedSiteCollectionNotifications | Should -Be $true
                 }
 
                 It "Should return true from the test method" {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
 
             }

@@ -91,15 +91,15 @@ try
                 Mock -CommandName Get-SPWebApplication -MockWith { return $null }
 
                 It "Should return null for all properties from the get method" {
-                    (Get-TargetResource @testParams).OnlySearchWithinSiteCollection | Should BeNullOrEmpty
+                    (Get-TargetResource @testParams).OnlySearchWithinSiteCollection | Should -BeNullOrEmpty
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should throw an exception from the set method" {
-                    { Set-TargetResource @testParams } | Should throw "Specified web application could not be found."
+                    { Set-TargetResource @testParams } | Should -Throw "Specified web application could not be found."
                 }
             }
 
@@ -154,17 +154,17 @@ try
                 }
 
                 It "Should return SearchTimeOut=10 from the get method" {
-                    (Get-TargetResource @testParams).ActiveDirectorySearchTimeout | Should Be 10
+                    (Get-TargetResource @testParams).ActiveDirectorySearchTimeout | Should -Be 10
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 $Global:SPDscWebApplicationUpdateCalled = $false
                 It "Should update the people picker settings" {
                     Set-TargetResource @testParams
-                    $Global:SPDscWebApplicationUpdateCalled | Should Be $true
+                    $Global:SPDscWebApplicationUpdateCalled | Should -Be $true
                 }
             }
 
@@ -210,17 +210,17 @@ try
                 }
 
                 It "Should return SearchTimeOut=10 from the get method" {
-                    (Get-TargetResource @testParams).ActiveDirectorySearchTimeout | Should Be 10
+                    (Get-TargetResource @testParams).ActiveDirectorySearchTimeout | Should -Be 10
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 $Global:SPDscWebApplicationUpdateCalled = $false
                 It "Should update the people picker settings" {
                     Set-TargetResource @testParams
-                    $Global:SPDscWebApplicationUpdateCalled | Should Be $true
+                    $Global:SPDscWebApplicationUpdateCalled | Should -Be $true
                 }
             }
 
@@ -276,11 +276,11 @@ try
 
                 It "Should return SearchTimeOut=10 from the get method" {
                     $result = Get-TargetResource @testParams
-                    $result.ActiveDirectorySearchTimeout | Should Be 10
+                    $result.ActiveDirectorySearchTimeout | Should -Be 10
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
             }
 
@@ -313,11 +313,11 @@ try
                 }
 
                 It "Should return SearchTimeOut=30 from the get method" {
-                    (Get-TargetResource @testParams).ActiveDirectorySearchTimeout | Should Be 30
+                    (Get-TargetResource @testParams).ActiveDirectorySearchTimeout | Should -Be 30
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
             }
         }

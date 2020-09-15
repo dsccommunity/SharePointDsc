@@ -71,12 +71,12 @@ try
                 Mock -CommandName New-SPAppManagementServiceApplicationProxy -MockWith { return $null }
 
                 It "Should return absent from the get method" {
-                    (Get-TargetResource @testParams).Ensure | Should Be "Absent"
+                    (Get-TargetResource @testParams).Ensure | Should -Be "Absent"
                     Assert-MockCalled Get-SPServiceApplication -ParameterFilter { $Name -eq $testParams.Name }
                 }
 
                 It "Should return false when the test method is called" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should create a new service application in the set method" {
@@ -109,7 +109,7 @@ try
                 }
 
                 It "Should return absent from the get method" {
-                    (Get-TargetResource @testParams).Ensure | Should Be "Absent"
+                    (Get-TargetResource @testParams).Ensure | Should -Be "Absent"
                     Assert-MockCalled Get-SPServiceApplication -ParameterFilter { $Name -eq $testParams.Name }
                 }
 
@@ -159,12 +159,12 @@ try
                 }
 
                 It "Should return present from the get method" {
-                    (Get-TargetResource @testParams).Ensure | Should Be "Present"
+                    (Get-TargetResource @testParams).Ensure | Should -Be "Present"
                     Assert-MockCalled Get-SPServiceApplication -ParameterFilter { $Name -eq $testParams.Name }
                 }
 
                 It "Should return true when the test method is called" {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
             }
 
@@ -200,14 +200,14 @@ try
                     @{ Name = $testParams.ApplicationPool } }
 
                 It "Should return false when the test method is called" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 $Global:SPDscAppServiceUpdateCalled = $false
                 It "Should call the update service app cmdlet from the set method" {
                     Set-TargetResource @testParams
                     Assert-MockCalled Get-SPServiceApplicationPool
-                    $Global:SPDscAppServiceUpdateCalled | Should Be $true
+                    $Global:SPDscAppServiceUpdateCalled | Should -Be $true
                 }
             }
 
@@ -247,11 +247,11 @@ try
                 Mock -CommandName New-SPAppManagementServiceApplicationProxy -MockWith { return $null }
 
                 It "Should return an empty ProxyName from the get method" {
-                    (Get-TargetResource @testParams).ProxyName | Should Be ""
+                    (Get-TargetResource @testParams).ProxyName | Should -Be ""
                 }
 
                 It "Should return false when the test method is called" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should call the update service app cmdlet from the set method" {
@@ -301,11 +301,11 @@ try
                 }
 
                 It "Should return present from the get method" {
-                    (Get-TargetResource @testParams).Ensure | Should Be "Present"
+                    (Get-TargetResource @testParams).Ensure | Should -Be "Present"
                 }
 
                 It "Should return false when the test method is called" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should call the remove service application cmdlet in the set method" {
@@ -324,11 +324,11 @@ try
                 Mock -CommandName Get-SPServiceApplication -MockWith { return $null }
 
                 It "Should return absent from the get method" {
-                    (Get-TargetResource @testParams).Ensure | Should Be "Absent"
+                    (Get-TargetResource @testParams).Ensure | Should -Be "Absent"
                 }
 
                 It "Should returns true when the test method is called" {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
             }
         }

@@ -99,17 +99,17 @@ try
 
                 It "Should return null values from the get method" {
                     $results = Get-TargetResource @testParams
-                    $results.CreatePersonalSite | Should BeNullOrEmpty
-                    $results.FollowAndEditProfile | Should BeNullOrEmpty
-                    $results.UseTagsAndNotes | Should BeNullOrEmpty
+                    $results.CreatePersonalSite | Should -BeNullOrEmpty
+                    $results.FollowAndEditProfile | Should -BeNullOrEmpty
+                    $results.UseTagsAndNotes | Should -BeNullOrEmpty
                 }
 
                 It "Should return false in the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should set the permissions correctly" {
-                    { Set-TargetResource @testParams } | Should Throw
+                    { Set-TargetResource @testParams } | Should -Throw
                 }
             }
 
@@ -132,7 +132,7 @@ try
                 }
 
                 It "Should return false in the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should set the permissions correctly" {
@@ -173,7 +173,7 @@ try
                 }
 
                 It "Should return false in the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should set the permissions correctly" {
@@ -214,7 +214,7 @@ try
                 }
 
                 It "Should return true in the test method" {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
             }
 
@@ -254,7 +254,7 @@ try
                 }
 
                 It "Should return false in the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should set the permissions correctly" {
@@ -299,7 +299,7 @@ try
                 }
 
                 It "Should return false in the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should set the permissions correctly" {
@@ -337,7 +337,7 @@ try
                 }
 
                 It "Should return true in the test method" {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
             }
         }

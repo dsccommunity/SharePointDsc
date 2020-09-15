@@ -110,15 +110,15 @@ namespace Microsoft.SharePoint.Administration {
                 }
 
                 It "Should return Ensure=Present from the get method" {
-                    (Get-TargetResource @testParams).Ensure | Should Be "Present"
+                    (Get-TargetResource @testParams).Ensure | Should -Be "Present"
                 }
 
                 It "Should return false and display message to indicate the databaseserver parameter does not match" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should throw an exception in the test method to say the databaseserver parameter does not match" {
-                    { Set-TargetResource @testParams } | Should throw "Specified database server does not match the actual database server. This resource cannot move the database to a different SQL instance."
+                    { Set-TargetResource @testParams } | Should -Throw "Specified database server does not match the actual database server. This resource cannot move the database to a different SQL instance."
                 }
             }
 
@@ -157,15 +157,15 @@ namespace Microsoft.SharePoint.Administration {
                 }
 
                 It "Should return Ensure=Present from the get method" {
-                    (Get-TargetResource @testParams).Ensure | Should Be "Present"
+                    (Get-TargetResource @testParams).Ensure | Should -Be "Present"
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should throw an exception in the set method to say the web application does not exist" {
-                    { Set-TargetResource @testParams } | Should throw "Specified web application does not exist."
+                    { Set-TargetResource @testParams } | Should -Throw "Specified web application does not exist."
                 }
             }
 
@@ -193,7 +193,7 @@ namespace Microsoft.SharePoint.Administration {
                 }
 
                 It "mounting a content database generates an error" {
-                    { Set-TargetResource @testParams } | Should throw "Error occurred while mounting content database. Content database is not mounted."
+                    { Set-TargetResource @testParams } | Should -Throw "Error occurred while mounting content database. Content database is not mounted."
                 }
             }
 
@@ -233,17 +233,17 @@ namespace Microsoft.SharePoint.Administration {
                 }
 
                 It "Should return Ensure=Absent from the get method" {
-                    (Get-TargetResource @testParams).Ensure | Should Be "Absent"
+                    (Get-TargetResource @testParams).Ensure | Should -Be "Absent"
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 $Global:SPDscContentDatabaseUpdated = $false
                 It "mounts a (new) content database" {
                     Set-TargetResource @testParams
-                    $Global:SPDscContentDatabaseUpdated | Should Be $true
+                    $Global:SPDscContentDatabaseUpdated | Should -Be $true
                 }
             }
 
@@ -281,17 +281,17 @@ namespace Microsoft.SharePoint.Administration {
                 }
 
                 It "Should return Ensure=Present from the get method" {
-                    (Get-TargetResource @testParams).Ensure | Should Be "Present"
+                    (Get-TargetResource @testParams).Ensure | Should -Be "Present"
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 $Global:SPDscContentDatabaseUpdated = $false
                 It "Should update the content database settings" {
                     Set-TargetResource @testParams
-                    $Global:SPDscContentDatabaseUpdated | Should Be $true
+                    $Global:SPDscContentDatabaseUpdated | Should -Be $true
                 }
             }
 
@@ -328,11 +328,11 @@ namespace Microsoft.SharePoint.Administration {
                 }
 
                 It "Should return Ensure=Present from the get method" {
-                    (Get-TargetResource @testParams).Ensure | Should Be "Present"
+                    (Get-TargetResource @testParams).Ensure | Should -Be "Present"
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should update the content database settings" {
@@ -388,17 +388,17 @@ namespace Microsoft.SharePoint.Administration {
                 }
 
                 It "Should return Ensure=Present from the get method" {
-                    (Get-TargetResource @testParams).Ensure | Should Be "Present"
+                    (Get-TargetResource @testParams).Ensure | Should -Be "Present"
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 $Global:SPDscContentDatabaseUpdated = $false
                 It "move the content database to the specified web application via set method" {
                     Set-TargetResource @testParams
-                    $Global:SPDscContentDatabaseUpdated | Should Be $true
+                    $Global:SPDscContentDatabaseUpdated | Should -Be $true
                 }
             }
 
@@ -432,11 +432,11 @@ namespace Microsoft.SharePoint.Administration {
                 }
 
                 It "Should return Ensure=Present from the get method" {
-                    (Get-TargetResource @testParams).Ensure | Should Be "Present"
+                    (Get-TargetResource @testParams).Ensure | Should -Be "Present"
                 }
 
                 It "Should return true from the test method" {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
             }
 
@@ -457,11 +457,11 @@ namespace Microsoft.SharePoint.Administration {
                 }
 
                 It "Should return Ensure=Absent from the get method" {
-                    (Get-TargetResource @testParams).Ensure | Should Be "Absent"
+                    (Get-TargetResource @testParams).Ensure | Should -Be "Absent"
                 }
 
                 It "Should return true from the test method" {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
             }
         }

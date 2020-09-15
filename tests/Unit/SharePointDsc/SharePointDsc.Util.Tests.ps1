@@ -15,10 +15,10 @@ $script:projectPath = "$PSScriptRoot\..\..\.." | Convert-Path
 $script:projectName = (Get-ChildItem -Path "$script:projectPath\*\*.psd1" | Where-Object -FilterScript {
         ($_.Directory.Name -match 'source|src' -or $_.Directory.Name -eq $_.BaseName) -and
         $(try
-            { Test-ModuleManifest -Path $_.FullName -ErrorAction Stop 
+            { Test-ModuleManifest -Path $_.FullName -ErrorAction Stop
             }
             catch
-            { $false 
+            { $false
             })
     }).BaseName
 
@@ -70,7 +70,7 @@ try
             Context -Name "Validate Get-SPDscAssemblyVersion" -Fixture {
                 It "Should return the version number of a given executable" {
                     $testPath = "C:\windows\System32\WindowsPowerShell\v1.0\powershell.exe"
-                    Get-SPDscAssemblyVersion -PathToAssembly $testPath | Should Not Be 0
+                    Get-SPDscAssemblyVersion -PathToAssembly $testPath | Should -Not -Be 0
                 }
             }
 
@@ -113,7 +113,7 @@ try
                     $mockPassword = ConvertTo-SecureString -String "password" -AsPlainText -Force
                     $mockCredential = New-Object -TypeName System.Management.Automation.PSCredential ("$($Env:USERDOMAIN)\$($Env:USERNAME)", $mockPassword)
                     { Invoke-SPDscCommand -ScriptBlock { return "value" } `
-                            -Credential $mockCredential 4>&1 } | Should Throw
+                            -Credential $mockCredential 4>&1 } | Should -Throw
                 }
 
                 It "Should throw normal exceptions when triggered in the script block" {
@@ -121,7 +121,7 @@ try
                         throw [Exception] "A random exception"
                     }
 
-                    { Invoke-SPDscCommand -ScriptBlock { return "value" } 4>&1 } | Should Throw
+                    { Invoke-SPDscCommand -ScriptBlock { return "value" } 4>&1 } | Should -Throw
                 }
 
                 It "Should throw normal exceptions when triggered in the script block using InstallAccount" {
@@ -132,7 +132,7 @@ try
                     $mockPassword = ConvertTo-SecureString -String "password" -AsPlainText -Force
                     $mockCredential = New-Object -TypeName System.Management.Automation.PSCredential ("username", $mockPassword)
                     { Invoke-SPDscCommand -ScriptBlock { return "value" } `
-                            -Credential $mockCredential 4>&1 } | Should Throw
+                            -Credential $mockCredential 4>&1 } | Should -Throw
                 }
 
                 It "Should handle a SharePoint update conflict exception by rebooting the server to retry" {
@@ -140,7 +140,7 @@ try
                         throw [Exception] "An update conflict has occurred, and you must re-try this action."
                     }
 
-                    { Invoke-SPDscCommand -ScriptBlock { return "value" } 4>&1 } | Should Not Throw
+                    { Invoke-SPDscCommand -ScriptBlock { return "value" } 4>&1 } | Should -Not -Throw
                 }
 
                 It "Should handle a SharePoint update conflict exception by rebooting the server to retry using InstallAccount" {
@@ -151,7 +151,7 @@ try
                     $mockPassword = ConvertTo-SecureString -String "password" -AsPlainText -Force
                     $mockCredential = New-Object -TypeName System.Management.Automation.PSCredential ("username", $mockPassword)
                     { Invoke-SPDscCommand -ScriptBlock { return "value" } `
-                            -Credential $mockCredential 4>&1 } | Should Not Throw
+                            -Credential $mockCredential 4>&1 } | Should -Not -Throw
                 }
             }
 
@@ -160,7 +160,7 @@ try
                     $desired = @{ Example = "test" }
                     Test-SPDscParameterState -CurrentValues $desired `
                         -Source 'SharePointDsc.Util' `
-                        -DesiredValues $desired | Should Be $true
+                        -DesiredValues $desired | Should -Be $true
                 }
 
                 It "Should return false when a value is different" {
@@ -168,7 +168,7 @@ try
                     $desired = @{ Example = "test" }
                     Test-SPDscParameterState -CurrentValues $current `
                         -Source 'SharePointDsc.Util' `
-                        -DesiredValues $desired | Should Be $false
+                        -DesiredValues $desired | Should -Be $false
                 }
 
                 It "Should return false when a value is missing" {
@@ -176,7 +176,7 @@ try
                     $desired = @{ Example = "test" }
                     Test-SPDscParameterState -CurrentValues $current `
                         -Source 'SharePointDsc.Util' `
-                        -DesiredValues $desired | Should Be $false
+                        -DesiredValues $desired | Should -Be $false
                 }
 
                 It "Should return true when only a specified value matches, but other non-listed values do not" {
@@ -185,7 +185,7 @@ try
                     Test-SPDscParameterState -CurrentValues $current `
                         -Source 'SharePointDsc.Util' `
                         -DesiredValues $desired `
-                        -ValuesToCheck @("Example") | Should Be $true
+                        -ValuesToCheck @("Example") | Should -Be $true
                 }
 
                 It "Should return false when only specified values do not match, but other non-listed values do " {
@@ -194,7 +194,7 @@ try
                     Test-SPDscParameterState -CurrentValues $current `
                         -Source 'SharePointDsc.Util' `
                         -DesiredValues $desired `
-                        -ValuesToCheck @("SecondExample") | Should Be $false
+                        -ValuesToCheck @("SecondExample") | Should -Be $false
                 }
 
                 It "Should return false when an empty array is used in the current values" {
@@ -202,7 +202,7 @@ try
                     $desired = @{ Example = "test"; SecondExample = "false" }
                     Test-SPDscParameterState -CurrentValues $current `
                         -Source 'SharePointDsc.Util' `
-                        -DesiredValues $desired | Should Be $false
+                        -DesiredValues $desired | Should -Be $false
                 }
             }
 
@@ -273,7 +273,7 @@ try
                     $global:SPDscGroupsToReturn = @("DOMAIN\Group 1")
                     $global:SPDscSidsToReturn = @("example SID")
                     $global:SPDscSidCount = 0
-                    Convert-SPDscADGroupIDToName -GroupId (New-Guid) | Should Be "DOMAIN\Group 1"
+                    Convert-SPDscADGroupIDToName -GroupId (New-Guid) | Should -Be "DOMAIN\Group 1"
                 }
 
                 Mock -CommandName "New-Object" -ParameterFilter {
@@ -298,7 +298,7 @@ try
                     $global:SPDscGroupsToReturn = @("DOMAIN\Group 1")
                     $global:SPDscSidsToReturn = @("example SID")
                     $global:SPDscSidCount = 0
-                    { Convert-SPDscADGroupIDToName -GroupId (New-Guid) } | Should Throw
+                    { Convert-SPDscADGroupIDToName -GroupId (New-Guid) } | Should -Throw
                 }
             }
 
@@ -369,7 +369,7 @@ try
                     $global:SPDscGroupsToReturn = @("DOMAIN\Group 1")
                     $global:SPDscSidsToReturn = @("example SID")
                     $global:SPDscSidCount = 0
-                    Convert-SPDscADGroupIDToName -GroupId (New-Guid) | Should Not BeNullOrEmpty
+                    Convert-SPDscADGroupIDToName -GroupId (New-Guid) | Should -Not -BeNullOrEmpty
                 }
             }
         }

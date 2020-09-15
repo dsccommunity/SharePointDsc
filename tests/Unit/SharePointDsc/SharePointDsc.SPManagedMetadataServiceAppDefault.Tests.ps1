@@ -119,11 +119,11 @@ try
                 }
 
                 It "Should throw an error in the Get Method, when the Service Application Proxy Group does not exist" {
-                    { Get-TargetResource @testParams } | Should Throw "Specified ServiceAppProxyGroup $($testParams.ServiceAppProxyGroup) does not exist."
+                    { Get-TargetResource @testParams } | Should -Throw "Specified ServiceAppProxyGroup $($testParams.ServiceAppProxyGroup) does not exist."
                 }
 
                 It "Should throw an error in the Set Method, when the Service Application Proxy Group does not exist" {
-                    { Set-TargetResource @testParams } | Should Throw "Specified ServiceAppProxyGroup $($testParams.ServiceAppProxyGroup) does not exist."
+                    { Set-TargetResource @testParams } | Should -Throw "Specified ServiceAppProxyGroup $($testParams.ServiceAppProxyGroup) does not exist."
                 }
             }
 
@@ -141,11 +141,11 @@ try
                 }
 
                 It "Should throw an error in the Get Method, when no Service Application Proxy is available" {
-                    { Get-TargetResource @testParams } | Should Throw "There are no Service Application Proxies available in the proxy group"
+                    { Get-TargetResource @testParams } | Should -Throw "There are no Service Application Proxies available in the proxy group"
                 }
 
                 It "Should throw an error in the Set Method, when no Service Application Proxy is available" {
-                    { Set-TargetResource @testParams } | Should Throw "There are no Service Application Proxies available in the proxy group"
+                    { Set-TargetResource @testParams } | Should -Throw "There are no Service Application Proxies available in the proxy group"
                 }
 
                 Mock -CommandName Get-SPServiceApplicationProxyGroup -MockWith {
@@ -166,11 +166,11 @@ try
                 }
 
                 It "Should throw an error in the Get method, when no MMS Service Application Proxy is available" {
-                    { Get-TargetResource @testParams } | Should Throw "There are no Managed Metadata Service Application Proxies available in the proxy group"
+                    { Get-TargetResource @testParams } | Should -Throw "There are no Managed Metadata Service Application Proxies available in the proxy group"
                 }
 
                 It "Should throw an error in the Set method, when no MMS Service Application Proxy is available" {
-                    { Set-TargetResource @testParams } | Should Throw "There are no Managed Metadata Service Application Proxies available in the proxy group"
+                    { Set-TargetResource @testParams } | Should -Throw "There are no Managed Metadata Service Application Proxies available in the proxy group"
                 }
             }
 
@@ -213,13 +213,13 @@ try
                 }
 
                 It "Should return false when the test method is called" {
-                    Test-TargetResource @testParams | Should be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should return null, as the proxy is not configured properly" {
                     $result = Get-TargetResource @testParams
-                    $result.DefaultKeywordProxyName | Should Be $null
-                    $result.DefaultSiteCollectionProxyName | Should Be $null
+                    $result.DefaultKeywordProxyName | Should -Be $null
+                    $result.DefaultSiteCollectionProxyName | Should -Be $null
                 }
 
                 It "Should set the defaults" {
@@ -227,9 +227,9 @@ try
 
                     Set-TargetResource @testParams
 
-                    $managedMetadataServiceApplicationProxyMock.Properties["IsDefaultKeywordTaxonomy"] | Should Be $true
-                    $managedMetadataServiceApplicationProxyMock.Properties["IsDefaultSiteCollectionTaxonomy"] | Should Be $true
-                    $Global:SPDscServiceProxyUpdateCalled | Should Be $true
+                    $managedMetadataServiceApplicationProxyMock.Properties["IsDefaultKeywordTaxonomy"] | Should -Be $true
+                    $managedMetadataServiceApplicationProxyMock.Properties["IsDefaultSiteCollectionTaxonomy"] | Should -Be $true
+                    $Global:SPDscServiceProxyUpdateCalled | Should -Be $true
                 }
             }
 
@@ -241,13 +241,13 @@ try
                 }
 
                 It "Should return false when the test method is called" {
-                    Test-TargetResource @testParams | Should be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should return the default proxy" {
                     $result = Get-TargetResource @testParams
-                    $result.DefaultKeywordProxyName | Should Be "Managed Metadata Service Application Proxy Default"
-                    $result.DefaultSiteCollectionProxyName | Should Be "Managed Metadata Service Application Proxy Default"
+                    $result.DefaultKeywordProxyName | Should -Be "Managed Metadata Service Application Proxy Default"
+                    $result.DefaultSiteCollectionProxyName | Should -Be "Managed Metadata Service Application Proxy Default"
                 }
 
                 It "Should set the defaults" {
@@ -256,14 +256,14 @@ try
 
                     Set-TargetResource @testParams
 
-                    $managedMetadataServiceApplicationProxy.Properties["IsDefaultKeywordTaxonomy"] | Should Be $true
-                    $managedMetadataServiceApplicationProxy.Properties["IsDefaultSiteCollectionTaxonomy"] | Should Be $true
+                    $managedMetadataServiceApplicationProxy.Properties["IsDefaultKeywordTaxonomy"] | Should -Be $true
+                    $managedMetadataServiceApplicationProxy.Properties["IsDefaultSiteCollectionTaxonomy"] | Should -Be $true
 
-                    $managedMetadataServiceApplicationProxyDefault.Properties["IsDefaultKeywordTaxonomy"] | Should Be $false
-                    $managedMetadataServiceApplicationProxyDefault.Properties["IsDefaultSiteCollectionTaxonomy"] | Should Be $false
+                    $managedMetadataServiceApplicationProxyDefault.Properties["IsDefaultKeywordTaxonomy"] | Should -Be $false
+                    $managedMetadataServiceApplicationProxyDefault.Properties["IsDefaultSiteCollectionTaxonomy"] | Should -Be $false
 
-                    $Global:SPDscServiceProxyUpdateCalled | Should Be $true
-                    $Global:SPDscServiceProxyUpdateCalledDefault | Should Be $true
+                    $Global:SPDscServiceProxyUpdateCalled | Should -Be $true
+                    $Global:SPDscServiceProxyUpdateCalledDefault | Should -Be $true
                 }
             }
 
@@ -307,13 +307,13 @@ try
                 }
 
                 It "Should return false when the test method is called" {
-                    Test-TargetResource @testParams | Should be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should return null" {
                     $result = Get-TargetResource @testParams
-                    $result.DefaultKeywordProxyName | Should Be $null
-                    $result.DefaultSiteCollectionProxyName | Should Be $null
+                    $result.DefaultKeywordProxyName | Should -Be $null
+                    $result.DefaultSiteCollectionProxyName | Should -Be $null
                 }
             }
         }

@@ -18,38 +18,38 @@ Describe -Tags @("Site") "SPSite - Integration Tests" {
                 Import-DscResource -ModuleName SharePointDsc
                 node "localhost" {
                     SPSite PathSite {
-                        Name = "Path based site"
-                        Url = "http://$($env:COMPUTERNAME)"
-                        OwnerAlias = $Global:SPDscIntegrationCredPool.Setup.UserName
+                        Name                 = "Path based site"
+                        Url                  = "http://$($env:COMPUTERNAME)"
+                        OwnerAlias           = $Global:SPDscIntegrationCredPool.Setup.UserName
                         PsDscRunAsCredential = $Global:SPDscIntegrationCredPool.Setup
                     }
                 }
             }
             . $configName -ConfigurationData $global:SPDscIntegrationConfigData -OutputPath "TestDrive:\$configName"
             Start-DscConfiguration -Wait -Force -Path "TestDrive:\$configName" -ComputerName "localhost"
-            (Test-DscConfiguration -ComputerName "localhost" -ReferenceConfiguration "TestDrive:\$configName\localhost.mof").InDesiredState | Should be $true   
+            (Test-DscConfiguration -ComputerName "localhost" -ReferenceConfiguration "TestDrive:\$configName\localhost.mof").InDesiredState | Should -Be $true
         }
-        
+
         It "Is able to create a new host name site collection" {
             $configName = "SPSite_CreateNewHostNameSite"
             Configuration $configName {
                 Import-DscResource -ModuleName SharePointDsc
                 node "localhost" {
                     SPSite PathSite {
-                        Name = "Path based site"
-                        Url = "http://sharepointdsc.test.lab"
+                        Name                     = "Path based site"
+                        Url                      = "http://sharepointdsc.test.lab"
                         HostHeaderWebApplication = "http://$($env:COMPUTERNAME)"
-                        OwnerAlias = $Global:SPDscIntegrationCredPool.Setup.UserName
-                        PsDscRunAsCredential = $Global:SPDscIntegrationCredPool.Setup
+                        OwnerAlias               = $Global:SPDscIntegrationCredPool.Setup.UserName
+                        PsDscRunAsCredential     = $Global:SPDscIntegrationCredPool.Setup
                     }
                 }
             }
             . $configName -ConfigurationData $global:SPDscIntegrationConfigData -OutputPath "TestDrive:\$configName"
             Start-DscConfiguration -Wait -Force -Path "TestDrive:\$configName" -ComputerName "localhost"
-            (Test-DscConfiguration -ComputerName "localhost" -ReferenceConfiguration "TestDrive:\$configName\localhost.mof").InDesiredState | Should be $true      
+            (Test-DscConfiguration -ComputerName "localhost" -ReferenceConfiguration "TestDrive:\$configName\localhost.mof").InDesiredState | Should -Be $true
         }
     }
-    
+
     AfterEach {
         Remove-DscConfigurationDocument -Stage Current, Pending, Previous -Force -Confirm:$false
     }

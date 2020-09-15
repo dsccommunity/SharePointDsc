@@ -114,11 +114,11 @@ try
                 }
 
                 It "Should return absent from the Get method" {
-                    (Get-TargetResource @testParams).Ensure | Should Be "absent"
+                    (Get-TargetResource @testParams).Ensure | Should -Be "absent"
                 }
 
                 It "Should return false when the Test method is called" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should create a new service application in the set method" {
@@ -153,7 +153,7 @@ try
                 Mock -CommandName Get-SPServiceApplicationPool -MockWith { return $null }
 
                 It "fails to create a new service application in the set method because the specified application pool is missing" {
-                    { Set-TargetResource @testParams } | Should throw "Specified application pool does not exist"
+                    { Set-TargetResource @testParams } | Should -Throw "Specified application pool does not exist"
                 }
             }
 
@@ -190,11 +190,11 @@ try
                 }
 
                 It "Should return absent from the Get method" {
-                    (Get-TargetResource @testParams).Ensure | Should Be "Absent"
+                    (Get-TargetResource @testParams).Ensure | Should -Be "Absent"
                 }
 
                 It "Should return false when the Test method is called" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
             }
 
@@ -255,11 +255,11 @@ try
                 }
 
                 It "Should return values from the get method" {
-                    Get-TargetResource @testParams | Should Not BeNullOrEmpty
+                    Get-TargetResource @testParams | Should -Not -BeNullOrEmpty
                 }
 
                 It "Should return true when the Test method is called" {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
             }
 
@@ -330,7 +330,7 @@ try
                 }
 
                 It "Should return false when the Test method is called" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 $Global:SPDscSiteUseUpdated = $false
@@ -339,7 +339,7 @@ try
 
                     Assert-MockCalled Get-SPServiceApplicationPool
                     Assert-MockCalled Set-SPWordConversionServiceApplication
-                    $Global:SPDscSiteUseUpdated | Should Be $true
+                    $Global:SPDscSiteUseUpdated | Should -Be $true
                 }
             }
 
@@ -409,14 +409,14 @@ try
                 }
 
                 It "Should return false when the Test method is called" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 $Global:SPDscSiteUseUpdated = $false
                 It "Should call the update service app cmdlet from the set method" {
                     Set-TargetResource @testParams
                     Assert-MockCalled Get-SPServiceApplication
-                    $Global:SPDscSiteUseUpdated | Should Be $true
+                    $Global:SPDscSiteUseUpdated | Should -Be $true
                 }
             }
 
@@ -429,11 +429,11 @@ try
                 Mock -CommandName Get-SPServiceApplication -MockWith { return $null }
 
                 It "Should return absent from the Get method" {
-                    (Get-TargetResource @testParams).Ensure | Should Be "Absent"
+                    (Get-TargetResource @testParams).Ensure | Should -Be "Absent"
                 }
 
                 It "Should return true when the Test method is called" {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
             }
 
@@ -478,11 +478,11 @@ try
                 }
 
                 It "Should return present from the Get method" {
-                    (Get-TargetResource @testParams).Ensure | Should Be "Present"
+                    (Get-TargetResource @testParams).Ensure | Should -Be "Present"
                 }
 
                 It "Should return true when the Test method is called" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should call the remove service application cmdlet in the set method" {
@@ -499,15 +499,15 @@ try
                 }
 
                 It "Should return null from the get method" {
-                    { Get-TargetResource @testParams } | Should throw "You cannot use any of the parameters when Ensure is specified as Absent"
+                    { Get-TargetResource @testParams } | Should -Throw "You cannot use any of the parameters when Ensure is specified as Absent"
                 }
 
                 It "Should return false from the test method" {
-                    { Test-TargetResource @testParams } | Should throw "You cannot use any of the parameters when Ensure is specified as Absent"
+                    { Test-TargetResource @testParams } | Should -Throw "You cannot use any of the parameters when Ensure is specified as Absent"
                 }
 
                 It "Should throw an exception in the set method" {
-                    { Set-TargetResource @testParams } | Should throw "You cannot use any of the parameters when Ensure is specified as Absent"
+                    { Set-TargetResource @testParams } | Should -Throw "You cannot use any of the parameters when Ensure is specified as Absent"
                 }
             }
 
@@ -519,15 +519,15 @@ try
                 }
 
                 It "Should return null from the get method" {
-                    { Get-TargetResource @testParams } | Should throw "An Application Pool and Database Name are required to configure the Word Automation Service Application"
+                    { Get-TargetResource @testParams } | Should -Throw "An Application Pool and Database Name are required to configure the Word Automation Service Application"
                 }
 
                 It "Should return false from the test method" {
-                    { Test-TargetResource @testParams } | Should throw "An Application Pool and Database Name are required to configure the Word Automation Service Application"
+                    { Test-TargetResource @testParams } | Should -Throw "An Application Pool and Database Name are required to configure the Word Automation Service Application"
                 }
 
                 It "Should throw an exception in the set method" {
-                    { Set-TargetResource @testParams } | Should throw "An Application Pool and Database Name are required to configure the Word Automation Service Application"
+                    { Set-TargetResource @testParams } | Should -Throw "An Application Pool and Database Name are required to configure the Word Automation Service Application"
                 }
             }
         }

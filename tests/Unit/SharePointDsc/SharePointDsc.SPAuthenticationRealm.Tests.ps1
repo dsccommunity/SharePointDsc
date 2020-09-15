@@ -66,7 +66,7 @@ try
                 }
 
                 It "Should return true from the set method" {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
             }
 
@@ -79,13 +79,13 @@ try
                 }
 
                 It "Should return false from the set method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should modify the authentication realm in the set method" {
                     Set-TargetResource @testParams
                     Assert-MockCalled -CommandName Set-SPAuthenticationRealm -Times 1
-                    $Global:SPAuthenticationRealm | Should Be "14757a87-4d74-4323-83b9-fb1e77e8f22f"
+                    $Global:SPAuthenticationRealm | Should -Be "14757a87-4d74-4323-83b9-fb1e77e8f22f"
                 }
             }
         }

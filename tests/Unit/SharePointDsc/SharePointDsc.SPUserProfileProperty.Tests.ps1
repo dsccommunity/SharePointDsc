@@ -443,7 +443,7 @@ try
                     $Global:SPUPGetProfileSubtypeCalled = $false
                     $Global:SPUPGetPropertyByNameCalled = $false
                     $Global:SPUPSMappingItemCalled = $false
-                    (Get-TargetResource @testParamsNewProperty).Ensure | Should Be "Absent"
+                    (Get-TargetResource @testParamsNewProperty).Ensure | Should -Be "Absent"
                 }
             }
 
@@ -455,17 +455,17 @@ try
                     $Global:SPUPGetProfileSubtypeCalled = $false
                     $Global:SPUPGetPropertyByNameCalled = $false
                     $Global:SPUPSMappingItemCalled = $false
-                    (Get-TargetResource @testParamsNewProperty).Ensure | Should Be "Absent"
+                    (Get-TargetResource @testParamsNewProperty).Ensure | Should -Be "Absent"
                     Assert-MockCalled Get-SPServiceApplication -ParameterFilter { $Name -eq $testParamsNewProperty.UserProfileService }
-                    $Global:SPUPGetProfileSubtypeCalled | Should be $true
-                    $Global:SPUPGetPropertyByNameCalled | Should be $true
-                    $Global:SPUPSMappingItemCalled | Should be $false
+                    $Global:SPUPGetProfileSubtypeCalled | Should -Be $true
+                    $Global:SPUPGetPropertyByNameCalled | Should -Be $true
+                    $Global:SPUPSMappingItemCalled | Should -Be $false
                 }
 
                 It "Should return false when the Test method is called" {
                     $Global:SPUPGetPropertyByNameCalled = $false
-                    Test-TargetResource @testParamsNewProperty | Should Be $false
-                    $Global:SPUPGetPropertyByNameCalled | Should be $true
+                    Test-TargetResource @testParamsNewProperty | Should -Be $false
+                    $Global:SPUPGetPropertyByNameCalled | Should -Be $true
                 }
 
                 It "creates a new user profile property in the set method" {
@@ -473,9 +473,9 @@ try
 
                     $Global:SPUPSMappingItemCalled = $false
                     Set-TargetResource @testParamsNewProperty
-                    $Global:SPUPGetProfileSubtypeCalled | Should be $true
+                    $Global:SPUPGetProfileSubtypeCalled | Should -Be $true
 
-                    $Global:SPUPSMappingItemCalled | Should be $true
+                    $Global:SPUPSMappingItemCalled | Should -Be $true
 
                 }
 
@@ -503,17 +503,17 @@ try
                     $Global:SPUPGetProfileSubtypeCalled = $false
                     $Global:SPUPGetPropertyByNameCalled = $false
                     $Global:SPUPSMappingItemCalled = $false
-                    (Get-TargetResource @testParamsNewProperty).Ensure | Should Be "Absent"
+                    (Get-TargetResource @testParamsNewProperty).Ensure | Should -Be "Absent"
                     Assert-MockCalled Get-SPServiceApplication -ParameterFilter { $Name -eq $testParamsNewProperty.UserProfileService }
-                    $Global:SPUPGetProfileSubtypeCalled | Should be $true
-                    $Global:SPUPGetPropertyByNameCalled | Should be $true
-                    $Global:SPUPSMappingItemCalled | Should be $false
+                    $Global:SPUPGetProfileSubtypeCalled | Should -Be $true
+                    $Global:SPUPGetPropertyByNameCalled | Should -Be $true
+                    $Global:SPUPSMappingItemCalled | Should -Be $false
                 }
 
                 It "Should return false when the Test method is called" {
                     $Global:SPUPGetPropertyByNameCalled = $false
-                    Test-TargetResource @testParamsNewProperty | Should Be $false
-                    $Global:SPUPGetPropertyByNameCalled | Should be $true
+                    Test-TargetResource @testParamsNewProperty | Should -Be $false
+                    $Global:SPUPGetPropertyByNameCalled | Should -Be $true
                 }
 
                 It "attempts to create a new property but fails as connection isn't available" {
@@ -521,11 +521,11 @@ try
                     $Global:SPUPGetPropertyByNameCalled = $false
                     $Global:SPUPSMappingItemCalled = $false
 
-                    { Set-TargetResource @testParamsNewProperty } | should throw "connection not found"
+                    { Set-TargetResource @testParamsNewProperty } | Should -Throw "connection not found"
 
-                    $Global:SPUPGetProfileSubtypeCalled | Should be $true
-                    $Global:SPUPGetPropertyByNameCalled | Should be $true
-                    $Global:SPUPSMappingItemCalled | Should be $false
+                    $Global:SPUPGetProfileSubtypeCalled | Should -Be $true
+                    $Global:SPUPGetPropertyByNameCalled | Should -Be $true
+                    $Global:SPUPSMappingItemCalled | Should -Be $false
 
                 }
             }
@@ -538,27 +538,27 @@ try
                     $Global:SPUPGetPropertyByNameCalled = $false
                     $Global:SPUPGetPropertyByNameCalled = $false
                     $Global:SPUPSMappingItemCalled = $false
-                    (Get-TargetResource @testParamsNewProperty).Ensure | Should Be "Absent"
+                    (Get-TargetResource @testParamsNewProperty).Ensure | Should -Be "Absent"
                     Assert-MockCalled Get-SPServiceApplication -ParameterFilter { $Name -eq $testParamsNewProperty.UserProfileService }
-                    $Global:SPUPGetProfileSubtypeCalled | Should be $true
-                    $Global:SPUPGetPropertyByNameCalled | Should be $true
-                    $Global:SPUPSMappingItemCalled | Should be $false
+                    $Global:SPUPGetProfileSubtypeCalled | Should -Be $true
+                    $Global:SPUPGetPropertyByNameCalled | Should -Be $true
+                    $Global:SPUPSMappingItemCalled | Should -Be $false
                 }
 
                 It "Should return false when the Test method is called" {
                     $Global:SPUPGetPropertyByNameCalled = $false
-                    Test-TargetResource @testParamsNewProperty | Should Be $false
-                    $Global:SPUPGetPropertyByNameCalled | Should be $true
+                    Test-TargetResource @testParamsNewProperty | Should -Be $false
+                    $Global:SPUPGetPropertyByNameCalled | Should -Be $true
                 }
 
                 It "creates a new user profile property in the set method" {
                     $Global:SPUPGetProfileSubtypeCalled = $false
                     $Global:SPUPSMappingItemCalled = $false
 
-                    { Set-TargetResource @testParamsNewProperty } | should throw "Term Set $($testParamsNewProperty.TermSet) not found"
+                    { Set-TargetResource @testParamsNewProperty } | Should -Throw "Term Set $($testParamsNewProperty.TermSet) not found"
 
-                    $Global:SPUPGetProfileSubtypeCalled | Should be $true
-                    $Global:SPUPSMappingItemCalled | Should be $false
+                    $Global:SPUPGetProfileSubtypeCalled | Should -Be $true
+                    $Global:SPUPSMappingItemCalled | Should -Be $false
 
                 }
                 $testParamsNewProperty.TermSet = $termSet
@@ -567,7 +567,7 @@ try
             Context -Name "When required values are not all passed" {
                 $testParamsNewProperty.TermGroup = $null
                 It "Should throw error from Set method" {
-                    { Set-TargetResource @testParamsNewProperty } | Should throw "Term Group  not found"
+                    { Set-TargetResource @testParamsNewProperty } | Should -Throw "Term Group  not found"
                 }
             }
 
@@ -592,7 +592,7 @@ try
                 } -ParameterFilter { $TypeName -eq "Microsoft.Office.Server.UserProfiles.UserProfileConfigManager" }
 
                 It "Should return Ensure = Absent from the Get method" {
-                    (Get-TargetResource @testParamsNewProperty).Ensure | Should Be "Absent"
+                    (Get-TargetResource @testParamsNewProperty).Ensure | Should -Be "Absent"
                 }
             }
 
@@ -615,7 +615,7 @@ try
                 } -ParameterFilter { $TypeName -eq "Microsoft.Office.Server.UserProfiles.UserProfileConfigManager" }
 
                 It "Should return Ensure = Absent from the Get method" {
-                    (Get-TargetResource @testParamsNewProperty).Ensure | Should Be "Absent"
+                    (Get-TargetResource @testParamsNewProperty).Ensure | Should -Be "Absent"
                 }
             }
 
@@ -627,27 +627,27 @@ try
                     $Global:SPUPGetPropertyByNameCalled = $false
                     $Global:SPUPGetPropertyByNameCalled = $false
                     $Global:SPUPSMappingItemCalled = $false
-                    (Get-TargetResource @testParamsNewProperty).Ensure | Should Be "Absent"
+                    (Get-TargetResource @testParamsNewProperty).Ensure | Should -Be "Absent"
                     Assert-MockCalled Get-SPServiceApplication -ParameterFilter { $Name -eq $testParamsNewProperty.UserProfileService }
-                    $Global:SPUPGetProfileSubtypeCalled | Should be $true
-                    $Global:SPUPGetPropertyByNameCalled | Should be $true
-                    $Global:SPUPSMappingItemCalled | Should be $false
+                    $Global:SPUPGetProfileSubtypeCalled | Should -Be $true
+                    $Global:SPUPGetPropertyByNameCalled | Should -Be $true
+                    $Global:SPUPSMappingItemCalled | Should -Be $false
                 }
 
                 It "Should return false when the Test method is called" {
                     $Global:SPUPGetPropertyByNameCalled = $false
-                    Test-TargetResource @testParamsNewProperty | Should Be $false
-                    $Global:SPUPGetPropertyByNameCalled | Should be $true
+                    Test-TargetResource @testParamsNewProperty | Should -Be $false
+                    $Global:SPUPGetPropertyByNameCalled | Should -Be $true
                 }
 
                 It "creates a new user profile property in the set method" {
                     $Global:SPUPGetProfileSubtypeCalled = $false
                     $Global:SPUPSMappingItemCalled = $false
 
-                    { Set-TargetResource @testParamsNewProperty } | should throw "Term Group $($testParamsNewProperty.TermGroup) not found"
+                    { Set-TargetResource @testParamsNewProperty } | Should -Throw "Term Group $($testParamsNewProperty.TermGroup) not found"
 
-                    $Global:SPUPGetProfileSubtypeCalled | Should be $true
-                    $Global:SPUPSMappingItemCalled | Should be $false
+                    $Global:SPUPGetProfileSubtypeCalled | Should -Be $true
+                    $Global:SPUPSMappingItemCalled | Should -Be $false
 
                 }
                 $testParamsNewProperty.TermGroup = $termGroup
@@ -661,27 +661,27 @@ try
                     $Global:SPUPGetPropertyByNameCalled = $false
                     $Global:SPUPGetPropertyByNameCalled = $false
                     $Global:SPUPSMappingItemCalled = $false
-                    (Get-TargetResource @testParamsNewProperty).Ensure | Should Be "Absent"
+                    (Get-TargetResource @testParamsNewProperty).Ensure | Should -Be "Absent"
                     Assert-MockCalled Get-SPServiceApplication -ParameterFilter { $Name -eq $testParamsNewProperty.UserProfileService }
-                    $Global:SPUPGetProfileSubtypeCalled | Should be $true
-                    $Global:SPUPGetPropertyByNameCalled | Should be $true
-                    $Global:SPUPSMappingItemCalled | Should be $false
+                    $Global:SPUPGetProfileSubtypeCalled | Should -Be $true
+                    $Global:SPUPGetPropertyByNameCalled | Should -Be $true
+                    $Global:SPUPSMappingItemCalled | Should -Be $false
                 }
 
                 It "Should return false when the Test method is called" {
                     $Global:SPUPGetPropertyByNameCalled = $false
-                    Test-TargetResource @testParamsNewProperty | Should Be $false
-                    $Global:SPUPGetPropertyByNameCalled | Should be $true
+                    Test-TargetResource @testParamsNewProperty | Should -Be $false
+                    $Global:SPUPGetPropertyByNameCalled | Should -Be $true
                 }
 
                 It "creates a new user profile property in the set method" {
                     $Global:SPUPGetProfileSubtypeCalled = $false
                     $Global:SPUPSMappingItemCalled = $false
 
-                    { Set-TargetResource @testParamsNewProperty } | should throw "Term Store $($testParamsNewProperty.TermStore) not found"
+                    { Set-TargetResource @testParamsNewProperty } | Should -Throw "Term Store $($testParamsNewProperty.TermStore) not found"
 
-                    $Global:SPUPGetProfileSubtypeCalled | Should be $true
-                    $Global:SPUPSMappingItemCalled | Should be $false
+                    $Global:SPUPGetProfileSubtypeCalled | Should -Be $true
+                    $Global:SPUPSMappingItemCalled | Should -Be $false
 
                 }
                 $testParamsNewProperty.TermStore = $termStore
@@ -703,25 +703,25 @@ try
                     $Global:SPUPGetProfileSubtypeCalled = $false
                     $Global:SPUPGetPropertyByNameCalled = $false
                     $Global:SPUPSMappingItemCalled = $false
-                    (Get-TargetResource @testParamsNewProperty).Ensure | Should Be "Present"
+                    (Get-TargetResource @testParamsNewProperty).Ensure | Should -Be "Present"
                     Assert-MockCalled Get-SPServiceApplication -ParameterFilter { $Name -eq $testParamsUpdateProperty.UserProfileService }
-                    $Global:SPUPGetProfileSubtypeCalled | Should be $true
-                    $Global:SPUPGetPropertyByNameCalled | Should be $true
-                    $Global:SPUPSMappingItemCalled | Should be $true
+                    $Global:SPUPGetProfileSubtypeCalled | Should -Be $true
+                    $Global:SPUPGetPropertyByNameCalled | Should -Be $true
+                    $Global:SPUPSMappingItemCalled | Should -Be $true
                 }
 
                 It "Should return false when the Test method is called" {
                     $Global:SPUPGetPropertyByNameCalled = $false
-                    Test-TargetResource @testParamsUpdateProperty | Should Be $false
-                    $Global:SPUPGetPropertyByNameCalled | Should be $true
+                    Test-TargetResource @testParamsUpdateProperty | Should -Be $false
+                    $Global:SPUPGetPropertyByNameCalled | Should -Be $true
                 }
 
                 It "updates an user profile property in the set method" {
                     $Global:SPUPGetProfileSubtypeCalled = $false
                     $Global:SPUPSMappingItemCalled = $false
                     Set-TargetResource @testParamsUpdateProperty
-                    $Global:SPUPGetProfileSubtypeCalled | Should be $true
-                    $Global:SPUPSMappingItemCalled | Should be $true
+                    $Global:SPUPGetProfileSubtypeCalled | Should -Be $true
+                    $Global:SPUPSMappingItemCalled | Should -Be $true
                 }
 
                 It "Should throw an error if the MappingDirection is set to Export" {
@@ -730,7 +730,7 @@ try
                     $testParamsExport.PropertyMappings[0].Direction = "Export"
                     $propertyMappingItem.IsImport = $true
 
-                    { Set-TargetResource @testParamsExport } | Should throw "not implemented"
+                    { Set-TargetResource @testParamsExport } | Should -Throw "not implemented"
                     $connection.Type = "ActiveDirectory"
                 }
             }
@@ -753,17 +753,17 @@ try
                     $Global:SPUPGetProfileSubtypeCalled = $false
                     $Global:SPUPGetPropertyByNameCalled = $false
                     $Global:SPUPSMappingItemCalled = $false
-                    (Get-TargetResource @testParamsNewProperty).Ensure | Should Be "Present"
+                    (Get-TargetResource @testParamsNewProperty).Ensure | Should -Be "Present"
                     Assert-MockCalled Get-SPServiceApplication -ParameterFilter { $Name -eq $testParamsUpdateProperty.UserProfileService }
-                    $Global:SPUPGetProfileSubtypeCalled | Should be $true
-                    $Global:SPUPGetPropertyByNameCalled | Should be $true
-                    $Global:SPUPSMappingItemCalled | Should be $true
+                    $Global:SPUPGetProfileSubtypeCalled | Should -Be $true
+                    $Global:SPUPGetPropertyByNameCalled | Should -Be $true
+                    $Global:SPUPSMappingItemCalled | Should -Be $true
                 }
 
                 It "Should return false when the Test method is called" {
                     $Global:SPUPGetPropertyByNameCalled = $false
-                    Test-TargetResource @testParamsUpdateProperty | Should Be $false
-                    $Global:SPUPGetPropertyByNameCalled | Should be $true
+                    Test-TargetResource @testParamsUpdateProperty | Should -Be $false
+                    $Global:SPUPGetPropertyByNameCalled | Should -Be $true
                 }
 
                 It "attempts to update an user profile property in the set method" {
@@ -771,11 +771,11 @@ try
                     $Global:SPUPGetPropertyByNameCalled = $false
                     $Global:SPUPSMappingItemCalled = $false
 
-                    { Set-TargetResource @testParamsUpdateProperty } | should throw "Can't change property type. Current Type"
+                    { Set-TargetResource @testParamsUpdateProperty } | Should -Throw "Can't change property type. Current Type"
 
-                    $Global:SPUPGetProfileSubtypeCalled | Should be $true
-                    $Global:SPUPGetPropertyByNameCalled | Should be $true
-                    $Global:SPUPSMappingItemCalled | Should be $false
+                    $Global:SPUPGetProfileSubtypeCalled | Should -Be $true
+                    $Global:SPUPGetPropertyByNameCalled | Should -Be $true
+                    $Global:SPUPSMappingItemCalled | Should -Be $false
                 }
                 $testParamsUpdateProperty.Type = $currentType
             }
@@ -799,17 +799,17 @@ try
                     $Global:SPUPGetProfileSubtypeCalled = $false
                     $Global:SPUPGetPropertyByNameCalled = $false
                     $Global:SPUPSMappingItemCalled = $false
-                    (Get-TargetResource @testParamsNewProperty).Ensure | Should Be "Present"
+                    (Get-TargetResource @testParamsNewProperty).Ensure | Should -Be "Present"
                     Assert-MockCalled Get-SPServiceApplication -ParameterFilter { $Name -eq $testParamsUpdateProperty.UserProfileService }
-                    $Global:SPUPGetProfileSubtypeCalled | Should be $true
-                    $Global:SPUPGetPropertyByNameCalled | Should be $true
-                    $Global:SPUPSMappingItemCalled | Should be $true
+                    $Global:SPUPGetProfileSubtypeCalled | Should -Be $true
+                    $Global:SPUPGetPropertyByNameCalled | Should -Be $true
+                    $Global:SPUPSMappingItemCalled | Should -Be $true
                 }
 
                 It "Should return false when the Test method is called" {
                     $Global:SPUPGetPropertyByNameCalled = $false
-                    Test-TargetResource @testParamsUpdateProperty | Should Be $false
-                    $Global:SPUPGetPropertyByNameCalled | Should be $true
+                    Test-TargetResource @testParamsUpdateProperty | Should -Be $false
+                    $Global:SPUPGetPropertyByNameCalled | Should -Be $true
                 }
 
                 It "updates an user profile property in the set method" {
@@ -819,9 +819,9 @@ try
 
                     Set-TargetResource @testParamsUpdateProperty
 
-                    $Global:SPUPGetProfileSubtypeCalled | Should be $true
-                    $Global:SPUPGetPropertyByNameCalled | Should be $true
-                    $Global:SPUPSMappingItemCalled | Should be $true
+                    $Global:SPUPGetProfileSubtypeCalled | Should -Be $true
+                    $Global:SPUPGetPropertyByNameCalled | Should -Be $true
+                    $Global:SPUPSMappingItemCalled | Should -Be $true
                 }
             }
 
@@ -842,17 +842,17 @@ try
                     $Global:SPUPGetProfileSubtypeCalled = $false
                     $Global:SPUPGetPropertyByNameCalled = $false
                     $Global:SPUPSMappingItemCalled = $false
-                    (Get-TargetResource @testParamsNewProperty).Ensure | Should Be "Present"
+                    (Get-TargetResource @testParamsNewProperty).Ensure | Should -Be "Present"
                     Assert-MockCalled Get-SPServiceApplication -ParameterFilter { $Name -eq $testParamsUpdateProperty.UserProfileService }
-                    $Global:SPUPGetProfileSubtypeCalled | Should be $true
-                    $Global:SPUPGetPropertyByNameCalled | Should be $true
-                    $Global:SPUPSMappingItemCalled | Should be $true
+                    $Global:SPUPGetProfileSubtypeCalled | Should -Be $true
+                    $Global:SPUPGetPropertyByNameCalled | Should -Be $true
+                    $Global:SPUPSMappingItemCalled | Should -Be $true
                 }
 
                 It "Should return false when the Test method is called" {
                     $Global:SPUPGetPropertyByNameCalled = $false
-                    Test-TargetResource @testParamsUpdateProperty | Should Be $false
-                    $Global:SPUPGetPropertyByNameCalled | Should be $true
+                    Test-TargetResource @testParamsUpdateProperty | Should -Be $false
+                    $Global:SPUPGetPropertyByNameCalled | Should -Be $true
                 }
 
                 It "updates an user profile property in the set method" {
@@ -862,9 +862,9 @@ try
 
                     Set-TargetResource @testParamsUpdateProperty
 
-                    $Global:SPUPGetProfileSubtypeCalled | Should be $true
-                    $Global:SPUPGetPropertyByNameCalled | Should be $true
-                    $Global:SPUPSMappingItemCalled | Should be $true
+                    $Global:SPUPGetProfileSubtypeCalled | Should -Be $true
+                    $Global:SPUPGetPropertyByNameCalled | Should -Be $true
+                    $Global:SPUPSMappingItemCalled | Should -Be $true
                 }
             }
 
@@ -890,10 +890,10 @@ try
 
                     Set-TargetResource @testParamsUpdateProperty
 
-                    $Global:SPUPGetProfileSubtypeCalled | Should be $true
-                    $Global:SPUPGetPropertyByNameCalled | Should be $true
-                    $Global:SPUPSMappingItemCalled | Should be $false
-                    $Global:SPUPCoreRemovePropertyByNameCalled | Should be $true
+                    $Global:SPUPGetProfileSubtypeCalled | Should -Be $true
+                    $Global:SPUPGetPropertyByNameCalled | Should -Be $true
+                    $Global:SPUPSMappingItemCalled | Should -Be $false
+                    $Global:SPUPCoreRemovePropertyByNameCalled | Should -Be $true
                 }
             }
 
@@ -1003,7 +1003,7 @@ try
                     $testParamsUpdateProperty.Ensure = "Present"
                     $testParamsUpdateProperty.PropertyMappings[0].Direction = "Import"
                     $testresults = Test-TargetResource @testParamsUpdateProperty
-                    $testresults | Should be $true
+                    $testresults | Should -Be $true
                 }
             }
         }

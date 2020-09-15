@@ -56,15 +56,15 @@ try
                 {
                     Context -Name "All methods throw exceptions as Project Server support in SharePointDsc is only for 2016" -Fixture {
                         It "Should throw on the get method" {
-                            { Get-TargetResource @testParams } | Should Throw
+                            { Get-TargetResource @testParams } | Should -Throw
                         }
 
                         It "Should throw on the test method" {
-                            { Test-TargetResource @testParams } | Should Throw
+                            { Test-TargetResource @testParams } | Should -Throw
                         }
 
                         It "Should throw on the set method" {
-                            { Set-TargetResource @testParams } | Should Throw
+                            { Set-TargetResource @testParams } | Should -Throw
                         }
                     }
                 }
@@ -165,12 +165,12 @@ try
 
                         It "should return absent from the get method" {
                             $global:SPDscSidCount = 0
-                            (Get-TargetResource @testParams).Ensure | Should Be "Absent"
+                            (Get-TargetResource @testParams).Ensure | Should -Be "Absent"
                         }
 
                         It "should return false from the test method" {
                             $global:SPDscSidCount = 0
-                            Test-TargetResource @testParams | Should Be $false
+                            Test-TargetResource @testParams | Should -Be $false
                         }
 
                         It "should make the updates in the set method" {
@@ -214,12 +214,12 @@ try
 
                         It "should return present from the get method" {
                             $global:SPDscSidCount = 0
-                            (Get-TargetResource @testParams).Ensure | Should Be "Present"
+                            (Get-TargetResource @testParams).Ensure | Should -Be "Present"
                         }
 
                         It "should return false from the test method" {
                             $global:SPDscSidCount = 0
-                            Test-TargetResource @testParams | Should Be $false
+                            Test-TargetResource @testParams | Should -Be $false
                         }
 
                         It "should make the updates in the set method" {
@@ -262,12 +262,12 @@ try
 
                         It "should return present from the get method" {
                             $global:SPDscSidCount = 0
-                            (Get-TargetResource @testParams).Ensure | Should Be "Present"
+                            (Get-TargetResource @testParams).Ensure | Should -Be "Present"
                         }
 
                         It "should return true from the test method" {
                             $global:SPDscSidCount = 0
-                            Test-TargetResource @testParams | Should Be $true
+                            Test-TargetResource @testParams | Should -Be $true
                         }
                     }
 
@@ -303,12 +303,12 @@ try
 
                         It "should return present from the get method" {
                             $global:SPDscSidCount = 0
-                            (Get-TargetResource @testParams).Ensure | Should Be "Present"
+                            (Get-TargetResource @testParams).Ensure | Should -Be "Present"
                         }
 
                         It "should return false from the test method" {
                             $global:SPDscSidCount = 0
-                            Test-TargetResource @testParams | Should Be $false
+                            Test-TargetResource @testParams | Should -Be $false
                         }
 
                         It "should make the updates in the set method" {
@@ -350,12 +350,12 @@ try
 
                         It "should return absent from the get method" {
                             $global:SPDscSidCount = 0
-                            (Get-TargetResource @testParams).Ensure | Should Be "Absent"
+                            (Get-TargetResource @testParams).Ensure | Should -Be "Absent"
                         }
 
                         It "should return true from the test method" {
                             $global:SPDscSidCount = 0
-                            Test-TargetResource @testParams | Should Be $true
+                            Test-TargetResource @testParams | Should -Be $true
                         }
                     }
 
@@ -395,19 +395,19 @@ try
 
                         It "should return present from the get method" {
                             $global:SPDscSidCount = 0
-                            (Get-TargetResource @testParams).Ensure | Should Be "Present"
+                            (Get-TargetResource @testParams).Ensure | Should -Be "Present"
                         }
 
                         It "should return true from the test method" {
                             $global:SPDscSidCount = 0
-                            Test-TargetResource @testParams | Should Be $false
+                            Test-TargetResource @testParams | Should -Be $false
                         }
 
                         It "should update the AutoReactivateUsers property during the set method" {
                             $global:SPDscAutoReactivateUsersCalled = $false
                             $global:SPDscSidCount = 0
                             Set-TargetResource @testParams
-                            $global:SPDscAutoReactivateUsersCalled | Should Be $true
+                            $global:SPDscAutoReactivateUsersCalled | Should -Be $true
                         }
                     }
 
@@ -447,12 +447,12 @@ try
 
                         It "should return present from the get method" {
                             $global:SPDscSidCount = 0
-                            (Get-TargetResource @testParams).Ensure | Should Be "Present"
+                            (Get-TargetResource @testParams).Ensure | Should -Be "Present"
                         }
 
                         It "should return true from the test method" {
                             $global:SPDscSidCount = 0
-                            Test-TargetResource @testParams | Should Be $true
+                            Test-TargetResource @testParams | Should -Be $true
                         }
                     }
                 }

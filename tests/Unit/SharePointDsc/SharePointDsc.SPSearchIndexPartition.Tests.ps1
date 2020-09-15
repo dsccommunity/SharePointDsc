@@ -133,11 +133,11 @@ try
 
                 It "Should return an empty server list from the get method" {
                     $result = Get-TargetResource @testParams
-                    $result.Servers | Should BeNullOrEmpty
+                    $result.Servers | Should -BeNullOrEmpty
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should create the search index in the set method" {
@@ -160,11 +160,11 @@ try
 
                 It "Should return present from the get method" {
                     $result = Get-TargetResource @testParams
-                    $result.Servers | Should Not BeNullOrEmpty
+                    $result.Servers | Should -Not -BeNullOrEmpty
                 }
 
                 It "Should return true from the test method" {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
             }
 
@@ -181,7 +181,7 @@ try
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should remove the search index in the set method" {

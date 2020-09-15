@@ -127,15 +127,15 @@ namespace Microsoft.SharePoint.Administration {
                 "Supply an argument that is less than or equal to 65535 and then try the command again."
 
                 It 'Should throw parameter validation exception in the get method' {
-                    { Get-TargetResource @testParams } | Should Throw $expectedException
+                    { Get-TargetResource @testParams } | Should -Throw $expectedException
                 }
 
                 It 'Should throw parameter validation exception in the test method' {
-                    { Test-TargetResource @testParams } | Should Throw $expectedException
+                    { Test-TargetResource @testParams } | Should -Throw $expectedException
                 }
 
                 It 'Should throw parameter validation exception in the Set method' {
-                    { Set-TargetResource @testParams } | Should Throw $expectedException
+                    { Set-TargetResource @testParams } | Should -Throw $expectedException
                 }
             }
 
@@ -154,11 +154,11 @@ namespace Microsoft.SharePoint.Administration {
                 }
 
                 It "Should throw exception in the test method" {
-                    { Test-TargetResource @testParams } | Should Throw "CentralAdministrationUrl is not a valid URI. It should include the scheme (http/https) and address."
+                    { Test-TargetResource @testParams } | Should -Throw "CentralAdministrationUrl is not a valid URI. It should include the scheme (http/https) and address."
                 }
 
                 It "Should throw exception in the set method" {
-                    { Set-TargetResource @testParams } | Should Throw "CentralAdministrationUrl is not a valid URI. It should include the scheme (http/https) and address."
+                    { Set-TargetResource @testParams } | Should -Throw "CentralAdministrationUrl is not a valid URI. It should include the scheme (http/https) and address."
                 }
             }
 
@@ -177,13 +177,13 @@ namespace Microsoft.SharePoint.Administration {
                 }
 
                 It "Should throw exception in the test method" {
-                    { Test-TargetResource @testParams } | Should Throw "CentralAdministrationPort does not match port number specified in CentralAdministrationUrl. " +
-                    "Either make the values match or don't specify CentralAdministrationPort."
+                    { Test-TargetResource @testParams } | Should -Throw ("CentralAdministrationPort does not match port number specified in CentralAdministrationUrl. " +
+                        "Either make the values match or don't specify CentralAdministrationPort.")
                 }
 
                 It "Should throw exception in the set method" {
-                    { Set-TargetResource @testParams } | Should Throw "CentralAdministrationPort does not match port number specified in CentralAdministrationUrl. " +
-                    "Either make the values match or don't specify CentralAdministrationPort."
+                    { Set-TargetResource @testParams } | Should -Throw ("CentralAdministrationPort does not match port number specified in CentralAdministrationUrl. " +
+                        "Either make the values match or don't specify CentralAdministrationPort.")
                 }
             }
 
@@ -221,11 +221,11 @@ namespace Microsoft.SharePoint.Administration {
                 }
 
                 It "Should return absent from the get method" {
-                    (Get-TargetResource @testParams).Ensure | Should Be "Absent"
+                    (Get-TargetResource @testParams).Ensure | Should -Be "Absent"
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should create the config database in the set method" {
@@ -269,11 +269,11 @@ namespace Microsoft.SharePoint.Administration {
                 }
 
                 It "Should return absent from the get method" {
-                    (Get-TargetResource @testParams).Ensure | Should Be "Absent"
+                    (Get-TargetResource @testParams).Ensure | Should -Be "Absent"
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should join the config database in the set method as it wont be running central admin" {
@@ -360,11 +360,11 @@ namespace Microsoft.SharePoint.Administration {
                 }
 
                 It "Should return absent from the get method" {
-                    (Get-TargetResource @testParams).Ensure | Should Be "Absent"
+                    (Get-TargetResource @testParams).Ensure | Should -Be "Absent"
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 $global:SPDscCentralAdminCheckDone = $false
@@ -439,11 +439,11 @@ namespace Microsoft.SharePoint.Administration {
                 }
 
                 It "Should return absent from the get method" {
-                    (Get-TargetResource @testParams).Ensure | Should Be "Absent"
+                    (Get-TargetResource @testParams).Ensure | Should -Be "Absent"
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 $global:SPDscCentralAdminCheckDone = $false
@@ -500,11 +500,11 @@ namespace Microsoft.SharePoint.Administration {
                 }
 
                 It "Should return absent from the get method" {
-                    (Get-TargetResource @testParams).Ensure | Should Be "Absent"
+                    (Get-TargetResource @testParams).Ensure | Should -Be "Absent"
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 $global:SPDscConfigLockTriggered = $false
@@ -614,7 +614,7 @@ namespace Microsoft.SharePoint.Administration {
 
                 $global:SPDscSIRunCount = 0
                 It "Should return false from the get method" {
-                    (Get-TargetResource @testParams).RunCentralAdmin | Should Be $false
+                    (Get-TargetResource @testParams).RunCentralAdmin | Should -Be $false
                 }
 
                 $global:SPDscSIRunCount = 0
@@ -625,7 +625,7 @@ namespace Microsoft.SharePoint.Administration {
 
                 $global:SPDscCentralAdminCheckDone = $false
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
             }
 
@@ -806,7 +806,7 @@ namespace Microsoft.SharePoint.Administration {
                 Mock -CommandName Set-SPCentralAdministration -MockWith { }
 
                 It "Should return 9999 as CA Port from the get method" {
-                    (Get-TargetResource @testParams).CentralAdministrationPort | Should Be 9999
+                    (Get-TargetResource @testParams).CentralAdministrationPort | Should -Be 9999
                 }
 
                 It "Should update the central administration port" {
@@ -815,7 +815,7 @@ namespace Microsoft.SharePoint.Administration {
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
             }
 
@@ -940,10 +940,10 @@ namespace Microsoft.SharePoint.Administration {
                 $global:SPDscSIRunCount = 2
                 It "Should return current values for the Get method" {
                     $result = Get-TargetResource @testParams
-                    $result.RunCentralAdmin | Should Be $true
-                    $result.CentralAdministrationUrl | Should Be $testParams.CentralAdministrationUrl
-                    $result.CentralAdministrationPort | Should Be $testParams.CentralAdministrationPort
-                    $result.CentralAdministrationAuth | Should Be "NTLM"
+                    $result.RunCentralAdmin | Should -Be $true
+                    $result.CentralAdministrationUrl | Should -Be $testParams.CentralAdministrationUrl
+                    $result.CentralAdministrationPort | Should -Be $testParams.CentralAdministrationPort
+                    $result.CentralAdministrationAuth | Should -Be "NTLM"
                 }
 
                 $global:SPDscSIRunCount = 2
@@ -954,7 +954,7 @@ namespace Microsoft.SharePoint.Administration {
 
                 $global:SPDscSIRunCount = 2
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
             }
 
@@ -1079,10 +1079,10 @@ namespace Microsoft.SharePoint.Administration {
                 $global:SPDscSIRunCount = 2
                 It "Should return current values for the Get method" {
                     $result = Get-TargetResource @testParams
-                    $result.RunCentralAdmin | Should Be $true
-                    $result.CentralAdministrationUrl | Should Be $testParams.CentralAdministrationUrl
-                    $result.CentralAdministrationPort | Should Be $testParams.CentralAdministrationPort
-                    $result.CentralAdministrationAuth | Should Be "Kerberos"
+                    $result.RunCentralAdmin | Should -Be $true
+                    $result.CentralAdministrationUrl | Should -Be $testParams.CentralAdministrationUrl
+                    $result.CentralAdministrationPort | Should -Be $testParams.CentralAdministrationPort
+                    $result.CentralAdministrationAuth | Should -Be "Kerberos"
                 }
 
                 $global:SPDscSIRunCount = 2
@@ -1093,7 +1093,7 @@ namespace Microsoft.SharePoint.Administration {
 
                 $global:SPDscSIRunCount = 2
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
             }
 
@@ -1221,9 +1221,9 @@ namespace Microsoft.SharePoint.Administration {
                 $global:SPDscSIRunCount = 0
                 It "Should return current values for the Get method" {
                     $result = Get-TargetResource @testParams
-                    $result.RunCentralAdmin | Should Be $false
-                    $result.CentralAdministrationUrl | Should Be $testParams.CentralAdministrationUrl
-                    $result.CentralAdministrationPort | Should Be $testParams.CentralAdministrationPort
+                    $result.RunCentralAdmin | Should -Be $false
+                    $result.CentralAdministrationUrl | Should -Be $testParams.CentralAdministrationUrl
+                    $result.CentralAdministrationPort | Should -Be $testParams.CentralAdministrationPort
                 }
 
                 $global:SPDscSIRunCount = 0
@@ -1234,7 +1234,7 @@ namespace Microsoft.SharePoint.Administration {
 
                 $global:SPDscCentralAdminCheckDone = $false
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
             }
 
@@ -1362,9 +1362,9 @@ namespace Microsoft.SharePoint.Administration {
                 $global:SPDscSIRunCount = 0
                 It "Should return current values for the Get method" {
                     $result = Get-TargetResource @testParams
-                    $result.RunCentralAdmin | Should Be $false
-                    $result.CentralAdministrationUrl | Should Be $testParams.CentralAdministrationUrl
-                    $result.CentralAdministrationPort | Should Be $testParams.CentralAdministrationPort
+                    $result.RunCentralAdmin | Should -Be $false
+                    $result.CentralAdministrationUrl | Should -Be $testParams.CentralAdministrationUrl
+                    $result.CentralAdministrationPort | Should -Be $testParams.CentralAdministrationPort
                 }
 
                 $global:SPDscSIRunCount = 0
@@ -1375,7 +1375,7 @@ namespace Microsoft.SharePoint.Administration {
 
                 $global:SPDscCentralAdminCheckDone = $false
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
             }
 
@@ -1439,11 +1439,11 @@ namespace Microsoft.SharePoint.Administration {
                 }
 
                 It "Should return absent from the get method" {
-                    (Get-TargetResource @testParams).Ensure | Should Be "Absent"
+                    (Get-TargetResource @testParams).Ensure | Should -Be "Absent"
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 $global:SPDscCentralAdminCheckDone = $false
@@ -1515,11 +1515,11 @@ namespace Microsoft.SharePoint.Administration {
                 }
 
                 It "Should return absent from the get method" {
-                    (Get-TargetResource @testParams).Ensure | Should Be "Absent"
+                    (Get-TargetResource @testParams).Ensure | Should -Be "Absent"
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 $global:SPDscCentralAdminCheckDone = $false
@@ -1654,9 +1654,9 @@ namespace Microsoft.SharePoint.Administration {
                 $global:SPDscSIRunCount = 0
                 It "Should return current values for the Get method" {
                     $result = Get-TargetResource @testParams
-                    $result.RunCentralAdmin | Should Be $false
-                    $result.CentralAdministrationUrl | Should Be $testParams.CentralAdministrationUrl
-                    $result.CentralAdministrationPort | Should Be $testParams.CentralAdministrationPort
+                    $result.RunCentralAdmin | Should -Be $false
+                    $result.CentralAdministrationUrl | Should -Be $testParams.CentralAdministrationUrl
+                    $result.CentralAdministrationPort | Should -Be $testParams.CentralAdministrationPort
                 }
 
                 $global:SPDscSIRunCount = 0
@@ -1667,7 +1667,7 @@ namespace Microsoft.SharePoint.Administration {
 
                 $global:SPDscCentralAdminCheckDone = $false
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
             }
 
@@ -1759,8 +1759,8 @@ namespace Microsoft.SharePoint.Administration {
                 $global:SPDscSIRunCount = 0
                 It "Should return present from the get method" {
                     $result = Get-TargetResource @testParams
-                    $result.Ensure | Should Be "Present"
-                    $result.RunCentralAdmin | Should Be $true
+                    $result.Ensure | Should -Be "Present"
+                    $result.RunCentralAdmin | Should -Be $true
                 }
 
                 $global:SPDscSIRunCount = 0
@@ -1771,7 +1771,7 @@ namespace Microsoft.SharePoint.Administration {
 
                 $global:SPDscSIRunCount = 0
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
             }
 
@@ -1856,17 +1856,17 @@ namespace Microsoft.SharePoint.Administration {
                 }
 
                 It "Should return present from the get method" {
-                    (Get-TargetResource @testParams).DeveloperDashboard | Should Be "Off"
+                    (Get-TargetResource @testParams).DeveloperDashboard | Should -Be "Off"
                 }
 
                 $Global:SPDscDevDashUpdated = $false
                 It "Should update DevDashboard settings in the set method" {
                     Set-TargetResource @testParams
-                    $Global:SPDscDevDashUpdated | Should Be $true
+                    $Global:SPDscDevDashUpdated | Should -Be $true
                 }
 
                 It "Should return true from the test method" {
-                    Test-TargetResource @testParams | Should be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
             }
 
@@ -1950,11 +1950,11 @@ namespace Microsoft.SharePoint.Administration {
                 }
 
                 It "Should return present from the get method" {
-                    (Get-TargetResource @testParams).Ensure | Should Be "Present"
+                    (Get-TargetResource @testParams).Ensure | Should -Be "Present"
                 }
 
                 It "Should return true from the test method" {
-                    Test-TargetResource @testParams | Should be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
             }
 
@@ -1971,15 +1971,15 @@ namespace Microsoft.SharePoint.Administration {
                 }
 
                 It "Should throw an exception from the get method" {
-                    { Get-TargetResource @testParams } | Should Throw
+                    { Get-TargetResource @testParams } | Should -Throw
                 }
 
                 It "Should throw an exception from the test method" {
-                    { Test-TargetResource @testParams } | Should Throw
+                    { Test-TargetResource @testParams } | Should -Throw
                 }
 
                 It "Should throw an exception from the set method" {
-                    { Set-TargetResource @testParams } | Should Throw
+                    { Set-TargetResource @testParams } | Should -Throw
                 }
             }
 
@@ -2001,15 +2001,15 @@ namespace Microsoft.SharePoint.Administration {
                     }
 
                     It "Should throw if server role is used in the get method" {
-                        { Get-TargetResource @testParams } | Should Throw
+                        { Get-TargetResource @testParams } | Should -Throw
                     }
 
                     It "Should throw if server role is used in the test method" {
-                        { Test-TargetResource @testParams } | Should Throw
+                        { Test-TargetResource @testParams } | Should -Throw
                     }
 
                     It "Should throw if server role is used in the set method" {
-                        { Set-TargetResource @testParams } | Should Throw
+                        { Set-TargetResource @testParams } | Should -Throw
                     }
                 }
 
@@ -2082,7 +2082,7 @@ namespace Microsoft.SharePoint.Administration {
                     Mock -CommandName Get-SPDscInstalledProductVersion -MockWith { return @{ FileMajorPart = 15 } }
 
                     It "Should return WebFrontEnd from the get method" {
-                        (Get-TargetResource @testParams).ServerRole | Should Be $null
+                        (Get-TargetResource @testParams).ServerRole | Should -Be $null
                     }
                 }
             }
@@ -2112,15 +2112,15 @@ namespace Microsoft.SharePoint.Administration {
                     }
 
                     It "Should throw if an invalid server role is used in the get method" {
-                        { Get-TargetResource @testParams } | Should Throw
+                        { Get-TargetResource @testParams } | Should -Throw
                     }
 
                     It "Should throw if an invalid server role is used in the test method" {
-                        { Test-TargetResource @testParams } | Should Throw
+                        { Test-TargetResource @testParams } | Should -Throw
                     }
 
                     It "Should throw if an invalid server role is used in the set method" {
-                        { Set-TargetResource @testParams } | Should Throw
+                        { Set-TargetResource @testParams } | Should -Throw
                     }
                 }
 
@@ -2159,15 +2159,15 @@ namespace Microsoft.SharePoint.Administration {
                     }
 
                     It "Should throw if an invalid server role is used in the get method" {
-                        { Get-TargetResource @testParams } | Should Not Throw
+                        { Get-TargetResource @testParams } | Should -Not -Throw
                     }
 
                     It "Should throw if an invalid server role is used in the test method" {
-                        { Test-TargetResource @testParams } | Should Not Throw
+                        { Test-TargetResource @testParams } | Should -Not -Throw
                     }
 
                     It "Should throw if an invalid server role is used in the set method" {
-                        { Set-TargetResource @testParams } | Should Not Throw
+                        { Set-TargetResource @testParams } | Should -Not -Throw
                     }
                 }
 
@@ -2252,15 +2252,15 @@ namespace Microsoft.SharePoint.Administration {
                     }
 
                     It "Should throw an exception in the get method" {
-                        { Get-TargetResource @testParams } | Should Throw "The DeveloperDashboard value 'OnDemand' is not allowed in SharePoint 2016 and 2019"
+                        { Get-TargetResource @testParams } | Should -Throw "The DeveloperDashboard value 'OnDemand' is not allowed in SharePoint 2016 and 2019"
                     }
 
                     It "Should throw an exception in the set method" {
-                        { Set-TargetResource @testParams } | Should Throw "The DeveloperDashboard value 'OnDemand' is not allowed in SharePoint 2016 and 2019"
+                        { Set-TargetResource @testParams } | Should -Throw "The DeveloperDashboard value 'OnDemand' is not allowed in SharePoint 2016 and 2019"
                     }
 
                     It "Should throw an exception in the test method" {
-                        { Test-TargetResource @testParams } | Should Throw "The DeveloperDashboard value 'OnDemand' is not allowed in SharePoint 2016 and 2019"
+                        { Test-TargetResource @testParams } | Should -Throw "The DeveloperDashboard value 'OnDemand' is not allowed in SharePoint 2016 and 2019"
                     }
                 }
             }
@@ -2349,7 +2349,7 @@ namespace Microsoft.SharePoint.Administration {
                     Mock -CommandName Set-SPApplicationCredentialKey -MockWith { return $null }
 
                     It "Should not throw an exception in the get method" {
-                        { Get-TargetResource @testParams } | Should Not Throw "Specifying ApplicationCredentialKey is only supported on SharePoint 2019"
+                        { Get-TargetResource @testParams } | Should -Not -Throw "Specifying ApplicationCredentialKey is only supported on SharePoint 2019"
                     }
 
                     It "Should set application credential key" {
@@ -2358,7 +2358,7 @@ namespace Microsoft.SharePoint.Administration {
                     }
 
                     It "Should not throw an exception in the test method" {
-                        { Test-TargetResource @testParams } | Should not Throw "Specifying ApplicationCredentialKey is only supported on SharePoint 2019"
+                        { Test-TargetResource @testParams } | Should -Not -Throw "Specifying ApplicationCredentialKey is only supported on SharePoint 2019"
                     }
                 }
             }
@@ -2430,7 +2430,7 @@ namespace Microsoft.SharePoint.Administration {
                 Mock -CommandName Get-SPDscInstalledProductVersion -MockWith { return @{ FileMajorPart = 16; ProductBuildPart = 4700 } }
 
                 It "Should return WebFrontEnd from the get method" {
-                    (Get-TargetResource @testParams).ServerRole | Should Be "WebFrontEnd"
+                    (Get-TargetResource @testParams).ServerRole | Should -Be "WebFrontEnd"
                 }
             }
 
@@ -2450,7 +2450,7 @@ namespace Microsoft.SharePoint.Administration {
                 Mock -CommandName Get-SPDscInstalledProductVersion -MockWith { return @{ FileMajorPart = 14 } }
 
                 It "Should throw when an unsupported version is installed and set is called" {
-                    { Set-TargetResource @testParams } | Should throw
+                    { Set-TargetResource @testParams } | Should -Throw
                 }
             }
 
@@ -2515,12 +2515,12 @@ namespace Microsoft.SharePoint.Administration {
 
                 It "Should still return present in the get method" {
                     $result = Get-TargetResource @testParams
-                    $result.Ensure | Should Be "Present"
-                    $result.RunCentralAdmin | Should BeNullOrEmpty
+                    $result.Ensure | Should -Be "Present"
+                    $result.RunCentralAdmin | Should -BeNullOrEmpty
                 }
 
                 It "Should return false in the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
             }
 
@@ -2615,15 +2615,79 @@ namespace Microsoft.SharePoint.Administration {
                 }
 
                 It "Should return present from the get method" {
-                    (Get-TargetResource @testParams).Ensure | Should Be "Present"
+                    (Get-TargetResource @testParams).Ensure | Should -Be "Present"
                 }
 
                 It "Should return true from the test method" {
-                    Test-TargetResource @testParams | Should be $true
+                    Test-TargetResource @testParams | Should -Be $true
+                    AdminContentDatabaseName = $testParams.AdminContentDatabaseName
+                }
+            }
+            Mock -CommandName "Get-SPDscConfigDBStatus" -MockWith {
+                return @{
+                    Locked           = $false
+                    ValidPermissions = $true
+                    DatabaseExists   = $true
+                }
+            }
+            Mock -CommandName "Get-SPDscSQLInstanceStatus" -MockWith {
+                return @{
+                    MaxDOPCorrect = $true
+                }
+            }
+            Mock -CommandName "Get-SPDatabase" -MockWith {
+                return @(@{
+                        Name                 = $testParams.FarmConfigDatabaseName
+                        Type                 = "Configuration Database"
+                        NormalizedDataSource = $testParams.DatabaseServer
+                    })
+            }
+            Mock -CommandName "Get-SPWebApplication" -MockWith {
+                return @{
+                    IsAdministrationWebApplication = $true
+                    ContentDatabases               = @(@{
+                            Name = $testParams.AdminContentDatabaseName
+                        })
+                    IISSettings                    = @(@{
+                            DisableKerberos = $true
+                        })
+                    Url                            = "http://localhost:9999"
+                }
+            }
+            Mock -CommandName "Get-SPServiceInstance" -MockWith {
+                if ($global:SPDscCentralAdminCheckDone -eq $true)
+                {
+                    return @(
+                        @{
+                            Name   = "WSS_Administration"
+                            Status = "Online"
+                        } | Add-Member -MemberType ScriptMethod `
+                            -Name GetType `
+                            -Value {
+                            return @{
+                                Name = "SPWebServiceInstance"
+                            }
+                        } -PassThru -Force
+                    )
+                }
+                else
+                {
+                    $global:SPDscCentralAdminCheckDone = $true
+                    return $null
                 }
             }
         }
+
+        It "Should return present from the get method" {
+            (Get-TargetResource @testParams).Ensure | Should -Be "Present"
+        }
+
+        It "Should return true from the test method" {
+            Test-TargetResource @testParams | Should -Be $true
+        }
     }
+}
+}
 }
 finally
 {

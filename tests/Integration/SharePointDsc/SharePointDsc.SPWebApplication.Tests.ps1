@@ -18,25 +18,25 @@ Describe -Tags @("WebApp") "SPWebApplication - Integration Tests" {
                 Import-DscResource -ModuleName SharePointDsc
                 node "localhost" {
                     SPWebApplication MainWebApp {
-                        Name = "Test Web App"
-                        Url = "http://$($env:COMPUTERNAME)"
-                        AllowAnonymous = $false
-                        ApplicationPool = "Test Web App Pool"
+                        Name                   = "Test Web App"
+                        Url                    = "http://$($env:COMPUTERNAME)"
+                        AllowAnonymous         = $false
+                        ApplicationPool        = "Test Web App Pool"
                         ApplicationPoolAccount = $Global:SPDscIntegrationCredPool.WebApp.UserName
-                        AuthenticationMethod = "NTLM"
-                        DatabaseName = "SP_Content"
-                        DatabaseServer = $env:COMPUTERNAME
-                        Port = 80
-                        PsDscRunAsCredential = $Global:SPDscIntegrationCredPool.Setup
+                        AuthenticationMethod   = "NTLM"
+                        DatabaseName           = "SP_Content"
+                        DatabaseServer         = $env:COMPUTERNAME
+                        Port                   = 80
+                        PsDscRunAsCredential   = $Global:SPDscIntegrationCredPool.Setup
                     }
                 }
             }
             . $configName -ConfigurationData $global:SPDscIntegrationConfigData -OutputPath "TestDrive:\$configName"
             Start-DscConfiguration -Wait -Force -Path "TestDrive:\$configName" -ComputerName "localhost"
-            (Test-DscConfiguration -ComputerName "localhost" -ReferenceConfiguration "TestDrive:\$configName\localhost.mof").InDesiredState | Should be $true      
+            (Test-DscConfiguration -ComputerName "localhost" -ReferenceConfiguration "TestDrive:\$configName\localhost.mof").InDesiredState | Should -Be $true
         }
     }
-    
+
     AfterEach {
         Remove-DscConfigurationDocument -Stage Current, Pending, Previous -Force -Confirm:$false
     }

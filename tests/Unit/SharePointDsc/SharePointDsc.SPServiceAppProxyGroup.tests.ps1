@@ -87,15 +87,15 @@ try
                 }
 
                 It "Should return Ensure=null from the get method" {
-                    (Get-TargetResource @testParams).Ensure | Should BeNullOrEmpty
+                    (Get-TargetResource @testParams).Ensure | Should -BeNullOrEmpty
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should throw an exception in the set method" {
-                    { Set-TargetResource @testParams } | Should throw "Cannot use the ServiceAppProxies parameter together with the ServiceAppProxiesToInclude or ServiceAppProxiesToExclude parameters"
+                    { Set-TargetResource @testParams } | Should -Throw "Cannot use the ServiceAppProxies parameter together with the ServiceAppProxiesToInclude or ServiceAppProxiesToExclude parameters"
                 }
             }
 
@@ -106,15 +106,15 @@ try
                 }
 
                 It "Should return Ensure=null from the get method" {
-                    (Get-TargetResource @testParams).Ensure | Should BeNullOrEmpty
+                    (Get-TargetResource @testParams).Ensure | Should -BeNullOrEmpty
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should throw an exception in the set method" {
-                    { Set-TargetResource @testParams } | Should throw "At least one of the following parameters must be specified: ServiceAppProxies, ServiceAppProxiesToInclude, ServiceAppProxiesToExclude"
+                    { Set-TargetResource @testParams } | Should -Throw "At least one of the following parameters must be specified: ServiceAppProxies, ServiceAppProxiesToInclude, ServiceAppProxiesToExclude"
                 }
             }
 
@@ -130,11 +130,11 @@ try
                 }
 
                 It "Should return ensure = absent  from the get method" {
-                    (Get-TargetResource @testParams).Ensure | Should be 'Absent'
+                    (Get-TargetResource @testParams).Ensure | Should -Be 'Absent'
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should create the Service Application Proxy Group with the set method" {
@@ -154,11 +154,11 @@ try
                 }
 
                 It "Should return ensure = absent  from the get method" {
-                    (Get-TargetResource @testParams).Ensure | Should be 'Absent'
+                    (Get-TargetResource @testParams).Ensure | Should -Be 'Absent'
                 }
 
                 It "Should return true from the test method" {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
             }
 
@@ -184,11 +184,11 @@ try
                 }
 
                 It "Should return ensure = present  from the get method" {
-                    (Get-TargetResource @testParams).Ensure | Should be 'Present'
+                    (Get-TargetResource @testParams).Ensure | Should -Be 'Present'
                 }
 
                 It "Should return true from the test method" {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
             }
 
@@ -220,11 +220,11 @@ try
                 }
 
                 It "Should return ensure = present  from the get method" {
-                    (Get-TargetResource @testParams).Ensure | Should be 'Present'
+                    (Get-TargetResource @testParams).Ensure | Should -Be 'Present'
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should add the missing and remove the extra service proxy in the set method" {
@@ -263,11 +263,11 @@ try
                 }
 
                 It "Should return ensure = present  from the get method" {
-                    (Get-TargetResource @testParams).Ensure | Should be 'Present'
+                    (Get-TargetResource @testParams).Ensure | Should -Be 'Present'
                 }
 
                 It "Should return true from the test method" {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
             }
 
@@ -299,11 +299,11 @@ try
                 }
 
                 It "Should return ensure = present  from the get method" {
-                    (Get-TargetResource @testParams).Ensure | Should be 'Present'
+                    (Get-TargetResource @testParams).Ensure | Should -Be 'Present'
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should add the missing and then not remove the extra service proxy in the set method" {
@@ -339,11 +339,11 @@ try
                 }
 
                 It "Should return ensure = present  from the get method" {
-                    (Get-TargetResource @testParams).Ensure | Should be 'Present'
+                    (Get-TargetResource @testParams).Ensure | Should -Be 'Present'
                 }
 
                 It "Should return true from the test method" {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
             }
 
@@ -374,11 +374,11 @@ try
                 }
 
                 It "Should return ensure = present  from the get method" {
-                    (Get-TargetResource @testParams).Ensure | Should be 'Present'
+                    (Get-TargetResource @testParams).Ensure | Should -Be 'Present'
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should remove the extra but not add a new service proxy in the set mthod" {
@@ -412,15 +412,15 @@ try
                 }
 
                 It "Should return ensure = present  from the get method" {
-                    (Get-TargetResource @testParams).Ensure | Should be 'Present'
+                    (Get-TargetResource @testParams).Ensure | Should -Be 'Present'
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should throw an error from the set method" {
-                    { Set-TargetResource @testParams } | Should throw "Invalid Service Application Proxy No Such Service Application"
+                    { Set-TargetResource @testParams } | Should -Throw "Invalid Service Application Proxy No Such Service Application"
                 }
             }
 
@@ -448,15 +448,15 @@ try
                 }
 
                 It "Should return ensure = present  from the get method" {
-                    (Get-TargetResource @testParams).Ensure | Should be 'Present'
+                    (Get-TargetResource @testParams).Ensure | Should -Be 'Present'
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should throw an error from the set method" {
-                    { Set-TargetResource @testParams } | Should throw "Invalid Service Application Proxy No Such Service Application"
+                    { Set-TargetResource @testParams } | Should -Throw "Invalid Service Application Proxy No Such Service Application"
                 }
             }
         }

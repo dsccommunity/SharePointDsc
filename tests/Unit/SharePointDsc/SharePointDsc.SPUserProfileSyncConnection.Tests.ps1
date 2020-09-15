@@ -279,16 +279,16 @@ try
                 Mock -CommandName Get-SPServiceApplication -MockWith { return $null }
 
                 It "Should return null from the Get method" {
-                    (Get-TargetResource @testParams).UserProfileService | Should BeNullOrEmpty
+                    (Get-TargetResource @testParams).UserProfileService | Should -BeNullOrEmpty
                     Assert-MockCalled Get-SPServiceApplication -ParameterFilter { $Name -eq $testParams.UserProfileService }
                 }
 
                 It "Should return false when the Test method is called" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should create a new service application in the set method" {
-                    { Set-TargetResource @testParams } | Should throw "User Profile Service Application $($testParams.UserProfileService) not found"
+                    { Set-TargetResource @testParams } | Should -Throw "User Profile Service Application $($testParams.UserProfileService) not found"
                 }
             }
 
@@ -314,18 +314,18 @@ try
                 Mock -CommandName Get-SPServiceApplication -MockWith { return $userProfileServiceNoConnections }
 
                 It "Should return null from the Get method" {
-                    (Get-TargetResource @testParams).UserProfileService | Should BeNullOrEmpty
+                    (Get-TargetResource @testParams).UserProfileService | Should -BeNullOrEmpty
                     Assert-MockCalled Get-SPServiceApplication -ParameterFilter { $Name -eq $testParams.UserProfileService }
                 }
 
                 It "Should return false when the Test method is called" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should create a new service application in the set method" {
                     $Global:SPDscUPSAddActiveDirectoryConnectionCalled = $false
                     Set-TargetResource @testParams
-                    $Global:SPDscUPSAddActiveDirectoryConnectionCalled | Should be $true
+                    $Global:SPDscUPSAddActiveDirectoryConnectionCalled | Should -Be $true
                 }
             }
 
@@ -348,20 +348,20 @@ try
                 $ConnnectionManager.Add($connection)
 
                 It "Should return service instance from the Get method" {
-                    (Get-TargetResource @testParams).UserProfileService | Should Not BeNullOrEmpty
+                    (Get-TargetResource @testParams).UserProfileService | Should -Not -BeNullOrEmpty
                     Assert-MockCalled Get-SPServiceApplication -ParameterFilter { $Name -eq $testParams.UserProfileService }
                 }
 
                 It "Should return false when the Test method is called" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "execute update credentials" {
                     $Global:SPDscUPSSyncConnectionSetCredentialsCalled = $false
                     $Global:SPDscUPSSyncConnectionRefreshSchemaCalled = $false
                     Set-TargetResource @testParams
-                    $Global:SPDscUPSSyncConnectionSetCredentialsCalled | Should be $true
-                    $Global:SPDscUPSSyncConnectionRefreshSchemaCalled | Should be $true
+                    $Global:SPDscUPSSyncConnectionSetCredentialsCalled | Should -Be $true
+                    $Global:SPDscUPSSyncConnectionRefreshSchemaCalled | Should -Be $true
                 }
             }
 
@@ -387,20 +387,20 @@ try
                 $ConnnectionManager.Add($connection)
 
                 It "Should return service instance from the Get method" {
-                    (Get-TargetResource @testParams).UserProfileService | Should Not BeNullOrEmpty
+                    (Get-TargetResource @testParams).UserProfileService | Should -Not -BeNullOrEmpty
                     Assert-MockCalled Get-SPServiceApplication -ParameterFilter { $Name -eq $testParams.UserProfileService }
                 }
 
                 It "Should return false when the Test method is called" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "execute update credentials" {
                     $Global:SPDscUPSSyncConnectionSetCredentialsCalled = $false
                     $Global:SPDscUPSSyncConnectionRefreshSchemaCalled = $false
                     Set-TargetResource @testParams
-                    $Global:SPDscUPSSyncConnectionSetCredentialsCalled | Should be $true
-                    $Global:SPDscUPSSyncConnectionRefreshSchemaCalled | Should be $true
+                    $Global:SPDscUPSSyncConnectionSetCredentialsCalled | Should -Be $true
+                    $Global:SPDscUPSSyncConnectionRefreshSchemaCalled | Should -Be $true
                 }
             }
 
@@ -464,12 +464,12 @@ try
                 } -ParameterFilter { $TypeName -eq "Microsoft.Office.Server.UserProfiles.UserProfileConfigManager" }
 
                 It "Should return service instance from the Get method" {
-                    (Get-TargetResource @testParams).UserProfileService | Should Not BeNullOrEmpty
+                    (Get-TargetResource @testParams).UserProfileService | Should -Not -BeNullOrEmpty
                     Assert-MockCalled Get-SPServiceApplication -ParameterFilter { $Name -eq $testParams.UserProfileService }
                 }
 
                 It "Should return false when the Test method is called" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 switch ($Global:SPDscHelper.CurrentStubBuildNumber.Major)
@@ -478,8 +478,8 @@ try
                     {
                         It "Should throw exception as force isn't specified" {
                             $Global:SPDscUPSSyncConnectionDeleteCalled = $false
-                            { Set-TargetResource @testParams } | Should throw
-                            $Global:SPDscUPSSyncConnectionDeleteCalled | Should be $false
+                            { Set-TargetResource @testParams } | Should -Throw
+                            $Global:SPDscUPSSyncConnectionDeleteCalled | Should -Be $false
                         }
                     }
                 }
@@ -504,14 +504,14 @@ try
                             $Global:SPDscUPSSyncConnectionDeleteCalled = $false
                             $Global:SPDscUPSAddActiveDirectoryConnectionCalled = $false
                             Set-TargetResource @forceTestParams
-                            $Global:SPDscUPSSyncConnectionDeleteCalled | Should be $true
-                            $Global:SPDscUPSAddActiveDirectoryConnectionCalled | Should be $true
+                            $Global:SPDscUPSSyncConnectionDeleteCalled | Should -Be $true
+                            $Global:SPDscUPSAddActiveDirectoryConnectionCalled | Should -Be $true
                         }
                     }
                 }
 
                 It "returns false in Test method as force is specified" {
-                    Test-TargetResource @forceTestParams | Should Be $false
+                    Test-TargetResource @forceTestParams | Should -Be $false
                 }
 
             }
@@ -551,11 +551,11 @@ try
                 It "attempts to execute method but synchronization is running" {
                     $Global:SPDscUpsSyncIsSynchronizationRunning = $false
                     $Global:SPDscUPSAddActiveDirectoryConnectionCalled = $false
-                    { Set-TargetResource @testParams } | Should throw
+                    { Set-TargetResource @testParams } | Should -Throw
                     Assert-MockCalled Get-SPServiceApplication
                     Assert-MockCalled New-Object -ParameterFilter { $TypeName -eq "Microsoft.Office.Server.UserProfiles.UserProfileConfigManager" }
-                    $Global:SPDscUpsSyncIsSynchronizationRunning | Should be $true;
-                    $Global:SPDscUPSAddActiveDirectoryConnectionCalled | Should be $false;
+                    $Global:SPDscUpsSyncIsSynchronizationRunning | Should -Be $true;
+                    $Global:SPDscUPSAddActiveDirectoryConnectionCalled | Should -Be $false;
                 }
             }
 
@@ -610,12 +610,12 @@ try
                 }
 
                 It "Should return values from the get method" {
-                    (Get-TargetResource @testParams).UserProfileService | Should Not BeNullOrEmpty
+                    (Get-TargetResource @testParams).UserProfileService | Should -Not -BeNullOrEmpty
                     Assert-MockCalled Get-SPServiceApplication -ParameterFilter { $Name -eq $testParams.UserProfileService }
                 }
 
                 It "Should return false when the Test method is called" {
-                    Test-TargetResource @difOUsTestParams | Should Be $false
+                    Test-TargetResource @difOUsTestParams | Should -Be $false
                 }
 
                 It "Should update OU lists" {
@@ -623,9 +623,9 @@ try
                     $Global:SPDscUPSSyncConnectionSetCredentialsCalled = $false
                     $Global:SPDscUPSSyncConnectionRefreshSchemaCalled = $false
                     Set-TargetResource @difOUsTestParams
-                    $Global:SPDscUPSSyncConnectionUpdateCalled | Should be $true
-                    $Global:SPDscUPSSyncConnectionSetCredentialsCalled | Should be $true
-                    $Global:SPDscUPSSyncConnectionRefreshSchemaCalled | Should be $true
+                    $Global:SPDscUPSSyncConnectionUpdateCalled | Should -Be $true
+                    $Global:SPDscUPSSyncConnectionSetCredentialsCalled | Should -Be $true
+                    $Global:SPDscUPSSyncConnectionRefreshSchemaCalled | Should -Be $true
                 }
             }
 
@@ -704,11 +704,11 @@ try
                 } -ParameterFilter { $TypeName -eq "Microsoft.Office.Server.UserProfiles.UserProfileConfigManager" }
 
                 It "Should return Ensure Present from the get method" {
-                    (Get-TargetResource @testParams).Ensure | Should Be "Present"
+                    (Get-TargetResource @testParams).Ensure | Should -Be "Present"
                 }
 
                 It "Should return true when the Test method is called" {
-                    { Test-TargetResource @testParams } | Should Be $true
+                    { Test-TargetResource @testParams } | Should -Be $true
                 }
 
                 It "Should create a new connection in the set method" {
@@ -812,17 +812,17 @@ try
                 } -ParameterFilter { $TypeName -eq "Microsoft.Office.Server.UserProfiles.UserProfileConfigManager" }
 
                 It "Should return Ensure Present from the get method" {
-                    (Get-TargetResource @testParams).Ensure | Should Be "Present"
+                    (Get-TargetResource @testParams).Ensure | Should -Be "Present"
                 }
 
                 It "Should return false when the Test method is called" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should remove the existing connection in the set method" {
                     $Global:SPDscUPSSyncConnectionDeleteCalled = $false
                     Set-TargetResource @testParams
-                    $Global:SPDscUPSSyncConnectionDeleteCalled | Should be $true
+                    $Global:SPDscUPSSyncConnectionDeleteCalled | Should -Be $true
                 }
             }
 
@@ -904,7 +904,7 @@ try
                     } -ParameterFilter { $TypeName -eq "Microsoft.Office.Server.UserProfiles.UserProfileConfigManager" }
 
                     It "Should return values from the get method" {
-                        (Get-TargetResource @testParams).UserProfileService | Should Not BeNullOrEmpty
+                        (Get-TargetResource @testParams).UserProfileService | Should -Not -BeNullOrEmpty
                     }
                 }
 
@@ -983,11 +983,11 @@ try
                     } -ParameterFilter { $TypeName -eq "Microsoft.Office.Server.UserProfiles.UserProfileConfigManager" }
 
                     It "Should return Ensure Present from the get method" {
-                        (Get-TargetResource @testParams).Ensure | Should Be "Present"
+                        (Get-TargetResource @testParams).Ensure | Should -Be "Present"
                     }
 
                     It "Should return true when the Test method is called" {
-                        { Test-TargetResource @testParams } | Should Be $true
+                        { Test-TargetResource @testParams } | Should -Be $true
                     }
 
                     It "Should create a new connection in the set method" {
@@ -1066,7 +1066,7 @@ try
                     } -ParameterFilter { $TypeName -eq "Microsoft.Office.Server.UserProfiles.UserProfileConfigManager" }
 
                     It "Should return Ensure Absent from the get method" {
-                        (Get-TargetResource @testParams).Ensure | Should Be "Absent"
+                        (Get-TargetResource @testParams).Ensure | Should -Be "Absent"
                     }
                 }
             }

@@ -18,21 +18,21 @@ Describe -Tags @("Farm") "SPCreateFarm - Integration Tests" {
                 Import-DscResource -ModuleName SharePointDsc
                 node "localhost" {
                     SPCreateFarm CreateLocalFarm {
-                        FarmConfigDatabaseName = "SP_Config"
+                        FarmConfigDatabaseName   = "SP_Config"
                         AdminContentDatabaseName = "SP_AdminContent"
-                        DatabaseServer = $env:COMPUTERNAME
-                        FarmAccount = $Global:SPDscIntegrationCredPool.Farm
-                        Passphrase = $Global:SPDscFarmPassphrase
-                        PsDscRunAsCredential = $Global:SPDscIntegrationCredPool.Setup
+                        DatabaseServer           = $env:COMPUTERNAME
+                        FarmAccount              = $Global:SPDscIntegrationCredPool.Farm
+                        Passphrase               = $Global:SPDscFarmPassphrase
+                        PsDscRunAsCredential     = $Global:SPDscIntegrationCredPool.Setup
                     }
                 }
             }
             . $configName -ConfigurationData $global:SPDscIntegrationConfigData -OutputPath "TestDrive:\$configName"
             Start-DscConfiguration -Wait -Force -Path "TestDrive:\$configName" -ComputerName "localhost"
-            (Test-DscConfiguration -ComputerName "localhost" -ReferenceConfiguration "TestDrive:\$configName\localhost.mof").InDesiredState | Should be $true    
+            (Test-DscConfiguration -ComputerName "localhost" -ReferenceConfiguration "TestDrive:\$configName\localhost.mof").InDesiredState | Should -Be $true
         }
     }
-    
+
     AfterEach {
         Remove-DscConfigurationDocument -Stage Current, Pending, Previous -Force -Confirm:$false
     }

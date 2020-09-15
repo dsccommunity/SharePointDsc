@@ -177,15 +177,15 @@ try
                         }
 
                         It "Should throw exception in the get method" {
-                            { Get-TargetResource @testParams } | Should throw "Specified PSDSCRunAsCredential "
+                            { Get-TargetResource @testParams } | Should -Throw "Specified PSDSCRunAsCredential "
                         }
 
                         It "Should throw exception in the test method" {
-                            { Test-TargetResource @testParams } | Should throw "Specified PSDSCRunAsCredential "
+                            { Test-TargetResource @testParams } | Should -Throw "Specified PSDSCRunAsCredential "
                         }
 
                         It "Should throw exception in the set method" {
-                            { Set-TargetResource @testParams } | Should throw "Specified PSDSCRunAsCredential "
+                            { Set-TargetResource @testParams } | Should -Throw "Specified PSDSCRunAsCredential "
                         }
                     }
 
@@ -201,15 +201,15 @@ try
                         }
 
                         It "Should throw exception in the get method" {
-                            { Get-TargetResource @testParams } | Should throw "Specified InstallAccount "
+                            { Get-TargetResource @testParams } | Should -Throw "Specified InstallAccount "
                         }
 
                         It "Should throw exception in the test method" {
-                            { Test-TargetResource @testParams } | Should throw "Specified InstallAccount "
+                            { Test-TargetResource @testParams } | Should -Throw "Specified InstallAccount "
                         }
 
                         It "Should throw exception in the set method" {
-                            { Set-TargetResource @testParams } | Should throw "Specified InstallAccount "
+                            { Set-TargetResource @testParams } | Should -Throw "Specified InstallAccount "
                         }
                     }
 
@@ -225,7 +225,7 @@ try
 
                         It "Should return absent from the get method" {
                             $Global:SPDscUPACheck = $false
-                            (Get-TargetResource @testParams).Ensure | Should Be "Absent"
+                            (Get-TargetResource @testParams).Ensure | Should -Be "Absent"
                         }
                     }
 
@@ -289,12 +289,12 @@ try
 
                         It "Should return absent from the get method" {
                             $Global:SPDscUPACheck = $false
-                            (Get-TargetResource @testParams).Ensure | Should Be "Absent"
+                            (Get-TargetResource @testParams).Ensure | Should -Be "Absent"
                         }
 
                         It "Should return false from the test method" {
                             $Global:SPDscUPACheck = $false
-                            Test-TargetResource @testParams | Should Be $false
+                            Test-TargetResource @testParams | Should -Be $false
                         }
 
                         It "Should call the start service cmdlet from the set method" {
@@ -310,7 +310,7 @@ try
                         }
 
                         It "Should throw in the set method if the user profile service app can't be found" {
-                            { Set-TargetResource @testParams } | Should Throw
+                            { Set-TargetResource @testParams } | Should -Throw
                         }
                     }
 
@@ -334,11 +334,11 @@ try
                         }
 
                         It "Should return present from the get method" {
-                            (Get-TargetResource @testParams).Ensure | Should Be "Present"
+                            (Get-TargetResource @testParams).Ensure | Should -Be "Present"
                         }
 
                         It "Should return true from the test method" {
-                            Test-TargetResource @testParams | Should Be $true
+                            Test-TargetResource @testParams | Should -Be $true
                         }
                     }
 
@@ -372,12 +372,12 @@ try
 
                         It "Should return present from the get method" {
                             $Global:SPDscUPACheck = $false
-                            (Get-TargetResource @testParams).Ensure | Should Be "Present"
+                            (Get-TargetResource @testParams).Ensure | Should -Be "Present"
                         }
 
                         It "Should return false from the test method" {
                             $Global:SPDscUPACheck = $false
-                            Test-TargetResource @testParams | Should Be $false
+                            Test-TargetResource @testParams | Should -Be $false
                         }
 
                         It "Should call the stop service cmdlet from the set method" {
@@ -408,11 +408,11 @@ try
                         }
 
                         It "Should return absent from the get method" {
-                            (Get-TargetResource @testParams).Ensure | Should Be "Absent"
+                            (Get-TargetResource @testParams).Ensure | Should -Be "Absent"
                         }
 
                         It "Should return true from the test method" {
-                            Test-TargetResource @testParams | Should Be $true
+                            Test-TargetResource @testParams | Should -Be $true
                         }
                     }
 
@@ -446,11 +446,11 @@ try
                         }
 
                         It "Should return absent from the get method" {
-                            (Get-TargetResource @testParams).Ensure | Should Be "Absent"
+                            (Get-TargetResource @testParams).Ensure | Should -Be "Absent"
                         }
 
                         It "Should return true from the test method" {
-                            Test-TargetResource @testParams | Should Be $true
+                            Test-TargetResource @testParams | Should -Be $true
                         }
                     }
 
@@ -487,11 +487,11 @@ try
                         }
 
                         It "Should return present from the get method" {
-                            (Get-TargetResource @testParams).Ensure | Should Be "Present"
+                            (Get-TargetResource @testParams).Ensure | Should -Be "Present"
                         }
 
                         It "Should return false from the test method" {
-                            Test-TargetResource @testParams | Should Be $false
+                            Test-TargetResource @testParams | Should -Be $false
                         }
 
                         It "Should call the stop service cmdlet from the set method" {
@@ -519,11 +519,11 @@ try
                         }
 
                         It "Should return present from the get method" {
-                            (Get-TargetResource @testParams).Ensure | Should Be "Absent"
+                            (Get-TargetResource @testParams).Ensure | Should -Be "Absent"
                         }
 
                         It "Should throw an error from the set method" {
-                            { Set-TargetResource @testParams } | Should throw
+                            { Set-TargetResource @testParams } | Should -Throw
                         }
                     }
 
@@ -539,11 +539,11 @@ try
                         }
 
                         It "Should throw an error from the get method" {
-                            { (Get-TargetResource @testParams).Ensure } | Should throw "Unable to retrieve the Farm Account. Check if the farm exists."
+                            { (Get-TargetResource @testParams).Ensure } | Should -Throw "Unable to retrieve the Farm Account. Check if the farm exists."
                         }
 
                         It "Should throw an error from the set method" {
-                            { Set-TargetResource @testParams } | Should throw "Unable to retrieve the Farm Account. Check if the farm exists."
+                            { Set-TargetResource @testParams } | Should -Throw "Unable to retrieve the Farm Account. Check if the farm exists."
                         }
                     }
                 }
@@ -555,15 +555,15 @@ try
                         }
 
                         It "Should throw on the get method" {
-                            { Get-TargetResource @testParams } | Should Throw
+                            { Get-TargetResource @testParams } | Should -Throw
                         }
 
                         It "Should throw on the test method" {
-                            { Test-TargetResource @testParams } | Should Throw
+                            { Test-TargetResource @testParams } | Should -Throw
                         }
 
                         It "Should throw on the set method" {
-                            { Set-TargetResource @testParams } | Should Throw
+                            { Set-TargetResource @testParams } | Should -Throw
                         }
                     }
                 }
