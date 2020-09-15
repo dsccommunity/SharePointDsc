@@ -1,8 +1,3 @@
-$script:resourceModulePath = Split-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -Parent
-$script:modulesFolderPath = Join-Path -Path $script:resourceModulePath -ChildPath 'Modules'
-$script:resourceHelperModulePath = Join-Path -Path $script:modulesFolderPath -ChildPath 'SharePointDsc.Util'
-Import-Module -Name (Join-Path -Path $script:resourceHelperModulePath -ChildPath 'SharePointDsc.Util.psm1')
-
 function Get-TargetResource
 {
     [CmdletBinding()]
@@ -168,9 +163,9 @@ function Get-TargetResource
 
             $admService = Get-SPDscContentService
             $quota = ($admService.QuotaTemplates | `
-                        Where-Object -FilterScript {
-                        $_.QuotaID -eq $site.Quota.QuotaID
-                    }).Name
+                    Where-Object -FilterScript {
+                    $_.QuotaID -eq $site.Quota.QuotaID
+                }).Name
 
             $CreateDefaultGroups = $true
             if ($null -eq $site.RootWeb.AssociatedVisitorGroup -and
@@ -291,127 +286,127 @@ function Set-TargetResource
 
         $params.Remove("InstallAccount") | Out-Null
 
-    $CreateDefaultGroups = $params.CreateDefaultGroups
-    $params.Remove("CreateDefaultGroups") | Out-Null
+        $CreateDefaultGroups = $params.CreateDefaultGroups
+        $params.Remove("CreateDefaultGroups") | Out-Null
 
-$site = Get-SPSite -Identity $params.Url -ErrorAction SilentlyContinue
+        $site = Get-SPSite -Identity $params.Url -ErrorAction SilentlyContinue
 
-if ($null -eq $site)
-{
-    Write-Verbose -Message ("Starting New-SPSite with the following parameters: " + `
-            "$(Convert-SPDscHashtableToString $params)")
-    $site = New-SPSite @params
-    if ($CreateDefaultGroups -eq $true)
-    {
-        $doCreateDefaultGroups = $true
-
-    }
-    else
-    {
-        Write-Verbose -Message ("CreateDefaultGroups set to false. The default " + `
-                "SharePoint groups will not be created")
-    }
-}
-else
-{
-    $newParams = @{
-        Identity = $params.Url
-    }
-
-    if ($params.ContainsKey("QuotaTemplate") -eq $true)
-    {
-        if ($params.QuotaTemplate -ne $CurrentValues.QuotaTemplate)
+        if ($null -eq $site)
         {
-            $newParams.QuotaTemplate = $params.QuotaTemplate
-        }
-    }
+            Write-Verbose -Message ("Starting New-SPSite with the following parameters: " + `
+                    "$(Convert-SPDscHashtableToString $params)")
+            $site = New-SPSite @params
+            if ($CreateDefaultGroups -eq $true)
+            {
+                $doCreateDefaultGroups = $true
 
-    $centralAdminWebApp = [Microsoft.SharePoint.Administration.SPAdministrationWebApplication]::Local
-    $centralAdminSite = Get-SPSite -Identity $centralAdminWebApp.Url
-    $systemAccountSite = New-Object "Microsoft.SharePoint.SPSite" -ArgumentList @($site.Id, $centralAdminSite.SystemAccount.UserToken)
-
-    if ($params.OwnerAlias -ne $CurrentValues.OwnerAlias)
-    {
-        Write-Verbose -Message "Updating owner to $($params.OwnerAlias)"
-        try
-        {
-            $confirmedUsername = $systemAccountSite.RootWeb.EnsureUser($params.OwnerAlias)
-            $systemAccountSite.Owner = $confirmedUsername
-        }
-        catch
-        {
-            Write-Output "Cannot resolve user $($params.OwnerAlias) as OwnerAlias"
-        }
-    }
-
-    if ($params.ContainsKey("SecondaryOwnerAlias") -eq $true -and `
-            $params.SecondaryOwnerAlias -ne $CurrentValues.SecondaryOwnerAlias)
-    {
-        Write-Verbose -Message "Updating secondary owner to $($params.SecondaryOwnerAlias)"
-        try
-        {
-            $confirmedUsername = $systemAccountSite.RootWeb.EnsureUser($params.SecondaryOwnerAlias)
-            $systemAccountSite.SecondaryContact = $confirmedUsername
-        }
-        catch
-        {
-            Write-Verbose -Message ("Cannot resolve user $($params.SecondaryOwnerAlias) " + `
-                    "as SecondaryOwnerAlias")
-        }
-    }
-
-    if ($params.ContainsKey("AdministrationSiteType") -eq $true)
-    {
-        if ($params.AdministrationSiteType -ne $CurrentValues.AdministrationSiteType)
-        {
-            $newParams.AdministrationSiteType = $params.AdministrationSiteType
-        }
-    }
-
-    if ($newParams.Count -gt 1)
-    {
-        Write-Verbose -Message "Updating existing site collection"
-        Write-Verbose -Message ("Starting Set-SPSite with the following parameters: " + `
-                "$(Convert-SPDscHashtableToString $newParams)")
-        Set-SPSite @newParams
-    }
-
-    if ($CurrentValues.CreateDefaultGroups -eq $false)
-    {
-        if ($CreateDefaultGroups -eq $true)
-        {
-            $doCreateDefaultGroups = $true
+            }
+            else
+            {
+                Write-Verbose -Message ("CreateDefaultGroups set to false. The default " + `
+                        "SharePoint groups will not be created")
+            }
         }
         else
         {
-            Write-Verbose -Message ("CreateDefaultGroups set to false. The default " + `
-                    "SharePoint groups will not be created")
+            $newParams = @{
+                Identity = $params.Url
+            }
+
+            if ($params.ContainsKey("QuotaTemplate") -eq $true)
+            {
+                if ($params.QuotaTemplate -ne $CurrentValues.QuotaTemplate)
+                {
+                    $newParams.QuotaTemplate = $params.QuotaTemplate
+                }
+            }
+
+            $centralAdminWebApp = [Microsoft.SharePoint.Administration.SPAdministrationWebApplication]::Local
+            $centralAdminSite = Get-SPSite -Identity $centralAdminWebApp.Url
+            $systemAccountSite = New-Object "Microsoft.SharePoint.SPSite" -ArgumentList @($site.Id, $centralAdminSite.SystemAccount.UserToken)
+
+            if ($params.OwnerAlias -ne $CurrentValues.OwnerAlias)
+            {
+                Write-Verbose -Message "Updating owner to $($params.OwnerAlias)"
+                try
+                {
+                    $confirmedUsername = $systemAccountSite.RootWeb.EnsureUser($params.OwnerAlias)
+                    $systemAccountSite.Owner = $confirmedUsername
+                }
+                catch
+                {
+                    Write-Output "Cannot resolve user $($params.OwnerAlias) as OwnerAlias"
+                }
+            }
+
+            if ($params.ContainsKey("SecondaryOwnerAlias") -eq $true -and `
+                    $params.SecondaryOwnerAlias -ne $CurrentValues.SecondaryOwnerAlias)
+            {
+                Write-Verbose -Message "Updating secondary owner to $($params.SecondaryOwnerAlias)"
+                try
+                {
+                    $confirmedUsername = $systemAccountSite.RootWeb.EnsureUser($params.SecondaryOwnerAlias)
+                    $systemAccountSite.SecondaryContact = $confirmedUsername
+                }
+                catch
+                {
+                    Write-Verbose -Message ("Cannot resolve user $($params.SecondaryOwnerAlias) " + `
+                            "as SecondaryOwnerAlias")
+                }
+            }
+
+            if ($params.ContainsKey("AdministrationSiteType") -eq $true)
+            {
+                if ($params.AdministrationSiteType -ne $CurrentValues.AdministrationSiteType)
+                {
+                    $newParams.AdministrationSiteType = $params.AdministrationSiteType
+                }
+            }
+
+            if ($newParams.Count -gt 1)
+            {
+                Write-Verbose -Message "Updating existing site collection"
+                Write-Verbose -Message ("Starting Set-SPSite with the following parameters: " + `
+                        "$(Convert-SPDscHashtableToString $newParams)")
+                Set-SPSite @newParams
+            }
+
+            if ($CurrentValues.CreateDefaultGroups -eq $false)
+            {
+                if ($CreateDefaultGroups -eq $true)
+                {
+                    $doCreateDefaultGroups = $true
+                }
+                else
+                {
+                    Write-Verbose -Message ("CreateDefaultGroups set to false. The default " + `
+                            "SharePoint groups will not be created")
+                }
+            }
+        }
+
+        if ($doCreateDefaultGroups -eq $true)
+        {
+            Write-Verbose -Message ("Creating default groups")
+
+            $centralAdminWebApp = [Microsoft.SharePoint.Administration.SPAdministrationWebApplication]::Local
+            $centralAdminSite = Get-SPSite -Identity $centralAdminWebApp.Url
+            $systemAccountSite = New-Object "Microsoft.SharePoint.SPSite" -ArgumentList @($site.Id, $centralAdminSite.SystemAccount.UserToken)
+
+            if ($null -eq $systemAccountSite.SecondaryContact)
+            {
+                $secondaryOwnerLogin = $null
+            }
+            else
+            {
+                $secondaryOwnerLogin = $systemAccountSite.SecondaryContact.UserLogin;
+            }
+
+            $systemAccountSite.RootWeb.CreateDefaultAssociatedGroups($systemAccountSite.Owner.UserLogin,
+                $secondaryOwnerLogin,
+                $null)
         }
     }
-}
-
-if ($doCreateDefaultGroups -eq $true)
-{
-    Write-Verbose -Message ("Creating default groups")
-
-    $centralAdminWebApp = [Microsoft.SharePoint.Administration.SPAdministrationWebApplication]::Local
-    $centralAdminSite = Get-SPSite -Identity $centralAdminWebApp.Url
-    $systemAccountSite = New-Object "Microsoft.SharePoint.SPSite" -ArgumentList @($site.Id, $centralAdminSite.SystemAccount.UserToken)
-
-    if ($null -eq $systemAccountSite.SecondaryContact)
-    {
-        $secondaryOwnerLogin = $null
-    }
-    else
-    {
-        $secondaryOwnerLogin = $systemAccountSite.SecondaryContact.UserLogin;
-    }
-
-    $systemAccountSite.RootWeb.CreateDefaultAssociatedGroups($systemAccountSite.Owner.UserLogin,
-        $secondaryOwnerLogin,
-        $null)
-}
-}
 }
 
 function Test-TargetResource

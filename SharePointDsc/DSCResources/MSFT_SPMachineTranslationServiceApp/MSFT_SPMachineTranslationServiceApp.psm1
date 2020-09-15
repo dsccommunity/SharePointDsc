@@ -1,8 +1,3 @@
-$script:resourceModulePath = Split-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -Parent
-$script:modulesFolderPath = Join-Path -Path $script:resourceModulePath -ChildPath 'Modules'
-$script:resourceHelperModulePath = Join-Path -Path $script:modulesFolderPath -ChildPath 'SharePointDsc.Util'
-Import-Module -Name (Join-Path -Path $script:resourceHelperModulePath -ChildPath 'SharePointDsc.Util.psm1')
-
 function Get-TargetResource
 {
     [CmdletBinding()]
@@ -306,10 +301,10 @@ function Test-TargetResource
         -Source $($MyInvocation.MyCommand.Source) `
         -DesiredValues $PSBoundParameters `
         -ValuesToCheck @("Name",
-            "ApplicationPool",
-            "DatabaseName",
-            "DatabaseServer",
-            "Ensure")
+        "ApplicationPool",
+        "DatabaseName",
+        "DatabaseServer",
+        "Ensure")
 
     Write-Verbose -Message "Test-TargetResource returned $result"
 

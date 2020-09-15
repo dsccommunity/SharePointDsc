@@ -1,8 +1,3 @@
-$script:resourceModulePath = Split-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -Parent
-$script:modulesFolderPath = Join-Path -Path $script:resourceModulePath -ChildPath 'Modules'
-$script:resourceHelperModulePath = Join-Path -Path $script:modulesFolderPath -ChildPath 'SharePointDsc.Util'
-Import-Module -Name (Join-Path -Path $script:resourceHelperModulePath -ChildPath 'SharePointDsc.Util.psm1')
-
 function Get-TargetResource
 {
     [CmdletBinding()]
@@ -829,26 +824,26 @@ function Test-TargetResource
             -Source $($MyInvocation.MyCommand.Source) `
             -DesiredValues $PSBoundParameters `
             -ValuesToCheck @("Name",
-                "DisplayName",
-                "Type",
-                "Description",
-                "PolicySetting",
-                "PrivacySetting",
-                "PropertyMappings",
-                "Length",
-                "DisplayOrder",
-                "IsEventLog",
-                "IsVisibleOnEditor",
-                "IsVisibleOnViewer",
-                "IsUserEditable",
-                "IsAlias",
-                "IsSearchable",
-                "IsReplicable",
-                "UserOverridePrivacy",
-                "TermGroup",
-                "TermStore",
-                "TermSet",
-                "Ensure")
+            "DisplayName",
+            "Type",
+            "Description",
+            "PolicySetting",
+            "PrivacySetting",
+            "PropertyMappings",
+            "Length",
+            "DisplayOrder",
+            "IsEventLog",
+            "IsVisibleOnEditor",
+            "IsVisibleOnViewer",
+            "IsUserEditable",
+            "IsAlias",
+            "IsSearchable",
+            "IsReplicable",
+            "UserOverridePrivacy",
+            "TermGroup",
+            "TermStore",
+            "TermSet",
+            "Ensure")
     }
     else
     {
