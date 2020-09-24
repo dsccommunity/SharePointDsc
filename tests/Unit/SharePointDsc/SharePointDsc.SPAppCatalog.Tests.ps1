@@ -46,48 +46,52 @@ Invoke-TestSetup
 
 try
 {
-    Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
-        InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
-            Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
+    InModuleScope -ModuleName $script:DSCResourceFullName -ScriptBlock {
+        Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
+            BeforeAll {
+                Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
-            $mockSiteId = [Guid]::NewGuid()
+                $mockSiteId = [Guid]::NewGuid()
 
-            $mockPassword = ConvertTo-SecureString -String "password" -AsPlainText -Force
-            $mockCredential = New-Object -TypeName System.Management.Automation.PSCredential `
-                -ArgumentList @("$($Env:USERDOMAIN)\$($Env:USERNAME)", $mockPassword)
-            $mockFarmCredential = New-Object -TypeName System.Management.Automation.PSCredential `
-                -ArgumentList @("DOMAIN\sp_farm", $mockPassword)
+                $mockPassword = ConvertTo-SecureString -String "password" -AsPlainText -Force
+                $mockCredential = New-Object -TypeName System.Management.Automation.PSCredential `
+                    -ArgumentList @("$($Env:USERDOMAIN)\$($Env:USERNAME)", $mockPassword)
+                $mockFarmCredential = New-Object -TypeName System.Management.Automation.PSCredential `
+                    -ArgumentList @("DOMAIN\sp_farm", $mockPassword)
 
-            # Mocks for all contexts
-            Mock -CommandName Get-SPDscFarmAccount -MockWith {
-                return $mockFarmCredential
+                # Mocks for all contexts
+                Mock -CommandName Get-SPDscFarmAccount -MockWith {
+                    return $mockFarmCredential
+                }
+                Mock -CommandName Add-SPDscUserToLocalAdmin -MockWith { }
+                Mock -CommandName Test-SPDscUserIsLocalAdmin -MockWith { return $false }
+                Mock -CommandName Remove-SPDscUserToLocalAdmin -MockWith { }
+                Mock -CommandName Restart-Service { }
             }
-            Mock -CommandName Add-SPDscUserToLocalAdmin -MockWith { }
-            Mock -CommandName Test-SPDscUserIsLocalAdmin -MockWith { return $false }
-            Mock -CommandName Remove-SPDscUserToLocalAdmin -MockWith { }
-            Mock -CommandName Restart-Service { }
 
             # Test contexts
             Context -Name "The PsDscRunAsCredential is the Farm account" -Fixture {
-                $testParams = @{
-                    SiteUrl = "https://content.sharepoint.contoso.com/sites/AppCatalog"
-                }
-
-                Mock -CommandName Update-SPAppCatalogConfiguration -MockWith { }
-                Mock -CommandName Get-SPSite -MockWith {
-                    return @{
-                        WebApplication = @{
-                            Features = @( @{ } ) | Add-Member -MemberType ScriptMethod `
-                                -Name "Item" `
-                                -Value { return $null } `
-                                -PassThru `
-                                -Force
-                        }
-                        ID             = $mockSiteId
+                BeforeAll {
+                    $testParams = @{
+                        SiteUrl = "https://content.sharepoint.contoso.com/sites/AppCatalog"
                     }
-                }
-                Mock -CommandName Get-SPDscFarmAccount -MockWith {
-                    return $mockCredential
+
+                    Mock -CommandName Update-SPAppCatalogConfiguration -MockWith { }
+                    Mock -CommandName Get-SPSite -MockWith {
+                        return @{
+                            WebApplication = @{
+                                Features = @( @{ } ) | Add-Member -MemberType ScriptMethod `
+                                    -Name "Item" `
+                                    -Value { return $null } `
+                                    -PassThru `
+                                    -Force
+                            }
+                            ID             = $mockSiteId
+                        }
+                    }
+                    Mock -CommandName Get-SPDscFarmAccount -MockWith {
+                        return $mockCredential
+                    }
                 }
 
                 It "Should throw exception when executed" {
@@ -96,21 +100,23 @@ try
             }
 
             Context -Name "The specified site exists, but cannot be set as an app catalog as it is of the wrong template" -Fixture {
-                $testParams = @{
-                    SiteUrl = "https://content.sharepoint.contoso.com/sites/AppCatalog"
-                }
+                BeforeAll {
+                    $testParams = @{
+                        SiteUrl = "https://content.sharepoint.contoso.com/sites/AppCatalog"
+                    }
 
-                Mock -CommandName Update-SPAppCatalogConfiguration -MockWith { throw 'Exception' }
-                Mock -CommandName Get-SPSite -MockWith {
-                    return @{
-                        WebApplication = @{
-                            Features = @( @{ } ) | Add-Member -MemberType ScriptMethod `
-                                -Name "Item" `
-                                -Value { return $null } `
-                                -PassThru `
-                                -Force
+                    Mock -CommandName Update-SPAppCatalogConfiguration -MockWith { throw 'Exception' }
+                    Mock -CommandName Get-SPSite -MockWith {
+                        return @{
+                            WebApplication = @{
+                                Features = @( @{ } ) | Add-Member -MemberType ScriptMethod `
+                                    -Name "Item" `
+                                    -Value { return $null } `
+                                    -PassThru `
+                                    -Force
+                            }
+                            ID             = $mockSiteId
                         }
-                        ID             = $mockSiteId
                     }
                 }
 
@@ -128,21 +134,23 @@ try
             }
 
             Context -Name "The specified site exists but is not set as the app catalog for its web application" -Fixture {
-                $testParams = @{
-                    SiteUrl = "https://content.sharepoint.contoso.com/sites/AppCatalog"
-                }
+                BeforeAll {
+                    $testParams = @{
+                        SiteUrl = "https://content.sharepoint.contoso.com/sites/AppCatalog"
+                    }
 
-                Mock -CommandName Update-SPAppCatalogConfiguration -MockWith { }
-                Mock -CommandName Get-SPSite -MockWith {
-                    return @{
-                        WebApplication = @{
-                            Features = @( @{ } ) | Add-Member -MemberType ScriptMethod `
-                                -Name "Item" `
-                                -Value { return $null } `
-                                -PassThru `
-                                -Force
+                    Mock -CommandName Update-SPAppCatalogConfiguration -MockWith { }
+                    Mock -CommandName Get-SPSite -MockWith {
+                        return @{
+                            WebApplication = @{
+                                Features = @( @{ } ) | Add-Member -MemberType ScriptMethod `
+                                    -Name "Item" `
+                                    -Value { return $null } `
+                                    -PassThru `
+                                    -Force
+                            }
+                            ID             = $mockSiteId
                         }
-                        ID             = $mockSiteId
                     }
                 }
 
@@ -162,28 +170,30 @@ try
             }
 
             Context -Name "The specified site exists and is the current app catalog already" -Fixture {
-                $testParams = @{
-                    SiteUrl = "https://content.sharepoint.contoso.com/sites/AppCatalog"
-                }
+                BeforeAll {
+                    $testParams = @{
+                        SiteUrl = "https://content.sharepoint.contoso.com/sites/AppCatalog"
+                    }
 
-                Mock -CommandName Get-SPSite -MockWith {
-                    return @{
-                        WebApplication = @{
-                            Features = @( @{ } ) | Add-Member -MemberType ScriptMethod `
-                                -Name "Item" `
-                                -Value {
-                                return @{
-                                    ID         = [guid]::NewGuid()
-                                    Properties = @{
-                                        "__AppCatSiteId" = @{Value = $mockSiteId }
+                    Mock -CommandName Get-SPSite -MockWith {
+                        return @{
+                            WebApplication = @{
+                                Features = @( @{ } ) | Add-Member -MemberType ScriptMethod `
+                                    -Name "Item" `
+                                    -Value {
+                                    return @{
+                                        ID         = [guid]::NewGuid()
+                                        Properties = @{
+                                            "__AppCatSiteId" = @{Value = $mockSiteId }
+                                        }
                                     }
-                                }
-                            } `
-                                -PassThru `
-                                -Force
+                                } `
+                                    -PassThru `
+                                    -Force
+                            }
+                            ID             = $mockSiteId
+                            Url            = $testParams.SiteUrl
                         }
-                        ID             = $mockSiteId
-                        Url            = $testParams.SiteUrl
                     }
                 }
 
@@ -197,24 +207,25 @@ try
             }
 
             Context -Name "The specified site exists and the resource tries to set the site using the farm account" -Fixture {
+                BeforeAll {
+                    $testParams = @{
+                        SiteUrl = "https://content.sharepoint.contoso.com/sites/AppCatalog"
+                    }
 
-                $testParams = @{
-                    SiteUrl = "https://content.sharepoint.contoso.com/sites/AppCatalog"
-                }
-
-                Mock -CommandName Update-SPAppCatalogConfiguration -MockWith {
-                    throw [System.UnauthorizedAccessException] "ACCESS IS DENIED"
-                }
-                Mock -CommandName Get-SPSite -MockWith {
-                    return @{
-                        WebApplication = @{
-                            Features = @( @{ } ) | Add-Member -MemberType ScriptMethod `
-                                -Name "Item" `
-                                -Value { return $null } `
-                                -PassThru `
-                                -Force
+                    Mock -CommandName Update-SPAppCatalogConfiguration -MockWith {
+                        throw [System.UnauthorizedAccessException] "ACCESS IS DENIED"
+                    }
+                    Mock -CommandName Get-SPSite -MockWith {
+                        return @{
+                            WebApplication = @{
+                                Features = @( @{ } ) | Add-Member -MemberType ScriptMethod `
+                                    -Name "Item" `
+                                    -Value { return $null } `
+                                    -PassThru `
+                                    -Force
+                            }
+                            ID             = $mockSiteId
                         }
-                        ID             = $mockSiteId
                     }
                 }
 

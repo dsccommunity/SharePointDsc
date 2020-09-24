@@ -47,28 +47,32 @@ Invoke-TestSetup
 
 try
 {
-    Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
-        InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
-            Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
+    InModuleScope -ModuleName $script:DSCResourceFullName -ScriptBlock {
+        Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
+            BeforeAll {
+                Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
-            # Initialize tests
-            $mockPassword = ConvertTo-SecureString -String "password" -AsPlainText -Force
-            $mockCredential = New-Object -TypeName System.Management.Automation.PSCredential `
-                -ArgumentList @("DOMAIN\username", $mockPassword)
+                # Initialize tests
+                $mockPassword = ConvertTo-SecureString -String "password" -AsPlainText -Force
+                $mockCredential = New-Object -TypeName System.Management.Automation.PSCredential `
+                    -ArgumentList @("DOMAIN\username", $mockPassword)
 
-            # Mocks for all contexts
+                # Mocks for all contexts
+            }
 
             # Test contexts
             Context -Name "The server is not part of SharePoint farm" -Fixture {
-                $testParams = @{
-                    IsSingleInstance      = "Yes"
-                    PerformanceLevel      = "Maximum"
-                    ContactEmail          = "sharepoint@contoso.com"
-                    WindowsServiceAccount = $mockCredential
-                }
+                BeforeAll {
+                    $testParams = @{
+                        IsSingleInstance      = "Yes"
+                        PerformanceLevel      = "Maximum"
+                        ContactEmail          = "sharepoint@contoso.com"
+                        WindowsServiceAccount = $mockCredential
+                    }
 
-                Mock -CommandName Get-SPFarm -MockWith {
-                    throw "Unable to detect local farm"
+                    Mock -CommandName Get-SPFarm -MockWith {
+                        throw "Unable to detect local farm"
+                    }
                 }
 
                 It "Should return null from the get method" {
@@ -88,8 +92,10 @@ try
             }
 
             Context -Name "No optional parameters are specified" -Fixture {
-                $testParams = @{
-                    IsSingleInstance = "Yes"
+                BeforeAll {
+                    $testParams = @{
+                        IsSingleInstance = "Yes"
+                    }
                 }
 
                 It "Should return null from the get method" {
@@ -109,18 +115,20 @@ try
             }
 
             Context -Name "When the configured settings are correct" -Fixture {
-                $testParams = @{
-                    IsSingleInstance      = "Yes"
-                    PerformanceLevel      = "Maximum"
-                    ContactEmail          = "sharepoint@contoso.com"
-                    WindowsServiceAccount = $mockCredential
-                }
+                BeforeAll {
+                    $testParams = @{
+                        IsSingleInstance      = "Yes"
+                        PerformanceLevel      = "Maximum"
+                        ContactEmail          = "sharepoint@contoso.com"
+                        WindowsServiceAccount = $mockCredential
+                    }
 
-                Mock -CommandName Get-SPEnterpriseSearchService -MockWith {
-                    return @{
-                        ProcessIdentity  = "DOMAIN\username"
-                        ContactEmail     = $testParams.ContactEmail
-                        PerformanceLevel = $testParams.PerformanceLevel
+                    Mock -CommandName Get-SPEnterpriseSearchService -MockWith {
+                        return @{
+                            ProcessIdentity  = "DOMAIN\username"
+                            ContactEmail     = $testParams.ContactEmail
+                            PerformanceLevel = $testParams.PerformanceLevel
+                        }
                     }
                 }
 
@@ -137,22 +145,24 @@ try
             }
 
             Context -Name "When the PerformanceLevel is incorrect" -Fixture {
-                $testParams = @{
-                    IsSingleInstance      = "Yes"
-                    PerformanceLevel      = "Maximum"
-                    ContactEmail          = "sharepoint@contoso.com"
-                    WindowsServiceAccount = $mockCredential
-                }
-
-                Mock -CommandName Get-SPEnterpriseSearchService -MockWith {
-                    return @{
-                        ProcessIdentity  = "DOMAIN\username"
-                        ContactEmail     = "sharepoint@contoso.com"
-                        PerformanceLevel = "Reduced"
+                BeforeAll {
+                    $testParams = @{
+                        IsSingleInstance      = "Yes"
+                        PerformanceLevel      = "Maximum"
+                        ContactEmail          = "sharepoint@contoso.com"
+                        WindowsServiceAccount = $mockCredential
                     }
-                }
 
-                Mock -CommandName Set-SPEnterpriseSearchService -MockWith { }
+                    Mock -CommandName Get-SPEnterpriseSearchService -MockWith {
+                        return @{
+                            ProcessIdentity  = "DOMAIN\username"
+                            ContactEmail     = "sharepoint@contoso.com"
+                            PerformanceLevel = "Reduced"
+                        }
+                    }
+
+                    Mock -CommandName Set-SPEnterpriseSearchService -MockWith { }
+                }
 
                 It "Should return the configured values from the Get method" {
                     $result = Get-TargetResource @testParams
@@ -170,22 +180,24 @@ try
             }
 
             Context -Name "When the WindowsServiceAccount is incorrect" -Fixture {
-                $testParams = @{
-                    IsSingleInstance      = "Yes"
-                    PerformanceLevel      = "Maximum"
-                    ContactEmail          = "sharepoint@contoso.com"
-                    WindowsServiceAccount = $mockCredential
-                }
-
-                Mock -CommandName Get-SPEnterpriseSearchService -MockWith {
-                    return @{
-                        ProcessIdentity  = "DOMAIN\wrongusername"
-                        ContactEmail     = "sharepoint@contoso.com"
-                        PerformanceLevel = "Maximum"
+                BeforeAll {
+                    $testParams = @{
+                        IsSingleInstance      = "Yes"
+                        PerformanceLevel      = "Maximum"
+                        ContactEmail          = "sharepoint@contoso.com"
+                        WindowsServiceAccount = $mockCredential
                     }
-                }
 
-                Mock -CommandName Set-SPEnterpriseSearchService -MockWith { }
+                    Mock -CommandName Get-SPEnterpriseSearchService -MockWith {
+                        return @{
+                            ProcessIdentity  = "DOMAIN\wrongusername"
+                            ContactEmail     = "sharepoint@contoso.com"
+                            PerformanceLevel = "Maximum"
+                        }
+                    }
+
+                    Mock -CommandName Set-SPEnterpriseSearchService -MockWith { }
+                }
 
                 It "Should return the configured values from the Get method" {
                     $result = Get-TargetResource @testParams
@@ -203,22 +215,24 @@ try
             }
 
             Context -Name "When the ContactEmail is incorrect" -Fixture {
-                $testParams = @{
-                    IsSingleInstance      = "Yes"
-                    PerformanceLevel      = "Maximum"
-                    ContactEmail          = "sharepoint@contoso.com"
-                    WindowsServiceAccount = $mockCredential
-                }
-
-                Mock -CommandName Get-SPEnterpriseSearchService -MockWith {
-                    return @{
-                        ProcessIdentity  = "DOMAIN\username"
-                        ContactEmail     = "incorrect@contoso.com"
-                        PerformanceLevel = "Maximum"
+                BeforeAll {
+                    $testParams = @{
+                        IsSingleInstance      = "Yes"
+                        PerformanceLevel      = "Maximum"
+                        ContactEmail          = "sharepoint@contoso.com"
+                        WindowsServiceAccount = $mockCredential
                     }
-                }
 
-                Mock -CommandName Set-SPEnterpriseSearchService -MockWith { }
+                    Mock -CommandName Get-SPEnterpriseSearchService -MockWith {
+                        return @{
+                            ProcessIdentity  = "DOMAIN\username"
+                            ContactEmail     = "incorrect@contoso.com"
+                            PerformanceLevel = "Maximum"
+                        }
+                    }
+
+                    Mock -CommandName Set-SPEnterpriseSearchService -MockWith { }
+                }
 
                 It "Should return the configured values from the Get method" {
                     $result = Get-TargetResource @testParams

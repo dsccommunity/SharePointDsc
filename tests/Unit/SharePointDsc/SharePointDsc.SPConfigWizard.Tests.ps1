@@ -46,31 +46,35 @@ Invoke-TestSetup
 
 try
 {
-    Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
-        InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
-            Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
+    InModuleScope -ModuleName $script:DSCResourceFullName -ScriptBlock {
+        Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
+            BeforeAll {
+                Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
-            # Mocks for all contexts
-            Mock -CommandName Remove-Item -MockWith { }
-            Mock -CommandName Get-Content -MockWith { return "log info" }
-            Mock -CommandName Get-SPDscServerPatchStatus -MockWith { return "UpgradeRequired" }
+                # Mocks for all contexts
+                Mock -CommandName Remove-Item -MockWith { }
+                Mock -CommandName Get-Content -MockWith { return "log info" }
+                Mock -CommandName Get-SPDscServerPatchStatus -MockWith { return "UpgradeRequired" }
+            }
 
             # Test contexts
             Context -Name "Upgrade required for Language Pack" -Fixture {
-                $testParams = @{
-                    IsSingleInstance = "Yes"
-                }
-
-                Mock -CommandName Get-SPDscRegistryKey -MockWith {
-                    if ($Value -eq "LanguagePackInstalled")
-                    {
-                        return 1
+                BeforeAll {
+                    $testParams = @{
+                        IsSingleInstance = "Yes"
                     }
-                }
 
-                Mock -CommandName Start-Process -MockWith {
-                    return @{
-                        ExitCode = 0
+                    Mock -CommandName Get-SPDscRegistryKey -MockWith {
+                        if ($Value -eq "LanguagePackInstalled")
+                        {
+                            return 1
+                        }
+                    }
+
+                    Mock -CommandName Start-Process -MockWith {
+                        return @{
+                            ExitCode = 0
+                        }
                     }
                 }
 
@@ -89,20 +93,22 @@ try
             }
 
             Context -Name "Upgrade required for Cumulative Update" -Fixture {
-                $testParams = @{
-                    IsSingleInstance = "Yes"
-                }
-
-                Mock -CommandName Get-SPDscRegistryKey -MockWith {
-                    if ($Value -eq "SetupType")
-                    {
-                        return "B2B_UPGRADE"
+                BeforeAll {
+                    $testParams = @{
+                        IsSingleInstance = "Yes"
                     }
-                }
 
-                Mock -CommandName Start-Process -MockWith {
-                    return @{
-                        ExitCode = 0
+                    Mock -CommandName Get-SPDscRegistryKey -MockWith {
+                        if ($Value -eq "SetupType")
+                        {
+                            return "B2B_UPGRADE"
+                        }
+                    }
+
+                    Mock -CommandName Start-Process -MockWith {
+                        return @{
+                            ExitCode = 0
+                        }
                     }
                 }
 
@@ -121,20 +127,22 @@ try
             }
 
             Context -Name "Config wizard should not be run, because not all servers have the binaries installed" -Fixture {
-                $testParams = @{
-                    IsSingleInstance = "Yes"
-                }
-
-                Mock -CommandName Get-SPDscRegistryKey -MockWith {
-                    if ($Value -eq "SetupType")
-                    {
-                        return "B2B_UPGRADE"
+                BeforeAll {
+                    $testParams = @{
+                        IsSingleInstance = "Yes"
                     }
+
+                    Mock -CommandName Get-SPDscRegistryKey -MockWith {
+                        if ($Value -eq "SetupType")
+                        {
+                            return "B2B_UPGRADE"
+                        }
+                    }
+
+                    Mock -CommandName Get-SPDscServerPatchStatus -MockWith { return "UpgradeBlocked" }
+
+                    Mock -CommandName Start-Process -MockWith { }
                 }
-
-                Mock -CommandName Get-SPDscServerPatchStatus -MockWith { return "UpgradeBlocked" }
-
-                Mock -CommandName Start-Process -MockWith { }
 
                 It "Should run Start-Process in the set method" {
                     Set-TargetResource @testParams
@@ -143,21 +151,23 @@ try
             }
 
             Context -Name "Current date outside Upgrade Days" -Fixture {
-                $testParams = @{
-                    IsSingleInstance    = "Yes"
-                    DatabaseUpgradeDays = "mon"
-                }
-
-                Mock -CommandName Get-SPDscRegistryKey -MockWith {
-                    if ($Value -eq "SetupType")
-                    {
-                        return "B2B_UPGRADE"
+                BeforeAll {
+                    $testParams = @{
+                        IsSingleInstance    = "Yes"
+                        DatabaseUpgradeDays = "mon"
                     }
-                }
 
-                $testDate = Get-Date -Day 17 -Month 7 -Year 2016 -Hour 12 -Minute 00 -Second 00
-                Mock -CommandName Get-Date -MockWith {
-                    return $testDate
+                    Mock -CommandName Get-SPDscRegistryKey -MockWith {
+                        if ($Value -eq "SetupType")
+                        {
+                            return "B2B_UPGRADE"
+                        }
+                    }
+
+                    $testDate = Get-Date -Day 17 -Month 7 -Year 2016 -Hour 12 -Minute 00 -Second 00
+                    Mock -CommandName Get-Date -MockWith {
+                        return $testDate
+                    }
                 }
 
                 It "Should return Ensure=Absent from the get method" {
@@ -174,22 +184,24 @@ try
             }
 
             Context -Name "Current date outside Upgrade Time" -Fixture {
-                $testParams = @{
-                    IsSingleInstance    = "Yes"
-                    DatabaseUpgradeDays = "sun"
-                    DatabaseUpgradeTime = "3:00am to 5:00am"
-                }
-
-                Mock -CommandName Get-SPDscRegistryKey -MockWith {
-                    if ($Value -eq "SetupType")
-                    {
-                        return "B2B_UPGRADE"
+                BeforeAll {
+                    $testParams = @{
+                        IsSingleInstance    = "Yes"
+                        DatabaseUpgradeDays = "sun"
+                        DatabaseUpgradeTime = "3:00am to 5:00am"
                     }
-                }
 
-                $testDate = Get-Date -Day 17 -Month 7 -Year 2016 -Hour 12 -Minute 00 -Second 00
-                Mock -CommandName Get-Date -MockWith {
-                    return $testDate
+                    Mock -CommandName Get-SPDscRegistryKey -MockWith {
+                        if ($Value -eq "SetupType")
+                        {
+                            return "B2B_UPGRADE"
+                        }
+                    }
+
+                    $testDate = Get-Date -Day 17 -Month 7 -Year 2016 -Hour 12 -Minute 00 -Second 00
+                    Mock -CommandName Get-Date -MockWith {
+                        return $testDate
+                    }
                 }
 
                 It "Should return null from the set method" {
@@ -198,22 +210,24 @@ try
             }
 
             Context -Name "Upgrade Time incorrectly formatted" -Fixture {
-                $testParams = @{
-                    IsSingleInstance    = "Yes"
-                    DatabaseUpgradeDays = "sun"
-                    DatabaseUpgradeTime = "error 3:00am to 5:00am"
-                }
-
-                Mock -CommandName Get-SPDscRegistryKey -MockWith {
-                    if ($Value -eq "SetupType")
-                    {
-                        return "B2B_UPGRADE"
+                BeforeAll {
+                    $testParams = @{
+                        IsSingleInstance    = "Yes"
+                        DatabaseUpgradeDays = "sun"
+                        DatabaseUpgradeTime = "error 3:00am to 5:00am"
                     }
-                }
 
-                $testDate = Get-Date -Day 17 -Month 7 -Year 2016 -Hour 12 -Minute 00 -Second 00
-                Mock -CommandName Get-Date -MockWith {
-                    return $testDate
+                    Mock -CommandName Get-SPDscRegistryKey -MockWith {
+                        if ($Value -eq "SetupType")
+                        {
+                            return "B2B_UPGRADE"
+                        }
+                    }
+
+                    $testDate = Get-Date -Day 17 -Month 7 -Year 2016 -Hour 12 -Minute 00 -Second 00
+                    Mock -CommandName Get-Date -MockWith {
+                        return $testDate
+                    }
                 }
 
                 It "Should return exception from the set method" {
@@ -222,22 +236,24 @@ try
             }
 
             Context -Name "Start time Upgrade Time incorrectly formatted" -Fixture {
-                $testParams = @{
-                    IsSingleInstance    = "Yes"
-                    DatabaseUpgradeDays = "sun"
-                    DatabaseUpgradeTime = "3:00xm to 5:00am"
-                }
-
-                Mock -CommandName Get-SPDscRegistryKey -MockWith {
-                    if ($Value -eq "SetupType")
-                    {
-                        return "B2B_UPGRADE"
+                BeforeAll {
+                    $testParams = @{
+                        IsSingleInstance    = "Yes"
+                        DatabaseUpgradeDays = "sun"
+                        DatabaseUpgradeTime = "3:00xm to 5:00am"
                     }
-                }
 
-                $testDate = Get-Date -Day 17 -Month 7 -Year 2016 -Hour 12 -Minute 00 -Second 00
-                Mock -CommandName Get-Date -MockWith {
-                    return $testDate
+                    Mock -CommandName Get-SPDscRegistryKey -MockWith {
+                        if ($Value -eq "SetupType")
+                        {
+                            return "B2B_UPGRADE"
+                        }
+                    }
+
+                    $testDate = Get-Date -Day 17 -Month 7 -Year 2016 -Hour 12 -Minute 00 -Second 00
+                    Mock -CommandName Get-Date -MockWith {
+                        return $testDate
+                    }
                 }
 
                 It "Should return exception from the set method" {
@@ -246,22 +262,24 @@ try
             }
 
             Context -Name "End time Upgrade Time incorrectly formatted" -Fixture {
-                $testParams = @{
-                    IsSingleInstance    = "Yes"
-                    DatabaseUpgradeDays = "sun"
-                    DatabaseUpgradeTime = "3:00am to 5:00xm"
-                }
-
-                Mock -CommandName Get-SPDscRegistryKey -MockWith {
-                    if ($Value -eq "SetupType")
-                    {
-                        return "B2B_UPGRADE"
+                BeforeAll {
+                    $testParams = @{
+                        IsSingleInstance    = "Yes"
+                        DatabaseUpgradeDays = "sun"
+                        DatabaseUpgradeTime = "3:00am to 5:00xm"
                     }
-                }
 
-                $testDate = Get-Date -Day 17 -Month 7 -Year 2016 -Hour 12 -Minute 00 -Second 00
-                Mock -CommandName Get-Date -MockWith {
-                    return $testDate
+                    Mock -CommandName Get-SPDscRegistryKey -MockWith {
+                        if ($Value -eq "SetupType")
+                        {
+                            return "B2B_UPGRADE"
+                        }
+                    }
+
+                    $testDate = Get-Date -Day 17 -Month 7 -Year 2016 -Hour 12 -Minute 00 -Second 00
+                    Mock -CommandName Get-Date -MockWith {
+                        return $testDate
+                    }
                 }
 
                 It "Should return exception from the set method" {
@@ -270,22 +288,24 @@ try
             }
 
             Context -Name "Start time of Upgrade Time larger than end time" -Fixture {
-                $testParams = @{
-                    IsSingleInstance    = "Yes"
-                    DatabaseUpgradeDays = "sun"
-                    DatabaseUpgradeTime = "3:00pm to 5:00am"
-                }
-
-                Mock -CommandName Get-SPDscRegistryKey -MockWith {
-                    if ($Value -eq "SetupType")
-                    {
-                        return "B2B_UPGRADE"
+                BeforeAll {
+                    $testParams = @{
+                        IsSingleInstance    = "Yes"
+                        DatabaseUpgradeDays = "sun"
+                        DatabaseUpgradeTime = "3:00pm to 5:00am"
                     }
-                }
 
-                $testDate = Get-Date -Day 17 -Month 7 -Year 2016 -Hour 12 -Minute 00 -Second 00
-                Mock -CommandName Get-Date -MockWith {
-                    return $testDate
+                    Mock -CommandName Get-SPDscRegistryKey -MockWith {
+                        if ($Value -eq "SetupType")
+                        {
+                            return "B2B_UPGRADE"
+                        }
+                    }
+
+                    $testDate = Get-Date -Day 17 -Month 7 -Year 2016 -Hour 12 -Minute 00 -Second 00
+                    Mock -CommandName Get-Date -MockWith {
+                        return $testDate
+                    }
                 }
 
                 It "Should return exception from the set method" {
@@ -294,20 +314,22 @@ try
             }
 
             Context -Name "ExitCode of process is not 0" -Fixture {
-                $testParams = @{
-                    IsSingleInstance = "Yes"
-                }
-
-                Mock -CommandName Get-SPDscRegistryKey -MockWith {
-                    if ($Value -eq "LanguagePackInstalled")
-                    {
-                        return 1
+                BeforeAll {
+                    $testParams = @{
+                        IsSingleInstance = "Yes"
                     }
-                }
 
-                Mock -CommandName Start-Process -MockWith { return
-                    @{
-                        ExitCode = -1
+                    Mock -CommandName Get-SPDscRegistryKey -MockWith {
+                        if ($Value -eq "LanguagePackInstalled")
+                        {
+                            return 1
+                        }
+                    }
+
+                    Mock -CommandName Start-Process -MockWith { return
+                        @{
+                            ExitCode = -1
+                        }
                     }
                 }
 
@@ -325,18 +347,20 @@ try
             }
 
             Context -Name "Ensure is set to Absent, Config Wizard not required" -Fixture {
-                $testParams = @{
-                    IsSingleInstance = "Yes"
-                    Ensure           = "Absent"
-                }
+                BeforeAll {
+                    $testParams = @{
+                        IsSingleInstance = "Yes"
+                        Ensure           = "Absent"
+                    }
 
-                Mock -CommandName Get-SPDscRegistryKey -MockWith {
-                    return 0
-                }
+                    Mock -CommandName Get-SPDscRegistryKey -MockWith {
+                        return 0
+                    }
 
-                Mock -CommandName Start-Process -MockWith {
-                    return @{
-                        ExitCode = 0
+                    Mock -CommandName Start-Process -MockWith {
+                        return @{
+                            ExitCode = 0
+                        }
                     }
                 }
 

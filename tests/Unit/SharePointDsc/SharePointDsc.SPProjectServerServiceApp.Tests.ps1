@@ -46,9 +46,23 @@ Invoke-TestSetup
 
 try
 {
-    Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
-        InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
-            Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
+    InModuleScope -ModuleName $script:DSCResourceFullName -ScriptBlock {
+        Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
+            BeforeAll {
+                Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
+
+                if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 16)
+                {
+                    # Initialize Tests
+                    $getTypeFullName = "Microsoft.Office.Project.Server.Administration.PsiServiceApplication"
+
+                    # Mocks for all contexts
+                    Mock -CommandName New-SPProjectServiceApplication -MockWith { }
+                    Mock -CommandName Set-SPProjectServiceApplication -MockWith { }
+                    Mock -CommandName Remove-SPServiceApplication -MockWith { }
+                    Mock -CommandName New-SPProjectServiceApplicationProxy -MockWith { }
+                }
+            }
 
             switch ($Global:SPDscHelper.CurrentStubBuildNumber.Major)
             {
@@ -70,26 +84,18 @@ try
                 }
                 16
                 {
-
-                    # Initialize Tests
-                    $getTypeFullName = "Microsoft.Office.Project.Server.Administration.PsiServiceApplication"
-
-                    # Mocks for all contexts
-                    Mock -CommandName New-SPProjectServiceApplication -MockWith { }
-                    Mock -CommandName Set-SPProjectServiceApplication -MockWith { }
-                    Mock -CommandName Remove-SPServiceApplication -MockWith { }
-                    Mock -CommandName New-SPProjectServiceApplicationProxy -MockWith { }
-
                     # Test contexts
                     Context -Name "When no service applications exist in the current farm" -Fixture {
-                        $testParams = @{
-                            Name            = "Test Project Server App"
-                            ApplicationPool = "Test App Pool"
-                            Ensure          = "Present"
-                        }
+                        BeforeAll {
+                            $testParams = @{
+                                Name            = "Test Project Server App"
+                                ApplicationPool = "Test App Pool"
+                                Ensure          = "Present"
+                            }
 
-                        Mock -CommandName Get-SPServiceApplication -MockWith {
-                            return $null
+                            Mock -CommandName Get-SPServiceApplication -MockWith {
+                                return $null
+                            }
                         }
 
                         It "Should return absent from the Get method" {
@@ -107,24 +113,26 @@ try
                     }
 
                     Context -Name "When service applications exist in the current farm but the specific Project Server app does not" -Fixture {
-                        $testParams = @{
-                            Name            = "Test Project Server App"
-                            ApplicationPool = "Test App Pool"
-                            Ensure          = "Present"
-                        }
-
-                        Mock -CommandName Get-SPServiceApplication -MockWith {
-                            $spServiceApp = [PSCustomObject]@{
-                                DisplayName = $testParams.Name
+                        BeforeAll {
+                            $testParams = @{
+                                Name            = "Test Project Server App"
+                                ApplicationPool = "Test App Pool"
+                                Ensure          = "Present"
                             }
-                            $spServiceApp | Add-Member -MemberType ScriptMethod `
-                                -Name GetType `
-                                -Value {
-                                return @{
-                                    FullName = "Microsoft.Office.UnKnownWebServiceApplication"
+
+                            Mock -CommandName Get-SPServiceApplication -MockWith {
+                                $spServiceApp = [PSCustomObject]@{
+                                    DisplayName = $testParams.Name
                                 }
-                            } -PassThru -Force
-                            return $spServiceApp
+                                $spServiceApp | Add-Member -MemberType ScriptMethod `
+                                    -Name GetType `
+                                    -Value {
+                                    return @{
+                                        FullName = "Microsoft.Office.UnKnownWebServiceApplication"
+                                    }
+                                } -PassThru -Force
+                                return $spServiceApp
+                            }
                         }
 
                         It "Should return absent from the Get method" {
@@ -133,22 +141,24 @@ try
                     }
 
                     Context -Name "When a service application exists and is configured correctly" -Fixture {
-                        $testParams = @{
-                            Name            = "Test Project Server App"
-                            ApplicationPool = "Test App Pool"
-                            Ensure          = "Present"
-                        }
-
-                        Mock -CommandName Get-SPServiceApplication -MockWith {
-                            $spServiceApp = [PSCustomObject]@{
-                                TypeName        = "Project Application Services"
-                                DisplayName     = $testParams.Name
-                                ApplicationPool = @{ Name = $testParams.ApplicationPool }
+                        BeforeAll {
+                            $testParams = @{
+                                Name            = "Test Project Server App"
+                                ApplicationPool = "Test App Pool"
+                                Ensure          = "Present"
                             }
-                            $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value {
-                                return @{ FullName = $getTypeFullName }
-                            } -PassThru -Force
-                            return $spServiceApp
+
+                            Mock -CommandName Get-SPServiceApplication -MockWith {
+                                $spServiceApp = [PSCustomObject]@{
+                                    TypeName        = "Project Application Services"
+                                    DisplayName     = $testParams.Name
+                                    ApplicationPool = @{ Name = $testParams.ApplicationPool }
+                                }
+                                $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value {
+                                    return @{ FullName = $getTypeFullName }
+                                } -PassThru -Force
+                                return $spServiceApp
+                            }
                         }
 
                         It "Should return present from the get method" {
@@ -161,26 +171,28 @@ try
                     }
 
                     Context -Name "When a service application exists and is not configured correctly" -Fixture {
-                        $testParams = @{
-                            Name            = "Test Project Server App"
-                            ApplicationPool = "Test App Pool"
-                            Ensure          = "Present"
-                        }
-
-                        Mock -CommandName Get-SPServiceApplication -MockWith {
-                            $spServiceApp = [PSCustomObject]@{
-                                TypeName        = "Project Application Services"
-                                DisplayName     = $testParams.Name
-                                ApplicationPool = @{ Name = "Wrong App Pool Name" }
+                        BeforeAll {
+                            $testParams = @{
+                                Name            = "Test Project Server App"
+                                ApplicationPool = "Test App Pool"
+                                Ensure          = "Present"
                             }
-                            $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value {
-                                return @{ FullName = $getTypeFullName }
-                            } -PassThru -Force
-                            return $spServiceApp
-                        }
-                        Mock -CommandName Get-SPServiceApplicationPool {
-                            return @{
-                                Name = $testParams.ApplicationPool
+
+                            Mock -CommandName Get-SPServiceApplication -MockWith {
+                                $spServiceApp = [PSCustomObject]@{
+                                    TypeName        = "Project Application Services"
+                                    DisplayName     = $testParams.Name
+                                    ApplicationPool = @{ Name = "Wrong App Pool Name" }
+                                }
+                                $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value {
+                                    return @{ FullName = $getTypeFullName }
+                                } -PassThru -Force
+                                return $spServiceApp
+                            }
+                            Mock -CommandName Get-SPServiceApplicationPool {
+                                return @{
+                                    Name = $testParams.ApplicationPool
+                                }
                             }
                         }
 
@@ -196,22 +208,24 @@ try
                     }
 
                     Context -Name "When the service app exists but it shouldn't" -Fixture {
-                        $testParams = @{
-                            Name            = "Test App"
-                            ApplicationPool = "-"
-                            Ensure          = "Absent"
-                        }
-
-                        Mock -CommandName Get-SPServiceApplication -MockWith {
-                            $spServiceApp = [PSCustomObject]@{
-                                TypeName        = "Project Application Services"
-                                DisplayName     = $testParams.Name
-                                ApplicationPool = @{ Name = $testParams.ApplicationPool }
+                        BeforeAll {
+                            $testParams = @{
+                                Name            = "Test App"
+                                ApplicationPool = "-"
+                                Ensure          = "Absent"
                             }
-                            $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value {
-                                return @{ FullName = $getTypeFullName }
-                            } -PassThru -Force
-                            return $spServiceApp
+
+                            Mock -CommandName Get-SPServiceApplication -MockWith {
+                                $spServiceApp = [PSCustomObject]@{
+                                    TypeName        = "Project Application Services"
+                                    DisplayName     = $testParams.Name
+                                    ApplicationPool = @{ Name = $testParams.ApplicationPool }
+                                }
+                                $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value {
+                                    return @{ FullName = $getTypeFullName }
+                                } -PassThru -Force
+                                return $spServiceApp
+                            }
                         }
 
                         It "Should return present from the Get method" {
@@ -229,14 +243,16 @@ try
                     }
 
                     Context -Name "When the service app doesn't exist and shouldn't" -Fixture {
-                        $testParams = @{
-                            Name            = "Test App"
-                            ApplicationPool = "-"
-                            Ensure          = "Absent"
-                        }
+                        BeforeAll {
+                            $testParams = @{
+                                Name            = "Test App"
+                                ApplicationPool = "-"
+                                Ensure          = "Absent"
+                            }
 
-                        Mock -CommandName Get-SPServiceApplication -MockWith {
-                            return $null
+                            Mock -CommandName Get-SPServiceApplication -MockWith {
+                                return $null
+                            }
                         }
 
                         It "Should return absent from the Get method" {

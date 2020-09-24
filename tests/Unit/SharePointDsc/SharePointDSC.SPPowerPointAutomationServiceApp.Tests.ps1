@@ -46,34 +46,38 @@ Invoke-TestSetup
 
 try
 {
-    Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
-        InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
-            Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
+    InModuleScope -ModuleName $script:DSCResourceFullName -ScriptBlock {
+        Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
+            BeforeAll {
+                Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
-            # Initialize tests
-            $getTypeFullName = "Microsoft.Office.Server.PowerPoint.Administration.PowerPointConversionServiceApplication"
+                # Initialize tests
+                $getTypeFullName = "Microsoft.Office.Server.PowerPoint.Administration.PowerPointConversionServiceApplication"
 
-            # Mocks for all
-            Mock -CommandName Get-SPServiceApplication -MockWith { }
-            Mock -CommandName Get-SPServiceApplicationPool -MockWith { }
-            Mock -CommandName Get-SPServiceApplicationProxy -MockWith { }
+                # Mocks for all
+                Mock -CommandName Get-SPServiceApplication -MockWith { }
+                Mock -CommandName Get-SPServiceApplicationPool -MockWith { }
+                Mock -CommandName Get-SPServiceApplicationProxy -MockWith { }
 
-            Mock -CommandName New-SPPowerPointConversionServiceApplication -MockWith { }
-            Mock -CommandName New-SPPowerPointConversionServiceApplicationProxy -MockWith { }
-            Mock -CommandName Remove-SPServiceApplication -MockWith { }
+                Mock -CommandName New-SPPowerPointConversionServiceApplication -MockWith { }
+                Mock -CommandName New-SPPowerPointConversionServiceApplicationProxy -MockWith { }
+                Mock -CommandName Remove-SPServiceApplication -MockWith { }
+            }
 
             # Test contexts
             Context -Name "When Ensure is Absent and we specify additional paramters" -Fixture {
-                $testParams = @{
-                    Name                            = "Power Point Automation Service Application"
-                    ProxyName                       = "Power Point Automation Service Application Proxy"
-                    ApplicationPool                 = "SharePoint Services App Pool"
-                    CacheExpirationPeriodInSeconds  = 600
-                    MaximumConversionsPerWorker     = 5
-                    WorkerKeepAliveTimeoutInSeconds = 120
-                    WorkerProcessCount              = 3
-                    WorkerTimeoutInSeconds          = 300
-                    Ensure                          = "Absent"
+                BeforeAll {
+                    $testParams = @{
+                        Name                            = "Power Point Automation Service Application"
+                        ProxyName                       = "Power Point Automation Service Application Proxy"
+                        ApplicationPool                 = "SharePoint Services App Pool"
+                        CacheExpirationPeriodInSeconds  = 600
+                        MaximumConversionsPerWorker     = 5
+                        WorkerKeepAliveTimeoutInSeconds = 120
+                        WorkerProcessCount              = 3
+                        WorkerTimeoutInSeconds          = 300
+                        Ensure                          = "Absent"
+                    }
                 }
 
                 It "Should throw an exception as additional parameters are not allowed when Ensure = 'Absent'" {
@@ -84,19 +88,21 @@ try
             }
 
             Context -Name "When Ensure is Present but we don't specify an ApplicationPool" -Fixture {
-                $testParams = @{
-                    Name                            = "Power Point Automation Service Application"
-                    ProxyName                       = "Power Point Automation Service Application Proxy"
-                    CacheExpirationPeriodInSeconds  = 600
-                    MaximumConversionsPerWorker     = 5
-                    WorkerKeepAliveTimeoutInSeconds = 120
-                    WorkerProcessCount              = 3
-                    WorkerTimeoutInSeconds          = 300
-                    Ensure                          = "Present"
-                }
+                BeforeAll {
+                    $testParams = @{
+                        Name                            = "Power Point Automation Service Application"
+                        ProxyName                       = "Power Point Automation Service Application Proxy"
+                        CacheExpirationPeriodInSeconds  = 600
+                        MaximumConversionsPerWorker     = 5
+                        WorkerKeepAliveTimeoutInSeconds = 120
+                        WorkerProcessCount              = 3
+                        WorkerTimeoutInSeconds          = 300
+                        Ensure                          = "Present"
+                    }
 
-                Mock -CommandName Get-SPServiceApplicationPool -MockWith {
-                    return $null
+                    Mock -CommandName Get-SPServiceApplicationPool -MockWith {
+                        return $null
+                    }
                 }
 
                 It "Should throw an exception as additional parameters are not allowed when Ensure = 'Absent'" {
@@ -109,53 +115,55 @@ try
 
 
             Context -Name "When no service applications exist in the current farm" -Fixture {
-                $testParams = @{
-                    Name                            = "Power Point Automation Service Application"
-                    ProxyName                       = "Power Point Automation Service Application Proxy"
-                    ApplicationPool                 = "SharePoint Services App Pool"
-                    CacheExpirationPeriodInSeconds  = 600
-                    MaximumConversionsPerWorker     = 5
-                    WorkerKeepAliveTimeoutInSeconds = 120
-                    WorkerProcessCount              = 3
-                    WorkerTimeoutInSeconds          = 300
-                    Ensure                          = "Present"
-                }
-
-                Mock -CommandName Get-SPServiceApplicationPool -MockWith {
-                    return @{
-                        Name = $testParams.ApplicationPool
+                BeforeAll {
+                    $testParams = @{
+                        Name                            = "Power Point Automation Service Application"
+                        ProxyName                       = "Power Point Automation Service Application Proxy"
+                        ApplicationPool                 = "SharePoint Services App Pool"
+                        CacheExpirationPeriodInSeconds  = 600
+                        MaximumConversionsPerWorker     = 5
+                        WorkerKeepAliveTimeoutInSeconds = 120
+                        WorkerProcessCount              = 3
+                        WorkerTimeoutInSeconds          = 300
+                        Ensure                          = "Present"
                     }
-                }
 
-                Mock -CommandName New-SPPowerPointConversionServiceApplication -MockWith {
-                    $spServiceApp = [PSCustomObject]@{
-                        DisplayName                     = $testParams.Name
-                        ApplicationPool                 = @{ Name = $testParams.ApplicationPool }
-                        CacheExpirationPeriodInSeconds  = 0
-                        MaximumConversionsPerWorker     = 0
-                        WorkerKeepAliveTimeoutInSeconds = 0
-                        WorkerProcessCount              = 0
-                        WorkerTimeoutInSeconds          = 0
-                    }
-                    $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod `
-                        -Name Update `
-                        -Value {
+                    Mock -CommandName Get-SPServiceApplicationPool -MockWith {
                         return @{
+                            Name = $testParams.ApplicationPool
+                        }
+                    }
+
+                    Mock -CommandName New-SPPowerPointConversionServiceApplication -MockWith {
+                        $spServiceApp = [PSCustomObject]@{
                             DisplayName                     = $testParams.Name
                             ApplicationPool                 = @{ Name = $testParams.ApplicationPool }
-                            CacheExpirationPeriodInSeconds  = $testParams.CacheExpirationPeriodInSeconds
-                            MaximumConversionsPerWorker     = $testParams.MaximumConversionsPerWorker
-                            WorkerKeepAliveTimeoutInSeconds = $testParams.WorkerKeepAliveTimeoutInSeconds
-                            WorkerProcessCount              = $testParams.WorkerProcessCount
-                            WorkerTimeoutInSeconds          = $testParams.WorkerTimeoutInSeconds
+                            CacheExpirationPeriodInSeconds  = 0
+                            MaximumConversionsPerWorker     = 0
+                            WorkerKeepAliveTimeoutInSeconds = 0
+                            WorkerProcessCount              = 0
+                            WorkerTimeoutInSeconds          = 0
                         }
-                    } -PassThru -Force
-                    return $($spServiceApp)
+                        $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod `
+                            -Name Update `
+                            -Value {
+                            return @{
+                                DisplayName                     = $testParams.Name
+                                ApplicationPool                 = @{ Name = $testParams.ApplicationPool }
+                                CacheExpirationPeriodInSeconds  = $testParams.CacheExpirationPeriodInSeconds
+                                MaximumConversionsPerWorker     = $testParams.MaximumConversionsPerWorker
+                                WorkerKeepAliveTimeoutInSeconds = $testParams.WorkerKeepAliveTimeoutInSeconds
+                                WorkerProcessCount              = $testParams.WorkerProcessCount
+                                WorkerTimeoutInSeconds          = $testParams.WorkerTimeoutInSeconds
+                            }
+                        } -PassThru -Force
+                        return $($spServiceApp)
+                    }
 
-                }
-                Mock -CommandName New-SPPowerPointConversionServiceApplicationProxy -MockWith { }
-                Mock -CommandName Get-SPServiceApplication -MockWith {
-                    return $null
+                    Mock -CommandName New-SPPowerPointConversionServiceApplicationProxy -MockWith { }
+                    Mock -CommandName Get-SPServiceApplication -MockWith {
+                        return $null
+                    }
                 }
 
                 It "Should return absent from the Get method" {
@@ -174,67 +182,68 @@ try
             }
 
             Context -Name "When service applications exist in the current farm but the specific PowerPoint Automation Services app does not" -Fixture {
-                $testParams = @{
-                    Name                            = "Power Point Automation Service Application"
-                    ProxyName                       = "Power Point Automation Service Application Proxy"
-                    ApplicationPool                 = "SharePoint Services App Pool"
-                    CacheExpirationPeriodInSeconds  = 600
-                    MaximumConversionsPerWorker     = 5
-                    WorkerKeepAliveTimeoutInSeconds = 120
-                    WorkerProcessCount              = 3
-                    WorkerTimeoutInSeconds          = 300
-                    Ensure                          = "Present"
-                }
-
-
-                Mock -CommandName Get-SPServiceApplicationPool -MockWith {
-                    return @{
-                        Name = $testParams.ApplicationPool
+                BeforeAll {
+                    $testParams = @{
+                        Name                            = "Power Point Automation Service Application"
+                        ProxyName                       = "Power Point Automation Service Application Proxy"
+                        ApplicationPool                 = "SharePoint Services App Pool"
+                        CacheExpirationPeriodInSeconds  = 600
+                        MaximumConversionsPerWorker     = 5
+                        WorkerKeepAliveTimeoutInSeconds = 120
+                        WorkerProcessCount              = 3
+                        WorkerTimeoutInSeconds          = 300
+                        Ensure                          = "Present"
                     }
-                }
 
-                Mock -CommandName New-SPPowerPointConversionServiceApplication -MockWith {
-                    $spServiceApp = [PSCustomObject]@{
-                        DisplayName                     = $testParams.Name
-                        ApplicationPool                 = @{ Name = $testParams.ApplicationPool }
-                        CacheExpirationPeriodInSeconds  = 0
-                        MaximumConversionsPerWorker     = 0
-                        WorkerKeepAliveTimeoutInSeconds = 0
-                        WorkerProcessCount              = 0
-                        WorkerTimeoutInSeconds          = 0
-                    }
-                    $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod `
-                        -Name Update `
-                        -Value {
+
+                    Mock -CommandName Get-SPServiceApplicationPool -MockWith {
                         return @{
+                            Name = $testParams.ApplicationPool
+                        }
+                    }
+
+                    Mock -CommandName New-SPPowerPointConversionServiceApplication -MockWith {
+                        $spServiceApp = [PSCustomObject]@{
                             DisplayName                     = $testParams.Name
                             ApplicationPool                 = @{ Name = $testParams.ApplicationPool }
-                            CacheExpirationPeriodInSeconds  = $testParams.CacheExpirationPeriodInSeconds
-                            MaximumConversionsPerWorker     = $testParams.MaximumConversionsPerWorker
-                            WorkerKeepAliveTimeoutInSeconds = $testParams.WorkerKeepAliveTimeoutInSeconds
-                            WorkerProcessCount              = $testParams.WorkerProcessCount
-                            WorkerTimeoutInSeconds          = $testParams.WorkerTimeoutInSeconds
+                            CacheExpirationPeriodInSeconds  = 0
+                            MaximumConversionsPerWorker     = 0
+                            WorkerKeepAliveTimeoutInSeconds = 0
+                            WorkerProcessCount              = 0
+                            WorkerTimeoutInSeconds          = 0
                         }
-                    } -PassThru -Force
-                    return $($spServiceApp)
-
-                }
-
-                Mock -CommandName New-SPPowerPointConversionServiceApplicationProxy -MockWith { }
-
-                Mock -CommandName Get-SPServiceApplication -MockWith {
-                    $spServiceApp = [PSCustomObject]@{
-                        DisplayName     = $testParams.Name
-                        ApplicationPool = @{ Name = $testParams.ApplicationPool }
+                        $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod `
+                            -Name Update `
+                            -Value {
+                            return @{
+                                DisplayName                     = $testParams.Name
+                                ApplicationPool                 = @{ Name = $testParams.ApplicationPool }
+                                CacheExpirationPeriodInSeconds  = $testParams.CacheExpirationPeriodInSeconds
+                                MaximumConversionsPerWorker     = $testParams.MaximumConversionsPerWorker
+                                WorkerKeepAliveTimeoutInSeconds = $testParams.WorkerKeepAliveTimeoutInSeconds
+                                WorkerProcessCount              = $testParams.WorkerProcessCount
+                                WorkerTimeoutInSeconds          = $testParams.WorkerTimeoutInSeconds
+                            }
+                        } -PassThru -Force
+                        return $($spServiceApp)
                     }
-                    $spServiceApp | Add-Member -MemberType ScriptMethod `
-                        -Name GetType `
-                        -Value {
-                        return @{
-                            FullName = "Microsoft.Office.UnKnownWebServiceApplication"
+
+                    Mock -CommandName New-SPPowerPointConversionServiceApplicationProxy -MockWith { }
+
+                    Mock -CommandName Get-SPServiceApplication -MockWith {
+                        $spServiceApp = [PSCustomObject]@{
+                            DisplayName     = $testParams.Name
+                            ApplicationPool = @{ Name = $testParams.ApplicationPool }
                         }
-                    } -PassThru -Force
-                    return $($spServiceApp)
+                        $spServiceApp | Add-Member -MemberType ScriptMethod `
+                            -Name GetType `
+                            -Value {
+                            return @{
+                                FullName = "Microsoft.Office.UnKnownWebServiceApplication"
+                            }
+                        } -PassThru -Force
+                        return $($spServiceApp)
+                    }
                 }
 
                 It "Should return 'Absent' from the Get method" {
@@ -252,34 +261,36 @@ try
             }
 
             Context -Name "When service applications should exist but the application pool doesn't exist" -Fixture {
-                $testParams = @{
-                    Name                            = "Power Point Automation Service Application"
-                    ProxyName                       = "Power Point Automation Service Application Proxy"
-                    ApplicationPool                 = "SharePoint Services App Pool"
-                    CacheExpirationPeriodInSeconds  = 600
-                    MaximumConversionsPerWorker     = 5
-                    WorkerKeepAliveTimeoutInSeconds = 120
-                    WorkerProcessCount              = 3
-                    WorkerTimeoutInSeconds          = 300
-                    Ensure                          = "Present"
-                }
-
-                Mock -CommandName Get-SPServiceApplication -MockWith {
-                    $spServiceApp = [PSCustomObject]@{
-                        DisplayName = $testParams.Name
+                BeforeAll {
+                    $testParams = @{
+                        Name                            = "Power Point Automation Service Application"
+                        ProxyName                       = "Power Point Automation Service Application Proxy"
+                        ApplicationPool                 = "SharePoint Services App Pool"
+                        CacheExpirationPeriodInSeconds  = 600
+                        MaximumConversionsPerWorker     = 5
+                        WorkerKeepAliveTimeoutInSeconds = 120
+                        WorkerProcessCount              = 3
+                        WorkerTimeoutInSeconds          = 300
+                        Ensure                          = "Present"
                     }
-                    $spServiceApp | Add-Member -MemberType ScriptMethod `
-                        -Name GetType `
-                        -Value {
-                        return @{
-                            FullName = "Microsoft.Office.UnKnownWebServiceApplication"
-                        }
-                    } -PassThru -Force
-                    return $($spServiceApp)
-                }
 
-                Mock -CommandName Get-SPServiceApplicationPool -MockWith {
-                    return $null
+                    Mock -CommandName Get-SPServiceApplication -MockWith {
+                        $spServiceApp = [PSCustomObject]@{
+                            DisplayName = $testParams.Name
+                        }
+                        $spServiceApp | Add-Member -MemberType ScriptMethod `
+                            -Name GetType `
+                            -Value {
+                            return @{
+                                FullName = "Microsoft.Office.UnKnownWebServiceApplication"
+                            }
+                        } -PassThru -Force
+                        return $($spServiceApp)
+                    }
+
+                    Mock -CommandName Get-SPServiceApplicationPool -MockWith {
+                        return $null
+                    }
                 }
 
                 It "Should return 'Absent' from the Get method" {
@@ -294,48 +305,50 @@ try
             }
 
             Context -Name "When a service application exists and is configured correctly" -Fixture {
-                $testParams = @{
-                    Name                            = "Power Point Automation Service Application"
-                    ProxyName                       = "Power Point Automation Service Application Proxy"
-                    ApplicationPool                 = "SharePoint Services App Pool"
-                    CacheExpirationPeriodInSeconds  = 600
-                    MaximumConversionsPerWorker     = 5
-                    WorkerKeepAliveTimeoutInSeconds = 120
-                    WorkerProcessCount              = 3
-                    WorkerTimeoutInSeconds          = 300
-                    Ensure                          = "Present"
-                }
-
-                Mock -CommandName Get-SPServiceApplication -MockWith {
-                    $spServiceApp = [PSCustomObject]@{
-                        DisplayName                     = $testParams.Name
-                        ApplicationPool                 = @{ Name = $testParams.ApplicationPool }
-                        CacheExpirationPeriodInSeconds  = $testParams.CacheExpirationPeriodInSeconds
-                        MaximumConversionsPerWorker     = $testParams.MaximumConversionsPerWorker
-                        WorkerKeepAliveTimeoutInSeconds = $testParams.WorkerKeepAliveTimeoutInSeconds
-                        WorkerProcessCount              = $testParams.WorkerProcessCount
-                        WorkerTimeoutInSeconds          = $testParams.WorkerTimeoutInSeconds
+                BeforeAll {
+                    $testParams = @{
+                        Name                            = "Power Point Automation Service Application"
+                        ProxyName                       = "Power Point Automation Service Application Proxy"
+                        ApplicationPool                 = "SharePoint Services App Pool"
+                        CacheExpirationPeriodInSeconds  = 600
+                        MaximumConversionsPerWorker     = 5
+                        WorkerKeepAliveTimeoutInSeconds = 120
+                        WorkerProcessCount              = 3
+                        WorkerTimeoutInSeconds          = 300
+                        Ensure                          = "Present"
                     }
-                    $spServiceApp | Add-Member -MemberType ScriptMethod `
-                        -Name GetType `
-                        -Value {
-                        return @{
-                            FullName = $getTypeFullName
+
+                    Mock -CommandName Get-SPServiceApplication -MockWith {
+                        $spServiceApp = [PSCustomObject]@{
+                            DisplayName                     = $testParams.Name
+                            ApplicationPool                 = @{ Name = $testParams.ApplicationPool }
+                            CacheExpirationPeriodInSeconds  = $testParams.CacheExpirationPeriodInSeconds
+                            MaximumConversionsPerWorker     = $testParams.MaximumConversionsPerWorker
+                            WorkerKeepAliveTimeoutInSeconds = $testParams.WorkerKeepAliveTimeoutInSeconds
+                            WorkerProcessCount              = $testParams.WorkerProcessCount
+                            WorkerTimeoutInSeconds          = $testParams.WorkerTimeoutInSeconds
                         }
-                    } -PassThru -Force
+                        $spServiceApp | Add-Member -MemberType ScriptMethod `
+                            -Name GetType `
+                            -Value {
+                            return @{
+                                FullName = $getTypeFullName
+                            }
+                        } -PassThru -Force
 
-                    $spServiceApp | Add-Member -MemberType ScriptMethod `
-                        -Name IsConnected `
-                        -Value {
-                        return $true
-                    } -PassThru -Force
+                        $spServiceApp | Add-Member -MemberType ScriptMethod `
+                            -Name IsConnected `
+                            -Value {
+                            return $true
+                        } -PassThru -Force
 
-                    return $($spServiceApp)
-                }
+                        return $($spServiceApp)
+                    }
 
-                Mock -CommandName Get-SPServiceApplicationProxy -MockWith {
-                    return @{
-                        Name = $testParams.ProxyName
+                    Mock -CommandName Get-SPServiceApplicationProxy -MockWith {
+                        return @{
+                            Name = $testParams.ProxyName
+                        }
                     }
                 }
 
@@ -349,45 +362,21 @@ try
             }
 
             Context -Name "When a service application exists but has a new Proxy Assignment" -Fixture {
-                $testParams = @{
-                    Name                            = "Power Point Automation Service Application"
-                    ProxyName                       = "Power Point Automation Service Application Proxy"
-                    ApplicationPool                 = "SharePoint Services App Pool"
-                    CacheExpirationPeriodInSeconds  = 600
-                    MaximumConversionsPerWorker     = 5
-                    WorkerKeepAliveTimeoutInSeconds = 120
-                    WorkerProcessCount              = 3
-                    WorkerTimeoutInSeconds          = 300
-                    Ensure                          = "Present"
-                }
-
-                Mock -CommandName Get-SPServiceApplication -MockWith {
-                    $spServiceApp = [PSCustomObject]@{
-                        DisplayName                     = $testParams.Name
-                        ApplicationPool                 = @{ Name = $testParams.ApplicationPool }
-                        CacheExpirationPeriodInSeconds  = $testParams.CacheExpirationPeriodInSeconds
-                        MaximumConversionsPerWorker     = $testParams.MaximumConversionsPerWorker
-                        WorkerKeepAliveTimeoutInSeconds = $testParams.WorkerKeepAliveTimeoutInSeconds
-                        WorkerProcessCount              = $testParams.WorkerProcessCount
-                        WorkerTimeoutInSeconds          = $testParams.WorkerTimeoutInSeconds
-
+                BeforeAll {
+                    $testParams = @{
+                        Name                            = "Power Point Automation Service Application"
+                        ProxyName                       = "Power Point Automation Service Application Proxy"
+                        ApplicationPool                 = "SharePoint Services App Pool"
+                        CacheExpirationPeriodInSeconds  = 600
+                        MaximumConversionsPerWorker     = 5
+                        WorkerKeepAliveTimeoutInSeconds = 120
+                        WorkerProcessCount              = 3
+                        WorkerTimeoutInSeconds          = 300
+                        Ensure                          = "Present"
                     }
-                    $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod `
-                        -Name GetType `
-                        -Value {
-                        return @{
-                            FullName = $getTypeFullName
-                        }
-                    } -PassThru -Force
-                    $spServiceApp = $spServiceApp | Add-Member -MemberType SCriptMethod `
-                        -Name IsConnected `
-                        -Value {
-                        return $true
-                    } -PassThru -Force
-                    $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod `
-                        -Name Update `
-                        -Value {
-                        return @{
+
+                    Mock -CommandName Get-SPServiceApplication -MockWith {
+                        $spServiceApp = [PSCustomObject]@{
                             DisplayName                     = $testParams.Name
                             ApplicationPool                 = @{ Name = $testParams.ApplicationPool }
                             CacheExpirationPeriodInSeconds  = $testParams.CacheExpirationPeriodInSeconds
@@ -395,31 +384,55 @@ try
                             WorkerKeepAliveTimeoutInSeconds = $testParams.WorkerKeepAliveTimeoutInSeconds
                             WorkerProcessCount              = $testParams.WorkerProcessCount
                             WorkerTimeoutInSeconds          = $testParams.WorkerTimeoutInSeconds
+
                         }
-                    } -PassThru -Force
+                        $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod `
+                            -Name GetType `
+                            -Value {
+                            return @{
+                                FullName = $getTypeFullName
+                            }
+                        } -PassThru -Force
+                        $spServiceApp = $spServiceApp | Add-Member -MemberType SCriptMethod `
+                            -Name IsConnected `
+                            -Value {
+                            return $true
+                        } -PassThru -Force
+                        $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod `
+                            -Name Update `
+                            -Value {
+                            return @{
+                                DisplayName                     = $testParams.Name
+                                ApplicationPool                 = @{ Name = $testParams.ApplicationPool }
+                                CacheExpirationPeriodInSeconds  = $testParams.CacheExpirationPeriodInSeconds
+                                MaximumConversionsPerWorker     = $testParams.MaximumConversionsPerWorker
+                                WorkerKeepAliveTimeoutInSeconds = $testParams.WorkerKeepAliveTimeoutInSeconds
+                                WorkerProcessCount              = $testParams.WorkerProcessCount
+                                WorkerTimeoutInSeconds          = $testParams.WorkerTimeoutInSeconds
+                            }
+                        } -PassThru -Force
 
-                    return $($spServiceApp)
-                }
-
-                Mock -CommandName Get-SPServiceApplicationPool -MockWith {
-                    return @{
-                        Name = $testParams.ApplicationPool
+                        return $($spServiceApp)
                     }
-                }
 
-
-
-                Mock -CommandName Get-SPServiceApplicationProxy -MockWith {
-                    $spServiceAppProxy = [PSCustomObject]@{
-                        Name = "$($testParams.ProxyName) other"
+                    Mock -CommandName Get-SPServiceApplicationPool -MockWith {
+                        return @{
+                            Name = $testParams.ApplicationPool
+                        }
                     }
-                    $spServiceAppProxy | Add-Member -MemberType SCriptMethod `
-                        -Name Delete `
-                        -Value {
-                        return $null
-                    } -PassThru -Force
 
-                    return $spServiceAppProxy
+                    Mock -CommandName Get-SPServiceApplicationProxy -MockWith {
+                        $spServiceAppProxy = [PSCustomObject]@{
+                            Name = "$($testParams.ProxyName) other"
+                        }
+                        $spServiceAppProxy | Add-Member -MemberType SCriptMethod `
+                            -Name Delete `
+                            -Value {
+                            return $null
+                        } -PassThru -Force
+
+                        return $spServiceAppProxy
+                    }
                 }
 
                 It "Should return Present from the get method" {
@@ -436,31 +449,33 @@ try
             }
 
             Context -Name "When a service application exists but has a new Application Pool Assignment" -Fixture {
-                $testParams = @{
-                    Name                            = "Power Point Automation Service Application"
-                    ProxyName                       = "Power Point Automation Service Application Proxy"
-                    ApplicationPool                 = "SharePoint Services App Pool"
-                    CacheExpirationPeriodInSeconds  = 600
-                    MaximumConversionsPerWorker     = 5
-                    WorkerKeepAliveTimeoutInSeconds = 120
-                    WorkerProcessCount              = 3
-                    WorkerTimeoutInSeconds          = 300
-                    Ensure                          = "Present"
-                }
-
-                Mock -CommandName Get-SPServiceApplication -MockWith {
-                    $spServiceApp = [PSCustomObject]@{
-                        DisplayName     = $testParams.Name
-                        ApplicationPool = @{ Name = "Other SharePoint Services App Pool" }
+                BeforeAll {
+                    $testParams = @{
+                        Name                            = "Power Point Automation Service Application"
+                        ProxyName                       = "Power Point Automation Service Application Proxy"
+                        ApplicationPool                 = "SharePoint Services App Pool"
+                        CacheExpirationPeriodInSeconds  = 600
+                        MaximumConversionsPerWorker     = 5
+                        WorkerKeepAliveTimeoutInSeconds = 120
+                        WorkerProcessCount              = 3
+                        WorkerTimeoutInSeconds          = 300
+                        Ensure                          = "Present"
                     }
-                    $spServiceApp | Add-Member -MemberType ScriptMethod `
-                        -Name GetType `
-                        -Value {
-                        return @{
-                            FullName = $getTypeFullName
+
+                    Mock -CommandName Get-SPServiceApplication -MockWith {
+                        $spServiceApp = [PSCustomObject]@{
+                            DisplayName     = $testParams.Name
+                            ApplicationPool = @{ Name = "Other SharePoint Services App Pool" }
                         }
-                    } -PassThru -Force
-                    return $spServiceApp
+                        $spServiceApp | Add-Member -MemberType ScriptMethod `
+                            -Name GetType `
+                            -Value {
+                            return @{
+                                FullName = $getTypeFullName
+                            }
+                        } -PassThru -Force
+                        return $spServiceApp
+                    }
                 }
 
                 It "Should return Present from the get method" {
@@ -472,24 +487,26 @@ try
             }
 
             Context -Name "When the service application exists but it shouldn't" -Fixture {
-                $testParams = @{
-                    Name   = "Power Point Automation Service Application"
-                    Ensure = "Absent"
-                }
-
-                Mock -CommandName Get-SPServiceApplication -MockWith {
-                    $spServiceApp = [PSCustomObject]@{
-                        DisplayName     = $testParams.Name
-                        ApplicationPool = @{ Name = $testParams.ApplicationPool }
+                BeforeAll {
+                    $testParams = @{
+                        Name   = "Power Point Automation Service Application"
+                        Ensure = "Absent"
                     }
-                    $spServiceApp | Add-Member -MemberType ScriptMethod `
-                        -Name GetType `
-                        -Value {
-                        return @{
-                            FullName = $getTypeFullName
+
+                    Mock -CommandName Get-SPServiceApplication -MockWith {
+                        $spServiceApp = [PSCustomObject]@{
+                            DisplayName     = $testParams.Name
+                            ApplicationPool = @{ Name = $testParams.ApplicationPool }
                         }
-                    } -PassThru -Force
-                    return $spServiceApp
+                        $spServiceApp | Add-Member -MemberType ScriptMethod `
+                            -Name GetType `
+                            -Value {
+                            return @{
+                                FullName = $getTypeFullName
+                            }
+                        } -PassThru -Force
+                        return $spServiceApp
+                    }
                 }
 
                 It "Should return present from the Get method" {
@@ -507,13 +524,15 @@ try
             }
 
             Context -Name "When the service application doesn't exist and it shouldn't" -Fixture {
-                $testParams = @{
-                    Name   = "Power Point Automation Service Application"
-                    Ensure = "Absent"
-                }
+                BeforeAll {
+                    $testParams = @{
+                        Name   = "Power Point Automation Service Application"
+                        Ensure = "Absent"
+                    }
 
-                Mock -CommandName Get-SPServiceApplication -MockWith {
-                    return $null
+                    Mock -CommandName Get-SPServiceApplication -MockWith {
+                        return $null
+                    }
                 }
 
                 It "Should return absent from the Get method" {
@@ -526,20 +545,22 @@ try
             }
 
             Context -Name "When a service application doesn't exists but it should" -Fixture {
-                $testParams = @{
-                    Name                            = "Power Point Automation Service Application"
-                    ProxyName                       = "Power Point Automation Service Application Proxy"
-                    ApplicationPool                 = "SharePoint Services App Pool"
-                    CacheExpirationPeriodInSeconds  = 600
-                    MaximumConversionsPerWorker     = 5
-                    WorkerKeepAliveTimeoutInSeconds = 120
-                    WorkerProcessCount              = 3
-                    WorkerTimeoutInSeconds          = 300
-                    Ensure                          = "Present"
-                }
+                BeforeAll {
+                    $testParams = @{
+                        Name                            = "Power Point Automation Service Application"
+                        ProxyName                       = "Power Point Automation Service Application Proxy"
+                        ApplicationPool                 = "SharePoint Services App Pool"
+                        CacheExpirationPeriodInSeconds  = 600
+                        MaximumConversionsPerWorker     = 5
+                        WorkerKeepAliveTimeoutInSeconds = 120
+                        WorkerProcessCount              = 3
+                        WorkerTimeoutInSeconds          = 300
+                        Ensure                          = "Present"
+                    }
 
-                Mock -CommandName Get-SPServiceApplication -MockWith {
-                    return $null
+                    Mock -CommandName Get-SPServiceApplication -MockWith {
+                        return $null
+                    }
                 }
 
                 It "Should return Absent from the get method" {

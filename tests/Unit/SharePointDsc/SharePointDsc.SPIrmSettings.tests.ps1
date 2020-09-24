@@ -45,27 +45,31 @@ Invoke-TestSetup
 
 try
 {
-    Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
-        InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
-            Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
+    InModuleScope -ModuleName $script:DSCResourceFullName -ScriptBlock {
+        Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
+            BeforeAll {
+                Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
-            # Initialize tests
+                # Initialize tests
 
-            # Mocks for all contexts
-            Mock -CommandName Get-SPFarm -MockWith {
-                return @{ }
+                # Mocks for all contexts
+                Mock -CommandName Get-SPFarm -MockWith {
+                    return @{ }
+                }
             }
 
             # Test contexts
             Context -Name "The server is not part of SharePoint farm" -Fixture {
-                $testParams = @{
-                    IsSingleInstance = "Yes"
-                    Ensure           = "Present"
-                    RMSserver        = "https://myRMSserver.local"
-                }
+                BeforeAll {
+                    $testParams = @{
+                        IsSingleInstance = "Yes"
+                        Ensure           = "Present"
+                        RMSserver        = "https://myRMSserver.local"
+                    }
 
-                Mock -CommandName Get-SPFarm -MockWith {
-                    throw "Unable to detect local farm"
+                    Mock -CommandName Get-SPFarm -MockWith {
+                        throw "Unable to detect local farm"
+                    }
                 }
 
                 It "Should return null from the get method" {
@@ -82,26 +86,28 @@ try
             }
 
             Context -Name "IRM settings match desired settings" -Fixture {
-                $testParams = @{
-                    IsSingleInstance = "Yes"
-                    Ensure           = "Present"
-                    RMSserver        = "https://myRMSserver.local"
-                }
-
-                Mock -CommandName Get-SPDscContentService -MockWith {
-                    $returnVal = @{
-                        IrmSettings = @{
-                            IrmRMSEnabled    = $true
-                            IrmRMSUseAD      = $false
-                            IrmRMSCertServer = "https://myRMSserver.local"
-                        }
+                BeforeAll {
+                    $testParams = @{
+                        IsSingleInstance = "Yes"
+                        Ensure           = "Present"
+                        RMSserver        = "https://myRMSserver.local"
                     }
-                    $returnVal = $returnVal | Add-Member -MemberType ScriptMethod `
-                        -Name Update `
-                        -Value {
-                        $Global:SPDscIRMUpdated = $true
-                    } -PassThru
-                    return $returnVal
+
+                    Mock -CommandName Get-SPDscContentService -MockWith {
+                        $returnVal = @{
+                            IrmSettings = @{
+                                IrmRMSEnabled    = $true
+                                IrmRMSUseAD      = $false
+                                IrmRMSCertServer = "https://myRMSserver.local"
+                            }
+                        }
+                        $returnVal = $returnVal | Add-Member -MemberType ScriptMethod `
+                            -Name Update `
+                            -Value {
+                            $Global:SPDscIRMUpdated = $true
+                        } -PassThru
+                        return $returnVal
+                    }
                 }
 
                 It "Should return present in the get method" {
@@ -114,26 +120,28 @@ try
             }
 
             Context -Name "IRM settings do not match desired settings" -Fixture {
-                $testParams = @{
-                    IsSingleInstance = "Yes"
-                    Ensure           = "Present"
-                    RMSserver        = "https://myRMSserver.local"
-                }
-
-                Mock -CommandName Get-SPDscContentService -MockWith {
-                    $returnVal = @{
-                        IrmSettings = @{
-                            IrmRMSEnabled    = $false
-                            IrmRMSUseAD      = $false
-                            IrmRMSCertServer = $null
-                        }
+                BeforeAll {
+                    $testParams = @{
+                        IsSingleInstance = "Yes"
+                        Ensure           = "Present"
+                        RMSserver        = "https://myRMSserver.local"
                     }
-                    $returnVal = $returnVal | Add-Member -MemberType ScriptMethod `
-                        -Name Update `
-                        -Value {
-                        $Global:SPDscIRMUpdated = $true
-                    } -PassThru
-                    return $returnVal
+
+                    Mock -CommandName Get-SPDscContentService -MockWith {
+                        $returnVal = @{
+                            IrmSettings = @{
+                                IrmRMSEnabled    = $false
+                                IrmRMSUseAD      = $false
+                                IrmRMSCertServer = $null
+                            }
+                        }
+                        $returnVal = $returnVal | Add-Member -MemberType ScriptMethod `
+                            -Name Update `
+                            -Value {
+                            $Global:SPDscIRMUpdated = $true
+                        } -PassThru
+                        return $returnVal
+                    }
                 }
 
                 It "Should return absent in the get method" {

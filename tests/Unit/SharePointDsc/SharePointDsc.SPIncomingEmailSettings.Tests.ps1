@@ -45,52 +45,56 @@ Invoke-TestSetup
 
 try
 {
-    Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
-        InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
-            Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
+    InModuleScope -ModuleName $script:DSCResourceFullName -ScriptBlock {
+        Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
+            BeforeAll {
+                Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
-            # Initialize tests
+                # Initialize tests
 
-            # Mocks for all contexts
-            Mock -CommandName 'Get-SPServiceInstance' -MockWith {
-                $serviceInstance =
-                @{
-                    Service = @{
-                        Enabled                          = $mock.Enabled
-                        DropFolder                       = $mock.DropFolder
-                        UseAutomaticSettings             = $mock.UseAutomaticSettings
-                        ServerDisplayAddress             = $mock.ServerDisplayAddress
-                        ServerAddress                    = $mock.ServerAddress
-                        UseDirectoryManagementService    = $mock.UseDirectoryManagementService
-                        RemoteDirectoryManagementService = $mock.RemoteDirectoryManagementService
-                        DirectoryManagementServiceURL    = $mock.DirectoryManagementServiceURL
-                        DistributionGroupsEnabled        = $mock.DistributionGroupsEnabled
-                        DLsRequireAuthenticatedSenders   = $mock.DLsRequireAuthenticatedSenders
+                # Mocks for all contexts
+                Mock -CommandName 'Get-SPServiceInstance' -MockWith {
+                    $serviceInstance =
+                    @{
+                        Service = @{
+                            Enabled                          = $mock.Enabled
+                            DropFolder                       = $mock.DropFolder
+                            UseAutomaticSettings             = $mock.UseAutomaticSettings
+                            ServerDisplayAddress             = $mock.ServerDisplayAddress
+                            ServerAddress                    = $mock.ServerAddress
+                            UseDirectoryManagementService    = $mock.UseDirectoryManagementService
+                            RemoteDirectoryManagementService = $mock.RemoteDirectoryManagementService
+                            DirectoryManagementServiceURL    = $mock.DirectoryManagementServiceURL
+                            DistributionGroupsEnabled        = $mock.DistributionGroupsEnabled
+                            DLsRequireAuthenticatedSenders   = $mock.DLsRequireAuthenticatedSenders
+                        }
                     }
+                    $serviceInstance = $serviceInstance | Add-Member -MemberType ScriptMethod -Name GetType -Value {
+                        return @{ FullName = "Microsoft.SharePoint.Administration.SPIncomingEmailServiceInstance" } } -Force -PassThru
+                    $serviceInstance.Service = $serviceInstance.Service | Add-Member -MemberType ScriptMethod -Name GetType -Value {
+                        return @{ FullName = "Microsoft.SharePoint.Administration.SPIncomingEmailService" } } -Force -PassThru
+                    $serviceInstance.Service = $serviceInstance.Service | Add-Member -MemberType ScriptMethod -Name Update -Value {
+                        $Global:SPDscUpdateCalled = $true } -PassThru
+                    return @($serviceInstance)
                 }
-                $serviceInstance = $serviceInstance | Add-Member -MemberType ScriptMethod -Name GetType -Value {
-                    return @{ FullName = "Microsoft.SharePoint.Administration.SPIncomingEmailServiceInstance" } } -Force -PassThru
-                $serviceInstance.Service = $serviceInstance.Service | Add-Member -MemberType ScriptMethod -Name GetType -Value {
-                    return @{ FullName = "Microsoft.SharePoint.Administration.SPIncomingEmailService" } } -Force -PassThru
-                $serviceInstance.Service = $serviceInstance.Service | Add-Member -MemberType ScriptMethod -Name Update -Value {
-                    $Global:SPDscUpdateCalled = $true } -PassThru
-                return @($serviceInstance)
             }
 
             # Test contexts
             Context -Name 'Cannot retrieve instance of mail service' -Fixture {
-                $testParams = @{
-                    IsSingleInstance     = 'Yes'
-                    Ensure               = 'Present'
-                    UseAutomaticSettings = $true
-                    ServerDisplayAddress = "contoso.com"
-                }
+                BeforeAll {
+                    $testParams = @{
+                        IsSingleInstance     = 'Yes'
+                        Ensure               = 'Present'
+                        UseAutomaticSettings = $true
+                        ServerDisplayAddress = "contoso.com"
+                    }
 
-                Mock -CommandName 'Get-SPServiceInstance' -MockWith {
-                    $serviceInstance = @{ }
-                    $serviceInstance = $serviceInstance | Add-Member -MemberType ScriptMethod -Name GetType -Value {
-                        return $null } -Force -PassThru
-                    return @($serviceInstance)
+                    Mock -CommandName 'Get-SPServiceInstance' -MockWith {
+                        $serviceInstance = @{ }
+                        $serviceInstance = $serviceInstance | Add-Member -MemberType ScriptMethod -Name GetType -Value {
+                            return $null } -Force -PassThru
+                        return @($serviceInstance)
+                    }
                 }
 
                 It 'Should return null values for the Get method' {
@@ -116,30 +120,32 @@ try
             }
 
             Context -Name 'When configured values are correct' -Fixture {
-                $testParams = @{
-                    IsSingleInstance               = 'Yes'
-                    Ensure                         = 'Present'
-                    UseAutomaticSettings           = $false
-                    UseDirectoryManagementService  = 'Remote'
-                    RemoteDirectoryManagementURL   = 'http://server:adminport/_vti_bin/SharepointEmailWS.asmx'
-                    DLsRequireAuthenticatedSenders = $false
-                    DistributionGroupsEnabled      = $true
-                    ServerDisplayAddress           = "contoso.com"
-                    DropFolder                     = '\\MailServer\SharedFolder'
-                }
+                BeforeAll {
+                    $testParams = @{
+                        IsSingleInstance               = 'Yes'
+                        Ensure                         = 'Present'
+                        UseAutomaticSettings           = $false
+                        UseDirectoryManagementService  = 'Remote'
+                        RemoteDirectoryManagementURL   = 'http://server:adminport/_vti_bin/SharepointEmailWS.asmx'
+                        DLsRequireAuthenticatedSenders = $false
+                        DistributionGroupsEnabled      = $true
+                        ServerDisplayAddress           = "contoso.com"
+                        DropFolder                     = '\\MailServer\SharedFolder'
+                    }
 
-                $mock = @{
-                    TypeName                         = 'Microsoft SharePoint Foundation Incoming E-Mail'
-                    Enabled                          = $true
-                    DropFolder                       = $testParams.DropFolder
-                    UseAutomaticSettings             = $testParams.UseAutomaticSettings
-                    ServerDisplayAddress             = $testParams.ServerDisplayAddress
-                    ServerAddress                    = $testParams.ServerAddress
-                    UseDirectoryManagementService    = $true
-                    RemoteDirectoryManagementService = $true
-                    DirectoryManagementServiceURL    = $testParams.RemoteDirectoryManagementURL
-                    DistributionGroupsEnabled        = $testParams.DistributionGroupsEnabled
-                    DLsRequireAuthenticatedSenders   = $testParams.DLsRequireAuthenticatedSenders
+                    $mock = @{
+                        TypeName                         = 'Microsoft SharePoint Foundation Incoming E-Mail'
+                        Enabled                          = $true
+                        DropFolder                       = $testParams.DropFolder
+                        UseAutomaticSettings             = $testParams.UseAutomaticSettings
+                        ServerDisplayAddress             = $testParams.ServerDisplayAddress
+                        ServerAddress                    = $testParams.ServerAddress
+                        UseDirectoryManagementService    = $true
+                        RemoteDirectoryManagementService = $true
+                        DirectoryManagementServiceURL    = $testParams.RemoteDirectoryManagementURL
+                        DistributionGroupsEnabled        = $testParams.DistributionGroupsEnabled
+                        DLsRequireAuthenticatedSenders   = $testParams.DLsRequireAuthenticatedSenders
+                    }
                 }
 
                 It "Should return current values for the Get method" {
@@ -161,29 +167,31 @@ try
             }
 
             Context -Name 'When configured values are incorrect' -Fixture {
-                $testParams = @{
-                    IsSingleInstance               = 'Yes'
-                    Ensure                         = 'Present'
-                    UseAutomaticSettings           = $false
-                    UseDirectoryManagementService  = 'Remote'
-                    RemoteDirectoryManagementURL   = 'http://server:adminport/_vti_bin/SharepointEmailWS.asmx'
-                    DLsRequireAuthenticatedSenders = $false
-                    DistributionGroupsEnabled      = $true
-                    ServerDisplayAddress           = "contoso.com"
-                    DropFolder                     = '\\MailServer\SharedFolder'
-                }
+                BeforeAll {
+                    $testParams = @{
+                        IsSingleInstance               = 'Yes'
+                        Ensure                         = 'Present'
+                        UseAutomaticSettings           = $false
+                        UseDirectoryManagementService  = 'Remote'
+                        RemoteDirectoryManagementURL   = 'http://server:adminport/_vti_bin/SharepointEmailWS.asmx'
+                        DLsRequireAuthenticatedSenders = $false
+                        DistributionGroupsEnabled      = $true
+                        ServerDisplayAddress           = "contoso.com"
+                        DropFolder                     = '\\MailServer\SharedFolder'
+                    }
 
-                $mock = @{
-                    Enabled                          = $true
-                    DropFolder                       = $null
-                    UseAutomaticSettings             = (-not $testParams.UseAutomaticSettings)
-                    ServerDisplayAddress             = $testParams.ServerDisplayAddress
-                    ServerAddress                    = $testParams.ServerAddress
-                    UseDirectoryManagementService    = $true
-                    RemoteDirectoryManagementService = $false
-                    DirectoryManagementServiceURL    = $null
-                    DistributionGroupsEnabled        = $testParams.DistributionGroupsEnabled
-                    DLsRequireAuthenticatedSenders   = $testParams.DLsRequireAuthenticatedSenders
+                    $mock = @{
+                        Enabled                          = $true
+                        DropFolder                       = $null
+                        UseAutomaticSettings             = (-not $testParams.UseAutomaticSettings)
+                        ServerDisplayAddress             = $testParams.ServerDisplayAddress
+                        ServerAddress                    = $testParams.ServerAddress
+                        UseDirectoryManagementService    = $true
+                        RemoteDirectoryManagementService = $false
+                        DirectoryManagementServiceURL    = $null
+                        DistributionGroupsEnabled        = $testParams.DistributionGroupsEnabled
+                        DLsRequireAuthenticatedSenders   = $testParams.DLsRequireAuthenticatedSenders
+                    }
                 }
 
                 It "Should return current values for the Get method" {
@@ -209,29 +217,31 @@ try
             }
 
             Context -Name 'When service is disabled, but should be enabled' -Fixture {
-                $testParams = @{
-                    IsSingleInstance               = 'Yes'
-                    Ensure                         = 'Present'
-                    UseAutomaticSettings           = $false
-                    UseDirectoryManagementService  = 'Remote'
-                    RemoteDirectoryManagementURL   = 'http://server:adminport/_vti_bin/SharepointEmailWS.asmx'
-                    DLsRequireAuthenticatedSenders = $false
-                    DistributionGroupsEnabled      = $true
-                    ServerDisplayAddress           = "contoso.com"
-                    DropFolder                     = '\\MailServer\SharedFolder'
-                }
+                BeforeAll {
+                    $testParams = @{
+                        IsSingleInstance               = 'Yes'
+                        Ensure                         = 'Present'
+                        UseAutomaticSettings           = $false
+                        UseDirectoryManagementService  = 'Remote'
+                        RemoteDirectoryManagementURL   = 'http://server:adminport/_vti_bin/SharepointEmailWS.asmx'
+                        DLsRequireAuthenticatedSenders = $false
+                        DistributionGroupsEnabled      = $true
+                        ServerDisplayAddress           = "contoso.com"
+                        DropFolder                     = '\\MailServer\SharedFolder'
+                    }
 
-                $mock = @{
-                    Enabled                          = $false
-                    DropFolder                       = $null
-                    UseAutomaticSettings             = $testParams.UseAutomaticSettings
-                    ServerDisplayAddress             = $null
-                    ServerAddress                    = $null
-                    UseDirectoryManagementService    = $false
-                    RemoteDirectoryManagementService = $false
-                    DirectoryManagementServiceURL    = $null
-                    DistributionGroupsEnabled        = $false
-                    DLsRequireAuthenticatedSenders   = $false
+                    $mock = @{
+                        Enabled                          = $false
+                        DropFolder                       = $null
+                        UseAutomaticSettings             = $testParams.UseAutomaticSettings
+                        ServerDisplayAddress             = $null
+                        ServerAddress                    = $null
+                        UseDirectoryManagementService    = $false
+                        RemoteDirectoryManagementService = $false
+                        DirectoryManagementServiceURL    = $null
+                        DistributionGroupsEnabled        = $false
+                        DLsRequireAuthenticatedSenders   = $false
+                    }
                 }
 
                 It "Should return null values for the Get method" {
@@ -257,22 +267,24 @@ try
             }
 
             Context -Name 'When service is enabled, but should be disabled' -Fixture {
-                $testParams = @{
-                    IsSingleInstance = 'Yes'
-                    Ensure           = 'Absent'
-                }
+                BeforeAll {
+                    $testParams = @{
+                        IsSingleInstance = 'Yes'
+                        Ensure           = 'Absent'
+                    }
 
-                $mock = @{
-                    Enabled                          = $true
-                    DropFolder                       = $null
-                    UseAutomaticSettings             = $true
-                    ServerDisplayAddress             = 'contoso.com'
-                    ServerAddress                    = $null
-                    UseDirectoryManagementService    = $false
-                    RemoteDirectoryManagementService = $false
-                    DirectoryManagementServiceURL    = $null
-                    DistributionGroupsEnabled        = $false
-                    DLsRequireAuthenticatedSenders   = $false
+                    $mock = @{
+                        Enabled                          = $true
+                        DropFolder                       = $null
+                        UseAutomaticSettings             = $true
+                        ServerDisplayAddress             = 'contoso.com'
+                        ServerAddress                    = $null
+                        UseDirectoryManagementService    = $false
+                        RemoteDirectoryManagementService = $false
+                        DirectoryManagementServiceURL    = $null
+                        DistributionGroupsEnabled        = $false
+                        DLsRequireAuthenticatedSenders   = $false
+                    }
                 }
 
                 It "Should return current values for the Get method" {
@@ -298,25 +310,27 @@ try
             }
 
             Context -Name 'When switching from manual to automatic settings' -Fixture {
-                $testParams = @{
-                    IsSingleInstance              = 'Yes'
-                    Ensure                        = 'Present'
-                    UseAutomaticSettings          = $true
-                    UseDirectoryManagementService = 'No'
-                    ServerDisplayAddress          = "contoso.com"
-                }
+                BeforeAll {
+                    $testParams = @{
+                        IsSingleInstance              = 'Yes'
+                        Ensure                        = 'Present'
+                        UseAutomaticSettings          = $true
+                        UseDirectoryManagementService = 'No'
+                        ServerDisplayAddress          = "contoso.com"
+                    }
 
-                $mock = @{
-                    Enabled                          = $true
-                    DropFolder                       = '\\MailServer\SharedFolder'
-                    UseAutomaticSettings             = (-not $testParams.UseAutomaticSettings)
-                    ServerDisplayAddress             = $testParams.ServerDisplayAddress
-                    ServerAddress                    = $null
-                    UseDirectoryManagementService    = $false
-                    RemoteDirectoryManagementService = $false
-                    DirectoryManagementServiceURL    = $null
-                    DistributionGroupsEnabled        = $false
-                    DLsRequireAuthenticatedSenders   = $false
+                    $mock = @{
+                        Enabled                          = $true
+                        DropFolder                       = '\\MailServer\SharedFolder'
+                        UseAutomaticSettings             = (-not $testParams.UseAutomaticSettings)
+                        ServerDisplayAddress             = $testParams.ServerDisplayAddress
+                        ServerAddress                    = $null
+                        UseDirectoryManagementService    = $false
+                        RemoteDirectoryManagementService = $false
+                        DirectoryManagementServiceURL    = $null
+                        DistributionGroupsEnabled        = $false
+                        DLsRequireAuthenticatedSenders   = $false
+                    }
                 }
 
                 It "Should return current values for the Get method" {
@@ -342,27 +356,29 @@ try
             }
 
             Context -Name 'When updating ServerAddress and Directory Managment Service' -Fixture {
-                $testParams = @{
-                    IsSingleInstance              = 'Yes'
-                    Ensure                        = 'Present'
-                    UseAutomaticSettings          = $false
-                    UseDirectoryManagementService = 'Yes'
-                    ServerDisplayAddress          = "contoso.com"
-                    ServerAddress                 = "mail.contoso.com"
-                    DropFolder                    = '\\MailServer\SharedFolder'
-                }
+                BeforeAll {
+                    $testParams = @{
+                        IsSingleInstance              = 'Yes'
+                        Ensure                        = 'Present'
+                        UseAutomaticSettings          = $false
+                        UseDirectoryManagementService = 'Yes'
+                        ServerDisplayAddress          = "contoso.com"
+                        ServerAddress                 = "mail.contoso.com"
+                        DropFolder                    = '\\MailServer\SharedFolder'
+                    }
 
-                $mock = @{
-                    Enabled                          = $true
-                    DropFolder                       = $testParams.DropFolder
-                    UseAutomaticSettings             = $testParams.UseAutomaticSettings
-                    ServerDisplayAddress             = $testParams.ServerDisplayAddress
-                    ServerAddress                    = "oldserver.contoso.com"
-                    UseDirectoryManagementService    = $true
-                    RemoteDirectoryManagementService = $true
-                    DirectoryManagementServiceURL    = 'http://server:adminport/_vti_bin/SharepointEmailWS.asmx'
-                    DistributionGroupsEnabled        = $false
-                    DLsRequireAuthenticatedSenders   = $false
+                    $mock = @{
+                        Enabled                          = $true
+                        DropFolder                       = $testParams.DropFolder
+                        UseAutomaticSettings             = $testParams.UseAutomaticSettings
+                        ServerDisplayAddress             = $testParams.ServerDisplayAddress
+                        ServerAddress                    = "oldserver.contoso.com"
+                        UseDirectoryManagementService    = $true
+                        RemoteDirectoryManagementService = $true
+                        DirectoryManagementServiceURL    = 'http://server:adminport/_vti_bin/SharepointEmailWS.asmx'
+                        DistributionGroupsEnabled        = $false
+                        DLsRequireAuthenticatedSenders   = $false
+                    }
                 }
 
                 It "Should return null values for the Get method" {
@@ -389,29 +405,31 @@ try
             }
 
             Context -Name 'When enabling Incoming Email, but not specifying required ServerDisplayAddress parameter' -Fixture {
-                $testParams = @{
-                    IsSingleInstance               = 'Yes'
-                    Ensure                         = 'Present'
-                    UseAutomaticSettings           = $false
-                    UseDirectoryManagementService  = 'Remote'
-                    RemoteDirectoryManagementURL   = 'http://server:adminport/_vti_bin/SharepointEmailWS.asmx'
-                    DLsRequireAuthenticatedSenders = $false
-                    DistributionGroupsEnabled      = $true
-                    #ServerDisplayAddress           = "contoso.com"
-                    DropFolder                     = '\\MailServer\SharedFolder'
-                }
+                BeforeAll {
+                    $testParams = @{
+                        IsSingleInstance               = 'Yes'
+                        Ensure                         = 'Present'
+                        UseAutomaticSettings           = $false
+                        UseDirectoryManagementService  = 'Remote'
+                        RemoteDirectoryManagementURL   = 'http://server:adminport/_vti_bin/SharepointEmailWS.asmx'
+                        DLsRequireAuthenticatedSenders = $false
+                        DistributionGroupsEnabled      = $true
+                        #ServerDisplayAddress           = "contoso.com"
+                        DropFolder                     = '\\MailServer\SharedFolder'
+                    }
 
-                $mock = @{
-                    Enabled                          = $true
-                    DropFolder                       = $null
-                    UseAutomaticSettings             = $testParams.UseAutomaticSettings
-                    ServerDisplayAddress             = $testParams.ServerDisplayAddress
-                    ServerAddress                    = $testParams.ServerAddress
-                    UseDirectoryManagementService    = $true
-                    RemoteDirectoryManagementService = $true
-                    DirectoryManagementServiceURL    = $testParams.RemoteDirectoryManagementURL
-                    DistributionGroupsEnabled        = $testParams.DistributionGroupsEnabled
-                    DLsRequireAuthenticatedSenders   = $testParams.DLsRequireAuthenticatedSenders
+                    $mock = @{
+                        Enabled                          = $true
+                        DropFolder                       = $null
+                        UseAutomaticSettings             = $testParams.UseAutomaticSettings
+                        ServerDisplayAddress             = $testParams.ServerDisplayAddress
+                        ServerAddress                    = $testParams.ServerAddress
+                        UseDirectoryManagementService    = $true
+                        RemoteDirectoryManagementService = $true
+                        DirectoryManagementServiceURL    = $testParams.RemoteDirectoryManagementURL
+                        DistributionGroupsEnabled        = $testParams.DistributionGroupsEnabled
+                        DLsRequireAuthenticatedSenders   = $testParams.DLsRequireAuthenticatedSenders
+                    }
                 }
 
                 It "Should return current values for the Get method" {
@@ -436,29 +454,31 @@ try
             }
 
             Context -Name 'When enabling Incoming Email, but not specifying required UseAutomaticSettings parameter' -Fixture {
-                $testParams = @{
-                    IsSingleInstance               = 'Yes'
-                    Ensure                         = 'Present'
-                    #UseAutomaticSettings           = $false
-                    UseDirectoryManagementService  = 'Remote'
-                    RemoteDirectoryManagementURL   = 'http://server:adminport/_vti_bin/SharepointEmailWS.asmx'
-                    DLsRequireAuthenticatedSenders = $false
-                    DistributionGroupsEnabled      = $true
-                    ServerDisplayAddress           = "contoso.com"
-                    DropFolder                     = '\\MailServer\SharedFolder'
-                }
+                BeforeAll {
+                    $testParams = @{
+                        IsSingleInstance               = 'Yes'
+                        Ensure                         = 'Present'
+                        #UseAutomaticSettings           = $false
+                        UseDirectoryManagementService  = 'Remote'
+                        RemoteDirectoryManagementURL   = 'http://server:adminport/_vti_bin/SharepointEmailWS.asmx'
+                        DLsRequireAuthenticatedSenders = $false
+                        DistributionGroupsEnabled      = $true
+                        ServerDisplayAddress           = "contoso.com"
+                        DropFolder                     = '\\MailServer\SharedFolder'
+                    }
 
-                $mock = @{
-                    Enabled                          = $true
-                    DropFolder                       = $null
-                    UseAutomaticSettings             = $true
-                    ServerDisplayAddress             = $testParams.ServerDisplayAddress
-                    ServerAddress                    = $testParams.ServerAddress
-                    UseDirectoryManagementService    = $true
-                    RemoteDirectoryManagementService = $true
-                    DirectoryManagementServiceURL    = $testParams.RemoteDirectoryManagementURL
-                    DistributionGroupsEnabled        = $testParams.DistributionGroupsEnabled
-                    DLsRequireAuthenticatedSenders   = $testParams.DLsRequireAuthenticatedSenders
+                    $mock = @{
+                        Enabled                          = $true
+                        DropFolder                       = $null
+                        UseAutomaticSettings             = $true
+                        ServerDisplayAddress             = $testParams.ServerDisplayAddress
+                        ServerAddress                    = $testParams.ServerAddress
+                        UseDirectoryManagementService    = $true
+                        RemoteDirectoryManagementService = $true
+                        DirectoryManagementServiceURL    = $testParams.RemoteDirectoryManagementURL
+                        DistributionGroupsEnabled        = $testParams.DistributionGroupsEnabled
+                        DLsRequireAuthenticatedSenders   = $testParams.DLsRequireAuthenticatedSenders
+                    }
                 }
 
                 It "Should return current values for the Get method" {
@@ -483,29 +503,30 @@ try
             }
 
             Context -Name 'When no RemoteDirectoryManagementURL specified for UseDirectoryManagementService = Remote' -Fixture {
-                $testParams = @{
-                    IsSingleInstance               = 'Yes'
-                    Ensure                         = 'Present'
-                    UseAutomaticSettings           = $false
-                    UseDirectoryManagementService  = 'Remote'
-                    #RemoteDirectoryManagementURL   = 'http://server:adminport/_vti_bin/SharepointEmailWS.asmx'
-                    DLsRequireAuthenticatedSenders = $false
-                    DistributionGroupsEnabled      = $true
-                    ServerDisplayAddress           = "contoso.com"
-                    DropFolder                     = '\\MailServer\SharedFolder'
-                }
+                BeforeAll {
+                    $testParams = @{
+                        IsSingleInstance               = 'Yes'
+                        Ensure                         = 'Present'
+                        UseAutomaticSettings           = $false
+                        UseDirectoryManagementService  = 'Remote'
+                        DLsRequireAuthenticatedSenders = $false
+                        DistributionGroupsEnabled      = $true
+                        ServerDisplayAddress           = "contoso.com"
+                        DropFolder                     = '\\MailServer\SharedFolder'
+                    }
 
-                $mock = @{
-                    Enabled                          = $true
-                    DropFolder                       = $null
-                    UseAutomaticSettings             = $testParams.UseAutomaticSettings
-                    ServerDisplayAddress             = $testParams.ServerDisplayAddress
-                    ServerAddress                    = $testParams.ServerAddress
-                    UseDirectoryManagementService    = $true
-                    RemoteDirectoryManagementService = $true
-                    DirectoryManagementServiceURL    = $testParams.RemoteDirectoryManagementURL
-                    DistributionGroupsEnabled        = $testParams.DistributionGroupsEnabled
-                    DLsRequireAuthenticatedSenders   = $testParams.DLsRequireAuthenticatedSenders
+                    $mock = @{
+                        Enabled                          = $true
+                        DropFolder                       = $null
+                        UseAutomaticSettings             = $testParams.UseAutomaticSettings
+                        ServerDisplayAddress             = $testParams.ServerDisplayAddress
+                        ServerAddress                    = $testParams.ServerAddress
+                        UseDirectoryManagementService    = $true
+                        RemoteDirectoryManagementService = $true
+                        DirectoryManagementServiceURL    = $testParams.RemoteDirectoryManagementURL
+                        DistributionGroupsEnabled        = $testParams.DistributionGroupsEnabled
+                        DLsRequireAuthenticatedSenders   = $testParams.DLsRequireAuthenticatedSenders
+                    }
                 }
 
                 It "Should return current values for the Get method" {
@@ -530,29 +551,30 @@ try
             }
 
             Context -Name 'When AutomaticMode is false, but no DropFolder specified' -Fixture {
-                $testParams = @{
-                    IsSingleInstance               = 'Yes'
-                    Ensure                         = 'Present'
-                    UseAutomaticSettings           = $false
-                    UseDirectoryManagementService  = 'Remote'
-                    RemoteDirectoryManagementURL   = 'http://server:adminport/_vti_bin/SharepointEmailWS.asmx'
-                    DLsRequireAuthenticatedSenders = $false
-                    DistributionGroupsEnabled      = $true
-                    ServerDisplayAddress           = "contoso.com"
-                    #DropFolder                     = '\\MailServer\SharedFolder'
-                }
+                BeforeAll {
+                    $testParams = @{
+                        IsSingleInstance               = 'Yes'
+                        Ensure                         = 'Present'
+                        UseAutomaticSettings           = $false
+                        UseDirectoryManagementService  = 'Remote'
+                        RemoteDirectoryManagementURL   = 'http://server:adminport/_vti_bin/SharepointEmailWS.asmx'
+                        DLsRequireAuthenticatedSenders = $false
+                        DistributionGroupsEnabled      = $true
+                        ServerDisplayAddress           = "contoso.com"
+                    }
 
-                $mock = @{
-                    Enabled                          = $true
-                    DropFolder                       = $null
-                    UseAutomaticSettings             = $true
-                    ServerDisplayAddress             = $testParams.ServerDisplayAddress
-                    ServerAddress                    = $testParams.ServerAddress
-                    UseDirectoryManagementService    = $true
-                    RemoteDirectoryManagementService = $true
-                    DirectoryManagementServiceURL    = $testParams.RemoteDirectoryManagementURL
-                    DistributionGroupsEnabled        = $testParams.DistributionGroupsEnabled
-                    DLsRequireAuthenticatedSenders   = $testParams.DLsRequireAuthenticatedSenders
+                    $mock = @{
+                        Enabled                          = $true
+                        DropFolder                       = $null
+                        UseAutomaticSettings             = $true
+                        ServerDisplayAddress             = $testParams.ServerDisplayAddress
+                        ServerAddress                    = $testParams.ServerAddress
+                        UseDirectoryManagementService    = $true
+                        RemoteDirectoryManagementService = $true
+                        DirectoryManagementServiceURL    = $testParams.RemoteDirectoryManagementURL
+                        DistributionGroupsEnabled        = $testParams.DistributionGroupsEnabled
+                        DLsRequireAuthenticatedSenders   = $testParams.DLsRequireAuthenticatedSenders
+                    }
                 }
 
                 It "Should return current values for the Get method" {
@@ -577,29 +599,31 @@ try
             }
 
             Context -Name 'When AutomaticMode is true, but a DropFolder was specified' -Fixture {
-                $testParams = @{
-                    IsSingleInstance               = 'Yes'
-                    Ensure                         = 'Present'
-                    UseAutomaticSettings           = $true
-                    UseDirectoryManagementService  = 'Remote'
-                    RemoteDirectoryManagementURL   = 'http://server:adminport/_vti_bin/SharepointEmailWS.asmx'
-                    DLsRequireAuthenticatedSenders = $false
-                    DistributionGroupsEnabled      = $true
-                    ServerDisplayAddress           = "contoso.com"
-                    DropFolder                     = '\\MailServer\SharedFolder'
-                }
+                BeforeAll {
+                    $testParams = @{
+                        IsSingleInstance               = 'Yes'
+                        Ensure                         = 'Present'
+                        UseAutomaticSettings           = $true
+                        UseDirectoryManagementService  = 'Remote'
+                        RemoteDirectoryManagementURL   = 'http://server:adminport/_vti_bin/SharepointEmailWS.asmx'
+                        DLsRequireAuthenticatedSenders = $false
+                        DistributionGroupsEnabled      = $true
+                        ServerDisplayAddress           = "contoso.com"
+                        DropFolder                     = '\\MailServer\SharedFolder'
+                    }
 
-                $mock = @{
-                    Enabled                          = $true
-                    DropFolder                       = $null
-                    UseAutomaticSettings             = $testParams.UseAutomaticSettings
-                    ServerDisplayAddress             = $testParams.ServerDisplayAddress
-                    ServerAddress                    = $testParams.ServerAddress
-                    UseDirectoryManagementService    = $true
-                    RemoteDirectoryManagementService = $true
-                    DirectoryManagementServiceURL    = $testParams.RemoteDirectoryManagementURL
-                    DistributionGroupsEnabled        = $testParams.DistributionGroupsEnabled
-                    DLsRequireAuthenticatedSenders   = $testParams.DLsRequireAuthenticatedSenders
+                    $mock = @{
+                        Enabled                          = $true
+                        DropFolder                       = $null
+                        UseAutomaticSettings             = $testParams.UseAutomaticSettings
+                        ServerDisplayAddress             = $testParams.ServerDisplayAddress
+                        ServerAddress                    = $testParams.ServerAddress
+                        UseDirectoryManagementService    = $true
+                        RemoteDirectoryManagementService = $true
+                        DirectoryManagementServiceURL    = $testParams.RemoteDirectoryManagementURL
+                        DistributionGroupsEnabled        = $testParams.DistributionGroupsEnabled
+                        DLsRequireAuthenticatedSenders   = $testParams.DLsRequireAuthenticatedSenders
+                    }
                 }
 
                 It "Should return current values for the Get method" {

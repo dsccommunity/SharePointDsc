@@ -46,89 +46,92 @@ Invoke-TestSetup
 
 try
 {
-    Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
-        InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
-            Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
+    InModuleScope -ModuleName $script:DSCResourceFullName -ScriptBlock {
+        Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
+            BeforeAll {
+                Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
-            # Initialize the tests
-            $relativePath = "\inetpub\wwwroot\Virtual Directories\8080"
-            $Global:SPDscWebConfigPath = Join-Path -Path "TestDrive:\" -ChildPath $relativePath
-            $Global:SPDscWebConfigRealPath = Join-Path -Path $TestDrive.FullName -ChildPath $relativePath
-            $Global:SPDscWebConfigFile = Join-Path -Path $Global:SPDscWebConfigPath -ChildPath "web.config"
-            New-Item -Path $Global:SPDscWebConfigPath -ItemType Directory
+                # Initialize the tests
+                $relativePath = "\inetpub\wwwroot\Virtual Directories\8080"
+                $Global:SPDscWebConfigPath = Join-Path -Path "TestDrive:\" -ChildPath $relativePath
+                $Global:SPDscWebConfigRealPath = Join-Path -Path $TestDrive.FullName -ChildPath $relativePath
+                $Global:SPDscWebConfigFile = Join-Path -Path $Global:SPDscWebConfigPath -ChildPath "web.config"
+                New-Item -Path $Global:SPDscWebConfigPath -ItemType Directory
 
-            try
-            {
-                [Microsoft.SharePoint.Administration.SPUrlZone]
-            }
-            catch
-            {
-                Add-Type -TypeDefinition @"
-namespace Microsoft.SharePoint.Administration {
-    public enum SPUrlZone { Default, Intranet, Internet, Custom, Extranet };
-}
-"@
-            }
-
-            # Mocks for all contexts
-            Mock -CommandName Get-SPWebApplication -MockWith {
-                return @{
-                    IISSettings = @(@{
-                            Path = $Global:SPDscWebConfigRealPath
-                        })
+                try
+                {
+                    [Microsoft.SharePoint.Administration.SPUrlZone]
                 }
-            }
+                catch
+                {
+                    Add-Type -TypeDefinition @"
+    namespace Microsoft.SharePoint.Administration {
+        public enum SPUrlZone { Default, Intranet, Internet, Custom, Extranet };
+    }
+"@
+                }
 
-            Mock -CommandName Get-SPServiceInstance -MockWith {
-                return @(
-                    @{
-                        Name     = ""
-                        TypeName = "Microsoft SharePoint Foundation Web Application"
-                    } | Add-Member -MemberType ScriptMethod `
-                        -Name GetType `
-                        -Value {
-                        return @{
-                            Name = "SPWebServiceInstance"
-                        }
-                    } -PassThru -Force | Add-Member -Name Name `
-                        -MemberType ScriptProperty `
-                        -PassThru `
-                    {
-                        # get
-                        ""
-                    }`
-                    {
-                        # set
-                        param ( $arg )
+                # Mocks for all contexts
+                Mock -CommandName Get-SPWebApplication -MockWith {
+                    return @{
+                        IISSettings = @(@{
+                                Path = $Global:SPDscWebConfigRealPath
+                            })
                     }
-                )
-            }
+                }
 
+                Mock -CommandName Get-SPServiceInstance -MockWith {
+                    return @(
+                        @{
+                            Name     = ""
+                            TypeName = "Microsoft SharePoint Foundation Web Application"
+                        } | Add-Member -MemberType ScriptMethod `
+                            -Name GetType `
+                            -Value {
+                            return @{
+                                Name = "SPWebServiceInstance"
+                            }
+                        } -PassThru -Force | Add-Member -Name Name `
+                            -MemberType ScriptProperty `
+                            -PassThru `
+                        {
+                            # get
+                            ""
+                        }`
+                        {
+                            # set
+                            param ( $arg )
+                        }
+                    )
+                }
 
-            function Update-SPDscTestConfigFile
-            {
-                [CmdletBinding()]
-                param(
-                    [Parameter(Mandatory = $true)]
-                    [String]
-                    $Content
-                )
-                Set-Content -Path $Global:SPDscWebConfigFile -Value $Content
+                function Update-SPDscTestConfigFile
+                {
+                    [CmdletBinding()]
+                    param(
+                        [Parameter(Mandatory = $true)]
+                        [String]
+                        $Content
+                    )
+                    Set-Content -Path $Global:SPDscWebConfigFile -Value $Content
+                }
             }
 
             # Test contexts
             Context -Name "The web application doesn't exist" {
-                $testParams = @{
-                    WebAppUrl   = "http://sharepoint.contoso.com"
-                    Zone        = "Default"
-                    EnableCache = $true
-                    Location    = "c:\BlobCache"
-                    MaxSizeInGB = 30
-                    FileTypes   = "\.(gif|jpg|jpeg)$"
-                }
+                BeforeAll {
+                    $testParams = @{
+                        WebAppUrl   = "http://sharepoint.contoso.com"
+                        Zone        = "Default"
+                        EnableCache = $true
+                        Location    = "c:\BlobCache"
+                        MaxSizeInGB = 30
+                        FileTypes   = "\.(gif|jpg|jpeg)$"
+                    }
 
-                Mock -CommandName Get-SPWebApplication -MockWith { return $null }
-                Mock -CommandName Test-Path -MockWith { return $false }
+                    Mock -CommandName Get-SPWebApplication -MockWith { return $null }
+                    Mock -CommandName Test-Path -MockWith { return $false }
+                }
 
                 It "Should throw exception from the get method" {
                     (Get-TargetResource @testParams).WebAppUrl | Should -Be $null
@@ -144,25 +147,27 @@ namespace Microsoft.SharePoint.Administration {
             }
 
             Context -Name "BlobCache is enabled, but the MaxSize parameters cannot be converted to Uint16" {
-                $testParams = @{
-                    WebAppUrl   = "http://sharepoint.contoso.com"
-                    Zone        = "Default"
-                    EnableCache = $true
-                    Location    = "c:\BlobCache"
-                    MaxSizeInGB = 30
-                    FileTypes   = "\.(gif|jpg|jpeg)$"
+                BeforeAll {
+                    $testParams = @{
+                        WebAppUrl   = "http://sharepoint.contoso.com"
+                        Zone        = "Default"
+                        EnableCache = $true
+                        Location    = "c:\BlobCache"
+                        MaxSizeInGB = 30
+                        FileTypes   = "\.(gif|jpg|jpeg)$"
+                    }
+
+                    Update-SPDscTestConfigFile -Content '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+        <configuration>
+        <SharePoint>
+            <BlobCache location="c:\BlobCache" path="\.(gif|jpg|jpeg)$" maxSize="30x" enabled="True" />
+        </SharePoint>
+        </configuration>'
+
+                    Mock -CommandName Test-Path -MockWith { return $true }
+
+                    Mock -CommandName Copy-Item -MockWith { }
                 }
-
-                Update-SPDscTestConfigFile -Content '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-    <configuration>
-    <SharePoint>
-        <BlobCache location="c:\BlobCache" path="\.(gif|jpg|jpeg)$" maxSize="30x" enabled="True" />
-    </SharePoint>
-    </configuration>'
-
-                Mock -CommandName Test-Path -MockWith { return $true }
-
-                Mock -CommandName Copy-Item -MockWith { }
 
                 It "Should return 0 from the get method" {
                     (Get-TargetResource @testParams).MaxSizeInGB | Should -Be 0
@@ -180,26 +185,28 @@ namespace Microsoft.SharePoint.Administration {
             }
 
             Context -Name "BlobCache correctly configured, but the folder does not exist" {
-                $testParams = @{
-                    WebAppUrl   = "http://sharepoint.contoso.com"
-                    Zone        = "Default"
-                    EnableCache = $true
-                    Location    = "c:\BlobCache"
-                    MaxSizeInGB = 30
-                    FileTypes   = "\.(gif|jpg|jpeg)$"
+                BeforeAll {
+                    $testParams = @{
+                        WebAppUrl   = "http://sharepoint.contoso.com"
+                        Zone        = "Default"
+                        EnableCache = $true
+                        Location    = "c:\BlobCache"
+                        MaxSizeInGB = 30
+                        FileTypes   = "\.(gif|jpg|jpeg)$"
+                    }
+
+                    Update-SPDscTestConfigFile -Content '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+        <configuration>
+        <SharePoint>
+            <BlobCache location="c:\BlobCache" path="\.(gif|jpg|jpeg)$" maxSize="30" enabled="True" />
+        </SharePoint>
+        </configuration>'
+
+                    Mock -CommandName Test-Path -MockWith { return $false }
+                    Mock -CommandName New-Item -MockWith { }
+
+                    Mock -CommandName Copy-Item -MockWith { }
                 }
-
-                Update-SPDscTestConfigFile -Content '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-    <configuration>
-    <SharePoint>
-        <BlobCache location="c:\BlobCache" path="\.(gif|jpg|jpeg)$" maxSize="30" enabled="True" />
-    </SharePoint>
-    </configuration>'
-
-                Mock -CommandName Test-Path -MockWith { return $false }
-                Mock -CommandName New-Item -MockWith { }
-
-                Mock -CommandName Copy-Item -MockWith { }
 
                 It "Should return values from the get method" {
                     Get-TargetResource @testParams | Should -Not -BeNullOrEmpty
@@ -215,27 +222,29 @@ namespace Microsoft.SharePoint.Administration {
             }
 
             Context -Name "BlobCache is enabled, but the other parameters do not match" {
-                $testParams = @{
-                    WebAppUrl   = "http://sharepoint.contoso.com"
-                    Zone        = "Default"
-                    EnableCache = $true
-                    Location    = "c:\BlobCache"
-                    MaxSizeInGB = 30
-                    MaxAge      = 30
-                    FileTypes   = "\.(gif|jpg|jpeg)$"
+                BeforeAll {
+                    $testParams = @{
+                        WebAppUrl   = "http://sharepoint.contoso.com"
+                        Zone        = "Default"
+                        EnableCache = $true
+                        Location    = "c:\BlobCache"
+                        MaxSizeInGB = 30
+                        MaxAge      = 30
+                        FileTypes   = "\.(gif|jpg|jpeg)$"
+                    }
+
+
+                    Update-SPDscTestConfigFile -Content '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+        <configuration>
+        <SharePoint>
+            <BlobCache location="c:\BlobCache" path="\.(csv|gif|jpg|jpeg)$" maxSize="20" enabled="True" />
+        </SharePoint>
+        </configuration>'
+
+                    Mock -CommandName Test-Path -MockWith { return $true }
+
+                    Mock -CommandName Copy-Item -MockWith { }
                 }
-
-
-                Update-SPDscTestConfigFile -Content '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-    <configuration>
-    <SharePoint>
-        <BlobCache location="c:\BlobCache" path="\.(csv|gif|jpg|jpeg)$" maxSize="20" enabled="True" />
-    </SharePoint>
-    </configuration>'
-
-                Mock -CommandName Test-Path -MockWith { return $true }
-
-                Mock -CommandName Copy-Item -MockWith { }
 
                 It "Should return values from the get method" {
                     Get-TargetResource @testParams | Should -Not -BeNullOrEmpty
@@ -254,39 +263,41 @@ namespace Microsoft.SharePoint.Administration {
             }
 
             Context -Name "BlobCache is disabled, but the parameters specify it to be enabled" {
-                $testParams = @{
-                    WebAppUrl   = "http://sharepoint.contoso.com"
-                    Zone        = "Default"
-                    EnableCache = $true
-                    Location    = "c:\BlobCache"
-                    MaxSizeInGB = 30
-                    FileTypes   = "\.(gif|jpg|jpeg)$"
-                }
-
-                Update-SPDscTestConfigFile -Content '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-    <configuration>
-    <SharePoint>
-        <BlobCache location="c:\BlobCache" path="\.(gif|jpg|jpeg)$" maxSize="20" enabled="False" />
-    </SharePoint>
-    </configuration>'
-
-                Mock -CommandName Get-SPWebApplication -MockWith {
-                    $IISSettings = @(@{
-                            Path = $Global:SPDscWebConfigRealPath
-                        })
-                    $iisSettingsCol = { $IISSettings }.Invoke()
-
-
-                    $webapp = @{
-                        IISSettings = $iisSettingsCol
+                BeforeAll {
+                    $testParams = @{
+                        WebAppUrl   = "http://sharepoint.contoso.com"
+                        Zone        = "Default"
+                        EnableCache = $true
+                        Location    = "c:\BlobCache"
+                        MaxSizeInGB = 30
+                        FileTypes   = "\.(gif|jpg|jpeg)$"
                     }
 
-                    return $webapp
+                    Update-SPDscTestConfigFile -Content '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+        <configuration>
+        <SharePoint>
+            <BlobCache location="c:\BlobCache" path="\.(gif|jpg|jpeg)$" maxSize="20" enabled="False" />
+        </SharePoint>
+        </configuration>'
+
+                    Mock -CommandName Get-SPWebApplication -MockWith {
+                        $IISSettings = @(@{
+                                Path = $Global:SPDscWebConfigRealPath
+                            })
+                        $iisSettingsCol = { $IISSettings }.Invoke()
+
+
+                        $webapp = @{
+                            IISSettings = $iisSettingsCol
+                        }
+
+                        return $webapp
+                    }
+
+                    Mock -CommandName Test-Path -MockWith { return $true }
+
+                    Mock -CommandName Copy-Item -MockWith { }
                 }
-
-                Mock -CommandName Test-Path -MockWith { return $true }
-
-                Mock -CommandName Copy-Item -MockWith { }
 
                 It "Should return values from the get method" {
                     Get-TargetResource @testParams | Should -Not -BeNullOrEmpty
@@ -304,23 +315,25 @@ namespace Microsoft.SharePoint.Administration {
             }
 
             Context -Name "The specified configuration is correctly configured" {
-                $testParams = @{
-                    WebAppUrl   = "http://sharepoint.contoso.com"
-                    Zone        = "Default"
-                    EnableCache = $true
-                    Location    = "c:\BlobCache"
-                    MaxSizeInGB = 30
-                    FileTypes   = "\.(gif|jpg|jpeg)$"
+                BeforeAll {
+                    $testParams = @{
+                        WebAppUrl   = "http://sharepoint.contoso.com"
+                        Zone        = "Default"
+                        EnableCache = $true
+                        Location    = "c:\BlobCache"
+                        MaxSizeInGB = 30
+                        FileTypes   = "\.(gif|jpg|jpeg)$"
+                    }
+
+                    Update-SPDscTestConfigFile -Content '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+        <configuration>
+        <SharePoint>
+            <BlobCache location="c:\BlobCache" path="\.(gif|jpg|jpeg)$" maxSize="30" enabled="True" />
+        </SharePoint>
+        </configuration>'
+
+                    Mock -CommandName Test-Path -MockWith { return $true }
                 }
-
-                Update-SPDscTestConfigFile -Content '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-    <configuration>
-    <SharePoint>
-        <BlobCache location="c:\BlobCache" path="\.(gif|jpg|jpeg)$" maxSize="30" enabled="True" />
-    </SharePoint>
-    </configuration>'
-
-                Mock -CommandName Test-Path -MockWith { return $true }
 
                 It "Should return values from the get method" {
                     Get-TargetResource @testParams | Should -Not -BeNullOrEmpty
@@ -332,22 +345,24 @@ namespace Microsoft.SharePoint.Administration {
             }
 
             Context -Name "BlobCache is enabled, but the parameters specify it to be disabled" {
-                $testParams = @{
-                    WebAppUrl   = "http:/sharepoint.contoso.com"
-                    Zone        = "Default"
-                    EnableCache = $false
+                BeforeAll {
+                    $testParams = @{
+                        WebAppUrl   = "http:/sharepoint.contoso.com"
+                        Zone        = "Default"
+                        EnableCache = $false
+                    }
+
+                    Update-SPDscTestConfigFile -Content '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+        <configuration>
+        <SharePoint>
+            <BlobCache location="c:\BlobCache" path="\.(gif|jpg|jpeg)$" maxSize="30" enabled="True" />
+        </SharePoint>
+        </configuration>'
+
+                    Mock -CommandName Test-Path -MockWith { return $true }
+
+                    Mock -CommandName Copy-Item -MockWith { }
                 }
-
-                Update-SPDscTestConfigFile -Content '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-    <configuration>
-    <SharePoint>
-        <BlobCache location="c:\BlobCache" path="\.(gif|jpg|jpeg)$" maxSize="30" enabled="True" />
-    </SharePoint>
-    </configuration>'
-
-                Mock -CommandName Test-Path -MockWith { return $true }
-
-                Mock -CommandName Copy-Item -MockWith { }
 
                 It "Should return values from the get method" {
                     Get-TargetResource @testParams | Should -Not -BeNullOrEmpty
@@ -365,43 +380,45 @@ namespace Microsoft.SharePoint.Administration {
             }
 
             Context -Name "The server doesn't have the web application role running" {
-                $testParams = @{
-                    WebAppUrl   = "http://sharepoint.contoso.com"
-                    Zone        = "Default"
-                    EnableCache = $true
-                    Location    = "c:\BlobCache"
-                    MaxSizeInGB = 30
-                    FileTypes   = "\.(gif|jpg|jpeg)$"
-                }
+                BeforeAll {
+                    $testParams = @{
+                        WebAppUrl   = "http://sharepoint.contoso.com"
+                        Zone        = "Default"
+                        EnableCache = $true
+                        Location    = "c:\BlobCache"
+                        MaxSizeInGB = 30
+                        FileTypes   = "\.(gif|jpg|jpeg)$"
+                    }
 
-                Update-SPDscTestConfigFile -Content '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-    <configuration>
-    <SharePoint>
-        <BlobCache location="c:\BlobCache" path="\.(gif|jpg|jpeg)$" maxSize="30" enabled="True" />
-    </SharePoint>
-    </configuration>'
+                    Update-SPDscTestConfigFile -Content '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+        <configuration>
+        <SharePoint>
+            <BlobCache location="c:\BlobCache" path="\.(gif|jpg|jpeg)$" maxSize="30" enabled="True" />
+        </SharePoint>
+        </configuration>'
 
-                Mock -CommandName Test-Path -MockWith { return $true }
-                Mock -CommandName Get-SPServiceInstance -MockWith {
-                    return @(
-                        $null | Add-Member -MemberType ScriptMethod `
-                            -Name GetType `
-                            -Value {
-                            return @{
-                                Name = "SPWebServiceInstance"
+                    Mock -CommandName Test-Path -MockWith { return $true }
+                    Mock -CommandName Get-SPServiceInstance -MockWith {
+                        return @(
+                            $null | Add-Member -MemberType ScriptMethod `
+                                -Name GetType `
+                                -Value {
+                                return @{
+                                    Name = "SPWebServiceInstance"
+                                }
+                            } -PassThru -Force | Add-Member -Name Name `
+                                -MemberType ScriptProperty `
+                                -PassThru `
+                            {
+                                # get
+                                ""
+                            }`
+                            {
+                                # set
+                                param ( $arg )
                             }
-                        } -PassThru -Force | Add-Member -Name Name `
-                            -MemberType ScriptProperty `
-                            -PassThru `
-                        {
-                            # get
-                            ""
-                        }`
-                        {
-                            # set
-                            param ( $arg )
-                        }
-                    )
+                        )
+                    }
                 }
 
                 It "Should return values from the get method" {

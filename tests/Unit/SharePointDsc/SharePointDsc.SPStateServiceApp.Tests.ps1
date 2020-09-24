@@ -47,57 +47,61 @@ Invoke-TestSetup
 
 try
 {
-    Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
-        InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
-            Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
+    InModuleScope -ModuleName $script:DSCResourceFullName -ScriptBlock {
+        Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
+            BeforeAll {
+                Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
-            # Initialize tests
-            $mockPassword = ConvertTo-SecureString -String "password" -AsPlainText -Force
-            $mockCredential = New-Object -TypeName System.Management.Automation.PSCredential `
-                -ArgumentList @("username", $mockPassword)
+                # Initialize tests
+                $mockPassword = ConvertTo-SecureString -String "password" -AsPlainText -Force
+                $mockCredential = New-Object -TypeName System.Management.Automation.PSCredential `
+                    -ArgumentList @("username", $mockPassword)
 
-            # Mocks for all contexts
-            Mock -CommandName New-SPStateServiceDatabase -MockWith { return @{ } }
-            Mock -CommandName New-SPStateServiceApplication -MockWith { return @{ } }
-            Mock -CommandName New-SPStateServiceApplicationProxy -MockWith { return @{ } }
-            Mock -CommandName Remove-SPServiceApplication -MockWith { }
+                # Mocks for all contexts
+                Mock -CommandName New-SPStateServiceDatabase -MockWith { return @{ } }
+                Mock -CommandName New-SPStateServiceApplication -MockWith { return @{ } }
+                Mock -CommandName New-SPStateServiceApplicationProxy -MockWith { return @{ } }
+                Mock -CommandName Remove-SPServiceApplication -MockWith { }
+            }
 
             # Test contexts
             Context -Name "the service app doesn't exist and should" -Fixture {
-                $testParams = @{
-                    Name                = "State Service App"
-                    ProxyName           = "State Service Proxy"
-                    DatabaseName        = "SP_StateService"
-                    DatabaseServer      = "SQL.test.domain"
-                    DatabaseCredentials = $mockCredential
-                    Ensure              = "Present"
-                }
-
-                Mock -CommandName New-SPStateServiceApplication -MockWith {
-                    $returnVal = @{
-                        Name = $testParams.Name
+                BeforeAll {
+                    $testParams = @{
+                        Name                = "State Service App"
+                        ProxyName           = "State Service Proxy"
+                        DatabaseName        = "SP_StateService"
+                        DatabaseServer      = "SQL.test.domain"
+                        DatabaseCredentials = $mockCredential
+                        Ensure              = "Present"
                     }
-                    $returnVal = $returnVal | Add-Member -MemberType ScriptMethod `
-                        -Name IsConnected -Value {
-                        return $true
-                    } -PassThru
 
-                    return $returnVal
-                }
-                Mock -CommandName Get-SPServiceApplication -MockWith { return $null }
-                Mock -CommandName Get-SPServiceApplicationProxy -MockWith {
-                    $proxiesToReturn = @()
-                    $proxy = @{
-                        Name        = $testParams.ProxyName
-                        DisplayName = $testParams.ProxyName
+                    Mock -CommandName New-SPStateServiceApplication -MockWith {
+                        $returnVal = @{
+                            Name = $testParams.Name
+                        }
+                        $returnVal = $returnVal | Add-Member -MemberType ScriptMethod `
+                            -Name IsConnected -Value {
+                            return $true
+                        } -PassThru
+
+                        return $returnVal
                     }
-                    $proxy = $proxy | Add-Member -MemberType ScriptMethod `
-                        -Name Delete `
-                        -Value { } `
-                        -PassThru
-                    $proxiesToReturn += $proxy
+                    Mock -CommandName Get-SPServiceApplication -MockWith { return $null }
+                    Mock -CommandName Get-SPServiceApplicationProxy -MockWith {
+                        $proxiesToReturn = @()
+                        $proxy = @{
+                            Name        = $testParams.ProxyName
+                            DisplayName = $testParams.ProxyName
+                        }
+                        $proxy = $proxy | Add-Member -MemberType ScriptMethod `
+                            -Name Delete `
+                            -Value { } `
+                            -PassThru
+                        $proxiesToReturn += $proxy
 
-                    return $proxiesToReturn
+                        return $proxiesToReturn
+                    }
                 }
 
                 It "Should return absent from the get method" {
@@ -110,45 +114,46 @@ try
 
                 It "Should create a state service app from the set method" {
                     Set-TargetResource @testParams
-
                     Assert-MockCalled New-SPStateServiceApplication
                 }
             }
 
             Context -Name "the service app exists and should" -Fixture {
-                $testParams = @{
-                    Name                = "State Service App"
-                    DatabaseName        = "SP_StateService"
-                    DatabaseServer      = "SQL.test.domain"
-                    DatabaseCredentials = $mockCredential
-                    Ensure              = "Present"
-                }
-
-                Mock -CommandName Get-SPStateServiceApplication -MockWith {
-                    $returnVal = @{
-                        DisplayName = $testParams.Name
-                        Name        = $testParams.Name
+                BeforeAll {
+                    $testParams = @{
+                        Name                = "State Service App"
+                        DatabaseName        = "SP_StateService"
+                        DatabaseServer      = "SQL.test.domain"
+                        DatabaseCredentials = $mockCredential
+                        Ensure              = "Present"
                     }
-                    $returnVal = $returnVal | Add-Member -MemberType ScriptMethod `
-                        -Name IsConnected -Value {
-                        return $true
-                    } -PassThru
 
-                    return $returnVal
-                }
-                Mock -CommandName Get-SPServiceApplicationProxy -MockWith {
-                    $proxiesToReturn = @()
-                    $proxy = @{
-                        Name        = $testParams.ProxyName
-                        DisplayName = $testParams.ProxyName
+                    Mock -CommandName Get-SPStateServiceApplication -MockWith {
+                        $returnVal = @{
+                            DisplayName = $testParams.Name
+                            Name        = $testParams.Name
+                        }
+                        $returnVal = $returnVal | Add-Member -MemberType ScriptMethod `
+                            -Name IsConnected -Value {
+                            return $true
+                        } -PassThru
+
+                        return $returnVal
                     }
-                    $proxy = $proxy | Add-Member -MemberType ScriptMethod `
-                        -Name Delete `
-                        -Value { } `
-                        -PassThru
-                    $proxiesToReturn += $proxy
+                    Mock -CommandName Get-SPServiceApplicationProxy -MockWith {
+                        $proxiesToReturn = @()
+                        $proxy = @{
+                            Name        = $testParams.ProxyName
+                            DisplayName = $testParams.ProxyName
+                        }
+                        $proxy = $proxy | Add-Member -MemberType ScriptMethod `
+                            -Name Delete `
+                            -Value { } `
+                            -PassThru
+                        $proxiesToReturn += $proxy
 
-                    return $proxiesToReturn
+                        return $proxiesToReturn
+                    }
                 }
 
                 It "Should return present from the get method" {
@@ -161,15 +166,17 @@ try
             }
 
             Context -Name "When the service app exists but it shouldn't" -Fixture {
-                $testParams = @{
-                    Name         = "State Service App"
-                    DatabaseName = "-"
-                    Ensure       = "Absent"
-                }
+                BeforeAll {
+                    $testParams = @{
+                        Name         = "State Service App"
+                        DatabaseName = "-"
+                        Ensure       = "Absent"
+                    }
 
-                Mock -CommandName Get-SPStateServiceApplication -MockWith {
-                    return @{
-                        DisplayName = $testParams.Name
+                    Mock -CommandName Get-SPStateServiceApplication -MockWith {
+                        return @{
+                            DisplayName = $testParams.Name
+                        }
                     }
                 }
 
@@ -188,14 +195,16 @@ try
             }
 
             Context -Name "When the service app doesn't exist and shouldn't" -Fixture {
-                $testParams = @{
-                    Name         = "State Service App"
-                    DatabaseName = "-"
-                    Ensure       = "Absent"
-                }
+                BeforeAll {
+                    $testParams = @{
+                        Name         = "State Service App"
+                        DatabaseName = "-"
+                        Ensure       = "Absent"
+                    }
 
-                Mock -CommandName Get-SPServiceApplication -MockWith {
-                    return $null
+                    Mock -CommandName Get-SPServiceApplication -MockWith {
+                        return $null
+                    }
                 }
 
                 It "Should return absent from the Get method" {

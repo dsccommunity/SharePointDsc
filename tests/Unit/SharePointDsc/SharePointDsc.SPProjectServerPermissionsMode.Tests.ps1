@@ -46,9 +46,16 @@ Invoke-TestSetup
 
 try
 {
-    Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
-        InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
-            Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
+    InModuleScope -ModuleName $script:DSCResourceFullName -ScriptBlock {
+        Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
+            BeforeAll {
+                Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
+
+                if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 16)
+                {
+                    Mock -CommandName Set-SPProjectPermissionMode -MockWith { }
+                }
+            }
 
             switch ($Global:SPDscHelper.CurrentStubBuildNumber.Major)
             {
@@ -70,15 +77,16 @@ try
                 }
                 16
                 {
-                    Mock -CommandName Set-SPProjectPermissionMode -MockWith { }
-
                     Context -Name "Permissions are in SharePoint mode, and should be" -Fixture {
-                        $testParams = @{
-                            Url            = "http://projects.contoso.com"
-                            PermissionMode = "SharePoint"
+                        BeforeAll {
+                            $testParams = @{
+                                Url            = "http://projects.contoso.com"
+                                PermissionMode = "SharePoint"
+                            }
+
+                            Mock -CommandName Get-SPProjectPermissionMode -MockWith { return "SharePoint" }
                         }
 
-                        Mock -CommandName Get-SPProjectPermissionMode -MockWith { return "SharePoint" }
                         It "should return the correct value for its current mode in the get method" {
                             (Get-TargetResource @testParams).PermissionMode | Should -Be "SharePoint"
                         }
@@ -89,12 +97,14 @@ try
                     }
 
                     Context -Name "Permissions are in ProjectServer mode, and should be" -Fixture {
-                        $testParams = @{
-                            Url            = "http://projects.contoso.com"
-                            PermissionMode = "ProjectServer"
-                        }
+                        BeforeAll {
+                            $testParams = @{
+                                Url            = "http://projects.contoso.com"
+                                PermissionMode = "ProjectServer"
+                            }
 
-                        Mock -CommandName Get-SPProjectPermissionMode -MockWith { return "ProjectServer" }
+                            Mock -CommandName Get-SPProjectPermissionMode -MockWith { return "ProjectServer" }
+                        }
 
                         It "should return the correct value for its current mode in the get method" {
                             (Get-TargetResource @testParams).PermissionMode | Should -Be "ProjectServer"
@@ -106,12 +116,14 @@ try
                     }
 
                     Context -Name "Permissions are in SharePoint mode, and shouldn't be" -Fixture {
-                        $testParams = @{
-                            Url            = "http://projects.contoso.com"
-                            PermissionMode = "ProjectServer"
-                        }
+                        BeforeAll {
+                            $testParams = @{
+                                Url            = "http://projects.contoso.com"
+                                PermissionMode = "ProjectServer"
+                            }
 
-                        Mock -CommandName Get-SPProjectPermissionMode -MockWith { return "SharePoint" }
+                            Mock -CommandName Get-SPProjectPermissionMode -MockWith { return "SharePoint" }
+                        }
 
                         It "should return the correct value for its current mode in the get method" {
                             (Get-TargetResource @testParams).PermissionMode | Should -Be "SharePoint"
@@ -128,12 +140,14 @@ try
                     }
 
                     Context -Name "Permissions are in ProjectServer mode, and shouldn't be" -Fixture {
-                        $testParams = @{
-                            Url            = "http://projects.contoso.com"
-                            PermissionMode = "SharePoint"
-                        }
+                        BeforeAll {
+                            $testParams = @{
+                                Url            = "http://projects.contoso.com"
+                                PermissionMode = "SharePoint"
+                            }
 
-                        Mock -CommandName Get-SPProjectPermissionMode -MockWith { return "ProjectServer" }
+                            Mock -CommandName Get-SPProjectPermissionMode -MockWith { return "ProjectServer" }
+                        }
 
                         It "should return the correct value for its current mode in the get method" {
                             (Get-TargetResource @testParams).PermissionMode | Should -Be "ProjectServer"
@@ -150,12 +164,14 @@ try
                     }
 
                     Context -Name "Unable to determine permissions mode" -Fixture {
-                        $testParams = @{
-                            Url            = "http://projects.contoso.com"
-                            PermissionMode = "SharePoint"
-                        }
+                        BeforeAll {
+                            $testParams = @{
+                                Url            = "http://projects.contoso.com"
+                                PermissionMode = "SharePoint"
+                            }
 
-                        Mock -CommandName Get-SPProjectPermissionMode -MockWith { throw "Unkown error" }
+                            Mock -CommandName Get-SPProjectPermissionMode -MockWith { throw "Unkown error" }
+                        }
 
                         It "should return 'unkonwn' in the get method" {
                             (Get-TargetResource @testParams).PermissionMode | Should -Be "unknown"

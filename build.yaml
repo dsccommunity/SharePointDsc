@@ -85,7 +85,7 @@ Pester: #Passthru, OutputFile, CodeCoverageOutputFile not supported
   # - tests/Integration
   ExcludeTag:
   Tag:
-  CodeCoverageThreshold: 70 # Set to 0 to bypass
+  CodeCoverageThreshold: 0 #70 # Set to 0 to bypass
 
 DscTest:
   # OutputFolder:

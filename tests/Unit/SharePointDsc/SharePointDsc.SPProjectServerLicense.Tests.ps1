@@ -46,9 +46,17 @@ Invoke-TestSetup
 
 try
 {
-    Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
-        InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
-            Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
+    InModuleScope -ModuleName $script:DSCResourceFullName -ScriptBlock {
+        Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
+            BeforeAll {
+                Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
+
+                if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 16)
+                {
+                    Mock -CommandName Enable-ProjectServerLicense -MockWith { }
+                    Mock -CommandName Disable-ProjectServerLicense -MockWith { }
+                }
+            }
 
             switch ($Global:SPDscHelper.CurrentStubBuildNumber.Major)
             {
@@ -70,18 +78,17 @@ try
                 }
                 16
                 {
-                    Mock -CommandName Enable-ProjectServerLicense -MockWith { }
-                    Mock -CommandName Disable-ProjectServerLicense -MockWith { }
-
                     Context -Name "Project server license is not enabled, but it should be" -Fixture {
-                        $testParams = @{
-                            IsSingleInstance = "Yes"
-                            Ensure           = "Present"
-                            ProductKey       = "XXXXX-XXXXX-XXXXX-XXXXX-XXXXX"
-                        }
+                        BeforeAll {
+                            $testParams = @{
+                                IsSingleInstance = "Yes"
+                                Ensure           = "Present"
+                                ProductKey       = "XXXXX-XXXXX-XXXXX-XXXXX-XXXXX"
+                            }
 
-                        Mock -CommandName Get-ProjectServerLicense -MockWith {
-                            return @("Project Server 2016 : Disabled", "Enabled date : 1/1/2000")
+                            Mock -CommandName Get-ProjectServerLicense -MockWith {
+                                return @("Project Server 2016 : Disabled", "Enabled date : 1/1/2000")
+                            }
                         }
 
                         It "Should return absent from the Get method" {
@@ -99,14 +106,16 @@ try
                     }
 
                     Context -Name "Project server license is enabled, and it should be" -Fixture {
-                        $testParams = @{
-                            IsSingleInstance = "Yes"
-                            Ensure           = "Present"
-                            ProductKey       = "XXXXX-XXXXX-XXXXX-XXXXX-XXXXX"
-                        }
+                        BeforeAll {
+                            $testParams = @{
+                                IsSingleInstance = "Yes"
+                                Ensure           = "Present"
+                                ProductKey       = "XXXXX-XXXXX-XXXXX-XXXXX-XXXXX"
+                            }
 
-                        Mock -CommandName Get-ProjectServerLicense -MockWith {
-                            return @("Project Server 2016 : Active", "Enabled date : 1/1/2000")
+                            Mock -CommandName Get-ProjectServerLicense -MockWith {
+                                return @("Project Server 2016 : Active", "Enabled date : 1/1/2000")
+                            }
                         }
 
                         It "Should return present from the Get method" {
@@ -119,13 +128,15 @@ try
                     }
 
                     Context -Name "Project server license is enabled, but it should not be" -Fixture {
-                        $testParams = @{
-                            IsSingleInstance = "Yes"
-                            Ensure           = "Absent"
-                        }
+                        BeforeAll {
+                            $testParams = @{
+                                IsSingleInstance = "Yes"
+                                Ensure           = "Absent"
+                            }
 
-                        Mock -CommandName Get-ProjectServerLicense -MockWith {
-                            return @("Project Server 2016 : Active", "Enabled date : 1/1/2000")
+                            Mock -CommandName Get-ProjectServerLicense -MockWith {
+                                return @("Project Server 2016 : Active", "Enabled date : 1/1/2000")
+                            }
                         }
 
                         It "Should return present from the Get method" {
@@ -143,13 +154,15 @@ try
                     }
 
                     Context -Name "Project server license is not enabled, and it should not be" -Fixture {
-                        $testParams = @{
-                            IsSingleInstance = "Yes"
-                            Ensure           = "Absent"
-                        }
+                        BeforeAll {
+                            $testParams = @{
+                                IsSingleInstance = "Yes"
+                                Ensure           = "Absent"
+                            }
 
-                        Mock -CommandName Get-ProjectServerLicense -MockWith {
-                            return @("Project Server 2016 : Disabled", "Enabled date : 1/1/2000")
+                            Mock -CommandName Get-ProjectServerLicense -MockWith {
+                                return @("Project Server 2016 : Disabled", "Enabled date : 1/1/2000")
+                            }
                         }
 
                         It "Should return absent from the Get method" {
@@ -162,14 +175,16 @@ try
                     }
 
                     Context -Name "The farm is not in a state to determine the license status" -Fixture {
-                        $testParams = @{
-                            IsSingleInstance = "Yes"
-                            Ensure           = "Present"
-                            ProductKey       = "XXXXX-XXXXX-XXXXX-XXXXX-XXXXX"
-                        }
+                        BeforeAll {
+                            $testParams = @{
+                                IsSingleInstance = "Yes"
+                                Ensure           = "Present"
+                                ProductKey       = "XXXXX-XXXXX-XXXXX-XXXXX-XXXXX"
+                            }
 
-                        Mock -CommandName Get-ProjectServerLicense -MockWith {
-                            throw "Unkown error"
+                            Mock -CommandName Get-ProjectServerLicense -MockWith {
+                                throw "Unkown error"
+                            }
                         }
 
                         It "Should return absent from the Get method" {
@@ -178,13 +193,15 @@ try
                     }
 
                     Context -Name "The license should be enabled but no product key was provided" -Fixture {
-                        $testParams = @{
-                            IsSingleInstance = "Yes"
-                            Ensure           = "Present"
-                        }
+                        BeforeAll {
+                            $testParams = @{
+                                IsSingleInstance = "Yes"
+                                Ensure           = "Present"
+                            }
 
-                        Mock -CommandName Get-ProjectServerLicense -MockWith {
-                            return @("Project Server 2016 : Disabled", "Enabled date : 1/1/2000")
+                            Mock -CommandName Get-ProjectServerLicense -MockWith {
+                                return @("Project Server 2016 : Disabled", "Enabled date : 1/1/2000")
+                            }
                         }
 
                         It "Should throw an error in the set method" {

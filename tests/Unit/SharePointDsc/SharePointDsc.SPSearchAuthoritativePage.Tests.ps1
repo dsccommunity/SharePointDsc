@@ -46,57 +46,60 @@ Invoke-TestSetup
 
 try
 {
-    Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
-        InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
-            Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
-            try
+    InModuleScope -ModuleName $script:DSCResourceFullName -ScriptBlock {
+        Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
+            BeforeAll {
+                Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
+                try
+                {
+                    Add-Type -TypeDefinition @"
+        namespace Microsoft.Office.Server.Search.Administration {
+            public enum SearchObjectLevel
             {
-                Add-Type -TypeDefinition @"
-    namespace Microsoft.Office.Server.Search.Administration {
-        public enum SearchObjectLevel
-        {
-            SPWeb,
-            SPSite,
-            SPSiteSubscription,
-            Ssa
-        }
+                SPWeb,
+                SPSite,
+                SPSiteSubscription,
+                Ssa
+            }
 
 
-        public class SearchObjectOwner {
-            public SearchObjectOwner(Microsoft.Office.Server.Search.Administration.SearchObjectLevel level) { }
+            public class SearchObjectOwner {
+                public SearchObjectOwner(Microsoft.Office.Server.Search.Administration.SearchObjectLevel level) { }
+            }
         }
-    }
 "@ -ErrorAction SilentlyContinue
+                }
+                catch
+                {
+
+                }
+
+                # Mocks for all contexts
+                Mock -CommandName Get-SPEnterpriseSearchQueryAuthority -MockWith { }
+                Mock -CommandName New-SPEnterpriseSearchQueryAuthority -MockWith { }
+                Mock -CommandName Set-SPEnterpriseSearchQueryAuthority -MockWith { }
+                Mock -CommandName Remove-SPEnterpriseSearchQueryAuthority -MockWith { }
+
+                Mock -CommandName Get-SPEnterpriseSearchQueryDemoted -MockWith { }
+                Mock -CommandName New-SPEnterpriseSearchQueryDemoted -MockWith { }
+                Mock -CommandName Remove-SPEnterpriseSearchQueryDemoted -MockWith { }
             }
-            catch
-            {
-
-            }
-            # Mocks for all contexts
-
-            Mock -CommandName Get-SPEnterpriseSearchQueryAuthority -MockWith { }
-            Mock -CommandName New-SPEnterpriseSearchQueryAuthority -MockWith { }
-            Mock -CommandName Set-SPEnterpriseSearchQueryAuthority -MockWith { }
-            Mock -CommandName Remove-SPEnterpriseSearchQueryAuthority -MockWith { }
-
-            Mock -CommandName Get-SPEnterpriseSearchQueryDemoted -MockWith { }
-            Mock -CommandName New-SPEnterpriseSearchQueryDemoted -MockWith { }
-            Mock -CommandName Remove-SPEnterpriseSearchQueryDemoted -MockWith { }
 
             # Test contexts
             Context -Name "A SharePoint Search Service doesn't exists" {
-                $testParams = @{
-                    ServiceAppName = "Search Service Application"
-                    Path           = "http://site.sharepoint.com/pages/authoratative.aspx"
-                    Action         = "Authoratative"
-                    Level          = 0.0
-                    Ensure         = "Present"
-                }
+                BeforeAll {
+                    $testParams = @{
+                        ServiceAppName = "Search Service Application"
+                        Path           = "http://site.sharepoint.com/pages/authoratative.aspx"
+                        Action         = "Authoratative"
+                        Level          = 0.0
+                        Ensure         = "Present"
+                    }
 
-                Mock -CommandName Get-SPEnterpriseSearchServiceApplication -MockWith {
-                    return $null
+                    Mock -CommandName Get-SPEnterpriseSearchServiceApplication -MockWith {
+                        return $null
+                    }
                 }
-
 
                 It "Should return absent from the get method" {
                     (Get-TargetResource @testParams).Ensure | Should -Be "Absent"
@@ -113,34 +116,35 @@ try
             }
 
             Context -Name "A search query authoratative page does exist and should" {
-                $testParams = @{
-                    ServiceAppName = "Search Service Application"
-                    Path           = "http://site.sharepoint.com/pages/authoratative.aspx"
-                    Action         = "Authoratative"
-                    Level          = 0.0
-                    Ensure         = "Present"
-                }
+                BeforeAll {
+                    $testParams = @{
+                        ServiceAppName = "Search Service Application"
+                        Path           = "http://site.sharepoint.com/pages/authoratative.aspx"
+                        Action         = "Authoratative"
+                        Level          = 0.0
+                        Ensure         = "Present"
+                    }
 
-                Mock -CommandName Get-SPEnterpriseSearchServiceApplication -MockWith {
-                    return @{
-                        DisplayName = $testParams.ServiceAppName
+                    Mock -CommandName Get-SPEnterpriseSearchServiceApplication -MockWith {
+                        return @{
+                            DisplayName = $testParams.ServiceAppName
+                        }
+                    }
+
+                    Mock -CommandName  Get-SPEnterpriseSearchQueryAuthority -MockWith {
+                        return @{
+                            Identity = $testParams.Path
+                            Level    = $testParams.Level
+                        }
+                    }
+
+                    Mock -CommandName Set-SPEnterpriseSearchQueryAuthority -MockWith {
+                        return @{
+                            Identity = $testParams.Path
+                            Level    = $testParams.Level
+                        }
                     }
                 }
-
-                Mock -CommandName  Get-SPEnterpriseSearchQueryAuthority -MockWith {
-                    return @{
-                        Identity = $testParams.Path
-                        Level    = $testParams.Level
-                    }
-                }
-
-                Mock -CommandName Set-SPEnterpriseSearchQueryAuthority -MockWith {
-                    return @{
-                        Identity = $testParams.Path
-                        Level    = $testParams.Level
-                    }
-                }
-
 
                 It "Should return present from the get method" {
                     $result = Get-TargetResource @testParams
@@ -160,31 +164,32 @@ try
             }
 
             Context -Name "A search query authoratative page does exist and shouldn't" {
-                $testParams = @{
-                    ServiceAppName = "Search Service Application"
-                    Path           = "http://site.sharepoint.com/pages/authoratative.aspx"
-                    Action         = "Authoratative"
-                    Level          = 0.0
-                    Ensure         = "Absent"
-                }
+                BeforeAll {
+                    $testParams = @{
+                        ServiceAppName = "Search Service Application"
+                        Path           = "http://site.sharepoint.com/pages/authoratative.aspx"
+                        Action         = "Authoratative"
+                        Level          = 0.0
+                        Ensure         = "Absent"
+                    }
 
-                Mock -CommandName Get-SPEnterpriseSearchServiceApplication -MockWith {
-                    return @{
-                        DisplayName = $testParams.ServiceAppName
+                    Mock -CommandName Get-SPEnterpriseSearchServiceApplication -MockWith {
+                        return @{
+                            DisplayName = $testParams.ServiceAppName
+                        }
+                    }
+
+                    Mock -CommandName  Get-SPEnterpriseSearchQueryAuthority -MockWith {
+                        return @{
+                            Identity = $testParams.Path
+                            Level    = $testParams.Level
+                        }
+                    }
+
+                    Mock -CommandName Remove-SPEnterpriseSearchQueryAuthority -MockWith {
+                        return $null
                     }
                 }
-
-                Mock -CommandName  Get-SPEnterpriseSearchQueryAuthority -MockWith {
-                    return @{
-                        Identity = $testParams.Path
-                        Level    = $testParams.Level
-                    }
-                }
-
-                Mock -CommandName Remove-SPEnterpriseSearchQueryAuthority -MockWith {
-                    return $null
-                }
-
 
                 It "Should return present from the get method" {
                     $result = Get-TargetResource @testParams
@@ -203,28 +208,29 @@ try
             }
 
             Context -Name "A search query authoratative page doesn't exist and shouldn't" {
-                $testParams = @{
-                    ServiceAppName = "Search Service Application"
-                    Path           = "http://site.sharepoint.com/pages/authoratative.aspx"
-                    Action         = "Authoratative"
-                    Level          = 0.0
-                    Ensure         = "Absent"
-                }
+                BeforeAll {
+                    $testParams = @{
+                        ServiceAppName = "Search Service Application"
+                        Path           = "http://site.sharepoint.com/pages/authoratative.aspx"
+                        Action         = "Authoratative"
+                        Level          = 0.0
+                        Ensure         = "Absent"
+                    }
 
-                Mock -CommandName Get-SPEnterpriseSearchServiceApplication -MockWith {
-                    return @{
-                        DisplayName = $testParams.ServiceAppName
+                    Mock -CommandName Get-SPEnterpriseSearchServiceApplication -MockWith {
+                        return @{
+                            DisplayName = $testParams.ServiceAppName
+                        }
+                    }
+
+                    Mock -CommandName  Get-SPEnterpriseSearchQueryAuthority -MockWith {
+                        return $null
+                    }
+
+                    Mock -CommandName Remove-SPEnterpriseSearchQueryAuthority -MockWith {
+                        return $null
                     }
                 }
-
-                Mock -CommandName  Get-SPEnterpriseSearchQueryAuthority -MockWith {
-                    return $null
-                }
-
-                Mock -CommandName Remove-SPEnterpriseSearchQueryAuthority -MockWith {
-                    return $null
-                }
-
 
                 It "Should return absent from the get method" {
                     $result = Get-TargetResource @testParams
@@ -243,31 +249,32 @@ try
             }
 
             Context -Name "A search query authoratative page doesn't exist but should" -Fixture {
-                $testParams = @{
-                    ServiceAppName = "Search Service Application"
-                    Path           = "http://site.sharepoint.com/pages/authoratative.aspx"
-                    Action         = "Authoratative"
-                    Level          = 0.0
-                    Ensure         = "Present"
-                }
+                BeforeAll {
+                    $testParams = @{
+                        ServiceAppName = "Search Service Application"
+                        Path           = "http://site.sharepoint.com/pages/authoratative.aspx"
+                        Action         = "Authoratative"
+                        Level          = 0.0
+                        Ensure         = "Present"
+                    }
 
-                Mock -CommandName Get-SPEnterpriseSearchServiceApplication -MockWith {
-                    return @{
-                        DisplayName = $testParams.ServiceAppName
+                    Mock -CommandName Get-SPEnterpriseSearchServiceApplication -MockWith {
+                        return @{
+                            DisplayName = $testParams.ServiceAppName
+                        }
+                    }
+
+                    Mock -CommandName  Get-SPEnterpriseSearchQueryAuthority -MockWith {
+                        return $null
+                    }
+
+                    Mock -CommandName New-SPEnterpriseSearchQueryAuthority -MockWith {
+                        return @{
+                            Identity = $testParams.Path
+                            Level    = $testParams.Level
+                        }
                     }
                 }
-
-                Mock -CommandName  Get-SPEnterpriseSearchQueryAuthority -MockWith {
-                    return $null
-                }
-
-                Mock -CommandName New-SPEnterpriseSearchQueryAuthority -MockWith {
-                    return @{
-                        Identity = $testParams.Path
-                        Level    = $testParams.Level
-                    }
-                }
-
 
                 It "Should return absent from the get method" {
                     $result = Get-TargetResource @testParams
@@ -282,27 +289,28 @@ try
                     Set-TargetResource @testParams
 
                     Assert-MockCalled -CommandName Get-SPEnterpriseSearchServiceApplication -Times 1
-
                 }
             }
 
             Context -Name "A search query demoted page does exist and should" {
-                $testParams = @{
-                    ServiceAppName = "Search Service Application"
-                    Path           = "http://site.sharepoint.com/pages/authoratative.aspx"
-                    Action         = "Demoted"
-                    Ensure         = "Present"
-                }
-
-                Mock -CommandName Get-SPEnterpriseSearchServiceApplication -MockWith {
-                    return @{
-                        DisplayName = $testParams.ServiceAppName
+                BeforeAll {
+                    $testParams = @{
+                        ServiceAppName = "Search Service Application"
+                        Path           = "http://site.sharepoint.com/pages/authoratative.aspx"
+                        Action         = "Demoted"
+                        Ensure         = "Present"
                     }
-                }
 
-                Mock -CommandName  Get-SPEnterpriseSearchQueryDemoted -MockWith {
-                    return @{
-                        Identity = $testParams.Path
+                    Mock -CommandName Get-SPEnterpriseSearchServiceApplication -MockWith {
+                        return @{
+                            DisplayName = $testParams.ServiceAppName
+                        }
+                    }
+
+                    Mock -CommandName  Get-SPEnterpriseSearchQueryDemoted -MockWith {
+                        return @{
+                            Identity = $testParams.Path
+                        }
                     }
                 }
 
@@ -323,22 +331,24 @@ try
             }
 
             Context -Name "A search query demoted page does exist and shouldn't" {
-                $testParams = @{
-                    ServiceAppName = "Search Service Application"
-                    Path           = "http://site.sharepoint.com/pages/authoratative.aspx"
-                    Action         = "Demoted"
-                    Ensure         = "Absent"
-                }
-
-                Mock -CommandName Get-SPEnterpriseSearchServiceApplication -MockWith {
-                    return @{
-                        DisplayName = $testParams.ServiceAppName
+                BeforeAll {
+                    $testParams = @{
+                        ServiceAppName = "Search Service Application"
+                        Path           = "http://site.sharepoint.com/pages/authoratative.aspx"
+                        Action         = "Demoted"
+                        Ensure         = "Absent"
                     }
-                }
 
-                Mock -CommandName  Get-SPEnterpriseSearchQueryDemoted -MockWith {
-                    return @{
-                        Identity = $testParams.Path
+                    Mock -CommandName Get-SPEnterpriseSearchServiceApplication -MockWith {
+                        return @{
+                            DisplayName = $testParams.ServiceAppName
+                        }
+                    }
+
+                    Mock -CommandName  Get-SPEnterpriseSearchQueryDemoted -MockWith {
+                        return @{
+                            Identity = $testParams.Path
+                        }
                     }
                 }
 
@@ -360,21 +370,23 @@ try
             }
 
             Context -Name "A search query demoted page doesn't exist and shouldn't" {
-                $testParams = @{
-                    ServiceAppName = "Search Service Application"
-                    Path           = "http://site.sharepoint.com/pages/authoratative.aspx"
-                    Action         = "Demoted"
-                    Ensure         = "Absent"
-                }
-
-                Mock -CommandName Get-SPEnterpriseSearchServiceApplication -MockWith {
-                    return @{
-                        DisplayName = $testParams.ServiceAppName
+                BeforeAll {
+                    $testParams = @{
+                        ServiceAppName = "Search Service Application"
+                        Path           = "http://site.sharepoint.com/pages/authoratative.aspx"
+                        Action         = "Demoted"
+                        Ensure         = "Absent"
                     }
-                }
 
-                Mock -CommandName  Get-SPEnterpriseSearchQueryDemoted -MockWith {
-                    return $null
+                    Mock -CommandName Get-SPEnterpriseSearchServiceApplication -MockWith {
+                        return @{
+                            DisplayName = $testParams.ServiceAppName
+                        }
+                    }
+
+                    Mock -CommandName  Get-SPEnterpriseSearchQueryDemoted -MockWith {
+                        return $null
+                    }
                 }
 
                 It "Should return absent from the get method" {
@@ -394,26 +406,28 @@ try
             }
 
             Context -Name "A search query demoted page doesn't exist but should" -Fixture {
-                $testParams = @{
-                    ServiceAppName = "Search Service Application"
-                    Path           = "http://site.sharepoint.com/pages/authoratative.aspx"
-                    Action         = "Demoted"
-                    Ensure         = "Present"
-                }
-
-                Mock -CommandName Get-SPEnterpriseSearchServiceApplication -MockWith {
-                    return @{
-                        DisplayName = $testParams.ServiceAppName
+                BeforeAll {
+                    $testParams = @{
+                        ServiceAppName = "Search Service Application"
+                        Path           = "http://site.sharepoint.com/pages/authoratative.aspx"
+                        Action         = "Demoted"
+                        Ensure         = "Present"
                     }
-                }
 
-                Mock -CommandName  Get-SPEnterpriseSearchQueryDemoted -MockWith {
-                    return $null
-                }
+                    Mock -CommandName Get-SPEnterpriseSearchServiceApplication -MockWith {
+                        return @{
+                            DisplayName = $testParams.ServiceAppName
+                        }
+                    }
 
-                Mock -CommandName  New-SPEnterpriseSearchQueryDemoted -MockWith {
-                    return @{
-                        Url = $params.Path
+                    Mock -CommandName  Get-SPEnterpriseSearchQueryDemoted -MockWith {
+                        return $null
+                    }
+
+                    Mock -CommandName  New-SPEnterpriseSearchQueryDemoted -MockWith {
+                        return @{
+                            Url = $params.Path
+                        }
                     }
                 }
 

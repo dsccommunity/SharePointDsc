@@ -46,26 +46,30 @@ Invoke-TestSetup
 
 try
 {
-    Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
-        InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
-            Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
+    InModuleScope -ModuleName $script:DSCResourceFullName -ScriptBlock {
+        Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
+            BeforeAll {
+                Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
-            # Initialize tests
+                # Initialize tests
 
-            # Mocks for all contexts
-            Mock -CommandName Set-SPAppAcquisitionConfiguration -MockWith { }
-            Mock -CommandName Set-SPOfficeStoreAppsDefaultActivation -MockWith { }
+                # Mocks for all contexts
+                Mock -CommandName Set-SPAppAcquisitionConfiguration -MockWith { }
+                Mock -CommandName Set-SPOfficeStoreAppsDefaultActivation -MockWith { }
+            }
 
             # Test contexts
             Context -Name "The specified web application does not exist" -Fixture {
-                $testParams = @{
-                    WebAppUrl          = "https://sharepoint.contoso.com"
-                    AllowAppPurchases  = $true
-                    AllowAppsForOffice = $true
-                }
+                BeforeAll {
+                    $testParams = @{
+                        WebAppUrl          = "https://sharepoint.contoso.com"
+                        AllowAppPurchases  = $true
+                        AllowAppsForOffice = $true
+                    }
 
-                Mock -CommandName Get-SPWebApplication -MockWith {
-                    return $null
+                    Mock -CommandName Get-SPWebApplication -MockWith {
+                        return $null
+                    }
                 }
 
                 It "Should return null from the get method" {
@@ -82,26 +86,28 @@ try
             }
 
             Context -Name "The specified settings do not match" -Fixture {
-                $testParams = @{
-                    WebAppUrl          = "https://sharepoint.contoso.com"
-                    AllowAppPurchases  = $true
-                    AllowAppsForOffice = $true
-                }
-
-                Mock -CommandName Get-SPAppAcquisitionConfiguration -MockWith {
-                    return @{
-                        Enabled = $false
+                BeforeAll {
+                    $testParams = @{
+                        WebAppUrl          = "https://sharepoint.contoso.com"
+                        AllowAppPurchases  = $true
+                        AllowAppsForOffice = $true
                     }
-                }
-                Mock -CommandName Get-SPOfficeStoreAppsDefaultActivation -MockWith {
-                    return @{
-                        Enable = $false
-                    }
-                }
 
-                Mock -CommandName Get-SPWebApplication -MockWith {
-                    return @{
-                        Url = "https://sharepoint.contoso.com"
+                    Mock -CommandName Get-SPAppAcquisitionConfiguration -MockWith {
+                        return @{
+                            Enabled = $false
+                        }
+                    }
+                    Mock -CommandName Get-SPOfficeStoreAppsDefaultActivation -MockWith {
+                        return @{
+                            Enable = $false
+                        }
+                    }
+
+                    Mock -CommandName Get-SPWebApplication -MockWith {
+                        return @{
+                            Url = "https://sharepoint.contoso.com"
+                        }
                     }
                 }
 
@@ -123,26 +129,28 @@ try
             }
 
             Context -Name "The specified settings match" -Fixture {
-                $testParams = @{
-                    WebAppUrl          = "https://sharepoint.contoso.com"
-                    AllowAppPurchases  = $true
-                    AllowAppsForOffice = $true
-                }
-
-                Mock -CommandName Get-SPAppAcquisitionConfiguration -MockWith {
-                    return @{
-                        Enabled = $true
+                BeforeAll {
+                    $testParams = @{
+                        WebAppUrl          = "https://sharepoint.contoso.com"
+                        AllowAppPurchases  = $true
+                        AllowAppsForOffice = $true
                     }
-                }
-                Mock -CommandName Get-SPOfficeStoreAppsDefaultActivation -MockWith {
-                    return @{
-                        Enable = $true
-                    }
-                }
 
-                Mock -CommandName Get-SPWebApplication -MockWith {
-                    return @{
-                        Url = "https://sharepoint.contoso.com"
+                    Mock -CommandName Get-SPAppAcquisitionConfiguration -MockWith {
+                        return @{
+                            Enabled = $true
+                        }
+                    }
+                    Mock -CommandName Get-SPOfficeStoreAppsDefaultActivation -MockWith {
+                        return @{
+                            Enable = $true
+                        }
+                    }
+
+                    Mock -CommandName Get-SPWebApplication -MockWith {
+                        return @{
+                            Url = "https://sharepoint.contoso.com"
+                        }
                     }
                 }
 
@@ -158,25 +166,27 @@ try
             }
 
             Context -Name "The specified setting does not match" -Fixture {
-                $testParams = @{
-                    WebAppUrl         = "https://sharepoint.contoso.com"
-                    AllowAppPurchases = $true
-                }
-
-                Mock -CommandName Get-SPAppAcquisitionConfiguration -MockWith {
-                    return @{
-                        Enabled = $false
+                BeforeAll {
+                    $testParams = @{
+                        WebAppUrl         = "https://sharepoint.contoso.com"
+                        AllowAppPurchases = $true
                     }
-                }
-                Mock -CommandName Get-SPOfficeStoreAppsDefaultActivation -MockWith {
-                    return @{
-                        Enable = $true
-                    }
-                }
 
-                Mock -CommandName Get-SPWebApplication -MockWith {
-                    return @{
-                        Url = "https://sharepoint.contoso.com"
+                    Mock -CommandName Get-SPAppAcquisitionConfiguration -MockWith {
+                        return @{
+                            Enabled = $false
+                        }
+                    }
+                    Mock -CommandName Get-SPOfficeStoreAppsDefaultActivation -MockWith {
+                        return @{
+                            Enable = $true
+                        }
+                    }
+
+                    Mock -CommandName Get-SPWebApplication -MockWith {
+                        return @{
+                            Url = "https://sharepoint.contoso.com"
+                        }
                     }
                 }
 

@@ -46,29 +46,12 @@ Invoke-TestSetup
 
 try
 {
-    Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
-        InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
-            Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
+    InModuleScope -ModuleName $script:DSCResourceFullName -ScriptBlock {
+        Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
+            BeforeAll {
+                Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
-            switch ($Global:SPDscHelper.CurrentStubBuildNumber.Major)
-            {
-                15
-                {
-                    Context -Name "All methods throw exceptions as Project Server support in SharePointDsc is only for 2016" -Fixture {
-                        It "Should throw on the get method" {
-                            { Get-TargetResource @testParams } | Should -Throw
-                        }
-
-                        It "Should throw on the test method" {
-                            { Test-TargetResource @testParams } | Should -Throw
-                        }
-
-                        It "Should throw on the set method" {
-                            { Set-TargetResource @testParams } | Should -Throw
-                        }
-                    }
-                }
-                16
+                if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 16)
                 {
                     $script:projectPath = "$PSScriptRoot\..\..\.." | Convert-Path
                     $script:projectName = (Get-ChildItem -Path "$script:projectPath\*\*.psd1" | Where-Object -FilterScript {
@@ -210,46 +193,72 @@ try
                             }
                         )
                     }
+                }
+            }
 
+            switch ($Global:SPDscHelper.CurrentStubBuildNumber.Major)
+            {
+                15
+                {
+                    Context -Name "All methods throw exceptions as Project Server support in SharePointDsc is only for 2016" -Fixture {
+                        It "Should throw on the get method" {
+                            { Get-TargetResource @testParams } | Should -Throw
+                        }
+
+                        It "Should throw on the test method" {
+                            { Test-TargetResource @testParams } | Should -Throw
+                        }
+
+                        It "Should throw on the set method" {
+                            { Set-TargetResource @testParams } | Should -Throw
+                        }
+                    }
+                }
+                16
+                {
                     Context -Name "A group doesn't exist, but should" -Fixture {
-                        $testParams = @{
-                            Url         = "http://server/pwa"
-                            Name        = "New Group 1"
-                            Description = "An example description"
-                        }
+                        BeforeAll {
+                            Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
-                        $global:SPDscCurrentGroupList = @{
-                            SecurityGroups = @(
-                                @{
-                                    WSEC_GRP_NAME = $testParams.Name
-                                    WSEC_GRP_UID  = (New-Guid)
-                                }
-                                @{
-                                    WSEC_GRP_NAME = "Not the group you want"
-                                    WSEC_GRP_UID  = (New-Guid)
-                                }
-                            )
-                        }
+                            $testParams = @{
+                                Url         = "http://server/pwa"
+                                Name        = "New Group 1"
+                                Description = "An example description"
+                            }
 
-                        $global:SPDscCurrentGroupDetails = @{
-                            SecurityGroups = New-Object -TypeName "System.Object" `
-                            | Add-Member -MemberType ScriptMethod `
-                                -Name FindByWSEC_GRP_UID `
-                                -Value {
-                                return @{
-                                    WSEC_GRP_NAME     = $testParams.Name
-                                    WSEC_GRP_DESC     = ""
-                                    WSEC_GRP_AD_GUID  = $null
-                                    WSEC_GRP_AD_GROUP = $null
+                            $global:SPDscCurrentGroupList = @{
+                                SecurityGroups = @(
+                                    @{
+                                        WSEC_GRP_NAME = $testParams.Name
+                                        WSEC_GRP_UID  = (New-Guid)
+                                    }
+                                    @{
+                                        WSEC_GRP_NAME = "Not the group you want"
+                                        WSEC_GRP_UID  = (New-Guid)
+                                    }
+                                )
+                            }
+
+                            $global:SPDscCurrentGroupDetails = @{
+                                SecurityGroups = New-Object -TypeName "System.Object" `
+                                | Add-Member -MemberType ScriptMethod `
+                                    -Name FindByWSEC_GRP_UID `
+                                    -Value {
+                                    return @{
+                                        WSEC_GRP_NAME     = $testParams.Name
+                                        WSEC_GRP_DESC     = ""
+                                        WSEC_GRP_AD_GUID  = $null
+                                        WSEC_GRP_AD_GROUP = $null
+                                    }
+                                } `
+                                    -Force -PassThru `
+                                | Add-Member -MemberType ScriptProperty `
+                                    -Name WSEC_GRP_AD_GUID `
+                                    -Value { return [System.DBNull]::Value } `
+                                    -PassThru -Force
+                                GroupMembers   = @{
+                                    Rows = @()
                                 }
-                            } `
-                                -Force -PassThru `
-                            | Add-Member -MemberType ScriptProperty `
-                                -Name WSEC_GRP_AD_GUID `
-                                -Value { return [System.DBNull]::Value } `
-                                -PassThru -Force
-                            GroupMembers   = @{
-                                Rows = @()
                             }
                         }
 
@@ -273,46 +282,48 @@ try
                     }
 
                     Context -Name "A group exists, and should and also has a correct description" -Fixture {
-                        $testParams = @{
-                            Url         = "http://server/pwa"
-                            Name        = "New Group 1"
-                            Description = "An example description"
-                        }
+                        BeforeAll {
+                            $testParams = @{
+                                Url         = "http://server/pwa"
+                                Name        = "New Group 1"
+                                Description = "An example description"
+                            }
 
-                        $global:SPDscCurrentGroupList = @{
-                            SecurityGroups = @(
-                                @{
+                            $global:SPDscCurrentGroupList = @{
+                                SecurityGroups = @(
+                                    @{
+                                        WSEC_GRP_NAME = $testParams.Name
+                                        WSEC_GRP_UID  = (New-Guid)
+                                    }
+                                    @{
+                                        WSEC_GRP_NAME = "Not the group you want"
+                                        WSEC_GRP_UID  = (New-Guid)
+                                    }
+                                )
+                            }
+
+                            $global:SPDscCurrentGroupDetails = @{
+                                SecurityGroups = @{
                                     WSEC_GRP_NAME = $testParams.Name
-                                    WSEC_GRP_UID  = (New-Guid)
+                                    WSEC_GRP_DESC = $testParams.Description
+                                } | Add-Member -MemberType ScriptMethod `
+                                    -Name FindByWSEC_GRP_UID `
+                                    -Value {
+                                    return @{
+                                        WSEC_GRP_NAME     = $testParams.Name
+                                        WSEC_GRP_DESC     = ""
+                                        WSEC_GRP_AD_GUID  = $null
+                                        WSEC_GRP_AD_GROUP = $null
+                                    }
+                                } `
+                                    -Force -PassThru `
+                                | Add-Member -MemberType ScriptProperty `
+                                    -Name WSEC_GRP_AD_GUID `
+                                    -Value { return [System.DBNull]::Value } `
+                                    -PassThru -Force
+                                GroupMembers   = @{
+                                    Rows = @()
                                 }
-                                @{
-                                    WSEC_GRP_NAME = "Not the group you want"
-                                    WSEC_GRP_UID  = (New-Guid)
-                                }
-                            )
-                        }
-
-                        $global:SPDscCurrentGroupDetails = @{
-                            SecurityGroups = @{
-                                WSEC_GRP_NAME = $testParams.Name
-                                WSEC_GRP_DESC = $testParams.Description
-                            } | Add-Member -MemberType ScriptMethod `
-                                -Name FindByWSEC_GRP_UID `
-                                -Value {
-                                return @{
-                                    WSEC_GRP_NAME     = $testParams.Name
-                                    WSEC_GRP_DESC     = ""
-                                    WSEC_GRP_AD_GUID  = $null
-                                    WSEC_GRP_AD_GROUP = $null
-                                }
-                            } `
-                                -Force -PassThru `
-                            | Add-Member -MemberType ScriptProperty `
-                                -Name WSEC_GRP_AD_GUID `
-                                -Value { return [System.DBNull]::Value } `
-                                -PassThru -Force
-                            GroupMembers   = @{
-                                Rows = @()
                             }
                         }
 
@@ -328,46 +339,48 @@ try
                     }
 
                     Context -Name "A group exists, but shouldn't" -Fixture {
-                        $testParams = @{
-                            Url    = "http://server/pwa"
-                            Name   = "New Group 1"
-                            Ensure = "Absent"
-                        }
+                        BeforeAll {
+                            $testParams = @{
+                                Url    = "http://server/pwa"
+                                Name   = "New Group 1"
+                                Ensure = "Absent"
+                            }
 
-                        $global:SPDscCurrentGroupList = @{
-                            SecurityGroups = @(
-                                @{
+                            $global:SPDscCurrentGroupList = @{
+                                SecurityGroups = @(
+                                    @{
+                                        WSEC_GRP_NAME = $testParams.Name
+                                        WSEC_GRP_UID  = (New-Guid)
+                                    }
+                                    @{
+                                        WSEC_GRP_NAME = "Not the group you want"
+                                        WSEC_GRP_UID  = (New-Guid)
+                                    }
+                                )
+                            }
+
+                            $global:SPDscCurrentGroupDetails = @{
+                                SecurityGroups = @{
                                     WSEC_GRP_NAME = $testParams.Name
-                                    WSEC_GRP_UID  = (New-Guid)
+                                    WSEC_GRP_DESC = $testParams.Description
+                                } | Add-Member -MemberType ScriptMethod `
+                                    -Name FindByWSEC_GRP_UID `
+                                    -Value {
+                                    return @{
+                                        WSEC_GRP_NAME     = $testParams.Name
+                                        WSEC_GRP_DESC     = ""
+                                        WSEC_GRP_AD_GUID  = $null
+                                        WSEC_GRP_AD_GROUP = $null
+                                    }
+                                } `
+                                    -Force -PassThru `
+                                | Add-Member -MemberType ScriptProperty `
+                                    -Name WSEC_GRP_AD_GUID `
+                                    -Value { return [System.DBNull]::Value } `
+                                    -PassThru -Force
+                                GroupMembers   = @{
+                                    Rows = @()
                                 }
-                                @{
-                                    WSEC_GRP_NAME = "Not the group you want"
-                                    WSEC_GRP_UID  = (New-Guid)
-                                }
-                            )
-                        }
-
-                        $global:SPDscCurrentGroupDetails = @{
-                            SecurityGroups = @{
-                                WSEC_GRP_NAME = $testParams.Name
-                                WSEC_GRP_DESC = $testParams.Description
-                            } | Add-Member -MemberType ScriptMethod `
-                                -Name FindByWSEC_GRP_UID `
-                                -Value {
-                                return @{
-                                    WSEC_GRP_NAME     = $testParams.Name
-                                    WSEC_GRP_DESC     = ""
-                                    WSEC_GRP_AD_GUID  = $null
-                                    WSEC_GRP_AD_GROUP = $null
-                                }
-                            } `
-                                -Force -PassThru `
-                            | Add-Member -MemberType ScriptProperty `
-                                -Name WSEC_GRP_AD_GUID `
-                                -Value { return [System.DBNull]::Value } `
-                                -PassThru -Force
-                            GroupMembers   = @{
-                                Rows = @()
                             }
                         }
 
@@ -389,22 +402,24 @@ try
                     }
 
                     Context -Name "A group doesn't exist, and shouldn't" -Fixture {
-                        $testParams = @{
-                            Url    = "http://server/pwa"
-                            Name   = "New Group 1"
-                            Ensure = "Absent"
-                        }
+                        BeforeAll {
+                            $testParams = @{
+                                Url    = "http://server/pwa"
+                                Name   = "New Group 1"
+                                Ensure = "Absent"
+                            }
 
-                        $global:SPDscCurrentGroupList = @{
-                            SecurityGroups = @(
-                                @{
-                                    WSEC_GRP_NAME = "Not the group you want"
-                                    WSEC_GRP_UID  = (New-Guid)
-                                }
-                            )
-                        }
+                            $global:SPDscCurrentGroupList = @{
+                                SecurityGroups = @(
+                                    @{
+                                        WSEC_GRP_NAME = "Not the group you want"
+                                        WSEC_GRP_UID  = (New-Guid)
+                                    }
+                                )
+                            }
 
-                        $global:SPDscCurrentGroupDetails = $null
+                            $global:SPDscCurrentGroupDetails = $null
+                        }
 
                         It "should return absent from the get method" {
                             $global:SPDscCreateGroupsCalled = $false
@@ -418,46 +433,48 @@ try
                     }
 
                     Context -Name "A group has an incorrect description set" -Fixture {
-                        $testParams = @{
-                            Url         = "http://server/pwa"
-                            Name        = "New Group 1"
-                            Description = "An example description"
-                        }
+                        BeforeAll {
+                            $testParams = @{
+                                Url         = "http://server/pwa"
+                                Name        = "New Group 1"
+                                Description = "An example description"
+                            }
 
-                        $global:SPDscCurrentGroupList = @{
-                            SecurityGroups = @(
-                                @{
+                            $global:SPDscCurrentGroupList = @{
+                                SecurityGroups = @(
+                                    @{
+                                        WSEC_GRP_NAME = $testParams.Name
+                                        WSEC_GRP_UID  = (New-Guid)
+                                    }
+                                    @{
+                                        WSEC_GRP_NAME = "Not the group you want"
+                                        WSEC_GRP_UID  = (New-Guid)
+                                    }
+                                )
+                            }
+
+                            $global:SPDscCurrentGroupDetails = @{
+                                SecurityGroups = @{
                                     WSEC_GRP_NAME = $testParams.Name
-                                    WSEC_GRP_UID  = (New-Guid)
+                                    WSEC_GRP_DESC = "Incorrect description"
+                                } | Add-Member -MemberType ScriptMethod `
+                                    -Name FindByWSEC_GRP_UID `
+                                    -Value {
+                                    return @{
+                                        WSEC_GRP_NAME     = $testParams.Name
+                                        WSEC_GRP_DESC     = ""
+                                        WSEC_GRP_AD_GUID  = $null
+                                        WSEC_GRP_AD_GROUP = $null
+                                    }
+                                } `
+                                    -Force -PassThru `
+                                | Add-Member -MemberType ScriptProperty `
+                                    -Name WSEC_GRP_AD_GUID `
+                                    -Value { return [System.DBNull]::Value } `
+                                    -PassThru -Force
+                                GroupMembers   = @{
+                                    Rows = @()
                                 }
-                                @{
-                                    WSEC_GRP_NAME = "Not the group you want"
-                                    WSEC_GRP_UID  = (New-Guid)
-                                }
-                            )
-                        }
-
-                        $global:SPDscCurrentGroupDetails = @{
-                            SecurityGroups = @{
-                                WSEC_GRP_NAME = $testParams.Name
-                                WSEC_GRP_DESC = "Incorrect description"
-                            } | Add-Member -MemberType ScriptMethod `
-                                -Name FindByWSEC_GRP_UID `
-                                -Value {
-                                return @{
-                                    WSEC_GRP_NAME     = $testParams.Name
-                                    WSEC_GRP_DESC     = ""
-                                    WSEC_GRP_AD_GUID  = $null
-                                    WSEC_GRP_AD_GROUP = $null
-                                }
-                            } `
-                                -Force -PassThru `
-                            | Add-Member -MemberType ScriptProperty `
-                                -Name WSEC_GRP_AD_GUID `
-                                -Value { return [System.DBNull]::Value } `
-                                -PassThru -Force
-                            GroupMembers   = @{
-                                Rows = @()
                             }
                         }
 
@@ -480,51 +497,53 @@ try
                     }
 
                     Context -Name "A group has an incorrect AD group set" -Fixture {
-                        $testParams = @{
-                            Url     = "http://server/pwa"
-                            Name    = "New Group 1"
-                            ADGroup = "DEMO\Group Name"
-                        }
-
-                        $global:SPDscCurrentGroupList = @{
-                            SecurityGroups = @(
-                                @{
-                                    WSEC_GRP_NAME = $testParams.Name
-                                    WSEC_GRP_UID  = (New-Guid)
-                                }
-                                @{
-                                    WSEC_GRP_NAME = "Not the group you want"
-                                    WSEC_GRP_UID  = (New-Guid)
-                                }
-                            )
-                        }
-
-                        $global:SPDscCurrentGroupDetails = @{
-                            SecurityGroups = @{
-                                WSEC_GRP_NAME = $testParams.Name
-                                WSEC_GRP_DESC = "Incorrect description"
-                            } | Add-Member -MemberType ScriptMethod `
-                                -Name FindByWSEC_GRP_UID `
-                                -Value {
-                                return @{
-                                    WSEC_GRP_NAME     = $testParams.Name
-                                    WSEC_GRP_DESC     = ""
-                                    WSEC_GRP_AD_GUID  = $null
-                                    WSEC_GRP_AD_GROUP = $null
-                                }
-                            } `
-                                -Force -PassThru `
-                            | Add-Member -MemberType ScriptProperty `
-                                -Name WSEC_GRP_AD_GUID `
-                                -Value { return New-Guid } `
-                                -PassThru -Force
-                            GroupMembers   = @{
-                                Rows = @()
+                        BeforeAll {
+                            $testParams = @{
+                                Url     = "http://server/pwa"
+                                Name    = "New Group 1"
+                                ADGroup = "DEMO\Group Name"
                             }
-                        }
 
-                        Mock -CommandName "Convert-SPDscADGroupIDToName" -MockWith {
-                            return "DEMO\Wrong Group"
+                            $global:SPDscCurrentGroupList = @{
+                                SecurityGroups = @(
+                                    @{
+                                        WSEC_GRP_NAME = $testParams.Name
+                                        WSEC_GRP_UID  = (New-Guid)
+                                    }
+                                    @{
+                                        WSEC_GRP_NAME = "Not the group you want"
+                                        WSEC_GRP_UID  = (New-Guid)
+                                    }
+                                )
+                            }
+
+                            $global:SPDscCurrentGroupDetails = @{
+                                SecurityGroups = @{
+                                    WSEC_GRP_NAME = $testParams.Name
+                                    WSEC_GRP_DESC = "Incorrect description"
+                                } | Add-Member -MemberType ScriptMethod `
+                                    -Name FindByWSEC_GRP_UID `
+                                    -Value {
+                                    return @{
+                                        WSEC_GRP_NAME     = $testParams.Name
+                                        WSEC_GRP_DESC     = ""
+                                        WSEC_GRP_AD_GUID  = $null
+                                        WSEC_GRP_AD_GROUP = $null
+                                    }
+                                } `
+                                    -Force -PassThru `
+                                | Add-Member -MemberType ScriptProperty `
+                                    -Name WSEC_GRP_AD_GUID `
+                                    -Value { return New-Guid } `
+                                    -PassThru -Force
+                                GroupMembers   = @{
+                                    Rows = @()
+                                }
+                            }
+
+                            Mock -CommandName "Convert-SPDscADGroupIDToName" -MockWith {
+                                return "DEMO\Wrong Group"
+                            }
                         }
 
                         It "should return present from the get method" {
@@ -546,51 +565,53 @@ try
                     }
 
                     Context -Name "A group has a correct AD group set" -Fixture {
-                        $testParams = @{
-                            Url     = "http://server/pwa"
-                            Name    = "New Group 1"
-                            ADGroup = "DEMO\Group Name"
-                        }
-
-                        $global:SPDscCurrentGroupList = @{
-                            SecurityGroups = @(
-                                @{
-                                    WSEC_GRP_NAME = $testParams.Name
-                                    WSEC_GRP_UID  = (New-Guid)
-                                }
-                                @{
-                                    WSEC_GRP_NAME = "Not the group you want"
-                                    WSEC_GRP_UID  = (New-Guid)
-                                }
-                            )
-                        }
-
-                        $global:SPDscCurrentGroupDetails = @{
-                            SecurityGroups = @{
-                                WSEC_GRP_NAME = $testParams.Name
-                                WSEC_GRP_DESC = "Incorrect description"
-                            } | Add-Member -MemberType ScriptMethod `
-                                -Name FindByWSEC_GRP_UID `
-                                -Value {
-                                return @{
-                                    WSEC_GRP_NAME     = $testParams.Name
-                                    WSEC_GRP_DESC     = ""
-                                    WSEC_GRP_AD_GUID  = $null
-                                    WSEC_GRP_AD_GROUP = $null
-                                }
-                            } `
-                                -Force -PassThru `
-                            | Add-Member -MemberType ScriptProperty `
-                                -Name WSEC_GRP_AD_GUID `
-                                -Value { return New-Guid } `
-                                -PassThru -Force
-                            GroupMembers   = @{
-                                Rows = @()
+                        BeforeAll {
+                            $testParams = @{
+                                Url     = "http://server/pwa"
+                                Name    = "New Group 1"
+                                ADGroup = "DEMO\Group Name"
                             }
-                        }
 
-                        Mock -CommandName "Convert-SPDscADGroupIDToName" -MockWith {
-                            return $testParams.ADGroup
+                            $global:SPDscCurrentGroupList = @{
+                                SecurityGroups = @(
+                                    @{
+                                        WSEC_GRP_NAME = $testParams.Name
+                                        WSEC_GRP_UID  = (New-Guid)
+                                    }
+                                    @{
+                                        WSEC_GRP_NAME = "Not the group you want"
+                                        WSEC_GRP_UID  = (New-Guid)
+                                    }
+                                )
+                            }
+
+                            $global:SPDscCurrentGroupDetails = @{
+                                SecurityGroups = @{
+                                    WSEC_GRP_NAME = $testParams.Name
+                                    WSEC_GRP_DESC = "Incorrect description"
+                                } | Add-Member -MemberType ScriptMethod `
+                                    -Name FindByWSEC_GRP_UID `
+                                    -Value {
+                                    return @{
+                                        WSEC_GRP_NAME     = $testParams.Name
+                                        WSEC_GRP_DESC     = ""
+                                        WSEC_GRP_AD_GUID  = $null
+                                        WSEC_GRP_AD_GROUP = $null
+                                    }
+                                } `
+                                    -Force -PassThru `
+                                | Add-Member -MemberType ScriptProperty `
+                                    -Name WSEC_GRP_AD_GUID `
+                                    -Value { return New-Guid } `
+                                    -PassThru -Force
+                                GroupMembers   = @{
+                                    Rows = @()
+                                }
+                            }
+
+                            Mock -CommandName "Convert-SPDscADGroupIDToName" -MockWith {
+                                return $testParams.ADGroup
+                            }
                         }
 
                         It "should return present from the get method" {
@@ -605,87 +626,89 @@ try
                     }
 
                     Context -Name "A group has a fixed members list that doesn't match" -Fixture {
-                        $testParams = @{
-                            Url     = "http://server/pwa"
-                            Name    = "New Group 1"
-                            Members = @(
-                                "DEMO\Member1",
-                                "DEMO\Member2"
-                            )
-                        }
-
-                        $global:SPDscCurrentGroupList = @{
-                            SecurityGroups = @(
-                                @{
-                                    WSEC_GRP_NAME = $testParams.Name
-                                    WSEC_GRP_UID  = (New-Guid)
-                                }
-                                @{
-                                    WSEC_GRP_NAME = "Not the group you want"
-                                    WSEC_GRP_UID  = (New-Guid)
-                                }
-                            )
-                        }
-
-                        $global:SPDscCurrentGroupDetails = @{
-                            SecurityGroups = @{
-                                WSEC_GRP_NAME = $testParams.Name
-                                WSEC_GRP_DESC = $testParams.Description
-                            } | Add-Member -MemberType ScriptMethod `
-                                -Name FindByWSEC_GRP_UID `
-                                -Value {
-                                return @{
-                                    WSEC_GRP_NAME     = $testParams.Name
-                                    WSEC_GRP_DESC     = ""
-                                    WSEC_GRP_AD_GUID  = $null
-                                    WSEC_GRP_AD_GROUP = $null
-                                }
-                            } `
-                                -Force -PassThru `
-                            | Add-Member -MemberType ScriptProperty `
-                                -Name WSEC_GRP_AD_GUID `
-                                -Value { return [System.DBNull]::Value } `
-                                -PassThru -Force
-                            GroupMembers   = @{
-                                Rows = @(
-                                    @{ RES_UID = New-Guid }
-                                    @{ RES_UID = New-Guid }
-                                    @{ RES_UID = New-Guid }
+                        BeforeAll {
+                            $testParams = @{
+                                Url     = "http://server/pwa"
+                                Name    = "New Group 1"
+                                Members = @(
+                                    "DEMO\Member1",
+                                    "DEMO\Member2"
                                 )
-                            } | Add-Member -MemberType ScriptMethod `
-                                -Name FindByRES_UIDWSEC_GRP_UID `
-                                -Value {
-                                return New-Object -TypeName "System.Object" `
-                                | Add-Member -MemberType ScriptMethod `
-                                    -Name Delete `
-                                    -Value {
-                                    $global:SPDscMemberDeleteCalled = $true
-                                } -PassThru -Force
-                            } -PassThru -Force `
-                            | Add-Member -MemberType ScriptMethod `
-                                -Name NewGroupMembersRow `
-                                -Value {
-                                return @{
-                                    WSEC_GRP_UID = ""
-                                    RES_UID      = ""
-                                }
-                            } -PassThru -Force `
-                            | Add-Member -MemberType ScriptMethod `
-                                -Name AddGroupMembersRow `
-                                -Value {
-                                $global:SPDscMemberRowAddedCalled = $true
-                            } -PassThru -Force
-                        }
+                            }
 
-                        $global:SPDscCurrentMembers = @(
-                            "i:0#.w|DEMO\Member1"
-                            "i:0#.w|DEMO\Member3"
-                            "i:0#.w|DEMO\Member4"
-                        )
-                        Mock -CommandName "Get-SPDscProjectServerResourceName" -MockWith {
-                            $value = $global:SPDscCurrentMembers[$global:SPDscCurrentMembersReadCount]
-                            $global:SPDscCurrentMembersReadCount ++
-                            return $value
+                            $global:SPDscCurrentGroupList = @{
+                                SecurityGroups = @(
+                                    @{
+                                        WSEC_GRP_NAME = $testParams.Name
+                                        WSEC_GRP_UID  = (New-Guid)
+                                    }
+                                    @{
+                                        WSEC_GRP_NAME = "Not the group you want"
+                                        WSEC_GRP_UID  = (New-Guid)
+                                    }
+                                )
+                            }
+
+                            $global:SPDscCurrentGroupDetails = @{
+                                SecurityGroups = @{
+                                    WSEC_GRP_NAME = $testParams.Name
+                                    WSEC_GRP_DESC = $testParams.Description
+                                } | Add-Member -MemberType ScriptMethod `
+                                    -Name FindByWSEC_GRP_UID `
+                                    -Value {
+                                    return @{
+                                        WSEC_GRP_NAME     = $testParams.Name
+                                        WSEC_GRP_DESC     = ""
+                                        WSEC_GRP_AD_GUID  = $null
+                                        WSEC_GRP_AD_GROUP = $null
+                                    }
+                                } `
+                                    -Force -PassThru `
+                                | Add-Member -MemberType ScriptProperty `
+                                    -Name WSEC_GRP_AD_GUID `
+                                    -Value { return [System.DBNull]::Value } `
+                                    -PassThru -Force
+                                GroupMembers   = @{
+                                    Rows = @(
+                                        @{ RES_UID = New-Guid }
+                                        @{ RES_UID = New-Guid }
+                                        @{ RES_UID = New-Guid }
+                                    )
+                                } | Add-Member -MemberType ScriptMethod `
+                                    -Name FindByRES_UIDWSEC_GRP_UID `
+                                    -Value {
+                                    return New-Object -TypeName "System.Object" `
+                                    | Add-Member -MemberType ScriptMethod `
+                                        -Name Delete `
+                                        -Value {
+                                        $global:SPDscMemberDeleteCalled = $true
+                                    } -PassThru -Force
+                                } -PassThru -Force `
+                                | Add-Member -MemberType ScriptMethod `
+                                    -Name NewGroupMembersRow `
+                                    -Value {
+                                    return @{
+                                        WSEC_GRP_UID = ""
+                                        RES_UID      = ""
+                                    }
+                                } -PassThru -Force `
+                                | Add-Member -MemberType ScriptMethod `
+                                    -Name AddGroupMembersRow `
+                                    -Value {
+                                    $global:SPDscMemberRowAddedCalled = $true
+                                } -PassThru -Force
+                            }
+
+                            $global:SPDscCurrentMembers = @(
+                                "i:0#.w|DEMO\Member1"
+                                "i:0#.w|DEMO\Member3"
+                                "i:0#.w|DEMO\Member4"
+                            )
+                            Mock -CommandName "Get-SPDscProjectServerResourceName" -MockWith {
+                                $value = $global:SPDscCurrentMembers[$global:SPDscCurrentMembersReadCount]
+                                $global:SPDscCurrentMembersReadCount ++
+                                return $value
+                            }
                         }
 
                         It "should return current members from the get method" {
@@ -714,88 +737,90 @@ try
                     }
 
                     Context -Name "A group has a fixed members list that matches" -Fixture {
-                        $testParams = @{
-                            Url     = "http://server/pwa"
-                            Name    = "New Group 1"
-                            Members = @(
-                                "DEMO\Member1"
-                                "DEMO\Member3"
-                                "DEMO\Member4"
-                            )
-                        }
-
-                        $global:SPDscCurrentGroupList = @{
-                            SecurityGroups = @(
-                                @{
-                                    WSEC_GRP_NAME = $testParams.Name
-                                    WSEC_GRP_UID  = (New-Guid)
-                                }
-                                @{
-                                    WSEC_GRP_NAME = "Not the group you want"
-                                    WSEC_GRP_UID  = (New-Guid)
-                                }
-                            )
-                        }
-
-                        $global:SPDscCurrentGroupDetails = @{
-                            SecurityGroups = @{
-                                WSEC_GRP_NAME = $testParams.Name
-                                WSEC_GRP_DESC = $testParams.Description
-                            } | Add-Member -MemberType ScriptMethod `
-                                -Name FindByWSEC_GRP_UID `
-                                -Value {
-                                return @{
-                                    WSEC_GRP_NAME     = $testParams.Name
-                                    WSEC_GRP_DESC     = ""
-                                    WSEC_GRP_AD_GUID  = $null
-                                    WSEC_GRP_AD_GROUP = $null
-                                }
-                            } `
-                                -Force -PassThru `
-                            | Add-Member -MemberType ScriptProperty `
-                                -Name WSEC_GRP_AD_GUID `
-                                -Value { return [System.DBNull]::Value } `
-                                -PassThru -Force
-                            GroupMembers   = @{
-                                Rows = @(
-                                    @{ RES_UID = New-Guid }
-                                    @{ RES_UID = New-Guid }
-                                    @{ RES_UID = New-Guid }
+                        BeforeAll {
+                            $testParams = @{
+                                Url     = "http://server/pwa"
+                                Name    = "New Group 1"
+                                Members = @(
+                                    "DEMO\Member1"
+                                    "DEMO\Member3"
+                                    "DEMO\Member4"
                                 )
-                            } | Add-Member -MemberType ScriptMethod `
-                                -Name FindByRES_UIDWSEC_GRP_UID `
-                                -Value {
-                                return New-Object -TypeName "System.Object" `
-                                | Add-Member -MemberType ScriptMethod `
-                                    -Name Delete `
-                                    -Value {
-                                    $global:SPDscMemberDeleteCalled = $true
-                                } -PassThru -Force
-                            } -PassThru -Force `
-                            | Add-Member -MemberType ScriptMethod `
-                                -Name NewGroupMembersRow `
-                                -Value {
-                                return @{
-                                    WSEC_GRP_UID = ""
-                                    RES_UID      = ""
-                                }
-                            } -PassThru -Force `
-                            | Add-Member -MemberType ScriptMethod `
-                                -Name AddGroupMembersRow `
-                                -Value {
-                                $global:SPDscMemberRowAddedCalled = $true
-                            } -PassThru -Force
-                        }
+                            }
 
-                        $global:SPDscCurrentMembers = @(
-                            "i:0#.w|DEMO\Member1"
-                            "i:0#.w|DEMO\Member3"
-                            "i:0#.w|DEMO\Member4"
-                        )
-                        Mock -CommandName "Get-SPDscProjectServerResourceName" -MockWith {
-                            $value = $global:SPDscCurrentMembers[$global:SPDscCurrentMembersReadCount]
-                            $global:SPDscCurrentMembersReadCount ++
-                            return $value
+                            $global:SPDscCurrentGroupList = @{
+                                SecurityGroups = @(
+                                    @{
+                                        WSEC_GRP_NAME = $testParams.Name
+                                        WSEC_GRP_UID  = (New-Guid)
+                                    }
+                                    @{
+                                        WSEC_GRP_NAME = "Not the group you want"
+                                        WSEC_GRP_UID  = (New-Guid)
+                                    }
+                                )
+                            }
+
+                            $global:SPDscCurrentGroupDetails = @{
+                                SecurityGroups = @{
+                                    WSEC_GRP_NAME = $testParams.Name
+                                    WSEC_GRP_DESC = $testParams.Description
+                                } | Add-Member -MemberType ScriptMethod `
+                                    -Name FindByWSEC_GRP_UID `
+                                    -Value {
+                                    return @{
+                                        WSEC_GRP_NAME     = $testParams.Name
+                                        WSEC_GRP_DESC     = ""
+                                        WSEC_GRP_AD_GUID  = $null
+                                        WSEC_GRP_AD_GROUP = $null
+                                    }
+                                } `
+                                    -Force -PassThru `
+                                | Add-Member -MemberType ScriptProperty `
+                                    -Name WSEC_GRP_AD_GUID `
+                                    -Value { return [System.DBNull]::Value } `
+                                    -PassThru -Force
+                                GroupMembers   = @{
+                                    Rows = @(
+                                        @{ RES_UID = New-Guid }
+                                        @{ RES_UID = New-Guid }
+                                        @{ RES_UID = New-Guid }
+                                    )
+                                } | Add-Member -MemberType ScriptMethod `
+                                    -Name FindByRES_UIDWSEC_GRP_UID `
+                                    -Value {
+                                    return New-Object -TypeName "System.Object" `
+                                    | Add-Member -MemberType ScriptMethod `
+                                        -Name Delete `
+                                        -Value {
+                                        $global:SPDscMemberDeleteCalled = $true
+                                    } -PassThru -Force
+                                } -PassThru -Force `
+                                | Add-Member -MemberType ScriptMethod `
+                                    -Name NewGroupMembersRow `
+                                    -Value {
+                                    return @{
+                                        WSEC_GRP_UID = ""
+                                        RES_UID      = ""
+                                    }
+                                } -PassThru -Force `
+                                | Add-Member -MemberType ScriptMethod `
+                                    -Name AddGroupMembersRow `
+                                    -Value {
+                                    $global:SPDscMemberRowAddedCalled = $true
+                                } -PassThru -Force
+                            }
+
+                            $global:SPDscCurrentMembers = @(
+                                "i:0#.w|DEMO\Member1"
+                                "i:0#.w|DEMO\Member3"
+                                "i:0#.w|DEMO\Member4"
+                            )
+                            Mock -CommandName "Get-SPDscProjectServerResourceName" -MockWith {
+                                $value = $global:SPDscCurrentMembers[$global:SPDscCurrentMembersReadCount]
+                                $global:SPDscCurrentMembersReadCount ++
+                                return $value
+                            }
                         }
 
                         It "should return current members from the get method" {
@@ -812,86 +837,88 @@ try
                     }
 
                     Context -Name "A group has a list of members to include that doesn't match" -Fixture {
-                        $testParams = @{
-                            Url              = "http://server/pwa"
-                            Name             = "New Group 1"
-                            MembersToInclude = @(
-                                "DEMO\Member2"
-                            )
-                        }
-
-                        $global:SPDscCurrentGroupList = @{
-                            SecurityGroups = @(
-                                @{
-                                    WSEC_GRP_NAME = $testParams.Name
-                                    WSEC_GRP_UID  = (New-Guid)
-                                }
-                                @{
-                                    WSEC_GRP_NAME = "Not the group you want"
-                                    WSEC_GRP_UID  = (New-Guid)
-                                }
-                            )
-                        }
-
-                        $global:SPDscCurrentGroupDetails = @{
-                            SecurityGroups = @{
-                                WSEC_GRP_NAME = $testParams.Name
-                                WSEC_GRP_DESC = $testParams.Description
-                            } | Add-Member -MemberType ScriptMethod `
-                                -Name FindByWSEC_GRP_UID `
-                                -Value {
-                                return @{
-                                    WSEC_GRP_NAME     = $testParams.Name
-                                    WSEC_GRP_DESC     = ""
-                                    WSEC_GRP_AD_GUID  = $null
-                                    WSEC_GRP_AD_GROUP = $null
-                                }
-                            } `
-                                -Force -PassThru `
-                            | Add-Member -MemberType ScriptProperty `
-                                -Name WSEC_GRP_AD_GUID `
-                                -Value { return [System.DBNull]::Value } `
-                                -PassThru -Force
-                            GroupMembers   = @{
-                                Rows = @(
-                                    @{ RES_UID = New-Guid }
-                                    @{ RES_UID = New-Guid }
-                                    @{ RES_UID = New-Guid }
+                        BeforeAll {
+                            $testParams = @{
+                                Url              = "http://server/pwa"
+                                Name             = "New Group 1"
+                                MembersToInclude = @(
+                                    "DEMO\Member2"
                                 )
-                            } | Add-Member -MemberType ScriptMethod `
-                                -Name FindByRES_UIDWSEC_GRP_UID `
-                                -Value {
-                                return New-Object -TypeName "System.Object" `
-                                | Add-Member -MemberType ScriptMethod `
-                                    -Name Delete `
-                                    -Value {
-                                    $global:SPDscMemberDeleteCalled = $true
-                                } -PassThru -Force
-                            } -PassThru -Force `
-                            | Add-Member -MemberType ScriptMethod `
-                                -Name NewGroupMembersRow `
-                                -Value {
-                                return @{
-                                    WSEC_GRP_UID = ""
-                                    RES_UID      = ""
-                                }
-                            } -PassThru -Force `
-                            | Add-Member -MemberType ScriptMethod `
-                                -Name AddGroupMembersRow `
-                                -Value {
-                                $global:SPDscMemberRowAddedCalled = $true
-                            } -PassThru -Force
-                        }
+                            }
 
-                        $global:SPDscCurrentMembers = @(
-                            "i:0#.w|DEMO\Member1"
-                            "i:0#.w|DEMO\Member3"
-                            "i:0#.w|DEMO\Member4"
-                        )
-                        Mock -CommandName "Get-SPDscProjectServerResourceName" -MockWith {
-                            $value = $global:SPDscCurrentMembers[$global:SPDscCurrentMembersReadCount]
-                            $global:SPDscCurrentMembersReadCount ++
-                            return $value
+                            $global:SPDscCurrentGroupList = @{
+                                SecurityGroups = @(
+                                    @{
+                                        WSEC_GRP_NAME = $testParams.Name
+                                        WSEC_GRP_UID  = (New-Guid)
+                                    }
+                                    @{
+                                        WSEC_GRP_NAME = "Not the group you want"
+                                        WSEC_GRP_UID  = (New-Guid)
+                                    }
+                                )
+                            }
+
+                            $global:SPDscCurrentGroupDetails = @{
+                                SecurityGroups = @{
+                                    WSEC_GRP_NAME = $testParams.Name
+                                    WSEC_GRP_DESC = $testParams.Description
+                                } | Add-Member -MemberType ScriptMethod `
+                                    -Name FindByWSEC_GRP_UID `
+                                    -Value {
+                                    return @{
+                                        WSEC_GRP_NAME     = $testParams.Name
+                                        WSEC_GRP_DESC     = ""
+                                        WSEC_GRP_AD_GUID  = $null
+                                        WSEC_GRP_AD_GROUP = $null
+                                    }
+                                } `
+                                    -Force -PassThru `
+                                | Add-Member -MemberType ScriptProperty `
+                                    -Name WSEC_GRP_AD_GUID `
+                                    -Value { return [System.DBNull]::Value } `
+                                    -PassThru -Force
+                                GroupMembers   = @{
+                                    Rows = @(
+                                        @{ RES_UID = New-Guid }
+                                        @{ RES_UID = New-Guid }
+                                        @{ RES_UID = New-Guid }
+                                    )
+                                } | Add-Member -MemberType ScriptMethod `
+                                    -Name FindByRES_UIDWSEC_GRP_UID `
+                                    -Value {
+                                    return New-Object -TypeName "System.Object" `
+                                    | Add-Member -MemberType ScriptMethod `
+                                        -Name Delete `
+                                        -Value {
+                                        $global:SPDscMemberDeleteCalled = $true
+                                    } -PassThru -Force
+                                } -PassThru -Force `
+                                | Add-Member -MemberType ScriptMethod `
+                                    -Name NewGroupMembersRow `
+                                    -Value {
+                                    return @{
+                                        WSEC_GRP_UID = ""
+                                        RES_UID      = ""
+                                    }
+                                } -PassThru -Force `
+                                | Add-Member -MemberType ScriptMethod `
+                                    -Name AddGroupMembersRow `
+                                    -Value {
+                                    $global:SPDscMemberRowAddedCalled = $true
+                                } -PassThru -Force
+                            }
+
+                            $global:SPDscCurrentMembers = @(
+                                "i:0#.w|DEMO\Member1"
+                                "i:0#.w|DEMO\Member3"
+                                "i:0#.w|DEMO\Member4"
+                            )
+                            Mock -CommandName "Get-SPDscProjectServerResourceName" -MockWith {
+                                $value = $global:SPDscCurrentMembers[$global:SPDscCurrentMembersReadCount]
+                                $global:SPDscCurrentMembersReadCount ++
+                                return $value
+                            }
                         }
 
                         It "should return current members from the get method" {
@@ -919,86 +946,88 @@ try
                     }
 
                     Context -Name "A group has a list of members to include that does match" -Fixture {
-                        $testParams = @{
-                            Url              = "http://server/pwa"
-                            Name             = "New Group 1"
-                            MembersToInclude = @(
-                                "DEMO\Member1"
-                            )
-                        }
-
-                        $global:SPDscCurrentGroupList = @{
-                            SecurityGroups = @(
-                                @{
-                                    WSEC_GRP_NAME = $testParams.Name
-                                    WSEC_GRP_UID  = (New-Guid)
-                                }
-                                @{
-                                    WSEC_GRP_NAME = "Not the group you want"
-                                    WSEC_GRP_UID  = (New-Guid)
-                                }
-                            )
-                        }
-
-                        $global:SPDscCurrentGroupDetails = @{
-                            SecurityGroups = @{
-                                WSEC_GRP_NAME = $testParams.Name
-                                WSEC_GRP_DESC = $testParams.Description
-                            } | Add-Member -MemberType ScriptMethod `
-                                -Name FindByWSEC_GRP_UID `
-                                -Value {
-                                return @{
-                                    WSEC_GRP_NAME     = $testParams.Name
-                                    WSEC_GRP_DESC     = ""
-                                    WSEC_GRP_AD_GUID  = $null
-                                    WSEC_GRP_AD_GROUP = $null
-                                }
-                            } `
-                                -Force -PassThru `
-                            | Add-Member -MemberType ScriptProperty `
-                                -Name WSEC_GRP_AD_GUID `
-                                -Value { return [System.DBNull]::Value } `
-                                -PassThru -Force
-                            GroupMembers   = @{
-                                Rows = @(
-                                    @{ RES_UID = New-Guid }
-                                    @{ RES_UID = New-Guid }
-                                    @{ RES_UID = New-Guid }
+                        BeforeAll {
+                            $testParams = @{
+                                Url              = "http://server/pwa"
+                                Name             = "New Group 1"
+                                MembersToInclude = @(
+                                    "DEMO\Member1"
                                 )
-                            } | Add-Member -MemberType ScriptMethod `
-                                -Name FindByRES_UIDWSEC_GRP_UID `
-                                -Value {
-                                return New-Object -TypeName "System.Object" `
-                                | Add-Member -MemberType ScriptMethod `
-                                    -Name Delete `
-                                    -Value {
-                                    $global:SPDscMemberDeleteCalled = $true
-                                } -PassThru -Force
-                            } -PassThru -Force `
-                            | Add-Member -MemberType ScriptMethod `
-                                -Name NewGroupMembersRow `
-                                -Value {
-                                return @{
-                                    WSEC_GRP_UID = ""
-                                    RES_UID      = ""
-                                }
-                            } -PassThru -Force `
-                            | Add-Member -MemberType ScriptMethod `
-                                -Name AddGroupMembersRow `
-                                -Value {
-                                $global:SPDscMemberRowAddedCalled = $true
-                            } -PassThru -Force
-                        }
+                            }
 
-                        $global:SPDscCurrentMembers = @(
-                            "i:0#.w|DEMO\Member1"
-                            "i:0#.w|DEMO\Member3"
-                            "i:0#.w|DEMO\Member4"
-                        )
-                        Mock -CommandName "Get-SPDscProjectServerResourceName" -MockWith {
-                            $value = $global:SPDscCurrentMembers[$global:SPDscCurrentMembersReadCount]
-                            $global:SPDscCurrentMembersReadCount ++
-                            return $value
+                            $global:SPDscCurrentGroupList = @{
+                                SecurityGroups = @(
+                                    @{
+                                        WSEC_GRP_NAME = $testParams.Name
+                                        WSEC_GRP_UID  = (New-Guid)
+                                    }
+                                    @{
+                                        WSEC_GRP_NAME = "Not the group you want"
+                                        WSEC_GRP_UID  = (New-Guid)
+                                    }
+                                )
+                            }
+
+                            $global:SPDscCurrentGroupDetails = @{
+                                SecurityGroups = @{
+                                    WSEC_GRP_NAME = $testParams.Name
+                                    WSEC_GRP_DESC = $testParams.Description
+                                } | Add-Member -MemberType ScriptMethod `
+                                    -Name FindByWSEC_GRP_UID `
+                                    -Value {
+                                    return @{
+                                        WSEC_GRP_NAME     = $testParams.Name
+                                        WSEC_GRP_DESC     = ""
+                                        WSEC_GRP_AD_GUID  = $null
+                                        WSEC_GRP_AD_GROUP = $null
+                                    }
+                                } `
+                                    -Force -PassThru `
+                                | Add-Member -MemberType ScriptProperty `
+                                    -Name WSEC_GRP_AD_GUID `
+                                    -Value { return [System.DBNull]::Value } `
+                                    -PassThru -Force
+                                GroupMembers   = @{
+                                    Rows = @(
+                                        @{ RES_UID = New-Guid }
+                                        @{ RES_UID = New-Guid }
+                                        @{ RES_UID = New-Guid }
+                                    )
+                                } | Add-Member -MemberType ScriptMethod `
+                                    -Name FindByRES_UIDWSEC_GRP_UID `
+                                    -Value {
+                                    return New-Object -TypeName "System.Object" `
+                                    | Add-Member -MemberType ScriptMethod `
+                                        -Name Delete `
+                                        -Value {
+                                        $global:SPDscMemberDeleteCalled = $true
+                                    } -PassThru -Force
+                                } -PassThru -Force `
+                                | Add-Member -MemberType ScriptMethod `
+                                    -Name NewGroupMembersRow `
+                                    -Value {
+                                    return @{
+                                        WSEC_GRP_UID = ""
+                                        RES_UID      = ""
+                                    }
+                                } -PassThru -Force `
+                                | Add-Member -MemberType ScriptMethod `
+                                    -Name AddGroupMembersRow `
+                                    -Value {
+                                    $global:SPDscMemberRowAddedCalled = $true
+                                } -PassThru -Force
+                            }
+
+                            $global:SPDscCurrentMembers = @(
+                                "i:0#.w|DEMO\Member1"
+                                "i:0#.w|DEMO\Member3"
+                                "i:0#.w|DEMO\Member4"
+                            )
+                            Mock -CommandName "Get-SPDscProjectServerResourceName" -MockWith {
+                                $value = $global:SPDscCurrentMembers[$global:SPDscCurrentMembersReadCount]
+                                $global:SPDscCurrentMembersReadCount ++
+                                return $value
+                            }
                         }
 
                         It "should return current members from the get method" {
@@ -1015,86 +1044,88 @@ try
                     }
 
                     Context -Name "A group has a list of members to exclude that doesn't match" -Fixture {
-                        $testParams = @{
-                            Url              = "http://server/pwa"
-                            Name             = "New Group 1"
-                            MembersToExclude = @(
-                                "DEMO\Member1"
-                            )
-                        }
-
-                        $global:SPDscCurrentGroupList = @{
-                            SecurityGroups = @(
-                                @{
-                                    WSEC_GRP_NAME = $testParams.Name
-                                    WSEC_GRP_UID  = (New-Guid)
-                                }
-                                @{
-                                    WSEC_GRP_NAME = "Not the group you want"
-                                    WSEC_GRP_UID  = (New-Guid)
-                                }
-                            )
-                        }
-
-                        $global:SPDscCurrentGroupDetails = @{
-                            SecurityGroups = @{
-                                WSEC_GRP_NAME = $testParams.Name
-                                WSEC_GRP_DESC = $testParams.Description
-                            } | Add-Member -MemberType ScriptMethod `
-                                -Name FindByWSEC_GRP_UID `
-                                -Value {
-                                return @{
-                                    WSEC_GRP_NAME     = $testParams.Name
-                                    WSEC_GRP_DESC     = ""
-                                    WSEC_GRP_AD_GUID  = $null
-                                    WSEC_GRP_AD_GROUP = $null
-                                }
-                            } `
-                                -Force -PassThru `
-                            | Add-Member -MemberType ScriptProperty `
-                                -Name WSEC_GRP_AD_GUID `
-                                -Value { return [System.DBNull]::Value } `
-                                -PassThru -Force
-                            GroupMembers   = @{
-                                Rows = @(
-                                    @{ RES_UID = New-Guid }
-                                    @{ RES_UID = New-Guid }
-                                    @{ RES_UID = New-Guid }
+                        BeforeAll {
+                            $testParams = @{
+                                Url              = "http://server/pwa"
+                                Name             = "New Group 1"
+                                MembersToExclude = @(
+                                    "DEMO\Member1"
                                 )
-                            } | Add-Member -MemberType ScriptMethod `
-                                -Name FindByRES_UIDWSEC_GRP_UID `
-                                -Value {
-                                return New-Object -TypeName "System.Object" `
-                                | Add-Member -MemberType ScriptMethod `
-                                    -Name Delete `
-                                    -Value {
-                                    $global:SPDscMemberDeleteCalled = $true
-                                } -PassThru -Force
-                            } -PassThru -Force `
-                            | Add-Member -MemberType ScriptMethod `
-                                -Name NewGroupMembersRow `
-                                -Value {
-                                return @{
-                                    WSEC_GRP_UID = ""
-                                    RES_UID      = ""
-                                }
-                            } -PassThru -Force `
-                            | Add-Member -MemberType ScriptMethod `
-                                -Name AddGroupMembersRow `
-                                -Value {
-                                $global:SPDscMemberRowAddedCalled = $true
-                            } -PassThru -Force
-                        }
+                            }
 
-                        $global:SPDscCurrentMembers = @(
-                            "i:0#.w|DEMO\Member1"
-                            "i:0#.w|DEMO\Member3"
-                            "i:0#.w|DEMO\Member4"
-                        )
-                        Mock -CommandName "Get-SPDscProjectServerResourceName" -MockWith {
-                            $value = $global:SPDscCurrentMembers[$global:SPDscCurrentMembersReadCount]
-                            $global:SPDscCurrentMembersReadCount ++
-                            return $value
+                            $global:SPDscCurrentGroupList = @{
+                                SecurityGroups = @(
+                                    @{
+                                        WSEC_GRP_NAME = $testParams.Name
+                                        WSEC_GRP_UID  = (New-Guid)
+                                    }
+                                    @{
+                                        WSEC_GRP_NAME = "Not the group you want"
+                                        WSEC_GRP_UID  = (New-Guid)
+                                    }
+                                )
+                            }
+
+                            $global:SPDscCurrentGroupDetails = @{
+                                SecurityGroups = @{
+                                    WSEC_GRP_NAME = $testParams.Name
+                                    WSEC_GRP_DESC = $testParams.Description
+                                } | Add-Member -MemberType ScriptMethod `
+                                    -Name FindByWSEC_GRP_UID `
+                                    -Value {
+                                    return @{
+                                        WSEC_GRP_NAME     = $testParams.Name
+                                        WSEC_GRP_DESC     = ""
+                                        WSEC_GRP_AD_GUID  = $null
+                                        WSEC_GRP_AD_GROUP = $null
+                                    }
+                                } `
+                                    -Force -PassThru `
+                                | Add-Member -MemberType ScriptProperty `
+                                    -Name WSEC_GRP_AD_GUID `
+                                    -Value { return [System.DBNull]::Value } `
+                                    -PassThru -Force
+                                GroupMembers   = @{
+                                    Rows = @(
+                                        @{ RES_UID = New-Guid }
+                                        @{ RES_UID = New-Guid }
+                                        @{ RES_UID = New-Guid }
+                                    )
+                                } | Add-Member -MemberType ScriptMethod `
+                                    -Name FindByRES_UIDWSEC_GRP_UID `
+                                    -Value {
+                                    return New-Object -TypeName "System.Object" `
+                                    | Add-Member -MemberType ScriptMethod `
+                                        -Name Delete `
+                                        -Value {
+                                        $global:SPDscMemberDeleteCalled = $true
+                                    } -PassThru -Force
+                                } -PassThru -Force `
+                                | Add-Member -MemberType ScriptMethod `
+                                    -Name NewGroupMembersRow `
+                                    -Value {
+                                    return @{
+                                        WSEC_GRP_UID = ""
+                                        RES_UID      = ""
+                                    }
+                                } -PassThru -Force `
+                                | Add-Member -MemberType ScriptMethod `
+                                    -Name AddGroupMembersRow `
+                                    -Value {
+                                    $global:SPDscMemberRowAddedCalled = $true
+                                } -PassThru -Force
+                            }
+
+                            $global:SPDscCurrentMembers = @(
+                                "i:0#.w|DEMO\Member1"
+                                "i:0#.w|DEMO\Member3"
+                                "i:0#.w|DEMO\Member4"
+                            )
+                            Mock -CommandName "Get-SPDscProjectServerResourceName" -MockWith {
+                                $value = $global:SPDscCurrentMembers[$global:SPDscCurrentMembersReadCount]
+                                $global:SPDscCurrentMembersReadCount ++
+                                return $value
+                            }
                         }
 
                         It "should return current members from the get method" {
@@ -1122,86 +1153,88 @@ try
                     }
 
                     Context -Name "A group has a list of members to exclude that does match" -Fixture {
-                        $testParams = @{
-                            Url              = "http://server/pwa"
-                            Name             = "New Group 1"
-                            MembersToExclude = @(
-                                "DEMO\Member2"
-                            )
-                        }
-
-                        $global:SPDscCurrentGroupList = @{
-                            SecurityGroups = @(
-                                @{
-                                    WSEC_GRP_NAME = $testParams.Name
-                                    WSEC_GRP_UID  = (New-Guid)
-                                }
-                                @{
-                                    WSEC_GRP_NAME = "Not the group you want"
-                                    WSEC_GRP_UID  = (New-Guid)
-                                }
-                            )
-                        }
-
-                        $global:SPDscCurrentGroupDetails = @{
-                            SecurityGroups = @{
-                                WSEC_GRP_NAME = $testParams.Name
-                                WSEC_GRP_DESC = $testParams.Description
-                            } | Add-Member -MemberType ScriptMethod `
-                                -Name FindByWSEC_GRP_UID `
-                                -Value {
-                                return @{
-                                    WSEC_GRP_NAME     = $testParams.Name
-                                    WSEC_GRP_DESC     = ""
-                                    WSEC_GRP_AD_GUID  = $null
-                                    WSEC_GRP_AD_GROUP = $null
-                                }
-                            } `
-                                -Force -PassThru `
-                            | Add-Member -MemberType ScriptProperty `
-                                -Name WSEC_GRP_AD_GUID `
-                                -Value { return [System.DBNull]::Value } `
-                                -PassThru -Force
-                            GroupMembers   = @{
-                                Rows = @(
-                                    @{ RES_UID = New-Guid }
-                                    @{ RES_UID = New-Guid }
-                                    @{ RES_UID = New-Guid }
+                        BeforeAll {
+                            $testParams = @{
+                                Url              = "http://server/pwa"
+                                Name             = "New Group 1"
+                                MembersToExclude = @(
+                                    "DEMO\Member2"
                                 )
-                            } | Add-Member -MemberType ScriptMethod `
-                                -Name FindByRES_UIDWSEC_GRP_UID `
-                                -Value {
-                                return New-Object -TypeName "System.Object" `
-                                | Add-Member -MemberType ScriptMethod `
-                                    -Name Delete `
-                                    -Value {
-                                    $global:SPDscMemberDeleteCalled = $true
-                                } -PassThru -Force
-                            } -PassThru -Force `
-                            | Add-Member -MemberType ScriptMethod `
-                                -Name NewGroupMembersRow `
-                                -Value {
-                                return @{
-                                    WSEC_GRP_UID = ""
-                                    RES_UID      = ""
-                                }
-                            } -PassThru -Force `
-                            | Add-Member -MemberType ScriptMethod `
-                                -Name AddGroupMembersRow `
-                                -Value {
-                                $global:SPDscMemberRowAddedCalled = $true
-                            } -PassThru -Force
-                        }
+                            }
 
-                        $global:SPDscCurrentMembers = @(
-                            "i:0#.w|DEMO\Member1"
-                            "i:0#.w|DEMO\Member3"
-                            "i:0#.w|DEMO\Member4"
-                        )
-                        Mock -CommandName "Get-SPDscProjectServerResourceName" -MockWith {
-                            $value = $global:SPDscCurrentMembers[$global:SPDscCurrentMembersReadCount]
-                            $global:SPDscCurrentMembersReadCount ++
-                            return $value
+                            $global:SPDscCurrentGroupList = @{
+                                SecurityGroups = @(
+                                    @{
+                                        WSEC_GRP_NAME = $testParams.Name
+                                        WSEC_GRP_UID  = (New-Guid)
+                                    }
+                                    @{
+                                        WSEC_GRP_NAME = "Not the group you want"
+                                        WSEC_GRP_UID  = (New-Guid)
+                                    }
+                                )
+                            }
+
+                            $global:SPDscCurrentGroupDetails = @{
+                                SecurityGroups = @{
+                                    WSEC_GRP_NAME = $testParams.Name
+                                    WSEC_GRP_DESC = $testParams.Description
+                                } | Add-Member -MemberType ScriptMethod `
+                                    -Name FindByWSEC_GRP_UID `
+                                    -Value {
+                                    return @{
+                                        WSEC_GRP_NAME     = $testParams.Name
+                                        WSEC_GRP_DESC     = ""
+                                        WSEC_GRP_AD_GUID  = $null
+                                        WSEC_GRP_AD_GROUP = $null
+                                    }
+                                } `
+                                    -Force -PassThru `
+                                | Add-Member -MemberType ScriptProperty `
+                                    -Name WSEC_GRP_AD_GUID `
+                                    -Value { return [System.DBNull]::Value } `
+                                    -PassThru -Force
+                                GroupMembers   = @{
+                                    Rows = @(
+                                        @{ RES_UID = New-Guid }
+                                        @{ RES_UID = New-Guid }
+                                        @{ RES_UID = New-Guid }
+                                    )
+                                } | Add-Member -MemberType ScriptMethod `
+                                    -Name FindByRES_UIDWSEC_GRP_UID `
+                                    -Value {
+                                    return New-Object -TypeName "System.Object" `
+                                    | Add-Member -MemberType ScriptMethod `
+                                        -Name Delete `
+                                        -Value {
+                                        $global:SPDscMemberDeleteCalled = $true
+                                    } -PassThru -Force
+                                } -PassThru -Force `
+                                | Add-Member -MemberType ScriptMethod `
+                                    -Name NewGroupMembersRow `
+                                    -Value {
+                                    return @{
+                                        WSEC_GRP_UID = ""
+                                        RES_UID      = ""
+                                    }
+                                } -PassThru -Force `
+                                | Add-Member -MemberType ScriptMethod `
+                                    -Name AddGroupMembersRow `
+                                    -Value {
+                                    $global:SPDscMemberRowAddedCalled = $true
+                                } -PassThru -Force
+                            }
+
+                            $global:SPDscCurrentMembers = @(
+                                "i:0#.w|DEMO\Member1"
+                                "i:0#.w|DEMO\Member3"
+                                "i:0#.w|DEMO\Member4"
+                            )
+                            Mock -CommandName "Get-SPDscProjectServerResourceName" -MockWith {
+                                $value = $global:SPDscCurrentMembers[$global:SPDscCurrentMembersReadCount]
+                                $global:SPDscCurrentMembersReadCount ++
+                                return $value
+                            }
                         }
 
                         It "should return current members from the get method" {

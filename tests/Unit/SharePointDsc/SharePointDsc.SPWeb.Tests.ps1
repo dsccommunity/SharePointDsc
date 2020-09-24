@@ -46,36 +46,40 @@ Invoke-TestSetup
 
 try
 {
-    Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
-        InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
-            Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
+    InModuleScope -ModuleName $script:DSCResourceFullName -ScriptBlock {
+        Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
+            BeforeAll {
+                Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
-            # Initialize tests
-            $fakeWebApp = [PSCustomObject]@{ }
-            $fakeWebApp | Add-Member -MemberType ScriptMethod `
-                -Name GrantAccessToProcessIdentity `
-                -PassThru `
-                -Value { }
+                # Initialize tests
+                $fakeWebApp = [PSCustomObject]@{ }
+                $fakeWebApp | Add-Member -MemberType ScriptMethod `
+                    -Name GrantAccessToProcessIdentity `
+                    -PassThru `
+                    -Value { }
 
-            # Mocks for all contexts
-            Mock -CommandName New-Object -MockWith {
-                [PSCustomObject]@{
-                    WebApplication = $fakeWebApp
+                # Mocks for all contexts
+                Mock -CommandName New-Object -MockWith {
+                    [PSCustomObject]@{
+                        WebApplication = $fakeWebApp
+                    }
+                } -ParameterFilter {
+                    $TypeName -eq "Microsoft.SharePoint.SPSite"
                 }
-            } -ParameterFilter {
-                $TypeName -eq "Microsoft.SharePoint.SPSite"
+                Mock -CommandName Remove-SPWeb -MockWith { }
             }
-            Mock -CommandName Remove-SPWeb -MockWith { }
 
             # Test contexts
             Context -Name "The SPWeb doesn't exist yet and should" -Fixture {
-                $testParams = @{
-                    Url         = "http://site.sharepoint.com/sites/web"
-                    Name        = "Team Site"
-                    Description = "desc"
-                }
+                BeforeAll {
+                    $testParams = @{
+                        Url         = "http://site.sharepoint.com/sites/web"
+                        Name        = "Team Site"
+                        Description = "desc"
+                    }
 
-                Mock -CommandName Get-SPWeb -MockWith { return $null }
+                    Mock -CommandName Get-SPWeb -MockWith { return $null }
+                }
 
                 It "Should return 'Absent' from the get method" {
                     (Get-TargetResource @testParams).Ensure | Should -Be "Absent"
@@ -96,23 +100,25 @@ try
             }
 
             Context -Name "The SPWeb exists and has the correct name and description" -Fixture {
-                $testParams = @{
-                    Url         = "http://site.sharepoint.com/sites/web"
-                    Name        = "Team Site"
-                    Description = "desc"
-                }
+                BeforeAll {
+                    $testParams = @{
+                        Url         = "http://site.sharepoint.com/sites/web"
+                        Name        = "Team Site"
+                        Description = "desc"
+                    }
 
-                Mock -CommandName Get-SPWeb -MockWith {
-                    return @{
-                        Url                = $testParams.Url
-                        Title              = $testParams.Name
-                        Description        = $testParams.Description
-                        WebTemplate        = "STS"
-                        WebTemplateId      = "0"
-                        Navigation         = @{ UseShared = $true }
-                        Language           = 1033
-                        HasUniquePerm      = $false
-                        RequestAccessEmail = "valid@contoso.com"
+                    Mock -CommandName Get-SPWeb -MockWith {
+                        return @{
+                            Url                = $testParams.Url
+                            Title              = $testParams.Name
+                            Description        = $testParams.Description
+                            WebTemplate        = "STS"
+                            WebTemplateId      = "0"
+                            Navigation         = @{ UseShared = $true }
+                            Language           = 1033
+                            HasUniquePerm      = $false
+                            RequestAccessEmail = "valid@contoso.com"
+                        }
                     }
                 }
 
@@ -133,16 +139,18 @@ try
             }
 
             Context -Name "The SPWeb exists and should not" -Fixture {
-                $testParams = @{
-                    Url         = "http://site.sharepoint.com/sites/web"
-                    Name        = "Team Site"
-                    Description = "desc"
-                    Ensure      = "Absent"
-                }
+                BeforeAll {
+                    $testParams = @{
+                        Url         = "http://site.sharepoint.com/sites/web"
+                        Name        = "Team Site"
+                        Description = "desc"
+                        Ensure      = "Absent"
+                    }
 
-                Mock -CommandName Get-SPWeb -MockWith {
-                    return @{
-                        Url = $testParams.Url
+                    Mock -CommandName Get-SPWeb -MockWith {
+                        return @{
+                            Url = $testParams.Url
+                        }
                     }
                 }
 
@@ -162,30 +170,31 @@ try
             }
 
             Context -Name "The SPWeb exists but has the wrong editable values" -Fixture {
-                $testParams = @{
-                    Url               = "http://site.sharepoint.com/sites/web"
-                    Name              = "Team Site"
-                    Description       = "desc"
-                    UseParentTopNav   = $false
-                    UniquePermissions = $true
+                BeforeAll {
+                    $testParams = @{
+                        Url               = "http://site.sharepoint.com/sites/web"
+                        Name              = "Team Site"
+                        Description       = "desc"
+                        UseParentTopNav   = $false
+                        UniquePermissions = $true
+                    }
+
+                    $web = [pscustomobject] @{
+                        Url           = $testParams.Url
+                        Title         = "Another title"
+                        Description   = "Another description"
+                        Navigation    = @{ UseShared = $true }
+                        HasUniquePerm = $false
+                    }
+
+                    $web | Add-Member -Name Update `
+                        -MemberType ScriptMethod `
+                        -Value { }
+
+                    Mock -CommandName Get-SPWeb -MockWith { $web }
                 }
-
-                $web = [pscustomobject] @{
-                    Url           = $testParams.Url
-                    Title         = "Another title"
-                    Description   = "Another description"
-                    Navigation    = @{ UseShared = $true }
-                    HasUniquePerm = $false
-                }
-
-                $web | Add-Member -Name Update `
-                    -MemberType ScriptMethod `
-                    -Value { }
-
-                Mock -CommandName Get-SPWeb -MockWith { $web }
 
                 It "Should return the SPWeb data from the get method" {
-
                     $result = Get-TargetResource @testParams
 
                     $result.Ensure | Should -Be "Present"
@@ -199,7 +208,6 @@ try
                 }
 
                 It "Should update the values in the set method" {
-
                     Set-TargetResource @testParams
 
                     $web.Title | Should -Be $testParams.Name
@@ -212,29 +220,30 @@ try
             }
 
             Context -Name "The SPWeb exists and the request access settings need to be set" -Fixture {
-                $testParams = @{
-                    Url                = "http://site.sharepoint.com/sites/web"
-                    RequestAccessEmail = "valid@contoso.com"
+                BeforeAll {
+                    $testParams = @{
+                        Url                = "http://site.sharepoint.com/sites/web"
+                        RequestAccessEmail = "valid@contoso.com"
+                    }
+
+                    $web = [pscustomobject] @{
+                        Url                = $testParams.Url
+                        HasUniquePerm      = $true
+                        RequestAccessEmail = "notvalid@contoso.com"
+                    }
+
+                    $web | Add-Member -Name Update `
+                        -MemberType ScriptMethod `
+                        -Value { }
+
+                    Mock -CommandName Get-SPWeb -MockWith { $web }
                 }
-
-                $web = [pscustomobject] @{
-                    Url                = $testParams.Url
-                    HasUniquePerm      = $true
-                    RequestAccessEmail = "notvalid@contoso.com"
-                }
-
-                $web | Add-Member -Name Update `
-                    -MemberType ScriptMethod `
-                    -Value { }
-
-                Mock -CommandName Get-SPWeb -MockWith { $web }
 
                 It "Should return false from the test method" {
                     Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should update the values in the set method" {
-
                     Set-TargetResource @testParams
 
                     $web.RequestAccessEmail | Should -Be $testParams.RequestAccessEmail
@@ -244,29 +253,30 @@ try
             }
 
             Context -Name "The SPWeb exists and the request access has to be disabled" -Fixture {
-                $testParams = @{
-                    Url                = "http://site.sharepoint.com/sites/web"
-                    RequestAccessEmail = ""
+                BeforeAll {
+                    $testParams = @{
+                        Url                = "http://site.sharepoint.com/sites/web"
+                        RequestAccessEmail = ""
+                    }
+
+                    $web = [pscustomobject] @{
+                        Url                = $testParams.Url
+                        HasUniquePerm      = $true
+                        RequestAccessEmail = "valid@contoso.com"
+                    }
+
+                    $web | Add-Member -Name Update `
+                        -MemberType ScriptMethod `
+                        -Value { }
+
+                    Mock -CommandName Get-SPWeb -MockWith { $web }
                 }
-
-                $web = [pscustomobject] @{
-                    Url                = $testParams.Url
-                    HasUniquePerm      = $true
-                    RequestAccessEmail = "valid@contoso.com"
-                }
-
-                $web | Add-Member -Name Update `
-                    -MemberType ScriptMethod `
-                    -Value { }
-
-                Mock -CommandName Get-SPWeb -MockWith { $web }
 
                 It "Should return false from the test method" {
                     Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should update the values in the set method" {
-
                     Set-TargetResource @testParams
 
                     $web.RequestAccessEmail | Should -Be ""
@@ -276,30 +286,31 @@ try
             }
 
             Context -Name "The SPWeb exists and does not have unique permission, when request access should be enabled" -Fixture {
-                $testParams = @{
-                    Url                = "http://site.sharepoint.com/sites/web"
-                    RequestAccessEmail = ""
-                    UniquePermissions  = $false
+                BeforeAll {
+                    $testParams = @{
+                        Url                = "http://site.sharepoint.com/sites/web"
+                        RequestAccessEmail = ""
+                        UniquePermissions  = $false
+                    }
+
+                    $web = [pscustomobject] @{
+                        Url                = $testParams.Url
+                        HasUniquePerm      = $false
+                        RequestAccessEmail = "valid@contoso.com"
+                    }
+
+                    $web | Add-Member -Name Update `
+                        -MemberType ScriptMethod `
+                        -Value { }
+
+                    Mock -CommandName Get-SPWeb -MockWith { $web }
                 }
-
-                $web = [pscustomobject] @{
-                    Url                = $testParams.Url
-                    HasUniquePerm      = $false
-                    RequestAccessEmail = "valid@contoso.com"
-                }
-
-                $web | Add-Member -Name Update `
-                    -MemberType ScriptMethod `
-                    -Value { }
-
-                Mock -CommandName Get-SPWeb -MockWith { $web }
 
                 It "Should return false from the test method" {
                     Test-TargetResource @testParams | Should -Be $true
                 }
 
                 It "Should not update the values set method" {
-
                     Set-TargetResource @testParams
 
                     $web.RequestAccessEmail | Should -Be "valid@contoso.com"
@@ -310,30 +321,31 @@ try
             }
 
             Context -Name "The SPWeb exists and does have unique permission and should not have unique permissions" -Fixture {
-                $testParams = @{
-                    Url                = "http://site.sharepoint.com/sites/web"
-                    RequestAccessEmail = ""
-                    UniquePermissions  = $false
+                BeforeAll {
+                    $testParams = @{
+                        Url                = "http://site.sharepoint.com/sites/web"
+                        RequestAccessEmail = ""
+                        UniquePermissions  = $false
+                    }
+
+                    $web = [pscustomobject] @{
+                        Url                = $testParams.Url
+                        HasUniquePerm      = $true
+                        RequestAccessEmail = "notvalid@contoso.com"
+                    }
+
+                    $web | Add-Member -Name Update `
+                        -MemberType ScriptMethod `
+                        -Value { }
+
+                    Mock -CommandName Get-SPWeb -MockWith { $web }
                 }
-
-                $web = [pscustomobject] @{
-                    Url                = $testParams.Url
-                    HasUniquePerm      = $true
-                    RequestAccessEmail = "notvalid@contoso.com"
-                }
-
-                $web | Add-Member -Name Update `
-                    -MemberType ScriptMethod `
-                    -Value { }
-
-                Mock -CommandName Get-SPWeb -MockWith { $web }
 
                 It "Should return false from the test method" {
                     Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should update the value of unique permissions and not change the request access email in the set method" {
-
                     Set-TargetResource @testParams
 
                     $web.RequestAccessEmail | Should -Be "notvalid@contoso.com"

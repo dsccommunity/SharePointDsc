@@ -46,23 +46,27 @@ Invoke-TestSetup
 
 try
 {
-    Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
-        InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
-            Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
+    InModuleScope -ModuleName $script:DSCResourceFullName -ScriptBlock {
+        Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
+            BeforeAll {
+                Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
-            # Mocks for all contexts
-            Mock -CommandName Start-SPServiceInstance -MockWith { }
-            Mock -CommandName Stop-SPServiceInstance -MockWith { }
+                # Mocks for all contexts
+                Mock -CommandName Start-SPServiceInstance -MockWith { }
+                Mock -CommandName Stop-SPServiceInstance -MockWith { }
+            }
 
             # Test contexts
             Context -Name "The service instance is not running but should be" -Fixture {
-                $testParams = @{
-                    Name   = "Service pool"
-                    Ensure = "Present"
-                }
+                BeforeAll {
+                    $testParams = @{
+                        Name   = "Service pool"
+                        Ensure = "Present"
+                    }
 
-                Mock -CommandName Get-SPServiceInstance -MockWith {
-                    return @()
+                    Mock -CommandName Get-SPServiceInstance -MockWith {
+                        return @()
+                    }
                 }
 
                 It "Should return absent from the get method" {
@@ -75,22 +79,24 @@ try
             }
 
             Context -Name "The service instance is not running but should be" -Fixture {
-                $testParams = @{
-                    Name   = "Service pool"
-                    Ensure = "Present"
-                }
+                BeforeAll {
+                    $testParams = @{
+                        Name   = "Service pool"
+                        Ensure = "Present"
+                    }
 
-                Mock -CommandName Get-SPServiceInstance -MockWith {
-                    return @(@{
-                            TypeName = $testParams.Name
-                            Status   = "Disabled"
-                            Server   = @{
-                                Name = $env:COMPUTERNAME
-                            }
-                        })
-                }
+                    Mock -CommandName Get-SPServiceInstance -MockWith {
+                        return @(@{
+                                TypeName = $testParams.Name
+                                Status   = "Disabled"
+                                Server   = @{
+                                    Name = $env:COMPUTERNAME
+                                }
+                            })
+                    }
 
-                Mock -CommandName Start-Sleep -MockWith {}
+                    Mock -CommandName Start-Sleep -MockWith {}
+                }
 
                 It "Should return absent from the get method" {
                     (Get-TargetResource @testParams).Ensure | Should -Be "Absent"
@@ -107,16 +113,18 @@ try
             }
 
             Context -Name "The service instance is running and should be" -Fixture {
-                $testParams = @{
-                    Name   = "Service pool"
-                    Ensure = "Present"
-                }
+                BeforeAll {
+                    $testParams = @{
+                        Name   = "Service pool"
+                        Ensure = "Present"
+                    }
 
-                Mock -CommandName Get-SPServiceInstance -MockWith {
-                    return @(@{
-                            TypeName = $testParams.Name
-                            Status   = "Online"
-                        })
+                    Mock -CommandName Get-SPServiceInstance -MockWith {
+                        return @(@{
+                                TypeName = $testParams.Name
+                                Status   = "Online"
+                            })
+                    }
                 }
 
                 It "Should return present from the get method" {
@@ -129,13 +137,15 @@ try
             }
 
             Context -Name "An invalid service application is specified to start" -Fixture {
-                $testParams = @{
-                    Name   = "Service pool"
-                    Ensure = "Present"
-                }
+                BeforeAll {
+                    $testParams = @{
+                        Name   = "Service pool"
+                        Ensure = "Present"
+                    }
 
-                Mock -CommandName Get-SPServiceInstance {
-                    return $null
+                    Mock -CommandName Get-SPServiceInstance {
+                        return $null
+                    }
                 }
 
                 It "Should throw when the set method is called" {
@@ -144,16 +154,18 @@ try
             }
 
             Context -Name "The service instance is not running and should not be" -Fixture {
-                $testParams = @{
-                    Name   = "Service pool"
-                    Ensure = "Absent"
-                }
+                BeforeAll {
+                    $testParams = @{
+                        Name   = "Service pool"
+                        Ensure = "Absent"
+                    }
 
-                Mock -CommandName Get-SPServiceInstance -MockWith {
-                    return @(@{
-                            TypeName = $testParams.Name
-                            Status   = "Disabled"
-                        })
+                    Mock -CommandName Get-SPServiceInstance -MockWith {
+                        return @(@{
+                                TypeName = $testParams.Name
+                                Status   = "Disabled"
+                            })
+                    }
                 }
 
                 It "Should return absent from the get method" {
@@ -166,22 +178,24 @@ try
             }
 
             Context -Name "The service instance is running and should not be" -Fixture {
-                $testParams = @{
-                    Name   = "Service pool"
-                    Ensure = "Absent"
-                }
+                BeforeAll {
+                    $testParams = @{
+                        Name   = "Service pool"
+                        Ensure = "Absent"
+                    }
 
-                Mock -CommandName Get-SPServiceInstance -MockWith {
-                    return @(@{
-                            TypeName = $testParams.Name
-                            Status   = "Online"
-                            Server   = @{
-                                Name = $env:COMPUTERNAME
-                            }
-                        })
-                }
+                    Mock -CommandName Get-SPServiceInstance -MockWith {
+                        return @(@{
+                                TypeName = $testParams.Name
+                                Status   = "Online"
+                                Server   = @{
+                                    Name = $env:COMPUTERNAME
+                                }
+                            })
+                    }
 
-                Mock -CommandName Start-Sleep -MockWith {}
+                    Mock -CommandName Start-Sleep -MockWith {}
+                }
 
                 It "Should return present from the get method" {
                     (Get-TargetResource @testParams).Ensure | Should -Be "Present"
@@ -193,19 +207,20 @@ try
 
                 It "Should call the stop service call from the set method" {
                     Set-TargetResource @testParams
-
                     Assert-MockCalled Stop-SPServiceInstance
                 }
             }
 
             Context -Name "An invalid service application is specified to stop" -Fixture {
-                $testParams = @{
-                    Name   = "Service pool"
-                    Ensure = "Absent"
-                }
+                BeforeAll {
+                    $testParams = @{
+                        Name   = "Service pool"
+                        Ensure = "Absent"
+                    }
 
-                Mock -CommandName Get-SPServiceInstance {
-                    return $null
+                    Mock -CommandName Get-SPServiceInstance {
+                        return $null
+                    }
                 }
 
                 It "Should throw when the set method is called" {

@@ -46,31 +46,35 @@ Invoke-TestSetup
 
 try
 {
-    Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
-        InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
-            Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
+    InModuleScope -ModuleName $script:DSCResourceFullName -ScriptBlock {
+        Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
+            BeforeAll {
+                Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
-            # Mocks for all contexts
-            Mock -CommandName Get-SPFarm -MockWith {
-                return @{ }
+                # Mocks for all contexts
+                Mock -CommandName Get-SPFarm -MockWith {
+                    return @{ }
+                }
             }
 
             # Test contexts
             Context -Name "The server is not part of SharePoint farm" -Fixture {
-                $testParams = @{
-                    WebAppUrl                              = "https://intranet.sharepoint.contoso.com"
-                    SettingsScope                          = "WebApplication"
-                    AllowSharePointDesigner                = $false
-                    AllowDetachPagesFromDefinition         = $false
-                    AllowCustomiseMasterPage               = $false
-                    AllowManageSiteURLStructure            = $false
-                    AllowCreateDeclarativeWorkflow         = $false
-                    AllowSavePublishDeclarativeWorkflow    = $false
-                    AllowSaveDeclarativeWorkflowAsTemplate = $false
-                }
+                BeforeAll {
+                    $testParams = @{
+                        WebAppUrl                              = "https://intranet.sharepoint.contoso.com"
+                        SettingsScope                          = "WebApplication"
+                        AllowSharePointDesigner                = $false
+                        AllowDetachPagesFromDefinition         = $false
+                        AllowCustomiseMasterPage               = $false
+                        AllowManageSiteURLStructure            = $false
+                        AllowCreateDeclarativeWorkflow         = $false
+                        AllowSavePublishDeclarativeWorkflow    = $false
+                        AllowSaveDeclarativeWorkflowAsTemplate = $false
+                    }
 
-                Mock -CommandName Get-SPFarm -MockWith {
-                    throw "Unable to detect local farm"
+                    Mock -CommandName Get-SPFarm -MockWith {
+                        throw "Unable to detect local farm"
+                    }
                 }
 
                 It "Should return null from the get method" {
@@ -87,39 +91,41 @@ try
             }
 
             Context -Name "The server is in a farm, target web application and the incorrect settings have been applied" -Fixture {
-                $testParams = @{
-                    WebAppUrl                              = "https://intranet.sharepoint.contoso.com"
-                    SettingsScope                          = "WebApplication"
-                    AllowSharePointDesigner                = $false
-                    AllowDetachPagesFromDefinition         = $false
-                    AllowCustomiseMasterPage               = $false
-                    AllowManageSiteURLStructure            = $false
-                    AllowCreateDeclarativeWorkflow         = $false
-                    AllowSavePublishDeclarativeWorkflow    = $false
-                    AllowSaveDeclarativeWorkflowAsTemplate = $false
-                }
-
-                Mock -CommandName Get-SPDesignerSettings -MockWith { return @{
-                        AllowDesigner                          = $true
-                        AllowRevertFromTemplate                = $true
-                        AllowMasterPageEditing                 = $true
-                        ShowURLStructure                       = $true
-                        AllowCreateDeclarativeWorkflow         = $true
-                        AllowSavePublishDeclarativeWorkflow    = $true
-                        AllowSaveDeclarativeWorkflowAsTemplate = $true
+                BeforeAll {
+                    $testParams = @{
+                        WebAppUrl                              = "https://intranet.sharepoint.contoso.com"
+                        SettingsScope                          = "WebApplication"
+                        AllowSharePointDesigner                = $false
+                        AllowDetachPagesFromDefinition         = $false
+                        AllowCustomiseMasterPage               = $false
+                        AllowManageSiteURLStructure            = $false
+                        AllowCreateDeclarativeWorkflow         = $false
+                        AllowSavePublishDeclarativeWorkflow    = $false
+                        AllowSaveDeclarativeWorkflowAsTemplate = $false
                     }
-                }
 
-                Mock -CommandName Get-SPWebapplication -MockWith {
-                    $result = @{ }
-                    $result.DisplayName = "Test"
-                    $result.Url = "https://intranet.sharepoint.contoso.com"
+                    Mock -CommandName Get-SPDesignerSettings -MockWith { return @{
+                            AllowDesigner                          = $true
+                            AllowRevertFromTemplate                = $true
+                            AllowMasterPageEditing                 = $true
+                            ShowURLStructure                       = $true
+                            AllowCreateDeclarativeWorkflow         = $true
+                            AllowSavePublishDeclarativeWorkflow    = $true
+                            AllowSaveDeclarativeWorkflowAsTemplate = $true
+                        }
+                    }
 
-                    $result = $result | Add-Member -MemberType ScriptMethod -Name Update -Value {
-                        $Global:SPDscDesignerUpdated = $true
-                    } -PassThru
+                    Mock -CommandName Get-SPWebapplication -MockWith {
+                        $result = @{ }
+                        $result.DisplayName = "Test"
+                        $result.Url = "https://intranet.sharepoint.contoso.com"
 
-                    return $result
+                        $result = $result | Add-Member -MemberType ScriptMethod -Name Update -Value {
+                            $Global:SPDscDesignerUpdated = $true
+                        } -PassThru
+
+                        return $result
+                    }
                 }
 
                 It "Should return values from the get method" {
@@ -138,32 +144,34 @@ try
             }
 
             Context -Name "The server is in a farm, target site collection and the incorrect settings have been applied" -Fixture {
-                $testParams = @{
-                    WebAppUrl                              = "https://intranet.sharepoint.contoso.com"
-                    SettingsScope                          = "SiteCollection"
-                    AllowSharePointDesigner                = $false
-                    AllowDetachPagesFromDefinition         = $false
-                    AllowCustomiseMasterPage               = $false
-                    AllowManageSiteURLStructure            = $false
-                    AllowCreateDeclarativeWorkflow         = $false
-                    AllowSavePublishDeclarativeWorkflow    = $false
-                    AllowSaveDeclarativeWorkflowAsTemplate = $false
-                }
-
-                Mock -CommandName Get-SPSite -MockWith {
-                    return @{
-                        Url                                    = "https://intranet.sharepoint.contoso.com"
-                        AllowDesigner                          = $true
-                        AllowRevertFromTemplate                = $true
-                        AllowMasterPageEditing                 = $true
-                        ShowURLStructure                       = $true
-                        AllowCreateDeclarativeWorkflow         = $true
-                        AllowSavePublishDeclarativeWorkflow    = $true
-                        AllowSaveDeclarativeWorkflowAsTemplate = $true
+                BeforeAll {
+                    $testParams = @{
+                        WebAppUrl                              = "https://intranet.sharepoint.contoso.com"
+                        SettingsScope                          = "SiteCollection"
+                        AllowSharePointDesigner                = $false
+                        AllowDetachPagesFromDefinition         = $false
+                        AllowCustomiseMasterPage               = $false
+                        AllowManageSiteURLStructure            = $false
+                        AllowCreateDeclarativeWorkflow         = $false
+                        AllowSavePublishDeclarativeWorkflow    = $false
+                        AllowSaveDeclarativeWorkflowAsTemplate = $false
                     }
-                }
 
-                Mock -CommandName Test-SPDscRunAsCredential { return $true }
+                    Mock -CommandName Get-SPSite -MockWith {
+                        return @{
+                            Url                                    = "https://intranet.sharepoint.contoso.com"
+                            AllowDesigner                          = $true
+                            AllowRevertFromTemplate                = $true
+                            AllowMasterPageEditing                 = $true
+                            ShowURLStructure                       = $true
+                            AllowCreateDeclarativeWorkflow         = $true
+                            AllowSavePublishDeclarativeWorkflow    = $true
+                            AllowSaveDeclarativeWorkflowAsTemplate = $true
+                        }
+                    }
+
+                    Mock -CommandName Test-SPDscRunAsCredential { return $true }
+                }
 
                 It "Should return values from the get method" {
                     (Get-TargetResource @testParams).AllowSharePointDesigner | Should -Be $true
@@ -179,30 +187,32 @@ try
             }
 
             Context -Name "The server is in a farm, target site collection and InstallAccount is used" -Fixture {
-                $testParams = @{
-                    WebAppUrl                              = "https://intranet.sharepoint.contoso.com"
-                    SettingsScope                          = "SiteCollection"
-                    AllowSharePointDesigner                = $false
-                    AllowDetachPagesFromDefinition         = $false
-                    AllowCustomiseMasterPage               = $false
-                    AllowManageSiteURLStructure            = $false
-                    AllowCreateDeclarativeWorkflow         = $false
-                    AllowSavePublishDeclarativeWorkflow    = $false
-                    AllowSaveDeclarativeWorkflowAsTemplate = $false
-                }
-                Mock -CommandName Get-SPSite -MockWith {
-                    return @{
-                        Url                                    = "https://intranet.sharepoint.contoso.com"
-                        AllowDesigner                          = $true
-                        AllowRevertFromTemplate                = $true
-                        AllowMasterPageEditing                 = $true
-                        ShowURLStructure                       = $true
-                        AllowCreateDeclarativeWorkflow         = $true
-                        AllowSavePublishDeclarativeWorkflow    = $true
-                        AllowSaveDeclarativeWorkflowAsTemplate = $true
+                BeforeAll {
+                    $testParams = @{
+                        WebAppUrl                              = "https://intranet.sharepoint.contoso.com"
+                        SettingsScope                          = "SiteCollection"
+                        AllowSharePointDesigner                = $false
+                        AllowDetachPagesFromDefinition         = $false
+                        AllowCustomiseMasterPage               = $false
+                        AllowManageSiteURLStructure            = $false
+                        AllowCreateDeclarativeWorkflow         = $false
+                        AllowSavePublishDeclarativeWorkflow    = $false
+                        AllowSaveDeclarativeWorkflowAsTemplate = $false
                     }
+                    Mock -CommandName Get-SPSite -MockWith {
+                        return @{
+                            Url                                    = "https://intranet.sharepoint.contoso.com"
+                            AllowDesigner                          = $true
+                            AllowRevertFromTemplate                = $true
+                            AllowMasterPageEditing                 = $true
+                            ShowURLStructure                       = $true
+                            AllowCreateDeclarativeWorkflow         = $true
+                            AllowSavePublishDeclarativeWorkflow    = $true
+                            AllowSaveDeclarativeWorkflowAsTemplate = $true
+                        }
+                    }
+                    Mock -CommandName Test-SPDscRunAsCredential { return $false }
                 }
-                Mock -CommandName Test-SPDscRunAsCredential { return $false }
 
                 It "Should throw an exception in the get method to say that this is not supported" {
                     { Get-TargetResource @testParams } | Should -Throw "http://aka.ms/xSharePointRemoteIssues"
@@ -218,43 +228,45 @@ try
             }
 
             Context -Name "The server is in a farm, target is web application and the correct settings have been applied" -Fixture {
-                $testParams = @{
-                    WebAppUrl                              = "https://intranet.sharepoint.contoso.com"
-                    SettingsScope                          = "SiteCollection"
-                    AllowSharePointDesigner                = $false
-                    AllowDetachPagesFromDefinition         = $false
-                    AllowCustomiseMasterPage               = $false
-                    AllowManageSiteURLStructure            = $false
-                    AllowCreateDeclarativeWorkflow         = $false
-                    AllowSavePublishDeclarativeWorkflow    = $false
-                    AllowSaveDeclarativeWorkflowAsTemplate = $false
-                }
-
-                Mock -CommandName Get-SPSite -MockWith {
-                    $returnVal = @{
-                        Url                                    = "https://intranet.sharepoint.contoso.com"
-                        AllowDesigner                          = $false
-                        AllowRevertFromTemplate                = $false
-                        AllowMasterPageEditing                 = $false
-                        ShowURLStructure                       = $false
+                BeforeAll {
+                    $testParams = @{
+                        WebAppUrl                              = "https://intranet.sharepoint.contoso.com"
+                        SettingsScope                          = "SiteCollection"
+                        AllowSharePointDesigner                = $false
+                        AllowDetachPagesFromDefinition         = $false
+                        AllowCustomiseMasterPage               = $false
+                        AllowManageSiteURLStructure            = $false
                         AllowCreateDeclarativeWorkflow         = $false
                         AllowSavePublishDeclarativeWorkflow    = $false
                         AllowSaveDeclarativeWorkflowAsTemplate = $false
                     }
-                    $returnVal = $returnVal | Add-Member -MemberType ScriptMethod -Name Update -Value {
-                        $Global:SPDscDesignerUpdated = $true
-                    } -PassThru
-                    return $returnVal
-                }
 
-                Mock -CommandName Test-SPDscRunAsCredential { return $true }
+                    Mock -CommandName Get-SPSite -MockWith {
+                        $returnVal = @{
+                            Url                                    = "https://intranet.sharepoint.contoso.com"
+                            AllowDesigner                          = $false
+                            AllowRevertFromTemplate                = $false
+                            AllowMasterPageEditing                 = $false
+                            ShowURLStructure                       = $false
+                            AllowCreateDeclarativeWorkflow         = $false
+                            AllowSavePublishDeclarativeWorkflow    = $false
+                            AllowSaveDeclarativeWorkflowAsTemplate = $false
+                        }
+                        $returnVal = $returnVal | Add-Member -MemberType ScriptMethod -Name Update -Value {
+                            $Global:SPDscDesignerUpdated = $true
+                        } -PassThru
+                        return $returnVal
+                    }
 
-                Mock -CommandName Get-SPWebApplication -MockWith {
-                    $result = @{ }
-                    $result.DisplayName = "Test"
-                    $result.Url = "https://intranet.sharepoint.contoso.com"
+                    Mock -CommandName Test-SPDscRunAsCredential { return $true }
 
-                    return $result
+                    Mock -CommandName Get-SPWebApplication -MockWith {
+                        $result = @{ }
+                        $result.DisplayName = "Test"
+                        $result.Url = "https://intranet.sharepoint.contoso.com"
+
+                        return $result
+                    }
                 }
 
                 It "Should return values from the get method" {
@@ -267,36 +279,38 @@ try
             }
 
             Context -Name "The server is in a farm, target is site collection and the correct settings have been applied" -Fixture {
-                $testParams = @{
-                    WebAppUrl                              = "https://intranet.sharepoint.contoso.com"
-                    SettingsScope                          = "SiteCollection"
-                    AllowSharePointDesigner                = $false
-                    AllowDetachPagesFromDefinition         = $false
-                    AllowCustomiseMasterPage               = $false
-                    AllowManageSiteURLStructure            = $false
-                    AllowCreateDeclarativeWorkflow         = $false
-                    AllowSavePublishDeclarativeWorkflow    = $false
-                    AllowSaveDeclarativeWorkflowAsTemplate = $false
-                }
-
-                Mock -CommandName Get-SPSite -MockWith {
-                    $returnVal = @{
-                        Url                                    = "https://intranet.sharepoint.contoso.com"
-                        AllowDesigner                          = $false
-                        AllowRevertFromTemplate                = $false
-                        AllowMasterPageEditing                 = $false
-                        ShowURLStructure                       = $false
+                BeforeAll {
+                    $testParams = @{
+                        WebAppUrl                              = "https://intranet.sharepoint.contoso.com"
+                        SettingsScope                          = "SiteCollection"
+                        AllowSharePointDesigner                = $false
+                        AllowDetachPagesFromDefinition         = $false
+                        AllowCustomiseMasterPage               = $false
+                        AllowManageSiteURLStructure            = $false
                         AllowCreateDeclarativeWorkflow         = $false
                         AllowSavePublishDeclarativeWorkflow    = $false
                         AllowSaveDeclarativeWorkflowAsTemplate = $false
                     }
-                    $returnVal = $returnVal | Add-Member -MemberType ScriptMethod -Name Update -Value {
-                        $Global:SPDscDesignerUpdated = $true
-                    } -PassThru
-                    return $returnVal
-                }
 
-                Mock -CommandName Test-SPDscRunAsCredential -MockWith { return $true }
+                    Mock -CommandName Get-SPSite -MockWith {
+                        $returnVal = @{
+                            Url                                    = "https://intranet.sharepoint.contoso.com"
+                            AllowDesigner                          = $false
+                            AllowRevertFromTemplate                = $false
+                            AllowMasterPageEditing                 = $false
+                            ShowURLStructure                       = $false
+                            AllowCreateDeclarativeWorkflow         = $false
+                            AllowSavePublishDeclarativeWorkflow    = $false
+                            AllowSaveDeclarativeWorkflowAsTemplate = $false
+                        }
+                        $returnVal = $returnVal | Add-Member -MemberType ScriptMethod -Name Update -Value {
+                            $Global:SPDscDesignerUpdated = $true
+                        } -PassThru
+                        return $returnVal
+                    }
+
+                    Mock -CommandName Test-SPDscRunAsCredential -MockWith { return $true }
+                }
 
                 It "Should return values from the get method" {
                     (Get-TargetResource @testParams).AllowSharePointDesigner | Should -Be $false

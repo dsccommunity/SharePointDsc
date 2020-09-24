@@ -46,27 +46,31 @@ Invoke-TestSetup
 
 try
 {
-    Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
-        InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
-            Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
+    InModuleScope -ModuleName $script:DSCResourceFullName -ScriptBlock {
+        Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
+            BeforeAll {
+                Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
-            # Initialize tests
+                # Initialize tests
 
-            # Mocks for all contexts
-            Mock -CommandName New-SPServiceApplicationPool -MockWith { }
-            Mock -CommandName Set-SPServiceApplicationPool -MockWith { }
-            Mock -CommandName Remove-SPServiceApplicationPool -MockWith { }
+                # Mocks for all contexts
+                Mock -CommandName New-SPServiceApplicationPool -MockWith { }
+                Mock -CommandName Set-SPServiceApplicationPool -MockWith { }
+                Mock -CommandName Remove-SPServiceApplicationPool -MockWith { }
+            }
 
             # Test contexts
             Context -Name "A service account pool does not exist but should" -Fixture {
-                $testParams = @{
-                    Name           = "Service pool"
-                    ServiceAccount = "DEMO\svcSPServiceApps"
-                    Ensure         = "Present"
-                }
+                BeforeAll {
+                    $testParams = @{
+                        Name           = "Service pool"
+                        ServiceAccount = "DEMO\svcSPServiceApps"
+                        Ensure         = "Present"
+                    }
 
-                Mock -CommandName Get-SPServiceApplicationPool -MockWith {
-                    return $null
+                    Mock -CommandName Get-SPServiceApplicationPool -MockWith {
+                        return $null
+                    }
                 }
 
                 It "Should return absent from the get method" {
@@ -84,16 +88,18 @@ try
             }
 
             Context -Name "A service account pool exists but has the wrong service account" -Fixture {
-                $testParams = @{
-                    Name           = "Service pool"
-                    ServiceAccount = "DEMO\svcSPServiceApps"
-                    Ensure         = "Present"
-                }
+                BeforeAll {
+                    $testParams = @{
+                        Name           = "Service pool"
+                        ServiceAccount = "DEMO\svcSPServiceApps"
+                        Ensure         = "Present"
+                    }
 
-                Mock -CommandName Get-SPServiceApplicationPool -MockWith {
-                    return @{
-                        Name               = $testParams.Name
-                        ProcessAccountName = "WRONG\account"
+                    Mock -CommandName Get-SPServiceApplicationPool -MockWith {
+                        return @{
+                            Name               = $testParams.Name
+                            ProcessAccountName = "WRONG\account"
+                        }
                     }
                 }
 
@@ -109,16 +115,18 @@ try
             }
 
             Context -Name "A service account pool exists and uses the correct account" -Fixture {
-                $testParams = @{
-                    Name           = "Service pool"
-                    ServiceAccount = "DEMO\svcSPServiceApps"
-                    Ensure         = "Present"
-                }
+                BeforeAll {
+                    $testParams = @{
+                        Name           = "Service pool"
+                        ServiceAccount = "DEMO\svcSPServiceApps"
+                        Ensure         = "Present"
+                    }
 
-                Mock -CommandName Get-SPServiceApplicationPool -MockWith {
-                    return @{
-                        Name               = $testParams.Name
-                        ProcessAccountName = $testParams.ServiceAccount
+                    Mock -CommandName Get-SPServiceApplicationPool -MockWith {
+                        return @{
+                            Name               = $testParams.Name
+                            ProcessAccountName = $testParams.ServiceAccount
+                        }
                     }
                 }
 
@@ -132,16 +140,18 @@ try
             }
 
             Context -Name "When the service app pool exists but it shouldn't" -Fixture {
-                $testParams = @{
-                    Name           = "Service pool"
-                    ServiceAccount = "DEMO\svcSPServiceApps"
-                    Ensure         = "Absent"
-                }
+                BeforeAll {
+                    $testParams = @{
+                        Name           = "Service pool"
+                        ServiceAccount = "DEMO\svcSPServiceApps"
+                        Ensure         = "Absent"
+                    }
 
-                Mock -CommandName Get-SPServiceApplicationPool -MockWith {
-                    return @{
-                        Name               = $testParams.Name
-                        ProcessAccountName = $testParams.ServiceAccount
+                    Mock -CommandName Get-SPServiceApplicationPool -MockWith {
+                        return @{
+                            Name               = $testParams.Name
+                            ProcessAccountName = $testParams.ServiceAccount
+                        }
                     }
                 }
 
@@ -160,14 +170,16 @@ try
             }
 
             Context -Name "When the service app pool doesn't exist and shouldn't" -Fixture {
-                $testParams = @{
-                    Name           = "Service pool"
-                    ServiceAccount = "DEMO\svcSPServiceApps"
-                    Ensure         = "Absent"
-                }
+                BeforeAll {
+                    $testParams = @{
+                        Name           = "Service pool"
+                        ServiceAccount = "DEMO\svcSPServiceApps"
+                        Ensure         = "Absent"
+                    }
 
-                Mock -CommandName Get-SPServiceApplicationPool -MockWith {
-                    return $null
+                    Mock -CommandName Get-SPServiceApplicationPool -MockWith {
+                        return $null
+                    }
                 }
 
                 It "Should return absent from the Get method" {

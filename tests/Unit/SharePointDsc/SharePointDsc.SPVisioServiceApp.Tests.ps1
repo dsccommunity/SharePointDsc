@@ -46,29 +46,33 @@ Invoke-TestSetup
 
 try
 {
-    Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
-        InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
-            Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
+    InModuleScope -ModuleName $script:DSCResourceFullName -ScriptBlock {
+        Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
+            BeforeAll {
+                Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
-            # Initialize Tests
-            $getTypeFullName = "Microsoft.Office.Visio.Server.Administration.VisioGraphicsServiceApplication"
+                # Initialize Tests
+                $getTypeFullName = "Microsoft.Office.Visio.Server.Administration.VisioGraphicsServiceApplication"
 
-            # Mocks for all contexts
-            Mock -CommandName New-SPVisioServiceApplication -MockWith { }
-            Mock -CommandName Remove-SPServiceApplication -MockWith { }
-            Mock -CommandName New-SPVisioServiceApplicationProxy -MockWith { }
+                # Mocks for all contexts
+                Mock -CommandName New-SPVisioServiceApplication -MockWith { }
+                Mock -CommandName Remove-SPServiceApplication -MockWith { }
+                Mock -CommandName New-SPVisioServiceApplicationProxy -MockWith { }
+            }
 
             # Test contexts
             Context -Name "When no service applications exist in the current farm" -Fixture {
-                $testParams = @{
-                    Name            = "Test Visio App"
-                    ProxyName       = "Visio Proxy"
-                    ApplicationPool = "Test App Pool"
-                    Ensure          = "Present"
-                }
+                BeforeAll {
+                    $testParams = @{
+                        Name            = "Test Visio App"
+                        ProxyName       = "Visio Proxy"
+                        ApplicationPool = "Test App Pool"
+                        Ensure          = "Present"
+                    }
 
-                Mock -CommandName Get-SPServiceApplication -MockWith {
-                    return $null
+                    Mock -CommandName Get-SPServiceApplication -MockWith {
+                        return $null
+                    }
                 }
 
                 It "Should return absent from the Get method" {
@@ -85,25 +89,27 @@ try
             }
 
             Context -Name "When service applications exist in the current farm but the specific Visio Graphics app does not" -Fixture {
-                $testParams = @{
-                    Name            = "Test Visio App"
-                    ApplicationPool = "Test App Pool"
-                    Ensure          = "Present"
-                }
-
-                Mock -CommandName Get-SPServiceApplication -MockWith {
-                    $spServiceApp = [PSCustomObject]@{
-                        DisplayName = $testParams.Name
+                BeforeAll {
+                    $testParams = @{
+                        Name            = "Test Visio App"
+                        ApplicationPool = "Test App Pool"
+                        Ensure          = "Present"
                     }
-                    $spServiceApp | Add-Member -MemberType ScriptMethod `
-                        -Name GetType `
-                        -Value {
-                        return @{
-                            FullName = "Microsoft.Office.UnKnownWebServiceApplication"
-                        }
-                    } -PassThru -Force
 
-                    return $spServiceApp
+                    Mock -CommandName Get-SPServiceApplication -MockWith {
+                        $spServiceApp = [PSCustomObject]@{
+                            DisplayName = $testParams.Name
+                        }
+                        $spServiceApp | Add-Member -MemberType ScriptMethod `
+                            -Name GetType `
+                            -Value {
+                            return @{
+                                FullName = "Microsoft.Office.UnKnownWebServiceApplication"
+                            }
+                        } -PassThru -Force
+
+                        return $spServiceApp
+                    }
                 }
 
                 It "Should return absent from the Get method" {
@@ -112,40 +118,42 @@ try
             }
 
             Context -Name "When a service application exists and is configured correctly" -Fixture {
-                $testParams = @{
-                    Name            = "Test Visio App"
-                    ProxyName       = "Visio Proxy"
-                    ApplicationPool = "Test App Pool"
-                    Ensure          = "Present"
-                }
-
-                Mock -CommandName Get-SPServiceApplication -MockWith {
-                    $spServiceApp = [PSCustomObject]@{
-                        TypeName        = "Visio Graphics Service Application"
-                        DisplayName     = $testParams.Name
-                        ApplicationPool = @{ Name = $testParams.ApplicationPool }
+                BeforeAll {
+                    $testParams = @{
+                        Name            = "Test Visio App"
+                        ProxyName       = "Visio Proxy"
+                        ApplicationPool = "Test App Pool"
+                        Ensure          = "Present"
                     }
-                    $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value {
-                        return @{ FullName = $getTypeFullName }
-                    } -PassThru -Force
-                    $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name IsConnected -Value {
-                        return $true
-                    } -PassThru -Force
-                    return $spServiceApp
-                }
-                Mock -CommandName Get-SPServiceApplicationProxy -MockWith {
-                    $proxiesToReturn = @()
-                    $proxy = @{
-                        Name        = $testParams.ProxyName
-                        DisplayName = $testParams.ProxyName
-                    }
-                    $proxy = $proxy | Add-Member -MemberType ScriptMethod `
-                        -Name Delete `
-                        -Value { } `
-                        -PassThru
-                    $proxiesToReturn += $proxy
 
-                    return $proxiesToReturn
+                    Mock -CommandName Get-SPServiceApplication -MockWith {
+                        $spServiceApp = [PSCustomObject]@{
+                            TypeName        = "Visio Graphics Service Application"
+                            DisplayName     = $testParams.Name
+                            ApplicationPool = @{ Name = $testParams.ApplicationPool }
+                        }
+                        $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value {
+                            return @{ FullName = $getTypeFullName }
+                        } -PassThru -Force
+                        $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name IsConnected -Value {
+                            return $true
+                        } -PassThru -Force
+                        return $spServiceApp
+                    }
+                    Mock -CommandName Get-SPServiceApplicationProxy -MockWith {
+                        $proxiesToReturn = @()
+                        $proxy = @{
+                            Name        = $testParams.ProxyName
+                            DisplayName = $testParams.ProxyName
+                        }
+                        $proxy = $proxy | Add-Member -MemberType ScriptMethod `
+                            -Name Delete `
+                            -Value { } `
+                            -PassThru
+                        $proxiesToReturn += $proxy
+
+                        return $proxiesToReturn
+                    }
                 }
 
                 It "Should return present from the get method" {
@@ -158,26 +166,28 @@ try
             }
 
             Context -Name "When a service application exists and is not configured correctly" -Fixture {
-                $testParams = @{
-                    Name            = "Test Visio App"
-                    ApplicationPool = "Test App Pool"
-                    Ensure          = "Present"
-                }
-
-                Mock -CommandName Get-SPServiceApplication -MockWith {
-                    $spServiceApp = [PSCustomObject]@{
-                        TypeName        = "Visio Graphics Service Application"
-                        DisplayName     = $testParams.Name
-                        ApplicationPool = @{ Name = "Wrong App Pool Name" }
+                BeforeAll {
+                    $testParams = @{
+                        Name            = "Test Visio App"
+                        ApplicationPool = "Test App Pool"
+                        Ensure          = "Present"
                     }
-                    $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value {
-                        return @{ FullName = $getTypeFullName }
-                    } -PassThru -Force
-                    return $spServiceApp
-                }
-                Mock -CommandName Get-SPServiceApplicationPool {
-                    return @{
-                        Name = $testParams.ApplicationPool
+
+                    Mock -CommandName Get-SPServiceApplication -MockWith {
+                        $spServiceApp = [PSCustomObject]@{
+                            TypeName        = "Visio Graphics Service Application"
+                            DisplayName     = $testParams.Name
+                            ApplicationPool = @{ Name = "Wrong App Pool Name" }
+                        }
+                        $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value {
+                            return @{ FullName = $getTypeFullName }
+                        } -PassThru -Force
+                        return $spServiceApp
+                    }
+                    Mock -CommandName Get-SPServiceApplicationPool {
+                        return @{
+                            Name = $testParams.ApplicationPool
+                        }
                     }
                 }
 
@@ -193,22 +203,24 @@ try
             }
 
             Context -Name "When the service app exists but it shouldn't" -Fixture {
-                $testParams = @{
-                    Name            = "Test App"
-                    ApplicationPool = "-"
-                    Ensure          = "Absent"
-                }
-
-                Mock -CommandName Get-SPServiceApplication -MockWith {
-                    $spServiceApp = [PSCustomObject]@{
-                        TypeName        = "Visio Graphics Service Application"
-                        DisplayName     = $testParams.Name
-                        ApplicationPool = @{ Name = $testParams.ApplicationPool }
+                BeforeAll {
+                    $testParams = @{
+                        Name            = "Test App"
+                        ApplicationPool = "-"
+                        Ensure          = "Absent"
                     }
-                    $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value {
-                        return @{ FullName = $getTypeFullName }
-                    } -PassThru -Force
-                    return $spServiceApp
+
+                    Mock -CommandName Get-SPServiceApplication -MockWith {
+                        $spServiceApp = [PSCustomObject]@{
+                            TypeName        = "Visio Graphics Service Application"
+                            DisplayName     = $testParams.Name
+                            ApplicationPool = @{ Name = $testParams.ApplicationPool }
+                        }
+                        $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value {
+                            return @{ FullName = $getTypeFullName }
+                        } -PassThru -Force
+                        return $spServiceApp
+                    }
                 }
 
                 It "Should return present from the Get method" {
@@ -226,14 +238,16 @@ try
             }
 
             Context -Name "When the service app doesn't exist and shouldn't" -Fixture {
-                $testParams = @{
-                    Name            = "Test App"
-                    ApplicationPool = "-"
-                    Ensure          = "Absent"
-                }
+                BeforeAll {
+                    $testParams = @{
+                        Name            = "Test App"
+                        ApplicationPool = "-"
+                        Ensure          = "Absent"
+                    }
 
-                Mock -CommandName Get-SPServiceApplication -MockWith {
-                    return $null
+                    Mock -CommandName Get-SPServiceApplication -MockWith {
+                        return $null
+                    }
                 }
 
                 It "Should return absent from the Get method" {

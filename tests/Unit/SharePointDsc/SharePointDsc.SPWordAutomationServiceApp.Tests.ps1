@@ -46,50 +46,264 @@ Invoke-TestSetup
 
 try
 {
-    Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
-        InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
-            Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
+    InModuleScope -ModuleName $script:DSCResourceFullName -ScriptBlock {
+        Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
+            BeforeAll {
+                Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
-            # Initialize tests
-            $getTypeFullName = "Microsoft.Office.Word.Server.Service.WordServiceApplication"
+                # Initialize tests
+                $getTypeFullName = "Microsoft.Office.Word.Server.Service.WordServiceApplication"
 
-            # Mocks for all contexts
-            Mock -CommandName Remove-SPServiceApplication -MockWith { }
-            Mock -CommandName Set-SPWordConversionServiceApplication -MockWith { }
-            Mock -CommandName Set-SPTimerJob { }
+                # Mocks for all contexts
+                Mock -CommandName Remove-SPServiceApplication -MockWith { }
+                Mock -CommandName Set-SPWordConversionServiceApplication -MockWith { }
+                Mock -CommandName Set-SPTimerJob { }
+            }
 
             # Test contexts
             Context -Name "When no service applications exist in the current farm and Ensure is set to Present" -Fixture {
-                $testParams = @{
-                    Name                            = "Word Automation Service Application"
-                    Ensure                          = "Present"
-                    ApplicationPool                 = "SharePoint Web Services"
-                    DatabaseName                    = "WordAutomation_DB"
-                    DatabaseServer                  = "SQLServer"
-                    SupportedFileFormats            = "docx", "doc", "mht", "rtf", "xml"
-                    DisableEmbeddedFonts            = $false
-                    MaximumMemoryUsage              = 100
-                    RecycleThreshold                = 100
-                    DisableBinaryFileScan           = $false
-                    ConversionProcesses             = 8
-                    JobConversionFrequency          = 15
-                    NumberOfConversionsPerProcess   = 12
-                    TimeBeforeConversionIsMonitored = 5
-                    MaximumConversionAttempts       = 2
-                    MaximumSyncConversionRequests   = 25
-                    KeepAliveTimeout                = 30
-                    MaximumConversionTime           = 300
+                BeforeAll {
+                    $testParams = @{
+                        Name                            = "Word Automation Service Application"
+                        Ensure                          = "Present"
+                        ApplicationPool                 = "SharePoint Web Services"
+                        DatabaseName                    = "WordAutomation_DB"
+                        DatabaseServer                  = "SQLServer"
+                        SupportedFileFormats            = "docx", "doc", "mht", "rtf", "xml"
+                        DisableEmbeddedFonts            = $false
+                        MaximumMemoryUsage              = 100
+                        RecycleThreshold                = 100
+                        DisableBinaryFileScan           = $false
+                        ConversionProcesses             = 8
+                        JobConversionFrequency          = 15
+                        NumberOfConversionsPerProcess   = 12
+                        TimeBeforeConversionIsMonitored = 5
+                        MaximumConversionAttempts       = 2
+                        MaximumSyncConversionRequests   = 25
+                        KeepAliveTimeout                = 30
+                        MaximumConversionTime           = 300
+                    }
+
+                    Mock -CommandName Get-SPServiceApplication -MockWith { return $null }
+                    Mock -CommandName Get-SPServiceApplicationPool -MockWith {
+                        return @(@{
+                                Name = $testParams.ApplicationPool
+                            })
+                    }
+
+                    Mock -CommandName New-SPWordConversionServiceApplication -MockWith {
+                        $returnval = @(@{
+                                WordServiceFormats            = @{
+                                    OpenXmlDocument    = $false
+                                    Word972003Document = $true
+                                    RichTextFormat     = $true
+                                    WebPage            = $true
+                                    Word2003Xml        = $true
+                                }
+                                DisableEmbeddedFonts          = $false
+                                MaximumMemoryUsage            = 100
+                                RecycleProcessThreshold       = 100
+                                DisableBinaryFileScan         = $false
+                                TotalActiveProcesses          = 8
+                                TimerJobFrequency             = 15
+                                ConversionsPerInstance        = 12
+                                ConversionTimeout             = 5
+                                MaximumConversionAttempts     = 2
+                                MaximumSyncConversionRequests = 25
+                                KeepAliveTimeout              = 30
+                                MaximumConversionTime         = 300
+                            })
+                        return $returnval
+                    }
                 }
 
-                Mock -CommandName Get-SPServiceApplication -MockWith { return $null }
-                Mock -CommandName Get-SPServiceApplicationPool -MockWith {
-                    return @(@{
-                            Name = $testParams.ApplicationPool
-                        })
+                It "Should return absent from the Get method" {
+                    (Get-TargetResource @testParams).Ensure | Should -Be "absent"
                 }
 
-                Mock -CommandName New-SPWordConversionServiceApplication -MockWith {
-                    $returnval = @(@{
+                It "Should return false when the Test method is called" {
+                    Test-TargetResource @testParams | Should -Be $false
+                }
+
+                It "Should create a new service application in the set method" {
+                    Set-TargetResource @testParams
+                    Assert-MockCalled New-SPWordConversionServiceApplication
+                }
+            }
+
+            Context -Name "When no service applications exist in the current farm and Ensure is set to Present, but the Application Pool does not exist" -Fixture {
+                BeforeAll {
+                    $testParams = @{
+                        Name                            = "Word Automation Service Application"
+                        Ensure                          = "Present"
+                        ApplicationPool                 = "SharePoint Web Services"
+                        DatabaseName                    = "WordAutomation_DB"
+                        DatabaseServer                  = "SQLServer"
+                        SupportedFileFormats            = "docx", "doc", "mht", "rtf", "xml"
+                        DisableEmbeddedFonts            = $false
+                        MaximumMemoryUsage              = 100
+                        RecycleThreshold                = 100
+                        DisableBinaryFileScan           = $false
+                        ConversionProcesses             = 8
+                        JobConversionFrequency          = 15
+                        NumberOfConversionsPerProcess   = 12
+                        TimeBeforeConversionIsMonitored = 5
+                        MaximumConversionAttempts       = 2
+                        MaximumSyncConversionRequests   = 25
+                        KeepAliveTimeout                = 30
+                        MaximumConversionTime           = 300
+                    }
+
+                    Mock -CommandName Get-SPServiceApplication -MockWith { return $null }
+                    Mock -CommandName Get-SPServiceApplicationPool -MockWith { return $null }
+                }
+
+                It "fails to create a new service application in the set method because the specified application pool is missing" {
+                    { Set-TargetResource @testParams } | Should -Throw "Specified application pool does not exist"
+                }
+            }
+
+            Context -Name "When service applications exist in the current farm but the specific word automation app does not" -Fixture {
+                BeforeAll {
+                    $testParams = @{
+                        Name                            = "Word Automation Service Application"
+                        Ensure                          = "Present"
+                        ApplicationPool                 = "SharePoint Web Services"
+                        DatabaseName                    = "WordAutomation_DB"
+                        DatabaseServer                  = "SQLServer"
+                        SupportedFileFormats            = "docx", "doc", "mht", "rtf", "xml"
+                        DisableEmbeddedFonts            = $false
+                        MaximumMemoryUsage              = 100
+                        RecycleThreshold                = 100
+                        DisableBinaryFileScan           = $false
+                        ConversionProcesses             = 8
+                        JobConversionFrequency          = 15
+                        NumberOfConversionsPerProcess   = 12
+                        TimeBeforeConversionIsMonitored = 5
+                        MaximumConversionAttempts       = 2
+                        MaximumSyncConversionRequests   = 25
+                        KeepAliveTimeout                = 30
+                        MaximumConversionTime           = 300
+                    }
+
+                    Mock -CommandName Get-SPServiceApplication -MockWith {
+                        $spServiceApp = [pscustomobject]@{
+                            DisplayName = $testParams.Name
+                        }
+                        $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value {
+                            return @{ FullName = "Microsoft.Office.UnKnownWebServiceApplication" }
+                        } -PassThru -Force
+                        return $spServiceApp
+                    }
+                }
+
+                It "Should return absent from the Get method" {
+                    (Get-TargetResource @testParams).Ensure | Should -Be "Absent"
+                }
+
+                It "Should return false when the Test method is called" {
+                    Test-TargetResource @testParams | Should -Be $false
+                }
+            }
+
+            Context -Name "When a service application exists and is configured correctly" -Fixture {
+                BeforeAll {
+                    $testParams = @{
+                        Name                            = "Word Automation Service Application"
+                        Ensure                          = "Present"
+                        ApplicationPool                 = "SharePoint Web Services"
+                        DatabaseName                    = "WordAutomation_DB"
+                        DatabaseServer                  = "SQLServer"
+                        SupportedFileFormats            = "docx", "doc", "mht", "rtf", "xml"
+                        DisableEmbeddedFonts            = $false
+                        MaximumMemoryUsage              = 100
+                        RecycleThreshold                = 100
+                        DisableBinaryFileScan           = $false
+                        ConversionProcesses             = 8
+                        JobConversionFrequency          = 15
+                        NumberOfConversionsPerProcess   = 12
+                        TimeBeforeConversionIsMonitored = 5
+                        MaximumConversionAttempts       = 2
+                        MaximumSyncConversionRequests   = 25
+                        KeepAliveTimeout                = 30
+                        MaximumConversionTime           = 300
+                    }
+
+                    Mock -CommandName Get-SPServiceApplication -MockWith {
+                        $spServiceApp = [pscustomobject]@{
+                            DisplayName                   = $testParams.Name
+                            ApplicationPool               = @{ Name = $testParams.ApplicationPool }
+                            Database                      = @{
+                                Name                 = $testParams.DatabaseName
+                                NormalizedDataSource = $testParams.DatabaseServer
+                            }
+                            WordServiceFormats            = @{
+                                OpenXmlDocument    = $true
+                                Word972003Document = $true
+                                RichTextFormat     = $true
+                                WebPage            = $true
+                                Word2003Xml        = $true
+                            }
+                            DisableEmbeddedFonts          = $false
+                            MaximumMemoryUsage            = 100
+                            RecycleProcessThreshold       = 100
+                            DisableBinaryFileScan         = $false
+                            TotalActiveProcesses          = 8
+                            TimerJobFrequency             = @{ TotalMinutes = 15 }
+                            ConversionsPerInstance        = 12
+                            ConversionTimeout             = @{ TotalMinutes = 5 }
+                            MaximumConversionAttempts     = 2
+                            MaximumSyncConversionRequests = 25
+                            KeepAliveTimeout              = @{ TotalSeconds = 30 }
+                            MaximumConversionTime         = @{ TotalSeconds = 300 }
+                        }
+                        $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value {
+                            return @{ FullName = $getTypeFullName }
+                        } -PassThru -Force
+                        return $spServiceApp
+                    }
+                }
+
+                It "Should return values from the get method" {
+                    Get-TargetResource @testParams | Should -Not -BeNullOrEmpty
+                }
+
+                It "Should return true when the Test method is called" {
+                    Test-TargetResource @testParams | Should -Be $true
+                }
+            }
+
+            Context -Name "When a service application exists and incorrect application pool is configured" -Fixture {
+                BeforeAll {
+                    $testParams = @{
+                        Name                            = "Word Automation Service Application"
+                        Ensure                          = "Present"
+                        ApplicationPool                 = "SharePoint Web Services"
+                        DatabaseName                    = "WordAutomation_DB"
+                        DatabaseServer                  = "SQLServer"
+                        SupportedFileFormats            = "docx", "doc", "mht", "rtf", "xml"
+                        DisableEmbeddedFonts            = $false
+                        MaximumMemoryUsage              = 100
+                        RecycleThreshold                = 100
+                        DisableBinaryFileScan           = $false
+                        ConversionProcesses             = 8
+                        JobConversionFrequency          = 15
+                        NumberOfConversionsPerProcess   = 12
+                        TimeBeforeConversionIsMonitored = 5
+                        MaximumConversionAttempts       = 2
+                        MaximumSyncConversionRequests   = 25
+                        KeepAliveTimeout                = 30
+                        MaximumConversionTime           = 300
+                    }
+
+                    Mock -CommandName Get-SPServiceApplication -MockWith {
+                        $spServiceApp = [pscustomobject]@{
+                            DisplayName                   = $testParams.Name
+                            ApplicationPool               = @{ Name = "Wrong App Pool Name" }
+                            Database                      = @{
+                                Name                 = $testParams.DatabaseName
+                                NormalizedDataSource = $testParams.DatabaseServer
+                            }
                             WordServiceFormats            = @{
                                 OpenXmlDocument    = $false
                                 Word972003Document = $true
@@ -109,232 +323,30 @@ try
                             MaximumSyncConversionRequests = 25
                             KeepAliveTimeout              = 30
                             MaximumConversionTime         = 300
-                        })
-                    return $returnval
-                }
+                        }
+                        $spServiceApp = $spServiceApp | Add-Member ScriptMethod Update {
+                            $Global:SPDscSiteUseUpdated = $true
+                        } -PassThru
+                        $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value {
+                            return @{ FullName = $getTypeFullName }
+                        } -PassThru -Force
+                        return $spServiceApp
+                    }
 
-                It "Should return absent from the Get method" {
-                    (Get-TargetResource @testParams).Ensure | Should -Be "absent"
+                    Mock -CommandName Get-SPServiceApplicationPool -MockWith { return @{ Name = $testParams.ApplicationPool } }
+
+                    Mock -CommandName Get-SPTimerJob {
+                        $returnval = @(@{ Name = "Just a name" })
+                        return , $returnval
+                    }
                 }
 
                 It "Should return false when the Test method is called" {
                     Test-TargetResource @testParams | Should -Be $false
                 }
 
-                It "Should create a new service application in the set method" {
-                    Set-TargetResource @testParams
-                    Assert-MockCalled New-SPWordConversionServiceApplication
-                }
-            }
-
-            Context -Name "When no service applications exist in the current farm and Ensure is set to Present, but the Application Pool does not exist" -Fixture {
-                $testParams = @{
-                    Name                            = "Word Automation Service Application"
-                    Ensure                          = "Present"
-                    ApplicationPool                 = "SharePoint Web Services"
-                    DatabaseName                    = "WordAutomation_DB"
-                    DatabaseServer                  = "SQLServer"
-                    SupportedFileFormats            = "docx", "doc", "mht", "rtf", "xml"
-                    DisableEmbeddedFonts            = $false
-                    MaximumMemoryUsage              = 100
-                    RecycleThreshold                = 100
-                    DisableBinaryFileScan           = $false
-                    ConversionProcesses             = 8
-                    JobConversionFrequency          = 15
-                    NumberOfConversionsPerProcess   = 12
-                    TimeBeforeConversionIsMonitored = 5
-                    MaximumConversionAttempts       = 2
-                    MaximumSyncConversionRequests   = 25
-                    KeepAliveTimeout                = 30
-                    MaximumConversionTime           = 300
-                }
-
-                Mock -CommandName Get-SPServiceApplication -MockWith { return $null }
-                Mock -CommandName Get-SPServiceApplicationPool -MockWith { return $null }
-
-                It "fails to create a new service application in the set method because the specified application pool is missing" {
-                    { Set-TargetResource @testParams } | Should -Throw "Specified application pool does not exist"
-                }
-            }
-
-            Context -Name "When service applications exist in the current farm but the specific word automation app does not" -Fixture {
-                $testParams = @{
-                    Name                            = "Word Automation Service Application"
-                    Ensure                          = "Present"
-                    ApplicationPool                 = "SharePoint Web Services"
-                    DatabaseName                    = "WordAutomation_DB"
-                    DatabaseServer                  = "SQLServer"
-                    SupportedFileFormats            = "docx", "doc", "mht", "rtf", "xml"
-                    DisableEmbeddedFonts            = $false
-                    MaximumMemoryUsage              = 100
-                    RecycleThreshold                = 100
-                    DisableBinaryFileScan           = $false
-                    ConversionProcesses             = 8
-                    JobConversionFrequency          = 15
-                    NumberOfConversionsPerProcess   = 12
-                    TimeBeforeConversionIsMonitored = 5
-                    MaximumConversionAttempts       = 2
-                    MaximumSyncConversionRequests   = 25
-                    KeepAliveTimeout                = 30
-                    MaximumConversionTime           = 300
-                }
-
-                Mock -CommandName Get-SPServiceApplication -MockWith {
-                    $spServiceApp = [pscustomobject]@{
-                        DisplayName = $testParams.Name
-                    }
-                    $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value {
-                        return @{ FullName = "Microsoft.Office.UnKnownWebServiceApplication" }
-                    } -PassThru -Force
-                    return $spServiceApp
-                }
-
-                It "Should return absent from the Get method" {
-                    (Get-TargetResource @testParams).Ensure | Should -Be "Absent"
-                }
-
-                It "Should return false when the Test method is called" {
-                    Test-TargetResource @testParams | Should -Be $false
-                }
-            }
-
-            Context -Name "When a service application exists and is configured correctly" -Fixture {
-                $testParams = @{
-                    Name                            = "Word Automation Service Application"
-                    Ensure                          = "Present"
-                    ApplicationPool                 = "SharePoint Web Services"
-                    DatabaseName                    = "WordAutomation_DB"
-                    DatabaseServer                  = "SQLServer"
-                    SupportedFileFormats            = "docx", "doc", "mht", "rtf", "xml"
-                    DisableEmbeddedFonts            = $false
-                    MaximumMemoryUsage              = 100
-                    RecycleThreshold                = 100
-                    DisableBinaryFileScan           = $false
-                    ConversionProcesses             = 8
-                    JobConversionFrequency          = 15
-                    NumberOfConversionsPerProcess   = 12
-                    TimeBeforeConversionIsMonitored = 5
-                    MaximumConversionAttempts       = 2
-                    MaximumSyncConversionRequests   = 25
-                    KeepAliveTimeout                = 30
-                    MaximumConversionTime           = 300
-                }
-
-                Mock -CommandName Get-SPServiceApplication -MockWith {
-                    $spServiceApp = [pscustomobject]@{
-                        DisplayName                   = $testParams.Name
-                        ApplicationPool               = @{ Name = $testParams.ApplicationPool }
-                        Database                      = @{
-                            Name                 = $testParams.DatabaseName
-                            NormalizedDataSource = $testParams.DatabaseServer
-                        }
-                        WordServiceFormats            = @{
-                            OpenXmlDocument    = $true
-                            Word972003Document = $true
-                            RichTextFormat     = $true
-                            WebPage            = $true
-                            Word2003Xml        = $true
-                        }
-                        DisableEmbeddedFonts          = $false
-                        MaximumMemoryUsage            = 100
-                        RecycleProcessThreshold       = 100
-                        DisableBinaryFileScan         = $false
-                        TotalActiveProcesses          = 8
-                        TimerJobFrequency             = @{ TotalMinutes = 15 }
-                        ConversionsPerInstance        = 12
-                        ConversionTimeout             = @{ TotalMinutes = 5 }
-                        MaximumConversionAttempts     = 2
-                        MaximumSyncConversionRequests = 25
-                        KeepAliveTimeout              = @{ TotalSeconds = 30 }
-                        MaximumConversionTime         = @{ TotalSeconds = 300 }
-                    }
-                    $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value {
-                        return @{ FullName = $getTypeFullName }
-                    } -PassThru -Force
-                    return $spServiceApp
-                }
-
-                It "Should return values from the get method" {
-                    Get-TargetResource @testParams | Should -Not -BeNullOrEmpty
-                }
-
-                It "Should return true when the Test method is called" {
-                    Test-TargetResource @testParams | Should -Be $true
-                }
-            }
-
-            Context -Name "When a service application exists and incorrect application pool is configured" -Fixture {
-                $testParams = @{
-                    Name                            = "Word Automation Service Application"
-                    Ensure                          = "Present"
-                    ApplicationPool                 = "SharePoint Web Services"
-                    DatabaseName                    = "WordAutomation_DB"
-                    DatabaseServer                  = "SQLServer"
-                    SupportedFileFormats            = "docx", "doc", "mht", "rtf", "xml"
-                    DisableEmbeddedFonts            = $false
-                    MaximumMemoryUsage              = 100
-                    RecycleThreshold                = 100
-                    DisableBinaryFileScan           = $false
-                    ConversionProcesses             = 8
-                    JobConversionFrequency          = 15
-                    NumberOfConversionsPerProcess   = 12
-                    TimeBeforeConversionIsMonitored = 5
-                    MaximumConversionAttempts       = 2
-                    MaximumSyncConversionRequests   = 25
-                    KeepAliveTimeout                = 30
-                    MaximumConversionTime           = 300
-                }
-
-                Mock -CommandName Get-SPServiceApplication -MockWith {
-                    $spServiceApp = [pscustomobject]@{
-                        DisplayName                   = $testParams.Name
-                        ApplicationPool               = @{ Name = "Wrong App Pool Name" }
-                        Database                      = @{
-                            Name                 = $testParams.DatabaseName
-                            NormalizedDataSource = $testParams.DatabaseServer
-                        }
-                        WordServiceFormats            = @{
-                            OpenXmlDocument    = $false
-                            Word972003Document = $true
-                            RichTextFormat     = $true
-                            WebPage            = $true
-                            Word2003Xml        = $true
-                        }
-                        DisableEmbeddedFonts          = $false
-                        MaximumMemoryUsage            = 100
-                        RecycleProcessThreshold       = 100
-                        DisableBinaryFileScan         = $false
-                        TotalActiveProcesses          = 8
-                        TimerJobFrequency             = 15
-                        ConversionsPerInstance        = 12
-                        ConversionTimeout             = 5
-                        MaximumConversionAttempts     = 2
-                        MaximumSyncConversionRequests = 25
-                        KeepAliveTimeout              = 30
-                        MaximumConversionTime         = 300
-                    }
-                    $spServiceApp = $spServiceApp | Add-Member ScriptMethod Update {
-                        $Global:SPDscSiteUseUpdated = $true
-                    } -PassThru
-                    $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value {
-                        return @{ FullName = $getTypeFullName }
-                    } -PassThru -Force
-                    return $spServiceApp
-                }
-
-                Mock -CommandName Get-SPServiceApplicationPool -MockWith { return @{ Name = $testParams.ApplicationPool } }
-
-                Mock -CommandName Get-SPTimerJob {
-                    $returnval = @(@{ Name = "Just a name" })
-                    return , $returnval
-                }
-
-                It "Should return false when the Test method is called" {
-                    Test-TargetResource @testParams | Should -Be $false
-                }
-
-                $Global:SPDscSiteUseUpdated = $false
                 It "calls Set-SPWordConversionServiceApplication and update service app cmdlet from the set method" {
+                    $Global:SPDscSiteUseUpdated = $false
                     Set-TargetResource @testParams
 
                     Assert-MockCalled Get-SPServiceApplicationPool
@@ -344,76 +356,78 @@ try
             }
 
             Context -Name "When a service application exists and incorrect settings are configured" -Fixture {
-                $testParams = @{
-                    Name                            = "Word Automation Service Application"
-                    Ensure                          = "Present"
-                    ApplicationPool                 = "SharePoint Web Services"
-                    DatabaseName                    = "WordAutomation_DB"
-                    DatabaseServer                  = "SQLServer"
-                    SupportedFileFormats            = "docx", "doc", "mht", "rtf", "xml"
-                    DisableEmbeddedFonts            = $false
-                    MaximumMemoryUsage              = 100
-                    RecycleThreshold                = 100
-                    DisableBinaryFileScan           = $false
-                    ConversionProcesses             = 8
-                    JobConversionFrequency          = 15
-                    NumberOfConversionsPerProcess   = 12
-                    TimeBeforeConversionIsMonitored = 5
-                    MaximumConversionAttempts       = 2
-                    MaximumSyncConversionRequests   = 25
-                    KeepAliveTimeout                = 30
-                    MaximumConversionTime           = 300
-                }
-
-                Mock -CommandName Get-SPServiceApplication -MockWith {
-                    $spServiceApp = [pscustomobject]@{
-                        DisplayName                   = $testParams.Name
-                        Database                      = @{
-                            Name                 = $testParams.DatabaseName
-                            NormalizedDataSource = $testParams.DatabaseServer
-                        }
-                        ApplicationPool               = @{ Name = $testParams.ApplicationPool }
-                        WordServiceFormats            = @{
-                            OpenXmlDocument    = $false
-                            Word972003Document = $true
-                            RichTextFormat     = $true
-                            WebPage            = $true
-                            Word2003Xml        = $true
-                        }
-                        DisableEmbeddedFonts          = $false
-                        MaximumMemoryUsage            = 100
-                        RecycleProcessThreshold       = 100
-                        DisableBinaryFileScan         = $false
-                        TotalActiveProcesses          = 8
-                        TimerJobFrequency             = 15
-                        ConversionsPerInstance        = 12
-                        ConversionTimeout             = 5
-                        MaximumConversionAttempts     = 2
-                        MaximumSyncConversionRequests = 25
-                        KeepAliveTimeout              = 30
-                        MaximumConversionTime         = 300
+                BeforeAll {
+                    $testParams = @{
+                        Name                            = "Word Automation Service Application"
+                        Ensure                          = "Present"
+                        ApplicationPool                 = "SharePoint Web Services"
+                        DatabaseName                    = "WordAutomation_DB"
+                        DatabaseServer                  = "SQLServer"
+                        SupportedFileFormats            = "docx", "doc", "mht", "rtf", "xml"
+                        DisableEmbeddedFonts            = $false
+                        MaximumMemoryUsage              = 100
+                        RecycleThreshold                = 100
+                        DisableBinaryFileScan           = $false
+                        ConversionProcesses             = 8
+                        JobConversionFrequency          = 15
+                        NumberOfConversionsPerProcess   = 12
+                        TimeBeforeConversionIsMonitored = 5
+                        MaximumConversionAttempts       = 2
+                        MaximumSyncConversionRequests   = 25
+                        KeepAliveTimeout                = 30
+                        MaximumConversionTime           = 300
                     }
-                    $spServiceApp = $spServiceApp | Add-Member ScriptMethod Update {
-                        $Global:SPDscSiteUseUpdated = $true
-                    } -PassThru
-                    $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value {
-                        return @{ FullName = $getTypeFullName }
-                    } -PassThru -Force
-                    return $spServiceApp
-                }
 
-                Mock -CommandName Get-SPServiceApplicationPool { return @{ Name = $testParams.ApplicationPool } }
-                Mock -CommandName Get-SPTimerJob {
-                    $returnval = @(@{ Name = "Just a name" })
-                    return , $returnval
+                    Mock -CommandName Get-SPServiceApplication -MockWith {
+                        $spServiceApp = [pscustomobject]@{
+                            DisplayName                   = $testParams.Name
+                            Database                      = @{
+                                Name                 = $testParams.DatabaseName
+                                NormalizedDataSource = $testParams.DatabaseServer
+                            }
+                            ApplicationPool               = @{ Name = $testParams.ApplicationPool }
+                            WordServiceFormats            = @{
+                                OpenXmlDocument    = $false
+                                Word972003Document = $true
+                                RichTextFormat     = $true
+                                WebPage            = $true
+                                Word2003Xml        = $true
+                            }
+                            DisableEmbeddedFonts          = $false
+                            MaximumMemoryUsage            = 100
+                            RecycleProcessThreshold       = 100
+                            DisableBinaryFileScan         = $false
+                            TotalActiveProcesses          = 8
+                            TimerJobFrequency             = 15
+                            ConversionsPerInstance        = 12
+                            ConversionTimeout             = 5
+                            MaximumConversionAttempts     = 2
+                            MaximumSyncConversionRequests = 25
+                            KeepAliveTimeout              = 30
+                            MaximumConversionTime         = 300
+                        }
+                        $spServiceApp = $spServiceApp | Add-Member ScriptMethod Update {
+                            $Global:SPDscSiteUseUpdated = $true
+                        } -PassThru
+                        $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value {
+                            return @{ FullName = $getTypeFullName }
+                        } -PassThru -Force
+                        return $spServiceApp
+                    }
+
+                    Mock -CommandName Get-SPServiceApplicationPool { return @{ Name = $testParams.ApplicationPool } }
+                    Mock -CommandName Get-SPTimerJob {
+                        $returnval = @(@{ Name = "Just a name" })
+                        return , $returnval
+                    }
                 }
 
                 It "Should return false when the Test method is called" {
                     Test-TargetResource @testParams | Should -Be $false
                 }
 
-                $Global:SPDscSiteUseUpdated = $false
                 It "Should call the update service app cmdlet from the set method" {
+                    $Global:SPDscSiteUseUpdated = $false
                     Set-TargetResource @testParams
                     Assert-MockCalled Get-SPServiceApplication
                     $Global:SPDscSiteUseUpdated | Should -Be $true
@@ -421,12 +435,14 @@ try
             }
 
             Context -Name "When no service application exists and Ensure is set to Absent" -Fixture {
-                $testParams = @{
-                    Name   = "Word Automation Service Application"
-                    Ensure = "Absent"
-                }
+                BeforeAll {
+                    $testParams = @{
+                        Name   = "Word Automation Service Application"
+                        Ensure = "Absent"
+                    }
 
-                Mock -CommandName Get-SPServiceApplication -MockWith { return $null }
+                    Mock -CommandName Get-SPServiceApplication -MockWith { return $null }
+                }
 
                 It "Should return absent from the Get method" {
                     (Get-TargetResource @testParams).Ensure | Should -Be "Absent"
@@ -438,43 +454,45 @@ try
             }
 
             Context -Name "When a service application exists and Ensure is set to Absent" -Fixture {
-                $testParams = @{
-                    Name   = "Word Automation Service Application"
-                    Ensure = "Absent"
-                }
-
-                Mock -CommandName Get-SPServiceApplication -MockWith {
-                    $spServiceApp = [pscustomobject]@{
-                        DisplayName                   = $testParams.Name
-                        ApplicationPool               = @{ Name = $testParams.ApplicationPool }
-                        Database                      = @{
-                            Name                 = $testParams.DatabaseName
-                            NormalizedDataSource = $testParams.DatabaseServer
-                        }
-                        WordServiceFormats            = @{
-                            OpenXmlDocument    = $true
-                            Word972003Document = $true
-                            RichTextFormat     = $true
-                            WebPage            = $true
-                            Word2003Xml        = $true
-                        }
-                        DisableEmbeddedFonts          = $false
-                        MaximumMemoryUsage            = 100
-                        RecycleProcessThreshold       = 100
-                        DisableBinaryFileScan         = $false
-                        TotalActiveProcesses          = 8
-                        TimerJobFrequency             = @{ TotalMinutes = 15 }
-                        ConversionsPerInstance        = 12
-                        ConversionTimeout             = @{ TotalMinutes = 5 }
-                        MaximumConversionAttempts     = 2
-                        MaximumSyncConversionRequests = 25
-                        KeepAliveTimeout              = @{ TotalSeconds = 30 }
-                        MaximumConversionTime         = @{ TotalSeconds = 300 }
+                BeforeAll {
+                    $testParams = @{
+                        Name   = "Word Automation Service Application"
+                        Ensure = "Absent"
                     }
-                    $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value {
-                        return @{ FullName = $getTypeFullName }
-                    } -PassThru -Force
-                    return $spServiceApp
+
+                    Mock -CommandName Get-SPServiceApplication -MockWith {
+                        $spServiceApp = [pscustomobject]@{
+                            DisplayName                   = $testParams.Name
+                            ApplicationPool               = @{ Name = $testParams.ApplicationPool }
+                            Database                      = @{
+                                Name                 = $testParams.DatabaseName
+                                NormalizedDataSource = $testParams.DatabaseServer
+                            }
+                            WordServiceFormats            = @{
+                                OpenXmlDocument    = $true
+                                Word972003Document = $true
+                                RichTextFormat     = $true
+                                WebPage            = $true
+                                Word2003Xml        = $true
+                            }
+                            DisableEmbeddedFonts          = $false
+                            MaximumMemoryUsage            = 100
+                            RecycleProcessThreshold       = 100
+                            DisableBinaryFileScan         = $false
+                            TotalActiveProcesses          = 8
+                            TimerJobFrequency             = @{ TotalMinutes = 15 }
+                            ConversionsPerInstance        = 12
+                            ConversionTimeout             = @{ TotalMinutes = 5 }
+                            MaximumConversionAttempts     = 2
+                            MaximumSyncConversionRequests = 25
+                            KeepAliveTimeout              = @{ TotalSeconds = 30 }
+                            MaximumConversionTime         = @{ TotalSeconds = 300 }
+                        }
+                        $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value {
+                            return @{ FullName = $getTypeFullName }
+                        } -PassThru -Force
+                        return $spServiceApp
+                    }
                 }
 
                 It "Should return present from the Get method" {
@@ -492,10 +510,12 @@ try
             }
 
             Context -Name "When Ensure is set to Absent, but another parameter is also used" -Fixture {
-                $testParams = @{
-                    Name            = "Word Automation Service Application"
-                    Ensure          = "Absent"
-                    ApplicationPool = "SharePoint Web Services"
+                BeforeAll {
+                    $testParams = @{
+                        Name            = "Word Automation Service Application"
+                        Ensure          = "Absent"
+                        ApplicationPool = "SharePoint Web Services"
+                    }
                 }
 
                 It "Should return null from the get method" {
@@ -512,10 +532,12 @@ try
             }
 
             Context -Name "When Ensure is set to Present, but the Application Pool or Database parameters are missing" -Fixture {
-                $testParams = @{
-                    Name            = "Word Automation Service Application"
-                    Ensure          = "Present"
-                    ApplicationPool = "SharePoint Web Services"
+                BeforeAll {
+                    $testParams = @{
+                        Name            = "Word Automation Service Application"
+                        Ensure          = "Present"
+                        ApplicationPool = "SharePoint Web Services"
+                    }
                 }
 
                 It "Should return null from the get method" {

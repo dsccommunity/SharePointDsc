@@ -46,52 +46,56 @@ Invoke-TestSetup
 
 try
 {
-    Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
-        InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
-            Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
+    InModuleScope -ModuleName $script:DSCResourceFullName -ScriptBlock {
+        Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
+            BeforeAll {
+                Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
-            # Initialize tests
+                # Initialize tests
 
-            # Mocks for all contexts
-            Mock -CommandName Update-SPSolution -MockWith { }
-            Mock -CommandName Install-SPFeature -MockWith { }
-            Mock -CommandName Install-SPSolution -MockWith { }
-            Mock -CommandName Uninstall-SPSolution -MockWith { }
-            Mock -CommandName Remove-SPSolution -MockWith { }
-            Mock -CommandName Start-Sleep -MockWith { }
+                # Mocks for all contexts
+                Mock -CommandName Update-SPSolution -MockWith { }
+                Mock -CommandName Install-SPFeature -MockWith { }
+                Mock -CommandName Install-SPSolution -MockWith { }
+                Mock -CommandName Uninstall-SPSolution -MockWith { }
+                Mock -CommandName Remove-SPSolution -MockWith { }
+                Mock -CommandName Start-Sleep -MockWith { }
+            }
 
             # Test contexts
             Context -Name "The solution isn't installed, but should be" -Fixture {
-                $testParams = @{
-                    Name        = "SomeSolution"
-                    LiteralPath = "\\server\share\file.wsp"
-                    Deployed    = $true
-                    Ensure      = "Present"
-                    Version     = "1.0.0.0"
-                    WebAppUrls  = @("http://app1", "http://app2")
-                }
-
-                $global:SPDscSolutionAdded = $false
-
-                Mock -CommandName Get-SPSolution -MockWith {
-                    if ($global:SPDscSolutionAdded)
-                    {
-                        return [pscustomobject] @{ }
+                BeforeAll {
+                    $testParams = @{
+                        Name        = "SomeSolution"
+                        LiteralPath = "\\server\share\file.wsp"
+                        Deployed    = $true
+                        Ensure      = "Present"
+                        Version     = "1.0.0.0"
+                        WebAppUrls  = @("http://app1", "http://app2")
                     }
-                    else
-                    {
-                        return $null
+
+                    $global:SPDscSolutionAdded = $false
+
+                    Mock -CommandName Get-SPSolution -MockWith {
+                        if ($global:SPDscSolutionAdded)
+                        {
+                            return [pscustomobject] @{ }
+                        }
+                        else
+                        {
+                            return $null
+                        }
                     }
-                }
 
-                Mock -CommandName Add-SPSolution -MockWith {
-                    $solution = [pscustomobject] @{ Properties = @{ Version = "" } }
-                    $solution | Add-Member -Name Update -MemberType ScriptMethod -Value { }
-                    $global:SPDscSolutionAdded = $true
-                    return $solution
-                }
+                    Mock -CommandName Add-SPSolution -MockWith {
+                        $solution = [pscustomobject] @{ Properties = @{ Version = "" } }
+                        $solution | Add-Member -Name Update -MemberType ScriptMethod -Value { }
+                        $global:SPDscSolutionAdded = $true
+                        return $solution
+                    }
 
-                $getResults = Get-TargetResource @testParams
+                    $getResults = Get-TargetResource @testParams
+                }
 
                 It "Should return the expected empty values from the get method" {
                     $getResults.Ensure | Should -Be "Absent"
@@ -112,49 +116,50 @@ try
             }
 
             Context -Name "The solution isn't installed, but should be with loop testing" -Fixture {
-                $testParams = @{
-                    Name        = "SomeSolution"
-                    LiteralPath = "\\server\share\file.wsp"
-                    Deployed    = $true
-                    Ensure      = "Present"
-                    Version     = "1.0.0.0"
-                    WebAppUrls  = @("http://app1", "http://app2")
-                }
+                BeforeAll {
+                    $testParams = @{
+                        Name        = "SomeSolution"
+                        LiteralPath = "\\server\share\file.wsp"
+                        Deployed    = $true
+                        Ensure      = "Present"
+                        Version     = "1.0.0.0"
+                        WebAppUrls  = @("http://app1", "http://app2")
+                    }
 
-                $global:SPDscSolutionAdded = $false
-                $global:SPDscLoopCount = 0
+                    $global:SPDscSolutionAdded = $false
+                    $global:SPDscLoopCount = 0
 
-                Mock -CommandName Get-SPSolution -MockWith {
-                    $global:SPDscLoopCount = $global:SPDscLoopCount + 1
-                    $index = $global:SPDscLoopCount
-                    if ($global:SPDscSolutionAdded)
-                    {
-                        if ($index -gt 2)
+                    Mock -CommandName Get-SPSolution -MockWith {
+                        $global:SPDscLoopCount = $global:SPDscLoopCount + 1
+                        $index = $global:SPDscLoopCount
+                        if ($global:SPDscSolutionAdded)
                         {
-                            return @{
-                                JobExists = $false
+                            if ($index -gt 2)
+                            {
+                                return @{
+                                    JobExists = $false
+                                }
+                            }
+                            else
+                            {
+                                return @{
+                                    JobExists = $true
+                                }
                             }
                         }
                         else
                         {
-                            return @{
-                                JobExists = $true
-                            }
+                            return $null
                         }
                     }
-                    else
-                    {
-                        return $null
+
+                    Mock -CommandName Add-SPSolution -MockWith {
+                        $solution = [pscustomobject] @{ Properties = @{ Version = "" } }
+                        $solution | Add-Member -Name Update -MemberType ScriptMethod -Value { }
+                        $global:SPDscSolutionAdded = $true
+                        return $solution
                     }
                 }
-
-                Mock -CommandName Add-SPSolution -MockWith {
-                    $solution = [pscustomobject] @{ Properties = @{ Version = "" } }
-                    $solution | Add-Member -Name Update -MemberType ScriptMethod -Value { }
-                    $global:SPDscSolutionAdded = $true
-                    return $solution
-                }
-
 
                 It "Should return the expected empty values from the get method" {
                     $global:SPDscLoopCount = 0
@@ -179,25 +184,27 @@ try
             }
 
             Context -Name "The solution is installed, but should not be" -Fixture {
-                $testParams = @{
-                    Name        = "SomeSolution"
-                    LiteralPath = "\\server\share\file.wsp"
-                    Deployed    = $true
-                    Ensure      = "Absent"
-                    Version     = "1.0.0.0"
-                    WebAppUrls  = @("http://app1", "http://app2")
-                }
-
-                Mock -CommandName Get-SPSolution -MockWith {
-                    return [pscustomobject]@{
-                        Deployed                = $true
-                        Properties              = @{ Version = "1.0.0.0" }
-                        DeployedWebApplications = @( [pscustomobject]@{Url = "http://app1" }, [pscustomobject]@{Url = "http://app2" })
-                        ContainsGlobalAssembly  = $true
+                BeforeAll {
+                    $testParams = @{
+                        Name        = "SomeSolution"
+                        LiteralPath = "\\server\share\file.wsp"
+                        Deployed    = $true
+                        Ensure      = "Absent"
+                        Version     = "1.0.0.0"
+                        WebAppUrls  = @("http://app1", "http://app2")
                     }
-                }
 
-                $getResults = Get-TargetResource @testParams
+                    Mock -CommandName Get-SPSolution -MockWith {
+                        return [pscustomobject]@{
+                            Deployed                = $true
+                            Properties              = @{ Version = "1.0.0.0" }
+                            DeployedWebApplications = @( [pscustomobject]@{Url = "http://app1" }, [pscustomobject]@{Url = "http://app2" })
+                            ContainsGlobalAssembly  = $true
+                        }
+                    }
+
+                    $getResults = Get-TargetResource @testParams
+                }
 
                 It "Should return the expected values from the get method" {
                     $getResults.Ensure | Should -Be "Present"
@@ -217,18 +224,20 @@ try
             }
 
             Context -Name "The solution isn't installed, and should not be" -Fixture {
-                $testParams = @{
-                    Name        = "SomeSolution"
-                    LiteralPath = "\\server\share\file.wsp"
-                    Deployed    = $false
-                    Ensure      = "Absent"
-                    Version     = "0.0.0.0"
-                    WebAppUrls  = @()
+                BeforeAll {
+                    $testParams = @{
+                        Name        = "SomeSolution"
+                        LiteralPath = "\\server\share\file.wsp"
+                        Deployed    = $false
+                        Ensure      = "Absent"
+                        Version     = "0.0.0.0"
+                        WebAppUrls  = @()
+                    }
+
+                    Mock -CommandName Get-SPSolution -MockWith { $null }
+
+                    $getResults = Get-TargetResource @testParams
                 }
-
-                Mock -CommandName Get-SPSolution -MockWith { $null }
-
-                $getResults = Get-TargetResource @testParams
 
                 It "Should return the expected empty values from the get method" {
                     $getResults.Ensure | Should -Be "Absent"
@@ -242,27 +251,29 @@ try
             }
 
             Context -Name "The solution is installed, but needs update" -Fixture {
-                $testParams = @{
-                    Name        = "SomeSolution"
-                    LiteralPath = "\\server\share\file.wsp"
-                    Deployed    = $true
-                    Ensure      = "Present"
-                    Version     = "1.1.0.0"
-                    WebAppUrls  = @("http://app1", "http://app2")
-                }
-
-                Mock -CommandName Get-SPSolution -MockWith {
-                    $s = [pscustomobject]@{
-                        Deployed                = $true
-                        Properties              = @{ Version = "1.0.0.0" }
-                        DeployedWebApplications = @( [pscustomobject]@{Url = "http://app1" }, [pscustomobject]@{Url = "http://app2" })
-                        ContainsGlobalAssembly  = $true
+                BeforeAll {
+                    $testParams = @{
+                        Name        = "SomeSolution"
+                        LiteralPath = "\\server\share\file.wsp"
+                        Deployed    = $true
+                        Ensure      = "Present"
+                        Version     = "1.1.0.0"
+                        WebAppUrls  = @("http://app1", "http://app2")
                     }
-                    $s | Add-Member -Name Update -MemberType ScriptMethod -Value { }
-                    return $s
-                }
 
-                $getResults = Get-TargetResource @testParams
+                    Mock -CommandName Get-SPSolution -MockWith {
+                        $s = [pscustomobject]@{
+                            Deployed                = $true
+                            Properties              = @{ Version = "1.0.0.0" }
+                            DeployedWebApplications = @( [pscustomobject]@{Url = "http://app1" }, [pscustomobject]@{Url = "http://app2" })
+                            ContainsGlobalAssembly  = $true
+                        }
+                        $s | Add-Member -Name Update -MemberType ScriptMethod -Value { }
+                        return $s
+                    }
+
+                    $getResults = Get-TargetResource @testParams
+                }
 
                 It "Should return the expected values from the get method" {
                     $getResults.Ensure | Should -Be "Present"
@@ -282,25 +293,27 @@ try
             }
 
             Context -Name "The solution is installed, and should be" -Fixture {
-                $testParams = @{
-                    Name        = "SomeSolution"
-                    LiteralPath = "\\server\share\file.wsp"
-                    Deployed    = $true
-                    Ensure      = "Present"
-                    Version     = "1.0.0.0"
-                    WebAppUrls  = @("http://app1", "http://app2")
-                }
-
-                Mock -CommandName Get-SPSolution -MockWith {
-                    return [pscustomobject]@{
-                        Deployed                = $true
-                        Properties              = @{ Version = "1.0.0.0" }
-                        DeployedWebApplications = @( [pscustomobject]@{Url = "http://app1" }, [pscustomobject]@{Url = "http://app2" })
-                        ContainsGlobalAssembly  = $true
+                BeforeAll {
+                    $testParams = @{
+                        Name        = "SomeSolution"
+                        LiteralPath = "\\server\share\file.wsp"
+                        Deployed    = $true
+                        Ensure      = "Present"
+                        Version     = "1.0.0.0"
+                        WebAppUrls  = @("http://app1", "http://app2")
                     }
-                }
 
-                $getResults = Get-TargetResource @testParams
+                    Mock -CommandName Get-SPSolution -MockWith {
+                        return [pscustomobject]@{
+                            Deployed                = $true
+                            Properties              = @{ Version = "1.0.0.0" }
+                            DeployedWebApplications = @( [pscustomobject]@{Url = "http://app1" }, [pscustomobject]@{Url = "http://app2" })
+                            ContainsGlobalAssembly  = $true
+                        }
+                    }
+
+                    $getResults = Get-TargetResource @testParams
+                }
 
                 It "Should return the expected values from the get method" {
                     $getResults.Ensure | Should -Be "Present"
@@ -314,27 +327,29 @@ try
             }
 
             Context -Name "The solution exists but is not deloyed, and needs update" -Fixture {
-                $testParams = @{
-                    Name        = "SomeSolution"
-                    LiteralPath = "\\server\share\file.wsp"
-                    Deployed    = $true
-                    Ensure      = "Present"
-                    Version     = "1.1.0.0"
-                    WebAppUrls  = @()
+                BeforeAll {
+                    $testParams = @{
+                        Name        = "SomeSolution"
+                        LiteralPath = "\\server\share\file.wsp"
+                        Deployed    = $true
+                        Ensure      = "Present"
+                        Version     = "1.1.0.0"
+                        WebAppUrls  = @()
+                    }
+
+                    $solution = [pscustomobject]@{
+                        Deployed                = $false
+                        Properties              = @{ Version = "1.0.0.0" }
+                        DeployedWebApplications = @( [pscustomobject]@{Url = "http://app1" }, [pscustomobject]@{Url = "http://app2" })
+                        ContainsGlobalAssembly  = $true
+                    }
+                    $solution | Add-Member -Name Update -MemberType ScriptMethod  -Value { }
+
+                    Mock -CommandName Get-SPSolution -MockWith { $solution }
+                    Mock -CommandName Add-SPSolution -MockWith { $solution }
+
+                    $getResults = Get-TargetResource @testParams
                 }
-
-                $solution = [pscustomobject]@{
-                    Deployed                = $false
-                    Properties              = @{ Version = "1.0.0.0" }
-                    DeployedWebApplications = @( [pscustomobject]@{Url = "http://app1" }, [pscustomobject]@{Url = "http://app2" })
-                    ContainsGlobalAssembly  = $true
-                }
-                $solution | Add-Member -Name Update -MemberType ScriptMethod  -Value { }
-
-                Mock -CommandName Get-SPSolution -MockWith { $solution }
-                Mock -CommandName Add-SPSolution -MockWith { $solution }
-
-                $getResults = Get-TargetResource @testParams
 
                 It "Should return the expected values from the get method" {
                     $getResults.Ensure | Should -Be "Present"
@@ -356,26 +371,28 @@ try
             }
 
             Context -Name "A solution deployment can target a specific compatability level" -Fixture {
-                $testParams = @{
-                    Name          = "SomeSolution"
-                    LiteralPath   = "\\server\share\file.wsp"
-                    Deployed      = $true
-                    Ensure        = "Present"
-                    Version       = "1.1.0.0"
-                    WebAppUrls    = @()
-                    SolutionLevel = "All"
-                }
+                BeforeAll {
+                    $testParams = @{
+                        Name          = "SomeSolution"
+                        LiteralPath   = "\\server\share\file.wsp"
+                        Deployed      = $true
+                        Ensure        = "Present"
+                        Version       = "1.1.0.0"
+                        WebAppUrls    = @()
+                        SolutionLevel = "All"
+                    }
 
-                $solution = [pscustomobject]@{
-                    Deployed                = $false
-                    Properties              = @{ Version = "1.0.0.0" }
-                    DeployedWebApplications = @( [pscustomobject]@{Url = "http://app1" }, [pscustomobject]@{Url = "http://app2" })
-                    ContainsGlobalAssembly  = $true
-                }
-                $solution | Add-Member -Name Update -MemberType ScriptMethod  -Value { }
+                    $solution = [pscustomobject]@{
+                        Deployed                = $false
+                        Properties              = @{ Version = "1.0.0.0" }
+                        DeployedWebApplications = @( [pscustomobject]@{Url = "http://app1" }, [pscustomobject]@{Url = "http://app2" })
+                        ContainsGlobalAssembly  = $true
+                    }
+                    $solution | Add-Member -Name Update -MemberType ScriptMethod  -Value { }
 
-                Mock -CommandName Get-SPSolution -MockWith { $solution }
-                Mock -CommandName Add-SPSolution -MockWith { $solution }
+                    Mock -CommandName Get-SPSolution -MockWith { $solution }
+                    Mock -CommandName Add-SPSolution -MockWith { $solution }
+                }
 
                 It "deploys the solution using the correct compatability level" {
                     Set-TargetResource @testParams
@@ -385,27 +402,29 @@ try
             }
 
             Context -Name "Solution is scoped at the Web Application Level" -Fixture {
-                $testParams = @{
-                    Name          = "SomeSolution"
-                    LiteralPath   = "\\server\share\file.wsp"
-                    Deployed      = $true
-                    Ensure        = "Present"
-                    Version       = "1.1.0.0"
-                    WebAppUrls    = @("https://contoso.com")
-                    SolutionLevel = "All"
-                }
+                BeforeAll {
+                    $testParams = @{
+                        Name          = "SomeSolution"
+                        LiteralPath   = "\\server\share\file.wsp"
+                        Deployed      = $true
+                        Ensure        = "Present"
+                        Version       = "1.1.0.0"
+                        WebAppUrls    = @("https://contoso.com")
+                        SolutionLevel = "All"
+                    }
 
-                $solution = [pscustomobject]@{
-                    Deployed                       = $false
-                    Properties                     = @{ Version = "1.0.0.0" }
-                    ContainsWebApplicationResource = $true
-                    DeployedWebApplications        = @()
-                    ContainsGlobalAssembly         = $true
-                }
-                $solution | Add-Member -Name Update -MemberType ScriptMethod  -Value { }
+                    $solution = [pscustomobject]@{
+                        Deployed                       = $false
+                        Properties                     = @{ Version = "1.0.0.0" }
+                        ContainsWebApplicationResource = $true
+                        DeployedWebApplications        = @()
+                        ContainsGlobalAssembly         = $true
+                    }
+                    $solution | Add-Member -Name Update -MemberType ScriptMethod  -Value { }
 
-                Mock -CommandName Get-SPSolution -MockWith { $solution }
-                Mock -CommandName Add-SPSolution -MockWith { $solution }
+                    Mock -CommandName Get-SPSolution -MockWith { $solution }
+                    Mock -CommandName Add-SPSolution -MockWith { $solution }
+                }
 
                 It "Deploys the solution to the specified Web Application" {
                     Set-TargetResource @testParams
@@ -413,36 +432,38 @@ try
             }
 
             Context -Name "Solution is scoped at multiple Web Application Levels" -Fixture {
-                $testParams = @{
-                    Name          = "SomeSolution"
-                    LiteralPath   = "\\server\share\file.wsp"
-                    Deployed      = $true
-                    Ensure        = "Present"
-                    Version       = "1.1.0.0"
-                    WebAppUrls    = @("https://contoso.com", "https://tailspintoys.com")
-                    SolutionLevel = "All"
-                }
-
-                $numberOfCalls = 1
-                Mock -CommandName Install-SPSolution -MockWith {
-                    if ($numberOfCalls -le 1)
-                    {
-                        $numberOfCalls++
-                        throw "A deployment is already underway"
+                BeforeAll {
+                    $testParams = @{
+                        Name          = "SomeSolution"
+                        LiteralPath   = "\\server\share\file.wsp"
+                        Deployed      = $true
+                        Ensure        = "Present"
+                        Version       = "1.1.0.0"
+                        WebAppUrls    = @("https://contoso.com", "https://tailspintoys.com")
+                        SolutionLevel = "All"
                     }
-                }
 
-                $solution = [pscustomobject]@{
-                    Deployed                       = $false
-                    Properties                     = @{ Version = "1.0.0.0" }
-                    ContainsWebApplicationResource = $true
-                    DeployedWebApplications        = @()
-                    ContainsGlobalAssembly         = $true
-                }
-                $solution | Add-Member -Name Update -MemberType ScriptMethod  -Value { }
+                    $numberOfCalls = 1
+                    Mock -CommandName Install-SPSolution -MockWith {
+                        if ($numberOfCalls -le 1)
+                        {
+                            $numberOfCalls++
+                            throw "A deployment is already underway"
+                        }
+                    }
 
-                Mock -CommandName Get-SPSolution -MockWith { $solution }
-                Mock -CommandName Add-SPSolution -MockWith { $solution }
+                    $solution = [pscustomobject]@{
+                        Deployed                       = $false
+                        Properties                     = @{ Version = "1.0.0.0" }
+                        ContainsWebApplicationResource = $true
+                        DeployedWebApplications        = @()
+                        ContainsGlobalAssembly         = $true
+                    }
+                    $solution | Add-Member -Name Update -MemberType ScriptMethod  -Value { }
+
+                    Mock -CommandName Get-SPSolution -MockWith { $solution }
+                    Mock -CommandName Add-SPSolution -MockWith { $solution }
+                }
 
                 It "Deploys the solution to the specified Web Application" {
                     Set-TargetResource @testParams

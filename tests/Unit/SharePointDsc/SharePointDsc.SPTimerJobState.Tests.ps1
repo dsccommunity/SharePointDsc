@@ -46,37 +46,41 @@ Invoke-TestSetup
 
 try
 {
-    Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
-        InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
-            Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
+    InModuleScope -ModuleName $script:DSCResourceFullName -ScriptBlock {
+        Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
+            BeforeAll {
+                Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
-            # Initialize tests
+                # Initialize tests
 
-            # Mocks for all contexts
-            Mock -CommandName Set-SPTimerJob -MockWith {
-                return $null
-            }
-            Mock -CommandName Enable-SPTimerJob -MockWith {
-                return $null
-            }
-            Mock -CommandName Get-SPFarm -MockWith {
-                return @{ }
-            }
-            Mock -CommandName Get-SPWebApplication -MockWith {
-                return @{ }
+                # Mocks for all contexts
+                Mock -CommandName Set-SPTimerJob -MockWith {
+                    return $null
+                }
+                Mock -CommandName Enable-SPTimerJob -MockWith {
+                    return $null
+                }
+                Mock -CommandName Get-SPFarm -MockWith {
+                    return @{ }
+                }
+                Mock -CommandName Get-SPWebApplication -MockWith {
+                    return @{ }
+                }
             }
 
             # Test contexts
             Context -Name "The server is not part of SharePoint farm" -Fixture {
-                $testParams = @{
-                    TypeName  = "job-spapp-statequery"
-                    WebAppUrl = "N/A"
-                    Enabled   = $true
-                    Schedule  = "hourly between 0 and 59"
-                }
+                BeforeAll {
+                    $testParams = @{
+                        TypeName  = "job-spapp-statequery"
+                        WebAppUrl = "N/A"
+                        Enabled   = $true
+                        Schedule  = "hourly between 0 and 59"
+                    }
 
-                Mock -CommandName Get-SPFarm -MockWith {
-                    throw "Unable to detect local farm"
+                    Mock -CommandName Get-SPFarm -MockWith {
+                        throw "Unable to detect local farm"
+                    }
                 }
 
                 It "Should return null from the get method" {
@@ -93,15 +97,17 @@ try
             }
 
             Context -Name "The specified web application is not found" -Fixture {
-                $testParams = @{
-                    TypeName  = "job-spapp-statequery"
-                    WebAppUrl = "http://sharepoint.domain.com"
-                    Enabled   = $true
-                    Schedule  = "hourly between 0 and 59"
-                }
+                BeforeAll {
+                    $testParams = @{
+                        TypeName  = "job-spapp-statequery"
+                        WebAppUrl = "http://sharepoint.domain.com"
+                        Enabled   = $true
+                        Schedule  = "hourly between 0 and 59"
+                    }
 
-                Mock -CommandName Get-SPWebApplication -MockWith {
-                    return $null
+                    Mock -CommandName Get-SPWebApplication -MockWith {
+                        return $null
+                    }
                 }
 
                 It "Should return null from the get method" {
@@ -118,15 +124,17 @@ try
             }
 
             Context -Name "No timer jobs found for the specified web application" -Fixture {
-                $testParams = @{
-                    TypeName  = "job-spapp-statequery"
-                    WebAppUrl = "http://sharepoint.domain.com"
-                    Enabled   = $true
-                    Schedule  = "hourly between 0 and 59"
-                }
+                BeforeAll {
+                    $testParams = @{
+                        TypeName  = "job-spapp-statequery"
+                        WebAppUrl = "http://sharepoint.domain.com"
+                        Enabled   = $true
+                        Schedule  = "hourly between 0 and 59"
+                    }
 
-                Mock -CommandName Get-SPTimerJob -MockWith {
-                    return $null
+                    Mock -CommandName Get-SPTimerJob -MockWith {
+                        return $null
+                    }
                 }
 
                 It "Should return null from the get method" {
@@ -142,23 +150,23 @@ try
                 }
             }
 
-            #WebApp with no timerjobs found
-
             Context -Name "The server is in a farm and the incorrect enabled settings have been applied" -Fixture {
-                $testParams = @{
-                    TypeName  = "job-spapp-statequery"
-                    WebAppUrl = "N/A"
-                    Enabled   = $true
-                    Schedule  = "hourly between 0 and 59"
-                }
-
-                Mock -CommandName Get-SPTimerJob -MockWith {
-                    $returnVal = @{
-                        TypeName   = "job-spapp-statequery"
-                        IsDisabled = $true
-                        Schedule   = "hourly between 0 and 59"
+                BeforeAll {
+                    $testParams = @{
+                        TypeName  = "job-spapp-statequery"
+                        WebAppUrl = "N/A"
+                        Enabled   = $true
+                        Schedule  = "hourly between 0 and 59"
                     }
-                    return , @($returnVal)
+
+                    Mock -CommandName Get-SPTimerJob -MockWith {
+                        $returnVal = @{
+                            TypeName   = "job-spapp-statequery"
+                            IsDisabled = $true
+                            Schedule   = "hourly between 0 and 59"
+                        }
+                        return , @($returnVal)
+                    }
                 }
 
                 It "Should return values from the get method" {
@@ -176,20 +184,22 @@ try
             }
 
             Context -Name "The server is in a farm and the incorrect enabled settings have been applied - WebApp" -Fixture {
-                $testParams = @{
-                    TypeName  = "job-spapp-statequery"
-                    WebAppUrl = "http://sharepoint.domain.com"
-                    Enabled   = $true
-                    Schedule  = "hourly between 0 and 59"
-                }
-
-                Mock -CommandName Get-SPTimerJob -MockWith {
-                    $returnVal = @{
-                        TypeName   = "job-spapp-statequery"
-                        IsDisabled = $true
-                        Schedule   = "hourly between 0 and 59"
+                BeforeAll {
+                    $testParams = @{
+                        TypeName  = "job-spapp-statequery"
+                        WebAppUrl = "http://sharepoint.domain.com"
+                        Enabled   = $true
+                        Schedule  = "hourly between 0 and 59"
                     }
-                    return , @($returnVal)
+
+                    Mock -CommandName Get-SPTimerJob -MockWith {
+                        $returnVal = @{
+                            TypeName   = "job-spapp-statequery"
+                            IsDisabled = $true
+                            Schedule   = "hourly between 0 and 59"
+                        }
+                        return , @($returnVal)
+                    }
                 }
 
                 It "Should return values from the get method" {
@@ -207,20 +217,22 @@ try
             }
 
             Context -Name "The server is in a farm and the incorrect schedule settings have been applied" -Fixture {
-                $testParams = @{
-                    TypeName  = "job-spapp-statequery"
-                    WebAppUrl = "N/A"
-                    Enabled   = $true
-                    Schedule  = "hourly between 0 and 59"
-                }
-
-                Mock -CommandName Get-SPTimerJob -MockWith {
-                    $returnVal = @{
-                        TypeName   = "job-spapp-statequery"
-                        IsDisabled = $false
-                        Schedule   = "weekly at sat 23:00:00"
+                BeforeAll {
+                    $testParams = @{
+                        TypeName  = "job-spapp-statequery"
+                        WebAppUrl = "N/A"
+                        Enabled   = $true
+                        Schedule  = "hourly between 0 and 59"
                     }
-                    return , @($returnVal)
+
+                    Mock -CommandName Get-SPTimerJob -MockWith {
+                        $returnVal = @{
+                            TypeName   = "job-spapp-statequery"
+                            IsDisabled = $false
+                            Schedule   = "weekly at sat 23:00:00"
+                        }
+                        return , @($returnVal)
+                    }
                 }
 
                 It "Should return values from the get method" {
@@ -238,20 +250,22 @@ try
             }
 
             Context -Name "The server is in a farm and the incorrect schedule settings have been applied - WebApp" -Fixture {
-                $testParams = @{
-                    TypeName  = "job-spapp-statequery"
-                    WebAppUrl = "http://sharepoint.domain.com"
-                    Enabled   = $true
-                    Schedule  = "hourly between 0 and 59"
-                }
-
-                Mock -CommandName Get-SPTimerJob -MockWith {
-                    $returnVal = @{
-                        TypeName   = "job-spapp-statequery"
-                        IsDisabled = $false
-                        Schedule   = "weekly at sat 23:00:00"
+                BeforeAll {
+                    $testParams = @{
+                        TypeName  = "job-spapp-statequery"
+                        WebAppUrl = "http://sharepoint.domain.com"
+                        Enabled   = $true
+                        Schedule  = "hourly between 0 and 59"
                     }
-                    return , @($returnVal)
+
+                    Mock -CommandName Get-SPTimerJob -MockWith {
+                        $returnVal = @{
+                            TypeName   = "job-spapp-statequery"
+                            IsDisabled = $false
+                            Schedule   = "weekly at sat 23:00:00"
+                        }
+                        return , @($returnVal)
+                    }
                 }
 
                 It "Should return values from the get method" {
@@ -269,24 +283,26 @@ try
             }
 
             Context -Name "The server is in a farm and the incorrect schedule format has been used" -Fixture {
-                $testParams = @{
-                    TypeName  = "job-spapp-statequery"
-                    WebAppUrl = "N/A"
-                    Enabled   = $true
-                    Schedule  = "hourly between 0 and 59"
-                }
-
-                Mock -CommandName Get-SPTimerJob -MockWith {
-                    $returnVal = @{
-                        TypeName   = "job-spapp-statequery"
-                        IsDisabled = $false
-                        Schedule   = "incorrect format"
+                BeforeAll {
+                    $testParams = @{
+                        TypeName  = "job-spapp-statequery"
+                        WebAppUrl = "N/A"
+                        Enabled   = $true
+                        Schedule  = "hourly between 0 and 59"
                     }
-                    return , @($returnVal)
-                }
 
-                Mock -CommandName Set-SPTimerJob -MockWith {
-                    throw "Invalid Time: `"The time given was not given in the proper format. See: Get-Help Set-SPTimerJob -detailed`""
+                    Mock -CommandName Get-SPTimerJob -MockWith {
+                        $returnVal = @{
+                            TypeName   = "job-spapp-statequery"
+                            IsDisabled = $false
+                            Schedule   = "incorrect format"
+                        }
+                        return , @($returnVal)
+                    }
+
+                    Mock -CommandName Set-SPTimerJob -MockWith {
+                        throw "Invalid Time: `"The time given was not given in the proper format. See: Get-Help Set-SPTimerJob -detailed`""
+                    }
                 }
 
                 It "Should return values from the get method" {
@@ -303,24 +319,26 @@ try
             }
 
             Context -Name "The server is in a farm and the incorrect schedule format has been used - WebApp" -Fixture {
-                $testParams = @{
-                    TypeName  = "job-spapp-statequery"
-                    WebAppUrl = "http://sharepoint.domain.com"
-                    Enabled   = $true
-                    Schedule  = "hourly between 0 and 59"
-                }
-
-                Mock -CommandName Get-SPTimerJob -MockWith {
-                    $returnVal = @{
-                        TypeName   = "job-spapp-statequery"
-                        IsDisabled = $false
-                        Schedule   = "incorrect format"
+                BeforeAll {
+                    $testParams = @{
+                        TypeName  = "job-spapp-statequery"
+                        WebAppUrl = "http://sharepoint.domain.com"
+                        Enabled   = $true
+                        Schedule  = "hourly between 0 and 59"
                     }
-                    return , @($returnVal)
-                }
 
-                Mock -CommandName Set-SPTimerJob -MockWith {
-                    throw "Invalid Time: `"The time given was not given in the proper format. See: Get-Help Set-SPTimerJob -detailed`""
+                    Mock -CommandName Get-SPTimerJob -MockWith {
+                        $returnVal = @{
+                            TypeName   = "job-spapp-statequery"
+                            IsDisabled = $false
+                            Schedule   = "incorrect format"
+                        }
+                        return , @($returnVal)
+                    }
+
+                    Mock -CommandName Set-SPTimerJob -MockWith {
+                        throw "Invalid Time: `"The time given was not given in the proper format. See: Get-Help Set-SPTimerJob -detailed`""
+                    }
                 }
 
                 It "Should return values from the get method" {
@@ -337,20 +355,22 @@ try
             }
 
             Context -Name "The server is in a farm and the correct settings have been applied" -Fixture {
-                $testParams = @{
-                    TypeName  = "job-spapp-statequery"
-                    WebAppUrl = "N/A"
-                    Enabled   = $true
-                    Schedule  = "hourly between 0 and 59"
-                }
-
-                Mock -CommandName Get-SPTimerJob -MockWith {
-                    $returnVal = @{
-                        TypeName   = "job-spapp-statequery"
-                        IsDisabled = $false
-                        Schedule   = "hourly between 0 and 59"
+                BeforeAll {
+                    $testParams = @{
+                        TypeName  = "job-spapp-statequery"
+                        WebAppUrl = "N/A"
+                        Enabled   = $true
+                        Schedule  = "hourly between 0 and 59"
                     }
-                    return , @($returnVal)
+
+                    Mock -CommandName Get-SPTimerJob -MockWith {
+                        $returnVal = @{
+                            TypeName   = "job-spapp-statequery"
+                            IsDisabled = $false
+                            Schedule   = "hourly between 0 and 59"
+                        }
+                        return , @($returnVal)
+                    }
                 }
 
                 It "Should return values from the get method" {
@@ -363,20 +383,22 @@ try
             }
 
             Context -Name "The server is in a farm and the correct settings have been applied - WebApp" -Fixture {
-                $testParams = @{
-                    TypeName  = "job-spapp-statequery"
-                    WebAppUrl = "http://sharepoint.domain.com"
-                    Enabled   = $true
-                    Schedule  = "hourly between 0 and 59"
-                }
-
-                Mock -CommandName Get-SPTimerJob -MockWith {
-                    $returnVal = @{
-                        TypeName   = "job-spapp-statequery"
-                        IsDisabled = $false
-                        Schedule   = "hourly between 0 and 59"
+                BeforeAll {
+                    $testParams = @{
+                        TypeName  = "job-spapp-statequery"
+                        WebAppUrl = "http://sharepoint.domain.com"
+                        Enabled   = $true
+                        Schedule  = "hourly between 0 and 59"
                     }
-                    return , @($returnVal)
+
+                    Mock -CommandName Get-SPTimerJob -MockWith {
+                        $returnVal = @{
+                            TypeName   = "job-spapp-statequery"
+                            IsDisabled = $false
+                            Schedule   = "hourly between 0 and 59"
+                        }
+                        return , @($returnVal)
+                    }
                 }
 
                 It "Should return values from the get method" {

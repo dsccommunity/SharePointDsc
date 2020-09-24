@@ -46,37 +46,41 @@ Invoke-TestSetup
 
 try
 {
-    Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
-        InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
-            Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
+    InModuleScope -ModuleName $script:DSCResourceFullName -ScriptBlock {
+        Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
+            BeforeAll {
+                Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
-            # Initialize tests
+                # Initialize tests
 
-            # Mocks for all contexts
-            Mock -CommandName Set-SPWebApplication { }
+                # Mocks for all contexts
+                Mock -CommandName Set-SPWebApplication { }
+            }
 
             # Test contexts
             Context -Name "The web application doesn't exist" -Fixture {
-                $testParams = @{
-                    WebAppUrl = "http://sharepoint.contoso.com"
-                    Default   = @(
-                        (New-CimInstance -ClassName MSFT_SPWebAppAuthenticationMode -Property @{
-                                AuthenticationMethod = "WindowsAuthentication"
-                                WindowsAuthMethod    = "NTLM"
-                            } -ClientOnly),
-                        (New-CimInstance -ClassName MSFT_SPWebAppAuthenticationMode -Property @{
-                                AuthenticationMethod   = "Federated"
-                                AuthenticationProvider = "ADFS"
-                            } -ClientOnly),
-                        (New-CimInstance -ClassName MSFT_SPWebAppAuthenticationMode -Property @{
-                                AuthenticationMethod = "FBA"
-                                MembershipProvider   = "MemberProvider"
-                                RoleProvider         = "RoleProvider"
-                            } -ClientOnly)
-                    )
-                }
+                BeforeAll {
+                    $testParams = @{
+                        WebAppUrl = "http://sharepoint.contoso.com"
+                        Default   = @(
+                            (New-CimInstance -ClassName MSFT_SPWebAppAuthenticationMode -Property @{
+                                    AuthenticationMethod = "WindowsAuthentication"
+                                    WindowsAuthMethod    = "NTLM"
+                                } -ClientOnly),
+                            (New-CimInstance -ClassName MSFT_SPWebAppAuthenticationMode -Property @{
+                                    AuthenticationMethod   = "Federated"
+                                    AuthenticationProvider = "ADFS"
+                                } -ClientOnly),
+                            (New-CimInstance -ClassName MSFT_SPWebAppAuthenticationMode -Property @{
+                                    AuthenticationMethod = "FBA"
+                                    MembershipProvider   = "MemberProvider"
+                                    RoleProvider         = "RoleProvider"
+                                } -ClientOnly)
+                        )
+                    }
 
-                Mock -CommandName Get-SPWebapplication -MockWith { return $null }
+                    Mock -CommandName Get-SPWebapplication -MockWith { return $null }
+                }
 
                 It "Should return null from the get method" {
                     $result = Get-TargetResource @testParams
@@ -98,17 +102,19 @@ try
             }
 
             Context -Name "AuthenticationMethod=WindowsAuthentication used without WindowsAuthMethod parameter" -Fixture {
-                $testParams = @{
-                    WebAppUrl = "http://sharepoint.contoso.com"
-                    Default   = @(
-                        (New-CimInstance -ClassName MSFT_SPWebAppAuthenticationMode -Property @{
-                                AuthenticationMethod   = "WindowsAuthentication"
-                                AuthenticationProvider = "INCORRECT"
-                            } -ClientOnly)
-                    )
-                }
+                BeforeAll {
+                    $testParams = @{
+                        WebAppUrl = "http://sharepoint.contoso.com"
+                        Default   = @(
+                            (New-CimInstance -ClassName MSFT_SPWebAppAuthenticationMode -Property @{
+                                    AuthenticationMethod   = "WindowsAuthentication"
+                                    AuthenticationProvider = "INCORRECT"
+                                } -ClientOnly)
+                        )
+                    }
 
-                Mock -CommandName Get-SPWebapplication -MockWith { return $null }
+                    Mock -CommandName Get-SPWebapplication -MockWith { return $null }
+                }
 
                 It "Should return null from the get method" {
                     $result = Get-TargetResource @testParams
@@ -129,18 +135,20 @@ try
             }
 
             Context -Name "AuthenticationMethod=WindowsAuthentication used with AuthenticationProvider parameter" -Fixture {
-                $testParams = @{
-                    WebAppUrl = "http://sharepoint.contoso.com"
-                    Default   = @(
-                        (New-CimInstance -ClassName MSFT_SPWebAppAuthenticationMode -Property @{
-                                AuthenticationMethod   = "WindowsAuthentication"
-                                WindowsAuthMethod      = "NTLM"
-                                AuthenticationProvider = "INCORRECT"
-                            } -ClientOnly)
-                    )
-                }
+                BeforeAll {
+                    $testParams = @{
+                        WebAppUrl = "http://sharepoint.contoso.com"
+                        Default   = @(
+                            (New-CimInstance -ClassName MSFT_SPWebAppAuthenticationMode -Property @{
+                                    AuthenticationMethod   = "WindowsAuthentication"
+                                    WindowsAuthMethod      = "NTLM"
+                                    AuthenticationProvider = "INCORRECT"
+                                } -ClientOnly)
+                        )
+                    }
 
-                Mock -CommandName Get-SPWebapplication -MockWith { return $null }
+                    Mock -CommandName Get-SPWebapplication -MockWith { return $null }
+                }
 
                 It "Should return null from the get method" {
                     $result = Get-TargetResource @testParams
@@ -161,18 +169,20 @@ try
             }
 
             Context -Name "AuthenticationMethod=WindowsAuthentication used with MembershipProvider parameter" -Fixture {
-                $testParams = @{
-                    WebAppUrl = "http://sharepoint.contoso.com"
-                    Default   = @(
-                        (New-CimInstance -ClassName MSFT_SPWebAppAuthenticationMode -Property @{
-                                AuthenticationMethod = "WindowsAuthentication"
-                                WindowsAuthMethod    = "NTLM"
-                                MembershipProvider   = "INCORRECT"
-                            } -ClientOnly)
-                    )
-                }
+                BeforeAll {
+                    $testParams = @{
+                        WebAppUrl = "http://sharepoint.contoso.com"
+                        Default   = @(
+                            (New-CimInstance -ClassName MSFT_SPWebAppAuthenticationMode -Property @{
+                                    AuthenticationMethod = "WindowsAuthentication"
+                                    WindowsAuthMethod    = "NTLM"
+                                    MembershipProvider   = "INCORRECT"
+                                } -ClientOnly)
+                        )
+                    }
 
-                Mock -CommandName Get-SPWebapplication -MockWith { return $null }
+                    Mock -CommandName Get-SPWebapplication -MockWith { return $null }
+                }
 
                 It "Should return null from the get method" {
                     $result = Get-TargetResource @testParams
@@ -193,19 +203,21 @@ try
             }
 
             Context -Name "AuthenticationMethod=FBA used with AuthenticationProvider parameter" -Fixture {
-                $testParams = @{
-                    WebAppUrl = "http://sharepoint.contoso.com"
-                    Default   = @(
-                        (New-CimInstance -ClassName MSFT_SPWebAppAuthenticationMode -Property @{
-                                AuthenticationMethod   = "FBA"
-                                AuthenticationProvider = "INCORRECT"
-                                MembershipProvider     = "INCORRECT"
-                                RoleProvider           = "INCORRECT"
-                            } -ClientOnly)
-                    )
-                }
+                BeforeAll {
+                    $testParams = @{
+                        WebAppUrl = "http://sharepoint.contoso.com"
+                        Default   = @(
+                            (New-CimInstance -ClassName MSFT_SPWebAppAuthenticationMode -Property @{
+                                    AuthenticationMethod   = "FBA"
+                                    AuthenticationProvider = "INCORRECT"
+                                    MembershipProvider     = "INCORRECT"
+                                    RoleProvider           = "INCORRECT"
+                                } -ClientOnly)
+                        )
+                    }
 
-                Mock -CommandName Get-SPWebapplication -MockWith { return $null }
+                    Mock -CommandName Get-SPWebapplication -MockWith { return $null }
+                }
 
                 It "Should return null from the get method" {
                     $result = Get-TargetResource @testParams
@@ -226,19 +238,21 @@ try
             }
 
             Context -Name "AuthenticationMethod=FBA used with WindowsAuthMethod parameter" -Fixture {
-                $testParams = @{
-                    WebAppUrl = "http://sharepoint.contoso.com"
-                    Default   = @(
-                        (New-CimInstance -ClassName MSFT_SPWebAppAuthenticationMode -Property @{
-                                AuthenticationMethod = "FBA"
-                                MembershipProvider   = "INCORRECT"
-                                RoleProvider         = "INCORRECT"
-                                WindowsAuthMethod    = "NTLM"
-                            } -ClientOnly)
-                    )
-                }
+                BeforeAll {
+                    $testParams = @{
+                        WebAppUrl = "http://sharepoint.contoso.com"
+                        Default   = @(
+                            (New-CimInstance -ClassName MSFT_SPWebAppAuthenticationMode -Property @{
+                                    AuthenticationMethod = "FBA"
+                                    MembershipProvider   = "INCORRECT"
+                                    RoleProvider         = "INCORRECT"
+                                    WindowsAuthMethod    = "NTLM"
+                                } -ClientOnly)
+                        )
+                    }
 
-                Mock -CommandName Get-SPWebapplication -MockWith { return $null }
+                    Mock -CommandName Get-SPWebapplication -MockWith { return $null }
+                }
 
                 It "Should return null from the get method" {
                     $result = Get-TargetResource @testParams
@@ -259,18 +273,20 @@ try
             }
 
             Context -Name "AuthenticationMethod=Federated used with RoleProvider parameter" -Fixture {
-                $testParams = @{
-                    WebAppUrl = "http://sharepoint.contoso.com"
-                    Default   = @(
-                        (New-CimInstance -ClassName MSFT_SPWebAppAuthenticationMode -Property @{
-                                AuthenticationMethod   = "Federated"
-                                AuthenticationProvider = "INCORRECT"
-                                RoleProvider           = "INCORRECT"
-                            } -ClientOnly)
-                    )
-                }
+                BeforeAll {
+                    $testParams = @{
+                        WebAppUrl = "http://sharepoint.contoso.com"
+                        Default   = @(
+                            (New-CimInstance -ClassName MSFT_SPWebAppAuthenticationMode -Property @{
+                                    AuthenticationMethod   = "Federated"
+                                    AuthenticationProvider = "INCORRECT"
+                                    RoleProvider           = "INCORRECT"
+                                } -ClientOnly)
+                        )
+                    }
 
-                Mock -CommandName Get-SPWebapplication -MockWith { return $null }
+                    Mock -CommandName Get-SPWebapplication -MockWith { return $null }
+                }
 
                 It "Should return null from the get method" {
                     $result = Get-TargetResource @testParams
@@ -291,18 +307,20 @@ try
             }
 
             Context -Name "AuthenticationMethod=Federated used with WindowsAuthMethod parameter" -Fixture {
-                $testParams = @{
-                    WebAppUrl = "http://sharepoint.contoso.com"
-                    Default   = @(
-                        (New-CimInstance -ClassName MSFT_SPWebAppAuthenticationMode -Property @{
-                                AuthenticationMethod   = "Federated"
-                                AuthenticationProvider = "INCORRECT"
-                                WindowsAuthMethod      = "NTLM"
-                            } -ClientOnly)
-                    )
-                }
+                BeforeAll {
+                    $testParams = @{
+                        WebAppUrl = "http://sharepoint.contoso.com"
+                        Default   = @(
+                            (New-CimInstance -ClassName MSFT_SPWebAppAuthenticationMode -Property @{
+                                    AuthenticationMethod   = "Federated"
+                                    AuthenticationProvider = "INCORRECT"
+                                    WindowsAuthMethod      = "NTLM"
+                                } -ClientOnly)
+                        )
+                    }
 
-                Mock -CommandName Get-SPWebapplication -MockWith { return $null }
+                    Mock -CommandName Get-SPWebapplication -MockWith { return $null }
+                }
 
                 It "Should return null from the get method" {
                     $result = Get-TargetResource @testParams
@@ -323,17 +341,19 @@ try
             }
 
             Context -Name "AuthenticationMethod=FBA and missing MembershipProvider parameter" -Fixture {
-                $testParams = @{
-                    WebAppUrl = "http://sharepoint.contoso.com"
-                    Default   = @(
-                        (New-CimInstance -ClassName MSFT_SPWebAppAuthenticationMode -Property @{
-                                AuthenticationMethod   = "FBA"
-                                AuthenticationProvider = "INCORRECT"
-                            } -ClientOnly)
-                    )
-                }
+                BeforeAll {
+                    $testParams = @{
+                        WebAppUrl = "http://sharepoint.contoso.com"
+                        Default   = @(
+                            (New-CimInstance -ClassName MSFT_SPWebAppAuthenticationMode -Property @{
+                                    AuthenticationMethod   = "FBA"
+                                    AuthenticationProvider = "INCORRECT"
+                                } -ClientOnly)
+                        )
+                    }
 
-                Mock -CommandName Get-SPWebapplication -MockWith { return $null }
+                    Mock -CommandName Get-SPWebapplication -MockWith { return $null }
+                }
 
                 It "Should return null from the get method" {
                     $result = Get-TargetResource @testParams
@@ -354,16 +374,18 @@ try
             }
 
             Context -Name "AuthenticationMethod=Federated and missing AuthenticationProvider parameter" -Fixture {
-                $testParams = @{
-                    WebAppUrl = "http://sharepoint.contoso.com"
-                    Default   = @(
-                        (New-CimInstance -ClassName MSFT_SPWebAppAuthenticationMode -Property @{
-                                AuthenticationMethod = "Federated"
-                            } -ClientOnly)
-                    )
-                }
+                BeforeAll {
+                    $testParams = @{
+                        WebAppUrl = "http://sharepoint.contoso.com"
+                        Default   = @(
+                            (New-CimInstance -ClassName MSFT_SPWebAppAuthenticationMode -Property @{
+                                    AuthenticationMethod = "Federated"
+                                } -ClientOnly)
+                        )
+                    }
 
-                Mock -CommandName Get-SPWebapplication -MockWith { return $null }
+                    Mock -CommandName Get-SPWebapplication -MockWith { return $null }
+                }
 
                 It "Should return null from the get method" {
                     $result = Get-TargetResource @testParams
@@ -384,11 +406,13 @@ try
             }
 
             Context -Name "No zones are specified" -Fixture {
-                $testParams = @{
-                    WebAppUrl = "http://sharepoint.contoso.com"
-                }
+                BeforeAll {
+                    $testParams = @{
+                        WebAppUrl = "http://sharepoint.contoso.com"
+                    }
 
-                Mock -CommandName Get-SPWebapplication -MockWith { return $null }
+                    Mock -CommandName Get-SPWebapplication -MockWith { return $null }
+                }
 
                 It "Should throw exception in the get method" {
                     $result = Get-TargetResource @testParams
@@ -409,27 +433,29 @@ try
             }
 
             Context -Name "WebApplication is Classic, but Default Zone config is Claims" -Fixture {
-                $testParams = @{
-                    WebAppUrl = "http://sharepoint.contoso.com"
-                    Default   = @(
-                        (New-CimInstance -ClassName MSFT_SPWebAppAuthenticationMode -Property @{
-                                AuthenticationMethod = "WindowsAuthentication"
-                                WindowsAuthMethod    = "NTLM"
-                            } -ClientOnly)
-                    )
-                }
+                BeforeAll {
+                    $testParams = @{
+                        WebAppUrl = "http://sharepoint.contoso.com"
+                        Default   = @(
+                            (New-CimInstance -ClassName MSFT_SPWebAppAuthenticationMode -Property @{
+                                    AuthenticationMethod = "WindowsAuthentication"
+                                    WindowsAuthMethod    = "NTLM"
+                                } -ClientOnly)
+                        )
+                    }
 
-                Mock -CommandName Get-SPWebapplication -MockWith {
-                    return @{
-                        IisSettings = @{
-                            Keys = "Default"
+                    Mock -CommandName Get-SPWebapplication -MockWith {
+                        return @{
+                            IisSettings = @{
+                                Keys = "Default"
+                            }
                         }
                     }
-                }
-                Mock -CommandName Get-SPAuthenticationProvider -MockWith { }
+                    Mock -CommandName Get-SPAuthenticationProvider -MockWith { }
 
-                Mock -CommandName New-SPAuthenticationProvider -MockWith { return @{ } }
-                Mock -CommandName Get-SPTrustedIdentityTokenIssuer -MockWith { return @{ } }
+                    Mock -CommandName New-SPAuthenticationProvider -MockWith { return @{ } }
+                    Mock -CommandName Get-SPTrustedIdentityTokenIssuer -MockWith { return @{ } }
+                }
 
                 It "Should return null from the get method" {
                     $result = Get-TargetResource @testParams
@@ -446,27 +472,29 @@ try
             }
 
             Context -Name "WebApplication is Classic, but Intranet Zone config is Claims" -Fixture {
-                $testParams = @{
-                    WebAppUrl = "http://sharepoint.contoso.com"
-                    Intranet  = @(
-                        (New-CimInstance -ClassName MSFT_SPWebAppAuthenticationMode -Property @{
-                                AuthenticationMethod = "WindowsAuthentication"
-                                WindowsAuthMethod    = "NTLM"
-                            } -ClientOnly)
-                    )
-                }
+                BeforeAll {
+                    $testParams = @{
+                        WebAppUrl = "http://sharepoint.contoso.com"
+                        Intranet  = @(
+                            (New-CimInstance -ClassName MSFT_SPWebAppAuthenticationMode -Property @{
+                                    AuthenticationMethod = "WindowsAuthentication"
+                                    WindowsAuthMethod    = "NTLM"
+                                } -ClientOnly)
+                        )
+                    }
 
-                Mock -CommandName Get-SPWebapplication -MockWith {
-                    return @{
-                        IisSettings = @{
-                            Keys = "Intranet"
+                    Mock -CommandName Get-SPWebapplication -MockWith {
+                        return @{
+                            IisSettings = @{
+                                Keys = "Intranet"
+                            }
                         }
                     }
-                }
-                Mock -CommandName Get-SPAuthenticationProvider -MockWith { }
+                    Mock -CommandName Get-SPAuthenticationProvider -MockWith { }
 
-                Mock -CommandName New-SPAuthenticationProvider -MockWith { return @{ } }
-                Mock -CommandName Get-SPTrustedIdentityTokenIssuer -MockWith { return @{ } }
+                    Mock -CommandName New-SPAuthenticationProvider -MockWith { return @{ } }
+                    Mock -CommandName Get-SPTrustedIdentityTokenIssuer -MockWith { return @{ } }
+                }
 
                 It "Should throw exception in the set method" {
                     { Set-TargetResource @testParams } | Should -Throw "Specified Web Application is using Classic Authentication and Claims Authentication is specified."
@@ -474,27 +502,29 @@ try
             }
 
             Context -Name "WebApplication is Classic, but Internet Zone config is Claims" -Fixture {
-                $testParams = @{
-                    WebAppUrl = "http://sharepoint.contoso.com"
-                    Internet  = @(
-                        (New-CimInstance -ClassName MSFT_SPWebAppAuthenticationMode -Property @{
-                                AuthenticationMethod = "WindowsAuthentication"
-                                WindowsAuthMethod    = "NTLM"
-                            } -ClientOnly)
-                    )
-                }
+                BeforeAll {
+                    $testParams = @{
+                        WebAppUrl = "http://sharepoint.contoso.com"
+                        Internet  = @(
+                            (New-CimInstance -ClassName MSFT_SPWebAppAuthenticationMode -Property @{
+                                    AuthenticationMethod = "WindowsAuthentication"
+                                    WindowsAuthMethod    = "NTLM"
+                                } -ClientOnly)
+                        )
+                    }
 
-                Mock -CommandName Get-SPWebapplication -MockWith {
-                    return @{
-                        IisSettings = @{
-                            Keys = "Internet"
+                    Mock -CommandName Get-SPWebapplication -MockWith {
+                        return @{
+                            IisSettings = @{
+                                Keys = "Internet"
+                            }
                         }
                     }
-                }
-                Mock -CommandName Get-SPAuthenticationProvider -MockWith { }
+                    Mock -CommandName Get-SPAuthenticationProvider -MockWith { }
 
-                Mock -CommandName New-SPAuthenticationProvider -MockWith { return @{ } }
-                Mock -CommandName Get-SPTrustedIdentityTokenIssuer -MockWith { return @{ } }
+                    Mock -CommandName New-SPAuthenticationProvider -MockWith { return @{ } }
+                    Mock -CommandName Get-SPTrustedIdentityTokenIssuer -MockWith { return @{ } }
+                }
 
                 It "Should throw exception in the set method" {
                     { Set-TargetResource @testParams } | Should -Throw "Specified Web Application is using Classic Authentication and Claims Authentication is specified."
@@ -502,27 +532,29 @@ try
             }
 
             Context -Name "WebApplication is Classic, but Extranet Zone config is Claims" -Fixture {
-                $testParams = @{
-                    WebAppUrl = "http://sharepoint.contoso.com"
-                    Extranet  = @(
-                        (New-CimInstance -ClassName MSFT_SPWebAppAuthenticationMode -Property @{
-                                AuthenticationMethod = "WindowsAuthentication"
-                                WindowsAuthMethod    = "NTLM"
-                            } -ClientOnly)
-                    )
-                }
+                BeforeAll {
+                    $testParams = @{
+                        WebAppUrl = "http://sharepoint.contoso.com"
+                        Extranet  = @(
+                            (New-CimInstance -ClassName MSFT_SPWebAppAuthenticationMode -Property @{
+                                    AuthenticationMethod = "WindowsAuthentication"
+                                    WindowsAuthMethod    = "NTLM"
+                                } -ClientOnly)
+                        )
+                    }
 
-                Mock -CommandName Get-SPWebapplication -MockWith {
-                    return @{
-                        IisSettings = @{
-                            Keys = "Extranet"
+                    Mock -CommandName Get-SPWebapplication -MockWith {
+                        return @{
+                            IisSettings = @{
+                                Keys = "Extranet"
+                            }
                         }
                     }
-                }
-                Mock -CommandName Get-SPAuthenticationProvider -MockWith { }
+                    Mock -CommandName Get-SPAuthenticationProvider -MockWith { }
 
-                Mock -CommandName New-SPAuthenticationProvider -MockWith { return @{ } }
-                Mock -CommandName Get-SPTrustedIdentityTokenIssuer -MockWith { return @{ } }
+                    Mock -CommandName New-SPAuthenticationProvider -MockWith { return @{ } }
+                    Mock -CommandName Get-SPTrustedIdentityTokenIssuer -MockWith { return @{ } }
+                }
 
                 It "Should throw exception in the set method" {
                     { Set-TargetResource @testParams } | Should -Throw "Specified Web Application is using Classic Authentication and Claims Authentication is specified."
@@ -530,27 +562,29 @@ try
             }
 
             Context -Name "WebApplication is Classic, but Custom Zone config is Claims" -Fixture {
-                $testParams = @{
-                    WebAppUrl = "http://sharepoint.contoso.com"
-                    Custom    = @(
-                        (New-CimInstance -ClassName MSFT_SPWebAppAuthenticationMode -Property @{
-                                AuthenticationMethod = "WindowsAuthentication"
-                                WindowsAuthMethod    = "NTLM"
-                            } -ClientOnly)
-                    )
-                }
+                BeforeAll {
+                    $testParams = @{
+                        WebAppUrl = "http://sharepoint.contoso.com"
+                        Custom    = @(
+                            (New-CimInstance -ClassName MSFT_SPWebAppAuthenticationMode -Property @{
+                                    AuthenticationMethod = "WindowsAuthentication"
+                                    WindowsAuthMethod    = "NTLM"
+                                } -ClientOnly)
+                        )
+                    }
 
-                Mock -CommandName Get-SPWebapplication -MockWith {
-                    return @{
-                        IisSettings = @{
-                            Keys = "Custom"
+                    Mock -CommandName Get-SPWebapplication -MockWith {
+                        return @{
+                            IisSettings = @{
+                                Keys = "Custom"
+                            }
                         }
                     }
-                }
-                Mock -CommandName Get-SPAuthenticationProvider -MockWith { }
+                    Mock -CommandName Get-SPAuthenticationProvider -MockWith { }
 
-                Mock -CommandName New-SPAuthenticationProvider -MockWith { return @{ } }
-                Mock -CommandName Get-SPTrustedIdentityTokenIssuer -MockWith { return @{ } }
+                    Mock -CommandName New-SPAuthenticationProvider -MockWith { return @{ } }
+                    Mock -CommandName Get-SPTrustedIdentityTokenIssuer -MockWith { return @{ } }
+                }
 
                 It "Should throw exception in the set method" {
                     { Set-TargetResource @testParams } | Should -Throw "Specified Web Application is using Classic Authentication and Claims Authentication is specified."
@@ -558,51 +592,53 @@ try
             }
 
             Context -Name "Default Zone of Web application is configured as specified" -Fixture {
-                $testParams = @{
-                    WebAppUrl = "http://sharepoint.contoso.com"
-                    Default   = @(
-                        (New-CimInstance -ClassName MSFT_SPWebAppAuthenticationMode -Property @{
-                                AuthenticationMethod = "WindowsAuthentication"
-                                WindowsAuthMethod    = "NTLM"
-                                UseBasicAuth         = $true
-                            } -ClientOnly),
-                        (New-CimInstance -ClassName MSFT_SPWebAppAuthenticationMode -Property @{
-                                AuthenticationMethod   = "Federated"
-                                AuthenticationProvider = "ADFS"
-                            } -ClientOnly),
-                        (New-CimInstance -ClassName MSFT_SPWebAppAuthenticationMode -Property @{
-                                AuthenticationMethod = "FBA"
-                                MembershipProvider   = "MemberProvider"
-                                RoleProvider         = "RoleProvider"
-                            } -ClientOnly)
-                    )
-                }
+                BeforeAll {
+                    $testParams = @{
+                        WebAppUrl = "http://sharepoint.contoso.com"
+                        Default   = @(
+                            (New-CimInstance -ClassName MSFT_SPWebAppAuthenticationMode -Property @{
+                                    AuthenticationMethod = "WindowsAuthentication"
+                                    WindowsAuthMethod    = "NTLM"
+                                    UseBasicAuth         = $true
+                                } -ClientOnly),
+                            (New-CimInstance -ClassName MSFT_SPWebAppAuthenticationMode -Property @{
+                                    AuthenticationMethod   = "Federated"
+                                    AuthenticationProvider = "ADFS"
+                                } -ClientOnly),
+                            (New-CimInstance -ClassName MSFT_SPWebAppAuthenticationMode -Property @{
+                                    AuthenticationMethod = "FBA"
+                                    MembershipProvider   = "MemberProvider"
+                                    RoleProvider         = "RoleProvider"
+                                } -ClientOnly)
+                        )
+                    }
 
-                Mock -CommandName Get-SPWebapplication -MockWith {
-                    return @{
-                        IisSettings = @{
-                            Keys = "Default"
+                    Mock -CommandName Get-SPWebapplication -MockWith {
+                        return @{
+                            IisSettings = @{
+                                Keys = "Default"
+                            }
                         }
                     }
-                }
-                Mock -CommandName Get-SPAuthenticationProvider -MockWith {
-                    return @(
-                        @{
-                            DisplayName            = "Windows Authentication"
-                            ClaimProviderName      = 'AD'
-                            DisableKerberos        = $true
-                            UseBasicAuthentication = $true
-                        },
-                        @{
-                            DisplayName        = "Forms Authentication"
-                            ClaimProviderName  = 'Forms'
-                            RoleProvider       = "RoleProvider"
-                            MembershipProvider = "MemberProvider"
-                        },
-                        @{
-                            DisplayName = "ADFS"
-                        }
-                    )
+                    Mock -CommandName Get-SPAuthenticationProvider -MockWith {
+                        return @(
+                            @{
+                                DisplayName            = "Windows Authentication"
+                                ClaimProviderName      = 'AD'
+                                DisableKerberos        = $true
+                                UseBasicAuthentication = $true
+                            },
+                            @{
+                                DisplayName        = "Forms Authentication"
+                                ClaimProviderName  = 'Forms'
+                                RoleProvider       = "RoleProvider"
+                                MembershipProvider = "MemberProvider"
+                            },
+                            @{
+                                DisplayName = "ADFS"
+                            }
+                        )
+                    }
                 }
 
                 It "Should return null from the get method" {
@@ -619,39 +655,41 @@ try
             }
 
             Context -Name "Specified Federated AuthenticationProvider does not exist" -Fixture {
-                $testParams = @{
-                    WebAppUrl = "http://sharepoint.contoso.com"
-                    Default   = @(
-                        (New-CimInstance -ClassName MSFT_SPWebAppAuthenticationMode -Property @{
-                                AuthenticationMethod = "WindowsAuthentication"
-                                WindowsAuthMethod    = "NTLM"
-                            } -ClientOnly),
-                        (New-CimInstance -ClassName MSFT_SPWebAppAuthenticationMode -Property @{
-                                AuthenticationMethod   = "Federated"
-                                AuthenticationProvider = "ADFS"
-                            } -ClientOnly)
-                    )
-                }
+                BeforeAll {
+                    $testParams = @{
+                        WebAppUrl = "http://sharepoint.contoso.com"
+                        Default   = @(
+                            (New-CimInstance -ClassName MSFT_SPWebAppAuthenticationMode -Property @{
+                                    AuthenticationMethod = "WindowsAuthentication"
+                                    WindowsAuthMethod    = "NTLM"
+                                } -ClientOnly),
+                            (New-CimInstance -ClassName MSFT_SPWebAppAuthenticationMode -Property @{
+                                    AuthenticationMethod   = "Federated"
+                                    AuthenticationProvider = "ADFS"
+                                } -ClientOnly)
+                        )
+                    }
 
-                Mock -CommandName Get-SPWebapplication -MockWith {
-                    return @{
-                        IisSettings = @{
-                            Keys = "Default"
+                    Mock -CommandName Get-SPWebapplication -MockWith {
+                        return @{
+                            IisSettings = @{
+                                Keys = "Default"
+                            }
                         }
                     }
-                }
-                Mock -CommandName Get-SPAuthenticationProvider -MockWith {
-                    return @(
-                        @{
-                            DisplayName       = "Windows Authentication"
-                            ClaimProviderName = 'AD'
-                            DisableKerberos   = $true
-                        }
-                    )
-                }
+                    Mock -CommandName Get-SPAuthenticationProvider -MockWith {
+                        return @(
+                            @{
+                                DisplayName       = "Windows Authentication"
+                                ClaimProviderName = 'AD'
+                                DisableKerberos   = $true
+                            }
+                        )
+                    }
 
-                Mock -CommandName New-SPAuthenticationProvider -MockWith { return @{ } }
-                Mock -CommandName Get-SPTrustedIdentityTokenIssuer -MockWith { return $null }
+                    Mock -CommandName New-SPAuthenticationProvider -MockWith { return @{ } }
+                    Mock -CommandName Get-SPTrustedIdentityTokenIssuer -MockWith { return $null }
+                }
 
                 It "Should throw exception in the set method" {
                     { Set-TargetResource @testParams } | Should -Throw "Specified AuthenticationProvider ADFS does not exist"
@@ -659,52 +697,54 @@ try
             }
 
             Context -Name "Default Zone of Web application is not configured as specified" -Fixture {
-                $testParams = @{
-                    WebAppUrl = "http://sharepoint.contoso.com"
-                    Default   = @(
-                        (New-CimInstance -ClassName MSFT_SPWebAppAuthenticationMode -Property @{
-                                AuthenticationMethod = "WindowsAuthentication"
-                                WindowsAuthMethod    = "NTLM"
-                                UseBasicAuth         = $true
-                            } -ClientOnly),
-                        (New-CimInstance -ClassName MSFT_SPWebAppAuthenticationMode -Property @{
-                                AuthenticationMethod   = "Federated"
-                                AuthenticationProvider = "ADFS"
-                            } -ClientOnly),
-                        (New-CimInstance -ClassName MSFT_SPWebAppAuthenticationMode -Property @{
-                                AuthenticationMethod = "FBA"
-                                MembershipProvider   = "MemberProvider"
-                                RoleProvider         = "RoleProvider"
-                            } -ClientOnly)
-                    )
-                }
+                BeforeAll {
+                    $testParams = @{
+                        WebAppUrl = "http://sharepoint.contoso.com"
+                        Default   = @(
+                            (New-CimInstance -ClassName MSFT_SPWebAppAuthenticationMode -Property @{
+                                    AuthenticationMethod = "WindowsAuthentication"
+                                    WindowsAuthMethod    = "NTLM"
+                                    UseBasicAuth         = $true
+                                } -ClientOnly),
+                            (New-CimInstance -ClassName MSFT_SPWebAppAuthenticationMode -Property @{
+                                    AuthenticationMethod   = "Federated"
+                                    AuthenticationProvider = "ADFS"
+                                } -ClientOnly),
+                            (New-CimInstance -ClassName MSFT_SPWebAppAuthenticationMode -Property @{
+                                    AuthenticationMethod = "FBA"
+                                    MembershipProvider   = "MemberProvider"
+                                    RoleProvider         = "RoleProvider"
+                                } -ClientOnly)
+                        )
+                    }
 
-                Mock -CommandName Get-SPWebapplication -MockWith {
-                    return @{
-                        IisSettings = @{
-                            Keys = "Default"
+                    Mock -CommandName Get-SPWebapplication -MockWith {
+                        return @{
+                            IisSettings = @{
+                                Keys = "Default"
+                            }
                         }
                     }
-                }
-                Mock -CommandName Get-SPAuthenticationProvider -MockWith {
-                    return @(
-                        @{
-                            DisplayName            = "Windows Authentication"
-                            ClaimProviderName      = 'AD'
-                            DisableKerberos        = $true
-                            UseBasicAuthentication = $false
-                        },
-                        @{
-                            DisplayName        = "Forms Authentication"
-                            ClaimProviderName  = 'Forms'
-                            RoleProvider       = "RoleProvider"
-                            MembershipProvider = "MemberProvider"
-                        }
-                    )
-                }
+                    Mock -CommandName Get-SPAuthenticationProvider -MockWith {
+                        return @(
+                            @{
+                                DisplayName            = "Windows Authentication"
+                                ClaimProviderName      = 'AD'
+                                DisableKerberos        = $true
+                                UseBasicAuthentication = $false
+                            },
+                            @{
+                                DisplayName        = "Forms Authentication"
+                                ClaimProviderName  = 'Forms'
+                                RoleProvider       = "RoleProvider"
+                                MembershipProvider = "MemberProvider"
+                            }
+                        )
+                    }
 
-                Mock -CommandName New-SPAuthenticationProvider -MockWith { return @{ } }
-                Mock -CommandName Get-SPTrustedIdentityTokenIssuer -MockWith { return @{ } }
+                    Mock -CommandName New-SPAuthenticationProvider -MockWith { return @{ } }
+                    Mock -CommandName Get-SPTrustedIdentityTokenIssuer -MockWith { return @{ } }
+                }
 
                 It "Should return null from the get method" {
                     $result = Get-TargetResource @testParams
@@ -725,49 +765,51 @@ try
             }
 
             Context -Name "Intranet Zone of Web application is configured as specified" -Fixture {
-                $testParams = @{
-                    WebAppUrl = "http://sharepoint.contoso.com"
-                    Intranet  = @(
-                        (New-CimInstance -ClassName MSFT_SPWebAppAuthenticationMode -Property @{
-                                AuthenticationMethod = "WindowsAuthentication"
-                                WindowsAuthMethod    = "NTLM"
-                            } -ClientOnly),
-                        (New-CimInstance -ClassName MSFT_SPWebAppAuthenticationMode -Property @{
-                                AuthenticationMethod   = "Federated"
-                                AuthenticationProvider = "ADFS"
-                            } -ClientOnly),
-                        (New-CimInstance -ClassName MSFT_SPWebAppAuthenticationMode -Property @{
-                                AuthenticationMethod = "FBA"
-                                MembershipProvider   = "MemberProvider"
-                                RoleProvider         = "RoleProvider"
-                            } -ClientOnly)
-                    )
-                }
+                BeforeAll {
+                    $testParams = @{
+                        WebAppUrl = "http://sharepoint.contoso.com"
+                        Intranet  = @(
+                            (New-CimInstance -ClassName MSFT_SPWebAppAuthenticationMode -Property @{
+                                    AuthenticationMethod = "WindowsAuthentication"
+                                    WindowsAuthMethod    = "NTLM"
+                                } -ClientOnly),
+                            (New-CimInstance -ClassName MSFT_SPWebAppAuthenticationMode -Property @{
+                                    AuthenticationMethod   = "Federated"
+                                    AuthenticationProvider = "ADFS"
+                                } -ClientOnly),
+                            (New-CimInstance -ClassName MSFT_SPWebAppAuthenticationMode -Property @{
+                                    AuthenticationMethod = "FBA"
+                                    MembershipProvider   = "MemberProvider"
+                                    RoleProvider         = "RoleProvider"
+                                } -ClientOnly)
+                        )
+                    }
 
-                Mock -CommandName Get-SPWebapplication -MockWith {
-                    return @{
-                        IisSettings = @{
-                            Keys = "Default", "Intranet"
+                    Mock -CommandName Get-SPWebapplication -MockWith {
+                        return @{
+                            IisSettings = @{
+                                Keys = "Default", "Intranet"
+                            }
                         }
                     }
-                }
-                Mock -CommandName Get-SPAuthenticationProvider -MockWith {
-                    return @(
-                        @{
-                            DisplayName       = "Windows Authentication"
-                            ClaimProviderName = 'AD'
-                            DisableKerberos   = $true
-                        },
-                        @{
-                            DisplayName        = "Forms Authentication"
-                            ClaimProviderName  = 'Forms'
-                            RoleProvider       = "RoleProvider"
-                            MembershipProvider = "MemberProvider"
-                        },
-                        @{
-                            DisplayName = "ADFS"
-                        }
-                    )
+                    Mock -CommandName Get-SPAuthenticationProvider -MockWith {
+                        return @(
+                            @{
+                                DisplayName       = "Windows Authentication"
+                                ClaimProviderName = 'AD'
+                                DisableKerberos   = $true
+                            },
+                            @{
+                                DisplayName        = "Forms Authentication"
+                                ClaimProviderName  = 'Forms'
+                                RoleProvider       = "RoleProvider"
+                                MembershipProvider = "MemberProvider"
+                            },
+                            @{
+                                DisplayName = "ADFS"
+                            }
+                        )
+                    }
                 }
 
                 It "Should return null from the get method" {
@@ -784,50 +826,52 @@ try
             }
 
             Context -Name "Intranet Zone of Web application is not configured as specified" -Fixture {
-                $testParams = @{
-                    WebAppUrl = "http://sharepoint.contoso.com"
-                    Intranet  = @(
-                        (New-CimInstance -ClassName MSFT_SPWebAppAuthenticationMode -Property @{
-                                AuthenticationMethod = "WindowsAuthentication"
-                                WindowsAuthMethod    = "NTLM"
-                            } -ClientOnly),
-                        (New-CimInstance -ClassName MSFT_SPWebAppAuthenticationMode -Property @{
-                                AuthenticationMethod   = "Federated"
-                                AuthenticationProvider = "ADFS"
-                            } -ClientOnly),
-                        (New-CimInstance -ClassName MSFT_SPWebAppAuthenticationMode -Property @{
-                                AuthenticationMethod = "FBA"
-                                MembershipProvider   = "MemberProvider"
-                                RoleProvider         = "RoleProvider"
-                            } -ClientOnly)
-                    )
-                }
+                BeforeAll {
+                    $testParams = @{
+                        WebAppUrl = "http://sharepoint.contoso.com"
+                        Intranet  = @(
+                            (New-CimInstance -ClassName MSFT_SPWebAppAuthenticationMode -Property @{
+                                    AuthenticationMethod = "WindowsAuthentication"
+                                    WindowsAuthMethod    = "NTLM"
+                                } -ClientOnly),
+                            (New-CimInstance -ClassName MSFT_SPWebAppAuthenticationMode -Property @{
+                                    AuthenticationMethod   = "Federated"
+                                    AuthenticationProvider = "ADFS"
+                                } -ClientOnly),
+                            (New-CimInstance -ClassName MSFT_SPWebAppAuthenticationMode -Property @{
+                                    AuthenticationMethod = "FBA"
+                                    MembershipProvider   = "MemberProvider"
+                                    RoleProvider         = "RoleProvider"
+                                } -ClientOnly)
+                        )
+                    }
 
-                Mock -CommandName Get-SPWebapplication -MockWith {
-                    return @{
-                        IisSettings = @{
-                            Keys = "Default", "Intranet"
+                    Mock -CommandName Get-SPWebapplication -MockWith {
+                        return @{
+                            IisSettings = @{
+                                Keys = "Default", "Intranet"
+                            }
                         }
                     }
-                }
-                Mock -CommandName Get-SPAuthenticationProvider -MockWith {
-                    return @(
-                        @{
-                            DisplayName       = "Windows Authentication"
-                            ClaimProviderName = 'AD'
-                            DisableKerberos   = $true
-                        },
-                        @{
-                            DisplayName        = "Forms Authentication"
-                            ClaimProviderName  = 'Forms'
-                            RoleProvider       = "RoleProvider"
-                            MembershipProvider = "MemberProvider"
-                        }
-                    )
-                }
+                    Mock -CommandName Get-SPAuthenticationProvider -MockWith {
+                        return @(
+                            @{
+                                DisplayName       = "Windows Authentication"
+                                ClaimProviderName = 'AD'
+                                DisableKerberos   = $true
+                            },
+                            @{
+                                DisplayName        = "Forms Authentication"
+                                ClaimProviderName  = 'Forms'
+                                RoleProvider       = "RoleProvider"
+                                MembershipProvider = "MemberProvider"
+                            }
+                        )
+                    }
 
-                Mock -CommandName New-SPAuthenticationProvider -MockWith { return @{ } }
-                Mock -CommandName Get-SPTrustedIdentityTokenIssuer -MockWith { return @{ } }
+                    Mock -CommandName New-SPAuthenticationProvider -MockWith { return @{ } }
+                    Mock -CommandName Get-SPTrustedIdentityTokenIssuer -MockWith { return @{ } }
+                }
 
                 It "Should return null from the get method" {
                     $result = Get-TargetResource @testParams
@@ -848,49 +892,51 @@ try
             }
 
             Context -Name "Internet Zone of Web application is configured as specified" -Fixture {
-                $testParams = @{
-                    WebAppUrl = "http://sharepoint.contoso.com"
-                    Internet  = @(
-                        (New-CimInstance -ClassName MSFT_SPWebAppAuthenticationMode -Property @{
-                                AuthenticationMethod = "WindowsAuthentication"
-                                WindowsAuthMethod    = "NTLM"
-                            } -ClientOnly),
-                        (New-CimInstance -ClassName MSFT_SPWebAppAuthenticationMode -Property @{
-                                AuthenticationMethod   = "Federated"
-                                AuthenticationProvider = "ADFS"
-                            } -ClientOnly),
-                        (New-CimInstance -ClassName MSFT_SPWebAppAuthenticationMode -Property @{
-                                AuthenticationMethod = "FBA"
-                                MembershipProvider   = "MemberProvider"
-                                RoleProvider         = "RoleProvider"
-                            } -ClientOnly)
-                    )
-                }
+                BeforeAll {
+                    $testParams = @{
+                        WebAppUrl = "http://sharepoint.contoso.com"
+                        Internet  = @(
+                            (New-CimInstance -ClassName MSFT_SPWebAppAuthenticationMode -Property @{
+                                    AuthenticationMethod = "WindowsAuthentication"
+                                    WindowsAuthMethod    = "NTLM"
+                                } -ClientOnly),
+                            (New-CimInstance -ClassName MSFT_SPWebAppAuthenticationMode -Property @{
+                                    AuthenticationMethod   = "Federated"
+                                    AuthenticationProvider = "ADFS"
+                                } -ClientOnly),
+                            (New-CimInstance -ClassName MSFT_SPWebAppAuthenticationMode -Property @{
+                                    AuthenticationMethod = "FBA"
+                                    MembershipProvider   = "MemberProvider"
+                                    RoleProvider         = "RoleProvider"
+                                } -ClientOnly)
+                        )
+                    }
 
-                Mock -CommandName Get-SPWebapplication -MockWith {
-                    return @{
-                        IisSettings = @{
-                            Keys = "Default", "Internet"
+                    Mock -CommandName Get-SPWebapplication -MockWith {
+                        return @{
+                            IisSettings = @{
+                                Keys = "Default", "Internet"
+                            }
                         }
                     }
-                }
-                Mock -CommandName Get-SPAuthenticationProvider -MockWith {
-                    return @(
-                        @{
-                            DisplayName       = "Windows Authentication"
-                            ClaimProviderName = 'AD'
-                            DisableKerberos   = $true
-                        },
-                        @{
-                            DisplayName        = "Forms Authentication"
-                            ClaimProviderName  = 'Forms'
-                            RoleProvider       = "RoleProvider"
-                            MembershipProvider = "MemberProvider"
-                        },
-                        @{
-                            DisplayName = "ADFS"
-                        }
-                    )
+                    Mock -CommandName Get-SPAuthenticationProvider -MockWith {
+                        return @(
+                            @{
+                                DisplayName       = "Windows Authentication"
+                                ClaimProviderName = 'AD'
+                                DisableKerberos   = $true
+                            },
+                            @{
+                                DisplayName        = "Forms Authentication"
+                                ClaimProviderName  = 'Forms'
+                                RoleProvider       = "RoleProvider"
+                                MembershipProvider = "MemberProvider"
+                            },
+                            @{
+                                DisplayName = "ADFS"
+                            }
+                        )
+                    }
                 }
 
                 It "Should return null from the get method" {
@@ -907,50 +953,52 @@ try
             }
 
             Context -Name "Internet Zone of Web application is not configured as specified" -Fixture {
-                $testParams = @{
-                    WebAppUrl = "http://sharepoint.contoso.com"
-                    Internet  = @(
-                        (New-CimInstance -ClassName MSFT_SPWebAppAuthenticationMode -Property @{
-                                AuthenticationMethod = "WindowsAuthentication"
-                                WindowsAuthMethod    = "NTLM"
-                            } -ClientOnly),
-                        (New-CimInstance -ClassName MSFT_SPWebAppAuthenticationMode -Property @{
-                                AuthenticationMethod   = "Federated"
-                                AuthenticationProvider = "ADFS"
-                            } -ClientOnly),
-                        (New-CimInstance -ClassName MSFT_SPWebAppAuthenticationMode -Property @{
-                                AuthenticationMethod = "FBA"
-                                MembershipProvider   = "MemberProvider"
-                                RoleProvider         = "RoleProvider"
-                            } -ClientOnly)
-                    )
-                }
+                BeforeAll {
+                    $testParams = @{
+                        WebAppUrl = "http://sharepoint.contoso.com"
+                        Internet  = @(
+                            (New-CimInstance -ClassName MSFT_SPWebAppAuthenticationMode -Property @{
+                                    AuthenticationMethod = "WindowsAuthentication"
+                                    WindowsAuthMethod    = "NTLM"
+                                } -ClientOnly),
+                            (New-CimInstance -ClassName MSFT_SPWebAppAuthenticationMode -Property @{
+                                    AuthenticationMethod   = "Federated"
+                                    AuthenticationProvider = "ADFS"
+                                } -ClientOnly),
+                            (New-CimInstance -ClassName MSFT_SPWebAppAuthenticationMode -Property @{
+                                    AuthenticationMethod = "FBA"
+                                    MembershipProvider   = "MemberProvider"
+                                    RoleProvider         = "RoleProvider"
+                                } -ClientOnly)
+                        )
+                    }
 
-                Mock -CommandName Get-SPWebapplication -MockWith {
-                    return @{
-                        IisSettings = @{
-                            Keys = "Default", "Internet"
+                    Mock -CommandName Get-SPWebapplication -MockWith {
+                        return @{
+                            IisSettings = @{
+                                Keys = "Default", "Internet"
+                            }
                         }
                     }
-                }
-                Mock -CommandName Get-SPAuthenticationProvider -MockWith {
-                    return @(
-                        @{
-                            DisplayName       = "Windows Authentication"
-                            ClaimProviderName = 'AD'
-                            DisableKerberos   = $true
-                        },
-                        @{
-                            DisplayName        = "Forms Authentication"
-                            ClaimProviderName  = 'Forms'
-                            RoleProvider       = "RoleProvider"
-                            MembershipProvider = "MemberProvider"
-                        }
-                    )
-                }
+                    Mock -CommandName Get-SPAuthenticationProvider -MockWith {
+                        return @(
+                            @{
+                                DisplayName       = "Windows Authentication"
+                                ClaimProviderName = 'AD'
+                                DisableKerberos   = $true
+                            },
+                            @{
+                                DisplayName        = "Forms Authentication"
+                                ClaimProviderName  = 'Forms'
+                                RoleProvider       = "RoleProvider"
+                                MembershipProvider = "MemberProvider"
+                            }
+                        )
+                    }
 
-                Mock -CommandName New-SPAuthenticationProvider -MockWith { return @{ } }
-                Mock -CommandName Get-SPTrustedIdentityTokenIssuer -MockWith { return @{ } }
+                    Mock -CommandName New-SPAuthenticationProvider -MockWith { return @{ } }
+                    Mock -CommandName Get-SPTrustedIdentityTokenIssuer -MockWith { return @{ } }
+                }
 
                 It "Should return null from the get method" {
                     $result = Get-TargetResource @testParams
@@ -971,49 +1019,51 @@ try
             }
 
             Context -Name "Extranet Zone of Web application is configured as specified" -Fixture {
-                $testParams = @{
-                    WebAppUrl = "http://sharepoint.contoso.com"
-                    Extranet  = @(
-                        (New-CimInstance -ClassName MSFT_SPWebAppAuthenticationMode -Property @{
-                                AuthenticationMethod = "WindowsAuthentication"
-                                WindowsAuthMethod    = "NTLM"
-                            } -ClientOnly),
-                        (New-CimInstance -ClassName MSFT_SPWebAppAuthenticationMode -Property @{
-                                AuthenticationMethod   = "Federated"
-                                AuthenticationProvider = "ADFS"
-                            } -ClientOnly),
-                        (New-CimInstance -ClassName MSFT_SPWebAppAuthenticationMode -Property @{
-                                AuthenticationMethod = "FBA"
-                                MembershipProvider   = "MemberProvider"
-                                RoleProvider         = "RoleProvider"
-                            } -ClientOnly)
-                    )
-                }
+                BeforeAll {
+                    $testParams = @{
+                        WebAppUrl = "http://sharepoint.contoso.com"
+                        Extranet  = @(
+                            (New-CimInstance -ClassName MSFT_SPWebAppAuthenticationMode -Property @{
+                                    AuthenticationMethod = "WindowsAuthentication"
+                                    WindowsAuthMethod    = "NTLM"
+                                } -ClientOnly),
+                            (New-CimInstance -ClassName MSFT_SPWebAppAuthenticationMode -Property @{
+                                    AuthenticationMethod   = "Federated"
+                                    AuthenticationProvider = "ADFS"
+                                } -ClientOnly),
+                            (New-CimInstance -ClassName MSFT_SPWebAppAuthenticationMode -Property @{
+                                    AuthenticationMethod = "FBA"
+                                    MembershipProvider   = "MemberProvider"
+                                    RoleProvider         = "RoleProvider"
+                                } -ClientOnly)
+                        )
+                    }
 
-                Mock -CommandName Get-SPWebapplication -MockWith {
-                    return @{
-                        IisSettings = @{
-                            Keys = "Default", "Extranet"
+                    Mock -CommandName Get-SPWebapplication -MockWith {
+                        return @{
+                            IisSettings = @{
+                                Keys = "Default", "Extranet"
+                            }
                         }
                     }
-                }
-                Mock -CommandName Get-SPAuthenticationProvider -MockWith {
-                    return @(
-                        @{
-                            DisplayName       = "Windows Authentication"
-                            ClaimProviderName = 'AD'
-                            DisableKerberos   = $true
-                        },
-                        @{
-                            DisplayName        = "Forms Authentication"
-                            ClaimProviderName  = 'Forms'
-                            RoleProvider       = "RoleProvider"
-                            MembershipProvider = "MemberProvider"
-                        },
-                        @{
-                            DisplayName = "ADFS"
-                        }
-                    )
+                    Mock -CommandName Get-SPAuthenticationProvider -MockWith {
+                        return @(
+                            @{
+                                DisplayName       = "Windows Authentication"
+                                ClaimProviderName = 'AD'
+                                DisableKerberos   = $true
+                            },
+                            @{
+                                DisplayName        = "Forms Authentication"
+                                ClaimProviderName  = 'Forms'
+                                RoleProvider       = "RoleProvider"
+                                MembershipProvider = "MemberProvider"
+                            },
+                            @{
+                                DisplayName = "ADFS"
+                            }
+                        )
+                    }
                 }
 
                 It "Should return null from the get method" {
@@ -1030,48 +1080,50 @@ try
             }
 
             Context -Name "Extranet Zone of Web application is not configured as specified" -Fixture {
-                $testParams = @{
-                    WebAppUrl = "http://sharepoint.contoso.com"
-                    Extranet  = @(
-                        (New-CimInstance -ClassName MSFT_SPWebAppAuthenticationMode -Property @{
-                                AuthenticationMethod = "WindowsAuthentication"
-                                WindowsAuthMethod    = "NTLM"
-                            } -ClientOnly),
-                        (New-CimInstance -ClassName MSFT_SPWebAppAuthenticationMode -Property @{
-                                AuthenticationMethod   = "Federated"
-                                AuthenticationProvider = "ADFS"
-                            } -ClientOnly)
-                    )
-                }
+                BeforeAll {
+                    $testParams = @{
+                        WebAppUrl = "http://sharepoint.contoso.com"
+                        Extranet  = @(
+                            (New-CimInstance -ClassName MSFT_SPWebAppAuthenticationMode -Property @{
+                                    AuthenticationMethod = "WindowsAuthentication"
+                                    WindowsAuthMethod    = "NTLM"
+                                } -ClientOnly),
+                            (New-CimInstance -ClassName MSFT_SPWebAppAuthenticationMode -Property @{
+                                    AuthenticationMethod   = "Federated"
+                                    AuthenticationProvider = "ADFS"
+                                } -ClientOnly)
+                        )
+                    }
 
-                Mock -CommandName Get-SPWebapplication -MockWith {
-                    return @{
-                        IisSettings = @{
-                            Keys = "Default", "Extranet"
+                    Mock -CommandName Get-SPWebapplication -MockWith {
+                        return @{
+                            IisSettings = @{
+                                Keys = "Default", "Extranet"
+                            }
                         }
                     }
-                }
-                Mock -CommandName Get-SPAuthenticationProvider -MockWith {
-                    return @(
-                        @{
-                            DisplayName       = "Windows Authentication"
-                            ClaimProviderName = 'AD'
-                            DisableKerberos   = $true
-                        },
-                        @{
-                            DisplayName        = "Forms Authentication"
-                            ClaimProviderName  = 'Forms'
-                            RoleProvider       = "RoleProvider"
-                            MembershipProvider = "MemberProvider"
-                        },
-                        @{
-                            DisplayName = "ADFS"
-                        }
-                    )
-                }
+                    Mock -CommandName Get-SPAuthenticationProvider -MockWith {
+                        return @(
+                            @{
+                                DisplayName       = "Windows Authentication"
+                                ClaimProviderName = 'AD'
+                                DisableKerberos   = $true
+                            },
+                            @{
+                                DisplayName        = "Forms Authentication"
+                                ClaimProviderName  = 'Forms'
+                                RoleProvider       = "RoleProvider"
+                                MembershipProvider = "MemberProvider"
+                            },
+                            @{
+                                DisplayName = "ADFS"
+                            }
+                        )
+                    }
 
-                Mock -CommandName New-SPAuthenticationProvider -MockWith { return @{ } }
-                Mock -CommandName Get-SPTrustedIdentityTokenIssuer -MockWith { return @{ } }
+                    Mock -CommandName New-SPAuthenticationProvider -MockWith { return @{ } }
+                    Mock -CommandName Get-SPTrustedIdentityTokenIssuer -MockWith { return @{ } }
+                }
 
                 It "Should return null from the get method" {
                     $result = Get-TargetResource @testParams
@@ -1092,49 +1144,51 @@ try
             }
 
             Context -Name "Custom Zone of Web application is configured as specified" -Fixture {
-                $testParams = @{
-                    WebAppUrl = "http://sharepoint.contoso.com"
-                    Custom    = @(
-                        (New-CimInstance -ClassName MSFT_SPWebAppAuthenticationMode -Property @{
-                                AuthenticationMethod = "WindowsAuthentication"
-                                WindowsAuthMethod    = "NTLM"
-                            } -ClientOnly),
-                        (New-CimInstance -ClassName MSFT_SPWebAppAuthenticationMode -Property @{
-                                AuthenticationMethod   = "Federated"
-                                AuthenticationProvider = "ADFS"
-                            } -ClientOnly),
-                        (New-CimInstance -ClassName MSFT_SPWebAppAuthenticationMode -Property @{
-                                AuthenticationMethod = "FBA"
-                                MembershipProvider   = "MemberProvider"
-                                RoleProvider         = "RoleProvider"
-                            } -ClientOnly)
-                    )
-                }
+                BeforeAll {
+                    $testParams = @{
+                        WebAppUrl = "http://sharepoint.contoso.com"
+                        Custom    = @(
+                            (New-CimInstance -ClassName MSFT_SPWebAppAuthenticationMode -Property @{
+                                    AuthenticationMethod = "WindowsAuthentication"
+                                    WindowsAuthMethod    = "NTLM"
+                                } -ClientOnly),
+                            (New-CimInstance -ClassName MSFT_SPWebAppAuthenticationMode -Property @{
+                                    AuthenticationMethod   = "Federated"
+                                    AuthenticationProvider = "ADFS"
+                                } -ClientOnly),
+                            (New-CimInstance -ClassName MSFT_SPWebAppAuthenticationMode -Property @{
+                                    AuthenticationMethod = "FBA"
+                                    MembershipProvider   = "MemberProvider"
+                                    RoleProvider         = "RoleProvider"
+                                } -ClientOnly)
+                        )
+                    }
 
-                Mock -CommandName Get-SPWebapplication -MockWith {
-                    return @{
-                        IisSettings = @{
-                            Keys = "Default", "Custom"
+                    Mock -CommandName Get-SPWebapplication -MockWith {
+                        return @{
+                            IisSettings = @{
+                                Keys = "Default", "Custom"
+                            }
                         }
                     }
-                }
-                Mock -CommandName Get-SPAuthenticationProvider -MockWith {
-                    return @(
-                        @{
-                            DisplayName       = "Windows Authentication"
-                            ClaimProviderName = 'AD'
-                            DisableKerberos   = $true
-                        },
-                        @{
-                            DisplayName        = "Forms Authentication"
-                            ClaimProviderName  = 'Forms'
-                            RoleProvider       = "RoleProvider"
-                            MembershipProvider = "MemberProvider"
-                        },
-                        @{
-                            DisplayName = "ADFS"
-                        }
-                    )
+                    Mock -CommandName Get-SPAuthenticationProvider -MockWith {
+                        return @(
+                            @{
+                                DisplayName       = "Windows Authentication"
+                                ClaimProviderName = 'AD'
+                                DisableKerberos   = $true
+                            },
+                            @{
+                                DisplayName        = "Forms Authentication"
+                                ClaimProviderName  = 'Forms'
+                                RoleProvider       = "RoleProvider"
+                                MembershipProvider = "MemberProvider"
+                            },
+                            @{
+                                DisplayName = "ADFS"
+                            }
+                        )
+                    }
                 }
 
                 It "Should return null from the get method" {
@@ -1151,50 +1205,52 @@ try
             }
 
             Context -Name "Custom Zone of Web application is not configured as specified" -Fixture {
-                $testParams = @{
-                    WebAppUrl = "http://sharepoint.contoso.com"
-                    Custom    = @(
-                        (New-CimInstance -ClassName MSFT_SPWebAppAuthenticationMode -Property @{
-                                AuthenticationMethod = "WindowsAuthentication"
-                                WindowsAuthMethod    = "Kerberos"
-                            } -ClientOnly),
-                        (New-CimInstance -ClassName MSFT_SPWebAppAuthenticationMode -Property @{
-                                AuthenticationMethod   = "Federated"
-                                AuthenticationProvider = "ADFS"
-                            } -ClientOnly),
-                        (New-CimInstance -ClassName MSFT_SPWebAppAuthenticationMode -Property @{
-                                AuthenticationMethod = "FBA"
-                                MembershipProvider   = "MemberProvider"
-                                RoleProvider         = "RoleProvider"
-                            } -ClientOnly)
-                    )
-                }
+                BeforeAll {
+                    $testParams = @{
+                        WebAppUrl = "http://sharepoint.contoso.com"
+                        Custom    = @(
+                            (New-CimInstance -ClassName MSFT_SPWebAppAuthenticationMode -Property @{
+                                    AuthenticationMethod = "WindowsAuthentication"
+                                    WindowsAuthMethod    = "Kerberos"
+                                } -ClientOnly),
+                            (New-CimInstance -ClassName MSFT_SPWebAppAuthenticationMode -Property @{
+                                    AuthenticationMethod   = "Federated"
+                                    AuthenticationProvider = "ADFS"
+                                } -ClientOnly),
+                            (New-CimInstance -ClassName MSFT_SPWebAppAuthenticationMode -Property @{
+                                    AuthenticationMethod = "FBA"
+                                    MembershipProvider   = "MemberProvider"
+                                    RoleProvider         = "RoleProvider"
+                                } -ClientOnly)
+                        )
+                    }
 
-                Mock -CommandName Get-SPWebapplication -MockWith {
-                    return @{
-                        IisSettings = @{
-                            Keys = "Default", "Custom"
+                    Mock -CommandName Get-SPWebapplication -MockWith {
+                        return @{
+                            IisSettings = @{
+                                Keys = "Default", "Custom"
+                            }
                         }
                     }
-                }
-                Mock -CommandName Get-SPAuthenticationProvider -MockWith {
-                    return @(
-                        @{
-                            DisplayName       = "Windows Authentication"
-                            ClaimProviderName = 'AD'
-                            DisableKerberos   = $false
-                        },
-                        @{
-                            DisplayName        = "Forms Authentication"
-                            ClaimProviderName  = 'Forms'
-                            RoleProvider       = "RoleProvider"
-                            MembershipProvider = "MemberProvider"
-                        }
-                    )
-                }
+                    Mock -CommandName Get-SPAuthenticationProvider -MockWith {
+                        return @(
+                            @{
+                                DisplayName       = "Windows Authentication"
+                                ClaimProviderName = 'AD'
+                                DisableKerberos   = $false
+                            },
+                            @{
+                                DisplayName        = "Forms Authentication"
+                                ClaimProviderName  = 'Forms'
+                                RoleProvider       = "RoleProvider"
+                                MembershipProvider = "MemberProvider"
+                            }
+                        )
+                    }
 
-                Mock -CommandName New-SPAuthenticationProvider -MockWith { return @{ } }
-                Mock -CommandName Get-SPTrustedIdentityTokenIssuer -MockWith { return @{ } }
+                    Mock -CommandName New-SPAuthenticationProvider -MockWith { return @{ } }
+                    Mock -CommandName Get-SPTrustedIdentityTokenIssuer -MockWith { return @{ } }
+                }
 
                 It "Should return null from the get method" {
                     $result = Get-TargetResource @testParams

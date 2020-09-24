@@ -46,30 +46,33 @@ Invoke-TestSetup
 
 try
 {
-    Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
-        InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
-            Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
+    InModuleScope -ModuleName $script:DSCResourceFullName -ScriptBlock {
+        Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
+            BeforeAll {
+                Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
-            Mock -CommandName Get-SPDiagnosticsProvider -MockWith {
-                return @{
-                    Name                = "job-diagnostics-blocking-query-provider"
-                    MaxTotalSizeInBytes = 100000
-                    Retention           = 14
-                    Enabled             = $true
-                } | Add-Member ScriptMethod Update {
-                } -PassThru
+                Mock -CommandName Get-SPDiagnosticsProvider -MockWith {
+                    return @{
+                        Name                = "job-diagnostics-blocking-query-provider"
+                        MaxTotalSizeInBytes = 100000
+                        Retention           = 14
+                        Enabled             = $true
+                    } | Add-Member ScriptMethod Update {
+                    } -PassThru
+                }
+
+                Mock -CommandName Set-SPDiagnosticsProvider -MockWith { }
             }
 
-            Mock -CommandName Set-SPDiagnosticsProvider -MockWith { }
-
             Context -Name "When the Diagnostics Provider passed doesn't exist" -Fixture {
-
-                $testParams = @{
-                    Name                = "MyFakeProvider"
-                    Retention           = 13
-                    MaxTotalSizeInBytes = 10000
-                    Enabled             = $true
-                    Ensure              = "Present"
+                BeforeAll {
+                    $testParams = @{
+                        Name                = "MyFakeProvider"
+                        Retention           = 13
+                        MaxTotalSizeInBytes = 10000
+                        Enabled             = $true
+                        Ensure              = "Present"
+                    }
                 }
 
                 It "Should return false when the Test method is called" {
@@ -86,13 +89,14 @@ try
             }
 
             Context -Name "When the Diagnostics Provider exists" -Fixture {
-
-                $testParams = @{
-                    Name                = "job-diagnostics-blocking-query-provider"
-                    Retention           = 13
-                    MaxTotalSizeInBytes = 10000
-                    Enabled             = $true
-                    Ensure              = "Present"
+                BeforeAll {
+                    $testParams = @{
+                        Name                = "job-diagnostics-blocking-query-provider"
+                        Retention           = 13
+                        MaxTotalSizeInBytes = 10000
+                        Enabled             = $true
+                        Ensure              = "Present"
+                    }
                 }
 
                 It "Should return false when the Test method is called" {
@@ -110,13 +114,14 @@ try
             }
 
             Context -Name "When using Ensure is Absent" -Fixture {
-
-                $testParams = @{
-                    Name                = "job-diagnostics-blocking-query-provider"
-                    Retention           = 13
-                    MaxTotalSizeInBytes = 10000
-                    Enabled             = $true
-                    Ensure              = "Absent"
+                BeforeAll {
+                    $testParams = @{
+                        Name                = "job-diagnostics-blocking-query-provider"
+                        Retention           = 13
+                        MaxTotalSizeInBytes = 10000
+                        Enabled             = $true
+                        Ensure              = "Absent"
+                    }
                 }
 
                 It "Should properly configure the provider" {

@@ -46,44 +46,48 @@ Invoke-TestSetup
 
 try
 {
-    Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
-        InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
-            Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
+    InModuleScope -ModuleName $script:DSCResourceFullName -ScriptBlock {
+        Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
+            BeforeAll {
+                Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
-            # Mocks for all contexts
-            Mock -CommandName Get-SPEnterpriseSearchServiceApplication {
-                return @{
-                    SearchCenterUrl = "http://example.sharepoint.com/pages"
+                # Mocks for all contexts
+                Mock -CommandName Get-SPEnterpriseSearchServiceApplication {
+                    return @{
+                        SearchCenterUrl = "http://example.sharepoint.com/pages"
+                    }
                 }
-            }
 
-            Mock -CommandName New-SPEnterpriseSearchMetadataCategory {
-                return @{
-                    Name = "Test Category"
+                Mock -CommandName New-SPEnterpriseSearchMetadataCategory {
+                    return @{
+                        Name = "Test Category"
+                    }
                 }
-            }
 
-            Mock -CommandName Set-SPEnterpriseSearchMetadataCategory {
-                return @{ }
-            }
+                Mock -CommandName Set-SPEnterpriseSearchMetadataCategory {
+                    return @{ }
+                }
 
-            Mock -CommandName Remove-SPEnterpriseSearchMetadataCategory {
-                return @{ }
+                Mock -CommandName Remove-SPEnterpriseSearchMetadataCategory {
+                    return @{ }
+                }
             }
 
             # Test contexts
             Context -Name "A search metadata category doesn't exist and should" -Fixture {
-                Mock -CommandName Get-SPEnterpriseSearchMetadataCategory {
-                    return $null
-                }
+                BeforeAll {
+                    Mock -CommandName Get-SPEnterpriseSearchMetadataCategory {
+                        return $null
+                    }
 
-                $testParams = @{
-                    Name                           = "Test Category"
-                    ServiceAppName                 = "Search Service Application"
-                    AutoCreateNewManagedProperties = $true
-                    DiscoverNewProperties          = $true
-                    MapToContents                  = $true
-                    Ensure                         = "Present"
+                    $testParams = @{
+                        Name                           = "Test Category"
+                        ServiceAppName                 = "Search Service Application"
+                        AutoCreateNewManagedProperties = $true
+                        DiscoverNewProperties          = $true
+                        MapToContents                  = $true
+                        Ensure                         = "Present"
+                    }
                 }
 
                 It "Should return absent from the get method" {
@@ -100,16 +104,18 @@ try
             }
 
             Context -Name "A search metadata category exists and shouldn't" -Fixture {
-                Mock -CommandName Get-SPEnterpriseSearchMetadataCategory {
-                    return @{
-                        Name = "Test Category"
+                BeforeAll {
+                    Mock -CommandName Get-SPEnterpriseSearchMetadataCategory {
+                        return @{
+                            Name = "Test Category"
+                        }
                     }
-                }
 
-                $testParams = @{
-                    Name           = "Test Category"
-                    ServiceAppName = "Search Service Application"
-                    Ensure         = "Absent"
+                    $testParams = @{
+                        Name           = "Test Category"
+                        ServiceAppName = "Search Service Application"
+                        Ensure         = "Absent"
+                    }
                 }
 
                 It "Should return Present from the Get Method" {
@@ -122,17 +128,19 @@ try
             }
 
             Context -Name "Trying to delete a non-empty metadata category" -Fixture {
-                Mock -CommandName Get-SPEnterpriseSearchMetadataCategory {
-                    return @{
-                        Name                 = "Test Category"
-                        CrawledPropertyCount = 1
+                BeforeAll {
+                    Mock -CommandName Get-SPEnterpriseSearchMetadataCategory {
+                        return @{
+                            Name                 = "Test Category"
+                            CrawledPropertyCount = 1
+                        }
                     }
-                }
 
-                $testParams = @{
-                    Name           = "Test Category"
-                    ServiceAppName = "Search Service Application"
-                    Ensure         = "Absent"
+                    $testParams = @{
+                        Name           = "Test Category"
+                        ServiceAppName = "Search Service Application"
+                        Ensure         = "Absent"
+                    }
                 }
 
                 It "Should throw an error from the Set Method" {
@@ -141,14 +149,16 @@ try
             }
 
             Context -Name "An invalid Search Service Aplication was specified" -Fixture {
-                $testParams = @{
-                    Name           = "Test Category"
-                    ServiceAppName = "Search Service Application"
-                    Ensure         = "Absent"
-                }
+                BeforeAll {
+                    $testParams = @{
+                        Name           = "Test Category"
+                        ServiceAppName = "Search Service Application"
+                        Ensure         = "Absent"
+                    }
 
-                Mock -CommandName Get-SPEnterpriseSearchServiceApplication {
-                    return $null
+                    Mock -CommandName Get-SPEnterpriseSearchServiceApplication {
+                        return $null
+                    }
                 }
 
                 It "Should throw an error in the Get Method" {

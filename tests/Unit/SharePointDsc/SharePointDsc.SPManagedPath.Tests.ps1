@@ -46,26 +46,30 @@ Invoke-TestSetup
 
 try
 {
-    Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
-        InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
-            Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
+    InModuleScope -ModuleName $script:DSCResourceFullName -ScriptBlock {
+        Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
+            BeforeAll {
+                Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
-            # Mocks for all contexts
-            Mock -CommandName New-SPManagedPath -MockWith { }
-            Mock -CommandName Remove-SPManagedPath -MockWith { }
+                # Mocks for all contexts
+                Mock -CommandName New-SPManagedPath -MockWith { }
+                Mock -CommandName Remove-SPManagedPath -MockWith { }
+            }
 
             # Test contexts
             Context -Name "The managed path does not exist and should" -Fixture {
-                $testParams = @{
-                    WebAppUrl   = "http://sites.sharepoint.com"
-                    RelativeUrl = "teams"
-                    Explicit    = $false
-                    HostHeader  = $false
-                    Ensure      = "Present"
-                }
+                BeforeAll {
+                    $testParams = @{
+                        WebAppUrl   = "http://sites.sharepoint.com"
+                        RelativeUrl = "teams"
+                        Explicit    = $false
+                        HostHeader  = $false
+                        Ensure      = "Present"
+                    }
 
-                Mock -CommandName Get-SPManagedPath -MockWith {
-                    return $null
+                    Mock -CommandName Get-SPManagedPath -MockWith {
+                        return $null
+                    }
                 }
 
                 It "Should return absent from the get method" {
@@ -89,18 +93,20 @@ try
             }
 
             Context -Name "The path exists but is of the wrong type" -Fixture {
-                $testParams = @{
-                    WebAppUrl   = "http://sites.sharepoint.com"
-                    RelativeUrl = "teams"
-                    Explicit    = $false
-                    HostHeader  = $false
-                    Ensure      = "Present"
-                }
+                BeforeAll {
+                    $testParams = @{
+                        WebAppUrl   = "http://sites.sharepoint.com"
+                        RelativeUrl = "teams"
+                        Explicit    = $false
+                        HostHeader  = $false
+                        Ensure      = "Present"
+                    }
 
-                Mock -CommandName Get-SPManagedPath -MockWith {
-                    return @{
-                        Name = $testParams.RelativeUrl
-                        Type = "ExplicitInclusion"
+                    Mock -CommandName Get-SPManagedPath -MockWith {
+                        return @{
+                            Name = $testParams.RelativeUrl
+                            Type = "ExplicitInclusion"
+                        }
                     }
                 }
 
@@ -110,18 +116,20 @@ try
             }
 
             Context -Name "The path exists and is the correct type" -Fixture {
-                $testParams = @{
-                    WebAppUrl   = "http://sites.sharepoint.com"
-                    RelativeUrl = "teams"
-                    Explicit    = $false
-                    HostHeader  = $false
-                    Ensure      = "Present"
-                }
+                BeforeAll {
+                    $testParams = @{
+                        WebAppUrl   = "http://sites.sharepoint.com"
+                        RelativeUrl = "teams"
+                        Explicit    = $false
+                        HostHeader  = $false
+                        Ensure      = "Present"
+                    }
 
-                Mock -CommandName Get-SPManagedPath -MockWith {
-                    return @{
-                        Name = $testParams.RelativeUrl
-                        Type = "WildcardInclusion"
+                    Mock -CommandName Get-SPManagedPath -MockWith {
+                        return @{
+                            Name = $testParams.RelativeUrl
+                            Type = "WildcardInclusion"
+                        }
                     }
                 }
 
@@ -135,18 +143,20 @@ try
             }
 
             Context -Name "The managed path exists but shouldn't" -Fixture {
-                $testParams = @{
-                    WebAppUrl   = "http://sites.sharepoint.com"
-                    RelativeUrl = "teams"
-                    Explicit    = $false
-                    HostHeader  = $false
-                    Ensure      = "Absent"
-                }
+                BeforeAll {
+                    $testParams = @{
+                        WebAppUrl   = "http://sites.sharepoint.com"
+                        RelativeUrl = "teams"
+                        Explicit    = $false
+                        HostHeader  = $false
+                        Ensure      = "Absent"
+                    }
 
-                Mock -CommandName Get-SPManagedPath -MockWith {
-                    return @{
-                        Name = $testParams.RelativeUrl
-                        Type = "WildcardInclusion"
+                    Mock -CommandName Get-SPManagedPath -MockWith {
+                        return @{
+                            Name = $testParams.RelativeUrl
+                            Type = "WildcardInclusion"
+                        }
                     }
                 }
 
@@ -165,16 +175,18 @@ try
             }
 
             Context -Name "The managed path doesn't exist and shouldn't" -Fixture {
-                $testParams = @{
-                    WebAppUrl   = "http://sites.sharepoint.com"
-                    RelativeUrl = "teams"
-                    Explicit    = $false
-                    HostHeader  = $false
-                    Ensure      = "Absent"
-                }
+                BeforeAll {
+                    $testParams = @{
+                        WebAppUrl   = "http://sites.sharepoint.com"
+                        RelativeUrl = "teams"
+                        Explicit    = $false
+                        HostHeader  = $false
+                        Ensure      = "Absent"
+                    }
 
-                Mock -CommandName Get-SPManagedPath -MockWith {
-                    return $null
+                    Mock -CommandName Get-SPManagedPath -MockWith {
+                        return $null
+                    }
                 }
 
                 It "Should return absent from the set method" {

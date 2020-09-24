@@ -47,32 +47,36 @@ Invoke-TestSetup
 
 try
 {
-    Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
-        InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
-            Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
+    InModuleScope -ModuleName $script:DSCResourceFullName -ScriptBlock {
+        Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
+            BeforeAll {
+                Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
-            # Initialize tests
-            $mockPassword = ConvertTo-SecureString -String "password" -AsPlainText -Force
-            $mockCredential = New-Object -TypeName System.Management.Automation.PSCredential `
-                -ArgumentList @("username", $mockPassword)
+                # Initialize tests
+                $mockPassword = ConvertTo-SecureString -String "password" -AsPlainText -Force
+                $mockCredential = New-Object -TypeName System.Management.Automation.PSCredential `
+                    -ArgumentList @("username", $mockPassword)
 
-            # Mocks for all contexts
-            Mock -CommandName New-SPManagedAccount -MockWith { }
-            Mock -CommandName Set-SPManagedAccount -MockWith { }
-            Mock -CommandName Remove-SPManagedAccount -MockWith { }
+                # Mocks for all contexts
+                Mock -CommandName New-SPManagedAccount -MockWith { }
+                Mock -CommandName Set-SPManagedAccount -MockWith { }
+                Mock -CommandName Remove-SPManagedAccount -MockWith { }
+            }
 
             # Test contexts
             Context -Name "The specified managed account does not exist in the farm and it should" -Fixture {
-                $testParams = @{
-                    Account           = $mockCredential
-                    EmailNotification = 7
-                    PreExpireDays     = 7
-                    Schedule          = ""
-                    Ensure            = "Present"
-                    AccountName       = $mockCredential.Username
-                }
+                BeforeAll {
+                    $testParams = @{
+                        Account           = $mockCredential
+                        EmailNotification = 7
+                        PreExpireDays     = 7
+                        Schedule          = ""
+                        Ensure            = "Present"
+                        AccountName       = $mockCredential.Username
+                    }
 
-                Mock -CommandName Get-SPManagedAccount -MockWith { return $null }
+                    Mock -CommandName Get-SPManagedAccount -MockWith { return $null }
+                }
 
                 It "Should return null from the get method" {
                     (Get-TargetResource @testParams).Ensure | Should -Be "Absent"
@@ -90,21 +94,23 @@ try
             }
 
             Context -Name "The specified managed account exists and it should but has an incorrect schedule" -Fixture {
-                $testParams = @{
-                    Account           = $mockCredential
-                    EmailNotification = 7
-                    PreExpireDays     = 7
-                    Schedule          = ""
-                    Ensure            = "Present"
-                    AccountName       = $mockCredential.Username
-                }
+                BeforeAll {
+                    $testParams = @{
+                        Account           = $mockCredential
+                        EmailNotification = 7
+                        PreExpireDays     = 7
+                        Schedule          = ""
+                        Ensure            = "Present"
+                        AccountName       = $mockCredential.Username
+                    }
 
-                Mock -CommandName Get-SPManagedAccount -MockWith {
-                    return @{
-                        Username                 = $testParams.AccountName
-                        DaysBeforeChangeToEmail  = $testParams.EmailNotification
-                        DaysBeforeExpiryToChange = $testParams.PreExpireDays
-                        ChangeSchedule           = "wrong schedule"
+                    Mock -CommandName Get-SPManagedAccount -MockWith {
+                        return @{
+                            Username                 = $testParams.AccountName
+                            DaysBeforeChangeToEmail  = $testParams.EmailNotification
+                            DaysBeforeExpiryToChange = $testParams.PreExpireDays
+                            ChangeSchedule           = "wrong schedule"
+                        }
                     }
                 }
 
@@ -119,21 +125,23 @@ try
             }
 
             Context -Name "The specified managed account exists and it should but has incorrect notifcation settings" -Fixture {
-                $testParams = @{
-                    Account           = $mockCredential
-                    EmailNotification = 7
-                    PreExpireDays     = 7
-                    Schedule          = ""
-                    Ensure            = "Present"
-                    AccountName       = $mockCredential.Username
-                }
+                BeforeAll {
+                    $testParams = @{
+                        Account           = $mockCredential
+                        EmailNotification = 7
+                        PreExpireDays     = 7
+                        Schedule          = ""
+                        Ensure            = "Present"
+                        AccountName       = $mockCredential.Username
+                    }
 
-                Mock -CommandName Get-SPManagedAccount -MockWith {
-                    return @{
-                        Username                 = $testParams.AccountName
-                        DaysBeforeChangeToEmail  = 0
-                        DaysBeforeExpiryToChange = 0
-                        ChangeSchedule           = $testParams.Schedule
+                    Mock -CommandName Get-SPManagedAccount -MockWith {
+                        return @{
+                            Username                 = $testParams.AccountName
+                            DaysBeforeChangeToEmail  = 0
+                            DaysBeforeExpiryToChange = 0
+                            ChangeSchedule           = $testParams.Schedule
+                        }
                     }
                 }
 
@@ -143,21 +151,23 @@ try
             }
 
             Context -Name "The specified managed account exists and it should and is also configured correctly" -Fixture {
-                $testParams = @{
-                    Account           = $mockCredential
-                    EmailNotification = 7
-                    PreExpireDays     = 7
-                    Schedule          = ""
-                    Ensure            = "Present"
-                    AccountName       = $mockCredential.Username
-                }
+                BeforeAll {
+                    $testParams = @{
+                        Account           = $mockCredential
+                        EmailNotification = 7
+                        PreExpireDays     = 7
+                        Schedule          = ""
+                        Ensure            = "Present"
+                        AccountName       = $mockCredential.Username
+                    }
 
-                Mock -CommandName Get-SPManagedAccount -MockWith {
-                    return @{
-                        Username                 = $testParams.AccountName
-                        DaysBeforeChangeToEmail  = $testParams.EmailNotification
-                        DaysBeforeExpiryToChange = $testParams.PreExpireDays
-                        ChangeSchedule           = $testParams.Schedule
+                    Mock -CommandName Get-SPManagedAccount -MockWith {
+                        return @{
+                            Username                 = $testParams.AccountName
+                            DaysBeforeChangeToEmail  = $testParams.EmailNotification
+                            DaysBeforeExpiryToChange = $testParams.PreExpireDays
+                            ChangeSchedule           = $testParams.Schedule
+                        }
                     }
                 }
 
@@ -171,20 +181,22 @@ try
             }
 
             Context -Name "The specified account should exist but the account property has not been specified" -Fixture {
-                $testParams = @{
-                    EmailNotification = 7
-                    PreExpireDays     = 7
-                    Schedule          = ""
-                    Ensure            = "Present"
-                    AccountName       = "username"
-                }
+                BeforeAll {
+                    $testParams = @{
+                        EmailNotification = 7
+                        PreExpireDays     = 7
+                        Schedule          = ""
+                        Ensure            = "Present"
+                        AccountName       = "username"
+                    }
 
-                Mock -CommandName Get-SPManagedAccount -MockWith {
-                    return @{
-                        Username                 = $testParams.AccountName
-                        DaysBeforeChangeToEmail  = $testParams.EmailNotification
-                        DaysBeforeExpiryToChange = $testParams.PreExpireDays
-                        ChangeSchedule           = $testParams.Schedule
+                    Mock -CommandName Get-SPManagedAccount -MockWith {
+                        return @{
+                            Username                 = $testParams.AccountName
+                            DaysBeforeChangeToEmail  = $testParams.EmailNotification
+                            DaysBeforeExpiryToChange = $testParams.PreExpireDays
+                            ChangeSchedule           = $testParams.Schedule
+                        }
                     }
                 }
 
@@ -194,17 +206,19 @@ try
             }
 
             Context -Name "The specified account exists but it should not" -Fixture {
-                $testParams = @{
-                    Ensure      = "Absent"
-                    AccountName = "username"
-                }
+                BeforeAll {
+                    $testParams = @{
+                        Ensure      = "Absent"
+                        AccountName = "username"
+                    }
 
-                Mock -CommandName Get-SPManagedAccount -MockWith {
-                    return @{
-                        Username                 = $testParams.AccountName
-                        DaysBeforeChangeToEmail  = $testParams.EmailNotification
-                        DaysBeforeExpiryToChange = $testParams.PreExpireDays
-                        ChangeSchedule           = $testParams.Schedule
+                    Mock -CommandName Get-SPManagedAccount -MockWith {
+                        return @{
+                            Username                 = $testParams.AccountName
+                            DaysBeforeChangeToEmail  = $testParams.EmailNotification
+                            DaysBeforeExpiryToChange = $testParams.PreExpireDays
+                            ChangeSchedule           = $testParams.Schedule
+                        }
                     }
                 }
 
@@ -223,13 +237,15 @@ try
             }
 
             Context -Name "The specified account does not exist and it should not" -Fixture {
-                $testParams = @{
-                    Ensure      = "Absent"
-                    AccountName = "username"
-                }
+                BeforeAll {
+                    $testParams = @{
+                        Ensure      = "Absent"
+                        AccountName = "username"
+                    }
 
-                Mock -CommandName Get-SPManagedAccount -MockWith {
-                    return $null
+                    Mock -CommandName Get-SPManagedAccount -MockWith {
+                        return $null
+                    }
                 }
 
                 It "Should return absent from the get method" {

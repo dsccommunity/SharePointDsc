@@ -46,62 +46,66 @@ Invoke-TestSetup
 
 try
 {
-    Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
-        InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
-            Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
+    InModuleScope -ModuleName $script:DSCResourceFullName -ScriptBlock {
+        Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
+            BeforeAll {
+                Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
-            # global variables
-            $SPTrustName = "HighTrust"
-            $SPTrustDescription = "HighTrust fake"
-            $SPTrustRegisteredIssuerNameIdentifier = "22222222-2222-2222-2222-222222222222"
-            $SPTrustSigningCertificateThumbprint = "123ABCFACE123ABCFACE123ABCFACE123ABCFACE"
-            $SPTrustSigningCertificateFilePath = "F:\Data\DSC\FakeSigning.cer"
-            $SPTrustAuthenticationRealm = [Guid]::New("D683A811-9F0E-49BC-8BF1-DC1C5FEC8447")
+                # global variables
+                $SPTrustName = "HighTrust"
+                $SPTrustDescription = "HighTrust fake"
+                $SPTrustRegisteredIssuerNameIdentifier = "22222222-2222-2222-2222-222222222222"
+                $SPTrustSigningCertificateThumbprint = "123ABCFACE123ABCFACE123ABCFACE123ABCFACE"
+                $SPTrustSigningCertificateFilePath = "F:\Data\DSC\FakeSigning.cer"
+                $SPTrustAuthenticationRealm = [Guid]::New("D683A811-9F0E-49BC-8BF1-DC1C5FEC8447")
 
-            # Mocks for all contexts
-            Mock -CommandName New-SPTrustedSecurityTokenIssuer -MockWith {
-                $sptrust = [pscustomobject]@{
-                    RegisteredIssuerName = "$SPTrustRegisteredIssuerNameIdentifier@$(Get-SPAuthenticationRealm)"
-                    Name                 = $testParams.Name
-                    Description          = $SPTrustDescription
+                # Mocks for all contexts
+                Mock -CommandName New-SPTrustedSecurityTokenIssuer -MockWith {
+                    $sptrust = [pscustomobject]@{
+                        RegisteredIssuerName = "$SPTrustRegisteredIssuerNameIdentifier@$(Get-SPAuthenticationRealm)"
+                        Name                 = $testParams.Name
+                        Description          = $SPTrustDescription
+                    }
+                    $sptrust | Add-Member -Name Update -MemberType ScriptMethod -Value { }
+                    return $sptrust
                 }
-                $sptrust | Add-Member -Name Update -MemberType ScriptMethod -Value { }
-                return $sptrust
+
+                Mock -CommandName Get-ChildItem -MockWith {
+                    return @(
+                        @{
+                            Thumbprint = $SPTrustSigningCertificateThumbprint
+                        }
+                    )
+                } -ParameterFilter { $Path -eq "Cert:\LocalMachine\My" }
+
+                Mock -CommandName New-Object -MockWith {
+                    return @(
+                        @{
+                            Thumbprint = $SPTrustSigningCertificateThumbprint
+                        }
+                    )
+                } -ParameterFilter { $TypeName -eq "System.Security.Cryptography.X509Certificates.X509Certificate2" }
+                #} -ParameterFilter { $TypeName -eq "System.Security.Cryptography.X509Certificates.X509Certificate2" -and $PSBoundParameters[0] -match $SPTrustSigningCertificateFilePath }
+
+                Mock -CommandName Get-SPAuthenticationRealm -MockWith {
+                    return $SPTrustAuthenticationRealm
+                }
+
+                Mock -CommandName Set-SPTrustedSecurityTokenIssuer -MockWith { }
             }
-
-            Mock -CommandName Get-ChildItem -MockWith {
-                return @(
-                    @{
-                        Thumbprint = $SPTrustSigningCertificateThumbprint
-                    }
-                )
-            } -ParameterFilter { $Path -eq "Cert:\LocalMachine\My" }
-
-            Mock -CommandName New-Object -MockWith {
-                return @(
-                    @{
-                        Thumbprint = $SPTrustSigningCertificateThumbprint
-                    }
-                )
-            } -ParameterFilter { $TypeName -eq "System.Security.Cryptography.X509Certificates.X509Certificate2" }
-            #} -ParameterFilter { $TypeName -eq "System.Security.Cryptography.X509Certificates.X509Certificate2" -and $PSBoundParameters[0] -match $SPTrustSigningCertificateFilePath }
-
-            Mock -CommandName Get-SPAuthenticationRealm -MockWith {
-                return $SPTrustAuthenticationRealm
-            }
-
-            Mock -CommandName Set-SPTrustedSecurityTokenIssuer -MockWith { }
 
             # Test contexts
             Context -Name "The SPTrustedSecurityTokenIssuer does not exist and should be created, using a signing certificate in the certificate store and the realm of the farm" -Fixture {
-                $testParams = @{
-                    Name                           = $SPTrustName
-                    Description                    = $SPTrustDescription
-                    RegisteredIssuerNameIdentifier = $SPTrustRegisteredIssuerNameIdentifier
-                    RegisteredIssuerNameRealm      = ""
-                    SigningCertificateThumbprint   = $SPTrustSigningCertificateThumbprint
-                    IsTrustBroker                  = $true
-                    Ensure                         = "Present"
+                BeforeAll {
+                    $testParams = @{
+                        Name                           = $SPTrustName
+                        Description                    = $SPTrustDescription
+                        RegisteredIssuerNameIdentifier = $SPTrustRegisteredIssuerNameIdentifier
+                        RegisteredIssuerNameRealm      = ""
+                        SigningCertificateThumbprint   = $SPTrustSigningCertificateThumbprint
+                        IsTrustBroker                  = $true
+                        Ensure                         = "Present"
+                    }
                 }
 
                 It "Should create the SPTrustedSecurityTokenIssuer using the realm of the farm" {
@@ -112,14 +116,16 @@ try
             }
 
             Context -Name "The SPTrustedSecurityTokenIssuer does not exist and should be created, using a signing certificate in the file system and the realm of the farm" -Fixture {
-                $testParams = @{
-                    Name                           = $SPTrustName
-                    Description                    = $SPTrustDescription
-                    RegisteredIssuerNameIdentifier = $SPTrustRegisteredIssuerNameIdentifier
-                    RegisteredIssuerNameRealm      = $null
-                    SigningCertificateFilePath     = $SPTrustSigningCertificateFilePath
-                    IsTrustBroker                  = $true
-                    Ensure                         = "Present"
+                BeforeAll {
+                    $testParams = @{
+                        Name                           = $SPTrustName
+                        Description                    = $SPTrustDescription
+                        RegisteredIssuerNameIdentifier = $SPTrustRegisteredIssuerNameIdentifier
+                        RegisteredIssuerNameRealm      = $null
+                        SigningCertificateFilePath     = $SPTrustSigningCertificateFilePath
+                        IsTrustBroker                  = $true
+                        Ensure                         = "Present"
+                    }
                 }
 
                 It "Should create the SPTrustedSecurityTokenIssuer using the realm of the farm" {
@@ -130,26 +136,28 @@ try
             }
 
             Context -Name "The SPTrustedSecurityTokenIssuer does not exist and should be created, using a signing certificate in the file system, SigningCertificateThumbprint and the realm of the farm" -Fixture {
-                $testParams = @{
-                    Name                           = $SPTrustName
-                    Description                    = $SPTrustDescription
-                    RegisteredIssuerNameIdentifier = $SPTrustRegisteredIssuerNameIdentifier
-                    RegisteredIssuerNameRealm      = $SPTrustSigningCertificateThumbprint
-                    SigningCertificateFilePath     = $SPTrustSigningCertificateFilePath
-                    IsTrustBroker                  = $true
-                    Ensure                         = "Present"
-                }
-
-                Mock -CommandName New-Object -MockWith {
-                    $retVal = [pscustomobject]@{
-                        Subject       = "CN=CertIdentifer"
-                        Thumbprint    = $SPTrustSigningCertificateThumbprint
-                        HasPrivateKey = $false
+                BeforeAll {
+                    $testParams = @{
+                        Name                           = $SPTrustName
+                        Description                    = $SPTrustDescription
+                        RegisteredIssuerNameIdentifier = $SPTrustRegisteredIssuerNameIdentifier
+                        RegisteredIssuerNameRealm      = $SPTrustSigningCertificateThumbprint
+                        SigningCertificateFilePath     = $SPTrustSigningCertificateFilePath
+                        IsTrustBroker                  = $true
+                        Ensure                         = "Present"
                     }
-                    Add-Member -InputObject $retVal -MemberType ScriptMethod Import { }
 
-                    return $retVal
-                } -ParameterFilter { $TypeName -eq "System.Security.Cryptography.X509Certificates.X509Certificate2" }
+                    Mock -CommandName New-Object -MockWith {
+                        $retVal = [pscustomobject]@{
+                            Subject       = "CN=CertIdentifer"
+                            Thumbprint    = $SPTrustSigningCertificateThumbprint
+                            HasPrivateKey = $false
+                        }
+                        Add-Member -InputObject $retVal -MemberType ScriptMethod Import { }
+
+                        return $retVal
+                    } -ParameterFilter { $TypeName -eq "System.Security.Cryptography.X509Certificates.X509Certificate2" }
+                }
 
                 It "Should create the SPTrustedSecurityTokenIssuer using the realm of the farm" {
                     Set-TargetResource @testParams
@@ -163,24 +171,26 @@ try
             }
 
             Context -Name "The SPTrustedSecurityTokenIssuer does not exist and should be created, using a custom realm" -Fixture {
-                $testParams = @{
-                    Name                           = $SPTrustName
-                    Description                    = $SPTrustDescription
-                    RegisteredIssuerNameIdentifier = $SPTrustRegisteredIssuerNameIdentifier
-                    RegisteredIssuerNameRealm      = "C47023F3-4109-4C6E-8913-DFC3DBACD8C5"
-                    SigningCertificateThumbprint   = $SPTrustSigningCertificateThumbprint
-                    IsTrustBroker                  = $true
-                    Ensure                         = "Present"
-                }
-
-                Mock -CommandName New-SPTrustedSecurityTokenIssuer -MockWith {
-                    $sptrust = [pscustomobject]@{
-                        Name                 = $testParams.Name
-                        RegisteredIssuerName = "$($testParams.RegisteredIssuerNameIdentifier)@$($testParams.RegisteredIssuerNameRealm)"
-                        Description          = $SPTrustDescription
+                BeforeAll {
+                    $testParams = @{
+                        Name                           = $SPTrustName
+                        Description                    = $SPTrustDescription
+                        RegisteredIssuerNameIdentifier = $SPTrustRegisteredIssuerNameIdentifier
+                        RegisteredIssuerNameRealm      = "C47023F3-4109-4C6E-8913-DFC3DBACD8C5"
+                        SigningCertificateThumbprint   = $SPTrustSigningCertificateThumbprint
+                        IsTrustBroker                  = $true
+                        Ensure                         = "Present"
                     }
-                    $sptrust | Add-Member -Name Update -MemberType ScriptMethod -Value { }
-                    return $sptrust
+
+                    Mock -CommandName New-SPTrustedSecurityTokenIssuer -MockWith {
+                        $sptrust = [pscustomobject]@{
+                            Name                 = $testParams.Name
+                            RegisteredIssuerName = "$($testParams.RegisteredIssuerNameIdentifier)@$($testParams.RegisteredIssuerNameRealm)"
+                            Description          = $SPTrustDescription
+                        }
+                        $sptrust | Add-Member -Name Update -MemberType ScriptMethod -Value { }
+                        return $sptrust
+                    }
                 }
 
                 It "Should create the SPTrustedSecurityTokenIssuer using the custom realm" {
@@ -191,27 +201,29 @@ try
             }
 
             Context -Name "The SPTrustedSecurityTokenIssuer does not exist and should be created, using a MetadataEndPoint" -Fixture {
-                $testParams = @{
-                    Name             = $SPTrustName
-                    Description      = $SPTrustDescription
-                    MetadataEndPoint = "https://accounts.accesscontrol.windows.net/TENANT.onmicrosoft.com/metadata/json/1"
-                    IsTrustBroker    = $true
-                    Ensure           = "Present"
-                }
-
-                Mock -CommandName Get-SPTrustedSecurityTokenIssuer -MockWith {
-                    return $null
-                }
-
-                Mock -CommandName New-SPTrustedSecurityTokenIssuer -MockWith {
-                    $sptrust = [pscustomobject]@{
-                        Name                 = $testParams.Name
-                        RegisteredIssuerName = "$SPTrustRegisteredIssuerNameIdentifier@5d38d3ac-eeb7-4fa4-992b-8d1d3a1cb405"
-                        Description          = $SPTrustDescription
-                        MetadataEndPoint     = $testParams.MetadataEndPoint
+                BeforeAll {
+                    $testParams = @{
+                        Name             = $SPTrustName
+                        Description      = $SPTrustDescription
+                        MetadataEndPoint = "https://accounts.accesscontrol.windows.net/TENANT.onmicrosoft.com/metadata/json/1"
+                        IsTrustBroker    = $true
+                        Ensure           = "Present"
                     }
-                    $sptrust | Add-Member -Name Update -MemberType ScriptMethod -Value { }
-                    return $sptrust
+
+                    Mock -CommandName Get-SPTrustedSecurityTokenIssuer -MockWith {
+                        return $null
+                    }
+
+                    Mock -CommandName New-SPTrustedSecurityTokenIssuer -MockWith {
+                        $sptrust = [pscustomobject]@{
+                            Name                 = $testParams.Name
+                            RegisteredIssuerName = "$SPTrustRegisteredIssuerNameIdentifier@5d38d3ac-eeb7-4fa4-992b-8d1d3a1cb405"
+                            Description          = $SPTrustDescription
+                            MetadataEndPoint     = $testParams.MetadataEndPoint
+                        }
+                        $sptrust | Add-Member -Name Update -MemberType ScriptMethod -Value { }
+                        return $sptrust
+                    }
                 }
 
                 It "Should create the SPTrustedSecurityTokenIssuer using a MetadataEndPoint" {
@@ -222,26 +234,28 @@ try
             }
 
             Context -Name "The SPTrustedSecurityTokenIssuer is desired, and both parameters SigningCertificateThumbprint and SigningCertificateFilePath are set but thumbprints does not match" -Fixture {
-                $testParams = @{
-                    Name                           = $SPTrustName
-                    Description                    = $SPTrustDescription
-                    RegisteredIssuerNameIdentifier = $SPTrustRegisteredIssuerNameIdentifier
-                    SigningCertificateThumbprint   = $SPTrustSigningCertificateThumbprint
-                    SigningCertificateFilePath     = $SPTrustSigningCertificateFilePath
-                    IsTrustBroker                  = $true
-                    Ensure                         = "Present"
-                }
-
-                Mock -CommandName New-Object -MockWith {
-                    $retVal = [pscustomobject]@{
-                        Subject       = "CN=CertIdentifer"
-                        Thumbprint    = "1111111111111111111111111111111111111111"
-                        HasPrivateKey = $false
+                BeforeAll {
+                    $testParams = @{
+                        Name                           = $SPTrustName
+                        Description                    = $SPTrustDescription
+                        RegisteredIssuerNameIdentifier = $SPTrustRegisteredIssuerNameIdentifier
+                        SigningCertificateThumbprint   = $SPTrustSigningCertificateThumbprint
+                        SigningCertificateFilePath     = $SPTrustSigningCertificateFilePath
+                        IsTrustBroker                  = $true
+                        Ensure                         = "Present"
                     }
-                    Add-Member -InputObject $retVal -MemberType ScriptMethod Import { }
 
-                    return $retVal
-                } -ParameterFilter { $TypeName -eq "System.Security.Cryptography.X509Certificates.X509Certificate2" }
+                    Mock -CommandName New-Object -MockWith {
+                        $retVal = [pscustomobject]@{
+                            Subject       = "CN=CertIdentifer"
+                            Thumbprint    = "1111111111111111111111111111111111111111"
+                            HasPrivateKey = $false
+                        }
+                        Add-Member -InputObject $retVal -MemberType ScriptMethod Import { }
+
+                        return $retVal
+                    } -ParameterFilter { $TypeName -eq "System.Security.Cryptography.X509Certificates.X509Certificate2" }
+                }
 
                 It "should fail validation of signing certificate parameters in the Set method" {
                     { Set-TargetResource @testParams } | Should -Throw "Imported certificate thumbprint (1111111111111111111111111111111111111111) does not match expected thumbprint ($SPTrustSigningCertificateThumbprint)."
@@ -253,38 +267,40 @@ try
             }
 
             Context -Name "The SPTrustedSecurityTokenIssuer is desired, and SigningCertificateFilePath are set but thumbprint does not match existing configuration" -Fixture {
-                $testParams = @{
-                    Name                           = $SPTrustName
-                    Description                    = $SPTrustDescription
-                    RegisteredIssuerNameIdentifier = $SPTrustRegisteredIssuerNameIdentifier
-                    SigningCertificateFilePath     = $SPTrustSigningCertificateFilePath
-                    IsTrustBroker                  = $true
-                    Ensure                         = "Present"
+                BeforeAll {
+                    $testParams = @{
+                        Name                           = $SPTrustName
+                        Description                    = $SPTrustDescription
+                        RegisteredIssuerNameIdentifier = $SPTrustRegisteredIssuerNameIdentifier
+                        SigningCertificateFilePath     = $SPTrustSigningCertificateFilePath
+                        IsTrustBroker                  = $true
+                        Ensure                         = "Present"
+                    }
+
+                    Mock -CommandName New-Object -MockWith {
+                        $retVal = [pscustomobject]@{
+                            Subject       = CertIdentifer
+                            Thumbprint    = "1111111111111111111111111111111111111"
+                            HasPrivateKey = $false
+                        }
+                        Add-Member -InputObject $retVal -MemberType ScriptMethod Import
+                        {
+                        }
+
+                        return $retVal
+                    } -ParameterFilter { $TypeName -eq "System.Security.Cryptography.X509Certificates.X509Certificate2" }
+
+                    Mock -CommandName New-Object -MockWith {
+                        $retVal = [pscustomobject]@{
+                            Subject       = "CN = CertIdentifer"
+                            Thumbprint    = $SigningCertificateThumbprint
+                            HasPrivateKey = $false
+                        }
+                        Add-Member -InputObject $retVal -MemberType ScriptMethod Import { }
+
+                        return $retVal
+                    } -ParameterFilter { $TypeName -eq "System.Security.Cryptography.X509Certificates.X509Certificate2" }
                 }
-
-                Mock -CommandName New-Object -MockWith {
-                    $retVal = [pscustomobject]@{
-                        Subject       = CertIdentifer
-                        Thumbprint    = "1111111111111111111111111111111111111"
-                        HasPrivateKey = $false
-                    }
-                    Add-Member -InputObject $retVal -MemberType ScriptMethod Import
-                    {
-                    }
-
-                    return $retVal
-                } -ParameterFilter { $TypeName -eq "System.Security.Cryptography.X509Certificates.X509Certificate2" }
-
-                Mock -CommandName New-Object -MockWith {
-                    $retVal = [pscustomobject]@{
-                        Subject       = "CN = CertIdentifer"
-                        Thumbprint    = $SigningCertificateThumbprint
-                        HasPrivateKey = $false
-                    }
-                    Add-Member -InputObject $retVal -MemberType ScriptMethod Import { }
-
-                    return $retVal
-                } -ParameterFilter { $TypeName -eq "System.Security.Cryptography.X509Certificates.X509Certificate2" }
 
                 It "should fail validation of signing certificate parameters in the Set method" {
                     { Set-TargetResource @testParams } | Should -Not -Throw
@@ -296,14 +312,16 @@ try
             }
 
             Context -Name "The SPTrustedSecurityTokenIssuer is desired, but both parameters SigningCertificateThumbprint and MetadataEndPoint are set while exactly 1 should" -Fixture {
-                $testParams = @{
-                    Name                           = $SPTrustName
-                    Description                    = $SPTrustDescription
-                    RegisteredIssuerNameIdentifier = $SPTrustRegisteredIssuerNameIdentifier
-                    SigningCertificateThumbprint   = $SPTrustSigningCertificateThumbprint
-                    MetadataEndPoint               = "https://accounts.accesscontrol.windows.net/TENANT.onmicrosoft.com/metadata/json/1"
-                    IsTrustBroker                  = $true
-                    Ensure                         = "Present"
+                BeforeAll {
+                    $testParams = @{
+                        Name                           = $SPTrustName
+                        Description                    = $SPTrustDescription
+                        RegisteredIssuerNameIdentifier = $SPTrustRegisteredIssuerNameIdentifier
+                        SigningCertificateThumbprint   = $SPTrustSigningCertificateThumbprint
+                        MetadataEndPoint               = "https://accounts.accesscontrol.windows.net/TENANT.onmicrosoft.com/metadata/json/1"
+                        IsTrustBroker                  = $true
+                        Ensure                         = "Present"
+                    }
                 }
 
                 It "should fail validation of signing certificate parameters in the Set method" {
@@ -316,14 +334,16 @@ try
             }
 
             Context -Name "The SPTrustedSecurityTokenIssuer is desired, but both parameters SigningCertificateFilePath and MetadataEndPoint are set while exactly 1 should" -Fixture {
-                $testParams = @{
-                    Name                           = $SPTrustName
-                    Description                    = $SPTrustDescription
-                    RegisteredIssuerNameIdentifier = $SPTrustRegisteredIssuerNameIdentifier
-                    SigningCertificateFilePath     = $SPTrustSigningCertificateFilePath
-                    MetadataEndPoint               = "https://accounts.accesscontrol.windows.net/TENANT.onmicrosoft.com/metadata/json/1"
-                    IsTrustBroker                  = $true
-                    Ensure                         = "Present"
+                BeforeAll {
+                    $testParams = @{
+                        Name                           = $SPTrustName
+                        Description                    = $SPTrustDescription
+                        RegisteredIssuerNameIdentifier = $SPTrustRegisteredIssuerNameIdentifier
+                        SigningCertificateFilePath     = $SPTrustSigningCertificateFilePath
+                        MetadataEndPoint               = "https://accounts.accesscontrol.windows.net/TENANT.onmicrosoft.com/metadata/json/1"
+                        IsTrustBroker                  = $true
+                        Ensure                         = "Present"
+                    }
                 }
 
                 It "should fail validation of signing certificate parameters in the Set method" {
@@ -336,13 +356,15 @@ try
             }
 
             Context -Name "The SPTrustedSecurityTokenIssuer is desired, but the thumbprint of the signing certificate in parameter SigningCertificateThumbprint is invalid" -Fixture {
-                $testParams = @{
-                    Name                           = $SPTrustName
-                    Description                    = $SPTrustDescription
-                    RegisteredIssuerNameIdentifier = $SPTrustRegisteredIssuerNameIdentifier
-                    SigningCertificateThumbprint   = "XX123ABCFACEXX"
-                    IsTrustBroker                  = $true
-                    Ensure                         = "Present"
+                BeforeAll {
+                    $testParams = @{
+                        Name                           = $SPTrustName
+                        Description                    = $SPTrustDescription
+                        RegisteredIssuerNameIdentifier = $SPTrustRegisteredIssuerNameIdentifier
+                        SigningCertificateThumbprint   = "XX123ABCFACEXX"
+                        IsTrustBroker                  = $true
+                        Ensure                         = "Present"
+                    }
                 }
 
                 It "should fail validation of parameter SigningCertificateThumbprint in the Set method" {
@@ -351,26 +373,28 @@ try
             }
 
             Context -Name "The SPTrustedSecurityTokenIssuer already exists and its signing certificate is specified using SigningCertificateThumbprint, and should not be changed" -Fixture {
-                $testParams = @{
-                    Name                           = $SPTrustName
-                    Description                    = $SPTrustDescription
-                    RegisteredIssuerNameIdentifier = $SPTrustRegisteredIssuerNameIdentifier
-                    SigningCertificateThumbprint   = $SPTrustSigningCertificateThumbprint
-                    IsTrustBroker                  = $true
-                    Ensure                         = "Present"
-                }
-
-                Mock -CommandName Get-SPTrustedSecurityTokenIssuer -MockWith {
-                    $sptrust = [pscustomobject]@{
-                        Name                 = $testParams.Name
-                        RegisteredIssuerName = "$($testParams.RegisteredIssuerNameIdentifier)@$(Get-SPAuthenticationRealm)"
-                        Description          = $testParams.Description
-                        IsSelfIssuer         = !$testParams.IsTrustBroker
-                        SigningCertificate   = [pscustomobject]@{
-                            Thumbprint = $testParams.SigningCertificateThumbprint
-                        }
+                BeforeAll {
+                    $testParams = @{
+                        Name                           = $SPTrustName
+                        Description                    = $SPTrustDescription
+                        RegisteredIssuerNameIdentifier = $SPTrustRegisteredIssuerNameIdentifier
+                        SigningCertificateThumbprint   = $SPTrustSigningCertificateThumbprint
+                        IsTrustBroker                  = $true
+                        Ensure                         = "Present"
                     }
-                    return $sptrust
+
+                    Mock -CommandName Get-SPTrustedSecurityTokenIssuer -MockWith {
+                        $sptrust = [pscustomobject]@{
+                            Name                 = $testParams.Name
+                            RegisteredIssuerName = "$($testParams.RegisteredIssuerNameIdentifier)@$(Get-SPAuthenticationRealm)"
+                            Description          = $testParams.Description
+                            IsSelfIssuer         = !$testParams.IsTrustBroker
+                            SigningCertificate   = [pscustomobject]@{
+                                Thumbprint = $testParams.SigningCertificateThumbprint
+                            }
+                        }
+                        return $sptrust
+                    }
                 }
 
                 It "Should be returned the get method with expected properties" {
@@ -389,38 +413,40 @@ try
             }
 
             Context -Name "The SPTrustedSecurityTokenIssuer already exists and its signing certificate is specified using SigningCertificateFilePath, and should not be changed" -Fixture {
-                $testParams = @{
-                    Name                           = $SPTrustName
-                    Description                    = $SPTrustDescription
-                    RegisteredIssuerNameIdentifier = $SPTrustRegisteredIssuerNameIdentifier
-                    SigningCertificateFilePath     = $SPTrustSigningCertificateFilePath
-                    IsTrustBroker                  = $true
-                    Ensure                         = "Present"
-                }
+                BeforeAll {
+                    $testParams = @{
+                        Name                           = $SPTrustName
+                        Description                    = $SPTrustDescription
+                        RegisteredIssuerNameIdentifier = $SPTrustRegisteredIssuerNameIdentifier
+                        SigningCertificateFilePath     = $SPTrustSigningCertificateFilePath
+                        IsTrustBroker                  = $true
+                        Ensure                         = "Present"
+                    }
 
-                Mock -CommandName Get-SPTrustedSecurityTokenIssuer -MockWith {
-                    $sptrust = [pscustomobject]@{
-                        Name                 = $testParams.Name
-                        RegisteredIssuerName = "$($testParams.RegisteredIssuerNameIdentifier)@$(Get-SPAuthenticationRealm)"
-                        Description          = $testParams.Description
-                        IsSelfIssuer         = !$testParams.IsTrustBroker
-                        SigningCertificate   = [pscustomobject]@{
-                            Thumbprint = $testParams.SigningCertificateThumbprint
+                    Mock -CommandName Get-SPTrustedSecurityTokenIssuer -MockWith {
+                        $sptrust = [pscustomobject]@{
+                            Name                 = $testParams.Name
+                            RegisteredIssuerName = "$($testParams.RegisteredIssuerNameIdentifier)@$(Get-SPAuthenticationRealm)"
+                            Description          = $testParams.Description
+                            IsSelfIssuer         = !$testParams.IsTrustBroker
+                            SigningCertificate   = [pscustomobject]@{
+                                Thumbprint = $testParams.SigningCertificateThumbprint
+                            }
                         }
+                        return $sptrust
                     }
-                    return $sptrust
+
+                    Mock -CommandName New-Object -MockWith {
+                        $retVal = [pscustomobject]@{
+                            Subject       = "CN = CertIdentifer"
+                            Thumbprint    = $SigningCertificateThumbprint
+                            HasPrivateKey = $false
+                        }
+                        Add-Member -InputObject $retVal -MemberType ScriptMethod Import { }
+
+                        return $retVal
+                    } -ParameterFilter { $TypeName -eq "System.Security.Cryptography.X509Certificates.X509Certificate2" }
                 }
-
-                Mock -CommandName New-Object -MockWith {
-                    $retVal = [pscustomobject]@{
-                        Subject       = "CN = CertIdentifer"
-                        Thumbprint    = $SigningCertificateThumbprint
-                        HasPrivateKey = $false
-                    }
-                    Add-Member -InputObject $retVal -MemberType ScriptMethod Import { }
-
-                    return $retVal
-                } -ParameterFilter { $TypeName -eq "System.Security.Cryptography.X509Certificates.X509Certificate2" }
 
                 It "Should be returned the get method with expected properties" {
                     $getResults = Get-TargetResource @testParams
@@ -438,24 +464,26 @@ try
             }
 
             Context -Name "The SPTrustedSecurityTokenIssuer exists and should be removed" -Fixture {
-                $testParams = @{
-                    Name                           = $SPTrustName
-                    Description                    = $SPTrustDescription
-                    RegisteredIssuerNameIdentifier = $SPTrustRegisteredIssuerNameIdentifier
-                    SigningCertificateThumbprint   = $SPTrustSigningCertificateThumbprint
-                    IsTrustBroker                  = $true
-                    Ensure                         = "Absent"
-                }
-
-                Mock -CommandName Get-SPTrustedSecurityTokenIssuer -MockWith {
-                    $sptrust = [pscustomobject]@{
-                        Name                 = $testParams.Name
-                        RegisteredIssuerName = "$($testParams.RegisteredIssuerNameIdentifier)@$(Get-SPAuthenticationRealm)"
+                BeforeAll {
+                    $testParams = @{
+                        Name                           = $SPTrustName
+                        Description                    = $SPTrustDescription
+                        RegisteredIssuerNameIdentifier = $SPTrustRegisteredIssuerNameIdentifier
+                        SigningCertificateThumbprint   = $SPTrustSigningCertificateThumbprint
+                        IsTrustBroker                  = $true
+                        Ensure                         = "Absent"
                     }
-                    return $sptrust
-                }
 
-                Mock -CommandName Remove-SPTrustedSecurityTokenIssuer -MockWith { }
+                    Mock -CommandName Get-SPTrustedSecurityTokenIssuer -MockWith {
+                        $sptrust = [pscustomobject]@{
+                            Name                 = $testParams.Name
+                            RegisteredIssuerName = "$($testParams.RegisteredIssuerNameIdentifier)@$(Get-SPAuthenticationRealm)"
+                        }
+                        return $sptrust
+                    }
+
+                    Mock -CommandName Remove-SPTrustedSecurityTokenIssuer -MockWith { }
+                }
 
                 It "Should be returned the get method with expected properties" {
                     $getResults = Get-TargetResource @testParams
@@ -475,26 +503,28 @@ try
             }
 
             Context -Name "The SPTrustedSecurityTokenIssuer exists and should be updated with a new RegisteredIssuerName" -Fixture {
-                $testParams = @{
-                    Name                           = $SPTrustName
-                    Description                    = $SPTrustDescription
-                    RegisteredIssuerNameIdentifier = "22222222-2222-2222-2222-333333333333"
-                    SigningCertificateThumbprint   = $SPTrustSigningCertificateThumbprint
-                    IsTrustBroker                  = $true
-                    Ensure                         = "Present"
-                }
-
-                Mock -CommandName Get-SPTrustedSecurityTokenIssuer -MockWith {
-                    $sptrust = [pscustomobject]@{
-                        Name                 = $testParams.Name
-                        RegisteredIssuerName = "$SPTrustRegisteredIssuerNameIdentifier@$(Get-SPAuthenticationRealm)"
-                        Description          = $SPTrustDescription
-                        IsSelfIssuer         = $true
-                        SigningCertificate   = [pscustomobject]@{
-                            Thumbprint = $testParams.$SPTrustSigningCertificateThumbprint
-                        }
+                BeforeAll {
+                    $testParams = @{
+                        Name                           = $SPTrustName
+                        Description                    = $SPTrustDescription
+                        RegisteredIssuerNameIdentifier = "22222222-2222-2222-2222-333333333333"
+                        SigningCertificateThumbprint   = $SPTrustSigningCertificateThumbprint
+                        IsTrustBroker                  = $true
+                        Ensure                         = "Present"
                     }
-                    return $sptrust
+
+                    Mock -CommandName Get-SPTrustedSecurityTokenIssuer -MockWith {
+                        $sptrust = [pscustomobject]@{
+                            Name                 = $testParams.Name
+                            RegisteredIssuerName = "$SPTrustRegisteredIssuerNameIdentifier@$(Get-SPAuthenticationRealm)"
+                            Description          = $SPTrustDescription
+                            IsSelfIssuer         = $true
+                            SigningCertificate   = [pscustomobject]@{
+                                Thumbprint = $testParams.$SPTrustSigningCertificateThumbprint
+                            }
+                        }
+                        return $sptrust
+                    }
                 }
 
                 It "Should be returned the get method with expected properties" {
@@ -513,27 +543,29 @@ try
             }
 
             Context -Name "The SPTrustedSecurityTokenIssuer exists and should be updated with a new RegisteredIssuerRealm" -Fixture {
-                $testParams = @{
-                    Name                           = $SPTrustName
-                    Description                    = $SPTrustDescription
-                    RegisteredIssuerNameIdentifier = $SPTrustRegisteredIssuerNameIdentifier
-                    RegisteredIssuerNameRealm      = [Guid]::NewGuid()
-                    SigningCertificateThumbprint   = $SPTrustSigningCertificateThumbprint
-                    IsTrustBroker                  = $true
-                    Ensure                         = "Present"
-                }
-
-                Mock -CommandName Get-SPTrustedSecurityTokenIssuer -MockWith {
-                    $sptrust = [pscustomobject]@{
-                        Name                 = $testParams.Name
-                        RegisteredIssuerName = "$SPTrustRegisteredIssuerNameIdentifier@$(Get-SPAuthenticationRealm)"
-                        Description          = $SPTrustDescription
-                        IsSelfIssuer         = $true
-                        SigningCertificate   = [pscustomobject]@{
-                            Thumbprint = $testParams.$SPTrustSigningCertificateThumbprint
-                        }
+                BeforeAll {
+                    $testParams = @{
+                        Name                           = $SPTrustName
+                        Description                    = $SPTrustDescription
+                        RegisteredIssuerNameIdentifier = $SPTrustRegisteredIssuerNameIdentifier
+                        RegisteredIssuerNameRealm      = [Guid]::NewGuid()
+                        SigningCertificateThumbprint   = $SPTrustSigningCertificateThumbprint
+                        IsTrustBroker                  = $true
+                        Ensure                         = "Present"
                     }
-                    return $sptrust
+
+                    Mock -CommandName Get-SPTrustedSecurityTokenIssuer -MockWith {
+                        $sptrust = [pscustomobject]@{
+                            Name                 = $testParams.Name
+                            RegisteredIssuerName = "$SPTrustRegisteredIssuerNameIdentifier@$(Get-SPAuthenticationRealm)"
+                            Description          = $SPTrustDescription
+                            IsSelfIssuer         = $true
+                            SigningCertificate   = [pscustomobject]@{
+                                Thumbprint = $testParams.$SPTrustSigningCertificateThumbprint
+                            }
+                        }
+                        return $sptrust
+                    }
                 }
 
                 It "Should be returned the get method with expected properties" {
@@ -552,26 +584,28 @@ try
             }
 
             Context -Name "The SPTrustedSecurityTokenIssuer exists and should be updated with a new Description" -Fixture {
-                $testParams = @{
-                    Name                           = $SPTrustName
-                    Description                    = "New description"
-                    RegisteredIssuerNameIdentifier = $SPTrustRegisteredIssuerNameIdentifier
-                    SigningCertificateThumbprint   = $SPTrustSigningCertificateThumbprint
-                    IsTrustBroker                  = $true
-                    Ensure                         = "Present"
-                }
-
-                Mock -CommandName Get-SPTrustedSecurityTokenIssuer -MockWith {
-                    $sptrust = [pscustomobject]@{
-                        Name                 = $testParams.Name
-                        RegisteredIssuerName = "$SPTrustRegisteredIssuerNameIdentifier@$(Get-SPAuthenticationRealm)"
-                        Description          = $SPTrustDescription
-                        IsSelfIssuer         = $true
-                        SigningCertificate   = [pscustomobject]@{
-                            Thumbprint = $testParams.$SPTrustSigningCertificateThumbprint
-                        }
+                BeforeAll {
+                    $testParams = @{
+                        Name                           = $SPTrustName
+                        Description                    = "New description"
+                        RegisteredIssuerNameIdentifier = $SPTrustRegisteredIssuerNameIdentifier
+                        SigningCertificateThumbprint   = $SPTrustSigningCertificateThumbprint
+                        IsTrustBroker                  = $true
+                        Ensure                         = "Present"
                     }
-                    return $sptrust
+
+                    Mock -CommandName Get-SPTrustedSecurityTokenIssuer -MockWith {
+                        $sptrust = [pscustomobject]@{
+                            Name                 = $testParams.Name
+                            RegisteredIssuerName = "$SPTrustRegisteredIssuerNameIdentifier@$(Get-SPAuthenticationRealm)"
+                            Description          = $SPTrustDescription
+                            IsSelfIssuer         = $true
+                            SigningCertificate   = [pscustomobject]@{
+                                Thumbprint = $testParams.$SPTrustSigningCertificateThumbprint
+                            }
+                        }
+                        return $sptrust
+                    }
                 }
 
                 It "Should be returned the get method with expected properties" {

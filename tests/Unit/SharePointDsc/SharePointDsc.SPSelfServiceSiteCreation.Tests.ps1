@@ -47,87 +47,90 @@ Invoke-TestSetup
 
 try
 {
-    Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
-        InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
-            Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
+    InModuleScope -ModuleName $script:DSCResourceFullName -ScriptBlock {
+        Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
+            BeforeAll {
+                Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
-            # Mocks for all contexts
-            try
-            {
-                [Microsoft.SharePoint.Administration.SiteCreationUserExperienceVersion]
-            }
-            catch
-            {
-                Add-Type -TypeDefinition @"
-    namespace Microsoft.SharePoint.Administration {
-        public enum SiteCreationUserExperienceVersion { Version1, Version2, Latest };
-    }
+                # Mocks for all contexts
+                try
+                {
+                    [Microsoft.SharePoint.Administration.SiteCreationUserExperienceVersion]
+                }
+                catch
+                {
+                    Add-Type -TypeDefinition @"
+        namespace Microsoft.SharePoint.Administration {
+            public enum SiteCreationUserExperienceVersion { Version1, Version2, Latest };
+        }
 "@
-            }
-
-            $webAppImplementation = {
-                $webApp = @{
-                    Url                                      = $null
-                    SelfServiceSiteCreationEnabled           = $null
-                    SelfServiceSiteCreationOnlineEnabled     = $null
-                    SelfServiceCreationQuotaTemplate         = $null
-                    ShowStartASiteMenuItem                   = $null
-                    SelfServiceCreateIndividualSite          = $null
-                    SelfServiceCreationParentSiteUrl         = $null
-                    SelfServiceSiteCustomFormUrl             = $null
-                    RequireContactForSelfServiceSiteCreation = $null
-                    Properties                               = @{ }
-                    UpdateCalled                             = $false
                 }
 
-                $webApp | Add-Member -MemberType ScriptMethod -Name Update -Value {
-                    $this.UpdateCalled = $true
-                }
-                return $webApp
-            }
+                $webAppImplementation = {
+                    $webApp = @{
+                        Url                                      = $null
+                        SelfServiceSiteCreationEnabled           = $null
+                        SelfServiceSiteCreationOnlineEnabled     = $null
+                        SelfServiceCreationQuotaTemplate         = $null
+                        ShowStartASiteMenuItem                   = $null
+                        SelfServiceCreateIndividualSite          = $null
+                        SelfServiceCreationParentSiteUrl         = $null
+                        SelfServiceSiteCustomFormUrl             = $null
+                        RequireContactForSelfServiceSiteCreation = $null
+                        Properties                               = @{ }
+                        UpdateCalled                             = $false
+                    }
 
-            Mock -CommandName Get-SPDscInstalledProductVersion {
-                return @{
-                    FileMajorPart    = $Global:SPDscHelper.CurrentStubBuildNumber.Major
-                    FileBuildPart    = $Global:SPDscHelper.CurrentStubBuildNumber.Build
-                    ProductBuildPart = $Global:SPDscHelper.CurrentStubBuildNumber.Build
+                    $webApp | Add-Member -MemberType ScriptMethod -Name Update -Value {
+                        $this.UpdateCalled = $true
+                    }
+                    return $webApp
+                }
+
+                Mock -CommandName Get-SPDscInstalledProductVersion {
+                    return @{
+                        FileMajorPart    = $Global:SPDscHelper.CurrentStubBuildNumber.Major
+                        FileBuildPart    = $Global:SPDscHelper.CurrentStubBuildNumber.Build
+                        ProductBuildPart = $Global:SPDscHelper.CurrentStubBuildNumber.Build
+                    }
                 }
             }
 
             # Test contexts
-
             Context -Name "Self service site creation settings matches the current state" -Fixture {
-                $testParams = @{
-                    WebAppUrl               = "http://sites.sharepoint.com"
-                    Enabled                 = $true
-                    OnlineEnabled           = $false
-                    QuotaTemplate           = "SSCQoutaTemplate"
-                    ShowStartASiteMenuItem  = $true
-                    CreateIndividualSite    = $false
-                    ParentSiteUrl           = "/sites/SSC"
-                    CustomFormUrl           = ""
-                    PolicyOption            = "CanHavePolicy"
-                    RequireSecondaryContact = $true
-                }
-
-                Mock -CommandName Get-SPWebApplication -MockWith {
-                    $webApp = $webAppImplementation.InvokeReturnAsIs()
-                    $webApp.Url = "http://sites.sharepoint.com"
-                    $webApp.SelfServiceSiteCreationEnabled = $true
-                    $webApp.SelfServiceSiteCreationOnlineEnabled = $false
-                    $webApp.SelfServiceCreationQuotaTemplate = "SSCQoutaTemplate"
-                    $webApp.ShowStartASiteMenuItem = $true
-                    $webApp.SelfServiceCreateIndividualSite = $false
-                    $webApp.SelfServiceCreationParentSiteUrl = "/sites/SSC"
-                    $webApp.SelfServiceSiteCustomFormUrl = ""
-                    $webApp.RequireContactForSelfServiceSiteCreation = $true
-                    $webapp.SiteCreationUserExperienceVersion = "Version2"
-                    $webApp.Properties = @{
-                        PolicyOption = "CanHavePolicy"
+                BeforeAll {
+                    $testParams = @{
+                        WebAppUrl               = "http://sites.sharepoint.com"
+                        Enabled                 = $true
+                        OnlineEnabled           = $false
+                        QuotaTemplate           = "SSCQoutaTemplate"
+                        ShowStartASiteMenuItem  = $true
+                        CreateIndividualSite    = $false
+                        ParentSiteUrl           = "/sites/SSC"
+                        CustomFormUrl           = ""
+                        PolicyOption            = "CanHavePolicy"
+                        RequireSecondaryContact = $true
                     }
 
-                    $Script:SPDscWebApplication = $webApp
-                    return($webApp)
+                    Mock -CommandName Get-SPWebApplication -MockWith {
+                        $webApp = $webAppImplementation.InvokeReturnAsIs()
+                        $webApp.Url = "http://sites.sharepoint.com"
+                        $webApp.SelfServiceSiteCreationEnabled = $true
+                        $webApp.SelfServiceSiteCreationOnlineEnabled = $false
+                        $webApp.SelfServiceCreationQuotaTemplate = "SSCQoutaTemplate"
+                        $webApp.ShowStartASiteMenuItem = $true
+                        $webApp.SelfServiceCreateIndividualSite = $false
+                        $webApp.SelfServiceCreationParentSiteUrl = "/sites/SSC"
+                        $webApp.SelfServiceSiteCustomFormUrl = ""
+                        $webApp.RequireContactForSelfServiceSiteCreation = $true
+                        $webapp.SiteCreationUserExperienceVersion = "Version2"
+                        $webApp.Properties = @{
+                            PolicyOption = "CanHavePolicy"
+                        }
+
+                        $Script:SPDscWebApplication = $webApp
+                        return($webApp)
+                    }
                 }
 
                 It "Should return the current data from the get method" {
@@ -155,25 +158,27 @@ try
             }
 
             Context -Name "Self service site creation settings does not match the current state" -Fixture {
-                $testParams = @{
-                    WebAppUrl               = "http://sites.sharepoint.com"
-                    Enabled                 = $true
-                    OnlineEnabled           = $false
-                    QuotaTemplate           = "SSCQoutaTemplate"
-                    ShowStartASiteMenuItem  = $true
-                    CreateIndividualSite    = $false
-                    ParentSiteUrl           = "/sites/SSC"
-                    CustomFormUrl           = "http://CustomForm.SharePoint.com"
-                    PolicyOption            = "CanHavePolicy"
-                    RequireSecondaryContact = $true
-                }
+                BeforeAll {
+                    $testParams = @{
+                        WebAppUrl               = "http://sites.sharepoint.com"
+                        Enabled                 = $true
+                        OnlineEnabled           = $false
+                        QuotaTemplate           = "SSCQoutaTemplate"
+                        ShowStartASiteMenuItem  = $true
+                        CreateIndividualSite    = $false
+                        ParentSiteUrl           = "/sites/SSC"
+                        CustomFormUrl           = "http://CustomForm.SharePoint.com"
+                        PolicyOption            = "CanHavePolicy"
+                        RequireSecondaryContact = $true
+                    }
 
-                Mock -CommandName Get-SPWebApplication -MockWith {
-                    $webApp = $webAppImplementation.InvokeReturnAsIs()
-                    $webApp.Url = "http://sites.sharepoint.com"
+                    Mock -CommandName Get-SPWebApplication -MockWith {
+                        $webApp = $webAppImplementation.InvokeReturnAsIs()
+                        $webApp.Url = "http://sites.sharepoint.com"
 
-                    $Script:SPDscWebApplication = $webApp
-                    return($webApp)
+                        $Script:SPDscWebApplication = $webApp
+                        return($webApp)
+                    }
                 }
 
                 It "Should return false from the test method" {
@@ -196,28 +201,30 @@ try
             }
 
             Context -Name "Disabling self service site creation does not match the current state" -Fixture {
-                $testParams = @{
-                    WebAppUrl = "http://sites.sharepoint.com"
-                    Enabled   = $false
-                }
-
-                Mock -CommandName Get-SPWebApplication -MockWith {
-                    $webApp = $webAppImplementation.InvokeReturnAsIs()
-                    $webApp.Url = "http://sites.sharepoint.com"
-                    $webApp.SelfServiceSiteCreationEnabled = $true
-                    $webApp.SelfServiceSiteCreationOnlineEnabled = $false
-                    $webApp.SelfServiceCreationQuotaTemplate = "SSCQoutaTemplate"
-                    $webApp.ShowStartASiteMenuItem = $true
-                    $webApp.SelfServiceCreateIndividualSite = $false
-                    $webApp.SelfServiceCreationParentSiteUrl = "/sites/SSC"
-                    $webApp.SelfServiceSiteCustomFormUrl = ""
-                    $webApp.RequireContactForSelfServiceSiteCreation = $true
-                    $webApp.Properties = @{
-                        PolicyOption = "CanHavePolicy"
+                BeforeAll {
+                    $testParams = @{
+                        WebAppUrl = "http://sites.sharepoint.com"
+                        Enabled   = $false
                     }
 
-                    $Script:SPDscWebApplication = $webApp
-                    return($webApp)
+                    Mock -CommandName Get-SPWebApplication -MockWith {
+                        $webApp = $webAppImplementation.InvokeReturnAsIs()
+                        $webApp.Url = "http://sites.sharepoint.com"
+                        $webApp.SelfServiceSiteCreationEnabled = $true
+                        $webApp.SelfServiceSiteCreationOnlineEnabled = $false
+                        $webApp.SelfServiceCreationQuotaTemplate = "SSCQoutaTemplate"
+                        $webApp.ShowStartASiteMenuItem = $true
+                        $webApp.SelfServiceCreateIndividualSite = $false
+                        $webApp.SelfServiceCreationParentSiteUrl = "/sites/SSC"
+                        $webApp.SelfServiceSiteCustomFormUrl = ""
+                        $webApp.RequireContactForSelfServiceSiteCreation = $true
+                        $webApp.Properties = @{
+                            PolicyOption = "CanHavePolicy"
+                        }
+
+                        $Script:SPDscWebApplication = $webApp
+                        return($webApp)
+                    }
                 }
 
                 It "Should return false from the test method" {
@@ -233,29 +240,31 @@ try
             }
 
             Context -Name "Disabling self service site creation and enabling show start a site menu item" -Fixture {
-                $testParams = @{
-                    WebAppUrl              = "http://sites.sharepoint.com"
-                    Enabled                = $false
-                    ShowStartASiteMenuItem = $true
-                }
-
-                Mock -CommandName Get-SPWebApplication -MockWith {
-                    $webApp = $webAppImplementation.InvokeReturnAsIs()
-                    $webApp.Url = "http://sites.sharepoint.com"
-                    $webApp.SelfServiceSiteCreationEnabled = $true
-                    $webApp.SelfServiceSiteCreationOnlineEnabled = $false
-                    $webApp.SelfServiceCreationQuotaTemplate = "SSCQoutaTemplate"
-                    $webApp.ShowStartASiteMenuItem = $true
-                    $webApp.SelfServiceCreateIndividualSite = $false
-                    $webApp.SelfServiceCreationParentSiteUrl = "/sites/SSC"
-                    $webApp.SelfServiceSiteCustomFormUrl = ""
-                    $webApp.RequireContactForSelfServiceSiteCreation = $true
-                    $webApp.Properties = @{
-                        PolicyOption = "CanHavePolicy"
+                BeforeAll {
+                    $testParams = @{
+                        WebAppUrl              = "http://sites.sharepoint.com"
+                        Enabled                = $false
+                        ShowStartASiteMenuItem = $true
                     }
 
-                    $Script:SPDscWebApplication = $webApp
-                    return($webApp)
+                    Mock -CommandName Get-SPWebApplication -MockWith {
+                        $webApp = $webAppImplementation.InvokeReturnAsIs()
+                        $webApp.Url = "http://sites.sharepoint.com"
+                        $webApp.SelfServiceSiteCreationEnabled = $true
+                        $webApp.SelfServiceSiteCreationOnlineEnabled = $false
+                        $webApp.SelfServiceCreationQuotaTemplate = "SSCQoutaTemplate"
+                        $webApp.ShowStartASiteMenuItem = $true
+                        $webApp.SelfServiceCreateIndividualSite = $false
+                        $webApp.SelfServiceCreationParentSiteUrl = "/sites/SSC"
+                        $webApp.SelfServiceSiteCustomFormUrl = ""
+                        $webApp.RequireContactForSelfServiceSiteCreation = $true
+                        $webApp.Properties = @{
+                            PolicyOption = "CanHavePolicy"
+                        }
+
+                        $Script:SPDscWebApplication = $webApp
+                        return($webApp)
+                    }
                 }
 
                 It "Should throw from the test method" {
@@ -268,13 +277,15 @@ try
             }
 
             Context -Name "Web application does not exist" -Fixture {
-                $testParams = @{
-                    WebAppUrl = "http://sites.sharepoint.com"
-                    Enabled   = $true
-                }
+                BeforeAll {
+                    $testParams = @{
+                        WebAppUrl = "http://sites.sharepoint.com"
+                        Enabled   = $true
+                    }
 
-                Mock -CommandName Get-SPWebApplication -MockWith {
-                    return($null)
+                    Mock -CommandName Get-SPWebApplication -MockWith {
+                        return($null)
+                    }
                 }
 
                 It "Should return a valid object with null on all properties" {
@@ -305,57 +316,57 @@ try
             if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 15 -or $Global:SPDscHelper.CurrentStubBuildNumber.Build -lt 10000)
             {
                 Context -Name "Using SP2019 parameters in SP2013/2016" -Fixture {
-                    $testParams = @{
-                        WebAppUrl               = "http://sites.sharepoint.com"
-                        Enabled                 = $true
-                        OnlineEnabled           = $false
-                        QuotaTemplate           = "SSCQoutaTemplate"
-                        ShowStartASiteMenuItem  = $true
-                        CreateIndividualSite    = $false
-                        ParentSiteUrl           = "/sites/SSC"
-                        CustomFormUrl           = ""
-                        ManagedPath             = "CANNOT BE USED"
-                        PolicyOption            = "CanHavePolicy"
-                        RequireSecondaryContact = $true
-                    }
-
                     It "Should throw and execption for ManagedPath from the set method" {
+                        $testParams = @{
+                            WebAppUrl               = "http://sites.sharepoint.com"
+                            Enabled                 = $true
+                            OnlineEnabled           = $false
+                            QuotaTemplate           = "SSCQoutaTemplate"
+                            ShowStartASiteMenuItem  = $true
+                            CreateIndividualSite    = $false
+                            ParentSiteUrl           = "/sites/SSC"
+                            CustomFormUrl           = ""
+                            ManagedPath             = "CANNOT BE USED"
+                            PolicyOption            = "CanHavePolicy"
+                            RequireSecondaryContact = $true
+                        }
+
                         { Set-TargetResource @testParams } | Should -Throw "Parameter ManagedPath is only supported in SharePoint 2019"
                     }
 
-                    $testParams = @{
-                        WebAppUrl               = "http://sites.sharepoint.com"
-                        Enabled                 = $true
-                        OnlineEnabled           = $false
-                        QuotaTemplate           = "SSCQoutaTemplate"
-                        ShowStartASiteMenuItem  = $true
-                        CreateIndividualSite    = $false
-                        ParentSiteUrl           = "/sites/SSC"
-                        CustomFormUrl           = ""
-                        AlternateUrl            = "CANNOT BE USED"
-                        PolicyOption            = "CanHavePolicy"
-                        RequireSecondaryContact = $true
-                    }
-
                     It "Should throw and execption for AlternateUrl from the set method" {
+                        $testParams = @{
+                            WebAppUrl               = "http://sites.sharepoint.com"
+                            Enabled                 = $true
+                            OnlineEnabled           = $false
+                            QuotaTemplate           = "SSCQoutaTemplate"
+                            ShowStartASiteMenuItem  = $true
+                            CreateIndividualSite    = $false
+                            ParentSiteUrl           = "/sites/SSC"
+                            CustomFormUrl           = ""
+                            AlternateUrl            = "CANNOT BE USED"
+                            PolicyOption            = "CanHavePolicy"
+                            RequireSecondaryContact = $true
+                        }
+
                         { Set-TargetResource @testParams } | Should -Throw "Parameter AlternateUrl is only supported in SharePoint 2019"
                     }
 
-                    $testParams = @{
-                        WebAppUrl               = "http://sites.sharepoint.com"
-                        Enabled                 = $true
-                        OnlineEnabled           = $false
-                        QuotaTemplate           = "SSCQoutaTemplate"
-                        ShowStartASiteMenuItem  = $true
-                        CreateIndividualSite    = $false
-                        ParentSiteUrl           = "/sites/SSC"
-                        CustomFormUrl           = ""
-                        UserExperienceVersion   = "Modern" # CANNOT BE USED
-                        PolicyOption            = "CanHavePolicy"
-                        RequireSecondaryContact = $true
-                    }
-
                     It "Should throw and execption for UserExperienceVersion from the set method" {
+                        $testParams = @{
+                            WebAppUrl               = "http://sites.sharepoint.com"
+                            Enabled                 = $true
+                            OnlineEnabled           = $false
+                            QuotaTemplate           = "SSCQoutaTemplate"
+                            ShowStartASiteMenuItem  = $true
+                            CreateIndividualSite    = $false
+                            ParentSiteUrl           = "/sites/SSC"
+                            CustomFormUrl           = ""
+                            UserExperienceVersion   = "Modern" # CANNOT BE USED
+                            PolicyOption            = "CanHavePolicy"
+                            RequireSecondaryContact = $true
+                        }
+
                         { Set-TargetResource @testParams } | Should -Throw "Parameter UserExperienceVersion is only supported in SharePoint 2019"
                     }
                 }
@@ -365,19 +376,21 @@ try
             if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 16 -and $Global:SPDscHelper.CurrentStubBuildNumber.Build -gt 10000)
             {
                 Context -Name "Using both ManagedPath and AlternateUrl" -Fixture {
-                    $testParams = @{
-                        WebAppUrl               = "http://sites.sharepoint.com"
-                        Enabled                 = $true
-                        OnlineEnabled           = $false
-                        QuotaTemplate           = "SSCQoutaTemplate"
-                        ShowStartASiteMenuItem  = $true
-                        CreateIndividualSite    = $false
-                        ParentSiteUrl           = "/sites/SSC"
-                        CustomFormUrl           = ""
-                        ManagedPath             = "sites"
-                        AlternateUrl            = "sharepoint.contoso.com"
-                        PolicyOption            = "CanHavePolicy"
-                        RequireSecondaryContact = $true
+                    BeforeAll {
+                        $testParams = @{
+                            WebAppUrl               = "http://sites.sharepoint.com"
+                            Enabled                 = $true
+                            OnlineEnabled           = $false
+                            QuotaTemplate           = "SSCQoutaTemplate"
+                            ShowStartASiteMenuItem  = $true
+                            CreateIndividualSite    = $false
+                            ParentSiteUrl           = "/sites/SSC"
+                            CustomFormUrl           = ""
+                            ManagedPath             = "sites"
+                            AlternateUrl            = "sharepoint.contoso.com"
+                            PolicyOption            = "CanHavePolicy"
+                            RequireSecondaryContact = $true
+                        }
                     }
 
                     It "Should throw and execption for ManagedPath from the set method" {

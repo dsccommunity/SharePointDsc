@@ -46,44 +46,48 @@ Invoke-TestSetup
 
 try
 {
-    Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
-        InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
-            Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
+    InModuleScope -ModuleName $script:DSCResourceFullName -ScriptBlock {
+        Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
+            BeforeAll {
+                Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
-            # Initialize tests
-            $listofAllServiceAppProxies = @(
-                "Web 1 User Profile Service Application",
-                "Web 1 MMS Service Application",
-                "State Service Application",
-                "Web 2 User Profile Service Application"
-            )
+                # Initialize tests
+                $listofAllServiceAppProxies = @(
+                    "Web 1 User Profile Service Application",
+                    "Web 1 MMS Service Application",
+                    "State Service Application",
+                    "Web 2 User Profile Service Application"
+                )
 
-            # Mocks for all contexts
-            Mock -CommandName Add-SPServiceApplicationProxyGroupMember -MockWith { }
-            Mock -CommandName Remove-SPServiceApplicationProxyGroupMember -MockWith { }
-            Mock -CommandName Get-SPServiceApplicationProxy -MockWith {
-                $proxiesToReturn = @()
-                foreach ($ServiceAppProxy in $listofAllServiceAppProxies)
-                {
-                    $proxiesToReturn += @{
-                        DisplayName = $ServiceAppProxy
+                # Mocks for all contexts
+                Mock -CommandName Add-SPServiceApplicationProxyGroupMember -MockWith { }
+                Mock -CommandName Remove-SPServiceApplicationProxyGroupMember -MockWith { }
+                Mock -CommandName Get-SPServiceApplicationProxy -MockWith {
+                    $proxiesToReturn = @()
+                    foreach ($ServiceAppProxy in $listofAllServiceAppProxies)
+                    {
+                        $proxiesToReturn += @{
+                            DisplayName = $ServiceAppProxy
+                        }
                     }
+                    return $proxiesToReturn
                 }
-                return $proxiesToReturn
-            }
-            Mock -CommandName New-SPServiceApplicationProxyGroup {
-                return @{
-                    Name = $TestParams.Name
+                Mock -CommandName New-SPServiceApplicationProxyGroup {
+                    return @{
+                        Name = $TestParams.Name
+                    }
                 }
             }
 
             # Test contexts
             Context -Name "ServiceAppProxies and ServiceAppProxiesToInclude parameters used simultaniously" -Fixture {
-                $testParams = @{
-                    Name                       = "Shared Services"
-                    Ensure                     = "Present"
-                    ServiceAppProxies          = "Web 1 User Profile Service Application", "Web 1 MMS Service Application", "State Service Application"
-                    ServiceAppProxiesToInclude = "Web 2 User Profile Service Application"
+                BeforeAll {
+                    $testParams = @{
+                        Name                       = "Shared Services"
+                        Ensure                     = "Present"
+                        ServiceAppProxies          = "Web 1 User Profile Service Application", "Web 1 MMS Service Application", "State Service Application"
+                        ServiceAppProxiesToInclude = "Web 2 User Profile Service Application"
+                    }
                 }
 
                 It "Should return Ensure=null from the get method" {
@@ -100,9 +104,11 @@ try
             }
 
             Context -Name "None of the ServiceAppProxies, ServiceAppProxiesToInclude and ServiceAppProxiesToExclude parameters are used" -Fixture {
-                $testParams = @{
-                    Name   = "My Proxy Group"
-                    Ensure = "Present"
+                BeforeAll {
+                    $testParams = @{
+                        Name   = "My Proxy Group"
+                        Ensure = "Present"
+                    }
                 }
 
                 It "Should return Ensure=null from the get method" {
@@ -119,14 +125,16 @@ try
             }
 
             Context -Name "The Service Application Proxy Group does not exist and should" -Fixture {
-                $testParams = @{
-                    Name              = "Shared Services"
-                    Ensure            = "Present"
-                    ServiceAppProxies = @("State Service Application", "Web 1 User Profile Service Application")
-                }
+                BeforeAll {
+                    $testParams = @{
+                        Name              = "Shared Services"
+                        Ensure            = "Present"
+                        ServiceAppProxies = @("State Service Application", "Web 1 User Profile Service Application")
+                    }
 
-                Mock -CommandName Get-SPServiceApplicationProxyGroup -MockWith {
-                    return $null
+                    Mock -CommandName Get-SPServiceApplicationProxyGroup -MockWith {
+                        return $null
+                    }
                 }
 
                 It "Should return ensure = absent  from the get method" {
@@ -144,13 +152,15 @@ try
             }
 
             Context -Name "The ServiceApplication Proxy Group does not exist, and should not" -Fixture {
-                $testParams = @{
-                    Name   = "Shared Services"
-                    Ensure = "Absent"
-                }
+                BeforeAll {
+                    $testParams = @{
+                        Name   = "Shared Services"
+                        Ensure = "Absent"
+                    }
 
-                Mock -CommandName Get-SPServiceApplicationProxyGroup -MockWith {
-                    return $null
+                    Mock -CommandName Get-SPServiceApplicationProxyGroup -MockWith {
+                        return $null
+                    }
                 }
 
                 It "Should return ensure = absent  from the get method" {
@@ -163,23 +173,25 @@ try
             }
 
             Context -Name "The Service Application Proxy Group exists and should, ServiceAppProxies match" -Fixture {
-                $testParams = @{
-                    Name              = "Shared Services"
-                    Ensure            = "Present"
-                    ServiceAppProxies = @("State Service Application", "Web 1 User Profile Service Application")
-                }
-
-                Mock -CommandName Get-SPServiceApplicationProxyGroup -MockWith {
-                    $proxiesToReturn = @()
-                    foreach ($ServiceAppProxy in $TestParams.ServiceAppProxies)
-                    {
-                        $proxiesToReturn += @{
-                            DisplayName = $ServiceAppProxy
-                        }
+                BeforeAll {
+                    $testParams = @{
+                        Name              = "Shared Services"
+                        Ensure            = "Present"
+                        ServiceAppProxies = @("State Service Application", "Web 1 User Profile Service Application")
                     }
-                    return @{
-                        Name    = $testParams.Name
-                        Proxies = $proxiesToReturn
+
+                    Mock -CommandName Get-SPServiceApplicationProxyGroup -MockWith {
+                        $proxiesToReturn = @()
+                        foreach ($ServiceAppProxy in $TestParams.ServiceAppProxies)
+                        {
+                            $proxiesToReturn += @{
+                                DisplayName = $ServiceAppProxy
+                            }
+                        }
+                        return @{
+                            Name    = $testParams.Name
+                            Proxies = $proxiesToReturn
+                        }
                     }
                 }
 
@@ -193,29 +205,31 @@ try
             }
 
             Context -Name "The Service Application Proxy Group exists and should, ServiceAppProxies do not match" -Fixture {
-                $testParams = @{
-                    Name              = "Shared Services"
-                    Ensure            = "Present"
-                    ServiceAppProxies = @(
-                        "State Service Application",
-                        "Web 1 User Profile Service Application")
-                }
-
-                $serviceAppProxiesConfigured = @(
-                    "State Service Application",
-                    "Web 2 User Profile Service Application")
-
-                Mock -CommandName Get-SPServiceApplicationProxyGroup -MockWith {
-                    $proxiesToReturn = @()
-                    foreach ($ServiceAppProxy in $serviceAppProxiesConfigured)
-                    {
-                        $proxiesToReturn += @{
-                            DisplayName = $ServiceAppProxy
-                        }
+                BeforeAll {
+                    $testParams = @{
+                        Name              = "Shared Services"
+                        Ensure            = "Present"
+                        ServiceAppProxies = @(
+                            "State Service Application",
+                            "Web 1 User Profile Service Application")
                     }
-                    return @{
-                        Name    = $testParams.Name
-                        Proxies = $proxiesToReturn
+
+                    $serviceAppProxiesConfigured = @(
+                        "State Service Application",
+                        "Web 2 User Profile Service Application")
+
+                    Mock -CommandName Get-SPServiceApplicationProxyGroup -MockWith {
+                        $proxiesToReturn = @()
+                        foreach ($ServiceAppProxy in $serviceAppProxiesConfigured)
+                        {
+                            $proxiesToReturn += @{
+                                DisplayName = $ServiceAppProxy
+                            }
+                        }
+                        return @{
+                            Name    = $testParams.Name
+                            Proxies = $proxiesToReturn
+                        }
                     }
                 }
 
@@ -235,30 +249,32 @@ try
             }
 
             Context -Name "The Service Application Proxy Group exists and should, ServiceAppProxiesToInclude matches" -Fixture {
-                $testParams = @{
-                    Name                       = "Shared Services"
-                    Ensure                     = "Present"
-                    ServiceAppProxiesToInclude = @(
-                        "State Service Application",
-                        "Web 1 User Profile Service Application")
-                }
-
-                $serviceAppProxiesConfigured = @(
-                    "State Service Application",
-                    "Web 1 User Profile Service Application",
-                    "Web 1 MMS Service Application")
-
-                Mock -CommandName Get-SPServiceApplicationProxyGroup -MockWith {
-                    $proxiesToReturn = @()
-                    foreach ($ServiceAppProxy in $serviceAppProxiesConfigured)
-                    {
-                        $proxiesToReturn += @{
-                            DisplayName = $ServiceAppProxy
-                        }
+                BeforeAll {
+                    $testParams = @{
+                        Name                       = "Shared Services"
+                        Ensure                     = "Present"
+                        ServiceAppProxiesToInclude = @(
+                            "State Service Application",
+                            "Web 1 User Profile Service Application")
                     }
-                    return @{
-                        Name    = $testParams.Name
-                        Proxies = $proxiesToReturn
+
+                    $serviceAppProxiesConfigured = @(
+                        "State Service Application",
+                        "Web 1 User Profile Service Application",
+                        "Web 1 MMS Service Application")
+
+                    Mock -CommandName Get-SPServiceApplicationProxyGroup -MockWith {
+                        $proxiesToReturn = @()
+                        foreach ($ServiceAppProxy in $serviceAppProxiesConfigured)
+                        {
+                            $proxiesToReturn += @{
+                                DisplayName = $ServiceAppProxy
+                            }
+                        }
+                        return @{
+                            Name    = $testParams.Name
+                            Proxies = $proxiesToReturn
+                        }
                     }
                 }
 
@@ -272,29 +288,31 @@ try
             }
 
             Context -Name "The Service Application Proxy Group exists and should, ServiceAppProxiesToInclude does not match" -Fixture {
-                $testParams = @{
-                    Name                       = "Shared Services"
-                    Ensure                     = "Present"
-                    ServiceAppProxiesToInclude = @(
-                        "State Service Application",
-                        "Web 1 User Profile Service Application")
-                }
-
-                $serviceAppProxiesConfigured = @(
-                    "State Service Application",
-                    "Web 1 MMS Service Application")
-
-                Mock -CommandName Get-SPServiceApplicationProxyGroup -MockWith {
-                    $proxiesToReturn = @()
-                    foreach ($ServiceAppProxy in $serviceAppProxiesConfigured)
-                    {
-                        $proxiesToReturn += @{
-                            DisplayName = $ServiceAppProxy
-                        }
+                BeforeAll {
+                    $testParams = @{
+                        Name                       = "Shared Services"
+                        Ensure                     = "Present"
+                        ServiceAppProxiesToInclude = @(
+                            "State Service Application",
+                            "Web 1 User Profile Service Application")
                     }
-                    return @{
-                        Name    = $testParams.Name
-                        Proxies = $proxiesToReturn
+
+                    $serviceAppProxiesConfigured = @(
+                        "State Service Application",
+                        "Web 1 MMS Service Application")
+
+                    Mock -CommandName Get-SPServiceApplicationProxyGroup -MockWith {
+                        $proxiesToReturn = @()
+                        foreach ($ServiceAppProxy in $serviceAppProxiesConfigured)
+                        {
+                            $proxiesToReturn += @{
+                                DisplayName = $ServiceAppProxy
+                            }
+                        }
+                        return @{
+                            Name    = $testParams.Name
+                            Proxies = $proxiesToReturn
+                        }
                     }
                 }
 
@@ -314,27 +332,29 @@ try
             }
 
             Context -Name "The Service Application Proxy Group exists and should, ServiceAppProxiesToExclude matches" -Fixture {
-                $testParams = @{
-                    Name                       = "Shared Services"
-                    Ensure                     = "Present"
-                    ServiceAppProxiesToExclude = @("Web 1 User Profile Service Application")
-                }
-
-                $serviceAppProxiesConfigured = @(
-                    "State Service Application",
-                    "Web 1 MMS Service Application")
-
-                Mock -CommandName Get-SPServiceApplicationProxyGroup -MockWith {
-                    $proxiesToReturn = @()
-                    foreach ($ServiceAppProxy in $serviceAppProxiesConfigured)
-                    {
-                        $proxiesToReturn += @{
-                            DisplayName = $ServiceAppProxy
-                        }
+                BeforeAll {
+                    $testParams = @{
+                        Name                       = "Shared Services"
+                        Ensure                     = "Present"
+                        ServiceAppProxiesToExclude = @("Web 1 User Profile Service Application")
                     }
-                    return @{
-                        Name    = $testParams.Name
-                        Proxies = $proxiesToReturn
+
+                    $serviceAppProxiesConfigured = @(
+                        "State Service Application",
+                        "Web 1 MMS Service Application")
+
+                    Mock -CommandName Get-SPServiceApplicationProxyGroup -MockWith {
+                        $proxiesToReturn = @()
+                        foreach ($ServiceAppProxy in $serviceAppProxiesConfigured)
+                        {
+                            $proxiesToReturn += @{
+                                DisplayName = $ServiceAppProxy
+                            }
+                        }
+                        return @{
+                            Name    = $testParams.Name
+                            Proxies = $proxiesToReturn
+                        }
                     }
                 }
 
@@ -348,28 +368,30 @@ try
             }
 
             Context -Name "The Service Application Proxy Group exists and should, ServiceAppProxiesToExclude does not match" -Fixture {
-                $testParams = @{
-                    Name                       = "Shared Services"
-                    Ensure                     = "Present"
-                    ServiceAppProxiesToExclude = @("Web 1 User Profile Service Application", "Web 2 User Profile Service Application")
-                }
-
-                $serviceAppProxiesConfigured = @(
-                    "State Service Application",
-                    "Web 1 MMS Service Application",
-                    "Web 1 User Profile Service Application")
-
-                Mock -CommandName Get-SPServiceApplicationProxyGroup -MockWith {
-                    $proxiesToReturn = @()
-                    foreach ($ServiceAppProxy in $serviceAppProxiesConfigured)
-                    {
-                        $proxiesToReturn += @{
-                            DisplayName = $ServiceAppProxy
-                        }
+                BeforeAll {
+                    $testParams = @{
+                        Name                       = "Shared Services"
+                        Ensure                     = "Present"
+                        ServiceAppProxiesToExclude = @("Web 1 User Profile Service Application", "Web 2 User Profile Service Application")
                     }
-                    return @{
-                        Name    = $testParams.Name
-                        Proxies = $proxiesToReturn
+
+                    $serviceAppProxiesConfigured = @(
+                        "State Service Application",
+                        "Web 1 MMS Service Application",
+                        "Web 1 User Profile Service Application")
+
+                    Mock -CommandName Get-SPServiceApplicationProxyGroup -MockWith {
+                        $proxiesToReturn = @()
+                        foreach ($ServiceAppProxy in $serviceAppProxiesConfigured)
+                        {
+                            $proxiesToReturn += @{
+                                DisplayName = $ServiceAppProxy
+                            }
+                        }
+                        return @{
+                            Name    = $testParams.Name
+                            Proxies = $proxiesToReturn
+                        }
                     }
                 }
 
@@ -389,25 +411,27 @@ try
             }
 
             Context -Name "Specified service application does not exist, ServiceAppProxies specified" -Fixture {
-                $testParams = @{
-                    Name              = "Shared Services"
-                    Ensure            = "Present"
-                    ServiceAppProxies = @(
-                        "No Such Service Application",
-                        "Web 1 User Profile Service Application")
-                }
-
-                Mock -CommandName Get-SPServiceApplicationProxyGroup -MockWith {
-                    $proxiesToReturn = @()
-                    foreach ($ServiceAppProxy in "Web 1 User Profile Service Application")
-                    {
-                        $proxiesToReturn += @{
-                            DisplayName = $ServiceAppProxy
-                        }
+                BeforeAll {
+                    $testParams = @{
+                        Name              = "Shared Services"
+                        Ensure            = "Present"
+                        ServiceAppProxies = @(
+                            "No Such Service Application",
+                            "Web 1 User Profile Service Application")
                     }
-                    return @{
-                        Name    = $testParams.Name
-                        Proxies = $proxiesToReturn
+
+                    Mock -CommandName Get-SPServiceApplicationProxyGroup -MockWith {
+                        $proxiesToReturn = @()
+                        foreach ($ServiceAppProxy in "Web 1 User Profile Service Application")
+                        {
+                            $proxiesToReturn += @{
+                                DisplayName = $ServiceAppProxy
+                            }
+                        }
+                        return @{
+                            Name    = $testParams.Name
+                            Proxies = $proxiesToReturn
+                        }
                     }
                 }
 
@@ -425,25 +449,27 @@ try
             }
 
             Context -Name "Specified service application does not exist, ServiceAppProxiesToInclude specified" -Fixture {
-                $testParams = @{
-                    Name                       = "Shared Services"
-                    Ensure                     = "Present"
-                    ServiceAppProxiesToInclude = @(
-                        "No Such Service Application",
-                        "Web 1 User Profile Service Application")
-                }
-
-                Mock -CommandName Get-SPServiceApplicationProxyGroup -MockWith {
-                    $proxiesToReturn = @()
-                    foreach ($ServiceAppProxy in "Web 1 User Profile Service Application")
-                    {
-                        $proxiesToReturn += @{
-                            DisplayName = $ServiceAppProxy
-                        }
+                BeforeAll {
+                    $testParams = @{
+                        Name                       = "Shared Services"
+                        Ensure                     = "Present"
+                        ServiceAppProxiesToInclude = @(
+                            "No Such Service Application",
+                            "Web 1 User Profile Service Application")
                     }
-                    return @{
-                        Name    = $testParams.Name
-                        Proxies = $proxiesToReturn
+
+                    Mock -CommandName Get-SPServiceApplicationProxyGroup -MockWith {
+                        $proxiesToReturn = @()
+                        foreach ($ServiceAppProxy in "Web 1 User Profile Service Application")
+                        {
+                            $proxiesToReturn += @{
+                                DisplayName = $ServiceAppProxy
+                            }
+                        }
+                        return @{
+                            Name    = $testParams.Name
+                            Proxies = $proxiesToReturn
+                        }
                     }
                 }
 

@@ -46,23 +46,27 @@ Invoke-TestSetup
 
 try
 {
-    Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
-        InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
-            Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
+    InModuleScope -ModuleName $script:DSCResourceFullName -ScriptBlock {
+        Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
+            BeforeAll {
+                Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
-            # Mocks for all contexts
-            Mock -CommandName Add-SPShellAdmin -MockWith { }
-            Mock -CommandName Remove-SPShellAdmin -MockWith { }
+                # Mocks for all contexts
+                Mock -CommandName Add-SPShellAdmin -MockWith { }
+                Mock -CommandName Remove-SPShellAdmin -MockWith { }
+            }
 
             # Test contexts
             Context -Name "The server is not part of SharePoint farm" -Fixture {
-                $testParams = @{
-                    IsSingleInstance = "Yes"
-                    Members          = "contoso\user1", "contoso\user2"
-                }
+                BeforeAll {
+                    $testParams = @{
+                        IsSingleInstance = "Yes"
+                        Members          = "contoso\user1", "contoso\user2"
+                    }
 
-                Mock -CommandName Get-SPFarm -MockWith {
-                    throw "Unable to detect local farm"
+                    Mock -CommandName Get-SPFarm -MockWith {
+                        throw "Unable to detect local farm"
+                    }
                 }
 
                 It "Should return null from the get method" {
@@ -82,16 +86,18 @@ try
             }
 
             Context -Name "ContentDatabases and AllContentDatabases parameters used simultaneously" -Fixture {
-                $testParams = @{
-                    IsSingleInstance = "Yes"
-                    Members          = "contoso\user1", "contoso\user2"
-                    Databases        = @(
-                        (New-CimInstance -ClassName MSFT_SPContentDatabasePermissions -Property @{
-                                Name    = "SharePoint_Content_Contoso1"
-                                Members = "contoso\user1", "contoso\user2"
-                            } -ClientOnly)
-                    )
-                    AllDatabases     = $true
+                BeforeAll {
+                    $testParams = @{
+                        IsSingleInstance = "Yes"
+                        Members          = "contoso\user1", "contoso\user2"
+                        Databases        = @(
+                            (New-CimInstance -ClassName MSFT_SPContentDatabasePermissions -Property @{
+                                    Name    = "SharePoint_Content_Contoso1"
+                                    Members = "contoso\user1", "contoso\user2"
+                                } -ClientOnly)
+                        )
+                        AllDatabases     = $true
+                    }
                 }
 
                 It "Should return null from the get method" {
@@ -111,10 +117,12 @@ try
             }
 
             Context -Name "Members and MembersToInclude parameters used simultaneously - General permissions" -Fixture {
-                $testParams = @{
-                    IsSingleInstance = "Yes"
-                    Members          = "contoso\user1", "contoso\user2"
-                    MembersToInclude = "contoso\user1", "contoso\user2"
+                BeforeAll {
+                    $testParams = @{
+                        IsSingleInstance = "Yes"
+                        Members          = "contoso\user1", "contoso\user2"
+                        MembersToInclude = "contoso\user1", "contoso\user2"
+                    }
                 }
 
                 It "Should return null from the get method" {
@@ -134,8 +142,10 @@ try
             }
 
             Context -Name "None of the Members, MembersToInclude and MembersToExclude parameters are used - General permissions" -Fixture {
-                $testParams = @{
-                    IsSingleInstance = "Yes"
+                BeforeAll {
+                    $testParams = @{
+                        IsSingleInstance = "Yes"
+                    }
                 }
 
                 It "Should return null from the get method" {
@@ -155,15 +165,17 @@ try
             }
 
             Context -Name "Members and MembersToInclude parameters used simultaneously - Database permissions" -Fixture {
-                $testParams = @{
-                    IsSingleInstance = "Yes"
-                    Databases        = @(
-                        (New-CimInstance -ClassName MSFT_SPDatabasePermissions -Property @{
-                                Name             = "SharePoint_Content_Contoso1"
-                                Members          = "contoso\user1", "contoso\user2"
-                                MembersToInclude = "contoso\user1", "contoso\user2"
-                            } -ClientOnly)
-                    )
+                BeforeAll {
+                    $testParams = @{
+                        IsSingleInstance = "Yes"
+                        Databases        = @(
+                            (New-CimInstance -ClassName MSFT_SPDatabasePermissions -Property @{
+                                    Name             = "SharePoint_Content_Contoso1"
+                                    Members          = "contoso\user1", "contoso\user2"
+                                    MembersToInclude = "contoso\user1", "contoso\user2"
+                                } -ClientOnly)
+                        )
+                    }
                 }
 
                 It "Should return null from the get method" {
@@ -183,15 +195,17 @@ try
             }
 
             Context -Name "Databases and ExcludeDatabases parameters used simultaneously" -Fixture {
-                $testParams = @{
-                    IsSingleInstance = "Yes"
-                    Databases        = @(
-                        (New-CimInstance -ClassName MSFT_SPDatabasePermissions -Property @{
-                                Name    = "SharePoint_Content_Contoso1"
-                                Members = "contoso\user1", "contoso\user2"
-                            } -ClientOnly)
-                    )
-                    ExcludeDatabases = "SharePoint_Content_Contoso2"
+                BeforeAll {
+                    $testParams = @{
+                        IsSingleInstance = "Yes"
+                        Databases        = @(
+                            (New-CimInstance -ClassName MSFT_SPDatabasePermissions -Property @{
+                                    Name    = "SharePoint_Content_Contoso1"
+                                    Members = "contoso\user1", "contoso\user2"
+                                } -ClientOnly)
+                        )
+                        ExcludeDatabases = "SharePoint_Content_Contoso2"
+                    }
                 }
 
                 It "Should return null from the get method" {
@@ -208,13 +222,15 @@ try
             }
 
             Context -Name "None of the Members, MembersToInclude and MembersToExclude parameters are used - Database permissions" -Fixture {
-                $testParams = @{
-                    IsSingleInstance = "Yes"
-                    Databases        = @(
-                        (New-CimInstance -ClassName MSFT_SPDatabasePermissions -Property @{
-                                Name = "SharePoint_Content_Contoso1"
-                            } -ClientOnly)
-                    )
+                BeforeAll {
+                    $testParams = @{
+                        IsSingleInstance = "Yes"
+                        Databases        = @(
+                            (New-CimInstance -ClassName MSFT_SPDatabasePermissions -Property @{
+                                    Name = "SharePoint_Content_Contoso1"
+                                } -ClientOnly)
+                        )
+                    }
                 }
 
                 It "Should return null from the get method" {
@@ -234,27 +250,29 @@ try
             }
 
             Context -Name "Specified content database does not exist - Database permissions" -Fixture {
-                $testParams = @{
-                    IsSingleInstance = "Yes"
-                    Databases        = @(
-                        (New-CimInstance -ClassName MSFT_SPDatabasePermissions -Property @{
-                                Name    = "SharePoint_Content_Contoso3"
-                                Members = "contoso\user1", "contoso\user2"
-                            } -ClientOnly)
-                    )
-                }
+                BeforeAll {
+                    $testParams = @{
+                        IsSingleInstance = "Yes"
+                        Databases        = @(
+                            (New-CimInstance -ClassName MSFT_SPDatabasePermissions -Property @{
+                                    Name    = "SharePoint_Content_Contoso3"
+                                    Members = "contoso\user1", "contoso\user2"
+                                } -ClientOnly)
+                        )
+                    }
 
-                Mock -CommandName Get-SPDatabase -MockWith {
-                    return @(
-                        @{
-                            Name = "SharePoint_Content_Contoso1"
-                            Id   = "F9168C5E-CEB2-4faa-B6BF-329BF39FA1E4"
-                        },
-                        @{
-                            Name = "SharePoint_Content_Contoso2"
-                            Id   = "936DA01F-9ABD-4d9d-80C7-02AF85C822A8"
-                        }
-                    )
+                    Mock -CommandName Get-SPDatabase -MockWith {
+                        return @(
+                            @{
+                                Name = "SharePoint_Content_Contoso1"
+                                Id   = "F9168C5E-CEB2-4faa-B6BF-329BF39FA1E4"
+                            },
+                            @{
+                                Name = "SharePoint_Content_Contoso2"
+                                Id   = "936DA01F-9ABD-4d9d-80C7-02AF85C822A8"
+                            }
+                        )
+                    }
                 }
 
                 It "Should return null from the get method" {
@@ -271,40 +289,42 @@ try
             }
 
             Context -Name "AllDatabases parameter is used and permissions do not match" -Fixture {
-                $testParams = @{
-                    IsSingleInstance = "Yes"
-                    Members          = "contoso\user1", "contoso\user2"
-                    AllDatabases     = $true
-                }
+                BeforeAll {
+                    $testParams = @{
+                        IsSingleInstance = "Yes"
+                        Members          = "contoso\user1", "contoso\user2"
+                        AllDatabases     = $true
+                    }
 
-                Mock -CommandName Get-SPShellAdmin -MockWith {
-                    if ($database)
-                    {
-                        # Database parameter used, return database permissions
-                        return @{
-                            UserName = "contoso\user3", "contoso\user4"
+                    Mock -CommandName Get-SPShellAdmin -MockWith {
+                        if ($database)
+                        {
+                            # Database parameter used, return database permissions
+                            return @{
+                                UserName = "contoso\user3", "contoso\user4"
+                            }
+                        }
+                        else
+                        {
+                            # Database parameter not used, return general permissions
+                            return @{
+                                UserName = "contoso\user3", "contoso\user4"
+                            }
                         }
                     }
-                    else
-                    {
-                        # Database parameter not used, return general permissions
-                        return @{
-                            UserName = "contoso\user3", "contoso\user4"
-                        }
-                    }
-                }
 
-                Mock -CommandName Get-SPDatabase -MockWith {
-                    return @(
-                        @{
-                            Name = "SharePoint_Content_Contoso1"
-                            Id   = "F9168C5E-CEB2-4faa-B6BF-329BF39FA1E4"
-                        },
-                        @{
-                            Name = "SharePoint_Content_Contoso2"
-                            Id   = "936DA01F-9ABD-4d9d-80C7-02AF85C822A8"
-                        }
-                    )
+                    Mock -CommandName Get-SPDatabase -MockWith {
+                        return @(
+                            @{
+                                Name = "SharePoint_Content_Contoso1"
+                                Id   = "F9168C5E-CEB2-4faa-B6BF-329BF39FA1E4"
+                            },
+                            @{
+                                Name = "SharePoint_Content_Contoso2"
+                                Id   = "936DA01F-9ABD-4d9d-80C7-02AF85C822A8"
+                            }
+                        )
+                    }
                 }
 
                 It "Should return null from the get method" {
@@ -323,45 +343,47 @@ try
             }
 
             Context -Name "AllDatabases parameter is used with ExcludeDatabases and permissions do not match" -Fixture {
-                $testParams = @{
-                    IsSingleInstance = "Yes"
-                    Members          = "contoso\user1", "contoso\user2"
-                    AllDatabases     = $true
-                    ExcludeDatabases = "SharePoint_Content_Contoso3"
-                }
+                BeforeAll {
+                    $testParams = @{
+                        IsSingleInstance = "Yes"
+                        Members          = "contoso\user1", "contoso\user2"
+                        AllDatabases     = $true
+                        ExcludeDatabases = "SharePoint_Content_Contoso3"
+                    }
 
-                Mock -CommandName Get-SPShellAdmin -MockWith {
-                    if ($database)
-                    {
-                        # Database parameter used, return database permissions
-                        return @{
-                            UserName = "contoso\user3", "contoso\user4"
+                    Mock -CommandName Get-SPShellAdmin -MockWith {
+                        if ($database)
+                        {
+                            # Database parameter used, return database permissions
+                            return @{
+                                UserName = "contoso\user3", "contoso\user4"
+                            }
+                        }
+                        else
+                        {
+                            # Database parameter not used, return general permissions
+                            return @{
+                                UserName = "contoso\user1", "contoso\user2"
+                            }
                         }
                     }
-                    else
-                    {
-                        # Database parameter not used, return general permissions
-                        return @{
-                            UserName = "contoso\user1", "contoso\user2"
-                        }
-                    }
-                }
 
-                Mock -CommandName Get-SPDatabase -MockWith {
-                    return @(
-                        @{
-                            Name = "SharePoint_Content_Contoso1"
-                            Id   = "F9168C5E-CEB2-4faa-B6BF-329BF39FA1E4"
-                        },
-                        @{
-                            Name = "SharePoint_Content_Contoso2"
-                            Id   = "936DA01F-9ABD-4d9d-80C7-02AF85C822A8"
-                        },
-                        @{
-                            Name = "SharePoint_Content_Contoso3"
-                            Id   = "936DA01F-9ABD-4d9d-80C7-02AF85C822A9"
-                        }
-                    )
+                    Mock -CommandName Get-SPDatabase -MockWith {
+                        return @(
+                            @{
+                                Name = "SharePoint_Content_Contoso1"
+                                Id   = "F9168C5E-CEB2-4faa-B6BF-329BF39FA1E4"
+                            },
+                            @{
+                                Name = "SharePoint_Content_Contoso2"
+                                Id   = "936DA01F-9ABD-4d9d-80C7-02AF85C822A8"
+                            },
+                            @{
+                                Name = "SharePoint_Content_Contoso3"
+                                Id   = "936DA01F-9ABD-4d9d-80C7-02AF85C822A9"
+                            }
+                        )
+                    }
                 }
 
                 It "Should return null from the get method" {
@@ -380,21 +402,23 @@ try
             }
 
             Context -Name "Configured Members do not match the actual members - General permissions" -Fixture {
-                $testParams = @{
-                    IsSingleInstance = "Yes"
-                    Members          = "contoso\user1", "contoso\user2"
-                }
-
-                Mock -CommandName Get-SPShellAdmin -MockWith {
-                    if ($database)
-                    {
-                        # Database parameter used, return database permissions
-                        return @{ }
+                BeforeAll {
+                    $testParams = @{
+                        IsSingleInstance = "Yes"
+                        Members          = "contoso\user1", "contoso\user2"
                     }
-                    else
-                    {
-                        # Database parameter not used, return general permissions
-                        return @{ UserName = "contoso\user3", "contoso\user4" }
+
+                    Mock -CommandName Get-SPShellAdmin -MockWith {
+                        if ($database)
+                        {
+                            # Database parameter used, return database permissions
+                            return @{ }
+                        }
+                        else
+                        {
+                            # Database parameter not used, return general permissions
+                            return @{ UserName = "contoso\user3", "contoso\user4" }
+                        }
                     }
                 }
 
@@ -414,22 +438,24 @@ try
             }
 
             Context -Name "Configured Members match the actual members - General permissions" -Fixture {
-                $testParams = @{
-                    IsSingleInstance = "Yes"
-                    Members          = "contoso\user1", "contoso\user2"
-                }
-
-                Mock -CommandName Get-SPShellAdmin -MockWith {
-                    if ($database)
-                    {
-                        # Database parameter used, return database permissions
-                        return @{ }
+                BeforeAll {
+                    $testParams = @{
+                        IsSingleInstance = "Yes"
+                        Members          = "contoso\user1", "contoso\user2"
                     }
-                    else
-                    {
-                        # Database parameter not used, return general permissions
-                        return @{
-                            UserName = "contoso\user1", "contoso\user2"
+
+                    Mock -CommandName Get-SPShellAdmin -MockWith {
+                        if ($database)
+                        {
+                            # Database parameter used, return database permissions
+                            return @{ }
+                        }
+                        else
+                        {
+                            # Database parameter not used, return general permissions
+                            return @{
+                                UserName = "contoso\user1", "contoso\user2"
+                            }
                         }
                     }
                 }
@@ -444,48 +470,50 @@ try
             }
 
             Context -Name "Configured Members do not match the actual members - Database permissions" -Fixture {
-                $testParams = @{
-                    IsSingleInstance = "Yes"
-                    Databases        = @(
-                        (New-CimInstance -ClassName MSFT_SPDatabasePermissions -Property @{
-                                Name    = "SharePoint_Content_Contoso1"
-                                Members = "contoso\user1", "contoso\user2"
-                            } -ClientOnly)
-                        (New-CimInstance -ClassName MSFT_SPDatabasePermissions -Property @{
-                                Name    = "SharePoint_Content_Contoso2"
-                                Members = "contoso\user1", "contoso\user2"
-                            } -ClientOnly)
-                    )
-                }
+                BeforeAll {
+                    $testParams = @{
+                        IsSingleInstance = "Yes"
+                        Databases        = @(
+                            (New-CimInstance -ClassName MSFT_SPDatabasePermissions -Property @{
+                                    Name    = "SharePoint_Content_Contoso1"
+                                    Members = "contoso\user1", "contoso\user2"
+                                } -ClientOnly)
+                            (New-CimInstance -ClassName MSFT_SPDatabasePermissions -Property @{
+                                    Name    = "SharePoint_Content_Contoso2"
+                                    Members = "contoso\user1", "contoso\user2"
+                                } -ClientOnly)
+                        )
+                    }
 
-                Mock -CommandName Get-SPShellAdmin -MockWith {
-                    if ($database)
-                    {
-                        # Database parameter used, return database permissions
-                        return @{
-                            UserName = "contoso\user3", "contoso\user4"
+                    Mock -CommandName Get-SPShellAdmin -MockWith {
+                        if ($database)
+                        {
+                            # Database parameter used, return database permissions
+                            return @{
+                                UserName = "contoso\user3", "contoso\user4"
+                            }
+                        }
+                        else
+                        {
+                            # Database parameter not used, return general permissions
+                            return @{
+                                UserName = "contoso\user1", "contoso\user2"
+                            }
                         }
                     }
-                    else
-                    {
-                        # Database parameter not used, return general permissions
-                        return @{
-                            UserName = "contoso\user1", "contoso\user2"
-                        }
-                    }
-                }
 
-                Mock -CommandName Get-SPDatabase -MockWith {
-                    return @(
-                        @{
-                            Name = "SharePoint_Content_Contoso1"
-                            Id   = "F9168C5E-CEB2-4faa-B6BF-329BF39FA1E4"
-                        },
-                        @{
-                            Name = "SharePoint_Content_Contoso2"
-                            Id   = "936DA01F-9ABD-4d9d-80C7-02AF85C822A8"
-                        }
-                    )
+                    Mock -CommandName Get-SPDatabase -MockWith {
+                        return @(
+                            @{
+                                Name = "SharePoint_Content_Contoso1"
+                                Id   = "F9168C5E-CEB2-4faa-B6BF-329BF39FA1E4"
+                            },
+                            @{
+                                Name = "SharePoint_Content_Contoso2"
+                                Id   = "936DA01F-9ABD-4d9d-80C7-02AF85C822A8"
+                            }
+                        )
+                    }
                 }
 
                 It "Should return null from the get method" {
@@ -504,48 +532,50 @@ try
             }
 
             Context -Name "Configured Members match the actual members - Database permissions" -Fixture {
-                $testParams = @{
-                    IsSingleInstance = "Yes"
-                    Databases        = @(
-                        (New-CimInstance -ClassName MSFT_SPDatabasePermissions -Property @{
-                                Name    = "SharePoint_Content_Contoso1"
-                                Members = "contoso\user1", "contoso\user2"
-                            } -ClientOnly)
-                        (New-CimInstance -ClassName MSFT_SPDatabasePermissions -Property @{
-                                Name    = "SharePoint_Content_Contoso2"
-                                Members = "contoso\user1", "contoso\user2"
-                            } -ClientOnly)
-                    )
-                }
+                BeforeAll {
+                    $testParams = @{
+                        IsSingleInstance = "Yes"
+                        Databases        = @(
+                            (New-CimInstance -ClassName MSFT_SPDatabasePermissions -Property @{
+                                    Name    = "SharePoint_Content_Contoso1"
+                                    Members = "contoso\user1", "contoso\user2"
+                                } -ClientOnly)
+                            (New-CimInstance -ClassName MSFT_SPDatabasePermissions -Property @{
+                                    Name    = "SharePoint_Content_Contoso2"
+                                    Members = "contoso\user1", "contoso\user2"
+                                } -ClientOnly)
+                        )
+                    }
 
-                Mock -CommandName Get-SPShellAdmin -MockWith {
-                    if ($database)
-                    {
-                        # Database parameter used, return database permissions
-                        return @{
-                            UserName = "contoso\user1", "contoso\user2"
+                    Mock -CommandName Get-SPShellAdmin -MockWith {
+                        if ($database)
+                        {
+                            # Database parameter used, return database permissions
+                            return @{
+                                UserName = "contoso\user1", "contoso\user2"
+                            }
+                        }
+                        else
+                        {
+                            # Database parameter not used, return general permissions
+                            return @{
+                                UserName = "contoso\user1", "contoso\user2"
+                            }
                         }
                     }
-                    else
-                    {
-                        # Database parameter not used, return general permissions
-                        return @{
-                            UserName = "contoso\user1", "contoso\user2"
-                        }
-                    }
-                }
 
-                Mock -CommandName Get-SPDatabase -MockWith {
-                    return @(
-                        @{
-                            Name = "SharePoint_Content_Contoso1"
-                            Id   = "F9168C5E-CEB2-4faa-B6BF-329BF39FA1E4"
-                        },
-                        @{
-                            Name = "SharePoint_Content_Contoso2"
-                            Id   = "936DA01F-9ABD-4d9d-80C7-02AF85C822A8"
-                        }
-                    )
+                    Mock -CommandName Get-SPDatabase -MockWith {
+                        return @(
+                            @{
+                                Name = "SharePoint_Content_Contoso1"
+                                Id   = "F9168C5E-CEB2-4faa-B6BF-329BF39FA1E4"
+                            },
+                            @{
+                                Name = "SharePoint_Content_Contoso2"
+                                Id   = "936DA01F-9ABD-4d9d-80C7-02AF85C822A8"
+                            }
+                        )
+                    }
                 }
 
                 It "Should return null from the get method" {
@@ -558,22 +588,24 @@ try
             }
 
             Context -Name "Configured MembersToInclude do not match the actual members - General permissions" -Fixture {
-                $testParams = @{
-                    IsSingleInstance = "Yes"
-                    MembersToInclude = "contoso\user1", "contoso\user2"
-                }
-
-                Mock -CommandName Get-SPShellAdmin -MockWith {
-                    if ($database)
-                    {
-                        # Database parameter used, return database permissions
-                        return @{ }
+                BeforeAll {
+                    $testParams = @{
+                        IsSingleInstance = "Yes"
+                        MembersToInclude = "contoso\user1", "contoso\user2"
                     }
-                    else
-                    {
-                        # Database parameter not used, return general permissions
-                        return @{
-                            UserName = "contoso\user3", "contoso\user4"
+
+                    Mock -CommandName Get-SPShellAdmin -MockWith {
+                        if ($database)
+                        {
+                            # Database parameter used, return database permissions
+                            return @{ }
+                        }
+                        else
+                        {
+                            # Database parameter not used, return general permissions
+                            return @{
+                                UserName = "contoso\user3", "contoso\user4"
+                            }
                         }
                     }
                 }
@@ -593,22 +625,24 @@ try
             }
 
             Context -Name "Configured MembersToInclude match the actual members - General permissions" -Fixture {
-                $testParams = @{
-                    IsSingleInstance = "Yes"
-                    MembersToInclude = "contoso\user1", "contoso\user2"
-                }
-
-                Mock -CommandName Get-SPShellAdmin -MockWith {
-                    if ($database)
-                    {
-                        # Database parameter used, return database permissions
-                        return @{ }
+                BeforeAll {
+                    $testParams = @{
+                        IsSingleInstance = "Yes"
+                        MembersToInclude = "contoso\user1", "contoso\user2"
                     }
-                    else
-                    {
-                        # Database parameter not used, return general permissions
-                        return @{
-                            UserName = "contoso\user1", "contoso\user2", "contoso\user3"
+
+                    Mock -CommandName Get-SPShellAdmin -MockWith {
+                        if ($database)
+                        {
+                            # Database parameter used, return database permissions
+                            return @{ }
+                        }
+                        else
+                        {
+                            # Database parameter not used, return general permissions
+                            return @{
+                                UserName = "contoso\user1", "contoso\user2", "contoso\user3"
+                            }
                         }
                     }
                 }
@@ -623,48 +657,50 @@ try
             }
 
             Context -Name "Configured MembersToInclude do not match the actual members - Database permissions" -Fixture {
-                $testParams = @{
-                    IsSingleInstance = "Yes"
-                    Databases        = @(
-                        (New-CimInstance -ClassName MSFT_SPDatabasePermissions -Property @{
-                                Name             = "SharePoint_Content_Contoso1"
-                                MembersToInclude = "contoso\user1", "contoso\user2"
-                            } -ClientOnly)
-                        (New-CimInstance -ClassName MSFT_SPDatabasePermissions -Property @{
-                                Name             = "SharePoint_Content_Contoso2"
-                                MembersToInclude = "contoso\user1", "contoso\user2"
-                            } -ClientOnly)
-                    )
-                }
+                BeforeAll {
+                    $testParams = @{
+                        IsSingleInstance = "Yes"
+                        Databases        = @(
+                            (New-CimInstance -ClassName MSFT_SPDatabasePermissions -Property @{
+                                    Name             = "SharePoint_Content_Contoso1"
+                                    MembersToInclude = "contoso\user1", "contoso\user2"
+                                } -ClientOnly)
+                            (New-CimInstance -ClassName MSFT_SPDatabasePermissions -Property @{
+                                    Name             = "SharePoint_Content_Contoso2"
+                                    MembersToInclude = "contoso\user1", "contoso\user2"
+                                } -ClientOnly)
+                        )
+                    }
 
-                Mock -CommandName Get-SPShellAdmin -MockWith {
-                    if ($database)
-                    {
-                        # Database parameter used, return database permissions
-                        return @{
-                            UserName = "contoso\user3", "contoso\user4"
+                    Mock -CommandName Get-SPShellAdmin -MockWith {
+                        if ($database)
+                        {
+                            # Database parameter used, return database permissions
+                            return @{
+                                UserName = "contoso\user3", "contoso\user4"
+                            }
+                        }
+                        else
+                        {
+                            # Database parameter not used, return general permissions
+                            return @{
+                                UserName = "contoso\user1", "contoso\user2"
+                            }
                         }
                     }
-                    else
-                    {
-                        # Database parameter not used, return general permissions
-                        return @{
-                            UserName = "contoso\user1", "contoso\user2"
-                        }
-                    }
-                }
 
-                Mock -CommandName Get-SPDatabase -MockWith {
-                    return @(
-                        @{
-                            Name = "SharePoint_Content_Contoso1"
-                            Id   = "F9168C5E-CEB2-4faa-B6BF-329BF39FA1E4"
-                        },
-                        @{
-                            Name = "SharePoint_Content_Contoso2"
-                            Id   = "936DA01F-9ABD-4d9d-80C7-02AF85C822A8"
-                        }
-                    )
+                    Mock -CommandName Get-SPDatabase -MockWith {
+                        return @(
+                            @{
+                                Name = "SharePoint_Content_Contoso1"
+                                Id   = "F9168C5E-CEB2-4faa-B6BF-329BF39FA1E4"
+                            },
+                            @{
+                                Name = "SharePoint_Content_Contoso2"
+                                Id   = "936DA01F-9ABD-4d9d-80C7-02AF85C822A8"
+                            }
+                        )
+                    }
                 }
 
                 It "Should return null from the get method" {
@@ -682,48 +718,50 @@ try
             }
 
             Context -Name "Configured MembersToInclude match the actual members - Database permissions" -Fixture {
-                $testParams = @{
-                    IsSingleInstance = "Yes"
-                    Databases        = @(
-                        (New-CimInstance -ClassName MSFT_SPDatabasePermissions -Property @{
-                                Name             = "SharePoint_Content_Contoso1"
-                                MembersToInclude = "contoso\user1", "contoso\user2"
-                            } -ClientOnly)
-                        (New-CimInstance -ClassName MSFT_SPDatabasePermissions -Property @{
-                                Name             = "SharePoint_Content_Contoso2"
-                                MembersToInclude = "contoso\user1", "contoso\user2"
-                            } -ClientOnly)
-                    )
-                }
+                BeforeAll {
+                    $testParams = @{
+                        IsSingleInstance = "Yes"
+                        Databases        = @(
+                            (New-CimInstance -ClassName MSFT_SPDatabasePermissions -Property @{
+                                    Name             = "SharePoint_Content_Contoso1"
+                                    MembersToInclude = "contoso\user1", "contoso\user2"
+                                } -ClientOnly)
+                            (New-CimInstance -ClassName MSFT_SPDatabasePermissions -Property @{
+                                    Name             = "SharePoint_Content_Contoso2"
+                                    MembersToInclude = "contoso\user1", "contoso\user2"
+                                } -ClientOnly)
+                        )
+                    }
 
-                Mock -CommandName Get-SPShellAdmin -MockWith {
-                    if ($database)
-                    {
-                        # Database parameter used, return database permissions
-                        return @{
-                            UserName = "contoso\user1", "contoso\user2", "contoso\user3"
+                    Mock -CommandName Get-SPShellAdmin -MockWith {
+                        if ($database)
+                        {
+                            # Database parameter used, return database permissions
+                            return @{
+                                UserName = "contoso\user1", "contoso\user2", "contoso\user3"
+                            }
+                        }
+                        else
+                        {
+                            # Database parameter not used, return general permissions
+                            return @{
+                                UserName = "contoso\user1", "contoso\user2"
+                            }
                         }
                     }
-                    else
-                    {
-                        # Database parameter not used, return general permissions
-                        return @{
-                            UserName = "contoso\user1", "contoso\user2"
-                        }
-                    }
-                }
 
-                Mock -CommandName Get-SPDatabase -MockWith {
-                    return @(
-                        @{
-                            Name = "SharePoint_Content_Contoso1"
-                            Id   = "F9168C5E-CEB2-4faa-B6BF-329BF39FA1E4"
-                        },
-                        @{
-                            Name = "SharePoint_Content_Contoso2"
-                            Id   = "936DA01F-9ABD-4d9d-80C7-02AF85C822A8"
-                        }
-                    )
+                    Mock -CommandName Get-SPDatabase -MockWith {
+                        return @(
+                            @{
+                                Name = "SharePoint_Content_Contoso1"
+                                Id   = "F9168C5E-CEB2-4faa-B6BF-329BF39FA1E4"
+                            },
+                            @{
+                                Name = "SharePoint_Content_Contoso2"
+                                Id   = "936DA01F-9ABD-4d9d-80C7-02AF85C822A8"
+                            }
+                        )
+                    }
                 }
 
                 It "Should return null from the get method" {
@@ -736,22 +774,24 @@ try
             }
 
             Context -Name "Configured MembersToExclude do not match the actual members - General permissions" -Fixture {
-                $testParams = @{
-                    IsSingleInstance = "Yes"
-                    MembersToExclude = "contoso\user1", "contoso\user2"
-                }
-
-                Mock -CommandName Get-SPShellAdmin -MockWith {
-                    if ($database)
-                    {
-                        # Database parameter used, return database permissions
-                        return @{ }
+                BeforeAll {
+                    $testParams = @{
+                        IsSingleInstance = "Yes"
+                        MembersToExclude = "contoso\user1", "contoso\user2"
                     }
-                    else
-                    {
-                        # Database parameter not used, return general permissions
-                        return @{
-                            UserName = "contoso\user1", "contoso\user2"
+
+                    Mock -CommandName Get-SPShellAdmin -MockWith {
+                        if ($database)
+                        {
+                            # Database parameter used, return database permissions
+                            return @{ }
+                        }
+                        else
+                        {
+                            # Database parameter not used, return general permissions
+                            return @{
+                                UserName = "contoso\user1", "contoso\user2"
+                            }
                         }
                     }
                 }
@@ -771,22 +811,24 @@ try
             }
 
             Context -Name "Configured MembersToExclude match the actual members - General permissions" -Fixture {
-                $testParams = @{
-                    IsSingleInstance = "Yes"
-                    MembersToExclude = "contoso\user1", "contoso\user2"
-                }
-
-                Mock -CommandName Get-SPShellAdmin -MockWith {
-                    if ($database)
-                    {
-                        # Database parameter used, return database permissions
-                        return @{ }
+                BeforeAll {
+                    $testParams = @{
+                        IsSingleInstance = "Yes"
+                        MembersToExclude = "contoso\user1", "contoso\user2"
                     }
-                    else
-                    {
-                        # Database parameter not used, return general permissions
-                        return @{
-                            UserName = "contoso\user3", "contoso\user4"
+
+                    Mock -CommandName Get-SPShellAdmin -MockWith {
+                        if ($database)
+                        {
+                            # Database parameter used, return database permissions
+                            return @{ }
+                        }
+                        else
+                        {
+                            # Database parameter not used, return general permissions
+                            return @{
+                                UserName = "contoso\user3", "contoso\user4"
+                            }
                         }
                     }
                 }
@@ -801,48 +843,50 @@ try
             }
 
             Context -Name "Configured MembersToExclude do not match the actual members - Database permissions" -Fixture {
-                $testParams = @{
-                    IsSingleInstance = "Yes"
-                    Databases        = @(
-                        (New-CimInstance -ClassName MSFT_SPDatabasePermissions -Property @{
-                                Name             = "SharePoint_Content_Contoso1"
-                                MembersToExclude = "contoso\user1", "contoso\user2"
-                            } -ClientOnly)
-                        (New-CimInstance -ClassName MSFT_SPDatabasePermissions -Property @{
-                                Name             = "SharePoint_Content_Contoso2"
-                                MembersToExclude = "contoso\user1", "contoso\user2"
-                            } -ClientOnly)
-                    )
-                }
+                BeforeAll {
+                    $testParams = @{
+                        IsSingleInstance = "Yes"
+                        Databases        = @(
+                            (New-CimInstance -ClassName MSFT_SPDatabasePermissions -Property @{
+                                    Name             = "SharePoint_Content_Contoso1"
+                                    MembersToExclude = "contoso\user1", "contoso\user2"
+                                } -ClientOnly)
+                            (New-CimInstance -ClassName MSFT_SPDatabasePermissions -Property @{
+                                    Name             = "SharePoint_Content_Contoso2"
+                                    MembersToExclude = "contoso\user1", "contoso\user2"
+                                } -ClientOnly)
+                        )
+                    }
 
-                Mock -CommandName Get-SPShellAdmin -MockWith {
-                    if ($database)
-                    {
-                        # Database parameter used, return database permissions
-                        return @{
-                            UserName = "contoso\user1", "contoso\user2"
+                    Mock -CommandName Get-SPShellAdmin -MockWith {
+                        if ($database)
+                        {
+                            # Database parameter used, return database permissions
+                            return @{
+                                UserName = "contoso\user1", "contoso\user2"
+                            }
+                        }
+                        else
+                        {
+                            # Database parameter not used, return general permissions
+                            return @{
+                                UserName = "contoso\user1", "contoso\user2"
+                            }
                         }
                     }
-                    else
-                    {
-                        # Database parameter not used, return general permissions
-                        return @{
-                            UserName = "contoso\user1", "contoso\user2"
-                        }
-                    }
-                }
 
-                Mock -CommandName Get-SPDatabase -MockWith {
-                    return @(
-                        @{
-                            Name = "SharePoint_Content_Contoso1"
-                            Id   = "F9168C5E-CEB2-4faa-B6BF-329BF39FA1E4"
-                        },
-                        @{
-                            Name = "SharePoint_Content_Contoso2"
-                            Id   = "936DA01F-9ABD-4d9d-80C7-02AF85C822A8"
-                        }
-                    )
+                    Mock -CommandName Get-SPDatabase -MockWith {
+                        return @(
+                            @{
+                                Name = "SharePoint_Content_Contoso1"
+                                Id   = "F9168C5E-CEB2-4faa-B6BF-329BF39FA1E4"
+                            },
+                            @{
+                                Name = "SharePoint_Content_Contoso2"
+                                Id   = "936DA01F-9ABD-4d9d-80C7-02AF85C822A8"
+                            }
+                        )
+                    }
                 }
 
                 It "Should return null from the get method" {
@@ -860,48 +904,50 @@ try
             }
 
             Context -Name "Configured MembersToExclude match the actual members - Database permissions" -Fixture {
-                $testParams = @{
-                    IsSingleInstance = "Yes"
-                    Databases        = @(
-                        (New-CimInstance -ClassName MSFT_SPDatabasePermissions -Property @{
-                                Name             = "SharePoint_Content_Contoso1"
-                                MembersToExclude = "contoso\user3", "contoso\user4"
-                            } -ClientOnly)
-                        (New-CimInstance -ClassName MSFT_SPDatabasePermissions -Property @{
-                                Name             = "SharePoint_Content_Contoso2"
-                                MembersToExclude = "contoso\user5", "contoso\user6"
-                            } -ClientOnly)
-                    )
-                }
+                BeforeAll {
+                    $testParams = @{
+                        IsSingleInstance = "Yes"
+                        Databases        = @(
+                            (New-CimInstance -ClassName MSFT_SPDatabasePermissions -Property @{
+                                    Name             = "SharePoint_Content_Contoso1"
+                                    MembersToExclude = "contoso\user3", "contoso\user4"
+                                } -ClientOnly)
+                            (New-CimInstance -ClassName MSFT_SPDatabasePermissions -Property @{
+                                    Name             = "SharePoint_Content_Contoso2"
+                                    MembersToExclude = "contoso\user5", "contoso\user6"
+                                } -ClientOnly)
+                        )
+                    }
 
-                Mock -CommandName Get-SPShellAdmin -MockWith {
-                    if ($database)
-                    {
-                        # Database parameter used, return database permissions
-                        return @{
-                            UserName = "contoso\user1", "contoso\user2"
+                    Mock -CommandName Get-SPShellAdmin -MockWith {
+                        if ($database)
+                        {
+                            # Database parameter used, return database permissions
+                            return @{
+                                UserName = "contoso\user1", "contoso\user2"
+                            }
+                        }
+                        else
+                        {
+                            # Database parameter not used, return general permissions
+                            return @{
+                                UserName = "contoso\user1", "contoso\user2"
+                            }
                         }
                     }
-                    else
-                    {
-                        # Database parameter not used, return general permissions
-                        return @{
-                            UserName = "contoso\user1", "contoso\user2"
-                        }
-                    }
-                }
 
-                Mock -CommandName Get-SPDatabase -MockWith {
-                    return @(
-                        @{
-                            Name = "SharePoint_Content_Contoso1"
-                            Id   = "F9168C5E-CEB2-4faa-B6BF-329BF39FA1E4"
-                        },
-                        @{
-                            Name = "SharePoint_Content_Contoso2"
-                            Id   = "936DA01F-9ABD-4d9d-80C7-02AF85C822A8"
-                        }
-                    )
+                    Mock -CommandName Get-SPDatabase -MockWith {
+                        return @(
+                            @{
+                                Name = "SharePoint_Content_Contoso1"
+                                Id   = "F9168C5E-CEB2-4faa-B6BF-329BF39FA1E4"
+                            },
+                            @{
+                                Name = "SharePoint_Content_Contoso2"
+                                Id   = "936DA01F-9ABD-4d9d-80C7-02AF85C822A8"
+                            }
+                        )
+                    }
                 }
 
                 It "Should return null from the get method" {

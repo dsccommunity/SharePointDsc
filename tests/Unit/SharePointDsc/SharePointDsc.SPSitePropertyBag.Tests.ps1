@@ -46,48 +46,53 @@ Invoke-TestSetup
 
 try
 {
-    Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
-        InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
-            Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
+    InModuleScope -ModuleName $script:DSCResourceFullName -ScriptBlock {
+        Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
+            BeforeAll {
+                Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
-            Mock -CommandName Get-SPSite -MockWith {
-                $spSite = [pscustomobject]@{
-                    RootWeb = @{
-                        Properties = @{
-                            PropertyKey = 'PropertyValue'
+                Mock -CommandName Get-SPSite -MockWith {
+                    $spSite = [pscustomobject]@{
+                        RootWeb = @{
+                            Properties = @{
+                                PropertyKey = 'PropertyValue'
+                            }
                         }
                     }
+
+                    $spSite = $spSite | Add-Member ScriptMethod OpenWeb {
+                        $prop = @{
+                            PropertyKey = 'PropertyValue'
+                        }
+                        $prop = $prop | Add-Member ScriptMethod Update {
+                        } -PassThru
+
+                        $returnval = @{
+                            Properties    = $prop
+                            AllProperties = @{ }
+                        }
+
+                        $returnval = $returnval | Add-Member ScriptMethod Update {
+                            $Global:SPDscSitePropertyUpdated = $true
+                        } -PassThru
+
+                        return $returnval
+                    } -PassThru
+                    return $spSite
                 }
-
-                $spSite = $spSite | Add-Member ScriptMethod OpenWeb {
-                    $prop = @{
-                        PropertyKey = 'PropertyValue'
-                    }
-                    $prop = $prop | Add-Member ScriptMethod Update {
-                    } -PassThru
-
-                    $returnval = @{
-                        Properties    = $prop
-                        AllProperties = @{ }
-                    }
-
-                    $returnval = $returnval | Add-Member ScriptMethod Update {
-                        $Global:SPDscSitePropertyUpdated = $true
-                    } -PassThru
-
-                    return $returnval
-                } -PassThru
-                return $spSite
             }
 
             Context -Name 'The site collection does not exist' -Fixture {
-                $testParams = @{
-                    Url   = "http://sharepoint.contoso.com"
-                    Key   = 'PropertyKey'
-                    Value = 'NewPropertyValue'
-                }
-                Mock -CommandName Get-SPSite -MockWith {
-                    return $null
+                BeforeAll {
+                    $testParams = @{
+                        Url   = "http://sharepoint.contoso.com"
+                        Key   = 'PropertyKey'
+                        Value = 'NewPropertyValue'
+                    }
+
+                    Mock -CommandName Get-SPSite -MockWith {
+                        return $null
+                    }
                 }
 
                 It 'Should throw exception in the get method' {
@@ -104,11 +109,13 @@ try
             }
 
             Context -Name 'The site collection property value does not match' -Fixture {
-                $testParams = @{
-                    Url    = "http://sharepoint.contoso.com"
-                    Key    = 'PropertyKey'
-                    Value  = 'NewPropertyValue'
-                    Ensure = 'Present'
+                BeforeAll {
+                    $testParams = @{
+                        Url    = "http://sharepoint.contoso.com"
+                        Key    = 'PropertyKey'
+                        Value  = 'NewPropertyValue'
+                        Ensure = 'Present'
+                    }
                 }
 
                 It 'Should return present from the get method' {
@@ -125,29 +132,27 @@ try
                     { Set-TargetResource @testParams } | Should -Not -Throw
                 }
 
-                $Global:SPDscSitePropertyUpdated = $false
                 It 'Calls Get-SPSite and update site collection property bag from the set method' {
+                    $Global:SPDscSitePropertyUpdated = $false
                     Set-TargetResource @testParams
-
                     $Global:SPDscSitePropertyUpdated | Should -Be $true
                 }
             }
 
             Context -Name 'The site collection property exists, and the value match' -Fixture {
-                $testParams = @{
-                    Url    = "http://sharepoint.contoso.com"
-                    Key    = 'PropertyKey'
-                    Value  = 'PropertyValue'
-                    Ensure = 'Present'
+                BeforeAll {
+                    $testParams = @{
+                        Url    = "http://sharepoint.contoso.com"
+                        Key    = 'PropertyKey'
+                        Value  = 'PropertyValue'
+                        Ensure = 'Present'
+                    }
                 }
 
-                $result = Get-TargetResource @testParams
 
-                It 'Should return present from the get method' {
+                It 'Should return present and same values as passed as parameters from the get method' {
+                    $result = Get-TargetResource @testParams
                     $result.Ensure | Should -Be 'present'
-                }
-
-                It 'Should return the same values as passed as parameters' {
                     $result.Key | Should -Be $testParams.Key
                     $result.value | Should -Be $testParams.value
                 }
@@ -158,20 +163,18 @@ try
             }
 
             Context -Name 'The site collection property does not exist, and should be removed' -Fixture {
-                $testParams = @{
-                    Url    = "http://sharepoint.contoso.com"
-                    Key    = 'NonExistingPropertyKey'
-                    Value  = 'PropertyValue'
-                    Ensure = 'Absent'
+                BeforeAll {
+                    $testParams = @{
+                        Url    = "http://sharepoint.contoso.com"
+                        Key    = 'NonExistingPropertyKey'
+                        Value  = 'PropertyValue'
+                        Ensure = 'Absent'
+                    }
                 }
 
-                $result = Get-TargetResource @testParams
-
-                It 'Should return absent from the get method' {
+                It 'Should return absent, the same key as passed as parameter and null value from the get method' {
+                    $result = Get-TargetResource @testParams
                     $result.Ensure | Should -Be 'absent'
-                }
-
-                It 'Should return the same key as passed as parameter and null value.' {
                     $result.Key | Should -Be $testParams.Key
                     $result.value | Should -Be $null
                 }
@@ -182,20 +185,18 @@ try
             }
 
             Context -Name 'The site collection property exists, and should not be' -Fixture {
-                $testParams = @{
-                    Url    = "http://sharepoint.contoso.com"
-                    Key    = 'PropertyKey'
-                    Value  = 'PropertyValue'
-                    Ensure = 'Absent'
+                BeforeAll {
+                    $testParams = @{
+                        Url    = "http://sharepoint.contoso.com"
+                        Key    = 'PropertyKey'
+                        Value  = 'PropertyValue'
+                        Ensure = 'Absent'
+                    }
                 }
 
-                $result = Get-TargetResource @testParams
-
-                It 'Should return Present from the get method' {
+                It 'Should return Present and the same values as passed as parameters from the get method' {
+                    $result = Get-TargetResource @testParams
                     $result.Ensure | Should -Be 'Present'
-                }
-
-                It 'Should return the same values as passed as parameters' {
                     $result.Key | Should -Be $testParams.Key
                     $result.value | Should -Be $testParams.Value
                 }
@@ -208,8 +209,8 @@ try
                     { Set-TargetResource @testParams } | Should -Not -Throw
                 }
 
-                $Global:SPDscSitePropertyUpdated = $false
                 It 'Calls Get-SPSite and remove site collection property bag from the set method' {
+                    $Global:SPDscSitePropertyUpdated = $false
                     Set-TargetResource @testParams
 
                     $Global:SPDscSitePropertyUpdated | Should -Be $true

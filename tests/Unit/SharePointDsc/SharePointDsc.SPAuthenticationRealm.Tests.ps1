@@ -46,23 +46,27 @@ Invoke-TestSetup
 
 try
 {
-    Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
-        InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
-            Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
+    InModuleScope -ModuleName $script:DSCResourceFullName -ScriptBlock {
+        Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
+            BeforeAll {
+                Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
-            Mock -CommandName Get-SPAuthenticationRealm {
-                return $Global:SPAuthenticationRealm
-            }
+                Mock -CommandName Get-SPAuthenticationRealm {
+                    return $Global:SPAuthenticationRealm
+                }
 
-            Mock -CommandName Set-SPAuthenticationRealm {
-                $Global:SPAuthenticationRealm = $Realm
+                Mock -CommandName Set-SPAuthenticationRealm {
+                    $Global:SPAuthenticationRealm = $Realm
+                }
             }
 
             Context -Name "Authentication realm matches the farm's current atuhentication realm" -Fixture {
-                $Global:SPAuthenticationRealm = "14757a87-4d74-4323-83b9-fb1e77e8f22f"
-                $testParams = @{
-                    IsSingleInstance    = "Yes"
-                    AuthenticationRealm = $Global:SPAuthenticationRealm
+                BeforeAll {
+                    $Global:SPAuthenticationRealm = "14757a87-4d74-4323-83b9-fb1e77e8f22f"
+                    $testParams = @{
+                        IsSingleInstance    = "Yes"
+                        AuthenticationRealm = $Global:SPAuthenticationRealm
+                    }
                 }
 
                 It "Should return true from the set method" {
@@ -71,11 +75,13 @@ try
             }
 
             Context -Name "Authentication realm does not match the farm's current atuhentication realm" -Fixture {
-                $Global:SPAuthenticationRealm = "11111111-1111-1111-1111-111111111111"
+                BeforeAll {
+                    $Global:SPAuthenticationRealm = "11111111-1111-1111-1111-111111111111"
 
-                $testParams = @{
-                    IsSingleInstance    = "Yes"
-                    AuthenticationRealm = "14757a87-4d74-4323-83b9-fb1e77e8f22f"
+                    $testParams = @{
+                        IsSingleInstance    = "Yes"
+                        AuthenticationRealm = "14757a87-4d74-4323-83b9-fb1e77e8f22f"
+                    }
                 }
 
                 It "Should return false from the set method" {

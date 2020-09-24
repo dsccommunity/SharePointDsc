@@ -46,22 +46,26 @@ Invoke-TestSetup
 
 try
 {
-    Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
-        InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
-            Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
+    InModuleScope -ModuleName $script:DSCResourceFullName -ScriptBlock {
+        Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
+            BeforeAll {
+                Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
+            }
 
             # Test contexts
             Context -Name "The Web Application isn't available" -Fixture {
-                $testParams = @{
-                    WebAppUrl      = "http://sharepoint.contoso.com"
-                    SMTPServer     = "smtp.contoso.com"
-                    FromAddress    = "from@email.com"
-                    ReplyToAddress = "reply@email.com"
-                    CharacterSet   = "65001"
-                }
+                BeforeAll {
+                    $testParams = @{
+                        WebAppUrl      = "http://sharepoint.contoso.com"
+                        SMTPServer     = "smtp.contoso.com"
+                        FromAddress    = "from@email.com"
+                        ReplyToAddress = "reply@email.com"
+                        CharacterSet   = "65001"
+                    }
 
-                Mock -CommandName Get-SPWebApplication -MockWith {
-                    return $null
+                    Mock -CommandName Get-SPWebApplication -MockWith {
+                        return $null
+                    }
                 }
 
                 It "Should return null from the get method" {
@@ -78,25 +82,27 @@ try
             }
 
             Context -Name "The web application exists and the properties match" -Fixture {
-                $testParams = @{
-                    WebAppUrl      = "http://sharepoint.contoso.com"
-                    SMTPServer     = "smtp.contoso.com"
-                    FromAddress    = "from@email.com"
-                    ReplyToAddress = "reply@email.com"
-                    CharacterSet   = "65001"
-                }
+                BeforeAll {
+                    $testParams = @{
+                        WebAppUrl      = "http://sharepoint.contoso.com"
+                        SMTPServer     = "smtp.contoso.com"
+                        FromAddress    = "from@email.com"
+                        ReplyToAddress = "reply@email.com"
+                        CharacterSet   = "65001"
+                    }
 
-                Mock -CommandName Get-SPWebapplication -MockWith {
-                    return @{
-                        Url                         = "http://sharepoint.contoso.com"
-                        OutboundMailServiceInstance = @{
-                            Server = @{
-                                Name = "smtp.contoso.com"
+                    Mock -CommandName Get-SPWebapplication -MockWith {
+                        return @{
+                            Url                         = "http://sharepoint.contoso.com"
+                            OutboundMailServiceInstance = @{
+                                Server = @{
+                                    Name = "smtp.contoso.com"
+                                }
                             }
+                            OutboundMailSenderAddress   = "from@email.com"
+                            OutboundMailReplyToAddress  = "reply@email.com"
+                            OutboundMailCodePage        = "65001"
                         }
-                        OutboundMailSenderAddress   = "from@email.com"
-                        OutboundMailReplyToAddress  = "reply@email.com"
-                        OutboundMailCodePage        = "65001"
                     }
                 }
 
@@ -110,44 +116,46 @@ try
             }
 
             Context -Name "The web application exists and the properties don't match" -Fixture {
-                $testParams = @{
-                    WebAppUrl      = "http://sharepoint.contoso.com"
-                    SMTPServer     = "smtp.contoso.com"
-                    FromAddress    = "from@email.com"
-                    ReplyToAddress = "reply@email.com"
-                    CharacterSet   = "65001"
-                }
-
-                Mock -CommandName Get-SPWebapplication -MockWith {
-                    $result = @{
-                        Url                         = "http://sharepoint.contoso.com"
-                        OutboundMailServiceInstance = @{
-                            Server = @{
-                                Name = "smtp2.contoso.com"
-                            }
-                        }
-                        OutboundMailSenderAddress   = "from@email.com"
-                        OutboundMailReplyToAddress  = "reply@email.com"
-                        OutboundMailCodePage        = "65001"
+                BeforeAll {
+                    $testParams = @{
+                        WebAppUrl      = "http://sharepoint.contoso.com"
+                        SMTPServer     = "smtp.contoso.com"
+                        FromAddress    = "from@email.com"
+                        ReplyToAddress = "reply@email.com"
+                        CharacterSet   = "65001"
                     }
-                    $result = $result | Add-Member -MemberType ScriptMethod `
-                        -Name UpdateMailSettings `
-                        -Value {
-                        param(
-                            [string]
-                            $SMTPServer,
 
-                            [string]
-                            $FromAddress,
+                    Mock -CommandName Get-SPWebapplication -MockWith {
+                        $result = @{
+                            Url                         = "http://sharepoint.contoso.com"
+                            OutboundMailServiceInstance = @{
+                                Server = @{
+                                    Name = "smtp2.contoso.com"
+                                }
+                            }
+                            OutboundMailSenderAddress   = "from@email.com"
+                            OutboundMailReplyToAddress  = "reply@email.com"
+                            OutboundMailCodePage        = "65001"
+                        }
+                        $result = $result | Add-Member -MemberType ScriptMethod `
+                            -Name UpdateMailSettings `
+                            -Value {
+                            param(
+                                [string]
+                                $SMTPServer,
 
-                            [string]
-                            $ReplyToAddress,
-                            [string]
-                            $CharacterSet
-                        )
-                        $Global:SPDscUpdateMailSettingsCalled = $true;
-                    } -PassThru
-                    return $result
+                                [string]
+                                $FromAddress,
+
+                                [string]
+                                $ReplyToAddress,
+                                [string]
+                                $CharacterSet
+                            )
+                            $Global:SPDscUpdateMailSettingsCalled = $true;
+                        } -PassThru
+                        return $result
+                    }
                 }
 
                 It "Should return false from the get method" {
@@ -168,13 +176,15 @@ try
             if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 15)
             {
                 Context -Name "UseTLS is using in SharePoint 2013" -Fixture {
-                    $testParams = @{
-                        WebAppUrl      = "http://sharepoint.contoso.com"
-                        SMTPServer     = "smtp.contoso.com"
-                        FromAddress    = "from@email.com"
-                        ReplyToAddress = "reply@email.com"
-                        UseTLS         = $true
-                        CharacterSet   = "65001"
+                    BeforeAll {
+                        $testParams = @{
+                            WebAppUrl      = "http://sharepoint.contoso.com"
+                            SMTPServer     = "smtp.contoso.com"
+                            FromAddress    = "from@email.com"
+                            ReplyToAddress = "reply@email.com"
+                            UseTLS         = $true
+                            CharacterSet   = "65001"
+                        }
                     }
 
                     It "Should throw an exception in the get method" {
@@ -191,13 +201,15 @@ try
                 }
 
                 Context -Name "SMTPPort is using in SharePoint 2013" -Fixture {
-                    $testParams = @{
-                        WebAppUrl      = "http://sharepoint.contoso.com"
-                        SMTPServer     = "smtp.contoso.com"
-                        FromAddress    = "from@email.com"
-                        ReplyToAddress = "reply@email.com"
-                        SMTPPort       = 25
-                        CharacterSet   = "65001"
+                    BeforeAll {
+                        $testParams = @{
+                            WebAppUrl      = "http://sharepoint.contoso.com"
+                            SMTPServer     = "smtp.contoso.com"
+                            FromAddress    = "from@email.com"
+                            ReplyToAddress = "reply@email.com"
+                            SMTPPort       = 25
+                            CharacterSet   = "65001"
+                        }
                     }
 
                     It "Should throw an exception in the get method" {
@@ -217,29 +229,31 @@ try
             if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 16)
             {
                 Context -Name "The web application exists and the properties match - SharePoint 2016/2019" -Fixture {
-                    $testParams = @{
-                        WebAppUrl      = "http://sharepoint.contoso.com"
-                        SMTPServer     = "smtp.contoso.com"
-                        FromAddress    = "from@email.com"
-                        CharacterSet   = "65001"
-                        ReplyToAddress = "reply@email.com"
-                        UseTLS         = $false
-                        SMTPPort       = 25
-                    }
+                    BeforeAll {
+                        $testParams = @{
+                            WebAppUrl      = "http://sharepoint.contoso.com"
+                            SMTPServer     = "smtp.contoso.com"
+                            FromAddress    = "from@email.com"
+                            CharacterSet   = "65001"
+                            ReplyToAddress = "reply@email.com"
+                            UseTLS         = $false
+                            SMTPPort       = 25
+                        }
 
-                    Mock -CommandName Get-SPWebapplication -MockWith {
-                        return @{
-                            Url                         = "http://sharepoint.contoso.com"
-                            OutboundMailServiceInstance = @{
-                                Server = @{
-                                    Name = "smtp.contoso.com"
+                        Mock -CommandName Get-SPWebapplication -MockWith {
+                            return @{
+                                Url                         = "http://sharepoint.contoso.com"
+                                OutboundMailServiceInstance = @{
+                                    Server = @{
+                                        Name = "smtp.contoso.com"
+                                    }
                                 }
+                                OutboundMailSenderAddress   = "from@email.com"
+                                OutboundMailReplyToAddress  = "reply@email.com"
+                                OutboundMailCodePage        = "65001"
+                                OutboundMailEnableSsl       = $false
+                                OutboundMailPort            = 25
                             }
-                            OutboundMailSenderAddress   = "from@email.com"
-                            OutboundMailReplyToAddress  = "reply@email.com"
-                            OutboundMailCodePage        = "65001"
-                            OutboundMailEnableSsl       = $false
-                            OutboundMailPort            = 25
                         }
                     }
 
@@ -253,55 +267,57 @@ try
                 }
 
                 Context -Name "The web application exists and the properties don't match - SharePoint 2016/2019" -Fixture {
-                    $testParams = @{
-                        WebAppUrl      = "http://sharepoint.contoso.com"
-                        SMTPServer     = "smtp.contoso.com"
-                        FromAddress    = "from@email.com"
-                        ReplyToAddress = "reply@email.com"
-                        CharacterSet   = "65001"
-                        UseTLS         = $true
-                        SMTPPort       = 25
-                    }
-
-                    Mock -CommandName Get-SPWebapplication -MockWith {
-                        $result = @{
-                            Url                         = "http://sharepoint.contoso.com"
-                            OutboundMailServiceInstance = @{
-                                Server = @{
-                                    Name = "smtp.contoso.com"
-                                }
-                            }
-                            OutboundMailSenderAddress   = "from@email.com"
-                            OutboundMailReplyToAddress  = "reply@email.com"
-                            OutboundMailCodePage        = "65001"
-                            OutboundMailEnableSsl       = $false
-                            OutboundMailPort            = 25
+                    BeforeAll {
+                        $testParams = @{
+                            WebAppUrl      = "http://sharepoint.contoso.com"
+                            SMTPServer     = "smtp.contoso.com"
+                            FromAddress    = "from@email.com"
+                            ReplyToAddress = "reply@email.com"
+                            CharacterSet   = "65001"
+                            UseTLS         = $true
+                            SMTPPort       = 25
                         }
-                        $result = $result | Add-Member -MemberType ScriptMethod `
-                            -Name UpdateMailSettings `
-                            -Value {
-                            param(
-                                [string]
-                                $SMTPServer,
 
-                                [string]
-                                $FromAddress,
+                        Mock -CommandName Get-SPWebapplication -MockWith {
+                            $result = @{
+                                Url                         = "http://sharepoint.contoso.com"
+                                OutboundMailServiceInstance = @{
+                                    Server = @{
+                                        Name = "smtp.contoso.com"
+                                    }
+                                }
+                                OutboundMailSenderAddress   = "from@email.com"
+                                OutboundMailReplyToAddress  = "reply@email.com"
+                                OutboundMailCodePage        = "65001"
+                                OutboundMailEnableSsl       = $false
+                                OutboundMailPort            = 25
+                            }
+                            $result = $result | Add-Member -MemberType ScriptMethod `
+                                -Name UpdateMailSettings `
+                                -Value {
+                                param(
+                                    [string]
+                                    $SMTPServer,
 
-                                [string]
-                                $ReplyToAddress,
+                                    [string]
+                                    $FromAddress,
 
-                                [string]
-                                $CharacterSet,
+                                    [string]
+                                    $ReplyToAddress,
 
-                                [bool]
-                                $EnableSsl,
+                                    [string]
+                                    $CharacterSet,
 
-                                [string]
-                                $Port
-                            )
-                            $Global:SPDscUpdateMailSettingsCalled = $true;
-                        } -PassThru
-                        return $result
+                                    [bool]
+                                    $EnableSsl,
+
+                                    [string]
+                                    $Port
+                                )
+                                $Global:SPDscUpdateMailSettingsCalled = $true;
+                            } -PassThru
+                            return $result
+                        }
                     }
 
                     It "Should return false from the get method" {

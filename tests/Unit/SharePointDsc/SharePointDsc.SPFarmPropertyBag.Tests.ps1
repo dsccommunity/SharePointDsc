@@ -46,22 +46,26 @@ Invoke-TestSetup
 
 try
 {
-    Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
-        InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
-            Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
+    InModuleScope -ModuleName $script:DSCResourceFullName -ScriptBlock {
+        Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
+            BeforeAll {
+                Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
+            }
 
             # Test contexts
             Context -Name 'No local SharePoint farm was detected' {
-                $testParams = @{
-                    Key   = 'FARM_TYPE'
-                    Value = 'SearchFarm'
-                }
+                BeforeAll {
+                    $testParams = @{
+                        Key   = 'FARM_TYPE'
+                        Value = 'SearchFarm'
+                    }
 
-                Mock -CommandName Get-SPFarm -MockWith {
-                    throw 'Unable to detect local farm'
-                }
+                    Mock -CommandName Get-SPFarm -MockWith {
+                        throw 'Unable to detect local farm'
+                    }
 
-                $result = Get-TargetResource @testParams
+                    $result = Get-TargetResource @testParams
+                }
 
                 It 'Should return absent from the get method' {
                     $result.Ensure | Should -Be 'absent'
@@ -84,28 +88,30 @@ try
                 }
             }
 
-            Mock -CommandName Get-SPFarm -MockWith {
-                $spFarm = [pscustomobject]@{
-                    Properties = @{
-                        FARM_TYPE = 'SearchFarm'
-                    }
-                }
-                $spFarm = $spFarm | Add-Member ScriptMethod Update {
-                    $Global:SPDscFarmPropertyUpdated = $true
-                } -PassThru
-                $spFarm = $spFarm | Add-Member ScriptMethod Remove {
-                    $Global:SPDscFarmPropertyRemoved = $true
-                } -PassThru
-                return $spFarm
-            }
-
             Context -Name 'The farm property does not exist, but should be' -Fixture {
-                $testParams = @{
-                    Key   = 'FARM_TYPE'
-                    Value = 'NewSearchFarm'
-                }
+                BeforeAll {
+                    $testParams = @{
+                        Key   = 'FARM_TYPE'
+                        Value = 'NewSearchFarm'
+                    }
 
-                $result = Get-TargetResource @testParams
+                    Mock -CommandName Get-SPFarm -MockWith {
+                        $spFarm = [pscustomobject]@{
+                            Properties = @{
+                                FARM_TYPE = 'SearchFarm'
+                            }
+                        }
+                        $spFarm = $spFarm | Add-Member ScriptMethod Update {
+                            $Global:SPDscFarmPropertyUpdated = $true
+                        } -PassThru
+                        $spFarm = $spFarm | Add-Member ScriptMethod Remove {
+                            $Global:SPDscFarmPropertyRemoved = $true
+                        } -PassThru
+                        return $spFarm
+                    }
+
+                    $result = Get-TargetResource @testParams
+                }
 
                 It 'Should return present from the get method' {
                     $result.Ensure | Should -Be 'present'
@@ -132,13 +138,30 @@ try
             }
 
             Context -Name 'The farm property exists, and should be' -Fixture {
-                $testParams = @{
-                    Key    = 'FARM_TYPE'
-                    Value  = 'SearchFarm'
-                    Ensure = 'Present'
-                }
+                BeforeAll {
+                    $testParams = @{
+                        Key    = 'FARM_TYPE'
+                        Value  = 'SearchFarm'
+                        Ensure = 'Present'
+                    }
 
-                $result = Get-TargetResource @testParams
+                    Mock -CommandName Get-SPFarm -MockWith {
+                        $spFarm = [pscustomobject]@{
+                            Properties = @{
+                                FARM_TYPE = 'SearchFarm'
+                            }
+                        }
+                        $spFarm = $spFarm | Add-Member ScriptMethod Update {
+                            $Global:SPDscFarmPropertyUpdated = $true
+                        } -PassThru
+                        $spFarm = $spFarm | Add-Member ScriptMethod Remove {
+                            $Global:SPDscFarmPropertyRemoved = $true
+                        } -PassThru
+                        return $spFarm
+                    }
+
+                    $result = Get-TargetResource @testParams
+                }
 
                 It 'Should return present from the get method' {
                     $result.Ensure | Should -Be 'present'
@@ -155,12 +178,29 @@ try
             }
 
             Context -Name 'The farm property does not exist, and should be' -Fixture {
-                $testParams = @{
-                    Key    = 'FARM_TYPED'
-                    Ensure = 'Absent'
-                }
+                BeforeAll {
+                    $testParams = @{
+                        Key    = 'FARM_TYPED'
+                        Ensure = 'Absent'
+                    }
 
-                $result = Get-TargetResource @testParams
+                    Mock -CommandName Get-SPFarm -MockWith {
+                        $spFarm = [pscustomobject]@{
+                            Properties = @{
+                                FARM_TYPE = 'SearchFarm'
+                            }
+                        }
+                        $spFarm = $spFarm | Add-Member ScriptMethod Update {
+                            $Global:SPDscFarmPropertyUpdated = $true
+                        } -PassThru
+                        $spFarm = $spFarm | Add-Member ScriptMethod Remove {
+                            $Global:SPDscFarmPropertyRemoved = $true
+                        } -PassThru
+                        return $spFarm
+                    }
+
+                    $result = Get-TargetResource @testParams
+                }
 
                 It 'Should return absent from the get method' {
                     $result.Ensure | Should -Be 'absent'
@@ -177,13 +217,30 @@ try
             }
 
             Context -Name 'The farm property exists, but should not be' -Fixture {
-                $testParams = @{
-                    Key    = 'FARM_TYPE'
-                    Value  = 'SearchFarm'
-                    Ensure = 'Absent'
-                }
+                BeforeAll {
+                    $testParams = @{
+                        Key    = 'FARM_TYPE'
+                        Value  = 'SearchFarm'
+                        Ensure = 'Absent'
+                    }
 
-                $result = Get-TargetResource @testParams
+                    Mock -CommandName Get-SPFarm -MockWith {
+                        $spFarm = [pscustomobject]@{
+                            Properties = @{
+                                FARM_TYPE = 'SearchFarm'
+                            }
+                        }
+                        $spFarm = $spFarm | Add-Member ScriptMethod Update {
+                            $Global:SPDscFarmPropertyUpdated = $true
+                        } -PassThru
+                        $spFarm = $spFarm | Add-Member ScriptMethod Remove {
+                            $Global:SPDscFarmPropertyRemoved = $true
+                        } -PassThru
+                        return $spFarm
+                    }
+
+                    $result = Get-TargetResource @testParams
+                }
 
                 It 'Should return Present from the get method' {
                     $result.Ensure | Should -Be 'Present'

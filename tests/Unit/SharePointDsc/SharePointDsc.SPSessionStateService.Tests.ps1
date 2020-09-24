@@ -46,29 +46,33 @@ Invoke-TestSetup
 
 try
 {
-    Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
-        InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
-            Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
+    InModuleScope -ModuleName $script:DSCResourceFullName -ScriptBlock {
+        Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
+            BeforeAll {
+                Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
-            # Mocks for all contexts
-            Mock -CommandName Set-SPSessionStateService -MockWith { return @{ } }
-            Mock -CommandName Enable-SPSessionStateService -MockWith { return @{ } }
-            Mock -CommandName Disable-SPSessionStateService -MockWith { return @{ } }
+                # Mocks for all contexts
+                Mock -CommandName Set-SPSessionStateService -MockWith { return @{ } }
+                Mock -CommandName Enable-SPSessionStateService -MockWith { return @{ } }
+                Mock -CommandName Disable-SPSessionStateService -MockWith { return @{ } }
+            }
 
             # Test contexts
             Context -Name "the service isn't enabled but should be" -Fixture {
-                $testParams = @{
-                    DatabaseName   = "SP_StateService"
-                    DatabaseServer = "SQL.test.domain"
-                    Ensure         = "Present"
-                    SessionTimeout = 60
-                }
+                BeforeAll {
+                    $testParams = @{
+                        DatabaseName   = "SP_StateService"
+                        DatabaseServer = "SQL.test.domain"
+                        Ensure         = "Present"
+                        SessionTimeout = 60
+                    }
 
-                Mock -CommandName Get-SPSessionStateService -MockWith {
-                    return @{
-                        SessionStateEnabled = $false
-                        Timeout             = @{
-                            TotalMinutes = 60
+                    Mock -CommandName Get-SPSessionStateService -MockWith {
+                        return @{
+                            SessionStateEnabled = $false
+                            Timeout             = @{
+                                TotalMinutes = 60
+                            }
                         }
                     }
                 }
@@ -83,24 +87,25 @@ try
 
                 It "Should enable the session service from the set method" {
                     Set-TargetResource @testParams
-
                     Assert-MockCalled Enable-SPSessionStateService
                 }
             }
 
             Context -Name "the service is enabled and should be" -Fixture {
-                $testParams = @{
-                    DatabaseName   = "SP_StateService"
-                    DatabaseServer = "SQL.test.domain"
-                    Ensure         = "Present"
-                    SessionTimeout = 60
-                }
+                BeforeAll {
+                    $testParams = @{
+                        DatabaseName   = "SP_StateService"
+                        DatabaseServer = "SQL.test.domain"
+                        Ensure         = "Present"
+                        SessionTimeout = 60
+                    }
 
-                Mock -CommandName Get-SPSessionStateService -MockWith {
-                    return @{
-                        SessionStateEnabled = $true
-                        Timeout             = @{
-                            TotalMinutes = 60
+                    Mock -CommandName Get-SPSessionStateService -MockWith {
+                        return @{
+                            SessionStateEnabled = $true
+                            Timeout             = @{
+                                TotalMinutes = 60
+                            }
                         }
                     }
                 }
@@ -115,18 +120,20 @@ try
             }
 
             Context -Name "the timeout should be set to 90 seconds but is 60" -Fixture {
-                $testParams = @{
-                    DatabaseName   = "SP_StateService"
-                    DatabaseServer = "SQL.test.domain"
-                    Ensure         = "Present"
-                    SessionTimeout = 90
-                }
+                BeforeAll {
+                    $testParams = @{
+                        DatabaseName   = "SP_StateService"
+                        DatabaseServer = "SQL.test.domain"
+                        Ensure         = "Present"
+                        SessionTimeout = 90
+                    }
 
-                Mock -CommandName Get-SPSessionStateService -MockWith {
-                    return @{
-                        SessionStateEnabled = $true
-                        Timeout             = @{
-                            TotalMinutes = 60
+                    Mock -CommandName Get-SPSessionStateService -MockWith {
+                        return @{
+                            SessionStateEnabled = $true
+                            Timeout             = @{
+                                TotalMinutes = 60
+                            }
                         }
                     }
                 }
@@ -143,23 +150,24 @@ try
 
                 It "Should update session timeout to 90 seconds" {
                     Set-TargetResource @testParams
-
                     Assert-MockCalled Set-SPSessionStateService
                 }
             }
 
             Context -Name "the service is enabled but shouldn't be" -Fixture {
-                $testParams = @{
-                    DatabaseName   = "SP_StateService"
-                    DatabaseServer = "SQL.test.domain"
-                    Ensure         = "Absent"
-                }
+                BeforeAll {
+                    $testParams = @{
+                        DatabaseName   = "SP_StateService"
+                        DatabaseServer = "SQL.test.domain"
+                        Ensure         = "Absent"
+                    }
 
-                Mock -CommandName Get-SPSessionStateService -MockWith {
-                    return @{
-                        SessionStateEnabled = $true
-                        Timeout             = @{
-                            TotalMinutes = 60
+                    Mock -CommandName Get-SPSessionStateService -MockWith {
+                        return @{
+                            SessionStateEnabled = $true
+                            Timeout             = @{
+                                TotalMinutes = 60
+                            }
                         }
                     }
                 }
@@ -179,17 +187,19 @@ try
             }
 
             Context -Name "the service is disabled and should be" -Fixture {
-                $testParams = @{
-                    DatabaseName   = "SP_StateService"
-                    DatabaseServer = "SQL.test.domain"
-                    Ensure         = "Absent"
-                }
+                BeforeAll {
+                    $testParams = @{
+                        DatabaseName   = "SP_StateService"
+                        DatabaseServer = "SQL.test.domain"
+                        Ensure         = "Absent"
+                    }
 
-                Mock -CommandName Get-SPSessionStateService -MockWith {
-                    return @{
-                        SessionStateEnabled = $false
-                        Timeout             = @{
-                            TotalMinutes = 60
+                    Mock -CommandName Get-SPSessionStateService -MockWith {
+                        return @{
+                            SessionStateEnabled = $false
+                            Timeout             = @{
+                                TotalMinutes = 60
+                            }
                         }
                     }
                 }

@@ -46,29 +46,12 @@ Invoke-TestSetup
 
 try
 {
-    Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
-        InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
-            Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
+    InModuleScope -ModuleName $script:DSCResourceFullName -ScriptBlock {
+        Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
+            BeforeAll {
+                Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
-            switch ($Global:SPDscHelper.CurrentStubBuildNumber.Major)
-            {
-                15
-                {
-                    Context -Name "All methods throw exceptions as Project Server support in SharePointDsc is only for 2016" -Fixture {
-                        It "Should throw on the get method" {
-                            { Get-TargetResource @testParams } | Should -Throw
-                        }
-
-                        It "Should throw on the test method" {
-                            { Test-TargetResource @testParams } | Should -Throw
-                        }
-
-                        It "Should throw on the set method" {
-                            { Set-TargetResource @testParams } | Should -Throw
-                        }
-                    }
-                }
-                16
+                if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 16)
                 {
                     $script:projectPath = "$PSScriptRoot\..\..\.." | Convert-Path
                     $script:projectName = (Get-ChildItem -Path "$script:projectPath\*\*.psd1" | Where-Object -FilterScript {
@@ -154,16 +137,40 @@ try
                     }
 
                     Mock -CommandName "Set-SPProjectUserSync" -MockWith { }
+                }
+            }
 
-                    Context -Name "WSS settings can not be found" -Fixture {
-                        $testParams = @{
-                            Url                                 = "http://sites.contoso.com/pwa"
-                            EnableProjectWebAppSync             = $false
-                            EnableProjectSiteSync               = $true
-                            EnableProjectSiteSyncForSPTaskLists = $false
+            switch ($Global:SPDscHelper.CurrentStubBuildNumber.Major)
+            {
+                15
+                {
+                    Context -Name "All methods throw exceptions as Project Server support in SharePointDsc is only for 2016" -Fixture {
+                        It "Should throw on the get method" {
+                            { Get-TargetResource @testParams } | Should -Throw
                         }
 
-                        $global:SPDscCurrentWssSettings = $null
+                        It "Should throw on the test method" {
+                            { Test-TargetResource @testParams } | Should -Throw
+                        }
+
+                        It "Should throw on the set method" {
+                            { Set-TargetResource @testParams } | Should -Throw
+                        }
+                    }
+                }
+                16
+                {
+                    Context -Name "WSS settings can not be found" -Fixture {
+                        BeforeAll {
+                            $testParams = @{
+                                Url                                 = "http://sites.contoso.com/pwa"
+                                EnableProjectWebAppSync             = $false
+                                EnableProjectSiteSync               = $true
+                                EnableProjectSiteSyncForSPTaskLists = $false
+                            }
+
+                            $global:SPDscCurrentWssSettings = $null
+                        }
 
                         It "Should return false on settings in the get method" {
                             $result = Get-TargetResource @testParams
@@ -174,17 +181,19 @@ try
                     }
 
                     Context -Name "WSS settings are not applied correctly" -Fixture {
-                        $testParams = @{
-                            Url                                 = "http://sites.contoso.com/pwa"
-                            EnableProjectWebAppSync             = $true
-                            EnableProjectSiteSync               = $true
-                            EnableProjectSiteSyncForSPTaskLists = $true
-                        }
+                        BeforeAll {
+                            $testParams = @{
+                                Url                                 = "http://sites.contoso.com/pwa"
+                                EnableProjectWebAppSync             = $true
+                                EnableProjectSiteSync               = $true
+                                EnableProjectSiteSyncForSPTaskLists = $true
+                            }
 
-                        $global:SPDscCurrentWssSettings = @{
-                            WssAdmin = (New-SPDscWssAdminTable -Values @{
-                                    WADMIN_USER_SYNC_SETTING = 11
-                                }).Tables[0]
+                            $global:SPDscCurrentWssSettings = @{
+                                WssAdmin = (New-SPDscWssAdminTable -Values @{
+                                        WADMIN_USER_SYNC_SETTING = 11
+                                    }).Tables[0]
+                            }
                         }
 
                         It "should return false on the values from the get method" {
@@ -205,17 +214,19 @@ try
                     }
 
                     Context -Name "WSS settings are applied correctly" -Fixture {
-                        $testParams = @{
-                            Url                                 = "http://sites.contoso.com/pwa"
-                            EnableProjectWebAppSync             = $true
-                            EnableProjectSiteSync               = $true
-                            EnableProjectSiteSyncForSPTaskLists = $true
-                        }
+                        BeforeAll {
+                            $testParams = @{
+                                Url                                 = "http://sites.contoso.com/pwa"
+                                EnableProjectWebAppSync             = $true
+                                EnableProjectSiteSync               = $true
+                                EnableProjectSiteSyncForSPTaskLists = $true
+                            }
 
-                        $global:SPDscCurrentWssSettings = @{
-                            WssAdmin = (New-SPDscWssAdminTable -Values @{
-                                    WADMIN_USER_SYNC_SETTING = 240
-                                }).Tables[0]
+                            $global:SPDscCurrentWssSettings = @{
+                                WssAdmin = (New-SPDscWssAdminTable -Values @{
+                                        WADMIN_USER_SYNC_SETTING = 240
+                                    }).Tables[0]
+                            }
                         }
 
                         It "should return true on the values from the get method" {

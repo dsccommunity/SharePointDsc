@@ -46,60 +46,61 @@ Invoke-TestSetup
 
 try
 {
-    Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
-        InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
-            Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
+    InModuleScope -ModuleName $script:DSCResourceFullName -ScriptBlock {
+        Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
+            BeforeAll {
+                Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
-            #Initialize tests
-            Add-Type -TypeDefinition @"
-        namespace Microsoft.SharePoint.Administration
-        {
-            public class IdentityType
+                #Initialize tests
+                Add-Type -TypeDefinition @"
+            namespace Microsoft.SharePoint.Administration
             {
-                public string SpecificUser { get; set; }
+                public class IdentityType
+                {
+                    public string SpecificUser { get; set; }
+                }
             }
-        }
 "@
 
-
-            # Mocks for all contexts
-            Mock -CommandName Get-SPManagedAccount -MockWith {
-                return "CONTOSO\svc.c2wts"
+                # Mocks for all contexts
+                Mock -CommandName Get-SPManagedAccount -MockWith {
+                    return "CONTOSO\svc.c2wts"
+                }
             }
 
             # Test contexts
             Context -Name "Service is set to use the specified identity" -Fixture {
-
-                $testParams = @{
-                    Name           = "Claims to Windows Token Service"
-                    ManagedAccount = "CONTOSO\svc.c2wts"
-                }
-
-                Mock -CommandName Get-SPServiceInstance -MockWith {
-                    $ProcessIdentity = @{
-                        username = $testParams.ManagedAccount
+                BeforeAll {
+                    $testParams = @{
+                        Name           = "Claims to Windows Token Service"
+                        ManagedAccount = "CONTOSO\svc.c2wts"
                     }
 
-                    $ProcessIdentity = $ProcessIdentity | Add-Member -MemberType ScriptMethod -Name Update -Value {
-                        $Global:SPDscSPServiceInstanceUpdateCalled = $true
-                    } -PassThru
-
-                    $ProcessIdentity = $ProcessIdentity | Add-Member -MemberType ScriptMethod -Name Deploy -Value {
-                    } -PassThru
-
-                    $ServiceIdentity = @{
-                        TypeName = $testParams.Name
-                        Service  = @{
-                            processidentity = $ProcessIdentity
+                    Mock -CommandName Get-SPServiceInstance -MockWith {
+                        $ProcessIdentity = @{
+                            username = $testParams.ManagedAccount
                         }
-                    }
 
-                    return $ServiceIdentity
+                        $ProcessIdentity = $ProcessIdentity | Add-Member -MemberType ScriptMethod -Name Update -Value {
+                            $Global:SPDscSPServiceInstanceUpdateCalled = $true
+                        } -PassThru
+
+                        $ProcessIdentity = $ProcessIdentity | Add-Member -MemberType ScriptMethod -Name Deploy -Value {
+                        } -PassThru
+
+                        $ServiceIdentity = @{
+                            TypeName = $testParams.Name
+                            Service  = @{
+                                processidentity = $ProcessIdentity
+                            }
+                        }
+
+                        return $ServiceIdentity
+                    }
                 }
 
                 It "Should return the current identity from the get method" {
                     (Get-TargetResource @testParams).ManagedAccount | Should -Not -BeNullOrEmpty
-
                 }
 
                 It "Should return true for the test method" {
@@ -108,31 +109,33 @@ try
             }
 
             Context -Name "Service is not set to use the specified identity" -Fixture {
-                $testParams = @{
-                    Name           = "Claims to Windows Token Service"
-                    ManagedAccount = "CONTOSO\svc.c2wts"
-                }
-
-                Mock -CommandName Get-SPServiceInstance -MockWith {
-                    $ProcessIdentity = @{
-                        username = "NT AUTHORITY\SYSTEM"
+                BeforeAll {
+                    $testParams = @{
+                        Name           = "Claims to Windows Token Service"
+                        ManagedAccount = "CONTOSO\svc.c2wts"
                     }
 
-                    $ProcessIdentity = $ProcessIdentity | Add-Member -MemberType ScriptMethod -Name Update -Value {
-                        $Global:SPDscSPServiceInstanceUpdateCalled = $true
-                    } -PassThru
-
-                    $ProcessIdentity = $ProcessIdentity | Add-Member -MemberType ScriptMethod -Name Deploy -Value {
-                    } -PassThru
-
-                    $ServiceIdentity = @{
-                        TypeName = $testParams.Name
-                        Service  = @{
-                            processidentity = $ProcessIdentity
+                    Mock -CommandName Get-SPServiceInstance -MockWith {
+                        $ProcessIdentity = @{
+                            username = "NT AUTHORITY\SYSTEM"
                         }
-                    }
 
-                    return $ServiceIdentity
+                        $ProcessIdentity = $ProcessIdentity | Add-Member -MemberType ScriptMethod -Name Update -Value {
+                            $Global:SPDscSPServiceInstanceUpdateCalled = $true
+                        } -PassThru
+
+                        $ProcessIdentity = $ProcessIdentity | Add-Member -MemberType ScriptMethod -Name Deploy -Value {
+                        } -PassThru
+
+                        $ServiceIdentity = @{
+                            TypeName = $testParams.Name
+                            Service  = @{
+                                processidentity = $ProcessIdentity
+                            }
+                        }
+
+                        return $ServiceIdentity
+                    }
                 }
 
                 It "Should return the current identity from the get method" {
@@ -143,39 +146,41 @@ try
                     Test-TargetResource @testParams | Should -Be $false
                 }
 
-                $Global:SPDscSPServiceInstanceUpdateCalled = $false
                 It "Should call the SPServiceInstance update method" {
+                    $Global:SPDscSPServiceInstanceUpdateCalled = $false
                     Set-TargetResource @testParams
                     $Global:SPDscSPServiceInstanceUpdateCalled | Should -Be $true
                 }
             }
 
             Context -Name "Search Service is not set to use the specified identity" -Fixture {
-                $testParams = @{
-                    Name           = "SharePoint Server Search"
-                    ManagedAccount = "CONTOSO\svc.search"
-                }
+                BeforeAll {
+                    $testParams = @{
+                        Name           = "SharePoint Server Search"
+                        ManagedAccount = "CONTOSO\svc.search"
+                    }
 
-                Mock -CommandName Get-SPEnterpriseSearchService -MockWith {
-                    $EnterpriseSearchService = @{ }
+                    Mock -CommandName Get-SPEnterpriseSearchService -MockWith {
+                        $EnterpriseSearchService = @{ }
 
-                    $EnterpriseSearchService = $EnterpriseSearchService | Add-Member -MemberType ScriptMethod -Name get_ProcessIdentity -Value {
-                        $ProcessIdentity = @{
-                            CurrentIdentityType = "account"
-                            Username            = "CONTOSO\wrong_account"
-                        }
+                        $EnterpriseSearchService = $EnterpriseSearchService | Add-Member -MemberType ScriptMethod -Name get_ProcessIdentity -Value {
+                            $ProcessIdentity = @{
+                                CurrentIdentityType = "account"
+                                Username            = "CONTOSO\wrong_account"
+                            }
 
-                        $ProcessIdentity = $ProcessIdentity | Add-Member -MemberType ScriptMethod -Name Update -Value {
-                            $Global:SPDscSPServiceInstanceUpdateCalled = $true
+                            $ProcessIdentity = $ProcessIdentity | Add-Member -MemberType ScriptMethod -Name Update -Value {
+                                $Global:SPDscSPServiceInstanceUpdateCalled = $true
+                            } -PassThru
+
+                            $ProcessIdentity = $ProcessIdentity | Add-Member -MemberType ScriptMethod -Name Deploy -Value {
+                            } -PassThru
+
+                            return $ProcessIdentity
                         } -PassThru
 
-                        $ProcessIdentity = $ProcessIdentity | Add-Member -MemberType ScriptMethod -Name Deploy -Value {
-                        } -PassThru
-
-                        return $ProcessIdentity
-                    } -PassThru
-
-                    return $EnterpriseSearchService
+                        return $EnterpriseSearchService
+                    }
                 }
 
                 It "Should return the current identity from the get method" {
@@ -186,39 +191,41 @@ try
                     Test-TargetResource @testParams | Should -Be $false
                 }
 
-                $Global:SPDscSPServiceInstanceUpdateCalled = $false
                 It "Should call the SPServiceInstance update method" {
+                    $Global:SPDscSPServiceInstanceUpdateCalled = $false
                     Set-TargetResource @testParams
                     $Global:SPDscSPServiceInstanceUpdateCalled | Should -Be $true
                 }
             }
 
             Context -Name "Search Service is not set to use the LocalSystem" -Fixture {
-                $testParams = @{
-                    Name           = "SharePoint Server Search"
-                    ManagedAccount = "LocalSystem"
-                }
+                BeforeAll {
+                    $testParams = @{
+                        Name           = "SharePoint Server Search"
+                        ManagedAccount = "LocalSystem"
+                    }
 
-                Mock -CommandName Get-SPEnterpriseSearchService -MockWith {
-                    $EnterpriseSearchService = @{ }
+                    Mock -CommandName Get-SPEnterpriseSearchService -MockWith {
+                        $EnterpriseSearchService = @{ }
 
-                    $EnterpriseSearchService = $EnterpriseSearchService | Add-Member -MemberType ScriptMethod -Name get_ProcessIdentity -Value {
-                        $ProcessIdentity = @{
-                            CurrentIdentityType = "LocalService"
-                            Username            = "CONTOSO\wrong_account"
-                        }
+                        $EnterpriseSearchService = $EnterpriseSearchService | Add-Member -MemberType ScriptMethod -Name get_ProcessIdentity -Value {
+                            $ProcessIdentity = @{
+                                CurrentIdentityType = "LocalService"
+                                Username            = "CONTOSO\wrong_account"
+                            }
 
-                        $ProcessIdentity = $ProcessIdentity | Add-Member -MemberType ScriptMethod -Name Update -Value {
-                            $Global:SPDscSPServiceInstanceUpdateCalled = $true
+                            $ProcessIdentity = $ProcessIdentity | Add-Member -MemberType ScriptMethod -Name Update -Value {
+                                $Global:SPDscSPServiceInstanceUpdateCalled = $true
+                            } -PassThru
+
+                            $ProcessIdentity = $ProcessIdentity | Add-Member -MemberType ScriptMethod -Name Deploy -Value {
+                            } -PassThru
+
+                            return $ProcessIdentity
                         } -PassThru
 
-                        $ProcessIdentity = $ProcessIdentity | Add-Member -MemberType ScriptMethod -Name Deploy -Value {
-                        } -PassThru
-
-                        return $ProcessIdentity
-                    } -PassThru
-
-                    return $EnterpriseSearchService
+                        return $EnterpriseSearchService
+                    }
                 }
 
                 It "Should return the current identity from the get method" {
@@ -229,27 +236,27 @@ try
                     Test-TargetResource @testParams | Should -Be $false
                 }
 
-                $Global:SPDscSPServiceInstanceUpdateCalled = $false
                 It "Should call the SPServiceInstance update method" {
+                    $Global:SPDscSPServiceInstanceUpdateCalled = $false
                     Set-TargetResource @testParams
                     $Global:SPDscSPServiceInstanceUpdateCalled | Should -Be $true
                 }
             }
 
             Context -Name "Invalid Service Specified" -Fixture {
+                BeforeAll {
+                    $testParams = @{
+                        Name           = "No Such Windows Token Service"
+                        ManagedAccount = "CONTOSO\svc.c2wts"
+                    }
 
-                $testParams = @{
-                    Name           = "No Such Windows Token Service"
-                    ManagedAccount = "CONTOSO\svc.c2wts"
-                }
-
-                Mock -CommandName Get-SPServiceInstance -MockWith {
-                    return $null
+                    Mock -CommandName Get-SPServiceInstance -MockWith {
+                        return $null
+                    }
                 }
 
                 It "Should return null from the get method" {
                     (Get-TargetResource @testParams).ManagedAccount | Should -BeNullOrEmpty
-
                 }
 
                 It "Should return false for the test method" {
@@ -262,41 +269,41 @@ try
             }
 
             Context -Name "Invalid managed account specified" -Fixture {
-
-                $testParams = @{
-                    Name           = "Claims to Windows Token Service"
-                    ManagedAccount = "CONTOSO\svc.badAccount"
-                }
-
-                Mock -CommandName Get-SPManagedAccount -MockWith {
-                    return $null
-                }
-
-                Mock -CommandName Get-SPServiceInstance -MockWith {
-                    $ProcessIdentity = @{
-                        username = "CONTOSO\svc.c2wts"
+                BeforeAll {
+                    $testParams = @{
+                        Name           = "Claims to Windows Token Service"
+                        ManagedAccount = "CONTOSO\svc.badAccount"
                     }
 
-                    $ProcessIdentity = $ProcessIdentity | Add-Member -MemberType ScriptMethod -Name Update -Value {
-                        $Global:SPDscSPServiceInstanceUpdateCalled = $true
-                    } -PassThru
+                    Mock -CommandName Get-SPManagedAccount -MockWith {
+                        return $null
+                    }
 
-                    $ProcessIdentity = $ProcessIdentity | Add-Member -MemberType ScriptMethod -Name Deploy -Value {
-                    } -PassThru
-
-                    $ServiceIdentity = @{
-                        TypeName = $testParams.Name
-                        Service  = @{
-                            processidentity = $ProcessIdentity
+                    Mock -CommandName Get-SPServiceInstance -MockWith {
+                        $ProcessIdentity = @{
+                            username = "CONTOSO\svc.c2wts"
                         }
-                    }
 
-                    return $ServiceIdentity
+                        $ProcessIdentity = $ProcessIdentity | Add-Member -MemberType ScriptMethod -Name Update -Value {
+                            $Global:SPDscSPServiceInstanceUpdateCalled = $true
+                        } -PassThru
+
+                        $ProcessIdentity = $ProcessIdentity | Add-Member -MemberType ScriptMethod -Name Deploy -Value {
+                        } -PassThru
+
+                        $ServiceIdentity = @{
+                            TypeName = $testParams.Name
+                            Service  = @{
+                                processidentity = $ProcessIdentity
+                            }
+                        }
+
+                        return $ServiceIdentity
+                    }
                 }
 
                 It "Should return the current identity from the get method" {
                     (Get-TargetResource @testParams).ManagedAccount | Should -Not -BeNullOrEmpty
-
                 }
 
                 It "Should return false for the test method" {
@@ -309,25 +316,26 @@ try
             }
 
             Context -Name "Service does not support setting process identity" -Fixture {
-
-                $testParams = @{
-                    Name           = "Machine Translation Service"
-                    ManagedAccount = "CONTOSO\svc.mts"
-                }
-
-                Mock -CommandName Get-SPManagedAccount -MockWith {
-                    return $null
-                }
-
-                Mock -CommandName Get-SPServiceInstance -MockWith {
-                    $ServiceIdentity = @{
-                        TypeName = $testParams.Name
-                        Service  = @{
-                            TypeName = $testParams.Name
-                        }
+                BeforeAll {
+                    $testParams = @{
+                        Name           = "Machine Translation Service"
+                        ManagedAccount = "CONTOSO\svc.mts"
                     }
 
-                    return $ServiceIdentity
+                    Mock -CommandName Get-SPManagedAccount -MockWith {
+                        return $null
+                    }
+
+                    Mock -CommandName Get-SPServiceInstance -MockWith {
+                        $ServiceIdentity = @{
+                            TypeName = $testParams.Name
+                            Service  = @{
+                                TypeName = $testParams.Name
+                            }
+                        }
+
+                        return $ServiceIdentity
+                    }
                 }
 
                 It "Should return null for the current identity from the get method" {
@@ -342,6 +350,7 @@ try
                     Mock -CommandName Get-SPManagedAccount -MockWith {
                         return "CONTOSO\svc.mts"
                     }
+
                     { Set-TargetResource @testParams } | Should -Throw "Service $($testParams.name) does not support setting the process identity"
                 }
             }
