@@ -21,6 +21,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - SharePointDsc
   - Changed ModuleBuilder module to latest version
+- SPWebAppSuiteBar
+  - Unblocked usage on SharePoint 2019. Added verbose messages clarifying usage
+    scenarios on SharePoint 2019.
 
 ### Fixed
 
