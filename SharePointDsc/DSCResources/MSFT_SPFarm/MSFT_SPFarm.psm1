@@ -215,7 +215,7 @@ function Get-TargetResource
             $ca = Get-SPServiceInstance -Server $env:ComputerName
             if ($null -ne $ca)
             {
-                $ca = $ca | Where-Object -Filterscript {
+                $ca = $ca | Where-Object -FilterScript {
                     $_.GetType().Name -eq "SPWebServiceInstance" -and
                     $_.Name -eq "WSS_Administration" -and
                     $_.Status -eq "Online"
@@ -440,9 +440,14 @@ function Set-TargetResource
             {
                 throw "CentralAdministrationUrl is not a valid URI. It should include the scheme (http/https) and address."
             }
-            if ($CentralAdministrationUrl -match ':\d+')
+
+            if ($PSBoundParameters.ContainsKey("CentralAdministrationPort"))
             {
-                throw "CentralAdministrationUrl should not specify port. Use CentralAdministrationPort instead."
+                if ($uri.Port -ne $CentralAdministrationPort)
+                {
+                    throw ("CentralAdministrationPort does not match port number specified in CentralAdministrationUrl. " +
+                        "Either make the values match or don't specify CentralAdministrationPort.")
+                }
             }
         }
     }
@@ -1177,12 +1182,14 @@ function Test-TargetResource
                 throw ("CentralAdministrationUrl is not a valid URI. It should " +
                     "include the scheme (http/https) and address.")
             }
-            # TODO: should we allow port here as long as either the port matches CentralAdministrationPort
-            #       or CentralAdministrationPort is not specified?
-            if ($CentralAdministrationUrl -match ':\d+')
+
+            if ($PSBoundParameters.ContainsKey("CentralAdministrationPort"))
             {
-                throw ("CentralAdministrationUrl should not specify port. Use " +
-                    "CentralAdministrationPort instead.")
+                if ($uri.Port -ne $CentralAdministrationPort)
+                {
+                    throw ("CentralAdministrationPort does not match port number specified in CentralAdministrationUrl. " +
+                        "Either make the values match or don't specify CentralAdministrationPort.")
+                }
             }
         }
     }

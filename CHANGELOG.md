@@ -21,6 +21,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - SharePointDsc
   - Changed ModuleBuilder module to latest version
+- SPFarm
+  - Added support for specifying port number in the CentralAdministrationUrl parameter.
+    If CentralAdministrationPort is also specified both port numbers must match.
 
 ### Fixed
 
