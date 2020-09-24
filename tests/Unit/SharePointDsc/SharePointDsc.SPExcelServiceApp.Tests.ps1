@@ -51,17 +51,20 @@ try
             BeforeAll {
                 Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
-                # Initialize tests
-                $getTypeFullName = "Microsoft.Office.Excel.Server.MossHost.ExcelServerWebServiceApplication"
+                if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 15)
+                {
+                    # Initialize tests
+                    $getTypeFullName = "Microsoft.Office.Excel.Server.MossHost.ExcelServerWebServiceApplication"
 
-                # Mocks for all contexts
-                Mock -CommandName Remove-SPServiceApplication -MockWith { }
-                Mock -CommandName New-SPExcelServiceApplication -MockWith { }
-                Mock -CommandName Get-SPExcelFileLocation -MockWith { }
-                Mock -CommandName Set-SPExcelServiceApplication -MockWith { }
-                Mock -CommandName New-SPExcelFileLocation -MockWith { }
-                Mock -CommandName Set-SPExcelFileLocation -MockWith { }
-                Mock -CommandName Remove-SPExcelFileLocation -MockWith { }
+                    # Mocks for all contexts
+                    Mock -CommandName Remove-SPServiceApplication -MockWith { }
+                    Mock -CommandName New-SPExcelServiceApplication -MockWith { }
+                    Mock -CommandName Get-SPExcelFileLocation -MockWith { }
+                    Mock -CommandName Set-SPExcelServiceApplication -MockWith { }
+                    Mock -CommandName New-SPExcelFileLocation -MockWith { }
+                    Mock -CommandName Set-SPExcelFileLocation -MockWith { }
+                    Mock -CommandName Remove-SPExcelFileLocation -MockWith { }
+                }
             }
 
             # Test contexts

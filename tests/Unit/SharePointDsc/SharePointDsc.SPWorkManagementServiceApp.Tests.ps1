@@ -48,12 +48,11 @@ try
 {
     InModuleScope -ModuleName $script:DSCResourceFullName -ScriptBlock {
         Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
-            # Test contexts
-            if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 15)
-            {
-                BeforeAll {
-                    Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
+            BeforeAll {
+                Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
+                if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 15)
+                {
                     # Initialize tests
                     $getTypeFullName = "Microsoft.Office.Server.WorkManagement.WorkManagementServiceApplication"
 
@@ -62,7 +61,11 @@ try
                     Mock -CommandName New-SPWorkManagementServiceApplication -MockWith { }
                     Mock -CommandName New-SPWorkManagementServiceApplicationProxy -MockWith { }
                 }
+            }
 
+            # Test contexts
+            if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 15)
+            {
                 Context -Name "When a service application exists and Ensure equals 'Absent'" -Fixture {
                     BeforeAll {
                         $testParams = @{
@@ -260,8 +263,6 @@ try
             {
                 Context -Name "Trying to use SPWorkManagementServiceApp in SP2016/SP2019, not available" -Fixture {
                     BeforeAll {
-                        Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
-
                         # Initialize tests
                         $getTypeFullName = "Microsoft.Office.Server.WorkManagement.WorkManagementServiceApplication"
 
