@@ -567,7 +567,7 @@ function Set-TargetResource
 
                     $isCentralAdminUrlHttps = (([System.Uri]$params.CentralAdministrationUrl).Scheme -eq 'https')
 
-                    $desiredUri = [System.Uri]("{0}:{1}" -f $params.CentralAdministrationUrl.TrimEnd('/'), $params.CentralAdministrationPort)
+                    $desiredUri = [System.Uri]($params.CentralAdministrationUrl.TrimEnd('/'))
                     $currentUri = [System.Uri]$centralAdminSite.Url
                     if ($desiredUri.AbsoluteUri -ne $currentUri.AbsoluteUri)
                     {
@@ -981,7 +981,7 @@ function Set-TargetResource
                         $reprovisionCentralAdmin = $false
                         $isCentralAdminUrlHttps = (([System.Uri]$params.CentralAdministrationUrl).Scheme -eq 'https')
 
-                        $desiredUri = [System.Uri]("{0}:{1}" -f $params.CentralAdministrationUrl.TrimEnd('/'), $params.CentralAdministrationPort)
+                        $desiredUri = [System.Uri]($params.CentralAdministrationUrl.TrimEnd('/'))
                         $currentUri = [System.Uri]$centralAdminSite.Url
 
                         if ($isCentralAdminUrlHttps)
