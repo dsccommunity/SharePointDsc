@@ -10,6 +10,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - SharePointDsc
   - Added logging to the event log when the code throws an exception
 
+### Changed
+
+- SPSite
+  - Added more explanation to documentation on which parameters are checked
+- SPWeb
+  - Added more explanation to documentation on using this resource
+
 ## [4.3.0] - 2020-09-30
 
 ### Added
