@@ -123,8 +123,8 @@ namespace Microsoft.SharePoint.Administration {
                 }
 
                 $expectedException = "Cannot validate argument on parameter 'CentralAdministrationPort'. " +
-                    "The 80000 argument is greater than the maximum allowed range of 65535. " +
-                    "Supply an argument that is less than or equal to 65535 and then try the command again."
+                "The 80000 argument is greater than the maximum allowed range of 65535. " +
+                "Supply an argument that is less than or equal to 65535 and then try the command again."
 
                 It 'Should throw parameter validation exception in the get method' {
                     { Get-TargetResource @testParams } | Should Throw $expectedException
@@ -162,13 +162,13 @@ namespace Microsoft.SharePoint.Administration {
                 }
             }
 
-            Context -Name "Invalid CA URL has been passed in with port included" -Fixture {
+            Context -Name "CA URL has been passed in, and the port does not match the one specified in CA Port" -Fixture {
                 $testParams = @{
                     IsSingleInstance          = "Yes"
                     Ensure                    = "Present"
                     FarmConfigDatabaseName    = "SP_Config"
-                    CentralAdministrationPort = 443
-                    CentralAdministrationUrl  = "https://admin.contoso.com:443"
+                    CentralAdministrationPort = 80
+                    CentralAdministrationUrl  = "https://admin.contoso.com"
                     DatabaseServer            = "sql.contoso.com"
                     FarmAccount               = $mockFarmAccount
                     Passphrase                = $mockPassphrase
@@ -177,11 +177,13 @@ namespace Microsoft.SharePoint.Administration {
                 }
 
                 It "Should throw exception in the test method" {
-                    { Test-TargetResource @testParams } | Should Throw "CentralAdministrationUrl should not specify port. Use CentralAdministrationPort instead."
+                    { Test-TargetResource @testParams } | Should Throw "CentralAdministrationPort does not match port number specified in CentralAdministrationUrl. " +
+                    "Either make the values match or don't specify CentralAdministrationPort."
                 }
 
                 It "Should throw exception in the set method" {
-                    { Set-TargetResource @testParams } | Should Throw "CentralAdministrationUrl should not specify port. Use CentralAdministrationPort instead."
+                    { Set-TargetResource @testParams } | Should Throw "CentralAdministrationPort does not match port number specified in CentralAdministrationUrl. " +
+                    "Either make the values match or don't specify CentralAdministrationPort."
                 }
             }
 
@@ -627,7 +629,107 @@ namespace Microsoft.SharePoint.Administration {
                 }
             }
 
-            Context -Name "Server is connected to farm, but CentralAdminPort is different" -Fixture {
+            Context -Name "Server is connected to farm, but CentralAdminPort is different (specified by CAUrl)" -Fixture {
+                $testParams = @{
+                    IsSingleInstance         = "Yes"
+                    Ensure                   = "Present"
+                    FarmConfigDatabaseName   = "SP_Config"
+                    DatabaseServer           = "sql.contoso.com"
+                    FarmAccount              = $mockFarmAccount
+                    Passphrase               = $mockPassphrase
+                    AdminContentDatabaseName = "SP_AdminContent"
+                    RunCentralAdmin          = $true
+                    CentralAdministrationUrl = "http://localhost:8080"
+                }
+
+                Mock -CommandName Get-SPDscRegistryKey -MockWith {
+                    return "Connection string example"
+                }
+
+                Mock -CommandName Get-SPFarm -MockWith {
+                    return @{
+                        Name                     = $testParams.FarmConfigDatabaseName
+                        DatabaseServer           = @{
+                            Name = $testParams.DatabaseServer
+                        }
+                        AdminContentDatabaseName = $testParams.AdminContentDatabaseName
+                        Services                 = @{
+                            TypeName         = "Central Administration"
+                            ApplicationPools = @{
+                                Name = "SharePoint Central Administration v4"
+                            }
+                        }
+                    }
+                }
+
+                Mock -CommandName Get-SPDscConfigDBStatus -MockWith {
+                    return @{
+                        Locked           = $false
+                        ValidPermissions = $true
+                        DatabaseExists   = $true
+                    }
+                }
+
+                Mock -CommandName Get-SPDatabase -MockWith {
+                    return @(@{
+                            Name                 = $testParams.FarmConfigDatabaseName
+                            Type                 = "Configuration Database"
+                            NormalizedDataSource = $testParams.DatabaseServer
+                        })
+                }
+
+                Mock -CommandName Get-SPWebApplication -MockWith {
+                    return @{
+                        IsAdministrationWebApplication = $true
+                        ContentDatabases               = @(@{
+                                Name = $testParams.AdminContentDatabaseName
+                            })
+                        IISSettings                    = @(@{
+                                DisableKerberos = $true
+                            })
+                        Url                            = "http://localhost:9999"
+                    }
+                }
+
+                Mock -CommandName Get-CimInstance -MockWith {
+                    return @{
+                        Domain = "domain.com"
+                    }
+                }
+
+                Mock -CommandName Get-SPServiceInstance -MockWith {
+                    return @(
+                        @{
+                            Name   = "WSS_Administration"
+                            Status = "Online"
+                        } | Add-Member -MemberType ScriptMethod `
+                            -Name GetType `
+                            -Value {
+                            return @{
+                                Name = "SPWebServiceInstance"
+                            }
+                        } -PassThru -Force
+                    )
+                }
+
+                Mock -CommandName Set-SPCentralAdministration -MockWith { }
+
+                It "Should return 9999 as CA Port from the get method" {
+                    (Get-TargetResource @testParams).CentralAdministrationPort | Should Be 9999
+                }
+
+                It "Should remove, and re-extend CA web application in the set method" {
+                    Set-TargetResource @testParams
+                    Assert-MockCalled -CommandName "Remove-SPWebApplication"
+                    Assert-MockCalled -CommandName "New-SPWebApplicationExtension"
+                }
+
+                It "Should return false from the test method" {
+                    Test-TargetResource @testParams | Should be $false
+                }
+            }
+
+            Context -Name "Server is connected to farm, but CentralAdminPort is different (specified by CAPort)" -Fixture {
                 $testParams = @{
                     IsSingleInstance          = "Yes"
                     Ensure                    = "Present"
