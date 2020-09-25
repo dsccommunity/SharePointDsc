@@ -68,17 +68,10 @@ function Get-TargetResource
 
         if ($installedVersion.FileMajorPart -ge 16)
         {
-            if ($installedVersion.ProductBuildPart.ToString().Length -eq 4)
-            {
-                $returnval.SuiteNavBrandingLogoNavigationUrl = $wa.SuiteNavBrandingLogoNavigationUrl
-                $returnval.SuiteNavBrandingLogoTitle = $wa.SuiteNavBrandingLogoTitle
-                $returnval.SuiteNavBrandingLogoUrl = $wa.SuiteNavBrandingLogoUrl
-                $returnval.SuiteNavBrandingText = $wa.SuiteNavBrandingText
-            }
-            else
-            {
-                return $returnval
-            }
+            $returnval.SuiteNavBrandingLogoNavigationUrl = $wa.SuiteNavBrandingLogoNavigationUrl
+            $returnval.SuiteNavBrandingLogoTitle = $wa.SuiteNavBrandingLogoTitle
+            $returnval.SuiteNavBrandingLogoUrl = $wa.SuiteNavBrandingLogoUrl
+            $returnval.SuiteNavBrandingText = $wa.SuiteNavBrandingText
         }
 
         return $returnval
