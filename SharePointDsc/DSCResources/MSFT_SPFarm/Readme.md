@@ -25,6 +25,13 @@ The port of the Central Admin website can be set by using the
 CentralAdministrationPort property. If this is not defined, the site will be
 provisioned on port 9999 unless the CentralAdministrationUrl property is
 specified and begins with https, in which case it will default to port 443.
+The port number in CentralAdministrationPort and CentralAdministrationUrl must
+match if both parameters are specified. It is not recommended to include port
+number 80 and 443 in the CentralAdministrationUrl parameter. This will
+automatically follow the URL shceme http (80) and https (443) specified.
+CentralAdministrationPort is an optional parameter and can be omitted if the
+port is specified in CentralAdministrationUrl, or if default ports for
+http/https is used (no port is required to be specified).
 However, this setting will not impact existing deployments that already have
 Central Admin provisioned on another port. Also, when a farm is created, the
 current behavior is to not enroll the server as a cache server (which is the
