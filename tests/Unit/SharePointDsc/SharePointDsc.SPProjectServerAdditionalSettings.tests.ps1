@@ -46,29 +46,12 @@ Invoke-TestSetup
 
 try
 {
-    Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
-        InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
-            Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
+    InModuleScope -ModuleName $script:DSCResourceFullName -ScriptBlock {
+        Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
+            BeforeAll {
+                Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
-            switch ($Global:SPDscHelper.CurrentStubBuildNumber.Major)
-            {
-                15
-                {
-                    Context -Name "All methods throw exceptions as Project Server support in SharePointDsc is only for 2016" -Fixture {
-                        It "Should throw on the get method" {
-                            { Get-TargetResource @testParams } | Should Throw
-                        }
-
-                        It "Should throw on the test method" {
-                            { Test-TargetResource @testParams } | Should Throw
-                        }
-
-                        It "Should throw on the set method" {
-                            { Set-TargetResource @testParams } | Should Throw
-                        }
-                    }
-                }
-                16
+                if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 16)
                 {
                     $script:projectPath = "$PSScriptRoot\..\..\.." | Convert-Path
                     $script:projectName = (Get-ChildItem -Path "$script:projectPath\*\*.psd1" | Where-Object -FilterScript {
@@ -183,21 +166,45 @@ try
                         } -PassThru -Force
                         return $service
                     }
+                }
+            }
 
+            switch ($Global:SPDscHelper.CurrentStubBuildNumber.Major)
+            {
+                15
+                {
+                    Context -Name "All methods throw exceptions as Project Server support in SharePointDsc is only for 2016" -Fixture {
+                        It "Should throw on the get method" {
+                            { Get-TargetResource @testParams } | Should -Throw
+                        }
+
+                        It "Should throw on the test method" {
+                            { Test-TargetResource @testParams } | Should -Throw
+                        }
+
+                        It "Should throw on the set method" {
+                            { Set-TargetResource @testParams } | Should -Throw
+                        }
+                    }
+                }
+                16
+                {
                     Context -Name "Has incorrect settings applied" -Fixture {
-                        $testParams = @{
-                            Url                               = "http://server/pwa"
-                            ProjectProfessionalMinBuildNumber = "1.0.0.0"
-                            ServerCurrency                    = "USD"
-                            EnforceServerCurrency             = $false
+                        BeforeAll {
+                            $testParams = @{
+                                Url                               = "http://server/pwa"
+                                ProjectProfessionalMinBuildNumber = "1.0.0.0"
+                                ServerCurrency                    = "USD"
+                                EnforceServerCurrency             = $false
+                            }
                         }
 
                         It "Should return current settings from the get method" {
-                            Get-TargetResource @testParams | Should Not BeNullOrEmpty
+                            Get-TargetResource @testParams | Should -Not -BeNullOrEmpty
                         }
 
                         It "Should return false from the test method" {
-                            Test-TargetResource @testParams | Should Be $false
+                            Test-TargetResource @testParams | Should -Be $false
                         }
 
                         It "Should update all settings from the set method" {
@@ -205,26 +212,28 @@ try
                             $global:SPDscSetServerCurrencyCalled = $false
                             $global:SPDscSetSingleCurrencyEnforcedCalled = $false
                             Set-TargetResource @testParams
-                            $global:SPDscSetProjectProfessionalMinimumBuildNumbersCalled | Should Be $true
-                            $global:SPDscSetServerCurrencyCalled | Should Be $true
-                            $global:SPDscSetSingleCurrencyEnforcedCalled | Should Be $true
+                            $global:SPDscSetProjectProfessionalMinimumBuildNumbersCalled | Should -Be $true
+                            $global:SPDscSetServerCurrencyCalled | Should -Be $true
+                            $global:SPDscSetSingleCurrencyEnforcedCalled | Should -Be $true
                         }
                     }
 
                     Context -Name "Has correct settings applied" -Fixture {
-                        $testParams = @{
-                            Url                               = "http://server/pwa"
-                            ProjectProfessionalMinBuildNumber = "2.0.0.0"
-                            ServerCurrency                    = "AUD"
-                            EnforceServerCurrency             = $true
+                        BeforeAll {
+                            $testParams = @{
+                                Url                               = "http://server/pwa"
+                                ProjectProfessionalMinBuildNumber = "2.0.0.0"
+                                ServerCurrency                    = "AUD"
+                                EnforceServerCurrency             = $true
+                            }
                         }
 
                         It "Should return current settings from the get method" {
-                            Get-TargetResource @testParams | Should Not BeNullOrEmpty
+                            Get-TargetResource @testParams | Should -Not -BeNullOrEmpty
                         }
 
                         It "Should return true from the test method" {
-                            Test-TargetResource @testParams | Should Be $true
+                            Test-TargetResource @testParams | Should -Be $true
                         }
                     }
 

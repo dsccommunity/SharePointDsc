@@ -5,11 +5,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Fixed
-
-- SPTrustedIdentityTokenIssuer
-  - Property ClaimProviderName is never set
-
 ### Added
 
 - SPProductUpdate
@@ -19,8 +14,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     application
 
 ### Changed
+
 - SharePointDsc
   - Changed ModuleBuilder module to latest version
+  - Update Pester tests to remove legacy Pester syntax
 - SPFarm
   - Added support for specifying port number in the CentralAdministrationUrl parameter.
     If CentralAdministrationPort is also specified both port numbers must match.
@@ -49,6 +46,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Fixed issue where code failed because the State database already existed
 - SPTrustedIdentityTokenIssuer
   - Run Get-SPClaimProvider only if property ClaimProviderName is omitted/null/empty
+  - Property ClaimProviderName is never set
 - SPWeb
   - Fixed issue with incorrect detection of SPWeb that has to be absent
 

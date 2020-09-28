@@ -45,40 +45,44 @@ Invoke-TestSetup
 
 try
 {
-    Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
-        InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
-            Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
+    InModuleScope -ModuleName $script:DSCResourceFullName -ScriptBlock {
+        Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
+            BeforeAll {
+                Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
-            #Initialise tests
-            $getTypeFullName = "Microsoft.SharePoint.Administration.SPOnlineApplicationPrincipalManagementServiceApplicationProxy"
+                #Initialise tests
+                $getTypeFullName = "Microsoft.SharePoint.Administration.SPOnlineApplicationPrincipalManagementServiceApplicationProxy"
 
-            # Mocks for all contexts
-            Mock -CommandName Remove-SPServiceApplicationProxy -MockWith { }
+                # Mocks for all contexts
+                Mock -CommandName Remove-SPServiceApplicationProxy -MockWith { }
+            }
 
             # Test contexts
             Context -Name "When no service application proxies exist in the current farm and it should" -Fixture {
-                $testParams = @{
-                    Name            = "Test Proxy"
-                    OnlineTenantUri = "https://contoso.sharepoint.com"
-                    Ensure          = "Present"
-                }
-
-                Mock -CommandName Get-SPServiceApplicationProxy -MockWith { return $null }
-                Mock -CommandName New-SPOnlineApplicationPrincipalManagementServiceApplicationProxy -MockWith {
-                    $returnVal = @{
-                        Name            = "ServiceApp"
-                        OnlineTenantUri = [Uri]"https://contoso.sharepoint.com"
+                BeforeAll {
+                    $testParams = @{
+                        Name            = "Test Proxy"
+                        OnlineTenantUri = "https://contoso.sharepoint.com"
+                        Ensure          = "Present"
                     }
-                    return $returnVal
+
+                    Mock -CommandName Get-SPServiceApplicationProxy -MockWith { return $null }
+                    Mock -CommandName New-SPOnlineApplicationPrincipalManagementServiceApplicationProxy -MockWith {
+                        $returnVal = @{
+                            Name            = "ServiceApp"
+                            OnlineTenantUri = [Uri]"https://contoso.sharepoint.com"
+                        }
+                        return $returnVal
+                    }
                 }
 
                 It "Should return absent from the get method" {
-                    (Get-TargetResource @testParams).Ensure | Should Be "Absent"
+                    (Get-TargetResource @testParams).Ensure | Should -Be "Absent"
                     Assert-MockCalled Get-SPServiceApplicationProxy
                 }
 
                 It "Should return false when the test method is called" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should create a new service application in the set method" {
@@ -91,38 +95,40 @@ try
             }
 
             Context -Name "When service applications exist in the current farm with the same name but metadata service endpoint URI does not match" -Fixture {
-                $testParams = @{
-                    Name            = "Test Proxy"
-                    OnlineTenantUri = "https://contoso.sharepoint.com"
-                    Ensure          = "Present"
-                }
-
-                Mock -CommandName Get-SPServiceApplicationProxy -MockWith {
-                    $spServiceAppProxy = [PSCustomObject]@{
-                        Name            = $testParams.Name
-                        OnlineTenantUri = [Uri]"https://litware.sharepoint.com"
+                BeforeAll {
+                    $testParams = @{
+                        Name            = "Test Proxy"
+                        OnlineTenantUri = "https://contoso.sharepoint.com"
+                        Ensure          = "Present"
                     }
-                    $spServiceAppProxy | Add-Member -MemberType ScriptMethod `
-                        -Name GetType `
-                        -Value {
-                        return @{
-                            FullName = $getTypeFullName
+
+                    Mock -CommandName Get-SPServiceApplicationProxy -MockWith {
+                        $spServiceAppProxy = [PSCustomObject]@{
+                            Name            = $testParams.Name
+                            OnlineTenantUri = [Uri]"https://litware.sharepoint.com"
                         }
-                    } -Force
-                    return $spServiceAppProxy
+                        $spServiceAppProxy | Add-Member -MemberType ScriptMethod `
+                            -Name GetType `
+                            -Value {
+                            return @{
+                                FullName = $getTypeFullName
+                            }
+                        } -Force
+                        return $spServiceAppProxy
+                    }
+                    Mock -CommandName New-SPOnlineApplicationPrincipalManagementServiceApplicationProxy -MockWith { return $null }
+                    Mock -CommandName Remove-SPServiceApplicationProxy -MockWith { return $null }
                 }
-                Mock -CommandName New-SPOnlineApplicationPrincipalManagementServiceApplicationProxy -MockWith { return $null }
-                Mock -CommandName Remove-SPServiceApplicationProxy -MockWith { return $null }
 
                 It "Should return present from the get method" {
                     $result = Get-TargetResource @testParams
-                    $result.Ensure | Should Be "Present"
-                    $result.OnlineTenantUri | Should Be "https://litware.sharepoint.com"
+                    $result.Ensure | Should -Be "Present"
+                    $result.OnlineTenantUri | Should -Be "https://litware.sharepoint.com"
                     Assert-MockCalled Get-SPServiceApplicationProxy
                 }
 
                 It "Should return false when the Test method is called" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should recreate the application proxy from the set method" {
@@ -138,57 +144,61 @@ try
             }
 
             Context -Name "When a service application exists and it should, and is also configured correctly" -Fixture {
-                $testParams = @{
-                    Name            = "Test Proxy"
-                    OnlineTenantUri = "https://contoso.sharepoint.com"
-                    Ensure          = "Present"
-                }
-
-                Mock -CommandName Get-SPServiceApplicationProxy -MockWith {
-                    $spServiceAppProxy = [PSCustomObject]@{
-                        Name            = $testParams.Name
-                        OnlineTenantUri = [Uri]$testParams.OnlineTenantUri
+                BeforeAll {
+                    $testParams = @{
+                        Name            = "Test Proxy"
+                        OnlineTenantUri = "https://contoso.sharepoint.com"
+                        Ensure          = "Present"
                     }
-                    $spServiceAppProxy | Add-Member -MemberType ScriptMethod -Name GetType -Value {
-                        return @{ FullName = $getTypeFullName }
-                    } -Force
-                    return $spServiceAppProxy
+
+                    Mock -CommandName Get-SPServiceApplicationProxy -MockWith {
+                        $spServiceAppProxy = [PSCustomObject]@{
+                            Name            = $testParams.Name
+                            OnlineTenantUri = [Uri]$testParams.OnlineTenantUri
+                        }
+                        $spServiceAppProxy | Add-Member -MemberType ScriptMethod -Name GetType -Value {
+                            return @{ FullName = $getTypeFullName }
+                        } -Force
+                        return $spServiceAppProxy
+                    }
                 }
 
                 It "Should return values from the get method" {
-                    (Get-TargetResource @testParams).Ensure | Should Be "Present"
+                    (Get-TargetResource @testParams).Ensure | Should -Be "Present"
                     Assert-MockCalled Get-SPServiceApplicationProxy
                 }
 
                 It "Should return true when the Test method is called" {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
             }
 
             Context -Name "When the service application proxy exists but it shouldn't" -Fixture {
-                $testParams = @{
-                    Name            = "Test Proxy"
-                    OnlineTenantUri = "https://contoso.sharepoint.com"
-                    Ensure          = "Absent"
-                }
-
-                Mock -CommandName Get-SPServiceApplicationProxy -MockWith {
-                    $spServiceAppProxy = [PSCustomObject]@{
-                        Name            = $testParams.Name
-                        OnlineTenantUri = [Uri]$testParams.OnlineTenantUri
+                BeforeAll {
+                    $testParams = @{
+                        Name            = "Test Proxy"
+                        OnlineTenantUri = "https://contoso.sharepoint.com"
+                        Ensure          = "Absent"
                     }
-                    $spServiceAppProxy | Add-Member -MemberType ScriptMethod -Name GetType -Value {
-                        return @{ FullName = $getTypeFullName }
-                    } -Force
-                    return $spServiceAppProxy
+
+                    Mock -CommandName Get-SPServiceApplicationProxy -MockWith {
+                        $spServiceAppProxy = [PSCustomObject]@{
+                            Name            = $testParams.Name
+                            OnlineTenantUri = [Uri]$testParams.OnlineTenantUri
+                        }
+                        $spServiceAppProxy | Add-Member -MemberType ScriptMethod -Name GetType -Value {
+                            return @{ FullName = $getTypeFullName }
+                        } -Force
+                        return $spServiceAppProxy
+                    }
                 }
 
                 It "Should return present from the Get method" {
-                    (Get-TargetResource @testParams).Ensure | Should Be "Present"
+                    (Get-TargetResource @testParams).Ensure | Should -Be "Present"
                 }
 
                 It "Should return false when the Test method is called" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should call the remove service application cmdlet in the set method" {
@@ -198,20 +208,22 @@ try
             }
 
             Context -Name "When the serivce application doesn't exist and it shouldn't" -Fixture {
-                $testParams = @{
-                    Name            = "Test Proxy"
-                    OnlineTenantUri = "https://contoso.sharepoint.com"
-                    Ensure          = "Absent"
+                BeforeAll {
+                    $testParams = @{
+                        Name            = "Test Proxy"
+                        OnlineTenantUri = "https://contoso.sharepoint.com"
+                        Ensure          = "Absent"
+                    }
+
+                    Mock -CommandName Get-SPServiceApplicationProxy -MockWith { return $null }
                 }
 
-                Mock -CommandName Get-SPServiceApplicationProxy -MockWith { return $null }
-
                 It "Should return absent from the Get method" {
-                    (Get-TargetResource @testParams).Ensure | Should Be "Absent"
+                    (Get-TargetResource @testParams).Ensure | Should -Be "Absent"
                 }
 
                 It "Should return true when the Test method is called" {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
             }
         }

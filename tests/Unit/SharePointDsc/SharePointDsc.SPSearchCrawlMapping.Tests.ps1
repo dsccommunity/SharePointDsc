@@ -46,167 +46,172 @@ Invoke-TestSetup
 
 try
 {
-    Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
-        InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
-            Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
+    InModuleScope -ModuleName $script:DSCResourceFullName -ScriptBlock {
+        Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
+            BeforeAll {
+                Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
-            # Initialize tests
-            $getTypeFullName = "Microsoft.Office.Server.Search.Administration.SearchServiceApplication"
+                # Initialize tests
+                $getTypeFullName = "Microsoft.Office.Server.Search.Administration.SearchServiceApplication"
 
-            # Mocks for all contexts
-            Mock -CommandName Remove-SPEnterpriseSearchCrawlMapping -MockWith { }
-            Mock -CommandName New-SPEnterpriseSearchCrawlMapping -MockWith { }
-            Mock -CommandName Get-SPEnterpriseSearchCrawlMapping -MockWith { }
-            Mock -CommandName Get-SPEnterpriseSearchServiceApplication -MockWith { }
+                # Mocks for all contexts
+                Mock -CommandName Remove-SPEnterpriseSearchCrawlMapping -MockWith { }
+                Mock -CommandName New-SPEnterpriseSearchCrawlMapping -MockWith { }
+                Mock -CommandName Get-SPEnterpriseSearchCrawlMapping -MockWith { }
+                Mock -CommandName Get-SPEnterpriseSearchServiceApplication -MockWith { }
 
-            Mock -CommandName Get-SPServiceApplication -MockWith {
-                return @(
-                    New-Object -TypeName "Object" |
-                    Add-Member -MemberType ScriptMethod `
-                        -Name GetType `
-                        -Value {
+                Mock -CommandName Get-SPServiceApplication -MockWith {
+                    return @(
                         New-Object -TypeName "Object" |
-                        Add-Member -MemberType NoteProperty `
-                            -Name FullName `
-                            -Value $getTypeFullName `
-                            -PassThru
-                    } `
-                        -PassThru -Force)
+                        Add-Member -MemberType ScriptMethod `
+                            -Name GetType `
+                            -Value {
+                            New-Object -TypeName "Object" |
+                            Add-Member -MemberType NoteProperty `
+                                -Name FullName `
+                                -Value $getTypeFullName `
+                                -PassThru
+                        } `
+                            -PassThru -Force)
+                }
             }
 
             # Test contexts
             Context -Name "When enterprise search service doesn't exist in the current farm" -Fixture {
-                $testParams = @{
-                    ServiceAppName = "Search Service Application"
-                    Url            = "http://crawl.sharepoint.com"
-                    Target         = "http://site.sharepoint.com"
-                    Ensure         = "Present"
-                }
+                BeforeAll {
+                    $testParams = @{
+                        ServiceAppName = "Search Service Application"
+                        Url            = "http://crawl.sharepoint.com"
+                        Target         = "http://site.sharepoint.com"
+                        Ensure         = "Present"
+                    }
 
-                Mock -CommandName Get-SPEnterpriseSearchServiceApplication -MockWith {
-                    return $null
-                }
-
-                It "Should return absent from the Get method" {
-                    (Get-TargetResource @testParams).Ensure | Should Be "Absent"
-                }
-
-                It "Should return false when the Test method is called" {
-                    Test-TargetResource @testParams | Should Be $false
-                }
-
-                It "Should throw Exception -- The Search Service Application does not exist" {
-                    { Set-TargetResource @testParams } | Should throw "The Search Service Application does not exist"
-                }
-
-            }
-
-            Context -Name "When no crawl mappings exists" -Fixture {
-                $testParams = @{
-                    ServiceAppName = "Search Service Application"
-                    Url            = "http://crawl.sharepoint.com"
-                    Target         = "http://site.sharepoint.com"
-                    Ensure         = "Present"
-                }
-
-                Mock -CommandName Get-SPEnterpriseSearchServiceApplication -MockWith {
-                    return @{
-                        Name = "Search Service Application"
+                    Mock -CommandName Get-SPEnterpriseSearchServiceApplication -MockWith {
+                        return $null
                     }
                 }
 
+                It "Should return absent from the Get method" {
+                    (Get-TargetResource @testParams).Ensure | Should -Be "Absent"
+                }
 
-                Mock -CommandName Get-SPEnterpriseSearchCrawlMapping -MockWith {
-                    return $null
+                It "Should return false when the Test method is called" {
+                    Test-TargetResource @testParams | Should -Be $false
+                }
+
+                It "Should throw Exception -- The Search Service Application does not exist" {
+                    { Set-TargetResource @testParams } | Should -Throw "The Search Service Application does not exist"
+                }
+            }
+
+            Context -Name "When no crawl mappings exists" -Fixture {
+                BeforeAll {
+                    $testParams = @{
+                        ServiceAppName = "Search Service Application"
+                        Url            = "http://crawl.sharepoint.com"
+                        Target         = "http://site.sharepoint.com"
+                        Ensure         = "Present"
+                    }
+
+                    Mock -CommandName Get-SPEnterpriseSearchServiceApplication -MockWith {
+                        return @{
+                            Name = "Search Service Application"
+                        }
+                    }
+
+                    Mock -CommandName Get-SPEnterpriseSearchCrawlMapping -MockWith {
+                        return $null
+                    }
                 }
 
                 It "Should return absent from the get method" {
-                    (Get-TargetResource @testParams).Ensure | Should Be "Absent"
+                    (Get-TargetResource @testParams).Ensure | Should -Be "Absent"
                 }
 
                 It "Should return true when the Test method is called" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
 
             }
 
             Context -Name "When crawl mappings exists but specific mapping does not" -Fixture {
-                $testParams = @{
-                    ServiceAppName = "Search Service Application"
-                    Url            = "http://crawl.sharepoint.com"
-                    Target         = "http://site.sharepoint.com"
-                    Ensure         = "Present"
-                }
+                BeforeAll {
+                    $testParams = @{
+                        ServiceAppName = "Search Service Application"
+                        Url            = "http://crawl.sharepoint.com"
+                        Target         = "http://site.sharepoint.com"
+                        Ensure         = "Present"
+                    }
 
-                Mock -CommandName Get-SPEnterpriseSearchServiceApplication -MockWith {
-                    return @{
-                        Name = "Search Service Application"
+                    Mock -CommandName Get-SPEnterpriseSearchServiceApplication -MockWith {
+                        return @{
+                            Name = "Search Service Application"
+                        }
+                    }
+
+                    Mock -CommandName Get-SPEnterpriseSearchCrawlMapping -MockWith {
+                        return @(
+                            @{
+                                Url    = "http://other.sharepoint.com"
+                                Target = "http://site.sharepoint.com"
+                            },
+                            @{
+                                Url    = "http://site.sharepoint.com"
+                                Target = "http://site2.sharepoint.com"
+                            }
+                        )
                     }
                 }
 
-
-                Mock -CommandName Get-SPEnterpriseSearchCrawlMapping -MockWith {
-                    return @(
-                        @{
-                            Url    = "http://other.sharepoint.com"
-                            Target = "http://site.sharepoint.com"
-                        },
-                        @{
-                            Url    = "http://site.sharepoint.com"
-                            Target = "http://site2.sharepoint.com"
-                        }
-                    )
-                }
-
                 It "Should return absent from the get method" {
-                    (Get-TargetResource @testParams).Ensure | Should Be "Absent"
+                    (Get-TargetResource @testParams).Ensure | Should -Be "Absent"
                 }
 
                 It "Should return false when the Test method is called" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
             }
 
             Context -Name "When a crawl mapping exists, and is configured correctly" -Fixture {
+                BeforeAll {
+                    $testParams = @{
+                        ServiceAppName = "Search Service Application"
+                        Url            = "http://crawl.sharepoint.com"
+                        Target         = "http://site.sharepoint.com"
+                        Ensure         = "Present"
+                    }
 
-                $testParams = @{
-                    ServiceAppName = "Search Service Application"
-                    Url            = "http://crawl.sharepoint.com"
-                    Target         = "http://site.sharepoint.com"
-                    Ensure         = "Present"
-                }
+                    Mock -CommandName Get-SPEnterpriseSearchServiceApplication -MockWith {
+                        return @{
+                            Name = "Search Service Application"
+                        }
+                    }
 
-                Mock -CommandName Get-SPEnterpriseSearchServiceApplication -MockWith {
-                    return @{
-                        Name = "Search Service Application"
+                    Mock -CommandName Get-SPEnterpriseSearchCrawlMapping -MockWith {
+                        return @(
+                            @{
+                                Source = "http://other.sharepoint.com"
+                                Target = "http://site.sharepoint.com"
+                            },
+                            @{
+                                Source = "http://site.sharepoint.com"
+                                Target = "http://site2.sharepoint.com"
+                            },
+                            @{
+                                Source = $testParams.Url
+                                Target = $testParams.Target
+                            }
+                        )
                     }
                 }
 
-
-                Mock -CommandName Get-SPEnterpriseSearchCrawlMapping -MockWith {
-                    return @(
-                        @{
-                            Source = "http://other.sharepoint.com"
-                            Target = "http://site.sharepoint.com"
-                        },
-                        @{
-                            Source = "http://site.sharepoint.com"
-                            Target = "http://site2.sharepoint.com"
-                        },
-                        @{
-                            Source = $testParams.Url
-                            Target = $testParams.Target
-                        }
-                    )
-                }
-
                 It "Should return present from the get method" {
-                    (Get-TargetResource @testParams).Ensure | Should Be "Present"
+                    (Get-TargetResource @testParams).Ensure | Should -Be "Present"
                 }
 
                 It "Should return true when the Test method is called" {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
 
                 It "Should call the Get Remove New SPEnterpriseSearchCrawlMapping update the crawl mapping" {
@@ -219,43 +224,44 @@ try
             }
 
             Context -Name "When a crawl mapping exists, but isn't configured correctly" -Fixture {
-                $testParams = @{
-                    ServiceAppName = "Search Service Application"
-                    Url            = "http://crawl.sharepoint.com"
-                    Target         = "http://site.sharepoint.com"
-                    Ensure         = "Present"
-                }
+                BeforeAll {
+                    $testParams = @{
+                        ServiceAppName = "Search Service Application"
+                        Url            = "http://crawl.sharepoint.com"
+                        Target         = "http://site.sharepoint.com"
+                        Ensure         = "Present"
+                    }
 
-                Mock -CommandName Get-SPEnterpriseSearchServiceApplication -MockWith {
-                    return @{
-                        Name = "Search Service Application"
+                    Mock -CommandName Get-SPEnterpriseSearchServiceApplication -MockWith {
+                        return @{
+                            Name = "Search Service Application"
+                        }
+                    }
+
+                    Mock -CommandName Get-SPEnterpriseSearchCrawlMapping -MockWith {
+                        return @(
+                            @{
+                                Source = "http://other.sharepoint.com"
+                                Target = "http://site.sharepoint.com"
+                            },
+                            @{
+                                Source = "http://site.sharepoint.com"
+                                Target = "http://site2.sharepoint.com"
+                            },
+                            @{
+                                Source = $testParams.Url
+                                Target = "http://other.sharepoint.com"
+                            }
+                        )
                     }
                 }
 
-
-                Mock -CommandName Get-SPEnterpriseSearchCrawlMapping -MockWith {
-                    return @(
-                        @{
-                            Source = "http://other.sharepoint.com"
-                            Target = "http://site.sharepoint.com"
-                        },
-                        @{
-                            Source = "http://site.sharepoint.com"
-                            Target = "http://site2.sharepoint.com"
-                        },
-                        @{
-                            Source = $testParams.Url
-                            Target = "http://other.sharepoint.com"
-                        }
-                    )
-                }
-
                 It "Should return present from the get method" {
-                    (Get-TargetResource @testParams).Ensure | Should Be "Present"
+                    (Get-TargetResource @testParams).Ensure | Should -Be "Present"
                 }
 
                 It "Should return false when the Test method is called" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should call the Get Remove New -SPEnterpriseSearchCrawlMapping update the crawl mapping" {
@@ -267,39 +273,40 @@ try
             }
 
             Context -Name "When a crawl mapping doesn't exists, but it should" -Fixture {
-                $testParams = @{
-                    ServiceAppName = "Search Service Application"
-                    Url            = "http://crawl.sharepoint.com"
-                    Target         = "http://site.sharepoint.com"
-                    Ensure         = "Present"
-                }
+                BeforeAll {
+                    $testParams = @{
+                        ServiceAppName = "Search Service Application"
+                        Url            = "http://crawl.sharepoint.com"
+                        Target         = "http://site.sharepoint.com"
+                        Ensure         = "Present"
+                    }
 
-                Mock -CommandName Get-SPEnterpriseSearchServiceApplication -MockWith {
-                    return @{
-                        Name = "Search Service Application"
+                    Mock -CommandName Get-SPEnterpriseSearchServiceApplication -MockWith {
+                        return @{
+                            Name = "Search Service Application"
+                        }
+                    }
+
+                    Mock -CommandName Get-SPEnterpriseSearchCrawlMapping -MockWith {
+                        return @(
+                            @{
+                                Source = "http://other.sharepoint.com"
+                                Target = "http://site.sharepoint.com"
+                            },
+                            @{
+                                Source = "http://site.sharepoint.com"
+                                Target = "http://site2.sharepoint.com"
+                            }
+                        )
                     }
                 }
 
-
-                Mock -CommandName Get-SPEnterpriseSearchCrawlMapping -MockWith {
-                    return @(
-                        @{
-                            Source = "http://other.sharepoint.com"
-                            Target = "http://site.sharepoint.com"
-                        },
-                        @{
-                            Source = "http://site.sharepoint.com"
-                            Target = "http://site2.sharepoint.com"
-                        }
-                    )
-                }
-
                 It "Should return absent from the get method" {
-                    (Get-TargetResource @testParams).Ensure | Should Be "Absent"
+                    (Get-TargetResource @testParams).Ensure | Should -Be "Absent"
                 }
 
                 It "Should return false when the Test method is called" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should call the Get Remove New -SPEnterpriseSearchCrawlMapping update the crawl mapping" {
@@ -309,43 +316,44 @@ try
             }
 
             Context -Name "When a crawl mapping exists, but isn't configured correctly" -Fixture {
-                $testParams = @{
-                    ServiceAppName = "Search Service Application"
-                    Url            = "http://crawl.sharepoint.com"
-                    Target         = "http://site.sharepoint.com"
-                    Ensure         = "Present"
-                }
+                BeforeAll {
+                    $testParams = @{
+                        ServiceAppName = "Search Service Application"
+                        Url            = "http://crawl.sharepoint.com"
+                        Target         = "http://site.sharepoint.com"
+                        Ensure         = "Present"
+                    }
 
-                Mock -CommandName Get-SPEnterpriseSearchServiceApplication -MockWith {
-                    return @{
-                        Name = "Search Service Application"
+                    Mock -CommandName Get-SPEnterpriseSearchServiceApplication -MockWith {
+                        return @{
+                            Name = "Search Service Application"
+                        }
+                    }
+
+                    Mock -CommandName Get-SPEnterpriseSearchCrawlMapping -MockWith {
+                        return @(
+                            @{
+                                Source = "http://other.sharepoint.com"
+                                Target = "http://site.sharepoint.com"
+                            },
+                            @{
+                                Source = "http://site.sharepoint.com"
+                                Target = "http://site2.sharepoint.com"
+                            },
+                            @{
+                                Source = $testParams.Url
+                                Target = "http://other.sharepoint.com"
+                            }
+                        )
                     }
                 }
 
-
-                Mock -CommandName Get-SPEnterpriseSearchCrawlMapping -MockWith {
-                    return @(
-                        @{
-                            Source = "http://other.sharepoint.com"
-                            Target = "http://site.sharepoint.com"
-                        },
-                        @{
-                            Source = "http://site.sharepoint.com"
-                            Target = "http://site2.sharepoint.com"
-                        },
-                        @{
-                            Source = $testParams.Url
-                            Target = "http://other.sharepoint.com"
-                        }
-                    )
-                }
-
                 It "Should return present from the get method" {
-                    (Get-TargetResource @testParams).Ensure | Should Be "Present"
+                    (Get-TargetResource @testParams).Ensure | Should -Be "Present"
                 }
 
                 It "Should return false when the Test method is called" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should call the Get - Remove - New EnterpriseSearchCrawlMapping update the crawl mapping" {
@@ -357,43 +365,44 @@ try
             }
 
             Context -Name "When a crawl mapping does exists, but it shouldn't" -Fixture {
-                $testParams = @{
-                    ServiceAppName = "Search Service Application"
-                    Url            = "http://crawl.sharepoint.com"
-                    Target         = "http://site.sharepoint.com"
-                    Ensure         = "Absent"
-                }
+                BeforeAll {
+                    $testParams = @{
+                        ServiceAppName = "Search Service Application"
+                        Url            = "http://crawl.sharepoint.com"
+                        Target         = "http://site.sharepoint.com"
+                        Ensure         = "Absent"
+                    }
 
-                Mock -CommandName Get-SPEnterpriseSearchServiceApplication -MockWith {
-                    return @{
-                        Name = "Search Service Application"
+                    Mock -CommandName Get-SPEnterpriseSearchServiceApplication -MockWith {
+                        return @{
+                            Name = "Search Service Application"
+                        }
+                    }
+
+                    Mock -CommandName Get-SPEnterpriseSearchCrawlMapping -MockWith {
+                        return @(
+                            @{
+                                Source = "http://other.sharepoint.com"
+                                Target = "http://site.sharepoint.com"
+                            },
+                            @{
+                                Source = "http://site.sharepoint.com"
+                                Target = "http://site2.sharepoint.com"
+                            },
+                            @{
+                                Source = $testParams.Url
+                                Target = $testParams.Target
+                            }
+                        )
                     }
                 }
 
-
-                Mock -CommandName Get-SPEnterpriseSearchCrawlMapping -MockWith {
-                    return @(
-                        @{
-                            Source = "http://other.sharepoint.com"
-                            Target = "http://site.sharepoint.com"
-                        },
-                        @{
-                            Source = "http://site.sharepoint.com"
-                            Target = "http://site2.sharepoint.com"
-                        },
-                        @{
-                            Source = $testParams.Url
-                            Target = $testParams.Target
-                        }
-                    )
-                }
-
                 It "Should return present from the get method" {
-                    (Get-TargetResource @testParams).Ensure | Should Be "Present"
+                    (Get-TargetResource @testParams).Ensure | Should -Be "Present"
                 }
 
                 It "Should return false when the Test method is called" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should call the Get Remove New -SPEnterpriseSearchCrawlMapping update the crawl mapping" {

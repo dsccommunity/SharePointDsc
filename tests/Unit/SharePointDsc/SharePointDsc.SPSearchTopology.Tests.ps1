@@ -46,144 +46,148 @@ Invoke-TestSetup
 
 try
 {
-    Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
-        InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
-            Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
+    InModuleScope -ModuleName $script:DSCResourceFullName -ScriptBlock {
+        Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
+            BeforeAll {
+                Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
-            # Initialize tests
-            $mockPath = Join-Path -Path $Global:SPDscHelper.RepoRoot `
-                -ChildPath "Tests/Unit/SharePointDsc/SharePointDsc.SPSearchTopology.Mocks.cs"
-            Add-Type -LiteralPath $mockPath
+                # Initialize tests
+                $mockPath = Join-Path -Path $Global:SPDscHelper.RepoRoot `
+                    -ChildPath "Tests/Unit/SharePointDsc/SharePointDsc.SPSearchTopology.Mocks.cs"
+                Add-Type -LiteralPath $mockPath
 
-            $serverId = New-Guid
+                $serverId = New-Guid
 
-            $adminComponent = New-Object Microsoft.Office.Server.Search.Administration.Topology.AdminComponent
-            $adminComponent.ServerName = $env:COMPUTERNAME
-            $adminComponent.ServerId = $serverId
-            $adminComponent.ComponentId = [Guid]::NewGuid()
+                $adminComponent = New-Object Microsoft.Office.Server.Search.Administration.Topology.AdminComponent
+                $adminComponent.ServerName = $env:COMPUTERNAME
+                $adminComponent.ServerId = $serverId
+                $adminComponent.ComponentId = [Guid]::NewGuid()
 
-            $crawlComponent = New-Object Microsoft.Office.Server.Search.Administration.Topology.CrawlComponent
-            $crawlComponent.ServerName = $env:COMPUTERNAME
-            $crawlComponent.ServerId = $serverId
-            $crawlComponent.ComponentId = [Guid]::NewGuid()
+                $crawlComponent = New-Object Microsoft.Office.Server.Search.Administration.Topology.CrawlComponent
+                $crawlComponent.ServerName = $env:COMPUTERNAME
+                $crawlComponent.ServerId = $serverId
+                $crawlComponent.ComponentId = [Guid]::NewGuid()
 
-            $contentProcessingComponent = New-Object Microsoft.Office.Server.Search.Administration.Topology.ContentProcessingComponent
-            $contentProcessingComponent.ServerName = $env:COMPUTERNAME
-            $contentProcessingComponent.ServerId = $serverId
-            $contentProcessingComponent.ComponentId = [Guid]::NewGuid()
+                $contentProcessingComponent = New-Object Microsoft.Office.Server.Search.Administration.Topology.ContentProcessingComponent
+                $contentProcessingComponent.ServerName = $env:COMPUTERNAME
+                $contentProcessingComponent.ServerId = $serverId
+                $contentProcessingComponent.ComponentId = [Guid]::NewGuid()
 
-            $analyticsProcessingComponent = New-Object Microsoft.Office.Server.Search.Administration.Topology.AnalyticsProcessingComponent
-            $analyticsProcessingComponent.ServerName = $env:COMPUTERNAME
-            $analyticsProcessingComponent.ServerId = $serverId
-            $analyticsProcessingComponent.ComponentId = [Guid]::NewGuid()
+                $analyticsProcessingComponent = New-Object Microsoft.Office.Server.Search.Administration.Topology.AnalyticsProcessingComponent
+                $analyticsProcessingComponent.ServerName = $env:COMPUTERNAME
+                $analyticsProcessingComponent.ServerId = $serverId
+                $analyticsProcessingComponent.ComponentId = [Guid]::NewGuid()
 
-            $queryProcessingComponent = New-Object Microsoft.Office.Server.Search.Administration.Topology.QueryProcessingComponent
-            $queryProcessingComponent.ServerName = $env:COMPUTERNAME
-            $queryProcessingComponent.ServerId = $serverId
-            $queryProcessingComponent.ComponentId = [Guid]::NewGuid()
+                $queryProcessingComponent = New-Object Microsoft.Office.Server.Search.Administration.Topology.QueryProcessingComponent
+                $queryProcessingComponent.ServerName = $env:COMPUTERNAME
+                $queryProcessingComponent.ServerId = $serverId
+                $queryProcessingComponent.ComponentId = [Guid]::NewGuid()
 
-            $indexComponent = New-Object Microsoft.Office.Server.Search.Administration.Topology.IndexComponent
-            $indexComponent.ServerName = $env:COMPUTERNAME
-            $indexComponent.ServerId = $serverId
-            $indexComponent.IndexPartitionOrdinal = 0
+                $indexComponent = New-Object Microsoft.Office.Server.Search.Administration.Topology.IndexComponent
+                $indexComponent.ServerName = $env:COMPUTERNAME
+                $indexComponent.ServerId = $serverId
+                $indexComponent.IndexPartitionOrdinal = 0
 
-            # Mocks for all contexts
-            Mock -CommandName Start-Sleep -MockWith { }
-            Mock -CommandName New-Item -MockWith { return @{ } }
-            Mock -CommandName Get-SPEnterpriseSearchServiceInstance -MockWith {
-                return @{
-                    Server     = @{
-                        Address = $env:COMPUTERNAME
+                # Mocks for all contexts
+                Mock -CommandName Start-Sleep -MockWith { }
+                Mock -CommandName New-Item -MockWith { return @{ } }
+                Mock -CommandName Get-SPEnterpriseSearchServiceInstance -MockWith {
+                    return @{
+                        Server     = @{
+                            Address = $env:COMPUTERNAME
+                        }
+                        Components = @(
+                            @{
+                                IndexLocation = @("C:\Program Files\Fake", "C:\Program Files\Fake2")
+                            },
+                            @{
+                                IndexLocation = @("C:\Program Files\Fake3")
+                            }
+                        )
+                        Status     = "Online"
                     }
-                    Components = @(
+                }
+                Mock -CommandName Get-SPEnterpriseSearchServiceApplication -MockWith {
+                    return @{
+                        ActiveTopology = @{ }
+                    }
+                }
+                Mock -CommandName Start-SPEnterpriseSearchServiceInstance -MockWith {
+                    return $null
+                }
+                Mock -CommandName New-SPEnterpriseSearchTopology -MockWith {
+                    $returnval = @{ }
+                    $returnval = $returnval | Add-Member -MemberType ScriptMethod `
+                        -Name AddComponent `
+                        -Value { } `
+                        -PassThru `
+                        -Force
+                    return $returnval
+                }
+                Mock -CommandName New-SPEnterpriseSearchAdminComponent -MockWith {
+                    return @{ }
+                }
+                Mock -CommandName New-SPEnterpriseSearchCrawlComponent -MockWith {
+                    return @{ }
+                }
+                Mock -CommandName New-SPEnterpriseSearchContentProcessingComponent -MockWith {
+                    return @{ }
+                }
+                Mock -CommandName New-SPEnterpriseSearchAnalyticsProcessingComponent -MockWith {
+                    return @{ }
+                }
+                Mock -CommandName New-SPEnterpriseSearchQueryProcessingComponent -MockWith {
+                    return @{ }
+                }
+                Mock -CommandName New-SPEnterpriseSearchIndexComponent -MockWith {
+                    return @{ }
+                }
+                Mock -CommandName Set-SPEnterpriseSearchTopology -MockWith {
+                    return @{ }
+                }
+                Mock -CommandName Remove-SPEnterpriseSearchComponent -MockWith {
+                    return $null
+                }
+                Mock -CommandName Get-SPServer -MockWith {
+                    return @(
                         @{
-                            IndexLocation = @("C:\Program Files\Fake", "C:\Program Files\Fake2")
-                        },
-                        @{
-                            IndexLocation = @("C:\Program Files\Fake3")
+                            Name = $env:COMPUTERNAME
+                            Id   = $serverId
                         }
                     )
-                    Status     = "Online"
                 }
-            }
-            Mock -CommandName Get-SPEnterpriseSearchServiceApplication -MockWith {
-                return @{
-                    ActiveTopology = @{ }
-                }
-            }
-            Mock -CommandName Start-SPEnterpriseSearchServiceInstance -MockWith {
-                return $null
-            }
-            Mock -CommandName New-SPEnterpriseSearchTopology -MockWith {
-                $returnval = @{ }
-                $returnval = $returnval | Add-Member -MemberType ScriptMethod `
-                    -Name AddComponent `
-                    -Value { } `
-                    -PassThru `
-                    -Force
-                return $returnval
-            }
-            Mock -CommandName New-SPEnterpriseSearchAdminComponent -MockWith {
-                return @{ }
-            }
-            Mock -CommandName New-SPEnterpriseSearchCrawlComponent -MockWith {
-                return @{ }
-            }
-            Mock -CommandName New-SPEnterpriseSearchContentProcessingComponent -MockWith {
-                return @{ }
-            }
-            Mock -CommandName New-SPEnterpriseSearchAnalyticsProcessingComponent -MockWith {
-                return @{ }
-            }
-            Mock -CommandName New-SPEnterpriseSearchQueryProcessingComponent -MockWith {
-                return @{ }
-            }
-            Mock -CommandName New-SPEnterpriseSearchIndexComponent -MockWith {
-                return @{ }
-            }
-            Mock -CommandName Set-SPEnterpriseSearchTopology -MockWith {
-                return @{ }
-            }
-            Mock -CommandName Remove-SPEnterpriseSearchComponent -MockWith {
-                return $null
-            }
-            Mock -CommandName Get-SPServer -MockWith {
-                return @(
-                    @{
-                        Name = $env:COMPUTERNAME
-                        Id   = $serverId
-                    }
-                )
             }
 
             # Test contexts
             Context -Name "No search topology has been applied" -Fixture {
-                $testParams = @{
-                    ServiceAppName          = "Search Service Application"
-                    Admin                   = @($env:COMPUTERNAME)
-                    Crawler                 = @($env:COMPUTERNAME)
-                    ContentProcessing       = @($env:COMPUTERNAME)
-                    AnalyticsProcessing     = @($env:COMPUTERNAME)
-                    QueryProcessing         = @($env:COMPUTERNAME)
-                    IndexPartition          = @($env:COMPUTERNAME)
-                    FirstPartitionDirectory = "I:\SearchIndexes\0"
-                }
+                BeforeAll {
+                    $testParams = @{
+                        ServiceAppName          = "Search Service Application"
+                        Admin                   = @($env:COMPUTERNAME)
+                        Crawler                 = @($env:COMPUTERNAME)
+                        ContentProcessing       = @($env:COMPUTERNAME)
+                        AnalyticsProcessing     = @($env:COMPUTERNAME)
+                        QueryProcessing         = @($env:COMPUTERNAME)
+                        IndexPartition          = @($env:COMPUTERNAME)
+                        FirstPartitionDirectory = "I:\SearchIndexes\0"
+                    }
 
-                Mock -CommandName Get-SPEnterpriseSearchComponent -MockWith {
-                    return @{ }
+                    Mock -CommandName Get-SPEnterpriseSearchComponent -MockWith {
+                        return @{ }
+                    }
                 }
 
                 It "Should return empty values from the get method" {
                     $result = Get-TargetResource @testParams
-                    $result.Admin | Should BeNullOrEmpty
-                    $result.Crawler | Should BeNullOrEmpty
-                    $result.ContentProcessing | Should BeNullOrEmpty
-                    $result.AnalyticsProcessing | Should BeNullOrEmpty
-                    $result.QueryProcessing | Should BeNullOrEmpty
+                    $result.Admin | Should -BeNullOrEmpty
+                    $result.Crawler | Should -BeNullOrEmpty
+                    $result.ContentProcessing | Should -BeNullOrEmpty
+                    $result.AnalyticsProcessing | Should -BeNullOrEmpty
+                    $result.QueryProcessing | Should -BeNullOrEmpty
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should set the desired topology for the current server" {
@@ -192,51 +196,53 @@ try
             }
 
             Context -Name "No search topology has been applied, with servers specified as FQDN" -Fixture {
-                $testParams = @{
-                    ServiceAppName          = "Search Service Application"
-                    Admin                   = @("$($env:COMPUTERNAME).domain.com")
-                    Crawler                 = @("$($env:COMPUTERNAME).domain.com")
-                    ContentProcessing       = @("$($env:COMPUTERNAME).domain.com")
-                    AnalyticsProcessing     = @("$($env:COMPUTERNAME).domain.com")
-                    QueryProcessing         = @("$($env:COMPUTERNAME).domain.com")
-                    IndexPartition          = @("$($env:COMPUTERNAME).domain.com")
-                    FirstPartitionDirectory = "I:\SearchIndexes\0"
-                }
+                BeforeAll {
+                    $testParams = @{
+                        ServiceAppName          = "Search Service Application"
+                        Admin                   = @("$($env:COMPUTERNAME).domain.com")
+                        Crawler                 = @("$($env:COMPUTERNAME).domain.com")
+                        ContentProcessing       = @("$($env:COMPUTERNAME).domain.com")
+                        AnalyticsProcessing     = @("$($env:COMPUTERNAME).domain.com")
+                        QueryProcessing         = @("$($env:COMPUTERNAME).domain.com")
+                        IndexPartition          = @("$($env:COMPUTERNAME).domain.com")
+                        FirstPartitionDirectory = "I:\SearchIndexes\0"
+                    }
 
-                Mock -CommandName Get-SPEnterpriseSearchComponent -MockWith {
-                    return @{ }
-                }
+                    Mock -CommandName Get-SPEnterpriseSearchComponent -MockWith {
+                        return @{ }
+                    }
 
-                Mock -CommandName Get-SPEnterpriseSearchServiceInstance -MockWith {
-                    return @{
-                        Server = @{
-                            Address = "$($env:COMPUTERNAME).domain.com"
+                    Mock -CommandName Get-SPEnterpriseSearchServiceInstance -MockWith {
+                        return @{
+                            Server = @{
+                                Address = "$($env:COMPUTERNAME).domain.com"
+                            }
+                            Status = "Online"
                         }
-                        Status = "Online"
-                    }
-                } -ParameterFilter { $Identity -eq "$($env:COMPUTERNAME).domain.com" }
+                    } -ParameterFilter { $Identity -eq "$($env:COMPUTERNAME).domain.com" }
 
-                Mock -CommandName Get-CimInstance -MockWith {
-                    return @{
-                        Domain = "domain.com"
+                    Mock -CommandName Get-CimInstance -MockWith {
+                        return @{
+                            Domain = "domain.com"
+                        }
                     }
+
+                    Mock -CommandName Get-SPEnterpriseSearchServiceInstance -MockWith {
+                        return $null
+                    } -ParameterFilter { $Identity -ne "$($env:COMPUTERNAME).domain.com" }
                 }
-
-                Mock -CommandName Get-SPEnterpriseSearchServiceInstance -MockWith {
-                    return $null
-                } -ParameterFilter { $Identity -ne "$($env:COMPUTERNAME).domain.com" }
 
                 It "Should return empty values from the get method" {
                     $result = Get-TargetResource @testParams
-                    $result.Admin | Should BeNullOrEmpty
-                    $result.Crawler | Should BeNullOrEmpty
-                    $result.ContentProcessing | Should BeNullOrEmpty
-                    $result.AnalyticsProcessing | Should BeNullOrEmpty
-                    $result.QueryProcessing | Should BeNullOrEmpty
+                    $result.Admin | Should -BeNullOrEmpty
+                    $result.Crawler | Should -BeNullOrEmpty
+                    $result.ContentProcessing | Should -BeNullOrEmpty
+                    $result.AnalyticsProcessing | Should -BeNullOrEmpty
+                    $result.QueryProcessing | Should -BeNullOrEmpty
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should set the desired topology for the current server" {
@@ -245,34 +251,36 @@ try
             }
 
             Context -Name "No search topology exist and the search service instance isnt running" -Fixture {
-                $testParams = @{
-                    ServiceAppName          = "Search Service Application"
-                    Admin                   = @($env:COMPUTERNAME)
-                    Crawler                 = @($env:COMPUTERNAME)
-                    ContentProcessing       = @($env:COMPUTERNAME)
-                    AnalyticsProcessing     = @($env:COMPUTERNAME)
-                    QueryProcessing         = @($env:COMPUTERNAME)
-                    IndexPartition          = @($env:COMPUTERNAME)
-                    FirstPartitionDirectory = "I:\SearchIndexes\0"
-                }
-
-                Mock -CommandName Get-SPEnterpriseSearchComponent -MockWith {
-                    return @{ }
-                }
-                $Global:SPDscSearchRoleInstanceCalLCount = 0
-                Mock -CommandName Get-SPEnterpriseSearchServiceInstance -MockWith {
-                    if ($Global:SPDscSearchRoleInstanceCalLCount -eq 2)
-                    {
-                        $Global:SPDscSearchRoleInstanceCalLCount = 0
-                        return @{
-                            Status = "Online"
-                        }
+                BeforeAll {
+                    $testParams = @{
+                        ServiceAppName          = "Search Service Application"
+                        Admin                   = @($env:COMPUTERNAME)
+                        Crawler                 = @($env:COMPUTERNAME)
+                        ContentProcessing       = @($env:COMPUTERNAME)
+                        AnalyticsProcessing     = @($env:COMPUTERNAME)
+                        QueryProcessing         = @($env:COMPUTERNAME)
+                        IndexPartition          = @($env:COMPUTERNAME)
+                        FirstPartitionDirectory = "I:\SearchIndexes\0"
                     }
-                    else
-                    {
-                        $Global:SPDscSearchRoleInstanceCalLCount++
-                        return @{
-                            Status = "Offline"
+
+                    Mock -CommandName Get-SPEnterpriseSearchComponent -MockWith {
+                        return @{ }
+                    }
+                    $Global:SPDscSearchRoleInstanceCalLCount = 0
+                    Mock -CommandName Get-SPEnterpriseSearchServiceInstance -MockWith {
+                        if ($Global:SPDscSearchRoleInstanceCalLCount -eq 2)
+                        {
+                            $Global:SPDscSearchRoleInstanceCalLCount = 0
+                            return @{
+                                Status = "Online"
+                            }
+                        }
+                        else
+                        {
+                            $Global:SPDscSearchRoleInstanceCalLCount++
+                            return @{
+                                Status = "Offline"
+                            }
                         }
                     }
                 }
@@ -284,23 +292,25 @@ try
             }
 
             Context -Name "A search topology has been applied but it is not correct" -Fixture {
-                $testParams = @{
-                    ServiceAppName          = "Search Service Application"
-                    Admin                   = @($env:COMPUTERNAME)
-                    Crawler                 = @($env:COMPUTERNAME)
-                    ContentProcessing       = @($env:COMPUTERNAME)
-                    AnalyticsProcessing     = @($env:COMPUTERNAME)
-                    QueryProcessing         = @($env:COMPUTERNAME)
-                    IndexPartition          = @($env:COMPUTERNAME)
-                    FirstPartitionDirectory = "I:\SearchIndexes\0"
-                }
+                BeforeAll {
+                    $testParams = @{
+                        ServiceAppName          = "Search Service Application"
+                        Admin                   = @($env:COMPUTERNAME)
+                        Crawler                 = @($env:COMPUTERNAME)
+                        ContentProcessing       = @($env:COMPUTERNAME)
+                        AnalyticsProcessing     = @($env:COMPUTERNAME)
+                        QueryProcessing         = @($env:COMPUTERNAME)
+                        IndexPartition          = @($env:COMPUTERNAME)
+                        FirstPartitionDirectory = "I:\SearchIndexes\0"
+                    }
 
-                Mock -CommandName Get-SPEnterpriseSearchServiceInstance -MockWith {
-                    return @{
-                        Server = @{
-                            Address = $env:COMPUTERNAME
+                    Mock -CommandName Get-SPEnterpriseSearchServiceInstance -MockWith {
+                        return @{
+                            Server = @{
+                                Address = $env:COMPUTERNAME
+                            }
+                            Status = "Online"
                         }
-                        Status = "Online"
                     }
                 }
 
@@ -364,172 +374,178 @@ try
                     Assert-MockCalled New-SPEnterpriseSearchQueryProcessingComponent
                 }
 
-                $testParams = @{
-                    ServiceAppName          = "Search Service Application"
-                    Admin                   = @("sharepoint2")
-                    Crawler                 = @("sharepoint2")
-                    ContentProcessing       = @("sharepoint2")
-                    AnalyticsProcessing     = @("sharepoint2")
-                    QueryProcessing         = @("sharepoint2")
-                    IndexPartition          = @("sharepoint2")
-                    FirstPartitionDirectory = "I:\SearchIndexes\0"
-                }
-
-                Mock -CommandName Get-SPEnterpriseSearchComponent -MockWith {
-                    return @(
-                        $adminComponent,
-                        $crawlComponent,
-                        $contentProcessingComponent,
-                        $analyticsProcessingComponent,
-                        $queryProcessingComponent)
-                }
-
                 It "Should remove components that shouldn't be on this server" {
+                    $testParams = @{
+                        ServiceAppName          = "Search Service Application"
+                        Admin                   = @("sharepoint2")
+                        Crawler                 = @("sharepoint2")
+                        ContentProcessing       = @("sharepoint2")
+                        AnalyticsProcessing     = @("sharepoint2")
+                        QueryProcessing         = @("sharepoint2")
+                        IndexPartition          = @("sharepoint2")
+                        FirstPartitionDirectory = "I:\SearchIndexes\0"
+                    }
+
+                    Mock -CommandName Get-SPEnterpriseSearchComponent -MockWith {
+                        return @(
+                            $adminComponent,
+                            $crawlComponent,
+                            $contentProcessingComponent,
+                            $analyticsProcessingComponent,
+                            $queryProcessingComponent)
+                    }
+
                     Set-TargetResource @testParams
                     Assert-MockCalled Remove-SPEnterpriseSearchComponent -Times 5
                 }
             }
 
             Context -Name "The correct topology on this server exists" -Fixture {
-                $testParams = @{
-                    ServiceAppName          = "Search Service Application"
-                    Admin                   = @($env:COMPUTERNAME)
-                    Crawler                 = @($env:COMPUTERNAME)
-                    ContentProcessing       = @($env:COMPUTERNAME)
-                    AnalyticsProcessing     = @($env:COMPUTERNAME)
-                    QueryProcessing         = @($env:COMPUTERNAME)
-                    IndexPartition          = @($env:COMPUTERNAME)
-                    FirstPartitionDirectory = "I:\SearchIndexes\0"
-                }
+                BeforeAll {
+                    $testParams = @{
+                        ServiceAppName          = "Search Service Application"
+                        Admin                   = @($env:COMPUTERNAME)
+                        Crawler                 = @($env:COMPUTERNAME)
+                        ContentProcessing       = @($env:COMPUTERNAME)
+                        AnalyticsProcessing     = @($env:COMPUTERNAME)
+                        QueryProcessing         = @($env:COMPUTERNAME)
+                        IndexPartition          = @($env:COMPUTERNAME)
+                        FirstPartitionDirectory = "I:\SearchIndexes\0"
+                    }
 
-                Mock -CommandName Get-SPEnterpriseSearchComponent -MockWith {
-                    return @(
-                        $adminComponent,
-                        $crawlComponent,
-                        $contentProcessingComponent,
-                        $analyticsProcessingComponent,
-                        $queryProcessingComponent,
-                        $indexComponent)
-                }
+                    Mock -CommandName Get-SPEnterpriseSearchComponent -MockWith {
+                        return @(
+                            $adminComponent,
+                            $crawlComponent,
+                            $contentProcessingComponent,
+                            $analyticsProcessingComponent,
+                            $queryProcessingComponent,
+                            $indexComponent)
+                    }
 
-                Mock -CommandName Get-SPEnterpriseSearchServiceInstance {
-                    return @{
-                        Server     = @{
-                            Address = $env:COMPUTERNAME
+                    Mock -CommandName Get-SPEnterpriseSearchServiceInstance {
+                        return @{
+                            Server     = @{
+                                Address = $env:COMPUTERNAME
+                            }
+                            Components = @{
+                                IndexLocation = "D:\Index"
+                            }
+                            Status     = "Online"
+
                         }
-                        Components = @{
-                            IndexLocation = "D:\Index"
-                        }
-                        Status     = "Online"
-
                     }
                 }
 
                 It "Should return true from the test method" {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
 
                 It "Should return the FirstIndexPartition location" {
-                    (Get-TargetResource @testParams).FirstPartitionDirectory | Should Be "D:\Index"
+                    (Get-TargetResource @testParams).FirstPartitionDirectory | Should -Be "D:\Index"
                 }
             }
 
             Context -Name "No search service application exists" -Fixture {
-                $testParams = @{
-                    ServiceAppName          = "Search Service Application"
-                    Admin                   = @($env:COMPUTERNAME)
-                    Crawler                 = @($env:COMPUTERNAME)
-                    ContentProcessing       = @($env:COMPUTERNAME)
-                    AnalyticsProcessing     = @($env:COMPUTERNAME)
-                    QueryProcessing         = @($env:COMPUTERNAME)
-                    IndexPartition          = @($env:COMPUTERNAME)
-                    FirstPartitionDirectory = "I:\SearchIndexes\0"
-                }
+                BeforeAll {
+                    $testParams = @{
+                        ServiceAppName          = "Search Service Application"
+                        Admin                   = @($env:COMPUTERNAME)
+                        Crawler                 = @($env:COMPUTERNAME)
+                        ContentProcessing       = @($env:COMPUTERNAME)
+                        AnalyticsProcessing     = @($env:COMPUTERNAME)
+                        QueryProcessing         = @($env:COMPUTERNAME)
+                        IndexPartition          = @($env:COMPUTERNAME)
+                        FirstPartitionDirectory = "I:\SearchIndexes\0"
+                    }
 
-                Mock -CommandName Get-SPEnterpriseSearchServiceApplication -MockWith {
-                    return $null
-                }
-                Mock -CommandName Get-SPEnterpriseSearchComponent -MockWith {
-                    return @{ }
+                    Mock -CommandName Get-SPEnterpriseSearchServiceApplication -MockWith {
+                        return $null
+                    }
+                    Mock -CommandName Get-SPEnterpriseSearchComponent -MockWith {
+                        return @{ }
+                    }
                 }
 
                 It "Should return empty values from the get method" {
-                    (Get-TargetResource @testParams).Admin | Should BeNullOrEmpty
+                    (Get-TargetResource @testParams).Admin | Should -BeNullOrEmpty
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should set the desired topology for the current server" {
-                    { Set-TargetResource @testParams } | Should Throw
+                    { Set-TargetResource @testParams } | Should -Throw
                 }
             }
 
             Context -Name "A search topology exists that has a server with a new ID in it" -Fixture {
-                $newServerId = New-Guid
-                $adminComponent = New-Object Microsoft.Office.Server.Search.Administration.Topology.AdminComponent
-                $adminComponent.ServerName = $null
-                $adminComponent.ServerId = $newServerId
-                $adminComponent.ComponentId = [Guid]::NewGuid()
+                BeforeAll {
+                    $newServerId = New-Guid
+                    $adminComponent = New-Object Microsoft.Office.Server.Search.Administration.Topology.AdminComponent
+                    $adminComponent.ServerName = $null
+                    $adminComponent.ServerId = $newServerId
+                    $adminComponent.ComponentId = [Guid]::NewGuid()
 
-                $crawlComponent = New-Object Microsoft.Office.Server.Search.Administration.Topology.CrawlComponent
-                $crawlComponent.ServerName = $null
-                $crawlComponent.ServerId = $newServerId
-                $crawlComponent.ComponentId = [Guid]::NewGuid()
+                    $crawlComponent = New-Object Microsoft.Office.Server.Search.Administration.Topology.CrawlComponent
+                    $crawlComponent.ServerName = $null
+                    $crawlComponent.ServerId = $newServerId
+                    $crawlComponent.ComponentId = [Guid]::NewGuid()
 
-                $contentProcessingComponent = New-Object Microsoft.Office.Server.Search.Administration.Topology.ContentProcessingComponent
-                $contentProcessingComponent.ServerName = $null
-                $contentProcessingComponent.ServerId = $newServerId
-                $contentProcessingComponent.ComponentId = [Guid]::NewGuid()
+                    $contentProcessingComponent = New-Object Microsoft.Office.Server.Search.Administration.Topology.ContentProcessingComponent
+                    $contentProcessingComponent.ServerName = $null
+                    $contentProcessingComponent.ServerId = $newServerId
+                    $contentProcessingComponent.ComponentId = [Guid]::NewGuid()
 
-                $analyticsProcessingComponent = New-Object Microsoft.Office.Server.Search.Administration.Topology.AnalyticsProcessingComponent
-                $analyticsProcessingComponent.ServerName = $null
-                $analyticsProcessingComponent.ServerId = $newServerId
-                $analyticsProcessingComponent.ComponentId = [Guid]::NewGuid()
+                    $analyticsProcessingComponent = New-Object Microsoft.Office.Server.Search.Administration.Topology.AnalyticsProcessingComponent
+                    $analyticsProcessingComponent.ServerName = $null
+                    $analyticsProcessingComponent.ServerId = $newServerId
+                    $analyticsProcessingComponent.ComponentId = [Guid]::NewGuid()
 
-                $queryProcessingComponent = New-Object Microsoft.Office.Server.Search.Administration.Topology.QueryProcessingComponent
-                $queryProcessingComponent.ServerName = $null
-                $queryProcessingComponent.ServerId = $newServerId
-                $queryProcessingComponent.ComponentId = [Guid]::NewGuid()
+                    $queryProcessingComponent = New-Object Microsoft.Office.Server.Search.Administration.Topology.QueryProcessingComponent
+                    $queryProcessingComponent.ServerName = $null
+                    $queryProcessingComponent.ServerId = $newServerId
+                    $queryProcessingComponent.ComponentId = [Guid]::NewGuid()
 
-                $indexComponent = New-Object Microsoft.Office.Server.Search.Administration.Topology.IndexComponent
-                $indexComponent.ServerName = $null
-                $indexComponent.ServerId = $newServerId
-                $indexComponent.IndexPartitionOrdinal = 0
+                    $indexComponent = New-Object Microsoft.Office.Server.Search.Administration.Topology.IndexComponent
+                    $indexComponent.ServerName = $null
+                    $indexComponent.ServerId = $newServerId
+                    $indexComponent.IndexPartitionOrdinal = 0
 
-                $testParams = @{
-                    ServiceAppName          = "Search Service Application"
-                    Admin                   = @($env:COMPUTERNAME)
-                    Crawler                 = @($env:COMPUTERNAME)
-                    ContentProcessing       = @($env:COMPUTERNAME)
-                    AnalyticsProcessing     = @($env:COMPUTERNAME)
-                    QueryProcessing         = @($env:COMPUTERNAME)
-                    IndexPartition          = @($env:COMPUTERNAME)
-                    FirstPartitionDirectory = "I:\SearchIndexes\0"
-                }
+                    $testParams = @{
+                        ServiceAppName          = "Search Service Application"
+                        Admin                   = @($env:COMPUTERNAME)
+                        Crawler                 = @($env:COMPUTERNAME)
+                        ContentProcessing       = @($env:COMPUTERNAME)
+                        AnalyticsProcessing     = @($env:COMPUTERNAME)
+                        QueryProcessing         = @($env:COMPUTERNAME)
+                        IndexPartition          = @($env:COMPUTERNAME)
+                        FirstPartitionDirectory = "I:\SearchIndexes\0"
+                    }
 
-                Mock -CommandName Get-SPEnterpriseSearchComponent -MockWith {
-                    return @(
-                        $adminComponent,
-                        $crawlComponent,
-                        $contentProcessingComponent,
-                        $analyticsProcessingComponent,
-                        $queryProcessingComponent,
-                        $indexComponent)
-                }
+                    Mock -CommandName Get-SPEnterpriseSearchComponent -MockWith {
+                        return @(
+                            $adminComponent,
+                            $crawlComponent,
+                            $contentProcessingComponent,
+                            $analyticsProcessingComponent,
+                            $queryProcessingComponent,
+                            $indexComponent)
+                    }
 
-                Mock -CommandName Get-SPEnterpriseSearchServiceInstance {
-                    return @{
-                        Server = @{
-                            Address = $env:COMPUTERNAME
+                    Mock -CommandName Get-SPEnterpriseSearchServiceInstance {
+                        return @{
+                            Server = @{
+                                Address = $env:COMPUTERNAME
+                            }
+                            Status = "Online"
                         }
-                        Status = "Online"
                     }
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should update the topology in the set method" {

@@ -15,10 +15,10 @@ $script:projectPath = "$PSScriptRoot\..\..\.." | Convert-Path
 $script:projectName = (Get-ChildItem -Path "$script:projectPath\*\*.psd1" | Where-Object -FilterScript {
         ($_.Directory.Name -match 'source|src' -or $_.Directory.Name -eq $_.BaseName) -and
         $(try
-            { Test-ModuleManifest -Path $_.FullName -ErrorAction Stop 
+            { Test-ModuleManifest -Path $_.FullName -ErrorAction Stop
             }
             catch
-            { $false 
+            { $false
             })
     }).BaseName
 
@@ -63,30 +63,33 @@ Invoke-TestSetup
 
 try
 {
-    Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
-        InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
-            Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
+    InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
+        Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
+            BeforeAll {
+                Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
+            }
 
             Context -Name "Validate Get-SPDscAssemblyVersion" -Fixture {
                 It "Should return the version number of a given executable" {
                     $testPath = "C:\windows\System32\WindowsPowerShell\v1.0\powershell.exe"
-                    Get-SPDscAssemblyVersion -PathToAssembly $testPath | Should Not Be 0
+                    Get-SPDscAssemblyVersion -PathToAssembly $testPath | Should -Not -Be 0
                 }
             }
 
             Context -Name "Validate Invoke-SPDscCommand" -Fixture {
-
-                Mock -CommandName Invoke-Command -MockWith {
-                    return $null
-                }
-                Mock -CommandName New-PSSession -MockWith {
-                    return $null
-                }
-                Mock -CommandName Get-PSSnapin -MockWith {
-                    return $null
-                }
-                Mock -CommandName Add-PSSnapin -MockWith {
-                    return $null
+                BeforeAll {
+                    Mock -CommandName Invoke-Command -MockWith {
+                        return $null
+                    }
+                    Mock -CommandName New-PSSession -MockWith {
+                        return $null
+                    }
+                    Mock -CommandName Get-PSSnapin -MockWith {
+                        return $null
+                    }
+                    Mock -CommandName Add-PSSnapin -MockWith {
+                        return $null
+                    }
                 }
 
                 # The use of the '4>&1' operator is used to hide the verbose output from the
@@ -113,7 +116,7 @@ try
                     $mockPassword = ConvertTo-SecureString -String "password" -AsPlainText -Force
                     $mockCredential = New-Object -TypeName System.Management.Automation.PSCredential ("$($Env:USERDOMAIN)\$($Env:USERNAME)", $mockPassword)
                     { Invoke-SPDscCommand -ScriptBlock { return "value" } `
-                            -Credential $mockCredential 4>&1 } | Should Throw
+                            -Credential $mockCredential 4>&1 } | Should -Throw
                 }
 
                 It "Should throw normal exceptions when triggered in the script block" {
@@ -121,7 +124,7 @@ try
                         throw [Exception] "A random exception"
                     }
 
-                    { Invoke-SPDscCommand -ScriptBlock { return "value" } 4>&1 } | Should Throw
+                    { Invoke-SPDscCommand -ScriptBlock { return "value" } 4>&1 } | Should -Throw
                 }
 
                 It "Should throw normal exceptions when triggered in the script block using InstallAccount" {
@@ -132,7 +135,7 @@ try
                     $mockPassword = ConvertTo-SecureString -String "password" -AsPlainText -Force
                     $mockCredential = New-Object -TypeName System.Management.Automation.PSCredential ("username", $mockPassword)
                     { Invoke-SPDscCommand -ScriptBlock { return "value" } `
-                            -Credential $mockCredential 4>&1 } | Should Throw
+                            -Credential $mockCredential 4>&1 } | Should -Throw
                 }
 
                 It "Should handle a SharePoint update conflict exception by rebooting the server to retry" {
@@ -140,7 +143,7 @@ try
                         throw [Exception] "An update conflict has occurred, and you must re-try this action."
                     }
 
-                    { Invoke-SPDscCommand -ScriptBlock { return "value" } 4>&1 } | Should Not Throw
+                    { Invoke-SPDscCommand -ScriptBlock { return "value" } 4>&1 } | Should -Not -Throw
                 }
 
                 It "Should handle a SharePoint update conflict exception by rebooting the server to retry using InstallAccount" {
@@ -151,7 +154,7 @@ try
                     $mockPassword = ConvertTo-SecureString -String "password" -AsPlainText -Force
                     $mockCredential = New-Object -TypeName System.Management.Automation.PSCredential ("username", $mockPassword)
                     { Invoke-SPDscCommand -ScriptBlock { return "value" } `
-                            -Credential $mockCredential 4>&1 } | Should Not Throw
+                            -Credential $mockCredential 4>&1 } | Should -Not -Throw
                 }
             }
 
@@ -160,7 +163,7 @@ try
                     $desired = @{ Example = "test" }
                     Test-SPDscParameterState -CurrentValues $desired `
                         -Source 'SharePointDsc.Util' `
-                        -DesiredValues $desired | Should Be $true
+                        -DesiredValues $desired | Should -Be $true
                 }
 
                 It "Should return false when a value is different" {
@@ -168,7 +171,7 @@ try
                     $desired = @{ Example = "test" }
                     Test-SPDscParameterState -CurrentValues $current `
                         -Source 'SharePointDsc.Util' `
-                        -DesiredValues $desired | Should Be $false
+                        -DesiredValues $desired | Should -Be $false
                 }
 
                 It "Should return false when a value is missing" {
@@ -176,7 +179,7 @@ try
                     $desired = @{ Example = "test" }
                     Test-SPDscParameterState -CurrentValues $current `
                         -Source 'SharePointDsc.Util' `
-                        -DesiredValues $desired | Should Be $false
+                        -DesiredValues $desired | Should -Be $false
                 }
 
                 It "Should return true when only a specified value matches, but other non-listed values do not" {
@@ -185,7 +188,7 @@ try
                     Test-SPDscParameterState -CurrentValues $current `
                         -Source 'SharePointDsc.Util' `
                         -DesiredValues $desired `
-                        -ValuesToCheck @("Example") | Should Be $true
+                        -ValuesToCheck @("Example") | Should -Be $true
                 }
 
                 It "Should return false when only specified values do not match, but other non-listed values do " {
@@ -194,7 +197,7 @@ try
                     Test-SPDscParameterState -CurrentValues $current `
                         -Source 'SharePointDsc.Util' `
                         -DesiredValues $desired `
-                        -ValuesToCheck @("SecondExample") | Should Be $false
+                        -ValuesToCheck @("SecondExample") | Should -Be $false
                 }
 
                 It "Should return false when an empty array is used in the current values" {
@@ -202,174 +205,178 @@ try
                     $desired = @{ Example = "test"; SecondExample = "false" }
                     Test-SPDscParameterState -CurrentValues $current `
                         -Source 'SharePointDsc.Util' `
-                        -DesiredValues $desired | Should Be $false
+                        -DesiredValues $desired | Should -Be $false
                 }
             }
 
             Context -Name "Validate Convert-SPDscADGroupIDToName" -Fixture {
-                Mock -CommandName "New-Object" -ParameterFilter {
-                    $TypeName -eq "System.DirectoryServices.DirectoryEntry"
-                } -MockWith { return @{
-                        objectGUID = @{
-                            Value = (New-Guid)
-                        }
-                    } }
-
-                Mock -CommandName "New-Object" -ParameterFilter {
-                    $TypeName -eq "System.DirectoryServices.DirectorySearcher"
-                } -MockWith {
-                    $searcher = @{
-                        SearchRoot       = $null
-                        PageSize         = $null
-                        Filter           = $null
-                        SearchScope      = $null
-                        PropertiesToLoad = (New-Object -TypeName "System.Collections.Generic.List[System.String]")
-                    }
-                    $searcher = $searcher | Add-Member -MemberType ScriptMethod `
-                        -Name FindOne `
-                        -Value {
-                        $result = @{ }
-                        $result = $result | Add-Member -MemberType ScriptMethod `
-                            -Name GetDirectoryEntry `
-                            -Value {
-                            return @{
-                                objectsid = @("item")
+                BeforeAll {
+                    Mock -CommandName "New-Object" -ParameterFilter {
+                        $TypeName -eq "System.DirectoryServices.DirectoryEntry"
+                    } -MockWith { return @{
+                            objectGUID = @{
+                                Value = (New-Guid)
                             }
+                        } }
+
+                    Mock -CommandName "New-Object" -ParameterFilter {
+                        $TypeName -eq "System.DirectoryServices.DirectorySearcher"
+                    } -MockWith {
+                        $searcher = @{
+                            SearchRoot       = $null
+                            PageSize         = $null
+                            Filter           = $null
+                            SearchScope      = $null
+                            PropertiesToLoad = (New-Object -TypeName "System.Collections.Generic.List[System.String]")
+                        }
+                        $searcher = $searcher | Add-Member -MemberType ScriptMethod `
+                            -Name FindOne `
+                            -Value {
+                            $result = @{ }
+                            $result = $result | Add-Member -MemberType ScriptMethod `
+                                -Name GetDirectoryEntry `
+                                -Value {
+                                return @{
+                                    objectsid = @("item")
+                                }
+                            } -PassThru -Force
+                            return $result
                         } -PassThru -Force
-                        return $result
-                    } -PassThru -Force
-                    return $searcher
-                }
+                        return $searcher
+                    }
 
-                Mock -CommandName "New-Object" -ParameterFilter {
-                    $TypeName -eq "System.Security.Principal.SecurityIdentifier"
-                } -MockWith {
-                    $sid = @{ }
-                    $sid = $sid | Add-Member -MemberType ScriptMethod `
-                        -Name Translate `
-                        -Value {
-                        $returnVal = $global:SPDscGroupsToReturn[$global:SPDscSidCount]
-                        $global:SPDscSidCount++
-                        return $returnVal
-                    } -PassThru -Force
-                    return $sid
-                }
+                    Mock -CommandName "New-Object" -ParameterFilter {
+                        $TypeName -eq "System.Security.Principal.SecurityIdentifier"
+                    } -MockWith {
+                        $sid = @{ }
+                        $sid = $sid | Add-Member -MemberType ScriptMethod `
+                            -Name Translate `
+                            -Value {
+                            $returnVal = $global:SPDscGroupsToReturn[$global:SPDscSidCount]
+                            $global:SPDscSidCount++
+                            return $returnVal
+                        } -PassThru -Force
+                        return $sid
+                    }
 
-                Mock -CommandName "New-Object" -ParameterFilter {
-                    $TypeName -eq "System.Security.Principal.NTAccount"
-                } -MockWith {
-                    $sid = @{ }
-                    $sid = $sid | Add-Member -MemberType ScriptMethod `
-                        -Name Translate `
-                        -Value {
-                        $returnVal = $global:SPDscSidsToReturn[$global:SPDscSidCount]
-                        $global:SPDscSidCount++
-                        return $returnVal
-                    } -PassThru -Force
-                    return $sid
+                    Mock -CommandName "New-Object" -ParameterFilter {
+                        $TypeName -eq "System.Security.Principal.NTAccount"
+                    } -MockWith {
+                        $sid = @{ }
+                        $sid = $sid | Add-Member -MemberType ScriptMethod `
+                            -Name Translate `
+                            -Value {
+                            $returnVal = $global:SPDscSidsToReturn[$global:SPDscSidCount]
+                            $global:SPDscSidCount++
+                            return $returnVal
+                        } -PassThru -Force
+                        return $sid
+                    }
                 }
 
                 It "should convert an ID to an AD domain name" {
                     $global:SPDscGroupsToReturn = @("DOMAIN\Group 1")
                     $global:SPDscSidsToReturn = @("example SID")
                     $global:SPDscSidCount = 0
-                    Convert-SPDscADGroupIDToName -GroupId (New-Guid) | Should Be "DOMAIN\Group 1"
-                }
-
-                Mock -CommandName "New-Object" -ParameterFilter {
-                    $TypeName -eq "System.DirectoryServices.DirectorySearcher"
-                } -MockWith {
-                    $searcher = @{
-                        SearchRoot       = $null
-                        PageSize         = $null
-                        Filter           = $null
-                        SearchScope      = $null
-                        PropertiesToLoad = (New-Object -TypeName "System.Collections.Generic.List[System.String]")
-                    }
-                    $searcher = $searcher | Add-Member -MemberType ScriptMethod `
-                        -Name FindOne `
-                        -Value {
-                        return $null
-                    } -PassThru -Force
-                    return $searcher
+                    Convert-SPDscADGroupIDToName -GroupId (New-Guid) | Should -Be "DOMAIN\Group 1"
                 }
 
                 It "should throw an error if no result is found in AD" {
+                    Mock -CommandName "New-Object" -ParameterFilter {
+                        $TypeName -eq "System.DirectoryServices.DirectorySearcher"
+                    } -MockWith {
+                        $searcher = @{
+                            SearchRoot       = $null
+                            PageSize         = $null
+                            Filter           = $null
+                            SearchScope      = $null
+                            PropertiesToLoad = (New-Object -TypeName "System.Collections.Generic.List[System.String]")
+                        }
+                        $searcher = $searcher | Add-Member -MemberType ScriptMethod `
+                            -name FindOne `
+                            -Value {
+                            return $null
+                        } -PassThru -Force
+                        return $searcher
+                    }
+
                     $global:SPDscGroupsToReturn = @("DOMAIN\Group 1")
                     $global:SPDscSidsToReturn = @("example SID")
                     $global:SPDscSidCount = 0
-                    { Convert-SPDscADGroupIDToName -GroupId (New-Guid) } | Should Throw
+                    { Convert-SPDscADGroupIDToName -GroupId (New-Guid) } | Should -Throw
                 }
             }
 
             Context -Name "Validate Convert-SPDscADGroupNameToId" -Fixture {
-                Mock -CommandName "New-Object" -ParameterFilter {
-                    $TypeName -eq "System.DirectoryServices.DirectoryEntry"
-                } -MockWith { return @{
-                        objectGUID = @{
-                            Value = (New-Guid)
-                        }
-                    } }
-
-                Mock -CommandName "New-Object" -ParameterFilter {
-                    $TypeName -eq "System.DirectoryServices.DirectorySearcher"
-                } -MockWith {
-                    $searcher = @{
-                        SearchRoot       = $null
-                        PageSize         = $null
-                        Filter           = $null
-                        SearchScope      = $null
-                        PropertiesToLoad = (New-Object -TypeName "System.Collections.Generic.List[System.String]")
-                    }
-                    $searcher = $searcher | Add-Member -MemberType ScriptMethod `
-                        -Name FindOne `
-                        -Value {
-                        $result = @{ }
-                        $result = $result | Add-Member -MemberType ScriptMethod `
-                            -Name GetDirectoryEntry `
-                            -Value {
-                            return @{
-                                objectsid = @("item")
+                BeforeAll {
+                    Mock -CommandName "New-Object" -ParameterFilter {
+                        $TypeName -eq "System.DirectoryServices.DirectoryEntry"
+                    } -MockWith { return @{
+                            objectGUID = @{
+                                Value = (New-Guid)
                             }
+                        } }
+
+                    Mock -CommandName "New-Object" -ParameterFilter {
+                        $TypeName -eq "System.DirectoryServices.DirectorySearcher"
+                    } -MockWith {
+                        $searcher = @{
+                            SearchRoot       = $null
+                            PageSize         = $null
+                            Filter           = $null
+                            SearchScope      = $null
+                            PropertiesToLoad = (New-Object -TypeName "System.Collections.Generic.List[System.String]")
+                        }
+                        $searcher = $searcher | Add-Member -MemberType ScriptMethod `
+                            -Name FindOne `
+                            -Value {
+                            $result = @{ }
+                            $result = $result | Add-Member -MemberType ScriptMethod `
+                                -Name GetDirectoryEntry `
+                                -Value {
+                                return @{
+                                    objectsid = @("item")
+                                }
+                            } -PassThru -Force
+                            return $result
                         } -PassThru -Force
-                        return $result
-                    } -PassThru -Force
-                    return $searcher
-                }
+                        return $searcher
+                    }
 
-                Mock -CommandName "New-Object" -ParameterFilter {
-                    $TypeName -eq "System.Security.Principal.SecurityIdentifier"
-                } -MockWith {
-                    $sid = @{ }
-                    $sid = $sid | Add-Member -MemberType ScriptMethod `
-                        -Name Translate `
-                        -Value {
-                        $returnVal = $global:SPDscGroupsToReturn[$global:SPDscSidCount]
-                        $global:SPDscSidCount++
-                        return $returnVal
-                    } -PassThru -Force
-                    return $sid
-                }
+                    Mock -CommandName "New-Object" -ParameterFilter {
+                        $TypeName -eq "System.Security.Principal.SecurityIdentifier"
+                    } -MockWith {
+                        $sid = @{ }
+                        $sid = $sid | Add-Member -MemberType ScriptMethod `
+                            -Name Translate `
+                            -Value {
+                            $returnVal = $global:SPDscGroupsToReturn[$global:SPDscSidCount]
+                            $global:SPDscSidCount++
+                            return $returnVal
+                        } -PassThru -Force
+                        return $sid
+                    }
 
-                Mock -CommandName "New-Object" -ParameterFilter {
-                    $TypeName -eq "System.Security.Principal.NTAccount"
-                } -MockWith {
-                    $sid = @{ }
-                    $sid = $sid | Add-Member -MemberType ScriptMethod `
-                        -Name Translate `
-                        -Value {
-                        $returnVal = $global:SPDscSidsToReturn[$global:SPDscSidCount]
-                        $global:SPDscSidCount++
-                        return $returnVal
-                    } -PassThru -Force
-                    return $sid
+                    Mock -CommandName "New-Object" -ParameterFilter {
+                        $TypeName -eq "System.Security.Principal.NTAccount"
+                    } -MockWith {
+                        $sid = @{ }
+                        $sid = $sid | Add-Member -MemberType ScriptMethod `
+                            -Name Translate `
+                            -Value {
+                            $returnVal = $global:SPDscSidsToReturn[$global:SPDscSidCount]
+                            $global:SPDscSidCount++
+                            return $returnVal
+                        } -PassThru -Force
+                        return $sid
+                    }
                 }
 
                 It "should convert an AD domain name to an ID" {
                     $global:SPDscGroupsToReturn = @("DOMAIN\Group 1")
                     $global:SPDscSidsToReturn = @("example SID")
                     $global:SPDscSidCount = 0
-                    Convert-SPDscADGroupIDToName -GroupId (New-Guid) | Should Not BeNullOrEmpty
+                    Convert-SPDscADGroupIDToName -GroupId (New-Guid) | Should -Not -BeNullOrEmpty
                 }
             }
         }

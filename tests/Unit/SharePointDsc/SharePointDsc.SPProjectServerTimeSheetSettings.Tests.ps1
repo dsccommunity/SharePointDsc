@@ -46,29 +46,12 @@ Invoke-TestSetup
 
 try
 {
-    Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
-        InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
-            Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
+    InModuleScope -ModuleName $script:DSCResourceFullName -ScriptBlock {
+        Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
+            BeforeAll {
+                Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
-            switch ($Global:SPDscHelper.CurrentStubBuildNumber.Major)
-            {
-                15
-                {
-                    Context -Name "All methods throw exceptions as Project Server support in SharePointDsc is only for 2016" -Fixture {
-                        It "Should throw on the get method" {
-                            { Get-TargetResource @testParams } | Should Throw
-                        }
-
-                        It "Should throw on the test method" {
-                            { Test-TargetResource @testParams } | Should Throw
-                        }
-
-                        It "Should throw on the set method" {
-                            { Set-TargetResource @testParams } | Should Throw
-                        }
-                    }
-                }
-                16
+                if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 16)
                 {
                     $script:projectPath = "$PSScriptRoot\..\..\.." | Convert-Path
                     $script:projectName = (Get-ChildItem -Path "$script:projectPath\*\*.psd1" | Where-Object -FilterScript {
@@ -157,155 +140,183 @@ try
                         } -PassThru -Force
                         return $service
                     }
+                }
+            }
 
-                    Context -Name "Timesheet settings cannot be read" -Fixture {
-                        $testParams = @{
-                            Url                                        = "http://sites.contoso.com/pwa"
-                            EnableOvertimeAndNonBillableTracking       = $true
-                            DefaultTimesheetCreationMode               = "CurrentProjects"
-                            DefaultTrackingUnit                        = "Days"
-                            DefaultReportingUnit                       = "Days"
-                            HoursInStandardDay                         = 8
-                            HoursInStandardWeek                        = 40
-                            MaxHoursPerTimesheet                       = 100
-                            MinHoursPerTimesheet                       = 0
-                            MaxHoursPerDay                             = 18
-                            AllowFutureTimeReporting                   = $true
-                            AllowNewPersonalTasks                      = $true
-                            AllowTopLevelTimeReporting                 = $true
-                            RequireTaskStatusManagerApproval           = $true
-                            RequireLineApprovalBeforeTimesheetApproval = $true
-                            EnableTimesheetAuditing                    = $true
-                            FixedApprovalRouting                       = $true
-                            SingleEntryMode                            = $true
-                            DefaultTrackingMode                        = "PercentComplete"
-                            ForceTrackingModeForAllProjects            = $true
+            switch ($Global:SPDscHelper.CurrentStubBuildNumber.Major)
+            {
+                15
+                {
+                    Context -Name "All methods throw exceptions as Project Server support in SharePointDsc is only for 2016" -Fixture {
+                        It "Should throw on the get method" {
+                            { Get-TargetResource @testParams } | Should -Throw
                         }
 
-                        $global:SPDscCurrentTimeSheetSettings = $null
+                        It "Should throw on the test method" {
+                            { Test-TargetResource @testParams } | Should -Throw
+                        }
+
+                        It "Should throw on the set method" {
+                            { Set-TargetResource @testParams } | Should -Throw
+                        }
+                    }
+                }
+                16
+                {
+                    Context -Name "Timesheet settings cannot be read" -Fixture {
+                        BeforeAll {
+                            $testParams = @{
+                                Url                                        = "http://sites.contoso.com/pwa"
+                                EnableOvertimeAndNonBillableTracking       = $true
+                                DefaultTimesheetCreationMode               = "CurrentProjects"
+                                DefaultTrackingUnit                        = "Days"
+                                DefaultReportingUnit                       = "Days"
+                                HoursInStandardDay                         = 8
+                                HoursInStandardWeek                        = 40
+                                MaxHoursPerTimesheet                       = 100
+                                MinHoursPerTimesheet                       = 0
+                                MaxHoursPerDay                             = 18
+                                AllowFutureTimeReporting                   = $true
+                                AllowNewPersonalTasks                      = $true
+                                AllowTopLevelTimeReporting                 = $true
+                                RequireTaskStatusManagerApproval           = $true
+                                RequireLineApprovalBeforeTimesheetApproval = $true
+                                EnableTimesheetAuditing                    = $true
+                                FixedApprovalRouting                       = $true
+                                SingleEntryMode                            = $true
+                                DefaultTrackingMode                        = "PercentComplete"
+                                ForceTrackingModeForAllProjects            = $true
+                            }
+
+                            $global:SPDscCurrentTimeSheetSettings = $null
+                        }
 
                         It "should return null values on properties from the get method" {
-                            (Get-TargetResource @testParams).DefaultTimesheetCreationMode | Should BeNullOrEmpty
+                            (Get-TargetResource @testParams).DefaultTimesheetCreationMode | Should -BeNullOrEmpty
                         }
                     }
 
                     Context -Name "Timesheet settings exist but are not set correctly" -Fixture {
-                        $testParams = @{
-                            Url                                        = "http://sites.contoso.com/pwa"
-                            EnableOvertimeAndNonBillableTracking       = $true
-                            DefaultTimesheetCreationMode               = "CurrentProjects"
-                            DefaultTrackingUnit                        = "Days"
-                            DefaultReportingUnit                       = "Days"
-                            HoursInStandardDay                         = 8
-                            HoursInStandardWeek                        = 40
-                            MaxHoursPerTimesheet                       = 100
-                            MinHoursPerTimesheet                       = 0
-                            MaxHoursPerDay                             = 18
-                            AllowFutureTimeReporting                   = $true
-                            AllowNewPersonalTasks                      = $true
-                            AllowTopLevelTimeReporting                 = $true
-                            RequireTaskStatusManagerApproval           = $true
-                            RequireLineApprovalBeforeTimesheetApproval = $true
-                            EnableTimesheetAuditing                    = $true
-                            FixedApprovalRouting                       = $true
-                            SingleEntryMode                            = $true
-                            DefaultTrackingMode                        = "PercentComplete"
-                            ForceTrackingModeForAllProjects            = $true
-                        }
+                        BeforeAll {
+                            $testParams = @{
+                                Url                                        = "http://sites.contoso.com/pwa"
+                                EnableOvertimeAndNonBillableTracking       = $true
+                                DefaultTimesheetCreationMode               = "CurrentProjects"
+                                DefaultTrackingUnit                        = "Days"
+                                DefaultReportingUnit                       = "Days"
+                                HoursInStandardDay                         = 8
+                                HoursInStandardWeek                        = 40
+                                MaxHoursPerTimesheet                       = 100
+                                MinHoursPerTimesheet                       = 0
+                                MaxHoursPerDay                             = 18
+                                AllowFutureTimeReporting                   = $true
+                                AllowNewPersonalTasks                      = $true
+                                AllowTopLevelTimeReporting                 = $true
+                                RequireTaskStatusManagerApproval           = $true
+                                RequireLineApprovalBeforeTimesheetApproval = $true
+                                EnableTimesheetAuditing                    = $true
+                                FixedApprovalRouting                       = $true
+                                SingleEntryMode                            = $true
+                                DefaultTrackingMode                        = "PercentComplete"
+                                ForceTrackingModeForAllProjects            = $true
+                            }
 
-                        $global:SPDscCurrentTimeSheetSettings = @{
-                            TimeSheetSettings = (New-SPDscTimeSheetSettingsTable -Values @{
-                                    WADMIN_TS_DEF_DISPLAY_ENUM             = 0
-                                    WADMIN_TS_CREATE_MODE_ENUM             = 0
-                                    WADMIN_TS_DEF_ENTRY_MODE_ENUM          = 1
-                                    WADMIN_TS_REPORT_UNIT_ENUM             = 0
-                                    WADMIN_TS_HOURS_PER_DAY                = 450000
-                                    WADMIN_TS_HOURS_PER_WEEK               = 2250000
-                                    WADMIN_TS_MAX_HR_PER_TS                = 6600000
-                                    WADMIN_TS_MIN_HR_PER_TS                = 60000
-                                    WADMIN_TS_MAX_HR_PER_DAY               = 480000
-                                    WADMIN_TS_IS_FUTURE_REP_ALLOWED        = $false
-                                    WADMIN_TS_IS_UNVERS_TASK_ALLOWED       = $false
-                                    WADMIN_TS_ALLOW_PROJECT_LEVEL          = $false
-                                    WADMIN_TS_PROJECT_MANAGER_COORDINATION = $false
-                                    WADMIN_TS_PROJECT_MANAGER_APPROVAL     = $false
-                                    WADMIN_TS_IS_AUDIT_ENABLED             = $false
-                                    WADMIN_TS_FIXED_APPROVAL_ROUTING       = $false
-                                    WADMIN_TS_TIED_MODE                    = $false
-                                    WADMIN_DEFAULT_TRACKING_METHOD         = 0
-                                    WADMIN_IS_TRACKING_METHOD_LOCKED       = $false
-                                }).Tables[0]
+                            $global:SPDscCurrentTimeSheetSettings = @{
+                                TimeSheetSettings = (New-SPDscTimeSheetSettingsTable -Values @{
+                                        WADMIN_TS_DEF_DISPLAY_ENUM             = 0
+                                        WADMIN_TS_CREATE_MODE_ENUM             = 0
+                                        WADMIN_TS_DEF_ENTRY_MODE_ENUM          = 1
+                                        WADMIN_TS_REPORT_UNIT_ENUM             = 0
+                                        WADMIN_TS_HOURS_PER_DAY                = 450000
+                                        WADMIN_TS_HOURS_PER_WEEK               = 2250000
+                                        WADMIN_TS_MAX_HR_PER_TS                = 6600000
+                                        WADMIN_TS_MIN_HR_PER_TS                = 60000
+                                        WADMIN_TS_MAX_HR_PER_DAY               = 480000
+                                        WADMIN_TS_IS_FUTURE_REP_ALLOWED        = $false
+                                        WADMIN_TS_IS_UNVERS_TASK_ALLOWED       = $false
+                                        WADMIN_TS_ALLOW_PROJECT_LEVEL          = $false
+                                        WADMIN_TS_PROJECT_MANAGER_COORDINATION = $false
+                                        WADMIN_TS_PROJECT_MANAGER_APPROVAL     = $false
+                                        WADMIN_TS_IS_AUDIT_ENABLED             = $false
+                                        WADMIN_TS_FIXED_APPROVAL_ROUTING       = $false
+                                        WADMIN_TS_TIED_MODE                    = $false
+                                        WADMIN_DEFAULT_TRACKING_METHOD         = 0
+                                        WADMIN_IS_TRACKING_METHOD_LOCKED       = $false
+                                    }).Tables[0]
+                            }
                         }
 
                         It "Should return the current values from the get method" {
-                            (Get-TargetResource @testParams).DefaultTimesheetCreationMode | Should Be "NoPrepopulation"
+                            (Get-TargetResource @testParams).DefaultTimesheetCreationMode | Should -Be "NoPrepopulation"
                         }
 
                         It "Should return false from the test method" {
-                            Test-TargetResource @testParams | Should Be $false
+                            Test-TargetResource @testParams | Should -Be $false
                         }
 
                         It "Should call update in the set method" {
                             $global:SPDscUpdateTimeSheetSettingsCalled = $false
                             Set-TargetResource @testParams
-                            $global:SPDscUpdateTimeSheetSettingsCalled | Should Be $true
+                            $global:SPDscUpdateTimeSheetSettingsCalled | Should -Be $true
                         }
                     }
 
                     Context -Name "Timesheet settings exist and are set correctly" -Fixture {
-                        $testParams = @{
-                            Url                                        = "http://sites.contoso.com/pwa"
-                            EnableOvertimeAndNonBillableTracking       = $true
-                            DefaultTimesheetCreationMode               = "CurrentProjects"
-                            DefaultTrackingUnit                        = "Days"
-                            DefaultReportingUnit                       = "Days"
-                            HoursInStandardDay                         = 8
-                            HoursInStandardWeek                        = 40
-                            MaxHoursPerTimesheet                       = 100
-                            MinHoursPerTimesheet                       = 0
-                            MaxHoursPerDay                             = 18
-                            AllowFutureTimeReporting                   = $true
-                            AllowNewPersonalTasks                      = $true
-                            AllowTopLevelTimeReporting                 = $true
-                            RequireTaskStatusManagerApproval           = $true
-                            RequireLineApprovalBeforeTimesheetApproval = $true
-                            EnableTimesheetAuditing                    = $true
-                            FixedApprovalRouting                       = $true
-                            SingleEntryMode                            = $true
-                            DefaultTrackingMode                        = "PercentComplete"
-                            ForceTrackingModeForAllProjects            = $true
-                        }
+                        BeforeAll {
+                            $testParams = @{
+                                Url                                        = "http://sites.contoso.com/pwa"
+                                EnableOvertimeAndNonBillableTracking       = $true
+                                DefaultTimesheetCreationMode               = "CurrentProjects"
+                                DefaultTrackingUnit                        = "Days"
+                                DefaultReportingUnit                       = "Days"
+                                HoursInStandardDay                         = 8
+                                HoursInStandardWeek                        = 40
+                                MaxHoursPerTimesheet                       = 100
+                                MinHoursPerTimesheet                       = 0
+                                MaxHoursPerDay                             = 18
+                                AllowFutureTimeReporting                   = $true
+                                AllowNewPersonalTasks                      = $true
+                                AllowTopLevelTimeReporting                 = $true
+                                RequireTaskStatusManagerApproval           = $true
+                                RequireLineApprovalBeforeTimesheetApproval = $true
+                                EnableTimesheetAuditing                    = $true
+                                FixedApprovalRouting                       = $true
+                                SingleEntryMode                            = $true
+                                DefaultTrackingMode                        = "PercentComplete"
+                                ForceTrackingModeForAllProjects            = $true
+                            }
 
-                        $global:SPDscCurrentTimeSheetSettings = @{
-                            TimeSheetSettings = (New-SPDscTimeSheetSettingsTable -Values @{
-                                    WADMIN_TS_DEF_DISPLAY_ENUM             = 7
-                                    WADMIN_TS_CREATE_MODE_ENUM             = 2
-                                    WADMIN_TS_DEF_ENTRY_MODE_ENUM          = 0
-                                    WADMIN_TS_REPORT_UNIT_ENUM             = 1
-                                    WADMIN_TS_HOURS_PER_DAY                = 480000
-                                    WADMIN_TS_HOURS_PER_WEEK               = 2400000
-                                    WADMIN_TS_MAX_HR_PER_TS                = 6000000
-                                    WADMIN_TS_MIN_HR_PER_TS                = 0
-                                    WADMIN_TS_MAX_HR_PER_DAY               = 1080000
-                                    WADMIN_TS_IS_FUTURE_REP_ALLOWED        = $true
-                                    WADMIN_TS_IS_UNVERS_TASK_ALLOWED       = $true
-                                    WADMIN_TS_ALLOW_PROJECT_LEVEL          = $true
-                                    WADMIN_TS_PROJECT_MANAGER_COORDINATION = $true
-                                    WADMIN_TS_PROJECT_MANAGER_APPROVAL     = $true
-                                    WADMIN_TS_IS_AUDIT_ENABLED             = $true
-                                    WADMIN_TS_FIXED_APPROVAL_ROUTING       = $true
-                                    WADMIN_TS_TIED_MODE                    = $true
-                                    WADMIN_DEFAULT_TRACKING_METHOD         = 2
-                                    WADMIN_IS_TRACKING_METHOD_LOCKED       = $true
-                                }).Tables[0]
+                            $global:SPDscCurrentTimeSheetSettings = @{
+                                TimeSheetSettings = (New-SPDscTimeSheetSettingsTable -Values @{
+                                        WADMIN_TS_DEF_DISPLAY_ENUM             = 7
+                                        WADMIN_TS_CREATE_MODE_ENUM             = 2
+                                        WADMIN_TS_DEF_ENTRY_MODE_ENUM          = 0
+                                        WADMIN_TS_REPORT_UNIT_ENUM             = 1
+                                        WADMIN_TS_HOURS_PER_DAY                = 480000
+                                        WADMIN_TS_HOURS_PER_WEEK               = 2400000
+                                        WADMIN_TS_MAX_HR_PER_TS                = 6000000
+                                        WADMIN_TS_MIN_HR_PER_TS                = 0
+                                        WADMIN_TS_MAX_HR_PER_DAY               = 1080000
+                                        WADMIN_TS_IS_FUTURE_REP_ALLOWED        = $true
+                                        WADMIN_TS_IS_UNVERS_TASK_ALLOWED       = $true
+                                        WADMIN_TS_ALLOW_PROJECT_LEVEL          = $true
+                                        WADMIN_TS_PROJECT_MANAGER_COORDINATION = $true
+                                        WADMIN_TS_PROJECT_MANAGER_APPROVAL     = $true
+                                        WADMIN_TS_IS_AUDIT_ENABLED             = $true
+                                        WADMIN_TS_FIXED_APPROVAL_ROUTING       = $true
+                                        WADMIN_TS_TIED_MODE                    = $true
+                                        WADMIN_DEFAULT_TRACKING_METHOD         = 2
+                                        WADMIN_IS_TRACKING_METHOD_LOCKED       = $true
+                                    }).Tables[0]
+                            }
                         }
 
                         It "Should return the current values from the get method" {
-                            (Get-TargetResource @testParams).DefaultTimesheetCreationMode | Should Be "CurrentProjects"
+                            (Get-TargetResource @testParams).DefaultTimesheetCreationMode | Should -Be "CurrentProjects"
                         }
 
                         It "Should return true from the test method" {
-                            Test-TargetResource @testParams | Should Be $true
+                            Test-TargetResource @testParams | Should -Be $true
                         }
                     }
                 }

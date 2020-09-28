@@ -46,9 +46,17 @@ Invoke-TestSetup
 
 try
 {
-    Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
-        InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
-            Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
+    InModuleScope -ModuleName $script:DSCResourceFullName -ScriptBlock {
+        Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
+            BeforeAll {
+                Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
+
+                if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 16)
+                {
+                    Mock -CommandName Enable-ProjectServerLicense -MockWith { }
+                    Mock -CommandName Disable-ProjectServerLicense -MockWith { }
+                }
+            }
 
             switch ($Global:SPDscHelper.CurrentStubBuildNumber.Major)
             {
@@ -56,40 +64,39 @@ try
                 {
                     Context -Name "All methods throw exceptions as Project Server support in SharePointDsc is only for 2016" -Fixture {
                         It "Should throw on the get method" {
-                            { Get-TargetResource @testParams } | Should Throw
+                            { Get-TargetResource @testParams } | Should -Throw
                         }
 
                         It "Should throw on the test method" {
-                            { Test-TargetResource @testParams } | Should Throw
+                            { Test-TargetResource @testParams } | Should -Throw
                         }
 
                         It "Should throw on the set method" {
-                            { Set-TargetResource @testParams } | Should Throw
+                            { Set-TargetResource @testParams } | Should -Throw
                         }
                     }
                 }
                 16
                 {
-                    Mock -CommandName Enable-ProjectServerLicense -MockWith { }
-                    Mock -CommandName Disable-ProjectServerLicense -MockWith { }
-
                     Context -Name "Project server license is not enabled, but it should be" -Fixture {
-                        $testParams = @{
-                            IsSingleInstance = "Yes"
-                            Ensure           = "Present"
-                            ProductKey       = "XXXXX-XXXXX-XXXXX-XXXXX-XXXXX"
-                        }
+                        BeforeAll {
+                            $testParams = @{
+                                IsSingleInstance = "Yes"
+                                Ensure           = "Present"
+                                ProductKey       = "XXXXX-XXXXX-XXXXX-XXXXX-XXXXX"
+                            }
 
-                        Mock -CommandName Get-ProjectServerLicense -MockWith {
-                            return @("Project Server 2016 : Disabled", "Enabled date : 1/1/2000")
+                            Mock -CommandName Get-ProjectServerLicense -MockWith {
+                                return @("Project Server 2016 : Disabled", "Enabled date : 1/1/2000")
+                            }
                         }
 
                         It "Should return absent from the Get method" {
-                            (Get-TargetResource @testParams).Ensure | Should Be "Absent"
+                            (Get-TargetResource @testParams).Ensure | Should -Be "Absent"
                         }
 
                         It "Should return false when the Test method is called" {
-                            Test-TargetResource @testParams | Should Be $false
+                            Test-TargetResource @testParams | Should -Be $false
                         }
 
                         It "Should enable the license in the set method" {
@@ -99,41 +106,45 @@ try
                     }
 
                     Context -Name "Project server license is enabled, and it should be" -Fixture {
-                        $testParams = @{
-                            IsSingleInstance = "Yes"
-                            Ensure           = "Present"
-                            ProductKey       = "XXXXX-XXXXX-XXXXX-XXXXX-XXXXX"
-                        }
+                        BeforeAll {
+                            $testParams = @{
+                                IsSingleInstance = "Yes"
+                                Ensure           = "Present"
+                                ProductKey       = "XXXXX-XXXXX-XXXXX-XXXXX-XXXXX"
+                            }
 
-                        Mock -CommandName Get-ProjectServerLicense -MockWith {
-                            return @("Project Server 2016 : Active", "Enabled date : 1/1/2000")
+                            Mock -CommandName Get-ProjectServerLicense -MockWith {
+                                return @("Project Server 2016 : Active", "Enabled date : 1/1/2000")
+                            }
                         }
 
                         It "Should return present from the Get method" {
-                            (Get-TargetResource @testParams).Ensure | Should Be "Present"
+                            (Get-TargetResource @testParams).Ensure | Should -Be "Present"
                         }
 
                         It "Should return true when the Test method is called" {
-                            Test-TargetResource @testParams | Should Be $true
+                            Test-TargetResource @testParams | Should -Be $true
                         }
                     }
 
                     Context -Name "Project server license is enabled, but it should not be" -Fixture {
-                        $testParams = @{
-                            IsSingleInstance = "Yes"
-                            Ensure           = "Absent"
-                        }
+                        BeforeAll {
+                            $testParams = @{
+                                IsSingleInstance = "Yes"
+                                Ensure           = "Absent"
+                            }
 
-                        Mock -CommandName Get-ProjectServerLicense -MockWith {
-                            return @("Project Server 2016 : Active", "Enabled date : 1/1/2000")
+                            Mock -CommandName Get-ProjectServerLicense -MockWith {
+                                return @("Project Server 2016 : Active", "Enabled date : 1/1/2000")
+                            }
                         }
 
                         It "Should return present from the Get method" {
-                            (Get-TargetResource @testParams).Ensure | Should Be "Present"
+                            (Get-TargetResource @testParams).Ensure | Should -Be "Present"
                         }
 
                         It "Should return false when the Test method is called" {
-                            Test-TargetResource @testParams | Should Be $false
+                            Test-TargetResource @testParams | Should -Be $false
                         }
 
                         It "Should enable the license in the set method" {
@@ -143,52 +154,58 @@ try
                     }
 
                     Context -Name "Project server license is not enabled, and it should not be" -Fixture {
-                        $testParams = @{
-                            IsSingleInstance = "Yes"
-                            Ensure           = "Absent"
-                        }
+                        BeforeAll {
+                            $testParams = @{
+                                IsSingleInstance = "Yes"
+                                Ensure           = "Absent"
+                            }
 
-                        Mock -CommandName Get-ProjectServerLicense -MockWith {
-                            return @("Project Server 2016 : Disabled", "Enabled date : 1/1/2000")
+                            Mock -CommandName Get-ProjectServerLicense -MockWith {
+                                return @("Project Server 2016 : Disabled", "Enabled date : 1/1/2000")
+                            }
                         }
 
                         It "Should return absent from the Get method" {
-                            (Get-TargetResource @testParams).Ensure | Should Be "absent"
+                            (Get-TargetResource @testParams).Ensure | Should -Be "absent"
                         }
 
                         It "Should return true when the Test method is called" {
-                            Test-TargetResource @testParams | Should Be $true
+                            Test-TargetResource @testParams | Should -Be $true
                         }
                     }
 
                     Context -Name "The farm is not in a state to determine the license status" -Fixture {
-                        $testParams = @{
-                            IsSingleInstance = "Yes"
-                            Ensure           = "Present"
-                            ProductKey       = "XXXXX-XXXXX-XXXXX-XXXXX-XXXXX"
-                        }
+                        BeforeAll {
+                            $testParams = @{
+                                IsSingleInstance = "Yes"
+                                Ensure           = "Present"
+                                ProductKey       = "XXXXX-XXXXX-XXXXX-XXXXX-XXXXX"
+                            }
 
-                        Mock -CommandName Get-ProjectServerLicense -MockWith {
-                            throw "Unkown error"
+                            Mock -CommandName Get-ProjectServerLicense -MockWith {
+                                throw "Unkown error"
+                            }
                         }
 
                         It "Should return absent from the Get method" {
-                            (Get-TargetResource @testParams).Ensure | Should Be "absent"
+                            (Get-TargetResource @testParams).Ensure | Should -Be "absent"
                         }
                     }
 
                     Context -Name "The license should be enabled but no product key was provided" -Fixture {
-                        $testParams = @{
-                            IsSingleInstance = "Yes"
-                            Ensure           = "Present"
-                        }
+                        BeforeAll {
+                            $testParams = @{
+                                IsSingleInstance = "Yes"
+                                Ensure           = "Present"
+                            }
 
-                        Mock -CommandName Get-ProjectServerLicense -MockWith {
-                            return @("Project Server 2016 : Disabled", "Enabled date : 1/1/2000")
+                            Mock -CommandName Get-ProjectServerLicense -MockWith {
+                                return @("Project Server 2016 : Disabled", "Enabled date : 1/1/2000")
+                            }
                         }
 
                         It "Should throw an error in the set method" {
-                            { Set-TargetResource @testParams } | Should Throw
+                            { Set-TargetResource @testParams } | Should -Throw
                         }
                     }
                 }

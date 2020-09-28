@@ -49,55 +49,62 @@ try
     $ErrorActionPreference = 'stop'
     Set-StrictMode -Version latest
 
-    Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
-        InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
-            Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
+    InModuleScope -ModuleName $script:DSCResourceFullName -ScriptBlock {
+        Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
+            BeforeAll {
+                Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
-            $testParams = @{
-                Name   = "Managed Metadata"
-                Ensure = "Present"
+                $testParams = @{
+                    Name   = "Managed Metadata"
+                    Ensure = "Present"
+                }
+
+                Mock Publish-SPServiceApplication { }
+                Mock Unpublish-SPServiceApplication { }
             }
 
-            Mock Publish-SPServiceApplication { }
-            Mock Unpublish-SPServiceApplication { }
-
             Context -Name "An invalid service application is specified to be published" {
-                Mock -CommandName Get-SPServiceApplication {
-                    $spServiceApp = [pscustomobject]@{
-                        Name = $testParams.Name
-                        Uri  = $null
+                BeforeAll {
+                    Mock -CommandName Get-SPServiceApplication {
+                        $spServiceApp = [pscustomobject]@{
+                            Name = $testParams.Name
+                            Uri  = $null
+                        }
+                        return $spServiceApp
                     }
-                    return $spServiceApp
                 }
+
                 It "Should return absent from the get method" {
-                    (Get-TargetResource @testParams).Ensure | Should Be "Absent"
+                    (Get-TargetResource @testParams).Ensure | Should -Be "Absent"
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "throws when the set method is called" {
-                    { Set-TargetResource @testParams } | Should Throw
+                    { Set-TargetResource @testParams } | Should -Throw
                 }
             }
 
             Context -Name "The service application is not published but should be" {
-                Mock -CommandName Get-SPServiceApplication {
-                    $spServiceApp = [pscustomobject]@{
-                        Name   = $testParams.Name
-                        Uri    = "urn:schemas-microsoft-com:sharepoint:service:mmsid"
-                        Shared = $false
+                BeforeAll {
+                    Mock -CommandName Get-SPServiceApplication {
+                        $spServiceApp = [pscustomobject]@{
+                            Name   = $testParams.Name
+                            Uri    = "urn:schemas-microsoft-com:sharepoint:service:mmsid"
+                            Shared = $false
+                        }
+                        return $spServiceApp
                     }
-                    return $spServiceApp
                 }
 
                 It "Should return absent from the get method" {
-                    (Get-TargetResource @testParams).Ensure | Should Be "Absent"
+                    (Get-TargetResource @testParams).Ensure | Should -Be "Absent"
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "calls the Publish-SPServiceApplication call from the set method" {
@@ -108,77 +115,87 @@ try
             }
 
             Context -Name "The service application is published and should be" {
-                Mock -CommandName Get-SPServiceApplication {
-                    $spServiceApp = [pscustomobject]@{
-                        Name   = $testParams.Name
-                        Uri    = "urn:schemas-microsoft-com:sharepoint:service:mmsid"
-                        Shared = $true
+                BeforeAll {
+                    Mock -CommandName Get-SPServiceApplication {
+                        $spServiceApp = [pscustomobject]@{
+                            Name   = $testParams.Name
+                            Uri    = "urn:schemas-microsoft-com:sharepoint:service:mmsid"
+                            Shared = $true
+                        }
+                        return $spServiceApp
                     }
-                    return $spServiceApp
                 }
 
                 It "Should return present from the get method" {
-                    (Get-TargetResource @testParams).Ensure | Should Be "Present"
+                    (Get-TargetResource @testParams).Ensure | Should -Be "Present"
                 }
 
                 It "Should return true from the test method" {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
             }
 
             Context -Name "The service application specified does not exist" {
-                Mock -CommandName Get-SPServiceApplication { return $null }
+                BeforeAll {
+                    Mock -CommandName Get-SPServiceApplication { return $null }
+                }
 
                 It "Should return absent from the get method" {
-                    (Get-TargetResource @testParams).Ensure | Should Be "Absent"
+                    (Get-TargetResource @testParams).Ensure | Should -Be "Absent"
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "throws when the set method is called" {
-                    { Set-TargetResource @testParams } | Should Throw
+                    { Set-TargetResource @testParams } | Should -Throw
                 }
             }
 
-            $testParams.Ensure = "Absent"
-
             Context -Name "The service application is not published and should not be" {
-                Mock -CommandName Get-SPServiceApplication {
-                    $spServiceApp = [pscustomobject]@{
-                        Name   = $testParams.Name
-                        Uri    = "urn:schemas-microsoft-com:sharepoint:service:mmsid"
-                        Shared = $false
+                BeforeAll {
+                    $testParams.Ensure = "Absent"
+
+                    Mock -CommandName Get-SPServiceApplication {
+                        $spServiceApp = [pscustomobject]@{
+                            Name   = $testParams.Name
+                            Uri    = "urn:schemas-microsoft-com:sharepoint:service:mmsid"
+                            Shared = $false
+                        }
+                        return $spServiceApp
                     }
-                    return $spServiceApp
                 }
 
                 It "Should return absent from the get method" {
-                    (Get-TargetResource @testParams).Ensure | Should Be "Absent"
+                    (Get-TargetResource @testParams).Ensure | Should -Be "Absent"
                 }
 
                 It "Should return true from the test method" {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
             }
 
             Context -Name "The service application is published and should not be" {
-                Mock -CommandName Get-SPServiceApplication {
-                    $spServiceApp = [pscustomobject]@{
-                        Name   = $testParams.Name
-                        Uri    = "urn:schemas-microsoft-com:sharepoint:service:mmsid"
-                        Shared = $true
+                BeforeAll {
+                    $testParams.Ensure = "Absent"
+
+                    Mock -CommandName Get-SPServiceApplication {
+                        $spServiceApp = [pscustomobject]@{
+                            Name   = $testParams.Name
+                            Uri    = "urn:schemas-microsoft-com:sharepoint:service:mmsid"
+                            Shared = $true
+                        }
+                        return $spServiceApp
                     }
-                    return $spServiceApp
                 }
 
                 It "Should return present from the get method" {
-                    (Get-TargetResource @testParams).Ensure | Should Be "Present"
+                    (Get-TargetResource @testParams).Ensure | Should -Be "Present"
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "calls the Unpublish-SPServiceApplication call from the set method" {

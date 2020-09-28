@@ -118,8 +118,8 @@ function Set-TargetResource
 
     if ($Ensure -eq "Absent")
     {
-        throw "This resource cannot undo Security Token Service Configuration changes. `
-        Please set Ensure to Present or omit the resource"
+        throw ("This resource cannot undo Security Token Service Configuration changes. " + `
+                "Please set Ensure to Present or omit the resource")
     }
 
     Invoke-SPDscCommand -Credential $InstallAccount `

@@ -46,77 +46,84 @@ Invoke-TestSetup
 
 try
 {
-    Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
-        InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
-            Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
+    InModuleScope -ModuleName $script:DSCResourceFullName -ScriptBlock {
+        Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
+            BeforeAll {
+                Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
-            # Initialize tests
+                # Initialize tests
 
-            # Mocks for all contexts
-            Mock -CommandName Set-SPWebApplication -MockWith { }
+                # Mocks for all contexts
+                Mock -CommandName Set-SPWebApplication -MockWith { }
+            }
 
             # Test contexts
             Context -Name "WebApplication does not exist" -Fixture {
-                $testParams = @{
-                    WebAppUrl            = "https://web.contoso.com"
-                    ServiceAppProxyGroup = "Web1ProxyGroup"
+                BeforeAll {
+                    $testParams = @{
+                        WebAppUrl            = "https://web.contoso.com"
+                        ServiceAppProxyGroup = "Web1ProxyGroup"
+                    }
+
+                    Mock -CommandName Get-SPWebApplication -MockWith { }
                 }
 
-                Mock -CommandName Get-SPWebApplication -MockWIth { }
-
                 It "Should return null property from the get method" {
-                    (Get-TargetResource @testParams).WebAppUrl | Should Be $null
+                    (Get-TargetResource @testParams).WebAppUrl | Should -Be $null
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
-
             }
 
             Context -Name "WebApplication Proxy Group connection matches desired config" -Fixture {
-                $testParams = @{
-                    WebAppUrl            = "https://web.contoso.com"
-                    ServiceAppProxyGroup = "Web1ProxyGroup"
-                }
+                BeforeAll {
+                    $testParams = @{
+                        WebAppUrl            = "https://web.contoso.com"
+                        ServiceAppProxyGroup = "Web1ProxyGroup"
+                    }
 
-                Mock -CommandName Get-SPWebApplication -MockWIth {
-                    return @{
-                        ServiceApplicationProxyGroup = @{
-                            Name = "Web1ProxyGroup"
+                    Mock -CommandName Get-SPWebApplication -MockWith {
+                        return @{
+                            ServiceApplicationProxyGroup = @{
+                                Name = "Web1ProxyGroup"
+                            }
                         }
                     }
                 }
 
                 It "Should return values from the get method" {
-                    (Get-TargetResource @testParams).ServiceAppProxyGroup | Should Be "Web1ProxyGroup"
+                    (Get-TargetResource @testParams).ServiceAppProxyGroup | Should -Be "Web1ProxyGroup"
                 }
 
                 It "Should return true from the test method" {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
             }
 
             Context -Name "WebApplication Proxy Group connection does not match desired config" -Fixture {
-                $testParams = @{
-                    WebAppUrl            = "https://web.contoso.com"
-                    ServiceAppProxyGroup = "Default"
-                }
+                BeforeAll {
+                    $testParams = @{
+                        WebAppUrl            = "https://web.contoso.com"
+                        ServiceAppProxyGroup = "Default"
+                    }
 
-                Mock -CommandName Get-SPWebApplication -MockWIth {
-                    return @{
-                        ServiceApplicationProxyGroup = @{
-                            Name = "Web1ProxyGroup"
+                    Mock -CommandName Get-SPWebApplication -MockWith {
+                        return @{
+                            ServiceApplicationProxyGroup = @{
+                                Name = "Web1ProxyGroup"
+                            }
                         }
                     }
                 }
 
                 It "Should return values from the get method" {
-                    (Get-TargetResource @testParams).ServiceAppProxyGroup | Should Be "Web1ProxyGroup"
+                    (Get-TargetResource @testParams).ServiceAppProxyGroup | Should -Be "Web1ProxyGroup"
                 }
 
                 It "Should return false from the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should update the webapplication from the set method" {

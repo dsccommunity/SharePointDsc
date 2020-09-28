@@ -46,29 +46,12 @@ Invoke-TestSetup
 
 try
 {
-    Describe -Name $global:SPDscHelper.DescribeHeader -Fixture {
-        InModuleScope -ModuleName $global:SPDscHelper.ModuleName -ScriptBlock {
-            Invoke-Command -ScriptBlock $global:SPDscHelper.InitializeScript -NoNewScope
+    InModuleScope -ModuleName $script:DSCResourceFullName -ScriptBlock {
+        Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
+            BeforeAll {
+                Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
-            switch ($global:SPDscHelper.CurrentStubBuildNumber.Major)
-            {
-                15
-                {
-                    Context -Name "All methods throw exceptions as Project Server support in SharePointDsc is only for 2016" -Fixture {
-                        It "Should throw on the get method" {
-                            { Get-TargetResource @testParams } | Should Throw
-                        }
-
-                        It "Should throw on the test method" {
-                            { Test-TargetResource @testParams } | Should Throw
-                        }
-
-                        It "Should throw on the set method" {
-                            { Set-TargetResource @testParams } | Should Throw
-                        }
-                    }
-                }
-                16
+                if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 16)
                 {
                     $script:projectPath = "$PSScriptRoot\..\..\.." | Convert-Path
                     $script:projectName = (Get-ChildItem -Path "$script:projectPath\*\*.psd1" | Where-Object -FilterScript {
@@ -243,306 +226,340 @@ try
                         }
                         return $permissions[$PermissionId]
                     }
+                }
+            }
 
+            switch ($global:SPDscHelper.CurrentStubBuildNumber.Major)
+            {
+                15
+                {
+                    Context -Name "All methods throw exceptions as Project Server support in SharePointDsc is only for 2016" -Fixture {
+                        It "Should throw on the get method" {
+                            { Get-TargetResource @testParams } | Should -Throw
+                        }
+
+                        It "Should throw on the test method" {
+                            { Test-TargetResource @testParams } | Should -Throw
+                        }
+
+                        It "Should throw on the set method" {
+                            { Set-TargetResource @testParams } | Should -Throw
+                        }
+                    }
+                }
+                16
+                {
                     Context -Name "A resource should have permissions but is missing some" -Fixture {
-                        $testParams = @{
-                            Url              = "http://server/pwa"
-                            EntityType       = "User"
-                            EntityName       = "TEST\user1"
-                            AllowPermissions = @(
-                                "FakePermission1",
-                                "FakePermission2"
-                            )
-                            DenyPermissions  = @(
-                                "FakePermission3",
-                                "FakePermission4"
+                        BeforeAll {
+                            $testParams = @{
+                                Url              = "http://server/pwa"
+                                EntityType       = "User"
+                                EntityName       = "TEST\user1"
+                                AllowPermissions = @(
+                                    "FakePermission1",
+                                    "FakePermission2"
+                                )
+                                DenyPermissions  = @(
+                                    "FakePermission3",
+                                    "FakePermission4"
+                                )
+                            }
+
+                            $global:SPDscCurrentResourceAuth = New-SPDscUserGlobalPermissionsTable -Values @(
+                                @{
+                                    RES_UID          = $global:SPDscResourceId
+                                    WSEC_FEA_ACT_UID = [Guid]::Parse("ce501426-c4bf-4619-a635-a937b7be7950")
+                                    WSEC_ALLOW       = $true
+                                    WSEC_DENY        = $false
+                                },
+                                @{
+                                    RES_UID          = $global:SPDscResourceId
+                                    WSEC_FEA_ACT_UID = [Guid]::Parse("ce501426-c4bf-4619-a635-a937b7be7952")
+                                    WSEC_ALLOW       = $false
+                                    WSEC_DENY        = $true
+                                }
                             )
                         }
 
-                        $global:SPDscCurrentResourceAuth = New-SPDscUserGlobalPermissionsTable -Values @(
-                            @{
-                                RES_UID          = $global:SPDscResourceId
-                                WSEC_FEA_ACT_UID = [Guid]::Parse("ce501426-c4bf-4619-a635-a937b7be7950")
-                                WSEC_ALLOW       = $true
-                                WSEC_DENY        = $false
-                            },
-                            @{
-                                RES_UID          = $global:SPDscResourceId
-                                WSEC_FEA_ACT_UID = [Guid]::Parse("ce501426-c4bf-4619-a635-a937b7be7952")
-                                WSEC_ALLOW       = $false
-                                WSEC_DENY        = $true
-                            }
-                        )
-
                         It "Should return the current permissions from the get method" {
-                            (Get-TargetResource @testParams).AllowPermissions | Should Not BeNullOrEmpty
+                            (Get-TargetResource @testParams).AllowPermissions | Should -Not -BeNullOrEmpty
                         }
 
                         It "Should return false from the set method" {
-                            Test-TargetResource @testParams | Should Be $false
+                            Test-TargetResource @testParams | Should -Be $false
                         }
 
                         It "Should call methods to add the missing permissions in the set method" {
                             $global:SPDscUpdateResourcesCalled = $false
                             Set-TargetResource @testParams
-                            $global:SPDscUpdateResourcesCalled | Should Be $true
+                            $global:SPDscUpdateResourcesCalled | Should -Be $true
                         }
                     }
 
                     Context -Name "A resource should have permissions but has additional ones" -Fixture {
-                        $testParams = @{
-                            Url              = "http://server/pwa"
-                            EntityType       = "User"
-                            EntityName       = "TEST\user1"
-                            AllowPermissions = @(
-                                "FakePermission1"
-                            )
-                            DenyPermissions  = @(
-                                "FakePermission3"
+                        BeforeAll {
+                            $testParams = @{
+                                Url              = "http://server/pwa"
+                                EntityType       = "User"
+                                EntityName       = "TEST\user1"
+                                AllowPermissions = @(
+                                    "FakePermission1"
+                                )
+                                DenyPermissions  = @(
+                                    "FakePermission3"
+                                )
+                            }
+
+                            $global:SPDscCurrentResourceAuth = New-SPDscUserGlobalPermissionsTable -Values @(
+                                @{
+                                    RES_UID          = $global:SPDscResourceId
+                                    WSEC_FEA_ACT_UID = [Guid]::Parse("ce501426-c4bf-4619-a635-a937b7be7950")
+                                    WSEC_ALLOW       = $true
+                                    WSEC_DENY        = $false
+                                },
+                                @{
+                                    RES_UID          = $global:SPDscResourceId
+                                    WSEC_FEA_ACT_UID = [Guid]::Parse("ce501426-c4bf-4619-a635-a937b7be7951")
+                                    WSEC_ALLOW       = $true
+                                    WSEC_DENY        = $false
+                                },
+                                @{
+                                    RES_UID          = $global:SPDscResourceId
+                                    WSEC_FEA_ACT_UID = [Guid]::Parse("ce501426-c4bf-4619-a635-a937b7be7952")
+                                    WSEC_ALLOW       = $false
+                                    WSEC_DENY        = $true
+                                },
+                                @{
+                                    RES_UID          = $global:SPDscResourceId
+                                    WSEC_FEA_ACT_UID = [Guid]::Parse("ce501426-c4bf-4619-a635-a937b7be7953")
+                                    WSEC_ALLOW       = $false
+                                    WSEC_DENY        = $true
+                                }
                             )
                         }
 
-                        $global:SPDscCurrentResourceAuth = New-SPDscUserGlobalPermissionsTable -Values @(
-                            @{
-                                RES_UID          = $global:SPDscResourceId
-                                WSEC_FEA_ACT_UID = [Guid]::Parse("ce501426-c4bf-4619-a635-a937b7be7950")
-                                WSEC_ALLOW       = $true
-                                WSEC_DENY        = $false
-                            },
-                            @{
-                                RES_UID          = $global:SPDscResourceId
-                                WSEC_FEA_ACT_UID = [Guid]::Parse("ce501426-c4bf-4619-a635-a937b7be7951")
-                                WSEC_ALLOW       = $true
-                                WSEC_DENY        = $false
-                            },
-                            @{
-                                RES_UID          = $global:SPDscResourceId
-                                WSEC_FEA_ACT_UID = [Guid]::Parse("ce501426-c4bf-4619-a635-a937b7be7952")
-                                WSEC_ALLOW       = $false
-                                WSEC_DENY        = $true
-                            },
-                            @{
-                                RES_UID          = $global:SPDscResourceId
-                                WSEC_FEA_ACT_UID = [Guid]::Parse("ce501426-c4bf-4619-a635-a937b7be7953")
-                                WSEC_ALLOW       = $false
-                                WSEC_DENY        = $true
-                            }
-                        )
-
                         It "Should return the current permissions from the get method" {
-                            (Get-TargetResource @testParams).AllowPermissions | Should Not BeNullOrEmpty
+                            (Get-TargetResource @testParams).AllowPermissions | Should -Not -BeNullOrEmpty
                         }
 
                         It "Should return false from the set method" {
-                            Test-TargetResource @testParams | Should Be $false
+                            Test-TargetResource @testParams | Should -Be $false
                         }
 
                         It "Should call methods to add the missing permissions in the set method" {
                             $global:SPDscUpdateResourcesCalled = $false
                             Set-TargetResource @testParams
-                            $global:SPDscUpdateResourcesCalled | Should Be $true
+                            $global:SPDscUpdateResourcesCalled | Should -Be $true
                         }
                     }
 
                     Context -Name "A resource should have permissions and they match" -Fixture {
-                        $testParams = @{
-                            Url              = "http://server/pwa"
-                            EntityType       = "User"
-                            EntityName       = "TEST\user1"
-                            AllowPermissions = @(
-                                "FakePermission1",
-                                "FakePermission2"
-                            )
-                            DenyPermissions  = @(
-                                "FakePermission3",
-                                "FakePermission4"
+                        BeforeAll {
+                            $testParams = @{
+                                Url              = "http://server/pwa"
+                                EntityType       = "User"
+                                EntityName       = "TEST\user1"
+                                AllowPermissions = @(
+                                    "FakePermission1",
+                                    "FakePermission2"
+                                )
+                                DenyPermissions  = @(
+                                    "FakePermission3",
+                                    "FakePermission4"
+                                )
+                            }
+
+                            $global:SPDscCurrentResourceAuth = New-SPDscUserGlobalPermissionsTable -Values @(
+                                @{
+                                    RES_UID          = $global:SPDscResourceId
+                                    WSEC_FEA_ACT_UID = [Guid]::Parse("ce501426-c4bf-4619-a635-a937b7be7950")
+                                    WSEC_ALLOW       = $true
+                                    WSEC_DENY        = $false
+                                },
+                                @{
+                                    RES_UID          = $global:SPDscResourceId
+                                    WSEC_FEA_ACT_UID = [Guid]::Parse("ce501426-c4bf-4619-a635-a937b7be7951")
+                                    WSEC_ALLOW       = $true
+                                    WSEC_DENY        = $false
+                                },
+                                @{
+                                    RES_UID          = $global:SPDscResourceId
+                                    WSEC_FEA_ACT_UID = [Guid]::Parse("ce501426-c4bf-4619-a635-a937b7be7952")
+                                    WSEC_ALLOW       = $false
+                                    WSEC_DENY        = $true
+                                },
+                                @{
+                                    RES_UID          = $global:SPDscResourceId
+                                    WSEC_FEA_ACT_UID = [Guid]::Parse("ce501426-c4bf-4619-a635-a937b7be7953")
+                                    WSEC_ALLOW       = $false
+                                    WSEC_DENY        = $true
+                                }
                             )
                         }
 
-                        $global:SPDscCurrentResourceAuth = New-SPDscUserGlobalPermissionsTable -Values @(
-                            @{
-                                RES_UID          = $global:SPDscResourceId
-                                WSEC_FEA_ACT_UID = [Guid]::Parse("ce501426-c4bf-4619-a635-a937b7be7950")
-                                WSEC_ALLOW       = $true
-                                WSEC_DENY        = $false
-                            },
-                            @{
-                                RES_UID          = $global:SPDscResourceId
-                                WSEC_FEA_ACT_UID = [Guid]::Parse("ce501426-c4bf-4619-a635-a937b7be7951")
-                                WSEC_ALLOW       = $true
-                                WSEC_DENY        = $false
-                            },
-                            @{
-                                RES_UID          = $global:SPDscResourceId
-                                WSEC_FEA_ACT_UID = [Guid]::Parse("ce501426-c4bf-4619-a635-a937b7be7952")
-                                WSEC_ALLOW       = $false
-                                WSEC_DENY        = $true
-                            },
-                            @{
-                                RES_UID          = $global:SPDscResourceId
-                                WSEC_FEA_ACT_UID = [Guid]::Parse("ce501426-c4bf-4619-a635-a937b7be7953")
-                                WSEC_ALLOW       = $false
-                                WSEC_DENY        = $true
-                            }
-                        )
-
                         It "Should return the current permissions from the get method" {
-                            (Get-TargetResource @testParams).AllowPermissions | Should Not BeNullOrEmpty
+                            (Get-TargetResource @testParams).AllowPermissions | Should -Not -BeNullOrEmpty
                         }
 
                         It "Should return true from the set method" {
-                            Test-TargetResource @testParams | Should Be $true
+                            Test-TargetResource @testParams | Should -Be $true
                         }
                     }
 
                     Context -Name "A group should have permissions but is missing some" -Fixture {
-                        $testParams = @{
-                            Url              = "http://server/pwa"
-                            EntityType       = "Group"
-                            EntityName       = "group1"
-                            AllowPermissions = @(
-                                "FakePermission1",
-                                "FakePermission2"
-                            )
-                            DenyPermissions  = @(
-                                "FakePermission3",
-                                "FakePermission4"
+                        BeforeAll {
+                            $testParams = @{
+                                Url              = "http://server/pwa"
+                                EntityType       = "Group"
+                                EntityName       = "group1"
+                                AllowPermissions = @(
+                                    "FakePermission1",
+                                    "FakePermission2"
+                                )
+                                DenyPermissions  = @(
+                                    "FakePermission3",
+                                    "FakePermission4"
+                                )
+                            }
+
+                            $global:SPDscCurrentGroupDetails = New-SPDscGroupGlobalPermissionsTable -Values @(
+                                @{
+                                    WSEC_GRP_UID     = $global:SPDscGroupId
+                                    WSEC_FEA_ACT_UID = [Guid]::Parse("ce501426-c4bf-4619-a635-a937b7be7950")
+                                    WSEC_ALLOW       = $true
+                                    WSEC_DENY        = $false
+                                },
+                                @{
+                                    WSEC_GRP_UID     = $global:SPDscGroupId
+                                    WSEC_FEA_ACT_UID = [Guid]::Parse("ce501426-c4bf-4619-a635-a937b7be7952")
+                                    WSEC_ALLOW       = $false
+                                    WSEC_DENY        = $true
+                                }
                             )
                         }
 
-                        $global:SPDscCurrentGroupDetails = New-SPDscGroupGlobalPermissionsTable -Values @(
-                            @{
-                                WSEC_GRP_UID     = $global:SPDscGroupId
-                                WSEC_FEA_ACT_UID = [Guid]::Parse("ce501426-c4bf-4619-a635-a937b7be7950")
-                                WSEC_ALLOW       = $true
-                                WSEC_DENY        = $false
-                            },
-                            @{
-                                WSEC_GRP_UID     = $global:SPDscGroupId
-                                WSEC_FEA_ACT_UID = [Guid]::Parse("ce501426-c4bf-4619-a635-a937b7be7952")
-                                WSEC_ALLOW       = $false
-                                WSEC_DENY        = $true
-                            }
-                        )
-
                         It "Should return the current permissions from the get method" {
-                            (Get-TargetResource @testParams).AllowPermissions | Should Not BeNullOrEmpty
+                            (Get-TargetResource @testParams).AllowPermissions | Should -Not -BeNullOrEmpty
                         }
 
                         It "Should return false from the set method" {
-                            Test-TargetResource @testParams | Should Be $false
+                            Test-TargetResource @testParams | Should -Be $false
                         }
 
                         It "Should call methods to add the missing permissions in the set method" {
                             $global:SPDscSetGroupsCalled = $false
                             Set-TargetResource @testParams
-                            $global:SPDscSetGroupsCalled | Should Be $true
+                            $global:SPDscSetGroupsCalled | Should -Be $true
                         }
                     }
 
                     Context -Name "A group should have permissions but has additional ones" -Fixture {
-                        $testParams = @{
-                            Url              = "http://server/pwa"
-                            EntityType       = "Group"
-                            EntityName       = "Group1"
-                            AllowPermissions = @(
-                                "FakePermission1"
-                            )
-                            DenyPermissions  = @(
-                                "FakePermission3"
+                        BeforeAll {
+                            $testParams = @{
+                                Url              = "http://server/pwa"
+                                EntityType       = "Group"
+                                EntityName       = "Group1"
+                                AllowPermissions = @(
+                                    "FakePermission1"
+                                )
+                                DenyPermissions  = @(
+                                    "FakePermission3"
+                                )
+                            }
+
+                            $global:SPDscCurrentGroupDetails = New-SPDscGroupGlobalPermissionsTable -Values @(
+                                @{
+                                    WSEC_GRP_UID     = $global:SPDscGroupId
+                                    WSEC_FEA_ACT_UID = [Guid]::Parse("ce501426-c4bf-4619-a635-a937b7be7950")
+                                    WSEC_ALLOW       = $true
+                                    WSEC_DENY        = $false
+                                },
+                                @{
+                                    WSEC_GRP_UID     = $global:SPDscGroupId
+                                    WSEC_FEA_ACT_UID = [Guid]::Parse("ce501426-c4bf-4619-a635-a937b7be7951")
+                                    WSEC_ALLOW       = $true
+                                    WSEC_DENY        = $false
+                                },
+                                @{
+                                    WSEC_GRP_UID     = $global:SPDscGroupId
+                                    WSEC_FEA_ACT_UID = [Guid]::Parse("ce501426-c4bf-4619-a635-a937b7be7952")
+                                    WSEC_ALLOW       = $false
+                                    WSEC_DENY        = $true
+                                },
+                                @{
+                                    WSEC_GRP_UID     = $global:SPDscGroupId
+                                    WSEC_FEA_ACT_UID = [Guid]::Parse("ce501426-c4bf-4619-a635-a937b7be7953")
+                                    WSEC_ALLOW       = $false
+                                    WSEC_DENY        = $true
+                                }
                             )
                         }
 
-                        $global:SPDscCurrentGroupDetails = New-SPDscGroupGlobalPermissionsTable -Values @(
-                            @{
-                                WSEC_GRP_UID     = $global:SPDscGroupId
-                                WSEC_FEA_ACT_UID = [Guid]::Parse("ce501426-c4bf-4619-a635-a937b7be7950")
-                                WSEC_ALLOW       = $true
-                                WSEC_DENY        = $false
-                            },
-                            @{
-                                WSEC_GRP_UID     = $global:SPDscGroupId
-                                WSEC_FEA_ACT_UID = [Guid]::Parse("ce501426-c4bf-4619-a635-a937b7be7951")
-                                WSEC_ALLOW       = $true
-                                WSEC_DENY        = $false
-                            },
-                            @{
-                                WSEC_GRP_UID     = $global:SPDscGroupId
-                                WSEC_FEA_ACT_UID = [Guid]::Parse("ce501426-c4bf-4619-a635-a937b7be7952")
-                                WSEC_ALLOW       = $false
-                                WSEC_DENY        = $true
-                            },
-                            @{
-                                WSEC_GRP_UID     = $global:SPDscGroupId
-                                WSEC_FEA_ACT_UID = [Guid]::Parse("ce501426-c4bf-4619-a635-a937b7be7953")
-                                WSEC_ALLOW       = $false
-                                WSEC_DENY        = $true
-                            }
-                        )
-
                         It "Should return the current permissions from the get method" {
-                            (Get-TargetResource @testParams).AllowPermissions | Should Not BeNullOrEmpty
+                            (Get-TargetResource @testParams).AllowPermissions | Should -Not -BeNullOrEmpty
                         }
 
                         It "Should return false from the set method" {
-                            Test-TargetResource @testParams | Should Be $false
+                            Test-TargetResource @testParams | Should -Be $false
                         }
 
                         It "Should call methods to add the missing permissions in the set method" {
                             $global:SPDscSetGroupsCalled = $false
                             Set-TargetResource @testParams
-                            $global:SPDscSetGroupsCalled | Should Be $true
+                            $global:SPDscSetGroupsCalled | Should -Be $true
                         }
                     }
 
                     Context -Name "A group should have permissions and they match" -Fixture {
-                        $testParams = @{
-                            Url              = "http://server/pwa"
-                            EntityType       = "Group"
-                            EntityName       = "Group1"
-                            AllowPermissions = @(
-                                "FakePermission1",
-                                "FakePermission2"
-                            )
-                            DenyPermissions  = @(
-                                "FakePermission3",
-                                "FakePermission4"
+                        BeforeAll {
+                            $testParams = @{
+                                Url              = "http://server/pwa"
+                                EntityType       = "Group"
+                                EntityName       = "Group1"
+                                AllowPermissions = @(
+                                    "FakePermission1",
+                                    "FakePermission2"
+                                )
+                                DenyPermissions  = @(
+                                    "FakePermission3",
+                                    "FakePermission4"
+                                )
+                            }
+
+                            $global:SPDscCurrentGroupDetails = New-SPDscGroupGlobalPermissionsTable -Values @(
+                                @{
+                                    WSEC_GRP_UID     = $global:SPDscGroupId
+                                    WSEC_FEA_ACT_UID = [Guid]::Parse("ce501426-c4bf-4619-a635-a937b7be7950")
+                                    WSEC_ALLOW       = $true
+                                    WSEC_DENY        = $false
+                                },
+                                @{
+                                    WSEC_GRP_UID     = $global:SPDscGroupId
+                                    WSEC_FEA_ACT_UID = [Guid]::Parse("ce501426-c4bf-4619-a635-a937b7be7951")
+                                    WSEC_ALLOW       = $true
+                                    WSEC_DENY        = $false
+                                },
+                                @{
+                                    WSEC_GRP_UID     = $global:SPDscGroupId
+                                    WSEC_FEA_ACT_UID = [Guid]::Parse("ce501426-c4bf-4619-a635-a937b7be7952")
+                                    WSEC_ALLOW       = $false
+                                    WSEC_DENY        = $true
+                                },
+                                @{
+                                    WSEC_GRP_UID     = $global:SPDscGroupId
+                                    WSEC_FEA_ACT_UID = [Guid]::Parse("ce501426-c4bf-4619-a635-a937b7be7953")
+                                    WSEC_ALLOW       = $false
+                                    WSEC_DENY        = $true
+                                }
                             )
                         }
 
-                        $global:SPDscCurrentGroupDetails = New-SPDscGroupGlobalPermissionsTable -Values @(
-                            @{
-                                WSEC_GRP_UID     = $global:SPDscGroupId
-                                WSEC_FEA_ACT_UID = [Guid]::Parse("ce501426-c4bf-4619-a635-a937b7be7950")
-                                WSEC_ALLOW       = $true
-                                WSEC_DENY        = $false
-                            },
-                            @{
-                                WSEC_GRP_UID     = $global:SPDscGroupId
-                                WSEC_FEA_ACT_UID = [Guid]::Parse("ce501426-c4bf-4619-a635-a937b7be7951")
-                                WSEC_ALLOW       = $true
-                                WSEC_DENY        = $false
-                            },
-                            @{
-                                WSEC_GRP_UID     = $global:SPDscGroupId
-                                WSEC_FEA_ACT_UID = [Guid]::Parse("ce501426-c4bf-4619-a635-a937b7be7952")
-                                WSEC_ALLOW       = $false
-                                WSEC_DENY        = $true
-                            },
-                            @{
-                                WSEC_GRP_UID     = $global:SPDscGroupId
-                                WSEC_FEA_ACT_UID = [Guid]::Parse("ce501426-c4bf-4619-a635-a937b7be7953")
-                                WSEC_ALLOW       = $false
-                                WSEC_DENY        = $true
-                            }
-                        )
-
                         It "Should return the current permissions from the get method" {
-                            (Get-TargetResource @testParams).AllowPermissions | Should Not BeNullOrEmpty
+                            (Get-TargetResource @testParams).AllowPermissions | Should -Not -BeNullOrEmpty
                         }
 
                         It "Should return true from the set method" {
-                            Test-TargetResource @testParams | Should Be $true
+                            Test-TargetResource @testParams | Should -Be $true
                         }
                     }
                 }
