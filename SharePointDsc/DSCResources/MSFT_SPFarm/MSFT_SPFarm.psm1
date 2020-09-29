@@ -810,10 +810,20 @@ function Set-TargetResource
 
             if ($dbStatus.DatabaseExists -eq $true)
             {
-                Write-Verbose -Message ("The SharePoint config database " +
-                    "'$($params.FarmConfigDatabaseName)' already exists, so " +
-                    "this server will join the farm.")
-                $createFarm = $false
+                if ($dbStatus.DatabaseEmpty -eq $true)
+                {
+                    Write-Verbose -Message ("The SharePoint config database " +
+                        "'$($params.FarmConfigDatabaseName)' exists but is empty, so " +
+                        "this server will create the farm.")
+                    $createFarm = $true
+                }
+                else
+                {
+                    Write-Verbose -Message ("The SharePoint config database " +
+                        "'$($params.FarmConfigDatabaseName)' already exists, so " +
+                        "this server will join the farm.")
+                    $createFarm = $false
+                }
             }
             elseif ($dbStatus.DatabaseExists -eq $false -and $params.RunCentralAdmin -eq $false)
             {

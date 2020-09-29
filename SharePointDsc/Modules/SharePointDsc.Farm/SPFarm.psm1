@@ -79,8 +79,18 @@ function Get-SPDscConfigDBStatus
             }
         }
 
+        $configDBempty = $false
+        if ($configDBexists -eq $true)
+        {
+            # Checking if ConfigDB contains any tables
+            $connection.ChangeDatabase($Database)
+            $command.CommandText = "SELECT COUNT(*) FROM sys.tables"
+            $configDBempty = ($command.ExecuteScalar() -eq 0)
+        }
+
         return @{
             DatabaseExists   = $configDBexists
+            DatabaseEmpty    = $configDBempty
             ValidPermissions = $hasPermissions
             Locked           = $lockExists
         }
