@@ -44,7 +44,12 @@ function Get-SPDscSearchCrawlSchedule
         }
         Default
         {
-            throw "An unknown schedule type was detected"
+            $message = "An unknown schedule type was detected"
+            Add-SPDscEvent -Message $message `
+                -EntryType 'Error' `
+                -EventID 100 `
+                -Source $MyInvocation.MyCommand.Source
+            throw $message
         }
     }
     return $result

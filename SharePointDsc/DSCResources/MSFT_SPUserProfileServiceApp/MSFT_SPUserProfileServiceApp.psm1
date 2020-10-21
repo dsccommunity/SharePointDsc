@@ -98,9 +98,14 @@ function Get-TargetResource
             # InstallAccount used
             if ($InstallAccount.UserName -eq $farmAccount.UserName)
             {
-                throw ("Specified InstallAccount ($($InstallAccount.UserName)) is the Farm " + `
+                $message = ("Specified InstallAccount ($($InstallAccount.UserName)) is the Farm " + `
                         "Account. Make sure the specified InstallAccount isn't the Farm Account " + `
                         "and try again")
+                Add-SPDscEvent -Message $message `
+                    -EntryType 'Error' `
+                    -EventID 100 `
+                    -Source $MyInvocation.MyCommand.Source
+                throw $message
             }
         }
         else
@@ -120,13 +125,19 @@ function Get-TargetResource
     }
     else
     {
-        throw ("Unable to retrieve the Farm Account. Check if the farm exists.")
+        $message = ("Unable to retrieve the Farm Account. Check if the farm exists.")
+        Add-SPDscEvent -Message $message `
+            -EntryType 'Error' `
+            -EventID 100 `
+            -Source $MyInvocation.MyCommand.Source
+        throw $message
     }
 
     $result = Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments $PSBoundParameters `
+        -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
         -ScriptBlock {
         $params = $args[0]
+        $eventSource = $args[1]
 
         $serviceApps = Get-SPServiceApplication -Name $params.Name -ErrorAction SilentlyContinue
         $nullReturn = @{
@@ -212,7 +223,12 @@ function Get-TargetResource
             }
             catch
             {
-                throw "The provided My Site Location is not a valid My Site Host."
+                $message = "The provided My Site Location is not a valid My Site Host."
+                Add-SPDscEvent -Message $message `
+                    -EntryType 'Error' `
+                    -EventID 100 `
+                    -Source $eventSource
+                throw $message
             }
 
             return @{
@@ -341,9 +357,14 @@ function Set-TargetResource
                 # InstallAccount used
                 if ($InstallAccount.UserName -eq $farmAccount.UserName)
                 {
-                    throw ("Specified InstallAccount ($($InstallAccount.UserName)) is the Farm " + `
+                    $message = ("Specified InstallAccount ($($InstallAccount.UserName)) is the Farm " + `
                             "Account. Make sure the specified InstallAccount isn't the Farm Account " + `
                             "and try again")
+                    Add-SPDscEvent -Message $message `
+                        -EntryType 'Error' `
+                        -EventID 100 `
+                        -Source $MyInvocation.MyCommand.Source
+                    throw $message
                 }
                 $setupAccount = $InstallAccount.UserName
             }
@@ -356,9 +377,14 @@ function Set-TargetResource
                     $localaccount = "$($Env:USERDOMAIN)\$($Env:USERNAME)"
                     if ($localaccount -eq $farmAccount.UserName)
                     {
-                        throw ("Specified PSDSCRunAsCredential ($localaccount) is the Farm " + `
+                        $message = ("Specified PSDSCRunAsCredential ($localaccount) is the Farm " + `
                                 "Account. Make sure the specified PSDSCRunAsCredential isn't the " + `
                                 "Farm Account and try again")
+                        Add-SPDscEvent -Message $message `
+                            -EntryType 'Error' `
+                            -EventID 100 `
+                            -Source $MyInvocation.MyCommand.Source
+                        throw $message
                     }
                     $setupAccount = $localaccount
                 }
@@ -366,7 +392,12 @@ function Set-TargetResource
         }
         else
         {
-            throw ("Unable to retrieve the Farm Account. Check if the farm exists.")
+            $message = ("Unable to retrieve the Farm Account. Check if the farm exists.")
+            Add-SPDscEvent -Message $message `
+                -EntryType 'Error' `
+                -EventID 100 `
+                -Source $MyInvocation.MyCommand.Source
+            throw $message
         }
 
         Write-Verbose -Message "Creating user profile service application $Name"
@@ -387,10 +418,11 @@ function Set-TargetResource
         }
 
         $null = Invoke-SPDscCommand -Credential $FarmAccount `
-            -Arguments @($PSBoundParameters, $setupAccount) `
+            -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source, $setupAccount) `
             -ScriptBlock {
             $params = $args[0]
-            $setupAccount = $args[1]
+            $eventSource = $args[1]
+            $setupAccount = $args[2]
 
             $updateEnableNetBIOS = $false
             if ($params.ContainsKey("EnableNetBIOS"))
@@ -428,13 +460,13 @@ function Set-TargetResource
                 $params.Remove("Ensure") | Out-Null
             }
 
-            $params = Rename-SPDscParamValue -params $params `
-                -oldName "SyncDBName" `
-                -newName "ProfileSyncDBName"
+            $params = Rename-SPDscParamValue -Params $params `
+                -OldName "SyncDBName" `
+                -NewName "ProfileSyncDBName"
 
-            $params = Rename-SPDscParamValue -params $params `
-                -oldName "SyncDBServer" `
-                -newName "ProfileSyncDBServer"
+            $params = Rename-SPDscParamValue -Params $params `
+                -OldName "SyncDBServer" `
+                -NewName "ProfileSyncDBServer"
 
             $pName = "$($params.Name) Proxy"
 
@@ -466,8 +498,13 @@ function Set-TargetResource
                 $app = New-SPProfileServiceApplication @params
                 if ($null -eq $app)
                 {
-                    throw ("An error occurred during creation of the service application: " + `
+                    $message = ("An error occurred during creation of the service application: " + `
                             $_.Exception.Message)
+                    Add-SPDscEvent -Message $message `
+                        -EntryType 'Error' `
+                        -EventID 100 `
+                        -Source $eventSource
+                    throw $message
                 }
                 New-SPProfileServiceApplicationProxy -Name $pName `
                     -ServiceApplication $app `

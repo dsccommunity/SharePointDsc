@@ -36,7 +36,12 @@ function Get-SPDscProjectServerGlobalPermissionId
                 $errorString += ", $($_.Name)"
             }
         }
-        throw "Unable to find permission '$PermissionName' - acceptable values are: $errorString"
+        $message = "Unable to find permission '$PermissionName' - acceptable values are: $errorString"
+        Add-SPDscEvent -Message $message `
+            -EntryType 'Error' `
+            -EventID 100 `
+            -Source $MyInvocation.MyCommand.Source
+        throw $message
     }
 
     return $result
@@ -62,7 +67,12 @@ function Get-SPDscProjectServerPermissionName
 
     if ($null -eq $result)
     {
-        throw "Unable to find permission with ID '$PermissionId'"
+        $message = "Unable to find permission with ID '$PermissionId'"
+        Add-SPDscEvent -Message $message `
+            -EntryType 'Error' `
+            -EventID 100 `
+            -Source $MyInvocation.MyCommand.Source
+        throw $message
     }
     return $result
 }
@@ -132,12 +142,22 @@ function Get-SPDscProjectServerResourceId
             }
             if ($null -eq $script:SPDscReturnVal)
             {
-                throw "Resource '$ResourceName' not found"
+                $message = "Resource '$ResourceName' not found"
+                Add-SPDscEvent -Message $message `
+                    -EntryType 'Error' `
+                    -EventID 100 `
+                    -Source $MyInvocation.MyCommand.Source
+                throw $message
             }
         }
         else
         {
-            throw "Resource '$ResourceName' not found"
+            $message = "Resource '$ResourceName' not found"
+            Add-SPDscEvent -Message $message `
+                -EntryType 'Error' `
+                -EventID 100 `
+                -Source $MyInvocation.MyCommand.Source
+            throw $message
         }
     }
     return $script:SPDscReturnVal
@@ -198,8 +218,13 @@ function New-SPDscProjectServerWebService
     $filehash = "44CC60C2227011D08F36A7954C317195C0A44F3D52D51B0F54009AA03EF97E1B2F80A162D76F177E70D1756E42484DF367FACB25920C2C93FB8DFB8A8F5F08A5"
     if ($filehash -ne (Get-FileHash -Path $psDllPath -Algorithm SHA512).Hash)
     {
-        throw ("The hash for ProjectServerServices.dll isn't the expected value. Please make " + `
+        $message = ("The hash for ProjectServerServices.dll isn't the expected value. Please make " + `
                 "sure the correct file exists on the file system.")
+        Add-SPDscEvent -Message $message `
+            -EntryType 'Error' `
+            -EventID 100 `
+            -Source $MyInvocation.MyCommand.Source
+        throw $message
     }
     $bytes = [System.IO.File]::ReadAllBytes($psDllPath)
     [System.Reflection.Assembly]::Load($bytes) | Out-Null

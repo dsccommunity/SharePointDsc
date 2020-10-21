@@ -82,20 +82,31 @@ function Set-TargetResource
     Write-Verbose -Message "Setting service application publish status '$Name'"
 
     Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments $PSBoundParameters `
+        -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
         -ScriptBlock {
         $params = $args[0]
+        $eventSource = $args[1]
 
         $serviceApp = Get-SPServiceApplication -Name $params.Name -ErrorAction SilentlyContinue
         if ($null -eq $serviceApp)
         {
-            throw [Exception] ("The service application $Name does not exist")
+            $message = ("The service application $Name does not exist")
+            Add-SPDscEvent -Message $message `
+                -EntryType 'Error' `
+                -EventID 100 `
+                -Source $eventSource
+            throw $message
         }
 
         if ($null -eq $serviceApp.Uri)
         {
-            throw [Exception] ("Only Business Data Connectivity, Machine Translation, Managed Metadata, " + `
+            $message = ("Only Business Data Connectivity, Machine Translation, Managed Metadata, " + `
                     "User Profile, Search, Secure Store are supported to be published via DSC.")
+            Add-SPDscEvent -Message $message `
+                -EntryType 'Error' `
+                -EventID 100 `
+                -Source $eventSource
+            throw $message
         }
 
         if ($Ensure -eq "Present")

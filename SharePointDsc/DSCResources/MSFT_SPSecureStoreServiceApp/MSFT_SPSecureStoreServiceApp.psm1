@@ -257,16 +257,26 @@ function Set-TargetResource
             ($result.DatabaseServer -ne $DatabaseServer) -and `
             ($DatabaseServer -notlike "$($result.DatabaseServer).*"))
         {
-            throw ("Specified database server does not match the actual " + `
+            $message = ("Specified database server does not match the actual " + `
                     "database server. This resource cannot move the database " + `
                     "to a different SQL instance.")
+            Add-SPDscEvent -Message $message `
+                -EntryType 'Error' `
+                -EventID 100 `
+                -Source $MyInvocation.MyCommand.Source
+            throw $message
         }
 
         if ($PSBoundParameters.ContainsKey("DatabaseName") -and `
             ($result.DatabaseName -ne $DatabaseName))
         {
-            throw ("Specified database name does not match the actual " + `
+            $message = ("Specified database name does not match the actual " + `
                     "database name. This resource cannot rename the database.")
+            Add-SPDscEvent -Message $message `
+                -EntryType 'Error' `
+                -EventID 100 `
+                -Source $MyInvocation.MyCommand.Source
+            throw $message
         }
 
         if ([string]::IsNullOrEmpty($ApplicationPool) -eq $false `

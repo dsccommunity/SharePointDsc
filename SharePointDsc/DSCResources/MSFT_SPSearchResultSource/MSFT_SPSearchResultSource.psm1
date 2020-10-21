@@ -175,25 +175,37 @@ function Set-TargetResource
     {
         Write-Verbose -Message "Creating search result source $Name"
         Invoke-SPDscCommand -Credential $InstallAccount `
-            -Arguments $PSBoundParameters `
+            -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
             -ScriptBlock {
             $params = $args[0]
+            $eventSource = $args[1]
+
             [void] [Reflection.Assembly]::LoadWithPartialName("Microsoft.Office.Server.Search")
 
             $serviceApp = Get-SPEnterpriseSearchServiceApplication `
                 -Identity $params.SearchServiceAppName
             if ($null -eq $serviceApp)
             {
-                throw ("Specified Search service application $($params.SearchServiceAppName)" + `
+                $message = ("Specified Search service application $($params.SearchServiceAppName)" + `
                         "does not exist.")
+                Add-SPDscEvent -Message $message `
+                    -EntryType 'Error' `
+                    -EventID 100 `
+                    -Source $eventSource
+                throw $message
             }
 
             $fedManager = New-Object Microsoft.Office.Server.Search.Administration.Query.FederationManager($serviceApp)
             $providers = $fedManager.ListProviders()
             if ($providers.Keys -notcontains $params.ProviderType)
             {
-                throw ("Unknown ProviderType ($($params.ProviderType)) is used. Allowed " + `
+                $message = ("Unknown ProviderType ($($params.ProviderType)) is used. Allowed " + `
                         "values are: '" + ($providers.Keys -join "', '") + "'")
+                Add-SPDscEvent -Message $message `
+                    -EntryType 'Error' `
+                    -EventID 100 `
+                    -Source $eventSource
+                throw $message
             }
 
             $searchOwner = $null

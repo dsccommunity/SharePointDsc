@@ -25,8 +25,13 @@ function Get-TargetResource
 
     if ((Get-SPDscInstalledProductVersion).FileMajorPart -ne 15)
     {
-        throw [Exception] ("Only SharePoint 2013 is supported to deploy the user profile sync " + `
+        $message = ("Only SharePoint 2013 is supported to deploy the user profile sync " + `
                 "service via DSC, as 2016/2019 do not use the FIM based sync service.")
+        Add-SPDscEvent -Message $message `
+            -EntryType 'Error' `
+            -EventID 100 `
+            -Source $MyInvocation.MyCommand.Source
+        throw $message
     }
 
     $farmAccount = Invoke-SPDscCommand -Credential $InstallAccount `
@@ -42,9 +47,14 @@ function Get-TargetResource
             # InstallAccount used
             if ($InstallAccount.UserName -eq $farmAccount.UserName)
             {
-                throw ("Specified InstallAccount ($($InstallAccount.UserName)) is the Farm " + `
+                $message = ("Specified InstallAccount ($($InstallAccount.UserName)) is the Farm " + `
                         "Account. Make sure the specified InstallAccount isn't the Farm Account " + `
                         "and try again")
+                Add-SPDscEvent -Message $message `
+                    -EntryType 'Error' `
+                    -EventID 100 `
+                    -Source $MyInvocation.MyCommand.Source
+                throw $message
             }
         }
         else
@@ -56,16 +66,26 @@ function Get-TargetResource
                 $localaccount = "$($Env:USERDOMAIN)\$($Env:USERNAME)"
                 if ($localaccount -eq $farmAccount.UserName)
                 {
-                    throw ("Specified PSDSCRunAsCredential ($localaccount) is the Farm " + `
+                    $message = ("Specified PSDSCRunAsCredential ($localaccount) is the Farm " + `
                             "Account. Make sure the specified PSDSCRunAsCredential isn't the " + `
                             "Farm Account and try again")
+                    Add-SPDscEvent -Message $message `
+                        -EntryType 'Error' `
+                        -EventID 100 `
+                        -Source $MyInvocation.MyCommand.Source
+                    throw $message
                 }
             }
         }
     }
     else
     {
-        throw ("Unable to retrieve the Farm Account. Check if the farm exists.")
+        $message = ("Unable to retrieve the Farm Account. Check if the farm exists.")
+        Add-SPDscEvent -Message $message `
+            -EntryType 'Error' `
+            -EventID 100 `
+            -Source $MyInvocation.MyCommand.Source
+        throw $message
     }
 
     $result = Invoke-SPDscCommand -Credential $InstallAccount `
@@ -161,8 +181,13 @@ function Set-TargetResource
 
     if ((Get-SPDscInstalledProductVersion).FileMajorPart -ne 15)
     {
-        throw [Exception] ("Only SharePoint 2013 is supported to deploy the user profile sync " + `
+        $message = ("Only SharePoint 2013 is supported to deploy the user profile sync " + `
                 "service via DSC, as 2016/2019 do not use the FIM based sync service.")
+        Add-SPDscEvent -Message $message `
+            -EntryType 'Error' `
+            -EventID 100 `
+            -Source $MyInvocation.MyCommand.Source
+        throw $message
     }
 
     $farmAccount = Invoke-SPDscCommand -Credential $InstallAccount `
@@ -178,9 +203,14 @@ function Set-TargetResource
             # InstallAccount used
             if ($InstallAccount.UserName -eq $farmAccount.UserName)
             {
-                throw ("Specified InstallAccount ($($InstallAccount.UserName)) is the Farm " + `
+                $message = ("Specified InstallAccount ($($InstallAccount.UserName)) is the Farm " + `
                         "Account. Make sure the specified InstallAccount isn't the Farm Account " + `
                         "and try again")
+                Add-SPDscEvent -Message $message `
+                    -EntryType 'Error' `
+                    -EventID 100 `
+                    -Source $MyInvocation.MyCommand.Source
+                throw $message
             }
         }
         else
@@ -192,16 +222,26 @@ function Set-TargetResource
                 $localaccount = "$($Env:USERDOMAIN)\$($Env:USERNAME)"
                 if ($localaccount -eq $farmAccount.UserName)
                 {
-                    throw ("Specified PSDSCRunAsCredential ($localaccount) is the Farm " + `
+                    $message = ("Specified PSDSCRunAsCredential ($localaccount) is the Farm " + `
                             "Account. Make sure the specified PSDSCRunAsCredential isn't the " + `
                             "Farm Account and try again")
+                    Add-SPDscEvent -Message $message `
+                        -EntryType 'Error' `
+                        -EventID 100 `
+                        -Source $MyInvocation.MyCommand.Source
+                    throw $message
                 }
             }
         }
     }
     else
     {
-        throw ("Unable to retrieve the Farm Account. Check if the farm exists.")
+        $message = ("Unable to retrieve the Farm Account. Check if the farm exists.")
+        Add-SPDscEvent -Message $message `
+            -EntryType 'Error' `
+            -EventID 100 `
+            -Source $MyInvocation.MyCommand.Source
+        throw $message
     }
 
     if ($PSBoundParameters.ContainsKey("RunOnlyWhenWriteable") -eq $true)
@@ -241,10 +281,11 @@ function Set-TargetResource
     try
     {
         Invoke-SPDscCommand -Credential $FarmAccount `
-            -Arguments ($PSBoundParameters, $farmAccount) `
+            -Arguments ($PSBoundParameters, $MyInvocation.MyCommand.Source, $farmAccount) `
             -ScriptBlock {
             $params = $args[0]
-            $farmAccount = $args[1]
+            $eventSource = $args[1]
+            $farmAccount = $args[2]
 
             $currentServer = $env:COMPUTERNAME
 
@@ -263,7 +304,12 @@ function Set-TargetResource
             }
             if ($null -eq $syncService)
             {
-                throw "Unable to locate a user profile sync service instance on $currentServer to start"
+                $message = "Unable to locate a user profile sync service instance on $currentServer to start"
+                Add-SPDscEvent -Message $message `
+                    -EntryType 'Error' `
+                    -EventID 100 `
+                    -Source $eventSource
+                throw $message
             }
 
             # Start the Sync service if it should be running on this server
@@ -273,8 +319,13 @@ function Set-TargetResource
                     -ErrorAction SilentlyContinue
                 if ($null -eq $ups)
                 {
-                    throw [Exception] ("No User Profile Service Application was found " + `
+                    $message = ("No User Profile Service Application was found " + `
                             "named $($params.UserProfileServiceAppName)")
+                    Add-SPDscEvent -Message $message `
+                        -EntryType 'Error' `
+                        -EventID 100 `
+                        -Source $eventSource
+                    throw $message
                 }
 
                 $userName = $farmAccount.UserName
@@ -317,7 +368,12 @@ function Set-TargetResource
 
             if ($syncService.Status -ne $desiredState)
             {
-                throw "An error occured. We couldn't properly set the User Profile Sync Service on the server."
+                $message = "An error occured. We couldn't properly set the User Profile Sync Service on the server."
+                Add-SPDscEvent -Message $message `
+                    -EntryType 'Error' `
+                    -EventID 100 `
+                    -Source $eventSource
+                throw $message
             }
         }
     }
@@ -367,8 +423,13 @@ function Test-TargetResource
 
     if ((Get-SPDscInstalledProductVersion).FileMajorPart -ne 15)
     {
-        throw [Exception] ("Only SharePoint 2013 is supported to deploy the user profile sync " + `
+        $message = ("Only SharePoint 2013 is supported to deploy the user profile sync " + `
                 "service via DSC, as 2016/2019 do not use the FIM based sync service.")
+        Add-SPDscEvent -Message $message `
+            -EntryType 'Error' `
+            -EventID 100 `
+            -Source $MyInvocation.MyCommand.Source
+        throw $message
     }
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
@@ -418,16 +479,22 @@ function Test-SPDscUserProfileDBReadOnly()
     )
 
     $databaseReadOnly = Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments $UserProfileServiceAppName `
+        -Arguments @($UserProfileServiceAppName, $MyInvocation.MyCommand.Source) `
         -ScriptBlock {
         $UserProfileServiceAppName = $args[0]
+        $eventSource = $args[1]
 
         $serviceApps = Get-SPServiceApplication -Name $UserProfileServiceAppName `
             -ErrorAction SilentlyContinue
         if ($null -eq $serviceApps)
         {
-            throw [Exception] ("No user profile service was found " + `
+            $message = ("No user profile service was found " + `
                     "named $UserProfileServiceAppName")
+            Add-SPDscEvent -Message $message `
+                -EntryType 'Error' `
+                -EventID 100 `
+                -Source $eventSource
+            throw $message
         }
         $ups = $serviceApps | Where-Object -FilterScript {
             $_.GetType().FullName -eq "Microsoft.Office.Server.Administration.UserProfileApplication"

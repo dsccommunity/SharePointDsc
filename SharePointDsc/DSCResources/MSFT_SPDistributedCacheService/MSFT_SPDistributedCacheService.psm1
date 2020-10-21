@@ -168,9 +168,10 @@ function Set-TargetResource
         {
             Write-Verbose -Message "Enabling distributed cache service"
             Invoke-SPDscCommand -Credential $InstallAccount `
-                -Arguments $PSBoundParameters `
+                -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
                 -ScriptBlock {
                 $params = $args[0]
+                $eventSource = $args[1]
 
                 if ($params.ContainsKey("ServerProvisionOrder"))
                 {
@@ -235,9 +236,16 @@ function Set-TargetResource
 
                         if ($ServerCount -ge $params.ServerProvisionOrder.Length)
                         {
-                            throw ("The server $($env:COMPUTERNAME) was not found in the " + `
+                            $message = ("The server $($env:COMPUTERNAME) was not found in the " + `
                                     "ServerProvisionOrder array of Distributed Cache server(s).  " + `
-                                    "The server must be included in ServerProvisionOrder or Ensure equal to Absent.")
+                                    "The server must be included in ServerProvisionOrder or Ensure " + `
+                                    "equal to Absent.")
+                            Add-SPDscEvent -Message $message `
+                                -EntryType 'Error' `
+                                -EventID 100 `
+                                -Source $eventSource
+                            throw $message
+
                         }
                         $currentServer = $params.ServerProvisionOrder[$serverCount]
                     }
@@ -334,7 +342,7 @@ function Set-TargetResource
         {
             if ($CurrentState.ServiceAccount -ne $ServiceAccount.UserName)
             {
-                Invoke-SPDSCCommand -Credential $InstallAccount `
+                Invoke-SPDscCommand -Credential $InstallAccount `
                     -Arguments $PSBoundParameters `
                     -ScriptBlock {
                     $params = $args[0]
@@ -366,7 +374,7 @@ function Set-TargetResource
             if ($CurrentState.CacheSizeInMB -ne $CacheSizeInMB)
             {
                 Write-Verbose -Message "Updating distributed cache service cache size"
-                Invoke-SPDSCCommand -Credential $InstallAccount `
+                Invoke-SPDscCommand -Credential $InstallAccount `
                     -Arguments $PSBoundParameters `
                     -ScriptBlock {
                     $params = $args[0]

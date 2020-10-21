@@ -114,16 +114,22 @@ function Set-TargetResource
     $PSBoundParameters.Ensure = $Ensure
 
     Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments $PSBoundParameters `
+        -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
         -ScriptBlock {
         $params = $args[0]
+        $eventSource = $args[1]
 
         $ups = Get-SPServiceApplication -Name $params.UserProfileService `
             -ErrorAction SilentlyContinue
 
         if ($null -eq $ups)
         {
-            throw "Service application $($params.UserProfileService) not found"
+            $message = "Service application $($params.UserProfileService) not found"
+            Add-SPDscEvent -Message $message `
+                -EntryType 'Error' `
+                -EventID 100 `
+                -Source $eventSource
+            throw $message
         }
 
         $caURL = (Get-SpWebApplication  -IncludeCentralAdministration | Where-Object -FilterScript {
@@ -137,7 +143,12 @@ function Set-TargetResource
         if ($null -eq $userProfileConfigManager)
         {
             #if config manager returns null when ups is available then isuee is permissions
-            throw "Account running process needs admin permission on user profile service application"
+            $message = "Account running process needs admin permission on user profile service application"
+            Add-SPDscEvent -Message $message `
+                -EntryType 'Error' `
+                -EventID 100 `
+                -Source $eventSource
+            throw $message
         }
         $properties = $userProfileConfigManager.GetPropertiesWithSection()
         $userProfileProperty = $properties.GetSectionByName($params.Name)

@@ -122,11 +122,16 @@ function Get-TargetResource
 
     if ((Get-SPDscInstalledProductVersion).FileMajorPart -ne 15)
     {
-        throw [Exception] ("Only SharePoint 2013 is supported to deploy Excel Services " + `
+        $message = ("Only SharePoint 2013 is supported to deploy Excel Services " + `
                 "service applications via DSC, as SharePoint 2016 and SharePoint 2019 deprecated " + `
                 "this service. See " + `
                 "https://technet.microsoft.com/en-us/library/mt346112(v=office.16).aspx " + `
                 "for more info.")
+        Add-SPDscEvent -Message $message `
+            -EntryType 'Error' `
+            -EventID 100 `
+            -Source $MyInvocation.MyCommand.Source
+        throw $message
     }
 
     $result = Invoke-SPDscCommand -Credential $InstallAccount `
@@ -311,11 +316,16 @@ function Set-TargetResource
 
     if ((Get-SPDscInstalledProductVersion).FileMajorPart -ne 15)
     {
-        throw [Exception] ("Only SharePoint 2013 is supported to deploy Excel Services " + `
-                "service applications via DSC, as SharePoint 2016 and SharePoint 2019 have deprecated " + `
+        $message = ("Only SharePoint 2013 is supported to deploy Excel Services " + `
+                "service applications via DSC, as SharePoint 2016 and SharePoint 2019 deprecated " + `
                 "this service. See " + `
                 "https://technet.microsoft.com/en-us/library/mt346112(v=office.16).aspx " + `
                 "for more info.")
+        Add-SPDscEvent -Message $message `
+            -EntryType 'Error' `
+            -EventID 100 `
+            -Source $MyInvocation.MyCommand.Source
+        throw $message
     }
     $result = Get-TargetResource @PSBoundParameters
 
@@ -569,11 +579,16 @@ function Test-TargetResource
 
     if ((Get-SPDscInstalledProductVersion).FileMajorPart -ne 15)
     {
-        throw [Exception] ("Only SharePoint 2013 is supported to deploy Excel Services " + `
-                "service applications via DSC, as SharePoint 2016 and SharePoint 2019 have deprecated " + `
+        $message = ("Only SharePoint 2013 is supported to deploy Excel Services " + `
+                "service applications via DSC, as SharePoint 2016 and SharePoint 2019 deprecated " + `
                 "this service. See " + `
                 "https://technet.microsoft.com/en-us/library/mt346112(v=office.16).aspx " + `
                 "for more info.")
+        Add-SPDscEvent -Message $message `
+            -EntryType 'Error' `
+            -EventID 100 `
+            -Source $MyInvocation.MyCommand.Source
+        throw $message
     }
 
     $CurrentValues = Get-TargetResource @PSBoundParameters

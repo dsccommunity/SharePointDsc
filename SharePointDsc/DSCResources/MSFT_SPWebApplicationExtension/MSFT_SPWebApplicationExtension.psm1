@@ -182,14 +182,20 @@ function Set-TargetResource
     if ($Ensure -eq "Present")
     {
         Invoke-SPDscCommand -Credential $InstallAccount `
-            -Arguments $PSBoundParameters `
+            -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
             -ScriptBlock {
             $params = $args[0]
+            $eventSource = $args[1]
 
             $wa = Get-SPWebApplication -Identity $params.WebAppUrl -ErrorAction SilentlyContinue
             if ($null -eq $wa)
             {
-                throw "Web Application with URL $($params.WebAppUrl) does not exist"
+                $message = "Web Application with URL $($params.WebAppUrl) does not exist"
+                Add-SPDscEvent -Message $message `
+                    -EntryType 'Error' `
+                    -EventID 100 `
+                    -Source $eventSource
+                throw $message
             }
 
 
@@ -241,14 +247,20 @@ function Set-TargetResource
     if ($Ensure -eq "Absent")
     {
         Invoke-SPDscCommand -Credential $InstallAccount `
-            -Arguments $PSBoundParameters `
+            -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
             -ScriptBlock {
             $params = $args[0]
+            $eventSource = $args[1]
 
             $wa = Get-SPWebApplication -Identity $params.WebAppUrl -ErrorAction SilentlyContinue
             if ($null -eq $wa)
             {
-                throw "Web Application with URL $($params.WebAppUrl) does not exist"
+                $message = "Web Application with URL $($params.WebAppUrl) does not exist"
+                Add-SPDscEvent -Message $message `
+                    -EntryType 'Error' `
+                    -EventID 100 `
+                    -Source $eventSource
+                throw $message
             }
             if ($null -ne $wa)
             {

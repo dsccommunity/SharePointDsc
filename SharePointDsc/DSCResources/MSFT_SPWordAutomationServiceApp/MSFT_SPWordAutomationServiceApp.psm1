@@ -122,13 +122,23 @@ function Get-TargetResource
                 $MaximumConversionTime) -and `
         ($Ensure -eq "Absent"))
     {
-        throw "You cannot use any of the parameters when Ensure is specified as Absent"
+        $message = "You cannot use any of the parameters when Ensure is specified as Absent"
+        Add-SPDscEvent -Message $message `
+            -EntryType 'Error' `
+            -EventID 100 `
+            -Source $MyInvocation.MyCommand.Source
+        throw $message
     }
 
     if (($Ensure -eq "Present") -and -not ($ApplicationPool -and $DatabaseName))
     {
-        throw ("An Application Pool and Database Name are required to configure the Word " + `
+        $message = ("An Application Pool and Database Name are required to configure the Word " + `
                 "Automation Service Application")
+        Add-SPDscEvent -Message $message `
+            -EntryType 'Error' `
+            -EventID 100 `
+            -Source $MyInvocation.MyCommand.Source
+        throw $message
     }
 
     $result = Invoke-SPDscCommand -Credential $InstallAccount `
@@ -327,15 +337,25 @@ function Set-TargetResource
                 $MaximumConversionTime) -and `
         ($Ensure -eq "Absent"))
     {
-        throw "You cannot use any of the parameters when Ensure is specified as Absent"
+        $message = "You cannot use any of the parameters when Ensure is specified as Absent"
+        Add-SPDscEvent -Message $message `
+            -EntryType 'Error' `
+            -EventID 100 `
+            -Source $MyInvocation.MyCommand.Source
+        throw $message
     }
 
     $PSBoundParameters.Ensure = $Ensure
 
     if (($Ensure -eq "Present") -and -not ($ApplicationPool -and $DatabaseName))
     {
-        throw ("An Application Pool and Database Name are required to configure the Word " + `
+        $message = ("An Application Pool and Database Name are required to configure the Word " + `
                 "Automation Service Application")
+        Add-SPDscEvent -Message $message `
+            -EntryType 'Error' `
+            -EventID 100 `
+            -Source $MyInvocation.MyCommand.Source
+        throw $message
     }
 
     $result = Get-TargetResource @PSBoundParameters
@@ -343,9 +363,10 @@ function Set-TargetResource
     {
         Write-Verbose -Message "Creating Word Automation Service Application $Name"
         Invoke-SPDscCommand -Credential $InstallAccount `
-            -Arguments $PSBoundParameters `
+            -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
             -ScriptBlock {
             $params = $args[0]
+            $eventSource = $args[1]
 
             $appPool = Get-SPServiceApplicationPool -Identity $params.ApplicationPool
             if ($appPool)
@@ -379,7 +400,12 @@ function Set-TargetResource
             }
             else
             {
-                throw "Specified application pool does not exist"
+                $message = "Specified application pool does not exist"
+                Add-SPDscEvent -Message $message `
+                    -EntryType 'Error' `
+                    -EventID 100 `
+                    -Source $eventSource
+                throw $message
             }
         }
     }
@@ -388,9 +414,10 @@ function Set-TargetResource
     {
         Write-Verbose -Message "Updating Word Automation Service Application $Name"
         Invoke-SPDscCommand -Credential $InstallAccount `
-            -Arguments $PSBoundParameters `
+            -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
             -ScriptBlock {
             $params = $args[0]
+            $eventSource = $args[1]
 
             $serviceApp = Get-SPServiceApplication -Name $params.Name `
             | Where-Object -FilterScript {
@@ -501,7 +528,12 @@ function Set-TargetResource
                 }
                 else
                 {
-                    throw "Timerjob could not be found"
+                    $message = "Timerjob could not be found"
+                    Add-SPDscEvent -Message $message `
+                        -EntryType 'Error' `
+                        -EventID 100 `
+                        -Source $eventSource
+                    throw $message
                 }
             }
             if ($params.NumberOfConversionsPerProcess)
@@ -687,13 +719,23 @@ function Test-TargetResource
                 $MaximumConversionTime) -and `
         ($Ensure -eq "Absent"))
     {
-        throw "You cannot use any of the parameters when Ensure is specified as Absent"
+        $message = "You cannot use any of the parameters when Ensure is specified as Absent"
+        Add-SPDscEvent -Message $message `
+            -EntryType 'Error' `
+            -EventID 100 `
+            -Source $MyInvocation.MyCommand.Source
+        throw $message
     }
 
     if (($Ensure -eq "Present") -and -not ($ApplicationPool -and $DatabaseName))
     {
-        throw ("An Application Pool and Database Name are required to configure the Word " + `
+        $message = ("An Application Pool and Database Name are required to configure the Word " + `
                 "Automation Service Application")
+        Add-SPDscEvent -Message $message `
+            -EntryType 'Error' `
+            -EventID 100 `
+            -Source $MyInvocation.MyCommand.Source
+        throw $message
     }
 
     $CurrentValues = Get-TargetResource @PSBoundParameters

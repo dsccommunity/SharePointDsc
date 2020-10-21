@@ -228,14 +228,24 @@ function Set-TargetResource
 
     if ($Members -and (($MembersToInclude) -or ($MembersToExclude)))
     {
-        throw ("Cannot use the Members parameter together with the " + `
+        $message = ("Cannot use the Members parameter together with the " + `
                 "MembersToInclude or MembersToExclude parameters")
+        Add-SPDscEvent -Message $message `
+            -EntryType 'Error' `
+            -EventID 100 `
+            -Source $MyInvocation.MyCommand.Source
+        throw $message
     }
 
     if (!$Members -and !$MembersToInclude -and !$MembersToExclude)
     {
-        throw ("At least one of the following parameters must be specified: " + `
+        $message = ("At least one of the following parameters must be specified: " + `
                 "Members, MembersToInclude, MembersToExclude")
+        Add-SPDscEvent -Message $message `
+            -EntryType 'Error' `
+            -EventID 100 `
+            -Source $MyInvocation.MyCommand.Source
+        throw $message
     }
 
     foreach ($member in $Members)
@@ -243,8 +253,13 @@ function Set-TargetResource
         if (($member.ActAsSystemAccount -eq $true) -and `
             ($member.PermissionLevel -ne "Full Control"))
         {
-            throw ("Members Parameter: You cannot specify ActAsSystemAccount " + `
+            $message = ("Members Parameter: You cannot specify ActAsSystemAccount " + `
                     "with any other permission than Full Control")
+            Add-SPDscEvent -Message $message `
+                -EntryType 'Error' `
+                -EventID 100 `
+                -Source $MyInvocation.MyCommand.Source
+            throw $message
         }
     }
 
@@ -253,8 +268,13 @@ function Set-TargetResource
         if (($member.ActAsSystemAccount -eq $true) -and `
             ($member.PermissionLevel -ne "Full Control"))
         {
-            throw ("MembersToInclude Parameter: You cannot specify ActAsSystemAccount " + `
+            $message = ("MembersToInclude Parameter: You cannot specify ActAsSystemAccount " + `
                     "with any other permission than Full Control")
+            Add-SPDscEvent -Message $message `
+                -EntryType 'Error' `
+                -EventID 100 `
+                -Source $MyInvocation.MyCommand.Source
+            throw $message
         }
     }
 
@@ -266,7 +286,12 @@ function Set-TargetResource
 
     if ($null -eq $CurrentValues.WebAppUrl)
     {
-        throw "Web application does not exist"
+        $message = "Web application does not exist"
+        Add-SPDscEvent -Message $message `
+            -EntryType 'Error' `
+            -EventID 100 `
+            -Source $MyInvocation.MyCommand.Source
+        throw $message
     }
 
     $cacheAccounts = Get-SPDscCacheAccountConfiguration -InputParameters $WebAppUrl
@@ -275,8 +300,13 @@ function Set-TargetResource
     {
         if ($cacheAccounts.SuperUserAccount -eq "" -or $cacheAccounts.SuperReaderAccount -eq "")
         {
-            throw ("Cache accounts not configured properly. PortalSuperUserAccount or " + `
+            $message = ("Cache accounts not configured properly. PortalSuperUserAccount or " + `
                     "PortalSuperReaderAccount property is not configured.")
+            Add-SPDscEvent -Message $message `
+                -EntryType 'Error' `
+                -EventID 100 `
+                -Source $MyInvocation.MyCommand.Source
+            throw $message
         }
     }
 
@@ -398,7 +428,12 @@ function Set-TargetResource
             if (($cacheAccounts.SuperUserAccount -eq $member.Username) -or `
                 ($cacheAccounts.SuperReaderAccount -eq $member.Username))
             {
-                throw "You cannot exclude the Cache accounts from the Web Application Policy"
+                $message = "You cannot exclude the Cache accounts from the Web Application Policy"
+                Add-SPDscEvent -Message $message `
+                    -EntryType 'Error' `
+                    -EventID 100 `
+                    -Source $MyInvocation.MyCommand.Source
+                throw $message
             }
 
             if ($null -ne $policy)
@@ -414,11 +449,12 @@ function Set-TargetResource
 
     ## Perform changes
     Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments @($PSBoundParameters, $PSScriptRoot, $changeUsers) `
+        -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source, $PSScriptRoot, $changeUsers) `
         -ScriptBlock {
         $params = $args[0]
-        $scriptRoot = $args[1]
-        $changeUsers = $args[2]
+        $eventSource = $args[1]
+        $scriptRoot = $args[2]
+        $changeUsers = $args[3]
 
         $modulePath = "..\..\Modules\SharePointDsc.WebAppPolicy\SPWebAppPolicy.psm1"
         Import-Module -Name (Join-Path -Path $scriptRoot -ChildPath $modulePath -Resolve)
@@ -427,7 +463,12 @@ function Set-TargetResource
 
         if ($null -eq $wa)
         {
-            throw "Specified web application could not be found."
+            $message = "Specified web application could not be found."
+            Add-SPDscEvent -Message $message `
+                -EntryType 'Error' `
+                -EventID 100 `
+                -Source $eventSource
+            throw $message
         }
 
         $denyAll = $wa.PolicyRoles.GetSpecialRole([Microsoft.SharePoint.Administration.SPPolicyRoleType]::DenyAll)
@@ -657,8 +698,13 @@ function Test-TargetResource
         if (($cacheAccounts.SuperUserAccount -eq "") -or `
             ($cacheAccounts.SuperReaderAccount -eq ""))
         {
-            throw "Cache accounts not configured properly. PortalSuperUserAccount or " + `
+            $message = "Cache accounts not configured properly. PortalSuperUserAccount or " + `
                 "PortalSuperReaderAccount property is not configured."
+            Add-SPDscEvent -Message $message `
+                -EntryType 'Error' `
+                -EventID 100 `
+                -Source $MyInvocation.MyCommand.Source
+            throw $message
         }
     }
 
@@ -839,7 +885,12 @@ function Test-TargetResource
             if (($cacheAccounts.SuperUserAccount -eq $member.Username) -or `
                 ($cacheAccounts.SuperReaderAccount -eq $member.Username))
             {
-                throw "You cannot exclude the Cache accounts from the Web Application Policy"
+                $message = "You cannot exclude the Cache accounts from the Web Application Policy"
+                Add-SPDscEvent -Message $message `
+                    -EntryType 'Error' `
+                    -EventID 100 `
+                    -Source $MyInvocation.MyCommand.Source
+                throw $message
             }
 
             foreach ($policy in $CurrentValues.Members)
@@ -898,16 +949,22 @@ function Get-SPDscCacheAccountConfiguration()
     )
 
     $cacheAccounts = Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments $InputParameters `
+        -Arguments @($InputParameters, $MyInvocation.MyCommand.Source) `
         -ScriptBlock {
         Write-Verbose -Message "Retrieving CacheAccounts"
         $params = $args[0]
+        $eventSource = $args[1]
 
         $wa = Get-SPWebApplication -Identity $params -ErrorAction SilentlyContinue
 
         if ($null -eq $wa)
         {
-            throw "Specified web application could not be found."
+            $message = "Specified web application could not be found."
+            Add-SPDscEvent -Message $message `
+                -EntryType 'Error' `
+                -EventID 100 `
+                -Source $eventSource
+            throw $message
         }
 
         $returnval = @{

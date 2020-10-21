@@ -61,6 +61,28 @@ try
 
                 Mock Publish-SPServiceApplication { }
                 Mock Unpublish-SPServiceApplication { }
+
+                function Add-SPDscEvent
+                {
+                    param (
+                        [Parameter(Mandatory = $true)]
+                        [System.String]
+                        $Message,
+
+                        [Parameter(Mandatory = $true)]
+                        [System.String]
+                        $Source,
+
+                        [Parameter()]
+                        [ValidateSet('Error', 'Information', 'FailureAudit', 'SuccessAudit', 'Warning')]
+                        [System.String]
+                        $EntryType,
+
+                        [Parameter()]
+                        [System.UInt32]
+                        $EventID
+                    )
+                }
             }
 
             Context -Name "An invalid service application is specified to be published" {

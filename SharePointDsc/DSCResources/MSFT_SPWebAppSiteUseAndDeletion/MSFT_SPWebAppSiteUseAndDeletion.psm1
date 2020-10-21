@@ -111,9 +111,10 @@ function Set-TargetResource
     Write-Verbose -Message "Setting web application '$WebAppUrl' Site Use and Deletion settings"
 
     Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments $PSBoundParameters `
+        -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
         -ScriptBlock {
         $params = $args[0]
+        $eventSource = $args[1]
 
         try
         {
@@ -121,21 +122,36 @@ function Set-TargetResource
         }
         catch
         {
-            throw ("No local SharePoint farm was detected. Site Use and Deletion settings " + `
+            $message = ("No local SharePoint farm was detected. Site Use and Deletion settings " + `
                     "will not be applied")
+            Add-SPDscEvent -Message $message `
+                -EntryType 'Error' `
+                -EventID 100 `
+                -Source $eventSource
+            throw $message
         }
 
         $wa = Get-SPWebApplication -Identity $params.WebAppUrl -ErrorAction SilentlyContinue
         if ($null -eq $wa)
         {
-            throw "Configured web application could not be found"
+            $message = "Configured web application could not be found"
+            Add-SPDscEvent -Message $message `
+                -EntryType 'Error' `
+                -EventID 100 `
+                -Source $eventSource
+            throw $message
         }
 
         # Check if the specified value is in the range for the configured schedule
         $job = Get-SPTimerJob -Identity job-dead-site-delete -WebApplication $params.WebAppUrl
         if ($null -eq $job)
         {
-            throw "Dead Site Delete timer job for web application $($params.WebAppUrl) could not be found"
+            $message = "Dead Site Delete timer job for web application $($params.WebAppUrl) could not be found"
+            Add-SPDscEvent -Message $message `
+                -EntryType 'Error' `
+                -EventID 100 `
+                -Source $eventSource
+            throw $message
         }
         else
         {
@@ -147,8 +163,13 @@ function Set-TargetResource
                     if (($params.UnusedSiteNotificationsBeforeDeletion -lt 28) -or
                         ($params.UnusedSiteNotificationsBeforeDeletion -gt 168))
                     {
-                        throw ("Value of UnusedSiteNotificationsBeforeDeletion has to be >28 and " + `
+                        $message = ("Value of UnusedSiteNotificationsBeforeDeletion has to be >28 and " + `
                                 "<168 when the schedule is set to daily")
+                        Add-SPDscEvent -Message $message `
+                            -EntryType 'Error' `
+                            -EventID 100 `
+                            -Source $eventSource
+                        throw $message
                     }
                 }
                 "Weekly"
@@ -156,8 +177,13 @@ function Set-TargetResource
                     if (($params.UnusedSiteNotificationsBeforeDeletion -lt 4) -or
                         ($params.UnusedSiteNotificationsBeforeDeletion -gt 24))
                     {
-                        throw ("Value of UnusedSiteNotificationsBeforeDeletion has to be >4 and " + `
+                        $message = ("Value of UnusedSiteNotificationsBeforeDeletion has to be >4 and " + `
                                 "<24 when the schedule is set to weekly")
+                        Add-SPDscEvent -Message $message `
+                            -EntryType 'Error' `
+                            -EventID 100 `
+                            -Source $eventSource
+                        throw $message
                     }
                 }
                 "Monthly"
@@ -165,8 +191,13 @@ function Set-TargetResource
                     if (($params.UnusedSiteNotificationsBeforeDeletion -lt 2) -or
                         ($params.UnusedSiteNotificationsBeforeDeletion -gt 6))
                     {
-                        throw ("Value of UnusedSiteNotificationsBeforeDeletion has to be >2 and " + `
+                        $message = ("Value of UnusedSiteNotificationsBeforeDeletion has to be >2 and " + `
                                 "<6 when the schedule is set to monthly")
+                        Add-SPDscEvent -Message $message `
+                            -EntryType 'Error' `
+                            -EventID 100 `
+                            -Source $eventSource
+                        throw $message
                     }
                 }
             }

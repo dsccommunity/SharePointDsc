@@ -60,6 +60,28 @@ try
                     Mock -CommandName Remove-SPServiceApplication -MockWith { }
                     Mock -CommandName New-SPWorkManagementServiceApplication -MockWith { }
                     Mock -CommandName New-SPWorkManagementServiceApplicationProxy -MockWith { }
+
+                    function Add-SPDscEvent
+                    {
+                        param (
+                            [Parameter(Mandatory = $true)]
+                            [System.String]
+                            $Message,
+
+                            [Parameter(Mandatory = $true)]
+                            [System.String]
+                            $Source,
+
+                            [Parameter()]
+                            [ValidateSet('Error', 'Information', 'FailureAudit', 'SuccessAudit', 'Warning')]
+                            [System.String]
+                            $EntryType,
+
+                            [Parameter()]
+                            [System.UInt32]
+                            $EventID
+                        )
+                    }
                 }
             }
 

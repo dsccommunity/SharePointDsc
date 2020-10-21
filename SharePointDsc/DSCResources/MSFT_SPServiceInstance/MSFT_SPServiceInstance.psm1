@@ -95,7 +95,7 @@ function Set-TargetResource
     $newName = (Get-SPDscServiceTypeName -DisplayName $Name)
     $invokeArgs = @{
         Credential = $InstallAccount
-        Arguments  = @($PSBoundParameters, $newName)
+        Arguments  = @($PSBoundParameters, $MyInvocation.MyCommand.Source, $newName)
     }
 
     if ($Ensure -eq "Present")
@@ -104,7 +104,8 @@ function Set-TargetResource
 
         Invoke-SPDscCommand @invokeArgs -ScriptBlock {
             $params = $args[0]
-            $newName = $args[1]
+            $eventSource = $args[1]
+            $newName = $args[2]
 
             $computerName = $env:COMPUTERNAME
             $si = Get-SPServiceInstance -Server $computerName -All | Where-Object -FilterScript {
@@ -126,7 +127,12 @@ function Set-TargetResource
 
             if ($null -eq $si)
             {
-                throw [Exception] "Unable to locate service instance '$($params.Name)'"
+                $message = "Unable to locate service instance '$($params.Name)'"
+                Add-SPDscEvent -Message $message `
+                    -EntryType 'Error' `
+                    -EventID 100 `
+                    -Source $eventSource
+                throw $message
             }
 
             Start-SPServiceInstance -Identity $si
@@ -158,7 +164,8 @@ function Set-TargetResource
 
         Invoke-SPDscCommand @invokeArgs -ScriptBlock {
             $params = $args[0]
-            $newName = $args[1]
+            $eventSource = $args[1]
+            $newName = $args[2]
 
             $si = Get-SPServiceInstance -Server $env:COMPUTERNAME -All | Where-Object -FilterScript {
                 $_.TypeName -eq $params.Name -or `
@@ -178,7 +185,12 @@ function Set-TargetResource
             }
             if ($null -eq $si)
             {
-                throw [Exception] "Unable to locate service instance '$($params.Name)'"
+                $message = "Unable to locate service instance '$($params.Name)'"
+                Add-SPDscEvent -Message $message `
+                    -EntryType 'Error' `
+                    -EventID 100 `
+                    -Source $eventSource
+                throw $message
             }
             Stop-SPServiceInstance -Identity $si
 

@@ -32,9 +32,14 @@ function Get-TargetResource
     if ((Get-SPDscInstalledProductVersion).FileMajorPart -eq 15 `
             -and (Get-SPDscInstalledProductVersion).FileBuildPart -lt 4605)
     {
-        throw [Exception] ("Adding databases to SQL Always-On Availability Groups " + `
+        $message = ("Adding databases to SQL Always-On Availability Groups " + `
                 "require the SharePoint 2013 April 2014 CU to be installed. " + `
                 "http://support.microsoft.com/kb/2880551")
+        Add-SPDscEvent -Message $message `
+            -EntryType 'Error' `
+            -EventID 100 `
+            -Source $MyInvocation.MyCommand.Source
+        throw $message
     }
 
     if ($Ensure -eq "Present")
@@ -158,18 +163,24 @@ function Set-TargetResource
     if ((Get-SPDscInstalledProductVersion).FileMajorPart -eq 15 `
             -and (Get-SPDscInstalledProductVersion).FileBuildPart -lt 4605)
     {
-        throw [Exception] ("Adding databases to SQL Always-On Availability Groups " + `
+        $message = ("Adding databases to SQL Always-On Availability Groups " + `
                 "require the SharePoint 2013 April 2014 CU to be installed. " + `
                 "http://support.microsoft.com/kb/2880551")
+        Add-SPDscEvent -Message $message `
+            -EntryType 'Error' `
+            -EventID 100 `
+            -Source $MyInvocation.MyCommand.Source
+        throw $message
     }
 
     if ($Ensure -eq "Present")
     {
         Write-Verbose -Message "Checking AAG settings for $DatabaseName"
         Invoke-SPDscCommand -Credential $InstallAccount `
-            -Arguments ($PSBoundParameters) `
+            -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
             -ScriptBlock {
             $params = $args[0]
+            $eventSource = $args[1]
 
             $databases = Get-SPDatabase | Where-Object -FilterScript {
                 $_.Name -like $params.DatabaseName
@@ -218,7 +229,12 @@ function Set-TargetResource
             }
             else
             {
-                throw "Specified database(s) not found."
+                $message = "Specified database(s) not found."
+                Add-SPDscEvent -Message $message `
+                    -EntryType 'Error' `
+                    -EventID 100 `
+                    -Source $eventSource
+                throw $message
             }
         }
     }
@@ -226,9 +242,10 @@ function Set-TargetResource
     {
         Write-Verbose -Message "Removing $DatabaseName from $AGName"
         Invoke-SPDscCommand -Credential $InstallAccount `
-            -Arguments $PSBoundParameters `
+            -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
             -ScriptBlock {
             $params = $args[0]
+            $eventSource = $args[1]
 
             $databases = Get-SPDatabase | Where-Object -FilterScript {
                 $_.Name -like $params.DatabaseName
@@ -245,7 +262,12 @@ function Set-TargetResource
             }
             else
             {
-                throw "Specified database(s) not found."
+                $message = "Specified database(s) not found."
+                Add-SPDscEvent -Message $message `
+                    -EntryType 'Error' `
+                    -EventID 100 `
+                    -Source $eventSource
+                throw $message
             }
         }
     }

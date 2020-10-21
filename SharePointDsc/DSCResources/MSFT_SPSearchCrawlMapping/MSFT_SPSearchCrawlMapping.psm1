@@ -124,14 +124,20 @@ function Set-TargetResource
         Write-Verbose "Adding the Crawl Mapping '$Url'"
 
         Invoke-SPDscCommand -Credential $InstallAccount `
-            -Arguments $PSBoundParameters `
+            -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
             -ScriptBlock {
             $params = $args[0]
+            $eventSource = $args[1]
 
             $searchApp = Get-SPEnterpriseSearchServiceApplication -Identity $params.ServiceAppName
             if ($null -eq $searchApp)
             {
-                throw [Exception] "The Search Service Application does not exist"
+                $message = "The Search Service Application does not exist"
+                Add-SPDscEvent -Message $message `
+                    -EntryType 'Error' `
+                    -EventID 100 `
+                    -Source $eventSource
+                throw $message
             }
             else
             {

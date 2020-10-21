@@ -166,6 +166,28 @@ try
                         } -PassThru -Force
                         return $service
                     }
+
+                    function Add-SPDscEvent
+                    {
+                        param (
+                            [Parameter(Mandatory = $true)]
+                            [System.String]
+                            $Message,
+
+                            [Parameter(Mandatory = $true)]
+                            [System.String]
+                            $Source,
+
+                            [Parameter()]
+                            [ValidateSet('Error', 'Information', 'FailureAudit', 'SuccessAudit', 'Warning')]
+                            [System.String]
+                            $EntryType,
+
+                            [Parameter()]
+                            [System.UInt32]
+                            $EventID
+                        )
+                    }
                 }
             }
 

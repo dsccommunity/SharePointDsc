@@ -146,7 +146,12 @@ function Set-TargetResource
         ($PSBoundParameters.ContainsKey("DatabaseName") -eq $false -or
             $PSBoundParameters.ContainsKey("DatabaseServer") -eq $false))
     {
-        throw "Parameter DatabaseName and DatabaseServer are required when Ensure=Present"
+        $message = "Parameter DatabaseName and DatabaseServer are required when Ensure=Present"
+        Add-SPDscEvent -Message $message `
+            -EntryType 'Error' `
+            -EventID 100 `
+            -Source $MyInvocation.MyCommand.Source
+        throw $message
     }
 
     $result = Get-TargetResource @PSBoundParameters

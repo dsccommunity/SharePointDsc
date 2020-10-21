@@ -58,15 +58,25 @@ function Get-TargetResource
     # AuthenticationType=CertificateName and CertificateRuleAccess parameters not specified
     if ($AuthenticationType -eq "CertificateRuleAccess" -and -not $CertificateName)
     {
-        throw ("When AuthenticationType=CertificateRuleAccess, the parameter " + `
+        $message = ("When AuthenticationType=CertificateRuleAccess, the parameter " + `
                 "CertificateName is required")
+        Add-SPDscEvent -Message $message `
+            -EntryType 'Error' `
+            -EventID 100 `
+            -Source $MyInvocation.MyCommand.Source
+        throw $message
     }
 
     # AuthenticationType=CertificateName and CertificateRuleAccess parameters not
     # specified correctly
     if ($AuthenticationType -ne "CertificateRuleAccess" -and $CertificateName)
     {
-        throw "When specifying CertificateName, the AuthenticationType parameter is required"
+        $message = "When specifying CertificateName, the AuthenticationType parameter is required"
+        Add-SPDscEvent -Message $message `
+            -EntryType 'Error' `
+            -EventID 100 `
+            -Source $MyInvocation.MyCommand.Source
+        throw $message
     }
 
     # AuthenticationType=NTLMAccountRuleAccess and AuthenticationCredentialsparameters
@@ -75,8 +85,13 @@ function Get-TargetResource
                 -or $AuthenticationType -eq "BasicAccountRuleAccess") `
             -and -not $AuthenticationCredentials)
     {
-        throw ("When AuthenticationType is NTLMAccountRuleAccess or BasicAccountRuleAccess, " + `
+        $message = ("When AuthenticationType is NTLMAccountRuleAccess or BasicAccountRuleAccess, " + `
                 "the parameter AuthenticationCredentials is required")
+        Add-SPDscEvent -Message $message `
+            -EntryType 'Error' `
+            -EventID 100 `
+            -Source $MyInvocation.MyCommand.Source
+        throw $message
     }
 
     # AuthenticationCredentials parameters, but AuthenticationType is not NTLMAccountRuleAccess
@@ -85,8 +100,13 @@ function Get-TargetResource
             -and $AuthenticationType -ne "NTLMAccountRuleAccess" `
             -and $AuthenticationType -ne "BasicAccountRuleAccess")
     {
-        throw ("When specifying AuthenticationCredentials, the AuthenticationType " + `
+        $message = ("When specifying AuthenticationCredentials, the AuthenticationType " + `
                 "parameter is required")
+        Add-SPDscEvent -Message $message `
+            -EntryType 'Error' `
+            -EventID 100 `
+            -Source $MyInvocation.MyCommand.Source
+        throw $message
     }
 
     # ExclusionRule only with CrawlConfigurationRules=CrawlComplexUrls
@@ -94,8 +114,13 @@ function Get-TargetResource
             -and ($CrawlConfigurationRules -contains "CrawlAsHTTP" `
                 -or $CrawlConfigurationRules -contains "FollowLinksNoPageCrawl"))
     {
-        throw ("When RuleType=ExclusionRule, CrawlConfigurationRules cannot contain " + `
+        $message = ("When RuleType=ExclusionRule, CrawlConfigurationRules cannot contain " + `
                 "the values FollowLinksNoPageCrawl or CrawlAsHTTP")
+        Add-SPDscEvent -Message $message `
+            -EntryType 'Error' `
+            -EventID 100 `
+            -Source $MyInvocation.MyCommand.Source
+        throw $message
     }
 
     # ExclusionRule cannot be used with AuthenticationCredentials, CertificateName or
@@ -103,8 +128,13 @@ function Get-TargetResource
     if ($RuleType -eq "ExclusionRule" `
             -and ($AuthenticationCredentials -or $CertificateName -or $AuthenticationType))
     {
-        throw ("When Type=ExclusionRule, parameters AuthenticationCredentials, " + `
+        $message = ("When Type=ExclusionRule, parameters AuthenticationCredentials, " + `
                 "CertificateName or AuthenticationType are not allowed")
+        Add-SPDscEvent -Message $message `
+            -EntryType 'Error' `
+            -EventID 100 `
+            -Source $MyInvocation.MyCommand.Source
+        throw $message
     }
 
     $result = Invoke-SPDscCommand -Credential $InstallAccount `
@@ -283,15 +313,25 @@ function Set-TargetResource
     # AuthenticationType=CertificateName and CertificateRuleAccess parameters not specified
     if ($AuthenticationType -eq "CertificateRuleAccess" -and -not $CertificateName)
     {
-        throw ("When AuthenticationType=CertificateRuleAccess, the parameter " + `
+        $message = ("When AuthenticationType=CertificateRuleAccess, the parameter " + `
                 "CertificateName is required")
+        Add-SPDscEvent -Message $message `
+            -EntryType 'Error' `
+            -EventID 100 `
+            -Source $MyInvocation.MyCommand.Source
+        throw $message
     }
 
     # AuthenticationType=CertificateName and CertificateRuleAccess parameters not
     # specified correctly
     if ($AuthenticationType -ne "CertificateRuleAccess" -and $CertificateName)
     {
-        throw "When specifying CertificateName, the AuthenticationType parameter is required"
+        $message = "When specifying CertificateName, the AuthenticationType parameter is required"
+        Add-SPDscEvent -Message $message `
+            -EntryType 'Error' `
+            -EventID 100 `
+            -Source $MyInvocation.MyCommand.Source
+        throw $message
     }
 
     # AuthenticationType=NTLMAccountRuleAccess and AuthenticationCredentialsparameters
@@ -300,8 +340,13 @@ function Set-TargetResource
                 -or $AuthenticationType -eq "BasicAccountRuleAccess") `
             -and -not $AuthenticationCredentials)
     {
-        throw ("When AuthenticationType is NTLMAccountRuleAccess or BasicAccountRuleAccess, " + `
+        $message = ("When AuthenticationType is NTLMAccountRuleAccess or BasicAccountRuleAccess, " + `
                 "the parameter AuthenticationCredentials is required")
+        Add-SPDscEvent -Message $message `
+            -EntryType 'Error' `
+            -EventID 100 `
+            -Source $MyInvocation.MyCommand.Source
+        throw $message
     }
 
     # AuthenticationCredentials parameters, but AuthenticationType is not NTLMAccountRuleAccess
@@ -310,8 +355,13 @@ function Set-TargetResource
             -and $AuthenticationType -ne "NTLMAccountRuleAccess" `
             -and $AuthenticationType -ne "BasicAccountRuleAccess")
     {
-        throw ("When specifying AuthenticationCredentials, the AuthenticationType " + `
+        $message = ("When specifying AuthenticationCredentials, the AuthenticationType " + `
                 "parameter is required")
+        Add-SPDscEvent -Message $message `
+            -EntryType 'Error' `
+            -EventID 100 `
+            -Source $MyInvocation.MyCommand.Source
+        throw $message
     }
 
     # ExclusionRule only with CrawlConfigurationRules=CrawlComplexUrls
@@ -319,8 +369,13 @@ function Set-TargetResource
             -and ($CrawlConfigurationRules -contains "CrawlAsHTTP" `
                 -or $CrawlConfigurationRules -contains "FollowLinksNoPageCrawl"))
     {
-        throw ("When RuleType=ExclusionRule, CrawlConfigurationRules cannot contain " + `
+        $message = ("When RuleType=ExclusionRule, CrawlConfigurationRules cannot contain " + `
                 "the values FollowLinksNoPageCrawl or CrawlAsHTTP")
+        Add-SPDscEvent -Message $message `
+            -EntryType 'Error' `
+            -EventID 100 `
+            -Source $MyInvocation.MyCommand.Source
+        throw $message
     }
 
     # ExclusionRule cannot be used with AuthenticationCredentials, CertificateName or
@@ -328,8 +383,13 @@ function Set-TargetResource
     if ($RuleType -eq "ExclusionRule" `
             -and ($AuthenticationCredentials -or $CertificateName -or $AuthenticationType))
     {
-        throw ("When Type=ExclusionRule, parameters AuthenticationCredentials, " + `
+        $message = ("When Type=ExclusionRule, parameters AuthenticationCredentials, " + `
                 "CertificateName or AuthenticationType are not allowed")
+        Add-SPDscEvent -Message $message `
+            -EntryType 'Error' `
+            -EventID 100 `
+            -Source $MyInvocation.MyCommand.Source
+        throw $message
     }
 
     if ($result.Ensure -eq "Absent" -and $Ensure -eq "Present")

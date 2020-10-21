@@ -155,9 +155,10 @@ function Set-TargetResource
     Write-Verbose -Message "Setting Health Analyzer Rule configuration settings"
 
     Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments $PSBoundParameters `
+        -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
         -ScriptBlock {
         $params = $args[0]
+        $eventSource = $args[1]
 
         try
         {
@@ -165,8 +166,13 @@ function Set-TargetResource
         }
         catch
         {
-            throw ("No local SharePoint farm was detected. Health Analyzer Rule " + `
+            $message = ("No local SharePoint farm was detected. Health Analyzer Rule " + `
                     "settings will not be applied")
+            Add-SPDscEvent -Message $message `
+                -EntryType 'Error' `
+                -EventID 100 `
+                -Source $eventSource
+            throw $message
         }
 
         $caWebapp = Get-SPwebapplication -IncludeCentralAdministration `
@@ -176,8 +182,13 @@ function Set-TargetResource
 
         if ($null -eq $caWebapp)
         {
-            throw ("No Central Admin web application was found. Health Analyzer Rule " + `
+            $message = ("No Central Admin web application was found. Health Analyzer Rule " + `
                     "settings will not be applied")
+            Add-SPDscEvent -Message $message `
+                -EntryType 'Error' `
+                -EventID 100 `
+                -Source $eventSource
+            throw $message
         }
 
         # Get Central Admin SPWeb
@@ -215,15 +226,25 @@ function Set-TargetResource
             }
             else
             {
-                throw ("Could not find specified Health Analyzer Rule. Health Analyzer Rule " + `
+                $message = ("Could not find specified Health Analyzer Rule. Health Analyzer Rule " + `
                         "settings will not be applied. Make sure any related service " + `
                         "applications exists")
+                Add-SPDscEvent -Message $message `
+                    -EntryType 'Error' `
+                    -EventID 100 `
+                    -Source $eventSource
+                throw $message
             }
         }
         else
         {
-            throw ("Could not find Health Analyzer Rules list. Health Analyzer Rule settings " + `
+            $message = ("Could not find Health Analyzer Rules list. Health Analyzer Rule settings " + `
                     "will not be applied")
+            Add-SPDscEvent -Message $message `
+                -EntryType 'Error' `
+                -EventID 100 `
+                -Source $eventSource
+            throw $message
         }
     }
 }

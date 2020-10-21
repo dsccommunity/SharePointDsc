@@ -85,8 +85,11 @@ function Set-TargetResource
 
     Write-Verbose -Message "Setting service instance '$Name' to '$ManagedAccount'"
 
-    Invoke-SPDscCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+    Invoke-SPDscCommand -Credential $InstallAccount `
+        -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
+        -ScriptBlock {
         $params = $args[0]
+        $eventSource = $args[1]
 
         if ($params.Name -eq "SharePoint Server Search")
         {
@@ -99,12 +102,22 @@ function Set-TargetResource
             }
             if ($null -eq $serviceInstance)
             {
-                throw [System.Exception] "Unable to locate service $($params.Name)"
+                $message = "Unable to locate service $($params.Name)"
+                Add-SPDscEvent -Message $message `
+                    -EntryType 'Error' `
+                    -EventID 100 `
+                    -Source $eventSource
+                throw $message
             }
 
             if ($null -eq $serviceInstance.service.processidentity)
             {
-                throw [System.Exception] "Service $($params.name) does not support setting the process identity"
+                $message = "Service $($params.name) does not support setting the process identity"
+                Add-SPDscEvent -Message $message `
+                    -EntryType 'Error' `
+                    -EventID 100 `
+                    -Source $eventSource
+                throw $message
             }
 
             $processIdentity = $serviceInstance.Service.ProcessIdentity
@@ -122,7 +135,12 @@ function Set-TargetResource
                 -ErrorAction SilentlyContinue
             if ($null -eq $managedAccount)
             {
-                throw [System.Exception] "Unable to locate Managed Account $($params.ManagedAccount)"
+                $message = "Unable to locate Managed Account $($params.ManagedAccount)"
+                Add-SPDscEvent -Message $message `
+                    -EntryType 'Error' `
+                    -EventID 100 `
+                    -Source $eventSource
+                throw $message
             }
 
             $processIdentity.CurrentIdentityType = [Microsoft.SharePoint.Administration.IdentityType]::SpecificUser

@@ -49,9 +49,10 @@ function Get-TargetResource
     Write-Verbose -Message "Getting SPTrustedSecurityTokenIssuer '$Name' settings"
 
     $result = Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments $PSBoundParameters `
+        -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
         -ScriptBlock {
         $params = $args[0]
+        $eventSource = $args[1]
 
         $spTrust = Get-SPTrustedSecurityTokenIssuer -Identity $params.Name `
             -ErrorAction SilentlyContinue
@@ -84,7 +85,12 @@ function Get-TargetResource
                 }
                 catch
                 {
-                    throw ("Signing certificate was not found in path '$($params.SigningCertificateFilePath)'.")
+                    $message = ("Signing certificate was not found in path '$($params.SigningCertificateFilePath)'.")
+                    Add-SPDscEvent -Message $message `
+                        -EntryType 'Error' `
+                        -EventID 100 `
+                        -Source $eventSource
+                    throw $message
                 }
 
                 if ($cert.Thumbprint -match $signingCertificateThumbprint)
@@ -199,42 +205,68 @@ function Set-TargetResource
         if ($PSBoundParameters.ContainsKey("SigningCertificateThumbprint") -and `
                 $PSBoundParameters.ContainsKey("MetadataEndPoint"))
         {
-            throw ("Cannot use both parameters SigningCertificateThumbprint and MetadataEndPoint at the same time.")
+            $message = ("Cannot use both parameters SigningCertificateThumbprint and MetadataEndPoint at the same time.")
+            Add-SPDscEvent -Message $message `
+                -EntryType 'Error' `
+                -EventID 100 `
+                -Source $MyInvocation.MyCommand.Source
+            throw $message
         }
 
         if ($PSBoundParameters.ContainsKey("SigningCertificateFilePath") -and `
                 $PSBoundParameters.ContainsKey("MetadataEndPoint"))
         {
-            throw ("Cannot use both parameters SigningCertificateFilePath and MetadataEndPoint at the same time.")
+            $message = ("Cannot use both parameters SigningCertificateFilePath and MetadataEndPoint at the same time.")
+            Add-SPDscEvent -Message $message `
+                -EntryType 'Error' `
+                -EventID 100 `
+                -Source $MyInvocation.MyCommand.Source
+            throw $message
         }
 
         if ($PSBoundParameters.ContainsKey("SigningCertificateThumbprint") -eq $false -and `
                 $PSBoundParameters.ContainsKey("SigningCertificateFilePath") -eq $false -and `
                 $PSBoundParameters.ContainsKey("MetadataEndPoint") -eq $false)
         {
-            throw ("At least one of the following parameters must be specified: " + `
+            $message = ("At least one of the following parameters must be specified: " + `
                     "SigningCertificateThumbprint, SigningCertificateFilePath, MetadataEndPoint.")
+            Add-SPDscEvent -Message $message `
+                -EntryType 'Error' `
+                -EventID 100 `
+                -Source $MyInvocation.MyCommand.Source
+            throw $message
         }
 
         if ($PSBoundParameters.ContainsKey("MetadataEndPoint") -and `
                 $PSBoundParameters.ContainsKey("RegisteredIssuerNameIdentifier"))
         {
-            throw ("Cannot use both parameters MetadataEndPoint and RegisteredIssuerNameIdentifier at the same time.")
+            $message = ("Cannot use both parameters MetadataEndPoint and RegisteredIssuerNameIdentifier at the same time.")
+            Add-SPDscEvent -Message $message `
+                -EntryType 'Error' `
+                -EventID 100 `
+                -Source $MyInvocation.MyCommand.Source
+            throw $message
         }
 
         if ($PSBoundParameters.ContainsKey("MetadataEndPoint") -and `
                 $PSBoundParameters.ContainsKey("RegisteredIssuerNameRealm"))
         {
-            throw ("Cannot use both parameters MetadataEndPoint and RegisteredIssuerNameRealm at the same time.")
+            $message = ("Cannot use both parameters MetadataEndPoint and RegisteredIssuerNameRealm at the same time.")
+            Add-SPDscEvent -Message $message `
+                -EntryType 'Error' `
+                -EventID 100 `
+                -Source $MyInvocation.MyCommand.Source
+            throw $message
         }
 
         $PSBoundParameters.Add("CurrentValues", $CurrentValues)
 
 
         $null = Invoke-SPDscCommand -Credential $InstallAccount `
-            -Arguments $PSBoundParameters `
+            -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
             -ScriptBlock {
             $params = $args[0]
+            $eventSource = $args[1]
 
             $runParams = @{ }
             if ($params.Description)
@@ -265,13 +297,23 @@ function Set-TargetResource
                     }
                     catch
                     {
-                        throw ("Signing certificate was not found in path '$($params.SigningCertificateFilePath)'.")
+                        $message = ("Signing certificate was not found in path '$($params.SigningCertificateFilePath)'.")
+                        Add-SPDscEvent -Message $message `
+                            -EntryType 'Error' `
+                            -EventID 100 `
+                            -Source $eventSource
+                        throw $message
                     }
                     if ($params.SigningCertificateThumbprint)
                     {
                         if (-not ($params.SigningCertificateThumbprint -eq $cert.Thumbprint))
                         {
-                            throw "Imported certificate thumbprint ($($cert.Thumbprint)) does not match expected thumbprint ($($params.SigningCertificateThumbprint))."
+                            $message = "Imported certificate thumbprint ($($cert.Thumbprint)) does not match expected thumbprint ($($params.SigningCertificateThumbprint))."
+                            Add-SPDscEvent -Message $message `
+                                -EntryType 'Error' `
+                                -EventID 100 `
+                                -Source $eventSource
+                            throw $message
                         }
                     }
                 }
@@ -282,7 +324,12 @@ function Set-TargetResource
 
                     if ($params.SigningCertificateThumbprint -notmatch "^[A-Fa-f0-9]{40}$")
                     {
-                        throw ("Parameter SigningCertificateThumbprint does not match valid format '^[A-Fa-f0-9]{40}$'.")
+                        $message = ("Parameter SigningCertificateThumbprint does not match valid format '^[A-Fa-f0-9]{40}$'.")
+                        Add-SPDscEvent -Message $message `
+                            -EntryType 'Error' `
+                            -EventID 100 `
+                            -Source $eventSource
+                        throw $message
                     }
 
                     $cert = Get-ChildItem -Path Cert:\LocalMachine\My | Where-Object -FilterScript {
@@ -291,8 +338,13 @@ function Set-TargetResource
 
                     if (!$cert)
                     {
-                        throw ("Signing certificate with thumbprint $($params.SigningCertificateThumbprint) " + `
+                        $message = ("Signing certificate with thumbprint $($params.SigningCertificateThumbprint) " + `
                                 "was not found in certificate store 'LocalMachine\My'.")
+                        Add-SPDscEvent -Message $message `
+                            -EntryType 'Error' `
+                            -EventID 100 `
+                            -Source $eventSource
+                        throw $message
                     }
                 }
 
@@ -404,33 +456,58 @@ function Test-TargetResource
     if ($PSBoundParameters.ContainsKey("SigningCertificateThumbprint") -and `
             $PSBoundParameters.ContainsKey("MetadataEndPoint"))
     {
-        throw ("Cannot use both parameters SigningCertificateThumbprint and MetadataEndPoint at the same time.")
+        $message = ("Cannot use both parameters SigningCertificateThumbprint and MetadataEndPoint at the same time.")
+        Add-SPDscEvent -Message $message `
+            -EntryType 'Error' `
+            -EventID 100 `
+            -Source $MyInvocation.MyCommand.Source
+        throw $message
     }
 
     if ($PSBoundParameters.ContainsKey("SigningCertificateFilePath") -and `
             $PSBoundParameters.ContainsKey("MetadataEndPoint"))
     {
-        throw ("Cannot use both parameters SigningCertificateFilePath and MetadataEndPoint at the same time.")
+        $message = ("Cannot use both parameters SigningCertificateFilePath and MetadataEndPoint at the same time.")
+        Add-SPDscEvent -Message $message `
+            -EntryType 'Error' `
+            -EventID 100 `
+            -Source $MyInvocation.MyCommand.Source
+        throw $message
     }
 
     if ($PSBoundParameters.ContainsKey("SigningCertificateThumbprint") -eq $false -and `
             $PSBoundParameters.ContainsKey("SigningCertificateFilePath") -eq $false -and `
             $PSBoundParameters.ContainsKey("MetadataEndPoint") -eq $false)
     {
-        throw ("At least one of the following parameters must be specified: " + `
+        $message = ("At least one of the following parameters must be specified: " + `
                 "SigningCertificateThumbprint, SigningCertificateFilePath, MetadataEndPoint.")
+        Add-SPDscEvent -Message $message `
+            -EntryType 'Error' `
+            -EventID 100 `
+            -Source $MyInvocation.MyCommand.Source
+        throw $message
     }
 
     if ($PSBoundParameters.ContainsKey("MetadataEndPoint") -and `
             $PSBoundParameters.ContainsKey("RegisteredIssuerNameIdentifier"))
     {
-        throw ("Cannot use both parameters MetadataEndPoint and RegisteredIssuerNameIdentifier at the same time.")
+        $message = ("Cannot use both parameters MetadataEndPoint and RegisteredIssuerNameIdentifier at the same time.")
+        Add-SPDscEvent -Message $message `
+            -EntryType 'Error' `
+            -EventID 100 `
+            -Source $MyInvocation.MyCommand.Source
+        throw $message
     }
 
     if ($PSBoundParameters.ContainsKey("MetadataEndPoint") -and `
             $PSBoundParameters.ContainsKey("RegisteredIssuerNameRealm"))
     {
-        throw ("Cannot use both parameters MetadataEndPoint and RegisteredIssuerNameRealm at the same time.")
+        $message = ("Cannot use both parameters MetadataEndPoint and RegisteredIssuerNameRealm at the same time.")
+        Add-SPDscEvent -Message $message `
+            -EntryType 'Error' `
+            -EventID 100 `
+            -Source $MyInvocation.MyCommand.Source
+        throw $message
     }
 
     # If RegisteredIssuerNameRealm was not set, it won't be present in the $PSBoundParameters

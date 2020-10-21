@@ -104,9 +104,10 @@ function Set-TargetResource
     Write-Verbose "Setting SharePoint IRM Settings"
 
     Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments $PSBoundParameters `
+        -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
         -ScriptBlock {
         $params = $args[0]
+        $eventSource = $args[1]
 
         try
         {
@@ -114,15 +115,24 @@ function Set-TargetResource
         }
         catch
         {
-            throw "No local SharePoint farm was detected. IRM settings will not be applied"
-            return
+            $message = "No local SharePoint farm was detected. IRM settings will not be applied"
+            Add-SPDscEvent -Message $message `
+                -EntryType 'Error' `
+                -EventID 100 `
+                -Source $eventSource
+            throw $message
         }
 
         $admService = Get-SPDscContentService
 
         if ($params.UseADRMS -and ($null -ne $params.RMSserver))
         {
-            throw "Cannot specify both an RMSserver and set UseADRMS to True"
+            $message = "Cannot specify both an RMSserver and set UseADRMS to True"
+            Add-SPDscEvent -Message $message `
+                -EntryType 'Error' `
+                -EventID 100 `
+                -Source $eventSource
+            throw $message
         }
 
         if ($params.UseADRMS -ne $true)

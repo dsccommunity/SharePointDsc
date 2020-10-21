@@ -129,16 +129,26 @@ function Set-TargetResource
                     -or $PSBoundParameters.ContainsKey("SuiteNavBrandingLogoUrl") `
                     -or $PSBoundParameters.ContainsKey("SuiteNavBrandingText"))
             {
-                throw ("Cannot specify SuiteNavBrandingLogoNavigationUrl, SuiteNavBrandingLogoTitle, " + `
+                $message = ("Cannot specify SuiteNavBrandingLogoNavigationUrl, SuiteNavBrandingLogoTitle, " + `
                         "SuiteNavBrandingLogoUrl or SuiteNavBrandingText with SharePoint 2013. Instead," + `
                         " only specify the SuiteBarBrandingElementHtml parameter")
+                Add-SPDscEvent -Message $message `
+                    -EntryType 'Error' `
+                    -EventID 100 `
+                    -Source $MyInvocation.MyCommand.Source
+                throw $message
             }
 
             <# Exception: The SP2013 optional parameter is null. #>
             if (!$PSBoundParameters.ContainsKey("SuiteBarBrandingElementHtml"))
             {
-                throw ("You need to specify a value for the SuiteBarBrandingElementHtml parameter with" + `
+                $message = ("You need to specify a value for the SuiteBarBrandingElementHtml parameter with" + `
                         " SharePoint 2013")
+                Add-SPDscEvent -Message $message `
+                    -EntryType 'Error' `
+                    -EventID 100 `
+                    -Source $MyInvocation.MyCommand.Source
+                throw $message
             }
         }
         16
@@ -172,9 +182,14 @@ function Set-TargetResource
                     -and !$PSBoundParameters.ContainsKey("SuiteNavBrandingText") `
                     -and !$PSBoundParameters.ContainsKey("SuiteBarBrandingElementHtml"))
             {
-                throw ("You need to specify a value for either SuiteNavBrandingLogoNavigationUrl, " + `
+                $message = ("You need to specify a value for either SuiteNavBrandingLogoNavigationUrl, " + `
                         "SuiteNavBrandingLogoTitle, SuiteNavBrandingLogoUrl, SuiteNavBrandingText " + `
                         "or SuiteBarBrandingElementHtml with SharePoint 2016")
+                Add-SPDscEvent -Message $message `
+                    -EntryType 'Error' `
+                    -EventID 100 `
+                    -Source $MyInvocation.MyCommand.Source
+                throw $message
             }
         }
     }
@@ -183,14 +198,20 @@ function Set-TargetResource
 
     if ($null -eq $CurrentValues.WebAppUrl)
     {
-        throw "Web application does not exist"
+        $message = "Web application does not exist"
+        Add-SPDscEvent -Message $message `
+            -EntryType 'Error' `
+            -EventID 100 `
+            -Source $MyInvocation.MyCommand.Source
+        throw $message
     }
 
     ## Perform changes
     Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments @($PSBoundParameters) `
+        -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
         -ScriptBlock {
         $params = $args[0]
+        $eventSource = $args[1]
 
         $installedVersion = Get-SPDscInstalledProductVersion
 
@@ -198,7 +219,12 @@ function Set-TargetResource
 
         if ($null -eq $wa)
         {
-            throw "Specified web application could not be found."
+            $message = "Specified web application could not be found."
+            Add-SPDscEvent -Message $message `
+                -EntryType 'Error' `
+                -EventID 100 `
+                -Source $eventSource
+            throw $message
         }
 
         Write-Verbose -Message "Processing changes"

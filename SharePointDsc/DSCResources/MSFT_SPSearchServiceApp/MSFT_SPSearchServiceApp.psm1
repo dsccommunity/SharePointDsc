@@ -224,14 +224,22 @@ function Set-TargetResource
         # Create the service app as it doesn't exist
 
         Write-Verbose -Message "Creating Search Service Application $Name"
-        Invoke-SPDscCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+        Invoke-SPDscCommand -Credential $InstallAccount `
+            -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
+            -ScriptBlock {
             $params = $args[0]
+            $eventSource = $args[1]
 
             $serviceAppPool = Get-SPServiceApplicationPool $params.ApplicationPool
             if ($null -eq $serviceAppPool)
             {
-                throw ("Specified service application pool $($params.ApplicationPool) does not " + `
+                $message = ("Specified service application pool $($params.ApplicationPool) does not " + `
                         "exist. Please make sure it exists before continuing.")
+                Add-SPDscEvent -Message $message `
+                    -EntryType 'Error' `
+                    -EventID 100 `
+                    -Source $eventSource
+                throw $message
             }
 
             $serviceInstance = Get-SPEnterpriseSearchServiceInstance -Local
@@ -271,9 +279,14 @@ function Set-TargetResource
                 }
                 else
                 {
-                    throw ("Please install SharePoint 2019, 2016 or SharePoint 2013 with August " + `
+                    $message = ("Please install SharePoint 2019, 2016 or SharePoint 2013 with August " + `
                             "2015 CU or higher before attempting to create a cloud enabled " + `
                             "search service application")
+                    Add-SPDscEvent -Message $message `
+                        -EntryType 'Error' `
+                        -EventID 100 `
+                        -Source $eventSource
+                    throw $message
                 }
             }
 

@@ -149,7 +149,12 @@ function Set-TargetResource
         (-not($PSBoundParameters.ContainsKey("MimeType")) -or `
                 -not($PSBoundParameters.ContainsKey("Description"))))
     {
-        throw "Ensure is configured as Present, but MimeType and/or Description is missing"
+        $message = "Ensure is configured as Present, but MimeType and/or Description is missing"
+        Add-SPDscEvent -Message $message `
+            -EntryType 'Error' `
+            -EventID 100 `
+            -Source $MyInvocation.MyCommand.Source
+        throw $message
     }
 
     $PSBoundParameters.Ensure = $Ensure
@@ -158,16 +163,22 @@ function Set-TargetResource
 
     Write-Verbose -Message "Checking if Service Application '$ServiceAppName' exists"
     Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments $PSBoundParameters `
+        -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
         -ScriptBlock {
         $params = $args[0]
+        $eventSource = $args[1]
 
         $serviceApps = Get-SPServiceApplication -Name $params.ServiceAppName `
             -ErrorAction SilentlyContinue
 
         if ($null -eq $serviceApps)
         {
-            throw "Service Application $($params.ServiceAppName) is not found"
+            $message = "Service Application $($params.ServiceAppName) is not found"
+            Add-SPDscEvent -Message $message `
+                -EntryType 'Error' `
+                -EventID 100 `
+                -Source $eventSource
+            throw $message
         }
 
         $serviceApp = $serviceApps | Where-Object -FilterScript {
@@ -176,7 +187,12 @@ function Set-TargetResource
 
         if ($null -eq $serviceApp)
         {
-            throw  "Service Application $($params.ServiceAppName) is not a search service application"
+            $message = "Service Application $($params.ServiceAppName) is not a search service application"
+            Add-SPDscEvent -Message $message `
+                -EntryType 'Error' `
+                -EventID 100 `
+                -Source $eventSource
+            throw $message
         }
     }
 
