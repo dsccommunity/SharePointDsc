@@ -34,16 +34,26 @@ function Set-SPDscWebApplicationBlockedFileTypeConfig
             -and (($Settings.ContainsKey("EnsureBlocked") -eq $true) `
                 -or ($Settings.ContainsKey("EnsureAllowed") -eq $true)))
     {
-        throw ("Blocked file types must use either the 'blocked' property or the " + `
+        $message = ("Blocked file types must use either the 'blocked' property or the " + `
                 "'EnsureBlocked' and/or 'EnsureAllowed' properties, but not both.")
+        Add-SPDscEvent -Message $message `
+            -EntryType 'Error' `
+            -EventID 100 `
+            -Source $MyInvocation.MyCommand.Source
+        throw $message
     }
 
     if (($Settings.ContainsKey("Blocked") -eq $false) `
             -and ($Settings.ContainsKey("EnsureBlocked") -eq $false) `
             -and ($Settings.ContainsKey("EnsureAllowed") -eq $false))
     {
-        throw ("Blocked file types must specify at least one property (either 'Blocked, " + `
+        $message = ("Blocked file types must specify at least one property (either 'Blocked, " + `
                 "'EnsureBlocked' or 'EnsureAllowed')")
+        Add-SPDscEvent -Message $message `
+            -EntryType 'Error' `
+            -EventID 100 `
+            -Source $MyInvocation.MyCommand.Source
+        throw $message
     }
 
     if ($Settings.ContainsKey("Blocked") -eq $true)
@@ -99,16 +109,26 @@ function Test-SPDscWebApplicationBlockedFileTypeConfig
             -and (($DesiredSettings.ContainsKey("EnsureBlocked") -eq $true) `
                 -or ($DesiredSettings.ContainsKey("EnsureAllowed") -eq $true)))
     {
-        throw ("Blocked file types must use either the 'blocked' property or the " + `
+        $message = ("Blocked file types must use either the 'blocked' property or the " + `
                 "'EnsureBlocked' and/or 'EnsureAllowed' properties, but not both.")
+        Add-SPDscEvent -Message $message `
+            -EntryType 'Error' `
+            -EventID 100 `
+            -Source $MyInvocation.MyCommand.Source
+        throw $message
     }
 
     if (($DesiredSettings.ContainsKey("Blocked") -eq $false) `
             -and ($DesiredSettings.ContainsKey("EnsureBlocked") -eq $false) `
             -and ($DesiredSettings.ContainsKey("EnsureAllowed") -eq $false))
     {
-        throw ("Blocked file types must specify at least one property (either 'Blocked, " + `
+        $message = ("Blocked file types must specify at least one property (either 'Blocked, " + `
                 "'EnsureBlocked' or 'EnsureAllowed')")
+        Add-SPDscEvent -Message $message `
+            -EntryType 'Error' `
+            -EventID 100 `
+            -Source $MyInvocation.MyCommand.Source
+        throw $message
     }
 
     if ($DesiredSettings.ContainsKey("Blocked") -eq $true)
@@ -122,7 +142,7 @@ function Test-SPDscWebApplicationBlockedFileTypeConfig
         else
         {
             $message = ("The parameter Blocked does not match the desired state. " + `
-                        "Actual: $($CurrentSettings.Blocked). Desired: $($DesiredSettings.Blocked)")
+                    "Actual: $($CurrentSettings.Blocked). Desired: $($DesiredSettings.Blocked)")
             Write-Verbose -Message $message
             Add-SPDscEvent -Message $message -EntryType 'Error' -EventID 1 -Source $Source
 
@@ -139,7 +159,7 @@ function Test-SPDscWebApplicationBlockedFileTypeConfig
         if ($null -ne $itemsToAdd)
         {
             $message = ("The parameter EnsureBlocked does not match the desired state. " + `
-                        "Actual: $($CurrentSettings.Blocked). Desired: $($DesiredSettings.EnsureBlocked)")
+                    "Actual: $($CurrentSettings.Blocked). Desired: $($DesiredSettings.EnsureBlocked)")
             Write-Verbose -Message $message
             Add-SPDscEvent -Message $message -EntryType 'Error' -EventID 1 -Source $Source
 
@@ -155,7 +175,7 @@ function Test-SPDscWebApplicationBlockedFileTypeConfig
         if ($null -ne $itemsToRemove)
         {
             $message = ("The parameter EnsureAllowed does not match the desired state. " + `
-                        "Actual: $($CurrentSettings.Blocked). Desired: $($DesiredSettings.EnsureAllowed)")
+                    "Actual: $($CurrentSettings.Blocked). Desired: $($DesiredSettings.EnsureAllowed)")
             Write-Verbose -Message $message
             Add-SPDscEvent -Message $message -EntryType 'Error' -EventID 1 -Source $Source
 

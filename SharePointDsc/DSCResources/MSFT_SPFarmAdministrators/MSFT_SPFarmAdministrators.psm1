@@ -30,14 +30,24 @@ function Get-TargetResource
 
     if ($Members -and (($MembersToInclude) -or ($MembersToExclude)))
     {
-        throw ("Cannot use the Members parameter together with the " + `
+        $message = ("Cannot use the Members parameter together with the " + `
                 "MembersToInclude or MembersToExclude parameters")
+        Add-SPDscEvent -Message $message `
+            -EntryType 'Error' `
+            -EventID 100 `
+            -Source $MyInvocation.MyCommand.Source
+        throw $message
     }
 
     if (!$Members -and !$MembersToInclude -and !$MembersToExclude)
     {
-        throw ("At least one of the following parameters must be specified: " + `
+        $message = ("At least one of the following parameters must be specified: " + `
                 "Members, MembersToInclude, MembersToExclude")
+        Add-SPDscEvent -Message $message `
+            -EntryType 'Error' `
+            -EventID 100 `
+            -Source $MyInvocation.MyCommand.Source
+        throw $message
     }
 
     $result = Invoke-SPDscCommand -Credential $InstallAccount `
@@ -108,20 +118,35 @@ function Set-TargetResource
 
     if ($Members -and (($MembersToInclude) -or ($MembersToExclude)))
     {
-        throw ("Cannot use the Members parameter together with the " + `
+        $message = ("Cannot use the Members parameter together with the " + `
                 "MembersToInclude or MembersToExclude parameters")
+        Add-SPDscEvent -Message $message `
+            -EntryType 'Error' `
+            -EventID 100 `
+            -Source $MyInvocation.MyCommand.Source
+        throw $message
     }
 
     if (!$Members -and !$MembersToInclude -and !$MembersToExclude)
     {
-        throw ("At least one of the following parameters must be specified: " + `
+        $message = ("At least one of the following parameters must be specified: " + `
                 "Members, MembersToInclude, MembersToExclude")
+        Add-SPDscEvent -Message $message `
+            -EntryType 'Error' `
+            -EventID 100 `
+            -Source $MyInvocation.MyCommand.Source
+        throw $message
     }
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
     if ($null -eq $CurrentValues.Members)
     {
-        throw "Unable to locate central administration website"
+        $message = "Unable to locate central administration website"
+        Add-SPDscEvent -Message $message `
+            -EntryType 'Error' `
+            -EventID 100 `
+            -Source $MyInvocation.MyCommand.Source
+        throw $message
     }
 
     $changeUsers = @{ }
@@ -269,14 +294,24 @@ function Test-TargetResource
 
     if ($Members -and (($MembersToInclude) -or ($MembersToExclude)))
     {
-        throw ("Cannot use the Members parameter together with the " + `
+        $message = ("Cannot use the Members parameter together with the " + `
                 "MembersToInclude or MembersToExclude parameters")
+        Add-SPDscEvent -Message $message `
+            -EntryType 'Error' `
+            -EventID 100 `
+            -Source $MyInvocation.MyCommand.Source
+        throw $message
     }
 
     if (!$Members -and !$MembersToInclude -and !$MembersToExclude)
     {
-        throw ("At least one of the following parameters must be specified: " + `
+        $message = ("At least one of the following parameters must be specified: " + `
                 "Members, MembersToInclude, MembersToExclude")
+        Add-SPDscEvent -Message $message `
+            -EntryType 'Error' `
+            -EventID 100 `
+            -Source $MyInvocation.MyCommand.Source
+        throw $message
     }
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
@@ -376,9 +411,10 @@ function Merge-SPDscFarmAdminList
     )
 
     $null = Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments $changeUsers `
+        -Arguments @($changeUsers, $MyInvocation.MyCommand.Source) `
         -ScriptBlock {
         $changeUsers = $args[0]
+        $eventSource = $args[1]
 
         $webApps = Get-SPWebApplication -IncludeCentralAdministration
         $caWebapp = $webApps | Where-Object -FilterScript {
@@ -386,7 +422,12 @@ function Merge-SPDscFarmAdminList
         }
         if ($null -eq $caWebapp)
         {
-            throw "Unable to locate central administration website"
+            $message = "Unable to locate central administration website"
+            Add-SPDscEvent -Message $message `
+                -EntryType 'Error' `
+                -EventID 100 `
+                -Source $eventSource
+            throw $message
         }
         $caWeb = Get-SPWeb($caWebapp.Url)
         $farmAdminGroup = $caWeb.AssociatedOwnerGroup

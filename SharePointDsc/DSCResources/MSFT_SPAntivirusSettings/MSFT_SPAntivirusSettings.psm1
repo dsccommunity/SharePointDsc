@@ -124,9 +124,10 @@ function Set-TargetResource
     Write-Verbose -Message "Setting antivirus configuration settings"
 
     Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments $PSBoundParameters `
+        -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
         -ScriptBlock {
         $params = $args[0]
+        $eventSource = $args[1]
 
         try
         {
@@ -134,8 +135,12 @@ function Set-TargetResource
         }
         catch
         {
-            throw "No local SharePoint farm was detected. Antivirus settings will not be applied"
-            return
+            $message = "No local SharePoint farm was detected. Antivirus settings will not be applied"
+            Add-SPDscEvent -Message $message `
+                -EntryType 'Error' `
+                -EventID 100 `
+                -Source $eventSource
+            throw $message
         }
 
         Write-Verbose -Message "Start update"

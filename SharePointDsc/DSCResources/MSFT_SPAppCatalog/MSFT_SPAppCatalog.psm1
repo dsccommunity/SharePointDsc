@@ -79,9 +79,14 @@ function Set-TargetResource
             # InstallAccount used
             if ($InstallAccount.UserName -eq $farmAccount.UserName)
             {
-                throw ("Specified InstallAccount ($($InstallAccount.UserName)) is the Farm " + `
+                $message = ("Specified InstallAccount ($($InstallAccount.UserName)) is the Farm " + `
                         "Account. Make sure the specified InstallAccount isn't the Farm Account " + `
                         "and try again")
+                Add-SPDscEvent -Message $message `
+                    -EntryType 'Error' `
+                    -EventID 100 `
+                    -Source $MyInvocation.MyCommand.Source
+                throw $message
             }
         }
         else
@@ -93,16 +98,26 @@ function Set-TargetResource
                 $localaccount = "$($Env:USERDOMAIN)\$($Env:USERNAME)"
                 if ($localaccount -eq $farmAccount.UserName)
                 {
-                    throw ("Specified PSDSCRunAsCredential ($localaccount) is the Farm " + `
+                    $message = ("Specified PSDSCRunAsCredential ($localaccount) is the Farm " + `
                             "Account. Make sure the specified PSDSCRunAsCredential isn't the " + `
                             "Farm Account and try again")
+                    Add-SPDscEvent -Message $message `
+                        -EntryType 'Error' `
+                        -EventID 100 `
+                        -Source $MyInvocation.MyCommand.Source
+                    throw $message
                 }
             }
         }
     }
     else
     {
-        throw ("Unable to retrieve the Farm Account. Check if the farm exists.")
+        $message = "Unable to retrieve the Farm Account. Check if the farm exists."
+        Add-SPDscEvent -Message $message `
+            -EntryType 'Error' `
+            -EventID 100 `
+            -Source $MyInvocation.MyCommand.Source
+        throw $message
     }
 
     # Add the FarmAccount to the local Administrators group, if it's not already there
@@ -121,18 +136,25 @@ function Set-TargetResource
     }
 
     Invoke-SPDscCommand -Credential $farmAccount `
-        -Arguments $PSBoundParameters `
+        -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
         -ScriptBlock {
         $params = $args[0]
+        $eventSource = $args[1]
+
         try
         {
             Update-SPAppCatalogConfiguration -Site $params.SiteUrl -Confirm:$false
         }
         catch [System.UnauthorizedAccessException]
         {
-            throw ("This resource must be run as the farm account (not a setup account). " + `
+            $message = ("This resource must be run as the farm account (not a setup account). " + `
                     "Please ensure either the PsDscRunAsCredential or InstallAccount " + `
                     "credentials are set to the farm account and run this resource again")
+            Add-SPDscEvent -Message $message `
+                -EntryType 'Error' `
+                -EventID 100 `
+                -Source $eventSource
+            throw $message
         }
     } | Out-Null
 

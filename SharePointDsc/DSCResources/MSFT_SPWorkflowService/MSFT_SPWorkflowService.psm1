@@ -95,15 +95,21 @@ function Set-TargetResource
 
     ## Perform changes
     Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments @($PSBoundParameters) `
+        -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
         -ScriptBlock {
         $params = $args[0]
+        $eventSource = $args[1]
 
         $site = Get-SPSite $params.SPSiteUrl
 
         if ($null -eq $site)
         {
-            throw "Specified site collection could not be found."
+            $message = "Specified site collection could not be found."
+            Add-SPDscEvent -Message $message `
+                -EntryType 'Error' `
+                -EventID 100 `
+                -Source $eventSource
+            throw $message
         }
 
         Write-Verbose -Message "Processing changes"

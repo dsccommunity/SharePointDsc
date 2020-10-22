@@ -87,21 +87,41 @@ function Set-SPDscWebApplicationHappyHourConfig
             -or (Test-SPDscObjectHasProperty $Settings "Minute") -eq $false `
             -or (Test-SPDscObjectHasProperty $Settings "Duration") -eq $false)
     {
-        throw "Happy hour settings must include 'hour', 'minute' and 'duration'"
+        $message = "Happy hour settings must include 'hour', 'minute' and 'duration'"
+        Add-SPDscEvent -Message $message `
+            -EntryType 'Error' `
+            -EventID 100 `
+            -Source $MyInvocation.MyCommand.Source
+        throw $message
     }
     else
     {
         if ($Settings.Hour -lt 0 -or $Settings.Hour -gt 23)
         {
-            throw "Happy hour setting 'hour' must be between 0 and 23"
+            $message = "Happy hour setting 'hour' must be between 0 and 23"
+            Add-SPDscEvent -Message $message `
+                -EntryType 'Error' `
+                -EventID 100 `
+                -Source $MyInvocation.MyCommand.Source
+            throw $message
         }
         if ($Settings.Minute -lt 0 -or $Settings.Minute -gt 59)
         {
-            throw "Happy hour setting 'minute' must be between 0 and 59"
+            $message = "Happy hour setting 'minute' must be between 0 and 59"
+            Add-SPDscEvent -Message $message `
+                -EntryType 'Error' `
+                -EventID 100 `
+                -Source $MyInvocation.MyCommand.Source
+            throw $message
         }
         if ($Settings.Duration -lt 0 -or $Settings.Duration -gt 23)
         {
-            throw "Happy hour setting 'hour' must be between 0 and 23"
+            $message = "Happy hour setting 'hour' must be between 0 and 23"
+            Add-SPDscEvent -Message $message `
+                -EntryType 'Error' `
+                -EventID 100 `
+                -Source $MyInvocation.MyCommand.Source
+            throw $message
         }
         $h = $Settings.Hour
         $m = $Settings.Minute
@@ -133,17 +153,17 @@ function Test-SPDscWebApplicationThrottlingConfig
         -Source $Source `
         -DesiredValues $DesiredSettings `
         -ValuesToCheck @(
-            "ListViewThreshold",
-            "AllowObjectModelOverride",
-            "AdminThreshold",
-            "ListViewLookupThreshold",
-            "HappyHourEnabled",
-            "UniquePermissionThreshold",
-            "RequestThrottling",
-            "ChangeLogEnabled",
-            "ChangeLogExpiryDays",
-            "EventHandlersEnabled"
-        )
+        "ListViewThreshold",
+        "AllowObjectModelOverride",
+        "AdminThreshold",
+        "ListViewLookupThreshold",
+        "HappyHourEnabled",
+        "UniquePermissionThreshold",
+        "RequestThrottling",
+        "ChangeLogEnabled",
+        "ChangeLogExpiryDays",
+        "EventHandlersEnabled"
+    )
     if ($testReturn -eq $true)
     {
         if ($null -ne $DesiredSettings.HappyHour)

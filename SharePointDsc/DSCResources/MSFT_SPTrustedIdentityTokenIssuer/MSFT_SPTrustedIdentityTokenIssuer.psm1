@@ -189,23 +189,33 @@ function Set-TargetResource
             if ($PSBoundParameters.ContainsKey("SigningCertificateThumbprint") -and `
                     $PSBoundParameters.ContainsKey("SigningCertificateFilePath"))
             {
-                throw ("Cannot use both parameters SigningCertificateThumbprint and SigningCertificateFilePath at the same time.")
-                return
+                $message = ("Cannot use both parameters SigningCertificateThumbprint and SigningCertificateFilePath at the same time.")
+                Add-SPDscEvent -Message $message `
+                    -EntryType 'Error' `
+                    -EventID 100 `
+                    -Source $MyInvocation.MyCommand.Source
+                throw $message
             }
 
             if (!$PSBoundParameters.ContainsKey("SigningCertificateThumbprint") -and `
                     !$PSBoundParameters.ContainsKey("SigningCertificateFilePath"))
             {
-                throw ("At least one of the following parameters must be specified: " + `
+                $message = ("At least one of the following parameters must be specified: " + `
                         "SigningCertificateThumbprint, SigningCertificateFilePath.")
-                return
+                Add-SPDscEvent -Message $message `
+                    -EntryType 'Error' `
+                    -EventID 100 `
+                    -Source $MyInvocation.MyCommand.Source
+                throw $message
             }
 
             Write-Verbose -Message "Creating SPTrustedIdentityTokenIssuer '$Name'"
             $null = Invoke-SPDscCommand -Credential $InstallAccount `
-                -Arguments $PSBoundParameters `
+                -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
                 -ScriptBlock {
                 $params = $args[0]
+                $eventSource = $args[1]
+
                 if ($params.SigningCertificateThumbprint)
                 {
                     Write-Verbose -Message ("Getting signing certificate with thumbprint " + `
@@ -213,7 +223,12 @@ function Set-TargetResource
 
                     if ($params.SigningCertificateThumbprint -notmatch "^[A-Fa-f0-9]{40}$")
                     {
-                        throw ("Parameter SigningCertificateThumbprint does not match valid format '^[A-Fa-f0-9]{40}$'.")
+                        $message = ("Parameter SigningCertificateThumbprint does not match valid format '^[A-Fa-f0-9]{40}$'.")
+                        Add-SPDscEvent -Message $message `
+                            -EntryType 'Error' `
+                            -EventID 100 `
+                            -Source $eventSource
+                        throw $message
                     }
 
                     $cert = Get-ChildItem -Path Cert:\LocalMachine\My | Where-Object -FilterScript {
@@ -222,14 +237,24 @@ function Set-TargetResource
 
                     if (!$cert)
                     {
-                        throw ("Signing certificate with thumbprint $($params.SigningCertificateThumbprint) " + `
+                        $message = ("Signing certificate with thumbprint $($params.SigningCertificateThumbprint) " + `
                                 "was not found in certificate store 'LocalMachine\My'.")
+                        Add-SPDscEvent -Message $message `
+                            -EntryType 'Error' `
+                            -EventID 100 `
+                            -Source $eventSource
+                        throw $message
                     }
 
                     if ($cert.HasPrivateKey)
                     {
-                        throw ("SharePoint requires that the private key of the signing certificate" + `
+                        $message = ("SharePoint requires that the private key of the signing certificate" + `
                                 " is not installed in the certificate store.")
+                        Add-SPDscEvent -Message $message `
+                            -EntryType 'Error' `
+                            -EventID 100 `
+                            -Source $eventSource
+                        throw $message
                     }
                 }
                 else
@@ -242,7 +267,12 @@ function Set-TargetResource
                     }
                     catch
                     {
-                        throw ("Signing certificate was not found in path '$($params.SigningCertificateFilePath)'.")
+                        $message = ("Signing certificate was not found in path '$($params.SigningCertificateFilePath)'.")
+                        Add-SPDscEvent -Message $message `
+                            -EntryType 'Error' `
+                            -EventID 100 `
+                            -Source $eventSource
+                        throw $message
                     }
                 }
 
@@ -270,7 +300,12 @@ function Set-TargetResource
                     })
                 if ($null -eq $mappings)
                 {
-                    throw ("IdentifierClaim does not match any claim type specified in ClaimsMappings.")
+                    $message = ("IdentifierClaim does not match any claim type specified in ClaimsMappings.")
+                    Add-SPDscEvent -Message $message `
+                        -EntryType 'Error' `
+                        -EventID 100 `
+                        -Source $eventSource
+                    throw $message
                 }
 
                 $runParams = @{ }
@@ -286,7 +321,12 @@ function Set-TargetResource
 
                 if ($null -eq $trust)
                 {
-                    throw "SharePoint failed to create the SPTrustedIdentityTokenIssuer."
+                    $message = "SharePoint failed to create the SPTrustedIdentityTokenIssuer."
+                    Add-SPDscEvent -Message $message `
+                        -EntryType 'Error' `
+                        -EventID 100 `
+                        -Source $eventSource
+                    throw $message
                 }
 
                 if ($false -eq [String]::IsNullOrWhiteSpace($params.ClaimProviderName))
@@ -425,14 +465,24 @@ function Test-TargetResource
     if ($PSBoundParameters.ContainsKey("SigningCertificateThumbprint") -and `
             $PSBoundParameters.ContainsKey("SigningCertificateFilePath"))
     {
-        throw ("Cannot use both parameters SigningCertificateThumbprint and SigningCertificateFilePath at the same time.")
+        $message = ("Cannot use both parameters SigningCertificateThumbprint and SigningCertificateFilePath at the same time.")
+        Add-SPDscEvent -Message $message `
+            -EntryType 'Error' `
+            -EventID 100 `
+            -Source $MyInvocation.MyCommand.Source
+        throw $message
     }
 
     if ($PSBoundParameters.ContainsKey("SigningCertificateThumbprint") -eq $false -and `
             $PSBoundParameters.ContainsKey("SigningCertificateFilePath") -eq $false)
     {
-        throw ("At least one of the following parameters must be specified: " + `
+        $message = ("At least one of the following parameters must be specified: " + `
                 "SigningCertificateThumbprint, SigningCertificateFilePath.")
+        Add-SPDscEvent -Message $message `
+            -EntryType 'Error' `
+            -EventID 100 `
+            -Source $MyInvocation.MyCommand.Source
+        throw $message
     }
 
     $CurrentValues = Get-TargetResource @PSBoundParameters

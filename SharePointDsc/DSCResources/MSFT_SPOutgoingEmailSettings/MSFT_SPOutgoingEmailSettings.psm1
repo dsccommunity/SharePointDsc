@@ -43,13 +43,23 @@ function Get-TargetResource
     if (($PSBoundParameters.ContainsKey("UseTLS") -eq $true) -and `
             $installedVersion.FileMajorPart -ne 16)
     {
-        throw [Exception] "UseTLS is only supported in SharePoint 2016 and SharePoint 2019."
+        $message = "UseTLS is only supported in SharePoint 2016 and SharePoint 2019."
+        Add-SPDscEvent -Message $message `
+            -EntryType 'Error' `
+            -EventID 100 `
+            -Source $MyInvocation.MyCommand.Source
+        throw $message
     }
 
     if (($PSBoundParameters.ContainsKey("SMTPPort") -eq $true) -and `
             $installedVersion.FileMajorPart -ne 16)
     {
-        throw [Exception] "SMTPPort is only supported in SharePoint 2016 and SharePoint 2019."
+        $message = "SMTPPort is only supported in SharePoint 2016 and SharePoint 2019."
+        Add-SPDscEvent -Message $message `
+            -EntryType 'Error' `
+            -EventID 100 `
+            -Source $MyInvocation.MyCommand.Source
+        throw $message
     }
 
     $result = Invoke-SPDscCommand -Credential $InstallAccount `
@@ -137,19 +147,30 @@ function Set-TargetResource
     if (($PSBoundParameters.ContainsKey("UseTLS") -eq $true) -and `
             $installedVersion.FileMajorPart -lt 16)
     {
-        throw [Exception] "UseTLS is only supported in SharePoint 2016 and SharePoint 2019."
+        $message = "UseTLS is only supported in SharePoint 2016 and SharePoint 2019."
+        Add-SPDscEvent -Message $message `
+            -EntryType 'Error' `
+            -EventID 100 `
+            -Source $MyInvocation.MyCommand.Source
+        throw $message
     }
 
     if (($PSBoundParameters.ContainsKey("SMTPPort") -eq $true) -and `
             $installedVersion.FileMajorPart -lt 16)
     {
-        throw [Exception] "SMTPPort is only supported in SharePoint 2016 and SharePoint 2019."
+        $message = "SMTPPort is only supported in SharePoint 2016 and SharePoint 2019."
+        Add-SPDscEvent -Message $message `
+            -EntryType 'Error' `
+            -EventID 100 `
+            -Source $MyInvocation.MyCommand.Source
+        throw $message
     }
 
     $null = Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments $PSBoundParameters `
+        -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
         -ScriptBlock {
         $params = $args[0]
+        $eventSource = $args[1]
         $webApp = $null
 
         Write-Verbose -Message "Retrieving $($params.WebAppUrl) settings"
@@ -157,7 +178,12 @@ function Set-TargetResource
         $webApp = Get-SPWebApplication $params.WebAppUrl -IncludeCentralAdministration
         if ($null -eq $webApp)
         {
-            throw "Web Application $webAppUrl not found"
+            $message = "Web Application $webAppUrl not found"
+            Add-SPDscEvent -Message $message `
+                -EntryType 'Error' `
+                -EventID 100 `
+                -Source $eventSource
+            throw $message
         }
 
         $installedVersion = Get-SPDscInstalledProductVersion
@@ -199,8 +225,13 @@ function Set-TargetResource
             }
             default
             {
-                throw ("Detected an unsupported major version of SharePoint. SharePointDsc only " + `
+                $message = ("Detected an unsupported major version of SharePoint. SharePointDsc only " + `
                         "supports SharePoint 2013, 2016 or 2019.")
+                Add-SPDscEvent -Message $message `
+                    -EntryType 'Error' `
+                    -EventID 100 `
+                    -Source $eventSource
+                throw $message
             }
         }
     }

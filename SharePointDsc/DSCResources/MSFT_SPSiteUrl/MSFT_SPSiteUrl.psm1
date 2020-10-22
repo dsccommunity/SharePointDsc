@@ -148,25 +148,41 @@ function Set-TargetResource
         $PSBoundParameters.ContainsKey("Extranet") -eq $false -and
         $PSBoundParameters.ContainsKey("Custom") -eq $false)
     {
-        throw "No zone specified. Please specify a zone"
+        $message = "No zone specified. Please specify a zone"
+        Add-SPDscEvent -Message $message `
+            -EntryType 'Error' `
+            -EventID 100 `
+            -Source $MyInvocation.MyCommand.Source
+        throw $message
     }
 
     Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments $PSBoundParameters `
+        -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
         -ScriptBlock {
         $params = $args[0]
+        $eventSource = $args[1]
 
         $site = Get-SPSite -Identity $params.Url `
             -ErrorAction SilentlyContinue
 
         if ($null -eq $site)
         {
-            throw "Specified site $($params.Url) does not exist"
+            $message = "Specified site $($params.Url) does not exist"
+            Add-SPDscEvent -Message $message `
+                -EntryType 'Error' `
+                -EventID 100 `
+                -Source $eventSource
+            throw $message
         }
 
         if ($site.HostHeaderIsSiteName -eq $false)
         {
-            throw "Specified site $($params.Url) is not a Host Named Site Collection"
+            $message = "Specified site $($params.Url) is not a Host Named Site Collection"
+            Add-SPDscEvent -Message $message `
+                -EntryType 'Error' `
+                -EventID 100 `
+                -Source $eventSource
+            throw $message
         }
 
         $siteurls = Get-SPSiteUrl -Identity $params.Url
@@ -222,8 +238,13 @@ function Set-TargetResource
             }
             else
             {
-                throw ("Specified URL $($params.Intranet) (Zone: Intranet) is already assigned " + `
+                $message = ("Specified URL $($params.Intranet) (Zone: Intranet) is already assigned " + `
                         "to a site collection: $($siteurl[0].Url)")
+                Add-SPDscEvent -Message $message `
+                    -EntryType 'Error' `
+                    -EventID 100 `
+                    -Source $eventSource
+                throw $message
             }
         }
 
@@ -236,8 +257,13 @@ function Set-TargetResource
             }
             else
             {
-                throw ("Specified URL $($params.Internet) (Zone: Internet) is already assigned " + `
+                $message = ("Specified URL $($params.Internet) (Zone: Internet) is already assigned " + `
                         "to a site collection: $($siteurl[0].Url)")
+                Add-SPDscEvent -Message $message `
+                    -EntryType 'Error' `
+                    -EventID 100 `
+                    -Source $eventSource
+                throw $message
             }
         }
 
@@ -250,8 +276,13 @@ function Set-TargetResource
             }
             else
             {
-                throw ("Specified URL $($params.Extranet) (Zone: Extranet) is already assigned " + `
+                $message = ("Specified URL $($params.Extranet) (Zone: Extranet) is already assigned " + `
                         "to a site collection: $($siteurl[0].Url)")
+                Add-SPDscEvent -Message $message `
+                    -EntryType 'Error' `
+                    -EventID 100 `
+                    -Source $eventSource
+                throw $message
             }
         }
 
@@ -264,8 +295,13 @@ function Set-TargetResource
             }
             else
             {
-                throw ("Specified URL $($params.Custom) (Zone: Custom) is already assigned " + `
+                $message = ("Specified URL $($params.Custom) (Zone: Custom) is already assigned " + `
                         "to a site collection: $($siteurl[0].Url)")
+                Add-SPDscEvent -Message $message `
+                    -EntryType 'Error' `
+                    -EventID 100 `
+                    -Source $eventSource
+                throw $message
             }
         }
     }

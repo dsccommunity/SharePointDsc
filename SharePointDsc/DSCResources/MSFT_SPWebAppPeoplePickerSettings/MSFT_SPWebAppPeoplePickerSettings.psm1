@@ -116,15 +116,21 @@ function Set-TargetResource
 
     ## Perform changes
     Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments $PSBoundParameters `
+        -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
         -ScriptBlock {
         $params = $args[0]
+        $eventSource = $args[1]
 
         $wa = Get-SPWebApplication -Identity $params.WebAppUrl -ErrorAction SilentlyContinue
 
         if ($null -eq $wa)
         {
-            throw "Specified web application could not be found."
+            $message = "Specified web application could not be found."
+            Add-SPDscEvent -Message $message `
+                -EntryType 'Error' `
+                -EventID 100 `
+                -Source $eventSource
+            throw $message
         }
 
         if ($params.ContainsKey("ActiveDirectoryCustomFilter"))

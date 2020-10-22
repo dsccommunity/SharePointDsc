@@ -237,11 +237,12 @@ function Set-TargetResource
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
     Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments @($PSBoundParameters, $CurrentValues) `
+        -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source, $CurrentValues) `
         -ScriptBlock {
-
         $params = $args[0]
-        $CurrentValues = $args[1]
+        $eventSource = $args[1]
+        $CurrentValues = $args[2]
+
         $ConfirmPreference = 'None'
 
         $AllSearchServers = @()
@@ -343,7 +344,12 @@ function Set-TargetResource
             }
             if ($null -eq $serviceToAdd)
             {
-                throw "Unable to locate a search service instance on $serverName"
+                $message = "Unable to locate a search service instance on $serverName"
+                Add-SPDscEvent -Message $message `
+                    -EntryType 'Error' `
+                    -EventID 100 `
+                    -Source $eventSource
+                throw $message
             }
             $AllSearchServiceInstances.Add($server, $serviceToAdd)
         }
@@ -352,8 +358,12 @@ function Set-TargetResource
         $ssa = Get-SPEnterpriseSearchServiceApplication -Identity $params.ServiceAppName
         if ($null -eq $ssa)
         {
-            throw "Search service applications '$($params.ServiceAppName)' was not found"
-            return
+            $message = "Search service applications '$($params.ServiceAppName)' was not found"
+            Add-SPDscEvent -Message $message `
+                -EntryType 'Error' `
+                -EventID 100 `
+                -Source $eventSource
+            throw $message
         }
         $currentTopology = $ssa.ActiveTopology
         $newTopology = New-SPEnterpriseSearchTopology -SearchApplication $ssa `

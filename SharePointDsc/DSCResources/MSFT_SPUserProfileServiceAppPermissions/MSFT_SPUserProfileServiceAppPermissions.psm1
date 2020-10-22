@@ -164,15 +164,22 @@ function Set-TargetResource
         $CurrentValues = Get-TargetResource @PSBoundParameters
     }
 
-    Invoke-SPDscCommand -Credential $InstallAccount -Arguments @($PSBoundParameters, $CurrentValues) -ScriptBlock {
+    Invoke-SPDscCommand -Credential $InstallAccount `
+        -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source, $CurrentValues) `
+        -ScriptBlock {
         $params = $args[0]
-        $CurrentValues = $args[1]
+        $eventSource = $args[1]
+        $CurrentValues = $args[2]
 
         $proxy = Get-SPServiceApplicationProxy | Where-Object { $_.DisplayName -eq $params.ProxyName }
         if ($null -eq $proxy)
         {
-            throw "Unable to find service application proxy called '$($params.ProxyName)'"
-            return
+            $message = "Unable to find service application proxy called '$($params.ProxyName)'"
+            Add-SPDscEvent -Message $message `
+                -EntryType 'Error' `
+                -EventID 100 `
+                -Source $eventSource
+            throw $message
         }
         $security = Get-SPProfileServiceApplicationSecurity -ProfileServiceApplicationProxy $proxy
 
@@ -363,8 +370,13 @@ function Confirm-SPDscUpaPermissionsConfig()
     ) | ForEach-Object -Process {
         if (($Parameters.$_ -contains "Everyone") -and ($Parameters.$_ -contains "None"))
         {
-            throw ("You can not specify 'Everyone' and 'None' in the same property. " + `
+            $message = ("You can not specify 'Everyone' and 'None' in the same property. " + `
                     "Check the value for the '$_' property on this resource.")
+            Add-SPDscEvent -Message $message `
+                -EntryType 'Error' `
+                -EventID 100 `
+                -Source $MyInvocation.MyCommand.Source
+            throw $message
         }
     }
 }

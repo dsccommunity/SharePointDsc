@@ -29,14 +29,20 @@ function Get-TargetResource
 
     if ($TypeName -eq "Microsoft.SharePoint.Administration.Health.SPHealthAnalyzerJobDefinition")
     {
-        throw ("You cannot use SPTimerJobState to change the schedule of " + `
+        $message = ("You cannot use SPTimerJobState to change the schedule of " + `
                 "health analyzer timer jobs.")
+        Add-SPDscEvent -Message $message `
+            -EntryType 'Error' `
+            -EventID 100 `
+            -Source $MyInvocation.MyCommand.Source
+        throw $message
     }
 
     $result = Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments $PSBoundParameters `
+        -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
         -ScriptBlock {
         $params = $args[0]
+        $eventSource = $args[1]
 
         try
         {
@@ -44,8 +50,13 @@ function Get-TargetResource
         }
         catch
         {
-            throw ("No local SharePoint farm was detected. Timer job " + `
+            $message = ("No local SharePoint farm was detected. Timer job " + `
                     "settings will not be applied")
+            Add-SPDscEvent -Message $message `
+                -EntryType 'Error' `
+                -EventID 100 `
+                -Source $eventSource
+            throw $message
         }
 
         $returnval = @{
@@ -57,7 +68,12 @@ function Get-TargetResource
             $wa = Get-SPWebApplication -Identity $params.WebAppUrl -ErrorAction SilentlyContinue
             if ($null -eq $wa)
             {
-                throw ("Specified web application not found!")
+                $message = ("Specified web application not found!")
+                Add-SPDscEvent -Message $message `
+                    -EntryType 'Error' `
+                    -EventID 100 `
+                    -Source $eventSource
+                throw $message
             }
 
             $timerjob = Get-SPTimerJob -Type $params.TypeName `
@@ -65,7 +81,12 @@ function Get-TargetResource
 
             if ($timerjob.Count -eq 0)
             {
-                throw ("No timer jobs found. Please check the input values")
+                $message = ("No timer jobs found. Please check the input values")
+                Add-SPDscEvent -Message $message `
+                    -EntryType 'Error' `
+                    -EventID 100 `
+                    -Source $eventSource
+                throw $message
             }
 
             $returnval.WebAppUrl = $params.WebAppUrl
@@ -91,8 +112,13 @@ function Get-TargetResource
             }
             else
             {
-                throw ("$($timerjob.Count) timer jobs found. Check input " + `
+                $message = ("$($timerjob.Count) timer jobs found. Check input " + `
                         "values or use the WebAppUrl parameter.")
+                Add-SPDscEvent -Message $message `
+                    -EntryType 'Error' `
+                    -EventID 100 `
+                    -Source $eventSource
+                throw $message
             }
         }
         return $returnval
@@ -131,14 +157,20 @@ function Set-TargetResource
 
     if ($TypeName -eq "Microsoft.SharePoint.Administration.Health.SPHealthAnalyzerJobDefinition")
     {
-        throw ("You cannot use SPTimerJobState to change the schedule of " + `
+        $message = ("You cannot use SPTimerJobState to change the schedule of " + `
                 "health analyzer timer jobs.")
+        Add-SPDscEvent -Message $message `
+            -EntryType 'Error' `
+            -EventID 100 `
+            -Source $MyInvocation.MyCommand.Source
+        throw $message
     }
 
     Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments $PSBoundParameters `
+        -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
         -ScriptBlock {
         $params = $args[0]
+        $eventSource = $args[1]
 
         try
         {
@@ -146,7 +178,12 @@ function Set-TargetResource
         }
         catch
         {
-            throw "No local SharePoint farm was detected. Timer job settings will not be applied"
+            $message = "No local SharePoint farm was detected. Timer job settings will not be applied"
+            Add-SPDscEvent -Message $message `
+                -EntryType 'Error' `
+                -EventID 100 `
+                -Source $eventSource
+            throw $message
         }
 
         Write-Verbose -Message "Start update"
@@ -156,7 +193,12 @@ function Set-TargetResource
             $wa = Get-SPWebApplication -Identity $params.WebAppUrl -ErrorAction SilentlyContinue
             if ($null -eq $wa)
             {
-                throw "Specified web application not found!"
+                $message = "Specified web application not found!"
+                Add-SPDscEvent -Message $message `
+                    -EntryType 'Error' `
+                    -EventID 100 `
+                    -Source $eventSource
+                throw $message
             }
 
             $timerjob = Get-SPTimerJob -Type $params.TypeName `
@@ -164,7 +206,12 @@ function Set-TargetResource
 
             if ($timerjob.Count -eq 0)
             {
-                throw ("No timer jobs found. Please check the input values")
+                $message = ("No timer jobs found. Please check the input values")
+                Add-SPDscEvent -Message $message `
+                    -EntryType 'Error' `
+                    -EventID 100 `
+                    -Source $eventSource
+                throw $message
             }
 
             if ($params.ContainsKey("Schedule") -eq $true)
@@ -182,13 +229,23 @@ function Set-TargetResource
                         if ($_.Exception.Message -like `
                                 "*The time given was not given in the proper format*")
                         {
-                            throw ("Incorrect schedule format used. New schedule will " + `
+                            $message = ("Incorrect schedule format used. New schedule will " + `
                                     "not be applied.")
+                            Add-SPDscEvent -Message $message `
+                                -EntryType 'Error' `
+                                -EventID 100 `
+                                -Source $eventSource
+                            throw $message
                         }
                         else
                         {
-                            throw ("Error occurred. Timer job settings will not be applied. " + `
+                            $message = ("Error occurred. Timer job settings will not be applied. " + `
                                     "Error details: $($_.Exception.Message)")
+                            Add-SPDscEvent -Message $message `
+                                -EntryType 'Error' `
+                                -EventID 100 `
+                                -Source $eventSource
+                            throw $message
                         }
                     }
                 }
@@ -207,9 +264,13 @@ function Set-TargetResource
                         }
                         catch
                         {
-                            throw ("Error occurred while enabling job. Timer job settings will " + `
+                            $message = ("Error occurred while enabling job. Timer job settings will " + `
                                     "not be applied. Error details: $($_.Exception.Message)")
-                            return
+                            Add-SPDscEvent -Message $message `
+                                -EntryType 'Error' `
+                                -EventID 100 `
+                                -Source $eventSource
+                            throw $message
                         }
                     }
                     else
@@ -221,9 +282,13 @@ function Set-TargetResource
                         }
                         catch
                         {
-                            throw ("Error occurred while disabling job. Timer job settings will " + `
+                            $message = ("Error occurred while disabling job. Timer job settings will " + `
                                     "not be applied. Error details: $($_.Exception.Message)")
-                            return
+                            Add-SPDscEvent -Message $message `
+                                -EntryType 'Error' `
+                                -EventID 100 `
+                                -Source $eventSource
+                            throw $message
                         }
                     }
                 }
@@ -249,13 +314,23 @@ function Set-TargetResource
                             if ($_.Exception.Message -like `
                                     "*The time given was not given in the proper format*")
                             {
-                                throw ("Incorrect schedule format used. New schedule will " + `
+                                $message = ("Incorrect schedule format used. New schedule will " + `
                                         "not be applied.")
+                                Add-SPDscEvent -Message $message `
+                                    -EntryType 'Error' `
+                                    -EventID 100 `
+                                    -Source $eventSource
+                                throw $message
                             }
                             else
                             {
-                                throw ("Error occurred. Timer job settings will not be applied. " + `
+                                $message = ("Error occurred. Timer job settings will not be applied. " + `
                                         "Error details: $($_.Exception.Message)")
+                                Add-SPDscEvent -Message $message `
+                                    -EntryType 'Error' `
+                                    -EventID 100 `
+                                    -Source $eventSource
+                                throw $message
                             }
                         }
                     }
@@ -274,8 +349,13 @@ function Set-TargetResource
                             }
                             catch
                             {
-                                throw ("Error occurred while enabling job. Timer job settings will " + `
+                                $message = ("Error occurred while enabling job. Timer job settings will " + `
                                         "not be applied. Error details: $($_.Exception.Message)")
+                                Add-SPDscEvent -Message $message `
+                                    -EntryType 'Error' `
+                                    -EventID 100 `
+                                    -Source $eventSource
+                                throw $message
                             }
                         }
                         else
@@ -287,8 +367,13 @@ function Set-TargetResource
                             }
                             catch
                             {
-                                throw ("Error occurred while disabling job. Timer job settings will " + `
+                                $message = ("Error occurred while disabling job. Timer job settings will " + `
                                         "not be applied. Error details: $($_.Exception.Message)")
+                                Add-SPDscEvent -Message $message `
+                                    -EntryType 'Error' `
+                                    -EventID 100 `
+                                    -Source $eventSource
+                                throw $message
                             }
                         }
                     }
@@ -296,8 +381,13 @@ function Set-TargetResource
             }
             else
             {
-                throw ("$($timerjob.Count) timer jobs found. Check input " + `
+                $message = ("$($timerjob.Count) timer jobs found. Check input " + `
                         "values or use the WebAppUrl parameter.")
+                Add-SPDscEvent -Message $message `
+                    -EntryType 'Error' `
+                    -EventID 100 `
+                    -Source $eventSource
+                throw $message
             }
         }
     }
@@ -334,8 +424,13 @@ function Test-TargetResource
 
     if ($TypeName -eq "Microsoft.SharePoint.Administration.Health.SPHealthAnalyzerJobDefinition")
     {
-        throw ("You cannot use SPTimerJobState to change the schedule of " + `
+        $message = ("You cannot use SPTimerJobState to change the schedule of " + `
                 "health analyzer timer jobs.")
+        Add-SPDscEvent -Message $message `
+            -EntryType 'Error' `
+            -EventID 100 `
+            -Source $MyInvocation.MyCommand.Source
+        throw $message
     }
 
     $CurrentValues = Get-TargetResource @PSBoundParameters

@@ -40,7 +40,12 @@ function Get-TargetResource
     {
         if (-not (Test-Path -Path $CertificateFilePath))
         {
-            throw ("Specified CertificateFilePath does not exist: $CertificateFilePath")
+            $message = ("Specified CertificateFilePath does not exist: $CertificateFilePath")
+            Add-SPDscEvent -Message $message `
+                -EntryType 'Error' `
+                -EventID 100 `
+                -Source $MyInvocation.MyCommand.Source
+            throw $message
         }
     }
 
@@ -110,8 +115,13 @@ function Set-TargetResource
     if (-not ($PSBoundParameters.ContainsKey("CertificateThumbprint")) -and `
             -not($PSBoundParameters.ContainsKey("CertificateFilePath")))
     {
-        throw ("At least one of the following parameters must be specified: " + `
+        $message = ("At least one of the following parameters must be specified: " + `
                 "CertificateThumbprint, CertificateFilePath.")
+        Add-SPDscEvent -Message $message `
+            -EntryType 'Error' `
+            -EventID 100 `
+            -Source $MyInvocation.MyCommand.Source
+        throw $message
     }
 
     if ($PSBoundParameters.ContainsKey("CertificateFilePath") -and `
@@ -119,7 +129,12 @@ function Set-TargetResource
     {
         if (-not (Test-Path -Path $CertificateFilePath))
         {
-            throw ("Specified CertificateFilePath does not exist: $CertificateFilePath")
+            $message = ("Specified CertificateFilePath does not exist: $CertificateFilePath")
+            Add-SPDscEvent -Message $message `
+                -EntryType 'Error' `
+                -EventID 100 `
+                -Source $MyInvocation.MyCommand.Source
+            throw $message
         }
     }
 
@@ -128,9 +143,10 @@ function Set-TargetResource
     {
         Write-Verbose -Message "Updating SPTrustedRootAuthority '$Name'"
         $null = Invoke-SPDscCommand -Credential $InstallAccount `
-            -Arguments $PSBoundParameters `
+            -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
             -ScriptBlock {
             $params = $args[0]
+            $eventSource = $args[1]
 
             if ($params.ContainsKey("CertificateFilePath"))
             {
@@ -142,19 +158,34 @@ function Set-TargetResource
                 }
                 catch
                 {
-                    throw "An error occured: $($_.Exception.Message)"
+                    $message = "An error occured: $($_.Exception.Message)"
+                    Add-SPDscEvent -Message $message `
+                        -EntryType 'Error' `
+                        -EventID 100 `
+                        -Source $eventSource
+                    throw $message
                 }
 
                 if ($null -eq $cert)
                 {
-                    throw "Import of certificate failed."
+                    $message = "Import of certificate failed."
+                    Add-SPDscEvent -Message $message `
+                        -EntryType 'Error' `
+                        -EventID 100 `
+                        -Source $eventSource
+                    throw $message
                 }
 
                 if ($params.ContainsKey("CertificateThumbprint"))
                 {
                     if (-not $params.CertificateThumbprint.Equals($cert.Thumbprint))
                     {
-                        throw "Imported certificate thumbprint ($($cert.Thumbprint)) does not match expected thumbprint ($($params.CertificateThumbprint))."
+                        $message = "Imported certificate thumbprint ($($cert.Thumbprint)) does not match expected thumbprint ($($params.CertificateThumbprint))."
+                        Add-SPDscEvent -Message $message `
+                            -EntryType 'Error' `
+                            -EventID 100 `
+                            -Source $eventSource
+                        throw $message
                     }
                 }
             }
@@ -166,7 +197,12 @@ function Set-TargetResource
 
                 if ($null -eq $cert)
                 {
-                    throw "Certificate not found in the local Certificate Store"
+                    $message = "Certificate not found in the local Certificate Store"
+                    Add-SPDscEvent -Message $message `
+                        -EntryType 'Error' `
+                        -EventID 100 `
+                        -Source $eventSource
+                    throw $message
                 }
             }
 
@@ -188,9 +224,10 @@ function Set-TargetResource
     {
         Write-Verbose -Message "Adding SPTrustedRootAuthority '$Name'"
         $null = Invoke-SPDscCommand -Credential $InstallAccount `
-            -Arguments $PSBoundParameters `
-            -ScriptBlock {
-            $params = $args[0]
+        -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
+        -ScriptBlock {
+        $params = $args[0]
+        $eventSource = $args[1]
 
             if ($params.ContainsKey("CertificateFilePath"))
             {
@@ -202,19 +239,34 @@ function Set-TargetResource
                 }
                 catch
                 {
-                    throw "An error occured: $($_.Exception.Message)"
+                    $message = "An error occured: $($_.Exception.Message)"
+                    Add-SPDscEvent -Message $message `
+                        -EntryType 'Error' `
+                        -EventID 100 `
+                        -Source $eventSource
+                    throw $message
                 }
 
                 if ($null -eq $cert)
                 {
-                    throw "Import of certificate failed."
+                    $message = "Import of certificate failed."
+                    Add-SPDscEvent -Message $message `
+                        -EntryType 'Error' `
+                        -EventID 100 `
+                        -Source $eventSource
+                    throw $message
                 }
 
                 if ($params.ContainsKey("CertificateThumbprint"))
                 {
                     if (-not $params.CertificateThumbprint.Equals($cert.Thumbprint))
                     {
-                        throw "Imported certificate thumbprint ($($cert.Thumbprint)) does not match expected thumbprint ($($params.CertificateThumbprint))."
+                        $message = "Imported certificate thumbprint ($($cert.Thumbprint)) does not match expected thumbprint ($($params.CertificateThumbprint))."
+                        Add-SPDscEvent -Message $message `
+                            -EntryType 'Error' `
+                            -EventID 100 `
+                            -Source $eventSource
+                        throw $message
                     }
                 }
             }
@@ -226,7 +278,12 @@ function Set-TargetResource
 
                 if ($null -eq $cert)
                 {
-                    throw "Certificate not found in the local Certificate Store"
+                    $message = "Certificate not found in the local Certificate Store"
+                    Add-SPDscEvent -Message $message `
+                        -EntryType 'Error' `
+                        -EventID 100 `
+                        -Source $eventSource
+                    throw $message
                 }
             }
 
@@ -289,8 +346,13 @@ function Test-TargetResource
     if (-not ($PSBoundParameters.ContainsKey("CertificateThumbprint")) -and `
             -not($PSBoundParameters.ContainsKey("CertificateFilePath")))
     {
-        throw ("At least one of the following parameters must be specified: " + `
+        $message = ("At least one of the following parameters must be specified: " + `
                 "CertificateThumbprint, CertificateFilePath.")
+        Add-SPDscEvent -Message $message `
+            -EntryType 'Error' `
+            -EventID 100 `
+            -Source $MyInvocation.MyCommand.Source
+        throw $message
     }
 
     if ($PSBoundParameters.ContainsKey("CertificateFilePath") -and `
@@ -298,7 +360,12 @@ function Test-TargetResource
     {
         if (-not (Test-Path -Path $CertificateFilePath))
         {
-            throw ("Specified CertificateFilePath does not exist: $CertificateFilePath")
+            $message = ("Specified CertificateFilePath does not exist: $CertificateFilePath")
+            Add-SPDscEvent -Message $message `
+                -EntryType 'Error' `
+                -EventID 100 `
+                -Source $MyInvocation.MyCommand.Source
+            throw $message
         }
     }
 

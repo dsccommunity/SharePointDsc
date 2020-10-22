@@ -191,9 +191,10 @@ function Set-TargetResource
     if ($Ensure -eq "Present")
     {
         Invoke-SPDscCommand -Credential $InstallAccount `
-            -Arguments $PSBoundParameters `
+            -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
             -ScriptBlock {
             $params = $args[0]
+            $eventSource = $args[1]
 
             $wa = Get-SPWebApplication -Identity $params.Name -ErrorAction SilentlyContinue
             if ($null -eq $wa)
@@ -223,15 +224,23 @@ function Set-TargetResource
                     {
                         if ($_.Exception.Message -like "*No matching accounts were found*")
                         {
-                            throw ("The specified managed account was not found. Please make " + `
+                            $message = ("The specified managed account was not found. Please make " + `
                                     "sure the managed account exists before continuing.")
-                            return
+                            Add-SPDscEvent -Message $message `
+                                -EntryType 'Error' `
+                                -EventID 100 `
+                                -Source $eventSource
+                            throw $message
                         }
                         else
                         {
-                            throw ("Error occurred. Web application was not created. Error " + `
+                            $message = ("Error occurred. Web application was not created. Error " + `
                                     "details: $($_.Exception.Message)")
-                            return
+                            Add-SPDscEvent -Message $message `
+                                -EntryType 'Error' `
+                                -EventID 100 `
+                                -Source $eventSource
+                            throw $message
                         }
                     }
                 }

@@ -174,9 +174,14 @@ function Get-TargetResource
             }
             else
             {
-                throw ("A known issue exists that prevents these settings from being managed " + `
+                $message = ("A known issue exists that prevents these settings from being managed " + `
                         "when InstallAccount is used instead of PsDscRunAsAccount. See " + `
-                        "http://aka.ms/xSharePointRemoteIssues for details.")
+                        "http://aka.ms/SharePointDscRemoteIssues for details.")
+                Add-SPDscEvent -Message $message `
+                    -EntryType 'Error' `
+                    -EventID 100 `
+                    -Source $MyInvocation.MyCommand.Source
+                throw $message
             }
         }
     }
@@ -238,9 +243,10 @@ function Set-TargetResource
         "WebApplication"
         {
             Invoke-SPDscCommand -Credential $InstallAccount `
-                -Arguments $PSBoundParameters `
+                -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
                 -ScriptBlock {
                 $params = $args[0]
+                $eventSource = $args[1]
 
                 try
                 {
@@ -248,9 +254,13 @@ function Set-TargetResource
                 }
                 catch
                 {
-                    throw ("No local SharePoint farm was detected. SharePoint " + `
+                    $message = ("No local SharePoint farm was detected. SharePoint " + `
                             "Designer settings will not be applied")
-                    return
+                    Add-SPDscEvent -Message $message `
+                        -EntryType 'Error' `
+                        -EventID 100 `
+                        -Source $eventSource
+                    throw $message
                 }
 
                 Write-Verbose -Message "Start update SPD web application settings"
@@ -261,9 +271,13 @@ function Set-TargetResource
                 }
                 if ($null -eq $webapp)
                 {
-                    throw ("Web application not found. SharePoint Designer settings " + `
+                    $message = ("Web application not found. SharePoint Designer settings " + `
                             "will not be applied")
-                    return
+                    Add-SPDscEvent -Message $message `
+                        -EntryType 'Error' `
+                        -EventID 100 `
+                        -Source $eventSource
+                    throw $message
                 }
                 else
                 {
@@ -308,9 +322,10 @@ function Set-TargetResource
             if ((Test-SPDscRunAsCredential -Credential $InstallAccount) -eq $true)
             {
                 Invoke-SPDscCommand -Credential $InstallAccount `
-                    -Arguments $PSBoundParameters `
+                    -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
                     -ScriptBlock {
                     $params = $args[0]
+                    $eventSource = $args[1]
 
                     try
                     {
@@ -318,9 +333,13 @@ function Set-TargetResource
                     }
                     catch
                     {
-                        throw ("No local SharePoint farm was detected. SharePoint Designer " + `
+                        $message = ("No local SharePoint farm was detected. SharePoint Designer " + `
                                 "settings will not be applied")
-                        return
+                        Add-SPDscEvent -Message $message `
+                            -EntryType 'Error' `
+                            -EventID 100 `
+                            -Source $eventSource
+                        throw $message
                     }
 
                     Write-Verbose -Message "Start update SPD site collection settings"
@@ -329,9 +348,13 @@ function Set-TargetResource
                     $site = Get-SPSite -Identity $params.WebAppUrl -ErrorAction SilentlyContinue
                     if ($null -eq $site)
                     {
-                        throw ("Site collection not found. SharePoint Designer settings " + `
+                        $message = ("Site collection not found. SharePoint Designer settings " + `
                                 "will not be applied")
-                        return $null
+                        Add-SPDscEvent -Message $message `
+                            -EntryType 'Error' `
+                            -EventID 100 `
+                            -Source $eventSource
+                        throw $message
                     }
                     else
                     {
@@ -372,9 +395,14 @@ function Set-TargetResource
             }
             else
             {
-                throw ("A known issue exists that prevents these settings from being " + `
+                $message = ("A known issue exists that prevents these settings from being " + `
                         "managed when InstallAccount is used instead of PsDscRunAsAccount. " + `
-                        "See http://aka.ms/xSharePointRemoteIssues for details.")
+                        "See http://aka.ms/SharePointDscRemoteIssues for details.")
+                Add-SPDscEvent -Message $message `
+                    -EntryType 'Error' `
+                    -EventID 100 `
+                    -Source $MyInvocation.MyCommand.Source
+                throw $message
             }
         }
     }

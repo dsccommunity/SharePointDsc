@@ -419,10 +419,10 @@ function Set-TargetResource
     $PSBoundParameters.Ensure = $Ensure
 
     Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments $PSBoundParameters `
+        -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
         -ScriptBlock {
-
         $params = $args[0]
+        $eventSource = $args[1]
 
         if ( ($params.ContainsKey("TermSet")  `
                     -or $params.ContainsKey("TermGroup") `
@@ -432,14 +432,24 @@ function Set-TargetResource
                     -and $params.ContainsKey("TermSet") -eq $false)
         )
         {
-            throw ("You have to provide all 3 parameters Termset, TermGroup and TermStore " + `
+            $message = ("You have to provide all 3 parameters Termset, TermGroup and TermStore " + `
                     "when providing any of the 3.")
+            Add-SPDscEvent -Message $message `
+                -EntryType 'Error' `
+                -EventID 100 `
+                -Source $eventSource
+            throw $message
         }
 
         if ($params.ContainsKey("TermSet") `
                 -and (@("string (single value)", "string (multi value)").Contains($params.Type.ToLower()) -eq $false))
         {
-            throw "Only String and String Multivalue can use Termsets"
+            $message = "Only String and String Multivalue can use Termsets"
+            Add-SPDscEvent -Message $message `
+                -EntryType 'Error' `
+                -EventID 100 `
+                -Source $eventSource
+            throw $message
         }
 
         $ups = Get-SPServiceApplication -Name $params.UserProfileService `
@@ -461,8 +471,13 @@ function Set-TargetResource
         if ($null -eq $userProfileConfigManager)
         {
             #if config manager returns when ups is available then isuee is permissions
-            throw ("Account running process needs admin permissions on the user profile " + `
+            $message = ("Account running process needs admin permissions on the user profile " + `
                     "service application")
+            Add-SPDscEvent -Message $message `
+                -EntryType 'Error' `
+                -EventID 100 `
+                -Source $eventSource
+            throw $message
         }
         $coreProperties = $userProfileConfigManager.ProfilePropertyManager.GetCoreProperties()
 
@@ -474,8 +489,13 @@ function Set-TargetResource
         if ($null -ne $userProfileProperty -and $params.ContainsKey("Type") `
                 -and $userProfileProperty.CoreProperty.Type -ne $params.Type)
         {
-            throw ("Can't change property type. Current Type is " + `
+            $message = ("Can't change property type. Current Type is " + `
                     "$($userProfileProperty.CoreProperty.Type)")
+            Add-SPDscEvent -Message $message `
+                -EntryType 'Error' `
+                -EventID 100 `
+                -Source $eventSource
+            throw $message
         }
 
         $termSet = $null
@@ -494,20 +514,35 @@ function Set-TargetResource
 
                 if ($null -eq $termStore)
                 {
-                    throw "Term Store $($params.termStore) not found"
+                    $message = "Term Store $($params.termStore) not found"
+                    Add-SPDscEvent -Message $message `
+                        -EntryType 'Error' `
+                        -EventID 100 `
+                        -Source $eventSource
+                    throw $message
                 }
 
                 $group = $termStore.Groups[$params.TermGroup]
 
                 if ($null -eq $group)
                 {
-                    throw "Term Group $($params.termGroup) not found"
+                    $message = "Term Group $($params.termGroup) not found"
+                    Add-SPDscEvent -Message $message `
+                        -EntryType 'Error' `
+                        -EventID 100 `
+                        -Source $eventSource
+                    throw $message
                 }
 
                 $termSet = $group.TermSets[$params.TermSet]
                 if ($null -eq $termSet)
                 {
-                    throw "Term Set $($params.termSet) not found"
+                    $message = "Term Set $($params.termSet) not found"
+                    Add-SPDscEvent -Message $message `
+                        -EntryType 'Error' `
+                        -EventID 100 `
+                        -Source $eventSource
+                    throw $message
                 }
             }
         }
@@ -637,7 +672,12 @@ function Set-TargetResource
 
                 if ($null -eq $syncConnection)
                 {
-                    throw "connection not found"
+                    $message = "connection not found"
+                    Add-SPDscEvent -Message $message `
+                        -EntryType 'Error' `
+                        -EventID 100 `
+                        -Source $eventSource
+                    throw $message
                 }
 
                 if ($null -ne $syncConnection.PropertyMapping)
@@ -661,7 +701,12 @@ function Set-TargetResource
                     {
                         if ($export)
                         {
-                            throw "not implemented"
+                            $message = "not implemented"
+                            Add-SPDscEvent -Message $message `
+                                -EntryType 'Error' `
+                                -EventID 100 `
+                                -Source $eventSource
+                            throw $message
                         }
                         else
                         {

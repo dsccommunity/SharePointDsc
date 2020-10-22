@@ -55,6 +55,28 @@ try
                 Mock -CommandName Get-SPFarm -MockWith {
                     return @{ }
                 }
+
+                function Add-SPDscEvent
+                {
+                    param (
+                        [Parameter(Mandatory = $true)]
+                        [System.String]
+                        $Message,
+
+                        [Parameter(Mandatory = $true)]
+                        [System.String]
+                        $Source,
+
+                        [Parameter()]
+                        [ValidateSet('Error', 'Information', 'FailureAudit', 'SuccessAudit', 'Warning')]
+                        [System.String]
+                        $EntryType,
+
+                        [Parameter()]
+                        [System.UInt32]
+                        $EventID
+                    )
+                }
             }
 
             # Test contexts
@@ -215,15 +237,15 @@ try
                 }
 
                 It "Should throw an exception in the get method to say that this is not supported" {
-                    { Get-TargetResource @testParams } | Should -Throw "http://aka.ms/xSharePointRemoteIssues"
+                    { Get-TargetResource @testParams } | Should -Throw "http://aka.ms/SharePointDscRemoteIssues"
                 }
 
                 It "Should throw an exception in the test method to say that this is not supported" {
-                    { Test-TargetResource @testParams } | Should -Throw "http://aka.ms/xSharePointRemoteIssues"
+                    { Test-TargetResource @testParams } | Should -Throw "http://aka.ms/SharePointDscRemoteIssues"
                 }
 
                 It "Should throw an exception in the set method to say that this is not supported" {
-                    { Set-TargetResource @testParams } | Should -Throw "http://aka.ms/xSharePointRemoteIssues"
+                    { Set-TargetResource @testParams } | Should -Throw "http://aka.ms/SharePointDscRemoteIssues"
                 }
             }
 

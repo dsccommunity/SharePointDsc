@@ -67,6 +67,8 @@ try
         Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             BeforeAll {
                 Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
+
+                Mock -CommandName Add-SPDscEvent -MockWith {}
             }
 
             Context -Name "Validate Get-SPDscAssemblyVersion" -Fixture {

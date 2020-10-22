@@ -52,9 +52,30 @@ try
                 Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
                 # Mocks for all contexts
-                Mock -CommandName New-SPAlternateURL { }
-                Mock -CommandName Set-SPAlternateURL { }
-                Mock -CommandName Remove-SPAlternateURL { }
+                Mock -CommandName New-SPAlternateURL -MockWith { }
+                Mock -CommandName Set-SPAlternateURL -MockWith { }
+                Mock -CommandName Remove-SPAlternateURL -MockWith { }
+                function Add-SPDscEvent
+                {
+                    param (
+                        [Parameter(Mandatory = $true)]
+                        [System.String]
+                        $Message,
+
+                        [Parameter(Mandatory = $true)]
+                        [System.String]
+                        $Source,
+
+                        [Parameter()]
+                        [ValidateSet('Error', 'Information', 'FailureAudit', 'SuccessAudit', 'Warning')]
+                        [System.String]
+                        $EntryType,
+
+                        [Parameter()]
+                        [System.UInt32]
+                        $EventID
+                    )
+                }
             }
 
             # Test contexts

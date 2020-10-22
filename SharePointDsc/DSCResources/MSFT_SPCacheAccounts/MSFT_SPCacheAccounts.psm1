@@ -166,13 +166,21 @@ function Set-TargetResource
 
     $PSBoundParameters.SetWebAppPolicy = $SetWebAppPolicy
 
-    Invoke-SPDscCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+    Invoke-SPDscCommand -Credential $InstallAccount `
+        -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
+        -ScriptBlock {
         $params = $args[0]
+        $eventSource = $args[1]
 
         $wa = Get-SPWebApplication -Identity $params.WebAppUrl -ErrorAction SilentlyContinue
         if ($null -eq $wa)
         {
-            throw [Exception] "The web applications $($params.WebAppUrl) can not be found to set cache accounts"
+            $message = "The web applications $($params.WebAppUrl) can not be found to set cache accounts"
+            Add-SPDscEvent -Message $message `
+                -EntryType 'Error' `
+                -EventID 100 `
+                -Source $eventSource
+            throw $message
         }
 
         if ($wa.UseClaimsAuthentication -eq $true)

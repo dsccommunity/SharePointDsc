@@ -84,16 +84,21 @@ function Set-TargetResource
     Write-Verbose -Message "Setting web application '$WebAppUrl' blocked file types"
 
     $null = Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments @($PSBoundParameters, $PSScriptRoot) `
+        -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source, $PSScriptRoot) `
         -ScriptBlock {
         $params = $args[0]
-        $ScriptRoot = $args[1]
+        $eventSource = $args[1]
+        $ScriptRoot = $args[2]
 
         $wa = Get-SPWebApplication -Identity $params.WebAppUrl -ErrorAction SilentlyContinue
         if ($null -eq $wa)
         {
-            throw "Web application $($params.WebAppUrl) was not found"
-            return
+            $message = "Web application $($params.WebAppUrl) was not found"
+            Add-SPDscEvent -Message $message `
+                -EntryType 'Error' `
+                -EventID 100 `
+                -Source $MyInvocation.MyCommand.Source
+            throw $message
         }
 
         $modulePath = "..\..\Modules\SharePointDsc.WebApplication\SPWebApplication.BlockedFileTypes.psm1"

@@ -41,9 +41,10 @@ function Get-TargetResource
     Write-Verbose -Message "Getting blob cache settings for $WebAppUrl"
 
     $result = Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments $PSBoundParameters `
+        -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
         -ScriptBlock {
         $params = $args[0]
+        $eventSource = $args[1]
 
         $webappsi = Get-SPServiceInstance -Server $env:COMPUTERNAME `
             -ErrorAction SilentlyContinue `
@@ -109,7 +110,12 @@ function Get-TargetResource
         }
         catch
         {
-            throw "Error: $($_.Exception.Message)"
+            $message = "Error: $($_.Exception.Message)"
+            Add-SPDscEvent -Message $message `
+                -EntryType 'Error' `
+                -EventID 100 `
+                -Source $eventSource
+            throw $message
         }
 
         try
@@ -122,7 +128,12 @@ function Get-TargetResource
         }
         catch
         {
-            throw "Error: $($_.Exception.Message)"
+            $message = "Error: $($_.Exception.Message)"
+            Add-SPDscEvent -Message $message `
+                -EntryType 'Error' `
+                -EventID 100 `
+                -Source $eventSource
+            throw $message
         }
 
         $returnval = @{
@@ -229,10 +240,11 @@ function Set-TargetResource
     {
         ## Perform changes
         Invoke-SPDscCommand -Credential $InstallAccount `
-            -Arguments @($PSBoundParameters, $changes) `
+            -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source, $changes) `
             -ScriptBlock {
             $params = $args[0]
-            $changes = $args[1]
+            $eventSource = $args[1]
+            $changes = $args[2]
 
             $webappsi = Get-SPServiceInstance -Server $env:COMPUTERNAME `
                 -ErrorAction SilentlyContinue `
@@ -243,14 +255,24 @@ function Set-TargetResource
 
             if ($null -eq $webappsi)
             {
-                throw "Server isn't running the Web Application role"
+                $message = "Server isn't running the Web Application role"
+                Add-SPDscEvent -Message $message `
+                    -EntryType 'Error' `
+                    -EventID 100 `
+                    -Source $eventSource
+                throw $message
             }
 
             $wa = Get-SPWebApplication -Identity $params.WebAppUrl -ErrorAction SilentlyContinue
 
             if ($null -eq $wa)
             {
-                throw "Specified web application could not be found."
+                $message = "Specified web application could not be found."
+                Add-SPDscEvent -Message $message `
+                    -EntryType 'Error' `
+                    -EventID 100 `
+                    -Source $eventSource
+                throw $message
             }
 
             Write-Verbose -Message "Processing changes"
@@ -305,11 +327,21 @@ function Set-TargetResource
             }
             catch [DriveNotFoundException]
             {
-                throw "Specified drive does not exist"
+                $message = "Specified drive does not exist"
+                Add-SPDscEvent -Message $message `
+                    -EntryType 'Error' `
+                    -EventID 100 `
+                    -Source $MyInvocation.MyCommand.Source
+                throw $message
             }
             catch
             {
-                throw "Error creating Blob Cache folder: $($_.Exception.Message)"
+                $message = "Error creating Blob Cache folder: $($_.Exception.Message)"
+                Add-SPDscEvent -Message $message `
+                    -EntryType 'Error' `
+                    -EventID 100 `
+                    -Source $MyInvocation.MyCommand.Source
+                throw $message
             }
         }
     }

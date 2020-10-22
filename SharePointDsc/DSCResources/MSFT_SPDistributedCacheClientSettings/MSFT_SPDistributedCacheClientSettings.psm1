@@ -215,12 +215,17 @@ function Get-TargetResource
         $installedVersion = Get-SPDscInstalledProductVersion
         if ($installedVersion.FileMajorPart -eq 15)
         {
-            throw ("The following parameters are only supported in SharePoint 2016 and above: " + `
+            $message = ("The following parameters are only supported in SharePoint 2016 and above: " + `
                     "DFLTCMaxConnectionsToServer, DFLTCRequestTimeout, DFLTCChannelOpenTimeOut, " + `
                     "DSWUCMaxConnectionsToServer, DSWUCRequestTimeout, DSWUCChannelOpenTimeOut, " + `
                     "DUGCMaxConnectionsToServer, DUGCRequestTimeout, DUGCChannelOpenTimeOut, " + `
                     "DRTCMaxConnectionsToServer, DRTCRequestTimeout, DRTCChannelOpenTimeOut, " + `
                     "DHSCMaxConnectionsToServer, DHSCRequestTimeout and DHSCChannelOpenTimeOut")
+            Add-SPDscEvent -Message $message `
+                -EntryType 'Error' `
+                -EventID 100 `
+                -Source $MyInvocation.MyCommand.Source
+            throw $message
         }
     }
 
@@ -571,12 +576,17 @@ function Set-TargetResource
         $installedVersion = Get-SPDscInstalledProductVersion
         if ($installedVersion.FileMajorPart -eq 15)
         {
-            throw ("The following parameters are only supported in SharePoint 2016 and above: " + `
+            $message = ("The following parameters are only supported in SharePoint 2016 and above: " + `
                     "DFLTCMaxConnectionsToServer, DFLTCRequestTimeout, DFLTCChannelOpenTimeOut, " + `
                     "DSWUCMaxConnectionsToServer, DSWUCRequestTimeout, DSWUCChannelOpenTimeOut, " + `
                     "DUGCMaxConnectionsToServer, DUGCRequestTimeout, DUGCChannelOpenTimeOut, " + `
                     "DRTCMaxConnectionsToServer, DRTCRequestTimeout, DRTCChannelOpenTimeOut, " + `
                     "DHSCMaxConnectionsToServer, DHSCRequestTimeout and DHSCChannelOpenTimeOut")
+            Add-SPDscEvent -Message $message `
+                -EntryType 'Error' `
+                -EventID 100 `
+                -Source $MyInvocation.MyCommand.Source
+            throw $message
         }
     }
 

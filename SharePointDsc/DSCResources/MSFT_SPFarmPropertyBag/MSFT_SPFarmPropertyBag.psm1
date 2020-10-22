@@ -100,9 +100,10 @@ function Set-TargetResource()
     Write-Verbose -Message "Setting SPFarm property '$Name'"
 
     Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments $PSBoundParameters `
+        -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
         -ScriptBlock {
         $params = $args[0]
+        $eventSource = $args[1]
 
         try
         {
@@ -110,7 +111,12 @@ function Set-TargetResource()
         }
         catch
         {
-            throw "No local SharePoint farm was detected."
+            $message = "No local SharePoint farm was detected."
+            Add-SPDscEvent -Message $message `
+                -EntryType 'Error' `
+                -EventID 100 `
+                -Source $eventSource
+            throw $message
         }
 
         if ($params.Ensure -eq 'Present')

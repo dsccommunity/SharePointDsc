@@ -54,6 +54,28 @@ try
                 Mock -CommandName Remove-SPTrustedRootAuthority -MockWith { }
                 Mock -CommandName Set-SPTrustedRootAuthority -MockWith { }
                 Mock -CommandName New-SPTrustedRootAuthority -MockWith { }
+
+                function Add-SPDscEvent
+                {
+                    param (
+                        [Parameter(Mandatory = $true)]
+                        [System.String]
+                        $Message,
+
+                        [Parameter(Mandatory = $true)]
+                        [System.String]
+                        $Source,
+
+                        [Parameter()]
+                        [ValidateSet('Error', 'Information', 'FailureAudit', 'SuccessAudit', 'Warning')]
+                        [System.String]
+                        $EntryType,
+
+                        [Parameter()]
+                        [System.UInt32]
+                        $EventID
+                    )
+                }
             }
 
             Context -Name "When both CertificalThumbprint and CertificateFilePath are specified and thumbprints does not match (root authority exists)" -Fixture {

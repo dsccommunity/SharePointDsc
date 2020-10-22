@@ -77,14 +77,20 @@ function Set-TargetResource
     Write-Verbose -Message "Setting app store settings of $WebAppUrl"
 
     Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments $PSBoundParameters `
+        -Arguments @($PSBoundParameters,$MyInvocation.MyCommand.Source) `
         -ScriptBlock {
         $params = $args[0]
+        $eventSource = $args[1]
 
         $wa = Get-SPWebApplication -Identity $params.WebAppUrl -ErrorAction SilentlyContinue
         if ($null -eq $wa)
         {
-            throw ("Specified web application does not exist.")
+            $message = "Specified web application does not exist."
+            Add-SPDscEvent -Message $message `
+                -EntryType 'Error' `
+                -EventID 100 `
+                -Source $eventSource
+            throw $message
         }
 
         if ($params.ContainsKey("AllowAppPurchases"))

@@ -328,11 +328,12 @@ function Set-TargetResource
     }
 
     Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments @($PSBoundParameters, $PSScriptRoot) `
+        -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source, $PSScriptRoot) `
         -ScriptBlock {
 
         $params = $args[0]
-        $scriptRoot = $args[1]
+        $eventSource = $args[1]
+        $scriptRoot = $args[2]
 
         Import-Module -Name (Join-Path $scriptRoot "MSFT_SPUserProfileSyncConnection.psm1")
 
@@ -344,7 +345,12 @@ function Set-TargetResource
 
         if ($null -eq $ups)
         {
-            throw "User Profile Service Application $($params.UserProfileService) not found"
+            $message = "User Profile Service Application $($params.UserProfileService) not found"
+            Add-SPDscEvent -Message $message `
+                -EntryType 'Error' `
+                -EventID 100 `
+                -Source $eventSource
+            throw $message
         }
         $context = Get-SPDscServiceContext -ProxyGroup $ups.ServiceApplicationProxyGroup
 
@@ -354,7 +360,12 @@ function Set-TargetResource
 
         if ($upcm.IsSynchronizationRunning())
         {
-            throw "Synchronization is in Progress."
+            $message = "Synchronization is in Progress."
+            Add-SPDscEvent -Message $message `
+                -EntryType 'Error' `
+                -EventID 100 `
+                -Source $eventSource
+            throw $message
         }
 
         # In SP2016, the forest name is used as name but the dot is replaced by a dash
@@ -370,7 +381,7 @@ function Set-TargetResource
 
         $connection = $upcm.ConnectionManager | Where-Object -FilterScript {
             $_.DisplayName -eq $Name
-        } | Select-Object -first 1
+        } | Select-Object -First 1
 
         if ($params.Ensure -eq "Present")
         {
@@ -424,7 +435,12 @@ function Set-TargetResource
                             }
                             else
                             {
-                                throw "connection exists and forest is different. use force"
+                                $message = "connection exists and forest is different. use force"
+                                Add-SPDscEvent -Message $message `
+                                    -EntryType 'Error' `
+                                    -EventID 100 `
+                                    -Source $eventSource
+                                throw $message
                             }
                         }
 

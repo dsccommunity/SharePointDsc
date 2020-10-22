@@ -171,23 +171,43 @@ function Set-TargetResource
 
         if ($upgradeTimes.Count -ne 3)
         {
-            throw "Time window incorrectly formatted."
+            $message = "Time window incorrectly formatted."
+            Add-SPDscEvent -Message $message `
+                -EntryType 'Error' `
+                -EventID 100 `
+                -Source $MyInvocation.MyCommand.Source
+            throw $message
         }
         else
         {
             if ([datetime]::TryParse($upgradeTimes[0], [ref]$starttime) -ne $true)
             {
-                throw "Error converting start time"
+                $message = "Error converting start time"
+                Add-SPDscEvent -Message $message `
+                    -EntryType 'Error' `
+                    -EventID 100 `
+                    -Source $MyInvocation.MyCommand.Source
+                throw $message
             }
 
             if ([datetime]::TryParse($upgradeTimes[2], [ref]$endtime) -ne $true)
             {
-                throw "Error converting end time"
+                $message = "Error converting end time"
+                Add-SPDscEvent -Message $message `
+                    -EntryType 'Error' `
+                    -EventID 100 `
+                    -Source $MyInvocation.MyCommand.Source
+                throw $message
             }
 
             if ($starttime -gt $endtime)
             {
-                throw "Error: Start time cannot be larger than end time"
+                $message = "Error: Start time cannot be larger than end time"
+                Add-SPDscEvent -Message $message `
+                    -EntryType 'Error' `
+                    -EventID 100 `
+                    -Source $MyInvocation.MyCommand.Source
+                throw $message
             }
         }
 
@@ -262,9 +282,14 @@ function Set-TargetResource
         }
         Default
         {
-            throw ("SharePoint Post Setup Configuration Wizard failed, " + `
+            $message = ("SharePoint Post Setup Configuration Wizard failed, " + `
                     "exit code was $result. Error codes can be found at " + `
                     "https://aka.ms/installerrorcodes")
+            Add-SPDscEvent -Message $message `
+                -EntryType 'Error' `
+                -EventID 100 `
+                -Source $MyInvocation.MyCommand.Source
+            throw $message
         }
     }
 }

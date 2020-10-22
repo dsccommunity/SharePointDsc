@@ -55,9 +55,14 @@ function Get-TargetResource
     $installedVersion = Get-SPDscInstalledProductVersion
     if ($installedVersion.FileMajorPart -eq 16)
     {
-        throw [Exception] ("Work Management Service Application is no longer available " + `
+        $message = ("Work Management Service Application is no longer available " + `
                 "in SharePoint 2016/2019: " + `
                 "https://technet.microsoft.com/en-us/library/mt346112(v=office.16).aspx")
+        Add-SPDscEvent -Message $message `
+            -EntryType 'Error' `
+            -EventID 100 `
+            -Source $MyInvocation.MyCommand.Source
+        throw $message
     }
 
     $result = Invoke-SPDscCommand -Credential $InstallAccount `
@@ -173,14 +178,24 @@ function Set-TargetResource
     $installedVersion = Get-SPDscInstalledProductVersion
     if ($installedVersion.FileMajorPart -eq 16)
     {
-        throw [Exception] ("Work Management Service Application is no longer available " + `
+        $message = ("Work Management Service Application is no longer available " + `
                 "in SharePoint 2016/2019: " + `
                 "https://technet.microsoft.com/en-us/library/mt346112(v=office.16).aspx")
+        Add-SPDscEvent -Message $message `
+            -EntryType 'Error' `
+            -EventID 100 `
+            -Source $MyInvocation.MyCommand.Source
+        throw $message
     }
 
     if ($Ensure -ne "Absent" -and $PSBoundParameters.ContainsKey("ApplicationPool") -eq $false)
     {
-        throw "Parameter ApplicationPool is required unless service is being removed(Ensure='Absent')"
+        $message = "Parameter ApplicationPool is required unless service is being removed(Ensure='Absent')"
+        Add-SPDscEvent -Message $message `
+            -EntryType 'Error' `
+            -EventID 100 `
+            -Source $MyInvocation.MyCommand.Source
+        throw $message
     }
 
     $result = Get-TargetResource @PSBoundParameters
@@ -385,9 +400,14 @@ function Test-TargetResource
     $installedVersion = Get-SPDscInstalledProductVersion
     if ($installedVersion.FileMajorPart -eq 16)
     {
-        throw [Exception] ("Work Management Service Application is no longer available " + `
+        $message = ("Work Management Service Application is no longer available " + `
                 "in SharePoint 2016/2019: " + `
                 "https://technet.microsoft.com/en-us/library/mt346112(v=office.16).aspx")
+        Add-SPDscEvent -Message $message `
+            -EntryType 'Error' `
+            -EventID 100 `
+            -Source $MyInvocation.MyCommand.Source
+        throw $message
     }
 
     $PSBoundParameters.Ensure = $Ensure
@@ -403,14 +423,14 @@ function Test-TargetResource
             -Source $($MyInvocation.MyCommand.Source) `
             -DesiredValues $PSBoundParameters `
             -ValuesToCheck @("ApplicationPool",
-                "MinimumTimeBetweenEwsSyncSubscriptionSearches",
-                "MinimumTimeBetweenProviderRefreshes",
-                "MinimumTimeBetweenSearchQueries",
-                "Name",
-                "NumberOfSubscriptionSyncsPerEwsSyncRun",
-                "NumberOfUsersEwsSyncWillProcessAtOnce",
-                "NumberOfUsersPerEwsSyncBatch",
-                "Ensure")
+            "MinimumTimeBetweenEwsSyncSubscriptionSearches",
+            "MinimumTimeBetweenProviderRefreshes",
+            "MinimumTimeBetweenSearchQueries",
+            "Name",
+            "NumberOfSubscriptionSyncsPerEwsSyncRun",
+            "NumberOfUsersEwsSyncWillProcessAtOnce",
+            "NumberOfUsersPerEwsSyncBatch",
+            "Ensure")
     }
     else
     {

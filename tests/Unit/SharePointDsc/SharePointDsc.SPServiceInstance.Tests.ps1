@@ -54,6 +54,28 @@ try
                 # Mocks for all contexts
                 Mock -CommandName Start-SPServiceInstance -MockWith { }
                 Mock -CommandName Stop-SPServiceInstance -MockWith { }
+
+                function Add-SPDscEvent
+                {
+                    param (
+                        [Parameter(Mandatory = $true)]
+                        [System.String]
+                        $Message,
+
+                        [Parameter(Mandatory = $true)]
+                        [System.String]
+                        $Source,
+
+                        [Parameter()]
+                        [ValidateSet('Error', 'Information', 'FailureAudit', 'SuccessAudit', 'Warning')]
+                        [System.String]
+                        $EntryType,
+
+                        [Parameter()]
+                        [System.UInt32]
+                        $EventID
+                    )
+                }
             }
 
             # Test contexts

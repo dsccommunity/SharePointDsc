@@ -84,18 +84,23 @@ function Set-TargetResource
 
     Write-Verbose -Message "Setting web application '$WebAppUrl' workflow settings"
 
-    $paramArgs = @($PSBoundParameters, $PSScriptRoot)
+    $paramArgs = @($PSBoundParameters, $MyInvocation.MyCommand.Source, $PSScriptRoot)
     $null = Invoke-SPDscCommand -Credential $InstallAccount `
         -Arguments $paramArgs `
         -ScriptBlock {
         $params = $args[0]
-        $ScriptRoot = $args[1]
+        $eventSource = $args[1]
+        $ScriptRoot = $args[2]
 
         $wa = Get-SPWebApplication -Identity $params.WebAppUrl -ErrorAction SilentlyContinue
         if ($null -eq $wa)
         {
-            throw "Web application $($params.WebAppUrl) was not found"
-            return
+            $message = "Web application $($params.WebAppUrl) was not found"
+            Add-SPDscEvent -Message $message `
+                -EntryType 'Error' `
+                -EventID 100 `
+                -Source $eventSource
+            throw $message
         }
 
         $relpath = "..\..\Modules\SharePointDsc.WebApplication\SPWebApplication.Workflow.psm1"

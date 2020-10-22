@@ -72,10 +72,11 @@ function Get-TargetResource
     Write-Verbose -Message "Getting Content Source Setting for '$Name'"
 
     $result = Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments @($PSBoundParameters, $PSScriptRoot) `
+        -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source, $PSScriptRoot) `
         -ScriptBlock {
         $params = $args[0]
-        $ScriptRoot = $args[1]
+        $eventSource = $args[1]
+        $ScriptRoot = $args[2]
 
         $relativePath = "..\..\Modules\SharePointDsc.Search\SPSearchContentSource.Schedules.psm1"
         $modulePath = Join-Path -Path $ScriptRoot `
@@ -211,8 +212,13 @@ function Get-TargetResource
             }
             Default
             {
-                throw ("SharePointDsc does not currently support '$($source.Type)' content " + `
+                $message = ("SharePointDsc does not currently support '$($source.Type)' content " + `
                         "sources. Please use only 'SharePoint', 'FileShare', 'Website' or 'Business'.")
+                Add-SPDscEvent -Message $message `
+                    -EntryType 'Error' `
+                    -EventID 100 `
+                    -Source $eventSource
+                throw $message
             }
         }
         return $result
@@ -298,59 +304,114 @@ function Set-TargetResource
         {
             if ($PSBoundParameters.ContainsKey("LimitPageDepth") -eq $true)
             {
-                throw "Parameter LimitPageDepth is not valid for SharePoint content sources"
+                $message = "Parameter LimitPageDepth is not valid for SharePoint content sources"
+                Add-SPDscEvent -Message $message `
+                    -EntryType 'Error' `
+                    -EventID 100 `
+                    -Source $MyInvocation.MyCommand.Source
+                throw $message
             }
             if ($PSBoundParameters.ContainsKey("LimitServerHops") -eq $true)
             {
-                throw "Parameter LimitServerHops is not valid for SharePoint content sources"
+                $message = "Parameter LimitServerHops is not valid for SharePoint content sources"
+                Add-SPDscEvent -Message $message `
+                    -EntryType 'Error' `
+                    -EventID 100 `
+                    -Source $MyInvocation.MyCommand.Source
+                throw $message
             }
             if ($CrawlSetting -ne "CrawlVirtualServers" -and
                 $CrawlSetting -ne "CrawlSites"
             )
             {
-                throw ("Parameter CrawlSetting can only be set to CrawlVirtualServers or CrawlSites " + `
+                $message = ("Parameter CrawlSetting can only be set to CrawlVirtualServers or CrawlSites " + `
                         "for SharePoint content sources")
+                Add-SPDscEvent -Message $message `
+                    -EntryType 'Error' `
+                    -EventID 100 `
+                    -Source $MyInvocation.MyCommand.Source
+                throw $message
             }
         }
         "Website"
         {
             if ($PSBoundParameters.ContainsKey("ContinuousCrawl") -eq $true)
             {
-                throw "Parameter ContinuousCrawl is not valid for Website content sources"
+                $message = "Parameter ContinuousCrawl is not valid for Website content sources"
+                Add-SPDscEvent -Message $message `
+                    -EntryType 'Error' `
+                    -EventID 100 `
+                    -Source $MyInvocation.MyCommand.Source
+                throw $message
             }
             if ($PSBoundParameters.ContainsKey("LimitServerHops") -eq $true)
             {
-                throw "Parameter LimitServerHops is not valid for Website content sources"
+                $message = "Parameter LimitServerHops is not valid for Website content sources"
+                Add-SPDscEvent -Message $message `
+                    -EntryType 'Error' `
+                    -EventID 100 `
+                    -Source $MyInvocation.MyCommand.Source
+                throw $message
             }
         }
         "FileShare"
         {
             if ($PSBoundParameters.ContainsKey("LimitPageDepth") -eq $true)
             {
-                throw "Parameter LimitPageDepth is not valid for FileShare content sources"
+                $message = "Parameter LimitPageDepth is not valid for FileShare content sources"
+                Add-SPDscEvent -Message $message `
+                    -EntryType 'Error' `
+                    -EventID 100 `
+                    -Source $MyInvocation.MyCommand.Source
+                throw $message
             }
             if ($PSBoundParameters.ContainsKey("LimitServerHops") -eq $true)
             {
-                throw "Parameter LimitServerHops is not valid for FileShare content sources"
+                $message = "Parameter LimitServerHops is not valid for FileShare content sources"
+                Add-SPDscEvent -Message $message `
+                    -EntryType 'Error' `
+                    -EventID 100 `
+                    -Source $MyInvocation.MyCommand.Source
+                throw $message
             }
             if ($CrawlSetting -eq "Custom")
             {
-                throw "Parameter CrawlSetting can only be set to custom for website content sources"
+                $message = "Parameter CrawlSetting can only be set to custom for website content sources"
+                Add-SPDscEvent -Message $message `
+                    -EntryType 'Error' `
+                    -EventID 100 `
+                    -Source $MyInvocation.MyCommand.Source
+                throw $message
             }
         }
         "Business"
         {
             if ($PSBoundParameters.ContainsKey("ContinuousCrawl") -eq $true)
             {
-                throw "Parameter ContinuousCrawl is not valid for Business content sources"
+                $message = "Parameter ContinuousCrawl is not valid for Business content sources"
+                Add-SPDscEvent -Message $message `
+                    -EntryType 'Error' `
+                    -EventID 100 `
+                    -Source $MyInvocation.MyCommand.Source
+                throw $message
             }
             if ($PSBoundParameters.ContainsKey("LimitPageDepth") -eq $true)
             {
-                throw "Parameter LimitPageDepth is not valid for Business content sources"
+                $message = "Parameter LimitPageDepth is not valid for Business content sources"
+                Add-SPDscEvent -Message $message `
+                    -EntryType 'Error' `
+                    -EventID 100 `
+                    -Source $MyInvocation.MyCommand.Source
+                throw $message
             }
             if ($PSBoundParameters.ContainsKey("LimitServerHops") -eq $true)
             {
-                throw "Parameter LimitServerHops is not valid for Business content sources"
+                $message = "Parameter LimitServerHops is not valid for Business content sources"
+                Add-SPDscEvent -Message $message `
+                    -EntryType 'Error' `
+                    -EventID 100 `
+                    -Source $MyInvocation.MyCommand.Source
+                throw $message
             }
         }
     }
@@ -359,11 +420,16 @@ function Set-TargetResource
 
     if ($ContentSourceType -ne $CurrentValues.ContentSourceType -and $Force -eq $false)
     {
-        throw ("The type of the a search content source can not be changed from " + `
+        $message = ("The type of the a search content source can not be changed from " + `
                 "'$($CurrentValues.ContentSourceType)' to '$ContentSourceType' without " + `
                 "deleting and adding it again. Specify 'Force = `$true' in order to allow " + `
                 "DSC to do this, or manually remove the existing content source and re-run " + `
                 "the configuration.")
+        Add-SPDscEvent -Message $message `
+            -EntryType 'Error' `
+            -EventID 100 `
+            -Source $MyInvocation.MyCommand.Source
+        throw $message
     }
 
     if (($ContentSourceType -ne $CurrentValues.ContentSourceType -and $Force -eq $true) `
@@ -384,9 +450,10 @@ function Set-TargetResource
     {
         # Create the new content source and then apply settings to it
         Invoke-SPDscCommand -Credential $InstallAccount `
-            -Arguments @($PSBoundParameters) `
+            -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
             -ScriptBlock {
             $params = $args[0]
+            $eventSource = $args[1]
 
             $OFS = ","
             $startAddresses = "$($params.Addresses)"
@@ -447,8 +514,13 @@ function Set-TargetResource
 
                 if ($null -eq $source)
                 {
-                    throw ("An error occurred during creation of the Content Source, " + `
+                    $message = ("An error occurred during creation of the Content Source, " + `
                             "please check if all parameters are correct.")
+                    Add-SPDscEvent -Message $message `
+                        -EntryType 'Error' `
+                        -EventID 100 `
+                        -Source $eventSource
+                    throw $message
                 }
             }
 
@@ -789,59 +861,114 @@ function Test-TargetResource
         {
             if ($PSBoundParameters.ContainsKey("LimitPageDepth") -eq $true)
             {
-                throw "Parameter LimitPageDepth is not valid for SharePoint content sources"
+                $message = "Parameter LimitPageDepth is not valid for SharePoint content sources"
+                Add-SPDscEvent -Message $message `
+                    -EntryType 'Error' `
+                    -EventID 100 `
+                    -Source $MyInvocation.MyCommand.Source
+                throw $message
             }
             if ($PSBoundParameters.ContainsKey("LimitServerHops") -eq $true)
             {
-                throw "Parameter LimitServerHops is not valid for SharePoint content sources"
+                $message = "Parameter LimitServerHops is not valid for SharePoint content sources"
+                Add-SPDscEvent -Message $message `
+                    -EntryType 'Error' `
+                    -EventID 100 `
+                    -Source $MyInvocation.MyCommand.Source
+                throw $message
             }
             if ($CrawlSetting -ne "CrawlVirtualServers" -and
                 $CrawlSetting -ne "CrawlSites"
             )
             {
-                throw ("Parameter CrawlSetting can only be set to CrawlVirtualServers or CrawlSites " + `
+                $message = ("Parameter CrawlSetting can only be set to CrawlVirtualServers or CrawlSites " + `
                         "for SharePoint content sources")
+                Add-SPDscEvent -Message $message `
+                    -EntryType 'Error' `
+                    -EventID 100 `
+                    -Source $MyInvocation.MyCommand.Source
+                throw $message
             }
         }
         "Website"
         {
             if ($PSBoundParameters.ContainsKey("ContinuousCrawl") -eq $true)
             {
-                throw "Parameter ContinuousCrawl is not valid for Website content sources"
+                $message = "Parameter ContinuousCrawl is not valid for Website content sources"
+                Add-SPDscEvent -Message $message `
+                    -EntryType 'Error' `
+                    -EventID 100 `
+                    -Source $MyInvocation.MyCommand.Source
+                throw $message
             }
             if ($PSBoundParameters.ContainsKey("LimitServerHops") -eq $true)
             {
-                throw "Parameter LimitServerHops is not valid for Website content sources"
+                $message = "Parameter LimitServerHops is not valid for Website content sources"
+                Add-SPDscEvent -Message $message `
+                    -EntryType 'Error' `
+                    -EventID 100 `
+                    -Source $MyInvocation.MyCommand.Source
+                throw $message
             }
         }
         "FileShare"
         {
             if ($PSBoundParameters.ContainsKey("LimitPageDepth") -eq $true)
             {
-                throw "Parameter LimitPageDepth is not valid for FileShare content sources"
+                $message = "Parameter LimitPageDepth is not valid for FileShare content sources"
+                Add-SPDscEvent -Message $message `
+                    -EntryType 'Error' `
+                    -EventID 100 `
+                    -Source $MyInvocation.MyCommand.Source
+                throw $message
             }
             if ($PSBoundParameters.ContainsKey("LimitServerHops") -eq $true)
             {
-                throw "Parameter LimitServerHops is not valid for FileShare content sources"
+                $message = "Parameter LimitServerHops is not valid for FileShare content sources"
+                Add-SPDscEvent -Message $message `
+                    -EntryType 'Error' `
+                    -EventID 100 `
+                    -Source $MyInvocation.MyCommand.Source
+                throw $message
             }
             if ($CrawlSetting -eq "Custom")
             {
-                throw "Parameter CrawlSetting can only be set to custom for website content sources"
+                $message = "Parameter CrawlSetting can only be set to custom for website content sources"
+                Add-SPDscEvent -Message $message `
+                    -EntryType 'Error' `
+                    -EventID 100 `
+                    -Source $MyInvocation.MyCommand.Source
+                throw $message
             }
         }
         "Business"
         {
             if ($PSBoundParameters.ContainsKey("ContinuousCrawl") -eq $true)
             {
-                throw "Parameter ContinuousCrawl is not valid for Business content sources"
+                $message = "Parameter ContinuousCrawl is not valid for Business content sources"
+                Add-SPDscEvent -Message $message `
+                    -EntryType 'Error' `
+                    -EventID 100 `
+                    -Source $MyInvocation.MyCommand.Source
+                throw $message
             }
             if ($PSBoundParameters.ContainsKey("LimitPageDepth") -eq $true)
             {
-                throw "Parameter LimitPageDepth is not valid for Business content sources"
+                $message = "Parameter LimitPageDepth is not valid for Business content sources"
+                Add-SPDscEvent -Message $message `
+                    -EntryType 'Error' `
+                    -EventID 100 `
+                    -Source $MyInvocation.MyCommand.Source
+                throw $message
             }
             if ($PSBoundParameters.ContainsKey("LimitServerHops") -eq $true)
             {
-                throw "Parameter LimitServerHops is not valid for Business content sources"
+                $message = "Parameter LimitServerHops is not valid for Business content sources"
+                Add-SPDscEvent -Message $message `
+                    -EntryType 'Error' `
+                    -EventID 100 `
+                    -Source $MyInvocation.MyCommand.Source
+                throw $message
             }
         }
     }

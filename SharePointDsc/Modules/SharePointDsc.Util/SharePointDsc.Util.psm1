@@ -48,7 +48,7 @@ function Add-SPDscEvent
     try
     {
         Write-EventLog -LogName $LogName -Source $Source `
-            -EventID $EventID -Message $Message -EntryType $EntryType
+            -EventId $EventID -Message $Message -EntryType $EntryType
     }
     catch
     {
@@ -68,7 +68,12 @@ function Add-SPDscUserToLocalAdmin
 
     if ($UserName.Contains("\") -eq $false)
     {
-        throw [Exception] "Usernames should be formatted as domain\username"
+        $message = "Usernames should be formatted as domain\username"
+        Add-SPDscEvent -Message $message `
+            -EntryType 'Error' `
+            -EventID 100 `
+            -Source $MyInvocation.MyCommand.Source
+        throw $message
     }
 
     $domainName = $UserName.Split('\')[0]
@@ -190,7 +195,12 @@ function Convert-SPDscADGroupIDToName
     }
     else
     {
-        throw "Unable to locate group with id $GroupId"
+        $message = "Unable to locate group with id $GroupId"
+        Add-SPDscEvent -Message $message `
+            -EntryType 'Error' `
+            -EventID 100 `
+            -Source $MyInvocation.MyCommand.Source
+        throw $message
     }
 }
 
@@ -396,7 +406,12 @@ function Get-SPDscFarmVersionInfo
 
         if ($null -eq $products)
         {
-            throw "Product not found: $ProductToCheck"
+            $message = "Product not found: $ProductToCheck"
+            Add-SPDscEvent -Message $message `
+                -EntryType 'Error' `
+                -EventID 100 `
+                -Source $MyInvocation.MyCommand.Source
+            throw $message
         }
     }
 
@@ -493,7 +508,12 @@ function Get-SPDscRegistryKey
     }
     else
     {
-        throw "Specified registry key $Key could not be found."
+        $message = "Specified registry key $Key could not be found."
+        Add-SPDscEvent -Message $message `
+            -EntryType 'Error' `
+            -EventID 100 `
+            -Source $MyInvocation.MyCommand.Source
+        throw $message
     }
 }
 
@@ -558,7 +578,12 @@ function Get-SPDscInstalledProductVersion
     $fullPath = Get-Item $pathToSearch -ErrorAction SilentlyContinue | Sort-Object { $_.Directory } -Descending | Select-Object -First 1
     if ($null -eq $fullPath)
     {
-        throw 'SharePoint path {C:\Program Files\Common Files\microsoft shared\Web Server Extensions} does not exist'
+        $message = 'SharePoint path {C:\Program Files\Common Files\microsoft shared\Web Server Extensions} does not exist'
+        Add-SPDscEvent -Message $message `
+            -EntryType 'Error' `
+            -EventID 100 `
+            -Source $MyInvocation.MyCommand.Source
+        throw $message
     }
     else
     {
@@ -606,9 +631,13 @@ function Invoke-SPDscCommand
     {
         if ($Env:USERNAME.Contains("$"))
         {
-            throw [Exception] ("You need to specify a value for either InstallAccount " + `
+            $message = ("You need to specify a value for either InstallAccount " + `
                     "or PsDscRunAsCredential.")
-            return
+            Add-SPDscEvent -Message $message `
+                -EntryType 'Error' `
+                -EventID 100 `
+                -Source $MyInvocation.MyCommand.Source
+            throw $message
         }
         Write-Verbose -Message "Executing as the local run as user $($Env:USERDOMAIN)\$($Env:USERNAME)"
 
@@ -626,7 +655,12 @@ function Invoke-SPDscCommand
             }
             else
             {
-                throw $_
+                $message = $_
+                Add-SPDscEvent -Message $message `
+                    -EntryType 'Error' `
+                    -EventID 100 `
+                    -Source $MyInvocation.MyCommand.Source
+                throw $message
             }
         }
     }
@@ -636,10 +670,14 @@ function Invoke-SPDscCommand
         {
             if (-not $Env:USERNAME.Contains("$"))
             {
-                throw [Exception] ("Unable to use both InstallAccount and " + `
+                $message = ("Unable to use both InstallAccount and " + `
                         "PsDscRunAsCredential in a single resource. Remove one " + `
                         "and try again.")
-                return
+                Add-SPDscEvent -Message $message `
+                    -EntryType 'Error' `
+                    -EventID 100 `
+                    -Source $MyInvocation.MyCommand.Source
+                throw $message
             }
         }
         Write-Verbose -Message ("Executing using a provided credential and local PSSession " + `
@@ -675,7 +713,12 @@ function Invoke-SPDscCommand
             }
             else
             {
-                throw $_
+                $message = $_
+                Add-SPDscEvent -Message $message `
+                    -EntryType 'Error' `
+                    -EventID 100 `
+                    -Source $MyInvocation.MyCommand.Source
+                throw $message
             }
         }
         finally
@@ -723,7 +766,12 @@ function Remove-SPDscUserToLocalAdmin
 
     if ($UserName.Contains("\") -eq $false)
     {
-        throw [Exception] "Usernames should be formatted as domain\username"
+        $message = "Usernames should be formatted as domain\username"
+        Add-SPDscEvent -Message $message `
+            -EntryType 'Error' `
+            -EventID 100 `
+            -Source $MyInvocation.MyCommand.Source
+        throw $message
     }
 
     $domainName = $UserName.Split('\')[0]
@@ -868,8 +916,12 @@ function Test-SPDscRunningAsFarmAccount
     {
         if ($Env:USERNAME.Contains("$"))
         {
-            throw [Exception] "You need to specify a value for either InstallAccount or PsDscRunAsCredential."
-            return
+            $message = "You need to specify a value for either InstallAccount or PsDscRunAsCredential."
+            Add-SPDscEvent -Message $message `
+                -EntryType 'Error' `
+                -EventID 100 `
+                -Source $MyInvocation.MyCommand.Source
+            throw $message
         }
         $Username = "$($Env:USERDOMAIN)\$($Env:USERNAME)"
     }
@@ -928,14 +980,24 @@ function Test-SPDscParameterState
         ($DesiredValues.GetType().Name -ne "CimInstance") -and `
         ($DesiredValues.GetType().Name -ne "PSBoundParametersDictionary"))
     {
-        throw ("Property 'DesiredValues' in Test-SPDscParameterState must be either a " + `
+        $message = ("Property 'DesiredValues' in Test-SPDscParameterState must be either a " + `
                 "Hashtable or CimInstance. Type detected was $($DesiredValues.GetType().Name)")
+        Add-SPDscEvent -Message $message `
+            -EntryType 'Error' `
+            -EventID 100 `
+            -Source $MyInvocation.MyCommand.Source
+        throw $message
     }
 
     if (($DesiredValues.GetType().Name -eq "CimInstance") -and ($null -eq $ValuesToCheck))
     {
-        throw ("If 'DesiredValues' is a CimInstance then property 'ValuesToCheck' must contain " + `
+        $message = ("If 'DesiredValues' is a CimInstance then property 'ValuesToCheck' must contain " + `
                 "a value")
+        Add-SPDscEvent -Message $message `
+            -EntryType 'Error' `
+            -EventID 100 `
+            -Source $MyInvocation.MyCommand.Source
+        throw $message
     }
 
     if (($null -eq $ValuesToCheck) -or ($ValuesToCheck.Count -lt 1))
@@ -1261,7 +1323,12 @@ function Test-SPDscUserIsLocalAdmin
 
     if ($UserName.Contains("\") -eq $false)
     {
-        throw [Exception] "Usernames should be formatted as domain\username"
+        $message = "Usernames should be formatted as domain\username"
+        Add-SPDscEvent -Message $message `
+            -EntryType 'Error' `
+            -EventID 100 `
+            -Source $MyInvocation.MyCommand.Source
+        throw $message
     }
 
     $accountName = $UserName.Split('\')[1]
@@ -1299,7 +1366,12 @@ function Test-SPDscIsADUser
 
     if ($null -eq $result)
     {
-        throw "Unable to locate identity '$IdentityName' in the current domain."
+        $message = "Unable to locate identity '$IdentityName' in the current domain."
+        Add-SPDscEvent -Message $message `
+            -EntryType 'Error' `
+            -EventID 100 `
+            -Source $MyInvocation.MyCommand.Source
+        throw $message
     }
 
     if ($result[0].Properties.objectclass -contains "user")
@@ -1383,7 +1455,12 @@ function Format-OfficePatchGUID
             -or $guidParts[3].Length -ne 4 `
             -or $guidParts[4].Length -ne 12)
     {
-        throw "The provided Office Patch GUID is not in the expected format (e.g. XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX"
+        $message = "The provided Office Patch GUID is not in the expected format (e.g. XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX"
+        Add-SPDscEvent -Message $message `
+            -EntryType 'Error' `
+            -EventID 100 `
+            -Source $MyInvocation.MyCommand.Source
+        throw $message
     }
 
     $newPart1 = ConvertTo-ReverseString -InputString $guidParts[0]
@@ -1408,7 +1485,12 @@ function ConvertTo-TwoDigitFlipString
 
     if ($InputString.Length % 2 -ne 0)
     {
-        throw "The input string was not in the correct format. It needs to have an even length."
+        $message = "The input string was not in the correct format. It needs to have an even length."
+        Add-SPDscEvent -Message $message `
+            -EntryType 'Error' `
+            -EventID 100 `
+            -Source $MyInvocation.MyCommand.Source
+        throw $message
     }
 
     $flippedString = ""

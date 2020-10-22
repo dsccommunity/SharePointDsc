@@ -69,9 +69,10 @@ function Get-TargetResource
     Write-Verbose -Message "Getting managed metadata service application $Name"
 
     $result = Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments $PSBoundParameters `
+        -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
         -ScriptBlock {
         $params = $args[0]
+        $eventSource = $args[1]
 
         $serviceApps = Get-SPServiceApplication -Name $params.Name `
             -ErrorAction SilentlyContinue
@@ -168,8 +169,13 @@ function Get-TargetResource
                     }
                     default
                     {
-                        throw ("Detected an unsupported major version of SharePoint. " + `
+                        $message = ("Detected an unsupported major version of SharePoint. " + `
                                 "SharePointDsc only supports SharePoint 2013, 2016 or 2019.")
+                        Add-SPDscEvent -Message $message `
+                            -EntryType 'Error' `
+                            -EventID 100 `
+                            -Source $eventSource
+                        throw $message
                     }
                 }
 
@@ -467,12 +473,13 @@ function Set-TargetResource
             Write-Verbose -Message "Updating the term store administrators"
             # Update the term store administrators
             Invoke-SPDscCommand -Credential $InstallAccount `
-                -Arguments @($PSBoundParameters, $result, $pName) `
+                -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source, $result, $pName) `
                 -ScriptBlock {
 
                 $params = $args[0]
-                $currentValues = $args[1]
-                $pName = $args[2]
+                $eventSource = $args[1]
+                $currentValues = $args[2]
+                $pName = $args[3]
 
                 $centralAdminSite = Get-SPWebApplication -IncludeCentralAdministration `
                 | Where-Object -FilterScript {
@@ -483,7 +490,12 @@ function Set-TargetResource
 
                 if ($null -eq $termStore)
                 {
-                    throw "The name of the Managed Metadata Service Application Proxy '$pName' did not return any termstore."
+                    $message = "The name of the Managed Metadata Service Application Proxy '$pName' did not return any termstore."
+                    Add-SPDscEvent -Message $message `
+                        -EntryType 'Error' `
+                        -EventID 100 `
+                        -Source $eventSource
+                    throw $message
                 }
 
                 $changesToMake = Compare-Object -ReferenceObject $currentValues.TermStoreAdministrators `
@@ -514,7 +526,12 @@ function Set-TargetResource
                         }
                         default
                         {
-                            throw "An unknown side indicator was found."
+                            $message = "An unknown side indicator was found."
+                            Add-SPDscEvent -Message $message `
+                                -EntryType 'Error' `
+                                -EventID 100 `
+                                -Source $eventSource
+                            throw $message
                         }
                     }
                 }
@@ -529,11 +546,12 @@ function Set-TargetResource
             # The lanauge settings should be set to default
             Write-Verbose -Message "Updating the default language for Managed Metadata Service Application Proxy '$pName'"
             Invoke-SPDscCommand -Credential $InstallAccount `
-                -Arguments @($PSBoundParameters, $pName) `
+                -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source, $pName) `
                 -ScriptBlock {
 
                 $params = $args[0]
-                $pName = $args[1]
+                $eventSource = $args[1]
+                $pName = $args[2]
 
                 $centralAdminSite = Get-SPWebApplication -IncludeCentralAdministration `
                 | Where-Object -FilterScript {
@@ -544,7 +562,12 @@ function Set-TargetResource
 
                 if ($null -eq $termStore)
                 {
-                    throw "The name of the Managed Metadata Service Application Proxy '$pName' did not return any termstore."
+                    $message = "The name of the Managed Metadata Service Application Proxy '$pName' did not return any termstore."
+                    Add-SPDscEvent -Message $message `
+                        -EntryType 'Error' `
+                        -EventID 100 `
+                        -Source $eventSource
+                    throw $message
                 }
 
                 $permissionResult = $termStore.TermStoreAdministrators.DoesUserHavePermissions([Microsoft.SharePoint.Taxonomy.TaxonomyRights]::ManageTermStore)
@@ -573,12 +596,13 @@ function Set-TargetResource
             Write-Verbose -Message "Updating working languages for Managed Metadata Service Application Proxy '$pName'"
             # Update the term store working languages
             Invoke-SPDscCommand -Credential $InstallAccount `
-                -Arguments @($PSBoundParameters, $result, $pName) `
+                -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source, $result, $pName) `
                 -ScriptBlock {
 
                 $params = $args[0]
-                $currentValues = $args[1]
-                $pName = $args[2]
+                $eventSource = $args[1]
+                $currentValues = $args[2]
+                $pName = $args[3]
 
                 $centralAdminSite = Get-SPWebApplication -IncludeCentralAdministration `
                 | Where-Object -FilterScript {
@@ -589,7 +613,12 @@ function Set-TargetResource
 
                 if ($null -eq $termStore)
                 {
-                    throw "The name of the Managed Metadata Service Application Proxy '$pName' did not return any termstore."
+                    $message = "The name of the Managed Metadata Service Application Proxy '$pName' did not return any termstore."
+                    Add-SPDscEvent -Message $message `
+                        -EntryType 'Error' `
+                        -EventID 100 `
+                        -Source $eventSource
+                    throw $message
                 }
 
                 $permissionResult = $termStore.TermStoreAdministrators.DoesUserHavePermissions([Microsoft.SharePoint.Taxonomy.TaxonomyRights]::ManageTermStore)
@@ -619,7 +648,12 @@ function Set-TargetResource
                         }
                         default
                         {
-                            throw "An unknown side indicator was found."
+                            $message = "An unknown side indicator was found."
+                            Add-SPDscEvent -Message $message `
+                                -EntryType 'Error' `
+                                -EventID 100 `
+                                -Source $eventSource
+                            throw $message
                         }
                     }
                 }
@@ -639,10 +673,11 @@ function Set-TargetResource
         )
         {
             Invoke-SPDscCommand -Credential $InstallAccount `
-                -Arguments @($PSBoundParameters, $pName) `
+                -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source, $pName) `
                 -ScriptBlock {
                 $params = $args[0]
-                $pName = $args[1]
+                $eventSource = $args[1]
+                $pName = $args[2]
 
                 $proxy = Get-SPMetadataServiceApplicationProxy -Identity $pName
                 if ($null -ne $proxy)
@@ -652,7 +687,12 @@ function Set-TargetResource
                 }
                 else
                 {
-                    throw [Exception] "No SPMetadataServiceApplicationProxy with the name '$($proxyName)' was found. Please verify your Managed Metadata Service Application."
+                    $message = "No SPMetadataServiceApplicationProxy with the name '$($proxyName)' was found. Please verify your Managed Metadata Service Application."
+                    Add-SPDscEvent -Message $message `
+                        -EntryType 'Error' `
+                        -EventID 100 `
+                        -Source $eventSource
+                    throw $message
                 }
             }
         }
@@ -662,10 +702,11 @@ function Set-TargetResource
         )
         {
             Invoke-SPDscCommand -Credential $InstallAccount `
-                -Arguments @($PSBoundParameters, $pName) `
+                -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source, $pName) `
                 -ScriptBlock {
                 $params = $args[0]
-                $pName = $args[1]
+                $eventSource = $args[1]
+                $pName = $args[2]
 
                 $proxy = Get-SPMetadataServiceApplicationProxy -Identity $pName
                 if ($null -ne $proxy)
@@ -675,7 +716,12 @@ function Set-TargetResource
                 }
                 else
                 {
-                    throw [Exception] "No SPMetadataServiceApplicationProxy with the name '$($proxyName)' was found. Please verify your Managed Metadata Service Application."
+                    $message = "No SPMetadataServiceApplicationProxy with the name '$($proxyName)' was found. Please verify your Managed Metadata Service Application."
+                    Add-SPDscEvent -Message $message `
+                        -EntryType 'Error' `
+                        -EventID 100 `
+                        -Source $eventSource
+                    throw $message
                 }
             }
         }

@@ -34,14 +34,24 @@ function Get-TargetResource
 
     if ($Members -and (($MembersToInclude) -or ($MembersToExclude)))
     {
-        throw ("Cannot use the Members parameter together with the MembersToInclude or " + `
+        $message = ("Cannot use the Members parameter together with the MembersToInclude or " + `
                 "MembersToExclude parameters")
+        Add-SPDscEvent -Message $message `
+            -EntryType 'Error' `
+            -EventID 100 `
+            -Source $MyInvocation.MyCommand.Source
+        throw $message
     }
 
     if ($null -eq $Members -and $null -eq $MembersToInclude -and $null -eq $MembersToExclude)
     {
-        throw ("At least one of the following parameters must be specified: Members, " + `
+        $message = ("At least one of the following parameters must be specified: Members, " + `
                 "MembersToInclude, MembersToExclude")
+        Add-SPDscEvent -Message $message `
+            -EntryType 'Error' `
+            -EventID 100 `
+            -Source $MyInvocation.MyCommand.Source
+        throw $message
     }
 
     $result = Invoke-SPDscCommand -Credential $InstallAccount `
@@ -231,28 +241,44 @@ function Set-TargetResource
 
     if ($Members -and (($MembersToInclude) -or ($MembersToExclude)))
     {
-        throw ("Cannot use the Members parameter together with the MembersToInclude or " + `
+        $message = ("Cannot use the Members parameter together with the MembersToInclude or " + `
                 "MembersToExclude parameters")
+        Add-SPDscEvent -Message $message `
+            -EntryType 'Error' `
+            -EventID 100 `
+            -Source $MyInvocation.MyCommand.Source
+        throw $message
     }
 
     if ($null -eq $Members -and $null -eq $MembersToInclude -and $null -eq $MembersToExclude)
     {
-        throw ("At least one of the following parameters must be specified: Members, " + `
+        $message = ("At least one of the following parameters must be specified: Members, " + `
                 "MembersToInclude, MembersToExclude")
+        Add-SPDscEvent -Message $message `
+            -EntryType 'Error' `
+            -EventID 100 `
+            -Source $MyInvocation.MyCommand.Source
+        throw $message
     }
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
     Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments @($PSBoundParameters, $CurrentValues) `
+        -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source, $CurrentValues) `
         -ScriptBlock {
         $params = $args[0]
-        $CurrentValues = $args[1]
+        $eventSource = $args[1]
+        $CurrentValues = $args[2]
 
         $serviceApp = Get-SPServiceApplication -Name $params.ServiceAppName
         if ($null -eq $serviceApp)
         {
-            throw "Unable to locate service application $($params.ServiceAppName)"
+            $message = "Unable to locate service application $($params.ServiceAppName)"
+            Add-SPDscEvent -Message $message `
+                -EntryType 'Error' `
+                -EventID 100 `
+                -Source $eventSource
+            throw $message
         }
 
         Write-Verbose -Message "Checking if valid AccessLevels are used"
@@ -285,8 +311,13 @@ function Set-TargetResource
                 {
                     if ($availablePerms -notcontains $accessLevel)
                     {
-                        throw ("Unknown AccessLevel is used ($accessLevel). Allowed values are " + `
+                        $message = ("Unknown AccessLevel is used ($accessLevel). Allowed values are " + `
                                 "'" + ($availablePerms -join "', '") + "'")
+                        Add-SPDscEvent -Message $message `
+                            -EntryType 'Error' `
+                            -EventID 100 `
+                            -Source $eventSource
+                        throw $message
                     }
                 }
             }
@@ -301,8 +332,13 @@ function Set-TargetResource
                 {
                     if ($availablePerms -notcontains $accessLevel)
                     {
-                        throw ("Unknown AccessLevel is used ($accessLevel). Allowed values are " + `
+                        $message = ("Unknown AccessLevel is used ($accessLevel). Allowed values are " + `
                                 "'" + ($availablePerms -join "', '") + "'")
+                        Add-SPDscEvent -Message $message `
+                            -EntryType 'Error' `
+                            -EventID 100 `
+                            -Source $eventSource
+                        throw $message
                     }
                 }
             }

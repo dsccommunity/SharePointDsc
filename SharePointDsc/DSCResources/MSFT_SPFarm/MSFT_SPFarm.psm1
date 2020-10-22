@@ -96,7 +96,13 @@ function Get-TargetResource
 
     if ($Ensure -eq "Absent")
     {
-        throw "SharePointDsc does not support removing a server from a farm, please set the ensure property to 'present'"
+        $message = "SharePointDsc does not support removing a server from a farm, please set " + `
+            "the ensure property to 'present'"
+        Add-SPDscEvent -Message $message `
+            -EntryType 'Error' `
+            -EventID 100 `
+            -Source $MyInvocation.MyCommand.Source
+        throw $message
     }
 
     $supportsSettingApplicationCredentialKey = $false
@@ -111,7 +117,13 @@ function Get-TargetResource
         {
             if ($DeveloperDashboard -eq "OnDemand")
             {
-                throw "The DeveloperDashboard value 'OnDemand' is not allowed in SharePoint 2016 and 2019"
+                $message = "The DeveloperDashboard value 'OnDemand' is not allowed in SharePoint " + `
+                    "2016 and 2019"
+                Add-SPDscEvent -Message $message `
+                    -EntryType 'Error' `
+                    -EventID 100 `
+                    -Source $MyInvocation.MyCommand.Source
+                throw $message
             }
 
             if ($DeveloperDashboard -eq "On")
@@ -134,22 +146,37 @@ function Get-TargetResource
         }
         default
         {
-            throw ("Detected an unsupported major version of SharePoint. SharePointDsc only " +
+            $message = ("Detected an unsupported major version of SharePoint. SharePointDsc only " +
                 "supports SharePoint 2013, 2016 or 2019.")
+            Add-SPDscEvent -Message $message `
+                -EntryType 'Error' `
+                -EventID 100 `
+                -Source $MyInvocation.MyCommand.Source
+            throw $message
         }
     }
 
     if ($PSBoundParameters.ContainsKey("ApplicationCredentialKey") -and
         -not $supportsSettingApplicationCredentialKey)
     {
-        throw [Exception] ("Specifying ApplicationCredentialKey is only supported " +
+        $message = ("Specifying ApplicationCredentialKey is only supported " +
             "on SharePoint 2019")
+        Add-SPDscEvent -Message $message `
+            -EntryType 'Error' `
+            -EventID 100 `
+            -Source $MyInvocation.MyCommand.Source
+        throw $message
     }
 
     if (($PSBoundParameters.ContainsKey("ServerRole") -eq $true) -and
         $installedVersion.FileMajorPart -ne 16)
     {
-        throw [Exception] "Server role is only supported in SharePoint 2016 and 2019."
+        $message = "Server role is only supported in SharePoint 2016 and 2019."
+        Add-SPDscEvent -Message $message `
+            -EntryType 'Error' `
+            -EventID 100 `
+            -Source $MyInvocation.MyCommand.Source
+        throw $message
     }
 
     if (($PSBoundParameters.ContainsKey("ServerRole") -eq $true) -and
@@ -158,10 +185,15 @@ function Get-TargetResource
         ($ServerRole -eq "ApplicationWithSearch" -or
             $ServerRole -eq "WebFrontEndWithDistributedCache"))
     {
-        throw [Exception] ("ServerRole values of 'ApplicationWithSearch' or " +
+        $message = ("ServerRole values of 'ApplicationWithSearch' or " +
             "'WebFrontEndWithDistributedCache' require the SharePoint 2016 " +
             "Feature Pack 1 to be installed. See " +
             "https://support.microsoft.com/en-us/kb/3127940")
+        Add-SPDscEvent -Message $message `
+            -EntryType 'Error' `
+            -EventID 100 `
+            -Source $MyInvocation.MyCommand.Source
+        throw $message
     }
 
 
@@ -423,8 +455,13 @@ function Set-TargetResource
 
     if ($Ensure -eq "Absent")
     {
-        throw ("SharePointDsc does not support removing a server from a farm, please set the " +
+        $message = ("SharePointDsc does not support removing a server from a farm, please set the " +
             "ensure property to 'present'")
+        Add-SPDscEvent -Message $message `
+            -EntryType 'Error' `
+            -EventID 100 `
+            -Source $MyInvocation.MyCommand.Source
+        throw $message
     }
 
     if ($PSBoundParameters.ContainsKey("CentralAdministrationUrl"))
@@ -438,15 +475,27 @@ function Set-TargetResource
             $uri = $CentralAdministrationUrl -as [System.Uri]
             if ($null -eq $uri.AbsoluteUri -or $uri.scheme -notin ('http', 'https'))
             {
-                throw "CentralAdministrationUrl is not a valid URI. It should include the scheme (http/https) and address."
+                $message = "CentralAdministrationUrl is not a valid URI. It should include the " + `
+                    "scheme (http/https) and address."
+                Add-SPDscEvent -Message $message `
+                    -EntryType 'Error' `
+                    -EventID 100 `
+                    -Source $MyInvocation.MyCommand.Source
+                throw $message
             }
 
             if ($PSBoundParameters.ContainsKey("CentralAdministrationPort"))
             {
                 if ($uri.Port -ne $CentralAdministrationPort)
                 {
-                    throw ("CentralAdministrationPort does not match port number specified in CentralAdministrationUrl. " +
-                        "Either make the values match or don't specify CentralAdministrationPort.")
+                    $message = ("CentralAdministrationPort does not match port number specified in " + `
+                            "CentralAdministrationUrl. Either make the values match or don't specify " + `
+                            "CentralAdministrationPort.")
+                    Add-SPDscEvent -Message $message `
+                        -EntryType 'Error' `
+                        -EventID 100 `
+                        -Source $MyInvocation.MyCommand.Source
+                    throw $message
                 }
             }
         }
@@ -484,9 +533,10 @@ function Set-TargetResource
         if ($CurrentValues.RunCentralAdmin -ne $RunCentralAdmin)
         {
             Invoke-SPDscCommand -Credential $InstallAccount `
-                -Arguments $PSBoundParameters `
+                -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
                 -ScriptBlock {
                 $params = $args[0]
+                $eventSource = $args[1]
 
                 # Provision central administration
                 if ($params.RunCentralAdmin -eq $true)
@@ -510,7 +560,12 @@ function Set-TargetResource
 
                     if ($null -eq $serviceInstance)
                     {
-                        throw [Exception] "Unable to locate Central Admin service instance on this server"
+                        $message = "Unable to locate Central Admin service instance on this server"
+                        Add-SPDscEvent -Message $message `
+                            -EntryType 'Error' `
+                            -EventID 100 `
+                            -Source $eventSource
+                        throw $message
                     }
                     Start-SPServiceInstance -Identity $serviceInstance
                 }
@@ -535,7 +590,12 @@ function Set-TargetResource
 
                     if ($null -eq $serviceInstance)
                     {
-                        throw "Unable to locate Central Admin service instance on this server"
+                        $message = "Unable to locate Central Admin service instance on this server"
+                        Add-SPDscEvent -Message $message `
+                            -EntryType 'Error' `
+                            -EventID 100 `
+                            -Source $eventSource
+                        throw $message
                     }
                     Stop-SPServiceInstance -Identity $serviceInstance
                 }
@@ -685,10 +745,11 @@ function Set-TargetResource
         Write-Verbose -Message "Server not part of farm, creating or joining farm"
 
         $actionResult = Invoke-SPDscCommand -Credential $InstallAccount `
-            -Arguments @($PSBoundParameters, $PSScriptRoot) `
+            -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source, $PSScriptRoot) `
             -ScriptBlock {
             $params = $args[0]
-            $scriptRoot = $args[1]
+            $eventSource = $args[1]
+            $scriptRoot = $args[2]
 
             $modulePath = "..\..\Modules\SharePointDsc.Farm\SPFarm.psm1"
             Import-Module -Name (Join-Path -Path $scriptRoot -ChildPath $modulePath -Resolve)
@@ -709,7 +770,12 @@ function Set-TargetResource
 
             if ($sqlInstanceStatus.MaxDOPCorrect -ne $true)
             {
-                throw "The MaxDOP setting is incorrect. Please correct before continuing."
+                $message = "The MaxDOP setting is incorrect. Please correct before continuing."
+                Add-SPDscEvent -Message $message `
+                    -EntryType 'Error' `
+                    -EventID 100 `
+                    -Source $eventSource
+                throw $message
             }
 
             $dbStatus = Get-SPDscConfigDBStatus -SQLServer $params.DatabaseServer `
@@ -729,7 +795,12 @@ function Set-TargetResource
 
             if ($dbStatus.ValidPermissions -eq $false)
             {
-                throw "The current user does not have sufficient permissions to SQL Server"
+                $message = "The current user does not have sufficient permissions to SQL Server"
+                Add-SPDscEvent -Message $message `
+                    -EntryType 'Error' `
+                    -EventID 100 `
+                    -Source $eventSource
+                throw $message
             }
 
             $executeArgs = @{
@@ -795,17 +866,27 @@ function Set-TargetResource
                 }
                 Default
                 {
-                    throw [Exception] ("An unknown version of SharePoint (Major version $_) " +
+                    $message = ("An unknown version of SharePoint (Major version $_) " +
                         "was detected. Only versions 15 (SharePoint 2013) and" +
                         "16 (SharePoint 2016 or SharePoint 2019) are supported.")
+                    Add-SPDscEvent -Message $message `
+                        -EntryType 'Error' `
+                        -EventID 100 `
+                        -Source $eventSource
+                    throw $message
                 }
             }
 
             if ($params.ContainsKey("ApplicationCredentialKey") -and
                 -not $supportsSettingApplicationCredentialKey)
             {
-                throw [Exception] ("Specifying ApplicationCredentialKey is only supported " +
+                $message = ("Specifying ApplicationCredentialKey is only supported " +
                     "on SharePoint 2019")
+                Add-SPDscEvent -Message $message `
+                    -EntryType 'Error' `
+                    -EventID 100 `
+                    -Source $eventSource
+                throw $message
             }
 
             if ($dbStatus.DatabaseExists -eq $true)
@@ -901,7 +982,12 @@ function Set-TargetResource
                 if ($connectedToFarm -eq $false)
                 {
                     Write-Verbose -Message ("Unable to join config database. Throwing exception.")
-                    throw $lastException
+                    $message = $lastException
+                    Add-SPDscEvent -Message $message `
+                        -EntryType 'Error' `
+                        -EventID 100 `
+                        -Source $eventSource
+                    throw $message
                 }
                 $farmAction = "JoinedFarm"
             }
@@ -1049,7 +1135,12 @@ function Set-TargetResource
 
                     if ($null -eq $serviceInstance)
                     {
-                        throw [Exception] "Unable to locate Central Admin service instance on this server"
+                        $message = "Unable to locate Central Admin service instance on this server"
+                        Add-SPDscEvent -Message $message `
+                            -EntryType 'Error' `
+                            -EventID 100 `
+                            -Source $eventSource
+                        throw $message
                     }
                     Start-SPServiceInstance -Identity $serviceInstance
                 }
@@ -1189,16 +1280,27 @@ function Test-TargetResource
             $uri = $CentralAdministrationUrl -as [System.Uri]
             if ($null -eq $uri.AbsoluteUri)
             {
-                throw ("CentralAdministrationUrl is not a valid URI. It should " +
+                $message = ("CentralAdministrationUrl is not a valid URI. It should " +
                     "include the scheme (http/https) and address.")
+                Add-SPDscEvent -Message $message `
+                    -EntryType 'Error' `
+                    -EventID 100 `
+                    -Source $MyInvocation.MyCommand.Source
+                throw $message
             }
 
             if ($PSBoundParameters.ContainsKey("CentralAdministrationPort"))
             {
                 if ($uri.Port -ne $CentralAdministrationPort)
                 {
-                    throw ("CentralAdministrationPort does not match port number specified in CentralAdministrationUrl. " +
-                        "Either make the values match or don't specify CentralAdministrationPort.")
+                    $message = ("CentralAdministrationPort does not match port number specified " + `
+                            "in CentralAdministrationUrl. Either make the values match or don't " + `
+                            "specify CentralAdministrationPort.")
+                    Add-SPDscEvent -Message $message `
+                        -EntryType 'Error' `
+                        -EventID 100 `
+                        -Source $MyInvocation.MyCommand.Source
+                    throw $message
                 }
             }
         }

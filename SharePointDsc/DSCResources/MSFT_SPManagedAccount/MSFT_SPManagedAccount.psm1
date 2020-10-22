@@ -107,9 +107,13 @@ function Set-TargetResource
 
     if ($Ensure -eq "Present" -and $null -eq $Account)
     {
-        throw ("You must specify the 'Account' property as a PSCredential to create a " + `
+        $message = ("You must specify the 'Account' property as a PSCredential to create a " + `
                 "managed account")
-        return
+        Add-SPDscEvent -Message $message `
+            -EntryType 'Error' `
+            -EventID 100 `
+            -Source $MyInvocation.MyCommand.Source
+        throw $message
     }
 
     $currentValues = Get-TargetResource @PSBoundParameters
