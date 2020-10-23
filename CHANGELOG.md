@@ -25,6 +25,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - SPShellAdmins
   - Fixed issue with Get-DscConfiguration which threw an error when only one
     item was returned by the Get method
+- SPWordAutomationServiceApp
+  - Fixed issue where provisioning the service app requires a second run to
+    update all specified parameters
 
 ## [4.3.0] - 2020-09-30
 

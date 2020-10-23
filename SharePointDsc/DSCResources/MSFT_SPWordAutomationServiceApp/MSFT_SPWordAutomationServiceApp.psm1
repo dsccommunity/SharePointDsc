@@ -371,19 +371,17 @@ function Set-TargetResource
             $appPool = Get-SPServiceApplicationPool -Identity $params.ApplicationPool
             if ($appPool)
             {
-                $cmdletparams = @{ }
-                $cmdletparams.Name = $params.Name
-                if ($params.Name)
+                $cmdletparams = @{
+                    Name            = $params.Name
+                    ApplicationPool = $params.ApplicationPool
+                }
+                if ($params.ContainsKey("DatabaseName"))
                 {
                     $cmdletparams.DatabaseName = $params.DatabaseName
                 }
-                if ($params.Name)
+                if ($params.ContainsKey("DatabaseServer"))
                 {
                     $cmdletparams.DatabaseServer = $params.DatabaseServer
-                }
-                if ($params.Name)
-                {
-                    $cmdletparams.ApplicationPool = $params.ApplicationPool
                 }
 
                 if ($params.useSQLAuthentication -eq $true)
@@ -408,6 +406,10 @@ function Set-TargetResource
                 throw $message
             }
         }
+
+        # Retrieving updated current state, so additionally
+        # specified parameters are also updated.
+        $result = Get-TargetResource @PSBoundParameters
     }
 
     if ($result.Ensure -eq "Present" -and $Ensure -eq "Present")
