@@ -19,6 +19,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- SPSearchTopology
+  - Fixes issue where applying a topology failed when the search service
+    instance was disabled instead of offline
 - SPShellAdmins
   - Fixed issue with Get-DscConfiguration which threw an error when only one
     item was returned by the Get method
