@@ -17,6 +17,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - SPWeb
   - Added more explanation to documentation on using this resource
 
+### Fixed
+
+- SPShellAdmins
+  - Fixed issue with Get-DscConfiguration which threw an error when only one
+    item was returned by the Get method
+
 ## [4.3.0] - 2020-09-30
 
 ### Added
