@@ -68,7 +68,7 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting secure store service application '$Name'"
 
-    $result = Invoke-SPDscCommand -Credential $InstallAccount `
+    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
         -Arguments $PSBoundParameters `
         -ScriptBlock {
         $params = $args[0]
@@ -214,7 +214,7 @@ function Set-TargetResource
     if ($result.Ensure -eq "Absent" -and $Ensure -eq "Present")
     {
         Write-Verbose -Message "Creating Secure Store Service Application $Name"
-        Invoke-SPDscCommand -Credential $InstallAccount `
+        Invoke-SPDSCCommand -Credential $InstallAccount `
             -Arguments $params `
             -ScriptBlock {
             $params = $args[0]
@@ -224,6 +224,44 @@ function Set-TargetResource
                 ApplicationPool = $params.ApplicationPool
                 AuditingEnabled = $params.AuditingEnabled
             }
+
+            if ($params.ContainsKey("AuditlogMaxSize"))
+            {
+                $newParams.Add("AuditlogMaxSize", $params.AuditlogMaxSize)
+            }
+
+            if ($params.ContainsKey("DatabaseName"))
+            {
+                $newParams.Add("DatabaseName", $params.DatabaseName)
+            }
+
+            if ($params.ContainsKey("DatabaseServer"))
+            {
+                $newParams.Add("DatabaseServer", $params.DatabaseServer)
+            }
+
+            if ($params.ContainsKey("FailoverDatabaseServer"))
+            {
+                $newParams.Add("FailoverDatabaseServer", $params.FailoverDatabaseServer)
+            }
+
+            if ($params.ContainsKey("PartitionMode"))
+            {
+                $newParams.Add("PartitionMode", $params.PartitionMode)
+            }
+
+            if ($params.ContainsKey("Sharing"))
+            {
+                $newParams.Add("Sharing", $params.Sharing)
+            }
+
+            if ($params.UseSQLAuthentication -eq $true)
+            {
+                Write-Verbose -Message "Using SQL authentication to create service application as `$useSQLAuthentication is set to $($params.useSQLAuthentication)."
+                $newParams.Add("DatabaseUsername", $params.DatabaseCredentials.Username)
+                $newParams.Add("DatabasePassword", $params.DatabaseCredentials.Password)
+            }
+
 
             if ($params.UseSQLAuthentication -eq $true)
             {
@@ -257,33 +295,23 @@ function Set-TargetResource
             ($result.DatabaseServer -ne $DatabaseServer) -and `
             ($DatabaseServer -notlike "$($result.DatabaseServer).*"))
         {
-            $message = ("Specified database server does not match the actual " + `
+            throw ("Specified database server does not match the actual " + `
                     "database server. This resource cannot move the database " + `
                     "to a different SQL instance.")
-            Add-SPDscEvent -Message $message `
-                -EntryType 'Error' `
-                -EventID 100 `
-                -Source $MyInvocation.MyCommand.Source
-            throw $message
         }
 
         if ($PSBoundParameters.ContainsKey("DatabaseName") -and `
             ($result.DatabaseName -ne $DatabaseName))
         {
-            $message = ("Specified database name does not match the actual " + `
+            throw ("Specified database name does not match the actual " + `
                     "database name. This resource cannot rename the database.")
-            Add-SPDscEvent -Message $message `
-                -EntryType 'Error' `
-                -EventID 100 `
-                -Source $MyInvocation.MyCommand.Source
-            throw $message
         }
 
         if ([string]::IsNullOrEmpty($ApplicationPool) -eq $false `
                 -and $ApplicationPool -ne $result.ApplicationPool)
         {
             Write-Verbose -Message "Updating Secure Store Service Application $Name"
-            Invoke-SPDscCommand -Credential $InstallAccount `
+            Invoke-SPDSCCommand -Credential $InstallAccount `
                 -Arguments $PSBoundParameters `
                 -ScriptBlock {
                 $params = $args[0]
@@ -301,7 +329,7 @@ function Set-TargetResource
     {
         # The service app should not exit
         Write-Verbose -Message "Removing Secure Store Service Application $Name"
-        Invoke-SPDscCommand -Credential $InstallAccount `
+        Invoke-SPDSCCommand -Credential $InstallAccount `
             -Arguments $PSBoundParameters `
             -ScriptBlock {
             $params = $args[0]
@@ -440,6 +468,70 @@ function Test-TargetResource
     Write-Verbose -Message "Test-TargetResource returned $result"
 
     return $result
+}
+
+Export-ModuleMember -Function *-TargetResource
+Write-Verbose -Message $message
+Add-SPDscEvent -Message $message -EntryType 'Error' -EventID 1 -Source $MyInvocation.MyCommand.Source
+
+Write-Verbose -Message "Test-TargetResource returned false"
+return $false
+}
+
+if ($PSBoundParameters.ContainsKey("DatabaseName") -and `
+    ($null -ne $CurrentValues.DatabaseName) -and `
+    ($CurrentValues.DatabaseName -ne $DatabaseName))
+{
+    $message = ("Specified database name {$DatabaseName} does not match the " + `
+            "actual database name {$($($CurrentValues.DatabaseName))}. This " + `
+            "resource cannot rename the database.")
+    Write-Verbose -Message $message
+    Add-SPDscEvent -Message $message -EntryType 'Error' -EventID 1 -Source $MyInvocation.MyCommand.Source
+
+    Write-Verbose -Message "Test-TargetResource returned false"
+    return $false
+}
+
+$result = Test-SPDscParameterState -CurrentValues $CurrentValues `
+    -Source $($MyInvocation.MyCommand.Source) `
+    -DesiredValues $PSBoundParameters `
+    -ValuesToCheck @("ApplicationPool", "Ensure")
+
+Write-Verbose -Message "Test-TargetResource returned $result"
+
+return $result
+}
+
+Export-ModuleMember -Function *-TargetResource
+Write-Verbose -Message $message
+Add-SPDscEvent -Message $message -EntryType 'Error' -EventID 1 -Source $MyInvocation.MyCommand.Source
+
+Write-Verbose -Message "Test-TargetResource returned false"
+return $false
+}
+
+if ($PSBoundParameters.ContainsKey("DatabaseName") -and `
+    ($null -ne $CurrentValues.DatabaseName) -and `
+    ($CurrentValues.DatabaseName -ne $DatabaseName))
+{
+    $message = ("Specified database name {$DatabaseName} does not match the " + `
+            "actual database name {$($($CurrentValues.DatabaseName))}. This " + `
+            "resource cannot rename the database.")
+    Write-Verbose -Message $message
+    Add-SPDscEvent -Message $message -EntryType 'Error' -EventID 1 -Source $MyInvocation.MyCommand.Source
+
+    Write-Verbose -Message "Test-TargetResource returned false"
+    return $false
+}
+
+$result = Test-SPDscParameterState -CurrentValues $CurrentValues `
+    -Source $($MyInvocation.MyCommand.Source) `
+    -DesiredValues $PSBoundParameters `
+    -ValuesToCheck @("ApplicationPool", "Ensure")
+
+Write-Verbose -Message "Test-TargetResource returned $result"
+
+return $result
 }
 
 Export-ModuleMember -Function *-TargetResource
