@@ -254,6 +254,25 @@ function Set-TargetResource
         -ScriptBlock {
         $psconfigExe = $args[0]
 
+        Write-Verbose -Message "Starting 'Product Version Job' timer job"
+        $pvTimerJob = Get-SPTimerJob -Identity 'job-admin-product-version'
+        $lastRunTime = $pvTimerJob.LastRunTime
+
+        Start-SPTimerJob -Identity $pvTimerJob
+
+        $jobRunning = $true
+        $maxCount = 30
+        $count = 0
+        while ($jobRunning -and $count -le $maxCount)
+        {
+            Start-Sleep -Seconds 10
+
+            $pvTimerJob = Get-SPTimerJob -Identity 'job-admin-product-version'
+            $jobRunning = $lastRunTime -eq $pvTimerJob.LastRunTime
+
+            $count++
+        }
+
         $stdOutTempFile = "$env:TEMP\$((New-Guid).Guid)"
         $psconfig = Start-Process -FilePath $psconfigExe `
             -ArgumentList "-cmd upgrade -inplace b2b -wait -cmd applicationcontent -install -cmd installfeatures -cmd secureresources -cmd services -install" `

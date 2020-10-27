@@ -19,6 +19,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- SPConfigWizard
+  - Fixes issue where a CU installation wasn't registered properly in the
+    config database. Added logic to run the Product Version timer job
 - SPSearchTopology
   - Fixes issue where applying a topology failed when the search service
     instance was disabled instead of offline
