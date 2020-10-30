@@ -1,3 +1,8 @@
+$script:resourceModulePath = Split-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -Parent
+$script:modulesFolderPath = Join-Path -Path $script:resourceModulePath -ChildPath 'Modules'
+$script:resourceHelperModulePath = Join-Path -Path $script:modulesFolderPath -ChildPath 'SharePointDsc.Util'
+Import-Module -Name (Join-Path -Path $script:resourceHelperModulePath -ChildPath 'SharePointDsc.Util.psm1')
+
 function Get-TargetResource
 {
     [CmdletBinding()]
@@ -179,5 +184,61 @@ function Test-TargetResource
 
     return $result
 }
+
+function Export-TargetResource
+{
+    $ParentModuleBase = Get-Module "SharePointDSC" | Select-Object -ExpandProperty Modulebase
+    $module = Join-Path -Path $ParentModuleBase -ChildPath "\DSCResources\MSFT_SPServiceAppPool\MSFT_SPServiceAppPool.psm1" -Resolve
+    $spServiceAppPools = Get-SPServiceApplicationPool | Sort-Object -Property Name
+    $Content = ''
+    $params = Get-DSCFakeParameters -ModulePath $module
+
+    $i = 1
+    $total = $spServiceAppPools.Length
+    foreach($spServiceAppPool in $spServiceAppPools)
+    {
+        try
+        {
+            $appPoolName = $spServiceAppPool.Name
+            Write-Host "Scanning SPServiceApplicationPool [$i/$total] {$appPoolName}"
+            $PartialContent = "        SPServiceAppPool " + $spServiceAppPool.Name.Replace(" ", "") + "`r`n"
+            $PartialContent += "        {`r`n"
+            $params.Name = $appPoolName
+            $results = Get-TargetResource @params
+            $results = Repair-Credentials -results $results
+
+            $serviceAccount = Get-Credentials $results.ServiceAccount
+            $convertToVariable = $false
+            if($serviceAccount)
+            {
+                $convertToVariable = $true
+                $results.ServiceAccount = (Resolve-Credentials -UserName $results.ServiceAccount) + ".UserName"
+            }
+
+            if($null -eq $results.Get_Item("AllowAnonymous"))
+            {
+                $results.Remove("AllowAnonymous")
+            }
+            $currentDSCBlock = Get-DSCBlock -Params $results -ModulePath $module
+            if($convertToVariable)
+            {
+                $currentDSCBlock = Convert-DSCStringParamToVariable -DSCBlock $currentDSCBlock -ParameterName "ServiceAccount"
+                $currentDSCBlock = Convert-DSCStringParamToVariable -DSCBlock $currentDSCBlock -ParameterName "PsDscRunAsCredential"
+            }
+            $PartialContent += $currentDSCBlock
+
+            $PartialContent += "        }`r`n"
+            $i++
+        }
+        catch
+        {
+            $Global:ErrorLog += "[Service Application Pool]" + $spServiceAppPool.Name + "`r`n"
+            $Global:ErrorLog += "$_`r`n`r`n"
+        }
+        $Content += $PartialContent
+    }
+    Return $Content
+}
+
 
 Export-ModuleMember -Function *-TargetResource

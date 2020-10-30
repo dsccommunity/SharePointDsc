@@ -1,3 +1,8 @@
+$script:resourceModulePath = Split-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -Parent
+$script:modulesFolderPath = Join-Path -Path $script:resourceModulePath -ChildPath 'Modules'
+$script:resourceHelperModulePath = Join-Path -Path $script:modulesFolderPath -ChildPath 'SharePointDsc.Util'
+Import-Module -Name (Join-Path -Path $script:resourceHelperModulePath -ChildPath 'SharePointDsc.Util.psm1')
+
 function Get-TargetResource
 {
     [CmdletBinding()]
@@ -124,20 +129,14 @@ function Set-TargetResource
         Write-Verbose "Adding the Crawl Mapping '$Url'"
 
         Invoke-SPDscCommand -Credential $InstallAccount `
-            -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
+            -Arguments $PSBoundParameters `
             -ScriptBlock {
             $params = $args[0]
-            $eventSource = $args[1]
 
             $searchApp = Get-SPEnterpriseSearchServiceApplication -Identity $params.ServiceAppName
             if ($null -eq $searchApp)
             {
-                $message = "The Search Service Application does not exist"
-                Add-SPDscEvent -Message $message `
-                    -EntryType 'Error' `
-                    -EventID 100 `
-                    -Source $eventSource
-                throw $message
+                throw [Exception] "The Search Service Application does not exist"
             }
             else
             {

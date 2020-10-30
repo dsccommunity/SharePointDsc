@@ -1,3 +1,8 @@
+$script:resourceModulePath = Split-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -Parent
+$script:modulesFolderPath = Join-Path -Path $script:resourceModulePath -ChildPath 'Modules'
+$script:resourceHelperModulePath = Join-Path -Path $script:modulesFolderPath -ChildPath 'SharePointDsc.Util'
+Import-Module -Name (Join-Path -Path $script:resourceHelperModulePath -ChildPath 'SharePointDsc.Util.psm1')
+
 function Get-TargetResource()
 {
     [CmdletBinding()]
@@ -29,21 +34,15 @@ function Get-TargetResource()
     Write-Verbose -Message "Looking for SPSite property '$Key'"
 
     $result = Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
+        -Arguments $PSBoundParameters `
         -ScriptBlock {
         $params = $args[0]
-        $eventSource = $args[1]
 
         $spSite = Get-SPSite -Identity $params.Url -ErrorAction SilentlyContinue
 
         if ($null -eq $spSite)
         {
-            $message = "Specified site collection could not be found."
-            Add-SPDscEvent -Message $message `
-                -EntryType 'Error' `
-                -EventID 100 `
-                -Source $eventSource
-            throw $message
+            throw "Specified site collection could not be found."
         }
 
         if ($null -ne $spSite.RootWeb.Properties -and `
@@ -98,21 +97,15 @@ function Set-TargetResource()
     Write-Verbose -Message "Setting SPSite property '$Key'"
 
     Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
+        -Arguments $PSBoundParameters `
         -ScriptBlock {
         $params = $args[0]
-        $eventSource = $args[1]
 
         $spSite = Get-SPSite -Identity $params.Url -ErrorAction SilentlyContinue
 
         if ($null -eq $spSite)
         {
-            $message = "Specified site collection could not be found."
-            Add-SPDscEvent -Message $message `
-                -EntryType 'Error' `
-                -EventID 100 `
-                -Source $eventSource
-            throw $message
+            throw "Specified site collection could not be found."
         }
 
         $spWeb = $spSite.OpenWeb()
@@ -135,12 +128,7 @@ function Set-TargetResource()
         }
         else
         {
-            $message = "Cannot retrieve the property bag. Please check if you have the correct permissions."
-            Add-SPDscEvent -Message $message `
-                -EntryType 'Error' `
-                -EventID 100 `
-                -Source $eventSource
-            throw $message
+            throw "Cannot retrieve the property bag. Please check if you have the correct permissions."
         }
     }
 }

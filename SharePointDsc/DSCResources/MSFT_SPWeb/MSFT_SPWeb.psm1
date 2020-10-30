@@ -1,3 +1,8 @@
+$script:resourceModulePath = Split-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -Parent
+$script:modulesFolderPath = Join-Path -Path $script:resourceModulePath -ChildPath 'Modules'
+$script:resourceHelperModulePath = Join-Path -Path $script:modulesFolderPath -ChildPath 'SharePointDsc.Util'
+Import-Module -Name (Join-Path -Path $script:resourceHelperModulePath -ChildPath 'SharePointDsc.Util.psm1')
+
 function Get-TargetResource
 {
     [CmdletBinding()]
@@ -65,24 +70,27 @@ function Get-TargetResource
 
         if ($web)
         {
-            return @{
-                Url                = $params.Url
-                Ensure             = "Present"
-                Description        = $web.Description
-                Name               = $web.Title
-                Language           = $web.Language
-                Template           = "$($web.WebTemplate)#$($web.WebTemplateId)"
-                UniquePermissions  = $web.HasUniquePerm
-                UseParentTopNav    = $web.Navigation.UseShared
-                RequestAccessEmail = $web.RequestAccessEmail
-            }
+            $ensureResult = "Present"
+            $templateResult = "$($web.WebTemplate)#$($web.WebTemplateId)"
+            $parentTopNav = $web.Navigation.UseShared
         }
         else
         {
-            return @{
-                Url    = $params.Url
-                Ensure = "Absent"
-            }
+            $ensureResult = "Absent"
+            $templateResult = $null
+            $parentTopNav = $null
+        }
+
+        return @{
+            Url                = $web.Url
+            Ensure             = $ensureResult
+            Description        = $web.Description
+            Name               = $web.Title
+            Language           = $web.Language
+            Template           = $templateResult
+            UniquePermissions  = $web.HasUniquePerm
+            UseParentTopNav    = $parentTopNav
+            RequestAccessEmail = $web.RequestAccessEmail
         }
     }
 
@@ -336,6 +344,58 @@ function Test-TargetResource
     Write-Verbose -Message "Test-TargetResource returned $result"
 
     return $result
+}
+
+function Export-TargetResource{
+    Param(
+        $URL,
+        $DependsOn
+    )
+    $content = ''
+    $ParentModuleBase = Get-Module "SharePointDSC" | Select-Object -ExpandProperty Modulebase
+    $module = Join-Path -Path $ParentModuleBase -ChildPath "\DSCResources\MSFT_SPWeb\MSFT_SPWeb.psm1" -Resolve
+    $SPWebs = Get-SPWeb -Limit All -Site $URL
+    $j = 1
+    $totalWebs = $webs.Length
+    Foreach($SPWeb in $SPWebs)
+    {
+        Write-Host "    -> Scanning Web [$j/$totalWebs] {$($SPWeb.URL)}"
+        Try
+        {
+            $paramsWeb = Get-DSCFakeParameters -ModulePath $module
+            $SPWebGuid = [System.Guid]::NewGuid().toString()
+            $paramsWeb.Url = $SPWeb.URL
+            $results = Get-TargetResource @paramsWeb
+            
+            $results.Description = $results.Description.Replace("`"", "'").Replace("`r`n", ' `
+            ')
+            $PartialContent = "        SPWeb $($SPWebGuid)`r`n"
+            $PartialContent += "        {`r`n"
+            $results = Repair-Credentials -results $results
+            if ($DependsOn){ 
+                $results.add("DependsOn", $DependsOn)
+            }
+            $currentBlock = Get-DSCBlock -Params $results -ModulePath $module
+            $currentBlock = Convert-DSCStringParamToVariable -DSCBlock $currentBlock -ParameterName "PsDscRunAsCredential"
+            $PartialContent += $currentBlock
+            $PartialContent += "        }`r`n"
+
+            <# SPWeb Feature Section #>
+            if(($Global:ExtractionModeValue -eq 3 -and $Quiet) -or $Global:ComponentsToExtract.Contains("SPFeature"))
+            {
+                $partialContent += Read-TargetResource -ResourceName SPFeature -ExportParam @{Scope = "Web"; Url = $SPWeb.URL; DependsOn="[SPWeb]$($SPWebGuid)";}
+            }
+            $j++
+        }
+        catch
+        {
+            $_
+            $Global:ErrorLog += "[Web]" + $spweb.Url + "`r`n"
+            $Global:ErrorLog += "$_`r`n`r`n"
+        }
+        $Content += $PartialContent
+    }
+    Return $Content
 }
 
 Export-ModuleMember -Function *-TargetResource

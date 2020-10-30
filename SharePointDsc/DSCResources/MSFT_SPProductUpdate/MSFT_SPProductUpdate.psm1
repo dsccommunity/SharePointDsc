@@ -1,3 +1,8 @@
+$script:resourceModulePath = Split-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -Parent
+$script:modulesFolderPath = Join-Path -Path $script:resourceModulePath -ChildPath 'Modules'
+$script:resourceHelperModulePath = Join-Path -Path $script:modulesFolderPath -ChildPath 'SharePointDsc.Util'
+Import-Module -Name (Join-Path -Path $script:resourceHelperModulePath -ChildPath 'SharePointDsc.Util.psm1')
+
 function Get-TargetResource
 {
     [CmdletBinding()]
@@ -33,22 +38,19 @@ function Get-TargetResource
 
     if ($Ensure -eq "Absent")
     {
-        $message = "SharePoint does not support uninstalling updates."
-        Add-SPDscEvent -Message $message `
-            -EntryType 'Error' `
-            -EventID 100 `
-            -Source $MyInvocation.MyCommand.Source
-        throw $message
+        throw [Exception] "SharePoint does not support uninstalling updates."
+        return
     }
 
     Write-Verbose -Message "Getting install status of SP binaries"
 
+    $languagepack = $false
+    $servicepack = $false
     $language = ""
 
     Write-Verbose -Message "Check if the setup file exists"
     if (-not(Test-Path -Path $SetupFile))
     {
-        Write-Verbose -Message "ERROR: Setup files could not be found: $SetupFile"
         return @{
             SetupFile         = $SetupFile
             ShutdownServices  = $ShutdownServices
@@ -98,13 +100,8 @@ function Get-TargetResource
 
         if ($null -ne $zone)
         {
-            $message = ("Setup file is blocked! Please use 'Unblock-File -Path $SetupFile' " + `
+            throw ("Setup file is blocked! Please use 'Unblock-File -Path $SetupFile' " + `
                     "to unblock the file before continuing.")
-            Add-SPDscEvent -Message $message `
-                -EntryType 'Error' `
-                -EventID 100 `
-                -Source $MyInvocation.MyCommand.Source
-            throw $message
         }
         Write-Verbose -Message "File not blocked, continuing."
     }
@@ -137,6 +134,7 @@ function Get-TargetResource
     {
         Write-Verbose -Message "Update is a Language Pack Service Pack."
         # Retrieve language from file and check version for that language pack.
+        $languagepack = $true
 
         # Extract language from filename
         if ($setupFileInfo.Name -match "\w*-(\w{2}-\w{2}).exe")
@@ -145,12 +143,7 @@ function Get-TargetResource
         }
         else
         {
-            $message = "Update does not contain the language code in the correct format."
-            Add-SPDscEvent -Message $message `
-                -EntryType 'Error' `
-                -EventID 100 `
-                -Source $MyInvocation.MyCommand.Source
-            throw $message
+            throw "Update does not contain the language code in the correct format."
         }
 
         try
@@ -159,23 +152,13 @@ function Get-TargetResource
         }
         catch
         {
-            $message = "Error while converting language information: $language"
-            Add-SPDscEvent -Message $message `
-                -EntryType 'Error' `
-                -EventID 100 `
-                -Source $MyInvocation.MyCommand.Source
-            throw $message
+            throw "Error while converting language information: $language"
         }
 
         # try/catch is required for some versions of Windows, other version use the LCID value of 4096
         if ($cultureInfo.LCID -eq 4096)
         {
-            $message = "Error while converting language information: $language"
-            Add-SPDscEvent -Message $message `
-                -EntryType 'Error' `
-                -EventID 100 `
-                -Source $MyInvocation.MyCommand.Source
-            throw $message
+            throw "Error while converting language information: $language"
         }
 
         # Extract English name of the language code
@@ -208,12 +191,7 @@ function Get-TargetResource
 
         if ($versionInfo -eq $nullVersion)
         {
-            $message = "Error: Product for language $language is not found."
-            Add-SPDscEvent -Message $message `
-                -EntryType 'Error' `
-                -EventID 100 `
-                -Source $MyInvocation.MyCommand.Source
-            throw $message
+            throw "Error: Product for language $language is not found."
         }
         else
         {
@@ -224,6 +202,7 @@ function Get-TargetResource
     {
         Write-Verbose -Message "Update is a Service Pack for SharePoint."
         # Check SharePoint version information.
+        $servicepack = $true
         $versionInfo = Get-SPDscLocalVersionInfo -ProductVersion $sharePointVersion
     }
     else
@@ -306,23 +285,14 @@ function Set-TargetResource
 
     if ($Ensure -eq "Absent")
     {
-        $message = "SharePoint does not support uninstalling updates."
-        Add-SPDscEvent -Message $message `
-            -EntryType 'Error' `
-            -EventID 100 `
-            -Source $MyInvocation.MyCommand.Source
-        throw $message
+        throw [Exception] "SharePoint does not support uninstalling updates."
+        return
     }
 
     Write-Verbose -Message "Check if the setup file exists"
     if (-not(Test-Path -Path $SetupFile))
     {
-        $message = "Setup file cannot be found: {$SetupFile}"
-        Add-SPDscEvent -Message $message `
-            -EntryType 'Error' `
-            -EventID 100 `
-            -Source $MyInvocation.MyCommand.Source
-        throw $message
+        throw "Setup file cannot be found: {$SetupFile}"
     }
 
     Write-Verbose -Message "Checking file status of $SetupFile"
@@ -365,13 +335,8 @@ function Set-TargetResource
 
         if ($null -ne $zone)
         {
-            $message = ("Setup file is blocked! Please use 'Unblock-File -Path $SetupFile' " + `
+            throw ("Setup file is blocked! Please use 'Unblock-File -Path $SetupFile' " + `
                     "to unblock the file before continuing.")
-            Add-SPDscEvent -Message $message `
-                -EntryType 'Error' `
-                -EventID 100 `
-                -Source $MyInvocation.MyCommand.Source
-            throw $message
         }
         Write-Verbose -Message "File not blocked, continuing."
     }
@@ -411,43 +376,23 @@ function Set-TargetResource
 
         if ($upgradeTimes.Count -ne 3)
         {
-            $message = "Time window incorrectly formatted."
-            Add-SPDscEvent -Message $message `
-                -EntryType 'Error' `
-                -EventID 100 `
-                -Source $MyInvocation.MyCommand.Source
-            throw $message
+            throw "Time window incorrectly formatted."
         }
         else
         {
             if ([datetime]::TryParse($upgradeTimes[0], [ref]$starttime) -ne $true)
             {
-                $message = "Error converting start time"
-                Add-SPDscEvent -Message $message `
-                    -EntryType 'Error' `
-                    -EventID 100 `
-                    -Source $MyInvocation.MyCommand.Source
-                throw $message
+                throw "Error converting start time"
             }
 
             if ([datetime]::TryParse($upgradeTimes[2], [ref]$endtime) -ne $true)
             {
-                $message = "Error converting end time"
-                Add-SPDscEvent -Message $message `
-                    -EntryType 'Error' `
-                    -EventID 100 `
-                    -Source $MyInvocation.MyCommand.Source
-                throw $message
+                throw "Error converting end time"
             }
 
             if ($starttime -gt $endtime)
             {
-                $message = "Error: Start time cannot be larger than end time"
-                Add-SPDscEvent -Message $message `
-                    -EntryType 'Error' `
-                    -EventID 100 `
-                    -Source $MyInvocation.MyCommand.Source
-                throw $message
+                throw "Error: Start time cannot be larger than end time"
             }
         }
 
@@ -561,10 +506,9 @@ function Set-TargetResource
     Write-Verbose -Message "Beginning installation of the SharePoint update"
 
     Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments @($SetupFile, $MyInvocation.MyCommand.Source) `
+        -Arguments $SetupFile `
         -ScriptBlock {
         $setupFile = $args[0]
-        $eventSource = $args[1]
 
         Write-Verbose -Message "Checking if SetupFile is an UNC path"
         $uncInstall = $false
@@ -580,12 +524,7 @@ function Set-TargetResource
             }
             else
             {
-                $message = "Cannot extract servername from UNC path. Check if it is in the correct format."
-                Add-SPDscEvent -Message $message `
-                    -EntryType 'Error' `
-                    -EventID 100 `
-                    -Source $eventSource
-                throw $message
+                throw "Cannot extract servername from UNC path. Check if it is in the correct format."
             }
 
             Set-SPDscZoneMap -Server $serverName
@@ -622,13 +561,8 @@ function Set-TargetResource
             }
             Default
             {
-                $message = ("SharePoint update install failed, exit code was $($setup.ExitCode). " + `
+                throw ("SharePoint update install failed, exit code was $($setup.ExitCode). " + `
                         "Error codes can be found at https://aka.ms/installerrorcodes")
-                Add-SPDscEvent -Message $message `
-                    -EntryType 'Error' `
-                    -EventID 100 `
-                    -Source $eventSource
-                throw $message
             }
         }
     }
@@ -727,12 +661,7 @@ function Test-TargetResource
 
     if ($Ensure -eq "Absent")
     {
-        $message = "SharePoint does not support uninstalling updates."
-        Add-SPDscEvent -Message $message `
-            -EntryType 'Error' `
-            -EventID 100 `
-            -Source $MyInvocation.MyCommand.Source
-        throw $message
+        throw [Exception] "SharePoint does not support uninstalling updates."
     }
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
@@ -855,12 +784,7 @@ function Get-SPDscLocalVersionInfo
                         }
                         catch [Exception]
                         {
-                            $message = "An error occured during the collection of data about installed products in Get-SPDscLocalVersionInfo."
-                            Add-SPDscEvent -Message $message `
-                                -EntryType 'Error' `
-                                -EventID 100 `
-                                -Source $MyInvocation.MyCommand.Source
-                            throw $message
+                            throw [Exception] "An error occured during the collection of data about installed products in Get-SPDscLocalVersionInfo."
                         }
                     }
                 }

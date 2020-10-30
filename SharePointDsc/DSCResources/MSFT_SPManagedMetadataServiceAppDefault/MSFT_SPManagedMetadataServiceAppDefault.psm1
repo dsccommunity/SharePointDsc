@@ -1,3 +1,8 @@
+$script:resourceModulePath = Split-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -Parent
+$script:modulesFolderPath = Join-Path -Path $script:resourceModulePath -ChildPath 'Modules'
+$script:resourceHelperModulePath = Join-Path -Path $script:modulesFolderPath -ChildPath 'SharePointDsc.Util'
+Import-Module -Name (Join-Path -Path $script:resourceHelperModulePath -ChildPath 'SharePointDsc.Util.psm1')
+
 function Get-TargetResource
 {
     [CmdletBinding()]
@@ -24,12 +29,10 @@ function Get-TargetResource
     Write-Verbose -Message "Getting the default site collection and keyword term store settings"
 
     $result = Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
+        -Arguments $PSBoundParameters `
         -ScriptBlock {
 
         $params = $args[0]
-        $eventSource = $args[1]
-
 
         if ($params.ServiceAppProxyGroup -eq 'default')
         {
@@ -43,24 +46,14 @@ function Get-TargetResource
 
         if ($null -eq $serviceAppProxyGroup)
         {
-            $message = "Specified ServiceAppProxyGroup $($params.ServiceAppProxyGroup) does not exist."
-            Add-SPDscEvent -Message $message `
-                -EntryType 'Error' `
-                -EventID 100 `
-                -Source $eventSource
-            throw $message
+            throw "Specified ServiceAppProxyGroup $($params.ServiceAppProxyGroup) does not exist."
         }
 
         $serviceAppProxies = $serviceAppProxyGroup.Proxies
 
         if ($null -eq $serviceAppProxies)
         {
-            $message = "There are no Service Application Proxies available in the proxy group"
-            Add-SPDscEvent -Message $message `
-                -EntryType 'Error' `
-                -EventID 100 `
-                -Source $eventSource
-            throw $message
+            throw "There are no Service Application Proxies available in the proxy group"
         }
 
         $serviceAppProxies = $serviceAppProxies | Where-Object -FilterScript {
@@ -69,12 +62,7 @@ function Get-TargetResource
 
         if ($null -eq $serviceAppProxies)
         {
-            $message = "There are no Managed Metadata Service Application Proxies available in the proxy group"
-            Add-SPDscEvent -Message $message `
-                -EntryType 'Error' `
-                -EventID 100 `
-                -Source $eventSource
-            throw $message
+            throw "There are no Managed Metadata Service Application Proxies available in the proxy group"
         }
 
         $defaultSiteCollectionProxyIsSet = $false
@@ -145,11 +133,10 @@ function Set-TargetResource
     Write-Verbose -Message "Setting the default site collection and keyword term store settings"
 
     $null = Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
+        -Arguments $PSBoundParameters `
         -ScriptBlock {
 
         $params = $args[0]
-        $eventSource = $args[1]
 
         if ($params.ServiceAppProxyGroup -eq 'default')
         {
@@ -163,24 +150,14 @@ function Set-TargetResource
 
         if ($null -eq $serviceAppProxyGroup)
         {
-            $message = "Specified ServiceAppProxyGroup $($params.ServiceAppProxyGroup) does not exist."
-            Add-SPDscEvent -Message $message `
-                -EntryType 'Error' `
-                -EventID 100 `
-                -Source $eventSource
-            throw $message
+            throw "Specified ServiceAppProxyGroup $($params.ServiceAppProxyGroup) does not exist."
         }
 
         $serviceAppProxies = $serviceAppProxyGroup.Proxies
 
         if ($null -eq $serviceAppProxies)
         {
-            $message = "There are no Service Application Proxies available in the proxy group"
-            Add-SPDscEvent -Message $message `
-                -EntryType 'Error' `
-                -EventID 100 `
-                -Source $eventSource
-            throw $message
+            throw "There are no Service Application Proxies available in the proxy group"
         }
 
         $serviceAppProxies = $serviceAppProxies | Where-Object -FilterScript {
@@ -189,12 +166,7 @@ function Set-TargetResource
 
         if ($null -eq $serviceAppProxies)
         {
-            $message = "There are no Managed Metadata Service Application Proxies available in the proxy group"
-            Add-SPDscEvent -Message $message `
-                -EntryType 'Error' `
-                -EventID 100 `
-                -Source $eventSource
-            throw $message
+            throw "There are no Managed Metadata Service Application Proxies available in the proxy group"
         }
 
         foreach ($serviceAppProxy in $serviceAppProxies)

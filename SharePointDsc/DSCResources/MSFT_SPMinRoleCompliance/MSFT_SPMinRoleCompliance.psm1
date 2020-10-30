@@ -1,3 +1,8 @@
+$script:resourceModulePath = Split-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -Parent
+$script:modulesFolderPath = Join-Path -Path $script:resourceModulePath -ChildPath 'Modules'
+$script:resourceHelperModulePath = Join-Path -Path $script:modulesFolderPath -ChildPath 'SharePointDsc.Util'
+Import-Module -Name (Join-Path -Path $script:resourceHelperModulePath -ChildPath 'SharePointDsc.Util.psm1')
+
 function Get-TargetResource
 {
     [CmdletBinding()]
@@ -24,12 +29,7 @@ function Get-TargetResource
     $installedVersion = Get-SPDscInstalledProductVersion
     if ($installedVersion.FileMajorPart -ne 16)
     {
-        $message = "MinRole is only supported in SharePoint 2016 and 2019."
-        Add-SPDscEvent -Message $message `
-            -EntryType 'Error' `
-            -EventID 100 `
-            -Source $MyInvocation.MyCommand.Source
-        throw $message
+        throw [Exception] "MinRole is only supported in SharePoint 2016 and 2019."
     }
 
     $result = Invoke-SPDscCommand -Credential $InstallAccount `
@@ -91,23 +91,13 @@ function Set-TargetResource
     $installedVersion = Get-SPDscInstalledProductVersion
     if ($installedVersion.FileMajorPart -ne 16)
     {
-        $message = "MinRole is only supported in SharePoint 2016 and 2019."
-        Add-SPDscEvent -Message $message `
-            -EntryType 'Error' `
-            -EventID 100 `
-            -Source $MyInvocation.MyCommand.Source
-        throw $message
+        throw [Exception] "MinRole is only supported in SharePoint 2016 and 2019."
     }
 
     if ($State -eq "NonCompliant")
     {
-        $message = ("State can only be configured to 'Compliant'. The 'NonCompliant' value is only " + `
+        throw ("State can only be configured to 'Compliant'. The 'NonCompliant' value is only " + `
                 "used to report when the farm is not compliant")
-        Add-SPDscEvent -Message $message `
-            -EntryType 'Error' `
-            -EventID 100 `
-            -Source $MyInvocation.MyCommand.Source
-        throw $message
     }
 
     Invoke-SPDscCommand -Credential $InstallAccount `
@@ -164,13 +154,8 @@ function Test-TargetResource
 
     if ($State -eq "NonCompliant")
     {
-        $message = ("State can only be configured to 'Compliant'. The 'NonCompliant' value is only " + `
+        throw ("State can only be configured to 'Compliant'. The 'NonCompliant' value is only " + `
                 "used to report when the farm is not compliant")
-        Add-SPDscEvent -Message $message `
-            -EntryType 'Error' `
-            -EventID 100 `
-            -Source $MyInvocation.MyCommand.Source
-        throw $message
     }
 
     $CurrentValues = Get-TargetResource @PSBoundParameters

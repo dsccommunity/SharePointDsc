@@ -1,3 +1,8 @@
+$script:resourceModulePath = Split-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -Parent
+$script:modulesFolderPath = Join-Path -Path $script:resourceModulePath -ChildPath 'Modules'
+$script:resourceHelperModulePath = Join-Path -Path $script:modulesFolderPath -ChildPath 'SharePointDsc.Util'
+Import-Module -Name (Join-Path -Path $script:resourceHelperModulePath -ChildPath 'SharePointDsc.Util.psm1')
+
 function Get-TargetResource
 {
     # Ignoring this because we need to generate a stub credential to return up the current
@@ -119,24 +124,18 @@ function Set-TargetResource
         $PSBoundParameters.ContainsKey("ContactEmail") -eq $false -and `
             $PSBoundParameters.ContainsKey("WindowsServiceAccount") -eq $false)
     {
-        $message = ("You have to specify at least one of the following parameters: " + `
+        throw ("You have to specify at least one of the following parameters: " + `
                 "PerformanceLevel, ContactEmail or WindowsServiceAccount")
-        Add-SPDscEvent -Message $message `
-            -EntryType 'Error' `
-            -EventID 100 `
-            -Source $MyInvocation.MyCommand.Source
-        throw $message
     }
 
     $result = Get-TargetResource @PSBoundParameters
 
     # Update the service app that already exists
     Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source, $result) `
+        -Arguments @($PSBoundParameters, $result) `
         -ScriptBlock {
         $params = $args[0]
-        $eventSource = $args[1]
-        $result = $args[2]
+        $result = $args[1]
 
         try
         {
@@ -144,13 +143,8 @@ function Set-TargetResource
         }
         catch
         {
-            $message = ("No local SharePoint farm was detected. Search service " + `
+            throw ("No local SharePoint farm was detected. Search service " + `
                     "settings will not be applied")
-            Add-SPDscEvent -Message $message `
-                -EntryType 'Error' `
-                -EventID 100 `
-                -Source $eventSource
-            throw $message
         }
 
         $setParams = @{ }

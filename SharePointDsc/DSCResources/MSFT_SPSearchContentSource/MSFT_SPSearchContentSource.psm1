@@ -1,3 +1,8 @@
+$script:resourceModulePath = Split-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -Parent
+$script:modulesFolderPath = Join-Path -Path $script:resourceModulePath -ChildPath 'Modules'
+$script:resourceHelperModulePath = Join-Path -Path $script:modulesFolderPath -ChildPath 'SharePointDsc.Util'
+Import-Module -Name (Join-Path -Path $script:resourceHelperModulePath -ChildPath 'SharePointDsc.Util.psm1')
+
 function Get-TargetResource
 {
     [CmdletBinding()]
@@ -72,11 +77,10 @@ function Get-TargetResource
     Write-Verbose -Message "Getting Content Source Setting for '$Name'"
 
     $result = Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source, $PSScriptRoot) `
+        -Arguments @($PSBoundParameters, $PSScriptRoot) `
         -ScriptBlock {
         $params = $args[0]
-        $eventSource = $args[1]
-        $ScriptRoot = $args[2]
+        $ScriptRoot = $args[1]
 
         $relativePath = "..\..\Modules\SharePointDsc.Search\SPSearchContentSource.Schedules.psm1"
         $modulePath = Join-Path -Path $ScriptRoot `
@@ -212,13 +216,8 @@ function Get-TargetResource
             }
             Default
             {
-                $message = ("SharePointDsc does not currently support '$($source.Type)' content " + `
+                throw ("SharePointDsc does not currently support '$($source.Type)' content " + `
                         "sources. Please use only 'SharePoint', 'FileShare', 'Website' or 'Business'.")
-                Add-SPDscEvent -Message $message `
-                    -EntryType 'Error' `
-                    -EventID 100 `
-                    -Source $eventSource
-                throw $message
             }
         }
         return $result
@@ -304,114 +303,59 @@ function Set-TargetResource
         {
             if ($PSBoundParameters.ContainsKey("LimitPageDepth") -eq $true)
             {
-                $message = "Parameter LimitPageDepth is not valid for SharePoint content sources"
-                Add-SPDscEvent -Message $message `
-                    -EntryType 'Error' `
-                    -EventID 100 `
-                    -Source $MyInvocation.MyCommand.Source
-                throw $message
+                throw "Parameter LimitPageDepth is not valid for SharePoint content sources"
             }
             if ($PSBoundParameters.ContainsKey("LimitServerHops") -eq $true)
             {
-                $message = "Parameter LimitServerHops is not valid for SharePoint content sources"
-                Add-SPDscEvent -Message $message `
-                    -EntryType 'Error' `
-                    -EventID 100 `
-                    -Source $MyInvocation.MyCommand.Source
-                throw $message
+                throw "Parameter LimitServerHops is not valid for SharePoint content sources"
             }
             if ($CrawlSetting -ne "CrawlVirtualServers" -and
                 $CrawlSetting -ne "CrawlSites"
             )
             {
-                $message = ("Parameter CrawlSetting can only be set to CrawlVirtualServers or CrawlSites " + `
+                throw ("Parameter CrawlSetting can only be set to CrawlVirtualServers or CrawlSites " + `
                         "for SharePoint content sources")
-                Add-SPDscEvent -Message $message `
-                    -EntryType 'Error' `
-                    -EventID 100 `
-                    -Source $MyInvocation.MyCommand.Source
-                throw $message
             }
         }
         "Website"
         {
             if ($PSBoundParameters.ContainsKey("ContinuousCrawl") -eq $true)
             {
-                $message = "Parameter ContinuousCrawl is not valid for Website content sources"
-                Add-SPDscEvent -Message $message `
-                    -EntryType 'Error' `
-                    -EventID 100 `
-                    -Source $MyInvocation.MyCommand.Source
-                throw $message
+                throw "Parameter ContinuousCrawl is not valid for Website content sources"
             }
             if ($PSBoundParameters.ContainsKey("LimitServerHops") -eq $true)
             {
-                $message = "Parameter LimitServerHops is not valid for Website content sources"
-                Add-SPDscEvent -Message $message `
-                    -EntryType 'Error' `
-                    -EventID 100 `
-                    -Source $MyInvocation.MyCommand.Source
-                throw $message
+                throw "Parameter LimitServerHops is not valid for Website content sources"
             }
         }
         "FileShare"
         {
             if ($PSBoundParameters.ContainsKey("LimitPageDepth") -eq $true)
             {
-                $message = "Parameter LimitPageDepth is not valid for FileShare content sources"
-                Add-SPDscEvent -Message $message `
-                    -EntryType 'Error' `
-                    -EventID 100 `
-                    -Source $MyInvocation.MyCommand.Source
-                throw $message
+                throw "Parameter LimitPageDepth is not valid for FileShare content sources"
             }
             if ($PSBoundParameters.ContainsKey("LimitServerHops") -eq $true)
             {
-                $message = "Parameter LimitServerHops is not valid for FileShare content sources"
-                Add-SPDscEvent -Message $message `
-                    -EntryType 'Error' `
-                    -EventID 100 `
-                    -Source $MyInvocation.MyCommand.Source
-                throw $message
+                throw "Parameter LimitServerHops is not valid for FileShare content sources"
             }
             if ($CrawlSetting -eq "Custom")
             {
-                $message = "Parameter CrawlSetting can only be set to custom for website content sources"
-                Add-SPDscEvent -Message $message `
-                    -EntryType 'Error' `
-                    -EventID 100 `
-                    -Source $MyInvocation.MyCommand.Source
-                throw $message
+                throw "Parameter CrawlSetting can only be set to custom for website content sources"
             }
         }
         "Business"
         {
             if ($PSBoundParameters.ContainsKey("ContinuousCrawl") -eq $true)
             {
-                $message = "Parameter ContinuousCrawl is not valid for Business content sources"
-                Add-SPDscEvent -Message $message `
-                    -EntryType 'Error' `
-                    -EventID 100 `
-                    -Source $MyInvocation.MyCommand.Source
-                throw $message
+                throw "Parameter ContinuousCrawl is not valid for Business content sources"
             }
             if ($PSBoundParameters.ContainsKey("LimitPageDepth") -eq $true)
             {
-                $message = "Parameter LimitPageDepth is not valid for Business content sources"
-                Add-SPDscEvent -Message $message `
-                    -EntryType 'Error' `
-                    -EventID 100 `
-                    -Source $MyInvocation.MyCommand.Source
-                throw $message
+                throw "Parameter LimitPageDepth is not valid for Business content sources"
             }
             if ($PSBoundParameters.ContainsKey("LimitServerHops") -eq $true)
             {
-                $message = "Parameter LimitServerHops is not valid for Business content sources"
-                Add-SPDscEvent -Message $message `
-                    -EntryType 'Error' `
-                    -EventID 100 `
-                    -Source $MyInvocation.MyCommand.Source
-                throw $message
+                throw "Parameter LimitServerHops is not valid for Business content sources"
             }
         }
     }
@@ -420,16 +364,11 @@ function Set-TargetResource
 
     if ($ContentSourceType -ne $CurrentValues.ContentSourceType -and $Force -eq $false)
     {
-        $message = ("The type of the a search content source can not be changed from " + `
+        throw ("The type of the a search content source can not be changed from " + `
                 "'$($CurrentValues.ContentSourceType)' to '$ContentSourceType' without " + `
                 "deleting and adding it again. Specify 'Force = `$true' in order to allow " + `
                 "DSC to do this, or manually remove the existing content source and re-run " + `
                 "the configuration.")
-        Add-SPDscEvent -Message $message `
-            -EntryType 'Error' `
-            -EventID 100 `
-            -Source $MyInvocation.MyCommand.Source
-        throw $message
     }
 
     if (($ContentSourceType -ne $CurrentValues.ContentSourceType -and $Force -eq $true) `
@@ -450,10 +389,9 @@ function Set-TargetResource
     {
         # Create the new content source and then apply settings to it
         Invoke-SPDscCommand -Credential $InstallAccount `
-            -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
+            -Arguments @($PSBoundParameters) `
             -ScriptBlock {
             $params = $args[0]
-            $eventSource = $args[1]
 
             $OFS = ","
             $startAddresses = "$($params.Addresses)"
@@ -514,13 +452,8 @@ function Set-TargetResource
 
                 if ($null -eq $source)
                 {
-                    $message = ("An error occurred during creation of the Content Source, " + `
+                    throw ("An error occurred during creation of the Content Source, " + `
                             "please check if all parameters are correct.")
-                    Add-SPDscEvent -Message $message `
-                        -EntryType 'Error' `
-                        -EventID 100 `
-                        -Source $eventSource
-                    throw $message
                 }
             }
 
@@ -861,114 +794,59 @@ function Test-TargetResource
         {
             if ($PSBoundParameters.ContainsKey("LimitPageDepth") -eq $true)
             {
-                $message = "Parameter LimitPageDepth is not valid for SharePoint content sources"
-                Add-SPDscEvent -Message $message `
-                    -EntryType 'Error' `
-                    -EventID 100 `
-                    -Source $MyInvocation.MyCommand.Source
-                throw $message
+                throw "Parameter LimitPageDepth is not valid for SharePoint content sources"
             }
             if ($PSBoundParameters.ContainsKey("LimitServerHops") -eq $true)
             {
-                $message = "Parameter LimitServerHops is not valid for SharePoint content sources"
-                Add-SPDscEvent -Message $message `
-                    -EntryType 'Error' `
-                    -EventID 100 `
-                    -Source $MyInvocation.MyCommand.Source
-                throw $message
+                throw "Parameter LimitServerHops is not valid for SharePoint content sources"
             }
             if ($CrawlSetting -ne "CrawlVirtualServers" -and
                 $CrawlSetting -ne "CrawlSites"
             )
             {
-                $message = ("Parameter CrawlSetting can only be set to CrawlVirtualServers or CrawlSites " + `
+                throw ("Parameter CrawlSetting can only be set to CrawlVirtualServers or CrawlSites " + `
                         "for SharePoint content sources")
-                Add-SPDscEvent -Message $message `
-                    -EntryType 'Error' `
-                    -EventID 100 `
-                    -Source $MyInvocation.MyCommand.Source
-                throw $message
             }
         }
         "Website"
         {
             if ($PSBoundParameters.ContainsKey("ContinuousCrawl") -eq $true)
             {
-                $message = "Parameter ContinuousCrawl is not valid for Website content sources"
-                Add-SPDscEvent -Message $message `
-                    -EntryType 'Error' `
-                    -EventID 100 `
-                    -Source $MyInvocation.MyCommand.Source
-                throw $message
+                throw "Parameter ContinuousCrawl is not valid for Website content sources"
             }
             if ($PSBoundParameters.ContainsKey("LimitServerHops") -eq $true)
             {
-                $message = "Parameter LimitServerHops is not valid for Website content sources"
-                Add-SPDscEvent -Message $message `
-                    -EntryType 'Error' `
-                    -EventID 100 `
-                    -Source $MyInvocation.MyCommand.Source
-                throw $message
+                throw "Parameter LimitServerHops is not valid for Website content sources"
             }
         }
         "FileShare"
         {
             if ($PSBoundParameters.ContainsKey("LimitPageDepth") -eq $true)
             {
-                $message = "Parameter LimitPageDepth is not valid for FileShare content sources"
-                Add-SPDscEvent -Message $message `
-                    -EntryType 'Error' `
-                    -EventID 100 `
-                    -Source $MyInvocation.MyCommand.Source
-                throw $message
+                throw "Parameter LimitPageDepth is not valid for FileShare content sources"
             }
             if ($PSBoundParameters.ContainsKey("LimitServerHops") -eq $true)
             {
-                $message = "Parameter LimitServerHops is not valid for FileShare content sources"
-                Add-SPDscEvent -Message $message `
-                    -EntryType 'Error' `
-                    -EventID 100 `
-                    -Source $MyInvocation.MyCommand.Source
-                throw $message
+                throw "Parameter LimitServerHops is not valid for FileShare content sources"
             }
             if ($CrawlSetting -eq "Custom")
             {
-                $message = "Parameter CrawlSetting can only be set to custom for website content sources"
-                Add-SPDscEvent -Message $message `
-                    -EntryType 'Error' `
-                    -EventID 100 `
-                    -Source $MyInvocation.MyCommand.Source
-                throw $message
+                throw "Parameter CrawlSetting can only be set to custom for website content sources"
             }
         }
         "Business"
         {
             if ($PSBoundParameters.ContainsKey("ContinuousCrawl") -eq $true)
             {
-                $message = "Parameter ContinuousCrawl is not valid for Business content sources"
-                Add-SPDscEvent -Message $message `
-                    -EntryType 'Error' `
-                    -EventID 100 `
-                    -Source $MyInvocation.MyCommand.Source
-                throw $message
+                throw "Parameter ContinuousCrawl is not valid for Business content sources"
             }
             if ($PSBoundParameters.ContainsKey("LimitPageDepth") -eq $true)
             {
-                $message = "Parameter LimitPageDepth is not valid for Business content sources"
-                Add-SPDscEvent -Message $message `
-                    -EntryType 'Error' `
-                    -EventID 100 `
-                    -Source $MyInvocation.MyCommand.Source
-                throw $message
+                throw "Parameter LimitPageDepth is not valid for Business content sources"
             }
             if ($PSBoundParameters.ContainsKey("LimitServerHops") -eq $true)
             {
-                $message = "Parameter LimitServerHops is not valid for Business content sources"
-                Add-SPDscEvent -Message $message `
-                    -EntryType 'Error' `
-                    -EventID 100 `
-                    -Source $MyInvocation.MyCommand.Source
-                throw $message
+                throw "Parameter LimitServerHops is not valid for Business content sources"
             }
         }
     }
@@ -1068,6 +946,92 @@ function Test-TargetResource
     Write-Verbose -Message "Test-TargetResource returned $result"
 
     return $result
+}
+
+function Export-TargetResource
+{
+    param
+    (
+        $searchSAName,
+        $dependsOn    
+    )
+
+    $content = ''
+    $ParentModuleBase = Get-Module "SharePointDSC" | Select-Object -ExpandProperty Modulebase
+    $module = Join-Path -Path $ParentModuleBase -ChildPath "\DSCResources\MSFT_SPSearchContentSource\MSFT_SPSearchContentSource.psm1" -Resolve    
+    
+    $params = Get-DSCFakeParameters -ModulePath $module
+
+    $contentSources = Get-SPEnterpriseSearchCrawlContentSource -SearchApplication $searchSAName
+
+    $j = 1
+    $totalCS = $contentSources.Length
+    foreach($contentSource in $contentSources)
+    {
+        try{
+            $csName = $contentSource.Name
+            Write-Host "    -> Scanning Content Source [$j/$totalCS] {$csName}"
+
+            $sscsGuid = [System.Guid]::NewGuid().toString()
+
+            $params.Name = $csName
+            $params.ServiceAppName = $searchSAName
+
+            if(!$source.Type -eq "CustomRepository")
+            {
+                $results = Get-TargetResource @params
+                $partialContent = "        SPSearchContentSource " + $contentSource.Name.Replace(" ", "") + $sscsGuid + "`r`n"
+                $partialContent += "        {`r`n"
+
+                $searchScheduleModulePath = Join-Path -Path $ParentModuleBase -ChildPath "\Modules\SharePointDsc.Search\SPSearchContentSource.Schedules.psm1"
+                Import-Module -Name $searchScheduleModulePath
+                # TODO: Figure out way to properly pass CimInstance objects and then add the schedules back;
+                if ($contentSource.IncrementalCrawlSchedule) {
+                    $incremental = Get-SPDSCSearchCrawlSchedule -Schedule $contentSource.IncrementalCrawlSchedule
+                    $results.IncrementalSchedule = Get-SPCrawlSchedule $incremental
+                }
+                else {
+                    $results.Remove("IncrementalSchedule")
+                }
+
+                if ($contentSource.FullCrawlSchedule){
+                    $full = Get-SPDSCSearchCrawlSchedule -Schedule $contentSource.FullCrawlSchedule
+                    $results.FullSchedule = Get-SPCrawlSchedule $full
+                }
+                else {
+                    $results.Remove("FullSchedule")
+                }
+
+                if ($dependsOn)
+                {
+                    $results.add("DependsOn", $dependsOn)
+                }
+
+                $results = Repair-Credentials -results $results
+
+                $currentBlock= Get-DSCBlock -Params $results -ModulePath $module
+                $currentBlock = Convert-DSCStringParamToVariable -DSCBlock $currentBlock -ParameterName "PsDscRunAsCredential"
+                if ($contentSource.IncrementalCrawlSchedule) {
+                    $currentBlock = Convert-DSCStringParamToVariable -DSCBlock $currentBlock -ParameterName "IncrementalSchedule"
+                }
+
+                if ($contentSource.FullCrawlSchedule){
+                    $currentBlock = Convert-DSCStringParamToVariable -DSCBlock $currentBlock -ParameterName "FullSchedule"
+                }
+
+                $partialContent += $currentBlock.replace('`','"')
+                $partialContent += "        }`r`n"
+            }
+        }
+        Catch
+        {
+            $_
+        }
+        $Content += $partialContent
+        $j++
+    }
+    return $content
+    #endregion
 }
 
 Export-ModuleMember -Function *-TargetResource

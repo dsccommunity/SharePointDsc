@@ -1,3 +1,8 @@
+$script:resourceModulePath = Split-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -Parent
+$script:modulesFolderPath = Join-Path -Path $script:resourceModulePath -ChildPath 'Modules'
+$script:resourceHelperModulePath = Join-Path -Path $script:modulesFolderPath -ChildPath 'SharePointDsc.Util'
+Import-Module -Name (Join-Path -Path $script:resourceHelperModulePath -ChildPath 'SharePointDsc.Util.psm1')
+
 function Get-TargetResource
 {
     [CmdletBinding()]
@@ -107,13 +112,9 @@ function Set-TargetResource
 
     if ($Ensure -eq "Present" -and $null -eq $Account)
     {
-        $message = ("You must specify the 'Account' property as a PSCredential to create a " + `
+        throw ("You must specify the 'Account' property as a PSCredential to create a " + `
                 "managed account")
-        Add-SPDscEvent -Message $message `
-            -EntryType 'Error' `
-            -EventID 100 `
-            -Source $MyInvocation.MyCommand.Source
-        throw $message
+        return
     }
 
     $currentValues = Get-TargetResource @PSBoundParameters
@@ -225,5 +226,58 @@ function Test-TargetResource
 
     return $result
 }
+
+function Export-TargetResource
+{
+    $ParentModuleBase = Get-Module "SharePointDSC" | Select-Object -ExpandProperty Modulebase
+    $module = Join-Path -Path $ParentModuleBase -ChildPath "\DSCResources\MSFT_SPManagedAccount\MSFT_SPManagedAccount.psm1" -Resolve
+    $managedAccounts = Get-SPManagedAccount
+
+    $i = 1
+    $total = $managedAccounts.Length
+    foreach($managedAccount in $managedAccounts)
+    {
+        try
+        {
+            $mAccountName = $managedAccount.UserName
+            Write-Host "Scanning SPManagedAccount [$i/$total] {$mAccountName}"
+
+            $PartialContent = "        SPManagedAccount " + [System.Guid]::NewGuid().toString() + "`r`n"
+            $PartialContent += "        {`r`n"
+            <# WA - 1.6.0.0 has a bug where the Get-TargetResource returns an array of all ManagedAccount (see Issue #533) #>
+            $schedule = $null
+            if($null -ne $managedAccount.ChangeSchedule)
+            {
+                $schedule = $managedAccount.ChangeSchedule.ToString()
+            }
+            $results = @{AccountName = $managedAccount.UserName; EmailNotification = $managedAccount.DaysBeforeChangeToEmail; PreExpireDays = $managedAccount.DaysBeforeExpiryToChange;Schedule = $schedule;Ensure="Present";}
+            $results["Account"] = (Resolve-Credentials -UserName $managedAccount.UserName)
+            $results = Repair-Credentials -results $results
+
+            $accountName = Get-Credentials -UserName $managedAccount.UserName
+            if(!$accountName)
+            {
+                Save-Credentials -UserName $managedAccount.UserName
+            }
+            $results.AccountName = $results["Account"] + ".UserName"
+
+            $currentBlock = Get-DSCBlock -Params $results -ModulePath $module
+            $currentBlock = Convert-DSCStringParamToVariable -DSCBlock $currentBlock -ParameterName "Account"
+            $currentBlock = Convert-DSCStringParamToVariable -DSCBlock $currentBlock -ParameterName "AccountName"
+            $currentBlock = Convert-DSCStringParamToVariable -DSCBlock $currentBlock -ParameterName "PsDscRunAsCredential"
+            $PartialContent += $currentBlock
+            $PartialContent += "        }`r`n"
+            $i++
+        }
+        catch
+        {
+            $Global:ErrorLog += "[Managed Account]" + $managedAccount.UserName + "`r`n"
+            $Global:ErrorLog += "$_`r`n`r`n"
+        }
+        $Content += $PartialContent
+    }
+    Return $Content
+}
+
 
 Export-ModuleMember -Function *-TargetResource

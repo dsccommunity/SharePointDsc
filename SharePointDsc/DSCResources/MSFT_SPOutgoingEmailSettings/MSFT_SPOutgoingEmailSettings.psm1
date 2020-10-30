@@ -1,3 +1,8 @@
+$script:resourceModulePath = Split-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -Parent
+$script:modulesFolderPath = Join-Path -Path $script:resourceModulePath -ChildPath 'Modules'
+$script:resourceHelperModulePath = Join-Path -Path $script:modulesFolderPath -ChildPath 'SharePointDsc.Util'
+Import-Module -Name (Join-Path -Path $script:resourceHelperModulePath -ChildPath 'SharePointDsc.Util.psm1')
+
 function Get-TargetResource
 {
     [CmdletBinding()]
@@ -43,23 +48,13 @@ function Get-TargetResource
     if (($PSBoundParameters.ContainsKey("UseTLS") -eq $true) -and `
             $installedVersion.FileMajorPart -ne 16)
     {
-        $message = "UseTLS is only supported in SharePoint 2016 and SharePoint 2019."
-        Add-SPDscEvent -Message $message `
-            -EntryType 'Error' `
-            -EventID 100 `
-            -Source $MyInvocation.MyCommand.Source
-        throw $message
+        throw [Exception] "UseTLS is only supported in SharePoint 2016 and SharePoint 2019."
     }
 
     if (($PSBoundParameters.ContainsKey("SMTPPort") -eq $true) -and `
             $installedVersion.FileMajorPart -ne 16)
     {
-        $message = "SMTPPort is only supported in SharePoint 2016 and SharePoint 2019."
-        Add-SPDscEvent -Message $message `
-            -EntryType 'Error' `
-            -EventID 100 `
-            -Source $MyInvocation.MyCommand.Source
-        throw $message
+        throw [Exception] "SMTPPort is only supported in SharePoint 2016 and SharePoint 2019."
     }
 
     $result = Invoke-SPDscCommand -Credential $InstallAccount `
@@ -147,30 +142,19 @@ function Set-TargetResource
     if (($PSBoundParameters.ContainsKey("UseTLS") -eq $true) -and `
             $installedVersion.FileMajorPart -lt 16)
     {
-        $message = "UseTLS is only supported in SharePoint 2016 and SharePoint 2019."
-        Add-SPDscEvent -Message $message `
-            -EntryType 'Error' `
-            -EventID 100 `
-            -Source $MyInvocation.MyCommand.Source
-        throw $message
+        throw [Exception] "UseTLS is only supported in SharePoint 2016 and SharePoint 2019."
     }
 
     if (($PSBoundParameters.ContainsKey("SMTPPort") -eq $true) -and `
             $installedVersion.FileMajorPart -lt 16)
     {
-        $message = "SMTPPort is only supported in SharePoint 2016 and SharePoint 2019."
-        Add-SPDscEvent -Message $message `
-            -EntryType 'Error' `
-            -EventID 100 `
-            -Source $MyInvocation.MyCommand.Source
-        throw $message
+        throw [Exception] "SMTPPort is only supported in SharePoint 2016 and SharePoint 2019."
     }
 
     $null = Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
+        -Arguments $PSBoundParameters `
         -ScriptBlock {
         $params = $args[0]
-        $eventSource = $args[1]
         $webApp = $null
 
         Write-Verbose -Message "Retrieving $($params.WebAppUrl) settings"
@@ -178,12 +162,7 @@ function Set-TargetResource
         $webApp = Get-SPWebApplication $params.WebAppUrl -IncludeCentralAdministration
         if ($null -eq $webApp)
         {
-            $message = "Web Application $webAppUrl not found"
-            Add-SPDscEvent -Message $message `
-                -EntryType 'Error' `
-                -EventID 100 `
-                -Source $eventSource
-            throw $message
+            throw "Web Application $webAppUrl not found"
         }
 
         $installedVersion = Get-SPDscInstalledProductVersion
@@ -225,13 +204,8 @@ function Set-TargetResource
             }
             default
             {
-                $message = ("Detected an unsupported major version of SharePoint. SharePointDsc only " + `
+                throw ("Detected an unsupported major version of SharePoint. SharePointDsc only " + `
                         "supports SharePoint 2013, 2016 or 2019.")
-                Add-SPDscEvent -Message $message `
-                    -EntryType 'Error' `
-                    -EventID 100 `
-                    -Source $eventSource
-                throw $message
             }
         }
     }
@@ -287,15 +261,70 @@ function Test-TargetResource
         -Source $($MyInvocation.MyCommand.Source) `
         -DesiredValues $PSBoundParameters `
         -ValuesToCheck @("SMTPServer",
-        "FromAddress",
-        "ReplyToAddress",
-        "CharacterSet",
-        "UseTLS",
-        "SMTPPort")
+            "FromAddress",
+            "ReplyToAddress",
+            "CharacterSet",
+            "UseTLS",
+            "SMTPPort")
 
     Write-Verbose -Message "Test-TargetResource returned $result"
 
     return $result
+}
+
+function Export-TargetResource{
+    Param(
+        $WebAppUrl,
+        $DependsOn
+    )
+    $ParentModuleBase = Get-Module "SharePointDSC" | Select-Object -ExpandProperty Modulebase
+    $module = Join-Path -Path $ParentModuleBase -ChildPath "\DSCResources\MSFT_SPOutgoingEmailSettings\MSFT_SPOutgoingEmailSettings.psm1" -Resolve
+    Import-Module $module
+    $params = Get-DSCFakeParameters -ModulePath $module
+
+    $params.WebAppUrl = $WebAppUrl
+    $spMajorVersion = (Get-SPDSCInstalledProductVersion).FileMajorPart
+    if($spMajorVersion.ToString() -ge "15" -and $params.Contains("UseTLS"))
+    {
+        $params.Remove("UseTLS")
+    }
+    if($spMajorVersion.ToString() -ge "15" -and $params.Contains("SMTPPort"))
+    {
+        $params.Remove("SMTPPort")
+    }
+
+    $results = Get-TargetResource @params
+    if($null -eq $results["SMTPPort"])
+    {
+        $results.Remove("SMTPPort")
+    }
+    if($null -eq $results["UseTLS"])
+    {
+        $results.Remove("UseTLS")
+    }
+    if($null -eq $results["ReplyToAddress"])
+    {
+        $results["ReplyToAddress"] = "*"
+    }
+    if($null -ne $results["SMTPServer"] -and "" -ne $results["SMTPServer"])
+    {
+        Write-Host "    -> Scanning Outgoing Email Settings"
+        $Content += "        SPOutgoingEmailSettings " + [System.Guid]::NewGuid().ToString() + "`r`n"
+        $Content += "        {`r`n"
+        $results = Repair-Credentials -results $results
+        if ($DependsOn){ 
+            $results.add("DependsOn", $DependsOn)
+        }
+        if($null -eq $results.ReplyToAddress -or $results.ReplyToAddress -eq "")
+        {
+            $results.ReplyToAddress = "*"
+        }
+        $currentDSCBlock = Get-DSCBlock -Params $results -ModulePath $module                
+        $currentDSCBlock = Convert-DSCStringParamToVariable -DSCBlock $currentDSCBlock -ParameterName "PsDscRunAsCredential"
+        $Content += $currentDSCBlock
+        $Content += "        }`r`n"
+    }
+    return $Content
 }
 
 Export-ModuleMember -Function *-TargetResource

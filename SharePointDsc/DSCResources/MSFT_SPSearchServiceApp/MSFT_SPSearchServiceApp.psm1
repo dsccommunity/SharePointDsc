@@ -1,3 +1,8 @@
+$script:resourceModulePath = Split-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -Parent
+$script:modulesFolderPath = Join-Path -Path $script:resourceModulePath -ChildPath 'Modules'
+$script:resourceHelperModulePath = Join-Path -Path $script:modulesFolderPath -ChildPath 'SharePointDsc.Util'
+Import-Module -Name (Join-Path -Path $script:resourceHelperModulePath -ChildPath 'SharePointDsc.Util.psm1')
+
 function Get-TargetResource
 {
     # Ignoring this because we need to generate a stub credential to return up the current
@@ -224,22 +229,14 @@ function Set-TargetResource
         # Create the service app as it doesn't exist
 
         Write-Verbose -Message "Creating Search Service Application $Name"
-        Invoke-SPDscCommand -Credential $InstallAccount `
-            -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
-            -ScriptBlock {
+        Invoke-SPDscCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
             $params = $args[0]
-            $eventSource = $args[1]
 
             $serviceAppPool = Get-SPServiceApplicationPool $params.ApplicationPool
             if ($null -eq $serviceAppPool)
             {
-                $message = ("Specified service application pool $($params.ApplicationPool) does not " + `
+                throw ("Specified service application pool $($params.ApplicationPool) does not " + `
                         "exist. Please make sure it exists before continuing.")
-                Add-SPDscEvent -Message $message `
-                    -EntryType 'Error' `
-                    -EventID 100 `
-                    -Source $eventSource
-                throw $message
             }
 
             $serviceInstance = Get-SPEnterpriseSearchServiceInstance -Local
@@ -279,14 +276,9 @@ function Set-TargetResource
                 }
                 else
                 {
-                    $message = ("Please install SharePoint 2019, 2016 or SharePoint 2013 with August " + `
+                    throw ("Please install SharePoint 2019, 2016 or SharePoint 2013 with August " + `
                             "2015 CU or higher before attempting to create a cloud enabled " + `
                             "search service application")
-                    Add-SPDscEvent -Message $message `
-                        -EntryType 'Error' `
-                        -EventID 100 `
-                        -Source $eventSource
-                    throw $message
                 }
             }
 
@@ -578,6 +570,85 @@ function Test-TargetResource
     Write-Verbose -Message "Test-TargetResource returned $result"
 
     return $result
+}
+
+function Export-TargetResource
+{
+    $searchSA = Get-SPServiceApplication | Where-Object{$_.GetType().Name -eq "SearchServiceApplication"}
+
+    $i = 1
+    $total = $searchSA.Length
+    $content = ''
+    $ParentModuleBase = Get-Module "SharePointDSC" | Select-Object -ExpandProperty Modulebase
+    $module = Join-Path -Path $ParentModuleBase -ChildPath "\DSCResources\MSFT_SPSearchServiceApp\MSFT_SPSearchServiceApp.psm1" -Resolve  
+
+    foreach ($searchSAInstance in $searchSA)
+    {
+        try
+        {
+            if ($null -ne $searchSAInstance)
+            {
+                $serviceName = $searchSAInstance.Name
+                Write-Host "Scanning Search Service Application [$i/$total] {$serviceName}"
+                $params = Get-DSCFakeParameters -ModulePath $module
+
+                $partialContent = "        SPSearchServiceApp " + $searchSAInstance.Name.Replace(" ", "") + "`r`n"
+                $partialContent += "        {`r`n"
+                $params.Name = $serviceName
+                $params.ApplicationPool = $searchSAInstance.ApplicationPool.Name
+                $results = Get-TargetResource @params
+                if($results.Get_Item("CloudIndex") -eq $false)
+                {
+                    $results.Remove("CloudIndex")
+                }
+
+                if($results.Contains("InstallAccount"))
+                {
+                    $results.Remove("InstallAccount")
+                }
+
+                if ($null -eq $results.WindowsServiceAccount)
+                {
+                    $results.Remove("WindowsServiceAccount")
+                }
+
+                if($null -eq $results.SearchCenterUrl)
+                {
+                    $results.Remove("SearchCenterUrl")
+                }
+
+                Save-Credentials -UserName $results["DefaultContentAccessAccount"].Username
+                $Results["DefaultContentAccessAccount"] = Resolve-Credentials -Username $results["DefaultContentAccessAccount"].Username
+
+                <# Nik20170111 - Fix a bug in 1.5.0.0 where DatabaseName and DatabaseServer is not properly returned #>
+                $results["DatabaseName"] = $searchSAInstance.SearchAdminDatabase.Name
+                $results["DatabaseServer"] = $searchSAInstance.SearchAdminDatabase.Server.Name
+                
+                $results = Repair-Credentials -results $results
+
+                Add-ConfigurationDataEntry -Node "NonNodeData" -Key "DatabaseServer" -Value $results.DatabaseServer -Description "Name of the Database Server associated with the destination SharePoint Farm;"
+                $results.DatabaseServer = "`$ConfigurationData.NonNodeData.DatabaseServer"
+
+                $currentBlock = Get-DSCBlock -Params $results -ModulePath $module
+                $currentBlock = Convert-DSCStringParamToVariable -DSCBlock $currentBlock -ParameterName "DefaultContentAccessAccount"
+                $currentBlock = Convert-DSCStringParamToVariable -DSCBlock $currentBlock -ParameterName "DatabaseServer"
+                $currentBlock = Convert-DSCStringParamToVariable -DSCBlock $currentBlock -ParameterName "PsDscRunAsCredential"
+                $partialContent += $currentBlock
+                $partialContent += "        }`r`n"
+
+                $partialContent += Read-TargetResource -ResourceName SPSearchContentSource -ExportParams @{searchSAName = $searchSAInstance.Name; DependsOn = "[SPSearchServiceApp]$($searchSAInstance.Name.Replace(' ', ''))"}
+            }
+            $i++
+            $content += $partialContent 
+        }
+        catch
+        {
+            $_
+            $Global:ErrorLog += "[Search Service Application]" + $searchSAInstance.Name + "`r`n"
+            $Global:ErrorLog += "$_`r`n`r`n"
+        }
+    }
+    Return $content
 }
 
 Export-ModuleMember -Function *-TargetResource

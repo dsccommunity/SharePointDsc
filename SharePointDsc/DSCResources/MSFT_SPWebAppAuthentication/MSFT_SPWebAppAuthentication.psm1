@@ -1,3 +1,8 @@
+$script:resourceModulePath = Split-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -Parent
+$script:modulesFolderPath = Join-Path -Path $script:resourceModulePath -ChildPath 'Modules'
+$script:resourceHelperModulePath = Join-Path -Path $script:modulesFolderPath -ChildPath 'SharePointDsc.Util'
+Import-Module -Name (Join-Path -Path $script:resourceHelperModulePath -ChildPath 'SharePointDsc.Util.psm1')
+
 function Get-TargetResource
 {
     [CmdletBinding()]
@@ -302,12 +307,7 @@ function Set-TargetResource
             $PSBoundParameters.ContainsKey("Extranet") -eq $false -and `
             $PSBoundParameters.ContainsKey("Custom") -eq $false)
     {
-        $message = "You have to specify at least one zone."
-        Add-SPDscEvent -Message $message `
-            -EntryType 'Error' `
-            -EventID 100 `
-            -Source $MyInvocation.MyCommand.Source
-        throw $message
+        throw "You have to specify at least one zone."
     }
 
     # Perform test on specified configurations for each zone
@@ -338,20 +338,14 @@ function Set-TargetResource
 
     # Get current authentication method
     $authMethod = Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
+        -Arguments $PSBoundParameters `
         -ScriptBlock {
         $params = $args[0]
-        $eventSource = $args[1]
 
         $wa = Get-SPWebApplication -Identity $params.WebAppUrl -ErrorAction SilentlyContinue
         if ($null -eq $wa)
         {
-            $message = "Specified Web Application $($params.WebAppUrl) does not exist"
-            Add-SPDscEvent -Message $message `
-                -EntryType 'Error' `
-                -EventID 100 `
-                -Source $eventSource
-            throw $message
+            throw "Specified Web Application $($params.WebAppUrl) does not exist"
         }
 
         $authProviders = Get-SPAuthenticationProvider -WebApplication $params.WebAppUrl -Zone Default
@@ -415,12 +409,7 @@ function Set-TargetResource
         # Check if specified zone exists
         if ($CurrentValues.ContainsKey("Intranet") -eq $false)
         {
-            $message = "Specified zone Intranet does not exist"
-            Add-SPDscEvent -Message $message `
-                -EntryType 'Error' `
-                -EventID 100 `
-                -Source $MyInvocation.MyCommand.Source
-            throw $message
+            throw "Specified zone Intranet does not exist"
         }
 
         # Test is current config matches desired config
@@ -439,12 +428,7 @@ function Set-TargetResource
         # Check if specified zone exists
         if ($CurrentValues.ContainsKey("Internet") -eq $false)
         {
-            $message = "Specified zone Internet does not exist"
-            Add-SPDscEvent -Message $message `
-                -EntryType 'Error' `
-                -EventID 100 `
-                -Source $MyInvocation.MyCommand.Source
-            throw $message
+            throw "Specified zone Internet does not exist"
         }
 
         # Test is current config matches desired config
@@ -463,12 +447,7 @@ function Set-TargetResource
         # Check if specified zone exists
         if ($CurrentValues.ContainsKey("Extranet") -eq $false)
         {
-            $message = "Specified zone Extranet does not exist"
-            Add-SPDscEvent -Message $message `
-                -EntryType 'Error' `
-                -EventID 100 `
-                -Source $MyInvocation.MyCommand.Source
-            throw $message
+            throw "Specified zone Extranet does not exist"
         }
 
         # Test is current config matches desired config
@@ -487,12 +466,7 @@ function Set-TargetResource
         # Check if specified zone exists
         if ($CurrentValues.ContainsKey("Custom") -eq $false)
         {
-            $message = "Specified zone Custom does not exist"
-            Add-SPDscEvent -Message $message `
-                -EntryType 'Error' `
-                -EventID 100 `
-                -Source $MyInvocation.MyCommand.Source
-            throw $message
+            throw "Specified zone Custom does not exist"
         }
 
         # Test is current config matches desired config
@@ -576,12 +550,7 @@ function Test-TargetResource
     {
         if ($CurrentValues.ContainsKey("Intranet") -eq $false)
         {
-            $message = "Specified zone Intranet does not exist"
-            Add-SPDscEvent -Message $message `
-                -EntryType 'Error' `
-                -EventID 100 `
-                -Source $MyInvocation.MyCommand.Source
-            throw $message
+            throw "Specified zone Intranet does not exist"
         }
 
         $result = Test-ZoneConfiguration -DesiredConfig $Intranet `
@@ -599,12 +568,7 @@ function Test-TargetResource
     {
         if ($CurrentValues.ContainsKey("Internet") -eq $false)
         {
-            $message = "Specified zone Internet does not exist"
-            Add-SPDscEvent -Message $message `
-                -EntryType 'Error' `
-                -EventID 100 `
-                -Source $MyInvocation.MyCommand.Source
-            throw $message
+            throw "Specified zone Internet does not exist"
         }
 
         $result = Test-ZoneConfiguration -DesiredConfig $Internet `
@@ -622,12 +586,7 @@ function Test-TargetResource
     {
         if ($CurrentValues.ContainsKey("Extranet") -eq $false)
         {
-            $message = "Specified zone Extranet does not exist"
-            Add-SPDscEvent -Message $message `
-                -EntryType 'Error' `
-                -EventID 100 `
-                -Source $MyInvocation.MyCommand.Source
-            throw $message
+            throw "Specified zone Extranet does not exist"
         }
 
         $result = Test-ZoneConfiguration -DesiredConfig $Extranet `
@@ -645,13 +604,8 @@ function Test-TargetResource
     {
         if ($CurrentValues.ContainsKey("Custom") -eq $false)
         {
-            $message = "Specified zone Custom does not exist"
-            Add-SPDscEvent -Message $message `
-                -EntryType 'Error' `
-                -EventID 100 `
-                -Source $MyInvocation.MyCommand.Source
-            throw $message
             Write-Verbose -Message "Test-TargetResource returned false"
+            throw "Specified zone Custom does not exist"
         }
 
         $result = Test-ZoneConfiguration -DesiredConfig $Custom `
@@ -762,10 +716,6 @@ function Test-Parameter()
                         "using WindowsAuthentication"
                     if ($Exception)
                     {
-                        Add-SPDscEvent -Message $message `
-                            -EntryType 'Error' `
-                            -EventID 100 `
-                            -Source $MyInvocation.MyCommand.Source
                         throw $message
                     }
                     else
@@ -783,10 +733,6 @@ function Test-Parameter()
                         "or RoleProvider when using WindowsAuthentication"
                     if ($Exception)
                     {
-                        Add-SPDscEvent -Message $message `
-                            -EntryType 'Error' `
-                            -EventID 100 `
-                            -Source $MyInvocation.MyCommand.Source
                         throw $message
                     }
                     else
@@ -805,10 +751,6 @@ function Test-Parameter()
                         "RoleProvider when using FBA"
                     if ($Exception)
                     {
-                        Add-SPDscEvent -Message $message `
-                            -EntryType 'Error' `
-                            -EventID 100 `
-                            -Source $MyInvocation.MyCommand.Source
                         throw $message
                     }
                     else
@@ -825,10 +767,6 @@ function Test-Parameter()
                         "when using FBA"
                     if ($Exception)
                     {
-                        Add-SPDscEvent -Message $message `
-                            -EntryType 'Error' `
-                            -EventID 100 `
-                            -Source $MyInvocation.MyCommand.Source
                         throw $message
                     }
                     else
@@ -844,10 +782,6 @@ function Test-Parameter()
                         "using FBA"
                     if ($Exception)
                     {
-                        Add-SPDscEvent -Message $message `
-                            -EntryType 'Error' `
-                            -EventID 100 `
-                            -Source $MyInvocation.MyCommand.Source
                         throw $message
                     }
                     else
@@ -866,10 +800,6 @@ function Test-Parameter()
                         "RoleProvider when using Federated"
                     if ($Exception)
                     {
-                        Add-SPDscEvent -Message $message `
-                            -EntryType 'Error' `
-                            -EventID 100 `
-                            -Source $MyInvocation.MyCommand.Source
                         throw $message
                     }
                     else
@@ -886,10 +816,6 @@ function Test-Parameter()
                         "when using Federated"
                     if ($Exception)
                     {
-                        Add-SPDscEvent -Message $message `
-                            -EntryType 'Error' `
-                            -EventID 100 `
-                            -Source $MyInvocation.MyCommand.Source
                         throw $message
                     }
                     else
@@ -905,10 +831,6 @@ function Test-Parameter()
                         "using Federated"
                     if ($Exception)
                     {
-                        Add-SPDscEvent -Message $message `
-                            -EntryType 'Error' `
-                            -EventID 100 `
-                            -Source $MyInvocation.MyCommand.Source
                         throw $message
                     }
                     else
@@ -938,14 +860,9 @@ function Test-ZoneIsNotClassic()
     {
         if ($desiredAuth.AuthenticationMethod -ne "Classic")
         {
-            $message = ("Specified Web Application is using Classic Authentication and " + `
+            throw ("Specified Web Application is using Classic Authentication and " + `
                     "Claims Authentication is specified. Please use " + `
                     "Convert-SPWebApplication first!")
-            Add-SPDscEvent -Message $message `
-                -EntryType 'Error' `
-                -EventID 100 `
-                -Source $MyInvocation.MyCommand.Source
-            throw $message
         }
     }
 }
@@ -968,10 +885,9 @@ function Set-ZoneConfiguration()
     )
 
     Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
+        -Arguments $PSBoundParameters `
         -ScriptBlock {
         $params = $args[0]
-        $eventSource = $args[1]
 
         $ap = @()
 
@@ -1008,13 +924,8 @@ function Set-ZoneConfiguration()
                         -ErrorAction SilentlyContinue
                     if ($null -eq $tokenIssuer)
                     {
-                        $message = ("Specified AuthenticationProvider $($zoneConfig.AuthenticationProvider) " + `
+                        throw ("Specified AuthenticationProvider $($zoneConfig.AuthenticationProvider) " + `
                                 "does not exist")
-                        Add-SPDscEvent -Message $message `
-                            -EntryType 'Error' `
-                            -EventID 100 `
-                            -Source $eventSource
-                        throw $message
                     }
                     $newap = New-SPAuthenticationProvider -TrustedIdentityTokenIssuer $tokenIssuer
                 }

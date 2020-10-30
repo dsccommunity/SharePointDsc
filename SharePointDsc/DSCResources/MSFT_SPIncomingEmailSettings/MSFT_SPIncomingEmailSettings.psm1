@@ -1,3 +1,8 @@
+$script:resourceModulePath = Split-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -Parent
+$script:modulesFolderPath = Join-Path -Path $script:resourceModulePath -ChildPath 'Modules'
+$script:resourceHelperModulePath = Join-Path -Path $script:modulesFolderPath -ChildPath 'SharePointDsc.Util'
+Import-Module -Name (Join-Path -Path $script:resourceHelperModulePath -ChildPath 'SharePointDsc.Util.psm1')
+
 function Get-TargetResource
 {
     [CmdletBinding()]
@@ -200,61 +205,35 @@ function Set-TargetResource
     {
         if (-not $PSBoundParameters.containskey("UseAutomaticSettings"))
         {
-            $message = "UseAutomaticSettings parameter must be specified when enabling incoming email."
-            Add-SPDscEvent -Message $message `
-                -EntryType 'Error' `
-                -EventID 100 `
-                -Source $MyInvocation.MyCommand.Source
-            throw $message
+            throw "UseAutomaticSettings parameter must be specified when enabling incoming email."
         }
 
         if (-not $PSBoundParameters.containskey("ServerDisplayAddress"))
         {
-            $message = "ServerDisplayAddress parameter must be specified when enabling incoming email"
-            Add-SPDscEvent -Message $message `
-                -EntryType 'Error' `
-                -EventID 100 `
-                -Source $MyInvocation.MyCommand.Source
-            throw $message
+            throw "ServerDisplayAddress parameter must be specified when enabling incoming email"
         }
 
         if (($PSBoundParameters.UseDirectoryManagementService -eq 'Remote' -and $null -eq $PSBoundParameters.RemoteDirectoryManagementURL) `
                 -or ($PSBoundParameters.containskey('RemoteDirectoryManagementURL') -and $PSBoundParameters.UseDirectoryManagementService -ne 'Remote'))
         {
-            $message = "RemoteDirectoryManagementURL must be specified only when UseDirectoryManagementService is set to 'Remote'"
-            Add-SPDscEvent -Message $message `
-                -EntryType 'Error' `
-                -EventID 100 `
-                -Source $MyInvocation.MyCommand.Source
-            throw $message
+            throw "RemoteDirectoryManagementURL must be specified only when UseDirectoryManagementService is set to 'Remote'"
         }
 
         if ($PSBoundParameters.UseAutomaticSettings -eq $true -and $PSBoundParameters.containskey("DropFolder"))
         {
-            $message = "DropFolder parameter is not valid when using Automatic Mode"
-            Add-SPDscEvent -Message $message `
-                -EntryType 'Error' `
-                -EventID 100 `
-                -Source $MyInvocation.MyCommand.Source
-            throw $message
+            throw "DropFolder parameter is not valid when using Automatic Mode"
         }
 
         if ($PSBoundParameters.UseAutomaticSettings -eq $false -and (-not $PSBoundParameters.containskey("DropFolder")))
         {
-            $message = "DropFolder parameter must be specified when not using Automatic Mode"
-            Add-SPDscEvent -Message $message `
-                -EntryType 'Error' `
-                -EventID 100 `
-                -Source $MyInvocation.MyCommand.Source
-            throw $message
+            throw "DropFolder parameter must be specified when not using Automatic Mode"
         }
     }
 
     Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
+        -Arguments $PSBoundParameters `
         -ScriptBlock {
         $params = $args[0]
-        $eventSource = $args[1]
 
         $spEmailServiceInstance = (Get-SPServiceInstance | Where-Object { $_.GetType().FullName -eq "Microsoft.SharePoint.Administration.SPIncomingEmailServiceInstance" }) | Select-Object -First 1
         $spEmailService = $spEmailServiceInstance.service
@@ -262,12 +241,7 @@ function Set-TargetResource
         #some simple error checking, just incase we didn't capture the service for some reason
         if ($null -eq $spEmailService)
         {
-            $message = "Error getting the SharePoint Incoming Email Service"
-            Add-SPDscEvent -Message $message `
-                -EntryType 'Error' `
-                -EventID 100 `
-                -Source $eventSource
-            throw $message
+            throw "Error getting the SharePoint Incoming Email Service"
         }
 
         if ($params.Ensure -eq "Absent")

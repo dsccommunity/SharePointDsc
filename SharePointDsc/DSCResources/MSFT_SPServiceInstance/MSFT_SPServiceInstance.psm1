@@ -1,3 +1,8 @@
+$script:resourceModulePath = Split-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -Parent
+$script:modulesFolderPath = Join-Path -Path $script:resourceModulePath -ChildPath 'Modules'
+$script:resourceHelperModulePath = Join-Path -Path $script:modulesFolderPath -ChildPath 'SharePointDsc.Util'
+Import-Module -Name (Join-Path -Path $script:resourceHelperModulePath -ChildPath 'SharePointDsc.Util.psm1')
+
 function Get-TargetResource
 {
     [CmdletBinding()]
@@ -95,7 +100,7 @@ function Set-TargetResource
     $newName = (Get-SPDscServiceTypeName -DisplayName $Name)
     $invokeArgs = @{
         Credential = $InstallAccount
-        Arguments  = @($PSBoundParameters, $MyInvocation.MyCommand.Source, $newName)
+        Arguments  = @($PSBoundParameters, $newName)
     }
 
     if ($Ensure -eq "Present")
@@ -104,8 +109,7 @@ function Set-TargetResource
 
         Invoke-SPDscCommand @invokeArgs -ScriptBlock {
             $params = $args[0]
-            $eventSource = $args[1]
-            $newName = $args[2]
+            $newName = $args[1]
 
             $computerName = $env:COMPUTERNAME
             $si = Get-SPServiceInstance -Server $computerName -All | Where-Object -FilterScript {
@@ -127,12 +131,7 @@ function Set-TargetResource
 
             if ($null -eq $si)
             {
-                $message = "Unable to locate service instance '$($params.Name)'"
-                Add-SPDscEvent -Message $message `
-                    -EntryType 'Error' `
-                    -EventID 100 `
-                    -Source $eventSource
-                throw $message
+                throw [Exception] "Unable to locate service instance '$($params.Name)'"
             }
 
             Start-SPServiceInstance -Identity $si
@@ -148,8 +147,8 @@ function Set-TargetResource
             while (($count -lt $maxCount) -and ($serviceCheck.Status -ne "Online"))
             {
                 Write-Verbose -Message ("$([DateTime]::Now.ToShortTimeString()) - Waiting " + `
-                        "for service instance to start. Current status: $($serviceCheck.Status) " + `
-                        "(waited $count of $maxCount minutes)")
+                                        "for service instance to start. Current status: $($serviceCheck.Status) " + `
+                                        "(waited $count of $maxCount minutes)")
                 Start-Sleep -Seconds 60
                 $serviceCheck = Get-SPServiceInstance -Server $si.Server.Name -All | Where-Object -FilterScript {
                     $_.TypeName -eq $si.TypeName
@@ -164,8 +163,7 @@ function Set-TargetResource
 
         Invoke-SPDscCommand @invokeArgs -ScriptBlock {
             $params = $args[0]
-            $eventSource = $args[1]
-            $newName = $args[2]
+            $newName = $args[1]
 
             $si = Get-SPServiceInstance -Server $env:COMPUTERNAME -All | Where-Object -FilterScript {
                 $_.TypeName -eq $params.Name -or `
@@ -185,12 +183,7 @@ function Set-TargetResource
             }
             if ($null -eq $si)
             {
-                $message = "Unable to locate service instance '$($params.Name)'"
-                Add-SPDscEvent -Message $message `
-                    -EntryType 'Error' `
-                    -EventID 100 `
-                    -Source $eventSource
-                throw $message
+                throw [Exception] "Unable to locate service instance '$($params.Name)'"
             }
             Stop-SPServiceInstance -Identity $si
 
@@ -205,8 +198,8 @@ function Set-TargetResource
             while (($count -lt $maxCount) -and ($serviceCheck.Status -ne "Disabled"))
             {
                 Write-Verbose -Message ("$([DateTime]::Now.ToShortTimeString()) - Waiting " + `
-                        "for service instance to stop. Current status: $($serviceCheck.Status) " + `
-                        "(waited $count of $maxCount minutes)")
+                                        "for service instance to stop. Current status: $($serviceCheck.Status) " + `
+                                        "(waited $count of $maxCount minutes)")
                 Start-Sleep -Seconds 60
                 $serviceCheck = Get-SPServiceInstance -Server $si.Server.Name -All | Where-Object -FilterScript {
                     $_.TypeName -eq $si.TypeName

@@ -1,3 +1,8 @@
+$script:resourceModulePath = Split-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -Parent
+$script:modulesFolderPath = Join-Path -Path $script:resourceModulePath -ChildPath 'Modules'
+$script:resourceHelperModulePath = Join-Path -Path $script:modulesFolderPath -ChildPath 'SharePointDsc.Util'
+Import-Module -Name (Join-Path -Path $script:resourceHelperModulePath -ChildPath 'SharePointDsc.Util.psm1')
+
 function Get-TargetResource
 {
     [CmdletBinding()]
@@ -65,13 +70,8 @@ function Get-TargetResource
 
     if ($ProxyLibraries -and (($ProxyLibrariesToInclude) -or ($ProxyLibrariesToExclude)))
     {
-        $message = ("Cannot use the ProxyLibraries parameter together with the ProxyLibrariesToInclude or " + `
+        throw ("Cannot use the ProxyLibraries parameter together with the ProxyLibrariesToInclude or " + `
                 "ProxyLibrariesToExclude parameters")
-        Add-SPDscEvent -Message $message `
-            -EntryType 'Error' `
-            -EventID 100 `
-            -Source $MyInvocation.MyCommand.Source
-        throw $message
     }
 
     $result = Invoke-SPDscCommand -Credential $InstallAccount `
@@ -211,30 +211,19 @@ function Set-TargetResource
 
     if ($ProxyLibraries -and (($ProxyLibrariesToInclude) -or ($ProxyLibrariesToExclude)))
     {
-        $message = ("Cannot use the ProxyLibraries parameter together with the ProxyLibrariesToInclude or " + `
+        throw ("Cannot use the ProxyLibraries parameter together with the ProxyLibrariesToInclude or " + `
                 "ProxyLibrariesToExclude parameters")
-        Add-SPDscEvent -Message $message `
-            -EntryType 'Error' `
-            -EventID 100 `
-            -Source $MyInvocation.MyCommand.Source
-        throw $message
     }
 
     Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
+        -Arguments @($PSBoundParameters) `
         -ScriptBlock {
         $params = $args[0]
-        $eventSource = $args[1]
 
         $webApplication = Get-SPWebApplication -Identity $params.WebAppUrl -ErrorAction SilentlyContinue
         if ($null -eq $webApplication)
         {
-            $message = "Web application $($params.WebAppUrl) was not found"
-            Add-SPDscEvent -Message $message `
-                -EntryType 'Error' `
-                -EventID 100 `
-                -Source $eventSource
-            throw $message
+            throw "Web application $($params.WebAppUrl) was not found"
         }
 
         $clientCallableSettings = $webApplication.ClientCallableSettings
@@ -606,15 +595,15 @@ function Test-TargetResource
         -Source $($MyInvocation.MyCommand.Source) `
         -DesiredValues $PSBoundParameters `
         -ValuesToCheck @("WebAppUrl",
-        "MaxResourcesPerRequest",
-        "MaxObjectPaths",
-        "ExecutionTimeout",
-        "RequestXmlMaxDepth",
-        "EnableXsdValidation",
-        "EnableStackTrace",
-        "RequestUsageExecutionTimeThreshold",
-        "LogActionsIfHasRequestException",
-        "EnableRequestUsage")
+            "MaxResourcesPerRequest",
+            "MaxObjectPaths",
+            "ExecutionTimeout",
+            "RequestXmlMaxDepth",
+            "EnableXsdValidation",
+            "EnableStackTrace",
+            "RequestUsageExecutionTimeThreshold",
+            "LogActionsIfHasRequestException",
+            "EnableRequestUsage")
 
     Write-Verbose -Message "Test-TargetResource returned $result"
 

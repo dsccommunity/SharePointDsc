@@ -1,3 +1,8 @@
+$script:resourceModulePath = Split-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -Parent
+$script:modulesFolderPath = Join-Path -Path $script:resourceModulePath -ChildPath 'Modules'
+$script:resourceHelperModulePath = Join-Path -Path $script:modulesFolderPath -ChildPath 'SharePointDsc.Util'
+Import-Module -Name (Join-Path -Path $script:resourceHelperModulePath -ChildPath 'SharePointDsc.Util.psm1')
+
 function Get-TargetResource
 {
     [CmdletBinding()]
@@ -96,30 +101,18 @@ function Set-TargetResource
 
     if ($Ensure -eq "Absent")
     {
-        $message = "This resource cannot remove Diagnostics Provider. Please use ensure equals Present."
-        Add-SPDscEvent -Message $message `
-            -EntryType 'Error' `
-            -EventID 100 `
-            -Source $MyInvocation.MyCommand.Source
-        throw $message
+        throw "This resource cannot remove Diagnostics Provider. Please use ensure equals Present."
     }
 
     Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
+        -Arguments $PSBoundParameters `
         -ScriptBlock {
         $params = $args[0]
-        $eventSource = $args[1]
-
         $diagnosticProvider = Get-SPDiagnosticsProvider | Where-Object { $_.Name -eq $params.Name }
 
         if ($null -eq $diagnosticProvider)
         {
-            $message = "The specified Diagnostic Provider {" + $params.Name + "} could not be found."
-            Add-SPDscEvent -Message $message `
-                -EntryType 'Error' `
-                -EventID 100 `
-                -Source $eventSource
-            throw $message
+            throw "The specified Diagnostic Provider {" + $params.Name + "} could not be found."
         }
 
         $newParams = @{

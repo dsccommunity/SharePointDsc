@@ -1,3 +1,8 @@
+$script:resourceModulePath = Split-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -Parent
+$script:modulesFolderPath = Join-Path -Path $script:resourceModulePath -ChildPath 'Modules'
+$script:resourceHelperModulePath = Join-Path -Path $script:modulesFolderPath -ChildPath 'SharePointDsc.Util'
+Import-Module -Name (Join-Path -Path $script:resourceHelperModulePath -ChildPath 'SharePointDsc.Util.psm1')
+
 function Get-TargetResource
 {
     [CmdletBinding()]
@@ -34,12 +39,7 @@ function Get-TargetResource
 
     if (($RequestLimit -gt 0) -and ($WaitTime -gt 0))
     {
-        $message = "Only one Crawler Impact Rule HitRate argument (RequestLimit, WaitTime) can be specified"
-        Add-SPDscEvent -Message $message `
-            -EntryType 'Error' `
-            -EventID 100 `
-            -Source $MyInvocation.MyCommand.Source
-        throw $message
+        throw "Only one Crawler Impact Rule HitRate argument (RequestLimit, WaitTime) can be specified"
     }
 
     $result = Invoke-SPDscCommand -Credential $InstallAccount `
@@ -135,12 +135,7 @@ function Set-TargetResource
 
     if (($RequestLimit -gt 0) -and ($WaitTime -gt 0))
     {
-        $message = "Only one Crawler Impact Rule HitRate argument (RequestLimit, WaitTime) can be specified"
-        Add-SPDscEvent -Message $message `
-            -EntryType 'Error' `
-            -EventID 100 `
-            -Source $MyInvocation.MyCommand.Source
-        throw $message
+        throw "Only one Crawler Impact Rule HitRate argument (RequestLimit, WaitTime) can be specified"
     }
 
     $result = Get-TargetResource @PSBoundParameters
@@ -149,11 +144,9 @@ function Set-TargetResource
     {
         Write-Verbose -Message "Creating Crawler Impact Rule $Name"
         Invoke-SPDscCommand -Credential $InstallAccount `
-            -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
+            -Arguments $PSBoundParameters `
             -ScriptBlock {
             $params = $args[0]
-            $eventSource = $args[1]
-
             $behavior = "0"
             $hitRate = 0
             if ($null -eq $params.RequestLimit)
@@ -170,12 +163,7 @@ function Set-TargetResource
             $serviceApp = Get-SPEnterpriseSearchServiceApplication -Identity $params.ServiceAppName
             if ($null -eq $serviceApp)
             {
-                $message = "The Search Service Application does not exist."
-                Add-SPDscEvent -Message $message `
-                    -EntryType 'Error' `
-                    -EventID 100 `
-                    -Source $eventSource
-                throw $message
+                throw "The Search Service Application does not exist."
             }
             New-SPEnterpriseSearchSiteHitRule -Name $params.Name `
                 -Behavior $behavior `
@@ -187,11 +175,9 @@ function Set-TargetResource
     {
         Write-Verbose -Message "Updating Crawler Impact Rule $Name"
         Invoke-SPDscCommand -Credential $InstallAccount `
-            -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
+            -Arguments $PSBoundParameters `
             -ScriptBlock {
             $params = $args[0]
-            $eventSource = $args[1]
-
             $behavior = "0"
             $hitRate = 0
             if ($null -eq $params.RequestLimit)
@@ -207,12 +193,7 @@ function Set-TargetResource
             $serviceApp = Get-SPEnterpriseSearchServiceApplication -Identity $params.ServiceAppName
             if ($null -eq $serviceApp)
             {
-                $message = "The Search Service Application does not exist."
-                Add-SPDscEvent -Message $message `
-                    -EntryType 'Error' `
-                    -EventID 100 `
-                    -Source $eventSource
-                throw $message
+                throw "The Search Service Application does not exist."
             }
 
             Remove-SPEnterpriseSearchSiteHitRule -Identity $params.Name `
@@ -230,20 +211,13 @@ function Set-TargetResource
     {
         Write-Verbose -Message "Removing Crawler Impact Rule $Name"
         Invoke-SPDscCommand -Credential $InstallAccount `
-            -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
+            -Arguments $PSBoundParameters `
             -ScriptBlock {
             $params = $args[0]
-            $eventSource = $args[1]
-
             $serviceApp = Get-SPEnterpriseSearchServiceApplication -Identity $params.ServiceAppName
             if ($null -eq $serviceApp)
             {
-                $message = "The Search Service Application does not exist."
-                Add-SPDscEvent -Message $message `
-                    -EntryType 'Error' `
-                    -EventID 100 `
-                    -Source $eventSource
-                throw $message
+                throw "The Search Service Application does not exist."
             }
             Remove-SPEnterpriseSearchSiteHitRule -Identity $params.Name `
                 -SearchService $serviceApp `
@@ -289,12 +263,7 @@ function Test-TargetResource
 
     if (($RequestLimit -gt 0) -and ($WaitTime -gt 0))
     {
-        $message = "Only one Crawler Impact Rule HitRate argument (RequestLimit, WaitTime) can be specified"
-        Add-SPDscEvent -Message $message `
-            -EntryType 'Error' `
-            -EventID 100 `
-            -Source $MyInvocation.MyCommand.Source
-        throw $message
+        throw "Only one Crawler Impact Rule HitRate argument (RequestLimit, WaitTime) can be specified"
     }
 
     $behavior = ""

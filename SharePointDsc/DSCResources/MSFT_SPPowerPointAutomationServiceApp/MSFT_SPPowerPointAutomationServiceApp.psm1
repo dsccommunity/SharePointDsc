@@ -1,3 +1,8 @@
+$script:resourceModulePath = Split-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -Parent
+$script:modulesFolderPath = Join-Path -Path $script:resourceModulePath -ChildPath 'Modules'
+$script:resourceHelperModulePath = Join-Path -Path $script:modulesFolderPath -ChildPath 'SharePointDsc.Util'
+Import-Module -Name (Join-Path -Path $script:resourceHelperModulePath -ChildPath 'SharePointDsc.Util.psm1')
+
 function Get-TargetResource
 {
     [CmdletBinding()]
@@ -56,23 +61,13 @@ function Get-TargetResource
                 -or $WorkerProcessCount `
                 -or $WorkerTimeoutInSeconds) -and ($Ensure -eq "Absent"))
     {
-        $message = "You cannot use any of the parameters when Ensure is specified as Absent"
-        Add-SPDscEvent -Message $message `
-            -EntryType 'Error' `
-            -EventID 100 `
-            -Source $MyInvocation.MyCommand.Source
-        throw $message
+        throw "You cannot use any of the parameters when Ensure is specified as Absent"
     }
 
     if (($Ensure -eq "Present") -and -not $ApplicationPool)
     {
-        $message = ("An Application Pool is required to configure the PowerPoint " + `
+        throw ("An Application Pool is required to configure the PowerPoint " + `
                 "Automation Service Application")
-        Add-SPDscEvent -Message $message `
-            -EntryType 'Error' `
-            -EventID 100 `
-            -Source $MyInvocation.MyCommand.Source
-        throw $message
     }
 
     $result = Invoke-SPDscCommand -Credential $InstallAccount `
@@ -188,22 +183,12 @@ function Set-TargetResource
                 -or $WorkerProcessCount `
                 -or $WorkerTimeoutInSeconds) -and ($Ensure -eq "Absent"))
     {
-        $message = "You cannot use any of the parameters when Ensure is specified as Absent"
-        Add-SPDscEvent -Message $message `
-            -EntryType 'Error' `
-            -EventID 100 `
-            -Source $MyInvocation.MyCommand.Source
-        throw $message
+        throw "You cannot use any of the parameters when Ensure is specified as Absent"
     }
     if (($Ensure -eq "Present") -and -not $ApplicationPool)
     {
-        $message = ("An Application Pool is required to configure the PowerPoint " + `
+        throw ("An Application Pool is required to configure the PowerPoint " + `
                 "Automation Service Application")
-        Add-SPDscEvent -Message $message `
-            -EntryType 'Error' `
-            -EventID 100 `
-            -Source $MyInvocation.MyCommand.Source
-        throw $message
     }
 
     $result = Get-TargetResource @PSBoundParameters
@@ -211,10 +196,9 @@ function Set-TargetResource
     {
         Write-Verbose -Message "Creating PowerPoint Automation Service Application $Name"
         Invoke-SPDscCommand -Credential $InstallAccount `
-            -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
+            -Arguments $PSBoundParameters `
             -ScriptBlock {
             $params = $args[0]
-            $eventSource = $args[1]
 
             $proxyName = $params.ProxyName
             if ($null -eq $proxyName)
@@ -252,12 +236,7 @@ function Set-TargetResource
             }
             else
             {
-                $message = "Specified application pool does not exist"
-                Add-SPDscEvent -Message $message `
-                    -EntryType 'Error' `
-                    -EventID 100 `
-                    -Source $eventSource
-                throw $message
+                throw "Specified application pool does not exist"
             }
         }
     }
@@ -265,22 +244,16 @@ function Set-TargetResource
     {
         Write-Verbose -Message "Updating PowerPoint Automation Service Application $Name"
         Invoke-SPDscCommand -Credential $InstallAccount `
-            -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source, $result) `
+            -Arguments $PSBoundParameters, $result `
             -ScriptBlock {
             $params = $args[0]
-            $eventSource = $args[1]
-            $result = $args[2]
+            $result = $args[1]
 
             $serviceApps = Get-SPServiceApplication -Name $params.Name `
                 -ErrorAction SilentlyContinue
             if ($null -eq $serviceApps)
             {
-                $message = "No Service applications are available in the farm."
-                Add-SPDscEvent -Message $message `
-                    -EntryType 'Error' `
-                    -EventID 100 `
-                    -Source $eventSource
-                throw $message
+                throw "No Service applications are available in the farm."
             }
             $serviceApp = $serviceApps `
             | Where-Object -FilterScript {
@@ -288,12 +261,7 @@ function Set-TargetResource
             }
             if ($null -eq $serviceApp)
             {
-                $message = "Unable to find specified service application."
-                Add-SPDscEvent -Message $message `
-                    -EntryType 'Error' `
-                    -EventID 100 `
-                    -Source $eventSource
-                throw $message
+                throw "Unable to find specified service application."
             }
             if ([string]::IsNullOrEmpty($params.ApplicationPool) -eq $false `
                     -and $params.ApplicationPool -ne $result.ApplicationPool)
@@ -301,12 +269,7 @@ function Set-TargetResource
                 $appPool = Get-SPServiceApplicationPool -Identity $params.ApplicationPool
                 if ($null -eq $appPool)
                 {
-                    $message = "The specified App Pool does not exist"
-                    Add-SPDscEvent -Message $message `
-                        -EntryType 'Error' `
-                        -EventID 100 `
-                        -Source $eventSource
-                    throw $message
+                    throw "The specified App Pool does not exist"
                 }
                 $serviceApp.ApplicationPool = $appPool
             }
@@ -434,23 +397,13 @@ function Test-TargetResource
                 $WorkerProcessCount -or `
                 $WorkerTimeoutInSeconds) -and ($Ensure -eq "Absent"))
     {
-        $message = "You cannot use any of the parameters when Ensure is specified as Absent"
-        Add-SPDscEvent -Message $message `
-            -EntryType 'Error' `
-            -EventID 100 `
-            -Source $MyInvocation.MyCommand.Source
-        throw $message
+        throw "You cannot use any of the parameters when Ensure is specified as Absent"
     }
 
     if (($Ensure -eq "Present") -and -not $ApplicationPool)
     {
-        $message = ("An Application Pool is required to configure the PowerPoint " + `
+        throw ("An Application Pool is required to configure the PowerPoint " + `
                 "Automation Service Application")
-        Add-SPDscEvent -Message $message `
-            -EntryType 'Error' `
-            -EventID 100 `
-            -Source $MyInvocation.MyCommand.Source
-        throw $message
     }
 
     $CurrentValues = Get-TargetResource @PSBoundParameters

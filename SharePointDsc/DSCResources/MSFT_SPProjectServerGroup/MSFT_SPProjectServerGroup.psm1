@@ -1,3 +1,8 @@
+$script:resourceModulePath = Split-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -Parent
+$script:modulesFolderPath = Join-Path -Path $script:resourceModulePath -ChildPath 'Modules'
+$script:resourceHelperModulePath = Join-Path -Path $script:modulesFolderPath -ChildPath 'SharePointDsc.Util'
+Import-Module -Name (Join-Path -Path $script:resourceHelperModulePath -ChildPath 'SharePointDsc.Util.psm1')
+
 function Get-TargetResource
 {
     [CmdletBinding()]
@@ -46,13 +51,8 @@ function Get-TargetResource
 
     if ((Get-SPDscInstalledProductVersion).FileMajorPart -lt 16)
     {
-        $message = ("Support for Project Server in SharePointDsc is only valid for " + `
+        throw [Exception] ("Support for Project Server in SharePointDsc is only valid for " + `
                 "SharePoint 2016 and 2019.")
-        Add-SPDscEvent -Message $message `
-            -EntryType 'Error' `
-            -EventID 100 `
-            -Source $MyInvocation.MyCommand.Source
-        throw $message
     }
 
     if ($PSBoundParameters.ContainsKey("ADGroup") -eq $true -and `
@@ -60,44 +60,28 @@ function Get-TargetResource
                 $PSBoundParameters.ContainsKey("MembersToInclude") -eq $true -or `
                 $PSBoundParameters.ContainsKey("MembersToExclude") -eq $true))
     {
-        $message = ("Property ADGroup can not be used at the same time as Members, " + `
+        throw ("Property ADGroup can not be used at the same time as Members, " + `
                 "MembersToInclude or MembersToExclude")
-        Add-SPDscEvent -Message $message `
-            -EntryType 'Error' `
-            -EventID 100 `
-            -Source $MyInvocation.MyCommand.Source
-        throw $message
     }
 
     if ($PSBoundParameters.ContainsKey("Members") -eq $true -and `
         ($PSBoundParameters.ContainsKey("MembersToInclude") -eq $true -or `
                 $PSBoundParameters.ContainsKey("MembersToExclude") -eq $true))
     {
-        $message = ("Property Members can not be used at the same time as " + `
+        throw ("Property Members can not be used at the same time as " + `
                 "MembersToInclude or MembersToExclude")
-        Add-SPDscEvent -Message $message `
-            -EntryType 'Error' `
-            -EventID 100 `
-            -Source $MyInvocation.MyCommand.Source
-        throw $message
     }
 
     $result = Invoke-SPDscCommand -Credential $InstallAccount `
-        -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source, $PSScriptRoot) `
+        -Arguments @($PSBoundParameters, $PSScriptRoot) `
         -ScriptBlock {
         $params = $args[0]
-        $eventSource = $args[1]
-        $scriptRoot = $args[2]
+        $scriptRoot = $args[1]
 
         if ((Get-SPProjectPermissionMode -Url $params.Url) -ne "ProjectServer")
         {
-            $message = ("SPProjectServerGroup is design for Project Server permissions " + `
+            throw [Exception] ("SPProjectServerGroup is design for Project Server permissions " + `
                     "mode only, and this site is set to SharePoint mode")
-            Add-SPDscEvent -Message $message `
-                -EntryType 'Error' `
-                -EventID 100 `
-                -Source $eventSource
-            throw $message
         }
 
         $modulePath = "..\..\Modules\SharePointDsc.ProjectServerConnector\SharePointDsc.ProjectServerConnector.psm1"
