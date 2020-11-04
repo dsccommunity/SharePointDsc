@@ -263,6 +263,7 @@ function Set-TargetResource
         $jobRunning = $true
         $maxCount = 30
         $count = 0
+        Write-Verbose -Message "Waiting for 'Product Version Job' timer job to complete"
         while ($jobRunning -and $count -le $maxCount)
         {
             Start-Sleep -Seconds 10
