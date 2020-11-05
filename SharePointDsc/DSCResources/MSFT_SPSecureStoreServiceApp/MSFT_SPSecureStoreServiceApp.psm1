@@ -236,7 +236,7 @@ function Set-TargetResource
 
             foreach ($item in ($params.GetEnumerator() | Where-Object -FilterScript { $_.Key -in $paramList }))
             {
-                $params.Add($item.Key, $item.Value)
+                $newParams.Add($item.Key, $item.Value)
             }
 
             $pName = "$($params.Name) Proxy"
