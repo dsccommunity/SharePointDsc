@@ -10,6 +10,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - SharePointDsc
   - Added logging to the event log when the code throws an exception
 
+### Fixed
+
+- SPWorkflowService
+  - Fixed issue configuring workflow service when no workflow service is currently configured.
+
 ## [4.3.0] - 2020-09-30
 
 ### Added

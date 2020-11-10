@@ -27,7 +27,7 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting the current Workflow Service Configuration(s)"
 
-    $result = Invoke-SPDscCommand -Credential $InstallAccount `
+    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
         -Arguments $PSBoundParameters `
         -ScriptBlock {
         $params = $args[0]
@@ -51,8 +51,13 @@ function Get-TargetResource
 
             if ($null -ne $workflowProxy)
             {
+                $workflowHostUri = $workflowProxy.GetHostname($site)
+                if ($null -ne $workflowHostUri)
+                {
+                    $workflowHostUri = $workflowHostUri.TrimEnd("/")
+                }
                 $returnval = @{
-                    WorkflowHostUri = $workflowProxy.GetHostname($site).TrimEnd("/")
+                    WorkflowHostUri = $workflowHostUri
                     SPSiteUrl       = $params.SPSiteUrl
                     ScopeName       = $workflowProxy.GetWorkflowScopeName($site)
                     AllowOAuthHttp  = $params.AllowOAuthHttp
@@ -94,7 +99,7 @@ function Set-TargetResource
     Write-Verbose -Message "Registering the Workflow Service"
 
     ## Perform changes
-    Invoke-SPDscCommand -Credential $InstallAccount `
+    Invoke-SPDSCCommand -Credential $InstallAccount `
         -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
         -ScriptBlock {
         $params = $args[0]
