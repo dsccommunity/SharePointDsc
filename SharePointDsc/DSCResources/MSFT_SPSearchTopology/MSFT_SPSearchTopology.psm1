@@ -283,7 +283,7 @@ function Set-TargetResource
                 $searchService = Get-SPEnterpriseSearchServiceInstance -Identity $searchServer
             }
 
-            if ($searchService.Status -eq "Offline")
+            if (($searchService.Status -eq "Offline") -or ($searchService.Status -eq "Disabled"))
             {
                 Write-Verbose -Message "Start Search Service Instance"
                 Start-SPEnterpriseSearchServiceInstance -Identity $searchServer

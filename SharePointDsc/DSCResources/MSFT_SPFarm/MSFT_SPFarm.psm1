@@ -631,7 +631,8 @@ function Set-TargetResource
                     $currentUri = [System.Uri]$centralAdminSite.Url
                     if ($desiredUri.AbsoluteUri -ne $currentUri.AbsoluteUri)
                     {
-                        Write-Verbose -Message "Re-provisioning CA because $($currentUri.AbsoluteUri) does not equal $($desiredUri.AbsoluteUri)"
+                        Write-Verbose -Message ("Re-provisioning CA because $($currentUri.AbsoluteUri) " + `
+                                "does not equal $($desiredUri.AbsoluteUri)")
                         $reprovisionCentralAdmin = $true
                     }
                     else
@@ -657,14 +658,17 @@ function Set-TargetResource
                             if ($desiredUri.Host -ne $iisBindings[0].HostHeader -or
                                 $desiredUri.Port -ne $iisBindings[0].Port)
                             {
-                                Write-Verbose -Message "Re-provisioning CA because $($desiredUri.Host) does not equal $($iisBindings[0].HostHeader) or $($desiredUri.Port) does not equal $($iisBindings[0].Port)"
+                                Write-Verbose -Message ("Re-provisioning CA because $($desiredUri.Host) does not " + `
+                                        "equal $($iisBindings[0].HostHeader) or $($desiredUri.Port) does not " + `
+                                        "equal $($iisBindings[0].Port)")
                                 $reprovisionCentralAdmin = $true
                             }
                         }
                         else
                         {
                             # iisBindings did not exist or did not contain a valid hostheader
-                            Write-Verbose -Message "Re-provisioning CA because IIS Bindings does not exist or does not contain a valid host header"
+                            Write-Verbose -Message ("Re-provisioning CA because IIS Bindings does not " + `
+                                    "exist or does not contain a valid host header")
                             $reprovisionCentralAdmin = $true
                         }
                     }
@@ -707,7 +711,8 @@ function Set-TargetResource
             if ($CurrentValues.CentralAdministrationAuth -ne $CentralAdministrationAuth -and
                 (-not $reprovisionCentralAdmin))
             {
-                Write-Verbose -Message "Updating CentralAdmin authentication method from $($CurrentValues.CentralAdministrationAuth) to $CentralAdministrationAuth"
+                Write-Verbose -Message ("Updating CentralAdmin authentication method from " + `
+                        "$($CurrentValues.CentralAdministrationAuth) to $CentralAdministrationAuth")
                 Invoke-SPDscCommand -Credential $InstallAccount `
                     -Arguments $PSBoundParameters `
                     -ScriptBlock {
@@ -756,7 +761,8 @@ function Set-TargetResource
 
             if ($params.UseSQLAuthentication -eq $true)
             {
-                Write-Verbose -Message "Using SQL authentication to create service application as `$useSQLAuthentication is set to $($params.useSQLAuthentication)."
+                Write-Verbose -Message ("Using SQL authentication to create service application as " + `
+                        "`$useSQLAuthentication is set to $($params.useSQLAuthentication).")
                 $databaseCredentialsParam = @{
                     DatabaseCredentials = $params.DatabaseCredentials
                 }
@@ -795,12 +801,24 @@ function Set-TargetResource
 
             if ($dbStatus.ValidPermissions -eq $false)
             {
-                $message = "The current user does not have sufficient permissions to SQL Server"
-                Add-SPDscEvent -Message $message `
-                    -EntryType 'Error' `
-                    -EventID 100 `
-                    -Source $eventSource
-                throw $message
+                if ($dbStatus.DatabaseEmpty -eq $true)
+                {
+                    # If DatabaseEmpty is True most probably precreated databases are being used
+                    Write-Verbose -Message ("IMPORTANT: Permissions check failed, but an empty " + `
+                            "configDB '$($params.FarmConfigDatabaseName)' was found. Assuming that " + `
+                            "precreated databases are being used.")
+                }
+                else
+                {
+                    # If DatabaseEmpty is False, then either the specified ConfigDB doesn't exist or
+                    # is already provisioned
+                    $message = "The current user does not have sufficient permissions to SQL Server"
+                    Add-SPDscEvent -Message $message `
+                        -EntryType 'Error' `
+                        -EventID 100 `
+                        -Source $eventSource
+                    throw $message
+                }
             }
 
             $executeArgs = @{
@@ -814,12 +832,14 @@ function Set-TargetResource
 
             if ($params.useSQLAuthentication -eq $true)
             {
-                Write-Verbose -Message "Using SQL authentication to connect to / create farm as `$useSQLAuthentication is set to $($params.useSQLAuthentication)."
+                Write-Verbose -Message ("Using SQL authentication to connect to / create farm as " + `
+                        "`$useSQLAuthentication is set to $($params.useSQLAuthentication).")
                 $executeArgs.Add("DatabaseCredentials", $params.DatabaseCredentials)
             }
             else
             {
-                Write-Verbose -Message "`$useSQLAuthentication is false or not specified; using default Windows authentication."
+                Write-Verbose -Message ("`$useSQLAuthentication is false or not specified; using " + `
+                        "default Windows authentication.")
             }
 
             $installedVersion = Get-SPDscInstalledProductVersion
@@ -1087,7 +1107,8 @@ function Set-TargetResource
                         }
                         elseif ($desiredUri.AbsoluteUri -ne $currentUri.AbsoluteUri)
                         {
-                            Write-Verbose -Message "Re-provisioning CA because $($currentUri.AbsoluteUri) does not equal $($desiredUri.AbsoluteUri)"
+                            Write-Verbose -Message ("Re-provisioning CA because $($currentUri.AbsoluteUri) " + `
+                                    "does not equal $($desiredUri.AbsoluteUri)")
                             $reprovisionCentralAdmin = $true
                         }
 

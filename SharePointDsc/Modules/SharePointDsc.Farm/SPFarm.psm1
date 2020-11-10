@@ -64,9 +64,6 @@ function Get-SPDscConfigDBStatus
         $command.CommandText = "SELECT COUNT(*) FROM sys.databases WHERE name = '$Database'"
         $configDBexists = ($command.ExecuteScalar() -eq 1)
 
-        $command.CommandText = "SELECT COUNT(*) FROM sys.databases WHERE name = '$($Database)_Lock'"
-        $lockExists = ($command.ExecuteScalar() -eq 1)
-
         $serverRolesToCheck = @("dbcreator", "securityadmin")
         $hasPermissions = $true
         foreach ($serverRole in $serverRolesToCheck)
@@ -87,6 +84,10 @@ function Get-SPDscConfigDBStatus
             $command.CommandText = "SELECT COUNT(*) FROM sys.tables"
             $configDBempty = ($command.ExecuteScalar() -eq 0)
         }
+
+        $connection.ChangeDatabase('TempDB')
+        $command.CommandText = "SELECT COUNT([name]) FROM sys.tables WHERE [name] = 'SPDscLock'"
+        $lockExists = ($command.ExecuteScalar() -eq 1)
 
         return @{
             DatabaseExists   = $configDBexists
@@ -232,7 +233,7 @@ function Add-SPDscConfigDBLock
     }
     else # Just use Windows integrated auth
     {
-        $connection.ConnectionString = "Server=$SQLServer;Integrated Security=SSPI;Database=Master"
+        $connection.ConnectionString = "Server=$SQLServer;Integrated Security=SSPI;Database=TempDB"
     }
     $command = New-Object -TypeName "System.Data.SqlClient.SqlCommand"
 
@@ -241,8 +242,8 @@ function Add-SPDscConfigDBLock
         $connection.Open()
         $command.Connection = $connection
 
-        $command.CommandText = "CREATE DATABASE [$($Database)_Lock]"
-        $command.ExecuteNonQuery()
+        $command.CommandText = "CREATE TABLE SPDscLock (Locked BIT)"
+        $null = $command.ExecuteNonQuery()
     }
     finally
     {
@@ -308,7 +309,7 @@ function Remove-SPDscConfigDBLock
     }
     else # Just use Windows integrated auth
     {
-        $connection.ConnectionString = "Server=$SQLServer;Integrated Security=SSPI;Database=Master"
+        $connection.ConnectionString = "Server=$SQLServer;Integrated Security=SSPI;Database=TempDB"
     }
     $command = New-Object -TypeName "System.Data.SqlClient.SqlCommand"
 
@@ -317,8 +318,8 @@ function Remove-SPDscConfigDBLock
         $connection.Open()
         $command.Connection = $connection
 
-        $command.CommandText = "DROP DATABASE [$($Database)_Lock]"
-        $command.ExecuteNonQuery()
+        $command.CommandText = "DROP TABLE [SPDscLock]"
+        $null = $command.ExecuteNonQuery()
     }
     finally
     {
@@ -329,4 +330,3 @@ function Remove-SPDscConfigDBLock
         }
     }
 }
-
