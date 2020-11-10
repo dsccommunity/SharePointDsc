@@ -52,10 +52,12 @@ function Get-TargetResource
             if ($null -ne $workflowProxy)
             {
                 $workflowHostUri = $workflowProxy.GetHostname($site)
+
                 if ($null -ne $workflowHostUri)
                 {
                     $workflowHostUri = $workflowHostUri.TrimEnd("/")
                 }
+
                 $returnval = @{
                     WorkflowHostUri = $workflowHostUri
                     SPSiteUrl       = $params.SPSiteUrl
