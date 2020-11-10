@@ -232,6 +232,13 @@ function Set-TargetResource
                 $newParams.Add("DatabasePassword", $params.DatabaseCredentials.Password)
             }
 
+            $paramList = @('AuditlogMaxSize', 'DatabaseName', 'DatabaseServer', 'FailoverDatabaseServer', 'PartitionMode', 'Sharing')
+
+            foreach ($item in ($params.GetEnumerator() | Where-Object -FilterScript { $_.Key -in $paramList }))
+            {
+                $newParams.Add($item.Key, $item.Value)
+            }
+
             $pName = "$($params.Name) Proxy"
 
             if ($params.ContainsKey("ProxyName") -and $null -ne $params.ProxyName)

@@ -61,3 +61,6 @@ NOTE:
 When using SharePoint 2016 and later and enabling the Developer Dashboard,
 please make sure you also provision the Usage and Health service application
 to make sure the Developer Dashboard works properly.
+
+NOTE2:
+Since v4.4 the resource supports the use of precreated databases.

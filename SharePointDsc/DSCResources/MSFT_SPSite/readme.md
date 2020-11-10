@@ -7,9 +7,13 @@ This resource will provision a site collection to the current farm, based on
 the settings that are passed through. These settings map to the New-SPSite
 cmdlet and accept the same values and types.
 
-The current version of SharePointDsc is only able to check for the existence
-of a site collection, the additional parameters are not checked for yet, but
-will be in a later release
+When the site collection exists, not all parameters are checked for being
+in the desired state. The following parameters are checked:
+QuotaTemplate, OwnerAlias, SecondaryOwnerAlias, AdministrationSiteType
+
+Since the title of the site collection can be changed by the site collection
+owner and can result in a conflict between the owner and DSC. Therefore the
+resource is only using the Name parameter during site creation.
 
 NOTE:
 When creating Host Header Site Collections, do not use the HostHeader

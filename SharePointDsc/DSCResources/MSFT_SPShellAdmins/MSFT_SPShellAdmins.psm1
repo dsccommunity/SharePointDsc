@@ -146,7 +146,7 @@ function Get-TargetResource
 
         return @{
             IsSingleInstance = "Yes"
-            Members          = $shellAdmins.UserName
+            Members          = [System.Array]$shellAdmins.UserName
             MembersToInclude = $params.MembersToInclude
             MembersToExclude = $params.MembersToExclude
             Databases        = $cdbPermissions
