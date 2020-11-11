@@ -37,7 +37,7 @@ function Get-TargetResource
     Write-Verbose -Message "Check if Binary folder exists"
     if (-not(Test-Path -Path $BinaryDir))
     {
-        $message = "PrerequisitesInstaller cannot be found: {$InstallerPath}"
+        $message = "Specified path cannot be found: {$BinaryDir}"
         Add-SPDscEvent -Message $message `
             -EntryType 'Error' `
             -EventID 100 `
@@ -292,6 +292,7 @@ function Get-TargetResource
         }
     }
 }
+
 
 function Set-TargetResource
 {

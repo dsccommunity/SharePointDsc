@@ -266,6 +266,7 @@ function Set-TargetResource
 
         $PSBoundParameters.Add("CurrentValues", $CurrentValues)
 
+
         $null = Invoke-SPDscCommand -Credential $InstallAccount `
             -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
             -ScriptBlock {

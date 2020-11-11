@@ -35,6 +35,7 @@ function Get-TargetResource
         $params = $args[0]
         $eventSource = $args[1]
 
+
         if ($params.ServiceAppProxyGroup -eq 'default')
         {
             $serviceAppProxyGroup = Get-SPServiceApplicationProxyGroup -Default -ErrorAction SilentlyContinue

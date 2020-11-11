@@ -154,6 +154,8 @@ function Set-TargetResource
 
     Write-Verbose -Message "Setting content database configuration settings"
 
+    $PSBoundParameters.Ensure = $Ensure
+
     Invoke-SPDscCommand -Credential $InstallAccount `
         -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
         -ScriptBlock {

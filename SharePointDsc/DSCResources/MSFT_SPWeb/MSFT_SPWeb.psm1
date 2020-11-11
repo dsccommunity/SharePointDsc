@@ -89,18 +89,6 @@ function Get-TargetResource
                 Ensure = "Absent"
             }
         }
-
-        return @{
-            Url                = $web.Url
-            Ensure             = $ensureResult
-            Description        = $web.Description
-            Name               = $web.Title
-            Language           = $web.Language
-            Template           = $templateResult
-            UniquePermissions  = $web.HasUniquePerm
-            UseParentTopNav    = $parentTopNav
-            RequestAccessEmail = $web.RequestAccessEmail
-        }
     }
 
     return $result

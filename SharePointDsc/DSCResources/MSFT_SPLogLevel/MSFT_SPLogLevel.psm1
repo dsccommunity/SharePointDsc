@@ -196,6 +196,7 @@ function Set-TargetResource
 
         if ((($DesiredSetting.Name) | Measure-Object).Count -ne 1 -or ($DesiredSetting.Name).contains(",") )
         {
+            $message = "Exactly one log name, or the wildcard character '*' must be provided for each log item"
             Add-SPDscEvent -Message $message `
                 -EntryType 'Error' `
                 -EventID 100 `

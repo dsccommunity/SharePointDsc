@@ -172,14 +172,15 @@ function Set-TargetResource
                     Write-Verbose -Message ("SuiteNavBrandingText with SharePoint 2019 an newer has no " + `
                             "built in support of showing the value on web pages.")
                 }
-
-                if ($PSBoundParameters.ContainsKey("SuiteBarBrandingElementHtml"))
-                {
-                    Write-Verbose -Message ("SuiteBarBrandingElementHtml with SharePoint 2016 and newer only " + `
-                            "works if using a SharePoint 2013 masterpage")
-                }
             }
 
+            if ($PSBoundParameters.ContainsKey("SuiteBarBrandingElementHtml"))
+            {
+                Write-Verbose -Message ("SuiteBarBrandingElementHtml with SharePoint 2016 and newer only " + `
+                        "works if using a SharePoint 2013 masterpage")
+            }
+
+            <# Exception: All the optional parameters are null for SP2016. #>
             if (!$PSBoundParameters.ContainsKey("SuiteNavBrandingLogoNavigationUrl") `
                     -and !$PSBoundParameters.ContainsKey("SuiteNavBrandingLogoTitle") `
                     -and !$PSBoundParameters.ContainsKey("SuiteNavBrandingLogoUrl") `

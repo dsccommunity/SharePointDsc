@@ -279,6 +279,7 @@ function Set-TargetResource
         {
             Write-Verbose -Message "Disabling SharePoint Incoming Email"
             $spEmailService.Enabled = $false
+
         }
         else #Present
         {

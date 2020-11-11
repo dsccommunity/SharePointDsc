@@ -445,7 +445,6 @@ function Set-TargetResource
             -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
             -ScriptBlock {
             $params = $args[0]
-            $eventSource = $args[1]
             Remove-SPEnterpriseSearchCrawlContentSource -Identity $params.Name `
                 -SearchApplication $params.ServiceAppName `
                 -Confirm:$false
@@ -456,9 +455,10 @@ function Set-TargetResource
     {
         # Create the new content source and then apply settings to it
         Invoke-SPDscCommand -Credential $InstallAccount `
-            -Arguments @($PSBoundParameters) `
+            -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
             -ScriptBlock {
             $params = $args[0]
+            $eventSource = $args[1]
 
             $OFS = ","
             $startAddresses = "$($params.Addresses)"

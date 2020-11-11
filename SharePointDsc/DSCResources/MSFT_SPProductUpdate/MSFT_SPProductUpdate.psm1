@@ -44,7 +44,6 @@ function Get-TargetResource
             -EventID 100 `
             -Source $MyInvocation.MyCommand.Source
         throw $message
-        return
     }
 
     Write-Verbose -Message "Getting install status of SP binaries"
@@ -318,7 +317,6 @@ function Set-TargetResource
             -EventID 100 `
             -Source $MyInvocation.MyCommand.Source
         throw $message
-        return
     }
 
     Write-Verbose -Message "Check if the setup file exists"

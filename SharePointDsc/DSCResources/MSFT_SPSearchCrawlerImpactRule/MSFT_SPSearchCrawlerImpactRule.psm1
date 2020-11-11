@@ -255,6 +255,8 @@ function Set-TargetResource
                 -ErrorAction SilentlyContinue
         }
     }
+
+
 }
 
 function Test-TargetResource

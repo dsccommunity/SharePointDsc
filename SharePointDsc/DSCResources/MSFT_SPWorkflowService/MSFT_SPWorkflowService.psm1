@@ -32,7 +32,7 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting the current Workflow Service Configuration(s)"
 
-    $result = Invoke-SPDscCommand -Credential $InstallAccount `
+    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
         -Arguments $PSBoundParameters `
         -ScriptBlock {
         $params = $args[0]
@@ -62,6 +62,7 @@ function Get-TargetResource
                 {
                     $workflowHostUri = $workflowHostUri.TrimEnd("/")
                 }
+
                 $returnval = @{
                     WorkflowHostUri = $workflowHostUri
                     SPSiteUrl       = $params.SPSiteUrl

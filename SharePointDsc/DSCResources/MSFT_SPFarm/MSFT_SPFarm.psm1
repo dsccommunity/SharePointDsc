@@ -486,6 +486,7 @@ function Set-TargetResource
                     -Source $MyInvocation.MyCommand.Source
                 throw $message
             }
+
             if ($PSBoundParameters.ContainsKey("CentralAdministrationPort"))
             {
                 if ($uri.Port -ne $CentralAdministrationPort)
@@ -1099,13 +1100,12 @@ function Set-TargetResource
                         $reprovisionCentralAdmin = $false
                         $isCentralAdminUrlHttps = (([System.Uri]$params.CentralAdministrationUrl).Scheme -eq 'https')
 
-                        $desiredUri = [System.Uri]("{0}:{1}" $desiredUri = [System.Uri]("{0}:{1}" -f $params.CentralAdministrationUrl.TrimEnd('/'), $params.CentralAdministrationPort) -f $params.CentralAdministrationUrl.TrimEnd('/'), $params.CentralAdministrationPort)
+                        $desiredUri = [System.Uri]($params.CentralAdministrationUrl.TrimEnd('/'))
                         $currentUri = [System.Uri]$centralAdminSite.Url
 
                         if ($isCentralAdminUrlHttps)
                         {
-                            Write-Verbose -Message ("Re-provisioning CA because $($currentUri.AbsoluteUri) " + `
-                                    "does not equal $($desiredUri.AbsoluteUri)")
+                            Write-Verbose -Message "Re-provisioning newly created CA because we want it to be HTTPS"
                             $reprovisionCentralAdmin = $true
                         }
                         elseif ($desiredUri.AbsoluteUri -ne $currentUri.AbsoluteUri)
@@ -1312,8 +1312,7 @@ function Test-TargetResource
                     -Source $MyInvocation.MyCommand.Source
                 throw $message
             }
-            # TODO: should we allow port here as long as either the port matches CentralAdministrationPort
-            #       or CentralAdministrationPort is not specified?
+
             if ($PSBoundParameters.ContainsKey("CentralAdministrationPort"))
             {
                 if ($uri.Port -ne $CentralAdministrationPort)

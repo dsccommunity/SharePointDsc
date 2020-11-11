@@ -771,6 +771,7 @@ function Test-Parameter()
                             -EntryType 'Error' `
                             -EventID 100 `
                             -Source $MyInvocation.MyCommand.Source
+                        throw $message
                     }
                     else
                     {
@@ -791,6 +792,7 @@ function Test-Parameter()
                             -EntryType 'Error' `
                             -EventID 100 `
                             -Source $MyInvocation.MyCommand.Source
+                        throw $message
                     }
                     else
                     {
@@ -812,6 +814,7 @@ function Test-Parameter()
                             -EntryType 'Error' `
                             -EventID 100 `
                             -Source $MyInvocation.MyCommand.Source
+                        throw $message
                     }
                     else
                     {
@@ -831,6 +834,7 @@ function Test-Parameter()
                             -EntryType 'Error' `
                             -EventID 100 `
                             -Source $MyInvocation.MyCommand.Source
+                        throw $message
                     }
                     else
                     {
@@ -849,6 +853,7 @@ function Test-Parameter()
                             -EntryType 'Error' `
                             -EventID 100 `
                             -Source $MyInvocation.MyCommand.Source
+                        throw $message
                     }
                     else
                     {
@@ -870,6 +875,7 @@ function Test-Parameter()
                             -EntryType 'Error' `
                             -EventID 100 `
                             -Source $MyInvocation.MyCommand.Source
+                        throw $message
                     }
                     else
                     {
@@ -889,6 +895,7 @@ function Test-Parameter()
                             -EntryType 'Error' `
                             -EventID 100 `
                             -Source $MyInvocation.MyCommand.Source
+                        throw $message
                     }
                     else
                     {
@@ -907,6 +914,7 @@ function Test-Parameter()
                             -EntryType 'Error' `
                             -EventID 100 `
                             -Source $MyInvocation.MyCommand.Source
+                        throw $message
                     }
                     else
                     {

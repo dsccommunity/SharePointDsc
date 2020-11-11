@@ -390,22 +390,26 @@ function Set-TargetResource
             }
         }
 
-        $centralAdminWebApp = [Microsoft.SharePoint.Administration.SPAdministrationWebApplication]::Local
-        $centralAdminSite = Get-SPSite -Identity $centralAdminWebApp.Url
-        $systemAccountSite = New-Object "Microsoft.SharePoint.SPSite" -ArgumentList @($site.Id, $centralAdminSite.SystemAccount.UserToken)
-
-        if ($null -eq $systemAccountSite.SecondaryContact)
+        if ($doCreateDefaultGroups -eq $true)
         {
-            $secondaryOwnerLogin = $null
-        }
-        else
-        {
-            $secondaryOwnerLogin = $systemAccountSite.SecondaryContact.UserLogin;
-        }
+            Write-Verbose -Message ("Creating default groups")
+            $centralAdminWebApp = [Microsoft.SharePoint.Administration.SPAdministrationWebApplication]::Local
+            $centralAdminSite = Get-SPSite -Identity $centralAdminWebApp.Url
+            $systemAccountSite = New-Object "Microsoft.SharePoint.SPSite" -ArgumentList @($site.Id, $centralAdminSite.SystemAccount.UserToken)
 
-        $systemAccountSite.RootWeb.CreateDefaultAssociatedGroups($systemAccountSite.Owner.UserLogin,
-            $secondaryOwnerLogin,
-            $null)
+            if ($null -eq $systemAccountSite.SecondaryContact)
+            {
+                $secondaryOwnerLogin = $null
+            }
+            else
+            {
+                $secondaryOwnerLogin = $systemAccountSite.SecondaryContact.UserLogin;
+            }
+
+            $systemAccountSite.RootWeb.CreateDefaultAssociatedGroups($systemAccountSite.Owner.UserLogin,
+                $secondaryOwnerLogin,
+                $null)
+        }
     }
 }
 

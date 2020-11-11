@@ -543,7 +543,7 @@ try
                     }
                 }
 
-                Context -Name "A config and lock database exist, and this server should be connected to it but isn't" -Fixture {
+                Context -Name "A config database exists, and this server should be connected to it but isn't and this server won't run central admin" -Fixture {
                     BeforeAll {
                         $testParams = @{
                             IsSingleInstance         = "Yes"
