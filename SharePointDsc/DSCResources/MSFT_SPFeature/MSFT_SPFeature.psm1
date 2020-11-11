@@ -231,6 +231,7 @@ Function Export-TargetResource{
         $URL,
         $DependsOn
     )
+    $VerbosePreference = "SilentlyContinue"
     $spMajorVersion = (Get-SPDSCInstalledProductVersion).FileMajorPart
     $versionFilter = $spMajorVersion.ToString() + "*"
     $Features = Get-SPFeature | Where-Object{$_.Scope -eq $Scope -and $_.Version -like $versionFilter}
@@ -267,7 +268,7 @@ Function Export-TargetResource{
                     $results.Remove("InstalAccount")
                 }
                 $results = Repair-Credentials -results $results
-                if ($DependsOn){ 
+                if ($DependsOn){
                     $results.add("DependsOn", $DependsOn)
                 }
                 $currentDSCBlock = Get-DSCBlock -Params $results -ModulePath $module

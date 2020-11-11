@@ -587,6 +587,7 @@ function Test-TargetResource
 
 function Export-TargetResource
 {
+    $VerbosePreference = "SilentlyContinue"
     $searchSA = Get-SPServiceApplication | Where-Object { $_.GetType().Name -eq "SearchServiceApplication" }
 
     $i = 1

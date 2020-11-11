@@ -523,6 +523,7 @@ function Test-TargetResource
 
 function Export-TargetResource
 {
+    $VerbosePreference = "SilentlyContinue"
     $spSites = Get-SPSite -Limit All
     $siteGuid = $null
     $siteTitle = $null

@@ -309,6 +309,7 @@ function Export-TargetResource
         $WebAppUrl,
         $DependsOn
     )
+    $VerbosePreference = "SilentlyContinue"
     $ParentModuleBase = Get-Module "SharePointDSC" | Select-Object -ExpandProperty Modulebase
     $module = Join-Path -Path $ParentModuleBase -ChildPath "\DSCResources\MSFT_SPOutgoingEmailSettings\MSFT_SPOutgoingEmailSettings.psm1" -Resolve
     Import-Module $module

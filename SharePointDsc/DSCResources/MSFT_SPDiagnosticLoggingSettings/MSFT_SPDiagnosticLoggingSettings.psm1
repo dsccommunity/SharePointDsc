@@ -373,6 +373,7 @@ function Test-TargetResource
 <## This function retrieves all settings related to Diagnostic Logging (ULS logs) on the SharePoint farm. #>
 function Export-TargetResource
 {
+    $VerbosePreference = "SilentlyContinue"
     $ParentModuleBase = Get-Module "SharePointDSC" | Select-Object -ExpandProperty Modulebase
     $module = Join-Path -Path $ParentModuleBase -ChildPath  "\DSCResources\MSFT_SPDiagnosticLoggingSettings\MSFT_SPDiagnosticLoggingSettings.psm1" -Resolve
     $params = Get-DSCFakeParameters -ModulePath $module

@@ -1083,6 +1083,7 @@ function Export-TargetResource
         $dependsOn
     )
 
+    $VerbosePreference = "SilentlyContinue"
     $content = ''
     $ParentModuleBase = Get-Module "SharePointDSC" | Select-Object -ExpandProperty Modulebase
     $module = Join-Path -Path $ParentModuleBase -ChildPath "\DSCResources\MSFT_SPSearchContentSource\MSFT_SPSearchContentSource.psm1" -Resolve

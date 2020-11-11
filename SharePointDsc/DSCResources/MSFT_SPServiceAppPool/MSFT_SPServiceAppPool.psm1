@@ -187,6 +187,7 @@ function Test-TargetResource
 
 function Export-TargetResource
 {
+    $VerbosePreference = "SilentlyContinue"
     $ParentModuleBase = Get-Module "SharePointDSC" | Select-Object -ExpandProperty Modulebase
     $module = Join-Path -Path $ParentModuleBase -ChildPath "\DSCResources\MSFT_SPServiceAppPool\MSFT_SPServiceAppPool.psm1" -Resolve
     $spServiceAppPools = Get-SPServiceApplicationPool | Sort-Object -Property Name

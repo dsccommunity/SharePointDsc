@@ -518,6 +518,7 @@ function Export-TargetResource
         [System.String]
         $BinaryLocation = "\\<location>"
     )
+    $VerbosePreference = "SilentlyContinue"
     Add-ConfigurationDataEntry -Node "NonNodeData" -Key "FullInstallation" -Value "`$False" -Description "Specifies whether or not the DSC configuration script will install the SharePoint Prerequisites and Binaries;"
     $Content = "        if(`$ConfigurationData.NonNodeData.FullInstallation)`r`n"
     $Content += "        {`r`n"

@@ -1351,11 +1351,14 @@ function Test-SPDscIsADUser
         $IdentityName
     )
 
+    $NetBios = ""
     if ($IdentityName -like "*\*")
     {
+        $NetBios = $IdentityName.Split('\')[0]
         $IdentityName = $IdentityName.Substring($IdentityName.IndexOf('\') + 1)
     }
 
+    $domain = Get-A
     $searcher = New-Object -TypeName System.DirectoryServices.DirectorySearcher
     $searcher.filter = "((samAccountName=$IdentityName))"
     $searcher.SearchScope = "subtree"

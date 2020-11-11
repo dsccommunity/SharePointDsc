@@ -48,18 +48,18 @@
     # ProcessorArchitecture = ''
 
     # Modules that must be imported into the global environment prior to importing this module
-     RequiredModules = @(
-         @{​ 
-            ModuleName = "ReverseDSC"
+    RequiredModules      = @(
+        @{
+            ModuleName      = "ReverseDSC"
             RequiredVersion = "2.0.0.7"
-        }​​​
-    ​)
+        }
+    )
 
     # Assemblies that must be loaded prior to importing this module
     # RequiredAssemblies = @()
 
     # Script files (.ps1) that are run in the caller's environment prior to importing this module.
-    ScriptsToProcess = @("Modules\SharePointDSC.Reverse\Import-SPPowerShellSnapIn.ps1")
+    ScriptsToProcess     = @("Modules\SharePointDSC.Reverse\Import-SPPowerShellSnapIn.ps1")
 
     # Type files (.ps1xml) to be loaded when importing this module
     # TypesToProcess = @()
@@ -68,7 +68,8 @@
     # FormatsToProcess = @()
 
     # Modules to import as nested modules of the module specified in RootModule/ModuleToProcess
-    NestedModules        = @("Modules\SharePointDsc.Util\SharePointDsc.Util.psm1")
+    NestedModules        = @("Modules\SharePointDsc.Reverse\SharePointDsc.Reverse.psm1",
+        "Modules\SharePointDsc.Util\SharePointDsc.Util.psm1")
 
     # Functions to export from this module
     FunctionsToExport    = @(
@@ -96,21 +97,26 @@
         'Get-SPDscServerPatchStatus',
         'Get-SPDscServiceContext',
         'Get-SPDscUserProfileSubTypeManager',
+        'Get-SPWebPolicyPermissions',
         'Invoke-SPDscCommand',
+        'Read-TargetResource',
         'Remove-SPDscGenericObject',
         'Remove-SPDscUserToLocalAdmin',
         'Remove-SPDscZoneMap',
         'Rename-SPDscParamValue',
+        'Repair-Credentials',
         'Resolve-SPDscSecurityIdentifier',
         'Set-SPDscObjectPropertyIfValuePresent',
         'Set-SPDscZoneMap',
+        'Set-SPFarmAdministrators',
+        'Set-SPFarmAdministratorsBlock',
+        'Start-SharePointDSCExtract',
         'Test-SPDscIsADUser',
         'Test-SPDscObjectHasProperty',
         'Test-SPDscParameterState',
         'Test-SPDscRunAsCredential',
         'Test-SPDscRunningAsFarmAccount',
-        'Test-SPDscUserIsLocalAdmin',
-        'Start-SharePointDSCExtract'
+        'Test-SPDscUserIsLocalAdmin'
     )
 
     # Cmdlets to export from this module

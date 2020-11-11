@@ -1352,6 +1352,7 @@ function Test-TargetResource
 
 function Export-TargetResource
 {
+    $VerbosePreference = "SilentlyContinue"
     param(
         [string]$ServerName,
         [bool]$RunCentralAdmin

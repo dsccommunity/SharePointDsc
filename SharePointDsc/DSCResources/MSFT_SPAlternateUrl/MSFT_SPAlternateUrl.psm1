@@ -327,6 +327,7 @@ function Test-TargetResource
 
 function Export-TargetResource
 {
+    $VerbosePreference = "SilentlyContinue"
     $ParentModuleBase = Get-Module "SharePointDSC" | Select-Object -ExpandProperty Modulebase
     $module = Join-Path -Path $ParentModuleBase -ChildPath "\DSCResources\MSFT_SPAlternateUrl\MSFT_SPAlternateUrl.psm1" -Resolve
     $Content = ''

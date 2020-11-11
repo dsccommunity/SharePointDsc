@@ -349,6 +349,7 @@ function Export-TargetResource
         $URL,
         $DependsOn
     )
+    $VerbosePreference = "SilentlyContinue"
     $content = ''
     $ParentModuleBase = Get-Module "SharePointDSC" | Select-Object -ExpandProperty Modulebase
     $module = Join-Path -Path $ParentModuleBase -ChildPath "\DSCResources\MSFT_SPWeb\MSFT_SPWeb.psm1" -Resolve

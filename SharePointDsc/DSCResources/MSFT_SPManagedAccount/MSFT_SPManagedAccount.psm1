@@ -233,6 +233,7 @@ function Test-TargetResource
 
 function Export-TargetResource
 {
+    $VerbosePreference = "SilentlyContinue"
     $ParentModuleBase = Get-Module "SharePointDSC" | Select-Object -ExpandProperty Modulebase
     $module = Join-Path -Path $ParentModuleBase -ChildPath "\DSCResources\MSFT_SPManagedAccount\MSFT_SPManagedAccount.psm1" -Resolve
     $managedAccounts = Get-SPManagedAccount
