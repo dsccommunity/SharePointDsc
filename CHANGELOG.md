@@ -36,6 +36,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - SPWordAutomationServiceApp
   - Fixed issue where provisioning the service app requires a second run to
     update all specified parameters
+- SPWorkflowService
+  - Fixed issue configuring workflow service when no workflow service is currently configured.
 
 ## [4.3.0] - 2020-09-30
 
