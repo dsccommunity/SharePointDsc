@@ -256,10 +256,10 @@ function Set-TargetResource
         {
             $params.Remove("InstallAccount") | Out-Null
         }
-        $params = $params | Rename-SPDscParamValue -oldName "LogPath" `
-            -newName "LogLocation" `
-        | Rename-SPDscParamValue -oldName "LogSpaceInGB" `
-            -newName "LogDiskSpaceUsageGB"
+        $params = $params | Rename-SPDscParamValue -OldName "LogPath" `
+            -NewName "LogLocation" `
+        | Rename-SPDscParamValue -OldName "LogSpaceInGB" `
+            -NewName "LogDiskSpaceUsageGB"
 
         Set-SPDiagnosticConfig @params
     }
@@ -374,7 +374,7 @@ function Test-TargetResource
 function Export-TargetResource
 {
     $ParentModuleBase = Get-Module "SharePointDSC" | Select-Object -ExpandProperty Modulebase
-	$module = Join-Path -Path $ParentModuleBase -ChildPath  "\DSCResources\MSFT_SPDiagnosticLoggingSettings\MSFT_SPDiagnosticLoggingSettings.psm1" -Resolve
+    $module = Join-Path -Path $ParentModuleBase -ChildPath  "\DSCResources\MSFT_SPDiagnosticLoggingSettings\MSFT_SPDiagnosticLoggingSettings.psm1" -Resolve
     $params = Get-DSCFakeParameters -ModulePath $module
 
     $Content = "        SPDiagnosticLoggingSettings ApplyDiagnosticLogSettings`r`n"
@@ -390,7 +390,7 @@ function Export-TargetResource
     $currentBlock = Convert-DSCStringParamToVariable -DSCBlock $currentBlock -ParameterName "PsDscRunAsCredential"
     $Content += $currentBlock
     $Content += "        }`r`n"
-	Return $Content
+    Return $Content
 }
 
 

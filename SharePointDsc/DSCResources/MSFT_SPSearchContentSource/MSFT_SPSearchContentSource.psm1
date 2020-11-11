@@ -442,7 +442,7 @@ function Set-TargetResource
     {
         # Remove the existing content source
         Invoke-SPDscCommand -Credential $InstallAccount `
-            -Arguments @($PSBoundParameters, $MyInvocation.MyCommand.Source) `
+            -Arguments @($PSBoundParameters) `
             -ScriptBlock {
             $params = $args[0]
             Remove-SPEnterpriseSearchCrawlContentSource -Identity $params.Name `

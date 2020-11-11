@@ -228,7 +228,6 @@ function Get-TargetResource
         }
         "Chinese (Simplified, China)"
         {
-            # Language name of Chinese SP2013/2016 and SP2019 install package are different
             $languageEnglish = "Chinese (PRC)"
         }
         "Chinese (Traditional, Taiwan)"

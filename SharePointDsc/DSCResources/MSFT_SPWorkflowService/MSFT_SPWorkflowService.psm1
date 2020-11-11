@@ -32,7 +32,7 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting the current Workflow Service Configuration(s)"
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+    $result = Invoke-SPDscCommand -Credential $InstallAccount `
         -Arguments $PSBoundParameters `
         -ScriptBlock {
         $params = $args[0]
